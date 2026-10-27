@@ -1,5 +1,87 @@
-# Subsystem: src (page 7 of 9)
+# Subsystem: src (page 7 of 10)
 Previous: [KB_src_p6.md](KB_src_p6.md)
+
+## src/media_decoder.c
+- Doc: decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `decoder_ctx` (struct, line 54)
+  - `out_fd` (type_alias, line 53) `typedef struct decoder_ctx { int out_fd;`
+  - `open` (function, line 18) `*
+ * Sandbox: the decoder needs open() for shared libraries (.so loading) and
+ * brk/mmap for FFm...`
+  - `decoder_close` (function, line 78) `static void decoder_close(decoder_ctx *dc)`
+  - `decoder_init` (function, line 96) `static int decoder_init(decoder_ctx *dc, const uint8_t *data, size_t len)`
+  - `frame_pts_us` (function, line 215) `static int64_t frame_pts_us(const AVFrame *f, AVRational tb, int64_t fallback)`
+  - `av_rescale_q` (function, line 217) `return av_rescale_q(f->pts, tb, (AVRational)`
+  - `send_video_frame` (function, line 222) `static void send_video_frame(decoder_ctx *dc, int64_t pts_us)`
+  - `send_audio_frame` (function, line 242) `static void send_audio_frame(decoder_ctx *dc, int64_t pts_us)`
+  - `decode_segment` (function, line 276) `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)`
+  - `media_decoder_run` (function, line 379) `void media_decoder_run(int out_fd, int cmd_fd)`
+  - `media_decoder_spawn` (function, line 449) `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)`
+  - `dropped` (function, line 369) `* the codec in permanent EOF state: every segment after the first decoded * one was silently dropped ("plays a...`
+  - `fd` (function, line 469) `* prevent the Wayland display fd (inherited from the parent) from * surviving the exec. An inherited Wayland fd...`
+  - `_POSIX_C_SOURCE` (macro, line 23) `#define _POSIX_C_SOURCE`
+- Depends on: `include/media_decoder.h`, `include/util.h`
+
+## src/net_realm.c
+- Doc: ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `lower` (function, line 17) `static char lower(char c)`
+  - `ends_with_realm` (function, line 23) `static int ends_with_realm(const char *host, size_t n, const char *suffix)`
+  - `nr_classify_host` (function, line 34) `nr_realm nr_classify_host(const char *host)`
+  - `host_of` (function, line 52) `static int host_of(const char *url, char *out, size_t out_size)`
+  - `nr_classify_url` (function, line 68) `nr_realm nr_classify_url(const char *url)`
+  - `nr_route_for` (function, line 74) `nr_route nr_route_for(const char *url, nr_config cfg)`
+  - `nr_realm_allows_http` (function, line 88) `int nr_realm_allows_http(nr_realm r)`
+  - `nr_realm_name` (function, line 94) `const char *nr_realm_name(nr_realm r)`
+  - `nr_route_name` (function, line 103) `const char *nr_route_name(nr_route r)`
+  - `NR_MAX_HOST` (macro, line 15) `#define NR_MAX_HOST`
+- Depends on: `include/net_realm.h`
+
+## src/os_sandbox.c
+- Doc: os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `os_policy_allows` (function, line 52) `int os_policy_allows(long syscall_nr)`
+  - `os_policy_size` (function, line 59) `size_t os_policy_size(void)`
+  - `os_prot_allowed` (function, line 65) `int os_prot_allowed(long syscall_nr, unsigned long prot)`
+  - `os_no_dump` (function, line 75) `os_status os_no_dump(void)`
+  - `excluded` (function, line 89) `* intentionally excluded (they need /proc remounting and a post-unshare fork). */
+int os_namespac...`
+  - `os_isolate_namespaces` (function, line 94) `os_status os_isolate_namespaces(void)`
+  - `os_policy_allows` (function, line 106) `int os_policy_allows(long syscall_nr)`
+  - `os_policy_size` (function, line 107) `size_t os_policy_size(void)`
+  - `os_prot_allowed` (function, line 108) `int os_prot_allowed(long syscall_nr, unsigned long prot)`
+  - `os_no_dump` (function, line 111) `os_status os_no_dump(void)`
+  - `os_harden` (function, line 113) `os_status os_harden(os_violation action)`
+  - `os_namespace_flags` (function, line 115) `int os_namespace_flags(void)`
+  - `os_isolate_namespaces` (function, line 116) `os_status os_isolate_namespaces(void)`
+  - `os_harden` (function, line 145) `os_status os_harden(os_violation action)`
+  - `ll_create_ruleset` (function, line 239) `static long ll_create_ruleset(const struct landlock_ruleset_attr *attr,
+                         ...`
+  - `ll_add_rule` (function, line 244) `static long ll_add_rule(int fd, enum landlock_rule_type type,
+                        const void ...`
+  - `ll_restrict_self` (function, line 249) `static long ll_restrict_self(int fd, uint32_t flags)`
+  - `ll_handled` (function, line 265) `static uint64_t ll_handled(int abi)`
+  - `ll_read_access` (function, line 279) `static uint64_t ll_read_access(uint64_t handled)`
+  - `os_landlock_abi` (function, line 285) `int os_landlock_abi(void)`
+  - `os_landlock_restrict` (function, line 291) `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
+  - `os_landlock_abi` (function, line 331) `int os_landlock_abi(void)`
+  - `os_landlock_restrict` (function, line 332) `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
+  - `number` (function, line 157) `* number (x32/i386 on x86_64, AArch32 on aarch64). */ prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W |...`
+  - `headroom` (function, line 203) `* wide headroom (room for ~125 allowed syscalls). */ prog[at_mmap].jt = (unsigned char)(prot_check - (at_mmap + 1));`
+  - `fields` (function, line 303) `* long as the unknown trailing fields (net/scoped) are zero, which they are. */ int rfd =...`
+  - `_GNU_SOURCE` (macro, line 13) `#define _GNU_SOURCE`
+  - `OS_ALLOWED_N` (macro, line 50) `#define OS_ALLOWED_N`
+  - `OS_SECCOMP_ARCH` (macro, line 140) `#  define OS_SECCOMP_ARCH`
+  - `OS_SECCOMP_ARCH` (macro, line 142) `#  define OS_SECCOMP_ARCH`
+  - `LL_FS_BASE` (macro, line 254) `#define LL_FS_BASE`
+- Depends on: `include/os_sandbox.h`
 
 ## src/page_view.c
 - Doc: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
@@ -22,7 +104,7 @@ Previous: [KB_src_p6.md](KB_src_p6.md)
   - `form_rec` (struct, line 4469)
   - `form_table` (struct, line 4475)
   - `pv_flow_reg` (struct, line 4831)
-  - `pv_computed` (struct, line 7032)
+  - `pv_computed` (struct, line 7035)
   - `pv_def_h` (struct, line 2304)
   - `cols` (type_alias, line 1268) `typedef struct pv_cont_info { int id, display, gap, justify, cols;`
   - `mb` (type_alias, line 1370) `typedef struct pv_box_info { int l, r, w, center, mt, mb;`
@@ -276,30 +358,30 @@ static int root_els_match(void *ctx,...`
   - `table_columns` (function, line 5042) `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
   - `in_hidden_subtree` (function, line 5116) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...`
-  - `in_boilerplate_subtree` (function, line 5140) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-  - `in_closed_details_subtree` (function, line 5155) `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-  - `pv_build` (function, line 5175) `pv_status pv_build(const hp_document *doc, pv_view **out)`
-  - `pv_build_ex` (function, line 5179) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-  - `pv_build_full` (function, line 5183) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+  - `in_boilerplate_subtree` (function, line 5143) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
+  - `in_closed_details_subtree` (function, line 5158) `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
+  - `pv_build` (function, line 5178) `pv_status pv_build(const hp_document *doc, pv_view **out)`
+  - `pv_build_ex` (function, line 5182) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
+  - `pv_build_full` (function, line 5186) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...`
-  - `annotate_replaced_run` (function, line 5205) `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
+  - `annotate_replaced_run` (function, line 5208) `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                             ...`
-  - `pv_root_insets` (function, line 5278) `void pv_root_insets(const css_style *body, int out[4])`
-  - `collect_page_css` (function, line 5288) `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
+  - `pv_root_insets` (function, line 5281) `void pv_root_insets(const css_style *body, int out[4])`
+  - `collect_page_css` (function, line 5291) `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
                      ...`
-  - `pv_build_styled` (function, line 5317) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+  - `pv_build_styled` (function, line 5320) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...`
-  - `px` (function, line 5914) `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
+  - `px` (function, line 5917) `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
                 if (iw <...`
-  - `engine` (function, line 6861) `* layout engine (contiguous item gather) drops every cell onto its own row and
+  - `engine` (function, line 6864) `* layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-col...`
-  - `pv_css_drops` (function, line 7003) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+  - `pv_css_drops` (function, line 7006) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...`
-  - `pv_computed_new` (function, line 7037) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
+  - `pv_computed_new` (function, line 7040) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
   ...`
-  - `pv_computed_get` (function, line 7056) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
+  - `pv_computed_get` (function, line 7059) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
                     do...`
-  - `pv_computed_free` (function, line 7078) `void pv_computed_free(pv_computed *pc)`
+  - `pv_computed_free` (function, line 7081) `void pv_computed_free(pv_computed *pc)`
   - `positions` (function, line 140) `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);`
   - `content` (function, line 1190) `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);`
   - `address` (function, line 1258) `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...`
@@ -311,15 +393,15 @@ static int root_els_match(void *ctx,...`
   - `col_free_share` (function, line 2705) `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...`
   - `none` (function, line 2727) `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...`
   - `outermost` (function, line 3610) `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
-  - `inside` (function, line 5427) `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
-  - `control` (function, line 5736) `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
-  - `band` (function, line 5980) `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...`
-  - `height` (function, line 6007) `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-  - `block_id` (function, line 6148) `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
-  - `URL` (function, line 6289) `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-  - `block` (function, line 6577) `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
-  - `flow` (function, line 6755) `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
-  - `line` (function, line 6870) `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
+  - `inside` (function, line 5430) `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
+  - `control` (function, line 5739) `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
+  - `band` (function, line 5983) `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...`
+  - `height` (function, line 6010) `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+  - `block_id` (function, line 6151) `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
+  - `URL` (function, line 6292) `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+  - `block` (function, line 6580) `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
+  - `flow` (function, line 6758) `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
+  - `line` (function, line 6873) `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
   - `_POSIX_C_SOURCE` (macro, line 10) `#define _POSIX_C_SOURCE`
   - `PV_MAX_DIM` (macro, line 52) `#define PV_MAX_DIM`
   - `PV_FONT_REL_MIN` (macro, line 57) `#define PV_FONT_REL_MIN`
@@ -388,103 +470,6 @@ static int root_els_match(void *ctx,...`
                     const ...`
   - `PQS_SS_LEN` (macro, line 17) `#define PQS_SS_LEN`
 - Depends on: `include/pq_seal.h`
-
-## src/prefetch.c
-- Doc: ci_starts: static int is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' ||...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `attr_span` (struct, line 65)
-  - `is_ws` (function, line 26) `static int is_ws(char c)`
-  - `is_name_char` (function, line 30) `static int is_name_char(char c)`
-  - `lower` (function, line 35) `static int lower(int c)`
-  - `ci_starts` (function, line 40) `static int ci_starts(const char *p, const char *end, const char *kw)`
-  - `ci_find` (function, line 49) `static const char *ci_find(const char *p, const char *end, const char *kw)`
-  - `ci_eq_span` (function, line 58) `static int ci_eq_span(const char *s, size_t n, const char *kw)`
-  - `emit` (function, line 120) `static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen)`
-  - `pf_scan` (function, line 133) `int pf_scan(const char *html, size_t len, pf_list *out)`
-  - `pf_list_free` (function, line 196) `void pf_list_free(pf_list *l)`
-  - `js_ident_ch` (function, line 207) `static int js_ident_ch(char c)`
-  - `js_skip_ws` (function, line 212) `static size_t js_skip_ws(const char *s, size_t i, size_t n)`
-  - `js_skip_string` (function, line 219) `static size_t js_skip_string(const char *s, size_t i, size_t n)`
-  - `js_take_spec` (function, line 226) `static void js_take_spec(const char *s, size_t i, size_t n,
-                         char (*out)[...`
-  - `pf_scan_imports` (function, line 241) `size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], size_t cap)`
-  - `pf_pool_add` (function, line 288) `int pf_pool_add(pf_pool *p, const char *url)`
-  - `pf_is_js` (function, line 311) `static int pf_is_js(const char *url, const char *ctype)`
-  - `pf_url_cb` (function, line 319) `static int pf_url_cb(void *ctx, const char *base, const char *ref, char *out, size_t outsz)`
-  - `pf_url_shaped` (function, line 324) `static int pf_url_shaped(const char *sp)`
-  - `pf_follow_imports` (function, line 333) `static void pf_follow_imports(pf_pool *p, const char *base, const char *body, size_t len)`
-  - `pf_worker` (function, line 349) `static void *pf_worker(void *arg)`
-  - `pf_pool_start` (function, line 387) `int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls,
-                  pf_fetch_f...`
-  - `pool_start` (function, line 394) `static int pool_start(pf_pool *p, const char *const *urls, size_t nurls,
-                      pf...`
-  - `pf_pool_take` (function, line 444) `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status,
-                 char **body,...`
-  - `pf_find_importmap` (function, line 483) `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n)`
-  - `pf_pool_start_page` (function, line 504) `int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *page_url,
-          ...`
-  - `pf_pool_finish` (function, line 540) `void pf_pool_finish(pf_pool *p)`
-  - `pf_pooled_fetch` (function, line 561) `int pf_pooled_fetch(void *vctx, const char *method, const char *url,
-                    const ch...`
-  - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
-  - `PF_MAX_URL` (macro, line 24) `#define PF_MAX_URL`
-- Depends on: `include/import_map.h`, `include/prefetch.h`, `include/url.h`
-
-## src/prefs.c
-- Doc: url_valid: A representable URL: 1..PREFS_MAX_URL-1 bytes, no control bytes, no DEL. * Space is...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `sbuf` (struct, line 380)
-  - `url_valid` (function, line 26) `static int url_valid(const char *url)`
-  - `title_clean` (function, line 39) `static char *title_clean(const char *src)`
-  - `prefs_init` (function, line 66) `void prefs_init(prefs_state *p)`
-  - `prefs_free` (function, line 74) `void prefs_free(prefs_state *p)`
-  - `bookmark_push` (function, line 91) `static prefs_status bookmark_push(prefs_state *p, const char *url, const char *title)`
-  - `history_push_back` (function, line 109) `static prefs_status history_push_back(prefs_state *p, const char *url)`
-  - `prefs_bookmark_index` (function, line 125) `int prefs_bookmark_index(const prefs_state *p, const char *url)`
-  - `prefs_bookmark_toggle` (function, line 132) `prefs_status prefs_bookmark_toggle(prefs_state *p, const char *url,
-                             ...`
-  - `prefs_history_add` (function, line 152) `prefs_status prefs_history_add(prefs_state *p, const char *url)`
-  - `prefs_format` (function, line 183) `prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)`
-  - `apply_kv` (function, line 231) `static void apply_kv(prefs_state *out, const char *key, long val)`
-  - `prefs_parse` (function, line 247) `prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)`
-  - `ci_eq` (function, line 313) `static int ci_eq(char a, char b)`
-  - `ci_starts` (function, line 319) `static int ci_starts(const char *s, const char *q)`
-  - `ci_contains` (function, line 327) `static int ci_contains(const char *s, const char *q)`
-  - `url_prefix_match` (function, line 336) `static int url_prefix_match(const char *url, const char *q)`
-  - `sugg_push` (function, line 348) `static void sugg_push(char *out, size_t row_len, int max_rows, int *n,
-                      cons...`
-  - `prefs_suggest` (function, line 357) `int prefs_suggest(const prefs_state *p, const char *query,
-                  char *out, size_t ro...`
-  - `sb_put` (function, line 382) `static void sb_put(sbuf *b, const char *s, size_t n)`
-  - `sb_str` (function, line 397) `static void sb_str(sbuf *b, const char *s)`
-  - `sb_esc` (function, line 400) `static void sb_esc(sbuf *b, const char *s)`
-  - `sb_link_item` (function, line 413) `static void sb_link_item(sbuf *b, const char *url, const char *label)`
-  - `prefs_bookmarks_page` (function, line 421) `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)`
-  - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
-  - `PREFS_MAGIC` (macro, line 20) `#define PREFS_MAGIC`
-- Depends on: `include/prefs.h`, `include/zoom.h`
-
-## src/profile.c
-- Doc: keyfile_create: #include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h>...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `join_path` (function, line 29) `static int join_path(const profile_ctx *ctx, const char *name,
-                     char *out, si...`
-  - `keyfile_create` (function, line 36) `static profile_status keyfile_create(const char *dir, const char *path,
-                         ...`
-  - `profile_open` (function, line 59) `profile_status profile_open(profile_ctx *ctx, const char *dir)`
-  - `map_ds` (function, line 98) `static profile_status map_ds(ds_status ds)`
-  - `profile_load` (function, line 112) `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)`
-  - `profile_save` (function, line 133) `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)`
-  - `profile_close` (function, line 149) `void profile_close(profile_ctx *ctx)`
-  - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
-  - `PROFILE_KEYFILE_LEN` (macro, line 27) `#define PROFILE_KEYFILE_LEN`
-- Depends on: `include/disk_store.h`, `include/profile.h`
 
 
 Next: [KB_src_p8.md](KB_src_p8.md)

@@ -160,6 +160,7 @@ typedef struct child_state {
     int             last_reader;
     int             last_prefers_dark;
     int             last_viewport_w;   /* @media render width (0 => normalized default) */
+    int             frame_id;          /* 0 = top document, 1..15 = iframe document (frame_broker id) */
     char           *extern_css;        /* fetched <link rel=stylesheet> bodies (Hito 27); */
     size_t          extern_css_len;    /* kept so click/re-derive restyles without refetch */
     pv_view        *preserved_view;    /* pre-script DOM snapshot (fallback when jQuery */
@@ -211,14 +212,23 @@ static uint64_t sig_mix(uint64_t h, const char *s, size_t n) {
  * by the style/class writes of a script that merely reads computed values back. */
 static uint64_t computed_signature(const dom_index *idx) {
     uint64_t h = 1469598103934665603ULL;
-    dom_node_id ids[256];
+    dom_node_id ids_stack[256];
+    dom_node_id *ids = ids_stack;
+    dom_node_id *ids_heap = NULL;
     size_t n = dom_get_by_tag(idx, "style", ids, 256);
-    if (n > 256) n = 256;
+    if (n > 256) {
+        /* A design system keeps one <style> per component: a cap here would let a late rewrite of
+         * the 257th stylesheet go unseen and serve a stale cascade. */
+        if (n <= SIZE_MAX / sizeof *ids_heap) ids_heap = (dom_node_id *)calloc(n, sizeof *ids_heap);
+        if (ids_heap != NULL) { ids = ids_heap; n = dom_get_by_tag(idx, "style", ids, n); }
+        else n = 256;
+    }
     for (size_t i = 0; i < n; ++i) {
         size_t len = 0;
         const char *t = dom_text_content(idx, ids[i], &len);
         if (t != NULL) h = sig_mix(h, t, len);
     }
+    free(ids_heap);
     static const char *const roots[2] = { "html", "body" };
     for (int r = 0; r < 2; ++r) {
         dom_node_id id;
@@ -418,8 +428,9 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
     idn_parse(&idn_cfg, cs->identity);              /* an unreadable line is the default identity */
     if (jd_install(js, idx, &cs->jd_op) != JD_OK
      || jd_install_events(js, cs->click) != JD_OK
-     || je_install_identity(js, TAB_SCREEN_W, TAB_SCREEN_H, idn_cfg.user_agent, idn_cfg.languages) != JE_OK
-     || je_install_canvas(js, readback_key) != JE_OK) {
+     || je_install_identity_trusted(js, TAB_SCREEN_W, TAB_SCREEN_H, idn_cfg.user_agent, idn_cfg.languages,
+                                    net_allowed && run_js) != JE_OK
+     || je_install_canvas(js, (net_allowed && run_js) ? JE_READBACK_EXACT : readback_key) != JE_OK) {
         js_context_free(js); jd_click_state_free(cs->click); cs->click = NULL;
         dom_free(idx); hp_document_free(doc); return -1;
     }
@@ -1264,7 +1275,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     if (ok && run_js) {
         /* window.open exists only for a trusted host (plan B4c); installed before the
          * scripts so feature detection sees it. */
-        if (net) { (void)jt_enable_open(cs->js); (void)jt_enable_ws(cs->js); (void)jt_enable_worker(cs->js);
+        if (net) { (void)jt_enable_open(cs->js); (void)jt_enable_ws(cs->js); (void)jt_enable_frames(cs->js, cs->frame_id); (void)jt_enable_worker(cs->js);
                      (void)jt_enable_observers(cs->js);
                      (void)jd_set_computed(cs->js, child_computed, cs); }
         /* Open the network window: XHR/fetch (if installed) may now reach the parent.
@@ -2151,7 +2162,7 @@ static void tab_worker_run(int rfd, int wfd) {
          * allowed: host in allow.conf AND js.conf), reader (distraction-free), dark
          * (prefers-color-scheme) and css (external stylesheet fetch, Hito 27), then
          * the page URL (for the real location), before length+payload. */
-        uint8_t run_js = 0, net = 0, reader = 0, dark = 0, css = 0;
+        uint8_t run_js = 0, net = 0, reader = 0, dark = 0, css = 0, fid = 0;
         int32_t vpw = 0;
         char *url = NULL, *cookies = NULL, *storage = NULL;
         size_t storage_len = 0;
@@ -2161,7 +2172,10 @@ static void tab_worker_run(int rfd, int wfd) {
              || read_full(rfd, &reader, 1) != 0
              || read_full(rfd, &dark, 1) != 0
              || read_full(rfd, &css, 1) != 0
+             || read_full(rfd, &fid, 1) != 0
+             || fid > 15
              || read_full(rfd, &vpw, sizeof vpw) != 0) break;
+            cs.frame_id = fid;
             size_t ulen = 0;
             if (read_full(rfd, &ulen, sizeof ulen) != 0) break;
             if (ulen > TAB_MAX_URL) break; /* defensive: URLs are small */
@@ -2285,6 +2299,7 @@ struct tab {
     int            op_budget_ms;    /* its network time budget (0 = default) */
     int64_t        op_net_us;       /* network time spent in the current operation */
     int            viewport_w;    /* @media render width for the next load (0 => default) */
+    int            frame_id;      /* iframe id for the next load (0 => top document) */
     char           identity[IDN_SERIAL_MAX]; /* idn_serialize text sent with every load ("" = default) */
     size_t         subreq_n;      /* subresources served during the last load */
     uint64_t       subreq_us;     /* wall time spent serving them (microseconds) */
@@ -3037,6 +3052,11 @@ void tab_set_identity(tab *t, const char *serialized) {
     t->identity[n] = '\0';
 }
 
+void tab_set_frame_id(tab *t, int id) {
+    if (t == NULL) return;
+    t->frame_id = (id > 0 && id <= 15) ? id : 0;
+}
+
 void tab_set_viewport_w(tab *t, int px) {
     if (t == NULL) return;
     t->viewport_w = (px > 0) ? px : 0;   /* 0 => the worker uses the normalized default */
@@ -3306,7 +3326,7 @@ static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout) {
         }
         d[len] = '\0';
         bytes += len;
-        if (kind < TAB_WS_OPEN || kind > TAB_WS_CLOSE || !t->last_net_granted) {
+        if (kind < TAB_WS_OPEN || kind > TAB_WS_FRAME_CLOSE || !t->last_net_granted) {
             free(d);
             continue;
         }
@@ -3377,7 +3397,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][css:1][vpw:4][url_len][url]
+    /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][css:1][frame:1][vpw:4][url_len][url]
      * [ck_len][cookies][st_len][storage][id_len][identity][len][html] (the flags, viewport width, URL and cookie seed
      * precede the payload so the html stays zero-copy). net grants XHR/fetch and is only
      * meaningful with JS on; css grants GET-only external stylesheet fetches (Hito 27);
@@ -3385,7 +3405,8 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     uint8_t op = OP_LOAD, jflag = run_js ? 1 : 0,
             nflag = (run_js && t->net_allowed) ? 1 : 0,
             rflag = reader ? 1 : 0, dflag = prefers_dark ? 1 : 0,
-            cflag = t->css_allowed ? 1 : 0;
+            cflag = t->css_allowed ? 1 : 0,
+            fflag = (nflag && t->frame_id > 0 && t->frame_id <= 15) ? (uint8_t)t->frame_id : 0;
     int32_t vpw = (int32_t)t->viewport_w;
     const char *ck = (nflag && t->cookies_in != NULL) ? t->cookies_in : "";
     size_t cklen = strlen(ck);
@@ -3398,6 +3419,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
      || write_full(t->req_fd, &rflag, 1) != 0
      || write_full(t->req_fd, &dflag, 1) != 0
      || write_full(t->req_fd, &cflag, 1) != 0
+     || write_full(t->req_fd, &fflag, 1) != 0
      || write_full(t->req_fd, &vpw, sizeof vpw) != 0
      || write_full(t->req_fd, &ulen, sizeof ulen) != 0
      || (ulen != 0 && write_full(t->req_fd, page_url, ulen) != 0)

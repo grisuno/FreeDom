@@ -215,6 +215,11 @@ hb_decision hb_check(const hb_set *s, const char *host) {
     return blocked ? HB_BLOCK : HB_ALLOW;
 }
 
+hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted) {
+    if (page_trusted) return HB_ALLOW;
+    return hb_check(s, host);
+}
+
 int hb_is_allowlisted(const hb_set *s, const char *host) {
     if (s == NULL || host == NULL) return 0;
     size_t n = strlen(host);

@@ -1,6 +1,63 @@
 # Subsystem: include (page 5 of 5)
 Previous: [KB_include_p4.md](KB_include_p4.md)
 
+## include/tab.h
+- Doc: tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `tab_hist_op` (struct, line 54)
+  - `tab_ws_op` (struct, line 72)
+  - `tab_page` (struct, line 79)
+  - `tab_eval_result` (struct, line 131)
+  - `tab_image` (struct, line 144)
+  - `tab_status` (enum, line 31)
+  - `tab_ws_kind` (enum, line 61)
+  - `tab_ws_event_kind` (enum, line 67)
+  - `tab` (type_alias, line 46) `typedef struct tab tab;`
+  - `replace` (type_alias, line 54) `typedef struct tab_hist_op { int replace;`
+  - `kind` (type_alias, line 71) `typedef struct tab_ws_op { int kind;`
+  - `width` (type_alias, line 144) `typedef struct tab_image { uint32_t width;`
+  - `tab_worker_dispatch` (function, line 156) `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
+  - `tab_open` (function, line 160) `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
+  - `tab_parse_worker_args` (function, line 167) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
+  - `out_status` (function, line 179) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
+  - `tab_set_fetcher` (function, line 190) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
+  - `tab_inflight_request_headers` (function, line 195) `const char *tab_inflight_request_headers(void);`
+  - `tab_report_response_headers` (function, line 200) `void tab_report_response_headers(const char *lines);`
+  - `bytes` (function, line 204) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+  - `tab_set_css_sink` (function, line 213) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+  - `tab_set_net_allowed` (function, line 218) `void tab_set_net_allowed(tab *t, int allowed);`
+  - `tab_set_op_net_budget_ms` (function, line 222) `void tab_set_op_net_budget_ms(tab *t, int ms);`
+  - `tab_async_fd` (function, line 227) `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
+  - `tab_async_busy` (function, line 233) `int tab_async_busy(const tab *t);`
+  - `jar` (function, line 240) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+  - `tab_set_cookies` (function, line 244) `void tab_set_cookies(tab *t, const char *cookies);`
+  - `origin` (function, line 247) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+  - `tab_set_storage` (function, line 249) `void tab_set_storage(tab *t, const char *blob, size_t len);`
+  - `exclusively` (function, line 255) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+  - `tab_set_viewport_w` (function, line 263) `void tab_set_viewport_w(tab *t, int px);`
+  - `load` (function, line 267) `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);`
+  - `tab_set_identity` (function, line 273) `void tab_set_identity(tab *t, const char *serialized);`
+  - `tab_last_subreq_stats` (function, line 279) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
+  - `tab_subreq_permitted` (function, line 284) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
+  - `view` (function, line 292) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+  - `string` (function, line 312) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+  - `granted` (function, line 361) `* granted (allow.conf AND js.conf);`
+  - `returned` (function, line 362) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+  - `popstate` (function, line 368) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+  - `decode` (function, line 387) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+  - `tab_alive` (function, line 400) `int tab_alive(const tab *t);`
+  - `tab_child_pid` (function, line 403) `pid_t tab_child_pid(const tab *t);`
+  - `tab_close` (function, line 406) `void tab_close(tab *t);`
+  - `tab_page_free` (function, line 409) `void tab_page_free(tab_page *p);`
+  - `tab_eval_result_free` (function, line 410) `void tab_eval_result_free(tab_eval_result *r);`
+  - `tab_image_free` (function, line 411) `void tab_image_free(tab_image *img);`
+  - `FREEDOM_TAB_H` (macro, line 2) `#define FREEDOM_TAB_H`
+  - `TAB_MAX_INPUT` (macro, line 152) `#define TAB_MAX_INPUT`
+- Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
+- Imported by: `gui/browser_ui.c`, `include/frame_host.h`, `src/freedom.c`, `src/tab.c`, `tests/test_frame_host.c`, `tests/test_tab.c`
+
 ## include/text_case.h
 - Doc: Case mapping for text-transform and synthesized small caps (spec/text_case.md).
 - Layer: utility
@@ -106,21 +163,22 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
 - Symbols:
   - `ui_line` (struct, line 30)
   - `ui_layout` (struct, line 35)
-  - `rd_doc` (struct, line 69)
-  - `jg_table` (struct, line 95)
-  - `tab` (struct, line 105)
+  - `rd_doc` (struct, line 74)
+  - `jg_table` (struct, line 100)
+  - `tab` (struct, line 110)
   - `ui_status` (enum, line 20)
   - `offset` (type_alias, line 30) `typedef struct ui_line { size_t offset;`
   - `space` (function, line 44) `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
   - `ui_layout_free` (function, line 52) `void ui_layout_free(ui_layout *lay);`
   - `ui_clamp_scroll` (function, line 55) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);`
-  - `available` (function, line 86) `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
-  - `out` (function, line 98) `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
-  - `placeholders` (function, line 108) `* above always draw image placeholders (no worker to decode hostile bytes);`
-  - `disk` (function, line 113) `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
-  - `images` (function, line 115) `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
-  - `ui_render_viewport_w` (function, line 142) `int ui_render_viewport_w(void);`
-  - `ui_persisted_prefs` (function, line 147) `int ui_persisted_prefs(prefs_state *out);`
+  - `shortcut` (function, line 71) `* from a keyboard shortcut (Ctrl+Shift+E only relaxes a weak-but-valid certificate). */ void...`
+  - `available` (function, line 91) `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
+  - `out` (function, line 103) `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
+  - `placeholders` (function, line 113) `* above always draw image placeholders (no worker to decode hostile bytes);`
+  - `disk` (function, line 118) `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
+  - `images` (function, line 120) `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
+  - `ui_render_viewport_w` (function, line 147) `int ui_render_viewport_w(void);`
+  - `ui_persisted_prefs` (function, line 152) `int ui_persisted_prefs(prefs_state *out);`
   - `FREEDOM_UI_H` (macro, line 2) `#define FREEDOM_UI_H`
 - Depends on: `include/prefs.h`
 - Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`

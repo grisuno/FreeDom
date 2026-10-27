@@ -3,6 +3,14 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `car_ops` | struct | `include/css_atrule.h:22` | `` |
+| `car_supports` | function | `include/css_atrule.h:29` | `int car_supports(const char *s, size_t a, size_t b, const car_ops *ops);` |
+| `CB_AUTO_REJECT` | macro | `include/css_box.h:10` | `#define CB_AUTO_REJECT` |
+| `CB_AUTO_RESET` | macro | `include/css_box.h:12` | `#define CB_AUTO_RESET` |
+| `CB_AUTO_RESET_NONE` | macro | `include/css_box.h:13` | `#define CB_AUTO_RESET_NONE` |
+| `CB_AUTO_VALUE` | macro | `include/css_box.h:11` | `#define CB_AUTO_VALUE` |
+| `FREEDOM_CSS_BOX_H` | macro | `include/css_box.h:2` | `#define FREEDOM_CSS_BOX_H` |
+| `cb_emit_len` | function | `include/css_box.h:17` | `int cb_emit_len(css_decl *dst, int cap, int slot, const char *val, int allow_auto, int allow_neg);` |
 | `cb_expand_box2` | function | `include/css_box.h:21` | `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...` |
 | `cb_expand_box4` | function | `include/css_box.h:19` | `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);` |
 | `cb_expand_grid_template_cols` | function | `include/css_box.h:43` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);` |
@@ -250,18 +258,36 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `dl_should_download` | function | `include/download.h:43` | `int dl_should_download(const char *content_type, const char *content_disposition);` |
 | `dl_status` | enum | `include/download.h:33` | `` |
 | `literal` | function | `include/download.h:47` | `* a static string literal (never freed). */ const char *dl_ext_for_type(const char *content_type);` |
-| `FBP_EXPR_MAX` | macro | `include/fb_panes.h:29` | `#define FBP_EXPR_MAX` |
-| `FBP_SELECTOR_MAX` | macro | `include/fb_panes.h:28` | `#define FBP_SELECTOR_MAX` |
+| `FBC_BASE_MAX` | macro | `include/fb_cmdline.h:17` | `#define FBC_BASE_MAX` |
+| `FBC_ENTRY_MAX` | macro | `include/fb_cmdline.h:16` | `#define FBC_ENTRY_MAX` |
+| `FBC_HIST_MAX` | macro | `include/fb_cmdline.h:15` | `#define FBC_HIST_MAX` |
+| `FBC_LIST_NAMES` | macro | `include/fb_cmdline.h:18` | `#define FBC_LIST_NAMES` |
+| `FREEDOM_FB_CMDLINE_H` | macro | `include/fb_cmdline.h:2` | `#define FREEDOM_FB_CMDLINE_H` |
+| `fbc_complete_pick` | function | `include/fb_cmdline.h:51` | `size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen, char *ins, size_t ins_cap, char *list...` |
+| `fbc_complete_split` | function | `include/fb_cmdline.h:42` | `long fbc_complete_split(const char *text, size_t n, char *base, size_t cap, size_t *prefix_off);` |
+| `fbc_filter` | enum | `include/fb_cmdline.h:54` | `` |
+| `fbc_filter_label` | function | `include/fb_cmdline.h:64` | `const char *fbc_filter_label(int filter);` |
+| `fbc_filter_next` | function | `include/fb_cmdline.h:63` | `int fbc_filter_next(int filter);` |
+| `fbc_filter_passes` | function | `include/fb_cmdline.h:62` | `int fbc_filter_passes(int filter, int level);` |
+| `fbc_history` | struct | `include/fb_cmdline.h:20` | `` |
+| `fbc_history_free` | function | `include/fb_cmdline.h:28` | `void fbc_history_free(fbc_history *h);` |
+| `fbc_history_init` | function | `include/fb_cmdline.h:27` | `void fbc_history_init(fbc_history *h);` |
+| `fbc_history_next` | function | `include/fb_cmdline.h:38` | `const char *fbc_history_next(fbc_history *h);` |
+| `fbc_history_prev` | function | `include/fb_cmdline.h:35` | `const char *fbc_history_prev(fbc_history *h, const char *cur, size_t curlen);` |
+| `fbc_history_push` | function | `include/fb_cmdline.h:31` | `int fbc_history_push(fbc_history *h, const char *text, size_t len);` |
+| `fbc_names_expr` | function | `include/fb_cmdline.h:46` | `size_t fbc_names_expr(const char *base, char *out, size_t cap);` |
+| `FBP_EXPR_MAX` | macro | `include/fb_panes.h:31` | `#define FBP_EXPR_MAX` |
+| `FBP_SELECTOR_MAX` | macro | `include/fb_panes.h:30` | `#define FBP_SELECTOR_MAX` |
 | `FREEDOM_FB_PANES_H` | macro | `include/fb_panes.h:2` | `#define FREEDOM_FB_PANES_H` |
-| `fbp_expr` | function | `include/fb_panes.h:55` | `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` |
-| `fbp_is_pane` | function | `include/fb_panes.h:47` | `int fbp_is_pane(int tab);` |
-| `fbp_js_quote` | function | `include/fb_panes.h:51` | `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` |
+| `fbp_expr` | function | `include/fb_panes.h:57` | `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` |
+| `fbp_is_pane` | function | `include/fb_panes.h:49` | `int fbp_is_pane(int tab);` |
+| `fbp_js_quote` | function | `include/fb_panes.h:53` | `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` |
 | `fbp_tab` | enum | `include/fb_panes.h:17` | `` |
-| `fbp_tab_at` | function | `include/fb_panes.h:44` | `int fbp_tab_at(double x, double cell_w, double pad_cells);` |
-| `fbp_tab_from_name` | function | `include/fb_panes.h:35` | `int fbp_tab_from_name(const char *name);` |
-| `fbp_tab_label` | function | `include/fb_panes.h:32` | `const char *fbp_tab_label(int tab);` |
-| `fbp_tab_span` | function | `include/fb_panes.h:41` | `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` |
-| `fbp_tab_wrap` | function | `include/fb_panes.h:38` | `int fbp_tab_wrap(int tab, int dir);` |
+| `fbp_tab_at` | function | `include/fb_panes.h:46` | `int fbp_tab_at(double x, double cell_w, double pad_cells);` |
+| `fbp_tab_from_name` | function | `include/fb_panes.h:37` | `int fbp_tab_from_name(const char *name);` |
+| `fbp_tab_label` | function | `include/fb_panes.h:34` | `const char *fbp_tab_label(int tab);` |
+| `fbp_tab_span` | function | `include/fb_panes.h:43` | `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` |
+| `fbp_tab_wrap` | function | `include/fb_panes.h:40` | `int fbp_tab_wrap(int tab, int dir);` |
 | `FREEDOM_FLEX_LAYOUT_H` | macro | `include/flex_layout.h:2` | `#define FREEDOM_FLEX_LAYOUT_H` |
 | `FX_AREA_MAX_CELLS` | macro | `include/flex_layout.h:138` | `#define FX_AREA_MAX_CELLS` |
 | `FX_AREA_MAX_COLS` | macro | `include/flex_layout.h:137` | `#define FX_AREA_MAX_COLS` |
@@ -317,6 +343,23 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `fm_plan` | struct | `include/form.h:52` | `` |
 | `fm_status` | enum | `include/form.h:61` | `` |
 | `kind` | type_alias | `include/form.h:51` | `typedef struct fm_plan { fm_kind kind;` |
+| `FBK_MAX_DEPTH` | macro | `include/frame_broker.h:17` | `#define FBK_MAX_DEPTH` |
+| `FBK_MAX_FRAMES` | macro | `include/frame_broker.h:16` | `#define FBK_MAX_FRAMES` |
+| `FBK_MAX_MSG` | macro | `include/frame_broker.h:18` | `#define FBK_MAX_MSG` |
+| `FBK_ORIGIN_MAX` | macro | `include/frame_broker.h:19` | `#define FBK_ORIGIN_MAX` |
+| `FBK_URL_MAX` | macro | `include/frame_broker.h:20` | `#define FBK_URL_MAX` |
+| `FREEDOM_FRAME_BROKER_H` | macro | `include/frame_broker.h:2` | `#define FREEDOM_FRAME_BROKER_H` |
+| `f` | type_alias | `include/frame_broker.h:37` | `typedef struct fbk_table { fbk_frame f[FBK_MAX_FRAMES];` |
+| `fbk_add` | function | `include/frame_broker.h:49` | `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id);` |
+| `fbk_frame` | struct | `include/frame_broker.h:31` | `` |
+| `fbk_init` | function | `include/frame_broker.h:45` | `int fbk_init(fbk_table *t, const char *top_url);` |
+| `fbk_origin` | function | `include/frame_broker.h:55` | `const char *fbk_origin(const fbk_table *t, int id);` |
+| `fbk_origin_of` | function | `include/frame_broker.h:42` | `int fbk_origin_of(const char *url, char *out, size_t cap);` |
+| `fbk_rel` | enum | `include/frame_broker.h:22` | `` |
+| `fbk_remove` | function | `include/frame_broker.h:52` | `void fbk_remove(fbk_table *t, int id);` |
+| `fbk_table` | struct | `include/frame_broker.h:38` | `` |
+| `fbk_verdict` | enum | `include/frame_broker.h:24` | `` |
+| `used` | type_alias | `include/frame_broker.h:30` | `typedef struct fbk_frame { int used;` |
 | `FREEDOM_FRAME_CLOCK_H` | macro | `include/frame_clock.h:2` | `#define FREEDOM_FRAME_CLOCK_H` |
 | `active` | type_alias | `include/frame_clock.h:14` | `typedef struct fc_clock { int active;` |
 | `fc_clock` | struct | `include/frame_clock.h:15` | `` |
@@ -324,6 +367,14 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `fc_interval_ms` | function | `include/frame_clock.h:23` | `int fc_interval_ms(const fc_clock *c);` |
 | `fc_needs_tick` | function | `include/frame_clock.h:22` | `int fc_needs_tick(const fc_clock *c);` |
 | `fc_set_active` | function | `include/frame_clock.h:21` | `void fc_set_active(fc_clock *c, int active);` |
+| `FH_MAX_DEPTH` | macro | `include/frame_host.h:17` | `#define FH_MAX_DEPTH` |
+| `FREEDOM_FRAME_HOST_H` | macro | `include/frame_host.h:2` | `#define FREEDOM_FRAME_HOST_H` |
+| `fh_apply_top` | function | `include/frame_host.h:35` | `void fh_apply_top(fh_host *h, const tab_page *page);` |
+| `fh_count` | function | `include/frame_host.h:42` | `int fh_count(const fh_host *h);` |
+| `fh_free` | function | `include/frame_host.h:31` | `void fh_free(fh_host *h);` |
+| `fh_host` | type_alias | `include/frame_host.h:18` | `typedef struct fh_host fh_host;` |
+| `fh_new` | function | `include/frame_host.h:27` | `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` |
+| `fh_tick` | function | `include/frame_host.h:39` | `int fh_tick(fh_host *h, int elapsed_ms);` |
 | `FB_MAX_ENTRIES` | macro | `include/freebug.h:56` | `#define FB_MAX_ENTRIES` |
 | `FB_MAX_ENTRY_BYTES` | macro | `include/freebug.h:57` | `#define FB_MAX_ENTRY_BYTES` |
 | `FB_MAX_FILE_BYTES` | macro | `include/freebug.h:62` | `#define FB_MAX_FILE_BYTES` |
@@ -375,7 +426,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `hcf_search_dirs` | function | `include/host_conf.h:28` | `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out);` |
 | `hcf_search_dirs_from_env` | function | `include/host_conf.h:31` | `void hcf_search_dirs_from_env(hcf_dirs *out);` |
 | `FREEDOM_HOSTBLOCK_H` | macro | `include/hostblock.h:2` | `#define FREEDOM_HOSTBLOCK_H` |
-| `hb_count` | function | `include/hostblock.h:79` | `size_t hb_count(const hb_set *s, hb_list list);` |
+| `hb_count` | function | `include/hostblock.h:85` | `size_t hb_count(const hb_set *s, hb_list list);` |
 | `hb_decision` | enum | `include/hostblock.h:37` | `` |
 | `hb_free` | function | `include/hostblock.h:52` | `void hb_free(hb_set *s);` |
 | `hb_is_allowlisted` | function | `include/hostblock.h:75` | `int hb_is_allowlisted(const hb_set *s, const char *host);` |
@@ -445,56 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `idn_clear_geo` | function | `include/identity.h:54` | `void idn_clear_geo(idn_config *c);` |
 | `idn_config` | struct | `include/identity.h:37` | `` |
 | `idn_defaults` | function | `include/identity.h:45` | `void idn_defaults(idn_config *c);` |
-| `idn_geo_mode` | enum | `include/identity.h:25` | `` |
-| `idn_is_default` | function | `include/identity.h:48` | `int idn_is_default(const idn_config *c);` |
-| `idn_parse` | function | `include/identity.h:67` | `void idn_parse(idn_config *c, const char *text);` |
-| `idn_primary_language` | function | `include/identity.h:59` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);` |
-| `idn_render_page` | function | `include/identity.h:73` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` |
-| `idn_serialize` | function | `include/identity.h:63` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` |
-| `idn_set_geo` | function | `include/identity.h:53` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);` |
-| `idn_set_languages` | function | `include/identity.h:52` | `int idn_set_languages(idn_config *c, const char *list);` |
-| `idn_set_user_agent` | function | `include/identity.h:51` | `int idn_set_user_agent(idn_config *c, const char *ua);` |
-| `idn_user_agent` | function | `include/identity.h:57` | `const char *idn_user_agent(const idn_config *c);` |
-| `user_agent` | type_alias | `include/identity.h:36` | `typedef struct idn_config { char user_agent[IDN_UA_MAX];` |
-| `FREEDOM_IMAGE_DECODE_H` | macro | `include/image_decode.h:2` | `#define FREEDOM_IMAGE_DECODE_H` |
-| `IMG_MAX_DIM` | macro | `include/image_decode.h:65` | `#define IMG_MAX_DIM` |
-| `IMG_MAX_PIXELS` | macro | `include/image_decode.h:66` | `#define IMG_MAX_PIXELS` |
-| `decode` | function | `include/image_decode.h:92` | `* the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and * expands to BGRA. Rejects non-JPEG...` |
-| `guards` | function | `include/image_decode.h:25` | `* guards (in-memory source only, longjmp error manager so a bad stream never * calls exit(), dimension caps before...` |
-| `img_dimensions_ok` | function | `include/image_decode.h:78` | `int img_dimensions_ok(uint32_t w, uint32_t h);` |
-| `img_format` | enum | `include/image_decode.h:33` | `` |
-| `img_format_name` | function | `include/image_decode.h:124` | `const char *img_format_name(img_format f);` |
-| `img_pixels` | struct | `include/image_decode.h:56` | `` |
-| `img_pixels_free` | function | `include/image_decode.h:121` | `void img_pixels_free(img_pixels *p);` |
-| `img_status` | enum | `include/image_decode.h:41` | `` |
-| `inputs` | function | `include/image_decode.h:81` | `* Degenerate inputs (<= 0) yield (0,0). Pure. */ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h...` |
-| `width` | type_alias | `include/image_decode.h:56` | `typedef struct img_pixels { uint32_t width;` |
-| `FREEDOM_IMPORT_MAP_H` | macro | `include/import_map.h:2` | `#define FREEDOM_IMPORT_MAP_H` |
-| `IM_MAX_ENTRIES` | macro | `include/import_map.h:18` | `#define IM_MAX_ENTRIES` |
-| `IM_MAX_SCOPES` | macro | `include/import_map.h:19` | `#define IM_MAX_SCOPES` |
-| `IM_MAX_TEXT` | macro | `include/import_map.h:17` | `#define IM_MAX_TEXT` |
-| `algorithm` | function | `include/import_map.h:13` | `* resolution algorithm (scopes, exact and prefix matches). URL resolution is the * caller's (the same resolver the...` |
-| `im_count` | function | `include/import_map.h:37` | `size_t im_count(const im_map *m);` |
-| `im_free` | function | `include/import_map.h:40` | `void im_free(im_map *m);` |
-| `im_map` | type_alias | `include/import_map.h:23` | `typedef struct im_map im_map;` |
-| `im_resolve` | function | `include/import_map.h:33` | `int im_resolve(const im_map *m, const char *base, const char *specifier, im_url_fn resolve, void *ctx, char *out...` |
-| `map` | function | `include/import_map.h:28` | `* map (fail closed = no mapping). NULL only on OOM. */ im_map *im_parse(const char *json, size_t len, const char...` |
-| `FREEDOM_INTERP_H` | macro | `include/interp.h:2` | `#define FREEDOM_INTERP_H` |
-| `IP_ITERATION_INFINITE` | macro | `include/interp.h:85` | `#define IP_ITERATION_INFINITE` |
-| `IP_MAX_KEYFRAMES` | macro | `include/interp.h:68` | `#define IP_MAX_KEYFRAMES` |
-| `ip_anim` | struct | `include/interp.h:101` | `` |
-| `ip_anim_current` | function | `include/interp.h:131` | `double ip_anim_current(const ip_anim *a);` |
-| `ip_anim_done` | function | `include/interp.h:134` | `int ip_anim_done(const ip_anim *a);` |
-| `ip_anim_init` | function | `include/interp.h:121` | `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease, const ip_keyframe *kf, int n_kf, double...` |
-| `ip_anim_tick` | function | `include/interp.h:128` | `int ip_anim_tick(ip_anim *a, double dt_ms);` |
-| `ip_direction` | enum | `include/interp.h:87` | `` |
-| `ip_ease` | function | `include/interp.h:48` | `double ip_ease(double t, const ip_ease_fn *fn);` |
-| `ip_ease_fn` | struct | `include/interp.h:38` | `` |
-| `ip_easing` | enum | `include/interp.h:25` | `` |
-| `ip_fill_mode` | enum | `include/interp.h:94` | `` |
-| `ip_interp` | function | `include/interp.h:62` | `double ip_interp(ip_val_kind kind, double a, double b, double t);` |
-| `ip_keyframe` | struct | `include/interp.h:70` | `` |
-| `ip_kf_interp` | function | `include/interp.h:78` | `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf, int n_kf, double pct);` |
-| `ip_lerp` | function | `include/interp.h:60` | `double ip_lerp(double a, double b, double t);` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

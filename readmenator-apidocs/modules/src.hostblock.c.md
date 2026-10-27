@@ -1,11 +1,11 @@
 # `src/hostblock.c`
 
-> Source: [src/hostblock.c:1](../../src/hostblock.c#L1) | language `c` | coverage 45.5% | [API index](../index.md)
+> Source: [src/hostblock.c:1](../../src/hostblock.c#L1) | language `c` | coverage 41.7% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`hb_table`](#hb_table), [`hb_set`](#hb_set)
-- **Functions:** [`hb_new`](#hb_new), [`hb_free`](#hb_free), [`hb_load`](#hb_load), [`hb_check`](#hb_check), [`hb_is_allowlisted`](#hb_is_allowlisted), [`hb_count`](#hb_count)
+- **Functions:** [`hb_new`](#hb_new), [`hb_free`](#hb_free), [`hb_load`](#hb_load), [`hb_check`](#hb_check), [`hb_check_subresource`](#hb_check_subresource), [`hb_is_allowlisted`](#hb_is_allowlisted), [`hb_count`](#hb_count)
 - **Macros:** [`HB_MAX_HOST`](#hb_max_host), [`HB_INIT_CAP`](#hb_init_cap)
 
 ## Type Diagram
@@ -17,6 +17,17 @@ classDiagram
     <<struct>> hb_table
     class hb_set
     <<struct>> hb_set
+```
+
+## Call Graph
+
+Solid arrows stay in this module, dashed arrows leave it.
+
+```mermaid
+flowchart LR
+    n_src_hostblock_c__hb_check_subresource(["hb_check_subresource"])
+    n_src_hostblock_c__hb_check(["hb_check"])
+    n_src_hostblock_c__hb_check_subresource --> n_src_hostblock_c__hb_check
 ```
 
 ## Structs
@@ -132,7 +143,33 @@ hb_decision hb_check(const hb_set *s, const char *host)
 
 **Returns:** `hb_decision`
 
-*Called by:* [`proceed`](gui.browser_ui.c.md#proceed), [`gets`](src.freedom.c.md#gets)
+*Called by:* [`proceed`](gui.browser_ui.c.md#proceed), [`hb_check_subresource`](#hb_check_subresource)
+
+---
+
+<a id="hb_check_subresource"></a>
+
+### `hb_check_subresource`
+
+`function` | [src/hostblock.c:218](../../src/hostblock.c#L218)
+
+```c
+hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `s` | `hb_set *` |  |  |
+| `host` | `char *` |  |  |
+| `page_trusted` | `int` |  |  |
+
+**Returns:** `hb_decision`
+
+*Calls:* [`hb_check`](#hb_check)
+
+*Called by:* [`gets`](src.freedom.c.md#gets)
 
 ---
 
@@ -140,7 +177,7 @@ hb_decision hb_check(const hb_set *s, const char *host)
 
 ### `hb_is_allowlisted`
 
-`function` | [src/hostblock.c:218](../../src/hostblock.c#L218)
+`function` | [src/hostblock.c:223](../../src/hostblock.c#L223)
 
 ```c
 int hb_is_allowlisted(const hb_set *s, const char *host)
@@ -167,7 +204,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `hb_count`
 
-`function` | [src/hostblock.c:238](../../src/hostblock.c#L238)
+`function` | [src/hostblock.c:243](../../src/hostblock.c#L243)
 
 ```c
 size_t hb_count(const hb_set *s, hb_list list)
@@ -186,7 +223,7 @@ Number of unique domains on the given list (for tests/diagnostics).
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`hb_count`](#hb_count) (include/hostblock.h:79).
+> **Inherited:** Documentation from [`hb_count`](#hb_count) (include/hostblock.h:85).
 
 ---
 

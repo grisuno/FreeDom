@@ -39,7 +39,7 @@ static const char JDCE_SHIM[] =
     "  g.HTMLElement=HTMLElement;\n"
     "  function isConn(el){\n"
     "    var de=doc.documentElement, n=el;\n"
-    "    for(var i=0;n&&i<4096;i++){ if(n===de) return true; n=n.parentNode; }\n"
+    "    for(var i=0;n&&i<4096;i++){ if(n===de) return true; n=n.parentNode||n.host; }\n"
     "    return false;\n"
     "  }\n"
     "  function track(el,def){\n"

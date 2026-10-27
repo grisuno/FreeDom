@@ -635,6 +635,10 @@ static int jd_freeze_mutators(JSContext *jsctx) {
 static const char JD_DOCUMENT_SHIM[] =
     "(function(){"
     "  var __wc={};"                          /* handle -> wrapper: stable node identity (===) */
+    /* handle of a shadow root's top-level node -> its shadow root (DOM 4.2.2: that node's parent is the
+     * root, not the host). Valid only while the node still sits under the host (moved nodes fall back). */
+    "  var SHTOP=new Map(); __G.__shTop=SHTOP;"
+    "  function shRoot(h,p){ var s=SHTOP.get(h); return (s&&s.host&&s.host._h===p)?s:null; }"
     /* Layout geometry (spec/js_geom.md): real only when the trusted parent installed
      * a table (dom.viewport() non-null); otherwise every measurement is zero. */
     /* ParentNode/ChildNode insertion: a fragment contributes its collected children
@@ -649,6 +653,11 @@ static const char JD_DOCUMENT_SHIM[] =
     "    if(typeof __G.__scriptsInserted==='function') __G.__scriptsInserted(list); }"
     /* HTMLAnchorElement/HTMLAreaElement URL decomposition (HTML 4.6.3): the href attribute resolved
      * against the document URL, read through the URL class. Any other element has no such member. */
+    /* URL decomposition members exist only on <a>/<area> (HTML 4.6.3); on any other element (custom
+     * elements assign this.search/this.host as plain fields) the write shadows the getter. */
+    "  function urlShadow(el,prop,v){ var t=dom.tagName(el._h); t=t===null?'':String(t).toLowerCase();"
+    "    if(t==='a'||t==='area') return;"
+    "    Object.defineProperty(el,prop,{value:v,writable:true,configurable:true,enumerable:true}); }"
     "  function anchorPart(el,prop){ var t=dom.tagName(el._h); t=t===null?'':String(t).toLowerCase();"
     "    if(t!=='a'&&t!=='area') return undefined;"
     "    var v=dom.getAttribute(el._h,'href'); if(v===null) return '';"
@@ -722,13 +731,21 @@ static const char JD_DOCUMENT_SHIM[] =
      "      get href(){ var h=this._h; var v=dom.getAttribute(h,'href'); return v===null?'':v; },"
      "      set href(v){ var h=this._h; dom.setAttribute(h,'href',String(v)); },"
      "      get protocol(){ return anchorPart(this,'protocol'); },"
+     "      set protocol(v){ urlShadow(this,'protocol',v); },"
      "      get host(){ return anchorPart(this,'host'); },"
+     "      set host(v){ urlShadow(this,'host',v); },"
      "      get hostname(){ return anchorPart(this,'hostname'); },"
+     "      set hostname(v){ urlShadow(this,'hostname',v); },"
      "      get port(){ return anchorPart(this,'port'); },"
+     "      set port(v){ urlShadow(this,'port',v); },"
      "      get pathname(){ return anchorPart(this,'pathname'); },"
+     "      set pathname(v){ urlShadow(this,'pathname',v); },"
      "      get search(){ return anchorPart(this,'search'); },"
+     "      set search(v){ urlShadow(this,'search',v); },"
      "      get hash(){ return anchorPart(this,'hash'); },"
+     "      set hash(v){ urlShadow(this,'hash',v); },"
      "      get origin(){ return anchorPart(this,'origin'); },"
+     "      set origin(v){ urlShadow(this,'origin',v); },"
      /* Form element properties (jQuery/Bootstrap feature detection needs these).
       * checked/value/type/disabled map to their attributes; defaultChecked/selected
       * fall back to the attribute when the property itself is unset. These are
@@ -782,8 +799,8 @@ static const char JD_DOCUMENT_SHIM[] =
     "        for(var i=0;i<arguments.length;i++) insAt(h,nodesOf(arguments[i]),null); },"
     "      remove: function(){ var h=this._h; var p=dom.parent(h); if(p!==null) dom.removeChild(p,h); },"
      "      cloneNode: function(deep){ var h=this._h; var c=dom.cloneNode(h, !!deep); return c===null?null:wrap(c); },"
-    "      get parentNode(){ var h=this._h; var p=dom.parent(h); return p===null?null:wrap(p); },"
-    "      get parentElement(){ var h=this._h; var p=dom.parent(h); return p===null?null:wrap(p); },"
+    "      get parentNode(){ var h=this._h; var p=dom.parent(h); if(p===null) return null; return shRoot(h,p)||wrap(p); },"
+    "      get parentElement(){ var h=this._h; var p=dom.parent(h); return p===null||shRoot(h,p)?null:wrap(p); },"
     "      get firstChild(){ var h=this._h; var c=dom.childNode(h,false); return c===null?null:wrap(c); },"
     "      get firstElementChild(){ var h=this._h; var c=dom.firstChild(h); return c===null?null:wrap(c); },"
     "      get nextSibling(){ var h=this._h; var s=dom.siblingNode(h,false); return s===null?null:wrap(s); },"
@@ -823,13 +840,22 @@ static const char JD_DOCUMENT_SHIM[] =
     "      get classList(){ var h=this._h;"
     "        function toks(){ var c=dom.getAttribute(h,'class'); return c?c.split(/\\s+/).filter(Boolean):[]; }"
     "        function put(a){ dom.setAttribute(h,'class',a.join(' ')); }"
-    "        return { contains:function(x){ return toks().indexOf(String(x))>=0; },"
+    "        var L={ contains:function(x){ return toks().indexOf(String(x))>=0; },"
     "          add:function(){ var t=toks(); for(var i=0;i<arguments.length;i++){var x=String(arguments[i]); if(t.indexOf(x)<0)t.push(x);} put(t); },"
     "          remove:function(){ var t=toks(); for(var i=0;i<arguments.length;i++){var j=t.indexOf(String(arguments[i])); if(j>=0)t.splice(j,1);} put(t); },"
     "          toggle:function(x,f){ x=String(x); var t=toks(); var has=t.indexOf(x)>=0; var add=(f===undefined)?!has:!!f; if(add&&!has)t.push(x); else if(!add&&has)t.splice(t.indexOf(x),1); put(t); return add; },"
     "          replace:function(a,b){ var t=toks(); var j=t.indexOf(String(a)); if(j>=0){t[j]=String(b);put(t);return true;} return false; },"
     "          get length(){ var h=this._h; return toks().length; }, item:function(i){ return toks()[i]||null; },"
-    "          toString:function(){ return dom.getAttribute(h,'class')||''; } }; },"
+    "          forEach:function(f,t){ var a=toks(); for(var i=0;i<a.length;i++) f.call(t,a[i],i,L); },"
+    "          keys:function(){ return toks().keys(); }, values:function(){ return toks()[Symbol.iterator](); },"
+    "          entries:function(){ return toks().entries(); },"
+    "          supports:function(){ return true; },"
+    "          toString:function(){ return dom.getAttribute(h,'class')||''; } };"
+    "        Object.defineProperty(L,'value',{get:function(){ return dom.getAttribute(h,'class')||''; },"
+    "          set:function(v){ dom.setAttribute(h,'class',String(v)); }});"
+    "        Object.defineProperty(L,Symbol.iterator,{value:function(){ return toks()[Symbol.iterator](); }});"
+    "        return new Proxy(L,{ get:function(t,p){ if(typeof p==='string'&&/^[0-9]+$/.test(p)){ var v=toks()[+p]; return v; }"
+    "          return t[p]; } }); },"
     /* style write-through (spec/js_dom.md 7j): el.style reads/writes the real
      * `style` attribute via dom.getAttribute/setAttribute, so the next
      * pv_build_styled sees JS mutations and OP_TICK/OP_EVENT repaints them.
@@ -1048,18 +1074,21 @@ static const char JD_DOCUMENT_SHIM[] =
     "  var fragSeq=0;"
     "  function mkFrag(){ var kids=[]; var fk=null;"
     "    function fkey(){ if(fk===null){ fk='oF'+(++fragSeq); __G.__objRegister('F'+fragSeq,f); } return fk; }"
+    "function flat(a){ var out=[]; for(var i=0;i<a.length;i++){ var c=a[i];"
+    "  if(c&&c.__frag){ var m=c.__frag.slice(); c.__frag.length=0; for(var j=0;j<m.length;j++) out.push(m[j]); }"
+    "  else if(c&&c._h!==undefined) out.push(c); } return out; }"
     "function fq(s,one){ var out=[]; for(var i=0;i<kids.length;i++){ var k=kids[i]; if(!k||k.nodeType!==1) continue;"
     "  if(k.matches&&k.matches(s)){ out.push(k); if(one) return out; }"
     "  var sub=k.querySelectorAll?k.querySelectorAll(s):[]; for(var j=0;j<sub.length;j++){ out.push(sub[j]); if(one) return out; } } return out; }"
-    "    var f={nodeType:11, __frag:kids,"
+    "    var f={nodeType:11, __frag:kids, getRootNode:function(){ return f; },"
     "    addEventListener:function(t,fn,o){ __G.__evAdd(fkey(),t,fn,o); },"
     "    removeEventListener:function(t,fn,o){ __G.__evRemove(fkey(),t,fn,o); },"
     "    dispatchEvent:function(ev){ return __G.__evDispatch(fkey(),ev); },"
     "    appendChild:function(c){ if(c&&c.__frag){ for(var i=0;i<c.__frag.length;i++) kids.push(c.__frag[i]); c.__frag.length=0; return c; } if(c&&c._h!==undefined) kids.push(c); return c; },"
-    "    insertBefore:function(n,ref){ if(n&&n._h!==undefined){ var i=ref?kids.indexOf(ref):-1; if(i<0) kids.push(n); else kids.splice(i,0,n); } return n; },"
+    "    insertBefore:function(n,ref){ var l=flat([n]); var i=ref?kids.indexOf(ref):-1; if(i<0) for(var j=0;j<l.length;j++) kids.push(l[j]); else kids.splice.apply(kids,[i,0].concat(l)); return n; },"
     "    removeChild:function(c){ var i=kids.indexOf(c); if(i>=0) kids.splice(i,1); return c; },"
-    "    append:function(){ for(var i=0;i<arguments.length;i++){var a=arguments[i]; if(a&&a._h!==undefined) kids.push(a);} },"
-    "    prepend:function(){ for(var i=arguments.length-1;i>=0;i--){var a=arguments[i]; if(a&&a._h!==undefined) kids.unshift(a);} },"
+    "    append:function(){ var l=flat(arguments); for(var i=0;i<l.length;i++) kids.push(l[i]); },"
+    "    prepend:function(){ var l=flat(arguments); kids.splice.apply(kids,[0,0].concat(l)); },"
     "    cloneNode:function(deep){ var g2=mkFrag(); if(deep){ for(var i=0;i<kids.length;i++){ var k=kids[i]; g2.__frag.push(k&&k.cloneNode?k.cloneNode(true):k); } } return g2; },"
     "    get childNodes(){ return kids.slice(); }, get children(){ return kids.slice(); },"
     "    get firstChild(){ return kids.length?kids[0]:null; },"
@@ -1085,7 +1114,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "      get firstElementChild(){ return h.firstElementChild; }, get lastElementChild(){ return h.lastElementChild; },"
     "      get childElementCount(){ return h.childElementCount; }, hasChildNodes:function(){ return h.hasChildNodes(); },"
     "      get textContent(){ return h.textContent; }, set textContent(v){ h.textContent=v; },"
-    "      get ownerDocument(){ return __G.document; },"
+    "      get ownerDocument(){ return __G.document; }, getRootNode:function(){ return f; },"
     "      querySelector:function(s){ return h.querySelector(s); }, querySelectorAll:function(s){ return h.querySelectorAll(s); },"
     "      getElementById:function(i){ return h.querySelector('[id=\"'+String(i).replace(/[\\\"]/g,'\\$&')+'\"]'); },"
     "      addEventListener:function(){ return h.addEventListener.apply(h,arguments); },"
@@ -1430,7 +1459,7 @@ static const char JD_MODERN_SHIM[] =
     "   'HTMLOutputElement','HTMLDetailsElement','HTMLDialogElement','HTMLSlotElement','HTMLTemplateElement',"
     "   'HTMLHeadElement','HTMLBodyElement','HTMLTitleElement','HTMLMetaElement','HTMLLinkElement',"
     "   'HTMLObjectElement','HTMLEmbedElement','HTMLParamElement','HTMLBaseElement','HTMLPictureElement',"
-    "   'HTMLTimeElement','HTMLMapElement','HTMLAreaElement','HTMLModElement','HTMLMediaElement',"
+    "   'HTMLTimeElement','HTMLDataElement','HTMLMapElement','HTMLAreaElement','HTMLModElement','HTMLMediaElement',"
     "   'HTMLDListElement','HTMLFrameSetElement','HTMLFrameElement','HTMLDirectoryElement','HTMLFontElement',"
      "   'XMLDocument','HTMLDocument','Document','DocumentFragment','ShadowRoot','CharacterData','Text','Comment','Attr',"
      "   'DOMTokenList','NodeList','HTMLCollection','CSSStyleDeclaration','EventTarget',"
@@ -1624,6 +1653,8 @@ static const char JD_MODERN_SHIM[] =
   "        if(t==='2d'||t==='2d')return new CanvasCtx(this.width,this.height);return null;};"
   "      this.toDataURL=function(t){var c=new CanvasCtx(this.width,this.height);return c.toDataURL(t);};"
   "    };"
+  "    if(typeof g.HTMLElement==='function'){ g.HTMLCanvasElement.prototype=Object.create(g.HTMLElement.prototype,"
+  "      {constructor:{value:g.HTMLCanvasElement,writable:true,configurable:true}}); }"
   "  }"
      "  function observer(){ function O(cb){ this._cb=cb; } O.prototype.observe=function(){};"
      "    O.prototype.unobserve=function(){}; O.prototype.disconnect=function(){};"

@@ -1,5 +1,16 @@
-# API (page 4 of 11)
+# API (page 4 of 12)
 Previous: [API_p3.md](API_p3.md)
+
+## include/css_values.h
+Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `tests/test_css_values.c`
+- `cv_parse_color` (function) `include/css_values.h:12` `int cv_parse_color(const char *v);`
+- `cv_interp_color` (function) `include/css_values.h:13` `int cv_interp_color(const char *v);`
+- `cv_color_ok` (function) `include/css_values.h:14` `int cv_color_ok(int c);`
+- `cv_bg_alpha_of` (function) `include/css_values.h:15` `int cv_bg_alpha_of(const char *v);`
+- `cv_filter_scale` (function) `include/css_values.h:20` `double cv_filter_scale(int pct);` -- The multiplier a filter() brightness/contrast/saturate percentage means (150 -> 1.5).
+- `cv_parse_color_t7` (function) `include/css_values.h:24` `int cv_parse_color_t7(const char *v);` -- cv_parse_color with the color's alpha as TRANSPARENCY in bits 24..30 (0 opaque, 127 clear): an opaque color is...
+- `black` (function) `include/css_values.h:27` `* transparent black (127 << 24) -- text that paints nothing, not an absent * value. CC_COLOR_CURRENT and -1...`
+- `cv_interp_bg` (function) `include/css_values.h:30` `int cv_interp_bg(const char *v);`
 
 ## include/css_vars.h
 Imported by: `src/css.c`, `src/css_vars.c`, `src/page_view.c`, `tests/test_css.c`, `tests/test_css_vars.c`
@@ -59,16 +70,30 @@ Imported by: `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 - `DL_ERR_OVERFLOW` (function) `include/download.h:56` `* DL_ERR_OVERFLOW (out left empty). url/content_disposition NULL => absent. */ dl_status dl_pick_name(const char...`
 - `basename` (function) `include/download.h:61` `* sanitized basename (a name still containing '/' is rejected => DL_ERR_OVERFLOW, * so the path can never escape...`
 
+## include/fb_cmdline.h
+Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `tests/test_fb_cmdline.c`, `tests/test_js_dom.c`
+- `fbc_history_init` (function) `include/fb_cmdline.h:27` `void fbc_history_init(fbc_history *h);`
+- `fbc_history_free` (function) `include/fb_cmdline.h:28` `void fbc_history_free(fbc_history *h);`
+- `fbc_history_push` (function) `include/fb_cmdline.h:31` `int fbc_history_push(fbc_history *h, const char *text, size_t len);` -- #define FBC_BASE_MAX   256    /* bytes of a completion base path #define FBC_LIST_NAMES 40     /* candidates shown...
+- `fbc_history_prev` (function) `include/fb_cmdline.h:35` `const char *fbc_history_prev(fbc_history *h, const char *cur, size_t curlen);` -- Older entry (saves cur as the draft when leaving the live line), or NULL when there is none. * The pointer is valid...
+- `fbc_history_next` (function) `include/fb_cmdline.h:38` `const char *fbc_history_next(fbc_history *h);` -- Older entry (saves cur as the draft when leaving the live line), or NULL when there is none. * The pointer is valid...
+- `fbc_complete_split` (function) `include/fb_cmdline.h:42` `long fbc_complete_split(const char *text, size_t n, char *base, size_t cap, size_t *prefix_off);` -- Splits the trailing property path of text[0,n): base ("a.b" of "a.b.c", "" = global) into base[cap], * *prefix_off =...
+- `fbc_names_expr` (function) `include/fb_cmdline.h:46` `size_t fbc_names_expr(const char *base, char *out, size_t cap);` -- JS expression returning the newline-joined property names reachable from the path `base` * (no getter is run).
+- `fbc_complete_pick` (function) `include/fb_cmdline.h:51` `size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen, char *ins, size_t ins_cap, char *list...` -- From the newline-separated `names`, those starting with prefix[0,plen): `ins` gets the longest common extension...
+- `fbc_filter_passes` (function) `include/fb_cmdline.h:62` `int fbc_filter_passes(int filter, int level);`
+- `fbc_filter_next` (function) `include/fb_cmdline.h:63` `int fbc_filter_next(int filter);` -- extension beyond the prefix, `list` the candidates space-separated; *count how many matched.
+- `fbc_filter_label` (function) `include/fb_cmdline.h:64` `const char *fbc_filter_label(int filter);` -- the length of the insertion. size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen, char *ins...
+
 ## include/fb_panes.h
-Imported by: `gui/browser_ui.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
-- `fbp_tab_label` (function) `include/fb_panes.h:32` `const char *fbp_tab_label(int tab);` -- FBP_CONSOLE = 0, FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where the JS time went (sampling...
-- `fbp_tab_from_name` (function) `include/fb_panes.h:35` `int fbp_tab_from_name(const char *name);` -- FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where the JS time went (sampling profiler, time-weighted) FBP_THROWS,    /*...
-- `fbp_tab_wrap` (function) `include/fb_panes.h:38` `int fbp_tab_wrap(int tab, int dir);` -- FBP_THROWS,    /* every exception thrown, caught ones included ("break on throw" log) FBP_COUNT } fbp_tab; #define...
-- `fbp_tab_span` (function) `include/fb_panes.h:41` `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` -- #define FBP_SELECTOR_MAX 256   /* bytes of the user's argument (selector / index / filter) #define FBP_EXPR_MAX...
-- `fbp_tab_at` (function) `include/fb_panes.h:44` `int fbp_tab_at(double x, double cell_w, double pad_cells);` -- /* Label of a tab; an out-of-range id is the console.
-- `fbp_is_pane` (function) `include/fb_panes.h:47` `int fbp_is_pane(int tab);` -- /* Tab named `name` (case-insensitive), or -1 when unknown / NULL. int fbp_tab_from_name(const char *name); /* The...
-- `fbp_js_quote` (function) `include/fb_panes.h:51` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` -- JS string literal for s[0,n) (double-quoted).
-- `fbp_expr` (function) `include/fb_panes.h:55` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` -- The expression that fills `tab`'s panel for argument sel[0,n); NUL-terminated in out. * Returns its length, or 0 for...
+Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
+- `fbp_tab_label` (function) `include/fb_panes.h:34` `const char *fbp_tab_label(int tab);` -- FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where the JS time went (sampling profiler, time-weighted)...
+- `fbp_tab_from_name` (function) `include/fb_panes.h:37` `int fbp_tab_from_name(const char *name);` -- FBP_PROFILE,   /* where the JS time went (sampling profiler, time-weighted) FBP_THROWS,    /* every exception...
+- `fbp_tab_wrap` (function) `include/fb_panes.h:40` `int fbp_tab_wrap(int tab, int dir);` -- FBP_STORAGE,   /* cookies, localStorage and sessionStorage of the page FBP_COUNT } fbp_tab; #define FBP_SELECTOR_MAX...
+- `fbp_tab_span` (function) `include/fb_panes.h:43` `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` -- #define FBP_SELECTOR_MAX 256   /* bytes of the user's argument (selector / index / filter) #define FBP_EXPR_MAX...
+- `fbp_tab_at` (function) `include/fb_panes.h:46` `int fbp_tab_at(double x, double cell_w, double pad_cells);` -- /* Label of a tab; an out-of-range id is the console.
+- `fbp_is_pane` (function) `include/fb_panes.h:49` `int fbp_is_pane(int tab);` -- /* Tab named `name` (case-insensitive), or -1 when unknown / NULL. int fbp_tab_from_name(const char *name); /* The...
+- `fbp_js_quote` (function) `include/fb_panes.h:53` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` -- JS string literal for s[0,n) (double-quoted).
+- `fbp_expr` (function) `include/fb_panes.h:57` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` -- The expression that fills `tab`'s panel for argument sel[0,n); NUL-terminated in out. * Returns its length, or 0 for...
 
 ## include/flex_layout.h
 Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
@@ -92,6 +117,14 @@ Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_lay
 - `win` (function) `include/flex_layout.h:352` `* margins win (both = centre, left only = end);`
 - `fx_cross_offset` (function) `include/flex_layout.h:354` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` -- Cross-axis (horizontal) offset of a column item of width w in avail px. auto margins win (both = centre, left only =...
 
+## include/frame_broker.h
+Imported by: `src/frame_broker.c`, `src/frame_host.c`, `tests/test_frame_broker.c`
+- `fbk_origin_of` (function) `include/frame_broker.h:42` `int fbk_origin_of(const char *url, char *out, size_t cap);` -- Serialized origin ("https://host[:port]", lowercase) or "null" for opaque/non-https/unparseable. * 0 on success, -1...
+- `fbk_init` (function) `include/frame_broker.h:45` `int fbk_init(fbk_table *t, const char *top_url);` -- Serialized origin ("https://host[:port]", lowercase) or "null" for opaque/non-https/unparseable. * 0 on success, -1...
+- `fbk_add` (function) `include/frame_broker.h:49` `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id);` -- Adds a child of `parent` for url.
+- `fbk_remove` (function) `include/frame_broker.h:52` `void fbk_remove(fbk_table *t, int id);` -- Adds a child of `parent` for url.
+- `fbk_origin` (function) `include/frame_broker.h:55` `const char *fbk_origin(const fbk_table *t, int id);` -- Adds a child of `parent` for url.
+
 ## include/frame_clock.h
 Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
 - `fc_init` (function) `include/frame_clock.h:20` `void fc_init(fc_clock *c);`
@@ -99,8 +132,17 @@ Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
 - `fc_needs_tick` (function) `include/frame_clock.h:22` `int fc_needs_tick(const fc_clock *c);`
 - `fc_interval_ms` (function) `include/frame_clock.h:23` `int fc_interval_ms(const fc_clock *c);`
 
+## include/frame_host.h
+Depends on: `include/tab.h`
+Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `tests/test_frame_host.c`
+- `fh_new` (function) `include/frame_host.h:27` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` -- top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame...
+- `fh_free` (function) `include/frame_host.h:31` `void fh_free(fh_host *h);` -- top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame...
+- `fh_apply_top` (function) `include/frame_host.h:35` `void fh_apply_top(fh_host *h, const tab_page *page);` -- Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP document; other * kinds are ignored.
+- `fh_tick` (function) `include/frame_host.h:39` `int fh_tick(fh_host *h, int elapsed_ms);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
+- `fh_count` (function) `include/frame_host.h:42` `int fh_count(const fh_host *h);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
+
 ## include/freebug.h
-Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_freebug.c`
+Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/fb_cmdline.c`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_fb_cmdline.c`, `tests/test_freebug.c`
 - `fb_buffer_init` (function) `include/freebug.h:65` `void fb_buffer_init(fb_buffer *b);` -- A stored source name is truncated to this many bytes (NUL excluded).
 - `truncated` (function) `include/freebug.h:69` `* A message longer than FB_MAX_ENTRY_BYTES is stored truncated (not dropped). A * dropped push raises b->overflow...`
 - `copied` (function) `include/freebug.h:75` `* copied (truncated to FB_MAX_FILE_BYTES);`
@@ -131,7 +173,7 @@ Imported by: `gui/browser_ui.c`, `include/host_conf.h`, `src/freedom.c`, `src/ho
 - `hb_free` (function) `include/hostblock.h:52` `void hb_free(hb_set *s);` -- HB_ALLOW = 0,  /* the host may be contacted HB_BLOCK       /* the host is on the blocklist (and not re-enabled) }...
 - `walked` (function) `include/hostblock.h:65` `* walked (the host, then without its first label, ...): any suffix on the allowlist * => HB_ALLOW (allow wins...`
 - `hb_is_allowlisted` (function) `include/hostblock.h:75` `int hb_is_allowlisted(const hb_set *s, const char *host);` -- 1 iff a domain suffix of host is explicitly on the allowlist (covers subdomains), else 0.
-- `hb_count` (function) `include/hostblock.h:79` `size_t hb_count(const hb_set *s, hb_list list);` -- Number of unique domains on the given list (for tests/diagnostics).
+- `hb_count` (function) `include/hostblock.h:85` `size_t hb_count(const hb_set *s, hb_list list);` -- Number of unique domains on the given list (for tests/diagnostics).
 
 ## include/hostedit.h
 Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
@@ -290,12 +332,12 @@ Depends on: `include/js_dom.h`, `include/js_sandbox.h`
 Imported by: `src/js_trusted.c`, `src/tab.c`, `tests/test_js_dom.c`
 - `null` (function) `include/js_trusted.h:24` `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...`
 - `jt_take_opens` (function) `include/js_trusted.h:42` `char *jt_take_opens(js_context *ctx);` -- The parent installed a new geometry table (layout or scroll changed): re-evaluates every observed target and fires a...
-- `parent` (function) `include/js_trusted.h:69` `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);`
-- `jt_take_ws` (function) `include/js_trusted.h:75` `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);` -- Drains up to cap recorded operations into ops (each data owned; release with jt_ws_ops_free).
-- `jt_ws_ops_free` (function) `include/js_trusted.h:76` `void jt_ws_ops_free(jt_ws_op *ops, size_t n);`
-- `jt_ws_event` (function) `include/js_trusted.h:81` `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);` -- Delivers a socket event from the parent: data enters JS as a VALUE (a string for text, an ArrayBuffer for binary...
-- `jt_take_storage` (function) `include/js_trusted.h:93` `int jt_take_storage(js_context *ctx, char **out, size_t *len);` -- When the store changed since the last call, returns 1 with an owned snapshot of * the whole store in *out (length...
-- `realm` (function) `include/js_trusted.h:96` `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...`
+- `parent` (function) `include/js_trusted.h:80` `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);`
+- `jt_take_ws` (function) `include/js_trusted.h:86` `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);` -- Drains up to cap recorded operations into ops (each data owned; release with jt_ws_ops_free).
+- `jt_ws_ops_free` (function) `include/js_trusted.h:87` `void jt_ws_ops_free(jt_ws_op *ops, size_t n);`
+- `jt_ws_event` (function) `include/js_trusted.h:92` `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);` -- Delivers a socket event from the parent: data enters JS as a VALUE (a string for text, an ArrayBuffer for binary...
+- `jt_take_storage` (function) `include/js_trusted.h:104` `int jt_take_storage(js_context *ctx, char **out, size_t *len);` -- When the store changed since the last call, returns 1 with an owned snapshot of * the whole store in *out (length...
+- `realm` (function) `include/js_trusted.h:107` `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...`
 
 ## include/link_nav.h
 Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/link_nav.c`, `src/tab.c`, `tests/test_link_nav.c`
@@ -450,49 +492,6 @@ Imported by: `gui/browser_ui.c`, `src/profile.c`, `tests/test_profile.c`
 - `absent` (function) `include/profile.h:53` `* the keyfile when absent (0600, atomic write);`
 - `closed` (function) `include/profile.h:54` `* wrong size fails closed (PROFILE_ERR_KEY, never overwritten). Derives the * AEAD key (Argon2id, per-device salt)...`
 - `profile_close` (function) `include/profile.h:67` `void profile_close(profile_ctx *ctx);` -- Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init).
-
-## include/render_doc.h
-Depends on: `include/page_view.h`, `include/render_policy.h`
-Imported by: `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
-- `list` (function) `include/render_doc.h:18` `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
-- `RD_IMAGE` (function) `include/render_doc.h:59` `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
-- `form` (function) `include/render_doc.h:63` `* form (-1 = none);`
-- `default` (function) `include/render_doc.h:151` `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
-- `to` (function) `include/render_doc.h:251` `* belongs to (-1 = none);`
-- `rdp_images_warning` (function) `include/render_doc.h:306` `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-- `rd_free` (function) `include/render_doc.h:316` `void rd_free(rd_doc *d);` -- Builds the paint-ready document from an inert display list and the page's capabilities. view == NULL is treated as...
-- `rd_count` (function) `include/render_doc.h:319` `size_t rd_count(const rd_doc *d);` -- images and caps.images is false, a single RD_NOTICE block carrying rdp_images_warning() is prepended so the user is...
-- `rd_at` (function) `include/render_doc.h:320` `const rd_block *rd_at(const rd_doc *d, size_t i);`
-- `rd_box_count` (function) `include/render_doc.h:324` `size_t rd_box_count(const rd_doc *d);` -- Box tree accessors (Step D). rd_box_count is the number of box definitions (0 when * caps.css is off); rd_box_at...
-- `rd_box_at` (function) `include/render_doc.h:325` `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-- `rd_cont_count` (function) `include/render_doc.h:329` `size_t rd_cont_count(const rd_doc *d);` -- Container table accessors. rd_cont_count is the number of containers; rd_cont_at * returns conts[i] (i == a run's...
-- `rd_cont_at` (function) `include/render_doc.h:330` `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-- `rd_kind_name` (function) `include/render_doc.h:334` `const char *rd_kind_name(rd_kind k);` -- Stable, short English name of a block kind for structured/agent output.
-- `rd_block_tag` (function) `include/render_doc.h:342` `const char *rd_block_tag(const rd_block *b);` -- Canonical HTML tag name for a block, so the presentation layer can look up its user-agent box (box_style) without...
-- `rd_block_heading_level` (function) `include/render_doc.h:349` `int rd_block_heading_level(const rd_block *b);` -- Effective heading level of a block, 0 when it is not heading content.
-- `decision` (function) `include/render_doc.h:352` `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-- `IMG_FAIL_OK` (function) `include/render_doc.h:358` `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-- `rd_input_label` (function) `include/render_doc.h:363` `const char *rd_input_label(int input_type);` -- Stable, short English name of a form control type (a pv_input_type value), e.g. * "text" / "password" / "submit".
-- `rd_input_invisible` (function) `include/render_doc.h:368` `int rd_input_invisible(int input_type);` -- Nonzero iff a control of this type has no face of its own and is therefore never laid out or painted: a hidden...
-
-## include/render_policy.h
-Imported by: `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
-- `rdp_is_tracking_pixel` (function) `include/render_policy.h:53` `int rdp_is_tracking_pixel(int w, int h);` -- Tracking-pixel heuristic over an image's declared dimensions. w/h negative means "unknown".
-- `size` (function) `include/render_policy.h:56` `* announced size (e.g. <img width height>);`
-- `rdp_img_reason` (function) `include/render_policy.h:66` `const char *rdp_img_reason(rdp_img_decision d);` -- Stable, short, English reason string for structured/agent-friendly output. * Never NULL; an unknown enum value...
-- `rdp_images_warning` (function) `include/render_policy.h:69` `const char *rdp_images_warning(void);` -- Stable, short, English reason string for structured/agent-friendly output. * Never NULL; an unknown enum value...
-
-## include/renderer.h
-Imported by: `src/renderer.c`, `tests/test_renderer.c`
-- `rd_result_free` (function) `include/renderer.h:46` `void rd_result_free(rd_result *out);` -- Renders untrusted HTML out-of-process and returns an inert title + text. html == NULL or out == NULL => RD_ERR_NULL_ARG.
-
-## include/request_policy.h
-Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/request_policy.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_request_policy.c`
-- `rp_host_of` (function) `include/request_policy.h:30` `int rp_host_of(const char *url, char *out, size_t out_size);` -- Lowercased host of an absolute URL into out.
-- `rp_site_of` (function) `include/request_policy.h:34` `int rp_site_of(const char *host, char *out, size_t out_size);` -- Registrable domain ("site") of a host into out (simplified public-suffix * rule).
-- `rp_same_site` (function) `include/request_policy.h:37` `int rp_same_site(const char *top_level_url, const char *request_url);` -- Registrable domain ("site") of a host into out (simplified public-suffix * rule).
-- `rp_sanitize_request_headers` (function) `include/request_policy.h:57` `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);` -- Filters the page-supplied header block `raw` ("Name: value" lines separated by '\n') into `out` (same format...
-- `rp_headers_have` (function) `include/request_policy.h:61` `static inline int rp_headers_have(const char *lines, const char *name)` -- 1 when the sanitized block `lines` carries a header called `name` (case-insensitive).
 
 
 Next: [API_p5.md](API_p5.md)

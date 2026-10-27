@@ -1,6 +1,6 @@
-# src: css
+# include: css
 
-src: css groups 53 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
+include: css groups 52 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
 ```mermaid
 graph LR
@@ -14,15 +14,15 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (2.1)
+## include (1.1)
 
 include groups 18 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
-## src (2.2)
+## src (1.2)
 
-src groups 19 files (c) around BT_LEN_AUTO, layout_block, bt_nn, BT_WRAP_EPS, height. layout_block: Block container: stack non-none children vertically, collapsing each...
+src groups 18 files (c) around BT_LEN_AUTO, layout_block, bt_nn, BT_WRAP_EPS, height. layout_block: Block container: stack non-none children vertically, collapsing each...
 
-## tests (2.3)
+## tests (1.3)
 
 tests groups 16 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
 
@@ -63,7 +63,6 @@ tests groups 16 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - src/css_text.c
 - src/css_values.c
 - src/css_vars.c
-- src/dom.c
 - src/text_case.c
 - tests/test_compositor.c
 - tests/test_css.c

@@ -939,6 +939,7 @@
 
 ## F
 
+- [`f`](modules/include.frame_broker.h.md#f) type_alias in `include/frame_broker.h`
 - [`fails`](modules/src.js_dom.c.md#fails) function in `src/js_dom.c`
 - [`fallback`](modules/include.pdf_export.h.md#fallback) function in `include/pdf_export.h`
 - [`fallback`](modules/src.tab.c.md#fallback) function in `src/tab.c`
@@ -969,6 +970,54 @@
 - [`FB_MAX_FILE_BYTES`](modules/include.freebug.h.md#fb_max_file_bytes) macro in `include/freebug.h`
 - [`FB_MAX_FILE_BYTES`](modules/src.tab.c.md#fb_max_file_bytes) function in `src/tab.c`
 - [`FB_MAX_TOTAL_BYTES`](modules/include.freebug.h.md#fb_max_total_bytes) macro in `include/freebug.h`
+- [`FBC_BASE_MAX`](modules/include.fb_cmdline.h.md#fbc_base_max) macro in `include/fb_cmdline.h`
+- [`fbc_complete_pick`](modules/include.fb_cmdline.h.md#fbc_complete_pick) function in `include/fb_cmdline.h`
+- [`fbc_complete_pick`](modules/src.fb_cmdline.c.md#fbc_complete_pick) function in `src/fb_cmdline.c`
+- [`fbc_complete_split`](modules/include.fb_cmdline.h.md#fbc_complete_split) function in `include/fb_cmdline.h`
+- [`fbc_complete_split`](modules/src.fb_cmdline.c.md#fbc_complete_split) function in `src/fb_cmdline.c`
+- [`FBC_ENTRY_MAX`](modules/include.fb_cmdline.h.md#fbc_entry_max) macro in `include/fb_cmdline.h`
+- [`fbc_filter`](modules/include.fb_cmdline.h.md#fbc_filter) enum in `include/fb_cmdline.h`
+- [`fbc_filter_label`](modules/include.fb_cmdline.h.md#fbc_filter_label) function in `include/fb_cmdline.h`
+- [`fbc_filter_label`](modules/src.fb_cmdline.c.md#fbc_filter_label) function in `src/fb_cmdline.c`
+- [`fbc_filter_next`](modules/include.fb_cmdline.h.md#fbc_filter_next) function in `include/fb_cmdline.h`
+- [`fbc_filter_next`](modules/src.fb_cmdline.c.md#fbc_filter_next) function in `src/fb_cmdline.c`
+- [`fbc_filter_passes`](modules/include.fb_cmdline.h.md#fbc_filter_passes) function in `include/fb_cmdline.h`
+- [`fbc_filter_passes`](modules/src.fb_cmdline.c.md#fbc_filter_passes) function in `src/fb_cmdline.c`
+- [`FBC_HIST_MAX`](modules/include.fb_cmdline.h.md#fbc_hist_max) macro in `include/fb_cmdline.h`
+- [`fbc_history`](modules/include.fb_cmdline.h.md#fbc_history) struct in `include/fb_cmdline.h`
+- [`fbc_history_free`](modules/include.fb_cmdline.h.md#fbc_history_free) function in `include/fb_cmdline.h`
+- [`fbc_history_free`](modules/src.fb_cmdline.c.md#fbc_history_free) function in `src/fb_cmdline.c`
+- [`fbc_history_init`](modules/include.fb_cmdline.h.md#fbc_history_init) function in `include/fb_cmdline.h`
+- [`fbc_history_init`](modules/src.fb_cmdline.c.md#fbc_history_init) function in `src/fb_cmdline.c`
+- [`fbc_history_next`](modules/include.fb_cmdline.h.md#fbc_history_next) function in `include/fb_cmdline.h`
+- [`fbc_history_next`](modules/src.fb_cmdline.c.md#fbc_history_next) function in `src/fb_cmdline.c`
+- [`fbc_history_prev`](modules/include.fb_cmdline.h.md#fbc_history_prev) function in `include/fb_cmdline.h`
+- [`fbc_history_prev`](modules/src.fb_cmdline.c.md#fbc_history_prev) function in `src/fb_cmdline.c`
+- [`fbc_history_push`](modules/include.fb_cmdline.h.md#fbc_history_push) function in `include/fb_cmdline.h`
+- [`fbc_history_push`](modules/src.fb_cmdline.c.md#fbc_history_push) function in `src/fb_cmdline.c`
+- [`FBC_LIST_NAMES`](modules/include.fb_cmdline.h.md#fbc_list_names) macro in `include/fb_cmdline.h`
+- [`fbc_names_expr`](modules/include.fb_cmdline.h.md#fbc_names_expr) function in `include/fb_cmdline.h`
+- [`fbc_names_expr`](modules/src.fb_cmdline.c.md#fbc_names_expr) function in `src/fb_cmdline.c`
+- [`fbk_add`](modules/include.frame_broker.h.md#fbk_add) function in `include/frame_broker.h`
+- [`fbk_add`](modules/src.frame_broker.c.md#fbk_add) function in `src/frame_broker.c`
+- [`fbk_frame`](modules/include.frame_broker.h.md#fbk_frame) struct in `include/frame_broker.h`
+- [`fbk_init`](modules/include.frame_broker.h.md#fbk_init) function in `include/frame_broker.h`
+- [`fbk_init`](modules/src.frame_broker.c.md#fbk_init) function in `src/frame_broker.c`
+- [`FBK_MAX_DEPTH`](modules/include.frame_broker.h.md#fbk_max_depth) macro in `include/frame_broker.h`
+- [`FBK_MAX_FRAMES`](modules/include.frame_broker.h.md#fbk_max_frames) macro in `include/frame_broker.h`
+- [`FBK_MAX_MSG`](modules/include.frame_broker.h.md#fbk_max_msg) macro in `include/frame_broker.h`
+- [`fbk_origin`](modules/include.frame_broker.h.md#fbk_origin) function in `include/frame_broker.h`
+- [`fbk_origin`](modules/src.frame_broker.c.md#fbk_origin) function in `src/frame_broker.c`
+- [`FBK_ORIGIN_MAX`](modules/include.frame_broker.h.md#fbk_origin_max) macro in `include/frame_broker.h`
+- [`fbk_origin_of`](modules/include.frame_broker.h.md#fbk_origin_of) function in `include/frame_broker.h`
+- [`fbk_origin_of`](modules/src.frame_broker.c.md#fbk_origin_of) function in `src/frame_broker.c`
+- [`fbk_rel`](modules/include.frame_broker.h.md#fbk_rel) enum in `include/frame_broker.h`
+- [`fbk_remove`](modules/include.frame_broker.h.md#fbk_remove) function in `include/frame_broker.h`
+- [`fbk_remove`](modules/src.frame_broker.c.md#fbk_remove) function in `src/frame_broker.c`
+- [`fbk_route`](modules/src.frame_broker.c.md#fbk_route) function in `src/frame_broker.c`
+- [`fbk_table`](modules/include.frame_broker.h.md#fbk_table) struct in `include/frame_broker.h`
+- [`FBK_URL_MAX`](modules/include.frame_broker.h.md#fbk_url_max) macro in `include/frame_broker.h`
+- [`fbk_verdict`](modules/include.frame_broker.h.md#fbk_verdict) enum in `include/frame_broker.h`
 - [`fbp_expr`](modules/include.fb_panes.h.md#fbp_expr) function in `include/fb_panes.h`
 - [`fbp_expr`](modules/src.fb_panes.c.md#fbp_expr) function in `src/fb_panes.c`
 - [`FBP_EXPR_MAX`](modules/include.fb_panes.h.md#fbp_expr_max) macro in `include/fb_panes.h`
@@ -1027,6 +1076,20 @@
 - [`fetch_ctx`](modules/src.secure_fetch.c.md#fetch_ctx) struct in `src/secure_fetch.c`
 - [`fetch_job`](modules/gui.browser_ui.c.md#fetch_job) struct in `gui/browser_ui.c`
 - [`fetch_prep`](modules/gui.browser_ui.c.md#fetch_prep) struct in `gui/browser_ui.c`
+- [`fh_apply_top`](modules/include.frame_host.h.md#fh_apply_top) function in `include/frame_host.h`
+- [`fh_apply_top`](modules/src.frame_host.c.md#fh_apply_top) function in `src/frame_host.c`
+- [`fh_count`](modules/include.frame_host.h.md#fh_count) function in `include/frame_host.h`
+- [`fh_count`](modules/src.frame_host.c.md#fh_count) function in `src/frame_host.c`
+- [`fh_free`](modules/include.frame_host.h.md#fh_free) function in `include/frame_host.h`
+- [`fh_free`](modules/src.frame_host.c.md#fh_free) function in `src/frame_host.c`
+- [`fh_host`](modules/include.frame_host.h.md#fh_host) type_alias in `include/frame_host.h`
+- [`fh_host`](modules/src.frame_host.c.md#fh_host) struct in `src/frame_host.c`
+- [`FH_MAX_DEPTH`](modules/include.frame_host.h.md#fh_max_depth) macro in `include/frame_host.h`
+- [`fh_new`](modules/include.frame_host.h.md#fh_new) function in `include/frame_host.h`
+- [`fh_new`](modules/src.frame_host.c.md#fh_new) function in `src/frame_host.c`
+- [`fh_slot`](modules/src.frame_host.c.md#fh_slot) struct in `src/frame_host.c`
+- [`fh_tick`](modules/include.frame_host.h.md#fh_tick) function in `include/frame_host.h`
+- [`fh_tick`](modules/src.frame_host.c.md#fh_tick) function in `src/frame_host.c`
 - [`fields`](modules/gui.browser_ui.c.md#fields) function in `gui/browser_ui.c`
 - [`fields`](modules/src.os_sandbox.c.md#fields) function in `src/os_sandbox.c`
 - [`file`](modules/src.text_shape.c.md#file) type_alias in `src/text_shape.c`
@@ -1301,6 +1364,7 @@
 - [`hash`](modules/src.webfont_load.c.md#hash) type_alias in `src/webfont_load.c`
 - [`have`](modules/gui.browser_ui.c.md#have) function in `gui/browser_ui.c`
 - [`hb_check`](modules/src.hostblock.c.md#hb_check) function in `src/hostblock.c`
+- [`hb_check_subresource`](modules/src.hostblock.c.md#hb_check_subresource) function in `src/hostblock.c`
 - [`hb_count`](modules/include.hostblock.h.md#hb_count) function in `include/hostblock.h`
 - [`hb_count`](modules/src.hostblock.c.md#hb_count) function in `src/hostblock.c`
 - [`hb_decision`](modules/include.hostblock.h.md#hb_decision) enum in `include/hostblock.h`
@@ -1643,6 +1707,8 @@
 - [`je_install`](modules/src.js_env.c.md#je_install) function in `src/js_env.c`
 - [`je_install_canvas`](modules/src.js_env.c.md#je_install_canvas) function in `src/js_env.c`
 - [`je_install_identity`](modules/src.js_env.c.md#je_install_identity) function in `src/js_env.c`
+- [`je_install_identity_trusted`](modules/src.js_env.c.md#je_install_identity_trusted) function in `src/js_env.c`
+- [`JE_READBACK_EXACT`](modules/include.js_env.h.md#je_readback_exact) macro in `include/js_env.h`
 - [`je_status`](modules/include.js_env.h.md#je_status) enum in `include/js_env.h`
 - [`jg_add`](modules/include.js_geom.h.md#jg_add) function in `include/js_geom.h`
 - [`jg_add`](modules/src.js_geom.c.md#jg_add) function in `src/js_geom.c`
@@ -1750,6 +1816,7 @@
 - [`jsp_present_trusted`](modules/src.js_policy.c.md#jsp_present_trusted) function in `src/js_policy.c`
 - [`jsp_trusted`](modules/include.js_policy.h.md#jsp_trusted) function in `include/js_policy.h`
 - [`jsp_trusted`](modules/src.js_policy.c.md#jsp_trusted) function in `src/js_policy.c`
+- [`jt_enable_frames`](modules/src.js_trusted.c.md#jt_enable_frames) function in `src/js_trusted.c`
 - [`jt_enable_observers`](modules/src.js_trusted.c.md#jt_enable_observers) function in `src/js_trusted.c`
 - [`jt_enable_open`](modules/src.js_trusted.c.md#jt_enable_open) function in `src/js_trusted.c`
 - [`jt_enable_storage`](modules/src.js_trusted.c.md#jt_enable_storage) function in `src/js_trusted.c`
@@ -1836,6 +1903,7 @@
 - [`ln_result`](modules/include.link_nav.h.md#ln_result) struct in `include/link_nav.h`
 - [`ln_status`](modules/include.link_nav.h.md#ln_status) enum in `include/link_nav.h`
 - [`ln_target_kind`](modules/include.link_nav.h.md#ln_target_kind) enum in `include/link_nav.h`
+- [`load`](modules/include.tab.h.md#load) function in `include/tab.h`
 - [`load`](modules/src.tab.c.md#tab-load) method of `tab` in `src/tab.c`
 - [`load_baseline`](modules/tools.fbench.py.md#load_baseline) function in `tools.fbench`
 - [`load_current`](modules/tools.fbench.py.md#load_current) function in `tools.fbench`
@@ -2774,6 +2842,9 @@
 - [`resolves`](modules/src.page_view.c.md#resolves) function in `src/page_view.c`
 - [`returned`](modules/include.tab.h.md#returned) function in `include/tab.h`
 - [`rgb_from_packed`](modules/gui.bui_theme.c.md#rgb_from_packed) function in `gui/bui_theme.c`
+- [`ROL32`](modules/src.sha2.c.md#rol32) macro in `src/sha2.c`
+- [`ROR32`](modules/src.sha2.c.md#ror32) macro in `src/sha2.c`
+- [`ROR64`](modules/src.sha2.c.md#ror64) macro in `src/sha2.c`
 - [`row`](modules/gui.browser_ui.c.md#row) function in `gui/browser_ui.c`
 - [`ROW_PAINT_ALL`](modules/gui.browser_ui.c.md#row_paint_all) macro in `gui/browser_ui.c`
 - [`ROW_PAINT_BAND`](modules/gui.browser_ui.c.md#row_paint_band) macro in `gui/browser_ui.c`
@@ -2906,7 +2977,16 @@
 - [`sf_ws_send`](modules/src.secure_fetch.c.md#sf_ws_send) function in `src/secure_fetch.c`
 - [`sf_ws_url_check`](modules/gui.browser_ui.c.md#sf_ws_url_check) function in `gui/browser_ui.c`
 - [`sf_ws_url_check`](modules/src.secure_fetch.c.md#sf_ws_url_check) function in `src/secure_fetch.c`
+- [`sha_alg`](modules/include.sha2.h.md#sha_alg) enum in `include/sha2.h`
+- [`sha_alg_from_name`](modules/include.sha2.h.md#sha_alg_from_name) function in `include/sha2.h`
+- [`sha_alg_from_name`](modules/src.sha2.c.md#sha_alg_from_name) function in `src/sha2.c`
+- [`sha_digest`](modules/include.sha2.h.md#sha_digest) function in `include/sha2.h`
+- [`sha_digest`](modules/src.sha2.c.md#sha_digest) function in `src/sha2.c`
+- [`sha_digest_len`](modules/include.sha2.h.md#sha_digest_len) function in `include/sha2.h`
+- [`sha_digest_len`](modules/src.sha2.c.md#sha_digest_len) function in `src/sha2.c`
+- [`SHA_MAX_DIGEST`](modules/include.sha2.h.md#sha_max_digest) macro in `include/sha2.h`
 - [`shape`](modules/include.css_gradient.h.md#cg_radial-shape) type_alias of `cg_radial` in `include/css_gradient.h`
+- [`shortcut`](modules/include.ui.h.md#shortcut) function in `include/ui.h`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`silently`](modules/include.js_sandbox.h.md#silently) function in `include/js_sandbox.h`
@@ -3062,6 +3142,7 @@
 - [`tab_set_css_sink`](modules/src.tab.c.md#tab_set_css_sink) function in `src/tab.c`
 - [`tab_set_fetcher`](modules/include.tab.h.md#tab_set_fetcher) function in `include/tab.h`
 - [`tab_set_fetcher`](modules/src.tab.c.md#tab_set_fetcher) function in `src/tab.c`
+- [`tab_set_frame_id`](modules/src.tab.c.md#tab_set_frame_id) function in `src/tab.c`
 - [`tab_set_geometry`](modules/src.tab.c.md#tab_set_geometry) function in `src/tab.c`
 - [`tab_set_identity`](modules/include.tab.h.md#tab_set_identity) function in `include/tab.h`
 - [`tab_set_identity`](modules/src.tab.c.md#tab_set_identity) function in `src/tab.c`
@@ -3298,6 +3379,7 @@
 - [`UI_SCROLLBAR_MIN`](modules/gui.browser_ui.c.md#ui_scrollbar_min) macro in `gui/browser_ui.c`
 - [`UI_SCROLLBAR_PAD`](modules/gui.browser_ui.c.md#ui_scrollbar_pad) macro in `gui/browser_ui.c`
 - [`UI_SCROLLBAR_W`](modules/gui.browser_ui.c.md#ui_scrollbar_w) macro in `gui/browser_ui.c`
+- [`ui_set_operator_insecure`](modules/gui.browser_ui.c.md#ui_set_operator_insecure) function in `gui/browser_ui.c`
 - [`UI_SLICE_MAX`](modules/gui.browser_ui.c.md#ui_slice_max) macro in `gui/browser_ui.c`
 - [`ui_status`](modules/include.ui.h.md#ui_status) enum in `include/ui.h`
 - [`UI_STRIKE_OFFSET`](modules/gui.browser_ui.c.md#ui_strike_offset) macro in `gui/browser_ui.c`
@@ -3349,6 +3431,7 @@
 - [`url_status`](modules/include.url.h.md#url_status) enum in `include/url.h`
 - [`url_validate_https`](modules/src.url.c.md#url_validate_https) function in `src/url.c`
 - [`URLs`](modules/include.js_dom.h.md#urls) function in `include/js_dom.h`
+- [`used`](modules/include.frame_broker.h.md#used) type_alias in `include/frame_broker.h`
 - [`used`](modules/src.text_shape.c.md#used) type_alias in `src/text_shape.c`
 - [`used`](modules/src.ws_hub.c.md#used) type_alias in `src/ws_hub.c`
 - [`user_agent`](modules/include.identity.h.md#user_agent) type_alias in `include/identity.h`

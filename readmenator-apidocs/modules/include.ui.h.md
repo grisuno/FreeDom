@@ -1,13 +1,13 @@
 # `include/ui.h`
 
-> Source: [include/ui.h:1](../../include/ui.h#L1) | language `h` | coverage 33.3% | [API index](../index.md)
+> Source: [include/ui.h:1](../../include/ui.h#L1) | language `h` | coverage 31.6% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`ui_line`](#ui_line), [`ui_layout`](#ui_layout), [`rd_doc`](#rd_doc), [`jg_table`](#jg_table), [`tab`](#tab)
 - **Enums:** [`ui_status`](#ui_status)
 - **Type Aliases:** [`offset`](#offset)
-- **Functions:** [`space`](#space), [`ui_layout_free`](#ui_layout_free), [`ui_clamp_scroll`](#ui_clamp_scroll), [`available`](#available), [`out`](#out), [`placeholders`](#placeholders), [`disk`](#disk), [`images`](#images), [`ui_render_viewport_w`](#ui_render_viewport_w), [`ui_persisted_prefs`](#ui_persisted_prefs)
+- **Functions:** [`space`](#space), [`ui_layout_free`](#ui_layout_free), [`ui_clamp_scroll`](#ui_clamp_scroll), [`shortcut`](#shortcut), [`available`](#available), [`out`](#out), [`placeholders`](#placeholders), [`disk`](#disk), [`images`](#images), [`ui_render_viewport_w`](#ui_render_viewport_w), [`ui_persisted_prefs`](#ui_persisted_prefs)
 
 ## Type Diagram
 
@@ -62,7 +62,7 @@ typedef struct ui_layout
 
 ### `rd_doc`
 
-`struct` | [include/ui.h:69](../../include/ui.h#L69)
+`struct` | [include/ui.h:74](../../include/ui.h#L74)
 
 ```c
 struct rd_doc;
@@ -74,7 +74,7 @@ struct rd_doc;
 
 ### `jg_table`
 
-`struct` | [include/ui.h:95](../../include/ui.h#L95)
+`struct` | [include/ui.h:100](../../include/ui.h#L100)
 
 ```c
 struct jg_table;
@@ -86,7 +86,7 @@ struct jg_table;
 
 ### `tab`
 
-`struct` | [include/ui.h:105](../../include/ui.h#L105)
+`struct` | [include/ui.h:110](../../include/ui.h#L110)
 
 ```c
 struct tab;
@@ -190,11 +190,31 @@ Clamps desired to [0, max(0, total_lines - viewport_lines)].
 
 ---
 
+<a id="shortcut"></a>
+
+### `shortcut`
+
+`function` | [include/ui.h:71](../../include/ui.h#L71)
+
+```c
+* from a keyboard shortcut (Ctrl+Shift+E only relaxes a weak-but-valid certificate). */ void ui_set_operator_insecure(int on);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `certificate` | `Ctrl+Shift+E only relaxes a weak-but-valid` |  |  |
+
+**Returns:** `* from a keyboard`
+
+---
+
 <a id="available"></a>
 
 ### `available`
 
-`function` | [include/ui.h:86](../../include/ui.h#L86)
+`function` | [include/ui.h:91](../../include/ui.h#L91)
 
 ```c
 * cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG directly (no PDF rasterise step). The image * height is bounded (a hostile page can
@@ -214,7 +234,7 @@ Clamps desired to [0, max(0, total_lines - viewport_lines)].
 
 ### `out`
 
-`function` | [include/ui.h:98](../../include/ui.h#L98)
+`function` | [include/ui.h:103](../../include/ui.h#L103)
 
 ```c
 * ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates, plus a FC_PNG_PAGE_W x FC_HEADLESS_VIEW_H * viewport at scroll 0. The caller hands i
@@ -234,7 +254,7 @@ Clamps desired to [0, max(0, total_lines - viewport_lines)].
 
 ### `placeholders`
 
-`function` | [include/ui.h:108](../../include/ui.h#L108)
+`function` | [include/ui.h:113](../../include/ui.h#L113)
 
 ```c
 * above always draw image placeholders (no worker to decode hostile bytes);
@@ -254,7 +274,7 @@ Clamps desired to [0, max(0, total_lines - viewport_lines)].
 
 ### `disk`
 
-`function` | [include/ui.h:113](../../include/ui.h#L113)
+`function` | [include/ui.h:118](../../include/ui.h#L118)
 
 ```c
 * images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https or file://);
@@ -274,7 +294,7 @@ Clamps desired to [0, max(0, total_lines - viewport_lines)].
 
 ### `images`
 
-`function` | [include/ui.h:115](../../include/ui.h#L115)
+`function` | [include/ui.h:120](../../include/ui.h#L120)
 
 ```c
 * fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder, byte-identical to the on-screen window path. The fetcher type * matches tab_fetch_fn (include
@@ -294,7 +314,7 @@ Clamps desired to [0, max(0, total_lines - viewport_lines)].
 
 ### `ui_render_viewport_w`
 
-`function` | [include/ui.h:142](../../include/ui.h#L142)
+`function` | [include/ui.h:147](../../include/ui.h#L147)
 
 ```c
 int ui_render_viewport_w(void);
@@ -312,7 +332,7 @@ The headless driver feeds it to tab_set_viewport_w so @media width queries match
 
 ### `ui_persisted_prefs`
 
-`function` | [include/ui.h:147](../../include/ui.h#L147)
+`function` | [include/ui.h:152](../../include/ui.h#L152)
 
 ```c
 int ui_persisted_prefs(prefs_state *out);

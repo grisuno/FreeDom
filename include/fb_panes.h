@@ -22,6 +22,8 @@ typedef enum fbp_tab {
     FBP_NET,
     FBP_PROFILE,   /* where the JS time went (sampling profiler, time-weighted) */
     FBP_THROWS,    /* every exception thrown, caught ones included ("break on throw" log) */
+    FBP_DOM,       /* properties of one element: attributes, geometry, state */
+    FBP_STORAGE,   /* cookies, localStorage and sessionStorage of the page */
     FBP_COUNT
 } fbp_tab;
 

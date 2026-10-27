@@ -41,6 +41,15 @@ Depurador con puntos de ruptura/paso a paso (QuickJS-ng embebido no expone un de
 confinado), edición en vivo de CSS desde el panel (el REPL ya permite `insertRule`), tiempos de red
 (el registro `net()` no guarda marcas de tiempo) y selección de elemento con el ratón sobre la página.
 
+## Pestañas DOM y Storage
+
+`FBP_DOM` ("DOM", argumento: selector, vacío = `body`): etiqueta, ruta de ancestros (`html > body > p#a`), atributos, estado
+(`id`, `className`, `hidden`, `href`, `src`, `textContent`; `value/checked/disabled/type/name` solo en controles de formulario),
+geometría (`getBoundingClientRect`, `offset*`, `client*`) y modo del `shadowRoot`. `FBP_STORAGE` ("Storage"): cookies visibles
+al script, `localStorage` y `sessionStorage` de la página (clave = valor, 120 caracteres por valor, 256 claves). Ambas **solo
+leen**: ninguna expresión llama `setItem`/`removeItem` ni escribe en el DOM. La línea de comandos (historial, Tab,
+filtro de consola) vive en `spec/fb_cmdline.md`.
+
 ## Pestañas Profile y Throws
 
 `FBP_PROFILE` ("Profile") ejecuta `profile()` y `FBP_THROWS` ("Throws") ejecuta `throws()` del REPL: el

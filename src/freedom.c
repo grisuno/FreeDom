@@ -62,13 +62,13 @@ static void print_usage(FILE *fp, const char *prog) {
     fprintf(fp, "  --as-host=HOST: --as-gui, with HOST standing in for a local file's host\n");
     fprintf(fp, "  --images: enable image loading in headless render (off by default: Privacy by Default)\n");
     fprintf(fp, "  --user=user:password: HTTP Basic Authentication credentials (headless only)\n");
-    fprintf(fp, "  --insecure: allow weak TLS certificates (headless only, explicit override)\n");
+    fprintf(fp, "  --insecure: skip certificate verification (explicit operator override, headless and GUI)\n");
     fprintf(fp, "  --impersonate: browser-consistent TLS ClientHello for allow+js hosts (opt-in; else PQ-hybrid)\n");
     fprintf(fp, "  --tor[=host:port]: route via a Tor SOCKS5h proxy (default 127.0.0.1:9050); reaches .onion\n");
     fprintf(fp, "  --i2p[=host:port]: route .i2p via an I2P HTTP proxy (default 127.0.0.1:4444)\n");
     fprintf(fp, "  --torify: also route ordinary clearnet through Tor (implies --tor)\n");
     fprintf(fp, "  --js[=off|allowlist|on]: page-JS policy (GUI; headless runs JS when this resolves to 'on')\n");
-    fprintf(fp, "  --dump-pane=TAB[:ARG]: headless, print a Freebug panel (html[:selector], css[:selector], script[:n], net[:filter]); implies JS on\n");
+    fprintf(fp, "  --dump-pane=TAB[:ARG]: headless, print a Freebug panel (html[:selector], css[:selector], script[:n], net[:filter], dom[:selector], storage, profile, throws); implies JS on\n");
     fprintf(fp, "  --dump-console: headless, run the page's JS and print the captured console (Freebug); implies JS on\n");
     fprintf(fp, "  --dump-dom: headless, print the paint-ready render tree (blocks, boxes, containers) to stdout\n");
     fprintf(fp, "  --dump-css: headless, print the resolved CSS property dump (boxes + block properties) to stdout\n");
@@ -485,7 +485,13 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
     if (g_hosts != NULL) {
         char host[512];
         if (rp_host_of(url, host, sizeof host) == 0) {
-            if (hb_check(g_hosts, host) == HB_BLOCK) return -1; /* same gate as the GUI fetcher */
+            /* same gate as the GUI fetcher: a trusted page (allow.conf AND js.conf host) is
+             * not stopped by the blocklist for its third parties (owner decision 2026-10-26). */
+            int page_trusted = 0;
+            char ph0[512];
+            if (base != NULL && g_js_hosts != NULL && rp_host_of(base, ph0, sizeof ph0) == 0)
+                page_trusted = hb_is_allowlisted(g_hosts, ph0) && hb_is_allowlisted(g_js_hosts, ph0);
+            if (hb_check_subresource(g_hosts, host, page_trusted) == HB_BLOCK) return -1;
             int allowed = hb_is_allowlisted(g_hosts, host);
             /* An allowlisted host, or any subresource of an operator-trusted (--js=on)
              * page -- its CDN, modules, API -- gets the allowlist's relaxed strength;
@@ -1440,6 +1446,10 @@ int main(int argc, char **argv) {
 
     /* GUI mode: optional start URL/file. */
     (void)wd_resolve_env();
+    if (global_insecure) {
+        fprintf(stderr, "freedom: --insecure: certificate verification is OFF for this session\n");
+        ui_set_operator_insecure(1);
+    }
     ui_status ust = ui_run_browser(target);
     if (ust == UI_ERR_DISPLAY)
         fprintf(stderr, "freedom: cannot connect to a Wayland display (WAYLAND_DISPLAY=%s, "

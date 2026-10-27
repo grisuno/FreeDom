@@ -101,7 +101,7 @@ static void test_navigator_identity(void **state) {
     EXPECT(f, "navigator.platform", "Linux x86_64");
     EXPECT(f, "navigator.vendor === ''", "true");
     EXPECT(f, "navigator.hardwareConcurrency", "2");
-    EXPECT(f, "navigator.deviceMemory", "8");
+    EXPECT(f, "typeof navigator.deviceMemory", "undefined");   /* Firefox has none (Chrome-only) */
     EXPECT(f, "navigator.webdriver", "false");
     EXPECT(f, "navigator.doNotTrack === null", "true");
 }
@@ -269,6 +269,83 @@ static void test_screen_edges(void **state) {
     js_context_free(ctx);
 }
 
+
+/* --- trusted-host fidelity (owner decision 2026-10-26) --- */
+
+static void test_trusted_fidelity_clock_is_millisecond_and_consistent(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    assert_int_equal(je_install(ctx, 1920, 1080), JE_OK);
+    const char *probe =
+        "(function(){ var seen={}, n=0, t0=Date.now(), t;"
+        "  while((t=Date.now())-t0<150){ if(!seen[t]){ seen[t]=1; n++; } }"
+        "  return n; })()";
+    js_result r;
+    assert_int_equal(js_eval(ctx, probe, strlen(probe), &r), JS_OK);
+    assert_true(atoi(r.value) <= 4);                        /* default: a 100 ms grid */
+    js_result_free(&r);
+
+    js_context_free(ctx);
+    ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    assert_int_equal(je_install_identity_trusted(ctx, 1920, 1080, NULL, NULL, 1), JE_OK);
+    assert_int_equal(js_eval(ctx, probe, strlen(probe), &r), JS_OK);
+    assert_true(atoi(r.value) > 20);                        /* trusted: 1 ms steps */
+    js_result_free(&r);
+    const char *cons = "Math.abs((performance.timeOrigin+performance.now())-Date.now())<50";
+    assert_int_equal(js_eval(ctx, cons, strlen(cons), &r), JS_OK);
+    assert_string_equal(r.value, "true");
+    js_result_free(&r);
+    assert_int_equal(je_install_identity_trusted(NULL, 1, 1, NULL, NULL, 1), JE_ERR_NULL_ARG);
+    js_context_free(ctx);
+}
+
+static void test_canvas_readback_exact_for_trusted(void **state) {
+    (void)state;
+    js_context *ctx = NULL;
+    assert_int_equal(js_context_new(NULL, &ctx), JS_OK);
+    assert_int_equal(je_install(ctx, 1920, 1080), JE_OK);
+    assert_int_equal(je_install_canvas(ctx, JE_READBACK_EXACT), JE_OK);
+    const char *src =
+        "(function(){ var a=new Uint8Array(4096), i; for(i=0;i<a.length;i++) a[i]=(i*7)&255;"
+        "  var p=canvas.readback(a), q=audio.readback(a);"
+        "  for(i=0;i<a.length;i++) if(p[i]!==a[i]||q[i]!==a[i]) return 'diff@'+i;"
+        "  return 'same'; })()";
+    js_result r;
+    assert_int_equal(js_eval(ctx, src, strlen(src), &r), JS_OK);
+    assert_string_equal(r.value, "same");
+    js_result_free(&r);
+    js_context_free(ctx);
+}
+
+
+/* --- crypto.subtle.digest (spec/js_env.md) --- */
+
+static void test_subtle_digest_resolves_known_vectors(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var out=[]; function hx(b){ return Array.prototype.map.call(new Uint8Array(b),"
+              "function(x){ return ('0'+x.toString(16)).slice(-2); }).join(''); }"
+              "var u=new Uint8Array([97,98,99]);"
+              "crypto.subtle.digest('SHA-256',u).then(function(b){ out.push(hx(b)); });"
+              "crypto.subtle.digest({name:'sha-1'},u.buffer).then(function(b){ out.push(hx(b)); });"
+              "crypto.subtle.digest('SHA-512',new DataView(u.buffer,1,1)).then(function(b){ out.push(b.byteLength); });"
+              "typeof crypto.subtle.digest('SHA-256',u).then", "function");
+    (void)js_pump_jobs(f->ctx, 100);
+    EXPECT(f, "out.join('|')",
+           "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad|"
+           "a9993e364706816aba3e25717850c26c9cd0d89d|64");
+}
+
+static void test_subtle_digest_rejects_bad_input(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var r=[]; crypto.subtle.digest('MD5',new Uint8Array(1)).catch(function(e){ r.push(e.name); });"
+              "crypto.subtle.digest('SHA-256','text').catch(function(e){ r.push(e.name); });"
+              "crypto.subtle.digest('SHA-256').catch(function(e){ r.push(e.name); }); 'queued'", "queued");
+    (void)js_pump_jobs(f->ctx, 100);
+    EXPECT(f, "r.join(',')", "NotSupportedError,TypeError,TypeError");
+}
+
 /* --- canvas/audio readback poisoning (fp_perturb) --- */
 
 static void test_canvas_readback(void **state) {
@@ -407,6 +484,10 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_unforgeable, setup, teardown),
         cmocka_unit_test(test_screen_edges),
         cmocka_unit_test(test_canvas_readback),
+        cmocka_unit_test(test_trusted_fidelity_clock_is_millisecond_and_consistent),
+        cmocka_unit_test(test_canvas_readback_exact_for_trusted),
+        cmocka_unit_test_setup_teardown(test_subtle_digest_resolves_known_vectors, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_subtle_digest_rejects_bad_input, setup, teardown),
         cmocka_unit_test(test_canvas_unlinkable),
         cmocka_unit_test(test_canvas_unforgeable),
         cmocka_unit_test(test_coexists_with_dom),

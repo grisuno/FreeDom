@@ -51,7 +51,11 @@ typedef enum jt_ws_kind {
     JT_WS_OPEN = 1,       /* data = absolute wss:// URL */
     JT_WS_SEND_TEXT = 2,  /* data = UTF-8 text */
     JT_WS_SEND_BIN = 3,   /* data = raw bytes */
-    JT_WS_CLOSE = 4       /* data empty */
+    JT_WS_CLOSE = 4,      /* data empty */
+    /* Frame traffic (spec/frame_broker.md) rides the same parent-mediated queue. */
+    JT_WS_FRAME_POST = 5, /* id: -1 parent, -2 top, >0 child token; data "targetOrigin\nJSON" */
+    JT_WS_FRAME_OPEN = 6, /* id: child token; data = absolute https URL of the <iframe src> */
+    JT_WS_FRAME_CLOSE = 7 /* id: child token; the <iframe> left the document or changed src */
 } jt_ws_kind;
 
 typedef struct jt_ws_op {
@@ -62,8 +66,15 @@ typedef struct jt_ws_op {
 } jt_ws_op;
 
 typedef enum jt_ws_event_kind {
-    JT_WSE_OPEN = 1, JT_WSE_TEXT = 2, JT_WSE_BINARY = 3, JT_WSE_CLOSE = 4, JT_WSE_ERROR = 5
+    JT_WSE_OPEN = 1, JT_WSE_TEXT = 2, JT_WSE_BINARY = 3, JT_WSE_CLOSE = 4, JT_WSE_ERROR = 5,
+    JT_WSE_FRAME_MSG = 6  /* data "senderOrigin\nrelation\nJSON"; relation p|t|c<token> */
 } jt_ws_event_kind;
+
+/* Installs window.parent/window.top, iframe.contentWindow and cross-window postMessage for a
+ * trusted page. frame_id is 0 for the top document and >0 for a document the parent loaded into
+ * an iframe (then parent/top are proxies; in the top document both are the window itself). The
+ * worker only records ops; the parent routes with frame_broker and re-checks every origin. */
+jd_status jt_enable_frames(js_context *ctx, int frame_id);
 
 /* Installs the WebSocket constructor (trusted host only). The worker never opens a
  * socket: the object records operations for the parent (jt_take_ws). */

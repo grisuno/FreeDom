@@ -20,6 +20,7 @@
 
 #include "anti_fp.h"
 #include "js_sandbox.h"
+#include "sha2.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -63,6 +64,26 @@ static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,
     double elapsed = monotonic_ms() - origin;
     if (elapsed < 0.0) elapsed = 0.0;
     return JS_NewFloat64(ctx, (double)fp_coarsen_time_ms((uint64_t)elapsed));
+}
+
+
+/* Trusted-host clocks (owner decision 2026-10-26): 1 ms like a stock Firefox, no coarse grid, and
+ * performance.timeOrigin consistent with Date.now(). A fixed origin plus a 100 ms grid is a tell. */
+static JSValue m_date_now_exact(JSContext *ctx, JSValueConst this_val,
+                                int argc, JSValueConst *argv) {
+    (void)this_val; (void)argc; (void)argv;
+    return JS_NewFloat64(ctx, (double)wall_clock_ms());
+}
+
+static JSValue m_perf_now_exact(JSContext *ctx, JSValueConst this_val,
+                                int argc, JSValueConst *argv,
+                                int magic, JSValueConst *func_data) {
+    (void)this_val; (void)argc; (void)argv; (void)magic;
+    double origin = 0.0;
+    JS_ToFloat64(ctx, &origin, func_data[0]);
+    double elapsed = monotonic_ms() - origin;
+    if (elapsed < 0.0) elapsed = 0.0;
+    return JS_NewFloat64(ctx, (double)(uint64_t)elapsed);
 }
 
 /* Inert helpers for the performance surface: a no-op and an empty-array getter.
@@ -143,6 +164,74 @@ static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,
                               int argc, JSValueConst *argv) {
     (void)ctx; (void)this_val; (void)argc; (void)argv;
     return JS_NULL;
+}
+
+
+/* Rejected promise carrying an Error of the given name (WebCrypto reports through DOMException
+ * names; the engine has no DOMException, a named Error is what pages test for). */
+static JSValue reject_named(JSContext *ctx, const char *name, const char *msg) {
+    JSValue fns[2];
+    JSValue p = JS_NewPromiseCapability(ctx, fns);
+    if (JS_IsException(p)) return p;
+    JSValue err = JS_NewError(ctx);
+    JS_DefinePropertyValueStr(ctx, err, "name", JS_NewString(ctx, name),
+                              JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+    JS_DefinePropertyValueStr(ctx, err, "message", JS_NewString(ctx, msg),
+                              JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+    JSValue r = JS_Call(ctx, fns[1], JS_UNDEFINED, 1, (JSValueConst *)&err);
+    JS_FreeValue(ctx, r); JS_FreeValue(ctx, err);
+    JS_FreeValue(ctx, fns[0]); JS_FreeValue(ctx, fns[1]);
+    return p;
+}
+
+/* crypto.subtle.digest(algorithm, data): a Promise of the ArrayBuffer digest. SHA-1/256/384/512;
+ * data is an ArrayBuffer or any typed array/DataView. No key material, no I/O. */
+static JSValue m_subtle_digest(JSContext *ctx, JSValueConst this_val,
+                               int argc, JSValueConst *argv) {
+    (void)this_val;
+    if (argc < 2) return reject_named(ctx, "TypeError", "digest requires an algorithm and data");
+    JSValue nm = JS_IsObject(argv[0]) ? JS_GetPropertyStr(ctx, argv[0], "name") : JS_DupValue(ctx, argv[0]);
+    const char *name = JS_IsString(nm) ? JS_ToCString(ctx, nm) : NULL;
+    sha_alg alg;
+    int known = (name != NULL && sha_alg_from_name(name, &alg) == 0);
+    if (name != NULL) JS_FreeCString(ctx, name);
+    JS_FreeValue(ctx, nm);
+    if (!known) return reject_named(ctx, "NotSupportedError", "Unrecognized name");
+
+    size_t len = 0;
+    const uint8_t *data = JS_GetArrayBuffer(ctx, &len, argv[1]);
+    JSValue view = JS_UNDEFINED;
+    if (data == NULL) {                                  /* a view over a buffer */
+        JS_FreeValue(ctx, JS_GetException(ctx));
+        view = JS_IsObject(argv[1]) ? JS_GetPropertyStr(ctx, argv[1], "buffer") : JS_UNDEFINED;
+        JSValue jo = JS_IsObject(argv[1]) ? JS_GetPropertyStr(ctx, argv[1], "byteOffset") : JS_UNDEFINED;
+        JSValue jl = JS_IsObject(argv[1]) ? JS_GetPropertyStr(ctx, argv[1], "byteLength") : JS_UNDEFINED;
+        int64_t off = -1, vlen = -1;
+        if (JS_ToInt64(ctx, &off, jo) != 0 || JS_ToInt64(ctx, &vlen, jl) != 0) { off = -1; }
+        JS_FreeValue(ctx, jo); JS_FreeValue(ctx, jl);
+        size_t blen = 0;
+        const uint8_t *base = JS_IsObject(view) ? JS_GetArrayBuffer(ctx, &blen, view) : NULL;
+        if (base == NULL || off < 0 || vlen < 0 || (size_t)off > blen || (size_t)vlen > blen - (size_t)off) {
+            JS_FreeValue(ctx, JS_GetException(ctx));
+            JS_FreeValue(ctx, view);
+            return reject_named(ctx, "TypeError", "data must be a BufferSource");
+        }
+        data = base + off;
+        len = (size_t)vlen;
+    }
+    uint8_t out[SHA_MAX_DIGEST];
+    int rc = sha_digest(alg, data, len, out);
+    JS_FreeValue(ctx, view);
+    if (rc != 0) return reject_named(ctx, "OperationError", "digest failed");
+
+    JSValue fns[2];
+    JSValue p = JS_NewPromiseCapability(ctx, fns);
+    if (JS_IsException(p)) return p;
+    JSValue ab = JS_NewArrayBufferCopy(ctx, out, sha_digest_len(alg));
+    JSValue r = JS_Call(ctx, fns[0], JS_UNDEFINED, 1, (JSValueConst *)&ab);
+    JS_FreeValue(ctx, r); JS_FreeValue(ctx, ab);
+    JS_FreeValue(ctx, fns[0]); JS_FreeValue(ctx, fns[1]);
+    return p;
 }
 
 /* --- read-only property helpers --- */
@@ -292,7 +381,6 @@ static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_o
           && def_str(ctx, nav, "platform", fp_platform()) == 0
           && def_str(ctx, nav, "vendor", fp_vendor()) == 0
           && def_int(ctx, nav, "hardwareConcurrency", fp_hardware_concurrency()) == 0
-          && def_int(ctx, nav, "deviceMemory", fp_device_memory_gb()) == 0
           && def_int(ctx, nav, "maxTouchPoints", fp_max_touch_points()) == 0
           && def_val(ctx, nav, "onLine", JS_NewBool(ctx, fp_on_line())) == 0
           && def_val(ctx, nav, "cookieEnabled", JS_NewBool(ctx, fp_cookie_enabled())) == 0
@@ -355,7 +443,7 @@ static int build_crypto(JSContext *ctx, JSValueConst global) {
     if (JS_IsException(crypto)) return -1;
     JSValue subtle = JS_NewObject(ctx);
     if (JS_IsException(subtle)) { JS_FreeValue(ctx, crypto); return -1; }
-    int ok = def_fn(ctx, subtle, "digest", m_subtle_null) == 0
+    int ok = def_fn(ctx, subtle, "digest", m_subtle_digest) == 0
           && def_fn(ctx, subtle, "encrypt", m_subtle_null) == 0
           && def_fn(ctx, subtle, "decrypt", m_subtle_null) == 0
           && def_fn(ctx, subtle, "generateKey", m_subtle_null) == 0
@@ -404,19 +492,19 @@ static int build_perf_navigation(JSContext *ctx, JSValueConst perf) {
     return def_val(ctx, perf, "navigation", nav);
 }
 
-static int build_performance(JSContext *ctx, JSValueConst global) {
+static int build_performance(JSContext *ctx, JSValueConst global, int exact) {
     JSValue perf = JS_NewObject(ctx);
     if (JS_IsException(perf)) return -1;
 
     JSValue origin = JS_NewFloat64(ctx, monotonic_ms());
     JSValueConst data[1] = { origin };
-    JSValue now = JS_NewCFunctionData(ctx, m_perf_now, 0, 0, 1, data);
+    JSValue now = JS_NewCFunctionData(ctx, exact ? m_perf_now_exact : m_perf_now, 0, 0, 1, data);
     JS_FreeValue(ctx, origin); /* JS_NewCFunctionData retains its own copy */
 
     /* def_val takes ownership of now (consumed even on failure). */
     int ok = def_val(ctx, perf, "now", now) == 0
           && def_val(ctx, perf, "timeOrigin",
-                     JS_NewFloat64(ctx, PERF_ORIGIN_EPOCH)) == 0
+                     JS_NewFloat64(ctx, exact ? (double)wall_clock_ms() : PERF_ORIGIN_EPOCH)) == 0
           && build_perf_timing(ctx, perf) == 0
           && build_perf_navigation(ctx, perf) == 0
           && def_fn(ctx, perf, "getEntries", m_empty_array) == 0
@@ -436,13 +524,13 @@ static int build_performance(JSContext *ctx, JSValueConst global) {
 
 /* Replaces the built-in Date.now with the coarsened version, non-writable and
  * non-configurable so a script cannot restore a high-resolution clock. */
-static int override_date_now(JSContext *ctx, JSValueConst global) {
+static int override_date_now(JSContext *ctx, JSValueConst global, int exact) {
     JSValue date = JS_GetPropertyStr(ctx, global, "Date");
     if (JS_IsException(date) || JS_IsUndefined(date)) {
         JS_FreeValue(ctx, date);
         return -1;
     }
-    JSValue fn = JS_NewCFunction(ctx, m_date_now, "now", 0);
+    JSValue fn = JS_NewCFunction(ctx, exact ? m_date_now_exact : m_date_now, "now", 0);
     int rc = JS_IsException(fn)
            ? -1
            : JS_DefinePropertyValueStr(ctx, date, "now", fn, 0);
@@ -473,7 +561,7 @@ static JSValue m_readback(JSContext *ctx, JSValueConst this_val,
     uint8_t *copy = (uint8_t *)malloc(size ? size : 1);
     if (copy == NULL) return JS_ThrowOutOfMemory(ctx);
     if (size != 0) memcpy(copy, data, size);
-    fp_perturb(copy, size, key);
+    if (key != JE_READBACK_EXACT) fp_perturb(copy, size, key);
 
     JSValue out = JS_NewUint8ArrayCopy(ctx, copy, size);
     free(copy);
@@ -507,6 +595,12 @@ je_status je_install(js_context *ctx, int screen_w, int screen_h) {
 
 je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
                               const char *user_agent, const char *languages) {
+    return je_install_identity_trusted(ctx, screen_w, screen_h, user_agent, languages, 0);
+}
+
+je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_h,
+                                      const char *user_agent, const char *languages,
+                                      int trusted) {
     if (ctx == NULL) return JE_ERR_NULL_ARG;
 
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
@@ -517,9 +611,9 @@ je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
 
     int ok = build_navigator(jsctx, global, user_agent, languages) == 0
           && build_screen(jsctx, global, screen_w, screen_h) == 0
-          && build_performance(jsctx, global) == 0
+          && build_performance(jsctx, global, trusted != 0) == 0
           && build_crypto(jsctx, global) == 0
-          && override_date_now(jsctx, global) == 0;
+          && override_date_now(jsctx, global, trusted != 0) == 0;
 
     JS_FreeValue(jsctx, global);
     return ok ? JE_OK : JE_ERR_OOM;

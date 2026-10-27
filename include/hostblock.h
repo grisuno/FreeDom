@@ -74,6 +74,12 @@ hb_decision hb_check(const hb_set *s, const char *host);
  * standard. s/host NULL, empty, or longer than 253 chars => 0. */
 int hb_is_allowlisted(const hb_set *s, const char *host);
 
+/* hb_check for a subresource request. When the PAGE that asks is trusted (its host is on
+ * allow.conf AND js.conf; owner decision 2026-10-26) the blocklist does not apply and the
+ * result is HB_ALLOW; otherwise identical to hb_check. Pure; authenticity and routing are
+ * enforced elsewhere and are unaffected. */
+hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted);
+
 /* Number of unique domains on the given list (for tests/diagnostics). 0 if s is
  * NULL. */
 size_t hb_count(const hb_set *s, hb_list list);

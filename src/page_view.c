@@ -5122,6 +5122,9 @@ static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base
             lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)p);
             int disp = cached_element_style_ref(el, sheet, style_cache)->display;
             if (disp == CSS_DISP_NONE) return 1;
+            /* Engine mark (js_dom_ext __shSync): a shadow host's light child whose slot is absent or
+             * hidden is not rendered. */
+            if (lxb_dom_element_has_attribute(el, (const lxb_char_t *)"data-fzu", 8)) return 1;
             /* HTML Rendering 15.3.1: `[hidden]{display:none}` is a UA rule, so
              * an author `display` on the element wins over it -- and it is
              * structure, so it holds with author CSS off too. */

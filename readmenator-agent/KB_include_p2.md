@@ -275,24 +275,49 @@ Previous: [KB_include.md](KB_include.md)
   - `DL_MAX_BYTES` (macro, line 31) `#define DL_MAX_BYTES`
 - Imported by: `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 
+## include/fb_cmdline.h
+- Doc: fbc_history_push: #define FBC_BASE_MAX   256    /* bytes of a completion base path #define...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fbc_history` (struct, line 20)
+  - `fbc_filter` (enum, line 54)
+  - `fbc_history_init` (function, line 27) `void fbc_history_init(fbc_history *h);`
+  - `fbc_history_free` (function, line 28) `void fbc_history_free(fbc_history *h);`
+  - `fbc_history_push` (function, line 31) `int fbc_history_push(fbc_history *h, const char *text, size_t len);`
+  - `fbc_history_prev` (function, line 35) `const char *fbc_history_prev(fbc_history *h, const char *cur, size_t curlen);`
+  - `fbc_history_next` (function, line 38) `const char *fbc_history_next(fbc_history *h);`
+  - `fbc_complete_split` (function, line 42) `long fbc_complete_split(const char *text, size_t n, char *base, size_t cap, size_t *prefix_off);`
+  - `fbc_names_expr` (function, line 46) `size_t fbc_names_expr(const char *base, char *out, size_t cap);`
+  - `fbc_complete_pick` (function, line 51) `size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen, char *ins, size_t ins_cap, char *list...`
+  - `fbc_filter_passes` (function, line 62) `int fbc_filter_passes(int filter, int level);`
+  - `fbc_filter_next` (function, line 63) `int fbc_filter_next(int filter);`
+  - `fbc_filter_label` (function, line 64) `const char *fbc_filter_label(int filter);`
+  - `FREEDOM_FB_CMDLINE_H` (macro, line 2) `#define FREEDOM_FB_CMDLINE_H`
+  - `FBC_HIST_MAX` (macro, line 15) `#define FBC_HIST_MAX`
+  - `FBC_ENTRY_MAX` (macro, line 16) `#define FBC_ENTRY_MAX`
+  - `FBC_BASE_MAX` (macro, line 17) `#define FBC_BASE_MAX`
+  - `FBC_LIST_NAMES` (macro, line 18) `#define FBC_LIST_NAMES`
+- Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `tests/test_fb_cmdline.c`, `tests/test_js_dom.c`
+
 ## include/fb_panes.h
-- Doc: fbp_tab_label: FBP_CONSOLE = 0, FBP_HTML, FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where...
+- Doc: fbp_tab_label: FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where the JS time went (sampling...
 - Layer: utility
 - Language: h
 - Symbols:
   - `fbp_tab` (enum, line 17)
-  - `fbp_tab_label` (function, line 32) `const char *fbp_tab_label(int tab);`
-  - `fbp_tab_from_name` (function, line 35) `int fbp_tab_from_name(const char *name);`
-  - `fbp_tab_wrap` (function, line 38) `int fbp_tab_wrap(int tab, int dir);`
-  - `fbp_tab_span` (function, line 41) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);`
-  - `fbp_tab_at` (function, line 44) `int fbp_tab_at(double x, double cell_w, double pad_cells);`
-  - `fbp_is_pane` (function, line 47) `int fbp_is_pane(int tab);`
-  - `fbp_js_quote` (function, line 51) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);`
-  - `fbp_expr` (function, line 55) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);`
+  - `fbp_tab_label` (function, line 34) `const char *fbp_tab_label(int tab);`
+  - `fbp_tab_from_name` (function, line 37) `int fbp_tab_from_name(const char *name);`
+  - `fbp_tab_wrap` (function, line 40) `int fbp_tab_wrap(int tab, int dir);`
+  - `fbp_tab_span` (function, line 43) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);`
+  - `fbp_tab_at` (function, line 46) `int fbp_tab_at(double x, double cell_w, double pad_cells);`
+  - `fbp_is_pane` (function, line 49) `int fbp_is_pane(int tab);`
+  - `fbp_js_quote` (function, line 53) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);`
+  - `fbp_expr` (function, line 57) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);`
   - `FREEDOM_FB_PANES_H` (macro, line 2) `#define FREEDOM_FB_PANES_H`
-  - `FBP_SELECTOR_MAX` (macro, line 28) `#define FBP_SELECTOR_MAX`
-  - `FBP_EXPR_MAX` (macro, line 29) `#define FBP_EXPR_MAX`
-- Imported by: `gui/browser_ui.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
+  - `FBP_SELECTOR_MAX` (macro, line 30) `#define FBP_SELECTOR_MAX`
+  - `FBP_EXPR_MAX` (macro, line 31) `#define FBP_EXPR_MAX`
+- Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
 
 ## include/flex_layout.h
 - Doc: fx_item: Upper bound on items per flex line / grid columns.
@@ -364,6 +389,30 @@ Previous: [KB_include.md](KB_include.md)
 - Depends on: `include/url.h`
 - Imported by: `gui/browser_ui.c`, `src/form.c`, `tests/test_form.c`
 
+## include/frame_broker.h
+- Doc: fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fbk_frame` (struct, line 31)
+  - `fbk_table` (struct, line 38)
+  - `fbk_rel` (enum, line 22)
+  - `fbk_verdict` (enum, line 24)
+  - `used` (type_alias, line 30) `typedef struct fbk_frame { int used;`
+  - `f` (type_alias, line 37) `typedef struct fbk_table { fbk_frame f[FBK_MAX_FRAMES];`
+  - `fbk_origin_of` (function, line 42) `int fbk_origin_of(const char *url, char *out, size_t cap);`
+  - `fbk_init` (function, line 45) `int fbk_init(fbk_table *t, const char *top_url);`
+  - `fbk_add` (function, line 49) `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id);`
+  - `fbk_remove` (function, line 52) `void fbk_remove(fbk_table *t, int id);`
+  - `fbk_origin` (function, line 55) `const char *fbk_origin(const fbk_table *t, int id);`
+  - `FREEDOM_FRAME_BROKER_H` (macro, line 2) `#define FREEDOM_FRAME_BROKER_H`
+  - `FBK_MAX_FRAMES` (macro, line 16) `#define FBK_MAX_FRAMES`
+  - `FBK_MAX_DEPTH` (macro, line 17) `#define FBK_MAX_DEPTH`
+  - `FBK_MAX_MSG` (macro, line 18) `#define FBK_MAX_MSG`
+  - `FBK_ORIGIN_MAX` (macro, line 19) `#define FBK_ORIGIN_MAX`
+  - `FBK_URL_MAX` (macro, line 20) `#define FBK_URL_MAX`
+- Imported by: `src/frame_broker.c`, `src/frame_host.c`, `tests/test_frame_broker.c`
+
 ## include/frame_clock.h
 - Doc: active: frame_clock (fc_) — pure animation frame scheduler.
 - Layer: utility
@@ -377,6 +426,22 @@ Previous: [KB_include.md](KB_include.md)
   - `fc_interval_ms` (function, line 23) `int fc_interval_ms(const fc_clock *c);`
   - `FREEDOM_FRAME_CLOCK_H` (macro, line 2) `#define FREEDOM_FRAME_CLOCK_H`
 - Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
+
+## include/frame_host.h
+- Doc: fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fh_host` (type_alias, line 18) `typedef struct fh_host fh_host;`
+  - `fh_new` (function, line 27) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);`
+  - `fh_free` (function, line 31) `void fh_free(fh_host *h);`
+  - `fh_apply_top` (function, line 35) `void fh_apply_top(fh_host *h, const tab_page *page);`
+  - `fh_tick` (function, line 39) `int fh_tick(fh_host *h, int elapsed_ms);`
+  - `fh_count` (function, line 42) `int fh_count(const fh_host *h);`
+  - `FREEDOM_FRAME_HOST_H` (macro, line 2) `#define FREEDOM_FRAME_HOST_H`
+  - `FH_MAX_DEPTH` (macro, line 17) `#define FH_MAX_DEPTH`
+- Depends on: `include/tab.h`
+- Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `tests/test_frame_host.c`
 
 ## include/freebug.h
 - Doc: fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated)....
@@ -401,7 +466,7 @@ Previous: [KB_include.md](KB_include.md)
   - `FB_MAX_ENTRY_BYTES` (macro, line 57) `#define FB_MAX_ENTRY_BYTES`
   - `FB_MAX_TOTAL_BYTES` (macro, line 58) `#define FB_MAX_TOTAL_BYTES`
   - `FB_MAX_FILE_BYTES` (macro, line 62) `#define FB_MAX_FILE_BYTES`
-- Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_freebug.c`
+- Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/fb_cmdline.c`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_fb_cmdline.c`, `tests/test_freebug.c`
 
 ## include/freedom_config.h
 - Layer: infrastructure
@@ -423,67 +488,6 @@ Previous: [KB_include.md](KB_include.md)
   - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 81) `#define FC_LAZY_IMAGE_MARGIN_PX`
   - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 87) `#define FC_TAB_OP_NET_BUDGET_MS`
 - Imported by: `gui/browser_ui_internal.h`, `gui/svg_paint.c`, `gui/ui_render.c`, `src/page_view.c`, `src/tab.c`
-
-## include/hls.h
-- Doc: hls_segment: or variant info.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `hls_segment` (struct, line 29)
-  - `hls_variant` (struct, line 36)
-  - `hls_playlist` (struct, line 45)
-  - `hls_status` (enum, line 21)
-  - `hls_select_variant` (function, line 65) `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);`
-  - `resolved` (function, line 68) `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the * written length, or 0 on failure. */...`
-  - `hls_playlist_free` (function, line 74) `void hls_playlist_free(hls_playlist *pl);`
-  - `FREEDOM_HLS_H` (macro, line 2) `#define FREEDOM_HLS_H`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
-
-## include/host_conf.h
-- Doc: hcf_search_dirs: Pure.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `hcf_dirs` (struct, line 20)
-  - `hcf_search_dirs` (function, line 28) `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out);`
-  - `hcf_search_dirs_from_env` (function, line 31) `void hcf_search_dirs_from_env(hcf_dirs *out);`
-  - `hcf_load_filter` (function, line 35) `hb_set *hcf_load_filter(const hcf_dirs *dirs);`
-  - `hcf_load_allowlist` (function, line 39) `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname);`
-  - `FREEDOM_HOST_CONF_H` (macro, line 2) `#define FREEDOM_HOST_CONF_H`
-  - `HCF_MAX_DIRS` (macro, line 15) `#define HCF_MAX_DIRS`
-  - `HCF_PATH_MAX` (macro, line 16) `#define HCF_PATH_MAX`
-  - `HCF_MAX_FILE_BYTES` (macro, line 18) `#define HCF_MAX_FILE_BYTES`
-- Depends on: `include/hostblock.h`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/host_conf.c`, `tests/test_host_conf.c`
-
-## include/hostblock.h
-- Doc: hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `hb_list` (enum, line 32)
-  - `hb_decision` (enum, line 37)
-  - `hb_status` (enum, line 42)
-  - `hb_set` (type_alias, line 29) `typedef struct hb_set hb_set;`
-  - `hb_new` (function, line 49) `hb_set *hb_new(void);`
-  - `hb_free` (function, line 52) `void hb_free(hb_set *s);`
-  - `walked` (function, line 65) `* walked (the host, then without its first label, ...): any suffix on the allowlist * => HB_ALLOW (allow wins...`
-  - `hb_is_allowlisted` (function, line 75) `int hb_is_allowlisted(const hb_set *s, const char *host);`
-  - `hb_count` (function, line 79) `size_t hb_count(const hb_set *s, hb_list list);`
-  - `FREEDOM_HOSTBLOCK_H` (macro, line 2) `#define FREEDOM_HOSTBLOCK_H`
-- Imported by: `gui/browser_ui.c`, `include/host_conf.h`, `src/freedom.c`, `src/hostblock.c`, `tests/test_hostblock.c`
-
-## include/hostedit.h
-- Doc: he_text_has_host: Returns 1 if text (the body of a hosts-format file) already lists host as a...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `he_status` (enum, line 24)
-  - `he_text_has_host` (function, line 46) `int he_text_has_host(const char *text, const char *host);`
-  - `he_suggest` (function, line 55) `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);`
-  - `FREEDOM_HOSTEDIT_H` (macro, line 2) `#define FREEDOM_HOSTEDIT_H`
-  - `HE_MAX_HOST` (macro, line 32) `#define HE_MAX_HOST`
-- Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

@@ -1,4 +1,4 @@
-# Subsystem: src (page 4 of 9)
+# Subsystem: src (page 4 of 10)
 Previous: [KB_src_p3.md](KB_src_p3.md)
 
 ## src/download.c
@@ -21,20 +21,40 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `dl_check_size` (function, line 213) `dl_status dl_check_size(size_t len)`
 - Depends on: `include/download.h`, `include/pdf_export.h`
 
+## src/fb_cmdline.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `dup_n` (function, line 10) `static char *dup_n(const char *s, size_t n)`
+  - `fbc_history_init` (function, line 19) `void fbc_history_init(fbc_history *h)`
+  - `fbc_history_free` (function, line 23) `void fbc_history_free(fbc_history *h)`
+  - `fbc_history_push` (function, line 32) `int fbc_history_push(fbc_history *h, const char *text, size_t len)`
+  - `fbc_history_prev` (function, line 53) `const char *fbc_history_prev(fbc_history *h, const char *cur, size_t curlen)`
+  - `fbc_history_next` (function, line 63) `const char *fbc_history_next(fbc_history *h)`
+  - `path_char` (function, line 70) `static int path_char(char c)`
+  - `fbc_complete_split` (function, line 74) `long fbc_complete_split(const char *text, size_t n, char *base, size_t cap, size_t *prefix_off)`
+  - `fbc_names_expr` (function, line 95) `size_t fbc_names_expr(const char *base, char *out, size_t cap)`
+  - `fbc_complete_pick` (function, line 118) `size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen,
+                    ...`
+  - `fbc_filter_passes` (function, line 159) `int fbc_filter_passes(int filter, int level)`
+  - `fbc_filter_next` (function, line 168) `int fbc_filter_next(int filter)`
+  - `fbc_filter_label` (function, line 173) `const char *fbc_filter_label(int filter)`
+- Depends on: `include/fb_cmdline.h`, `include/fb_panes.h`, `include/freebug.h`
+
 ## src/fb_panes.c
 - Layer: utility
 - Language: c
 - Symbols:
-  - `tab_ok` (function, line 70) `static int tab_ok(int tab)`
-  - `fbp_tab_label` (function, line 72) `const char *fbp_tab_label(int tab)`
-  - `ieq` (function, line 74) `static int ieq(const char *a, const char *b)`
-  - `fbp_tab_from_name` (function, line 83) `int fbp_tab_from_name(const char *name)`
-  - `fbp_tab_wrap` (function, line 90) `int fbp_tab_wrap(int tab, int dir)`
-  - `fbp_tab_span` (function, line 96) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
-  - `fbp_tab_at` (function, line 105) `int fbp_tab_at(double px, double cell_w, double pad_cells)`
-  - `fbp_is_pane` (function, line 115) `int fbp_is_pane(int tab)`
-  - `fbp_js_quote` (function, line 117) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
-  - `fbp_expr` (function, line 146) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
+  - `tab_ok` (function, line 107) `static int tab_ok(int tab)`
+  - `fbp_tab_label` (function, line 109) `const char *fbp_tab_label(int tab)`
+  - `ieq` (function, line 111) `static int ieq(const char *a, const char *b)`
+  - `fbp_tab_from_name` (function, line 120) `int fbp_tab_from_name(const char *name)`
+  - `fbp_tab_wrap` (function, line 127) `int fbp_tab_wrap(int tab, int dir)`
+  - `fbp_tab_span` (function, line 133) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
+  - `fbp_tab_at` (function, line 142) `int fbp_tab_at(double px, double cell_w, double pad_cells)`
+  - `fbp_is_pane` (function, line 152) `int fbp_is_pane(int tab)`
+  - `fbp_js_quote` (function, line 154) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
+  - `fbp_expr` (function, line 183) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
 - Depends on: `include/fb_panes.h`
 
 ## src/flex_layout.c
@@ -113,6 +133,24 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
                    con...`
 - Depends on: `include/form.h`
 
+## src/frame_broker.c
+- Doc: target_admits: int changed = 1;                                  /* fixpoint: slots are reused...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `lc` (function, line 9) `static char lc(char c)`
+  - `host_char_ok` (function, line 11) `static int host_char_ok(char c)`
+  - `fbk_origin_of` (function, line 15) `int fbk_origin_of(const char *url, char *out, size_t cap)`
+  - `fbk_init` (function, line 53) `int fbk_init(fbk_table *t, const char *top_url)`
+  - `live` (function, line 62) `static int live(const fbk_table *t, int id)`
+  - `fbk_add` (function, line 66) `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id)`
+  - `fbk_remove` (function, line 84) `void fbk_remove(fbk_table *t, int id)`
+  - `fbk_origin` (function, line 96) `const char *fbk_origin(const fbk_table *t, int id)`
+  - `target_admits` (function, line 101) `static int target_admits(const char *target, const char *snd, const char *recv)`
+  - `fbk_route` (function, line 118) `fbk_verdict fbk_route(const fbk_table *t, int from, fbk_rel rel, int child,
+                     ...`
+- Depends on: `include/frame_broker.h`
+
 ## src/frame_clock.c
 - Layer: utility
 - Language: c
@@ -122,6 +160,27 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `fc_interval_ms` (function, line 26) `int fc_interval_ms(const fc_clock *c)`
   - `FC_DEFAULT_INTERVAL_MS` (macro, line 8) `#define FC_DEFAULT_INTERVAL_MS`
 - Depends on: `include/frame_clock.h`
+
+## src/frame_host.c
+- Doc: reap: fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `fh_slot` (struct, line 14)
+  - `fh_host` (struct, line 20)
+  - `fh_new` (function, line 32) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
+                fh_top_...`
+  - `reap` (function, line 45) `static void reap(fh_host *h)`
+  - `fh_free` (function, line 55) `void fh_free(fh_host *h)`
+  - `fh_count` (function, line 63) `int fh_count(const fh_host *h)`
+  - `load_frame` (function, line 72) `static void load_frame(fh_host *h, int id, const char *url)`
+  - `find_child` (function, line 105) `static int find_child(const fh_host *h, int parent, int token)`
+  - `token_seen_by` (function, line 113) `static int token_seen_by(const fh_host *h, int dest, int from)`
+  - `post_op` (function, line 119) `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
+  - `apply_ops` (function, line 174) `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
+  - `fh_apply_top` (function, line 197) `void fh_apply_top(fh_host *h, const tab_page *page)`
+  - `fh_tick` (function, line 202) `int fh_tick(fh_host *h, int elapsed_ms)`
+- Depends on: `include/frame_broker.h`, `include/frame_host.h`
 
 ## src/freebug.c
 - Layer: utility
@@ -144,7 +203,7 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `hl_font_stash` (struct, line 609)
+  - `hl_font_stash` (struct, line 615)
   - `print_usage` (function, line 54) `static void print_usage(FILE *fp, const char *prog)`
   - `is_https_url` (function, line 83) `static int is_https_url(const char *s)`
   - `is_http_url` (function, line 87) `static int is_http_url(const char *s)`
@@ -165,41 +224,41 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `print_dom_css` (function, line 443) `static void print_dom_css(const rd_doc *doc)`
   - `headless_fetch` (function, line 467) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
-  - `foldback_cookies` (function, line 548) `static void foldback_cookies(const char *url, const char *jar)`
-  - `print_css_drops` (function, line 572) `static void print_css_drops(const char *html, size_t len)`
-  - `hl_font_stash_free` (function, line 617) `static void hl_font_stash_free(hl_font_stash *s)`
-  - `hl_css_sink` (function, line 630) `static void hl_css_sink(void *vctx, const char *url,
+  - `foldback_cookies` (function, line 554) `static void foldback_cookies(const char *url, const char *jar)`
+  - `print_css_drops` (function, line 578) `static void print_css_drops(const char *html, size_t len)`
+  - `hl_font_stash_free` (function, line 623) `static void hl_font_stash_free(hl_font_stash *s)`
+  - `hl_css_sink` (function, line 636) `static void hl_css_sink(void *vctx, const char *url,
                         const char *body, si...`
-  - `hl_font_fetch` (function, line 667) `static int hl_font_fetch(void *vctx, const char *url,
+  - `hl_font_fetch` (function, line 673) `static int hl_font_fetch(void *vctx, const char *url,
                          int *out_status, c...`
-  - `render_page` (function, line 676) `static int render_page(const char *html, size_t len, const char *top_url,
+  - `render_page` (function, line 682) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-  - `first` (function, line 754) `* always cleared first (fetch_and_render may paint several pages per
+  - `first` (function, line 760) `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-  - `sf_reason` (function, line 945) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 964) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 1027) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `sf_reason` (function, line 951) `static const char *sf_reason(sf_status ss)`
+  - `fetch_and_render_one` (function, line 970) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 1033) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 1053) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 1059) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 1090) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 1127) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1096) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1133) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1238) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1257) `int main(int argc, char **argv)`
+  - `run_dump_video` (function, line 1244) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1263) `int main(int argc, char **argv)`
   - `gets` (function, line 463) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-  - `pool` (function, line 740) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-  - `only` (function, line 822) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 992) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `pool` (function, line 746) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+  - `only` (function, line 828) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+  - `BLOCKED` (function, line 998) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
   - `EXIT_OK` (macro, line 50) `#define EXIT_OK`
   - `EXIT_ERROR` (macro, line 51) `#define EXIT_ERROR`
   - `EXIT_USAGE` (macro, line 52) `#define EXIT_USAGE`
   - `CSS_DROPS_REPORT_MAX` (macro, line 173) `#define CSS_DROPS_REPORT_MAX`
-  - `HL_FONT_MAX_SHEETS` (macro, line 606) `#define HL_FONT_MAX_SHEETS`
-  - `HL_FONT_MAX_BYTES` (macro, line 607) `#define HL_FONT_MAX_BYTES`
-  - `HL_JS_NAV_MAX` (macro, line 960) `#define HL_JS_NAV_MAX`
+  - `HL_FONT_MAX_SHEETS` (macro, line 612) `#define HL_FONT_MAX_SHEETS`
+  - `HL_FONT_MAX_BYTES` (macro, line 613) `#define HL_FONT_MAX_BYTES`
+  - `HL_JS_NAV_MAX` (macro, line 966) `#define HL_JS_NAV_MAX`
 - Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 
 ## src/hls.c
@@ -257,8 +316,9 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `hb_free` (function, line 149) `void hb_free(hb_set *s)`
   - `hb_load` (function, line 156) `hb_status hb_load(hb_set *s, const char *text, hb_list list)`
   - `hb_check` (function, line 193) `hb_decision hb_check(const hb_set *s, const char *host)`
-  - `hb_is_allowlisted` (function, line 218) `int hb_is_allowlisted(const hb_set *s, const char *host)`
-  - `hb_count` (function, line 238) `size_t hb_count(const hb_set *s, hb_list list)`
+  - `hb_check_subresource` (function, line 218) `hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted)`
+  - `hb_is_allowlisted` (function, line 223) `int hb_is_allowlisted(const hb_set *s, const char *host)`
+  - `hb_count` (function, line 243) `size_t hb_count(const hb_set *s, hb_list list)`
   - `HB_MAX_HOST` (macro, line 19) `#define HB_MAX_HOST`
   - `HB_INIT_CAP` (macro, line 20) `#define HB_INIT_CAP`
 - Depends on: `include/hostblock.h`, `include/util.h`
@@ -404,75 +464,6 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `_GNU_SOURCE` (macro, line 7) `#define _GNU_SOURCE`
   - `IDN_QUERY_FIELD_MAX` (macro, line 18) `#define IDN_QUERY_FIELD_MAX`
 - Depends on: `include/anti_fp.h`, `include/identity.h`
-
-## src/image_decode.c
-- Doc: jpeg_err_ctx: libjpeg error manager that longjmps instead of calling exit(), so a hostile JPEG *...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `jpeg_err_ctx` (struct, line 153)
-  - `gif_reader` (struct, line 255)
-  - `gif_bits` (struct, line 290)
-  - `read_be32` (function, line 52) `static uint32_t read_be32(const uint8_t *p)`
-  - `img_png_dimensions` (function, line 57) `img_status img_png_dimensions(const uint8_t *bytes, size_t len,
-                              uin...`
-  - `img_dimensions_ok` (function, line 68) `int img_dimensions_ok(uint32_t w, uint32_t h)`
-  - `img_fit` (function, line 76) `void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h,
-             double *out_w, do...`
-  - `premultiply` (function, line 90) `static void premultiply(uint8_t *data, size_t pixels)`
-  - `img_decode_png` (function, line 102) `img_status img_decode_png(const uint8_t *bytes, size_t len, img_pixels *out)`
-  - `jpeg_error_longjmp` (function, line 158) `static void jpeg_error_longjmp(j_common_ptr cinfo)`
-  - `jpeg_silence` (function, line 164) `static void jpeg_silence(j_common_ptr cinfo)`
-  - `img_decode_jpeg` (function, line 166) `img_status img_decode_jpeg(const uint8_t *bytes, size_t len, img_pixels *out)`
-  - `gr_u8` (function, line 260) `static int gr_u8(gif_reader *r, uint8_t *out)`
-  - `gr_u16le` (function, line 266) `static int gr_u16le(gif_reader *r, uint16_t *out)`
-  - `gr_skip` (function, line 273) `static int gr_skip(gif_reader *r, size_t n)`
-  - `gr_skip_subblocks` (function, line 280) `static int gr_skip_subblocks(gif_reader *r)`
-  - `gb_next_code` (function, line 298) `static int gb_next_code(gif_bits *b, unsigned width, unsigned *out)`
-  - `gif_deinterlace_row` (function, line 319) `static uint32_t gif_deinterlace_row(uint32_t r, uint32_t fh)`
-  - `gif_put_pixel` (function, line 334) `static void gif_put_pixel(uint32_t *canvas, uint32_t cw, uint32_t ch,
-                          u...`
-  - `img_decode_gif` (function, line 354) `img_status img_decode_gif(const uint8_t *bytes, size_t len, img_pixels *out)`
-  - `img_decode_webp` (function, line 520) `img_status img_decode_webp(const uint8_t *bytes, size_t len, img_pixels *out)`
-  - `img_decode` (function, line 553) `img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out)`
-  - `img_pixels_free` (function, line 566) `void img_pixels_free(img_pixels *p)`
-  - `img_format_name` (function, line 575) `const char *img_format_name(img_format f)`
-  - `exit` (function, line 6) `* malformed stream fails closed instead of calling exit(). GIF uses an own pure-C * bounded LZW decoder (no giflib)....`
-  - `PNG_IHDR_MIN` (macro, line 34) `#define PNG_IHDR_MIN`
-  - `GIF_LZW_MAX_CODES` (macro, line 253) `#define GIF_LZW_MAX_CODES`
-- Depends on: `include/image_decode.h`
-
-## src/import_map.c
-- Doc: str: A JSON string into an owned UTF-8 buffer (escapes decoded; a lone surrogate or a * raw...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `im_entry` (struct, line 19)
-  - `im_map` (struct, line 25)
-  - `jr` (struct, line 34)
-  - `scope` (type_alias, line 18) `typedef struct im_entry { int scope;`
-  - `ws` (function, line 39) `static void ws(jr *r)`
-  - `eat` (function, line 44) `static int eat(jr *r, char c)`
-  - `hex4` (function, line 50) `static int hex4(const char *s, uint32_t *out)`
-  - `put_utf8` (function, line 64) `static size_t put_utf8(char *o, uint32_t cp)`
-  - `str` (function, line 78) `static char *str(jr *r)`
-  - `skip` (function, line 128) `static void skip(jr *r, int depth)`
-  - `url_like` (function, line 156) `static int url_like(const char *s)`
-  - `dup_s` (function, line 168) `static char *dup_s(const char *s)`
-  - `clear` (function, line 175) `static void clear(im_map *m)`
-  - `add` (function, line 185) `static int add(im_map *m, int scope, const char *key, const char *addr, const char *doc_url,
-    ...`
-  - `specifier_map` (function, line 209) `static void specifier_map(jr *r, im_map *m, int scope, const char *doc_url,
-                     ...`
-  - `im_parse` (function, line 225) `im_map *im_parse(const char *json, size_t len, const char *doc_url, im_url_fn resolve, void *ctx)`
-  - `match` (function, line 272) `static int match(const im_map *m, int scope, const char *key, char *out, size_t outsz)`
-  - `im_resolve` (function, line 301) `int im_resolve(const im_map *m, const char *base, const char *specifier,
-               im_url_fn...`
-  - `im_count` (function, line 339) `size_t im_count(const im_map *m)`
-  - `im_free` (function, line 343) `void im_free(im_map *m)`
-  - `IM_MAX_DEPTH` (macro, line 16) `#define IM_MAX_DEPTH`
-  - `IM_URL_MAX` (macro, line 17) `#define IM_URL_MAX`
-- Depends on: `include/import_map.h`
 
 
 Next: [KB_src_p5.md](KB_src_p5.md)

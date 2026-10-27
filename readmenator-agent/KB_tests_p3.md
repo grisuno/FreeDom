@@ -342,6 +342,19 @@ static void test_leading_b...`
   - `main` (function, line 204) `int main(void)`
 - Depends on: `include/download.h`
 
+## tests/test_fb_cmdline.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_history_walks_and_restores_the_draft` (function, line 11) `static void test_history_walks_and_restores_the_draft(void **state)`
+  - `test_history_is_bounded_and_push_returns_to_live` (function, line 31) `static void test_history_is_bounded_and_push_returns_to_live(void **state)`
+  - `test_complete_split` (function, line 50) `static void test_complete_split(void **state)`
+  - `test_names_expr_quotes_the_base` (function, line 69) `static void test_names_expr_quotes_the_base(void **state)`
+  - `test_pick_common_prefix_and_list` (function, line 79) `static void test_pick_common_prefix_and_list(void **state)`
+  - `test_filter` (function, line 98) `static void test_filter(void **state)`
+  - `main` (function, line 117) `int main(void)`
+- Depends on: `include/fb_cmdline.h`, `include/freebug.h`
+
 ## tests/test_fb_panes.c
 - Doc: test_profile_and_throws_tabs: Profile and Throws read the engine's sampler/tracer through the...
 - Layer: testing
@@ -354,8 +367,9 @@ static void test_leading_b...`
   - `test_expr_per_tab` (function, line 83) `static void test_expr_per_tab(void **state)`
   - `assert_true` (function, line 91) `assert_true(strncmp(out, "(function(q)`
   - `test_profile_and_throws_tabs` (function, line 101) `static void test_profile_and_throws_tabs(void **state)`
-  - `test_expr_selector_cannot_escape_the_literal` (function, line 115) `static void test_expr_selector_cannot_escape_the_literal(void **state)`
-  - `main` (function, line 138) `int main(void)`
+  - `test_dom_and_storage_tabs` (function, line 116) `static void test_dom_and_storage_tabs(void **state)`
+  - `test_expr_selector_cannot_escape_the_literal` (function, line 133) `static void test_expr_selector_cannot_escape_the_literal(void **state)`
+  - `main` (function, line 156) `int main(void)`
 - Depends on: `include/fb_panes.h`
 
 ## tests/test_flex_layout.c
@@ -464,34 +478,22 @@ static void test_float_pack_m_holy_grail_pull_u...`
   - `main` (function, line 207) `int main(void)`
 - Depends on: `include/form.h`
 
-## tests/test_frame_clock.c
+## tests/test_frame_broker.c
+- Doc: test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router.
 - Layer: testing
 - Language: c
 - Symbols:
-  - `test_set_active_and_needs_tick` (function, line 23) `static void test_set_active_and_needs_tick(void **state)`
-  - `test_set_active_twice` (function, line 36) `static void test_set_active_twice(void **state)`
-  - `test_null_safe` (function, line 45) `static void test_null_safe(void **state)`
-  - `main` (function, line 53) `int main(void)`
-- Depends on: `include/frame_clock.h`
-
-## tests/test_freebug.c
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_push_and_read` (function, line 21) `static void test_push_and_read(void **state)`
-  - `test_empty_and_null_text` (function, line 46) `static void test_empty_and_null_text(void **state)`
-  - `test_count_cap_fails_closed` (function, line 59) `static void test_count_cap_fails_closed(void **state)`
-  - `test_entry_truncated_not_dropped` (function, line 75) `static void test_entry_truncated_not_dropped(void **state)`
-  - `test_total_bytes_cap_fails_closed` (function, line 93) `static void test_total_bytes_cap_fails_closed(void **state)`
-  - `test_level_clamped` (function, line 118) `static void test_level_clamped(void **state)`
-  - `test_level_name` (function, line 129) `static void test_level_name(void **state)`
-  - `test_reset_reuses_and_no_leak` (function, line 140) `static void test_reset_reuses_and_no_leak(void **state)`
-  - `test_free_idempotent` (function, line 161) `static void test_free_idempotent(void **state)`
-  - `test_push_loc_records_location` (function, line 175) `static void test_push_loc_records_location(void **state)`
-  - `test_push_loc_null_file_and_negative_nums` (function, line 197) `static void test_push_loc_null_file_and_negative_nums(void **state)`
-  - `test_push_loc_file_truncated` (function, line 214) `static void test_push_loc_file_truncated(void **state)`
-  - `main` (function, line 228) `int main(void)`
-- Depends on: `include/freebug.h`
+  - `test_origin_of` (function, line 12) `static void test_origin_of(void **state)`
+  - `build` (function, line 27) `static void build(fbk_table *t, int *a, int *b)`
+  - `test_parent_top_child_routes` (function, line 33) `static void test_parent_top_child_routes(void **state)`
+  - `test_siblings_not_addressable` (function, line 45) `static void test_siblings_not_addressable(void **state)`
+  - `test_target_origin` (function, line 55) `static void test_target_origin(void **state)`
+  - `test_opaque_never_matches_exact` (function, line 69) `static void test_opaque_never_matches_exact(void **state)`
+  - `test_size_and_dead_frames` (function, line 78) `static void test_size_and_dead_frames(void **state)`
+  - `test_limits_fail_closed` (function, line 90) `static void test_limits_fail_closed(void **state)`
+  - `test_remove_subtree_and_top` (function, line 102) `static void test_remove_subtree_and_top(void **state)`
+  - `main` (function, line 116) `int main(void)`
+- Depends on: `include/frame_broker.h`
 
 
 Next: [KB_tests_p4.md](KB_tests_p4.md)

@@ -287,6 +287,15 @@ size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap) {
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return 0;
     JSValue global = JS_GetGlobalObject(jsctx);
+    {   /* frames: surface <iframe> elements added/removed since the last take (spec/frame_broker.md) */
+        JSValue scan = JS_GetPropertyStr(jsctx, global, "__fzScan");
+        if (JS_IsFunction(jsctx, scan)) {
+            JSValue r = JS_Call(jsctx, scan, global, 0, NULL);
+            if (JS_IsException(r)) JS_FreeValue(jsctx, JS_GetException(jsctx));
+            JS_FreeValue(jsctx, r);
+        }
+        JS_FreeValue(jsctx, scan);
+    }
     JSValue arr = JS_GetPropertyStr(jsctx, global, "__wsOps");
     size_t k = 0, bytes = 0;
     int64_t len = 0;
@@ -301,7 +310,7 @@ size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap) {
             size_t n = 0;
             const char *str = NULL;
             if (JS_ToInt32(jsctx, &kind, kv) == 0 && JS_ToInt32(jsctx, &id, iv) == 0
-                && kind >= JT_WS_OPEN && kind <= JT_WS_CLOSE)
+                && kind >= JT_WS_OPEN && kind <= JT_WS_FRAME_CLOSE)
                 str = JS_ToCStringLen(jsctx, &n, dv);
             if (str != NULL) {
                 size_t plen = 0;
@@ -325,7 +334,7 @@ size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap) {
 }
 
 int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len) {
-    if (ctx == NULL || kind < JT_WSE_OPEN || kind > JT_WSE_ERROR) return 0;
+    if (ctx == NULL || kind < JT_WSE_OPEN || kind > JT_WSE_FRAME_MSG) return 0;
     if (data == NULL) len = 0;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return 0;
@@ -351,6 +360,88 @@ int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, s
     JS_FreeValue(jsctx, fn);
     JS_FreeValue(jsctx, global);
     return delivered;
+}
+
+/* Cross-window messaging for a trusted page (spec/frame_broker.md). The worker only RECORDS ops
+ * (kinds 5..7 of the parent-mediated queue); the parent routes through frame_broker, which fixes
+ * the sender origin. Payloads cross as JSON text and are parsed as DATA on arrival. Elements get
+ * a data-fzf token attribute so the parent can map an <iframe> to its frame. */
+static const char JT_FRAMES_BODY[] =
+    "  var seq=0, live={}, wins={}, nlive=0, MAXF=15, MAXMSG=1048576, MAXQ=" "256" ";"
+    "  if(!g.__wsOps) g.__wsOps=[];"
+    "  var prev=(typeof g.__wsEvent==='function')?g.__wsEvent:null;"
+    "  function dce(){ var e=new Error('The object could not be cloned.'); e.name='DataCloneError'; return e; }"
+    "  function send(rel,d,t){"
+    "    if(t&&typeof t==='object') t=t.targetOrigin;"
+    "    if(t===undefined||t===null) t='/'; t=String(t);"
+    "    var s; try{ s=JSON.stringify(d); }catch(e){ throw dce(); }"
+    "    if(s===undefined) s='null';"
+    "    if(s.length>MAXMSG) throw dce();"
+    "    if(g.__wsOps.length>=MAXQ) return;"
+    "    g.__wsOps.push([5,rel,t+'\\n'+s]); }"
+    "  function mk(rel){ if(wins[rel]) return wins[rel];"
+    "    var w={ postMessage:function(d,t){ send(rel,d,t); }, closed:false };"
+    "    return (wins[rel]=w); }"
+    "  function def(o,n,v){ try{ Object.defineProperty(o,n,{configurable:true,get:function(){ return v; },set:function(){}}); }catch(e){} }"
+    "  if(SELF===0){ def(g,'parent',g); def(g,'top',g); }"
+    "  else { def(g,'parent',mk(-1)); def(g,'top',mk(-2)); }"
+    "  g.__fzScan=function(){ var d=g.document; if(!d||!d.querySelectorAll) return;"
+    "    var list=d.querySelectorAll('iframe'), seen={};"
+    "    for(var i=0;i<list.length;i++){ var el=list[i], t=Number(el.getAttribute('data-fzf'))||0, src=el.getAttribute('src'), abs=null;"
+    "      if(src){ try{ var u=new g.URL(src,(g.location&&g.location.href)||undefined); if(u.protocol==='https:') abs=u.href; }catch(e){} }"
+    "      if(t&&live[t]&&live[t].url===abs){ seen[t]=1; continue; }"
+    "      if(t&&live[t]){ g.__wsOps.push([7,t,'']); delete live[t]; delete wins[t]; nlive--; el.removeAttribute('data-fzf'); t=0; }"
+    "      if(!abs||nlive>=MAXF||g.__wsOps.length>=MAXQ) continue;"
+    "      t=++seq; el.setAttribute('data-fzf',String(t)); live[t]={url:abs}; nlive++; seen[t]=1; g.__wsOps.push([6,t,abs]); }"
+    "    for(var k in live){ if(!seen[k]){ g.__wsOps.push([7,Number(k),'']); delete live[k]; delete wins[k]; nlive--; } } };"
+    "  var P=g.HTMLIFrameElement&&g.HTMLIFrameElement.prototype;"
+    "  if(P){"
+    /* A frame with no src (or about:blank) is a same-origin blank document the page may write
+     * into synchronously (TinyMCE, rich-text editors): a detached document, nothing leaves the worker. */
+    "    function blank(el){ var s=el.getAttribute('src'); return !s||s==='about:blank'; }"
+    "    function blankWin(el){ if(el.__fzb) return el.__fzb;"
+    "      var d=g.document.implementation.createHTMLDocument(''), buf='';"
+    "      d.open=function(){ buf=''; return d; };"
+    "      d.write=function(){ for(var i=0;i<arguments.length;i++) buf+=String(arguments[i]); };"
+    "      d.writeln=function(){ d.write.apply(d,arguments); buf+='\\n'; };"
+    "      d.close=function(){ var m=/<body[^>]*>([\\s\\S]*?)(<\\/body>|$)/i.exec(buf); d.body.innerHTML=m?m[1]:buf; };"
+    "      var w={ document:d, parent:g, top:g, frameElement:el, closed:false, postMessage:function(){},"
+    "        addEventListener:function(){}, removeEventListener:function(){}, getComputedStyle:function(e){ return g.getComputedStyle(e); } };"
+    "      try{ Object.defineProperty(el,'__fzb',{value:w}); }catch(e){} return w; }"
+    "    try{ Object.defineProperty(P,'contentWindow',{configurable:true,get:function(){"
+    "      if(blank(this)) return blankWin(this);"
+    "      g.__fzScan(); var t=Number(this.getAttribute('data-fzf'))||0; return (t&&live[t])?mk(t):null; }}); }catch(e){}"
+    "    try{ Object.defineProperty(P,'contentDocument',{configurable:true,get:function(){"
+    "      return blank(this)?blankWin(this).document:null; }}); }catch(e){} }"
+    "  g.__wsEvent=function(id,kind,code,data){"
+    "    if(kind!==6) return prev?prev.apply(this,arguments):0;"
+    "    var a=String(data).split('\\n'); if(a.length<3) return 0;"
+    "    var v; try{ v=JSON.parse(a.slice(2).join('\\n')); }catch(e){ return 0; }"
+    "    var rel=a[1], src=null;"
+    "    if(rel==='p') src=(SELF===0)?null:mk(-1); else if(rel==='t') src=(SELF===0)?null:mk(-2);"
+    "    else if(rel.charAt(0)==='c'){ var t=Number(rel.slice(1)); if(t&&live[t]) src=mk(t); }"
+    "    var ev=new g.Event('message'); ev.data=v; ev.origin=a[0]; ev.source=src; ev.ports=[]; ev.lastEventId='';"
+    "    g.dispatchEvent(ev); return 1; };"
+    " })()";
+
+jd_status jt_enable_frames(js_context *ctx, int frame_id) {
+    if (ctx == NULL || frame_id < 0 || frame_id > 15) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+    char head[64];
+    int hn = snprintf(head, sizeof head, "(function(){ var g=__G, SELF=%d;", frame_id);
+    if (hn < 0 || (size_t)hn >= sizeof head) return JD_ERR_INTERNAL;
+    size_t bl = sizeof JT_FRAMES_BODY - 1;
+    char *src = (char *)malloc((size_t)hn + bl + 1);
+    if (src == NULL) return JD_ERR_OOM;
+    memcpy(src, head, (size_t)hn);
+    memcpy(src + hn, JT_FRAMES_BODY, bl + 1);
+    JSValue r = JS_Eval(jsctx, src, (size_t)hn + bl, "<frames-shim>", JS_EVAL_TYPE_GLOBAL);
+    free(src);
+    int ok = !JS_IsException(r);
+    if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
+    JS_FreeValue(jsctx, r);
+    return ok ? JD_OK : JD_ERR_INTERNAL;
 }
 
 /* In-memory localStorage for a trusted host (spec/web_storage.md): a Map with the

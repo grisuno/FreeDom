@@ -18,9 +18,11 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/css_values.h`
 - `gui/browser_ui.c` -> `include/data_url.h`
 - `gui/browser_ui.c` -> `include/download.h`
+- `gui/browser_ui.c` -> `include/fb_cmdline.h`
 - `gui/browser_ui.c` -> `include/fb_panes.h`
 - `gui/browser_ui.c` -> `include/form.h`
 - `gui/browser_ui.c` -> `include/frame_clock.h`
+- `gui/browser_ui.c` -> `include/frame_host.h`
 - `gui/browser_ui.c` -> `include/freebug.h`
 - `gui/browser_ui.c` -> `include/hls.h`
 - `gui/browser_ui.c` -> `include/host_conf.h`
@@ -92,6 +94,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/dom.h` -> `include/html_parse.h`
 - `include/dom_debug.h` -> `include/render_doc.h`
 - `include/form.h` -> `include/url.h`
+- `include/frame_host.h` -> `include/tab.h`
 - `include/host_conf.h` -> `include/hostblock.h`
 - `include/http_cache.h` -> `include/local_store.h`
 - `include/js_dom.h` -> `include/dom.h`
@@ -212,10 +215,16 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/dom_debug.c` -> `include/page_view.h`
 - `src/download.c` -> `include/download.h`
 - `src/download.c` -> `include/pdf_export.h`
+- `src/fb_cmdline.c` -> `include/fb_cmdline.h`
+- `src/fb_cmdline.c` -> `include/fb_panes.h`
+- `src/fb_cmdline.c` -> `include/freebug.h`
 - `src/fb_panes.c` -> `include/fb_panes.h`
 - `src/flex_layout.c` -> `include/flex_layout.h`
 - `src/form.c` -> `include/form.h`
+- `src/frame_broker.c` -> `include/frame_broker.h`
 - `src/frame_clock.c` -> `include/frame_clock.h`
+- `src/frame_host.c` -> `include/frame_broker.h`
+- `src/frame_host.c` -> `include/frame_host.h`
 - `src/freebug.c` -> `include/freebug.h`
 - `src/freedom.c` -> `include/dom_debug.h`
 - `src/freedom.c` -> `include/fb_panes.h`
@@ -286,6 +295,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/js_env.c` -> `include/anti_fp.h`
 - `src/js_env.c` -> `include/js_env.h`
 - `src/js_env.c` -> `include/js_sandbox.h`
+- `src/js_env.c` -> `include/sha2.h`
 - `src/js_events.c` -> `include/dom.h`
 - `src/js_events.c` -> `include/freebug.h`
 - `src/js_events.c` -> `include/html_parse.h`
@@ -357,6 +367,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/secure_fetch.c` -> `include/request_policy.h`
 - `src/secure_fetch.c` -> `include/secure_fetch.h`
 - `src/secure_fetch.c` -> `include/url.h`
+- `src/sha2.c` -> `include/sha2.h`
 - `src/svg_render.c` -> `include/css_color.h`
 - `src/svg_render.c` -> `include/svg_render.h`
 - `src/tab.c` -> `include/anti_fp.h`
@@ -457,10 +468,15 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_dom_debug.c` -> `include/render_doc.h`
 - `tests/test_dom_debug.c` -> `include/render_policy.h`
 - `tests/test_download.c` -> `include/download.h`
+- `tests/test_fb_cmdline.c` -> `include/fb_cmdline.h`
+- `tests/test_fb_cmdline.c` -> `include/freebug.h`
 - `tests/test_fb_panes.c` -> `include/fb_panes.h`
 - `tests/test_flex_layout.c` -> `include/flex_layout.h`
 - `tests/test_form.c` -> `include/form.h`
+- `tests/test_frame_broker.c` -> `include/frame_broker.h`
 - `tests/test_frame_clock.c` -> `include/frame_clock.h`
+- `tests/test_frame_host.c` -> `include/frame_host.h`
+- `tests/test_frame_host.c` -> `include/tab.h`
 - `tests/test_freebug.c` -> `include/freebug.h`
 - `tests/test_freedom.c` -> `include/image_decode.h`
 - `tests/test_hls.c` -> `include/hls.h`
@@ -475,26 +491,10 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_import_map.c` -> `include/import_map.h`
 - `tests/test_interp.c` -> `include/interp.h`
 - `tests/test_js_dom.c` -> `include/dom.h`
+- `tests/test_js_dom.c` -> `include/fb_cmdline.h`
 - `tests/test_js_dom.c` -> `include/fb_panes.h`
 - `tests/test_js_dom.c` -> `include/html_parse.h`
 - `tests/test_js_dom.c` -> `include/js_dom.h`
 - `tests/test_js_dom.c` -> `include/js_geom.h`
-- `tests/test_js_dom.c` -> `include/js_sandbox.h`
-- `tests/test_js_dom.c` -> `include/js_trusted.h`
-- `tests/test_js_dom.c` -> `include/url.h`
-- `tests/test_js_dom.c` -> `include/web_storage.h`
-- `tests/test_js_env.c` -> `include/dom.h`
-- `tests/test_js_env.c` -> `include/html_parse.h`
-- `tests/test_js_env.c` -> `include/js_dom.h`
-- `tests/test_js_env.c` -> `include/js_env.h`
-- `tests/test_js_env.c` -> `include/js_sandbox.h`
-- `tests/test_js_geom.c` -> `include/js_geom.h`
-- `tests/test_js_policy.c` -> `include/js_policy.h`
-- `tests/test_js_sandbox.c` -> `include/js_sandbox.h`
-- `tests/test_link_nav.c` -> `include/link_nav.h`
-- `tests/test_local_store.c` -> `include/local_store.h`
-- `tests/test_media_decoder.c` -> `include/media_decoder.h`
-- `tests/test_net_realm.c` -> `include/net_realm.h`
-- `tests/test_os_sandbox.c` -> `include/os_sandbox.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

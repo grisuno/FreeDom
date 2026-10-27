@@ -1,6 +1,49 @@
 # Subsystem: tests (page 4 of 8)
 Previous: [KB_tests_p3.md](KB_tests_p3.md)
 
+## tests/test_frame_clock.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_set_active_and_needs_tick` (function, line 23) `static void test_set_active_and_needs_tick(void **state)`
+  - `test_set_active_twice` (function, line 36) `static void test_set_active_twice(void **state)`
+  - `test_null_safe` (function, line 45) `static void test_null_safe(void **state)`
+  - `main` (function, line 53) `int main(void)`
+- Depends on: `include/frame_clock.h`
+
+## tests/test_frame_host.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `on_top_msg` (function, line 38) `static void on_top_msg(void *ctx, const char *data, size_t len)`
+  - `stub_fetch` (function, line 43) `static int stub_fetch(void *ctx, const char *method, const char *url, const char *body, size_t bl...`
+  - `test_open_route_both_ways_and_drop_mismatch` (function, line 56) `static void test_open_route_both_ways_and_drop_mismatch(void **state)`
+  - `test_removing_iframe_closes_worker` (function, line 88) `static void test_removing_iframe_closes_worker(void **state)`
+  - `test_failed_fetch_leaves_no_frame` (function, line 113) `static void test_failed_fetch_leaves_no_frame(void **state)`
+  - `test_bad_args` (function, line 129) `static void test_bad_args(void **state)`
+  - `main` (function, line 138) `int main(int argc, char **argv)`
+  - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
+- Depends on: `include/frame_host.h`, `include/tab.h`
+
+## tests/test_freebug.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_push_and_read` (function, line 21) `static void test_push_and_read(void **state)`
+  - `test_empty_and_null_text` (function, line 46) `static void test_empty_and_null_text(void **state)`
+  - `test_count_cap_fails_closed` (function, line 59) `static void test_count_cap_fails_closed(void **state)`
+  - `test_entry_truncated_not_dropped` (function, line 75) `static void test_entry_truncated_not_dropped(void **state)`
+  - `test_total_bytes_cap_fails_closed` (function, line 93) `static void test_total_bytes_cap_fails_closed(void **state)`
+  - `test_level_clamped` (function, line 118) `static void test_level_clamped(void **state)`
+  - `test_level_name` (function, line 129) `static void test_level_name(void **state)`
+  - `test_reset_reuses_and_no_leak` (function, line 140) `static void test_reset_reuses_and_no_leak(void **state)`
+  - `test_free_idempotent` (function, line 161) `static void test_free_idempotent(void **state)`
+  - `test_push_loc_records_location` (function, line 175) `static void test_push_loc_records_location(void **state)`
+  - `test_push_loc_null_file_and_negative_nums` (function, line 197) `static void test_push_loc_null_file_and_negative_nums(void **state)`
+  - `test_push_loc_file_truncated` (function, line 214) `static void test_push_loc_file_truncated(void **state)`
+  - `main` (function, line 228) `int main(void)`
+- Depends on: `include/freebug.h`
+
 ## tests/test_freedom.c
 - Doc: run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing...
 - Layer: testing
@@ -169,29 +212,30 @@ static void tes...`
 - Layer: testing
 - Language: c
 - Symbols:
-  - `test_free_null_idempotent` (function, line 32) `static void test_free_null_idempotent(void **state)`
-  - `test_count_null_set` (function, line 37) `static void test_count_null_set(void **state)`
-  - `test_load_null_args` (function, line 45) `static void test_load_null_args(void **state)`
-  - `test_hosts_line_drops_ip` (function, line 55) `static void test_hosts_line_drops_ip(void **state)`
-  - `test_various_ip_tokens_ignored` (function, line 64) `static void test_various_ip_tokens_ignored(void **state)`
-  - `test_bare_domain_per_line` (function, line 73) `static void test_bare_domain_per_line(void **state)`
-  - `test_comments_and_blanks` (function, line 83) `static void test_comments_and_blanks(void **state)`
-  - `test_multiple_tokens_per_line` (function, line 99) `static void test_multiple_tokens_per_line(void **state)`
-  - `test_no_trailing_newline` (function, line 107) `static void test_no_trailing_newline(void **state)`
-  - `test_lowercased` (function, line 118) `static void test_lowercased(void **state)`
-  - `test_trailing_dot_trimmed` (function, line 128) `static void test_trailing_dot_trimmed(void **state)`
-  - `test_invalid_tokens_skipped` (function, line 139) `static void test_invalid_tokens_skipped(void **state)`
-  - `test_oversize_token_skipped` (function, line 155) `static void test_oversize_token_skipped(void **state)`
-  - `test_underscore_and_hyphen_valid` (function, line 166) `static void test_underscore_and_hyphen_valid(void **state)`
-  - `test_dedup_and_accumulate` (function, line 174) `static void test_dedup_and_accumulate(void **state)`
-  - `test_lists_independent` (function, line 185) `static void test_lists_independent(void **state)`
-  - `test_block_covers_subdomains` (function, line 197) `static void test_block_covers_subdomains(void **state)`
-  - `test_allow_wins_and_covers_subdomains` (function, line 210) `static void test_allow_wins_and_covers_subdomains(void **state)`
-  - `test_no_lists_allows` (function, line 224) `static void test_no_lists_allows(void **state)`
-  - `test_is_allowlisted` (function, line 231) `static void test_is_allowlisted(void **state)`
-  - `test_check_fail_open_edges` (function, line 252) `static void test_check_fail_open_edges(void **state)`
-  - `test_tld_entry_blocks_every_host_under_it` (function, line 268) `static void test_tld_entry_blocks_every_host_under_it(void **state)`
-  - `main` (function, line 282) `int main(void)`
+  - `test_new_free` (function, line 38) `static void test_new_free(void **state)`
+  - `test_free_null_idempotent` (function, line 47) `static void test_free_null_idempotent(void **state)`
+  - `test_count_null_set` (function, line 52) `static void test_count_null_set(void **state)`
+  - `test_load_null_args` (function, line 60) `static void test_load_null_args(void **state)`
+  - `test_hosts_line_drops_ip` (function, line 70) `static void test_hosts_line_drops_ip(void **state)`
+  - `test_various_ip_tokens_ignored` (function, line 79) `static void test_various_ip_tokens_ignored(void **state)`
+  - `test_bare_domain_per_line` (function, line 88) `static void test_bare_domain_per_line(void **state)`
+  - `test_comments_and_blanks` (function, line 98) `static void test_comments_and_blanks(void **state)`
+  - `test_multiple_tokens_per_line` (function, line 114) `static void test_multiple_tokens_per_line(void **state)`
+  - `test_no_trailing_newline` (function, line 122) `static void test_no_trailing_newline(void **state)`
+  - `test_lowercased` (function, line 133) `static void test_lowercased(void **state)`
+  - `test_trailing_dot_trimmed` (function, line 143) `static void test_trailing_dot_trimmed(void **state)`
+  - `test_invalid_tokens_skipped` (function, line 154) `static void test_invalid_tokens_skipped(void **state)`
+  - `test_oversize_token_skipped` (function, line 170) `static void test_oversize_token_skipped(void **state)`
+  - `test_underscore_and_hyphen_valid` (function, line 181) `static void test_underscore_and_hyphen_valid(void **state)`
+  - `test_dedup_and_accumulate` (function, line 189) `static void test_dedup_and_accumulate(void **state)`
+  - `test_lists_independent` (function, line 200) `static void test_lists_independent(void **state)`
+  - `test_block_covers_subdomains` (function, line 212) `static void test_block_covers_subdomains(void **state)`
+  - `test_allow_wins_and_covers_subdomains` (function, line 225) `static void test_allow_wins_and_covers_subdomains(void **state)`
+  - `test_no_lists_allows` (function, line 239) `static void test_no_lists_allows(void **state)`
+  - `test_is_allowlisted` (function, line 246) `static void test_is_allowlisted(void **state)`
+  - `test_check_fail_open_edges` (function, line 267) `static void test_check_fail_open_edges(void **state)`
+  - `test_tld_entry_blocks_every_host_under_it` (function, line 283) `static void test_tld_entry_blocks_every_host_under_it(void **state)`
+  - `main` (function, line 297) `int main(void)`
 - Depends on: `include/hostblock.h`
 
 ## tests/test_hostedit.c

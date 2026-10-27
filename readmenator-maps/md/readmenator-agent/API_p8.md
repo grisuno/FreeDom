@@ -1,5 +1,96 @@
-# API (page 8 of 11)
+# API (page 8 of 12)
 Previous: [API_p7.md](API_p7.md)
+
+## src/freedom.c
+Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
+- `print_usage` (function) `src/freedom.c:54` `static void print_usage(FILE *fp, const char *prog)`
+- `is_https_url` (function) `src/freedom.c:83` `static int is_https_url(const char *s)`
+- `is_http_url` (function) `src/freedom.c:87` `static int is_http_url(const char *s)`
+- `is_overlay_http` (function) `src/freedom.c:92` `static int is_overlay_http(const char *s)` -- fprintf(fp, "  --dump-video-url: headless, print the first detected video source URL to stdout (no truncation)\n")...
+- `now_us` (function) `src/freedom.c:148` `static uint64_t now_us(void)`
+- `timings_ensure_init` (function) `src/freedom.c:154` `static void timings_ensure_init(void)`
+- `timings_enabled` (function) `src/freedom.c:158` `static int timings_enabled(void)`
+- `timings_dump` (function) `src/freedom.c:162` `static void timings_dump(void)`
+- `user_impersonate_enabled` (function) `src/freedom.c:217` `static int user_impersonate_enabled(void)`
+- `read_file` (function) `src/freedom.c:224` `static char *read_file(const char *path, size_t *out_len)` -- User opt-in for TLS-impersonation blend: --impersonate or FREEDOM_IMPERSONATE=1.
+- `headless_load_hosts` (function) `src/freedom.c:242` `static void headless_load_hosts(void)`
+- `apply_identity` (function) `src/freedom.c:262` `static void apply_identity(sf_config *cfg)`
+- `apply_as_gui` (function) `src/freedom.c:267` `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
+- `is_blank_text` (function) `src/freedom.c:305` `static int is_blank_text(const char *s)` -- .js_mode       = mode, .host_in_js    = host[0] != '\0' && g_js_hosts != NULL && hb_is_allowlisted(g_js_hosts...
+- `print_doc` (function) `src/freedom.c:318` `static void print_doc(const rd_doc *doc)` -- Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data...
+- `print_console` (function) `src/freedom.c:411` `static void print_console(const fb_buffer *log)` -- Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed...
+- `print_dom` (function) `src/freedom.c:428` `static void print_dom(const rd_doc *doc)` -- Prints the paint-ready render tree (dom_debug) to stdout.
+- `print_dom_css` (function) `src/freedom.c:443` `static void print_dom_css(const rd_doc *doc)` -- Prints the CSS property inspector (dd_format_css) to stdout.
+- `gets` (function) `src/freedom.c:463` `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
+- `headless_fetch` (function) `src/freedom.c:467` `static int headless_fetch(void *ctx, const char *method, const char *url,
+                       ...` -- tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script...
+- `foldback_cookies` (function) `src/freedom.c:554` `static void foldback_cookies(const char *url, const char *jar)` -- Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set...
+- `print_css_drops` (function) `src/freedom.c:578` `static void print_css_drops(const char *html, size_t len)` -- Prints the author-CSS drop report for `html`, sorted by occurrence count.
+- `hl_font_stash_free` (function) `src/freedom.c:623` `static void hl_font_stash_free(hl_font_stash *s)`
+- `hl_css_sink` (function) `src/freedom.c:636` `static void hl_css_sink(void *vctx, const char *url,
+                        const char *body, si...` -- tab_css_sink_fn for headless: retains served 2xx CSS bodies (serial and pool paths alike) with an absolute https...
+- `hl_font_fetch` (function) `src/freedom.c:673` `static int hl_font_fetch(void *vctx, const char *url,
+                         int *out_status, c...` -- wf_fetch_fn around the headless policy gate (font bytes download like any * other subresource of this page). data...
+- `render_page` (function) `src/freedom.c:682` `static int render_page(const char *html, size_t len, const char *top_url,
+                       ...`
+- `pool` (function) `src/freedom.c:746` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+- `first` (function) `src/freedom.c:760` `* always cleared first (fetch_and_render may paint several pages per
+     * process). A NULL top_...`
+- `only` (function) `src/freedom.c:828` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+- `sf_reason` (function) `src/freedom.c:951` `static const char *sf_reason(sf_status ss)`
+- `fetch_and_render_one` (function) `src/freedom.c:970` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
+- `BLOCKED` (function) `src/freedom.c:998` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+- `elsewhere` (function) `src/freedom.c:1033` `* page whose script immediately forwards elsewhere (e.g. a search engine's
+ * JS-capability inter...`
+- `parent` (function) `src/freedom.c:1059` `* gated by the parent (ln_resolve: a local target stays under the document's
+ * directory, a remo...`
+- `run_headless` (function) `src/freedom.c:1096` `static int run_headless(const char *target)`
+- `video_fetch_with_fallback` (function) `src/freedom.c:1133` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+                     ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
+- `run_dump_video` (function) `src/freedom.c:1244` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
+- `main` (function) `src/freedom.c:1263` `int main(int argc, char **argv)`
+
+## src/hls.c
+Depends on: `include/hls.h`
+- `last_char` (function) `src/hls.c:38` `static const char *last_char(const char *s, size_t n, int c)` -- Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not found.
+- `name` (function) `src/hls.c:46` `* attr is the attribute name (e.g. "BANDWIDTH=");`
+- `parse_attr_long` (function) `src/hls.c:48` `static int parse_attr_long(const char *attrs, const char *end,
+                           const c...` -- Extracts a named attribute value from an #EXT-X-STREAM-INF attribute string. attr is the attribute name (e.g....
+- `parse_attr_resolution` (function) `src/hls.c:62` `static void parse_attr_resolution(const char *attrs, const char *end,
+                           ...` -- static int parse_attr_long(const char *attrs, const char *end, const char *attr, long *val) { size_t alen =...
+- `hls_parse` (function) `src/hls.c:80` `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)`
+- `hls_select_variant` (function) `src/hls.c:202` `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h)`
+- `hls_resolve_url` (function) `src/hls.c:223` `size_t hls_resolve_url(const char *base_url, const char *segment_url,
+                       char...`
+- `hls_playlist_free` (function) `src/hls.c:253` `void hls_playlist_free(hls_playlist *pl)`
+
+## src/host_conf.c
+Depends on: `include/host_conf.h`
+- `add_dir` (function) `src/host_conf.c:10` `static void add_dir(hcf_dirs *out, const char *path)`
+- `hcf_search_dirs` (function) `src/host_conf.c:20` `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out)`
+- `hcf_search_dirs_from_env` (function) `src/host_conf.c:32` `void hcf_search_dirs_from_env(hcf_dirs *out)`
+- `read_conf` (function) `src/host_conf.c:37` `static char *read_conf(const char *dir, const char *name)` -- add_dir(out, env); if (home != NULL && home[0] != '\0') { char user[HCF_PATH_MAX]; int n = snprintf(user, sizeof...
+- `load_into` (function) `src/host_conf.c:58` `static void load_into(hb_set *s, const char *dir, const char *name, hb_list list)`
+- `hcf_load_filter` (function) `src/host_conf.c:65` `hb_set *hcf_load_filter(const hcf_dirs *dirs)`
+- `hcf_load_allowlist` (function) `src/host_conf.c:76` `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname)`
+
+## src/hostblock.c
+Depends on: `include/hostblock.h`, `include/util.h`
+- `table_probe` (function) `src/hostblock.c:38` `static size_t table_probe(const hb_table *t, const char *key, size_t klen)` -- Finds the slot for key (length klen) in t, which must have a free slot.
+- `table_grow` (function) `src/hostblock.c:49` `static int table_grow(hb_table *t, size_t newcap)` -- Finds the slot for key (length klen) in t, which must have a free slot.
+- `table_insert` (function) `src/hostblock.c:71` `static int table_insert(hb_table *t, const char *key, size_t klen)` -- Inserts key (length klen) into t, deduping.
+- `table_contains` (function) `src/hostblock.c:92` `static int table_contains(const hb_table *t, const char *key)`
+- `table_free` (function) `src/hostblock.c:98` `static void table_free(hb_table *t)`
+- `lower` (function) `src/hostblock.c:107` `static char lower(char c)`
+- `is_ip_token` (function) `src/hostblock.c:113` `static int is_ip_token(const char *s, size_t n)` -- A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain.
+- `is_domain_char` (function) `src/hostblock.c:122` `static int is_domain_char(char c)` -- A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain.
+- `hb_new` (function) `src/hostblock.c:144` `hb_set *hb_new(void)`
+- `hb_free` (function) `src/hostblock.c:149` `void hb_free(hb_set *s)`
+- `hb_load` (function) `src/hostblock.c:156` `hb_status hb_load(hb_set *s, const char *text, hb_list list)`
+- `hb_check` (function) `src/hostblock.c:193` `hb_decision hb_check(const hb_set *s, const char *host)`
+- `hb_check_subresource` (function) `src/hostblock.c:218` `hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted)`
+- `hb_is_allowlisted` (function) `src/hostblock.c:223` `int hb_is_allowlisted(const hb_set *s, const char *host)`
+- `hb_count` (function) `src/hostblock.c:243` `size_t hb_count(const hb_set *s, hb_list list)`
 
 ## src/hostedit.c
 Depends on: `include/hostedit.h`
@@ -271,38 +362,38 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
                             in...`
 - `jd_is_mutator` (function) `src/js_dom.c:603` `static int jd_is_mutator(const char *name)`
 - `jd_freeze_mutators` (function) `src/js_dom.c:609` `static int jd_freeze_mutators(JSContext *jsctx)`
-- `table` (function) `src/js_dom.c:639` `* a table (dom.viewport() non-null);`
-- `attrNames` (function) `src/js_dom.c:686` `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
+- `table` (function) `src/js_dom.c:643` `* a table (dom.viewport() non-null);`
+- `attrNames` (function) `src/js_dom.c:695` `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
      * a missing '...`
-- `scripts` (function) `src/js_dom.c:868` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-- `enough` (function) `src/js_dom.c:1041` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-- `ms` (function) `src/js_dom.c:1216` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-- `empty` (function) `src/js_dom.c:1407` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-- `geometry` (function) `src/js_dom.c:1409` `* constant geometry (zero real leak);`
-- `size` (function) `src/js_dom.c:1412` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
-- `js_env` (function) `src/js_dom.c:1415` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+- `scripts` (function) `src/js_dom.c:894` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+- `enough` (function) `src/js_dom.c:1067` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+- `ms` (function) `src/js_dom.c:1245` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+- `empty` (function) `src/js_dom.c:1436` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+- `geometry` (function) `src/js_dom.c:1438` `* constant geometry (zero real leak);`
+- `size` (function) `src/js_dom.c:1441` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+- `js_env` (function) `src/js_dom.c:1444` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-- `jd_install` (function) `src/js_dom.c:1950` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-- `jd_flush_custom_elements` (function) `src/js_dom.c:2032` `void jd_flush_custom_elements(js_context *ctx)`
-- `fails` (function) `src/js_dom.c:2046` `* cap is reached or an allocation fails (caller stops), else 0. */
+- `jd_install` (function) `src/js_dom.c:1981` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+- `jd_flush_custom_elements` (function) `src/js_dom.c:2063` `void jd_flush_custom_elements(js_context *ctx)`
+- `fails` (function) `src/js_dom.c:2077` `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-- `jd_install_console` (function) `src/js_dom.c:2160` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-- `jd_set_cookies` (function) `src/js_dom.c:2197` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-- `jd_get_cookies` (function) `src/js_dom.c:2217` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-- `jd_set_computed` (function) `src/js_dom.c:2240` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-- `jd_set_geometry` (function) `src/js_dom.c:2251` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+- `jd_install_console` (function) `src/js_dom.c:2191` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+- `jd_set_cookies` (function) `src/js_dom.c:2228` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+- `jd_get_cookies` (function) `src/js_dom.c:2248` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+- `jd_set_computed` (function) `src/js_dom.c:2271` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+- `jd_set_geometry` (function) `src/js_dom.c:2282` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
 
 ## src/js_dom_ext.c
 Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`
-- `identity` (function) `src/js_dom_ext.c:102` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
-- `registration` (function) `src/js_dom_ext.c:439` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
+- `identity` (function) `src/js_dom_ext.c:104` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
+- `registration` (function) `src/js_dom_ext.c:481` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
  * observer...`
-- `run` (function) `src/js_dom_ext.c:1221` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-- `jdx_install` (function) `src/js_dom_ext.c:1286` `int jdx_install(JSContext *ctx)`
-- `jd_install_repl_api` (function) `src/js_dom_ext.c:1295` `jd_status jd_install_repl_api(js_context *ctx)`
-- `jd_set_repl_css` (function) `src/js_dom_ext.c:1303` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
-- `jd_install_geolocation` (function) `src/js_dom_ext.c:1316` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
-- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1335` `jd_status jd_install_indexeddb(js_context *ctx)`
+- `run` (function) `src/js_dom_ext.c:1265` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+- `jdx_install` (function) `src/js_dom_ext.c:1330` `int jdx_install(JSContext *ctx)`
+- `jd_install_repl_api` (function) `src/js_dom_ext.c:1339` `jd_status jd_install_repl_api(js_context *ctx)`
+- `jd_set_repl_css` (function) `src/js_dom_ext.c:1347` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+- `jd_install_geolocation` (function) `src/js_dom_ext.c:1360` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1379` `jd_status jd_install_indexeddb(js_context *ctx)`
 
 ## src/js_dom_ext.h
 Imported by: `src/js_dom.c`, `src/js_dom_ext.c`
@@ -328,44 +419,53 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
                         jd_fetch_fn fn, ...`
 
 ## src/js_env.c
-Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`
+Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/sha2.h`
 - `primitives` (function) `src/js_env.c:6` `* the pure anti_fp primitives (one audited source of normalized constants);`
-- `wall_clock_ms` (function) `src/js_env.c:35` `static uint64_t wall_clock_ms(void)`
-- `monotonic_ms` (function) `src/js_env.c:41` `static double monotonic_ms(void)`
-- `m_date_now` (function) `src/js_env.c:49` `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,
+- `wall_clock_ms` (function) `src/js_env.c:36` `static uint64_t wall_clock_ms(void)`
+- `monotonic_ms` (function) `src/js_env.c:42` `static double monotonic_ms(void)`
+- `m_date_now` (function) `src/js_env.c:50` `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,
                           int ar...`
-- `m_perf_now` (function) `src/js_env.c:57` `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,
+- `m_perf_now` (function) `src/js_env.c:58` `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,
                           int ar...` -- performance.now: coarsened elapsed since the origin bound at install time, so * it never leaks the host uptime.
-- `m_empty_array` (function) `src/js_env.c:77` `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
+- `m_date_now_exact` (function) `src/js_env.c:72` `static JSValue m_date_now_exact(JSContext *ctx, JSValueConst this_val,
+                          ...` -- Trusted-host clocks (owner decision 2026-10-26): 1 ms like a stock Firefox, no coarse grid, and *...
+- `m_perf_now_exact` (function) `src/js_env.c:78` `static JSValue m_perf_now_exact(JSContext *ctx, JSValueConst this_val,
+                          ...`
+- `m_empty_array` (function) `src/js_env.c:98` `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
                              ...`
-- `m_get_random_values` (function) `src/js_env.c:95` `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
+- `m_get_random_values` (function) `src/js_env.c:116` `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
                        ...`
-- `m_random_uuid` (function) `src/js_env.c:125` `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
+- `m_random_uuid` (function) `src/js_env.c:146` `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
                              ...`
-- `m_subtle_null` (function) `src/js_env.c:142` `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,
+- `m_subtle_null` (function) `src/js_env.c:163` `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,
                              ...`
-- `def_val` (function) `src/js_env.c:153` `static int def_val(JSContext *ctx, JSValueConst obj, const char *name, JSValue v)` -- Always takes ownership of v: JS_DefinePropertyValueStr consumes it (freeing it even when the define fails).
-- `def_str` (function) `src/js_env.c:159` `static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const char *s)`
-- `def_int` (function) `src/js_env.c:163` `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)`
-- `def_fn` (function) `src/js_env.c:167` `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
+- `reject_named` (function) `src/js_env.c:172` `static JSValue reject_named(JSContext *ctx, const char *name, const char *msg)` -- Rejected promise carrying an Error of the given name (WebCrypto reports through DOMException * names; the engine has...
+- `m_subtle_digest` (function) `src/js_env.c:189` `static JSValue m_subtle_digest(JSContext *ctx, JSValueConst this_val,
+                           ...` -- crypto.subtle.digest(algorithm, data): a Promise of the ArrayBuffer digest.
+- `def_val` (function) `src/js_env.c:242` `static int def_val(JSContext *ctx, JSValueConst obj, const char *name, JSValue v)` -- Always takes ownership of v: JS_DefinePropertyValueStr consumes it (freeing it even when the define fails).
+- `def_str` (function) `src/js_env.c:248` `static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const char *s)`
+- `def_int` (function) `src/js_env.c:252` `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)`
+- `def_fn` (function) `src/js_env.c:256` `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
                   JSCFuncti...`
-- `build_languages` (function) `src/js_env.c:174` `static JSValue build_languages(JSContext *ctx, const char *langs)` -- navigator.languages: a sealed array built by splitting fp_accept_language() * (e.g. "en-US,en") on commas.
-- `build_navigator` (function) `src/js_env.c:197` `static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,
+- `build_languages` (function) `src/js_env.c:263` `static JSValue build_languages(JSContext *ctx, const char *langs)` -- navigator.languages: a sealed array built by splitting fp_accept_language() * (e.g. "en-US,en") on commas.
+- `build_navigator` (function) `src/js_env.c:286` `static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,
         ...`
-- `methods` (function) `src/js_env.c:201` `* capability methods (sendBeacon, spec/js_dom.md 7h) without touching any * fingerprintable field. An untrusted...`
-- `build_screen` (function) `src/js_env.c:309` `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)`
-- `build_crypto` (function) `src/js_env.c:353` `static int build_crypto(JSContext *ctx, JSValueConst global)`
-- `build_perf_timing` (function) `src/js_env.c:381` `static int build_perf_timing(JSContext *ctx, JSValueConst perf)`
-- `build_perf_navigation` (function) `src/js_env.c:395` `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)`
-- `build_performance` (function) `src/js_env.c:407` `static int build_performance(JSContext *ctx, JSValueConst global)`
-- `override_date_now` (function) `src/js_env.c:439` `static int override_date_now(JSContext *ctx, JSValueConst global)` -- Replaces the built-in Date.now with the coarsened version, non-writable and * non-configurable so a script cannot...
-- `make_readback` (function) `src/js_env.c:483` `static JSValue make_readback(JSContext *ctx, uint64_t key)`
-- `build_readback_obj` (function) `src/js_env.c:491` `static int build_readback_obj(JSContext *ctx, JSValueConst global,
+- `methods` (function) `src/js_env.c:290` `* capability methods (sendBeacon, spec/js_dom.md 7h) without touching any * fingerprintable field. An untrusted...`
+- `build_screen` (function) `src/js_env.c:397` `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)`
+- `build_crypto` (function) `src/js_env.c:441` `static int build_crypto(JSContext *ctx, JSValueConst global)`
+- `build_perf_timing` (function) `src/js_env.c:469` `static int build_perf_timing(JSContext *ctx, JSValueConst perf)`
+- `build_perf_navigation` (function) `src/js_env.c:483` `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)`
+- `build_performance` (function) `src/js_env.c:495` `static int build_performance(JSContext *ctx, JSValueConst global, int exact)`
+- `override_date_now` (function) `src/js_env.c:527` `static int override_date_now(JSContext *ctx, JSValueConst global, int exact)` -- Replaces the built-in Date.now with the coarsened version, non-writable and * non-configurable so a script cannot...
+- `make_readback` (function) `src/js_env.c:571` `static JSValue make_readback(JSContext *ctx, uint64_t key)`
+- `build_readback_obj` (function) `src/js_env.c:579` `static int build_readback_obj(JSContext *ctx, JSValueConst global,
                               ...`
-- `je_install` (function) `src/js_env.c:504` `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
-- `je_install_identity` (function) `src/js_env.c:508` `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
+- `je_install` (function) `src/js_env.c:592` `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
+- `je_install_identity` (function) `src/js_env.c:596` `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
                       ...`
-- `je_install_canvas` (function) `src/js_env.c:528` `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
+- `je_install_identity_trusted` (function) `src/js_env.c:601` `je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_h,
+              ...`
+- `je_install_canvas` (function) `src/js_env.c:622` `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
 
 ## src/js_events.c
 Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
@@ -389,52 +489,6 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `send` (function) `src/js_fetch.c:96` `* callbacks fire right after send();`
 - `task` (function) `src/js_fetch.c:257` `* current task (the page never waits on it);`
 - `jd_install_xhr` (function) `src/js_fetch.c:281` `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
-
-## src/js_geom.c
-Depends on: `include/js_geom.h`
-- `jg_init` (function) `src/js_geom.c:17` `void jg_init(jg_table *t)`
-- `jg_free` (function) `src/js_geom.c:21` `void jg_free(jg_table *t)`
-- `clamp_coord` (function) `src/js_geom.c:27` `static int32_t clamp_coord(double v, double lo)`
-- `grow` (function) `src/js_geom.c:33` `static int grow(jg_table *t)`
-- `push` (function) `src/js_geom.c:45` `static int push(jg_table *t, dom_node_id node, int32_t x, int32_t y, int32_t w, int32_t h)`
-- `jg_add` (function) `src/js_geom.c:52` `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h)`
-- `unite` (function) `src/js_geom.c:63` `static int unite(jg_rect *a, const jg_rect *b)` -- Bounding box of a and b into a; returns 1 if a changed.
-- `cmp_node` (function) `src/js_geom.c:78` `static int cmp_node(const void *pa, const void *pb)`
-- `jg_finish` (function) `src/js_geom.c:83` `int jg_finish(jg_table *t)`
-- `jg_find` (function) `src/js_geom.c:96` `const jg_rect *jg_find(const jg_table *t, dom_node_id node)`
-- `slot_of` (function) `src/js_geom.c:102` `static uint32_t slot_of(dom_node_id n)`
-- `index_of` (function) `src/js_geom.c:109` `static size_t index_of(jg_table *t, uint32_t *slots, dom_node_id node, const jg_rect *seed,
-     ...` -- Index of node in t->r via the local hash, inserting an empty-at-rect entry * (a copy of seed) when absent.
-- `jg_aggregate` (function) `src/js_geom.c:124` `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx)`
-- `jg_wire_len` (function) `src/js_geom.c:163` `size_t jg_wire_len(const jg_table *t)`
-- `jg_encode` (function) `src/js_geom.c:167` `int jg_encode(const jg_table *t, int32_t *out, size_t cap)`
-- `in_range` (function) `src/js_geom.c:182` `static int in_range(int32_t v, int32_t lo)`
-- `jg_decode` (function) `src/js_geom.c:186` `int jg_decode(const int32_t *in, size_t n, jg_table *out)`
-- `fnv` (function) `src/js_geom.c:212` `static uint64_t fnv(uint64_t h, int32_t v)`
-- `jg_hash` (function) `src/js_geom.c:221` `uint64_t jg_hash(const jg_table *t)`
-
-## src/js_location.c
-Depends on: `include/js_dom.h`, `include/url.h`, `src/js_location_internal.h`
-- `jd_lp_set` (function) `src/js_location.c:24` `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
-                      const ...` -- Defines a string property on the __locParts data object from a (ptr,len) span. * The span is copied into an engine...
-- `jl_m_hist_target` (function) `src/js_location.c:35` `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.histTarget(base, ref): the same-origin target of history.pushState/replaceState (url_history_target) as a...
-- `jd_set_location` (function) `src/js_location.c:139` `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
-- `jd_take_nav_request` (function) `src/js_location.c:173` `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
-- `jd_take_history` (function) `src/js_location.c:219` `char *jd_take_history(js_context *ctx, int *go)`
-- `jd_pop_state` (function) `src/js_location.c:250` `int jd_pop_state(js_context *ctx, int index)`
-
-## src/js_location_internal.h
-Imported by: `src/js_dom.c`, `src/js_location.c`
-- `header` (function) `src/js_location_internal.h:6` `* stay out of every public header (include/ never sees quickjs.h). */ #include "quickjs.h" JSValue...`
-
-## src/js_policy.c
-Depends on: `include/js_policy.h`
-- `eq_ci` (function) `src/js_policy.c:12` `static int eq_ci(const char *a, const char *b)` -- js_policy — implementation: pure per-host JavaScript policy decision.
-- `jsp_enabled` (function) `src/js_policy.c:22` `bool jsp_enabled(jsp_mode mode, int host_allowlisted)`
-- `jsp_trusted` (function) `src/js_policy.c:31` `bool jsp_trusted(bool js_enabled, int host_allowlisted)`
-- `jsp_present_trusted` (function) `src/js_policy.c:35` `bool jsp_present_trusted(int host_allowlisted)`
-- `jsp_mode_from_str` (function) `src/js_policy.c:39` `jsp_mode jsp_mode_from_str(const char *s)`
-- `jsp_mode_str` (function) `src/js_policy.c:51` `const char *jsp_mode_str(jsp_mode mode)`
 
 
 Next: [API_p9.md](API_p9.md)

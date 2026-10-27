@@ -297,6 +297,8 @@ Never negative. Pure.
 
 **Returns:** `* caller has to`
 
+*Called by:* [`jt_take_ws`](src.js_trusted.c.md#jt_take_ws)
+
 ---
 
 <a id="bx_width_cap2"></a>

@@ -30,7 +30,7 @@ flowchart LR
 
 ### `fbp_tab_label`
 
-`function` `const` | [src/fb_panes.c:72](../../src/fb_panes.c#L72)
+`function` `const` | [src/fb_panes.c:109](../../src/fb_panes.c#L109)
 
 ```c
 const char *fbp_tab_label(int tab)
@@ -48,7 +48,7 @@ Never NULL.
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`fbp_tab_label`](#fbp_tab_label) (include/fb_panes.h:32).
+> **Inherited:** Documentation from [`fbp_tab_label`](#fbp_tab_label) (include/fb_panes.h:34).
 
 ---
 
@@ -56,7 +56,7 @@ Never NULL.
 
 ### `fbp_tab_from_name`
 
-`function` | [src/fb_panes.c:83](../../src/fb_panes.c#L83)
+`function` | [src/fb_panes.c:120](../../src/fb_panes.c#L120)
 
 ```c
 int fbp_tab_from_name(const char *name)
@@ -72,7 +72,7 @@ Tab named [`name`](src.text_shape.c.md#name) (case-insensitive), or -1 when unkn
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`fbp_tab_from_name`](#fbp_tab_from_name) (include/fb_panes.h:35).
+> **Inherited:** Documentation from [`fbp_tab_from_name`](#fbp_tab_from_name) (include/fb_panes.h:37).
 
 ---
 
@@ -80,7 +80,7 @@ Tab named [`name`](src.text_shape.c.md#name) (case-insensitive), or -1 when unkn
 
 ### `fbp_tab_wrap`
 
-`function` | [src/fb_panes.c:90](../../src/fb_panes.c#L90)
+`function` | [src/fb_panes.c:127](../../src/fb_panes.c#L127)
 
 ```c
 int fbp_tab_wrap(int tab, int dir)
@@ -97,7 +97,7 @@ The tab [`dir`](include.profile.h.md#dir) steps away (cyclic); an invalid `tab` 
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`fbp_tab_wrap`](#fbp_tab_wrap) (include/fb_panes.h:38).
+> **Inherited:** Documentation from [`fbp_tab_wrap`](#fbp_tab_wrap) (include/fb_panes.h:40).
 
 ---
 
@@ -105,7 +105,7 @@ The tab [`dir`](include.profile.h.md#dir) steps away (cyclic); an invalid `tab` 
 
 ### `fbp_tab_span`
 
-`function` | [src/fb_panes.c:96](../../src/fb_panes.c#L96)
+`function` | [src/fb_panes.c:133](../../src/fb_panes.c#L133)
 
 ```c
 void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)
@@ -123,7 +123,7 @@ x-extent of a tab in the bar: each is (letters + 2 * pad_cells) cells wide, cont
 | `x` | `double *` |  |  |
 | `w` | `double *` |  |  |
 
-> **Inherited:** Documentation from [`fbp_tab_span`](#fbp_tab_span) (include/fb_panes.h:41).
+> **Inherited:** Documentation from [`fbp_tab_span`](#fbp_tab_span) (include/fb_panes.h:43).
 
 *Called by:* [`fbp_tab_at`](#fbp_tab_at)
 
@@ -133,7 +133,7 @@ x-extent of a tab in the bar: each is (letters + 2 * pad_cells) cells wide, cont
 
 ### `fbp_tab_at`
 
-`function` | [src/fb_panes.c:105](../../src/fb_panes.c#L105)
+`function` | [src/fb_panes.c:142](../../src/fb_panes.c#L142)
 
 ```c
 int fbp_tab_at(double px, double cell_w, double pad_cells)
@@ -153,7 +153,7 @@ Exact inverse of fbp_tab_span.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`fbp_tab_at`](#fbp_tab_at) (include/fb_panes.h:44).
+> **Inherited:** Documentation from [`fbp_tab_at`](#fbp_tab_at) (include/fb_panes.h:46).
 
 *Calls:* [`fbp_tab_span`](#fbp_tab_span)
 
@@ -163,7 +163,7 @@ Exact inverse of fbp_tab_span.
 
 ### `fbp_is_pane`
 
-`function` | [src/fb_panes.c:115](../../src/fb_panes.c#L115)
+`function` | [src/fb_panes.c:152](../../src/fb_panes.c#L152)
 
 ```c
 int fbp_is_pane(int tab)
@@ -179,7 +179,7 @@ Whether the tab's editor argument is meaningful (console: JS; others: selector/i
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`fbp_is_pane`](#fbp_is_pane) (include/fb_panes.h:47).
+> **Inherited:** Documentation from [`fbp_is_pane`](#fbp_is_pane) (include/fb_panes.h:49).
 
 *Called by:* [`fbp_expr`](#fbp_expr)
 
@@ -189,7 +189,7 @@ Whether the tab's editor argument is meaningful (console: JS; others: selector/i
 
 ### `fbp_js_quote`
 
-`function` | [src/fb_panes.c:117](../../src/fb_panes.c#L117)
+`function` | [src/fb_panes.c:154](../../src/fb_panes.c#L154)
 
 ```c
 size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)
@@ -210,7 +210,7 @@ Returns its length, or 0 on failure (n too long, embedded NUL, cap too small).
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`fbp_js_quote`](#fbp_js_quote) (include/fb_panes.h:51).
+> **Inherited:** Documentation from [`fbp_js_quote`](#fbp_js_quote) (include/fb_panes.h:53).
 
 *Called by:* [`fbp_expr`](#fbp_expr)
 
@@ -220,7 +220,7 @@ Returns its length, or 0 on failure (n too long, embedded NUL, cap too small).
 
 ### `fbp_expr`
 
-`function` | [src/fb_panes.c:146](../../src/fb_panes.c#L146)
+`function` | [src/fb_panes.c:183](../../src/fb_panes.c#L183)
 
 ```c
 size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)
@@ -242,7 +242,7 @@ Returns its length, or 0 for the console, a hostile/oversized argument or a smal
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`fbp_expr`](#fbp_expr) (include/fb_panes.h:55).
+> **Inherited:** Documentation from [`fbp_expr`](#fbp_expr) (include/fb_panes.h:57).
 
 *Calls:* [`function`](src.css.c.md#function), [`fbp_is_pane`](#fbp_is_pane), [`fbp_js_quote`](#fbp_js_quote)
 

@@ -49,7 +49,7 @@ Objeto global `navigator` (solo lectura, sellado):
 | `navigator.platform` | `"Linux x86_64"` | `fp_platform()` |
 | `navigator.vendor` | `""` | `fp_vendor()` |
 | `navigator.hardwareConcurrency` | `2` | `fp_hardware_concurrency()` |
-| `navigator.deviceMemory` | `8` | `fp_device_memory_gb()` |
+| `navigator.deviceMemory` | (ausente) | Firefox no lo implementa (solo Chromium): exponerlo contradice el UA Firefox |
 | `navigator.webdriver` | `false` | constante (el agente es indistinguible del usuario) |
 | `navigator.doNotTrack` | `null` | constante (sin señal extra; igual que un Firefox sin DNT) |
 
@@ -153,7 +153,7 @@ const char *fp_vendor(void);     /* "" (sin vendor; minima entropia) */
 - Identidad: `navigator.userAgent` no vacío y contiene `"Firefox"`; `navigator.language==='en-US'`;
   `navigator.languages.length===2 && navigator.languages[0]==='en-US'`;
   `navigator.platform==='Linux x86_64'`; `navigator.vendor===''`;
-  `navigator.hardwareConcurrency===2`; `navigator.deviceMemory===8`;
+  `navigator.hardwareConcurrency===2`; `typeof navigator.deviceMemory === 'undefined'`;
   `navigator.webdriver===false`; `navigator.doNotTrack===null`.
 - Pantalla bucketeada: con `(1680,1050)` ⇒ `screen.width===1600 && screen.height===900`;
   `screen.availWidth===screen.width`; `screen.colorDepth===24`.
@@ -173,3 +173,17 @@ const char *fp_vendor(void);     /* "" (sin vendor; minima entropia) */
   globales sellados `canvas`/`audio`, ya con clave **por origen**: `fp_origin_key(session_key, eTLD+1)`).
 - `navigator.plugins`/`mimeTypes`/`connection`/`mediaDevices`/`getBattery`.
 - Letterboxing de la ventana real al bucket (es trabajo de la UI/orquestador, no de la binding).
+
+## Host trusted (allow.conf AND js.conf) -- enmienda del dueno 2026-10-26
+Dado un host en ambos archivos, Cuando se instala el entorno (`je_install_identity_trusted(..., 1)`),
+Entonces: `Date.now()` y `performance.now()` tienen resolucion de 1 ms (como Firefox), y
+`performance.timeOrigin + performance.now()` coincide con `Date.now()`; y `canvas.readback` /
+`audio.readback` devuelven los bytes sin perturbar (`JE_READBACK_EXACT`). Motivo: una rejilla de
+100 ms con origen fijo, o un canvas que cambia entre lecturas, es una senal de bot. El resto de los
+hosts conserva el reloj grueso y el envenenamiento por origen.
+
+## `crypto.subtle.digest`
+`digest(algorithm, data)` devuelve una Promesa del ArrayBuffer (SHA-1/256/384/512, nombre o
+`{name}`, insensible a mayusculas; `data` = ArrayBuffer o cualquier vista). Algoritmo desconocido =>
+rechazo `NotSupportedError`; `data` invalido => `TypeError`. Puro (`sha2`, vectores FIPS 180-4), sin
+clave ni E/S. El resto de `subtle` (cifrado, claves, firmas) sigue siendo inerte (devuelve `null`).

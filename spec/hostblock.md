@@ -131,3 +131,13 @@ size_t      hb_count(const hb_set *s, hb_list list);
 - El fetcher headless (`headless_fetch`) consulta `hb_check` igual que la GUI: antes solo la GUI lo hacía y el
   arnés cargaba lo que la ventana bloquea. La blanca gana sobre subdominios: con `reddit.com` en allow.conf,
   `pi.reddit.com` pasa; con solo `old.reddit.com`, se corta.
+
+## Subrecursos de una pagina trusted (`hb_check_subresource`) -- enmienda del dueno 2026-10-26
+
+Dado una pagina cuyo host esta en allow.conf Y js.conf (trusted),
+Cuando pide un subrecurso (script, CSS, fuente, imagen, XHR/fetch, WebSocket) a un host de terceros,
+Entonces la lista negra NO lo frena: `hb_check_subresource(s, host, 1)` devuelve `HB_ALLOW` aunque `hb_check` diga `HB_BLOCK`.
+
+- `page_trusted == 0` => identico a `hb_check` (el resto de paginas conserva el filtro).
+- Motivo: reCAPTCHA/BotGuard y los CDN de una SPA viven en terceros; sin ellos el sitio sirve el muro de bot.
+- No relaja autenticidad: VERIFYPEER, realm y politica TLS no pasan por aqui. Puro, sin estado.

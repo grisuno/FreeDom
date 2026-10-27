@@ -652,7 +652,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 *Calls:* [`css_style.translate`](include.css.h.md#css_style-translate), [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`csel_span_eq`](include.css_select.h.md#csel_span_eq), [`pv_box_def.scale`](include.page_view.h.md#pv_box_def-scale), [`expand_transform_list`](#expand_transform_list), [`matrix`](#matrix), [`parse_angle_deg`](#parse_angle_deg), [`translate3d`](#translate3d)
 
-*Called by:* [`fbp_expr`](src.fb_panes.c.md#fbp_expr)
+*Called by:* [`fbc_names_expr`](src.fb_cmdline.c.md#fbc_names_expr), [`fbp_expr`](src.fb_panes.c.md#fbp_expr), [`jt_enable_frames`](src.js_trusted.c.md#jt_enable_frames)
 
 ---
 

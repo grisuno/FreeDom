@@ -395,7 +395,7 @@ needs the cascade, and the memo cache is what keeps that from being quadratic.
 
 ### `pv_computed`
 
-`struct` | [src/page_view.c:7032](../../src/page_view.c#L7032)
+`struct` | [src/page_view.c:7035](../../src/page_view.c#L7035)
 
 ```c
 struct pv_computed
@@ -2304,7 +2304,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `pv_build`
 
-`function` | [src/page_view.c:5175](../../src/page_view.c#L5175)
+`function` | [src/page_view.c:5178](../../src/page_view.c#L5178)
 
 ```c
 pv_status pv_build(const hp_document *doc, pv_view **out)
@@ -2327,7 +2327,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out)
 
 ### `pv_build_ex`
 
-`function` | [src/page_view.c:5179](../../src/page_view.c#L5179)
+`function` | [src/page_view.c:5182](../../src/page_view.c#L5182)
 
 ```c
 pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)
@@ -2351,7 +2351,7 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)
 
 ### `pv_build_full`
 
-`function` | [src/page_view.c:5183](../../src/page_view.c#L5183)
+`function` | [src/page_view.c:5186](../../src/page_view.c#L5186)
 
 ```c
 pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader, int prefers_dark, pv_view **out)
@@ -2379,7 +2379,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader, int 
 
 ### `pv_root_insets`
 
-`function` | [src/page_view.c:5278](../../src/page_view.c#L5278)
+`function` | [src/page_view.c:5281](../../src/page_view.c#L5281)
 
 ```c
 void pv_root_insets(const css_style *body, int out[4])
@@ -2400,7 +2400,7 @@ void pv_root_insets(const css_style *body, int out[4])
 
 ### `pv_build_styled`
 
-`function` | [src/page_view.c:5317](../../src/page_view.c#L5317)
+`function` | [src/page_view.c:5320](../../src/page_view.c#L5320)
 
 ```c
 pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, int prefers_dark, const char *extern_css, size_t extern_len, int viewport_w, pv_view **out)
@@ -2431,7 +2431,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `inside`
 
-`function` | [src/page_view.c:5427](../../src/page_view.c#L5427)
+`function` | [src/page_view.c:5430](../../src/page_view.c#L5430)
 
 ```c
 * page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */ pv_root_insets(body_cs, v->root_m);
@@ -2451,7 +2451,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `control`
 
-`function` | [src/page_view.c:5736](../../src/page_view.c#L5736)
+`function` | [src/page_view.c:5739](../../src/page_view.c#L5739)
 
 ```c
 * caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);
@@ -2473,7 +2473,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `px`
 
-`function` | [src/page_view.c:5914](../../src/page_view.c#L5914)
+`function` | [src/page_view.c:5917](../../src/page_view.c#L5917)
 
 ```c
 * the viewBox extent for intrinsic px (slashdot social-icon balloon). */ if (iw <...
@@ -2493,7 +2493,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `band`
 
-`function` | [src/page_view.c:5980](../../src/page_view.c#L5980)
+`function` | [src/page_view.c:5983](../../src/page_view.c#L5983)
 
 ```c
 * run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float of text plus loose icons). */ pv_set_float(v, svg_cont.float_side, svg_cont.float_id
@@ -2513,7 +2513,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `height`
 
-`function` | [src/page_view.c:6007](../../src/page_view.c#L6007)
+`function` | [src/page_view.c:6010](../../src/page_view.c#L6010)
 
 ```c
 * times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);
@@ -2533,7 +2533,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `block_id`
 
-`function` | [src/page_view.c:6148](../../src/page_view.c#L6148)
+`function` | [src/page_view.c:6151](../../src/page_view.c#L6151)
 
 ```c
 * box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it falls * into flow as a full-width row. Gated on img_oof, so every * in-flow image keep
@@ -2554,7 +2554,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `URL`
 
-`function` | [src/page_view.c:6289](../../src/page_view.c#L6289)
+`function` | [src/page_view.c:6292](../../src/page_view.c#L6292)
 
 ```c
 * path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);
@@ -2568,7 +2568,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `block`
 
-`function` | [src/page_view.c:6577](../../src/page_view.c#L6577)
+`function` | [src/page_view.c:6580](../../src/page_view.c#L6580)
 
 ```c
 * block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block != prev_block);
@@ -2582,7 +2582,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `flow`
 
-`function` | [src/page_view.c:6755](../../src/page_view.c#L6755)
+`function` | [src/page_view.c:6758](../../src/page_view.c#L6758)
 
 ```c
 * it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through it. Subtree-wide: the run * may sit deep inside an undecorated abspos wrapper, where
@@ -2602,7 +2602,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `engine`
 
-`function` | [src/page_view.c:6861](../../src/page_view.c#L6861)
+`function` | [src/page_view.c:6864](../../src/page_view.c#L6864)
 
 ```c
 * layout engine (contiguous item gather) drops every cell onto its own row and * a 2-col...
@@ -2622,7 +2622,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `line`
 
-`function` | [src/page_view.c:6870](../../src/page_view.c#L6870)
+`function` | [src/page_view.c:6873](../../src/page_view.c#L6873)
 
 ```c
 * to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);
@@ -2642,7 +2642,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `pv_css_drops`
 
-`function` | [src/page_view.c:7003](../../src/page_view.c#L7003)
+`function` | [src/page_view.c:7006](../../src/page_view.c#L7006)
 
 ```c
 pv_status pv_css_drops(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len, int viewport_w, css_drop_log *log)
@@ -2671,7 +2671,7 @@ Nothing here can influence a render; see spec/css_drops.md for why the cause spl
 
 ### `pv_computed_new`
 
-`function` | [src/page_view.c:7037](../../src/page_view.c#L7037)
+`function` | [src/page_view.c:7040](../../src/page_view.c#L7040)
 
 ```c
 pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len, int viewport_w)
@@ -2695,7 +2695,7 @@ pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const cha
 
 ### `pv_computed_get`
 
-`function` | [src/page_view.c:7056](../../src/page_view.c#L7056)
+`function` | [src/page_view.c:7059](../../src/page_view.c#L7059)
 
 ```c
 int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color)
@@ -2725,7 +2725,7 @@ Resolves native_el (a dom_native_node pointer of the SAME document) into *st; wh
 
 ### `pv_computed_free`
 
-`function` | [src/page_view.c:7078](../../src/page_view.c#L7078)
+`function` | [src/page_view.c:7081](../../src/page_view.c#L7081)
 
 ```c
 void pv_computed_free(pv_computed *pc)

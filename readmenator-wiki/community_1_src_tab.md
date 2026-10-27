@@ -1,49 +1,49 @@
 # src: tab
 
-*Community 2 | 45 files | cohesion 0.69*
+*Community 1 | 48 files | cohesion 0.67*
 
 ## Definition
 
-This community groups 45 file(s) rooted at `src` with dominant language c (cohesion 0.69). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (253 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
+This community groups 48 file(s) rooted at `src` with dominant language c (cohesion 0.67). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (268 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
 
 ## Files
 
-### `src` (21 files)
+### `src` (23 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
+| `src/dom.c` | c | utility | 75 | no |
+| `src/fb_cmdline.c` | c | utility | 13 | no |
+| `src/fb_panes.c` | c | utility | 10 | no |
 | `src/freebug.c` | c | utility | 9 | no |
 | `src/html_parse.c` | c | utility | 29 | no |
 | `src/js_custom_elements.c` | c | utility | 1 | no |
 | `src/js_custom_elements.h` | h | utility | 2 | yes |
-| `src/js_dom.c` | c | utility | 63 | no |
-| `src/js_dom_ext.c` | c | utility | 8 | no |
-| `src/js_dom_ext.h` | h | utility | 2 | yes |
 
 ### `include` (13 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/dom.h` | h | utility | 30 | no |
+| `include/fb_cmdline.h` | h | utility | 18 | no |
+| `include/fb_panes.h` | h | utility | 12 | no |
 | `include/freebug.h` | h | utility | 18 | no |
 | `include/html_parse.h` | h | utility | 24 | no |
 | `include/js_dom.h` | h | utility | 23 | no |
-| `include/js_env.h` | h | infrastructure | 3 | no |
-| `include/js_geom.h` | h | utility | 19 | no |
-| `include/js_location.h` | h | utility | 6 | no |
+| `include/js_env.h` | h | infrastructure | 4 | no |
 
-### `tests` (11 files)
+### `tests` (12 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_dom.c` | c | testing | 44 | no |
+| `tests/test_fb_cmdline.c` | c | testing | 7 | no |
+| `tests/test_fb_panes.c` | c | testing | 10 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
-| `tests/test_js_dom.c` | c | testing | 253 | no |
-| `tests/test_js_env.c` | c | testing | 28 | no |
-| `tests/test_js_geom.c` | c | testing | 11 | no |
+| `tests/test_js_dom.c` | c | testing | 268 | no |
 
-*... and 25 more files in this community.*
+*... and 28 more files in this community.*
 
 
 ## Key Symbols
@@ -81,15 +81,16 @@ This community groups 45 file(s) rooted at `src` with dominant language c (cohes
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 103
-- Cross-boundary resolved imports (EXTRACTED): 47
+- Internal resolved imports (EXTRACTED): 107
+- Cross-boundary resolved imports (EXTRACTED): 51
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 1 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/dom.h.
-- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 7 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/freedom_view.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 5 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
+- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
 
 ## Risks
 
@@ -100,14 +101,16 @@ This community groups 45 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 41 file(s) lack file-level docs (e.g. `include/dom.h`)? What purpose do they serve?
+- Why do 44 file(s) lack file-level docs (e.g. `include/dom.h`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
 - What would break if the most connected file in src: tab changed?
-- Should src: tab be split, given cohesion 0.69?
+- Should src: tab be split, given cohesion 0.67?
 
 ## Sources
 
 - `include/dom.h`
+- `include/fb_cmdline.h`
+- `include/fb_panes.h`
 - `include/freebug.h`
 - `include/html_parse.h`
 - `include/js_dom.h`
@@ -116,15 +119,13 @@ This community groups 45 file(s) rooted at `src` with dominant language c (cohes
 - `include/js_location.h`
 - `include/js_sandbox.h`
 - `include/js_trusted.h`
-- `include/link_nav.h`
-- `include/tab.h`
 - `include/url.h`
 - `include/web_storage.h`
+- `src/dom.c`
+- `src/fb_cmdline.c`
+- `src/fb_panes.c`
 - `src/freebug.c`
 - `src/html_parse.c`
 - `src/js_custom_elements.c`
 - `src/js_custom_elements.h`
-- `src/js_dom.c`
-- `src/js_dom_ext.c`
-- `src/js_dom_ext.h`
-- *... and 25 more*
+- *... and 28 more*

@@ -1,6 +1,6 @@
 # include: browser
 
-*Community 5 | 19 files | cohesion 0.55*
+*Community 6 | 19 files | cohesion 0.55*
 
 ## Definition
 
@@ -19,13 +19,13 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 | `include/util.h` | h | utility | 6 | yes |
 | `src/browser.c` | c | utility | 41 | no |
 | `src/host_conf.c` | c | utility | 9 | no |
-| `src/hostblock.c` | c | utility | 18 | no |
+| `src/hostblock.c` | c | utility | 19 | no |
 | `src/media_decoder.c` | c | utility | 15 | no |
 | `src/os_sandbox.c` | c | utility | 31 | no |
 | `src/renderer.c` | c | presentation | 6 | no |
 | `tests/test_browser.c` | c | testing | 17 | no |
 | `tests/test_host_conf.c` | c | testing | 8 | no |
-| `tests/test_hostblock.c` | c | testing | 23 | no |
+| `tests/test_hostblock.c` | c | testing | 24 | no |
 | `tests/test_media_decoder.c` | c | testing | 6 | no |
 | `tests/test_os_sandbox.c` | c | testing | 19 | no |
 | `tests/test_renderer.c` | c | testing | 8 | no |
@@ -70,10 +70,9 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
-- [EXTRACTED] depends_on community 6 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
-- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
-- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/hostblock.h.
+- [EXTRACTED] depends_on community 2 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
+- [EXTRACTED] depends_on community 4 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
+- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
 
 ## Risks
 

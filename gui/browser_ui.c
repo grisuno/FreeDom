@@ -27,6 +27,7 @@
 #include "frame_clock.h"
 #include "freebug.h"
 #include "fb_panes.h"
+#include "fb_cmdline.h"
 #include "identity.h"
 #include "hostblock.h"
 #include "hostedit.h"
@@ -597,6 +598,15 @@ typedef struct browser_window {
     /* The page's WebSocket connections (trusted host only), held on this side: the
      * worker never touches a socket (spec/ws_hub.md). Closed with the page worker. */
     struct wh_hub *ws_hub;   /* forward-declared; ws_hub.h is included further down */
+    /* The page's iframes (trusted host only): one confined worker per frame, routed by frame_host.
+     * Lives and dies with the page worker (spec/frame_broker.md). Messages bound for the top
+     * document wait in frame_q until the call that produced them returns. */
+    struct fh_host *frames;
+    uint64_t        frames_due_ms;   /* absolute now_ms() of the next frame tick, 0 = none */
+    uint64_t        frames_last_ms;  /* when the frames were last ticked */
+    char           *frame_q[32];
+    size_t          frame_qn;
+    int             frame_draining;
     /* In-memory localStorage of trusted origins, shared by every tab of the window and
      * never written to disk (owner decision; spec/web_storage.md). */
     struct wst_db *web_store;
@@ -1076,6 +1086,7 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "secure_fetch.h"
 #include "tab.h"
 #include "ws_hub.h"
+#include "frame_host.h"
 #include "web_storage.h"
 #include "tls_impersonate.h"
 
@@ -1499,6 +1510,16 @@ static int page_host_allowlisted(const browser_window *w) {
     return hb_is_allowlisted(w->hosts, host);
 }
 
+/* The operator's --insecure (ui_set_operator_insecure): written once before the window exists.
+ * One helper so every GUI fetch -- document, subresource, image, video -- honours it alike. */
+static int g_operator_insecure;
+void ui_set_operator_insecure(int on) { g_operator_insecure = on != 0; }
+static void apply_operator_override(sf_config *cfg) {
+    if (!g_operator_insecure) return;
+    cfg->policy = SF_POLICY_PERMISSIVE;
+    cfg->insecure = 1;
+}
+
 /* tab_fetch_fn: the trusted parent's policy-checked subresource fetch for page XHR/fetch.
  * The worker has no network; it proxied the request here. We re-apply the SAME gates a
  * click/load gets -- https-only resolution (cross-host allowed), the host blocklist
@@ -1521,9 +1542,12 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
 
     char host[256];
     if (rp_host_of(abs, host, sizeof host) != 0) return -1;
-    if (hb_check(w->hosts, host) == HB_BLOCK) return -1;   /* tracker/host blocklist */
+    /* tracker/host blocklist -- except for a trusted page (allow.conf AND js.conf): its
+     * third parties (CDN, captcha, API) load; owner decision 2026-10-26. */
+    if (hb_check_subresource(w->hosts, host, page_trusted(w)) == HB_BLOCK) return -1;
 
     sf_config cfg = sf_config_default();
+    apply_operator_override(&cfg);
     cfg.extra_headers = tab_inflight_request_headers();   /* the page's own XHR/fetch headers */
     /* A subresource is optional by construction: the page renders without it.
      * Letting one stalled stylesheet or script hold the document's full 30 s
@@ -1714,6 +1738,7 @@ static int gui_image_fetch(void *vctx, const char *method, const char *url,
     if (url_resolve_https(w->cur_top, url, abs, sizeof abs) != URL_OK) return -1;
 
     sf_config cfg = sf_config_default();
+    apply_operator_override(&cfg);
     cfg.max_body_bytes = UI_IMAGE_MAX_BODY;
     /* Same reasoning as gui_subresource_fetch, and it matters most here: a page
      * names dozens of images, and every unreachable one used to cost the full
@@ -1805,6 +1830,7 @@ static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
     if (have_host && browser_is_exception(&w->bs, host)) {
         cfg->policy = SF_POLICY_PERMISSIVE;
     }
+    apply_operator_override(cfg);
 
     /* The user's sovereign override: a host explicitly on allow.conf may be navigated
      * below Freedom's standard (TLS 1.2, classical KE, weak cert) if strict fails. */
@@ -1861,6 +1887,7 @@ typedef struct fetch_job {
     sf_proxy_type proxy_type;
     int           allow_overlay_http;
     sf_policy     policy;
+    int           insecure;      /* operator --insecure: skip certificate verification */
     int           allowlisted;
     int           impersonate;   /* TLS-ClientHello blend for triple-opt-in hosts */
     char         *username;      /* HTTP Basic Auth username (may be NULL) */
@@ -1934,6 +1961,7 @@ static void *fetch_thread(void *arg) {
     cfg.proxy_address = j->proxy_address;
     cfg.allow_overlay_http = j->allow_overlay_http;
     cfg.policy = j->policy;
+    cfg.insecure = j->insecure;
     cfg.impersonate = j->impersonate;
     cfg.username = j->username;
     cfg.password = j->password;
@@ -1989,6 +2017,7 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
     j->proxy_type = cfg->proxy_type;
     j->allow_overlay_http = cfg->allow_overlay_http;
     j->policy = cfg->policy;
+    j->insecure = cfg->insecure;
     j->allowlisted = allowlisted;
     j->impersonate = cfg->impersonate;
     j->url = strdup(url);
@@ -2341,6 +2370,11 @@ static void foldback_session_cookies(const char *url, const char *jar) {
  * never outlive the document that opened it (spec/js_dom.md 7f). */
 static void close_page_worker(browser_window *w) {
     wh_close_all(w->ws_hub);
+    fh_free(w->frames);
+    w->frames = NULL;
+    w->frames_due_ms = 0;
+    for (size_t i = 0; i < w->frame_qn; ++i) free(w->frame_q[i]);
+    w->frame_qn = 0;
     if (w->tab_worker != NULL) { tab_close(w->tab_worker); w->tab_worker = NULL; }
 }
 
@@ -2597,7 +2631,8 @@ static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
                 "TLS 1.2, a classical key exchange, and weak-but-valid certificates\n"
                 "are then accepted for this host (with a warning). The chain is still\n"
                 "authenticated, so you reach the real site, not an impostor.\n"
-                "Ctrl+Shift+E relaxes only a weak certificate for this session.", host);
+                "Ctrl+Shift+E relaxes only a weak certificate for this session. An untrusted\n"
+                "or self-signed certificate needs the operator flag: freedom --insecure <url>.", host);
     }
     char msg[1536];
     snprintf(msg, sizeof msg,
@@ -11136,6 +11171,7 @@ static int video_read_frame(browser_window *w) {
 static int video_build_fetch_config(browser_window *w, const char *url, sf_config *cfg,
                                      int *allowlisted) {
     *cfg = sf_config_default();
+    apply_operator_override(cfg);
     cfg->timeout_ms = 10000L; /* video fetch is on the main Wayland thread: 10s max */
     *allowlisted = 0;
     if (w == NULL || url == NULL) return 1;
@@ -15323,8 +15359,56 @@ static void gui_ws_emit(void *ctx, int id, int kind, int code, const char *data,
  * Each open gets the SAME gates as any subresource of a trusted page: the tracker/
  * host blocklist, realm routing (fail-closed), the allowlist's relaxed strength and
  * peer verification always on -- never an unverified certificate. */
+/* fh_top_msg_fn: a frame posted to the top document. Queued, not delivered here: the delivery runs
+ * page script and may navigate, which would free the host that is mid-call. */
+static void gui_frame_top_msg(void *ctx, const char *data, size_t len) {
+    browser_window *w = (browser_window *)ctx;
+    if (w == NULL || data == NULL || w->frame_qn >= sizeof w->frame_q / sizeof w->frame_q[0]) return;
+    if (len == (size_t)-1) return;
+    char *c = (char *)malloc(len + 1);
+    if (c == NULL) return;
+    memcpy(c, data, len);
+    c[len] = '\0';
+    w->frame_q[w->frame_qn++] = c;
+}
+
+/* Delivers the queued frame messages to the top document, one at a time. A delivery can queue more
+ * (and can navigate: then the queue is gone and the loop ends). */
+static void frames_drain(browser_window *w) {
+    if (w->frame_draining) return;
+    w->frame_draining = 1;
+    while (w->frame_qn > 0 && w->tab_worker != NULL) {
+        char *m = w->frame_q[0];
+        memmove(&w->frame_q[0], &w->frame_q[1], (w->frame_qn - 1) * sizeof w->frame_q[0]);
+        w->frame_qn--;
+        tab_page page;
+        memset(&page, 0, sizeof page);
+        if (tab_ws_event(w->tab_worker, 0, TAB_WSE_FRAME_MSG, 0, m, strlen(m), &page) == TAB_OK)
+            (void)apply_click_result(w, &page);
+        tab_page_free(&page);
+        free(m);
+    }
+    w->frame_draining = 0;
+}
+
+/* Frame ops (iframe open/close, cross-window postMessage) of a TRUSTED page go to the frame host. */
+static void frames_apply(browser_window *w, const tab_page *page) {
+    int any = 0;
+    for (size_t i = 0; i < page->nws; ++i) if (page->ws[i].kind >= TAB_WS_FRAME_POST) any = 1;
+    if (!any || !page_trusted(w) || w->cur_top == NULL) return;
+    if (w->frames == NULL)
+        w->frames = fh_new(w->cur_top, gui_subresource_fetch, w, gui_frame_top_msg, w);
+    if (w->frames == NULL) return;
+    fh_apply_top(w->frames, page);
+    w->frames_last_ms = now_ms();
+    w->frames_due_ms = w->frames_last_ms + 50;
+    frames_drain(w);
+}
+
 static void ws_apply_ops(browser_window *w, const tab_page *page) {
     if (page->nws == 0) return;
+    frames_apply(w, page);
+    if (w->tab_worker == NULL) return;   /* a delivered message navigated away */
     if (w->ws_hub == NULL) w->ws_hub = wh_new();
     for (size_t i = 0; i < page->nws; ++i) {
         const tab_ws_op *op = &page->ws[i];
@@ -15333,7 +15417,7 @@ static void ws_apply_ops(browser_window *w, const tab_page *page) {
             int ok = (w->ws_hub != NULL && page_trusted(w)
                       && sf_ws_url_check(op->data) == SF_OK
                       && rp_host_of(op->data, host, sizeof host) == 0
-                      && hb_check(w->hosts, host) != HB_BLOCK);
+                      && hb_check_subresource(w->hosts, host, 1) != HB_BLOCK);
             sf_config cfg = sf_config_default();
             if (ok) {
                 /* The page is trusted: the allowlist's relaxed strength, certificate
@@ -16736,6 +16820,8 @@ struct freebug_window {
     char  *pane_text[FBP_COUNT];       /* last text of each panel, NULL = not fetched */
     char  *saved_arg[FBP_COUNT];       /* each tab's editor text while another tab is active */
     double saved_scroll[FBP_COUNT];    /* each tab's scroll while another tab is active */
+    fbc_history hist;                  /* REPL history (RAM only, never persisted) */
+    int    filter;                     /* fbc_filter applied to the console log */
 };
 
 /* y of the divider between the log pane and the editor. */
@@ -16786,10 +16872,11 @@ static void fbw_level_rgb(int level, double *r, double *g, double *b) {
 }
 
 /* Counts the visual lines a console buffer occupies (entries split on '\n'). */
-static size_t fbw_console_lines(const fb_buffer *log) {
+static size_t fbw_console_lines(const fb_buffer *log, int filter) {
     size_t lines = 0;
     for (size_t i = 0; i < fb_buffer_count(log); ++i) {
         const fb_entry *e = fb_buffer_at(log, i);
+        if (!fbc_filter_passes(filter, e->level)) continue;
         lines += 1;
         for (size_t k = 0; k < e->len; ++k) if (e->text[k] == '\n') lines++;
     }
@@ -16845,6 +16932,15 @@ static void fbw_paint_tabs(cairo_t *cr, const freebug_window *fb) {
         cairo_move_to(cr, x + cw * FBW_TAB_PAD, FBW_HEADER + FBW_TABBAR - 8.0);
         cairo_show_text(cr, fbp_tab_label(t));
     }
+    if (fb->tab == FBP_CONSOLE) {
+        char flt[40];
+        snprintf(flt, sizeof flt, "Ctrl+F show: %s", fbc_filter_label(fb->filter));
+        cairo_text_extents_t te;
+        cairo_text_extents(cr, flt, &te);
+        cairo_set_source_rgb(cr, fb->filter == FBC_FILTER_ALL ? 0.50 : 0.92, fb->filter == FBC_FILTER_ALL ? 0.53 : 0.74, 0.58);
+        cairo_move_to(cr, fb->width - FBW_PAD - te.x_advance - 44.0, FBW_HEADER + FBW_TABBAR - 8.0);
+        cairo_show_text(cr, flt);
+    }
 }
 
 /* A panel's text, one monospace line per source line, from `y` (already scrolled). */
@@ -16893,7 +16989,11 @@ static void freebug_paint(freebug_window *fb) {
     cairo_fill(cr);
     cairo_set_source_rgb(cr, 0.80, 0.82, 0.86);
     cairo_move_to(cr, FBW_PAD, FBW_HEADER - 8.0);
-    cairo_show_text(cr, "Freebug - F12 close - Ctrl+Tab/1-5 tabs - Ctrl+Enter run - Ctrl+L clear - Ctrl+C copy");
+    cairo_set_font_size(cr, 11.5);
+    char hdr[160];
+    snprintf(hdr, sizeof hdr, "Freebug - F12 close - Ctrl+Tab tabs - Ctrl+Enter run - Up/Dn history - Tab complete");
+    cairo_show_text(cr, hdr);
+    cairo_set_font_size(cr, 13.0);
 
     /* copy button (right side of header) */
     double cbx = fb->width - FBW_PAD - FBW_COPY_BTN_W;
@@ -16934,7 +17034,7 @@ static void freebug_paint(freebug_window *fb) {
     double logh = split_y - FBW_TOP;
 
     /* clamp the scroll against the content height */
-    double total = (double)((fb->tab == FBP_CONSOLE) ? fbw_console_lines(&w->console)
+    double total = (double)((fb->tab == FBP_CONSOLE) ? fbw_console_lines(&w->console, fb->filter)
                                                      : fbw_text_lines(fb->pane_text[fb->tab])) * FBW_LINE;
     double view = logh - 2 * FBW_PAD;
     double maxs = (total > view) ? (total - view) : 0.0;
@@ -16953,6 +17053,7 @@ static void freebug_paint(freebug_window *fb) {
     }
     for (size_t i = 0; i < fb_buffer_count(&w->console); ++i) {
         const fb_entry *e = fb_buffer_at(&w->console, i);
+        if (!fbc_filter_passes(fb->filter, e->level)) continue;
         double r, g, b; fbw_level_rgb(e->level, &r, &g, &b);
         cairo_set_source_rgb(cr, r, g, b);
         const char *p = e->text;
@@ -17181,6 +17282,7 @@ static void freebug_destroy(browser_window *w) {
     if (w->freebug == NULL) return;
     freebug_hide(w);
     for (int t = 0; t < FBP_COUNT; ++t) { free(w->freebug->pane_text[t]); free(w->freebug->saved_arg[t]); }
+    fbc_history_free(&w->freebug->hist);
     free(w->freebug);
     w->freebug = NULL;
 }
@@ -17308,6 +17410,7 @@ static void freebug_eval(browser_window *w) {
     size_t clen = tf_len(&fb->editor);
     if (clen == 0) return;
 
+    (void)fbc_history_push(&fb->hist, code, clen);
     char line[1100];
     int n = snprintf(line, sizeof line, "> %.1000s", code);
     if (n > 0) fb_buffer_push(&w->console, FB_LOG, line, strlen(line));
@@ -17341,6 +17444,45 @@ static void freebug_eval(browser_window *w) {
     freebug_redraw_fb(fb);
 }
 
+/* Replaces the editor text (history navigation). */
+static void freebug_set_editor(freebug_window *fb, const char *s) {
+    tf_clear(&fb->editor);
+    for (const char *p = s; p != NULL && *p != '\0'; ++p) tf_insert(&fb->editor, *p);
+}
+
+/* Tab in the console: completes the property path before the cursor. The names come from the
+ * page's REPL through descriptors (fbc_names_expr runs no page getter); one candidate is
+ * inserted, several insert their common prefix and list themselves in the log. */
+static void freebug_complete(browser_window *w) {
+    freebug_window *fb = w->freebug;
+    if (fb == NULL) return;
+    char base[FBC_BASE_MAX];
+    size_t poff = 0;
+    size_t cur = tf_cursor(&fb->editor);
+    long plen = fbc_complete_split(tf_text(&fb->editor), cur, base, sizeof base, &poff);
+    if (plen < 0) return;
+    char expr[2048];
+    if (fbc_names_expr(base, expr, sizeof expr) == 0) return;
+    tab *t = freebug_repl_worker(w);
+    if (t == NULL) return;
+    tab_eval_result r;
+    if (tab_eval(t, expr, strlen(expr), &r) != TAB_OK) {
+        if (w->tab_worker == t) close_page_worker(w);
+        return;
+    }
+    char ins[256], list[1024];
+    size_t count = 0;
+    size_t n = fbc_complete_pick(r.value != NULL ? r.value : "", tf_text(&fb->editor) + poff, (size_t)plen,
+                                 ins, sizeof ins, list, sizeof list, &count);
+    tab_eval_result_free(&r);
+    for (size_t i = 0; i < n; ++i) tf_insert(&fb->editor, ins[i]);
+    if (count > 1 && list[0] != '\0') {
+        fb_buffer_push(&w->console, FB_INFO, list, strlen(list));
+        fb->scroll = 1e9;
+    }
+    freebug_redraw_fb(fb);
+}
+
 static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
                                const char *utf8, int n, int ctrl, int shift) {
     freebug_window *fb = w->freebug;
@@ -17360,6 +17502,16 @@ static void freebug_handle_key(browser_window *w, xkb_keysym_t sym,
     }
     if (ctrl && (sym == XKB_KEY_l || sym == XKB_KEY_L)) {
         tf_clear(&fb->editor); freebug_redraw_fb(fb); return;
+    }
+    if (ctrl && (sym == XKB_KEY_f || sym == XKB_KEY_F)) {
+        fb->filter = fbc_filter_next(fb->filter); fb->scroll = 1e9; freebug_redraw_fb(fb); return;
+    }
+    if (!ctrl && fb->tab == FBP_CONSOLE && sym == XKB_KEY_Tab) { freebug_complete(w); return; }
+    if (!ctrl && fb->tab == FBP_CONSOLE && (sym == XKB_KEY_Up || sym == XKB_KEY_Down)) {
+        const char *h = (sym == XKB_KEY_Up) ? fbc_history_prev(&fb->hist, tf_text(&fb->editor), tf_len(&fb->editor))
+                                            : fbc_history_next(&fb->hist);
+        if (h != NULL) { freebug_set_editor(fb, h); freebug_redraw_fb(fb); }
+        return;
     }
     if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
         if (fbp_is_pane(fb->tab)) { freebug_pane_refresh(w); return; }  /* one-line argument */
@@ -18358,7 +18510,7 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
     }
 
     /* Ctrl+Shift+E: add current host to exception list and reload insecurely. */
-    if (ctrl && shift && sym == XKB_KEY_E) {
+    if (ctrl && shift && (sym == XKB_KEY_E || sym == XKB_KEY_e)) {
         const char *url = browser_current_url(&w->bs);
         char host[256];
         if (url != NULL && host_from_url(url, host, sizeof host)) {
@@ -18836,6 +18988,17 @@ static int gui_timing_step(browser_window *w, uint64_t now) {
     return -1;
 }
 
+/* Release what ui_run_browser opened before the window exists (profile, sealed cache, prefs) so a
+ * failed start -- no compositor, no xkb -- exits without leaking them. */
+static void startup_abort_release(browser_window *w) {
+    prefs_free(&w->prefs);
+    cf_attach_redirect_memory(NULL);
+    cf_set_store(NULL);
+    hc_close(w->http_cache);
+    w->http_cache = NULL;
+    profile_close(&w->profile);
+}
+
 ui_status ui_run_browser(const char *start_url) {
     browser_window w;
     memset(&w, 0, sizeof w);
@@ -18925,7 +19088,7 @@ ui_status ui_run_browser(const char *start_url) {
     w.video_evfd = -1;
     w.video_thread = 0;
 
-    if (browser_init(&w.bs) != BROWSER_OK) return UI_ERR_OOM;
+    if (browser_init(&w.bs) != BROWSER_OK) { startup_abort_release(&w); return UI_ERR_OOM; }
 
     if (start_url != NULL) {
         /* Strip userinfo (user:password@) before storing in history so
@@ -18939,10 +19102,13 @@ ui_status ui_run_browser(const char *start_url) {
     }
 
     w.xkb_ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-    if (w.xkb_ctx == NULL) { browser_free(&w.bs); return UI_ERR_OOM; }
+    if (w.xkb_ctx == NULL) { browser_free(&w.bs); startup_abort_release(&w); return UI_ERR_OOM; }
 
     w.display = wl_display_connect(NULL);
-    if (w.display == NULL) { browser_free(&w.bs); xkb_context_unref(w.xkb_ctx); return UI_ERR_DISPLAY; }
+    if (w.display == NULL) {
+        browser_free(&w.bs); xkb_context_unref(w.xkb_ctx); startup_abort_release(&w);
+        return UI_ERR_DISPLAY;
+    }
 
     /* Raise the Wayland output buffer from the default (4096 on this version)
      * so a large page with frequent redraws (spinner, JS ticks, video frames)
@@ -18965,6 +19131,7 @@ ui_status ui_run_browser(const char *start_url) {
         wl_display_disconnect(w.display);
         browser_free(&w.bs);
         xkb_context_unref(w.xkb_ctx);
+        startup_abort_release(&w);
         return UI_ERR_INTERNAL;
     }
 
@@ -19091,6 +19258,11 @@ ui_status ui_run_browser(const char *start_url) {
             int tw = tw_step;
             if (tw >= 0 && (timeout < 0 || tw < timeout)) { timeout = tw; timing_wake_only = 1; }
         }
+        /* Frame timers (hidden iframe documents of a trusted page) bound the wait too. */
+        if (w.frames != NULL && w.frames_due_ms != 0) {
+            int tk = (w.frames_due_ms > t) ? (int)(w.frames_due_ms - t) : 0;
+            if (timeout < 0 || tk < timeout) timeout = tk;
+        }
         /* A pending JS timer tick bounds the wait too (real async timers). */
         if (w.js_tick_due_ms != 0) {
             int tk = (w.js_tick_due_ms > t) ? (int)(w.js_tick_due_ms - t) : 0;
@@ -19214,6 +19386,17 @@ ui_status ui_run_browser(const char *start_url) {
                     w.js_tick_due_ms = now_ms() + 30;
                 }
             }
+        }
+
+        /* Frame timers: advance each iframe worker's virtual clock, route what they posted. */
+        if (w.frames != NULL && w.frames_due_ms != 0 && now_ms() >= w.frames_due_ms && !w.loading) {
+            uint64_t nowv = now_ms();
+            int el = (nowv > w.frames_last_ms) ? (int)(nowv - w.frames_last_ms) : 0;
+            w.frames_last_ms = nowv;
+            int nx = fh_tick(w.frames, el);
+            frames_drain(&w);
+            if (w.frames != NULL)
+                w.frames_due_ms = (nx < 0) ? 0 : nowv + (uint64_t)(nx < 20 ? 20 : nx);
         }
 
         /* Streaming fetch: new body data arrived. Drain the eventfd counter,
@@ -19355,6 +19538,7 @@ ui_status ui_run_browser(const char *start_url) {
     free(w.favorites);
     free(w.cur_html);
     free(w.cur_top);
+    free(w.auth_host);
     free(w.auth_user);
     free(w.auth_pass);
     browser_free(&w.bs);

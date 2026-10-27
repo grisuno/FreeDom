@@ -28,7 +28,7 @@ flowchart LR
     n_include_tab_h__tab_report_response_headers["tab.tab_report_response_headers"]
     n_include_tls_impersonate_h__ti_should_impersonate["tls_impersonate.ti_should_impersonate"]
     n_src_css_color_c__strncmp["css_color.strncmp"]
-    n_src_hostblock_c__hb_check["hostblock.hb_check"]
+    n_src_hostblock_c__hb_check_subresource["hostblock.hb_check_subresource"]
     n_src_link_nav_c__ln_resolve["link_nav.ln_resolve"]
     n_src_net_realm_c__nr_route_for["net_realm.nr_route_for"]
     n_src_secure_fetch_c__sf_config_default["secure_fetch.sf_config_default"]
@@ -53,7 +53,7 @@ flowchart LR
     n_src_freedom_c__gets -.-> n_include_tab_h__tab_report_response_headers
     n_src_freedom_c__gets -.-> n_include_tls_impersonate_h__ti_should_impersonate
     n_src_freedom_c__gets -.-> n_src_css_color_c__strncmp
-    n_src_freedom_c__gets -.-> n_src_hostblock_c__hb_check
+    n_src_freedom_c__gets -.-> n_src_hostblock_c__hb_check_subresource
     n_src_freedom_c__gets -.-> n_src_link_nav_c__ln_resolve
     n_src_freedom_c__gets -.-> n_src_net_realm_c__nr_route_for
     n_src_freedom_c__gets -.-> n_src_secure_fetch_c__sf_config_default
@@ -73,7 +73,7 @@ flowchart LR
 
 ### `hl_font_stash`
 
-`struct` | [src/freedom.c:609](../../src/freedom.c#L609)
+`struct` | [src/freedom.c:615](../../src/freedom.c#L615)
 
 ```c
 typedef struct
@@ -103,7 +103,7 @@ typedef struct
 
 **Returns:** `* gate a click`
 
-*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`hb_is_allowlisted`](include.hostblock.h.md#hb_is_allowlisted), [`rp_host_of`](include.request_policy.h.md#rp_host_of), [`sf_response_free`](include.secure_fetch.h.md#sf_response_free), [`tab_inflight_request_headers`](include.tab.h.md#tab_inflight_request_headers), [`tab_report_response_headers`](include.tab.h.md#tab_report_response_headers), [`ti_should_impersonate`](include.tls_impersonate.h.md#ti_should_impersonate), [`strncmp`](src.css_color.c.md#strncmp), [`hb_check`](src.hostblock.c.md#hb_check), [`ln_resolve`](src.link_nav.c.md#ln_resolve), [`nr_route_for`](src.net_realm.c.md#nr_route_for), [`sf_config_default`](src.secure_fetch.c.md#sf_config_default) and 2 more
+*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`hb_is_allowlisted`](include.hostblock.h.md#hb_is_allowlisted), [`rp_host_of`](include.request_policy.h.md#rp_host_of), [`sf_response_free`](include.secure_fetch.h.md#sf_response_free), [`tab_inflight_request_headers`](include.tab.h.md#tab_inflight_request_headers), [`tab_report_response_headers`](include.tab.h.md#tab_report_response_headers), [`ti_should_impersonate`](include.tls_impersonate.h.md#ti_should_impersonate), [`strncmp`](src.css_color.c.md#strncmp), [`hb_check_subresource`](src.hostblock.c.md#hb_check_subresource), [`ln_resolve`](src.link_nav.c.md#ln_resolve), [`nr_route_for`](src.net_realm.c.md#nr_route_for), [`sf_config_default`](src.secure_fetch.c.md#sf_config_default) and 2 more
 
 ---
 
@@ -111,7 +111,7 @@ typedef struct
 
 ### `pool`
 
-`function` | [src/freedom.c:740](../../src/freedom.c#L740)
+`function` | [src/freedom.c:746](../../src/freedom.c#L746)
 
 ```c
 * the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);
@@ -132,7 +132,7 @@ typedef struct
 
 ### `first`
 
-`function` | [src/freedom.c:754](../../src/freedom.c#L754)
+`function` | [src/freedom.c:760](../../src/freedom.c#L760)
 
 ```c
 * always cleared first (fetch_and_render may paint several pages per * process). A NULL top_...
@@ -154,7 +154,7 @@ typedef struct
 
 ### `only`
 
-`function` | [src/freedom.c:822](../../src/freedom.c#L822)
+`function` | [src/freedom.c:828](../../src/freedom.c#L828)
 
 ```c
 * styling for the local render only (no network). --images enables image loading * AND rendering, including remote fetches (so --download-png --images actually * shows images in the bitmap). */ rdp_ca
@@ -174,7 +174,7 @@ typedef struct
 
 ### `BLOCKED`
 
-`function` | [src/freedom.c:992](../../src/freedom.c#L992)
+`function` | [src/freedom.c:998](../../src/freedom.c#L998)
 
 ```c
 * is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);
@@ -194,7 +194,7 @@ typedef struct
 
 ### `elsewhere`
 
-`function` | [src/freedom.c:1027](../../src/freedom.c#L1027)
+`function` | [src/freedom.c:1033](../../src/freedom.c#L1033)
 
 ```c
 * page whose script immediately forwards elsewhere (e.g. a search engine's * JS-capability interstitial) renders as an empty husk instead of its destination. */ static int fetch_and_render(const char *url)
@@ -216,7 +216,7 @@ typedef struct
 
 ### `parent`
 
-`function` | [src/freedom.c:1053](../../src/freedom.c#L1053)
+`function` | [src/freedom.c:1059](../../src/freedom.c#L1059)
 
 ```c
 * gated by the parent (ln_resolve: a local target stays under the document's * directory, a remote one must be https), bounded by HL_JS_NAV_MAX hops. */ static int render_local(const char *target, int hop)
@@ -238,7 +238,7 @@ typedef struct
 
 ### `main`
 
-`function` | [src/freedom.c:1257](../../src/freedom.c#L1257)
+`function` | [src/freedom.c:1263](../../src/freedom.c#L1263)
 
 ```c
 int main(int argc, char **argv)
@@ -253,7 +253,7 @@ int main(int argc, char **argv)
 
 **Returns:** `int`
 
-*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`ui_run_browser`](gui.browser_ui.c.md#ui_run_browser), [`fbp_expr`](include.fb_panes.h.md#fbp_expr), [`fbp_is_pane`](include.fb_panes.h.md#fbp_is_pane), [`fbp_tab_from_name`](include.fb_panes.h.md#fbp_tab_from_name), [`media_decoder_run`](include.media_decoder.h.md#media_decoder_run), [`tab_worker_dispatch`](include.tab.h.md#tab_worker_dispatch), [`wd_resolve_env`](include.wl_display.h.md#wd_resolve_env), [`strncmp`](src.css_color.c.md#strncmp), [`jsp_mode_from_str`](src.js_policy.c.md#jsp_mode_from_str)
+*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`ui_run_browser`](gui.browser_ui.c.md#ui_run_browser), [`ui_set_operator_insecure`](gui.browser_ui.c.md#ui_set_operator_insecure), [`fbp_expr`](include.fb_panes.h.md#fbp_expr), [`fbp_is_pane`](include.fb_panes.h.md#fbp_is_pane), [`fbp_tab_from_name`](include.fb_panes.h.md#fbp_tab_from_name), [`media_decoder_run`](include.media_decoder.h.md#media_decoder_run), [`tab_worker_dispatch`](include.tab.h.md#tab_worker_dispatch), [`wd_resolve_env`](include.wl_display.h.md#wd_resolve_env), [`strncmp`](src.css_color.c.md#strncmp), [`jsp_mode_from_str`](src.js_policy.c.md#jsp_mode_from_str)
 
 ---
 
@@ -341,7 +341,7 @@ The corpus's worst page has ~25; the cap keeps the report readable and the buffe
 
 ### `HL_FONT_MAX_SHEETS`
 
-`macro` | [src/freedom.c:606](../../src/freedom.c#L606)
+`macro` | [src/freedom.c:612](../../src/freedom.c#L612)
 
 ```c
 #define HL_FONT_MAX_SHEETS
@@ -357,7 +357,7 @@ Same 16-sheet / 2 MiB bounds as the GUI stash (anti-DoS).
 
 ### `HL_FONT_MAX_BYTES`
 
-`macro` | [src/freedom.c:607](../../src/freedom.c#L607)
+`macro` | [src/freedom.c:613](../../src/freedom.c#L613)
 
 ```c
 #define HL_FONT_MAX_BYTES
@@ -369,7 +369,7 @@ Same 16-sheet / 2 MiB bounds as the GUI stash (anti-DoS).
 
 ### `HL_JS_NAV_MAX`
 
-`macro` | [src/freedom.c:960](../../src/freedom.c#L960)
+`macro` | [src/freedom.c:966](../../src/freedom.c#L966)
 
 ```c
 #define HL_JS_NAV_MAX

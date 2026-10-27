@@ -2,20 +2,20 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 290 files at commit `46704287d8d7`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 302 files at commit `7bf0a88f8590`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (156), `max` (129), `size` (122), `not` (121), `include` (120), `out` (119), `one` (119), `freedom` (115), `char` (106), `free` (105), `const` (104), `css` (97), `its` (97), `name` (94), `void` (92)
-- Subsystem `include: browser_ui`: 59 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
-- Subsystem `src: css`: 53 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
-- Subsystem `src: tab`: 45 files, core `src/tab.c`: clip_pm_ok: A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile...
+- Domain vocabulary (term, files): `null` (163), `max` (136), `size` (126), `not` (125), `include` (124), `out` (123), `one` (122), `freedom` (119), `char` (113), `free` (110), `const` (109), `its` (100), `css` (97), `void` (97), `name` (97)
+- Subsystem `include: css`: 52 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
+- Subsystem `src: tab`: 48 files, core `src/tab.c`: clip_pm_ok: A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile...
+- Subsystem `include: browser_ui`: 44 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
 - Subsystem `src: text_shape`: 42 files, core `src/text_shape.c`: load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *...
+- Subsystem `include: local_store`: 24 files, core `src/local_store.c`
 - Subsystem `include: page_view`: 19 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - Subsystem `include: browser`: 19 files, core `src/browser.c`: clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {...
-- Subsystem `src: local_store`: 16 files, core `src/local_store.c`
-- Subsystem `include: secure_fetch`: 13 files, core `src/secure_fetch.c`: tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a...
+- Subsystem `include: svg_render`: 14 files, core `src/svg_render.c`: svg_render — inline <svg> markup -> a bounded list of geometric shapes.
 - Business rules that the code cannot show live in section 7: record them there.
 
 ## 2. Workflow
@@ -30,9 +30,9 @@ Detected commands:
 - `make fuzz` (Makefile)
 - `make fuzz-js` (Makefile)
 - `make fuzz-imap` (Makefile)
+- `make fuzz-fbc` (Makefile)
+- `make fuzz-fbk` (Makefile)
 - `make fuzz-wst` (Makefile)
-- `make fuzz-rqh` (Makefile)
-- `make fuzz-geom` (Makefile)
 
 Session protocol:
 1. Start: read this file, then `readmenator . fresh` (exit 1 means run `readmenator . --rebuild`).
@@ -68,11 +68,11 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 179 files, 5947 symbols; docstrings on 27% of symbols; functions snake_case (99%); types PascalCase (0%); median file 244 lines, max 19377.
-- h: 95 files, 1535 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 75 lines, max 1253.
+- c: 187 files, 6069 symbols; docstrings on 27% of symbols; functions snake_case (99%); types PascalCase (0%); median file 237 lines, max 19561.
+- h: 99 files, 1587 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 73 lines, max 1253.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
 - sh: 4 files, 0 symbols; median file 39 lines, max 91.
-- Tests: 83 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
+- Tests: 87 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
 
 ## 5. Minimum deliverables
 

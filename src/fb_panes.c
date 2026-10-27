@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static const char *const TAB_LABEL[FBP_COUNT] = { "Console", "HTML", "CSS", "Script", "Net", "Profile", "Throws" };
+static const char *const TAB_LABEL[FBP_COUNT] = { "Console", "HTML", "CSS", "Script", "Net", "Profile", "Throws", "DOM", "Storage" };
 
 /* Each body runs as `function(q){ BODY }` and returns a string. q is the user's argument.
  * They read the page through the REPL command-line API (rules/styles/box/net), which exists
@@ -65,7 +65,44 @@ static const char JS_THROWS[] =
     "var r;try{r=throws(q||undefined);}catch(z){return '(throws() unavailable)';}"
     "return r||'(no exceptions thrown)';";
 
-static const char *const JS_BODY[FBP_COUNT] = { NULL, JS_HTML, JS_CSS, JS_SCRIPT, JS_NET, JS_PROFILE, JS_THROWS };
+/* Every read below is a plain property read or a getter of a standard host object; nothing writes. */
+static const char JS_DOM[] =
+    "var e=document.querySelector(q||'body');"
+    "if(!e)return '(no element matches '+q+')';"
+    "var o=[],i,a=e.attributes,k;"
+    "o.push('<'+String(e.tagName).toLowerCase()+'>  nodeType '+e.nodeType+'  children '+(e.childElementCount|0));"
+    "var p=[],n=e;for(i=0;n&&n.nodeType===1&&i<32;i++,n=n.parentNode){"
+    "p.unshift(String(n.tagName).toLowerCase()+(n.id?'#'+n.id:''));}"
+    "o.push('path   '+p.join(' > '));"
+    "o.push('== attributes ==');"
+    "for(i=0;a&&i<a.length&&i<64;i++){var v=String(a[i].value);o.push('  '+a[i].name+' = \"'+(v.length>120?v.slice(0,117)+'...':v)+'\"');}"
+    "if(!a||!a.length)o.push('  (none)');"
+    "o.push('== state ==');"
+    "var fc=/^(input|select|textarea|button|option|form)$/.test(String(e.tagName).toLowerCase());"
+    "var st=['id','className','hidden','href','src','textContent'];"
+    "if(fc)st.splice(2,0,'value','checked','disabled','type','name');"
+    "for(i=0;i<st.length;i++){try{k=e[st[i]];if(k===undefined||k===''||k===false)continue;k=String(k);"
+    "o.push('  '+st[i]+': '+(k.length>120?k.slice(0,117)+'...':k));}catch(z){}}"
+    "o.push('== geometry ==');"
+    "try{var r=e.getBoundingClientRect();o.push('  x '+r.left+'  y '+r.top+'  w '+r.width+'  h '+r.height);}catch(z){}"
+    "try{o.push('  offset '+e.offsetWidth+' x '+e.offsetHeight+'  client '+e.clientWidth+' x '+e.clientHeight);}catch(z){}"
+    "try{o.push('shadowRoot: '+(e.shadowRoot?e.shadowRoot.mode:'none'));}catch(z){}"
+    "return o.join('\\n');";
+
+static const char JS_STORAGE[] =
+    "var o=[],i,k,n;"
+    "o.push('== cookies (script-visible) ==');"
+    "var c=String(document.cookie||'');if(c){var cs=c.split(';');for(i=0;i<cs.length&&i<128;i++)o.push('  '+cs[i].trim().slice(0,160));}"
+    "else o.push('  (none)');"
+    "var S=['localStorage','sessionStorage'];"
+    "for(n=0;n<S.length;n++){o.push('== '+S[n]+' ==');var s;try{s=window[S[n]];}catch(z){s=null;}"
+    "if(!s){o.push('  (unavailable on this page)');continue;}"
+    "var m=s.length|0;if(!m)o.push('  (empty)');"
+    "for(i=0;i<m&&i<256;i++){k=s.key(i);var v=String(s.getItem(k));o.push('  '+k+' = '+(v.length>120?v.slice(0,117)+'...':v));}}"
+    "return o.join('\\n');";
+
+static const char *const JS_BODY[FBP_COUNT] = { NULL, JS_HTML, JS_CSS, JS_SCRIPT, JS_NET, JS_PROFILE, JS_THROWS,
+                                                JS_DOM, JS_STORAGE };
 
 static int tab_ok(int tab) { return tab >= 0 && tab < FBP_COUNT; }
 

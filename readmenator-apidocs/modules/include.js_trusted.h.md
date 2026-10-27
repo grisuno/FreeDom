@@ -31,7 +31,7 @@ classDiagram
 
 ### `jt_ws_op`
 
-`struct` | [include/js_trusted.h:57](../../include/js_trusted.h#L57)
+`struct` | [include/js_trusted.h:61](../../include/js_trusted.h#L61)
 
 ```c
 typedef struct jt_ws_op
@@ -57,7 +57,7 @@ typedef enum jt_ws_kind
 
 ### `jt_ws_event_kind`
 
-`enum` | [include/js_trusted.h:64](../../include/js_trusted.h#L64)
+`enum` | [include/js_trusted.h:68](../../include/js_trusted.h#L68)
 
 ```c
 typedef enum jt_ws_event_kind
@@ -71,7 +71,7 @@ typedef enum jt_ws_event_kind
 
 ### `kind`
 
-`type_alias` | [include/js_trusted.h:56](../../include/js_trusted.h#L56)
+`type_alias` | [include/js_trusted.h:60](../../include/js_trusted.h#L60)
 
 ```c
 typedef struct jt_ws_op { int kind;
@@ -128,7 +128,7 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 ### `parent`
 
-`function` | [include/js_trusted.h:69](../../include/js_trusted.h#L69)
+`function` | [include/js_trusted.h:80](../../include/js_trusted.h#L80)
 
 ```c
 * socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);
@@ -142,7 +142,7 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 ### `jt_take_ws`
 
-`function` | [include/js_trusted.h:75](../../include/js_trusted.h#L75)
+`function` | [include/js_trusted.h:86](../../include/js_trusted.h#L86)
 
 ```c
 size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);
@@ -168,7 +168,7 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 ### `jt_ws_ops_free`
 
-`function` | [include/js_trusted.h:76](../../include/js_trusted.h#L76)
+`function` | [include/js_trusted.h:87](../../include/js_trusted.h#L87)
 
 ```c
 void jt_ws_ops_free(jt_ws_op *ops, size_t n);
@@ -187,7 +187,7 @@ void jt_ws_ops_free(jt_ws_op *ops, size_t n);
 
 ### `jt_ws_event`
 
-`function` | [include/js_trusted.h:81](../../include/js_trusted.h#L81)
+`function` | [include/js_trusted.h:92](../../include/js_trusted.h#L92)
 
 ```c
 int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);
@@ -216,7 +216,7 @@ Returns 1 when a live socket with that id received it.
 
 ### `jt_take_storage`
 
-`function` | [include/js_trusted.h:93](../../include/js_trusted.h#L93)
+`function` | [include/js_trusted.h:104](../../include/js_trusted.h#L104)
 
 ```c
 int jt_take_storage(js_context *ctx, char **out, size_t *len);
@@ -240,7 +240,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `realm`
 
-`function` | [include/js_trusted.h:96](../../include/js_trusted.h#L96)
+`function` | [include/js_trusted.h:107](../../include/js_trusted.h#L107)
 
 ```c
 * runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and budget. ctx NULL => JD_ERR_NULL_ARG. */ jd_status jt_enable_worker(js_context *ctx);

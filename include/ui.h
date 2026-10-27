@@ -66,6 +66,11 @@ ui_status ui_run_text_view(const char *title, const char *text, size_t text_len)
  * Blocks until the window is closed. Visual-only (no headless test). */
 ui_status ui_run_browser(const char *start_url);
 
+/* Operator override (the --insecure flag): every GUI fetch skips certificate verification, exactly
+ * as the headless flag does. Set once before ui_run_browser; never reachable from page content or
+ * from a keyboard shortcut (Ctrl+Shift+E only relaxes a weak-but-valid certificate). */
+void ui_set_operator_insecure(int on);
+
 struct rd_doc;
 
 /* Headless vector-PDF export: render an already-built render document to a PDF at

@@ -2,6 +2,23 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_js_dom.c` -> `include/js_sandbox.h`
+- `tests/test_js_dom.c` -> `include/js_trusted.h`
+- `tests/test_js_dom.c` -> `include/url.h`
+- `tests/test_js_dom.c` -> `include/web_storage.h`
+- `tests/test_js_env.c` -> `include/dom.h`
+- `tests/test_js_env.c` -> `include/html_parse.h`
+- `tests/test_js_env.c` -> `include/js_dom.h`
+- `tests/test_js_env.c` -> `include/js_env.h`
+- `tests/test_js_env.c` -> `include/js_sandbox.h`
+- `tests/test_js_geom.c` -> `include/js_geom.h`
+- `tests/test_js_policy.c` -> `include/js_policy.h`
+- `tests/test_js_sandbox.c` -> `include/js_sandbox.h`
+- `tests/test_link_nav.c` -> `include/link_nav.h`
+- `tests/test_local_store.c` -> `include/local_store.h`
+- `tests/test_media_decoder.c` -> `include/media_decoder.h`
+- `tests/test_net_realm.c` -> `include/net_realm.h`
+- `tests/test_os_sandbox.c` -> `include/os_sandbox.h`
 - `tests/test_page_view.c` -> `include/box_style.h`
 - `tests/test_page_view.c` -> `include/css.h`
 - `tests/test_page_view.c` -> `include/dom.h`
@@ -27,6 +44,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_renderer.c` -> `include/renderer.h`
 - `tests/test_request_policy.c` -> `include/request_policy.h`
 - `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
+- `tests/test_sha2.c` -> `include/sha2.h`
 - `tests/test_shm_slots.c` -> `include/shm_slots.h`
 - `tests/test_svg_render.c` -> `include/svg_render.h`
 - `tests/test_tab.c` -> `include/css.h`
@@ -85,9 +103,12 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/dom.h` -> stddef.h, stdint.h
 - `include/dom_debug.h` -> stddef.h
 - `include/download.h` -> stddef.h
+- `include/fb_cmdline.h` -> stddef.h
 - `include/fb_panes.h` -> stddef.h
 - `include/flex_layout.h` -> stddef.h
 - `include/form.h` -> stddef.h
+- `include/frame_broker.h` -> stddef.h
+- `include/frame_host.h` -> stddef.h
 - `include/freebug.h` -> stddef.h
 - `include/hls.h` -> stddef.h
 - `include/host_conf.h` -> stddef.h
@@ -121,6 +142,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/renderer.h` -> stddef.h
 - `include/request_policy.h` -> stddef.h
 - `include/secure_fetch.h` -> stddef.h, stdint.h, time.h
+- `include/sha2.h` -> stddef.h, stdint.h
 - `include/svg_paint.h` -> cairo.h
 - `include/svg_render.h` -> stddef.h
 - `include/tab.h` -> stddef.h, stdint.h, sys/types.h
@@ -163,9 +185,12 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/dom.c` -> lexbor/html/html.h, stdint.h, stdlib.h, string.h
 - `src/dom_debug.c` -> stdarg.h, stddef.h, stdio.h
 - `src/download.c` -> ctype.h, string.h
+- `src/fb_cmdline.c` -> stdio.h, stdlib.h, string.h
 - `src/fb_panes.c` -> stdio.h, string.h
 - `src/flex_layout.c` -> stddef.h, string.h
 - `src/form.c` -> string.h
+- `src/frame_broker.c` -> string.h
+- `src/frame_host.c` -> stdio.h, stdlib.h, string.h
 - `src/freebug.c` -> stdlib.h, string.h
 - `src/freedom.c` -> limits.h, stdio.h, stdlib.h, string.h, time.h, unistd.h
 - `src/hls.c` -> stdlib.h, string.h
@@ -209,6 +234,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/renderer.c` -> errno.h, stdint.h, stdlib.h, string.h, sys/wait.h, unistd.h
 - `src/request_policy.c` -> stdlib.h, string.h
 - `src/secure_fetch.c` -> curl/curl.h, inttypes.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdio.h, stdlib.h, string.h, strings.h, time.h
+- `src/sha2.c` -> string.h
 - `src/svg_render.c` -> math.h, stddef.h, string.h
 - `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, pthread.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/random.h, sys/wait.h, time.h, unistd.h
 - `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, stdio.h, stdlib.h, string.h
@@ -250,10 +276,13 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_dom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, time.h
 - `tests/test_dom_debug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_download.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_fb_cmdline.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, string.h
 - `tests/test_fb_panes.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_flex_layout.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
 - `tests/test_form.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_frame_broker.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_frame_clock.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_frame_host.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_freebug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_freedom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/wait.h, unistd.h
 - `tests/test_hls.c` -> cmocka.h, setjmp.h, stddef.h, stdlib.h, string.h
@@ -288,6 +317,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_renderer.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_request_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
 - `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_sha2.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_shm_slots.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_tab.c` -> cmocka.h, poll.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h

@@ -1,6 +1,6 @@
 # src: tab
 
-src: tab groups 45 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
+src: tab groups 48 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
 
 ```mermaid
 graph LR
@@ -13,21 +13,23 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (3.1)
+## include (2.1)
 
 include groups 13 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
 
-## src (3.2)
+## src (2.2)
 
-src groups 21 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FREEDOM_JS_DOM_INTERNAL_H, jd_opaque_get, jd_idx. node_next: }; /* --- helpers --- static char *dup_bytes(const lxb_char_t *src, size_t...
+src groups 23 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FREEDOM_JS_DOM_INTERNAL_H, jd_opaque_get, jd_idx. to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
 
-## tests (3.3)
+## tests (2.3)
 
-tests groups 11 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, IDX. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
+tests groups 12 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, IDX. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
 
 **Files**:
 
 - include/dom.h
+- include/fb_cmdline.h
+- include/fb_panes.h
 - include/freebug.h
 - include/html_parse.h
 - include/js_dom.h
@@ -36,10 +38,11 @@ tests groups 11 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, 
 - include/js_location.h
 - include/js_sandbox.h
 - include/js_trusted.h
-- include/link_nav.h
-- include/tab.h
 - include/url.h
 - include/web_storage.h
+- src/dom.c
+- src/fb_cmdline.c
+- src/fb_panes.c
 - src/freebug.c
 - src/html_parse.c
 - src/js_custom_elements.c
@@ -57,18 +60,18 @@ tests groups 11 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, 
 - src/js_location_internal.h
 - src/js_sandbox.c
 - src/js_trusted.c
-- src/link_nav.c
 - src/tab.c
 - src/url.c
 - src/web_storage.c
 - tests/test_dom.c
+- tests/test_fb_cmdline.c
+- tests/test_fb_panes.c
 - tests/test_freebug.c
 - tests/test_html_parse.c
 - tests/test_js_dom.c
 - tests/test_js_env.c
 - tests/test_js_geom.c
 - tests/test_js_sandbox.c
-- tests/test_link_nav.c
 - tests/test_tab.c
 - tests/test_url.c
 - tests/test_web_storage.c

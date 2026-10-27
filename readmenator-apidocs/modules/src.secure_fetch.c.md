@@ -55,7 +55,6 @@ flowchart LR
     n_src_url_c__url_validate_https["url.url_validate_https"]
     n_src_url_c__url_resolve_https["url.url_resolve_https"]
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
-    n_src_tab_c__tab_load["tab.tab.load"]
     n_src_secure_fetch_c__sf_cookie_header_for --> n_src_secure_fetch_c__sf_cookie_line_matches
     n_src_secure_fetch_c__sf_enforce_policy --> n_src_secure_fetch_c__sf_check_chain_policy
     n_src_secure_fetch_c__sf_enforce_policy --> n_src_secure_fetch_c__sf_check_group_is_pq
@@ -74,7 +73,6 @@ flowchart LR
     n_src_secure_fetch_c__sf_validate_url -.-> n_src_url_c__url_validate_https
     n_src_secure_fetch_c__sf_resolve_redirect -.-> n_src_url_c__url_resolve_https
     n_src_secure_fetch_c__sf_rcache_get -.-> n_gui_browser_ui_c__strcmp
-    n_src_secure_fetch_c__sf_rcache_get -.-> n_src_tab_c__tab_load
 ```
 
 ## Structs
@@ -858,7 +856,7 @@ int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)
 
 **Returns:** `int`
 
-*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`tab.load`](src.tab.c.md#tab-load)
+*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
 *Called by:* [`sf_get_follow`](#sf_get_follow)
 

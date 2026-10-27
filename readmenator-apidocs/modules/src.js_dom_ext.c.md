@@ -12,7 +12,7 @@
 
 ### `identity`
 
-`function` | [src/js_dom_ext.c:102](../../src/js_dom_ext.c#L102)
+`function` | [src/js_dom_ext.c:104](../../src/js_dom_ext.c#L104)
 
 ```c
 * identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*, so the next pv_build_styled paints it. * innerHTML/textContent append (never replace
@@ -32,7 +32,7 @@
 
 ### `registration`
 
-`function` | [src/js_dom_ext.c:439](../../src/js_dom_ext.c#L439)
+`function` | [src/js_dom_ext.c:481](../../src/js_dom_ext.c#L481)
 
 ```c
 * registration (options, attributeFilter, subtree) and delivered in one microtask. An * observer...
@@ -46,7 +46,7 @@
 
 ### `jdx_install`
 
-`function` | [src/js_dom_ext.c:1286](../../src/js_dom_ext.c#L1286)
+`function` | [src/js_dom_ext.c:1330](../../src/js_dom_ext.c#L1330)
 
 ```c
 int jdx_install(JSContext *ctx)
@@ -66,7 +66,7 @@ int jdx_install(JSContext *ctx)
 
 ### `jd_install_repl_api`
 
-`function` | [src/js_dom_ext.c:1295](../../src/js_dom_ext.c#L1295)
+`function` | [src/js_dom_ext.c:1339](../../src/js_dom_ext.c#L1339)
 
 ```c
 jd_status jd_install_repl_api(js_context *ctx)
@@ -86,7 +86,7 @@ jd_status jd_install_repl_api(js_context *ctx)
 
 ### `jd_set_repl_css`
 
-`function` | [src/js_dom_ext.c:1303](../../src/js_dom_ext.c#L1303)
+`function` | [src/js_dom_ext.c:1347](../../src/js_dom_ext.c#L1347)
 
 ```c
 jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
@@ -108,7 +108,7 @@ jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
 
 ### `jd_install_geolocation`
 
-`function` | [src/js_dom_ext.c:1316](../../src/js_dom_ext.c#L1316)
+`function` | [src/js_dom_ext.c:1360](../../src/js_dom_ext.c#L1360)
 
 ```c
 jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)
@@ -133,7 +133,7 @@ jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double
 
 ### `jd_install_indexeddb`
 
-`function` | [src/js_dom_ext.c:1335](../../src/js_dom_ext.c#L1335)
+`function` | [src/js_dom_ext.c:1379](../../src/js_dom_ext.c#L1379)
 
 ```c
 jd_status jd_install_indexeddb(js_context *ctx)

@@ -3,6 +3,57 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `idn_geo_mode` | enum | `include/identity.h:25` | `` |
+| `idn_is_default` | function | `include/identity.h:48` | `int idn_is_default(const idn_config *c);` |
+| `idn_parse` | function | `include/identity.h:67` | `void idn_parse(idn_config *c, const char *text);` |
+| `idn_primary_language` | function | `include/identity.h:59` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);` |
+| `idn_render_page` | function | `include/identity.h:73` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` |
+| `idn_serialize` | function | `include/identity.h:63` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` |
+| `idn_set_geo` | function | `include/identity.h:53` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);` |
+| `idn_set_languages` | function | `include/identity.h:52` | `int idn_set_languages(idn_config *c, const char *list);` |
+| `idn_set_user_agent` | function | `include/identity.h:51` | `int idn_set_user_agent(idn_config *c, const char *ua);` |
+| `idn_user_agent` | function | `include/identity.h:57` | `const char *idn_user_agent(const idn_config *c);` |
+| `user_agent` | type_alias | `include/identity.h:36` | `typedef struct idn_config { char user_agent[IDN_UA_MAX];` |
+| `FREEDOM_IMAGE_DECODE_H` | macro | `include/image_decode.h:2` | `#define FREEDOM_IMAGE_DECODE_H` |
+| `IMG_MAX_DIM` | macro | `include/image_decode.h:65` | `#define IMG_MAX_DIM` |
+| `IMG_MAX_PIXELS` | macro | `include/image_decode.h:66` | `#define IMG_MAX_PIXELS` |
+| `decode` | function | `include/image_decode.h:92` | `* the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and * expands to BGRA. Rejects non-JPEG...` |
+| `guards` | function | `include/image_decode.h:25` | `* guards (in-memory source only, longjmp error manager so a bad stream never * calls exit(), dimension caps before...` |
+| `img_dimensions_ok` | function | `include/image_decode.h:78` | `int img_dimensions_ok(uint32_t w, uint32_t h);` |
+| `img_format` | enum | `include/image_decode.h:33` | `` |
+| `img_format_name` | function | `include/image_decode.h:124` | `const char *img_format_name(img_format f);` |
+| `img_pixels` | struct | `include/image_decode.h:56` | `` |
+| `img_pixels_free` | function | `include/image_decode.h:121` | `void img_pixels_free(img_pixels *p);` |
+| `img_status` | enum | `include/image_decode.h:41` | `` |
+| `inputs` | function | `include/image_decode.h:81` | `* Degenerate inputs (<= 0) yield (0,0). Pure. */ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h...` |
+| `width` | type_alias | `include/image_decode.h:56` | `typedef struct img_pixels { uint32_t width;` |
+| `FREEDOM_IMPORT_MAP_H` | macro | `include/import_map.h:2` | `#define FREEDOM_IMPORT_MAP_H` |
+| `IM_MAX_ENTRIES` | macro | `include/import_map.h:18` | `#define IM_MAX_ENTRIES` |
+| `IM_MAX_SCOPES` | macro | `include/import_map.h:19` | `#define IM_MAX_SCOPES` |
+| `IM_MAX_TEXT` | macro | `include/import_map.h:17` | `#define IM_MAX_TEXT` |
+| `algorithm` | function | `include/import_map.h:13` | `* resolution algorithm (scopes, exact and prefix matches). URL resolution is the * caller's (the same resolver the...` |
+| `im_count` | function | `include/import_map.h:37` | `size_t im_count(const im_map *m);` |
+| `im_free` | function | `include/import_map.h:40` | `void im_free(im_map *m);` |
+| `im_map` | type_alias | `include/import_map.h:23` | `typedef struct im_map im_map;` |
+| `im_resolve` | function | `include/import_map.h:33` | `int im_resolve(const im_map *m, const char *base, const char *specifier, im_url_fn resolve, void *ctx, char *out...` |
+| `map` | function | `include/import_map.h:28` | `* map (fail closed = no mapping). NULL only on OOM. */ im_map *im_parse(const char *json, size_t len, const char...` |
+| `FREEDOM_INTERP_H` | macro | `include/interp.h:2` | `#define FREEDOM_INTERP_H` |
+| `IP_ITERATION_INFINITE` | macro | `include/interp.h:85` | `#define IP_ITERATION_INFINITE` |
+| `IP_MAX_KEYFRAMES` | macro | `include/interp.h:68` | `#define IP_MAX_KEYFRAMES` |
+| `ip_anim` | struct | `include/interp.h:101` | `` |
+| `ip_anim_current` | function | `include/interp.h:131` | `double ip_anim_current(const ip_anim *a);` |
+| `ip_anim_done` | function | `include/interp.h:134` | `int ip_anim_done(const ip_anim *a);` |
+| `ip_anim_init` | function | `include/interp.h:121` | `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease, const ip_keyframe *kf, int n_kf, double...` |
+| `ip_anim_tick` | function | `include/interp.h:128` | `int ip_anim_tick(ip_anim *a, double dt_ms);` |
+| `ip_direction` | enum | `include/interp.h:87` | `` |
+| `ip_ease` | function | `include/interp.h:48` | `double ip_ease(double t, const ip_ease_fn *fn);` |
+| `ip_ease_fn` | struct | `include/interp.h:38` | `` |
+| `ip_easing` | enum | `include/interp.h:25` | `` |
+| `ip_fill_mode` | enum | `include/interp.h:94` | `` |
+| `ip_interp` | function | `include/interp.h:62` | `double ip_interp(ip_val_kind kind, double a, double b, double t);` |
+| `ip_keyframe` | struct | `include/interp.h:70` | `` |
+| `ip_kf_interp` | function | `include/interp.h:78` | `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf, int n_kf, double pct);` |
+| `ip_lerp` | function | `include/interp.h:60` | `double ip_lerp(double a, double b, double t);` |
 | `ip_lerp_color` | function | `include/interp.h:61` | `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t);` |
 | `ip_val_kind` | enum | `include/interp.h:54` | `` |
 | `kind` | type_alias | `include/interp.h:37` | `typedef struct ip_ease_fn { ip_easing kind;` |
@@ -32,6 +83,7 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `processed` | type_alias | `include/js_dom.h:41` | `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];` |
 | `run` | function | `include/js_dom.h:127` | `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...` |
 | `FREEDOM_JS_ENV_H` | macro | `include/js_env.h:2` | `#define FREEDOM_JS_ENV_H` |
+| `JE_READBACK_EXACT` | macro | `include/js_env.h:59` | `#define JE_READBACK_EXACT` |
 | `je_status` | enum | `include/js_env.h:27` | `` |
 | `poisoned` | function | `include/js_env.h:49` | `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...` |
 | `FREEDOM_JS_GEOM_H` | macro | `include/js_geom.h:2` | `#define FREEDOM_JS_GEOM_H` |
@@ -108,17 +160,17 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `JT_WS_MAX_BYTES` | macro | `include/js_trusted.h:48` | `#define JT_WS_MAX_BYTES` |
 | `JT_WS_MAX_OPS` | macro | `include/js_trusted.h:47` | `#define JT_WS_MAX_OPS` |
 | `jt_take_opens` | function | `include/js_trusted.h:42` | `char *jt_take_opens(js_context *ctx);` |
-| `jt_take_storage` | function | `include/js_trusted.h:93` | `int jt_take_storage(js_context *ctx, char **out, size_t *len);` |
-| `jt_take_ws` | function | `include/js_trusted.h:75` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);` |
-| `jt_ws_event` | function | `include/js_trusted.h:81` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);` |
-| `jt_ws_event_kind` | enum | `include/js_trusted.h:64` | `` |
+| `jt_take_storage` | function | `include/js_trusted.h:104` | `int jt_take_storage(js_context *ctx, char **out, size_t *len);` |
+| `jt_take_ws` | function | `include/js_trusted.h:86` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);` |
+| `jt_ws_event` | function | `include/js_trusted.h:92` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);` |
+| `jt_ws_event_kind` | enum | `include/js_trusted.h:68` | `` |
 | `jt_ws_kind` | enum | `include/js_trusted.h:50` | `` |
-| `jt_ws_op` | struct | `include/js_trusted.h:57` | `` |
-| `jt_ws_ops_free` | function | `include/js_trusted.h:76` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n);` |
-| `kind` | type_alias | `include/js_trusted.h:56` | `typedef struct jt_ws_op { int kind;` |
+| `jt_ws_op` | struct | `include/js_trusted.h:61` | `` |
+| `jt_ws_ops_free` | function | `include/js_trusted.h:87` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n);` |
+| `kind` | type_alias | `include/js_trusted.h:60` | `typedef struct jt_ws_op { int kind;` |
 | `null` | function | `include/js_trusted.h:24` | `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...` |
-| `parent` | function | `include/js_trusted.h:69` | `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);` |
-| `realm` | function | `include/js_trusted.h:96` | `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...` |
+| `parent` | function | `include/js_trusted.h:80` | `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);` |
+| `realm` | function | `include/js_trusted.h:107` | `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...` |
 | `FREEDOM_LAZY_LOAD_H` | macro | `include/lazy_load.h:2` | `#define FREEDOM_LAZY_LOAD_H` |
 | `FREEDOM_LINK_NAV_H` | macro | `include/link_nav.h:2` | `#define FREEDOM_LINK_NAV_H` |
 | `LN_MAX_FRAGMENT` | macro | `include/link_nav.h:38` | `#define LN_MAX_FRAGMENT` |
@@ -444,57 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `sf_config` | struct | `include/secure_fetch.h:80` | `` |
 | `sf_cookie_line_matches` | function | `include/secure_fetch.h:245` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
 | `sf_cookie_put` | function | `include/secure_fetch.h:240` | `void sf_cookie_put(const char *url, const char *namevalue);` |
-| `sf_get` | function | `include/secure_fetch.h:365` | `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...` |
-| `sf_global_init` | function | `include/secure_fetch.h:227` | `void sf_global_init(void);` |
-| `sf_header_value` | function | `include/secure_fetch.h:305` | `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` |
-| `sf_impersonate_kex_groups` | function | `include/secure_fetch.h:262` | `const char *sf_impersonate_kex_groups(void);` |
-| `sf_impersonate_tls13_ciphers` | function | `include/secure_fetch.h:263` | `const char *sf_impersonate_tls13_ciphers(void);` |
-| `sf_is_redirect_code` | function | `include/secure_fetch.h:294` | `int sf_is_redirect_code(long http_code);` |
-| `sf_policy` | enum | `include/secure_fetch.h:41` | `` |
-| `sf_proxy_type` | enum | `include/secure_fetch.h:70` | `` |
-| `sf_rcache_clear` | function | `include/secure_fetch.h:402` | `void sf_rcache_clear(void);` |
-| `sf_rcache_get` | function | `include/secure_fetch.h:401` | `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);` |
-| `sf_rcache_put` | function | `include/secure_fetch.h:400` | `int sf_rcache_put(const char *from, const char *to, time_t now);` |
-| `sf_rcache_set_backing` | function | `include/secure_fetch.h:411` | `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);` |
-| `sf_response` | struct | `include/secure_fetch.h:130` | `` |
-| `sf_response_free` | function | `include/secure_fetch.h:376` | `void sf_response_free(sf_response *resp);` |
-| `sf_status` | enum | `include/secure_fetch.h:24` | `` |
-| `sf_user_agent_or_default` | function | `include/secure_fetch.h:254` | `const char *sf_user_agent_or_default(const char *ua);` |
-| `sf_ws` | type_alias | `include/secure_fetch.h:325` | `typedef struct sf_ws sf_ws;` |
-| `sf_ws_close` | function | `include/secure_fetch.h:352` | `void sf_ws_close(sf_ws *ws);` |
-| `sf_ws_fd` | function | `include/secure_fetch.h:349` | `int sf_ws_fd(const sf_ws *ws);` |
-| `skipped` | function | `include/secure_fetch.h:283` | `* skipped (a classical key exchange is accepted);` |
-| `status` | type_alias | `include/secure_fetch.h:129` | `typedef struct sf_response { sf_status status;` |
-| `validators` | function | `include/secure_fetch.h:18` | `* The security logic lives in pure validators (no I/O);` |
-| `FREEDOM_SHM_SLOTS_H` | macro | `include/shm_slots.h:2` | `#define FREEDOM_SHM_SLOTS_H` |
-| `SS_COUNT` | macro | `include/shm_slots.h:17` | `#define SS_COUNT` |
-| `busy` | type_alias | `include/shm_slots.h:18` | `typedef struct ss_state { int busy[SS_COUNT];` |
-| `ss_committed` | function | `include/shm_slots.h:41` | `static inline void ss_committed(ss_state *s, int i)` |
-| `ss_init` | function | `include/shm_slots.h:24` | `static inline void ss_init(ss_state *s)` |
-| `ss_released` | function | `include/shm_slots.h:49` | `static inline int ss_released(ss_state *s, int i)` |
-| `ss_state` | struct | `include/shm_slots.h:19` | `` |
-| `FREEDOM_SVG_PAINT_H` | macro | `include/svg_paint.h:2` | `#define FREEDOM_SVG_PAINT_H` |
-| `svp_draw` | function | `include/svg_paint.h:31` | `void svp_draw(cairo_t *cr, const sv_image *img, double x, double y, double w, double h, int current_rgb);` |
-| `FREEDOM_SVG_RENDER_H` | macro | `include/svg_render.h:2` | `#define FREEDOM_SVG_RENDER_H` |
-| `SV_DEFAULT_H` | macro | `include/svg_render.h:42` | `#define SV_DEFAULT_H` |
-| `SV_DEFAULT_W` | macro | `include/svg_render.h:41` | `#define SV_DEFAULT_W` |
-| `SV_MAX_DEPTH` | macro | `include/svg_render.h:35` | `#define SV_MAX_DEPTH` |
-| `SV_MAX_INPUT` | macro | `include/svg_render.h:37` | `#define SV_MAX_INPUT` |
-| `SV_MAX_POINTS` | macro | `include/svg_render.h:33` | `#define SV_MAX_POINTS` |
-| `SV_MAX_SEGS` | macro | `include/svg_render.h:34` | `#define SV_MAX_SEGS` |
-| `SV_MAX_SHAPES` | macro | `include/svg_render.h:32` | `#define SV_MAX_SHAPES` |
-| `SV_TEXT_MAX` | macro | `include/svg_render.h:36` | `#define SV_TEXT_MAX` |
-| `height` | type_alias | `include/svg_render.h:104` | `typedef struct sv_image { double width, height;` |
-| `kind` | type_alias | `include/svg_render.h:75` | `typedef struct sv_shape { int kind;` |
-| `sv_fit` | function | `include/svg_render.h:131` | `void sv_fit(const sv_image *img, double dw, double dh, double *scale, double *off_x, double *off_y);` |
-| `sv_image` | struct | `include/svg_render.h:104` | `` |
-| `sv_seg` | struct | `include/svg_render.h:65` | `` |
-| `sv_shape` | struct | `include/svg_render.h:75` | `` |
-| `sv_shape_kind` | enum | `include/svg_render.h:44` | `` |
-| `sv_status` | enum | `include/svg_render.h:25` | `` |
-| `sv_verb` | enum | `include/svg_render.h:58` | `` |
-| `verb` | type_alias | `include/svg_render.h:64` | `typedef struct sv_seg { int verb;` |
-| `FREEDOM_TAB_H` | macro | `include/tab.h:2` | `#define FREEDOM_TAB_H` |
-| `TAB_MAX_INPUT` | macro | `include/tab.h:149` | `#define TAB_MAX_INPUT` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

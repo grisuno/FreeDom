@@ -1,6 +1,26 @@
 # Subsystem: tests (page 6 of 8)
 Previous: [KB_tests_p5.md](KB_tests_p5.md)
 
+## tests/test_net_realm.c
+- Doc: test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_classify_host_onion` (function, line 22) `static void test_classify_host_onion(void **state)`
+  - `test_classify_host_i2p` (function, line 30) `static void test_classify_host_i2p(void **state)`
+  - `test_classify_host_clearnet` (function, line 37) `static void test_classify_host_clearnet(void **state)`
+  - `test_classify_host_lookalikes` (function, line 44) `static void test_classify_host_lookalikes(void **state)`
+  - `test_classify_host_edges` (function, line 54) `static void test_classify_host_edges(void **state)`
+  - `test_classify_url` (function, line 67) `static void test_classify_url(void **state)`
+  - `test_route_onion` (function, line 79) `static void test_route_onion(void **state)`
+  - `test_route_i2p` (function, line 88) `static void test_route_i2p(void **state)`
+  - `test_route_clearnet` (function, line 96) `static void test_route_clearnet(void **state)`
+  - `test_route_null_blocked` (function, line 110) `static void test_route_null_blocked(void **state)`
+  - `test_realm_allows_http` (function, line 118) `static void test_realm_allows_http(void **state)`
+  - `test_names` (function, line 126) `static void test_names(void **state)`
+  - `main` (function, line 140) `int main(void)`
+- Depends on: `include/net_realm.h`
+
 ## tests/test_os_sandbox.c
 - Doc: test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations...
 - Layer: testing
@@ -468,21 +488,6 @@ static void test_build_heading_own_relative_size_replac...`
   - `main` (function, line 241) `int main(void)`
   - `consulted` (function, line 76) `* is not even consulted (a bogus URL still yields BLOCK_DISABLED). */ assert_int_equal( rdp_image_decision(off...`
 - Depends on: `include/render_policy.h`
-
-## tests/test_renderer.c
-- Doc: test_render_binary_does_not_crash_parent: (void)state; rd_result r...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_render_basic` (function, line 27) `static void test_render_basic(void **state)`
-  - `test_render_strips_script` (function, line 39) `static void test_render_strips_script(void **state)`
-  - `test_render_null_args` (function, line 48) `static void test_render_null_args(void **state)`
-  - `test_render_too_large` (function, line 55) `static void test_render_too_large(void **state)`
-  - `test_render_binary_does_not_crash_parent` (function, line 63) `static void test_render_binary_does_not_crash_parent(void **state)`
-  - `test_render_multiple_independent` (function, line 74) `static void test_render_multiple_independent(void **state)`
-  - `test_result_free_null_and_double` (function, line 84) `static void test_result_free_null_and_double(void **state)`
-  - `main` (function, line 93) `int main(void)`
-- Depends on: `include/renderer.h`
 
 
 Next: [KB_tests_p7.md](KB_tests_p7.md)

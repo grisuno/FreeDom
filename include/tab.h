@@ -59,11 +59,14 @@ typedef struct tab_hist_op {
 /* One WebSocket operation a trusted page's JS recorded (spec/js_dom.md 7f); the
  * trusted parent owns the socket. Kinds mirror jd_ws_kind. Owned by the tab_page. */
 typedef enum tab_ws_kind {
-    TAB_WS_OPEN = 1, TAB_WS_SEND_TEXT = 2, TAB_WS_SEND_BIN = 3, TAB_WS_CLOSE = 4
+    TAB_WS_OPEN = 1, TAB_WS_SEND_TEXT = 2, TAB_WS_SEND_BIN = 3, TAB_WS_CLOSE = 4,
+    /* frame traffic on the same parent-mediated queue (spec/frame_broker.md); mirrors jt_ws_kind */
+    TAB_WS_FRAME_POST = 5, TAB_WS_FRAME_OPEN = 6, TAB_WS_FRAME_CLOSE = 7
 } tab_ws_kind;
 
 typedef enum tab_ws_event_kind {
-    TAB_WSE_OPEN = 1, TAB_WSE_TEXT = 2, TAB_WSE_BINARY = 3, TAB_WSE_CLOSE = 4, TAB_WSE_ERROR = 5
+    TAB_WSE_OPEN = 1, TAB_WSE_TEXT = 2, TAB_WSE_BINARY = 3, TAB_WSE_CLOSE = 4, TAB_WSE_ERROR = 5,
+    TAB_WSE_FRAME_MSG = 6   /* data "senderOrigin\nrelation\nJSON": a message the parent routed in */
 } tab_ws_event_kind;
 
 typedef struct tab_ws_op {
@@ -258,6 +261,11 @@ void tab_set_css_allowed(tab *t, int allowed);
  * @media width query sees it; viewport UNITS (vw/vh) still resolve against the fixed
  * normalized desktop, so no real geometry leaks into computed lengths. */
 void tab_set_viewport_w(tab *t, int px);
+
+/* Marks the next load as an iframe document (id 1..15, the frame_broker id) so the worker installs
+ * window.parent/top as message proxies; 0 (default) is a top document. Meaningful only for a
+ * trusted load (net granted). */
+void tab_set_frame_id(tab *t, int id);
 
 /* The user's identity override (idn_serialize text, spec/identity.md) for the NEXT loads: the
  * worker applies it to navigator and, for a trusted host with a fixed place, installs

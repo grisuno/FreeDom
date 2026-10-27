@@ -1,6 +1,67 @@
 # Subsystem: include (page 3 of 5)
 Previous: [KB_include_p2.md](KB_include_p2.md)
 
+## include/hls.h
+- Doc: hls_segment: or variant info.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `hls_segment` (struct, line 29)
+  - `hls_variant` (struct, line 36)
+  - `hls_playlist` (struct, line 45)
+  - `hls_status` (enum, line 21)
+  - `hls_select_variant` (function, line 65) `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);`
+  - `resolved` (function, line 68) `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the * written length, or 0 on failure. */...`
+  - `hls_playlist_free` (function, line 74) `void hls_playlist_free(hls_playlist *pl);`
+  - `FREEDOM_HLS_H` (macro, line 2) `#define FREEDOM_HLS_H`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
+
+## include/host_conf.h
+- Doc: hcf_search_dirs: Pure.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `hcf_dirs` (struct, line 20)
+  - `hcf_search_dirs` (function, line 28) `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out);`
+  - `hcf_search_dirs_from_env` (function, line 31) `void hcf_search_dirs_from_env(hcf_dirs *out);`
+  - `hcf_load_filter` (function, line 35) `hb_set *hcf_load_filter(const hcf_dirs *dirs);`
+  - `hcf_load_allowlist` (function, line 39) `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname);`
+  - `FREEDOM_HOST_CONF_H` (macro, line 2) `#define FREEDOM_HOST_CONF_H`
+  - `HCF_MAX_DIRS` (macro, line 15) `#define HCF_MAX_DIRS`
+  - `HCF_PATH_MAX` (macro, line 16) `#define HCF_PATH_MAX`
+  - `HCF_MAX_FILE_BYTES` (macro, line 18) `#define HCF_MAX_FILE_BYTES`
+- Depends on: `include/hostblock.h`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/host_conf.c`, `tests/test_host_conf.c`
+
+## include/hostblock.h
+- Doc: hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `hb_list` (enum, line 32)
+  - `hb_decision` (enum, line 37)
+  - `hb_status` (enum, line 42)
+  - `hb_set` (type_alias, line 29) `typedef struct hb_set hb_set;`
+  - `hb_new` (function, line 49) `hb_set *hb_new(void);`
+  - `hb_free` (function, line 52) `void hb_free(hb_set *s);`
+  - `walked` (function, line 65) `* walked (the host, then without its first label, ...): any suffix on the allowlist * => HB_ALLOW (allow wins...`
+  - `hb_is_allowlisted` (function, line 75) `int hb_is_allowlisted(const hb_set *s, const char *host);`
+  - `hb_count` (function, line 85) `size_t hb_count(const hb_set *s, hb_list list);`
+  - `FREEDOM_HOSTBLOCK_H` (macro, line 2) `#define FREEDOM_HOSTBLOCK_H`
+- Imported by: `gui/browser_ui.c`, `include/host_conf.h`, `src/freedom.c`, `src/hostblock.c`, `tests/test_hostblock.c`
+
+## include/hostedit.h
+- Doc: he_text_has_host: Returns 1 if text (the body of a hosts-format file) already lists host as a...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `he_status` (enum, line 24)
+  - `he_text_has_host` (function, line 46) `int he_text_has_host(const char *text, const char *host);`
+  - `he_suggest` (function, line 55) `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);`
+  - `FREEDOM_HOSTEDIT_H` (macro, line 2) `#define FREEDOM_HOSTEDIT_H`
+  - `HE_MAX_HOST` (macro, line 32) `#define HE_MAX_HOST`
+- Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
+
 ## include/html_parse.h
 - Doc: hp_script: One executable <script>.
 - Layer: utility
@@ -194,6 +255,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `je_status` (enum, line 27)
   - `poisoned` (function, line 49) `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...`
   - `FREEDOM_JS_ENV_H` (macro, line 2) `#define FREEDOM_JS_ENV_H`
+  - `JE_READBACK_EXACT` (macro, line 59) `#define JE_READBACK_EXACT`
 - Depends on: `include/js_sandbox.h`
 - Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`
 
@@ -301,18 +363,18 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `jt_ws_op` (struct, line 57)
+  - `jt_ws_op` (struct, line 61)
   - `jt_ws_kind` (enum, line 50)
-  - `jt_ws_event_kind` (enum, line 64)
-  - `kind` (type_alias, line 56) `typedef struct jt_ws_op { int kind;`
+  - `jt_ws_event_kind` (enum, line 68)
+  - `kind` (type_alias, line 60) `typedef struct jt_ws_op { int kind;`
   - `null` (function, line 24) `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...`
   - `jt_take_opens` (function, line 42) `char *jt_take_opens(js_context *ctx);`
-  - `parent` (function, line 69) `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);`
-  - `jt_take_ws` (function, line 75) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);`
-  - `jt_ws_ops_free` (function, line 76) `void jt_ws_ops_free(jt_ws_op *ops, size_t n);`
-  - `jt_ws_event` (function, line 81) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);`
-  - `jt_take_storage` (function, line 93) `int jt_take_storage(js_context *ctx, char **out, size_t *len);`
-  - `realm` (function, line 96) `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...`
+  - `parent` (function, line 80) `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);`
+  - `jt_take_ws` (function, line 86) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);`
+  - `jt_ws_ops_free` (function, line 87) `void jt_ws_ops_free(jt_ws_op *ops, size_t n);`
+  - `jt_ws_event` (function, line 92) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);`
+  - `jt_take_storage` (function, line 104) `int jt_take_storage(js_context *ctx, char **out, size_t *len);`
+  - `realm` (function, line 107) `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...`
   - `FREEDOM_JS_TRUSTED_H` (macro, line 2) `#define FREEDOM_JS_TRUSTED_H`
   - `JT_WS_MAX` (macro, line 46) `#define JT_WS_MAX`
   - `JT_WS_MAX_OPS` (macro, line 47) `#define JT_WS_MAX_OPS`

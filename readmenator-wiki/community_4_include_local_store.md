@@ -1,12 +1,14 @@
-# src: local_store
+# include: local_store
 
-*Community 6 | 16 files | cohesion 0.79*
+*Community 4 | 24 files | cohesion 0.81*
 
 ## Definition
 
-This community groups 16 file(s) rooted at `src` with dominant language c (cohesion 0.79). Central symbols: `FREEDOM_CACHED_FETCH_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `HC_EVICT_EVERY`, `HC_HEURISTIC_CAP`, `HC_KEY_FILE`. Core file: `src/local_store.c` (335 symbols).
+This community groups 24 file(s) rooted at `include` with dominant language c (cohesion 0.81). Central symbols: `FREEDOM_CACHED_FETCH_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `FREEDOM_PREFS_H`, `FREEDOM_PROFILE_H`, `FREEDOM_ZOOM_H`. Core file: `src/local_store.c` (335 symbols).
 
 ## Files
+
+### `include` (8 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -15,17 +17,34 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 | `include/http_cache.h` | h | presentation | 19 | no |
 | `include/local_store.h` | h | data_access | 11 | no |
 | `include/pq_seal.h` | h | utility | 8 | no |
+| `include/prefs.h` | h | utility | 18 | no |
+| `include/profile.h` | h | utility | 9 | no |
+
+### `src` (8 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
 | `src/cached_fetch.c` | c | infrastructure | 14 | no |
 | `src/disk_store.c` | c | data_access | 6 | no |
 | `src/http_cache.c` | c | presentation | 38 | no |
 | `src/local_store.c` | c | data_access | 335 | no |
 | `src/pq_seal.c` | c | utility | 11 | no |
+| `src/prefs.c` | c | utility | 26 | no |
 | `src/profile.c` | c | utility | 9 | no |
+
+### `tests` (8 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
 | `tests/test_cached_fetch.c` | c | testing | 14 | no |
 | `tests/test_disk_store.c` | c | testing | 16 | no |
 | `tests/test_http_cache.c` | c | testing | 17 | no |
 | `tests/test_local_store.c` | c | testing | 18 | no |
 | `tests/test_pq_seal.c` | c | testing | 7 | no |
+| `tests/test_prefs.c` | c | testing | 15 | no |
+
+*... and 4 more files in this community.*
+
 
 ## Key Symbols
 
@@ -62,14 +81,15 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 19
-- Cross-boundary resolved imports (EXTRACTED): 5
+- Internal resolved imports (EXTRACTED): 30
+- Cross-boundary resolved imports (EXTRACTED): 7
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/cached_fetch.h.
-- [EXTRACTED] depends_on community 6 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
-- [EXTRACTED] depends_on community 6 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
+- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefs.h.
+- [EXTRACTED] depends_on community 4 <-> 8 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 7 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/ui.h imports include/prefs.h.
+- [EXTRACTED] depends_on community 4 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 
 ## Risks
 
@@ -79,9 +99,9 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 16 file(s) lack file-level docs (e.g. `include/cached_fetch.h`)? What purpose do they serve?
-- What would break if the most connected file in src: local_store changed?
-- Should src: local_store be split, given cohesion 0.79?
+- Why do 24 file(s) lack file-level docs (e.g. `include/cached_fetch.h`)? What purpose do they serve?
+- What would break if the most connected file in include: local_store changed?
+- Should include: local_store be split, given cohesion 0.81?
 
 ## Sources
 
@@ -90,14 +110,19 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 - `include/http_cache.h`
 - `include/local_store.h`
 - `include/pq_seal.h`
+- `include/prefs.h`
+- `include/profile.h`
+- `include/zoom.h`
 - `src/cached_fetch.c`
 - `src/disk_store.c`
 - `src/http_cache.c`
 - `src/local_store.c`
 - `src/pq_seal.c`
+- `src/prefs.c`
 - `src/profile.c`
+- `src/zoom.c`
 - `tests/test_cached_fetch.c`
 - `tests/test_disk_store.c`
 - `tests/test_http_cache.c`
 - `tests/test_local_store.c`
-- `tests/test_pq_seal.c`
+- *... and 4 more*

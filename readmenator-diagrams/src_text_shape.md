@@ -23,14 +23,14 @@ src groups 15 files (c) around lower, ci_starts_with, du_is_data_url, du_base64_
 
 ## tests (4.3)
 
-tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty. test_profile_and_throws_tabs: Profile and Throws read the engine's sampler/tracer...
+tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty. test_trusted_requires_both_signals: Hito 28: a host is TRUSTED (full author CSS +...
 
 **Files**:
 
 - include/data_url.h
-- include/fb_panes.h
 - include/hls.h
 - include/js_policy.h
+- include/link_nav.h
 - include/net_realm.h
 - include/perf_trace.h
 - include/psl_data.h
@@ -42,10 +42,10 @@ tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, 
 - include/webfont_load.h
 - include/wl_display.h
 - src/data_url.c
-- src/fb_panes.c
 - src/freedom.c
 - src/hls.c
 - src/js_policy.c
+- src/link_nav.c
 - src/net_realm.c
 - src/perf_trace.c
 - src/render_policy.c
@@ -57,9 +57,9 @@ tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, 
 - src/webfont_load.c
 - src/wl_display.c
 - tests/test_data_url.c
-- tests/test_fb_panes.c
 - tests/test_hls.c
 - tests/test_js_policy.c
+- tests/test_link_nav.c
 - tests/test_net_realm.c
 - tests/test_perf_trace.c
 - tests/test_request_policy.c

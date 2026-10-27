@@ -1,4 +1,4 @@
-# API (page 7 of 11)
+# API (page 7 of 12)
 Previous: [API_p6.md](API_p6.md)
 
 ## src/css_length.c
@@ -307,18 +307,35 @@ Depends on: `include/download.h`, `include/pdf_export.h`
 - `dl_build_path` (function) `src/download.c:195` `dl_status dl_build_path(const char *dir, const char *name, char *out, size_t outsz)`
 - `dl_check_size` (function) `src/download.c:213` `dl_status dl_check_size(size_t len)`
 
+## src/fb_cmdline.c
+Depends on: `include/fb_cmdline.h`, `include/fb_panes.h`, `include/freebug.h`
+- `dup_n` (function) `src/fb_cmdline.c:10` `static char *dup_n(const char *s, size_t n)`
+- `fbc_history_init` (function) `src/fb_cmdline.c:19` `void fbc_history_init(fbc_history *h)`
+- `fbc_history_free` (function) `src/fb_cmdline.c:23` `void fbc_history_free(fbc_history *h)`
+- `fbc_history_push` (function) `src/fb_cmdline.c:32` `int fbc_history_push(fbc_history *h, const char *text, size_t len)`
+- `fbc_history_prev` (function) `src/fb_cmdline.c:53` `const char *fbc_history_prev(fbc_history *h, const char *cur, size_t curlen)`
+- `fbc_history_next` (function) `src/fb_cmdline.c:63` `const char *fbc_history_next(fbc_history *h)`
+- `path_char` (function) `src/fb_cmdline.c:70` `static int path_char(char c)`
+- `fbc_complete_split` (function) `src/fb_cmdline.c:74` `long fbc_complete_split(const char *text, size_t n, char *base, size_t cap, size_t *prefix_off)`
+- `fbc_names_expr` (function) `src/fb_cmdline.c:95` `size_t fbc_names_expr(const char *base, char *out, size_t cap)`
+- `fbc_complete_pick` (function) `src/fb_cmdline.c:118` `size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen,
+                    ...`
+- `fbc_filter_passes` (function) `src/fb_cmdline.c:159` `int fbc_filter_passes(int filter, int level)`
+- `fbc_filter_next` (function) `src/fb_cmdline.c:168` `int fbc_filter_next(int filter)`
+- `fbc_filter_label` (function) `src/fb_cmdline.c:173` `const char *fbc_filter_label(int filter)`
+
 ## src/fb_panes.c
 Depends on: `include/fb_panes.h`
-- `tab_ok` (function) `src/fb_panes.c:70` `static int tab_ok(int tab)`
-- `fbp_tab_label` (function) `src/fb_panes.c:72` `const char *fbp_tab_label(int tab)`
-- `ieq` (function) `src/fb_panes.c:74` `static int ieq(const char *a, const char *b)`
-- `fbp_tab_from_name` (function) `src/fb_panes.c:83` `int fbp_tab_from_name(const char *name)`
-- `fbp_tab_wrap` (function) `src/fb_panes.c:90` `int fbp_tab_wrap(int tab, int dir)`
-- `fbp_tab_span` (function) `src/fb_panes.c:96` `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
-- `fbp_tab_at` (function) `src/fb_panes.c:105` `int fbp_tab_at(double px, double cell_w, double pad_cells)`
-- `fbp_is_pane` (function) `src/fb_panes.c:115` `int fbp_is_pane(int tab)`
-- `fbp_js_quote` (function) `src/fb_panes.c:117` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
-- `fbp_expr` (function) `src/fb_panes.c:146` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
+- `tab_ok` (function) `src/fb_panes.c:107` `static int tab_ok(int tab)`
+- `fbp_tab_label` (function) `src/fb_panes.c:109` `const char *fbp_tab_label(int tab)`
+- `ieq` (function) `src/fb_panes.c:111` `static int ieq(const char *a, const char *b)`
+- `fbp_tab_from_name` (function) `src/fb_panes.c:120` `int fbp_tab_from_name(const char *name)`
+- `fbp_tab_wrap` (function) `src/fb_panes.c:127` `int fbp_tab_wrap(int tab, int dir)`
+- `fbp_tab_span` (function) `src/fb_panes.c:133` `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
+- `fbp_tab_at` (function) `src/fb_panes.c:142` `int fbp_tab_at(double px, double cell_w, double pad_cells)`
+- `fbp_is_pane` (function) `src/fb_panes.c:152` `int fbp_is_pane(int tab)`
+- `fbp_js_quote` (function) `src/fb_panes.c:154` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
+- `fbp_expr` (function) `src/fb_panes.c:183` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
 
 ## src/flex_layout.c
 Depends on: `include/flex_layout.h`
@@ -387,11 +404,40 @@ Depends on: `include/form.h`
 - `fm_build` (function) `src/form.c:120` `fm_status fm_build(const char *base, const char *action, fm_method method,
                    con...`
 
+## src/frame_broker.c
+Depends on: `include/frame_broker.h`
+- `lc` (function) `src/frame_broker.c:9` `static char lc(char c)`
+- `host_char_ok` (function) `src/frame_broker.c:11` `static int host_char_ok(char c)`
+- `fbk_origin_of` (function) `src/frame_broker.c:15` `int fbk_origin_of(const char *url, char *out, size_t cap)`
+- `fbk_init` (function) `src/frame_broker.c:53` `int fbk_init(fbk_table *t, const char *top_url)`
+- `live` (function) `src/frame_broker.c:62` `static int live(const fbk_table *t, int id)`
+- `fbk_add` (function) `src/frame_broker.c:66` `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id)`
+- `fbk_remove` (function) `src/frame_broker.c:84` `void fbk_remove(fbk_table *t, int id)`
+- `fbk_origin` (function) `src/frame_broker.c:96` `const char *fbk_origin(const fbk_table *t, int id)`
+- `target_admits` (function) `src/frame_broker.c:101` `static int target_admits(const char *target, const char *snd, const char *recv)` -- int changed = 1;                                  /* fixpoint: slots are reused, order is not a tree order while...
+- `fbk_route` (function) `src/frame_broker.c:118` `fbk_verdict fbk_route(const fbk_table *t, int from, fbk_rel rel, int child,
+                     ...`
+
 ## src/frame_clock.c
 Depends on: `include/frame_clock.h`
 - `fc_set_active` (function) `src/frame_clock.c:16` `void fc_set_active(fc_clock *c, int active)`
 - `fc_needs_tick` (function) `src/frame_clock.c:21` `int fc_needs_tick(const fc_clock *c)`
 - `fc_interval_ms` (function) `src/frame_clock.c:26` `int fc_interval_ms(const fc_clock *c)`
+
+## src/frame_host.c
+Depends on: `include/frame_broker.h`, `include/frame_host.h`
+- `fh_new` (function) `src/frame_host.c:32` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
+                fh_top_...`
+- `reap` (function) `src/frame_host.c:45` `static void reap(fh_host *h)` -- fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx) { if...
+- `fh_free` (function) `src/frame_host.c:55` `void fh_free(fh_host *h)`
+- `fh_count` (function) `src/frame_host.c:63` `int fh_count(const fh_host *h)`
+- `load_frame` (function) `src/frame_host.c:72` `static void load_frame(fh_host *h, int id, const char *url)` -- Loads the document of frame `id` (already registered in the table).
+- `find_child` (function) `src/frame_host.c:105` `static int find_child(const fh_host *h, int parent, int token)`
+- `token_seen_by` (function) `src/frame_host.c:113` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
+- `post_op` (function) `src/frame_host.c:119` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
+- `apply_ops` (function) `src/frame_host.c:174` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
+- `fh_apply_top` (function) `src/frame_host.c:197` `void fh_apply_top(fh_host *h, const tab_page *page)`
+- `fh_tick` (function) `src/frame_host.c:202` `int fh_tick(fh_host *h, int elapsed_ms)`
 
 ## src/freebug.c
 Depends on: `include/freebug.h`
@@ -405,96 +451,6 @@ Depends on: `include/freebug.h`
 - `fb_buffer_count` (function) `src/freebug.c:101` `size_t fb_buffer_count(const fb_buffer *b)`
 - `fb_buffer_at` (function) `src/freebug.c:105` `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)`
 - `fb_level_name` (function) `src/freebug.c:110` `const char *fb_level_name(int level)`
-
-## src/freedom.c
-Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
-- `print_usage` (function) `src/freedom.c:54` `static void print_usage(FILE *fp, const char *prog)`
-- `is_https_url` (function) `src/freedom.c:83` `static int is_https_url(const char *s)`
-- `is_http_url` (function) `src/freedom.c:87` `static int is_http_url(const char *s)`
-- `is_overlay_http` (function) `src/freedom.c:92` `static int is_overlay_http(const char *s)` -- fprintf(fp, "  --dump-video-url: headless, print the first detected video source URL to stdout (no truncation)\n")...
-- `now_us` (function) `src/freedom.c:148` `static uint64_t now_us(void)`
-- `timings_ensure_init` (function) `src/freedom.c:154` `static void timings_ensure_init(void)`
-- `timings_enabled` (function) `src/freedom.c:158` `static int timings_enabled(void)`
-- `timings_dump` (function) `src/freedom.c:162` `static void timings_dump(void)`
-- `user_impersonate_enabled` (function) `src/freedom.c:217` `static int user_impersonate_enabled(void)`
-- `read_file` (function) `src/freedom.c:224` `static char *read_file(const char *path, size_t *out_len)` -- User opt-in for TLS-impersonation blend: --impersonate or FREEDOM_IMPERSONATE=1.
-- `headless_load_hosts` (function) `src/freedom.c:242` `static void headless_load_hosts(void)`
-- `apply_identity` (function) `src/freedom.c:262` `static void apply_identity(sf_config *cfg)`
-- `apply_as_gui` (function) `src/freedom.c:267` `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
-- `is_blank_text` (function) `src/freedom.c:305` `static int is_blank_text(const char *s)` -- .js_mode       = mode, .host_in_js    = host[0] != '\0' && g_js_hosts != NULL && hb_is_allowlisted(g_js_hosts...
-- `print_doc` (function) `src/freedom.c:318` `static void print_doc(const rd_doc *doc)` -- Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data...
-- `print_console` (function) `src/freedom.c:411` `static void print_console(const fb_buffer *log)` -- Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed...
-- `print_dom` (function) `src/freedom.c:428` `static void print_dom(const rd_doc *doc)` -- Prints the paint-ready render tree (dom_debug) to stdout.
-- `print_dom_css` (function) `src/freedom.c:443` `static void print_dom_css(const rd_doc *doc)` -- Prints the CSS property inspector (dd_format_css) to stdout.
-- `gets` (function) `src/freedom.c:463` `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-- `headless_fetch` (function) `src/freedom.c:467` `static int headless_fetch(void *ctx, const char *method, const char *url,
-                       ...` -- tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script...
-- `foldback_cookies` (function) `src/freedom.c:548` `static void foldback_cookies(const char *url, const char *jar)` -- Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set...
-- `print_css_drops` (function) `src/freedom.c:572` `static void print_css_drops(const char *html, size_t len)` -- Prints the author-CSS drop report for `html`, sorted by occurrence count.
-- `hl_font_stash_free` (function) `src/freedom.c:617` `static void hl_font_stash_free(hl_font_stash *s)`
-- `hl_css_sink` (function) `src/freedom.c:630` `static void hl_css_sink(void *vctx, const char *url,
-                        const char *body, si...` -- tab_css_sink_fn for headless: retains served 2xx CSS bodies (serial and pool paths alike) with an absolute https...
-- `hl_font_fetch` (function) `src/freedom.c:667` `static int hl_font_fetch(void *vctx, const char *url,
-                         int *out_status, c...` -- wf_fetch_fn around the headless policy gate (font bytes download like any * other subresource of this page). data...
-- `render_page` (function) `src/freedom.c:676` `static int render_page(const char *html, size_t len, const char *top_url,
-                       ...`
-- `pool` (function) `src/freedom.c:740` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-- `first` (function) `src/freedom.c:754` `* always cleared first (fetch_and_render may paint several pages per
-     * process). A NULL top_...`
-- `only` (function) `src/freedom.c:822` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-- `sf_reason` (function) `src/freedom.c:945` `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (function) `src/freedom.c:964` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
-- `BLOCKED` (function) `src/freedom.c:992` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
-- `elsewhere` (function) `src/freedom.c:1027` `* page whose script immediately forwards elsewhere (e.g. a search engine's
- * JS-capability inter...`
-- `parent` (function) `src/freedom.c:1053` `* gated by the parent (ln_resolve: a local target stays under the document's
- * directory, a remo...`
-- `run_headless` (function) `src/freedom.c:1090` `static int run_headless(const char *target)`
-- `video_fetch_with_fallback` (function) `src/freedom.c:1127` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
-                     ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
-- `run_dump_video` (function) `src/freedom.c:1238` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
-- `main` (function) `src/freedom.c:1257` `int main(int argc, char **argv)`
-
-## src/hls.c
-Depends on: `include/hls.h`
-- `last_char` (function) `src/hls.c:38` `static const char *last_char(const char *s, size_t n, int c)` -- Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not found.
-- `name` (function) `src/hls.c:46` `* attr is the attribute name (e.g. "BANDWIDTH=");`
-- `parse_attr_long` (function) `src/hls.c:48` `static int parse_attr_long(const char *attrs, const char *end,
-                           const c...` -- Extracts a named attribute value from an #EXT-X-STREAM-INF attribute string. attr is the attribute name (e.g....
-- `parse_attr_resolution` (function) `src/hls.c:62` `static void parse_attr_resolution(const char *attrs, const char *end,
-                           ...` -- static int parse_attr_long(const char *attrs, const char *end, const char *attr, long *val) { size_t alen =...
-- `hls_parse` (function) `src/hls.c:80` `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)`
-- `hls_select_variant` (function) `src/hls.c:202` `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h)`
-- `hls_resolve_url` (function) `src/hls.c:223` `size_t hls_resolve_url(const char *base_url, const char *segment_url,
-                       char...`
-- `hls_playlist_free` (function) `src/hls.c:253` `void hls_playlist_free(hls_playlist *pl)`
-
-## src/host_conf.c
-Depends on: `include/host_conf.h`
-- `add_dir` (function) `src/host_conf.c:10` `static void add_dir(hcf_dirs *out, const char *path)`
-- `hcf_search_dirs` (function) `src/host_conf.c:20` `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out)`
-- `hcf_search_dirs_from_env` (function) `src/host_conf.c:32` `void hcf_search_dirs_from_env(hcf_dirs *out)`
-- `read_conf` (function) `src/host_conf.c:37` `static char *read_conf(const char *dir, const char *name)` -- add_dir(out, env); if (home != NULL && home[0] != '\0') { char user[HCF_PATH_MAX]; int n = snprintf(user, sizeof...
-- `load_into` (function) `src/host_conf.c:58` `static void load_into(hb_set *s, const char *dir, const char *name, hb_list list)`
-- `hcf_load_filter` (function) `src/host_conf.c:65` `hb_set *hcf_load_filter(const hcf_dirs *dirs)`
-- `hcf_load_allowlist` (function) `src/host_conf.c:76` `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname)`
-
-## src/hostblock.c
-Depends on: `include/hostblock.h`, `include/util.h`
-- `table_probe` (function) `src/hostblock.c:38` `static size_t table_probe(const hb_table *t, const char *key, size_t klen)` -- Finds the slot for key (length klen) in t, which must have a free slot.
-- `table_grow` (function) `src/hostblock.c:49` `static int table_grow(hb_table *t, size_t newcap)` -- Finds the slot for key (length klen) in t, which must have a free slot.
-- `table_insert` (function) `src/hostblock.c:71` `static int table_insert(hb_table *t, const char *key, size_t klen)` -- Inserts key (length klen) into t, deduping.
-- `table_contains` (function) `src/hostblock.c:92` `static int table_contains(const hb_table *t, const char *key)`
-- `table_free` (function) `src/hostblock.c:98` `static void table_free(hb_table *t)`
-- `lower` (function) `src/hostblock.c:107` `static char lower(char c)`
-- `is_ip_token` (function) `src/hostblock.c:113` `static int is_ip_token(const char *s, size_t n)` -- A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain.
-- `is_domain_char` (function) `src/hostblock.c:122` `static int is_domain_char(char c)` -- A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain.
-- `hb_new` (function) `src/hostblock.c:144` `hb_set *hb_new(void)`
-- `hb_free` (function) `src/hostblock.c:149` `void hb_free(hb_set *s)`
-- `hb_load` (function) `src/hostblock.c:156` `hb_status hb_load(hb_set *s, const char *text, hb_list list)`
-- `hb_check` (function) `src/hostblock.c:193` `hb_decision hb_check(const hb_set *s, const char *host)`
-- `hb_is_allowlisted` (function) `src/hostblock.c:218` `int hb_is_allowlisted(const hb_set *s, const char *host)`
-- `hb_count` (function) `src/hostblock.c:238` `size_t hb_count(const hb_set *s, hb_list list)`
 
 
 Next: [API_p8.md](API_p8.md)

@@ -2566,6 +2566,77 @@ static void test_websocket_absent_for_untrusted_host(void **state) {
     tab_close(t);
 }
 
+/* Iframes through the real worker (spec/frame_broker.md): the top document surfaces its <iframe>
+ * as a FRAME_OPEN op; a document loaded as frame 3 posts to its parent; the routed reply arrives
+ * as FRAME_MSG and reaches the page's message listener. Untrusted hosts get none of it. */
+static const char FRAME_TOP_PAGE[] =
+    "<html><body><p id=\"o\">idle</p><iframe src=\"/anchor\"></iframe><script>"
+    "window.addEventListener('message',function(e){"
+    "  document.getElementById('o').textContent='top got '+e.data.v+' from '+e.origin; });"
+    "</script></body></html>";
+
+static const char FRAME_CHILD_PAGE[] =
+    "<html><body><p id=\"o\">child</p><script>"
+    "window.addEventListener('message',function(e){"
+    "  document.getElementById('o').textContent='child got '+e.data; });"
+    "parent.postMessage({v:7},'https://top.test');"
+    "</script></body></html>";
+
+static void test_frames_cross_the_worker(void **state) {
+    (void)state;
+    tab *top = NULL, *kid = NULL;
+    assert_int_equal(tab_open(&top), TAB_OK);
+    assert_int_equal(tab_open(&kid), TAB_OK);
+    tab_set_net_allowed(top, 1);
+    tab_set_net_allowed(kid, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(top, FRAME_TOP_PAGE, sizeof FRAME_TOP_PAGE - 1,
+                                   "https://top.test/", 1, 0, 0, &p), TAB_OK);
+    assert_int_equal(p.nws, 1);
+    assert_int_equal(p.ws[0].kind, TAB_WS_FRAME_OPEN);
+    assert_string_equal(p.ws[0].data, "https://top.test/anchor");
+    tab_page_free(&p);
+
+    tab_set_frame_id(kid, 3);
+    assert_int_equal(tab_load_full(kid, FRAME_CHILD_PAGE, sizeof FRAME_CHILD_PAGE - 1,
+                                   "https://top.test/anchor", 1, 0, 0, &p), TAB_OK);
+    assert_int_equal(p.nws, 1);
+    assert_int_equal(p.ws[0].kind, TAB_WS_FRAME_POST);
+    assert_int_equal(p.ws[0].id, -1);
+    assert_string_equal(p.ws[0].data, "https://top.test\n{\"v\":7}");
+    tab_page_free(&p);
+
+    const char *m = "https://top.test\nc1\n{\"v\":7}";
+    tab_page c;
+    assert_int_equal(tab_ws_event(top, 0, TAB_WSE_FRAME_MSG, 0, m, strlen(m), &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "top got 7 from https://top.test"));
+    tab_page_free(&c);
+    const char *r = "https://top.test\np\n\"hi\"";
+    assert_int_equal(tab_ws_event(kid, 0, TAB_WSE_FRAME_MSG, 0, r, strlen(r), &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "child got hi"));
+    tab_page_free(&c);
+    tab_close(top);
+    tab_close(kid);
+}
+
+static void test_frames_absent_for_untrusted_host(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 0);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, FRAME_TOP_PAGE, sizeof FRAME_TOP_PAGE - 1,
+                                   "https://top.test/", 1, 0, 0, &p), TAB_OK);
+    assert_int_equal(p.nws, 0);
+    tab_page_free(&p);
+    const char *m = "https://top.test\nc1\n{\"v\":7}";
+    tab_page c;
+    assert_int_equal(tab_ws_event(t, 0, TAB_WSE_FRAME_MSG, 0, m, strlen(m), &c), TAB_OK);
+    assert_non_null(view_find_text(c.view, "idle"));
+    tab_page_free(&c);
+    tab_close(t);
+}
+
 /* In-memory localStorage through the real worker (spec/web_storage.md). */
 static const char LS_PAGE[] =
     "<html><body><p id=\"o\">x</p><button id=\"b\">save</button><script>"
@@ -3572,6 +3643,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_prototype_accessor_without_own_member_does_not_recurse),
         cmocka_unit_test(test_websocket_ops_and_events_cross_the_worker),
         cmocka_unit_test(test_websocket_absent_for_untrusted_host),
+        cmocka_unit_test(test_frames_cross_the_worker),
+        cmocka_unit_test(test_frames_absent_for_untrusted_host),
         cmocka_unit_test(test_local_storage_seeded_and_collected_for_trusted),
         cmocka_unit_test(test_local_storage_never_seeded_for_untrusted),
         cmocka_unit_test(test_module_scripts_run_for_trusted_host),

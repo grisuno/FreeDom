@@ -52,4 +52,17 @@ je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
  * fp_origin_key(session_key, eTLD+1). The input array is never mutated. */
 je_status je_install_canvas(js_context *ctx, uint64_t readback_key);
 
+/* readback_key value meaning "do not perturb": canvas/audio readback returns the bytes as drawn.
+ * For a trusted host only (allow.conf AND js.conf, owner decision 2026-10-26): a poisoned canvas
+ * is itself a bot signal (two readbacks that differ from a real browser's), so the host sees a
+ * coherent, deterministic canvas instead. */
+#define JE_READBACK_EXACT ((uint64_t)0)
+
+/* As je_install_identity; trusted != 0 (allow.conf AND js.conf host, owner decision 2026-10-26)
+ * gives the clocks the 1 ms resolution of a stock Firefox and makes performance.timeOrigin
+ * consistent with Date.now(): a fixed origin plus a 100 ms grid is a bot tell. Untrusted: coarse. */
+je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_h,
+                                      const char *user_agent, const char *languages,
+                                      int trusted);
+
 #endif /* FREEDOM_JS_ENV_H */

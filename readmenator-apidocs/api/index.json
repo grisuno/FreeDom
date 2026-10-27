@@ -2,50 +2,50 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 207,
-  "entities": 3611,
+  "modules": 215,
+  "entities": 3702,
   "languages": {
-   "c": 96,
-   "h": 95,
+   "c": 100,
+   "h": 99,
    "py": 12,
    "sh": 4
   },
   "kinds": {
    "constant": 23,
-   "enum": 156,
-   "function": 1853,
-   "macro": 968,
+   "enum": 160,
+   "function": 1909,
+   "macro": 983,
    "method": 24,
-   "module": 207,
-   "struct": 242,
-   "type_alias": 131,
+   "module": 215,
+   "struct": 247,
+   "type_alias": 134,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 83,
+  "skipped_files": 87,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1415,
-   "total": 3581,
-   "percent": 39.5
+   "documented": 1462,
+   "total": 3672,
+   "percent": 39.8
   },
   "by_kind": {
    "enum": {
     "documented": 80,
-    "total": 156,
-    "percent": 51.3
+    "total": 160,
+    "percent": 50.0
    },
    "function": {
-    "documented": 795,
-    "total": 1853,
-    "percent": 42.9
+    "documented": 837,
+    "total": 1909,
+    "percent": 43.8
    },
    "macro": {
-    "documented": 307,
-    "total": 968,
-    "percent": 31.7
+    "documented": 311,
+    "total": 983,
+    "percent": 31.6
    },
    "method": {
     "documented": 0,
@@ -54,18 +54,18 @@
    },
    "module": {
     "documented": 30,
-    "total": 207,
-    "percent": 14.5
+    "total": 215,
+    "percent": 14.0
    },
    "struct": {
     "documented": 106,
-    "total": 242,
-    "percent": 43.8
+    "total": 247,
+    "percent": 42.9
    },
    "type_alias": {
-    "documented": 97,
-    "total": 131,
-    "percent": 74.0
+    "documented": 98,
+    "total": 134,
+    "percent": 73.1
    }
   },
   "by_module": {
@@ -86,8 +86,8 @@
    },
    "gui/browser_ui.c": {
     "documented": 83,
-    "total": 248,
-    "percent": 33.5
+    "total": 249,
+    "percent": 33.3
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -259,6 +259,11 @@
     "total": 9,
     "percent": 11.1
    },
+   "include/fb_cmdline.h": {
+    "documented": 11,
+    "total": 18,
+    "percent": 61.1
+   },
    "include/fb_panes.h": {
     "documented": 9,
     "total": 12,
@@ -274,10 +279,20 @@
     "total": 11,
     "percent": 27.3
    },
+   "include/frame_broker.h": {
+    "documented": 5,
+    "total": 17,
+    "percent": 29.4
+   },
    "include/frame_clock.h": {
     "documented": 1,
     "total": 7,
     "percent": 14.3
+   },
+   "include/frame_host.h": {
+    "documented": 6,
+    "total": 8,
+    "percent": 75.0
    },
    "include/freebug.h": {
     "documented": 13,
@@ -345,9 +360,9 @@
     "percent": 34.8
    },
    "include/js_env.h": {
-    "documented": 0,
-    "total": 3,
-    "percent": 0.0
+    "documented": 1,
+    "total": 4,
+    "percent": 25.0
    },
    "include/js_geom.h": {
     "documented": 15,
@@ -469,6 +484,11 @@
     "total": 48,
     "percent": 52.1
    },
+   "include/sha2.h": {
+    "documented": 3,
+    "total": 6,
+    "percent": 50.0
+   },
    "include/shm_slots.h": {
     "documented": 3,
     "total": 7,
@@ -486,8 +506,8 @@
    },
    "include/tab.h": {
     "documented": 23,
-    "total": 48,
-    "percent": 47.9
+    "total": 49,
+    "percent": 46.9
    },
    "include/text_case.h": {
     "documented": 6,
@@ -511,8 +531,8 @@
    },
    "include/ui.h": {
     "documented": 6,
-    "total": 18,
-    "percent": 33.3
+    "total": 19,
+    "percent": 31.6
    },
    "include/url.h": {
     "documented": 7,
@@ -714,6 +734,11 @@
     "total": 6,
     "percent": 16.7
    },
+   "src/fb_cmdline.c": {
+    "documented": 8,
+    "total": 12,
+    "percent": 66.7
+   },
    "src/fb_panes.c": {
     "documented": 8,
     "total": 9,
@@ -729,10 +754,20 @@
     "total": 3,
     "percent": 0.0
    },
+   "src/frame_broker.c": {
+    "documented": 5,
+    "total": 7,
+    "percent": 71.4
+   },
    "src/frame_clock.c": {
     "documented": 0,
     "total": 5,
     "percent": 0.0
+   },
+   "src/frame_host.c": {
+    "documented": 5,
+    "total": 8,
+    "percent": 62.5
    },
    "src/freebug.c": {
     "documented": 7,
@@ -756,8 +791,8 @@
    },
    "src/hostblock.c": {
     "documented": 5,
-    "total": 11,
-    "percent": 45.5
+    "total": 12,
+    "percent": 41.7
    },
    "src/hostedit.c": {
     "documented": 2,
@@ -831,7 +866,7 @@
    },
    "src/js_env.c": {
     "documented": 0,
-    "total": 9,
+    "total": 10,
     "percent": 0.0
    },
    "src/js_events.c": {
@@ -871,8 +906,8 @@
    },
    "src/js_trusted.c": {
     "documented": 5,
-    "total": 15,
-    "percent": 33.3
+    "total": 16,
+    "percent": 31.2
    },
    "src/link_nav.c": {
     "documented": 1,
@@ -959,6 +994,11 @@
     "total": 51,
     "percent": 27.5
    },
+   "src/sha2.c": {
+    "documented": 3,
+    "total": 7,
+    "percent": 42.9
+   },
    "src/svg_render.c": {
     "documented": 5,
     "total": 9,
@@ -966,8 +1006,8 @@
    },
    "src/tab.c": {
     "documented": 32,
-    "total": 85,
-    "percent": 37.6
+    "total": 86,
+    "percent": 37.2
    },
    "src/text_case.c": {
     "documented": 3,
@@ -1125,7 +1165,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 248
+   "entities": 249
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1298,6 +1338,11 @@
    "entities": 9
   },
   {
+   "uid": "include/fb_cmdline.h",
+   "path": "modules/include.fb_cmdline.h.jsonl",
+   "entities": 18
+  },
+  {
    "uid": "include/fb_panes.h",
    "path": "modules/include.fb_panes.h.jsonl",
    "entities": 12
@@ -1313,9 +1358,19 @@
    "entities": 12
   },
   {
+   "uid": "include/frame_broker.h",
+   "path": "modules/include.frame_broker.h.jsonl",
+   "entities": 17
+  },
+  {
    "uid": "include/frame_clock.h",
    "path": "modules/include.frame_clock.h.jsonl",
    "entities": 7
+  },
+  {
+   "uid": "include/frame_host.h",
+   "path": "modules/include.frame_host.h.jsonl",
+   "entities": 8
   },
   {
    "uid": "include/freebug.h",
@@ -1385,7 +1440,7 @@
   {
    "uid": "include/js_env.h",
    "path": "modules/include.js_env.h.jsonl",
-   "entities": 3
+   "entities": 4
   },
   {
    "uid": "include/js_geom.h",
@@ -1508,6 +1563,11 @@
    "entities": 48
   },
   {
+   "uid": "include/sha2.h",
+   "path": "modules/include.sha2.h.jsonl",
+   "entities": 6
+  },
+  {
    "uid": "include/shm_slots.h",
    "path": "modules/include.shm_slots.h.jsonl",
    "entities": 7
@@ -1525,7 +1585,7 @@
   {
    "uid": "include/tab.h",
    "path": "modules/include.tab.h.jsonl",
-   "entities": 48
+   "entities": 49
   },
   {
    "uid": "include/text_case.h",
@@ -1550,7 +1610,7 @@
   {
    "uid": "include/ui.h",
    "path": "modules/include.ui.h.jsonl",
-   "entities": 18
+   "entities": 19
   },
   {
    "uid": "include/url.h",
@@ -1753,6 +1813,11 @@
    "entities": 6
   },
   {
+   "uid": "src/fb_cmdline.c",
+   "path": "modules/src.fb_cmdline.c.jsonl",
+   "entities": 12
+  },
+  {
    "uid": "src/fb_panes.c",
    "path": "modules/src.fb_panes.c.jsonl",
    "entities": 9
@@ -1768,9 +1833,19 @@
    "entities": 3
   },
   {
+   "uid": "src/frame_broker.c",
+   "path": "modules/src.frame_broker.c.jsonl",
+   "entities": 7
+  },
+  {
    "uid": "src/frame_clock.c",
    "path": "modules/src.frame_clock.c.jsonl",
    "entities": 5
+  },
+  {
+   "uid": "src/frame_host.c",
+   "path": "modules/src.frame_host.c.jsonl",
+   "entities": 8
   },
   {
    "uid": "src/freebug.c",
@@ -1795,7 +1870,7 @@
   {
    "uid": "src/hostblock.c",
    "path": "modules/src.hostblock.c.jsonl",
-   "entities": 11
+   "entities": 12
   },
   {
    "uid": "src/hostedit.c",
@@ -1870,7 +1945,7 @@
   {
    "uid": "src/js_env.c",
    "path": "modules/src.js_env.c.jsonl",
-   "entities": 9
+   "entities": 10
   },
   {
    "uid": "src/js_events.c",
@@ -1910,7 +1985,7 @@
   {
    "uid": "src/js_trusted.c",
    "path": "modules/src.js_trusted.c.jsonl",
-   "entities": 15
+   "entities": 16
   },
   {
    "uid": "src/link_nav.c",
@@ -1998,6 +2073,11 @@
    "entities": 51
   },
   {
+   "uid": "src/sha2.c",
+   "path": "modules/src.sha2.c.jsonl",
+   "entities": 7
+  },
+  {
    "uid": "src/svg_render.c",
    "path": "modules/src.svg_render.c.jsonl",
    "entities": 9
@@ -2005,7 +2085,7 @@
   {
    "uid": "src/tab.c",
    "path": "modules/src.tab.c.jsonl",
-   "entities": 85
+   "entities": 86
   },
   {
    "uid": "src/text_case.c",
@@ -2145,7 +2225,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2167
+  "total": 2211
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

@@ -4,9 +4,9 @@
 
 ## Architecture Overview
 
-11 components stacked in 6 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 14 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
+13 components stacked in 7 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 20 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
 
-Upward dependencies to fix first: `src: tab` -> `include: page_view` (4 imports); `src: css` -> `src: tab` (3 imports); `src: css` -> `include: page_view` (3 imports); `src: tab` -> `include: browser_ui` (2 imports); `src: tab` -> `src: text_shape` (2 imports); `include: page_view` -> `include: browser_ui` (2 imports); `src: css` -> `src: text_shape` (1 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: browser` -> `src: tab` (1 imports); `src: local_store` -> `include: browser_ui` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `include: prefetch` -> `src: tab` (1 imports)
+Upward dependencies to fix first: `include: css` -> `include: page_view` (3 imports); `src: tab` -> `src: text_shape` (3 imports); `src: tab` -> `include: page_view` (3 imports); `src: tab` -> `include: browser_ui` (2 imports); `include: css` -> `src: text_shape` (1 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: browser` -> `src: tab` (1 imports); `include: svg_render` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `include: prefetch` -> `src: tab` (1 imports)
 
 ```mermaid
 flowchart TB
@@ -15,63 +15,67 @@ flowchart TB
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     subgraph lane_0["Tier 1 - entry / orchestration"]
         direction LR
-        n_c0["include: browser_ui<br/>41 files, 1077 symbols<br/>Core / utility"]:::cycle
+        n_c2["include: browser_ui<br/>29 files, 967 symbols<br/>Core / utility"]:::cycle
         n_d_tools["tools<br/>13 files, 69 symbols<br/>Core / utility"]:::default
         n_d__root_["(root)<br/>5 files, 3 symbols<br/>Core / utility"]:::entry
     end
     subgraph lane_1["Tier 2"]
         direction LR
-        n_c6["src: local_store<br/>11 files, 458 symbols<br/>Data access"]:::cycle
-        n_c3["src: text_shape<br/>29 files, 407 symbols<br/>Core / utility"]:::cycle
+        n_c3["src: text_shape<br/>29 files, 406 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c4["include: page_view<br/>12 files, 622 symbols<br/>Presentation / entry"]:::cycle
+        n_c5["include: page_view<br/>12 files, 622 symbols<br/>Presentation / entry"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
-        n_c2["src: tab<br/>34 files, 742 symbols<br/>Core / utility"]:::cycle
+        n_c1["src: tab<br/>36 files, 809 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_4["Tier 5"]
         direction LR
-        n_c1["src: css<br/>37 files, 1068 symbols<br/>Core / utility"]:::cycle
-        n_c8["include: prefetch<br/>4 files, 90 symbols<br/>Core / utility"]:::cycle
-        n_c7["include: secure_fetch<br/>8 files, 276 symbols<br/>Core / utility"]:::cycle
+        n_c7["include: svg_render<br/>12 files, 146 symbols<br/>Presentation / entry"]:::cycle
+        n_c9["include: prefetch<br/>4 files, 90 symbols<br/>Core / utility"]:::cycle
+        n_c10["include: sha2<br/>2 files, 21 symbols<br/>Core / utility"]:::default
     end
-    subgraph lane_5["Tier 6 - foundation"]
+    subgraph lane_5["Tier 6"]
         direction LR
-        n_c5["include: browser<br/>13 files, 195 symbols<br/>Core / utility"]:::cycle
+        n_c4["include: local_store<br/>16 files, 528 symbols<br/>Core / utility"]:::cycle
+        n_c0["include: css<br/>36 files, 993 symbols<br/>Core / utility"]:::cycle
     end
-    n_c0 ==>|"11"| n_c3
-    n_c0 -->|"2"| n_c6
-    n_c1 -->|"1"| n_c5
-    n_c2 -->|"3"| n_c1
-    n_c2 ==>|"4"| n_c7
-    n_c2 -->|"1"| n_c8
-    n_c3 ==>|"6"| n_c4
-    n_c4 ==>|"5"| n_c2
-    n_c6 -->|"1"| n_c5
-    n_c6 -->|"1"| n_c7
-    n_c2 <-.-|"3 upward"| n_c1
-    n_c3 <-.-|"1 upward"| n_c1
-    n_c4 <-.-|"3 upward"| n_c1
-    n_c0 <-.-|"2 upward"| n_c2
-    n_c3 <-.-|"2 upward"| n_c2
-    n_c4 <-.-|"4 upward"| n_c2
-    n_c0 <-.-|"1 upward"| n_c3
-    n_c0 <-.-|"2 upward"| n_c4
-    n_c3 <-.-|"1 upward"| n_c4
-    n_c2 <-.-|"1 upward"| n_c5
-    n_c0 <-.-|"1 upward"| n_c6
-    n_c2 <-.-|"1 upward"| n_c7
-    n_c3 <-.-|"1 upward"| n_c7
-    n_c2 <-.-|"1 upward"| n_c8
-    linkStyle 10,11,12,13,14,15,16,17,18,19,20,21,22,23 stroke:#f87171,stroke-width:2px;
-    n_c0 ~~~ n_c6
-    n_c6 ~~~ n_c4
-    n_c4 ~~~ n_c2
-    n_c2 ~~~ n_c1
-    n_c1 ~~~ n_c5
+    subgraph lane_6["Tier 7 - foundation"]
+        direction LR
+        n_c8["include: secure_fetch<br/>8 files, 276 symbols<br/>Core / utility"]:::cycle
+        n_c6["include: browser<br/>13 files, 196 symbols<br/>Core / utility"]:::cycle
+    end
+    n_c1 -->|"1"| n_c10
+    n_c1 -->|"1"| n_c7
+    n_c1 -->|"1"| n_c9
+    n_c2 ==>|"11"| n_c3
+    n_c3 ==>|"6"| n_c5
+    n_c4 -->|"1"| n_c6
+    n_c4 -->|"1"| n_c8
+    n_c5 ==>|"5"| n_c1
+    n_c7 ==>|"4"| n_c0
+    n_c7 -->|"1"| n_c4
+    n_c3 <-.-|"1 upward"| n_c0
+    n_c5 <-.-|"3 upward"| n_c0
+    n_c2 <-.-|"2 upward"| n_c1
+    n_c3 <-.-|"3 upward"| n_c1
+    n_c5 <-.-|"3 upward"| n_c1
+    n_c2 <-.-|"1 upward"| n_c3
+    n_c3 <-.-|"1 upward"| n_c5
+    n_c1 <-.-|"1 upward"| n_c6
+    n_c1 <-.-|"1 upward"| n_c7
+    n_c1 <-.-|"1 upward"| n_c8
+    n_c3 <-.-|"1 upward"| n_c8
+    n_c1 <-.-|"1 upward"| n_c9
+    linkStyle 10,11,12,13,14,15,16,17,18,19,20,21 stroke:#f87171,stroke-width:2px;
+    n_c2 ~~~ n_c3
+    n_c3 ~~~ n_c5
+    n_c5 ~~~ n_c1
+    n_c1 ~~~ n_c7
+    n_c7 ~~~ n_c4
+    n_c4 ~~~ n_c8
 ```
 
 ---
@@ -79,6 +83,21 @@ flowchart TB
 ## Execution Flows
 
 Entry points are scored from `__main__` guards, `main` functions, entry-style names and files, and call-graph sources. Each flow walks resolved calls in call-site order (depth <= 4, <= 40 steps); numbers give the call order, dashed arrows revisit an already expanded callee, red arrows are recursion. Interactive version with zoom and per-node docs: `readmenator-apidocs/index.html#/flows`.
+
+### `browser_ui.main`
+
+`gui/browser_ui.c:553`, score 11: `main` in a compiled-language file; entry-style name `main`.
+
+Call tree:
+
+```mermaid
+flowchart LR
+    classDef default fill:#111827,stroke:#38bdf8,color:#e5e7eb;
+    classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
+    n_gui_browser_ui_c__main["browser_ui.main<br/>browser_ui.c:553"]:::entry
+    n_gui_browser_ui_c__now_ms["browser_ui.now_ms<br/>Largest text slice measured/drawn at once (on...<br/>browser_ui.c:169"]:::default
+    n_gui_browser_ui_c__main -->|"1"| n_gui_browser_ui_c__now_ms
+```
 
 ### `freedom_view.main`
 
@@ -151,7 +170,7 @@ sequenceDiagram
 
 ### `freedom.main`
 
-`src/freedom.c:1257`, score 11: `main` in a compiled-language file; entry-style name `main`.
+`src/freedom.c:1263`, score 11: `main` in a compiled-language file; entry-style name `main`.
 
 Call tree:
 
@@ -159,8 +178,8 @@ Call tree:
 flowchart LR
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
-    n_src_freedom_c__main["freedom.main<br/>freedom.c:1257"]:::entry
-    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2747"]:::external
+    n_src_freedom_c__main["freedom.main<br/>freedom.c:1263"]:::entry
+    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2782"]:::external
     n_include_prefs_h__free["prefs.free<br/>prefs.h:72"]:::external
     n_src_prefs_c__prefs_format["prefs.prefs_format<br/>prefs.c:183"]:::external
     n_src_prefs_c__prefs_parse["prefs.prefs_parse<br/>prefs.c:247"]:::external
@@ -170,9 +189,9 @@ flowchart LR
     n_src_prefs_c__bookmark_push["prefs.bookmark_push<br/>Appends a cleaned bookmark.<br/>prefs.c:91"]:::external
     n_src_prefs_c__history_push_back["prefs.history_push_back<br/>Appends a history entry at the BACK preservin...<br/>prefs.c:109"]:::external
     n_src_prefs_c__apply_kv["prefs.apply_kv<br/>} for (size_t i = 0#59; i #lt; p-#gt;history_len#59; ++i)...<br/>prefs.c:231"]:::external
-    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1780"]:::external
-    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1058"]:::external
-    n_gui_browser_ui_c__is_https_url["browser_ui.is_https_url<br/>browser_ui.c:1043"]:::external
+    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1805"]:::external
+    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1068"]:::external
+    n_gui_browser_ui_c__is_https_url["browser_ui.is_https_url<br/>browser_ui.c:1053"]:::external
     n_src_hostblock_c__hb_check["hostblock.hb_check<br/>hostblock.c:193"]:::external
     n_src_hostblock_c__lower["hostblock.lower<br/>hostblock.c:107"]:::external
     n_src_hostblock_c__table_contains["hostblock.table_contains<br/>hostblock.c:92"]:::external
@@ -189,9 +208,9 @@ flowchart LR
     n_src_browser_c__browser_url_bar_extend_cursor["browser.browser_url_bar_extend_cursor<br/>browser.c:376"]:::external
     n_src_browser_c__browser_url_bar_set_cursor["browser.browser_url_bar_set_cursor<br/>browser.c:385"]:::external
     n_src_browser_c__browser_url_bar_select_all["browser.browser_url_bar_select_all<br/>browser.c:393"]:::external
-    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1731"]:::external
+    n_gui_browser_ui_c__apply_operator_override["browser_ui.apply_operator_override<br/>browser_ui.c:1517"]:::external
+    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1756"]:::external
     n_include_request_policy_h__rp_host_of["request_policy.rp_host_of<br/>Lowercased host of an absolute URL into out.<br/>request_policy.h:30"]:::external
-    n_include_tls_impersonate_h__ti_should_impersonate["tls_impersonate.ti_should_impersonate<br/>The double opt-in + user-flag gate (pure).<br/>tls_impersonate.h:56"]:::external
     n_src_freedom_c__main -.->|"recursion"| n_src_freedom_c__main
     n_src_freedom_c__main -->|"1"| n_gui_browser_ui_c__strcmp
     n_gui_browser_ui_c__strcmp -.->|"recursion"| n_gui_browser_ui_c__strcmp
@@ -228,11 +247,11 @@ flowchart LR
     n_include_browser_h__browser_is_exception -->|"9"| n_src_browser_c__browser_url_bar_extend_cursor
     n_include_browser_h__browser_is_exception -->|"10"| n_src_browser_c__browser_url_bar_set_cursor
     n_include_browser_h__browser_is_exception -->|"11"| n_src_browser_c__browser_url_bar_select_all
-    n_gui_browser_ui_c__prepare_fetch -->|"5"| n_gui_browser_ui_c__hb_is_allowlisted
+    n_gui_browser_ui_c__prepare_fetch -->|"5"| n_gui_browser_ui_c__apply_operator_override
+    n_gui_browser_ui_c__prepare_fetch -->|"6"| n_gui_browser_ui_c__hb_is_allowlisted
     n_gui_browser_ui_c__hb_is_allowlisted -.->|"recursion"| n_gui_browser_ui_c__hb_is_allowlisted
     n_gui_browser_ui_c__hb_is_allowlisted -->|"1"| n_include_request_policy_h__rp_host_of
-    n_gui_browser_ui_c__hb_is_allowlisted -->|"2"| n_include_tls_impersonate_h__ti_should_impersonate
-    linkStyle 0,2,5,6,8,19,24,37 stroke:#f87171,stroke-width:2px;
+    linkStyle 0,2,5,6,8,19,24,38 stroke:#f87171,stroke-width:2px;
 ```
 
 Cross-file sequence:
@@ -249,7 +268,6 @@ sequenceDiagram
     participant p_include_browser_h as browser.h
     participant p_src_browser_c as browser.c
     participant p_include_request_policy_h as request_policy.h
-    participant p_include_tls_impersonate_h as tls_impersonate.h
     p_src_freedom_c->>p_gui_browser_ui_c: strcmp()
     p_gui_browser_ui_c->>p_include_prefs_h: free()
     p_include_prefs_h->>p_src_prefs_c: prefs_format()
@@ -270,140 +288,6 @@ sequenceDiagram
     p_include_browser_h->>p_src_browser_c: browser_url_bar_set_cursor()
     p_include_browser_h->>p_src_browser_c: browser_url_bar_select_all()
     p_gui_browser_ui_c->>p_include_request_policy_h: rp_host_of()
-    p_gui_browser_ui_c->>p_include_tls_impersonate_h: ti_should_impersonate()
-```
-
-### `gen_psl.main`
-
-`tools/gen_psl.c:67`, score 11: `main` in a compiled-language file; entry-style name `main`.
-
-Call tree:
-
-```mermaid
-flowchart LR
-    classDef default fill:#111827,stroke:#38bdf8,color:#e5e7eb;
-    classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
-    classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
-    n_tools_gen_psl_c__main["gen_psl.main<br/>gen_psl.c:67"]:::entry
-    n_tools_gen_psl_c__ascii_lower["gen_psl.ascii_lower<br/>/* Sorts then drops adjacent duplicates in pl...<br/>gen_psl.c:55"]:::default
-    n_tools_gen_psl_c__vec_push["gen_psl.vec_push<br/>gen_psl.c:27"]:::default
-    n_tools_gen_psl_c__sort_unique["gen_psl.sort_unique<br/>v-#gt;cap = v-#gt;cap ?<br/>gen_psl.c:43"]:::default
-    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2747"]:::external
-    n_include_prefs_h__free["prefs.free<br/>prefs.h:72"]:::external
-    n_src_prefs_c__prefs_format["prefs.prefs_format<br/>prefs.c:183"]:::external
-    n_src_prefs_c__prefs_parse["prefs.prefs_parse<br/>prefs.c:247"]:::external
-    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1780"]:::external
-    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1058"]:::external
-    n_src_hostblock_c__hb_check["hostblock.hb_check<br/>hostblock.c:193"]:::external
-    n_include_anti_fp_h__domain["anti_fp.domain<br/>anti_fp.h:91"]:::external
-    n_include_browser_h__browser_is_exception["browser.browser_is_exception<br/>Index of the current entry within its documen...<br/>browser.h:99"]:::external
-    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1731"]:::external
-    n_include_tls_impersonate_h__ti_should_impersonate["tls_impersonate.ti_should_impersonate<br/>The double opt-in + user-flag gate (pure).<br/>tls_impersonate.h:56"]:::external
-    n_src_net_realm_c__nr_classify_url["net_realm.nr_classify_url<br/>net_realm.c:68"]:::external
-    n_include_net_realm_h__nr_realm_name["net_realm.nr_realm_name<br/>1 iff plain http:// is acceptable for this re...<br/>net_realm.h:69"]:::external
-    n_gui_browser_ui_c__clear_doc["browser_ui.clear_doc<br/>Releases the structured render of the previou...<br/>browser_ui.c:1374"]:::external
-    n_gui_browser_ui_c__free_inputs["browser_ui.free_inputs<br/>are not text-editable -- they are tracked via...<br/>browser_ui.c:1117"]:::external
-    n_gui_browser_ui_c__free_images["browser_ui.free_images<br/>static int input_is_editable(int input_type)...<br/>browser_ui.c:1125"]:::external
-    n_include_render_doc_h__rd_free["render_doc.rd_free<br/>Builds the paint-ready document from an inert...<br/>render_doc.h:316"]:::external
-    n_gui_browser_ui_c__set_cache["browser_ui.set_cache<br/>Releases the structured render of the previou...<br/>browser_ui.c:1384"]:::external
-    n_gui_browser_ui_c__gui_quiesce["browser_ui.gui_quiesce<br/>browser_ui.c:15468"]:::external
-    n_include_browser_h__browser_set_page["browser.browser_set_page<br/>browser.h:71"]:::external
-    n_src_browser_c__browser_navigate["browser.browser_navigate<br/>browser.c:224"]:::external
-    n_src_browser_c__browser_back["browser.browser_back<br/>browser.c:268"]:::external
-    n_src_browser_c__browser_forward["browser.browser_forward<br/>browser.c:280"]:::external
-    n_src_browser_c__browser_push_state["browser.browser_push_state<br/>browser.c:236"]:::external
-    n_src_browser_c__browser_replace_state["browser.browser_replace_state<br/>browser.c:243"]:::external
-    n_gui_browser_ui_c__fetch_launch["browser_ui.fetch_launch<br/>Spawns a detached worker to fetch url under c...<br/>browser_ui.c:1975"]:::external
-    n_gui_browser_ui_c__fetch_job_free["browser_ui.fetch_job_free<br/>browser_ui.c:1883"]:::external
-    n_gui_browser_ui_c__remember_visit["browser_ui.remember_visit<br/>Records a committed navigation in the persist...<br/>browser_ui.c:987"]:::external
-    n_src_css_color_c__strncmp["css_color.strncmp<br/>css_color.c:598"]:::external
-    n_src_prefs_c__prefs_history_add["prefs.prefs_history_add<br/>prefs.c:152"]:::external
-    n_src_profile_c__profile_save["profile.profile_save<br/>profile.c:133"]:::external
-    n_gui_browser_ui_c__show_busy["browser_ui.show_busy<br/>Marks a request in flight and paints a frame...<br/>browser_ui.c:2559"]:::external
-    n_gui_browser_ui_c__redraw["browser_ui.redraw<br/>browser_ui.c:16547"]:::external
-    n_tools_gen_psl_c__emit["gen_psl.emit<br/>gen_psl.c:61"]:::default
-    n_tools_gen_psl_c__main -.->|"recursion"| n_tools_gen_psl_c__main
-    n_tools_gen_psl_c__main -->|"1"| n_tools_gen_psl_c__ascii_lower
-    n_tools_gen_psl_c__main -->|"2"| n_tools_gen_psl_c__vec_push
-    n_tools_gen_psl_c__main -->|"3"| n_tools_gen_psl_c__sort_unique
-    n_tools_gen_psl_c__sort_unique -->|"1"| n_gui_browser_ui_c__strcmp
-    n_gui_browser_ui_c__strcmp -.->|"recursion"| n_gui_browser_ui_c__strcmp
-    n_gui_browser_ui_c__strcmp -->|"1"| n_include_prefs_h__free
-    n_include_prefs_h__free -->|"1"| n_src_prefs_c__prefs_format
-    n_include_prefs_h__free -->|"2"| n_src_prefs_c__prefs_parse
-    n_gui_browser_ui_c__strcmp -->|"2"| n_gui_browser_ui_c__prepare_fetch
-    n_gui_browser_ui_c__prepare_fetch -->|"1"| n_gui_browser_ui_c__host_from_url
-    n_gui_browser_ui_c__prepare_fetch -->|"2"| n_src_hostblock_c__hb_check
-    n_gui_browser_ui_c__prepare_fetch -->|"3"| n_include_anti_fp_h__domain
-    n_gui_browser_ui_c__prepare_fetch -->|"4"| n_include_browser_h__browser_is_exception
-    n_gui_browser_ui_c__prepare_fetch -->|"5"| n_gui_browser_ui_c__hb_is_allowlisted
-    n_gui_browser_ui_c__prepare_fetch -->|"6"| n_include_tls_impersonate_h__ti_should_impersonate
-    n_gui_browser_ui_c__prepare_fetch -->|"7"| n_src_net_realm_c__nr_classify_url
-    n_gui_browser_ui_c__prepare_fetch -->|"8"| n_include_net_realm_h__nr_realm_name
-    n_gui_browser_ui_c__strcmp -->|"3"| n_gui_browser_ui_c__clear_doc
-    n_gui_browser_ui_c__clear_doc -->|"1"| n_gui_browser_ui_c__free_inputs
-    n_gui_browser_ui_c__clear_doc -->|"2"| n_gui_browser_ui_c__free_images
-    n_gui_browser_ui_c__clear_doc -->|"3"| n_include_render_doc_h__rd_free
-    n_gui_browser_ui_c__strcmp -->|"4"| n_gui_browser_ui_c__set_cache
-    n_gui_browser_ui_c__set_cache -->|"1"| n_gui_browser_ui_c__gui_quiesce
-    n_gui_browser_ui_c__set_cache -.-> n_include_prefs_h__free
-    n_gui_browser_ui_c__strcmp -->|"5"| n_include_browser_h__browser_set_page
-    n_include_browser_h__browser_set_page -->|"1"| n_src_browser_c__browser_navigate
-    n_include_browser_h__browser_set_page -->|"2"| n_src_browser_c__browser_back
-    n_include_browser_h__browser_set_page -->|"3"| n_src_browser_c__browser_forward
-    n_include_browser_h__browser_set_page -->|"4"| n_src_browser_c__browser_push_state
-    n_include_browser_h__browser_set_page -->|"5"| n_src_browser_c__browser_replace_state
-    n_gui_browser_ui_c__strcmp -->|"6"| n_gui_browser_ui_c__fetch_launch
-    n_gui_browser_ui_c__fetch_launch -->|"1"| n_gui_browser_ui_c__fetch_job_free
-    n_gui_browser_ui_c__strcmp -->|"7"| n_gui_browser_ui_c__remember_visit
-    n_gui_browser_ui_c__remember_visit -->|"1"| n_src_css_color_c__strncmp
-    n_gui_browser_ui_c__remember_visit -->|"2"| n_src_prefs_c__prefs_history_add
-    n_gui_browser_ui_c__remember_visit -->|"3"| n_src_profile_c__profile_save
-    n_gui_browser_ui_c__strcmp -->|"8"| n_gui_browser_ui_c__show_busy
-    n_gui_browser_ui_c__show_busy -->|"1"| n_gui_browser_ui_c__redraw
-    n_tools_gen_psl_c__main -->|"4"| n_tools_gen_psl_c__emit
-    linkStyle 0,5 stroke:#f87171,stroke-width:2px;
-```
-
-Cross-file sequence:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant p_tools_gen_psl_c as gen_psl.c
-    participant p_gui_browser_ui_c as browser_ui.c
-    participant p_include_prefs_h as prefs.h
-    participant p_src_prefs_c as prefs.c
-    participant p_src_hostblock_c as hostblock.c
-    participant p_include_anti_fp_h as anti_fp.h
-    participant p_include_browser_h as browser.h
-    participant p_include_tls_impersonate_h as tls_impersonate.h
-    participant p_src_net_realm_c as net_realm.c
-    participant p_include_net_realm_h as net_realm.h
-    participant p_include_render_doc_h as render_doc.h
-    participant p_src_browser_c as browser.c
-    participant p_src_css_color_c as css_color.c
-    participant p_src_profile_c as profile.c
-    p_tools_gen_psl_c->>p_gui_browser_ui_c: strcmp()
-    p_gui_browser_ui_c->>p_include_prefs_h: free()
-    p_include_prefs_h->>p_src_prefs_c: prefs_format()
-    p_include_prefs_h->>p_src_prefs_c: prefs_parse()
-    p_gui_browser_ui_c->>p_src_hostblock_c: hb_check()
-    p_gui_browser_ui_c->>p_include_anti_fp_h: domain()
-    p_gui_browser_ui_c->>p_include_browser_h: browser_is_exception()
-    p_gui_browser_ui_c->>p_include_tls_impersonate_h: ti_should_impersonate()
-    p_gui_browser_ui_c->>p_src_net_realm_c: nr_classify_url()
-    p_gui_browser_ui_c->>p_include_net_realm_h: nr_realm_name()
-    p_gui_browser_ui_c->>p_include_render_doc_h: rd_free()
-    p_gui_browser_ui_c->>p_include_browser_h: browser_set_page()
-    p_include_browser_h->>p_src_browser_c: browser_navigate()
-    p_include_browser_h->>p_src_browser_c: browser_back()
-    p_include_browser_h->>p_src_browser_c: browser_forward()
-    p_include_browser_h->>p_src_browser_c: browser_push_state()
-    p_include_browser_h->>p_src_browser_c: browser_replace_state()
-    p_gui_browser_ui_c->>p_src_css_color_c: strncmp()
-    p_gui_browser_ui_c->>p_src_prefs_c: prefs_history_add()
-    p_gui_browser_ui_c->>p_src_profile_c: profile_save()
 ```
 
 ---

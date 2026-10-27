@@ -187,7 +187,7 @@ Distinct from hb_check: this reports an EXPLICIT allowlist entry, not the "allow
 
 ### `hb_count`
 
-`function` | [include/hostblock.h:79](../../include/hostblock.h#L79)
+`function` | [include/hostblock.h:85](../../include/hostblock.h#L85)
 
 ```c
 size_t hb_count(const hb_set *s, hb_list list);

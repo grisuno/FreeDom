@@ -18,6 +18,21 @@
 
 #include "hostblock.h"
 
+/* --- trusted page subresources --- */
+
+static void test_subresource_trusted_page_bypasses_blocklist(void **state) {
+    (void)state;
+    hb_set *s = hb_new();
+    assert_non_null(s);
+    assert_int_equal(hb_load(s, "0.0.0.0 recaptcha.example.com\n", HB_LIST_BLOCK), HB_OK);
+    assert_int_equal(hb_check(s, "recaptcha.example.com"), HB_BLOCK);
+    assert_int_equal(hb_check_subresource(s, "recaptcha.example.com", 1), HB_ALLOW);
+    assert_int_equal(hb_check_subresource(s, "recaptcha.example.com", 0), HB_BLOCK);
+    assert_int_equal(hb_check_subresource(NULL, "x.com", 1), HB_ALLOW);
+    assert_int_equal(hb_check_subresource(s, NULL, 0), HB_ALLOW);
+    hb_free(s);
+}
+
 /* --- lifecycle --- */
 
 static void test_new_free(void **state) {
@@ -304,6 +319,7 @@ int main(void) {
         cmocka_unit_test(test_no_lists_allows),
         cmocka_unit_test(test_is_allowlisted),
         cmocka_unit_test(test_check_fail_open_edges),
+        cmocka_unit_test(test_subresource_trusted_page_bypasses_blocklist),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -1,11 +1,11 @@
 # `src/js_trusted.c`
 
-> Source: [src/js_trusted.c:1](../../src/js_trusted.c#L1) | language `c` | coverage 33.3% | [API index](../index.md)
+> Source: [src/js_trusted.c:1](../../src/js_trusted.c#L1) | language `c` | coverage 31.2% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`jt_seed_ctx`](#jt_seed_ctx)
-- **Functions:** [`jt_enable_open`](#jt_enable_open), [`jt_enable_observers`](#jt_enable_observers), [`jt_geometry_changed`](#jt_geometry_changed), [`jt_take_opens`](#jt_take_opens), [`jt_enable_ws`](#jt_enable_ws), [`jt_ws_ops_free`](#jt_ws_ops_free), [`jt_take_ws`](#jt_take_ws), [`jt_ws_event`](#jt_ws_event), [`jt_enable_storage`](#jt_enable_storage), [`jt_take_storage`](#jt_take_storage), [`explicitly`](#explicitly), [`jt_enable_worker`](#jt_enable_worker)
+- **Functions:** [`jt_enable_open`](#jt_enable_open), [`jt_enable_observers`](#jt_enable_observers), [`jt_geometry_changed`](#jt_geometry_changed), [`jt_take_opens`](#jt_take_opens), [`jt_enable_ws`](#jt_enable_ws), [`jt_ws_ops_free`](#jt_ws_ops_free), [`jt_take_ws`](#jt_take_ws), [`jt_ws_event`](#jt_ws_event), [`jt_enable_frames`](#jt_enable_frames), [`jt_enable_storage`](#jt_enable_storage), [`jt_take_storage`](#jt_take_storage), [`explicitly`](#explicitly), [`jt_enable_worker`](#jt_enable_worker)
 - **Macros:** [`JT_IO_MAX_STR`](#jt_io_max_str)
 
 ## Call Graph
@@ -21,7 +21,10 @@ flowchart LR
     n_src_js_trusted_c__jt_take_opens(["jt_take_opens"])
     n_src_js_trusted_c__jt_enable_ws(["jt_enable_ws"])
     n_src_js_trusted_c__jt_take_ws(["jt_take_ws"])
+    n_src_box_style_c__take["box_style.take"]
     n_src_js_trusted_c__jt_ws_event(["jt_ws_event"])
+    n_src_js_trusted_c__jt_enable_frames(["jt_enable_frames"])
+    n_src_css_c__function["css.function"]
     n_src_js_trusted_c__jt_enable_storage(["jt_enable_storage"])
     n_src_web_storage_c__wst_foreach["web_storage.wst_foreach"]
     n_src_js_trusted_c__jt_take_storage(["jt_take_storage"])
@@ -33,8 +36,11 @@ flowchart LR
     n_src_js_trusted_c__jt_geometry_changed -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_take_opens -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_enable_ws -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_trusted_c__jt_take_ws -.-> n_src_box_style_c__take
     n_src_js_trusted_c__jt_take_ws -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_ws_event -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_trusted_c__jt_enable_frames -.-> n_src_css_c__function
+    n_src_js_trusted_c__jt_enable_frames -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_enable_storage -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_enable_storage -.-> n_src_web_storage_c__wst_foreach
     n_src_js_trusted_c__jt_take_storage -.-> n_src_js_sandbox_c__js_context_raw
@@ -49,7 +55,7 @@ flowchart LR
 
 ### `jt_seed_ctx`
 
-`struct` | [src/js_trusted.c:380](../../src/js_trusted.c#L380)
+`struct` | [src/js_trusted.c:471](../../src/js_trusted.c#L471)
 
 ```c
 typedef struct jt_seed_ctx { JSContext *js; JSValue fn; JSValue global; } jt_seed_ctx;
@@ -216,9 +222,9 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`jt_take_ws`](#jt_take_ws) (include/js_trusted.h:75).
+> **Inherited:** Documentation from [`jt_take_ws`](#jt_take_ws) (include/js_trusted.h:86).
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`take`](src.box_style.c.md#take), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -226,7 +232,7 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 ### `jt_ws_event`
 
-`function` | [src/js_trusted.c:327](../../src/js_trusted.c#L327)
+`function` | [src/js_trusted.c:336](../../src/js_trusted.c#L336)
 
 ```c
 int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)
@@ -249,9 +255,32 @@ Returns 1 when a live socket with that id received it.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`jt_ws_event`](#jt_ws_event) (include/js_trusted.h:81).
+> **Inherited:** Documentation from [`jt_ws_event`](#jt_ws_event) (include/js_trusted.h:92).
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+
+---
+
+<a id="jt_enable_frames"></a>
+
+### `jt_enable_frames`
+
+`function` | [src/js_trusted.c:427](../../src/js_trusted.c#L427)
+
+```c
+jd_status jt_enable_frames(js_context *ctx, int frame_id)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `frame_id` | `int` |  |  |
+
+**Returns:** `jd_status`
+
+*Calls:* [`function`](src.css.c.md#function), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -259,7 +288,7 @@ Returns 1 when a live socket with that id received it.
 
 ### `jt_enable_storage`
 
-`function` | [src/js_trusted.c:392](../../src/js_trusted.c#L392)
+`function` | [src/js_trusted.c:483](../../src/js_trusted.c#L483)
 
 ```c
 jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
@@ -283,7 +312,7 @@ jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
 
 ### `jt_take_storage`
 
-`function` | [src/js_trusted.c:413](../../src/js_trusted.c#L413)
+`function` | [src/js_trusted.c:504](../../src/js_trusted.c#L504)
 
 ```c
 int jt_take_storage(js_context *ctx, char **out, size_t *len)
@@ -301,7 +330,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`jt_take_storage`](#jt_take_storage) (include/js_trusted.h:93).
+> **Inherited:** Documentation from [`jt_take_storage`](#jt_take_storage) (include/js_trusted.h:104).
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`wst_pack`](src.web_storage.c.md#wst_pack)
 
@@ -311,7 +340,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `explicitly`
 
-`function` | [src/js_trusted.c:461](../../src/js_trusted.c#L461)
+`function` | [src/js_trusted.c:552](../../src/js_trusted.c#L552)
 
 ```c
 * explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...
@@ -332,7 +361,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `jt_enable_worker`
 
-`function` | [src/js_trusted.c:542](../../src/js_trusted.c#L542)
+`function` | [src/js_trusted.c:633](../../src/js_trusted.c#L633)
 
 ```c
 jd_status jt_enable_worker(js_context *ctx)

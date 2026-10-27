@@ -1,5 +1,310 @@
-# API (page 10 of 11)
+# API (page 10 of 12)
 Previous: [API_p9.md](API_p9.md)
+
+## src/page_view.c
+Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_vars.h`, `include/dom.h`, `include/flex_layout.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/page_view.h`, `include/svg_render.h`, `include/util.h`
+- `cp1252_to_ucs` (function) `src/page_view.c:90` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
+- `utf8_encode` (function) `src/page_view.c:104` `static size_t utf8_encode(unsigned int cp, char *out)` -- Encodes a BMP scalar (<= 0xFFFF, which covers all Windows-1252 targets) as * UTF-8 into out (up to 3 bytes); returns...
+- `utf8_sanitized_dup` (function) `src/page_view.c:117` `static char *utf8_sanitized_dup(const char *s)`
+- `positions` (function) `src/page_view.c:140` `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);`
+- `dup_n` (function) `src/page_view.c:151` `static char *dup_n(const char *s, size_t n)`
+- `run_init_common` (function) `src/page_view.c:165` `static void run_init_common(pv_run *r)` -- Common field initialization shared by all append helpers.
+- `pv_ptrmap_slot` (function) `src/page_view.c:301` `static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k)`
+- `pv_ptrmap_get` (function) `src/page_view.c:311` `static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out)`
+- `pv_ptrmap_put` (function) `src/page_view.c:319` `static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v)`
+- `pv_ptrmap_free` (function) `src/page_view.c:341` `static void pv_ptrmap_free(pv_ptrmap *m)`
+- `pv_node_map_init` (function) `src/page_view.c:356` `static int pv_node_map_init(pv_node_map *m)`
+- `pv_node_map_free` (function) `src/page_view.c:365` `static void pv_node_map_free(pv_node_map *m)`
+- `pv_node_map_build` (function) `src/page_view.c:407` `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root)` -- Builds a document-order map of all element nodes under root.
+- `pv_new` (function) `src/page_view.c:416` `pv_view *pv_new(void)`
+- `pv_append` (function) `src/page_view.c:420` `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,
+                    c...`
+- `pv_append_image` (function) `src/page_view.c:455` `pv_status pv_append_image(pv_view *v, int heading, int block_break,
+                          con...`
+- `pv_append_input` (function) `src/page_view.c:485` `pv_status pv_append_input(pv_view *v, int heading, int block_break,
+                          pv_...`
+- `pv_append_video` (function) `src/page_view.c:525` `pv_status pv_append_video(pv_view *v, int heading, int block_break,
+                          con...`
+- `pv_append_svg` (function) `src/page_view.c:561` `pv_status pv_append_svg(pv_view *v, int heading, int block_break,
+                        const c...`
+- `pv_set_emphasis` (function) `src/page_view.c:590` `void pv_set_emphasis(pv_view *v, int bold, int italic)`
+- `pv_set_indent` (function) `src/page_view.c:597` `void pv_set_indent(pv_view *v, int indent)`
+- `pv_set_color` (function) `src/page_view.c:602` `void pv_set_color(pv_view *v, int fg_rgb)`
+- `pv_set_bgcolor` (function) `src/page_view.c:607` `void pv_set_bgcolor(pv_view *v, int bg_rgb)`
+- `pv_set_text_style` (function) `src/page_view.c:612` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,
+                ...`
+- `pv_set_grad_text` (function) `src/page_view.c:623` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)`
+- `pv_set_text_ext` (function) `src/page_view.c:631` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)`
+- `ignored` (function) `src/page_view.c:672` `* source is ignored (fail-visible: never invisible text from half a
+     * pattern). A real text-...`
+- `pv_set_container` (function) `src/page_view.c:687` `void pv_set_container(pv_view *v, int cont_id, int cont_display,
+                      int cont_g...`
+- `pv_set_row_span` (function) `src/page_view.c:702` `void pv_set_row_span(pv_view *v, int row_span)`
+- `pv_set_grid_area` (function) `src/page_view.c:706` `void pv_set_grid_area(pv_view *v, int row_start, int col_start)`
+- `pv_set_grid` (function) `src/page_view.c:713` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)`
+- `pv_set_grid_rows` (function) `src/page_view.c:723` `void pv_set_grid_rows(pv_view *v, int grid_rows)`
+- `pv_set_cont_box` (function) `src/page_view.c:727` `void pv_set_cont_box(pv_view *v, int cont_box_id)`
+- `pv_set_flex` (function) `src/page_view.c:731` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,
+                 int...`
+- `pv_set_flex_mauto` (function) `src/page_view.c:743` `void pv_set_flex_mauto(pv_view *v, int mauto)`
+- `pv_set_cont_item` (function) `src/page_view.c:749` `void pv_set_cont_item(pv_view *v, int cont_item)`
+- `pv_set_float_w` (function) `src/page_view.c:754` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box,
+                    ...`
+- `pv_set_float` (function) `src/page_view.c:765` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,
+                int ...`
+- `pv_set_box` (function) `src/page_view.c:787` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,
+                int box_center, int ...`
+- `pv_set_box_pct` (function) `src/page_view.c:799` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,
+                    ...`
+- `pv_set_box_maxw` (function) `src/page_view.c:810` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct)`
+- `pv_set_ua_tag` (function) `src/page_view.c:817` `void pv_set_ua_tag(pv_view *v, int ua_tag)`
+- `pv_set_node_id` (function) `src/page_view.c:823` `void pv_set_node_id(pv_view *v, dom_node_id node_id)`
+- `pv_set_block_id` (function) `src/page_view.c:828` `void pv_set_block_id(pv_view *v, int block_id)`
+- `pv_set_own_box` (function) `src/page_view.c:833` `void pv_set_own_box(pv_view *v, int box_id)`
+- `pv_set_oof` (function) `src/page_view.c:838` `void pv_set_oof(pv_view *v, int oof)`
+- `pv_set_justify_self` (function) `src/page_view.c:843` `void pv_set_justify_self(pv_view *v, int justify_self)`
+- `pv_set_block_node` (function) `src/page_view.c:848` `void pv_set_block_node(pv_view *v, dom_node_id id)`
+- `pv_set_br_line` (function) `src/page_view.c:853` `void pv_set_br_line(pv_view *v, int br_line)`
+- `pv_set_input_checked` (function) `src/page_view.c:858` `void pv_set_input_checked(pv_view *v, int checked)`
+- `pv_set_input_placeholder` (function) `src/page_view.c:863` `void pv_set_input_placeholder(pv_view *v, int ph_color)`
+- `pv_svg_append_root_attrs` (function) `src/page_view.c:868` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs,
+               ...`
+- `pv_placeholder_color` (function) `src/page_view.c:897` `int pv_placeholder_color(const css_style *ph)`
+- `pv_set_input_select_opts` (function) `src/page_view.c:905` `void pv_set_input_select_opts(pv_view *v, const char *select_opts)`
+- `pv_add_cont_def` (function) `src/page_view.c:913` `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)`
+- `pv_cont_count` (function) `src/page_view.c:926` `size_t pv_cont_count(const pv_view *v)`
+- `pv_cont_at` (function) `src/page_view.c:930` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)`
+- `pv_add_box_def` (function) `src/page_view.c:935` `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)`
+- `pv_free` (function) `src/page_view.c:948` `void pv_free(pv_view *v)`
+- `pv_count` (function) `src/page_view.c:966` `size_t pv_count(const pv_view *v)`
+- `pv_at` (function) `src/page_view.c:970` `const pv_run *pv_at(const pv_view *v, size_t i)`
+- `pv_box_count` (function) `src/page_view.c:975` `size_t pv_box_count(const pv_view *v)`
+- `pv_box_at` (function) `src/page_view.c:979` `const pv_box_def *pv_box_at(const pv_view *v, size_t i)`
+- `node_next` (function) `src/page_view.c:987` `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` -- } size_t pv_box_count(const pv_view *v) { return (v != NULL) ? v->nbox : 0; } const pv_box_def *pv_box_at(const...
+- `is_block_tag` (function) `src/page_view.c:997` `static int is_block_tag(lxb_tag_id_t t)`
+- `is_block_like` (function) `src/page_view.c:1022` `static int is_block_like(lxb_tag_id_t t, css_display display)` -- An element should be treated as block-like (eligible for box registration, hbox, float) when its CSS display...
+- `resolves` (function) `src/page_view.c:1051` `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close
+ * button/tooltip w...`
+- `is_block_like_style` (function) `src/page_view.c:1061` `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` -- is_block_like with the out-of-flow coercion applied.
+- `generates_box` (function) `src/page_view.c:1073` `static int generates_box(lxb_tag_id_t t, css_display display)`
+- `generates_box_style` (function) `src/page_view.c:1085` `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)` -- Form controls (input/select/textarea/button) are inline-block by default but can carry author CSS like...
+- `causes_block_break` (function) `src/page_view.c:1092` `static int causes_block_break(lxb_tag_id_t t, css_display display)` -- Returns 1 when the element should cause a block break (start a new line). display:inline-block and display:inline do...
+- `paints` (function) `src/page_view.c:1105` `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas
+ * vacías"). Comment a...`
+- `ua_tag_of` (function) `src/page_view.c:1130` `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` -- User-agent box identity of a block-level element, from its lexbor tag id.
+- `heading_level` (function) `src/page_view.c:1152` `static int heading_level(lxb_tag_id_t t)`
+- `is_skipped_tag` (function) `src/page_view.c:1164` `static int is_skipped_tag(lxb_tag_id_t t)`
+- `node_tag` (function) `src/page_view.c:1185` `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)`
+- `content` (function) `src/page_view.c:1190` `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);`
+- `in_skipped_subtree` (function) `src/page_view.c:1193` `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+              ...` -- Nonzero if any ancestor up to base is a non-rendered container.
+- `font_color_attr` (function) `src/page_view.c:1230` `static int font_color_attr(lxb_dom_element_t *el)`
+- `bgcolor_attr` (function) `src/page_view.c:1236` `static int bgcolor_attr(lxb_dom_element_t *el)` -- Legacy bgcolor attribute (body/table/tr/td), the background twin of <font * color>: pre-CSS sites (Hacker News'...
+- `address` (function) `src/page_view.c:1258` `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...`
+- `child` (function) `src/page_view.c:1266` `* child (NULL = anonymous item: text directly inside the container);`
+- `id` (function) `src/page_view.c:1290` `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);`
+- `item_ordinal` (function) `src/page_view.c:1358` `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` -- Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its...
+- `it` (function) `src/page_view.c:1387` `* it (they inherit in CSS). list_style drives the <li> marker (structural);`
+- `pv_content_hidden` (function) `src/page_view.c:1391` `int pv_content_hidden(int box_hidden, int run_visibility)` -- The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field...
+- `pv_text_ext_reset` (function) `src/page_view.c:1397` `void pv_text_ext_reset(pv_text_ext *e)`
+- `pv_text_ext_merge` (function) `src/page_view.c:1423` `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` -- Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten...
+- `css_has_hbox` (function) `src/page_view.c:1485` `static int css_has_hbox(const css_style *cs)` -- True if the resolved style declares any HORIZONTAL box property, in either half of the <length-percentage>: `width...
+- `pv_mauto_of` (function) `src/page_view.c:1499` `static int pv_mauto_of(const css_style *cs)` -- Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side...
+- `css_hbox_resolve` (function) `src/page_view.c:1506` `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)`
+- `css_has_position` (function) `src/page_view.c:1559` `static int css_has_position(const css_style *cs)` -- A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree...
+- `border_side_cleared` (function) `src/page_view.c:1566` `static int border_side_cleared(int width, int style)` -- A side whose border the author zeroed (`border:0`, `border-width:0`) or switched off * (`border:none`); an unset...
+- `pv_control_frame_cleared` (function) `src/page_view.c:1572` `static int pv_control_frame_cleared(const css_style *cs)` -- The author cleared the control's frame on all four sides (pure): Firefox then paints * no native field chrome at all.
+- `css_has_boxdeco` (function) `src/page_view.c:1580` `static int css_has_boxdeco(const css_style *cs)`
+- `cont_def_reset` (function) `src/page_view.c:1724` `static void cont_def_reset(pv_cont_def *d)` -- Per-container parameters + parent linkage (2026-07-31).
+- `container_id` (function) `src/page_view.c:1743` `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` -- d->box_id = -1; d->item_grow = -1; d->item_shrink = -1; d->item_basis = CSS_LEN_UNSET; d->item_order =...
+- `annotate_flow_run` (function) `src/page_view.c:1831` `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,
+          ...` -- Stamps the last run with its element's layout annotation: container membership and item slot, flex/grid item...
+- `after_pending_emit` (function) `src/page_view.c:1879` `static pv_status after_pending_emit(pv_view *v, pv_container_reg *reg, pv_item_track *items,
+    ...`
+- `trying` (function) `src/page_view.c:1917` `* a real page passes without trying (slashdot's front page saturates it), and past
+ * it box_reg_...`
+- `box_reg_free` (function) `src/page_view.c:1946` `static void box_reg_free(pv_box_reg *r)`
+- `boxdef_from_style` (function) `src/page_view.c:1955` `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` -- Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style.
+- `here` (function) `src/page_view.c:2057` `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3...`
+- `glyphs` (function) `src/page_view.c:2105` `* glyphs (the runs carry it as their fill source);`
+- `box_reg_id` (function) `src/page_view.c:2203` `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
+           ...` -- Registers (or finds) the box for `node`. font_px is the element's COMPUTED font-size, needed because the user-agent...
+- `pseudo_box_reg` (function) `src/page_view.c:2232` `static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,
+                   ...` -- Registers (or finds) the GENERATED box of el's ::before / ::after (which = CSS_PSEUDO_BEFORE / CSS_PSEUDO_AFTER)...
+- `pseudo_generates_box` (function) `src/page_view.c:2253` `static int pseudo_generates_box(const css_style *ps)` -- True iff a generated box paints or sizes something of its own: the same gate as any element's box, plus a declared...
+- `pseudo_is_oof` (function) `src/page_view.c:2266` `static int pseudo_is_oof(const css_style *ps)`
+- `pseudo_is_block` (function) `src/page_view.c:2270` `static int pseudo_is_block(const css_style *ps)`
+- `pseudo_key` (function) `src/page_view.c:2276` `static const void *pseudo_key(const lxb_dom_node_t *el, int which)` -- return css_has_boxdeco(ps) || ps->width > 0 || ps->pct[CSS_PCT_WIDTH] > 0 || ps->background >= 0 ||...
+- `pv_ptr_hash` (function) `src/page_view.c:2339` `static size_t pv_ptr_hash(const void *p)`
+- `pv_cache_reindex` (function) `src/page_view.c:2347` `static void pv_cache_reindex(pv_style_cache *c)`
+- `pv_style_cache_init` (function) `src/page_view.c:2357` `static int pv_style_cache_init(pv_style_cache *c)`
+- `pv_style_cache_free` (function) `src/page_view.c:2377` `static void pv_style_cache_free(pv_style_cache *c)`
+- `pv_cache_find` (function) `src/page_view.c:2393` `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- cch_element_style(el, sheet), memoized in *cache.
+- `pv_cached_font_px` (function) `src/page_view.c:2408` `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- The COMPUTED font-size memoized for `node`, or 0 when it is not in the cache (no cache, or the element's style was...
+- `pv_cache_put` (function) `src/page_view.c:2413` `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
+                     ...`
+- `pv_var_push` (function) `src/page_view.c:2463` `static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,
+                      ...` -- Takes ownership of *own (left zeroed) as a new chain node over `parent`. * Returns the node's chain, or `parent`...
+- `pv_parent_element` (function) `src/page_view.c:2484` `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` -- cache->vn = g; cache->vncap = nc; } pv_var_node *n = (pv_var_node *)calloc(1, sizeof *n); if (n == NULL) {...
+- `cached_element_style_ref` (function) `src/page_view.c:2561` `static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const css_sheet *sheet,
+ ...` -- The same, returning a pointer to the memoized entry instead of a copy: css_style is ~7 KB, and the ancestor/subtree...
+- `cached_element_style` (function) `src/page_view.c:2644` `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
+            ...`
+- `col_free_share` (function) `src/page_view.c:2705` `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...` -- box_reg_id plus the line alignment an inline-level box needs (see * pv_box_def.line_align).
+- `inherited_text_color` (function) `src/page_view.c:2711` `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,
+             ...` -- The computed `color` of an element: its own declaration, else its nearest ancestor's (`color` inherits). -1 when no...
+- `box_reg_id_ex` (function) `src/page_view.c:2722` `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
+        ...`
+- `none` (function) `src/page_view.c:2727` `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...`
+- `cached_pseudo_style` (function) `src/page_view.c:2760` `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,
+             ...` -- The ::before/::after generated box's style of el (spec/page_view.md "Cajas generadas"): resolved against el's...
+- `subtree_is_oof` (function) `src/page_view.c:2778` `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
+                     ...` -- True iff the element itself is out of flow (position:absolute/fixed) or descends from one.
+- `size` (function) `src/page_view.c:2798` `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
+static void app...`
+- `css_replaced_h_fixed` (function) `src/page_view.c:2807` `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,
+                  ...` -- flat model, and auto keeps the intrinsic/attribute size (so the common `img{max-width:100%;height:auto}` rule does...
+- `builder` (function) `src/page_view.c:2825` `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
+ * (the ...`
+- `css_to_fx_justify` (function) `src/page_view.c:2854` `static int css_to_fx_justify(css_justify j)` -- Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to...
+- `is_bold_tag` (function) `src/page_view.c:2873` `static int is_bold_tag(lxb_tag_id_t t)` -- Tags the user-agent sheet renders bold.
+- `is_italic_tag` (function) `src/page_view.c:2878` `static int is_italic_tag(lxb_tag_id_t t)`
+- `is_inline_level_style` (function) `src/page_view.c:2915` `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` -- Inline-level box (CSS 2.1 9.2.2): display inline or inline-block, or a tag the UA * sheet makes inline, and not...
+- `in_mixed_line` (function) `src/page_view.c:2923` `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
+                       ...` -- True when `p` shares a line with inline content: a sibling that is non-blank text * or an inline-level element.
+- `children_all_inline_block` (function) `src/page_view.c:2939` `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
+           ...`
+- `col_has_free_space` (function) `src/page_view.c:2964` `static int col_has_free_space(const css_style *cs)` -- True iff a column can have FREE space on its main axis: a px height or a px min-height floor.
+- `flex_column_flows_as_block` (function) `src/page_view.c:2975` `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
+            ...` -- A flex COLUMN with the initial geometry (no reverse, no wrap, justify-content start, align-items stretch) stacks...
+- `fold_column_gap` (function) `src/page_view.c:3043` `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
+                            ...` -- The gap of a column that flows as block (above) is the space BETWEEN its items (Flexbox 8.1), so every item but the...
+- `column_gap_candidate` (function) `src/page_view.c:3068` `static int column_gap_candidate(const lxb_dom_node_t *el, const css_sheet *sheet,
+               ...` -- Cheap prefilter: could fold_column_gap change this element's style?
+- `is_layout_container` (function) `src/page_view.c:3078` `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
+                   ...` -- Cheap prefilter: could fold_column_gap change this element's style?
+- `css_has_hmargin` (function) `src/page_view.c:3104` `static int css_has_hmargin(const css_style *cs)` -- A flex/grid ITEM: its parent element is a layout container.
+- `item_sizes_itself` (function) `src/page_view.c:3133` `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
+                     ...`
+- `li_is_list_item` (function) `src/page_view.c:3149` `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
+                    ...` -- A marker is generated by a `display:list-item` box (CSS Lists 3 3.1), which is what the UA sheet makes an <li>; an...
+- `pv_element_has_before` (function) `src/page_view.c:3226` `static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,
+                     ...` -- True when the element's resolved style carries ::before generated content (spec/css.md ::before/::after: only...
+- `subtree_has_own_text` (function) `src/page_view.c:3258` `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+            ...` -- True when the subtree holds no non-blank text of its own outside skipped / hidden / closed-details subtrees...
+- `is_plain_wrapper` (function) `src/page_view.c:3280` `static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs)` -- A plain wrapper: a generic container with no decoration and no size of its own, so * it adds nothing to its parent's...
+- `element_is_content_leaf_d` (function) `src/page_view.c:3292` `static int element_is_content_leaf_d(const lxb_dom_node_t *n, const css_sheet *sheet,
+           ...`
+- `media_has_source` (function) `src/page_view.c:3318` `static int media_has_source(const lxb_dom_node_t *n)` -- Whether a <video>/<audio> names anything to play: its own `src`, or a <source> child with one.
+- `element_is_content_leaf` (function) `src/page_view.c:3332` `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
+             ...`
+- `resolve_context` (function) `src/page_view.c:3346` `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+                ...`
+- `outermost` (function) `src/page_view.c:3610` `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
+- `opens` (function) `src/page_view.c:3667` `* painter applies it when the box opens (band/shared context) — seeding
+             * it onto ru...`
+- `css_inline_boxdeco` (function) `src/page_view.c:3707` `css_inline_boxdeco(cs) &&
+                           !is_layout_item(p, sheet, style_cache))`
+- `margins` (function) `src/page_view.c:3747` `* margins (boxdef_from_style) and the painter applies them when
+                         * it ope...`
+- `container` (function) `src/page_view.c:3870` `* membership in this container (and none in any container further out,
+                 * since i...`
+- `walk` (function) `src/page_view.c:3968` `* far on this walk (they are all inside this element). */
+
+                        /* The innermo...`
+- `float` (function) `src/page_view.c:4093` `* genuinely nested float (oid != id) takes the deferred-column path. */
+    if (cont->float_oid =...`
+- `sz_count` (function) `src/page_view.c:4139` `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` -- Serialises an element subtree (the element itself included) into a fresh NUL-terminated buffer.
+- `sz_write` (function) `src/page_view.c:4153` `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
+- `serialize_subtree` (function) `src/page_view.c:4161` `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
+- `collapse_ws` (function) `src/page_view.c:4180` `static char *collapse_ws(const char *s, size_t n)` -- if (total == 0 || total > SV_MAX_INPUT) return NULL; char *buf = (char *)calloc(1, total + 1u); if (buf == NULL)...
+- `parse_dim` (function) `src/page_view.c:4204` `static int parse_dim(const lxb_char_t *s, size_t len)` -- Parses the leading non-negative integer of an HTML length attribute value (e.g. "640", "640px", "50%").
+- `present` (function) `src/page_view.c:4221` `* when no width descriptors are present (density-only or bare URLs). */
+static void srcset_best_u...`
+- `srcset_slot_width` (function) `src/page_view.c:4316` `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
+                              ...` -- Parses a sizes attribute ("(max-width: 600px) 100vw, 50vw") and returns the effective slot width in px for the given...
+- `dimensions` (function) `src/page_view.c:4362` `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
+static void srcse...`
+- `find_body` (function) `src/page_view.c:4394` `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
+- `find_root_els` (function) `src/page_view.c:4407` `static pv_root_els find_root_els(lxb_dom_node_t *root)`
+- `attributes` (function) `src/page_view.c:4421` `* carries those attributes (spec/css.md, "Root matcher"). */
+static int root_els_match(void *ctx,...`
+- `string` (function) `src/page_view.c:4432` `* Returns a heap string (caller frees) or NULL when neither carries a class —
+ * NULL simply mean...`
+- `forms_free` (function) `src/page_view.c:4480` `static void forms_free(form_table *ft)`
+- `ascii_ieq` (function) `src/page_view.c:4487` `static int ascii_ieq(const char *s, const char *lit)` -- } form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void...
+- `attr_dup` (function) `src/page_view.c:4499` `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
+- `forms_add` (function) `src/page_view.c:4508` `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
+- `form_for` (function) `src/page_view.c:4528` `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
+                    const lxb_...` -- } lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node); char *method = attr_dup(el, "method"...
+- `under_unrendered` (function) `src/page_view.c:4544` `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` -- Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected...
+- `collect_text` (function) `src/page_view.c:4557` `static char *collect_text(const lxb_dom_node_t *el)` -- Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of...
+- `classify_input` (function) `src/page_view.c:4581` `static pv_input_type classify_input(const char *type)`
+- `li_ordinal` (function) `src/page_view.c:4753` `static int li_ordinal(const lxb_dom_node_t *li)` -- 1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out...
+- `roman_marker` (function) `src/page_view.c:4779` `static void roman_marker(int n, int upper, char *out, size_t cap)` -- int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ?...
+- `list_marker` (function) `src/page_view.c:4804` `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
+                  ...` -- Builds the list marker for the first run of an <li>.
+- `node_table_role` (function) `src/page_view.c:4845` `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- The table role of an element: its computed `display` when that names one, else the role the HTML user-agent sheet...
+- `nearest_table` (function) `src/page_view.c:4863` `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+ ...` -- const lxb_char_t *nm = lxb_dom_element_local_name(el, &nl); char tag[BX_TAG_NAME_MAX]; const char *tagp = NULL; if...
+- `parent_is_table_internal` (function) `src/page_view.c:4902` `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a row group, a row or a column group.
+- `nearest_cell` (function) `src/page_view.c:4929` `static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+  ...` -- if (s->type == LXB_DOM_NODE_TYPE_TEXT && text_node_is_blank(s)) continue; if (s->type == LXB_DOM_NODE_TYPE_ELEMENT...
+- `cell_has_nested_table` (function) `src/page_view.c:4944` `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` -- Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not a leaf cell.
+- `next_skip` (function) `src/page_view.c:4953` `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` -- Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the...
+- `cell_anchors` (function) `src/page_view.c:4964` `static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count)` -- First <a href> element in the cell's subtree, with *count receiving how many * such anchors exist, capped at 2 (only...
+- `links` (function) `src/page_view.c:4982` `* its links (the Hacker News case: every story link lives inside a <td>), so the
+ * caller flows ...`
+- `flow_table` (function) `src/page_view.c:5003` `static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table)`
+- `in_flow_table_cell` (function) `src/page_view.c:5015` `static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
+           ...`
+- `table` (function) `src/page_view.c:5024` `* FLOW table (multi-link: walked so its links survive) do NOT suppress their
+ * content -- their ...`
+- `table_columns` (function) `src/page_view.c:5042` `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` -- Grid column count of a table: the maximum number of logical columns across all its rows, computed by summing each...
+- `in_hidden_subtree` (function) `src/page_view.c:5116` `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+               ...` -- Nonzero if n or any ancestor up to base has display:none (from the <style> sheet or its inline style=). display:none...
+- `in_boilerplate_subtree` (function) `src/page_view.c:5143` `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>).
+- `in_closed_details_subtree` (function) `src/page_view.c:5158` `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is inside a <details> without an `open` attribute and n is NOT inside its...
+- `pv_build` (function) `src/page_view.c:5178` `pv_status pv_build(const hp_document *doc, pv_view **out)`
+- `pv_build_ex` (function) `src/page_view.c:5182` `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
+- `pv_build_full` (function) `src/page_view.c:5186` `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+                     ...`
+- `annotate_replaced_run` (function) `src/page_view.c:5208` `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
+                            ...` -- Attaches the layout membership a replaced run needs to take part in its surroundings: flex/grid container identity...
+- `pv_root_insets` (function) `src/page_view.c:5281` `void pv_root_insets(const css_style *body, int out[4])`
+- `collect_page_css` (function) `src/page_view.c:5291` `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
+                     ...`
+- `pv_build_styled` (function) `src/page_view.c:5320` `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+                   ...`
+- `inside` (function) `src/page_view.c:5430` `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
+- `control` (function) `src/page_view.c:5739` `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
+- `px` (function) `src/page_view.c:5917` `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
+                if (iw <...`
+- `band` (function) `src/page_view.c:5983` `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...`
+- `height` (function) `src/page_view.c:6010` `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+- `block_id` (function) `src/page_view.c:6151` `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
+- `URL` (function) `src/page_view.c:6292` `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+- `block` (function) `src/page_view.c:6580` `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
+- `flow` (function) `src/page_view.c:6758` `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
+- `engine` (function) `src/page_view.c:6864` `* layout engine (contiguous item gather) drops every cell onto its own row and
+         * a 2-col...`
+- `line` (function) `src/page_view.c:6873` `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
+- `pv_css_drops` (function) `src/page_view.c:7006` `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+                       const cha...` -- Diagnostic counterpart to pv_build_styled: same document, same collected CSS text, same @media/root-scope context...
+- `pv_computed_new` (function) `src/page_view.c:7040` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
+  ...`
+- `pv_computed_get` (function) `src/page_view.c:7059` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
+                    do...`
+- `pv_computed_free` (function) `src/page_view.c:7081` `void pv_computed_free(pv_computed *pc)`
+
+## src/pdf_export.c
+Depends on: `include/pdf_export.h`
+- `pe_safe_basename` (function) `src/pdf_export.c:25` `pe_status pe_safe_basename(const char *title, char *out, size_t outsz)`
+- `pe_build_path_ext` (function) `src/pdf_export.c:66` `pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,
+                ...`
+- `pe_build_path` (function) `src/pdf_export.c:91` `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)`
+- `pe_paginate` (function) `src/pdf_export.c:95` `size_t pe_paginate(const double *tops, const double *heights, size_t n,
+                   double...`
 
 ## src/perf_trace.c
 Depends on: `include/perf_trace.h`
@@ -169,290 +474,6 @@ Depends on: `include/psl_data.h`, `include/request_policy.h`
 - `hdr_token_char` (function) `src/request_policy.c:178` `static int hdr_token_char(unsigned char c)`
 - `hdr_forbidden` (function) `src/request_policy.c:184` `static int hdr_forbidden(const char *n, size_t len)` -- static int hdr_name_has_prefix(const char *a, size_t alen, const char *lit) { size_t n = strlen(lit); if (alen < n)...
 - `rp_sanitize_request_headers` (function) `src/request_policy.c:197` `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap)`
-
-## src/secure_fetch.c
-Depends on: `include/anti_fp.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/url.h`
-- `ci_starts_with` (function) `src/secure_fetch.c:46` `static int ci_starts_with(const char *haystack, const char *prefix)` -- /* --- small helpers (no libc locale dependence) --- static int ci_equal(const char *a, const char *b) { while (*a...
-- `ci_index` (function) `src/secure_fetch.c:58` `static long ci_index(const char *haystack, const char *needle)` -- /* Case-insensitive: does haystack start with prefix? static int ci_starts_with(const char *haystack, const char...
-- `sf_share_lock` (function) `src/secure_fetch.c:74` `static void sf_share_lock(CURL *handle, curl_lock_data data,
-                          curl_lock_...`
-- `sf_share_unlock` (function) `src/secure_fetch.c:80` `static void sf_share_unlock(CURL *handle, curl_lock_data data, void *userptr)`
-- `sf_global_init` (function) `src/secure_fetch.c:87` `void sf_global_init(void)`
-- `sf_cookie_line_matches` (function) `src/secure_fetch.c:112` `int sf_cookie_line_matches(const char *line, const char *host, const char *path,
-                ...`
-- `sf_url_host_path` (function) `src/secure_fetch.c:167` `static int sf_url_host_path(const char *url, char *host, size_t hostsz,
-                         ...` -- Extracts host + path from a validated https url into caller buffers (path defaults * to "/").
-- `sf_cookie_header_for` (function) `src/secure_fetch.c:182` `size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)`
-- `sf_cookie_put` (function) `src/secure_fetch.c:211` `void sf_cookie_put(const char *url, const char *namevalue)`
-- `sf_config_default` (function) `src/secure_fetch.c:232` `sf_config sf_config_default(void)`
-- `header_value_clean` (function) `src/secure_fetch.c:258` `static int header_value_clean(const char *s)` -- c.password = NULL; c.insecure = 0; c.impersonate = 0; /* default hardened PQ-hybrid ClientHello; opt-in per trusted...
-- `sf_user_agent_or_default` (function) `src/secure_fetch.c:264` `const char *sf_user_agent_or_default(const char *ua)`
-- `sf_accept_language_or_default` (function) `src/secure_fetch.c:268` `const char *sf_accept_language_or_default(const char *lang)`
-- `sf_impersonate_kex_groups` (function) `src/secure_fetch.c:272` `const char *sf_impersonate_kex_groups(void)`
-- `sf_impersonate_tls13_ciphers` (function) `src/secure_fetch.c:273` `const char *sf_impersonate_tls13_ciphers(void)`
-- `sf_validate_url` (function) `src/secure_fetch.c:277` `sf_status sf_validate_url(const char *url)`
-- `sf_url_is_http` (function) `src/secure_fetch.c:285` `static int sf_url_is_http(const char *url)` -- Nonzero iff url is "http://host..." (case-insensitive) with a non-empty host.
-- `sf_check_tls_version` (function) `src/secure_fetch.c:297` `sf_status sf_check_tls_version(const char *negotiated_version)`
-- `sf_check_group_is_pq` (function) `src/secure_fetch.c:302` `sf_status sf_check_group_is_pq(const char *negotiated_group)`
-- `sf_check_chain_policy` (function) `src/secure_fetch.c:311` `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)`
-- `sf_enforce_policy` (function) `src/secure_fetch.c:321` `sf_status sf_enforce_policy(const char *tls_version, const char *group,
-                         ...`
-- `copy_checked` (function) `src/secure_fetch.c:352` `static int copy_checked(char *dst, size_t dstsz, const char *src)`
-- `sf_is_redirect_code` (function) `src/secure_fetch.c:361` `int sf_is_redirect_code(long http_code)`
-- `sf_header_value` (function) `src/secure_fetch.c:368` `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz)`
-- `sf_parse_location_header` (function) `src/secure_fetch.c:390` `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)`
-- `sf_resolve_redirect` (function) `src/secure_fetch.c:408` `sf_status sf_resolve_redirect(const char *base_url, const char *location,
-                       ...`
-- `module` (function) `src/secure_fetch.c:413` `* pure url module (DRY);`
-- `sf_ci_prefix` (function) `src/secure_fetch.c:420` `static int sf_ci_prefix(const char *s, const char *p)` -- Reference resolution + the https-only / no-downgrade policy live in the pure url module (DRY); a redirect is just a...
-- `sf_response_free` (function) `src/secure_fetch.c:460` `void sf_response_free(sf_response *resp)`
-- `progress` (function) `src/secure_fetch.c:499` `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
-- `copy_bounded` (function) `src/secure_fetch.c:530` `static void copy_bounded(char *dst, size_t dstsz, const char *src)`
-- `get_negotiated_group_name` (function) `src/secure_fetch.c:541` `static const char *get_negotiated_group_name(SSL *ssl)` -- static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len); static void...
-- `database` (function) `src/secure_fetch.c:545` `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...`
-- `group` (function) `src/secure_fetch.c:559` `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);`
-- `tls_capture_try` (function) `src/secure_fetch.c:574` `static void tls_capture_try(tls_capture *cap)` -- nid = SSL_get_shared_group(ssl, 0); #endif if (nid == 0) { return NULL; /* There is no negotiated group (e.g., TLS...
-- `tls_capture_from_ssl` (function) `src/secure_fetch.c:584` `static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl)` -- static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl); /* Idempotent: takes the TLS snapshot the first time...
-- `this` (function) `src/secure_fetch.c:591` `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...`
-- `header_cb` (function) `src/secure_fetch.c:610` `static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata)` -- Fires for every HTTP response (status line + headers) even when there is no * body, so it is the reliable point to...
-- `write_cb` (function) `src/secure_fetch.c:667` `static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)`
-- `name_is_pq_sig` (function) `src/secure_fetch.c:699` `static int name_is_pq_sig(int pknid)` -- if (grown == NULL) { sink->overflow = 2; /* OOM marker return 0; } sink->data = grown; sink->cap = newcap; }...
-- `inspect_chain` (function) `src/secure_fetch.c:709` `static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len)` -- Walks the verified chain into *info. sigbuf receives the leaf signature alg name. * Returns 0 on success, nonzero if...
-- `map_curl_error` (function) `src/secure_fetch.c:762` `static sf_status map_curl_error(CURLcode rc, const body_sink *sink)`
-- `add_header` (function) `src/secure_fetch.c:803` `static int add_header(struct curl_slist **h, const char *line)` -- Appends one header line without losing the list on OOM (the plain "h = curl_slist_append(h, ...)" idiom dropped the...
-- `sf_setup_handle` (function) `src/secure_fetch.c:817` `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
-           ...` -- The ONE place a curl handle is configured for a request (spec/secure_fetch.md): URL, realm proxy, TLS floor + KE...
-- `redirect` (function) `src/secure_fetch.c:892` `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
-     * different orig...`
-- `sf_perform` (function) `src/secure_fetch.c:984` `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
-            ...` -- The shared request engine for sf_get and sf_post.
-- `sf_get` (function) `src/secure_fetch.c:1144` `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
-- `sf_post` (function) `src/secure_fetch.c:1148` `sf_status sf_post(const char *url, const sf_config *cfg,
-                  const void *body, size...`
-- `sf_rcache_clear` (function) `src/secure_fetch.c:1178` `void sf_rcache_clear(void)`
-- `sf_rcache_set_backing` (function) `src/secure_fetch.c:1189` `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx)`
-- `rcache_put_ram` (function) `src/secure_fetch.c:1197` `static int rcache_put_ram(const char *from, const char *to, time_t now)`
-- `sf_rcache_put` (function) `src/secure_fetch.c:1216` `int sf_rcache_put(const char *from, const char *to, time_t now)`
-- `sf_rcache_get` (function) `src/secure_fetch.c:1226` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)`
-- `sf_get_follow` (function) `src/secure_fetch.c:1255` `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
-                ...`
-- `ws_ssl_info_cb` (function) `src/secure_fetch.c:1318` `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` -- An upgraded (CONNECT_ONLY) connection never runs the header callback that snapshots TLS for a fetch, and curl no...
-- `ws_ssl_ctx_cb` (function) `src/secure_fetch.c:1325` `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
-- `sf_ws_url_check` (function) `src/secure_fetch.c:1339` `sf_status sf_ws_url_check(const char *url)`
-- `ws_free` (function) `src/secure_fetch.c:1351` `static void ws_free(sf_ws *ws)`
-- `sf_ws_open` (function) `src/secure_fetch.c:1360` `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
-- `sf_ws_send` (function) `src/secure_fetch.c:1415` `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
-- `sf_ws_recv` (function) `src/secure_fetch.c:1438` `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
-- `sf_ws_fd` (function) `src/secure_fetch.c:1460` `int sf_ws_fd(const sf_ws *ws)`
-- `sf_ws_close` (function) `src/secure_fetch.c:1467` `void sf_ws_close(sf_ws *ws)`
-- `sf_fallback_policy` (function) `src/secure_fetch.c:1478` `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)`
-- `sf_downgrade_of` (function) `src/secure_fetch.c:1492` `static int sf_downgrade_of(sf_policy p)`
-- `sf_attempt_get` (function) `src/secure_fetch.c:1501` `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
-        ...`
-- `sf_attempt_post` (function) `src/secure_fetch.c:1507` `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
-       ...`
-- `sf_navigable` (function) `src/secure_fetch.c:1512` `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
-           ...`
-- `sf_get_follow_navigable` (function) `src/secure_fetch.c:1532` `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
-            ...`
-- `sf_post_navigable` (function) `src/secure_fetch.c:1537` `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
-                  ...`
-
-## src/svg_render.c
-Depends on: `include/css_color.h`, `include/svg_render.h`
-- `sv_is_space` (function) `src/svg_render.c:21` `static int sv_is_space(char c)`
-- `sv_is_digit` (function) `src/svg_render.c:25` `static int sv_is_digit(char c)`
-- `sv_lower` (function) `src/svg_render.c:27` `static char sv_lower(char c)`
-- `sv_span_eq` (function) `src/svg_render.c:32` `static int sv_span_eq(const char *s, size_t n, const char *lit)` -- /* --- small scanning helpers (no locale, no allocation) --- static int sv_is_space(char c) { return c == ' ' || c...
-- `sv_sep` (function) `src/svg_render.c:82` `static void sv_sep(const char *s, size_t n, size_t *i)` -- if (ev > 300) ev = 300; double m = pow(10.0, eneg ? -(double)ev : (double)ev); v *= m; p = q; } } if (neg) v = -v...
-- `sv_attr_get` (function) `src/svg_render.c:99` `static const char *sv_attr_get(const sv_attr *at, size_t nat, const char *name, size_t *len)` -- while (*i < n && sv_is_space(s[*i])) ++*i; } /* --- attribute lookup
-- `sv_attr_num` (function) `src/svg_render.c:108` `static double sv_attr_num(const sv_attr *at, size_t nat, const char *name, double dflt)` -- Numeric attribute, or `dflt` when absent/malformed.
-- `sv_mat_identity` (function) `src/svg_render.c:161` `static void sv_mat_identity(double *m)`
-- `sv_mat_mul` (function) `src/svg_render.c:166` `static void sv_mat_mul(const double *a, const double *b, double *out)` -- int    fill, stroke; double stroke_w; int    opacity, fill_opacity, stroke_opacity; int    fill_even_odd; int...
-- `sv_parse_transform` (function) `src/svg_render.c:179` `static void sv_parse_transform(const char *s, size_t n, double *m)` -- Parses a `transform` list and composes it onto ctx->m.
-- `sv_style_next` (function) `src/svg_render.c:238` `static int sv_style_next(const char *s, size_t n, size_t *i,
-                         const char ...` -- Reads one `name:value` declaration out of a style="" attribute.
-- `sv_apply_prop` (function) `src/svg_render.c:260` `static void sv_apply_prop(sv_ctx *ctx, const char *nm, size_t nl,
-                          const...` -- if (*i >= n || s[*i] != ':') { while (*i < n && s[*i] != ';') ++*i; return 1; } ++*i; size_t vs = *i; while (*i < n...
-- `sv_ctx_from_attrs` (function) `src/svg_render.c:307` `static void sv_ctx_from_attrs(sv_ctx *ctx, const sv_attr *at, size_t nat)` -- Folds every presentation attribute of the current tag (and its style="") into a copy of the inherited context.
-- `sv_new_shape` (function) `src/svg_render.c:324` `static sv_shape *sv_new_shape(sv_image *im, int kind, const sv_ctx *ctx)`
-- `sv_parse_points` (function) `src/svg_render.c:343` `static void sv_parse_points(sv_image *im, sv_shape *sh, const char *s, size_t n)` -- sh->fill = ctx->fill; sh->stroke = ctx->stroke; sh->stroke_w = ctx->stroke_w; sh->opacity = ctx->opacity...
-- `sv_new_seg` (function) `src/svg_render.c:363` `static sv_seg *sv_new_seg(sv_image *im, sv_shape *sh)`
-- `sv_seg_move` (function) `src/svg_render.c:371` `static int sv_seg_move(sv_image *im, sv_shape *sh, double x, double y)`
-- `sv_seg_line` (function) `src/svg_render.c:378` `static int sv_seg_line(sv_image *im, sv_shape *sh, double x, double y)`
-- `sv_seg_cubic` (function) `src/svg_render.c:385` `static int sv_seg_cubic(sv_image *im, sv_shape *sh,
-                        double x1, double y1,...`
-- `sv_arc_to_cubics` (function) `src/svg_render.c:399` `static int sv_arc_to_cubics(sv_image *im, sv_shape *sh,
-                            double x0, do...` -- Endpoint-parameterised elliptical arc -> up to 4 cubic segments (F.6.5 of the SVG spec).
-- `sv_flag` (function) `src/svg_render.c:477` `static int sv_flag(const char *s, size_t n, size_t *i, double *out)` -- An arc flag (SVG 1.1 path grammar): exactly one '0' or '1' character, with no separator required after it -- `a5 5 0...
-- `sv_parse_path` (function) `src/svg_render.c:488` `static void sv_parse_path(sv_image *im, sv_shape *sh, const char *s, size_t n)` -- Parses path data.
-- `point` (function) `src/svg_render.c:567` `* current point (SVG 8.3.6). */ int had = (prev == 'C' || prev == 'c' || prev == 'S' || prev == 's');`
-- `sv_is_dropped_element` (function) `src/svg_render.c:646` `static int sv_is_dropped_element(const char *name, size_t n)` -- True for elements whose whole subtree is dropped. <image>/<use>/<foreignObject> can name external resources...
-- `sv_scan_attrs` (function) `src/svg_render.c:658` `static void sv_scan_attrs(const char *s, size_t n, size_t *i,
-                          sv_attr *...` -- Scans the attributes of a tag whose body starts at s[*i] (just past the name). * Stops at '>' and reports whether...
-- `sv_skip_subtree` (function) `src/svg_render.c:704` `static void sv_skip_subtree(const char *s, size_t n, size_t *i, const char *name, size_t nlen)` -- Skips to just past the matching close tag of `name`, honouring nesting.
-- `sv_collect_text` (function) `src/svg_render.c:736` `static void sv_collect_text(const char *s, size_t n, size_t *i, char *dst, size_t cap)` -- Collects the literal text of the element that just opened, up to its close tag, * into a bounded buffer.
-- `sv_fit` (function) `src/svg_render.c:754` `void sv_fit(const sv_image *img, double dw, double dh,
-            double *scale, double *off_x, ...`
-- `sv_parse` (function) `src/svg_render.c:774` `sv_status sv_parse(const char *markup, size_t len, sv_image *out)`
-- `sv_parse_ex` (function) `src/svg_render.c:778` `sv_status sv_parse_ex(const char *markup, size_t len, sv_image *out, int root_fill)`
-
-## src/tab.c
-Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/data_url.h`, `include/dom.h`, `include/flex_layout.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/identity.h`, `include/image_decode.h`, `include/import_map.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/js_trusted.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/url.h`, `include/util.h`, `include/web_storage.h`
-- `clip_pm_ok` (function) `src/tab.c:77` `static int clip_pm_ok(int32_t v)` -- A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile * worker cannot hand the painter...
-- `rad_len_ok` (function) `src/tab.c:83` `static int rad_len_ok(int32_t v, int dflt)` -- A radial-gradient length off the wire (cg_radial encoding): per-mille 0..1e6, or * -(px)-1 with px <= 100000, or...
-- `child_reset_page` (function) `src/tab.c:184` `static void child_reset_page(child_state *cs)`
-- `sig_mix` (function) `src/tab.c:204` `static uint64_t sig_mix(uint64_t h, const char *s, size_t n)`
-- `computed_signature` (function) `src/tab.c:212` `static uint64_t computed_signature(const dom_index *idx)` -- What the retained cascade depends on: every <style> text plus the attributes of <html>/<body> (class/data-* theme...
-- `policy` (function) `src/tab.c:292` `* policy (host blocklist/tracker filter, realm routing, TLS-PQ) before fetching, so a
- * compromi...`
-- `prof_now_ms` (function) `src/tab.c:358` `static double prof_now_ms(void)` -- if (read_full(cs->rfd, &xlen, sizeof xlen) != 0 || xlen > SF_RESPONSE_HEADERS_MAX) { free(rbody); free(ctype)...
-- `prof_on` (function) `src/tab.c:363` `static int prof_on(void)`
-- `prof_lap` (function) `src/tab.c:368` `static void prof_lap(const char *what, double *t0)`
-- `run_js` (function) `src/tab.c:379` `* regardless of run_js (a no-JS load simply never records a request). */
-static int child_load(ch...`
-- `buffer` (function) `src/tab.c:427` `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of...`
-- `write_field` (function) `src/tab.c:458` `static int write_field(int fd, const char *s)` -- Writes one length-prefixed string field (the write mirror of read_field): a size_t * length then the bytes, with...
-- `blocks` (function) `src/tab.c:492` `*
- * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the
- * grid arr...`
-- `FB_MAX_FILE_BYTES` (function) `src/tab.c:924` `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
- * the stream. ...`
-- `budget_remaining_ms` (function) `src/tab.c:954` `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` -- Milliseconds of `budget_ms` still left since `start` (CLOCK_MONOTONIC), 0 if spent. * Used to share one page-wide JS...
-- `ctype_is_javascript` (function) `src/tab.c:968` `static int ctype_is_javascript(const char *ctype)` -- Content-Type gate for an external script's response (anti type-confusion, fail closed for real content types)...
-- `ctype_is_css` (function) `src/tab.c:977` `static int ctype_is_css(const char *ctype)` -- Content-Type gate for an external stylesheet (Hito 27), same shape as the script gate: a missing/empty type is...
-- `log_external_skip` (function) `src/tab.c:985` `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
-                ...` -- Freebug note about an external subresource (script/stylesheet) that was not used (skipped or refused).
-- `run` (function) `src/tab.c:1003` `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
- * Call after every ...`
-- `tab_url_resolve` (function) `src/tab.c:1052` `static int tab_url_resolve(void *ctx, const char *base, const char *ref,
-                        ...` -- Plain URL resolution of ref against base (https, or a local file confined to its * document's directory): the...
-- `tab_mod_resolve` (function) `src/tab.c:1061` `static int tab_mod_resolve(void *host, const char *base, const char *spec,
-                      ...`
-- `tab_mod_fetch` (function) `src/tab.c:1091` `static char *tab_mod_fetch(void *host, const char *url, size_t *len)` -- Loads a module's source through the trusted parent (TAG_SUBREQ: the full network policy applies), only inside a...
-- `write_history` (function) `src/tab.c:1113` `static int write_history(int wfd, child_state *cs)` -- Writes the history block of a response: [len][ops "K url\n"...][go:int32] * (spec/js_dom.md 7e).
-- `window` (function) `src/tab.c:1132` `* net window (cs->net_active). */
-static void child_fetch_stylesheets(child_state *cs)`
-- `child_handle_load` (function) `src/tab.c:1177` `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
-           ...`
-- `fallback` (function) `src/tab.c:1258` `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it...`
-- `WHERE` (function) `src/tab.c:1448` `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
-- `content` (function) `src/tab.c:1508` `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...`
-- `once` (function) `src/tab.c:1557` `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
-- `swap` (function) `src/tab.c:1566` `* display:none hiding an element via class swap (CSS, not
-     * DOM removal). */
-    if (ok && v...`
-- `write_full` (function) `src/tab.c:1587` `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd...`
-- `write_ws` (function) `src/tab.c:1611` `static int write_ws(int wfd, child_state *cs)` -- Writes the WebSocket block of a response: [n:int32] then per op * [kind:int32][id:int32][len][bytes] (spec/js_dom.md...
-- `write_storage` (function) `src/tab.c:1628` `static int write_storage(int wfd, child_state *cs)` -- int32_t cnt = (int32_t)n; int rc = (write_full(wfd, &cnt, sizeof cnt) == 0) ?
-- `write_opens` (function) `src/tab.c:1642` `static int write_opens(int wfd, child_state *cs)` -- static int write_storage(int wfd, child_state *cs) { char *blob = NULL; size_t len = 0; int32_t dirty = (cs->js !=...
-- `child_next_timer_ms` (function) `src/tab.c:1654` `static int32_t child_next_timer_ms(child_state *cs)` -- Smallest pending JS timer delay (__nextTimerMs), or -1 when JS is absent, the * eval fails, or nothing is pending.
-- `child_handle_mutation` (function) `src/tab.c:1669` `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
-                        ...` -- Fire click handlers for node_id (OP_CLICK) or advance the virtual timer clock (OP_TICK), then re-derive the view so...
-- `child_handle_click` (function) `src/tab.c:1749` `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-- `child_handle_tick` (function) `src/tab.c:1753` `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-- `child_handle_event` (function) `src/tab.c:1763` `static void child_handle_event(int wfd, child_state *cs)`
-- `child_handle_mouse` (function) `src/tab.c:1811` `static void child_handle_mouse(int wfd, child_state *cs)` -- Handles a mouse DOM event (OP_MOUSE).
-- `geom_parent` (function) `src/tab.c:1841` `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
-- `child_handle_geom` (function) `src/tab.c:1849` `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)` -- OP_GEOM (spec/js_geom.md): installs the parent's laid-out geometry into the page's JS, aggregated into ancestors...
-- `child_handle_submit` (function) `src/tab.c:1875` `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` -- Fires a submit event on the form enclosing node_id.
-- `child_handle_eval` (function) `src/tab.c:1909` `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` -- Response: [ok:int32][is_exception:int32][value_len][value]. ok==0 means a worker-level failure (no page loaded); a...
-- `child_handle_decode_image` (function) `src/tab.c:1950` `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` -- Response: [ok:int32] then, when ok, [w:u32][h:u32][stride:u32][len:size_t][data].
-- `child_handle_decode_image_b64` (function) `src/tab.c:1972` `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)` -- data: URI images: the parent only sliced the base64 payload (pure pointer arithmetic, no interpretation); the base64...
-- `gen_session_key` (function) `src/tab.c:1984` `static uint64_t gen_session_key(void)`
-- `tab_worker_run` (function) `src/tab.c:2004` `static void tab_worker_run(int rfd, int wfd)` -- The confined request loop.
-- `EPIPE` (function) `src/tab.c:2006` `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
-- `tzset` (function) `src/tab.c:2022` `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
-- `depth` (function) `src/tab.c:2036` `* defense in depth (seccomp already excludes open/socket/exec);`
-- `parse_worker_fd` (function) `src/tab.c:2228` `static int parse_worker_fd(const char *s, int *out)` -- free(buf); free(url); free(cookies); free(storage); } child_reset_page(&cs); fb_buffer_free(&cs.log); _exit(0); } /*...
-- `tab_parse_worker_args` (function) `src/tab.c:2240` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-- `tab_worker_dispatch` (function) `src/tab.c:2250` `void tab_worker_dispatch(int argc, char **argv)`
-- `load` (function) `src/tab.c:2267` `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
-- `ignore_sigpipe` (function) `src/tab.c:2304` `static void ignore_sigpipe(void)` -- A write to a dead child must not kill the parent with SIGPIPE.
-- `tab_refresh_alive` (function) `src/tab.c:2311` `static void tab_refresh_alive(tab *t)`
-- `read_field` (function) `src/tab.c:2330` `static int read_field(int fd, char **out, size_t *out_len)` -- Read one length-prefixed owned field from the child, capped against * amplification. *out is NUL-terminated.
-- `read_view` (function) `src/tab.c:2346` `static int read_view(int fd, pv_view **out)` -- Reads a display list serialised by write_view into a fresh pv_view.
-- `tests` (function) `src/tab.c:2421` `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
-- `layout` (function) `src/tab.c:2528` `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
-- `column` (function) `src/tab.c:2539` `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
-- `read_console` (function) `src/tab.c:2874` `static int read_console(int fd, fb_buffer *out)` -- Reads the console section written by write_console into out (a zero-initialised fb_buffer).
-- `send_request` (function) `src/tab.c:2911` `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` -- if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt...
-- `io_failure` (function) `src/tab.c:2921` `static tab_status io_failure(tab *t)`
-- `exec_worker_child` (function) `src/tab.c:2929` `static void exec_worker_child(int rfd, int wfd)` -- Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other...
-- `tab_set_fetcher` (function) `src/tab.c:3001` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- `tab_set_css_sink` (function) `src/tab.c:3007` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
-- `tab_set_op_net_budget_ms` (function) `src/tab.c:3013` `void tab_set_op_net_budget_ms(tab *t, int ms)`
-- `tab_set_net_allowed` (function) `src/tab.c:3017` `void tab_set_net_allowed(tab *t, int allowed)`
-- `tab_set_css_allowed` (function) `src/tab.c:3022` `void tab_set_css_allowed(tab *t, int allowed)`
-- `tab_last_subreq_stats` (function) `src/tab.c:3027` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
-- `tab_set_identity` (function) `src/tab.c:3032` `void tab_set_identity(tab *t, const char *serialized)`
-- `tab_set_viewport_w` (function) `src/tab.c:3040` `void tab_set_viewport_w(tab *t, int px)`
-- `tab_set_cookies` (function) `src/tab.c:3045` `void tab_set_cookies(tab *t, const char *cookies)`
-- `tab_subreq_permitted` (function) `src/tab.c:3051` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- `tab_report_response_headers` (function) `src/tab.c:3065` `void tab_report_response_headers(const char *lines)`
-- `tab_inflight_request_headers` (function) `src/tab.c:3077` `const char *tab_inflight_request_headers(void)`
-- `answered` (function) `src/tab.c:3086` `* A refused frame is still consumed and answered (status 0), so the protocol never
- * desyncs. Re...`
-- `hist_ops_free` (function) `src/tab.c:3159` `static void hist_ops_free(tab_hist_op *ops, size_t n)`
-- `is_activation_event` (function) `src/tab.c:3224` `static int is_activation_event(const char *type)` -- HTML 6.4.2 activation-triggering input events: only these let a page open a * window.
-- `open_urls_free` (function) `src/tab.c:3233` `static void open_urls_free(char **u, size_t n)`
-- `read_opens` (function) `src/tab.c:3243` `static tab_status read_opens(tab *t, const char *page_url, int gesture,
-                         ...` -- Reads the window.open block (see write_opens).
-- `ws_ops_free` (function) `src/tab.c:3272` `static void ws_ops_free(tab_ws_op *ops, size_t n)`
-- `read_ws` (function) `src/tab.c:3281` `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` -- Reads the WebSocket block (see write_ws), bounded by JT_WS_MAX_OPS ops and JT_WS_MAX_BYTES of payload.
-- `gate_js_nav` (function) `src/tab.c:3350` `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` -- Gates a raw JS navigation request against the page URL in the trusted parent (Zero Trust: a compromised worker...
-- `tab_load` (function) `src/tab.c:3360` `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- `tab_load_ex` (function) `src/tab.c:3364` `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- `tab_load_full` (function) `src/tab.c:3368` `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
-            ...`
-- `tab_click` (function) `src/tab.c:3567` `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- `tab_tick` (function) `src/tab.c:3575` `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-- `tab_submit` (function) `src/tab.c:3585` `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` -- Dispatches a submit event on the form enclosing node_id.
-- `tab_read_view` (function) `src/tab.c:3693` `tab_status tab_read_view(tab *t, tab_page *out)` -- Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request...
-- `frames` (function) `src/tab.c:3699` `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...`
-- `tab_await_result` (function) `src/tab.c:3702` `static tab_status tab_await_result(tab *t)`
-- `tab_await_result_inner` (function) `src/tab.c:3710` `static tab_status tab_await_result_inner(tab *t)`
-- `tab_read_view_ex` (function) `src/tab.c:3720` `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
-- `tab_eval` (function) `src/tab.c:3815` `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- `tab_decode_image_op` (function) `src/tab.c:3856` `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
-        ...` -- Shared by tab_decode_image and tab_decode_image_data_url: sends `bytes` under opcode `op` and parses the...
-- `tab_decode_image` (function) `src/tab.c:3898` `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- `tab_decode_image_data_url` (function) `src/tab.c:3905` `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-- `tab_alive` (function) `src/tab.c:3924` `int tab_alive(const tab *t)`
-- `tab_child_pid` (function) `src/tab.c:3930` `pid_t tab_child_pid(const tab *t)`
-- `tab_close` (function) `src/tab.c:3934` `void tab_close(tab *t)`
-- `tab_page_free` (function) `src/tab.c:3951` `void tab_page_free(tab_page *p)`
-- `tab_eval_result_free` (function) `src/tab.c:3981` `void tab_eval_result_free(tab_eval_result *r)`
-- `tab_image_free` (function) `src/tab.c:3990` `void tab_image_free(tab_image *img)`
-- `tab_geometry_send` (function) `src/tab.c:4002` `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)` -- Writes one encoded geometry table and waits for its acknowledgement (serving any network the * observer callbacks it...
-- `geometry_encode` (function) `src/tab.c:4020` `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)`
-- `tab_set_geometry` (function) `src/tab.c:4030` `tab_status tab_set_geometry(tab *t, const jg_table *g)`
-- `job_discard` (function) `src/tab.c:4044` `static void job_discard(tab *t)`
-- `tab_async_sync` (function) `src/tab.c:4056` `static void tab_async_sync(tab *t)` -- Waits for a running job and DISCARDS its result: any other worker call is about to change * the page, so the...
-- `job_main` (function) `src/tab.c:4066` `static void *job_main(void *arg)`
-- `tab_async_fd` (function) `src/tab.c:4082` `int tab_async_fd(tab *t)`
-- `tab_async_busy` (function) `src/tab.c:4091` `int tab_async_busy(const tab *t)`
-- `job_start` (function) `src/tab.c:4095` `static tab_status job_start(tab *t)`
-- `tab_tick_async` (function) `src/tab.c:4108` `tab_status tab_tick_async(tab *t, int elapsed_ms)`
-- `tab_geometry_async` (function) `src/tab.c:4118` `tab_status tab_geometry_async(tab *t, const jg_table *g)`
-- `tab_async_finish` (function) `src/tab.c:4133` `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)`
-- `tab_popstate` (function) `src/tab.c:4155` `tab_status tab_popstate(tab *t, int index, tab_page *out)`
-- `tab_ws_event` (function) `src/tab.c:4162` `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
-       ...`
-- `tab_set_storage` (function) `src/tab.c:4182` `void tab_set_storage(tab *t, const char *blob, size_t len)`
-
-## src/text_case.c
-Depends on: `include/css.h`, `include/text_case.h`
-- `pair_parity` (function) `src/text_case.c:8` `static int pair_parity(uint32_t cp)` -- Latin Extended-A and the Cyrillic historic block pair letters on adjacent code points, uppercase first.
-- `tc_upper` (function) `src/text_case.c:18` `uint32_t tc_upper(uint32_t cp)`
-- `tc_lower` (function) `src/text_case.c:37` `uint32_t tc_lower(uint32_t cp)`
-- `tc_is_lower` (function) `src/text_case.c:54` `int tc_is_lower(uint32_t cp)`
-- `utf8_decode` (function) `src/text_case.c:61` `static size_t utf8_decode(const unsigned char *s, size_t n, uint32_t *cp)` -- Decodes one UTF-8 code point of s[0,n) into *cp.
-- `utf8_put` (function) `src/text_case.c:79` `static void utf8_put(uint32_t cp, size_t len, unsigned char *out)` -- if ((c >> 5) == 0x6) { if (n < 2 || (s[1] & 0xC0) != 0x80) return 0; cp = ((c & 0x1Fu) << 6) | (s[1] & 0x3Fu)...
-- `utf8_len_of` (function) `src/text_case.c:91` `static size_t utf8_len_of(uint32_t cp)`
-- `tc_transform` (function) `src/text_case.c:95` `size_t tc_transform(const char *s, size_t n, int transform, int word_start,
-                    c...`
-- `tc_smallcaps_runs` (function) `src/text_case.c:117` `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap)`
 
 
 Next: [API_p11.md](API_p11.md)

@@ -24,6 +24,7 @@
 #include "web_storage.h"
 #include "js_sandbox.h"
 #include "fb_panes.h"
+#include "fb_cmdline.h"
 #include "url.h"
 
 static const char HTML[] =
@@ -228,6 +229,29 @@ static void test_classlist_backs_class_attr(void **state) {
     EXPECT(f, "var e=document.getElementById('go'); e.classList.remove('btn');"
               "e.classList.contains('btn')", "false");
     EXPECT(f, "var e=document.getElementById('go'); e.classList.toggle('on'); e.classList.contains('on')", "true");
+}
+
+static void test_classlist_is_iterable_like_domtokenlist(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var o=[]; for (var c of document.getElementById('go').classList) o.push(c); o.join()", "btn");
+    EXPECT(f, "var d=document.implementation.createHTMLDocument(''), fr=document.createDocumentFragment();"
+              "[d.getRootNode()===d, fr.getRootNode()===fr].join()", "true,true");
+    EXPECT(f, "var e=document.getElementById('go'); e.classList.add('big');"
+              "var o=[]; e.classList.forEach(function(c,i){ o.push(i+c); }); o.join()", "0btn,1big");
+    EXPECT(f, "var e=document.getElementById('go'); e.classList.value='a b';"
+              "[e.classList.value, e.className, [...e.classList].join('+'), e.classList.length].join('|')",
+              "a b|a b|a+b|2");
+    EXPECT(f, "var e=document.getElementById('go');"
+              "[e.classList.contains('zz'), Array.from(e.classList.entries()).length, e.classList[0]].join()",
+              "false,2,a");
+}
+
+static void test_canvas_element_inherits_html_element(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var c=document.createElement('canvas'); c.style.display='none';"
+              "[c instanceof HTMLElement, c instanceof HTMLCanvasElement, c.style.display,"
+              " typeof c.addEventListener, typeof c.getContext, c.width].join()",
+              "true,true,none,function,function,300");
 }
 
 static void test_document_fragment_reparents(void **state) {
@@ -614,6 +638,68 @@ static void test_shadow_mirror_inner_html(void **state) {
     EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
               "var sr=h.attachShadow({mode:'open'}); sr.innerHTML='<b>bold</b>';"
               "h.textContent", "bold");
+}
+
+/* Lit renders with shadowRoot.insertBefore(importNode(template.content), marker): a fragment
+ * argument must expand into the root's children (and mirror into the host), for insertBefore
+ * with and without a reference node, and for appendChild. */
+static void test_shadow_insert_fragment(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var sr=h.attachShadow({mode:'open'});"
+              "var t=document.createElement('template'); t.innerHTML='<p class=a>x</p><label>y</label>';"
+              "sr.insertBefore(document.importNode(t.content,true),null);"
+              "sr.querySelector('label')!==null && sr.childNodes.length===2 && h.textContent", "xy");
+    EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var sr=h.attachShadow({mode:'open'}); var m=document.createComment('m'); sr.appendChild(m);"
+              "var t=document.createElement('template'); t.innerHTML='<i>1</i><i>2</i>';"
+              "sr.insertBefore(document.importNode(t.content,true),m);"
+              "sr.childNodes.length===3 && sr.firstChild.nodeName==='I' && sr.lastChild===m && h.textContent", "12");
+    EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var sr=h.attachShadow({mode:'open'});"
+              "var t=document.createElement('template'); t.innerHTML='<b>z</b>';"
+              "sr.appendChild(document.importNode(t.content,true));"
+              "sr.querySelector('b')!==null && h.textContent", "z");
+    /* Lit's ChildPart: marker.parentNode is the ROOT, and inserting through it lands in the root */
+    EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var sr=h.attachShadow({mode:'open'}); var m=document.createComment(''); sr.insertBefore(m,null);"
+              "var d=document.createElement('div'); sr.appendChild(d);"
+              "var t=document.createElement('template'); t.innerHTML='<label>y</label>';"
+              "m.parentNode.insertBefore(document.importNode(t.content,true),null);"
+              "m.parentNode===sr && d.parentNode===sr && d.parentElement===null && sr.querySelector('label')!==null"
+              " && h.parentNode===document.body && d.getRootNode()===sr", "true");
+    EXPECT(f, "var fr=document.createDocumentFragment(); var a=document.createElement('p'); fr.appendChild(a);"
+              "var g=document.createDocumentFragment(); var b=document.createElement('p'); g.appendChild(b);"
+              "g.insertBefore(fr,b); g.childNodes.length===2 && g.firstChild===a && fr.childNodes.length===0", "true");
+}
+
+/* CEReactions: a custom element inserted into a shadow root is upgraded (and connected) before
+ * the insertion call returns, exactly as in the light tree; Lit reads methods off such children
+ * in firstUpdated, right after the render. */
+static void test_shadow_insert_upgrades_custom_elements(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "class XH extends HTMLElement{ assoc(){return 1;} connectedCallback(){ window.__cc=(window.__cc||0)+1; } }"
+              "customElements.define('x-h',XH);"
+              "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var sr=h.attachShadow({mode:'open'});"
+              "var t=document.createElement('template'); t.innerHTML='<div><x-h></x-h></div>';"
+              "sr.appendChild(document.importNode(t.content,true));"
+              "var x=sr.querySelector('x-h'); typeof x.assoc+','+window.__cc", "function,1");
+}
+
+/* <slot>.assignedNodes/assignedElements: the host's light children (never the shadow's own
+ * top-level nodes), by slot name; Lit components read them in firstUpdated. */
+static void test_slot_assigned_nodes(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var a=document.createElement('b'); var b=document.createElement('i'); b.setAttribute('slot','x');"
+              "h.appendChild(a); h.appendChild(b); h.appendChild(document.createTextNode('t'));"
+              "var sr=h.attachShadow({mode:'open'});"
+              "var s1=document.createElement('slot'); var s2=document.createElement('slot'); s2.setAttribute('name','x');"
+              "sr.appendChild(s1); sr.appendChild(s2);"
+              "[s1.assignedNodes().length, s1.assignedElements().length, s1.assignedElements()[0]===a,"
+              " s2.assignedNodes()[0]===b, s2.assignedElements().length, document.createElement('slot').assignedNodes().length].join()",
+           "2,1,true,true,1,0");
 }
 
 /* matchMedia evaluates for real against the normalized 1920x1080 desktop
@@ -2089,6 +2175,36 @@ static void test_create_html_document_is_detached(void **state) {
            "2,true,true,T,HTML,HEAD,2,");
 }
 
+static void test_url_members_shadowed_on_non_anchor(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "'use strict'; var d=document.createElement('div'); d.search=5; d.host='h'; d.hash='x';"
+              "var a=document.createElement('a'); a.href='https://e.test/p?q=1#z';"
+              "[d.search,d.host,d.hash,a.search,a.hash].join()",
+           "5,h,x,?q=1,#z");
+}
+
+static void test_slotted_nodes_unrendered_when_slot_hidden(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var h=document.createElement('div'); document.body.appendChild(h);"
+              "var sr=h.attachShadow({mode:'open'}); sr.innerHTML='<div hidden><slot name=a></slot></div><slot name=b></slot>';"
+              "h.innerHTML='<i slot=a id=x></i><i slot=b id=y></i><i slot=zz id=z></i>';"
+              "__shSync(); var m=function(i){ return h.querySelector('#'+i).hasAttribute('data-fzu'); };"
+              "[m('x'),m('y'),m('z')].join()",
+           "true,false,true");
+}
+
+static void test_slotted_nodes_unrendered_through_nested_shadow(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var tip=document.createElement('div'); document.body.appendChild(tip);"
+              "var tsr=tip.attachShadow({mode:'open'});"
+              "var pop=document.createElement('div'); tsr.appendChild(pop);"
+              "var psr=pop.attachShadow({mode:'open'}); psr.innerHTML='<div hidden><slot></slot></div>';"
+              "var inner=document.createElement('slot'); inner.setAttribute('name','content'); pop.appendChild(inner);"
+              "tip.innerHTML='<span slot=content id=t>Open</span>';"
+              "__shSync(); tip.querySelector('#t').hasAttribute('data-fzu')",
+           "true");
+}
+
 static void test_tree_walker_reverse_navigation(void **state) {
     fixture *f = (fixture *)*state;
     EXPECT(f, "var r=document.createElement('div'); r.innerHTML='<a id=a><i id=i></i></a><b id=b></b><u id=u></u>';"
@@ -2268,6 +2384,54 @@ static void test_freebug_script_pane_lists_and_numbers_source(void **state) {
     js_result_free(&r);
     run_pane(f, FBP_SCRIPT, "9", &r);
     assert_string_equal(r.value, "(no script #9)");
+    js_result_free(&r);
+}
+
+static void test_freebug_dom_and_storage_panes(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jd_install_repl_api(f->ctx), JD_OK);
+    js_result r;
+    run_pane(f, FBP_DOM, "#main", &r);
+    assert_non_null(strstr(r.value, "<div>  nodeType 1"));
+    assert_non_null(strstr(r.value, "class = \"container box\""));
+    assert_non_null(strstr(r.value, "path   "));
+    assert_non_null(strstr(r.value, "div#main"));
+    assert_non_null(strstr(r.value, "== geometry =="));
+    js_result_free(&r);
+    run_pane(f, FBP_DOM, "#absent", &r);
+    assert_string_equal(r.value, "(no element matches #absent)");
+    js_result_free(&r);
+    run_pane(f, FBP_STORAGE, "", &r);
+    assert_non_null(strstr(r.value, "== cookies (script-visible) =="));
+    assert_non_null(strstr(r.value, "== localStorage =="));
+    js_result_free(&r);
+}
+
+/* The completion expression resolves the path the user typed through descriptors: an accessor ON
+ * that path is followed (Enter would evaluate it too, and document.body is one), nothing else runs. */
+static void test_freebug_completion_follows_typed_accessors_only(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "globalThis.hit=0; globalThis.obj={alpha:1,get trap(){ globalThis.hit=1; return {inner:1}; }}; 0", "0");
+    char expr[1024];
+    assert_true(fbc_names_expr("obj", expr, sizeof expr) > 0);
+    js_result r;
+    assert_int_equal(run(f, expr, &r), JS_OK);
+    assert_non_null(strstr(r.value, "alpha"));
+    assert_non_null(strstr(r.value, "trap"));
+    js_result_free(&r);
+    assert_true(fbc_names_expr("obj.trap", expr, sizeof expr) > 0);
+    assert_int_equal(run(f, expr, &r), JS_OK);
+    assert_non_null(strstr(r.value, "inner"));         /* the typed accessor is followed */
+    js_result_free(&r);
+    EXPECT(f, "String(globalThis.hit)", "1");
+    EXPECT(f, "globalThis.hit=0; globalThis.o2={get a(){ globalThis.hit=2; return 1; }, b:2}; 0", "0");
+    assert_true(fbc_names_expr("o2", expr, sizeof expr) > 0);
+    assert_int_equal(run(f, expr, &r), JS_OK);         /* listing the owner's names runs no getter */
+    js_result_free(&r);
+    EXPECT(f, "String(globalThis.hit)", "0");
+    assert_true(fbc_names_expr("document", expr, sizeof expr) > 0);
+    assert_int_equal(run(f, expr, &r), JS_OK);
+    assert_non_null(strstr(r.value, "querySelector"));
     js_result_free(&r);
 }
 
@@ -2514,6 +2678,101 @@ static void test_ws_lifecycle_records_ops_and_fires_events(void **state) {
     assert_int_equal(jt_ws_event(f->ctx, id, JT_WSE_CLOSE, 1000, "bye", 3), 1);
     EXPECT(f, "L.join(',')", "open1,t:yo \"q\",b:2:7,close1000true3");
     assert_int_equal(jt_ws_event(f->ctx, 999, JT_WSE_TEXT, 0, "x", 1), 0);
+}
+
+/* --- iframes + cross-window postMessage (spec/frame_broker.md) --- */
+
+static void test_frames_top_document_parent_is_self(void **state) {
+    fixture *f = (fixture *)*state;
+    set_loc(f, "https://top.test/");
+    assert_int_equal(jt_enable_frames(f->ctx, 0), JD_OK);
+    EXPECT(f, "[window.parent===window, window.top===window].join()", "true,true");
+}
+
+static void test_frames_child_document_posts_to_parent_and_top(void **state) {
+    fixture *f = (fixture *)*state;
+    set_loc(f, "https://c.test/anchor");
+    assert_int_equal(jt_enable_frames(f->ctx, 3), JD_OK);
+    EXPECT(f, "[window.parent!==window, window.top!==window].join()", "true,true");
+    EXPECT(f, "parent.postMessage({a:1},'https://top.test'); top.postMessage('x','*'); 'ok'", "ok");
+    jt_ws_op ops[8];
+    size_t n = jt_take_ws(f->ctx, ops, 8);
+    assert_int_equal(n, 2);
+    assert_int_equal(ops[0].kind, JT_WS_FRAME_POST);
+    assert_int_equal(ops[0].id, -1);
+    assert_string_equal(ops[0].data, "https://top.test\n{\"a\":1}");
+    assert_int_equal(ops[1].id, -2);
+    assert_string_equal(ops[1].data, "*\n\"x\"");
+    jt_ws_ops_free(ops, n);
+}
+
+static void test_frames_blank_iframe_has_writable_document(void **state) {
+    fixture *f = (fixture *)*state;
+    set_loc(f, "https://top.test/p/");
+    assert_int_equal(jt_enable_frames(f->ctx, 0), JD_OK);
+    EXPECT(f, "var i=document.createElement('iframe'); document.body.appendChild(i);"
+              "var d=i.contentDocument; d.open(); d.write('<!DOCTYPE html><html><body><p id=\\'q\\'>hi</p></body></html>'); d.close();"
+              "[d===i.contentWindow.document, d.getElementById('q')&&d.getElementById('q').textContent,"
+              " i.contentWindow.parent===window, d.body&&d.body.tagName].join()",
+              "true,hi,true,BODY");
+    jt_ws_op ops[4];
+    assert_int_equal(jt_take_ws(f->ctx, ops, 4), 0);
+}
+
+static void test_frames_iframe_discovery_and_child_post(void **state) {
+    fixture *f = (fixture *)*state;
+    set_loc(f, "https://top.test/p/");
+    assert_int_equal(jt_enable_frames(f->ctx, 0), JD_OK);
+    EXPECT(f, "var i=document.createElement('iframe'); i.setAttribute('src','/anchor?k=1');"
+              "document.body.appendChild(i); typeof i.contentWindow.postMessage", "function");
+    jt_ws_op ops[8];
+    size_t n = jt_take_ws(f->ctx, ops, 8);
+    assert_int_equal(n, 1);
+    assert_int_equal(ops[0].kind, JT_WS_FRAME_OPEN);
+    assert_true(ops[0].id > 0);
+    assert_string_equal(ops[0].data, "https://top.test/anchor?k=1");
+    int tok = ops[0].id;
+    jt_ws_ops_free(ops, n);
+
+    EXPECT(f, "i.contentWindow.postMessage([1,2],'*'); 'sent'", "sent");
+    n = jt_take_ws(f->ctx, ops, 8);
+    assert_int_equal(n, 1);
+    assert_int_equal(ops[0].kind, JT_WS_FRAME_POST);
+    assert_int_equal(ops[0].id, tok);
+    assert_string_equal(ops[0].data, "*\n[1,2]");
+    jt_ws_ops_free(ops, n);
+
+    EXPECT(f, "i.parentNode.removeChild(i); 'gone'", "gone");
+    n = jt_take_ws(f->ctx, ops, 8);
+    assert_int_equal(n, 1);
+    assert_int_equal(ops[0].kind, JT_WS_FRAME_CLOSE);
+    assert_int_equal(ops[0].id, tok);
+    jt_ws_ops_free(ops, n);
+}
+
+static void test_frames_message_delivery_sets_origin_and_source(void **state) {
+    fixture *f = (fixture *)*state;
+    set_loc(f, "https://c.test/anchor");
+    assert_int_equal(jt_enable_frames(f->ctx, 3), JD_OK);
+    EXPECT(f, "var got=[]; window.addEventListener('message',function(e){"
+              "got.push(e.data.k+'|'+e.origin+'|'+(e.source===window.parent)); }); 'armed'", "armed");
+    const char *m = "https://top.test\np\n{\"k\":2}";
+    assert_int_equal(jt_ws_event(f->ctx, 0, JT_WSE_FRAME_MSG, 0, m, strlen(m)), 1);
+    EXPECT(f, "got.join(',')", "2|https://top.test|true");
+    /* a hostile payload is parsed as data, never evaluated */
+    const char *bad = "https://top.test\np\nglobalThis.pwn=1";
+    assert_int_equal(jt_ws_event(f->ctx, 0, JT_WSE_FRAME_MSG, 0, bad, strlen(bad)), 0);
+    EXPECT(f, "typeof globalThis.pwn", "undefined");
+}
+
+static void test_frames_oversize_payload_rejected(void **state) {
+    fixture *f = (fixture *)*state;
+    set_loc(f, "https://c.test/anchor");
+    assert_int_equal(jt_enable_frames(f->ctx, 3), JD_OK);
+    EXPECT(f, "var e='none'; try{ parent.postMessage('x'.repeat(2000000),'*'); }catch(x){ e=x.name; } e",
+              "DataCloneError");
+    jt_ws_op ops[8];
+    assert_int_equal(jt_take_ws(f->ctx, ops, 8), 0);
 }
 
 static void test_ws_rejects_plaintext_and_caps(void **state) {
@@ -3436,6 +3695,9 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_dynamic_script_src_loads_async_and_reports_load_or_error, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_append, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_inner_html, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_shadow_insert_fragment, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_slot_assigned_nodes, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_shadow_insert_upgrades_custom_elements, setup, teardown),
         cmocka_unit_test_setup_teardown(test_match_media_normalized_viewport, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_node_identity, setup, teardown),
         cmocka_unit_test_setup_teardown(test_element_attributes_named_node_map, setup, teardown),
@@ -3530,6 +3792,8 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_freebug_css_pane_lists_rules_computed_and_box, setup, teardown),
         cmocka_unit_test_setup_teardown(test_freebug_script_pane_lists_and_numbers_source, setup, teardown),
         cmocka_unit_test_setup_teardown(test_freebug_net_pane_empty_and_selector_is_data, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_freebug_dom_and_storage_panes, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_freebug_completion_follows_typed_accessors_only, setup, teardown),
         cmocka_unit_test_setup_teardown(test_repl_api_inspect_and_event_listeners, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_interfaces_and_events, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_dommatrix_and_imagedata, setup, teardown),
@@ -3539,6 +3803,9 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_fragment_queries, setup, teardown),
         cmocka_unit_test_setup_teardown(test_tree_walker_reverse_navigation, setup, teardown),
         cmocka_unit_test_setup_teardown(test_create_html_document_is_detached, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_url_members_shadowed_on_non_anchor, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_slotted_nodes_unrendered_when_slot_hidden, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_slotted_nodes_unrendered_through_nested_shadow, setup, teardown),
         cmocka_unit_test_setup_teardown(test_indexeddb_core, setup, teardown),
         cmocka_unit_test_setup_teardown(test_geolocation_fixed_coordinates, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_streams, setup, teardown),
@@ -3552,6 +3819,11 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_history_go_records_delta, setup, teardown),
         cmocka_unit_test_setup_teardown(test_history_is_bounded, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ws_absent_until_enabled, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_frames_top_document_parent_is_self, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_frames_child_document_posts_to_parent_and_top, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_frames_iframe_discovery_and_child_post, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_frames_message_delivery_sets_origin_and_source, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_frames_oversize_payload_rejected, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ws_lifecycle_records_ops_and_fires_events, setup, teardown),
         cmocka_unit_test_setup_teardown(test_ws_rejects_plaintext_and_caps, setup, teardown),
         cmocka_unit_test_setup_teardown(test_storage_untrusted_stays_ephemeral, setup, teardown),
@@ -3605,6 +3877,9 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_video_from_scripts_jkanime_style, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_from_scripts_video_data_is_variable, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_from_scripts_relative_resolved, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_classlist_is_iterable_like_domtokenlist, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_canvas_element_inherits_html_element, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_frames_blank_iframe_has_writable_document, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_from_scripts_video_data_string, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_from_scripts_no_video, setup, teardown),
         cmocka_unit_test(test_video_from_scripts_null_args),

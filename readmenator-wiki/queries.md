@@ -4,7 +4,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 ## Suggested
 
-### Q: What does browser_ui.c depend on, and what depends on it? (56 connections)
+### Q: What does browser_ui.c depend on, and what depends on it? (58 connections)
 
 - Status: unanswered
 
@@ -16,11 +16,11 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: How are the 59 files in 'include: browser_ui' related to each other?
+### Q: How are the 52 files in 'include: css' related to each other?
 
 - Status: unanswered
 
-### Q: Why are block_flow.c and test_renderer.c connected through 8 hops across 4 communities?
+### Q: Why are frame_broker.c and sha2.c connected through 9 hops across 4 communities?
 
 - Status: unanswered
 
