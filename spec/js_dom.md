@@ -682,3 +682,20 @@ Medido barriendo los sitios de `js.conf` (reddit, x.com, OSM):
   completo (`previousNode`/`lastChild` son stubs) y hace desaparecer el masthead. Ver memoria
   `freedom-shadow-scope-shadydom-trap-tanda71-2026-10-26`.
 
+
+## 7s. Fragmentos que ceden al prototipo y documento de iframe en blanco (2026-10-27)
+
+- Dado un `DocumentFragment` creado por `createDocumentFragment()` al que una libreria le cambia el
+  prototipo (ShadyDOM: `frag.__proto__ = ShadyRoot.prototype`), cuando se lee `childNodes`,
+  `querySelector`, `appendChild`... entonces responde el miembro del prototipo NUEVO, no el propio
+  del motor. Un fragmento sin tocar se comporta igual que antes (`protoYield`, una comparacion de
+  prototipo por acceso). Un prototipo que es el propio fragmento no recursiona.
+- Matiza el "descartado a proposito" de 7r: los miembros siguen siendo propios (no se mueven al
+  prototipo); solo ceden. Efecto medido en YouTube: `@query('#guide-button')` deja de dar `null`
+  (adios `invalid value used as WeakMap key`); el PNG de la portada es identico byte a byte.
+- Dado el documento de un iframe sin `src`/`about:blank` (allow∩js), cuando TinyMCE enlaza
+  listeners, entonces `document` y `contentWindow` son `EventTarget` reales
+  (`addEventListener`/`removeEventListener`/`dispatchEvent`) y `document.defaultView` es la ventana.
+  JustPaste: 0 errores de consola y la app monta.
+- Abierto: `PAGE_TOKEN` en YouTube (un observer de `ytd-app` resuelve el token antes de que el hijo
+  `ytd-page-manager` ejecute `ready`).

@@ -1072,6 +1072,24 @@ static const char JD_DOCUMENT_SHIM[] =
     /* A DocumentFragment (and so a ShadowRoot) is an EventTarget: its key is registered lazily,
      * on the first listener, so the jQuery-style fragments that never listen cost nothing. */
     "  var fragSeq=0;"
+    /* A fragment's members are own properties (the prototype must stay inert, see
+     * spec/js_dom.md 7r), so a library that swaps the prototype after creation would be shadowed:
+     * ShadyDOM builds its ShadowRoot as createDocumentFragment() with __proto__ = ShadyRoot.prototype,
+     * and the engine's physical child list hid the logical one (Polymer @query found nothing).
+     * protoYield makes each own function/accessor defer to the CURRENT prototype once it is no
+     * longer the original; an untouched fragment pays one getPrototypeOf compare per access. */
+    "  function protoLookup(o,n){ for(;o;o=Object.getPrototypeOf(o)){ var d=Object.getOwnPropertyDescriptor(o,n); if(d) return d; } return null; }"
+    "  function protoYield(f){ var base=Object.getPrototypeOf(f), names=Object.getOwnPropertyNames(f);"
+    "    names.forEach(function(n){ if(n.charAt(0)==='_') return; var d=Object.getOwnPropertyDescriptor(f,n); if(!d||!d.configurable) return;"
+    "      if(d.get){ var g=d.get, st=d.set;"
+    "        var ng=function(){ var s=(this&&typeof this==='object')?this:f, p=Object.getPrototypeOf(s);"
+    "          if(p!==base){ var pd=protoLookup(p,n); if(pd&&pd.get&&pd.get!==ng) return pd.get.call(s); if(pd&&!pd.get&&('value' in pd)) return pd.value; } return g.call(s); };"
+    "        Object.defineProperty(f,n,{configurable:true,enumerable:d.enumerable,get:ng,set:st}); }"
+    "      else if(typeof d.value==='function'){ var fn=d.value;"
+    "        var nf=function(){ var s=(this&&typeof this==='object')?this:f, p=Object.getPrototypeOf(s);"
+    "          if(p!==base){ var pd=protoLookup(p,n); if(pd&&typeof pd.value==='function'&&pd.value!==nf) return pd.value.apply(s,arguments); } return fn.apply(s,arguments); };"
+    "        Object.defineProperty(f,n,{configurable:true,enumerable:d.enumerable,writable:true,value:nf}); } });"
+    "    return f; }"
     "  function mkFrag(){ var kids=[]; var fk=null;"
     "    function fkey(){ if(fk===null){ fk='oF'+(++fragSeq); __G.__objRegister('F'+fragSeq,f); } return fk; }"
     "function flat(a){ var out=[]; for(var i=0;i<a.length;i++){ var c=a[i];"
@@ -1096,7 +1114,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "    get childElementCount(){ return kids.length; }, hasChildNodes:function(){ return kids.length>0; },"
     "    getElementById:function(id){ var r=fq('[id=\\\"'+String(id).replace(/[\\\"\\\\]/g,'\\\\$&')+'\\\"]',true); return r.length?r[0]:null; },"
     "    get firstElementChild(){ for(var i=0;i<kids.length;i++) if(kids[i]&&kids[i].nodeType===1) return kids[i]; return null; },"
-    "    querySelector:function(s){ var r=fq(String(s),true); return r.length?r[0]:null; }, querySelectorAll:function(s){ return fq(String(s),false); } }; return f; }"
+    "    querySelector:function(s){ var r=fq(String(s),true); return r.length?r[0]:null; }, querySelectorAll:function(s){ return fq(String(s),false); } }; return protoYield(f); }"
     /* A DocumentFragment over real nodes: every member delegates to the holder element that owns
      * them. __frag is a fresh snapshot, which nodesOf() moves natively into the new parent. */
     "  function mkHolderFrag(h){"
@@ -1120,7 +1138,7 @@ static const char JD_DOCUMENT_SHIM[] =
     "      addEventListener:function(){ return h.addEventListener.apply(h,arguments); },"
     "      removeEventListener:function(){ return h.removeEventListener.apply(h,arguments); },"
     "      dispatchEvent:function(e){ return h.dispatchEvent(e); } };"
-    "    return f; }"
+    "    return protoYield(f); }"
     "  d.createDocumentFragment=function(){ return mkFrag(); };"
     "  d.append=function(){ var r=tagOne('html'); if(r) r.append.apply(r,arguments); };"
     "  d.prepend=function(){ var r=tagOne('html'); if(r) r.prepend.apply(r,arguments); };"

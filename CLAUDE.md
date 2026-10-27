@@ -414,6 +414,8 @@ Cada línea es la decisión + su porqué; el detalle vive en `spec/`, en `git lo
 
 - **Tanda 74 (oct 26) — huecos de plataforma JS medidos en el barrido de consola: `classList` DOMTokenList completo, `<canvas>` heredaba de nada (sin `style`), `contentDocument` de iframe en blanco, `getRootNode` en documentos/fragmentos desprendidos.** Barrido: github/HF 0 errores. Abierto: masthead de YouTube (`#guide-button` null), pintar iframes. `[[freedom-js-platform-gaps-tanda74-2026-10-26]]`
 
+- **Tanda 75 (oct 27) — fragmentos que ceden al prototipo (ShadyDOM) y documento de iframe en blanco como EventTarget.** YouTube `guideButton` ya no es null (WeakMap), JustPaste 0 errores de consola; PNG de YouTube idéntico, ASan/UBSan + `fuzz-jsdom` limpios. Abierto: `PAGE_TOKEN` de YouTube. `[[freedom-fragment-proto-yield-tanda75-2026-10-27]]`
+
 ### 7.4 Tandas de paridad 21–25
 
 - **Tanda 21 (sep 6) — "sale del flujo" necesita ancla, y el bloque contenedor de un contenedor SIN caja era el de su primer ítem.** `[[freedom-oof-leaves-flow-anchor-2026-09-06]]`

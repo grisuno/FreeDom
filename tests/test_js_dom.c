@@ -2163,6 +2163,23 @@ static void test_fragment_queries(void **state) {
            "true,2,true,true,1,");
 }
 
+/* ShadyDOM builds its ShadowRoot as a fragment whose prototype is swapped (frag.__proto__ =
+ * ShadyRoot.prototype): the swapped prototype's members must win over the engine's own, or the
+ * root keeps reading the physical (empty) child list and Polymer's @query finds nothing. */
+static void test_fragment_yields_to_replaced_prototype(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var mk=function(){ var p={};"
+              "Object.defineProperty(p,'childNodes',{get:function(){return ['L1','L2'];}});"
+              "p.querySelector=function(s){return 'logical:'+s;};"
+              "p.appendChild=function(c){return 'logical-append';}; return p; };"
+              "var fr=document.createDocumentFragment(); Object.setPrototypeOf(fr,mk());"
+              "[fr.childNodes.length, fr.querySelector('#x'), fr.appendChild(document.createElement('i'))].join()",
+           "2,logical:#x,logical-append");
+    EXPECT(f, "var fr=document.createDocumentFragment(), a=document.createElement('div'); a.id='x'; fr.appendChild(a);"
+              "[fr.childNodes.length, fr.querySelector('#x')===a, fr.firstChild===a].join()",
+           "1,true,true");
+}
+
 /* jQuery's support test does createHTMLDocument("").body.innerHTML=...: it must be a detached
  * document, never the page (it used to wipe the real <body> of every jQuery 3 page). */
 static void test_create_html_document_is_detached(void **state) {
@@ -2715,6 +2732,21 @@ static void test_frames_blank_iframe_has_writable_document(void **state) {
               "[d===i.contentWindow.document, d.getElementById('q')&&d.getElementById('q').textContent,"
               " i.contentWindow.parent===window, d.body&&d.body.tagName].join()",
               "true,hi,true,BODY");
+    jt_ws_op ops[4];
+    assert_int_equal(jt_take_ws(f->ctx, ops, 4), 0);
+}
+
+/* TinyMCE binds its listeners to the frame's document and window: both must be real event targets. */
+static void test_frames_blank_iframe_document_and_window_are_event_targets(void **state) {
+    fixture *f = (fixture *)*state;
+    set_loc(f, "https://top.test/p/");
+    assert_int_equal(jt_enable_frames(f->ctx, 0), JD_OK);
+    EXPECT(f, "var i=document.createElement('iframe'); document.body.appendChild(i);"
+              "var d=i.contentDocument, w=i.contentWindow, n=0, h=function(){ n++; };"
+              "d.addEventListener('x',h); w.addEventListener('y',h);"
+              "d.dispatchEvent({type:'x'}); w.dispatchEvent({type:'y'}); d.removeEventListener('x',h); d.dispatchEvent({type:'x'});"
+              "[typeof d.addEventListener, d.defaultView===w, n].join()",
+              "function,true,2");
     jt_ws_op ops[4];
     assert_int_equal(jt_take_ws(f->ctx, ops, 4), 0);
 }
@@ -3801,6 +3833,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_form_elements_collection, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_styles_are_scoped, setup, teardown),
         cmocka_unit_test_setup_teardown(test_fragment_queries, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_fragment_yields_to_replaced_prototype, setup, teardown),
         cmocka_unit_test_setup_teardown(test_tree_walker_reverse_navigation, setup, teardown),
         cmocka_unit_test_setup_teardown(test_create_html_document_is_detached, setup, teardown),
         cmocka_unit_test_setup_teardown(test_url_members_shadowed_on_non_anchor, setup, teardown),
@@ -3880,6 +3913,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_classlist_is_iterable_like_domtokenlist, setup, teardown),
         cmocka_unit_test_setup_teardown(test_canvas_element_inherits_html_element, setup, teardown),
         cmocka_unit_test_setup_teardown(test_frames_blank_iframe_has_writable_document, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_frames_blank_iframe_document_and_window_are_event_targets, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_from_scripts_video_data_string, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_from_scripts_no_video, setup, teardown),
         cmocka_unit_test(test_video_from_scripts_null_args),
