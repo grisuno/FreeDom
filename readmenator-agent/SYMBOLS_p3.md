@@ -3,6 +3,14 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `CAR_INLINE_SPEC` | macro | `include/css_atrule.h:18` | `#define CAR_INLINE_SPEC` |
+| `CAR_LAYER_NAME_MAX` | macro | `include/css_atrule.h:17` | `#define CAR_LAYER_NAME_MAX` |
+| `CAR_MAX_DEPTH` | macro | `include/css_atrule.h:15` | `#define CAR_MAX_DEPTH` |
+| `CAR_MAX_LAYERS` | macro | `include/css_atrule.h:16` | `#define CAR_MAX_LAYERS` |
+| `FREEDOM_CSS_ATRULE_H` | macro | `include/css_atrule.h:2` | `#define FREEDOM_CSS_ATRULE_H` |
+| `car_effective_spec` | function | `include/css_atrule.h:44` | `int car_effective_spec(int spec, int layer, int important);` |
+| `car_layer_rank` | function | `include/css_atrule.h:40` | `int car_layer_rank(car_layers *L, const char *name, size_t len);` |
+| `car_layers` | struct | `include/css_atrule.h:31` | `` |
 | `car_ops` | struct | `include/css_atrule.h:22` | `` |
 | `car_supports` | function | `include/css_atrule.h:29` | `int car_supports(const char *s, size_t a, size_t b, const car_ops *ops);` |
 | `CB_AUTO_REJECT` | macro | `include/css_box.h:10` | `#define CB_AUTO_REJECT` |
@@ -367,14 +375,17 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `fc_interval_ms` | function | `include/frame_clock.h:23` | `int fc_interval_ms(const fc_clock *c);` |
 | `fc_needs_tick` | function | `include/frame_clock.h:22` | `int fc_needs_tick(const fc_clock *c);` |
 | `fc_set_active` | function | `include/frame_clock.h:21` | `void fc_set_active(fc_clock *c, int active);` |
-| `FH_MAX_DEPTH` | macro | `include/frame_host.h:17` | `#define FH_MAX_DEPTH` |
+| `FH_MAX_DEPTH` | macro | `include/frame_host.h:18` | `#define FH_MAX_DEPTH` |
 | `FREEDOM_FRAME_HOST_H` | macro | `include/frame_host.h:2` | `#define FREEDOM_FRAME_HOST_H` |
-| `fh_apply_top` | function | `include/frame_host.h:35` | `void fh_apply_top(fh_host *h, const tab_page *page);` |
-| `fh_count` | function | `include/frame_host.h:42` | `int fh_count(const fh_host *h);` |
-| `fh_free` | function | `include/frame_host.h:31` | `void fh_free(fh_host *h);` |
-| `fh_host` | type_alias | `include/frame_host.h:18` | `typedef struct fh_host fh_host;` |
-| `fh_new` | function | `include/frame_host.h:27` | `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` |
-| `fh_tick` | function | `include/frame_host.h:39` | `int fh_tick(fh_host *h, int elapsed_ms);` |
+| `fh_apply_top` | function | `include/frame_host.h:36` | `void fh_apply_top(fh_host *h, const tab_page *page);` |
+| `fh_count` | function | `include/frame_host.h:43` | `int fh_count(const fh_host *h);` |
+| `fh_frame_view` | function | `include/frame_host.h:49` | `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);` |
+| `fh_free` | function | `include/frame_host.h:32` | `void fh_free(fh_host *h);` |
+| `fh_generation` | function | `include/frame_host.h:52` | `unsigned fh_generation(const fh_host *h);` |
+| `fh_host` | type_alias | `include/frame_host.h:19` | `typedef struct fh_host fh_host;` |
+| `fh_new` | function | `include/frame_host.h:28` | `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` |
+| `fh_tick` | function | `include/frame_host.h:40` | `int fh_tick(fh_host *h, int elapsed_ms);` |
+| `it` | function | `include/frame_host.h:46` | `* confined worker last built it (NULL when no live frame has that URL);` |
 | `FB_MAX_ENTRIES` | macro | `include/freebug.h:56` | `#define FB_MAX_ENTRIES` |
 | `FB_MAX_ENTRY_BYTES` | macro | `include/freebug.h:57` | `#define FB_MAX_ENTRY_BYTES` |
 | `FB_MAX_FILE_BYTES` | macro | `include/freebug.h:62` | `#define FB_MAX_FILE_BYTES` |
@@ -485,16 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `hc_store` | type_alias | `include/http_cache.h:66` | `typedef struct hc_store hc_store;` |
 | `FREEDOM_IDENTITY_H` | macro | `include/identity.h:2` | `#define FREEDOM_IDENTITY_H` |
 | `IDN_GEO_ACC_MAX` | macro | `include/identity.h:23` | `#define IDN_GEO_ACC_MAX` |
-| `IDN_GEO_ACC_MIN` | macro | `include/identity.h:22` | `#define IDN_GEO_ACC_MIN` |
-| `IDN_LANG_MAX` | macro | `include/identity.h:17` | `#define IDN_LANG_MAX` |
-| `IDN_LANG_TAGS_MAX` | macro | `include/identity.h:18` | `#define IDN_LANG_TAGS_MAX` |
-| `IDN_PAGE_MAX` | macro | `include/identity.h:20` | `#define IDN_PAGE_MAX` |
-| `IDN_SERIAL_MAX` | macro | `include/identity.h:19` | `#define IDN_SERIAL_MAX` |
-| `IDN_UA_MAX` | macro | `include/identity.h:16` | `#define IDN_UA_MAX` |
-| `idn_accept_language` | function | `include/identity.h:58` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);` |
-| `idn_apply_query` | function | `include/identity.h:70` | `unsigned idn_apply_query(idn_config *c, const char *query);` |
-| `idn_clear_geo` | function | `include/identity.h:54` | `void idn_clear_geo(idn_config *c);` |
-| `idn_config` | struct | `include/identity.h:37` | `` |
-| `idn_defaults` | function | `include/identity.h:45` | `void idn_defaults(idn_config *c);` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

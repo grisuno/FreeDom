@@ -1,10 +1,10 @@
 # src: tab
 
-*Community 1 | 48 files | cohesion 0.67*
+*Community 2 | 48 files | cohesion 0.67*
 
 ## Definition
 
-This community groups 48 file(s) rooted at `src` with dominant language c (cohesion 0.67). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (268 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
+This community groups 48 file(s) rooted at `src` with dominant language c (cohesion 0.67). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (271 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
 
 ## Files
 
@@ -38,10 +38,10 @@ This community groups 48 file(s) rooted at `src` with dominant language c (cohes
 |------|----------|-------|---------|-----|
 | `tests/test_dom.c` | c | testing | 44 | no |
 | `tests/test_fb_cmdline.c` | c | testing | 7 | no |
-| `tests/test_fb_panes.c` | c | testing | 10 | no |
+| `tests/test_fb_panes.c` | c | testing | 11 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
-| `tests/test_js_dom.c` | c | testing | 268 | no |
+| `tests/test_js_dom.c` | c | testing | 271 | no |
 
 *... and 28 more files in this community.*
 
@@ -82,15 +82,16 @@ This community groups 48 file(s) rooted at `src` with dominant language c (cohes
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 107
-- Cross-boundary resolved imports (EXTRACTED): 51
+- Cross-boundary resolved imports (EXTRACTED): 52
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 7 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/freedom_view.c imports include/html_parse.h.
-- [EXTRACTED] depends_on community 5 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
-- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
+- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 8 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
+- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
+- [EXTRACTED] depends_on community 2 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
+- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
 
 ## Risks
 

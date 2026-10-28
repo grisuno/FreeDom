@@ -201,6 +201,21 @@ typedef int (*jd_fetch_fn)(void *ctx, const char *method, const char *url,
  * page's context. ctx == NULL / fn == NULL => JD_ERR_NULL_ARG. */
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx);
 
+/* Deferred variant (spec/subreq_async.md): queues the request with the host and returns 0 AT ONCE
+ * (non-zero = refused); the reply is handed back later, in issue order, through jd_net_deliver. */
+typedef int (*jd_fetch_async_fn)(void *ctx, const char *method, const char *url,
+                                 const char *body, size_t body_len, const char *req_headers);
+
+/* jd_install_xhr plus the deferred hook: async XMLHttpRequest and fetch() use `afn`; sync XHR keeps
+ * `fn`. afn == NULL is exactly jd_install_xhr. */
+jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
+                            jd_fetch_async_fn afn, void *afetch_ctx);
+
+/* Hands the OLDEST queued deferred request its reply (rc != 0 = refused/failed, status 0) and runs
+ * its callback. `ms` is the parent's measured wall time of the fetch (Freebug's Net panel). The caller drains microtasks afterwards. JD_ERR_INTERNAL when none is queued. */
+jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
+                         const char *ctype, const char *hdrs, int ms);
+
 /* Injects a JS shim that creates <iframe> elements from a page's `video[]` array
  * (or `video_data` variable) into the DOM, emulating the missing `video_min.js`
  * script. Must be called AFTER all page scripts have run (so video[] exists) and

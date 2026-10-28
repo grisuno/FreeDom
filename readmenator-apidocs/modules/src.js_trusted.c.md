@@ -55,7 +55,7 @@ flowchart LR
 
 ### `jt_seed_ctx`
 
-`struct` | [src/js_trusted.c:471](../../src/js_trusted.c#L471)
+`struct` | [src/js_trusted.c:476](../../src/js_trusted.c#L476)
 
 ```c
 typedef struct jt_seed_ctx { JSContext *js; JSValue fn; JSValue global; } jt_seed_ctx;
@@ -265,7 +265,7 @@ Returns 1 when a live socket with that id received it.
 
 ### `jt_enable_frames`
 
-`function` | [src/js_trusted.c:427](../../src/js_trusted.c#L427)
+`function` | [src/js_trusted.c:432](../../src/js_trusted.c#L432)
 
 ```c
 jd_status jt_enable_frames(js_context *ctx, int frame_id)
@@ -288,7 +288,7 @@ jd_status jt_enable_frames(js_context *ctx, int frame_id)
 
 ### `jt_enable_storage`
 
-`function` | [src/js_trusted.c:483](../../src/js_trusted.c#L483)
+`function` | [src/js_trusted.c:488](../../src/js_trusted.c#L488)
 
 ```c
 jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
@@ -312,7 +312,7 @@ jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
 
 ### `jt_take_storage`
 
-`function` | [src/js_trusted.c:504](../../src/js_trusted.c#L504)
+`function` | [src/js_trusted.c:509](../../src/js_trusted.c#L509)
 
 ```c
 int jt_take_storage(js_context *ctx, char **out, size_t *len)
@@ -340,7 +340,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `explicitly`
 
-`function` | [src/js_trusted.c:552](../../src/js_trusted.c#L552)
+`function` | [src/js_trusted.c:557](../../src/js_trusted.c#L557)
 
 ```c
 * explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...
@@ -361,7 +361,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `jt_enable_worker`
 
-`function` | [src/js_trusted.c:633](../../src/js_trusted.c#L633)
+`function` | [src/js_trusted.c:638](../../src/js_trusted.c#L638)
 
 ```c
 jd_status jt_enable_worker(js_context *ctx)

@@ -2,6 +2,10 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_js_dom.c` -> `include/fb_panes.h`
+- `tests/test_js_dom.c` -> `include/html_parse.h`
+- `tests/test_js_dom.c` -> `include/js_dom.h`
+- `tests/test_js_dom.c` -> `include/js_geom.h`
 - `tests/test_js_dom.c` -> `include/js_sandbox.h`
 - `tests/test_js_dom.c` -> `include/js_trusted.h`
 - `tests/test_js_dom.c` -> `include/url.h`
@@ -46,6 +50,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
 - `tests/test_sha2.c` -> `include/sha2.h`
 - `tests/test_shm_slots.c` -> `include/shm_slots.h`
+- `tests/test_subreq_batch.c` -> `include/subreq_batch.h`
 - `tests/test_svg_render.c` -> `include/svg_render.h`
 - `tests/test_tab.c` -> `include/css.h`
 - `tests/test_tab.c` -> `include/js_geom.h`
@@ -143,6 +148,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/request_policy.h` -> stddef.h
 - `include/secure_fetch.h` -> stddef.h, stdint.h, time.h
 - `include/sha2.h` -> stddef.h, stdint.h
+- `include/subreq_batch.h` -> stddef.h
 - `include/svg_paint.h` -> cairo.h
 - `include/svg_render.h` -> stddef.h
 - `include/tab.h` -> stddef.h, stdint.h, sys/types.h
@@ -235,6 +241,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/request_policy.c` -> stdlib.h, string.h
 - `src/secure_fetch.c` -> curl/curl.h, inttypes.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdio.h, stdlib.h, string.h, strings.h, time.h
 - `src/sha2.c` -> string.h
+- `src/subreq_batch.c` -> pthread.h, semaphore.h, stdlib.h, string.h, time.h
 - `src/svg_render.c` -> math.h, stddef.h, string.h
 - `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, pthread.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/random.h, sys/wait.h, time.h, unistd.h
 - `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, stdio.h, stdlib.h, string.h
@@ -319,8 +326,9 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_sha2.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_shm_slots.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
+- `tests/test_subreq_batch.c` -> cmocka.h, pthread.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h, unistd.h
 - `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
-- `tests/test_tab.c` -> cmocka.h, poll.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h
+- `tests/test_tab.c` -> cmocka.h, poll.h, pthread.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h
 - `tests/test_text_case.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_text_shape.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_textfield.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h

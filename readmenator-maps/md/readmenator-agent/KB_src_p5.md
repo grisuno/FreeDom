@@ -106,7 +106,7 @@ Previous: [KB_src_p4.md](KB_src_p4.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `jdce_install` (function, line 190) `int jdce_install(JSContext *ctx)`
+  - `jdce_install` (function, line 199) `int jdce_install(JSContext *ctx)`
 - Depends on: `src/js_custom_elements.h`
 
 ## src/js_custom_elements.h
@@ -195,24 +195,24 @@ Previous: [KB_src_p4.md](KB_src_p4.md)
   - `jd_freeze_mutators` (function, line 609) `static int jd_freeze_mutators(JSContext *jsctx)`
   - `attrNames` (function, line 695) `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
      * a missing '...`
-  - `js_env` (function, line 1444) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+  - `js_env` (function, line 1471) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-  - `jd_install` (function, line 1981) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-  - `jd_flush_custom_elements` (function, line 2063) `void jd_flush_custom_elements(js_context *ctx)`
-  - `fails` (function, line 2077) `* cap is reached or an allocation fails (caller stops), else 0. */
+  - `jd_install` (function, line 2008) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+  - `jd_flush_custom_elements` (function, line 2090) `void jd_flush_custom_elements(js_context *ctx)`
+  - `fails` (function, line 2104) `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-  - `jd_install_console` (function, line 2191) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-  - `jd_set_cookies` (function, line 2228) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-  - `jd_get_cookies` (function, line 2248) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-  - `jd_set_computed` (function, line 2271) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-  - `jd_set_geometry` (function, line 2282) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+  - `jd_install_console` (function, line 2218) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+  - `jd_set_cookies` (function, line 2255) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+  - `jd_get_cookies` (function, line 2275) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+  - `jd_set_computed` (function, line 2298) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+  - `jd_set_geometry` (function, line 2309) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
   - `table` (function, line 643) `* a table (dom.viewport() non-null);`
   - `scripts` (function, line 894) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
   - `enough` (function, line 1067) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-  - `ms` (function, line 1245) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-  - `empty` (function, line 1436) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-  - `geometry` (function, line 1438) `* constant geometry (zero real leak);`
-  - `size` (function, line 1441) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+  - `ms` (function, line 1272) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+  - `empty` (function, line 1463) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+  - `geometry` (function, line 1465) `* constant geometry (zero real leak);`
+  - `size` (function, line 1468) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
   - `_GNU_SOURCE` (macro, line 10) `#define _GNU_SOURCE`
   - `JD_COMPUTED_VALUE_MAX` (macro, line 412) `#define JD_COMPUTED_VALUE_MAX`
   - `JD_QSA_INLINE` (macro, line 475) `#define JD_QSA_INLINE`
@@ -353,11 +353,19 @@ static int cb_append(char **bu...`
 - Symbols:
   - `jd_pack_ptr` (function, line 28) `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)`
   - `jd_unpack_ptr` (function, line 33) `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)`
-  - `m_host_fetch` (function, line 46) `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
+  - `jd_reply_object` (function, line 43) `static JSValue jd_reply_object(JSContext *ctx, int rc, int status, const char *rbody,
+           ...`
+  - `m_host_fetch` (function, line 73) `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
                             in...`
-  - `jd_install_xhr` (function, line 281) `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
-  - `send` (function, line 96) `* callbacks fire right after send();`
-  - `task` (function, line 257) `* current task (the page never waits on it);`
+  - `m_host_fetch_async` (function, line 104) `static JSValue m_host_fetch_async(JSContext *ctx, JSValueConst this_val,
+                        ...`
+  - `jd_install_xhr` (function, line 335) `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
+  - `jd_net_deliver` (function, line 339) `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
+     ...`
+  - `jd_install_xhr_ex` (function, line 360) `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
+                   ...`
+  - `send` (function, line 127) `* callbacks fire right after send();`
+  - `task` (function, line 311) `* current task (the page never waits on it);`
   - `_GNU_SOURCE` (macro, line 6) `#define _GNU_SOURCE`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
 

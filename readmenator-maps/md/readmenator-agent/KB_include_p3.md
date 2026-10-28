@@ -238,10 +238,10 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `host` (function, line 163) `* for a trusted host (allow.conf AND js.conf);`
   - `jd_get_cookies` (function, line 174) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
   - `out_status` (function, line 182) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-  - `jd_process_iframes` (function, line 207) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-  - `URLs` (function, line 214) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-  - `jd_video_from_scripts` (function, line 228) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
-  - `jd_flush_custom_elements` (function, line 239) `void jd_flush_custom_elements(js_context *ctx);`
+  - `jd_process_iframes` (function, line 222) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
+  - `URLs` (function, line 229) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
+  - `jd_video_from_scripts` (function, line 243) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
+  - `jd_flush_custom_elements` (function, line 254) `void jd_flush_custom_elements(js_context *ctx);`
   - `FREEDOM_JS_DOM_H` (macro, line 2) `#define FREEDOM_JS_DOM_H`
   - `JD_IFRAME_TRACK_MAX` (macro, line 40) `#define JD_IFRAME_TRACK_MAX`
   - `JD_REPL_CSS_MAX` (macro, line 79) `#define JD_REPL_CSS_MAX`

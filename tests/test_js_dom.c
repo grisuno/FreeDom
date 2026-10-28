@@ -3162,6 +3162,40 @@ static void test_custom_element_reactions_through_template_fragment(void **state
               "par-start|kid|par-end");
 }
 
+/* ShadyDOM (noPatch) reads a fragment through the NATIVE accessors it captured
+ * (__shady_native_firstChild) after swapping the fragment's prototype to its own ShadowRoot.
+ * The own member deferred to the new prototype, whose getter called the native accessor, which
+ * found the own member again: a stack overflow, and an empty fragment (YouTube lost its masthead
+ * because no <slot> was ever found). The nested call must reach the engine's own implementation. */
+static void test_fragment_proto_swap_native_reentry(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var t=document.createElement('template'); t.innerHTML='<div id=\"a\"><slot name=\"s\"></slot></div><p id=\"b\"></p>';"
+              "var fr=document.importNode(t.content,true);"
+              "var nat=Object.getOwnPropertyDescriptor(Node.prototype,'firstChild').get;"
+              "var SR=function(){}; SR.prototype=Object.create(Object.getPrototypeOf(fr));"
+              "Object.defineProperty(SR.prototype,'firstChild',{configurable:true,get:function(){ return nat.call(this); }});"
+              "Object.defineProperty(SR.prototype,'querySelectorAll',{configurable:true,value:function(s){ return Element.prototype.querySelectorAll.call(this,s); }});"
+              "fr.__proto__=SR.prototype;"
+              "var r; try{ r=[fr.firstChild.id, fr.querySelectorAll('slot').length].join(); }catch(e){ r='ERR '+e.name; } r",
+              "a,1");
+}
+
+/* A timer tick on an UNCHANGED document must not rescan it: the full custom-element flush ran
+ * querySelectorAll('*') plus a reconcile of every live element on every tick (YouTube: ~500
+ * scans of ~1200 nodes, a third of the load). A mutation after the quiet ticks still reacts. */
+static void test_custom_element_tick_skips_unchanged_document(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "globalThis.scans=0; var oq=document.querySelectorAll;"
+              "document.querySelectorAll=function(s){ if(s==='*') scans++; return oq.call(document,s); };"
+              "var L=[]; class A extends HTMLElement{ connectedCallback(){ L.push('a'); } }"
+              "customElements.define('x-a',A); document.body.appendChild(document.createElement('x-a'));"
+              "__tickTimers(0); var base=scans;"
+              "for(var i=0;i<50;i++) __tickTimers(0);"
+              "[scans-base, L.length].join()", "0,1");
+    EXPECT(f, "var d=document.createElement('div'); d.innerHTML='<x-a></x-a>'; document.body.appendChild(d);"
+              "__tickTimers(0); L.length", "2");
+}
+
 /* With hundreds of definitions (YouTube defines ~900 ytd-* names) a subtree inserted later must
  * still find the custom element deep inside it: the lookup cannot depend on one selector list
  * that names every definition. */
@@ -3914,6 +3948,8 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_canvas_element_inherits_html_element, setup, teardown),
         cmocka_unit_test_setup_teardown(test_frames_blank_iframe_has_writable_document, setup, teardown),
         cmocka_unit_test_setup_teardown(test_frames_blank_iframe_document_and_window_are_event_targets, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_fragment_proto_swap_native_reentry, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_custom_element_tick_skips_unchanged_document, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_from_scripts_video_data_string, setup, teardown),
         cmocka_unit_test_setup_teardown(test_video_from_scripts_no_video, setup, teardown),
         cmocka_unit_test(test_video_from_scripts_null_args),

@@ -30,7 +30,7 @@ flowchart LR
 
 ### `fbp_tab_label`
 
-`function` `const` | [src/fb_panes.c:109](../../src/fb_panes.c#L109)
+`function` `const` | [src/fb_panes.c:112](../../src/fb_panes.c#L112)
 
 ```c
 const char *fbp_tab_label(int tab)
@@ -56,7 +56,7 @@ Never NULL.
 
 ### `fbp_tab_from_name`
 
-`function` | [src/fb_panes.c:120](../../src/fb_panes.c#L120)
+`function` | [src/fb_panes.c:123](../../src/fb_panes.c#L123)
 
 ```c
 int fbp_tab_from_name(const char *name)
@@ -80,7 +80,7 @@ Tab named [`name`](src.text_shape.c.md#name) (case-insensitive), or -1 when unkn
 
 ### `fbp_tab_wrap`
 
-`function` | [src/fb_panes.c:127](../../src/fb_panes.c#L127)
+`function` | [src/fb_panes.c:130](../../src/fb_panes.c#L130)
 
 ```c
 int fbp_tab_wrap(int tab, int dir)
@@ -105,7 +105,7 @@ The tab [`dir`](include.profile.h.md#dir) steps away (cyclic); an invalid `tab` 
 
 ### `fbp_tab_span`
 
-`function` | [src/fb_panes.c:133](../../src/fb_panes.c#L133)
+`function` | [src/fb_panes.c:136](../../src/fb_panes.c#L136)
 
 ```c
 void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)
@@ -133,7 +133,7 @@ x-extent of a tab in the bar: each is (letters + 2 * pad_cells) cells wide, cont
 
 ### `fbp_tab_at`
 
-`function` | [src/fb_panes.c:142](../../src/fb_panes.c#L142)
+`function` | [src/fb_panes.c:145](../../src/fb_panes.c#L145)
 
 ```c
 int fbp_tab_at(double px, double cell_w, double pad_cells)
@@ -163,7 +163,7 @@ Exact inverse of fbp_tab_span.
 
 ### `fbp_is_pane`
 
-`function` | [src/fb_panes.c:152](../../src/fb_panes.c#L152)
+`function` | [src/fb_panes.c:155](../../src/fb_panes.c#L155)
 
 ```c
 int fbp_is_pane(int tab)
@@ -189,7 +189,7 @@ Whether the tab's editor argument is meaningful (console: JS; others: selector/i
 
 ### `fbp_js_quote`
 
-`function` | [src/fb_panes.c:154](../../src/fb_panes.c#L154)
+`function` | [src/fb_panes.c:157](../../src/fb_panes.c#L157)
 
 ```c
 size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)
@@ -220,7 +220,7 @@ Returns its length, or 0 on failure (n too long, embedded NUL, cap too small).
 
 ### `fbp_expr`
 
-`function` | [src/fb_panes.c:183](../../src/fb_panes.c#L183)
+`function` | [src/fb_panes.c:186](../../src/fb_panes.c#L186)
 
 ```c
 size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)

@@ -619,7 +619,7 @@ void *js_context_raw(js_context *ctx)
 
 **Returns:** `void *`
 
-*Called by:* [`jd_inject_video_shim`](src.js_embed.c.md#jd_inject_video_shim), [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`je_install_canvas`](src.js_env.c.md#je_install_canvas), [`je_install_identity_trusted`](src.js_env.c.md#je_install_identity_trusted), [`jd_fire_click`](src.js_events.c.md#jd_fire_click), [`jd_fire_mouse_event`](src.js_events.c.md#jd_fire_mouse_event), [`jd_fire_submit`](src.js_events.c.md#jd_fire_submit), [`jd_install_events`](src.js_events.c.md#jd_install_events), [`jd_install_xhr`](src.js_fetch.c.md#jd_install_xhr), [`jd_pop_state`](src.js_location.c.md#jd_pop_state), [`jd_set_location`](src.js_location.c.md#jd_set_location), [`jd_take_history`](src.js_location.c.md#jd_take_history) and 12 more
+*Called by:* [`jd_inject_video_shim`](src.js_embed.c.md#jd_inject_video_shim), [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`je_install_canvas`](src.js_env.c.md#je_install_canvas), [`je_install_identity_trusted`](src.js_env.c.md#je_install_identity_trusted), [`jd_fire_click`](src.js_events.c.md#jd_fire_click), [`jd_fire_mouse_event`](src.js_events.c.md#jd_fire_mouse_event), [`jd_fire_submit`](src.js_events.c.md#jd_fire_submit), [`jd_install_events`](src.js_events.c.md#jd_install_events), [`jd_install_xhr_ex`](src.js_fetch.c.md#jd_install_xhr_ex), [`jd_net_deliver`](src.js_fetch.c.md#jd_net_deliver), [`jd_pop_state`](src.js_location.c.md#jd_pop_state), [`jd_set_location`](src.js_location.c.md#jd_set_location) and 13 more
 
 ---
 

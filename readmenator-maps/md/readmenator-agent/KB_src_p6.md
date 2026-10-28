@@ -83,7 +83,7 @@ Previous: [KB_src_p5.md](KB_src_p5.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `jt_seed_ctx` (struct, line 471)
+  - `jt_seed_ctx` (struct, line 476)
   - `jt_enable_open` (function, line 48) `jd_status jt_enable_open(js_context *ctx)`
   - `jt_enable_observers` (function, line 129) `jd_status jt_enable_observers(js_context *ctx)`
   - `jt_geometry_changed` (function, line 143) `jd_status jt_geometry_changed(js_context *ctx)`
@@ -94,13 +94,13 @@ Previous: [KB_src_p5.md](KB_src_p5.md)
   - `ws_payload` (function, line 261) `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)`
   - `jt_take_ws` (function, line 285) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)`
   - `jt_ws_event` (function, line 336) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)`
-  - `jt_enable_frames` (function, line 427) `jd_status jt_enable_frames(js_context *ctx, int frame_id)`
-  - `jt_seed_pair` (function, line 473) `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)`
-  - `jt_enable_storage` (function, line 483) `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)`
-  - `jt_take_storage` (function, line 504) `int jt_take_storage(js_context *ctx, char **out, size_t *len)`
-  - `explicitly` (function, line 552) `* explicitly (no window, no document). Delivery is always a timer task. */
+  - `jt_enable_frames` (function, line 432) `jd_status jt_enable_frames(js_context *ctx, int frame_id)`
+  - `jt_seed_pair` (function, line 478) `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)`
+  - `jt_enable_storage` (function, line 488) `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)`
+  - `jt_take_storage` (function, line 509) `int jt_take_storage(js_context *ctx, char **out, size_t *len)`
+  - `explicitly` (function, line 557) `* explicitly (no window, no document). Delivery is always a timer task. */
 static const char JT_W...`
-  - `jt_enable_worker` (function, line 633) `jd_status jt_enable_worker(js_context *ctx)`
+  - `jt_enable_worker` (function, line 638) `jd_status jt_enable_worker(js_context *ctx)`
   - `JT_IO_MAX_STR` (macro, line 62) `#define JT_IO_MAX_STR`
 - Depends on: `include/js_trusted.h`, `include/web_storage.h`
 
@@ -126,28 +126,28 @@ static const char JT_W...`
 - Layer: data_access
 - Language: c
 - Symbols:
-  - `cipher_for` (function, line 904) `static const EVP_CIPHER *cipher_for(ls_aead aead)`
-  - `argon2id_derive` (function, line 914) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+  - `cipher_for` (function, line 915) `static const EVP_CIPHER *cipher_for(ls_aead aead)`
+  - `argon2id_derive` (function, line 925) `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...`
-  - `ls_derive_key` (function, line 943) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+  - `ls_derive_key` (function, line 954) `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-  - `aead_encrypt` (function, line 952) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+  - `aead_encrypt` (function, line 963) `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-  - `aead_decrypt` (function, line 978) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+  - `aead_decrypt` (function, line 989) `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-  - `seal_core` (function, line 1006) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+  - `seal_core` (function, line 1017) `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...`
-  - `decrypt_blob` (function, line 1043) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+  - `decrypt_blob` (function, line 1054) `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-  - `ls_seal` (function, line 1074) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+  - `ls_seal` (function, line 1085) `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...`
-  - `ls_open` (function, line 1087) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+  - `ls_open` (function, line 1098) `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-  - `ls_seal_passphrase` (function, line 1098) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+  - `ls_seal_passphrase` (function, line 1109) `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...`
-  - `ls_open_passphrase` (function, line 1119) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+  - `ls_open_passphrase` (function, line 1130) `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-  - `ls_free` (function, line 1139) `void ls_free(uint8_t *buf, size_t len)`
+  - `ls_free` (function, line 1150) `void ls_free(uint8_t *buf, size_t len)`
   - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 3) `#define OSSL_KDF_PARAM_ARGON2_LANES`
   - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 6) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
   - `OSSL_KDF_PARAM_THREADS` (macro, line 9) `#define OSSL_KDF_PARAM_THREADS`
@@ -456,21 +456,25 @@ static const char JT_W...`
   - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 842) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
   - `OSSL_KDF_PARAM_THREADS` (macro, line 845) `#define OSSL_KDF_PARAM_THREADS`
   - `_GNU_SOURCE` (macro, line 847) `#define _GNU_SOURCE`
-  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 874) `#define OSSL_KDF_PARAM_ARGON2_LANES`
-  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 877) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
-  - `OSSL_KDF_PARAM_THREADS` (macro, line 880) `#define OSSL_KDF_PARAM_THREADS`
-  - `LS_VERSION` (macro, line 883) `#define LS_VERSION`
-  - `LS_KDF_NONE` (macro, line 884) `#define LS_KDF_NONE`
-  - `LS_KDF_ARGON2ID` (macro, line 885) `#define LS_KDF_ARGON2ID`
-  - `LS_ARGON2_T` (macro, line 888) `#define LS_ARGON2_T`
-  - `LS_ARGON2_M_KIB` (macro, line 889) `#define LS_ARGON2_M_KIB`
-  - `LS_ARGON2_P` (macro, line 890) `#define LS_ARGON2_P`
-  - `OFF_MAGIC` (macro, line 893) `#define OFF_MAGIC`
-  - `OFF_VERSION` (macro, line 894) `#define OFF_VERSION`
-  - `OFF_AEAD` (macro, line 895) `#define OFF_AEAD`
-  - `OFF_KDF` (macro, line 896) `#define OFF_KDF`
-  - `OFF_SALT` (macro, line 897) `#define OFF_SALT`
-  - `OFF_NONCE` (macro, line 898) `#define OFF_NONCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 850) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 853) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 856) `#define OSSL_KDF_PARAM_THREADS`
+  - `_GNU_SOURCE` (macro, line 858) `#define _GNU_SOURCE`
+  - `OSSL_KDF_PARAM_ARGON2_LANES` (macro, line 885) `#define OSSL_KDF_PARAM_ARGON2_LANES`
+  - `OSSL_KDF_PARAM_ARGON2_MEMCOST` (macro, line 888) `#define OSSL_KDF_PARAM_ARGON2_MEMCOST`
+  - `OSSL_KDF_PARAM_THREADS` (macro, line 891) `#define OSSL_KDF_PARAM_THREADS`
+  - `LS_VERSION` (macro, line 894) `#define LS_VERSION`
+  - `LS_KDF_NONE` (macro, line 895) `#define LS_KDF_NONE`
+  - `LS_KDF_ARGON2ID` (macro, line 896) `#define LS_KDF_ARGON2ID`
+  - `LS_ARGON2_T` (macro, line 899) `#define LS_ARGON2_T`
+  - `LS_ARGON2_M_KIB` (macro, line 900) `#define LS_ARGON2_M_KIB`
+  - `LS_ARGON2_P` (macro, line 901) `#define LS_ARGON2_P`
+  - `OFF_MAGIC` (macro, line 904) `#define OFF_MAGIC`
+  - `OFF_VERSION` (macro, line 905) `#define OFF_VERSION`
+  - `OFF_AEAD` (macro, line 906) `#define OFF_AEAD`
+  - `OFF_KDF` (macro, line 907) `#define OFF_KDF`
+  - `OFF_SALT` (macro, line 908) `#define OFF_SALT`
+  - `OFF_NONCE` (macro, line 909) `#define OFF_NONCE`
 - Depends on: `include/local_store.h`
 
 

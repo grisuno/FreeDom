@@ -1,6 +1,36 @@
 # API (page 5 of 12)
 Previous: [API_p4.md](API_p4.md)
 
+## include/prefetch.h
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/prefetch.c`, `tests/test_prefetch.c`
+- `pf_scan` (function) `include/prefetch.h:62` `int pf_scan(const char *html, size_t len, pf_list *out);` -- Lookahead scan of hostile HTML.
+- `pf_list_free` (function) `include/prefetch.h:63` `void pf_list_free(pf_list *l);`
+- `specifiers` (function) `include/prefetch.h:110` `* specifiers (each < PF_SPEC_MAX) into out[k] and returns how many. Pure. */ size_t pf_scan_imports(const char *js...`
+- `pf_find_importmap` (function) `include/prefetch.h:115` `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n);` -- Span of the first <script type=importmap> body in html (pure, bounded): 1 with * [*start, *start + *n) set, or 0...
+- `started` (function) `include/prefetch.h:121` `* to fetch or no thread started (the caller fetches serially). */ int pf_pool_start_page(pf_pool *p, const char...`
+- `pf_pool_add` (function) `include/prefetch.h:127` `int pf_pool_add(pf_pool *p, const char *url);` -- Queues one more URL on a started pool (deduplicated, bounded by PF_MAX_JOBS). * Returns 1 when added, 0 when already...
+- `fetch` (function) `include/prefetch.h:132` `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or * -1 when no thread could start...`
+- `pf_pool_take` (function) `include/prefetch.h:145` `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);` -- Cache-first take.
+- `pf_pool_finish` (function) `include/prefetch.h:151` `void pf_pool_finish(pf_pool *p);` -- Joins the worker threads and frees every unconsumed result.
+- `pool` (function) `include/prefetch.h:155` `* whose URL is pooled is served from the pool (a failed prefetch propagates the * failure -- never refetched);`
+- `pf_pooled_fetch` (function) `include/prefetch.h:165` `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...`
+
+## include/prefs.h
+Imported by: `gui/browser_ui.c`, `include/profile.h`, `include/ui.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
+- `prefs_init` (function) `include/prefs.h:66` `void prefs_init(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
+- `prefs_free` (function) `include/prefs.h:69` `void prefs_free(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
+- `free` (function) `include/prefs.h:72` `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);`
+- `prefs_bookmark_index` (function) `include/prefs.h:82` `int prefs_bookmark_index(const prefs_state *p, const char *url);` -- Parses text[0..len) over an out ALREADY initialised with prefs_init.
+- `prefs_suggest` (function) `include/prefs.h:101` `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);` -- Omnibox autocomplete: up to max_rows distinct URLs matching query (case- insensitive) written to out (rows of...
+- `anyway` (function) `include/prefs.h:106` `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());`
+
+## include/profile.h
+Depends on: `include/local_store.h`, `include/prefs.h`
+Imported by: `gui/browser_ui.c`, `src/profile.c`, `tests/test_profile.c`
+- `absent` (function) `include/profile.h:53` `* the keyfile when absent (0600, atomic write);`
+- `closed` (function) `include/profile.h:54` `* wrong size fails closed (PROFILE_ERR_KEY, never overwritten). Derives the * AEAD key (Argon2id, per-device salt)...`
+- `profile_close` (function) `include/profile.h:67` `void profile_close(profile_ctx *ctx);` -- Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init).
+
 ## include/render_doc.h
 Depends on: `include/page_view.h`, `include/render_policy.h`
 Imported by: `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
@@ -83,6 +113,16 @@ Imported by: `gui/browser_ui.c`, `tests/test_shm_slots.c`
 - `ss_init` (function) `include/shm_slots.h:24` `static inline void ss_init(ss_state *s)`
 - `ss_committed` (function) `include/shm_slots.h:41` `static inline void ss_committed(ss_state *s, int i)` -- Chooses the slot to paint into: the current one if free, else the other free one.
 - `ss_released` (function) `include/shm_slots.h:49` `static inline int ss_released(ss_state *s, int i)` -- if (!s->busy[i]) { s->back = i; return i; } } return -1; } /* The painted slot was attached and committed. static...
+
+## include/subreq_batch.h
+Imported by: `src/subreq_batch.c`, `src/tab.c`, `tests/test_subreq_batch.c`
+- `sqb_new` (function) `include/subreq_batch.h:37` `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx);`
+- `sqb_submit` (function) `include/subreq_batch.h:41` `int sqb_submit(sqb *b, int refused, const sqb_req *req);` -- Queues one request. refused != 0 queues a ready-made failure (no thread, no fetch) so the result count always equals...
+- `sqb_count` (function) `include/subreq_batch.h:42` `size_t sqb_count(const sqb *b);`
+- `sqb_wait_all` (function) `include/subreq_batch.h:44` `void sqb_wait_all(sqb *b);` -- Queues one request. refused != 0 queues a ready-made failure (no thread, no fetch) so the result count always equals...
+- `sqb_result` (function) `include/subreq_batch.h:46` `const sqb_res *sqb_result(const sqb *b, size_t i);` -- Queues one request. refused != 0 queues a ready-made failure (no thread, no fetch) so the result count always equals...
+- `sqb_reset` (function) `include/subreq_batch.h:48` `void sqb_reset(sqb *b);` -- Queues one request. refused != 0 queues a ready-made failure (no thread, no fetch) so the result count always equals...
+- `sqb_free` (function) `include/subreq_batch.h:49` `void sqb_free(sqb *b);`
 
 ## include/svg_paint.h
 Depends on: `include/svg_render.h`
@@ -193,8 +233,8 @@ Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/f
 - `placeholders` (function) `include/ui.h:113` `* above always draw image placeholders (no worker to decode hostile bytes);`
 - `disk` (function) `include/ui.h:118` `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
 - `images` (function) `include/ui.h:120` `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
-- `ui_render_viewport_w` (function) `include/ui.h:147` `int ui_render_viewport_w(void);` -- The fixed canvas width (px) every headless render (ui_render_png/pdf, ui_dump_layout) lays out at.
-- `ui_persisted_prefs` (function) `include/ui.h:152` `int ui_persisted_prefs(prefs_state *out);` -- The GUI's persisted choices (JS mode, images/CSS toggles, reader) from the encrypted profile, so `--as-gui` shows...
+- `ui_render_viewport_w` (function) `include/ui.h:156` `int ui_render_viewport_w(void);` -- The fixed canvas width (px) every headless render (ui_render_png/pdf, ui_dump_layout) lays out at.
+- `ui_persisted_prefs` (function) `include/ui.h:161` `int ui_persisted_prefs(prefs_state *out);` -- The GUI's persisted choices (JS mode, images/CSS toggles, reader) from the encrypted profile, so `--as-gui` shows...
 
 ## include/url.h
 Imported by: `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
@@ -455,14 +495,6 @@ Depends on: `include/cached_fetch.h`
 - `redirect_load` (function) `src/cached_fetch.c:140` `static int redirect_load(void *ctx, const char *from, time_t now, char *out, size_t cap)` -- } trace("miss", url); sf_status st = fetch(url, cfg, out, downgraded, allowlisted); if (st == SF_OK) remember(store...
 - `redirect_save` (function) `src/cached_fetch.c:144` `static void redirect_save(void *ctx, const char *from, const char *to, time_t now)`
 - `cf_attach_redirect_memory` (function) `src/cached_fetch.c:148` `void cf_attach_redirect_memory(hc_store *store)`
-
-## src/compositor.c
-Depends on: `include/compositor.h`, `include/css.h`
-- `cx_forms_stacking_context` (function) `src/compositor.c:16` `int cx_forms_stacking_context(const cx_style *s)`
-- `cx_box_layer` (function) `src/compositor.c:34` `cx_layer cx_box_layer(const cx_style *s)`
-- `eff_z` (function) `src/compositor.c:50` `static int eff_z(const cx_item *it)` -- Not a stacking context: a positioned box with z:auto still paints in the * positioned/zero layer (CSS 2.1 App E...
-- `cx_item_compare` (function) `src/compositor.c:54` `int cx_item_compare(const cx_item *a, const cx_item *b)`
-- `cx_sort` (function) `src/compositor.c:70` `void cx_sort(cx_item *items, size_t n)` -- Stable insertion sort: n is bounded by the caller (BT_MAX_POSITIONED), so O(n^2) is fine, and stability keeps...
 
 
 Next: [API_p6.md](API_p6.md)

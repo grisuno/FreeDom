@@ -48,7 +48,7 @@ flowchart LR
 
 ### `rd_build`
 
-`function` | [src/render_doc.c:270](../../src/render_doc.c#L270)
+`function` | [src/render_doc.c:274](../../src/render_doc.c#L274)
 
 ```c
 rd_status rd_build(const pv_view *view, rdp_caps caps, const char *top_level_url, rd_doc **out)
@@ -73,7 +73,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps, const char *top_level_url
 
 ### `unset`
 
-`function` | [src/render_doc.c:681](../../src/render_doc.c#L681)
+`function` | [src/render_doc.c:685](../../src/render_doc.c#L685)
 
 ```c
 * background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not content * with alt text, matching real-browser behaviour. */ if (d->boxes[i].bg_image_url[0] != '\0')
@@ -95,7 +95,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps, const char *top_level_url
 
 ### `rd_free`
 
-`function` | [src/render_doc.c:746](../../src/render_doc.c#L746)
+`function` | [src/render_doc.c:750](../../src/render_doc.c#L750)
 
 ```c
 void rd_free(rd_doc *d)
@@ -119,7 +119,7 @@ Idempotent; safe on NULL and safe to call twice.
 
 ### `rd_count`
 
-`function` | [src/render_doc.c:763](../../src/render_doc.c#L763)
+`function` | [src/render_doc.c:767](../../src/render_doc.c#L767)
 
 ```c
 size_t rd_count(const rd_doc *d)
@@ -145,7 +145,7 @@ NULL-safe.
 
 ### `rd_at`
 
-`function` `const` | [src/render_doc.c:767](../../src/render_doc.c#L767)
+`function` `const` | [src/render_doc.c:771](../../src/render_doc.c#L771)
 
 ```c
 const rd_block *rd_at(const rd_doc *d, size_t i)
@@ -166,7 +166,7 @@ const rd_block *rd_at(const rd_doc *d, size_t i)
 
 ### `rd_box_count`
 
-`function` | [src/render_doc.c:772](../../src/render_doc.c#L772)
+`function` | [src/render_doc.c:776](../../src/render_doc.c#L776)
 
 ```c
 size_t rd_box_count(const rd_doc *d)
@@ -190,7 +190,7 @@ Box tree accessors (Step D). rd_box_count is the number of box definitions (0 wh
 
 ### `rd_box_at`
 
-`function` `const` | [src/render_doc.c:776](../../src/render_doc.c#L776)
+`function` `const` | [src/render_doc.c:780](../../src/render_doc.c#L780)
 
 ```c
 const pv_box_def *rd_box_at(const rd_doc *d, size_t i)
@@ -211,7 +211,7 @@ const pv_box_def *rd_box_at(const rd_doc *d, size_t i)
 
 ### `rd_cont_count`
 
-`function` | [src/render_doc.c:781](../../src/render_doc.c#L781)
+`function` | [src/render_doc.c:785](../../src/render_doc.c#L785)
 
 ```c
 size_t rd_cont_count(const rd_doc *d)
@@ -235,7 +235,7 @@ Container table accessors. rd_cont_count is the number of containers; rd_cont_at
 
 ### `rd_cont_at`
 
-`function` `const` | [src/render_doc.c:785](../../src/render_doc.c#L785)
+`function` `const` | [src/render_doc.c:789](../../src/render_doc.c#L789)
 
 ```c
 const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)
@@ -256,7 +256,7 @@ const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)
 
 ### `rd_kind_name`
 
-`function` `const` | [src/render_doc.c:790](../../src/render_doc.c#L790)
+`function` `const` | [src/render_doc.c:794](../../src/render_doc.c#L794)
 
 ```c
 const char *rd_kind_name(rd_kind k)
@@ -282,7 +282,7 @@ Never NULL; an unknown enum value yields "block".
 
 ### `rd_block_heading_level`
 
-`function` | [src/render_doc.c:804](../../src/render_doc.c#L804)
+`function` | [src/render_doc.c:808](../../src/render_doc.c#L808)
 
 ```c
 int rd_block_heading_level(const rd_block *b)
@@ -308,7 +308,7 @@ RD_HEADING yields its heading_level clamped to 1..6; an RD_LINK carrying heading
 
 ### `rd_block_tag`
 
-`function` `const` | [src/render_doc.c:815](../../src/render_doc.c#L815)
+`function` `const` | [src/render_doc.c:819](../../src/render_doc.c#L819)
 
 ```c
 const char *rd_block_tag(const rd_block *b)
@@ -334,7 +334,7 @@ RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH -> "p", R
 
 ### `rd_input_label`
 
-`function` `const` | [src/render_doc.c:846](../../src/render_doc.c#L846)
+`function` `const` | [src/render_doc.c:850](../../src/render_doc.c#L850)
 
 ```c
 const char *rd_input_label(int input_type)
@@ -360,7 +360,7 @@ Stable, short English name of a form control type (a pv_input_type value), e.g.
 
 ### `rd_input_invisible`
 
-`function` | [src/render_doc.c:866](../../src/render_doc.c#L866)
+`function` | [src/render_doc.c:870](../../src/render_doc.c#L870)
 
 ```c
 int rd_input_invisible(int input_type)
@@ -386,7 +386,7 @@ Its data still takes part in form submission.
 
 ### `rd_image_label`
 
-`function` `const` | [src/render_doc.c:870](../../src/render_doc.c#L870)
+`function` `const` | [src/render_doc.c:874](../../src/render_doc.c#L874)
 
 ```c
 const char *rd_image_label(rdp_img_decision d)
@@ -406,7 +406,7 @@ const char *rd_image_label(rdp_img_decision d)
 
 ### `rd_image_fail_label`
 
-`function` `const` | [src/render_doc.c:881](../../src/render_doc.c#L881)
+`function` `const` | [src/render_doc.c:885](../../src/render_doc.c#L885)
 
 ```c
 const char *rd_image_fail_label(img_fail_reason reason)

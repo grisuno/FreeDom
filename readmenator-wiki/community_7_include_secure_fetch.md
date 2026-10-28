@@ -1,6 +1,6 @@
 # include: secure_fetch
 
-*Community 8 | 13 files | cohesion 0.54*
+*Community 7 | 13 files | cohesion 0.54*
 
 ## Definition
 
@@ -64,8 +64,8 @@ This community groups 13 file(s) rooted at `tests` with dominant language c (coh
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
-- [EXTRACTED] depends_on community 4 <-> 8 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
+- [EXTRACTED] depends_on community 6 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
 
 ## Risks
 

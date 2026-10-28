@@ -3,6 +3,18 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:217` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
+| `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:324` | `#define SF_WS_MAX_MESSAGE` |
+| `bits` | function | `include/secure_fetch.h:342` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
+| `connection` | function | `include/secure_fetch.h:356` | `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...` |
+| `exhausted` | function | `include/secure_fetch.h:387` | `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...` |
+| `policy` | type_alias | `include/secure_fetch.h:79` | `typedef struct sf_config { sf_policy policy;` |
+| `rp_sanitize_request_headers` | function | `include/secure_fetch.h:109` | `* rp_sanitize_request_headers ("Name: value\n" lines);` |
+| `sf_accept_language_or_default` | function | `include/secure_fetch.h:258` | `const char *sf_accept_language_or_default(const char *lang);` |
+| `sf_chain_info` | struct | `include/secure_fetch.h:61` | `` |
+| `sf_config` | struct | `include/secure_fetch.h:80` | `` |
+| `sf_cookie_line_matches` | function | `include/secure_fetch.h:245` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
+| `sf_cookie_put` | function | `include/secure_fetch.h:240` | `void sf_cookie_put(const char *url, const char *namevalue);` |
 | `sf_get` | function | `include/secure_fetch.h:365` | `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...` |
 | `sf_global_init` | function | `include/secure_fetch.h:227` | `void sf_global_init(void);` |
 | `sf_header_value` | function | `include/secure_fetch.h:305` | `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` |
@@ -38,6 +50,19 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `ss_init` | function | `include/shm_slots.h:24` | `static inline void ss_init(ss_state *s)` |
 | `ss_released` | function | `include/shm_slots.h:49` | `static inline int ss_released(ss_state *s, int i)` |
 | `ss_state` | struct | `include/shm_slots.h:19` | `` |
+| `SQB_MAX_JOBS` | macro | `include/subreq_batch.h:14` | `#define SQB_MAX_JOBS` |
+| `SUBREQ_BATCH_H` | macro | `include/subreq_batch.h:10` | `#define SUBREQ_BATCH_H` |
+| `ok` | type_alias | `include/subreq_batch.h:23` | `typedef struct sqb_res { int ok;` |
+| `sqb` | type_alias | `include/subreq_batch.h:34` | `typedef struct sqb sqb;` |
+| `sqb_count` | function | `include/subreq_batch.h:42` | `size_t sqb_count(const sqb *b);` |
+| `sqb_free` | function | `include/subreq_batch.h:49` | `void sqb_free(sqb *b);` |
+| `sqb_new` | function | `include/subreq_batch.h:37` | `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx);` |
+| `sqb_req` | struct | `include/subreq_batch.h:16` | `` |
+| `sqb_res` | struct | `include/subreq_batch.h:23` | `` |
+| `sqb_reset` | function | `include/subreq_batch.h:48` | `void sqb_reset(sqb *b);` |
+| `sqb_result` | function | `include/subreq_batch.h:46` | `const sqb_res *sqb_result(const sqb *b, size_t i);` |
+| `sqb_submit` | function | `include/subreq_batch.h:41` | `int sqb_submit(sqb *b, int refused, const sqb_req *req);` |
+| `sqb_wait_all` | function | `include/subreq_batch.h:44` | `void sqb_wait_all(sqb *b);` |
 | `FREEDOM_SVG_PAINT_H` | macro | `include/svg_paint.h:2` | `#define FREEDOM_SVG_PAINT_H` |
 | `svp_draw` | function | `include/svg_paint.h:31` | `void svp_draw(cairo_t *cr, const sv_image *img, double x, double y, double w, double h, int current_rgb);` |
 | `FREEDOM_SVG_RENDER_H` | macro | `include/svg_render.h:2` | `#define FREEDOM_SVG_RENDER_H` |
@@ -181,6 +206,7 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `FREEDOM_UI_H` | macro | `include/ui.h:2` | `#define FREEDOM_UI_H` |
 | `available` | function | `include/ui.h:91` | `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...` |
 | `disk` | function | `include/ui.h:118` | `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...` |
+| `fh_host` | struct | `include/ui.h:130` | `` |
 | `images` | function | `include/ui.h:120` | `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...` |
 | `jg_table` | struct | `include/ui.h:100` | `` |
 | `offset` | type_alias | `include/ui.h:30` | `typedef struct ui_line { size_t offset;` |
@@ -194,8 +220,8 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `ui_layout` | struct | `include/ui.h:35` | `` |
 | `ui_layout_free` | function | `include/ui.h:52` | `void ui_layout_free(ui_layout *lay);` |
 | `ui_line` | struct | `include/ui.h:30` | `` |
-| `ui_persisted_prefs` | function | `include/ui.h:152` | `int ui_persisted_prefs(prefs_state *out);` |
-| `ui_render_viewport_w` | function | `include/ui.h:147` | `int ui_render_viewport_w(void);` |
+| `ui_persisted_prefs` | function | `include/ui.h:161` | `int ui_persisted_prefs(prefs_state *out);` |
+| `ui_render_viewport_w` | function | `include/ui.h:156` | `int ui_render_viewport_w(void);` |
 | `ui_status` | enum | `include/ui.h:20` | `` |
 | `FREEDOM_URL_H` | macro | `include/url.h:2` | `#define FREEDOM_URL_H` |
 | `URL_ERR_NOT_HTTPS` | function | `include/url.h:109` | `* URL_ERR_NOT_HTTPS (out untouched);` |
@@ -470,31 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `CSS_INIT_DECLS` | macro | `src/css.c:51` | `#define CSS_INIT_DECLS` |
 | `CSS_INIT_RULES` | macro | `src/css.c:67` | `#define CSS_INIT_RULES` |
 | `CSS_INIT_SELS` | macro | `src/css.c:50` | `#define CSS_INIT_SELS` |
-| `CSS_INLINE_DECLS` | macro | `src/css.c:69` | `#define CSS_INLINE_DECLS` |
-| `CSS_MAX_FONT_FACES` | macro | `src/css.c:164` | `#define CSS_MAX_FONT_FACES` |
-| `CSS_MAX_RAW` | macro | `src/css.c:86` | `#define CSS_MAX_RAW` |
-| `CSS_MEDIA_MAX_DEPTH` | macro | `src/css.c:4695` | `#define CSS_MEDIA_MAX_DEPTH` |
-| `CSS_SELS_PER_GROUP` | macro | `src/css.c:68` | `#define CSS_SELS_PER_GROUP` |
-| `CSS_VAR_POOL` | macro | `src/css.c:6003` | `#define CSS_VAR_POOL` |
-| `CSS_WIDE_RESET` | macro | `src/css.c:221` | `#define CSS_WIDE_RESET` |
-| `LIST` | function | `src/css.c:2516` | `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...` |
-| `NULL` | function | `src/css.c:6422` | `* Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...` |
-| `P_META_CUSTOM` | macro | `src/css.c:82` | `#define P_META_CUSTOM` |
-| `P_META_VARSRC` | macro | `src/css.c:83` | `#define P_META_VARSRC` |
-| `add_rule` | function | `src/css.c:4411` | `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,                      siz...` |
-| `anim_easing_iv` | function | `src/css.c:1186` | `static int anim_easing_iv(const char *tok)` |
-| `apply_decl` | function | `src/css.c:5449` | `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
-| `apply_rule` | function | `src/css.c:6034` | `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
-| `apply_var_source` | function | `src/css.c:6007` | `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,         ...` |
-| `at_is_media` | function | `src/css.c:4562` | `static int at_is_media(const char *s, size_t i, size_t n)` |
-| `at_keyword` | function | `src/css.c:4573` | `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` |
-| `axis` | function | `src/css.c:1512` | `* bare center displaces it to the free axis (`center right` = x:right, y:center).  * Any other co...` |
-| `bg_alpha_of` | function | `src/css.c:235` | `static int bg_alpha_of(const char *v)` |
-| `block_end` | function | `src/css.c:4540` | `static size_t block_end(const char *s, size_t open, size_t n)` |
-| `blur` | function | `src/css.c:1475` | `* consumes ONLY blur(Npx);` |
-| `box_shadow_layer` | function | `src/css.c:1970` | `static int box_shadow_layer(const char *val, size_t len, int out[6])` |
-| `caller` | function | `src/css.c:3402` | `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...` |
-| `cand_cmp` | function | `src/css.c:5942` | `static int cand_cmp(const void *pa, const void *pb)` |
-| `cap` | function | `src/css.c:1744` | `* string past the cap (emit_content): a conforming declaration must not * count as a discard just because an icon...` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

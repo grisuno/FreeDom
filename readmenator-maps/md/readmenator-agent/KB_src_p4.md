@@ -45,16 +45,16 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `tab_ok` (function, line 107) `static int tab_ok(int tab)`
-  - `fbp_tab_label` (function, line 109) `const char *fbp_tab_label(int tab)`
-  - `ieq` (function, line 111) `static int ieq(const char *a, const char *b)`
-  - `fbp_tab_from_name` (function, line 120) `int fbp_tab_from_name(const char *name)`
-  - `fbp_tab_wrap` (function, line 127) `int fbp_tab_wrap(int tab, int dir)`
-  - `fbp_tab_span` (function, line 133) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
-  - `fbp_tab_at` (function, line 142) `int fbp_tab_at(double px, double cell_w, double pad_cells)`
-  - `fbp_is_pane` (function, line 152) `int fbp_is_pane(int tab)`
-  - `fbp_js_quote` (function, line 154) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
-  - `fbp_expr` (function, line 183) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
+  - `tab_ok` (function, line 110) `static int tab_ok(int tab)`
+  - `fbp_tab_label` (function, line 112) `const char *fbp_tab_label(int tab)`
+  - `ieq` (function, line 114) `static int ieq(const char *a, const char *b)`
+  - `fbp_tab_from_name` (function, line 123) `int fbp_tab_from_name(const char *name)`
+  - `fbp_tab_wrap` (function, line 130) `int fbp_tab_wrap(int tab, int dir)`
+  - `fbp_tab_span` (function, line 136) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
+  - `fbp_tab_at` (function, line 145) `int fbp_tab_at(double px, double cell_w, double pad_cells)`
+  - `fbp_is_pane` (function, line 155) `int fbp_is_pane(int tab)`
+  - `fbp_js_quote` (function, line 157) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
+  - `fbp_expr` (function, line 186) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
 - Depends on: `include/fb_panes.h`
 
 ## src/flex_layout.c
@@ -162,24 +162,27 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
 - Depends on: `include/frame_clock.h`
 
 ## src/frame_host.c
-- Doc: reap: fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn...
+- Doc: reap: h->fetch = fetch; h->fetch_ctx = fetch_ctx; h->top_msg = top_msg; h->top_ctx = top_ctx...
 - Layer: utility
 - Language: c
 - Symbols:
   - `fh_slot` (struct, line 14)
-  - `fh_host` (struct, line 20)
-  - `fh_new` (function, line 32) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
+  - `fh_host` (struct, line 22)
+  - `fh_new` (function, line 35) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
                 fh_top_...`
-  - `reap` (function, line 45) `static void reap(fh_host *h)`
-  - `fh_free` (function, line 55) `void fh_free(fh_host *h)`
-  - `fh_count` (function, line 63) `int fh_count(const fh_host *h)`
-  - `load_frame` (function, line 72) `static void load_frame(fh_host *h, int id, const char *url)`
-  - `find_child` (function, line 105) `static int find_child(const fh_host *h, int parent, int token)`
-  - `token_seen_by` (function, line 113) `static int token_seen_by(const fh_host *h, int dest, int from)`
-  - `post_op` (function, line 119) `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
-  - `apply_ops` (function, line 174) `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
-  - `fh_apply_top` (function, line 197) `void fh_apply_top(fh_host *h, const tab_page *page)`
-  - `fh_tick` (function, line 202) `int fh_tick(fh_host *h, int elapsed_ms)`
+  - `slot_release_view` (function, line 47) `static void slot_release_view(fh_slot *sl)`
+  - `reap` (function, line 55) `static void reap(fh_host *h)`
+  - `fh_free` (function, line 67) `void fh_free(fh_host *h)`
+  - `fh_count` (function, line 76) `int fh_count(const fh_host *h)`
+  - `load_frame` (function, line 85) `static void load_frame(fh_host *h, int id, const char *url)`
+  - `find_child` (function, line 129) `static int find_child(const fh_host *h, int parent, int token)`
+  - `token_seen_by` (function, line 137) `static int token_seen_by(const fh_host *h, int dest, int from)`
+  - `post_op` (function, line 143) `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
+  - `apply_ops` (function, line 198) `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
+  - `fh_apply_top` (function, line 221) `void fh_apply_top(fh_host *h, const tab_page *page)`
+  - `fh_tick` (function, line 226) `int fh_tick(fh_host *h, int elapsed_ms)`
+  - `fh_generation` (function, line 250) `unsigned fh_generation(const fh_host *h)`
+  - `fh_frame_view` (function, line 252) `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
 - Depends on: `include/frame_broker.h`, `include/frame_host.h`
 
 ## src/freebug.c
@@ -199,67 +202,69 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
 - Depends on: `include/freebug.h`
 
 ## src/freedom.c
-- Doc: is_overlay_http: fprintf(fp, "  --dump-video-url: headless, print the first detected video...
+- Doc: hl_frames: Frames of a trusted page, headless: the same frame_host the window drives, so the...
 - Layer: utility
 - Language: c
 - Symbols:
-  - `hl_font_stash` (struct, line 615)
-  - `print_usage` (function, line 54) `static void print_usage(FILE *fp, const char *prog)`
-  - `is_https_url` (function, line 83) `static int is_https_url(const char *s)`
-  - `is_http_url` (function, line 87) `static int is_http_url(const char *s)`
-  - `is_overlay_http` (function, line 92) `static int is_overlay_http(const char *s)`
-  - `now_us` (function, line 148) `static uint64_t now_us(void)`
-  - `timings_ensure_init` (function, line 154) `static void timings_ensure_init(void)`
-  - `timings_enabled` (function, line 158) `static int timings_enabled(void)`
-  - `timings_dump` (function, line 162) `static void timings_dump(void)`
-  - `user_impersonate_enabled` (function, line 217) `static int user_impersonate_enabled(void)`
-  - `read_file` (function, line 224) `static char *read_file(const char *path, size_t *out_len)`
-  - `headless_load_hosts` (function, line 242) `static void headless_load_hosts(void)`
-  - `apply_identity` (function, line 262) `static void apply_identity(sf_config *cfg)`
-  - `apply_as_gui` (function, line 267) `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
-  - `is_blank_text` (function, line 305) `static int is_blank_text(const char *s)`
-  - `print_doc` (function, line 318) `static void print_doc(const rd_doc *doc)`
-  - `print_console` (function, line 411) `static void print_console(const fb_buffer *log)`
-  - `print_dom` (function, line 428) `static void print_dom(const rd_doc *doc)`
-  - `print_dom_css` (function, line 443) `static void print_dom_css(const rd_doc *doc)`
-  - `headless_fetch` (function, line 467) `static int headless_fetch(void *ctx, const char *method, const char *url,
+  - `hl_frames` (struct, line 210)
+  - `hl_font_stash` (struct, line 634)
+  - `print_usage` (function, line 55) `static void print_usage(FILE *fp, const char *prog)`
+  - `is_https_url` (function, line 84) `static int is_https_url(const char *s)`
+  - `is_http_url` (function, line 88) `static int is_http_url(const char *s)`
+  - `is_overlay_http` (function, line 93) `static int is_overlay_http(const char *s)`
+  - `now_us` (function, line 149) `static uint64_t now_us(void)`
+  - `timings_ensure_init` (function, line 155) `static void timings_ensure_init(void)`
+  - `timings_enabled` (function, line 159) `static int timings_enabled(void)`
+  - `timings_dump` (function, line 163) `static void timings_dump(void)`
+  - `hl_frame_top_msg` (function, line 215) `static void hl_frame_top_msg(void *ctx, const char *data, size_t len)`
+  - `user_impersonate_enabled` (function, line 236) `static int user_impersonate_enabled(void)`
+  - `read_file` (function, line 243) `static char *read_file(const char *path, size_t *out_len)`
+  - `headless_load_hosts` (function, line 261) `static void headless_load_hosts(void)`
+  - `apply_identity` (function, line 281) `static void apply_identity(sf_config *cfg)`
+  - `apply_as_gui` (function, line 286) `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
+  - `is_blank_text` (function, line 324) `static int is_blank_text(const char *s)`
+  - `print_doc` (function, line 337) `static void print_doc(const rd_doc *doc)`
+  - `print_console` (function, line 430) `static void print_console(const fb_buffer *log)`
+  - `print_dom` (function, line 447) `static void print_dom(const rd_doc *doc)`
+  - `print_dom_css` (function, line 462) `static void print_dom_css(const rd_doc *doc)`
+  - `headless_fetch` (function, line 486) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
-  - `foldback_cookies` (function, line 554) `static void foldback_cookies(const char *url, const char *jar)`
-  - `print_css_drops` (function, line 578) `static void print_css_drops(const char *html, size_t len)`
-  - `hl_font_stash_free` (function, line 623) `static void hl_font_stash_free(hl_font_stash *s)`
-  - `hl_css_sink` (function, line 636) `static void hl_css_sink(void *vctx, const char *url,
+  - `foldback_cookies` (function, line 573) `static void foldback_cookies(const char *url, const char *jar)`
+  - `print_css_drops` (function, line 597) `static void print_css_drops(const char *html, size_t len)`
+  - `hl_font_stash_free` (function, line 642) `static void hl_font_stash_free(hl_font_stash *s)`
+  - `hl_css_sink` (function, line 655) `static void hl_css_sink(void *vctx, const char *url,
                         const char *body, si...`
-  - `hl_font_fetch` (function, line 673) `static int hl_font_fetch(void *vctx, const char *url,
+  - `hl_font_fetch` (function, line 692) `static int hl_font_fetch(void *vctx, const char *url,
                          int *out_status, c...`
-  - `render_page` (function, line 682) `static int render_page(const char *html, size_t len, const char *top_url,
+  - `render_page` (function, line 720) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-  - `first` (function, line 760) `* always cleared first (fetch_and_render may paint several pages per
+  - `first` (function, line 798) `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-  - `sf_reason` (function, line 951) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 970) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 1033) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `sf_reason` (function, line 994) `static const char *sf_reason(sf_status ss)`
+  - `fetch_and_render_one` (function, line 1013) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 1076) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 1059) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 1102) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 1096) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 1133) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1139) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1176) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1244) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1263) `int main(int argc, char **argv)`
-  - `gets` (function, line 463) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-  - `pool` (function, line 746) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-  - `only` (function, line 828) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 998) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `run_dump_video` (function, line 1287) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1306) `int main(int argc, char **argv)`
+  - `gets` (function, line 482) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
+  - `pool` (function, line 784) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+  - `only` (function, line 868) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+  - `BLOCKED` (function, line 1041) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
-  - `EXIT_OK` (macro, line 50) `#define EXIT_OK`
-  - `EXIT_ERROR` (macro, line 51) `#define EXIT_ERROR`
-  - `EXIT_USAGE` (macro, line 52) `#define EXIT_USAGE`
-  - `CSS_DROPS_REPORT_MAX` (macro, line 173) `#define CSS_DROPS_REPORT_MAX`
-  - `HL_FONT_MAX_SHEETS` (macro, line 612) `#define HL_FONT_MAX_SHEETS`
-  - `HL_FONT_MAX_BYTES` (macro, line 613) `#define HL_FONT_MAX_BYTES`
-  - `HL_JS_NAV_MAX` (macro, line 966) `#define HL_JS_NAV_MAX`
-- Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
+  - `EXIT_OK` (macro, line 51) `#define EXIT_OK`
+  - `EXIT_ERROR` (macro, line 52) `#define EXIT_ERROR`
+  - `EXIT_USAGE` (macro, line 53) `#define EXIT_USAGE`
+  - `CSS_DROPS_REPORT_MAX` (macro, line 174) `#define CSS_DROPS_REPORT_MAX`
+  - `HL_FONT_MAX_SHEETS` (macro, line 631) `#define HL_FONT_MAX_SHEETS`
+  - `HL_FONT_MAX_BYTES` (macro, line 632) `#define HL_FONT_MAX_BYTES`
+  - `HL_JS_NAV_MAX` (macro, line 1009) `#define HL_JS_NAV_MAX`
+- Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 
 ## src/hls.c
 - Doc: last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not...

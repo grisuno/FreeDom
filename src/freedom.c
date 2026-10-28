@@ -698,6 +698,25 @@ static int hl_font_fetch(void *vctx, const char *url,
                           out_status, out_body, out_len, out_ctype);
 }
 
+/* Lays the page out as the export will paint it and hands that geometry to a trusted page's JS
+ * (spec/js_geom.md). Returns 1 when the worker accepted it. A browser lays out between timers, so
+ * the tick loop calls it again: a widget that builds its UI from a timer (TinyMCE) measures real
+ * boxes, not the zeros of the first pass. */
+static int hl_publish_geometry(tab *t, const tab_page *page, wc_caps wc, const char *top_url) {
+    rd_doc *gdoc = NULL;
+    int sent = 0;
+    if (page->view == NULL) return 0;
+    if (rd_build(page->view, wc_render_caps(wc), top_url, &gdoc) == RD_OK) {
+        jg_table geom;
+        jg_init(&geom);
+        if (ui_page_geometry(gdoc, &geom) == UI_OK)
+            sent = (tab_set_geometry(t, &geom) == TAB_OK);
+        jg_free(&geom);
+        rd_free(gdoc);
+    }
+    return sent;
+}
+
 static int render_page(const char *html, size_t len, const char *top_url,
                        char **out_nav) {
     tab *t = NULL;
@@ -808,16 +827,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
      * the export will paint (spec/js_geom.md). tab_set_geometry sends nothing for an
      * untrusted load. */
     if (wc.net && page.view != NULL) {
-        rd_doc *gdoc = NULL;
-        int geom_sent = 0;
-        if (rd_build(page.view, wc_render_caps(wc), top_url, &gdoc) == RD_OK) {
-            jg_table geom;
-            jg_init(&geom);
-            if (ui_page_geometry(gdoc, &geom) == UI_OK)
-                geom_sent = (tab_set_geometry(t, &geom) == TAB_OK);
-            jg_free(&geom);
-            rd_free(gdoc);
-        }
+        int geom_sent = hl_publish_geometry(t, &page, wc, top_url);
         /* Observer callbacks (lazy loaders) fire on that geometry and may mutate the DOM
          * with no timer pending: pull the refreshed view without advancing the clock. */
         if (geom_sent && page.nav_url == NULL) {
@@ -828,12 +838,14 @@ static int render_page(const char *html, size_t len, const char *top_url,
             }
         }
     }
-    enum { HL_TICK_MAX = 240 };
+    enum { HL_TICK_MAX = 240, HL_GEOM_REPUBLISH_MAX = 16 };
     /* A JS navigation (at load or from a timer) ends the pumping: the page is
      * leaving, and the caller follows page.nav_url through the full policy. */
     for (int tick = 0; tick < HL_TICK_MAX && page.next_timer_ms >= 0 && page.nav_url == NULL;
          ++tick) {
         tab_page ticked;
+        /* Re-lay out before the timer fires (bounded: each pass builds the whole document). */
+        if (wc.net && tick < HL_GEOM_REPUBLISH_MAX) (void)hl_publish_geometry(t, &page, wc, top_url);
         if (tab_tick(t, page.next_timer_ms, &ticked) != TAB_OK) break;
         tab_page_free(&page);
         page = ticked;

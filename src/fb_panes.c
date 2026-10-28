@@ -53,9 +53,12 @@ static const char JS_SCRIPT[] =
 
 static const char JS_NET[] =
     "var r;try{r=net(q||undefined);}catch(z){return '(net() unavailable)';}"
-    "var o=[],i,e;for(i=0;i<r.length;i++){e=r[i];"
-    "o.push((e.method||'GET')+'  '+e.status+'  '+(e.type||'-')+'  '+e.url+(e.size?'  ('+e.size+' B)':''));}"
-    "return o.length?o.join('\\n'):'(no requests)';";
+    "var o=[],i,e,tb=0,tm=0;for(i=0;i<r.length;i++){e=r[i];tb+=e.size||0;tm+=(e.ms>0?e.ms:0);"
+    "o.push((e.method||'GET')+'  '+e.status+'  '+(e.ms>=0?e.ms+' ms':'-')+'  '+(e.type||'-')+'  '+e.url+(e.size?'  ('+e.size+' B)':''));}"
+    "if(!o.length) return '(no requests)';"
+    "if(r.length===1){ e=r[0]; o.push('','Request headers:',e.reqHeaders||'(none)','Response headers:',e.respHeaders||'(none)'); }"
+    "else o.push('','total: '+r.length+' requests, '+tb+' B, '+tm+' ms (sum of fetch times; they overlap)');"
+    "return o.join('\\n');";
 
 static const char JS_PROFILE[] =
     "var r;try{r=profile(q||undefined);}catch(z){return '(profile() unavailable)';}"

@@ -262,9 +262,10 @@ static void test_build_heading_own_relative_size_replac...`
   - `test_build_video_without_src_ignored` (function, line 5199) `static void test_build_video_without_src_ignored(void **state)`
   - `test_build_audio_as_video_kind` (function, line 5210) `static void test_build_audio_as_video_kind(void **state)`
   - `test_build_iframe_emits_navigable_link` (function, line 5224) `static void test_build_iframe_emits_navigable_link(void **state)`
-  - `test_build_iframe_without_src_ignored` (function, line 5242) `static void test_build_iframe_without_src_ignored(void **state)`
-  - `test_build_iframe_display_none_hidden` (function, line 5255) `static void test_build_iframe_display_none_hidden(void **state)`
-  - `main` (function, line 5268) `int main(void)`
+  - `test_build_live_iframe_is_a_sized_replaced_run` (function, line 5244) `static void test_build_live_iframe_is_a_sized_replaced_run(void **state)`
+  - `test_build_iframe_without_src_ignored` (function, line 5264) `static void test_build_iframe_without_src_ignored(void **state)`
+  - `test_build_iframe_display_none_hidden` (function, line 5277) `static void test_build_iframe_display_none_hidden(void **state)`
+  - `main` (function, line 5290) `int main(void)`
   - `it` (function, line 634) `* the rest of the row share it (so an overflowing table degrades to one row per * line, not one blob). */...`
   - `break` (function, line 703) `* block break (from entering <p>);`
   - `float_id` (function, line 1557) `* A run inside a float nested in another float reports the inner element as * float_id (unchanged) plus the outer...`
@@ -429,36 +430,36 @@ static void test_build_heading_own_relative_size_replac...`
   - `test_heading_paragraph_link` (function, line 64) `static void test_heading_paragraph_link(void **state)`
   - `test_emphasis_propagates` (function, line 94) `static void test_emphasis_propagates(void **state)`
   - `test_image_off_emits_notice_and_blocked` (function, line 125) `static void test_image_off_emits_notice_and_blocked(void **state)`
-  - `test_no_images_no_notice` (function, line 150) `static void test_no_images_no_notice(void **state)`
-  - `test_image_on_allows_normal` (function, line 164) `static void test_image_on_allows_normal(void **state)`
-  - `test_image_on_resolves_relative_src` (function, line 182) `static void test_image_on_resolves_relative_src(void **state)`
-  - `test_image_on_resolves_doc_relative_src` (function, line 198) `static void test_image_on_resolves_doc_relative_src(void **state)`
-  - `test_image_on_blocks_tracker` (function, line 212) `static void test_image_on_blocks_tracker(void **state)`
-  - `test_image_on_blocks_non_https` (function, line 225) `static void test_image_on_blocks_non_https(void **state)`
-  - `test_image_data_url_allowed_remote_top` (function, line 260) `static void test_image_data_url_allowed_remote_top(void **state)`
-  - `test_image_data_url_allowed_no_top` (function, line 278) `static void test_image_data_url_allowed_no_top(void **state)`
-  - `test_image_data_url_disabled_by_default` (function, line 291) `static void test_image_data_url_disabled_by_default(void **state)`
-  - `test_image_data_url_percent_encoded_blocked_invalid` (function, line 306) `static void test_image_data_url_percent_encoded_blocked_invalid(void **state)`
-  - `test_href_sanitised` (function, line 322) `static void test_href_sanitised(void **state)`
-  - `test_kind_name_total` (function, line 339) `static void test_kind_name_total(void **state)`
-  - `test_image_label_total` (function, line 349) `static void test_image_label_total(void **state)`
-  - `test_free_null_and_double` (function, line 362) `static void test_free_null_and_double(void **state)`
-  - `test_author_color_gated_by_css` (function, line 372) `static void test_author_color_gated_by_css(void **state)`
-  - `test_text_overflow_word_break_gated_by_css` (function, line 402) `static void test_text_overflow_word_break_gated_by_css(void **state)`
-  - `test_text_ext_2026_07_10_batch_gated_by_css` (function, line 437) `static void test_text_ext_2026_07_10_batch_gated_by_css(void **state)`
-  - `test_image_rendering_gated_on_image` (function, line 477) `static void test_image_rendering_gated_on_image(void **state)`
-  - `test_caret_color_gated_on_input` (function, line 506) `static void test_caret_color_gated_on_input(void **state)`
-  - `test_input_passthrough` (function, line 536) `static void test_input_passthrough(void **state)`
-  - `test_input_label_total` (function, line 571) `static void test_input_label_total(void **state)`
-  - `test_container_carried_by_default` (function, line 596) `static void test_container_carried_by_default(void **state)`
-  - `test_cont_item_carried_by_default` (function, line 628) `static void test_cont_item_carried_by_default(void **state)`
-  - `test_float_carried_by_default` (function, line 661) `static void test_float_carried_by_default(void **state)`
-  - `test_flex_item_carried_by_default` (function, line 697) `static void test_flex_item_carried_by_default(void **state)`
-  - `test_flex_wrap_align_row_gap_carried_by_default` (function, line 745) `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)`
-  - `test_heading_level_of_link` (function, line 777) `static void test_heading_level_of_link(void **state)`
-  - `test_block_tag_total` (function, line 793) `static void test_block_tag_total(void **state)`
-  - `test_node_id_carried_by_default` (function, line 829) `static void test_node_id_carried_by_default(void **state)`
-  - `main` (function, line 842) `int main(void)`
+  - `test_no_images_no_notice` (function, line 174) `static void test_no_images_no_notice(void **state)`
+  - `test_image_on_allows_normal` (function, line 188) `static void test_image_on_allows_normal(void **state)`
+  - `test_image_on_resolves_relative_src` (function, line 206) `static void test_image_on_resolves_relative_src(void **state)`
+  - `test_image_on_resolves_doc_relative_src` (function, line 222) `static void test_image_on_resolves_doc_relative_src(void **state)`
+  - `test_image_on_blocks_tracker` (function, line 236) `static void test_image_on_blocks_tracker(void **state)`
+  - `test_image_on_blocks_non_https` (function, line 249) `static void test_image_on_blocks_non_https(void **state)`
+  - `test_image_data_url_allowed_remote_top` (function, line 284) `static void test_image_data_url_allowed_remote_top(void **state)`
+  - `test_image_data_url_allowed_no_top` (function, line 302) `static void test_image_data_url_allowed_no_top(void **state)`
+  - `test_image_data_url_disabled_by_default` (function, line 315) `static void test_image_data_url_disabled_by_default(void **state)`
+  - `test_image_data_url_percent_encoded_blocked_invalid` (function, line 330) `static void test_image_data_url_percent_encoded_blocked_invalid(void **state)`
+  - `test_href_sanitised` (function, line 346) `static void test_href_sanitised(void **state)`
+  - `test_kind_name_total` (function, line 363) `static void test_kind_name_total(void **state)`
+  - `test_image_label_total` (function, line 373) `static void test_image_label_total(void **state)`
+  - `test_free_null_and_double` (function, line 386) `static void test_free_null_and_double(void **state)`
+  - `test_author_color_gated_by_css` (function, line 396) `static void test_author_color_gated_by_css(void **state)`
+  - `test_text_overflow_word_break_gated_by_css` (function, line 426) `static void test_text_overflow_word_break_gated_by_css(void **state)`
+  - `test_text_ext_2026_07_10_batch_gated_by_css` (function, line 461) `static void test_text_ext_2026_07_10_batch_gated_by_css(void **state)`
+  - `test_image_rendering_gated_on_image` (function, line 501) `static void test_image_rendering_gated_on_image(void **state)`
+  - `test_caret_color_gated_on_input` (function, line 530) `static void test_caret_color_gated_on_input(void **state)`
+  - `test_input_passthrough` (function, line 560) `static void test_input_passthrough(void **state)`
+  - `test_input_label_total` (function, line 595) `static void test_input_label_total(void **state)`
+  - `test_container_carried_by_default` (function, line 620) `static void test_container_carried_by_default(void **state)`
+  - `test_cont_item_carried_by_default` (function, line 652) `static void test_cont_item_carried_by_default(void **state)`
+  - `test_float_carried_by_default` (function, line 685) `static void test_float_carried_by_default(void **state)`
+  - `test_flex_item_carried_by_default` (function, line 721) `static void test_flex_item_carried_by_default(void **state)`
+  - `test_flex_wrap_align_row_gap_carried_by_default` (function, line 769) `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)`
+  - `test_heading_level_of_link` (function, line 801) `static void test_heading_level_of_link(void **state)`
+  - `test_block_tag_total` (function, line 817) `static void test_block_tag_total(void **state)`
+  - `test_node_id_carried_by_default` (function, line 853) `static void test_node_id_carried_by_default(void **state)`
+  - `main` (function, line 866) `int main(void)`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/flex_layout.h`, `include/page_view.h`, `include/render_doc.h`, `include/render_policy.h`
 
 ## tests/test_render_policy.c

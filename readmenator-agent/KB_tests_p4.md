@@ -12,16 +12,18 @@ Previous: [KB_tests_p3.md](KB_tests_p3.md)
 - Depends on: `include/frame_clock.h`
 
 ## tests/test_frame_host.c
+- Doc: test_frame_view_is_exposed_for_painting: The painter asks the host for the document of the frame...
 - Layer: testing
 - Language: c
 - Symbols:
   - `on_top_msg` (function, line 38) `static void on_top_msg(void *ctx, const char *data, size_t len)`
   - `stub_fetch` (function, line 43) `static int stub_fetch(void *ctx, const char *method, const char *url, const char *body, size_t bl...`
   - `test_open_route_both_ways_and_drop_mismatch` (function, line 56) `static void test_open_route_both_ways_and_drop_mismatch(void **state)`
-  - `test_removing_iframe_closes_worker` (function, line 88) `static void test_removing_iframe_closes_worker(void **state)`
-  - `test_failed_fetch_leaves_no_frame` (function, line 113) `static void test_failed_fetch_leaves_no_frame(void **state)`
-  - `test_bad_args` (function, line 129) `static void test_bad_args(void **state)`
-  - `main` (function, line 138) `int main(int argc, char **argv)`
+  - `test_frame_view_is_exposed_for_painting` (function, line 90) `static void test_frame_view_is_exposed_for_painting(void **state)`
+  - `test_removing_iframe_closes_worker` (function, line 112) `static void test_removing_iframe_closes_worker(void **state)`
+  - `test_failed_fetch_leaves_no_frame` (function, line 137) `static void test_failed_fetch_leaves_no_frame(void **state)`
+  - `test_bad_args` (function, line 153) `static void test_bad_args(void **state)`
+  - `main` (function, line 162) `int main(int argc, char **argv)`
   - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
 - Depends on: `include/frame_host.h`, `include/tab.h`
 

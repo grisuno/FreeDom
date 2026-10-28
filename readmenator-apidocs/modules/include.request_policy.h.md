@@ -127,8 +127,6 @@ A repeated name keeps its first occurrence. Pure; fail-closed (anything doubtful
 
 **Returns:** `int`
 
-*Called by:* [`answered`](src.tab.c.md#answered)
-
 ---
 
 <a id="rp_headers_have"></a>

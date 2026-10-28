@@ -12,15 +12,15 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: What does tab.c depend on, and what depends on it? (27 connections)
+### Q: What does tab.c depend on, and what depends on it? (28 connections)
 
 - Status: unanswered
 
-### Q: How are the 52 files in 'include: css' related to each other?
+### Q: How are the 59 files in 'include: browser_ui' related to each other?
 
 - Status: unanswered
 
-### Q: Why are frame_broker.c and sha2.c connected through 9 hops across 4 communities?
+### Q: Why are frame_broker.c and sha2.c connected through 9 hops across 5 communities?
 
 - Status: unanswered
 

@@ -24,6 +24,7 @@
 #include <string.h>
 #include <time.h>
 #include <poll.h>
+#include <pthread.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -1674,10 +1675,64 @@ static int stub_fetch(void *ctx, const char *method, const char *url,
     return 0;
 }
 
+/* Slow stub: counts how many fetches run AT THE SAME TIME (the parent must serve async
+ * XHRs in parallel) and answers with the URL it was asked for. */
+static pthread_mutex_t g_conc_lock = PTHREAD_MUTEX_INITIALIZER;
+static int g_conc_now, g_conc_max;
+static int slow_fetch(void *ctx, const char *method, const char *url,
+                      const char *body, size_t body_len,
+                      int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx; (void)method; (void)body; (void)body_len;
+    pthread_mutex_lock(&g_conc_lock);
+    if (++g_conc_now > g_conc_max) g_conc_max = g_conc_now;
+    pthread_mutex_unlock(&g_conc_lock);
+    usleep(150 * 1000);
+    pthread_mutex_lock(&g_conc_lock);
+    --g_conc_now;
+    pthread_mutex_unlock(&g_conc_lock);
+    char buf[128];
+    int n = snprintf(buf, sizeof buf, "R:%s", url);
+    *ob = strdup(buf); *ol = (size_t)n; *oct = strdup("text/plain"); *st = 200;
+    return (*ob != NULL && *oct != NULL) ? 0 : -1;
+}
+
+/* Four ASYNC XHRs plus one fetch(): they overlap in the parent (>= 3 at once), every callback
+ * fires with its own body in issue order, and a SYNC XHR keeps answering inline. */
+static void test_async_subrequests_run_in_parallel(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, slow_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] =
+        "<!DOCTYPE html><html><head><title></title></head><body><script>"
+        "var out=[];"
+        "for(var i=0;i<4;i++){ (function(i){ var x=new XMLHttpRequest(); x.open('GET','https://api.test/'+i);"
+        "  x.onload=function(){ out.push(x.responseText); document.title=out.join('|'); }; x.send(); })(i); }"
+        "fetch('https://api.test/f').then(function(r){return r.text();}).then(function(t){ out.push(t); document.title=out.join('|'); });"
+        "var s=new XMLHttpRequest(); s.open('GET','https://api.test/sync',false); s.send(); window.syncText=s.responseText;"
+        "</script></body></html>";
+    g_conc_now = g_conc_max = 0;
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://api.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "R:https://api.test/0|R:https://api.test/1|R:https://api.test/2|"
+                                 "R:https://api.test/3|R:https://api.test/f");
+    assert_true(g_conc_max >= 3);
+    tab_page_free(&p);
+    expect_eval(t, "window.syncText", "R:https://api.test/sync");
+    /* Network panel: the parent's own wall time per request (the page's clock is normalized, so
+     * only the parent can measure it) and the headers, readable through net(). */
+    expect_eval(t, "var n=net(), a=n.filter(function(e){return e.ms>=0;});"
+                   "[n.length, a.length, a.every(function(e){return e.ms>=100&&e.ms<5000;}),"
+                   "typeof n[0].reqHeaders, typeof n[0].respHeaders].join()", "6,5,true,string,string");
+    tab_close(t);
+}
+
 #define XHR_PAGE(URL) \
     "<!DOCTYPE html><html><head><title>x</title></head><body><script>" \
-    "var x=new XMLHttpRequest();x.open('GET','" URL "');x.send();" \
-    "document.title=x.status+':'+x.responseText;</script></body></html>"
+    "var x=new XMLHttpRequest();x.open('GET','" URL "');" \
+    "x.onloadend=function(){document.title=x.status+':'+x.responseText;};x.send();</script></body></html>"
 
 /* With net allowed (host in allow.conf AND js.conf) the page's XHR reaches the parent
  * fetcher and the response is visible to script. */
@@ -3608,6 +3663,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test_setup_teardown(test_worker_deep_recursion_and_runaway, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_sees_env, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_no_network_or_cross_origin_api, setup_loaded, teardown),
+        cmocka_unit_test(test_async_subrequests_run_in_parallel),
         cmocka_unit_test(test_xhr_works_when_net_allowed),
         cmocka_unit_test(test_xhr_undefined_when_net_not_allowed),
         cmocka_unit_test(test_xhr_blocked_host_refused_by_parent),

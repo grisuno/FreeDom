@@ -166,6 +166,7 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `rd_doc` (struct, line 74)
   - `jg_table` (struct, line 100)
   - `tab` (struct, line 110)
+  - `fh_host` (struct, line 130)
   - `ui_status` (enum, line 20)
   - `offset` (type_alias, line 30) `typedef struct ui_line { size_t offset;`
   - `space` (function, line 44) `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
@@ -177,8 +178,8 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `placeholders` (function, line 113) `* above always draw image placeholders (no worker to decode hostile bytes);`
   - `disk` (function, line 118) `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
   - `images` (function, line 120) `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
-  - `ui_render_viewport_w` (function, line 147) `int ui_render_viewport_w(void);`
-  - `ui_persisted_prefs` (function, line 152) `int ui_persisted_prefs(prefs_state *out);`
+  - `ui_render_viewport_w` (function, line 156) `int ui_render_viewport_w(void);`
+  - `ui_persisted_prefs` (function, line 161) `int ui_persisted_prefs(prefs_state *out);`
   - `FREEDOM_UI_H` (macro, line 2) `#define FREEDOM_UI_H`
 - Depends on: `include/prefs.h`
 - Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`

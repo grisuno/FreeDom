@@ -1,10 +1,10 @@
 # include: page_view
 
-*Community 5 | 19 files | cohesion 0.45*
+*Community 4 | 19 files | cohesion 0.45*
 
 ## Definition
 
-This community groups 19 file(s) rooted at `include` with dominant language c (cohesion 0.45). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`, `BT_MAX_CHILDREN`. Core file: `src/page_view.c` (255 symbols).
+This community groups 19 file(s) rooted at `include` with dominant language c (cohesion 0.45). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`, `BT_MAX_CHILDREN`. Core file: `src/page_view.c` (259 symbols).
 
 ## Files
 
@@ -14,19 +14,19 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 | `include/box_tree.h` | h | utility | 34 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 43 | no |
-| `include/page_view.h` | h | presentation | 91 | no |
+| `include/page_view.h` | h | presentation | 92 | no |
 | `include/render_doc.h` | h | presentation | 27 | no |
 | `include/render_policy.h` | h | presentation | 9 | no |
 | `src/box_style.c` | c | utility | 48 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 35 | no |
-| `src/page_view.c` | c | presentation | 255 | no |
+| `src/page_view.c` | c | presentation | 259 | no |
 | `src/render_doc.c` | c | presentation | 21 | no |
 | `tests/test_box_style.c` | c | testing | 49 | no |
 | `tests/test_box_tree.c` | c | testing | 69 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 71 | no |
-| `tests/test_page_view.c` | c | testing | 213 | no |
+| `tests/test_page_view.c` | c | testing | 214 | no |
 | `tests/test_render_doc.c` | c | testing | 37 | no |
 | `tests/test_render_policy.c` | c | testing | 21 | no |
 
@@ -66,14 +66,15 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 37
-- Cross-boundary resolved imports (EXTRACTED): 45
+- Cross-boundary resolved imports (EXTRACTED): 46
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
-- [EXTRACTED] depends_on community 5 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
+- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 4 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
+- [EXTRACTED] depends_on community 8 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
+- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
 
 ## Risks
 

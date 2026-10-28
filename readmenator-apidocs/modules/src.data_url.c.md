@@ -73,7 +73,7 @@ du_status du_base64_payload(const char *url, const char **payload, size_t *paylo
 
 *Calls:* [`du_is_data_url`](#du_is_data_url)
 
-*Called by:* [`rdp_image_decision`](src.render_policy.c.md#rdp_image_decision), [`tab_decode_image_data_url`](src.tab.c.md#tab_decode_image_data_url)
+*Called by:* [`rdp_image_decision`](src.render_policy.c.md#rdp_image_decision)
 
 ---
 

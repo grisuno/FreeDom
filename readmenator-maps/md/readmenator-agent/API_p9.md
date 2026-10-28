@@ -1,6 +1,24 @@
 # API (page 9 of 12)
 Previous: [API_p8.md](API_p8.md)
 
+## src/js_fetch.c
+Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
+- `jd_pack_ptr` (function) `src/js_fetch.c:28` `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` -- Carry the host fetch fn + its ctx as a function's closure data, each split into 32-bit halves (no assumption about...
+- `jd_unpack_ptr` (function) `src/js_fetch.c:33` `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)`
+- `jd_reply_object` (function) `src/js_fetch.c:43` `static JSValue jd_reply_object(JSContext *ctx, int rc, int status, const char *rbody,
+           ...` -- The object the shim sees for one reply (shared by the synchronous host call and the deferred * delivery).
+- `m_host_fetch` (function) `src/js_fetch.c:73` `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
+                            in...` -- __hostFetch(method, url, body) -> { status, body, contentType }.
+- `m_host_fetch_async` (function) `src/js_fetch.c:104` `static JSValue m_host_fetch_async(JSContext *ctx, JSValueConst this_val,
+                        ...` -- __hostFetchAsync(method, url, body, headers) -> bool: queues the request with the host and * returns at once; the...
+- `send` (function) `src/js_fetch.c:127` `* callbacks fire right after send();`
+- `task` (function) `src/js_fetch.c:311` `* current task (the page never waits on it);`
+- `jd_install_xhr` (function) `src/js_fetch.c:335` `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
+- `jd_net_deliver` (function) `src/js_fetch.c:339` `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
+     ...`
+- `jd_install_xhr_ex` (function) `src/js_fetch.c:360` `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
+                   ...`
+
 ## src/js_geom.c
 Depends on: `include/js_geom.h`
 - `jg_init` (function) `src/js_geom.c:17` `void jg_init(jg_table *t)`
@@ -125,13 +143,13 @@ Depends on: `include/js_trusted.h`, `include/web_storage.h`
 - `ws_payload` (function) `src/js_trusted.c:261` `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)` -- } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for (size_t i = 0; i < n; ++i) {...
 - `jt_take_ws` (function) `src/js_trusted.c:285` `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)`
 - `jt_ws_event` (function) `src/js_trusted.c:336` `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)`
-- `jt_enable_frames` (function) `src/js_trusted.c:427` `jd_status jt_enable_frames(js_context *ctx, int frame_id)`
-- `jt_seed_pair` (function) `src/js_trusted.c:473` `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)`
-- `jt_enable_storage` (function) `src/js_trusted.c:483` `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)`
-- `jt_take_storage` (function) `src/js_trusted.c:504` `int jt_take_storage(js_context *ctx, char **out, size_t *len)`
-- `explicitly` (function) `src/js_trusted.c:552` `* explicitly (no window, no document). Delivery is always a timer task. */
+- `jt_enable_frames` (function) `src/js_trusted.c:432` `jd_status jt_enable_frames(js_context *ctx, int frame_id)`
+- `jt_seed_pair` (function) `src/js_trusted.c:478` `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)`
+- `jt_enable_storage` (function) `src/js_trusted.c:488` `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)`
+- `jt_take_storage` (function) `src/js_trusted.c:509` `int jt_take_storage(js_context *ctx, char **out, size_t *len)`
+- `explicitly` (function) `src/js_trusted.c:557` `* explicitly (no window, no document). Delivery is always a timer task. */
 static const char JT_W...`
-- `jt_enable_worker` (function) `src/js_trusted.c:633` `jd_status jt_enable_worker(js_context *ctx)`
+- `jt_enable_worker` (function) `src/js_trusted.c:638` `jd_status jt_enable_worker(js_context *ctx)`
 
 ## src/link_nav.c
 Depends on: `include/link_nav.h`, `include/url.h`
@@ -149,28 +167,28 @@ Depends on: `include/link_nav.h`, `include/url.h`
 
 ## src/local_store.c
 Depends on: `include/local_store.h`
-- `cipher_for` (function) `src/local_store.c:904` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
-- `argon2id_derive` (function) `src/local_store.c:914` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+- `cipher_for` (function) `src/local_store.c:915` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
+- `argon2id_derive` (function) `src/local_store.c:925` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...`
-- `ls_derive_key` (function) `src/local_store.c:943` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+- `ls_derive_key` (function) `src/local_store.c:954` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-- `aead_encrypt` (function) `src/local_store.c:952` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_encrypt` (function) `src/local_store.c:963` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `aead_decrypt` (function) `src/local_store.c:978` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_decrypt` (function) `src/local_store.c:989` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `seal_core` (function) `src/local_store.c:1006` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+- `seal_core` (function) `src/local_store.c:1017` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...`
-- `decrypt_blob` (function) `src/local_store.c:1043` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+- `decrypt_blob` (function) `src/local_store.c:1054` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-- `ls_seal` (function) `src/local_store.c:1074` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+- `ls_seal` (function) `src/local_store.c:1085` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...`
-- `ls_open` (function) `src/local_store.c:1087` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+- `ls_open` (function) `src/local_store.c:1098` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-- `ls_seal_passphrase` (function) `src/local_store.c:1098` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+- `ls_seal_passphrase` (function) `src/local_store.c:1109` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...`
-- `ls_open_passphrase` (function) `src/local_store.c:1119` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+- `ls_open_passphrase` (function) `src/local_store.c:1130` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-- `ls_free` (function) `src/local_store.c:1139` `void ls_free(uint8_t *buf, size_t len)`
+- `ls_free` (function) `src/local_store.c:1150` `void ls_free(uint8_t *buf, size_t len)`
 
 ## src/media_decoder.c
 Depends on: `include/media_decoder.h`, `include/util.h`

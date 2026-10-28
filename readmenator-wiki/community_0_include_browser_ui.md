@@ -1,0 +1,150 @@
+# include: browser_ui
+
+*Community 0 | 59 files | cohesion 0.57*
+
+## Definition
+
+This community groups 59 file(s) rooted at `include` with dominant language c (cohesion 0.57). Central symbols: `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`, `DL_MAX_BYTES`. Core file: `gui/browser_ui.c` (650 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
+
+## Files
+
+### `include` (20 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `include/block_flow.h` | h | utility | 4 | yes |
+| `include/box_blur.h` | h | utility | 5 | yes |
+| `include/download.h` | h | utility | 9 | no |
+| `include/form.h` | h | utility | 12 | no |
+| `include/frame_clock.h` | h | utility | 7 | no |
+
+### `tests` (18 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `tests/test_block_flow.c` | c | testing | 8 | no |
+| `tests/test_box_blur.c` | c | testing | 11 | no |
+| `tests/test_download.c` | c | testing | 21 | no |
+| `tests/test_form.c` | c | testing | 20 | no |
+| `tests/test_frame_clock.c` | c | testing | 4 | no |
+
+### `src` (15 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `src/block_flow.c` | c | utility | 4 | yes |
+| `src/box_blur.c` | c | utility | 5 | no |
+| `src/download.c` | c | utility | 12 | no |
+| `src/form.c` | c | utility | 8 | no |
+| `src/frame_clock.c` | c | utility | 4 | no |
+
+### `gui` (6 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `gui/browser_ui.c` | c | presentation | 650 | no |
+| `gui/browser_ui_internal.h` | h | presentation | 10 | no |
+| `gui/bui_theme.c` | c | utility | 6 | no |
+| `gui/freedom_view.c` | c | presentation | 2 | no |
+| `gui/svg_paint.c` | c | utility | 5 | yes |
+
+*... and 39 more files in this community.*
+
+
+## Key Symbols
+
+- `_GNU_SOURCE` (macro, `gui/browser_ui.c:12`) `#define _GNU_SOURCE`
+- `UI_TOOLBAR_H` (macro, `gui/browser_ui.c:96`) `#define UI_TOOLBAR_H`
+- `UI_TITLEBAR_H` (macro, `gui/browser_ui.c:97`) `#define UI_TITLEBAR_H`
+- `UI_TABBAR_H` (macro, `gui/browser_ui.c:98`) `#define UI_TABBAR_H`
+- `UI_TAB_MIN_W` (macro, `gui/browser_ui.c:99`) `#define UI_TAB_MIN_W`
+- `UI_TAB_MAX_W` (macro, `gui/browser_ui.c:100`) `#define UI_TAB_MAX_W`
+- `UI_TAB_NEW_W` (macro, `gui/browser_ui.c:101`) `#define UI_TAB_NEW_W`
+- `UI_TAB_CLOSE_W` (macro, `gui/browser_ui.c:102`) `#define UI_TAB_CLOSE_W`
+- `UI_BTN_W` (macro, `gui/browser_ui.c:103`) `#define UI_BTN_W`
+- `UI_WIN_BTN_W` (macro, `gui/browser_ui.c:104`) `#define UI_WIN_BTN_W`
+- `UI_MARGIN` (macro, `gui/browser_ui.c:105`) `#define UI_MARGIN`
+- `UI_BTN_LEFT` (macro, `gui/browser_ui.c:106`) `#define UI_BTN_LEFT`
+- `UI_LIST_INDENT` (macro, `gui/browser_ui.c:110`) `#define UI_LIST_INDENT`
+- `UI_SCROLLBAR_W` (macro, `gui/browser_ui.c:115`) `#define UI_SCROLLBAR_W`
+- `UI_SCROLLBAR_MIN` (macro, `gui/browser_ui.c:116`) `#define UI_SCROLLBAR_MIN`
+- `UI_SCROLLBAR_PAD` (macro, `gui/browser_ui.c:117`) `#define UI_SCROLLBAR_PAD`
+- `UI_RESIZE_MARGIN` (macro, `gui/browser_ui.c:121`) `#define UI_RESIZE_MARGIN`
+- `UI_MENU_W` (macro, `gui/browser_ui.c:126`) `#define UI_MENU_W`
+- `UI_MENU_ITEM_H` (macro, `gui/browser_ui.c:127`) `#define UI_MENU_ITEM_H`
+- `UI_MENU_PAD` (macro, `gui/browser_ui.c:128`) `#define UI_MENU_PAD`
+- `UI_CHECK_SZ` (macro, `gui/browser_ui.c:129`) `#define UI_CHECK_SZ`
+- `UI_MENU_LABEL_H` (macro, `gui/browser_ui.c:130`) `#define UI_MENU_LABEL_H`
+- `UI_MENU_INPUT_H` (macro, `gui/browser_ui.c:131`) `#define UI_MENU_INPUT_H`
+- `UI_HAMBURGER_W` (macro, `gui/browser_ui.c:132`) `#define UI_HAMBURGER_W`
+- `UI_HAMBURGER_GAP` (macro, `gui/browser_ui.c:133`) `#define UI_HAMBURGER_GAP`
+- `UI_CURSOR_SIZE` (macro, `gui/browser_ui.c:134`) `#define UI_CURSOR_SIZE`
+- `UI_TOAST_PAD` (macro, `gui/browser_ui.c:135`) `#define UI_TOAST_PAD`
+- `OMNI_MAX_SUGG` (macro, `gui/browser_ui.c:136`) `#define OMNI_MAX_SUGG`
+- `UI_OMNI_ROW_H` (macro, `gui/browser_ui.c:137`) `#define UI_OMNI_ROW_H`
+- `UI_TWO_PI` (macro, `gui/browser_ui.c:138`) `#define UI_TWO_PI`
+
+## Internal vs External Edges
+
+- Internal resolved imports (EXTRACTED): 68
+- Cross-boundary resolved imports (EXTRACTED): 51
+
+## Connections
+
+- [EXTRACTED] depends_on community 0 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
+- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 0 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/compositor.h.
+- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
+- [EXTRACTED] depends_on community 0 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
+- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/cached_fetch.h.
+- [EXTRACTED] depends_on community 0 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/tab.h.
+
+## Risks
+
+- [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
+- [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
+- [layer strict] `tests/test_svg_render.c` (testing) -> `include/svg_render.h` (presentation)
+- [layer strict] `tests/test_ui.c` (testing) -> `include/ui.h` (presentation)
+- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1588` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:1754` `first` `dg`: `dg` assigned at line 1754 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4474` `flow_text` `space_w`: `space_w` assigned at line 4474 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4476` `flow_text` `i`: `i` assigned at line 4476 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5510` `table` `parent`: `parent` assigned at line 5510 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5511` `table` `seen`: `seen` assigned at line 5511 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5513` `table` `j`: `j` assigned at line 5513 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5813` `nested_cont_basis` `total`: `total` assigned at line 5813 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5814` `nested_cont_basis` `n_items`: `n_items` assigned at line 5814 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6886` `builds` `sl`: `sl` assigned at line 6886 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:8558` `defer_flush` `fw`: `fw` assigned at line 8558 but never read afterwards.
+
+## Open Questions
+
+- Why do 53 file(s) lack file-level docs (e.g. `gui/browser_ui.c`)? What purpose do they serve?
+- What would break if the most connected file in include: browser_ui changed?
+- Should include: browser_ui be split, given cohesion 0.57?
+
+## Sources
+
+- `gui/browser_ui.c`
+- `gui/browser_ui_internal.h`
+- `gui/bui_theme.c`
+- `gui/freedom_view.c`
+- `gui/svg_paint.c`
+- `gui/ui_render.c`
+- `include/block_flow.h`
+- `include/box_blur.h`
+- `include/download.h`
+- `include/form.h`
+- `include/frame_clock.h`
+- `include/freedom_config.h`
+- `include/hostedit.h`
+- `include/image_decode.h`
+- `include/interp.h`
+- `include/lazy_load.h`
+- `include/pdf_export.h`
+- `include/prefs.h`
+- `include/profile.h`
+- `include/shm_slots.h`
+- *... and 39 more*

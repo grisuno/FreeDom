@@ -90,7 +90,7 @@ OBJECTS   := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
 # request_policy links against psl_data.o. The table is rebuilt from the .dat.
 PSL_DAT    = third_party/psl/public_suffix_list.dat
 PSL_OBJ    = $(BUILD_DIR)/psl_data.o
-TEST_BINS := $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
+TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUILD_DIR)/test_html_parse \
              $(BUILD_DIR)/test_js_sandbox $(BUILD_DIR)/test_dom \
              $(BUILD_DIR)/test_js_dom $(BUILD_DIR)/test_os_sandbox \
              $(BUILD_DIR)/test_ui $(BUILD_DIR)/test_request_policy \
@@ -447,6 +447,9 @@ $(BUILD_DIR)/test_box_tree: $(TEST_DIR)/test_box_tree.c $(BUILD_DIR)/box_tree.o 
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
 # Pure /etc/hosts-format host filter (blocklist + allowlist). No I/O deps.
+$(BUILD_DIR)/test_subreq_batch: $(TEST_DIR)/test_subreq_batch.c $(BUILD_DIR)/subreq_batch.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) -lpthread $(CMOCKA_LIBS)
+
 $(BUILD_DIR)/test_hostblock: $(TEST_DIR)/test_hostblock.c $(BUILD_DIR)/hostblock.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
@@ -556,7 +559,7 @@ $(BUILD_DIR)/test_disk_store: $(TEST_DIR)/test_disk_store.c $(BUILD_DIR)/disk_st
 
 # Long-lived per-tab worker: links the whole hostile-content pipeline that runs
 # inside the confined child (parse + DOM + JS sandbox + bindings) plus os_sandbox.
-$(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
@@ -571,7 +574,7 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/id
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(CMOCKA_LIBS)
 
 # Trusted-parent iframe host over real confined workers.
-$(BUILD_DIR)/test_frame_host: $(TEST_DIR)/test_frame_host.c $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/tab.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/test_frame_host: $(TEST_DIR)/test_frame_host.c $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/tab.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
@@ -594,7 +597,7 @@ FREEDOM_GUI_OBJ = $(GUI_DIR)/browser_ui.c \
                   $(BUILD_DIR)/xdg-shell-protocol.c \
                   $(BUILD_DIR)/xdg-decoration-protocol.c
 
-$(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                       $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \

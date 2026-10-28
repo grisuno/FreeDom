@@ -1,10 +1,10 @@
 # `src/js_fetch.c`
 
-> Source: [src/js_fetch.c:1](../../src/js_fetch.c#L1) | language `c` | coverage 20.0% | [API index](../index.md)
+> Source: [src/js_fetch.c:1](../../src/js_fetch.c#L1) | language `c` | coverage 14.3% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`send`](#send), [`task`](#task), [`jd_install_xhr`](#jd_install_xhr)
+- **Functions:** [`send`](#send), [`task`](#task), [`jd_install_xhr`](#jd_install_xhr), [`jd_net_deliver`](#jd_net_deliver), [`jd_install_xhr_ex`](#jd_install_xhr_ex)
 - **Macros:** [`_GNU_SOURCE`](#_gnu_source)
 
 ## Call Graph
@@ -14,8 +14,12 @@ Solid arrows stay in this module, dashed arrows leave it.
 ```mermaid
 flowchart LR
     n_src_js_fetch_c__jd_install_xhr(["jd_install_xhr"])
+    n_src_js_fetch_c__jd_install_xhr_ex(["jd_install_xhr_ex"])
+    n_src_js_fetch_c__jd_net_deliver(["jd_net_deliver"])
     n_src_js_sandbox_c__js_context_raw["js_sandbox.js_context_raw"]
-    n_src_js_fetch_c__jd_install_xhr -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_fetch_c__jd_install_xhr --> n_src_js_fetch_c__jd_install_xhr_ex
+    n_src_js_fetch_c__jd_net_deliver -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_fetch_c__jd_install_xhr_ex -.-> n_src_js_sandbox_c__js_context_raw
 ```
 
 ## Functions
@@ -24,7 +28,7 @@ flowchart LR
 
 ### `send`
 
-`function` | [src/js_fetch.c:96](../../src/js_fetch.c#L96)
+`function` | [src/js_fetch.c:127](../../src/js_fetch.c#L127)
 
 ```c
 * callbacks fire right after send();
@@ -38,7 +42,7 @@ flowchart LR
 
 ### `task`
 
-`function` | [src/js_fetch.c:257](../../src/js_fetch.c#L257)
+`function` | [src/js_fetch.c:311](../../src/js_fetch.c#L311)
 
 ```c
 * current task (the page never waits on it);
@@ -58,7 +62,7 @@ flowchart LR
 
 ### `jd_install_xhr`
 
-`function` | [src/js_fetch.c:281](../../src/js_fetch.c#L281)
+`function` | [src/js_fetch.c:335](../../src/js_fetch.c#L335)
 
 ```c
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)
@@ -74,9 +78,66 @@ jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)
 
 **Returns:** `jd_status`
 
+*Calls:* [`jd_install_xhr_ex`](#jd_install_xhr_ex)
+
+---
+
+<a id="jd_net_deliver"></a>
+
+### `jd_net_deliver`
+
+`function` | [src/js_fetch.c:339](../../src/js_fetch.c#L339)
+
+```c
+jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len, const char *ctype, const char *hdrs, int ms)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `rc` | `int` |  |  |
+| `status` | `int` |  |  |
+| `body` | `char *` |  |  |
+| `len` | `size_t` |  |  |
+| `ctype` | `char *` |  |  |
+| `hdrs` | `char *` |  |  |
+| `ms` | `int` |  |  |
+
+**Returns:** `jd_status`
+
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`replies`](src.tab.c.md#replies)
+
+---
+
+<a id="jd_install_xhr_ex"></a>
+
+### `jd_install_xhr_ex`
+
+`function` | [src/js_fetch.c:360](../../src/js_fetch.c#L360)
+
+```c
+jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx, jd_fetch_async_fn afn, void *afetch_ctx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `fn` | `jd_fetch_fn` |  |  |
+| `fetch_ctx` | `void *` |  |  |
+| `afn` | `jd_fetch_async_fn` |  |  |
+| `afetch_ctx` | `void *` |  |  |
+
+**Returns:** `jd_status`
+
+*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+
+*Called by:* [`jd_install_xhr`](#jd_install_xhr), [`run_js`](src.tab.c.md#run_js)
 
 ---
 

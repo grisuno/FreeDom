@@ -97,8 +97,9 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `PV_BR_CONT` (macro, line 1198) `#define PV_BR_CONT`
   - `PV_PH_THEME` (macro, line 1223) `#define PV_PH_THEME`
   - `PV_PH_HIDDEN` (macro, line 1224) `#define PV_PH_HIDDEN`
+  - `PV_FRAME_SCHEME` (macro, line 1256) `#define PV_FRAME_SCHEME`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
-- Imported by: `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+- Imported by: `include/box_tree.h`, `include/frame_host.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/pdf_export.h
 - Doc: pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order)...
@@ -412,6 +413,26 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `FREEDOM_SHM_SLOTS_H` (macro, line 2) `#define FREEDOM_SHM_SLOTS_H`
   - `SS_COUNT` (macro, line 17) `#define SS_COUNT`
 - Imported by: `gui/browser_ui.c`, `tests/test_shm_slots.c`
+
+## include/subreq_batch.h
+- Doc: sqb_res: #ifndef SUBREQ_BATCH_H #define SUBREQ_BATCH_H #include <stddef.h> #define SQB_MAX_JOBS...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `sqb_req` (struct, line 16)
+  - `sqb_res` (struct, line 23)
+  - `ok` (type_alias, line 23) `typedef struct sqb_res { int ok;`
+  - `sqb` (type_alias, line 34) `typedef struct sqb sqb;`
+  - `sqb_new` (function, line 37) `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx);`
+  - `sqb_submit` (function, line 41) `int sqb_submit(sqb *b, int refused, const sqb_req *req);`
+  - `sqb_count` (function, line 42) `size_t sqb_count(const sqb *b);`
+  - `sqb_wait_all` (function, line 44) `void sqb_wait_all(sqb *b);`
+  - `sqb_result` (function, line 46) `const sqb_res *sqb_result(const sqb *b, size_t i);`
+  - `sqb_reset` (function, line 48) `void sqb_reset(sqb *b);`
+  - `sqb_free` (function, line 49) `void sqb_free(sqb *b);`
+  - `SUBREQ_BATCH_H` (macro, line 10) `#define SUBREQ_BATCH_H`
+  - `SQB_MAX_JOBS` (macro, line 14) `#define SQB_MAX_JOBS`
+- Imported by: `src/subreq_batch.c`, `src/tab.c`, `tests/test_subreq_batch.c`
 
 ## include/svg_paint.h
 - Doc: svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred...

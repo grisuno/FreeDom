@@ -38,6 +38,33 @@ static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi) {
     return (void *)(uintptr_t)u;
 }
 
+/* The object the shim sees for one reply (shared by the synchronous host call and the deferred
+ * delivery). Fail-closed: rc != 0 is { status:0, body:'' } and never says why. */
+static JSValue jd_reply_object(JSContext *ctx, int rc, int status, const char *rbody,
+                               size_t rlen, const char *rctype, const char *rhdrs) {
+    JSValue o = JS_NewObject(ctx);
+    if (rc == 0) {
+        JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, status));
+        JS_SetPropertyStr(ctx, o, "body", JS_NewStringLen(ctx, rbody ? rbody : "", rlen));
+        /* R7e: raw binary body as Uint8Array for arrayBuffer responseType. */
+        JSValue buf = JS_NewArrayBufferCopy(ctx, (const uint8_t *)(rbody ? rbody : ""), rlen);
+        if (!JS_IsException(buf)) {
+            JS_SetPropertyStr(ctx, o, "bodyRaw", buf);
+        } else {
+            JS_SetPropertyStr(ctx, o, "bodyRaw", JS_NULL);
+            JS_FreeValue(ctx, buf);
+        }
+        JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, rctype ? rctype : ""));
+        JS_SetPropertyStr(ctx, o, "headers", JS_NewString(ctx, rhdrs ? rhdrs : ""));
+    } else { /* fail-closed */
+        JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, 0));
+        JS_SetPropertyStr(ctx, o, "body", JS_NewString(ctx, ""));
+        JS_SetPropertyStr(ctx, o, "bodyRaw", JS_NULL);
+        JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, ""));
+    }
+    return o;
+}
+
 /* __hostFetch(method, url, body) -> { status, body, contentType }. The ONLY network
  * primitive exposed to script; it does NOT touch a socket -- it calls the host fetch
  * callback, which proxies to the trusted parent (full network policy re-applied there).
@@ -63,32 +90,36 @@ static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
         rc = fn(fctx, method ? method : "GET", url, body ? body : "", blen, rh,
                 &status, &rbody, &rlen, &rctype, &rhdrs);
 
-    JSValue o = JS_NewObject(ctx);
-    if (rc == 0) {
-        JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, status));
-        JS_SetPropertyStr(ctx, o, "body", JS_NewStringLen(ctx, rbody ? rbody : "", rlen));
-        /* R7e: raw binary body as Uint8Array for arrayBuffer responseType. */
-        JSValue buf = JS_NewArrayBufferCopy(ctx, (const uint8_t *)(rbody ? rbody : ""), rlen);
-        if (!JS_IsException(buf)) {
-            JS_SetPropertyStr(ctx, o, "bodyRaw", buf);
-        } else {
-            JS_SetPropertyStr(ctx, o, "bodyRaw", JS_NULL);
-            JS_FreeValue(ctx, buf);
-        }
-        JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, rctype ? rctype : ""));
-        JS_SetPropertyStr(ctx, o, "headers", JS_NewString(ctx, rhdrs ? rhdrs : ""));
-    } else { /* fail-closed */
-        JS_SetPropertyStr(ctx, o, "status", JS_NewInt32(ctx, 0));
-        JS_SetPropertyStr(ctx, o, "body", JS_NewString(ctx, ""));
-        JS_SetPropertyStr(ctx, o, "bodyRaw", JS_NULL);
-        JS_SetPropertyStr(ctx, o, "contentType", JS_NewString(ctx, ""));
-    }
+    JSValue o = jd_reply_object(ctx, rc, status, rbody, rlen, rctype, rhdrs);
     free(rbody); free(rctype); free(rhdrs);
     if (method != NULL) JS_FreeCString(ctx, method);
     if (url != NULL)    JS_FreeCString(ctx, url);
     if (body != NULL)   JS_FreeCString(ctx, body);
     if (rh != NULL)     JS_FreeCString(ctx, rh);
     return o;
+}
+
+/* __hostFetchAsync(method, url, body, headers) -> bool: queues the request with the host and
+ * returns at once; the reply comes back later through jd_net_deliver. false = not queued. */
+static JSValue m_host_fetch_async(JSContext *ctx, JSValueConst this_val,
+                                  int argc, JSValueConst *argv, int magic, JSValue *fd) {
+    (void)this_val; (void)magic;
+    jd_fetch_async_fn fn = (jd_fetch_async_fn)jd_unpack_ptr(ctx, fd[0], fd[1]);
+    void *fctx           = jd_unpack_ptr(ctx, fd[2], fd[3]);
+    const char *method = (argc > 0) ? JS_ToCString(ctx, argv[0]) : NULL;
+    const char *url    = (argc > 1) ? JS_ToCString(ctx, argv[1]) : NULL;
+    size_t blen = 0;
+    const char *body   = (argc > 2 && !JS_IsUndefined(argv[2]) && !JS_IsNull(argv[2]))
+                         ? JS_ToCStringLen(ctx, &blen, argv[2]) : NULL;
+    const char *rh = (argc > 3 && JS_IsString(argv[3])) ? JS_ToCString(ctx, argv[3]) : NULL;
+    int rc = -1;
+    if (fn != NULL && url != NULL)
+        rc = fn(fctx, method ? method : "GET", url, body ? body : "", blen, rh);
+    if (method != NULL) JS_FreeCString(ctx, method);
+    if (url != NULL)    JS_FreeCString(ctx, url);
+    if (body != NULL)   JS_FreeCString(ctx, body);
+    if (rh != NULL)     JS_FreeCString(ctx, rh);
+    return JS_NewBool(ctx, rc == 0);
 }
 
 /* XMLHttpRequest + fetch over the single synchronous __hostFetch primitive. The
@@ -104,9 +135,24 @@ static const char JD_XHR_SHIM[] =
      * requests -- no timing, Date is normalized). */
     "var NLOG=[]; function HF(m,u,b,h){ var r; try{ r=HF0(m,u,b,h||''); }catch(e){ r=null; }"
     "  if(NLOG.length<512) NLOG.push({method:String(m),url:String(u),status:r?(r.status|0):0,"
-    "    size:r&&r.body?r.body.length:0,type:r&&r.contentType?String(r.contentType):''});"
+    "    size:r&&r.body?r.body.length:0,type:r&&r.contentType?String(r.contentType):'',ms:-1,"
+    "    reqHeaders:String(h||''),respHeaders:r&&r.headers?String(r.headers):''});"
     "  if(r===null) throw new Error('fetch'); return r; }"
     "Object.defineProperty(__G,'__netLog',{value:function(){return NLOG;},configurable:true,writable:true,enumerable:false});"
+    /* Deferred requests: HFA queues one with the host and `cb(reply|null)` fires when the host
+     * hands the batch back (jd_net_deliver, issue order). Without a host hook it is absent and
+     * XHR/fetch keep the synchronous round trip. */
+    "var HFA0=__G.__hostFetchAsync, NQ=[]; try{ delete __G.__hostFetchAsync; }catch(e){}"
+    "var HAS_ASYNC=(typeof HFA0==='function');"
+    "function HFA(m,u,b,h,cb){ var q=false; try{ q=HFA0(m,u,b,h||''); }catch(e){}"
+    "  if(q){ NQ.push({cb:cb,m:m,u:u,h:String(h||'')}); return; }"
+    "  __G.setTimeout(function(){ cb(null); },0); }"
+    "if(HAS_ASYNC) Object.defineProperty(__G,'__netDeliver',{configurable:true,writable:true,enumerable:false,value:function(r){"
+    "  var e=NQ.shift(); if(!e) return;"
+    "  if(NLOG.length<512) NLOG.push({method:String(e.m),url:String(e.u),status:r?(r.status|0):0,"
+    "    size:r&&r.body?r.body.length:0,type:r&&r.contentType?String(r.contentType):'',ms:r?(r.ms|0):0,"
+    "    reqHeaders:e.h,respHeaders:r&&r.headers?String(r.headers):''});"
+    "  try{ e.cb(r); }catch(x){} }});"
     "function hdrPairs(t){ var m=[]; String(t||'').split('\\n').forEach(function(l){ var p=l.indexOf(':');\n"
     "  if(p>0) m.push([l.slice(0,p).trim(), l.slice(p+1).trim()]); }); return m; }\n"
     "var STATUS_TEXT={200:'OK',201:'Created',202:'Accepted',204:'No Content',206:'Partial Content',301:'Moved Permanently',\n"
@@ -159,29 +205,29 @@ static const char JD_XHR_SHIM[] =
     "    this.dispatchEvent(pev('abort',0,0)); this.upload.dispatchEvent(pev('abort',0,0));\n"
     "    this.dispatchEvent(pev('loadend',0,0)); }\n"
     "  this._sent=false; this.readyState=0; };\n"
-    "/* The round trip is synchronous under the hood, so the RESULT (status, responseText, headers) is\n"
-    " * settled inside send(); only the EVENTS of an async request are deferred, which keeps both the\n"
-    " * \"read it right after send()\" idiom of this engine and handlers set after send() working. */\n"
+    "/* A SYNC request (or a host without the deferred hook) settles inside send(); only its EVENTS are\n"
+    " * deferred. A deferred one stays OPENED until the host hands the batch back, then settles and fires\n"
+    " * its events at once. */\n"
     "XHR.prototype.send=function(b){ if(this.readyState!==1||this._sent){ var ie=new Error(\"Failed to execute 'send' on 'XMLHttpRequest': The object's state must be OPENED.\");\n"
     "    ie.name='InvalidStateError'; throw ie; }\n"
     "  var self=this, gen=++this._gen, hs='', o=this._rh; this._sent=true; this._done=false;\n"
     "  for(var k in o) hs+=o[k][0]+': '+o[k][1]+'\\n';\n"
     "  var body=(b==null||this._m==='GET'||this._m==='HEAD')?'':bodyText(b);\n"
-    "  var r; try{ r=HF(this._m,this._u,body,hs); }catch(e){ r=null; }\n"
+    "  var finish=function(r,inline){\n"
     "  var ok=!!r&&(r.status|0)!==0, n=0;\n"
-    "  if(ok){ this.status=r.status|0; this.statusText=STATUS_TEXT[this.status]||'';\n"
+    "  if(ok){ self.status=r.status|0; self.statusText=STATUS_TEXT[self.status]||'';\n"
     "    var hdrs=r.headers||''; if(r.contentType&&!/^content-type:/im.test(hdrs)) hdrs='content-type: '+r.contentType+'\\n'+hdrs;\n"
-    "    this._h=hdrs; this.responseText=r.body||''; n=this.responseText.length;\n"
-    "    var rt=this.responseType;\n"
+    "    self._h=hdrs; self.responseText=r.body||''; n=self.responseText.length;\n"
+    "    var rt=self.responseType;\n"
     "    if(rt==='arraybuffer'){\n"
-    "      if(r.bodyRaw&&r.bodyRaw.buffer&&r.bodyRaw.buffer!==r.bodyRaw){ try{this.response=r.bodyRaw.buffer;}catch(e){this.response=r.bodyRaw;} }\n"
-    "      else{ this.response=r.bodyRaw; }\n"
-    "    }else if(rt==='json'){ try{ this.response=JSON.parse(this.responseText); }catch(e){ this.response=null; } }\n"
-    "    else if(rt==='blob'){ try{ this.response=new Blob([r.bodyRaw||this.responseText],{type:r.contentType||''}); }catch(e){ this.response=null; } }\n"
-    "    else if(rt==='document'){ try{ this.response=new DOMParser().parseFromString(this.responseText,'text/html'); this.responseXML=this.response; }catch(e){ this.response=null; } }\n"
-    "    else{ this.response=this.responseText; } }\n"
-    "  else{ this.status=0; this.statusText=''; }\n"
-    "  this.readyState=4; this._done=true; this._ev=true;\n"
+    "      if(r.bodyRaw&&r.bodyRaw.buffer&&r.bodyRaw.buffer!==r.bodyRaw){ try{self.response=r.bodyRaw.buffer;}catch(e){self.response=r.bodyRaw;} }\n"
+    "      else{ self.response=r.bodyRaw; }\n"
+    "    }else if(rt==='json'){ try{ self.response=JSON.parse(self.responseText); }catch(e){ self.response=null; } }\n"
+    "    else if(rt==='blob'){ try{ self.response=new Blob([r.bodyRaw||self.responseText],{type:r.contentType||''}); }catch(e){ self.response=null; } }\n"
+    "    else if(rt==='document'){ try{ self.response=new DOMParser().parseFromString(self.responseText,'text/html'); self.responseXML=self.response; }catch(e){ self.response=null; } }\n"
+    "    else{ self.response=self.responseText; } }\n"
+    "  else{ self.status=0; self.statusText=''; }\n"
+    "  self.readyState=4; self._done=true; self._ev=true;\n"
     "  var fire=function(){ if(gen!==self._gen) return; self._ev=false;\n"
     "    self.dispatchEvent(pev('loadstart',0,0));\n"
     "    if(body!==''){ self.upload.dispatchEvent(pev('loadstart',0,body.length)); self.upload.dispatchEvent(pev('progress',body.length,body.length));\n"
@@ -192,7 +238,11 @@ static const char JD_XHR_SHIM[] =
     "    self.readyState=3; self.dispatchEvent(pev('readystatechange',0,0)); self.dispatchEvent(pev('progress',n,n));\n"
     "    self.readyState=4; self.dispatchEvent(pev('readystatechange',0,0));\n"
     "    self.dispatchEvent(pev('load',n,n)); self.dispatchEvent(pev('loadend',n,n)); };\n"
-    "  if(this._async&&typeof __G.setTimeout==='function') __G.setTimeout(fire,0); else fire(); };\n"
+    "  if(!inline&&self._async&&typeof __G.setTimeout==='function') __G.setTimeout(fire,0); else fire(); };\n"
+    "  if(this._async&&HAS_ASYNC){ this._ev=true;\n"
+    "    HFA(this._m,this._u,body,hs,function(r){ if(gen!==self._gen) return; finish(r,true); }); return; }\n"
+    "  var r; try{ r=HF(this._m,this._u,body,hs); }catch(e){ r=null; }\n"
+    "  finish(r,false); };\n"
     "Object.defineProperty(__G,'XMLHttpRequest',{configurable:true,writable:true,value:XHR});\n"
     "Object.defineProperty(__G,'XMLHttpRequestEventTarget',{configurable:true,writable:true,value:XETarget});\n"
     "Object.defineProperty(__G,'XMLHttpRequestUpload',{configurable:true,writable:true,value:XUpload});\n"
@@ -243,16 +293,20 @@ static const char JD_XHR_SHIM[] =
     "  return new Response(null,{status:st||302,headers:h}); };"
     "__G.Request=Request; __G.Response=Response;"
     "if(typeof __G.__streamBody==='function') __G.__streamBody(Response);"
+    "function mkResponse(r,rq){ var st=r.status|0; var h=new Headers(); if(r.contentType) h.set('content-type',r.contentType);"
+    "  String(r.headers||'').split('\\n').forEach(function(l){ var p=l.indexOf(':'); if(p>0){ var k=l.slice(0,p).trim(), v=l.slice(p+1).trim();"
+    "    if(k.toLowerCase()==='content-type') return; try{ h.append(k,v); }catch(e){} } });"
+    "  return new Response(r.body||'',{status:st,headers:h,url:rq.url,type:'basic',raw:r.bodyRaw||null}); }"
     "__G.fetch=function(input,opt){ var rq; try{ rq=new Request(input,opt); }catch(e){ return Promise.reject(e); }"
     "  if(rq.signal&&rq.signal.aborted) return Promise.reject(abortErr());"
     "  var hs=''; try{ rq.headers.forEach(function(v,k){ hs+=k+': '+v+'\\n'; }); }catch(e){}"
+    "  if(HAS_ASYNC) return new Promise(function(res,rej){"
+    "    HFA(rq.method,rq.url,bodyText(rq._body),hs,function(r){ if(!r||(r.status|0)===0) return rej(new TypeError('Failed to fetch'));"
+    "      if(rq.signal&&rq.signal.aborted) return rej(abortErr()); res(mkResponse(r,rq)); }); });"
     "  var r; try{ r=HF(rq.method,rq.url,bodyText(rq._body),hs); }catch(e){ r=null; }"
-    "  var st=r?(r.status|0):0; if(st===0) return Promise.reject(new TypeError('Failed to fetch'));"
+    "  if(!r||(r.status|0)===0) return Promise.reject(new TypeError('Failed to fetch'));"
     "  if(rq.signal&&rq.signal.aborted) return Promise.reject(abortErr());"
-    "  var h=new Headers(); if(r.contentType) h.set('content-type',r.contentType);"
-    "  String(r.headers||'').split('\\n').forEach(function(l){ var p=l.indexOf(':'); if(p>0){ var k=l.slice(0,p).trim(), v=l.slice(p+1).trim();"
-    "    if(k.toLowerCase()==='content-type') return; try{ h.append(k,v); }catch(e){} } });"
-    "  return Promise.resolve(new Response(r.body||'',{status:st,headers:h,url:rq.url,type:'basic',raw:r.bodyRaw||null})); };"
+    "  return Promise.resolve(mkResponse(r,rq)); };"
     /* navigator.sendBeacon: a queued POST over the same gated call, sent after the
      * current task (the page never waits on it); the parent applies the full policy
      * (hostblock included), so a tracker beacon is refused there, not here. */
@@ -262,7 +316,7 @@ static const char JD_XHR_SHIM[] =
     "    if(beacons.length>=64) return false;"
     "    beacons.push([url,bodyText(data)]);"
     "    if(beacons.length===1) __G.setTimeout(function(){ var q=beacons.splice(0);"
-    "      q.forEach(function(b){ try{ HF('POST',b[0],b[1]); }catch(e){} }); },0);"
+    "      q.forEach(function(b){ try{ if(HAS_ASYNC) HFA('POST',b[0],b[1],'',function(){}); else HF('POST',b[0],b[1]); }catch(e){} }); },0);"
     "    return true; };"
     /* the real navigator is non-extensible (anti-fp): the method goes on its own
      * extensible prototype, never on Object.prototype */
@@ -279,6 +333,32 @@ static const char JD_XHR_SHIM[] =
     "})();";
 
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx) {
+    return jd_install_xhr_ex(ctx, fn, fetch_ctx, NULL, NULL);
+}
+
+jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
+                         const char *ctype, const char *hdrs, int ms) {
+    if (ctx == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return JD_ERR_INTERNAL;
+    JSValue global = JS_GetGlobalObject(jsctx);
+    JSValue f = JS_GetPropertyStr(jsctx, global, "__netDeliver");
+    jd_status st = JD_ERR_INTERNAL;
+    if (JS_IsFunction(jsctx, f)) {
+        JSValue arg = jd_reply_object(jsctx, rc, status, body, len, ctype, hdrs);
+        if (!JS_IsException(arg)) JS_SetPropertyStr(jsctx, arg, "ms", JS_NewInt32(jsctx, ms < 0 ? 0 : ms));
+        JSValue r = JS_Call(jsctx, f, JS_UNDEFINED, 1, &arg);
+        JS_FreeValue(jsctx, arg);
+        if (!JS_IsException(r)) st = JD_OK; else JS_FreeValue(jsctx, JS_GetException(jsctx));
+        JS_FreeValue(jsctx, r);
+    }
+    JS_FreeValue(jsctx, f);
+    JS_FreeValue(jsctx, global);
+    return st;
+}
+
+jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
+                            jd_fetch_async_fn afn, void *afetch_ctx) {
     if (ctx == NULL || fn == NULL) return JD_ERR_NULL_ARG;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
@@ -293,6 +373,15 @@ jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx) {
     JSValue global = JS_GetGlobalObject(jsctx);
     if (JS_IsException(global)) { JS_FreeValue(jsctx, hf); return JD_ERR_OOM; }
     JS_SetPropertyStr(jsctx, global, "__hostFetch", hf); /* consumes hf */
+    if (afn != NULL) {
+        JSValue ad[4];
+        jd_pack_ptr(jsctx, &ad[0], (const void *)afn);
+        jd_pack_ptr(jsctx, &ad[2], (const void *)afetch_ctx);
+        JSValue hfa = JS_NewCFunctionData(jsctx, m_host_fetch_async, 4, 0, 4, ad);
+        for (int i = 0; i < 4; ++i) JS_FreeValue(jsctx, ad[i]);
+        if (!JS_IsException(hfa)) JS_SetPropertyStr(jsctx, global, "__hostFetchAsync", hfa);
+        else JS_FreeValue(jsctx, hfa);
+    }
     JS_FreeValue(jsctx, global);
 
     JSValue r = JS_Eval(jsctx, JD_XHR_SHIM, sizeof JD_XHR_SHIM - 1,

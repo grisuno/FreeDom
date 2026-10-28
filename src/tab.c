@@ -40,6 +40,7 @@
 #include "url.h"
 #include "web_storage.h"
 #include "import_map.h"
+#include "subreq_batch.h"
 #include "util.h"
 
 #include <errno.h>
@@ -126,7 +127,16 @@ enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5,
  * may issue zero or more TAG_SUBREQ subresource requests (XMLHttpRequest/fetch), which
  * the trusted parent fetches under full network policy; the final TAG_RESULT precedes
  * the page result. Only OP_LOAD carries tags (XHR is active only during page load). */
-enum { TAG_SUBREQ = 1, TAG_RESULT = 2 };
+enum { TAG_SUBREQ = 1, TAG_RESULT = 2,
+       /* Deferred subrequests (spec/subreq_async.md): TAG_SUBREQ_ASYNC carries the TAG_SUBREQ
+        * fields but the worker does not wait for the reply; TAG_NETWAIT asks the parent for the
+        * replies of every deferred request issued so far, in issue order. */
+       TAG_SUBREQ_ASYNC = 3, TAG_NETWAIT = 4 };
+
+#define TAB_MAX_ASYNC_PENDING SQB_MAX_JOBS            /* deferred requests outstanding */
+#define TAB_MAX_NET_ROUNDS    32                      /* drain rounds per operation */
+#define TAB_ASYNC_THREADS     6                       /* overlapping fetches (Firefox per-host limit) */
+#define TAB_MAX_BATCH_BYTES   ((size_t)(64u * 1024u * 1024u)) /* reply bytes one batch may hand the worker */
 
 /* Per-page subresource caps (anti-DoS): a hostile script cannot drive unbounded fetches
  * or amplification through the parent. */
@@ -156,6 +166,7 @@ typedef struct child_state {
     int             wfd;        /* worker write fd (child -> parent): for subresource requests */
     int             net_active; /* 1 only during a page-load script window (XHR allowed) */
     int             subreq_used;/* subresource requests issued this load (capped) */
+    int             async_pending; /* deferred requests whose reply has not been read yet */
     int             last_run_js;       /* render params from the last OP_LOAD */
     int             last_reader;
     int             last_prefers_dark;
@@ -303,13 +314,19 @@ static int child_computed(void *ctx, dom_node_id h, const char *prop, char *out,
  * compromised worker still cannot reach a blocked host. Refused/over-budget/IO-error =>
  * non-zero (XHR completes with status 0). Only callable inside a page-load script window
  * (net_active) so it never desyncs the OP_EVAL/OP_DECODE_IMAGE response paths. */
-static int child_fetch(void *vctx, const char *method, const char *url,
-                       const char *body, size_t body_len, const char *req_headers,
-                       int *out_status, char **out_body, size_t *out_body_len,
-                       char **out_ctype, char **out_headers) {
-    child_state *cs = (child_state *)vctx;
-    *out_status = 0; *out_body = NULL; *out_body_len = 0; *out_ctype = NULL;
-    if (out_headers != NULL) *out_headers = NULL;
+typedef struct net_reply {
+    int32_t status;
+    int32_t ms;                  /* parent-measured wall time of the fetch */
+    char   *body;  size_t body_len;
+    char   *ctype;
+    char   *hdrs;
+} net_reply;
+
+static void net_reply_free(net_reply *r) { free(r->body); free(r->ctype); free(r->hdrs); memset(r, 0, sizeof *r); }
+
+/* Writes one subrequest frame under `tag`; validates like every other worker-side limit. */
+static int child_write_subreq(child_state *cs, uint8_t tag, const char *method, const char *url,
+                              const char *body, size_t body_len, const char *req_headers) {
     if (cs == NULL || !cs->net_active) return -1;
     if (cs->subreq_used >= TAB_MAX_SUBREQ) return -1;
     size_t mlen = (method != NULL) ? strlen(method) : 0;
@@ -319,8 +336,6 @@ static int child_fetch(void *vctx, const char *method, const char *url,
     size_t hlen = (req_headers != NULL) ? strlen(req_headers) : 0;
     if (hlen > RP_HDR_MAX_BYTES) hlen = 0;      /* over the cap: the page's headers are dropped */
     cs->subreq_used++;
-
-    uint8_t tag = TAG_SUBREQ;
     if (write_full(cs->wfd, &tag, 1) != 0
      || write_full(cs->wfd, &mlen, sizeof mlen) != 0
      || (mlen != 0 && write_full(cs->wfd, method, mlen) != 0)
@@ -331,37 +346,88 @@ static int child_fetch(void *vctx, const char *method, const char *url,
      || write_full(cs->wfd, &hlen, sizeof hlen) != 0
      || (hlen != 0 && write_full(cs->wfd, req_headers, hlen) != 0))
         return -1;
-
-    int32_t status = 0;
-    size_t rlen = 0, clen = 0;
-    if (read_full(cs->rfd, &status, sizeof status) != 0
-     || read_full(cs->rfd, &rlen, sizeof rlen) != 0
-     || rlen > TAB_MAX_SUBRESOURCE)
-        return -1;
-    if (rlen == (size_t)-1) return -1;
-    char *rbody = (char *)malloc(rlen + 1);
-    if (rbody == NULL) return -1;
-    if (rlen != 0 && read_full(cs->rfd, rbody, rlen) != 0) { free(rbody); return -1; }
-    rbody[rlen] = '\0';
-    if (read_full(cs->rfd, &clen, sizeof clen) != 0 || clen > 256) { free(rbody); return -1; }
-    if (clen == (size_t)-1) { free(rbody); return -1; }
-    char *ctype = (char *)malloc(clen + 1);
-    if (ctype == NULL) { free(rbody); return -1; }
-    if (clen != 0 && read_full(cs->rfd, ctype, clen) != 0) { free(rbody); free(ctype); return -1; }
-    ctype[clen] = '\0';
-
-    size_t xlen = 0;
-    if (read_full(cs->rfd, &xlen, sizeof xlen) != 0 || xlen > SF_RESPONSE_HEADERS_MAX) {
-        free(rbody); free(ctype); return -1;
-    }
-    char *xhdrs = (char *)malloc(xlen + 1);
-    if (xhdrs == NULL) { free(rbody); free(ctype); return -1; }
-    if (xlen != 0 && read_full(cs->rfd, xhdrs, xlen) != 0) { free(rbody); free(ctype); free(xhdrs); return -1; }
-    xhdrs[xlen] = '\0';
-
-    *out_status = (int)status; *out_body = rbody; *out_body_len = rlen; *out_ctype = ctype;
-    if (out_headers != NULL) *out_headers = xhdrs; else free(xhdrs);
     return 0;
+}
+
+/* Reads one reply [status][body][ctype][headers][ms] (the format tab_write_reply produces). */
+static int child_read_reply(child_state *cs, net_reply *out) {
+    memset(out, 0, sizeof *out);
+    size_t rlen = 0, clen = 0, xlen = 0;
+    if (read_full(cs->rfd, &out->status, sizeof out->status) != 0
+     || read_full(cs->rfd, &rlen, sizeof rlen) != 0
+     || rlen > TAB_MAX_SUBRESOURCE || rlen == (size_t)-1)
+        return -1;
+    out->body = (char *)malloc(rlen + 1);
+    if (out->body == NULL) return -1;
+    if (rlen != 0 && read_full(cs->rfd, out->body, rlen) != 0) { net_reply_free(out); return -1; }
+    out->body[rlen] = '\0';
+    out->body_len = rlen;
+    if (read_full(cs->rfd, &clen, sizeof clen) != 0 || clen > 256 || clen == (size_t)-1) { net_reply_free(out); return -1; }
+    out->ctype = (char *)malloc(clen + 1);
+    if (out->ctype == NULL) { net_reply_free(out); return -1; }
+    if (clen != 0 && read_full(cs->rfd, out->ctype, clen) != 0) { net_reply_free(out); return -1; }
+    out->ctype[clen] = '\0';
+    if (read_full(cs->rfd, &xlen, sizeof xlen) != 0 || xlen > SF_RESPONSE_HEADERS_MAX || xlen == (size_t)-1) {
+        net_reply_free(out); return -1;
+    }
+    out->hdrs = (char *)malloc(xlen + 1);
+    if (out->hdrs == NULL) { net_reply_free(out); return -1; }
+    if (xlen != 0 && read_full(cs->rfd, out->hdrs, xlen) != 0) { net_reply_free(out); return -1; }
+    out->hdrs[xlen] = '\0';
+    if (read_full(cs->rfd, &out->ms, sizeof out->ms) != 0) { net_reply_free(out); return -1; }
+    return 0;
+}
+
+static int child_fetch(void *vctx, const char *method, const char *url,
+                       const char *body, size_t body_len, const char *req_headers,
+                       int *out_status, char **out_body, size_t *out_body_len,
+                       char **out_ctype, char **out_headers) {
+    child_state *cs = (child_state *)vctx;
+    *out_status = 0; *out_body = NULL; *out_body_len = 0; *out_ctype = NULL;
+    if (out_headers != NULL) *out_headers = NULL;
+    if (child_write_subreq(cs, TAG_SUBREQ, method, url, body, body_len, req_headers) != 0) return -1;
+    net_reply r;
+    if (child_read_reply(cs, &r) != 0) return -1;
+    *out_status = (int)r.status; *out_body = r.body; *out_body_len = r.body_len; *out_ctype = r.ctype;
+    if (out_headers != NULL) *out_headers = r.hdrs; else free(r.hdrs);
+    return 0;
+}
+
+/* Deferred request (jd_fetch_async_fn): the frame goes out, the reply is read by child_net_drain. */
+static int child_fetch_async(void *vctx, const char *method, const char *url,
+                             const char *body, size_t body_len, const char *req_headers) {
+    child_state *cs = (child_state *)vctx;
+    if (cs == NULL || cs->async_pending >= TAB_MAX_ASYNC_PENDING) return -1;
+    if (child_write_subreq(cs, TAG_SUBREQ_ASYNC, method, url, body, body_len, req_headers) != 0) return -1;
+    cs->async_pending++;
+    return 0;
+}
+
+/* Asks the parent for the deferred replies and hands each to its callback (issue order); the
+ * callbacks may queue more, so it repeats (bounded). Called with the network window open, before
+ * the view is derived: whatever the callbacks changed is part of this operation's result. All
+ * replies are READ first, then delivered: JS never writes a frame while the parent is still
+ * writing replies (no pipe deadlock). */
+static void child_net_drain(child_state *cs) {
+    if (cs == NULL || cs->js == NULL || !cs->net_active) return;
+    for (int round = 0; cs->async_pending > 0 && round < TAB_MAX_NET_ROUNDS; ++round) {
+        int n = cs->async_pending;
+        cs->async_pending = 0;
+        uint8_t tag = TAG_NETWAIT;
+        if (write_full(cs->wfd, &tag, 1) != 0) return;
+        net_reply *rep = (net_reply *)calloc((size_t)n, sizeof *rep);
+        if (rep == NULL) return;
+        int got = 0;
+        for (; got < n; ++got) if (child_read_reply(cs, &rep[got]) != 0) break;
+        for (int i = 0; i < got; ++i) {
+            (void)jd_net_deliver(cs->js, rep[i].status != 0 ? 0 : -1, (int)rep[i].status,
+                                 rep[i].body, rep[i].body_len, rep[i].ctype, rep[i].hdrs, (int)rep[i].ms);
+            net_reply_free(&rep[i]);
+        }
+        free(rep);
+        if (got < n) return;                       /* pipe broken: the next op fails closed */
+        (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
+    }
 }
 
 /* FREEDOM_JS_PROFILE=1: wall time of each worker load phase, on the worker's stderr. */
@@ -391,6 +457,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
                       int net_allowed, const char *page_url) {
     child_reset_page(cs);
     cs->subreq_used = 0;
+    cs->async_pending = 0;          /* the parent discards its batch at OP_LOAD */
     double pt = prof_now_ms();
 
     hp_config cfg = hp_config_default();
@@ -451,7 +518,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
      * undefined (Same-Origin-by-construction holds). child_fetch still refuses unless
      * net_active is set during the script window, so install is safe regardless. */
     if (run_js && net_allowed) {
-        (void)jd_install_xhr(js, child_fetch, cs);
+        (void)jd_install_xhr_ex(js, child_fetch, cs, child_fetch_async, cs);
         js_devtools_enable(js);   /* trusted page: record, so Freebug's Profile / Throws tabs have data */
     }
     /* indexedDB lives in page memory and only for a trusted host (like localStorage in RAM). */
@@ -1495,6 +1562,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             js_result_free(&fr);
             (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS); /* drain deferred promise jobs */
         }
+        /* Deferred XHR/fetch: the parent ran them in parallel; settle them before the view. */
+        child_net_drain(cs);
         /* Inject the video shim if the page defines `video[]` / `video_data`
          * (e.g. jkanime.net whose video_min.js is 404). It creates <iframe>
          * elements from the array, which the next step fetches and scans. */
@@ -1701,6 +1770,7 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
         } else {
             (void)jd_fire_click(cs->js, node_id);
         }
+        child_net_drain(cs);
         if (cs->js != NULL) jd_flush_custom_elements(cs->js);
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
@@ -2308,6 +2378,8 @@ struct tab {
     size_t         storage_in_len;
     char          *page_url;      /* current page URL (owned): base that gates JS navigation */
     char          *cookies_in;   /* seeds document.cookie for the next load (owned) */
+    sqb           *batch;        /* deferred subrequests in flight (spec/subreq_async.md), lazily made */
+    size_t         batch_bytes;  /* reply bytes already handed to the worker from this batch */
     tab_fetch_fn   fetcher;
     void          *fetcher_ctx;
     tab_css_sink_fn css_sink;    /* served-stylesheet observer, NULL = none */
@@ -3098,82 +3170,181 @@ const char *tab_inflight_request_headers(void) {
     return (g_inflight_headers != NULL && g_inflight_headers[0] != '\0') ? g_inflight_headers : NULL;
 }
 
-/* Handles one TAG_SUBREQ frame on the response pipe: reads the worker's subresource
- * request, gates it on the grants the PARENT decided for this load (Zero Trust: a
- * compromised worker forging frames gets a refusal, never a fetch -- net grants any
- * method, css-only grants exactly GET), then runs the policy-checked fetcher (or
- * refuses), and writes the reply [status:int32][body_len][body][ctype_len][ctype].
- * A refused frame is still consumed and answered (status 0), so the protocol never
- * desyncs. Returns 0 on success, -1 on a pipe/protocol error (caller aborts the
- * load). Bytes are capped (anti-amplification). */
-static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
-    size_t mlen = 0, ulen = 0, blen = 0, hlen = 0;
-    char *method = NULL, *url = NULL, *body = NULL, *rawh = NULL;
-    if (read_field(t->resp_fd, &method, &mlen) != 0) return -1;
-    if (read_field(t->resp_fd, &url, &ulen) != 0) { free(method); return -1; }
-    if (read_field(t->resp_fd, &body, &blen) != 0) { free(method); free(url); return -1; }
-    if (read_field(t->resp_fd, &rawh, &hlen) != 0) { free(method); free(url); free(body); return -1; }
-
-    /* The worker is untrusted: its header block is re-filtered here, and only the filtered
-     * block is visible to the fetcher (tab_inflight_request_headers) for this one call. */
-    char hdrs[RP_HDR_MAX_BYTES + 1];
-    hdrs[0] = '\0';
-    if (hlen <= RP_HDR_MAX_BYTES && rawh != NULL) (void)rp_sanitize_request_headers(rawh, hdrs, sizeof hdrs);
-    free(rawh);
-    g_inflight_headers = hdrs;
-    free(g_inflight_resp);
-    g_inflight_resp = NULL;
-    g_inflight_active = 1;
-
-    int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL;
-    int ok = 0;
-    /* After the load the fetch blocks the GUI thread: once an operation has spent its network
-     * budget, its remaining requests are refused (answered, so the protocol stays in step). */
-    int64_t budget_us = (int64_t)(t->op_budget_ms > 0 ? t->op_budget_ms : FC_TAB_OP_NET_BUDGET_MS) * 1000;
-    int over = t->in_op && t->op_net_us >= budget_us;
-    struct timespec f0, f1;
-    clock_gettime(CLOCK_MONOTONIC, &f0);
-    if (!over && tab_subreq_permitted(net_granted, css_granted, method)
-        && t->fetcher != NULL && ulen != 0
-        && t->fetcher(t->fetcher_ctx, method, url, body, blen,
-                      &status, &rbody, &rlen, &rctype) == 0) {
-        ok = 1;
-    }
-    clock_gettime(CLOCK_MONOTONIC, &f1);
-    g_inflight_headers = NULL;
-    g_inflight_active = 0;
-    if (t->in_op) t->op_net_us += (int64_t)(f1.tv_sec - f0.tv_sec) * 1000000
-                                + (f1.tv_nsec - f0.tv_nsec) / 1000;
-    if (!ok) { status = 0; rlen = 0; }                 /* refused/failed: fail-closed */
+/* Writes one reply [status:int32][body_len][body][ctype_len][ctype][hdr_len][hdrs][ms:int32] on req_fd
+ * (the worker reads it from child_read_reply). A failed request is the all-zero reply. */
+static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t rlen,
+                           const char *rctype, const char *rhdrs, int ms) {
+    if (!ok) { status = 0; rlen = 0; }                       /* refused/failed: fail-closed */
     if (rlen > TAB_MAX_SUBRESOURCE) { rlen = 0; status = 0; } /* defensive cap */
     size_t clen = (ok && rctype != NULL) ? strlen(rctype) : 0;
     if (clen > 256) clen = 256;
-    /* Served-stylesheet observer (spec/webfont.md b3b): the parent may retain
-     * served CSS (extern sheets for the @font-face loader). Only 2xx CSS
-     * bodies, only while a sink is installed; the sink copies what it keeps
-     * (rbody is freed below). The worker protocol is untouched. */
-    if (ok && status >= 200 && status < 300 && rlen > 0 && rbody != NULL
-        && t->css_sink != NULL && !t->in_async && ctype_is_css(rctype))
-        t->css_sink(t->css_sink_ctx, url, rbody, rlen, rctype);
-
-    /* The reply goes back on req_fd (the worker reads it from its rfd, the same fd it
-     * blocks on inside child_fetch). */
     int32_t st32 = (int32_t)status;
     int wok = (write_full(t->req_fd, &st32, sizeof st32) == 0
             && write_full(t->req_fd, &rlen, sizeof rlen) == 0
             && (rlen == 0 || write_full(t->req_fd, rbody, rlen) == 0)
             && write_full(t->req_fd, &clen, sizeof clen) == 0
             && (clen == 0 || write_full(t->req_fd, rctype, clen) == 0));
-    /* Response headers the page may read (a refused request reports none). */
-    size_t xlen = (ok && g_inflight_resp != NULL) ? strlen(g_inflight_resp) : 0;
+    size_t xlen = (ok && rhdrs != NULL) ? strlen(rhdrs) : 0;
     if (xlen > SF_RESPONSE_HEADERS_MAX) xlen = 0;
-    wok = wok && write_full(t->req_fd, &xlen, sizeof xlen) == 0
-              && (xlen == 0 || write_full(t->req_fd, g_inflight_resp, xlen) == 0);
+    int32_t ms32 = (int32_t)(ms < 0 ? 0 : ms);
+    return (wok && write_full(t->req_fd, &xlen, sizeof xlen) == 0
+               && (xlen == 0 || write_full(t->req_fd, rhdrs, xlen) == 0)
+               && write_full(t->req_fd, &ms32, sizeof ms32) == 0) ? 0 : -1;
+}
+
+/* The one place a subrequest reaches the fetcher, on the calling thread: the sanitized request
+ * headers are published (thread-local) for the call and the response headers the fetcher reports
+ * are captured into *out_hdrs (malloc'd). The worker is untrusted: its header block is re-filtered
+ * here. Returns 1 when the fetch succeeded. */
+static int tab_fetch_one(tab *t, const char *method, const char *url, const char *body, size_t blen,
+                         const char *rawh, int *status, char **rbody, size_t *rlen,
+                         char **rctype, char **out_hdrs) {
+    char hdrs[RP_HDR_MAX_BYTES + 1];
+    hdrs[0] = '\0';
+    if (rawh != NULL && strlen(rawh) <= RP_HDR_MAX_BYTES)
+        (void)rp_sanitize_request_headers(rawh, hdrs, sizeof hdrs);
+    g_inflight_headers = hdrs;
     free(g_inflight_resp);
     g_inflight_resp = NULL;
+    g_inflight_active = 1;
+    int ok = (t->fetcher != NULL && url != NULL && url[0] != '\0'
+              && t->fetcher(t->fetcher_ctx, method, url, body, blen, status, rbody, rlen, rctype) == 0);
+    g_inflight_headers = NULL;
+    g_inflight_active = 0;
+    *out_hdrs = g_inflight_resp;      /* ownership moves to the caller */
+    g_inflight_resp = NULL;
+    return ok;
+}
 
-    free(method); free(url); free(body); free(rbody); free(rctype);
-    return wok ? 0 : -1;
+/* Reads the fields of one subrequest frame. */
+static int tab_read_subreq_fields(tab *t, char **method, char **url, char **body, size_t *blen,
+                                  char **rawh, size_t *hlen) {
+    size_t mlen = 0, ulen = 0;
+    *method = *url = *body = *rawh = NULL;
+    if (read_field(t->resp_fd, method, &mlen) != 0) return -1;
+    if (read_field(t->resp_fd, url, &ulen) != 0) { free(*method); return -1; }
+    if (read_field(t->resp_fd, body, blen) != 0) { free(*method); free(*url); return -1; }
+    if (read_field(t->resp_fd, rawh, hlen) != 0) { free(*method); free(*url); free(*body); return -1; }
+    return 0;
+}
+
+static int64_t tab_op_budget_us(const tab *t) {
+    return (int64_t)(t->op_budget_ms > 0 ? t->op_budget_ms : FC_TAB_OP_NET_BUDGET_MS) * 1000;
+}
+
+static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,
+                                size_t rlen, const char *rctype) {
+    /* Served-stylesheet observer (spec/webfont.md b3b): only 2xx CSS bodies, only while a sink is
+     * installed; the sink copies what it keeps. The worker protocol is untouched. */
+    if (ok && status >= 200 && status < 300 && rlen > 0 && rbody != NULL
+        && t->css_sink != NULL && !t->in_async && ctype_is_css(rctype))
+        t->css_sink(t->css_sink_ctx, url, rbody, rlen, rctype);
+}
+
+/* Handles one TAG_SUBREQ frame on the response pipe: reads the worker's subresource
+ * request, gates it on the grants the PARENT decided for this load (Zero Trust: a
+ * compromised worker forging frames gets a refusal, never a fetch -- net grants any
+ * method, css-only grants exactly GET), then runs the policy-checked fetcher (or
+ * refuses), and writes the reply. A refused frame is still consumed and answered (status 0),
+ * so the protocol never desyncs. Returns 0 on success, -1 on a pipe/protocol error (caller
+ * aborts the load). Bytes are capped (anti-amplification). */
+static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
+    size_t blen = 0, hlen = 0;
+    char *method, *url, *body, *rawh;
+    if (tab_read_subreq_fields(t, &method, &url, &body, &blen, &rawh, &hlen) != 0) return -1;
+
+    int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL, *rhdrs = NULL;
+    int ok = 0;
+    /* After the load the fetch blocks the GUI thread: once an operation has spent its network
+     * budget, its remaining requests are refused (answered, so the protocol stays in step). */
+    int over = t->in_op && t->op_net_us >= tab_op_budget_us(t);
+    struct timespec f0, f1;
+    clock_gettime(CLOCK_MONOTONIC, &f0);
+    if (!over && tab_subreq_permitted(net_granted, css_granted, method))
+        ok = tab_fetch_one(t, method, url, body, blen, hlen <= RP_HDR_MAX_BYTES ? rawh : NULL,
+                           &status, &rbody, &rlen, &rctype, &rhdrs);
+    clock_gettime(CLOCK_MONOTONIC, &f1);
+    if (t->in_op) t->op_net_us += (int64_t)(f1.tv_sec - f0.tv_sec) * 1000000
+                                + (f1.tv_nsec - f0.tv_nsec) / 1000;
+    tab_note_css_served(t, ok, status, url, rbody, rlen, rctype);
+    int wr = tab_write_reply(t, ok, status, rbody, rlen, rctype, rhdrs,
+                             (int)((f1.tv_sec - f0.tv_sec) * 1000L + (f1.tv_nsec - f0.tv_nsec) / 1000000L));
+    free(method); free(url); free(body); free(rawh); free(rbody); free(rctype); free(rhdrs);
+    return wr;
+}
+
+/* The fetch of one deferred request, on a batch thread. The thread-local in-flight state of
+ * tab_fetch_one is per thread, so overlapping requests never see each other's headers. */
+static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out) {
+    tab *t = (tab *)vt;
+    int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL, *rhdrs = NULL;
+    int ok = tab_fetch_one(t, rq->method, rq->url, rq->body, rq->body_len, rq->headers,
+                           &status, &rbody, &rlen, &rctype, &rhdrs);
+    out->ok = ok; out->status = status;
+    out->body = rbody; out->body_len = rlen; out->ctype = rctype; out->resp_headers = rhdrs;
+    if (!ok) { free(rbody); free(rctype); free(rhdrs); memset(out, 0, sizeof *out); }
+    return ok ? 0 : -1;
+}
+
+/* TAG_SUBREQ_ASYNC: reads and gates the frame like tab_serve_subreq, then starts the fetch on a
+ * batch thread and goes back to reading frames; the reply is written at TAG_NETWAIT. A frame the
+ * batch cannot take is queued as a refusal when it can, and otherwise ends the load (the worker
+ * counts replies, so silently dropping one would desync the protocol). */
+static int tab_submit_async(tab *t, int net_granted, int css_granted) {
+    size_t blen = 0, hlen = 0;
+    char *method, *url, *body, *rawh;
+    if (tab_read_subreq_fields(t, &method, &url, &body, &blen, &rawh, &hlen) != 0) return -1;
+    if (t->batch == NULL) t->batch = sqb_new(TAB_ASYNC_THREADS, tab_batch_run, t);
+    int rc = -1;
+    if (t->batch != NULL) {
+        int over = t->in_op && t->op_net_us >= tab_op_budget_us(t);
+        int refused = over || !tab_subreq_permitted(net_granted, css_granted, method)
+                      || t->fetcher == NULL || url[0] == '\0' || hlen > RP_HDR_MAX_BYTES;
+        char hdrs[RP_HDR_MAX_BYTES + 1];
+        hdrs[0] = '\0';
+        if (!refused && rawh != NULL) (void)rp_sanitize_request_headers(rawh, hdrs, sizeof hdrs);
+        sqb_req rq = { method, url, body, blen, hdrs };
+        rc = sqb_submit(t->batch, refused, &rq);
+    }
+    free(method); free(url); free(body); free(rawh);
+    return rc;
+}
+
+/* TAG_NETWAIT: joins the batch and writes one reply per deferred request, in issue order. The
+ * operation's network time is the wall time of the join, not the sum of the requests. */
+static int tab_serve_netwait(tab *t) {
+    int rc = 0;
+    size_t n = sqb_count(t->batch);
+    struct timespec f0, f1;
+    clock_gettime(CLOCK_MONOTONIC, &f0);
+    sqb_wait_all(t->batch);
+    clock_gettime(CLOCK_MONOTONIC, &f1);
+    if (t->in_op) t->op_net_us += (int64_t)(f1.tv_sec - f0.tv_sec) * 1000000
+                                + (f1.tv_nsec - f0.tv_nsec) / 1000;
+    for (size_t i = 0; i < n && rc == 0; ++i) {
+        const sqb_res *r = sqb_result(t->batch, i);
+        int ok = r->ok;
+        if (ok && t->batch_bytes + r->body_len > TAB_MAX_BATCH_BYTES) ok = 0;   /* anti-amplification */
+        if (ok) t->batch_bytes += r->body_len;
+        rc = tab_write_reply(t, ok, r->status, r->body, r->body_len, r->ctype, r->resp_headers, r->elapsed_ms);
+    }
+    sqb_reset(t->batch);
+    return rc;
+}
+
+/* Serves the frame kinds the worker may send while it runs: 1 = served, 0 = not a subrequest
+ * tag, -1 = pipe/protocol error. */
+static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted) {
+    if (tag == TAG_SUBREQ)       return tab_serve_subreq(t, net_granted, css_granted) == 0 ? 1 : -1;
+    if (tag == TAG_SUBREQ_ASYNC) return tab_submit_async(t, net_granted, css_granted) == 0 ? 1 : -1;
+    if (tag == TAG_NETWAIT)      return tab_serve_netwait(t) == 0 ? 1 : -1;
+    return 0;
+}
+
+/* A new load abandons whatever the previous page left in flight. */
+static void tab_batch_discard(tab *t) {
+    if (t->batch != NULL) sqb_reset(t->batch);
+    t->batch_bytes = 0;
 }
 
 static void hist_ops_free(tab_hist_op *ops, size_t n) {
@@ -3396,6 +3567,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
 
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
+    tab_batch_discard(t);
 
     /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][css:1][frame:1][vpw:4][url_len][url]
      * [ck_len][cookies][st_len][storage][id_len][identity][len][html] (the flags, viewport width, URL and cookie seed
@@ -3448,10 +3620,9 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
         uint8_t tag = 0;
         if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
         if (tag == TAG_RESULT) break;
-        if (tag != TAG_SUBREQ) return io_failure(t);   /* desync */
         struct timespec s0, s1;
         clock_gettime(CLOCK_MONOTONIC, &s0);
-        if (tab_serve_subreq(t, nflag, cflag) != 0) return io_failure(t);
+        if (tab_serve_tag(t, tag, nflag, cflag) != 1) return io_failure(t);   /* desync / pipe error */
         clock_gettime(CLOCK_MONOTONIC, &s1);
         int64_t d = (int64_t)(s1.tv_sec - s0.tv_sec) * 1000000
                   + (s1.tv_nsec - s0.tv_nsec) / 1000;
@@ -3734,8 +3905,7 @@ static tab_status tab_await_result_inner(tab *t) {
         uint8_t tag = 0;
         if (read_full(t->resp_fd, &tag, 1) != 0) return io_failure(t);
         if (tag == TAG_RESULT) return TAB_OK;
-        if (tag != TAG_SUBREQ) return io_failure(t);
-        if (tab_serve_subreq(t, t->last_net_granted, 0) != 0) return io_failure(t);
+        if (tab_serve_tag(t, tag, t->last_net_granted, 0) != 1) return io_failure(t);
     }
 }
 
@@ -3964,6 +4134,7 @@ void tab_close(tab *t) {
         int st;
         while (waitpid(t->pid, &st, 0) < 0 && errno == EINTR) { /* retry */ }
     }
+    sqb_free(t->batch);
     free(t->cookies_in);
     free(t->page_url);
     free(t->storage_in);

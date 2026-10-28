@@ -25,7 +25,6 @@
 - [`alpha`](modules/include.box_blur.h.md#alpha) function in `include/box_blur.h`
 - [`ancestors`](modules/include.page_view.h.md#ancestors) function in `include/page_view.h`
 - [`anchor`](modules/gui.browser_ui.c.md#anchor) function in `gui/browser_ui.c`
-- [`answered`](modules/src.tab.c.md#answered) function in `src/tab.c`
 - [`anyway`](modules/include.prefs.h.md#anyway) function in `include/prefs.h`
 - [`approximation`](modules/gui.browser_ui.c.md#approximation) function in `gui/browser_ui.c`
 - [`area`](modules/gui.browser_ui.c.md#area) function in `gui/browser_ui.c`
@@ -1080,9 +1079,14 @@
 - [`fh_apply_top`](modules/src.frame_host.c.md#fh_apply_top) function in `src/frame_host.c`
 - [`fh_count`](modules/include.frame_host.h.md#fh_count) function in `include/frame_host.h`
 - [`fh_count`](modules/src.frame_host.c.md#fh_count) function in `src/frame_host.c`
+- [`fh_frame_view`](modules/include.frame_host.h.md#fh_frame_view) function in `include/frame_host.h`
+- [`fh_frame_view`](modules/src.frame_host.c.md#fh_frame_view) function in `src/frame_host.c`
 - [`fh_free`](modules/include.frame_host.h.md#fh_free) function in `include/frame_host.h`
 - [`fh_free`](modules/src.frame_host.c.md#fh_free) function in `src/frame_host.c`
+- [`fh_generation`](modules/include.frame_host.h.md#fh_generation) function in `include/frame_host.h`
+- [`fh_generation`](modules/src.frame_host.c.md#fh_generation) function in `src/frame_host.c`
 - [`fh_host`](modules/include.frame_host.h.md#fh_host) type_alias in `include/frame_host.h`
+- [`fh_host`](modules/include.ui.h.md#fh_host) struct in `include/ui.h`
 - [`fh_host`](modules/src.frame_host.c.md#fh_host) struct in `src/frame_host.c`
 - [`FH_MAX_DEPTH`](modules/include.frame_host.h.md#fh_max_depth) macro in `include/frame_host.h`
 - [`fh_new`](modules/include.frame_host.h.md#fh_new) function in `include/frame_host.h`
@@ -1182,6 +1186,7 @@
 - [`fp_vendor`](modules/include.anti_fp.h.md#fp_vendor) function in `include/anti_fp.h`
 - [`fp_vendor`](modules/src.anti_fp.c.md#fp_vendor) function in `src/anti_fp.c`
 - [`fragment`](modules/gui.browser_ui.c.md#fragment) function in `gui/browser_ui.c`
+- [`FRAME_BOX_MAX`](modules/gui.browser_ui.c.md#frame_box_max) macro in `gui/browser_ui.c`
 - [`frames`](modules/src.tab.c.md#frames) function in `src/tab.c`
 - [`free`](modules/include.prefs.h.md#free) function in `include/prefs.h`
 - [`free`](modules/include.webfont_load.h.md#free) function in `include/webfont_load.h`
@@ -1344,7 +1349,9 @@
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.os_sandbox.c.md#_gnu_source) macro in `src/os_sandbox.c`
+- [`_GNU_SOURCE`](modules/src.subreq_batch.c.md#_gnu_source) macro in `src/subreq_batch.c`
 - [`_GNU_SOURCE`](modules/src.tab.c.md#_gnu_source) macro in `src/tab.c`
 - [`gradient`](modules/src.css_gradient.c.md#gradient) function in `src/css_gradient.c`
 - [`granted`](modules/include.tab.h.md#granted) function in `include/tab.h`
@@ -1457,6 +1464,7 @@
 - [`HL_FONT_MAX_BYTES`](modules/src.freedom.c.md#hl_font_max_bytes) macro in `src/freedom.c`
 - [`HL_FONT_MAX_SHEETS`](modules/src.freedom.c.md#hl_font_max_sheets) macro in `src/freedom.c`
 - [`hl_font_stash`](modules/src.freedom.c.md#hl_font_stash) struct in `src/freedom.c`
+- [`hl_frames`](modules/src.freedom.c.md#hl_frames) struct in `src/freedom.c`
 - [`HL_JS_NAV_MAX`](modules/src.freedom.c.md#hl_js_nav_max) macro in `src/freedom.c`
 - [`hls_parse`](modules/src.hls.c.md#hls_parse) function in `src/hls.c`
 - [`hls_playlist`](modules/include.hls.h.md#hls_playlist) struct in `include/hls.h`
@@ -1637,6 +1645,7 @@
 - [`ip_val_kind`](modules/include.interp.h.md#ip_val_kind) enum in `include/interp.h`
 - [`it`](modules/gui.browser_ui.c.md#it) function in `gui/browser_ui.c`
 - [`it`](modules/include.flex_layout.h.md#it) function in `include/flex_layout.h`
+- [`it`](modules/include.frame_host.h.md#it) function in `include/frame_host.h`
 - [`it`](modules/src.page_view.c.md#it) function in `src/page_view.c`
 - [`item`](modules/src.css.c.md#item) function in `src/css.c`
 - [`item_sides`](modules/gui.browser_ui.c.md#item_sides) struct in `gui/browser_ui.c`
@@ -1679,7 +1688,9 @@
 - [`jd_install_repl_api`](modules/include.js_dom.h.md#jd_install_repl_api) function in `include/js_dom.h`
 - [`jd_install_repl_api`](modules/src.js_dom_ext.c.md#jd_install_repl_api) function in `src/js_dom_ext.c`
 - [`jd_install_xhr`](modules/src.js_fetch.c.md#jd_install_xhr) function in `src/js_fetch.c`
+- [`jd_install_xhr_ex`](modules/src.js_fetch.c.md#jd_install_xhr_ex) function in `src/js_fetch.c`
 - [`jd_method`](modules/src.js_dom.c.md#jd_method) struct in `src/js_dom.c`
+- [`jd_net_deliver`](modules/src.js_fetch.c.md#jd_net_deliver) function in `src/js_fetch.c`
 - [`jd_opaque`](modules/include.js_dom.h.md#jd_opaque) struct in `include/js_dom.h`
 - [`jd_opaque_get`](modules/src.js_dom.c.md#jd_opaque_get) function in `src/js_dom.c`
 - [`jd_opaque_get`](modules/src.js_dom_internal.h.md#jd_opaque_get) function in `src/js_dom_internal.h`
@@ -2011,6 +2022,7 @@
 - [`name`](modules/src.text_shape.c.md#name) type_alias in `src/text_shape.c`
 - [`namespace`](modules/include.os_sandbox.h.md#namespace) function in `include/os_sandbox.h`
 - [`nat_h`](modules/include.box_style.h.md#bx_bg_layer-nat_h) type_alias of `bx_bg_layer` in `include/box_style.h`
+- [`net_reply`](modules/src.tab.c.md#net_reply) struct in `src/tab.c`
 - [`node`](modules/include.box_tree.h.md#node) function in `include/box_tree.h`
 - [`node`](modules/include.js_geom.h.md#node) type_alias in `include/js_geom.h`
 - [`NONE`](modules/src.box_style.c.md#none) macro in `src/box_style.c`
@@ -2049,6 +2061,7 @@
 - [`offset`](modules/gui.browser_ui.c.md#offset) function in `gui/browser_ui.c`
 - [`offset`](modules/include.flex_layout.h.md#offset) function in `include/flex_layout.h`
 - [`offset`](modules/include.ui.h.md#offset) type_alias in `include/ui.h`
+- [`ok`](modules/include.subreq_batch.h.md#ok) type_alias in `include/subreq_batch.h`
 - [`OMNI_MAX_SUGG`](modules/gui.browser_ui.c.md#omni_max_sugg) macro in `gui/browser_ui.c`
 - [`once`](modules/gui.browser_ui.c.md#once) function in `gui/browser_ui.c`
 - [`once`](modules/src.tab.c.md#once) function in `src/tab.c`
@@ -2174,6 +2187,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2252,6 +2266,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2434,7 +2450,6 @@
 - [`poisoned`](modules/include.js_env.h.md#poisoned) function in `include/js_env.h`
 - [`policy`](modules/include.page_view.h.md#policy) function in `include/page_view.h`
 - [`policy`](modules/include.secure_fetch.h.md#policy) type_alias in `include/secure_fetch.h`
-- [`policy`](modules/src.tab.c.md#policy) function in `src/tab.c`
 - [`pool`](modules/include.prefetch.h.md#pool) function in `include/prefetch.h`
 - [`pool`](modules/src.css_gradient.c.md#pool) function in `src/css_gradient.c`
 - [`pool`](modules/src.freedom.c.md#pool) function in `src/freedom.c`
@@ -2623,6 +2638,9 @@
 - [`PV_FONT_REL_MAX`](modules/src.page_view.c.md#pv_font_rel_max) macro in `src/page_view.c`
 - [`PV_FONT_REL_MIN`](modules/src.page_view.c.md#pv_font_rel_min) macro in `src/page_view.c`
 - [`pv_form_method`](modules/include.page_view.h.md#pv_form_method) enum in `include/page_view.h`
+- [`PV_FRAME_DEF_W`](modules/src.page_view.c.md#pv_frame_def_w) macro in `src/page_view.c`
+- [`PV_FRAME_SCHEME`](modules/include.page_view.h.md#pv_frame_scheme) macro in `include/page_view.h`
+- [`PV_FRAME_URL_MAX`](modules/src.page_view.c.md#pv_frame_url_max) macro in `src/page_view.c`
 - [`pv_free`](modules/include.page_view.h.md#pv_free) function in `include/page_view.h`
 - [`pv_free`](modules/src.page_view.c.md#pv_free) function in `src/page_view.c`
 - [`PV_GRID_TRACKS`](modules/include.page_view.h.md#pv_grid_tracks) macro in `include/page_view.h`
@@ -2834,6 +2852,7 @@
 - [`repeat`](modules/src.css_box.c.md#repeat) function in `src/css_box.c`
 - [`repl_edges`](modules/gui.browser_ui.c.md#repl_edges) struct in `gui/browser_ui.c`
 - [`replace`](modules/include.tab.h.md#replace) type_alias in `include/tab.h`
+- [`replies`](modules/src.tab.c.md#replies) function in `src/tab.c`
 - [`required`](modules/include.flex_layout.h.md#required) function in `include/flex_layout.h`
 - [`resizes`](modules/gui.browser_ui.c.md#resizes) function in `gui/browser_ui.c`
 - [`resolve`](modules/gui.browser_ui.c.md#resolve) function in `gui/browser_ui.c`
@@ -3011,6 +3030,26 @@
 - [`spaced`](modules/gui.browser_ui.c.md#spaced) function in `gui/browser_ui.c`
 - [`span`](modules/src.css_color.c.md#span) function in `src/css_color.c`
 - [`specifiers`](modules/include.prefetch.h.md#specifiers) function in `include/prefetch.h`
+- [`sqb`](modules/include.subreq_batch.h.md#sqb) type_alias in `include/subreq_batch.h`
+- [`sqb`](modules/src.subreq_batch.c.md#sqb) struct in `src/subreq_batch.c`
+- [`sqb_count`](modules/include.subreq_batch.h.md#sqb_count) function in `include/subreq_batch.h`
+- [`sqb_count`](modules/src.subreq_batch.c.md#sqb_count) function in `src/subreq_batch.c`
+- [`sqb_free`](modules/include.subreq_batch.h.md#sqb_free) function in `include/subreq_batch.h`
+- [`sqb_free`](modules/src.subreq_batch.c.md#sqb_free) function in `src/subreq_batch.c`
+- [`sqb_job`](modules/src.subreq_batch.c.md#sqb_job) struct in `src/subreq_batch.c`
+- [`SQB_MAX_JOBS`](modules/include.subreq_batch.h.md#sqb_max_jobs) macro in `include/subreq_batch.h`
+- [`sqb_new`](modules/include.subreq_batch.h.md#sqb_new) function in `include/subreq_batch.h`
+- [`sqb_new`](modules/src.subreq_batch.c.md#sqb_new) function in `src/subreq_batch.c`
+- [`sqb_req`](modules/include.subreq_batch.h.md#sqb_req) struct in `include/subreq_batch.h`
+- [`sqb_res`](modules/include.subreq_batch.h.md#sqb_res) struct in `include/subreq_batch.h`
+- [`sqb_reset`](modules/include.subreq_batch.h.md#sqb_reset) function in `include/subreq_batch.h`
+- [`sqb_reset`](modules/src.subreq_batch.c.md#sqb_reset) function in `src/subreq_batch.c`
+- [`sqb_result`](modules/include.subreq_batch.h.md#sqb_result) function in `include/subreq_batch.h`
+- [`sqb_result`](modules/src.subreq_batch.c.md#sqb_result) function in `src/subreq_batch.c`
+- [`sqb_submit`](modules/include.subreq_batch.h.md#sqb_submit) function in `include/subreq_batch.h`
+- [`sqb_submit`](modules/src.subreq_batch.c.md#sqb_submit) function in `src/subreq_batch.c`
+- [`sqb_wait_all`](modules/include.subreq_batch.h.md#sqb_wait_all) function in `include/subreq_batch.h`
+- [`sqb_wait_all`](modules/src.subreq_batch.c.md#sqb_wait_all) function in `src/subreq_batch.c`
 - [`src`](modules/include.html_parse.h.md#src) function in `include/html_parse.h`
 - [`ss_committed`](modules/include.shm_slots.h.md#ss_committed) function in `include/shm_slots.h`
 - [`SS_COUNT`](modules/include.shm_slots.h.md#ss_count) macro in `include/shm_slots.h`
@@ -3024,6 +3063,7 @@
 - [`start_display`](modules/tools.guitime.py.md#start_display) function in `tools.guitime`
 - [`started`](modules/include.prefetch.h.md#started) function in `include/prefetch.h`
 - [`state`](modules/include.browser.h.md#state) function in `include/browser.h`
+- [`status`](modules/src.tab.c.md#net_reply-status) type_alias of `net_reply` in `src/tab.c`
 - [`status`](modules/include.js_sandbox.h.md#status) type_alias in `include/js_sandbox.h`
 - [`status`](modules/include.renderer.h.md#status) type_alias in `include/renderer.h`
 - [`status`](modules/include.secure_fetch.h.md#status) type_alias in `include/secure_fetch.h`
@@ -3086,6 +3126,7 @@
 - [`tab_async_fd`](modules/include.tab.h.md#tab_async_fd) function in `include/tab.h`
 - [`tab_async_fd`](modules/src.tab.c.md#tab_async_fd) function in `src/tab.c`
 - [`tab_async_finish`](modules/src.tab.c.md#tab_async_finish) function in `src/tab.c`
+- [`TAB_ASYNC_THREADS`](modules/src.tab.c.md#tab_async_threads) macro in `src/tab.c`
 - [`tab_child_pid`](modules/include.tab.h.md#tab_child_pid) function in `include/tab.h`
 - [`tab_child_pid`](modules/src.tab.c.md#tab_child_pid) function in `src/tab.c`
 - [`tab_click`](modules/src.tab.c.md#tab_click) function in `src/tab.c`
@@ -3110,12 +3151,15 @@
 - [`tab_load`](modules/src.tab.c.md#tab_load) function in `src/tab.c`
 - [`tab_load_ex`](modules/src.tab.c.md#tab_load_ex) function in `src/tab.c`
 - [`tab_load_full`](modules/src.tab.c.md#tab_load_full) function in `src/tab.c`
+- [`TAB_MAX_ASYNC_PENDING`](modules/src.tab.c.md#tab_max_async_pending) macro in `src/tab.c`
+- [`TAB_MAX_BATCH_BYTES`](modules/src.tab.c.md#tab_max_batch_bytes) macro in `src/tab.c`
 - [`TAB_MAX_EXTERN_CSS`](modules/src.tab.c.md#tab_max_extern_css) macro in `src/tab.c`
 - [`TAB_MAX_GEOM_WORDS`](modules/src.tab.c.md#tab_max_geom_words) macro in `src/tab.c`
 - [`TAB_MAX_HIST_BYTES`](modules/src.tab.c.md#tab_max_hist_bytes) macro in `src/tab.c`
 - [`TAB_MAX_HIST_OPS`](modules/src.tab.c.md#tab_max_hist_ops) macro in `src/tab.c`
 - [`TAB_MAX_INPUT`](modules/include.tab.h.md#tab_max_input) macro in `include/tab.h`
 - [`TAB_MAX_JS_JOBS`](modules/src.tab.c.md#tab_max_js_jobs) macro in `src/tab.c`
+- [`TAB_MAX_NET_ROUNDS`](modules/src.tab.c.md#tab_max_net_rounds) macro in `src/tab.c`
 - [`TAB_MAX_OPEN_BYTES`](modules/src.tab.c.md#tab_max_open_bytes) macro in `src/tab.c`
 - [`TAB_MAX_OPENS`](modules/src.tab.c.md#tab_max_opens) macro in `src/tab.c`
 - [`TAB_MAX_RUNS`](modules/src.tab.c.md#tab_max_runs) macro in `src/tab.c`
@@ -3369,6 +3413,7 @@
 - [`UI_RELOAD_X`](modules/gui.browser_ui.c.md#ui_reload_x) macro in `gui/browser_ui.c`
 - [`ui_render_pdf_images`](modules/gui.browser_ui.c.md#ui_render_pdf_images) function in `gui/browser_ui.c`
 - [`ui_render_png`](modules/gui.browser_ui.c.md#ui_render_png) function in `gui/browser_ui.c`
+- [`ui_render_png_frames`](modules/gui.browser_ui.c.md#ui_render_png_frames) function in `gui/browser_ui.c`
 - [`ui_render_png_images`](modules/gui.browser_ui.c.md#ui_render_png_images) function in `gui/browser_ui.c`
 - [`ui_render_viewport_w`](modules/gui.browser_ui.c.md#ui_render_viewport_w) function in `gui/browser_ui.c`
 - [`ui_render_viewport_w`](modules/include.ui.h.md#ui_render_viewport_w) function in `include/ui.h`
@@ -3463,6 +3508,7 @@
 - [`wc_derive`](modules/src.webcaps.c.md#wc_derive) function in `src/webcaps.c`
 - [`wc_from_flags`](modules/src.webcaps.c.md#wc_from_flags) function in `src/webcaps.c`
 - [`wc_input`](modules/include.webcaps.h.md#wc_input) struct in `include/webcaps.h`
+- [`wc_render_caps`](modules/gui.browser_ui.c.md#wc_render_caps) function in `gui/browser_ui.c`
 - [`wc_render_caps`](modules/src.webcaps.c.md#wc_render_caps) function in `src/webcaps.c`
 - [`wc_safe`](modules/src.webcaps.c.md#wc_safe) function in `src/webcaps.c`
 - [`WD_MAX_NAMES`](modules/src.wl_display.c.md#wd_max_names) macro in `src/wl_display.c`

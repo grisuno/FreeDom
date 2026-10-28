@@ -13,15 +13,15 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (7.1)
+## include (6.1)
 
 include groups 7 files (h) around FREEDOM_HOSTBLOCK_H, hb_set, hb_list, hb_decision, hb_status. browser_free: Zero-initialise or reset a state.
 
-## src (7.2)
+## src (6.2)
 
 src groups 6 files (c) around _POSIX_C_SOURCE, free_page, clear_status, free_history, free_exceptions. clear_status: #include <stdlib.h> #include <string.h> static void...
 
-## tests (7.3)
+## tests (6.3)
 
 tests groups 6 files (c) around _POSIX_C_SOURCE, test_init, test_navigate_history, test_navigate_from_middle_discards_future, test_back_forward_bounds. test_url_bar_selection: Omnibar selection model: extend builds a selection, ops...
 

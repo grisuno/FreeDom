@@ -13,15 +13,15 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (2.1)
+## include (3.1)
 
 include groups 13 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
 
-## src (2.2)
+## src (3.2)
 
 src groups 23 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FREEDOM_JS_DOM_INTERNAL_H, jd_opaque_get, jd_idx. to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
 
-## tests (2.3)
+## tests (3.3)
 
 tests groups 12 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, IDX. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
 

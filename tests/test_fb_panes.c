@@ -96,6 +96,17 @@ static void test_expr_per_tab(void **state) {
     assert_true(strstr(out, "localStorage") != NULL);   /* the last tab built is Storage */
 }
 
+/* The Net panel shows the parent's measured time and, for a single match, both header blocks. */
+static void test_net_pane_shows_timing_and_headers(void **state) {
+    (void)state;
+    char out[FBP_EXPR_MAX];
+    assert_true(fbp_expr(FBP_NET, "", 0, out, sizeof out) > 0);
+    assert_non_null(strstr(out, "e.ms"));
+    assert_non_null(strstr(out, "reqHeaders"));
+    assert_non_null(strstr(out, "respHeaders"));
+    assert_non_null(strstr(out, "total"));
+}
+
 /* Profile and Throws read the engine's sampler/tracer through the REPL command-line API, name
  * their tabs for --dump-pane, and fail soft when the API is absent (an untrusted page has none). */
 static void test_profile_and_throws_tabs(void **state) {
@@ -162,6 +173,7 @@ int main(void) {
         cmocka_unit_test(test_hit_test_inverts_the_layout),
         cmocka_unit_test(test_quote_escapes_and_fails_closed),
         cmocka_unit_test(test_expr_per_tab),
+        cmocka_unit_test(test_net_pane_shows_timing_and_headers),
         cmocka_unit_test(test_expr_selector_cannot_escape_the_literal),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

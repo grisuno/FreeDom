@@ -3,6 +3,37 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `idn_is_default` | function | `src/identity.c:29` | `int idn_is_default(const idn_config *c)` |
+| `idn_parse` | function | `src/identity.c:236` | `void idn_parse(idn_config *c, const char *text)` |
+| `idn_primary_language` | function | `src/identity.c:143` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)` |
+| `idn_render_page` | function | `src/identity.c:362` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap)` |
+| `idn_serialize` | function | `src/identity.c:206` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap)` |
+| `idn_set_geo` | function | `src/identity.c:91` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)` |
+| `idn_set_languages` | function | `src/identity.c:63` | `int idn_set_languages(idn_config *c, const char *list)` |
+| `idn_set_user_agent` | function | `src/identity.c:34` | `int idn_set_user_agent(idn_config *c, const char *ua)` |
+| `idn_user_agent` | function | `src/identity.c:109` | `const char *idn_user_agent(const idn_config *c)` |
+| `is_alnum` | function | `src/identity.c:21` | `static int is_alnum(char c)` |
+| `is_alpha` | function | `src/identity.c:20` | `static int is_alpha(char c)` |
+| `parse_geo` | function | `src/identity.c:223` | `static int parse_geo(const char *s, double *lat, double *lon, double *acc)` |
+| `parse_number` | function | `src/identity.c:268` | `static int parse_number(const char *s, double *out)` |
+| `pct_decode` | function | `src/identity.c:166` | `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)` |
+| `tag_valid` | function | `src/identity.c:50` | `static int tag_valid(const char *s, size_t n)` |
+| `GIF_LZW_MAX_CODES` | macro | `src/image_decode.c:253` | `#define GIF_LZW_MAX_CODES` |
+| `PNG_IHDR_MIN` | macro | `src/image_decode.c:34` | `#define PNG_IHDR_MIN` |
+| `exit` | function | `src/image_decode.c:6` | `* malformed stream fails closed instead of calling exit(). GIF uses an own pure-C * bounded LZW decoder (no giflib)....` |
+| `gb_next_code` | function | `src/image_decode.c:298` | `static int gb_next_code(gif_bits *b, unsigned width, unsigned *out)` |
+| `gif_bits` | struct | `src/image_decode.c:290` | `` |
+| `gif_deinterlace_row` | function | `src/image_decode.c:319` | `static uint32_t gif_deinterlace_row(uint32_t r, uint32_t fh)` |
+| `gif_put_pixel` | function | `src/image_decode.c:334` | `static void gif_put_pixel(uint32_t *canvas, uint32_t cw, uint32_t ch,                           u...` |
+| `gif_reader` | struct | `src/image_decode.c:255` | `` |
+| `gr_skip` | function | `src/image_decode.c:273` | `static int gr_skip(gif_reader *r, size_t n)` |
+| `gr_skip_subblocks` | function | `src/image_decode.c:280` | `static int gr_skip_subblocks(gif_reader *r)` |
+| `gr_u16le` | function | `src/image_decode.c:266` | `static int gr_u16le(gif_reader *r, uint16_t *out)` |
+| `gr_u8` | function | `src/image_decode.c:260` | `static int gr_u8(gif_reader *r, uint8_t *out)` |
+| `img_decode` | function | `src/image_decode.c:553` | `img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out)` |
+| `img_decode_gif` | function | `src/image_decode.c:354` | `img_status img_decode_gif(const uint8_t *bytes, size_t len, img_pixels *out)` |
+| `img_decode_jpeg` | function | `src/image_decode.c:166` | `img_status img_decode_jpeg(const uint8_t *bytes, size_t len, img_pixels *out)` |
+| `img_decode_png` | function | `src/image_decode.c:102` | `img_status img_decode_png(const uint8_t *bytes, size_t len, img_pixels *out)` |
 | `img_decode_webp` | function | `src/image_decode.c:520` | `img_status img_decode_webp(const uint8_t *bytes, size_t len, img_pixels *out)` |
 | `img_dimensions_ok` | function | `src/image_decode.c:68` | `int img_dimensions_ok(uint32_t w, uint32_t h)` |
 | `img_fit` | function | `src/image_decode.c:76` | `void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h,              double *out_w, do...` |
@@ -55,33 +86,33 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `sample_bezier_x` | function | `src/interp.c:18` | `static double sample_bezier_x(double t, double cx1, double cx2)` |
 | `sample_bezier_y` | function | `src/interp.c:29` | `static double sample_bezier_y(double t, double cy1, double cy2)` |
 | `solve_bezier_t` | function | `src/interp.c:35` | `static double solve_bezier_t(double x, double cx1, double cx2)` |
-| `jdce_install` | function | `src/js_custom_elements.c:190` | `int jdce_install(JSContext *ctx)` |
+| `jdce_install` | function | `src/js_custom_elements.c:199` | `int jdce_install(JSContext *ctx)` |
 | `FREEDOM_JS_CUSTOM_ELEMENTS_H` | macro | `src/js_custom_elements.h:2` | `#define FREEDOM_JS_CUSTOM_ELEMENTS_H` |
 | `jdce_install` | function | `src/js_custom_elements.h:9` | `int jdce_install(JSContext *ctx);` |
 | `JD_COMPUTED_VALUE_MAX` | macro | `src/js_dom.c:412` | `#define JD_COMPUTED_VALUE_MAX` |
 | `JD_QSA_INLINE` | macro | `src/js_dom.c:475` | `#define JD_QSA_INLINE` |
 | `_GNU_SOURCE` | macro | `src/js_dom.c:10` | `#define _GNU_SOURCE` |
 | `attrNames` | function | `src/js_dom.c:695` | `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so      * a missing '...` |
-| `empty` | function | `src/js_dom.c:1436` | `* inert: DOM interface constructors are empty (instanceof yields false, harmless);` |
+| `empty` | function | `src/js_dom.c:1463` | `* inert: DOM interface constructors are empty (instanceof yields false, harmless);` |
 | `enough` | function | `src/js_dom.c:1067` | `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...` |
-| `fails` | function | `src/js_dom.c:2077` | `* cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...` |
-| `geometry` | function | `src/js_dom.c:1438` | `* constant geometry (zero real leak);` |
-| `jd_flush_custom_elements` | function | `src/js_dom.c:2063` | `void jd_flush_custom_elements(js_context *ctx)` |
+| `fails` | function | `src/js_dom.c:2104` | `* cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...` |
+| `geometry` | function | `src/js_dom.c:1465` | `* constant geometry (zero real leak);` |
+| `jd_flush_custom_elements` | function | `src/js_dom.c:2090` | `void jd_flush_custom_elements(js_context *ctx)` |
 | `jd_freeze_mutators` | function | `src/js_dom.c:609` | `static int jd_freeze_mutators(JSContext *jsctx)` |
-| `jd_get_cookies` | function | `src/js_dom.c:2248` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)` |
+| `jd_get_cookies` | function | `src/js_dom.c:2275` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)` |
 | `jd_handle` | function | `src/js_dom.c:40` | `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)` |
 | `jd_handle_or_null` | function | `src/js_dom.c:47` | `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)` |
 | `jd_idx` | function | `src/js_dom.c:31` | `dom_index *jd_idx(JSContext *ctx)` |
-| `jd_install` | function | `src/js_dom.c:1981` | `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)` |
-| `jd_install_console` | function | `src/js_dom.c:2191` | `jd_status jd_install_console(js_context *ctx, fb_buffer *log)` |
+| `jd_install` | function | `src/js_dom.c:2008` | `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)` |
+| `jd_install_console` | function | `src/js_dom.c:2218` | `jd_status jd_install_console(js_context *ctx, fb_buffer *log)` |
 | `jd_is_mutator` | function | `src/js_dom.c:603` | `static int jd_is_mutator(const char *name)` |
 | `jd_method` | struct | `src/js_dom.c:454` | `` |
 | `jd_opaque_get` | function | `src/js_dom.c:27` | `jd_opaque *jd_opaque_get(JSContext *ctx)` |
 | `jd_query_list` | function | `src/js_dom.c:70` | `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)` |
-| `jd_set_computed` | function | `src/js_dom.c:2271` | `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)` |
-| `jd_set_cookies` | function | `src/js_dom.c:2228` | `jd_status jd_set_cookies(js_context *ctx, const char *cookies)` |
-| `jd_set_geometry` | function | `src/js_dom.c:2282` | `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)` |
-| `js_env` | function | `src/js_dom.c:1444` | `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the  * document shim (uses...` |
+| `jd_set_computed` | function | `src/js_dom.c:2298` | `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)` |
+| `jd_set_cookies` | function | `src/js_dom.c:2255` | `jd_status jd_set_cookies(js_context *ctx, const char *cookies)` |
+| `jd_set_geometry` | function | `src/js_dom.c:2309` | `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)` |
+| `js_env` | function | `src/js_dom.c:1471` | `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the  * document shim (uses...` |
 | `m_append_child` | function | `src/js_dom.c:264` | `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,                             ...` |
 | `m_attr_names` | function | `src/js_dom.c:536` | `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,                             in...` |
 | `m_child_node` | function | `src/js_dom.c:159` | `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
@@ -117,9 +148,9 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `m_sibling_node` | function | `src/js_dom.c:166` | `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
 | `m_tag_name` | function | `src/js_dom.c:112` | `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,                           int ar...` |
 | `m_text_content` | function | `src/js_dom.c:207` | `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,                             ...` |
-| `ms` | function | `src/js_dom.c:1245` | `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);` |
+| `ms` | function | `src/js_dom.c:1272` | `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);` |
 | `scripts` | function | `src/js_dom.c:894` | `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...` |
-| `size` | function | `src/js_dom.c:1441` | `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);` |
+| `size` | function | `src/js_dom.c:1468` | `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);` |
 | `table` | function | `src/js_dom.c:643` | `* a table (dom.viewport() non-null);` |
 | `identity` | function | `src/js_dom_ext.c:104` | `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...` |
 | `jd_install_geolocation` | function | `src/js_dom_ext.c:1360` | `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)` |
@@ -187,12 +218,16 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `jd_fire_submit` | function | `src/js_events.c:78` | `int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)` |
 | `jd_install_events` | function | `src/js_events.c:38` | `jd_status jd_install_events(js_context *ctx, jd_click_state *state)` |
 | `_GNU_SOURCE` | macro | `src/js_fetch.c:6` | `#define _GNU_SOURCE` |
-| `jd_install_xhr` | function | `src/js_fetch.c:281` | `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)` |
+| `jd_install_xhr` | function | `src/js_fetch.c:335` | `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)` |
+| `jd_install_xhr_ex` | function | `src/js_fetch.c:360` | `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,                    ...` |
+| `jd_net_deliver` | function | `src/js_fetch.c:339` | `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,      ...` |
 | `jd_pack_ptr` | function | `src/js_fetch.c:28` | `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` |
+| `jd_reply_object` | function | `src/js_fetch.c:43` | `static JSValue jd_reply_object(JSContext *ctx, int rc, int status, const char *rbody,            ...` |
 | `jd_unpack_ptr` | function | `src/js_fetch.c:33` | `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)` |
-| `m_host_fetch` | function | `src/js_fetch.c:46` | `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,                             in...` |
-| `send` | function | `src/js_fetch.c:96` | `* callbacks fire right after send();` |
-| `task` | function | `src/js_fetch.c:257` | `* current task (the page never waits on it);` |
+| `m_host_fetch` | function | `src/js_fetch.c:73` | `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,                             in...` |
+| `m_host_fetch_async` | function | `src/js_fetch.c:104` | `static JSValue m_host_fetch_async(JSContext *ctx, JSValueConst this_val,                         ...` |
+| `send` | function | `src/js_fetch.c:127` | `* callbacks fire right after send();` |
+| `task` | function | `src/js_fetch.c:311` | `* current task (the page never waits on it);` |
 | `JG_INDEX_SLOTS` | macro | `src/js_geom.c:14` | `#define JG_INDEX_SLOTS` |
 | `JG_SLOT_EMPTY` | macro | `src/js_geom.c:15` | `#define JG_SLOT_EMPTY` |
 | `clamp_coord` | function | `src/js_geom.c:27` | `static int32_t clamp_coord(double v, double lo)` |
@@ -290,19 +325,19 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `timespec_reached` | function | `src/js_sandbox.c:180` | `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)` |
 | `undefined` | function | `src/js_sandbox.c:512` | `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...` |
 | `JT_IO_MAX_STR` | macro | `src/js_trusted.c:62` | `#define JT_IO_MAX_STR` |
-| `explicitly` | function | `src/js_trusted.c:552` | `* explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...` |
+| `explicitly` | function | `src/js_trusted.c:557` | `* explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...` |
 | `hex_nibble` | function | `src/js_trusted.c:254` | `static int hex_nibble(char c)` |
-| `jt_enable_frames` | function | `src/js_trusted.c:427` | `jd_status jt_enable_frames(js_context *ctx, int frame_id)` |
+| `jt_enable_frames` | function | `src/js_trusted.c:432` | `jd_status jt_enable_frames(js_context *ctx, int frame_id)` |
 | `jt_enable_observers` | function | `src/js_trusted.c:129` | `jd_status jt_enable_observers(js_context *ctx)` |
 | `jt_enable_open` | function | `src/js_trusted.c:48` | `jd_status jt_enable_open(js_context *ctx)` |
-| `jt_enable_storage` | function | `src/js_trusted.c:483` | `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)` |
-| `jt_enable_worker` | function | `src/js_trusted.c:633` | `jd_status jt_enable_worker(js_context *ctx)` |
+| `jt_enable_storage` | function | `src/js_trusted.c:488` | `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)` |
+| `jt_enable_worker` | function | `src/js_trusted.c:638` | `jd_status jt_enable_worker(js_context *ctx)` |
 | `jt_enable_ws` | function | `src/js_trusted.c:237` | `jd_status jt_enable_ws(js_context *ctx)` |
 | `jt_geometry_changed` | function | `src/js_trusted.c:143` | `jd_status jt_geometry_changed(js_context *ctx)` |
-| `jt_seed_ctx` | struct | `src/js_trusted.c:471` | `` |
-| `jt_seed_pair` | function | `src/js_trusted.c:473` | `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)` |
+| `jt_seed_ctx` | struct | `src/js_trusted.c:476` | `` |
+| `jt_seed_pair` | function | `src/js_trusted.c:478` | `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)` |
 | `jt_take_opens` | function | `src/js_trusted.c:159` | `char *jt_take_opens(js_context *ctx)` |
-| `jt_take_storage` | function | `src/js_trusted.c:504` | `int jt_take_storage(js_context *ctx, char **out, size_t *len)` |
+| `jt_take_storage` | function | `src/js_trusted.c:509` | `int jt_take_storage(js_context *ctx, char **out, size_t *len)` |
 | `jt_take_ws` | function | `src/js_trusted.c:285` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)` |
 | `jt_ws_event` | function | `src/js_trusted.c:336` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)` |
 | `jt_ws_ops_free` | function | `src/js_trusted.c:249` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n)` |
@@ -317,18 +352,18 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `ln_resolve` | function | `src/link_nav.c:172` | `ln_status ln_resolve(const char *base, const char *href, ln_result *out)` |
 | `pop_seg` | function | `src/link_nav.c:98` | `static void pop_seg(char *body, size_t *blen)` |
 | `resolve_file` | function | `src/link_nav.c:149` | `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)` |
-| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:889` | `#define LS_ARGON2_M_KIB` |
-| `LS_ARGON2_P` | macro | `src/local_store.c:890` | `#define LS_ARGON2_P` |
-| `LS_ARGON2_T` | macro | `src/local_store.c:888` | `#define LS_ARGON2_T` |
-| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:885` | `#define LS_KDF_ARGON2ID` |
-| `LS_KDF_NONE` | macro | `src/local_store.c:884` | `#define LS_KDF_NONE` |
-| `LS_VERSION` | macro | `src/local_store.c:883` | `#define LS_VERSION` |
-| `OFF_AEAD` | macro | `src/local_store.c:895` | `#define OFF_AEAD` |
-| `OFF_KDF` | macro | `src/local_store.c:896` | `#define OFF_KDF` |
-| `OFF_MAGIC` | macro | `src/local_store.c:893` | `#define OFF_MAGIC` |
-| `OFF_NONCE` | macro | `src/local_store.c:898` | `#define OFF_NONCE` |
-| `OFF_SALT` | macro | `src/local_store.c:897` | `#define OFF_SALT` |
-| `OFF_VERSION` | macro | `src/local_store.c:894` | `#define OFF_VERSION` |
+| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:900` | `#define LS_ARGON2_M_KIB` |
+| `LS_ARGON2_P` | macro | `src/local_store.c:901` | `#define LS_ARGON2_P` |
+| `LS_ARGON2_T` | macro | `src/local_store.c:899` | `#define LS_ARGON2_T` |
+| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:896` | `#define LS_KDF_ARGON2ID` |
+| `LS_KDF_NONE` | macro | `src/local_store.c:895` | `#define LS_KDF_NONE` |
+| `LS_VERSION` | macro | `src/local_store.c:894` | `#define LS_VERSION` |
+| `OFF_AEAD` | macro | `src/local_store.c:906` | `#define OFF_AEAD` |
+| `OFF_KDF` | macro | `src/local_store.c:907` | `#define OFF_KDF` |
+| `OFF_MAGIC` | macro | `src/local_store.c:904` | `#define OFF_MAGIC` |
+| `OFF_NONCE` | macro | `src/local_store.c:909` | `#define OFF_NONCE` |
+| `OFF_SALT` | macro | `src/local_store.c:908` | `#define OFF_SALT` |
+| `OFF_VERSION` | macro | `src/local_store.c:905` | `#define OFF_VERSION` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:3` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:14` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:25` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
@@ -406,7 +441,8 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:817` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:828` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:839` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:874` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:850` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:885` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:6` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:17` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:28` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
@@ -460,41 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:556` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:567` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:578` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:589` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:600` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:611` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:622` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:633` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:644` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:655` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:666` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:677` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:688` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:699` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:710` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:721` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:732` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:743` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:754` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:765` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:776` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:787` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:798` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:809` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:820` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:831` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:842` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:877` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:9` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:20` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:31` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:42` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:53` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:64` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:75` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:86` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:97` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:108` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:119` | `#define OSSL_KDF_PARAM_THREADS` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

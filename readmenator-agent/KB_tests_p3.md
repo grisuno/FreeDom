@@ -356,7 +356,7 @@ static void test_leading_b...`
 - Depends on: `include/fb_cmdline.h`, `include/freebug.h`
 
 ## tests/test_fb_panes.c
-- Doc: test_profile_and_throws_tabs: Profile and Throws read the engine's sampler/tracer through the...
+- Doc: test_net_pane_shows_timing_and_headers: assert_int_equal(fbp_expr(FBP_CONSOLE, "", 0, out...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -366,10 +366,11 @@ static void test_leading_b...`
   - `test_quote_escapes_and_fails_closed` (function, line 57) `static void test_quote_escapes_and_fails_closed(void **state)`
   - `test_expr_per_tab` (function, line 83) `static void test_expr_per_tab(void **state)`
   - `assert_true` (function, line 91) `assert_true(strncmp(out, "(function(q)`
-  - `test_profile_and_throws_tabs` (function, line 101) `static void test_profile_and_throws_tabs(void **state)`
-  - `test_dom_and_storage_tabs` (function, line 116) `static void test_dom_and_storage_tabs(void **state)`
-  - `test_expr_selector_cannot_escape_the_literal` (function, line 133) `static void test_expr_selector_cannot_escape_the_literal(void **state)`
-  - `main` (function, line 156) `int main(void)`
+  - `test_net_pane_shows_timing_and_headers` (function, line 100) `static void test_net_pane_shows_timing_and_headers(void **state)`
+  - `test_profile_and_throws_tabs` (function, line 112) `static void test_profile_and_throws_tabs(void **state)`
+  - `test_dom_and_storage_tabs` (function, line 127) `static void test_dom_and_storage_tabs(void **state)`
+  - `test_expr_selector_cannot_escape_the_literal` (function, line 144) `static void test_expr_selector_cannot_escape_the_literal(void **state)`
+  - `main` (function, line 167) `int main(void)`
 - Depends on: `include/fb_panes.h`
 
 ## tests/test_flex_layout.c

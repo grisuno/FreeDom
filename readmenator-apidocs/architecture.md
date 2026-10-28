@@ -4,9 +4,9 @@
 
 ## Architecture Overview
 
-13 components stacked in 7 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 20 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
+14 components stacked in 5 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 15 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
 
-Upward dependencies to fix first: `include: css` -> `include: page_view` (3 imports); `src: tab` -> `src: text_shape` (3 imports); `src: tab` -> `include: page_view` (3 imports); `src: tab` -> `include: browser_ui` (2 imports); `include: css` -> `src: text_shape` (1 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: browser` -> `src: tab` (1 imports); `include: svg_render` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `include: prefetch` -> `src: tab` (1 imports)
+Upward dependencies to fix first: `include: css` -> `include: page_view` (3 imports); `src: tab` -> `src: text_shape` (3 imports); `src: tab` -> `include: page_view` (3 imports); `src: tab` -> `include: browser_ui` (2 imports); `include: page_view` -> `include: browser_ui` (2 imports); `include: tab` -> `src: tab` (2 imports); `include: tab` -> `include: page_view` (2 imports); `include: css` -> `src: text_shape` (1 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: browser` -> `src: tab` (1 imports); `src: local_store` -> `include: browser_ui` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `include: prefetch` -> `src: tab` (1 imports)
 
 ```mermaid
 flowchart TB
@@ -15,67 +15,66 @@ flowchart TB
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     subgraph lane_0["Tier 1 - entry / orchestration"]
         direction LR
-        n_c2["include: browser_ui<br/>29 files, 967 symbols<br/>Core / utility"]:::cycle
+        n_c0["include: browser_ui<br/>41 files, 1095 symbols<br/>Core / utility"]:::cycle
         n_d_tools["tools<br/>13 files, 69 symbols<br/>Core / utility"]:::default
         n_d__root_["(root)<br/>5 files, 3 symbols<br/>Core / utility"]:::entry
     end
     subgraph lane_1["Tier 2"]
         direction LR
-        n_c3["src: text_shape<br/>29 files, 406 symbols<br/>Core / utility"]:::cycle
+        n_c6["src: local_store<br/>11 files, 462 symbols<br/>Data access"]:::cycle
+        n_c3["src: text_shape<br/>29 files, 408 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c5["include: page_view<br/>12 files, 622 symbols<br/>Presentation / entry"]:::cycle
+        n_c4["include: page_view<br/>12 files, 627 symbols<br/>Presentation / entry"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
-        n_c1["src: tab<br/>36 files, 809 symbols<br/>Core / utility"]:::cycle
+        n_c2["src: tab<br/>36 files, 833 symbols<br/>Core / utility"]:::cycle
     end
-    subgraph lane_4["Tier 5"]
+    subgraph lane_4["Tier 5 - foundation"]
         direction LR
-        n_c7["include: svg_render<br/>12 files, 146 symbols<br/>Presentation / entry"]:::cycle
         n_c9["include: prefetch<br/>4 files, 90 symbols<br/>Core / utility"]:::cycle
+        n_c8["include: tab<br/>5 files, 103 symbols<br/>Core / utility"]:::cycle
+        n_c7["include: secure_fetch<br/>8 files, 276 symbols<br/>Core / utility"]:::cycle
+        n_c5["include: browser<br/>13 files, 196 symbols<br/>Core / utility"]:::cycle
+        n_c1["include: css<br/>36 files, 993 symbols<br/>Core / utility"]:::cycle
+        n_c11["include: subreq_batch<br/>2 files, 27 symbols<br/>Core / utility"]:::default
         n_c10["include: sha2<br/>2 files, 21 symbols<br/>Core / utility"]:::default
     end
-    subgraph lane_5["Tier 6"]
-        direction LR
-        n_c4["include: local_store<br/>16 files, 528 symbols<br/>Core / utility"]:::cycle
-        n_c0["include: css<br/>36 files, 993 symbols<br/>Core / utility"]:::cycle
-    end
-    subgraph lane_6["Tier 7 - foundation"]
-        direction LR
-        n_c8["include: secure_fetch<br/>8 files, 276 symbols<br/>Core / utility"]:::cycle
-        n_c6["include: browser<br/>13 files, 196 symbols<br/>Core / utility"]:::cycle
-    end
-    n_c1 -->|"1"| n_c10
-    n_c1 -->|"1"| n_c7
-    n_c1 -->|"1"| n_c9
-    n_c2 ==>|"11"| n_c3
-    n_c3 ==>|"6"| n_c5
-    n_c4 -->|"1"| n_c6
-    n_c4 -->|"1"| n_c8
-    n_c5 ==>|"5"| n_c1
-    n_c7 ==>|"4"| n_c0
-    n_c7 -->|"1"| n_c4
-    n_c3 <-.-|"1 upward"| n_c0
-    n_c5 <-.-|"3 upward"| n_c0
-    n_c2 <-.-|"2 upward"| n_c1
-    n_c3 <-.-|"3 upward"| n_c1
-    n_c5 <-.-|"3 upward"| n_c1
-    n_c2 <-.-|"1 upward"| n_c3
-    n_c3 <-.-|"1 upward"| n_c5
-    n_c1 <-.-|"1 upward"| n_c6
-    n_c1 <-.-|"1 upward"| n_c7
-    n_c1 <-.-|"1 upward"| n_c8
-    n_c3 <-.-|"1 upward"| n_c8
-    n_c1 <-.-|"1 upward"| n_c9
-    linkStyle 10,11,12,13,14,15,16,17,18,19,20,21 stroke:#f87171,stroke-width:2px;
-    n_c2 ~~~ n_c3
-    n_c3 ~~~ n_c5
-    n_c5 ~~~ n_c1
-    n_c1 ~~~ n_c7
-    n_c7 ~~~ n_c4
-    n_c4 ~~~ n_c8
+    n_c0 ==>|"11"| n_c3
+    n_c0 -->|"2"| n_c6
+    n_c2 ==>|"5"| n_c1
+    n_c2 -->|"1"| n_c10
+    n_c2 -->|"1"| n_c11
+    n_c2 -->|"4"| n_c5
+    n_c2 -->|"4"| n_c7
+    n_c2 -->|"1"| n_c8
+    n_c2 -->|"1"| n_c9
+    n_c3 ==>|"6"| n_c4
+    n_c4 ==>|"5"| n_c2
+    n_c6 -->|"1"| n_c5
+    n_c6 -->|"1"| n_c7
+    n_c3 <-.-|"1 upward"| n_c1
+    n_c4 <-.-|"3 upward"| n_c1
+    n_c0 <-.-|"2 upward"| n_c2
+    n_c3 <-.-|"3 upward"| n_c2
+    n_c4 <-.-|"3 upward"| n_c2
+    n_c0 <-.-|"1 upward"| n_c3
+    n_c0 <-.-|"2 upward"| n_c4
+    n_c3 <-.-|"1 upward"| n_c4
+    n_c2 <-.-|"1 upward"| n_c5
+    n_c0 <-.-|"1 upward"| n_c6
+    n_c2 <-.-|"1 upward"| n_c7
+    n_c3 <-.-|"1 upward"| n_c7
+    n_c2 <-.-|"2 upward"| n_c8
+    n_c4 <-.-|"2 upward"| n_c8
+    n_c2 <-.-|"1 upward"| n_c9
+    linkStyle 13,14,15,16,17,18,19,20,21,22,23,24,25,26,27 stroke:#f87171,stroke-width:2px;
+    n_c0 ~~~ n_c6
+    n_c6 ~~~ n_c4
+    n_c4 ~~~ n_c2
+    n_c2 ~~~ n_c9
 ```
 
 ---
@@ -170,7 +169,7 @@ sequenceDiagram
 
 ### `freedom.main`
 
-`src/freedom.c:1263`, score 11: `main` in a compiled-language file; entry-style name `main`.
+`src/freedom.c:1306`, score 11: `main` in a compiled-language file; entry-style name `main`.
 
 Call tree:
 
@@ -178,8 +177,8 @@ Call tree:
 flowchart LR
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
-    n_src_freedom_c__main["freedom.main<br/>freedom.c:1263"]:::entry
-    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2782"]:::external
+    n_src_freedom_c__main["freedom.main<br/>freedom.c:1306"]:::entry
+    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2792"]:::external
     n_include_prefs_h__free["prefs.free<br/>prefs.h:72"]:::external
     n_src_prefs_c__prefs_format["prefs.prefs_format<br/>prefs.c:183"]:::external
     n_src_prefs_c__prefs_parse["prefs.prefs_parse<br/>prefs.c:247"]:::external
@@ -189,9 +188,9 @@ flowchart LR
     n_src_prefs_c__bookmark_push["prefs.bookmark_push<br/>Appends a cleaned bookmark.<br/>prefs.c:91"]:::external
     n_src_prefs_c__history_push_back["prefs.history_push_back<br/>Appends a history entry at the BACK preservin...<br/>prefs.c:109"]:::external
     n_src_prefs_c__apply_kv["prefs.apply_kv<br/>} for (size_t i = 0#59; i #lt; p-#gt;history_len#59; ++i)...<br/>prefs.c:231"]:::external
-    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1805"]:::external
-    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1068"]:::external
-    n_gui_browser_ui_c__is_https_url["browser_ui.is_https_url<br/>browser_ui.c:1053"]:::external
+    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1806"]:::external
+    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1069"]:::external
+    n_gui_browser_ui_c__is_https_url["browser_ui.is_https_url<br/>browser_ui.c:1054"]:::external
     n_src_hostblock_c__hb_check["hostblock.hb_check<br/>hostblock.c:193"]:::external
     n_src_hostblock_c__lower["hostblock.lower<br/>hostblock.c:107"]:::external
     n_src_hostblock_c__table_contains["hostblock.table_contains<br/>hostblock.c:92"]:::external
@@ -208,8 +207,8 @@ flowchart LR
     n_src_browser_c__browser_url_bar_extend_cursor["browser.browser_url_bar_extend_cursor<br/>browser.c:376"]:::external
     n_src_browser_c__browser_url_bar_set_cursor["browser.browser_url_bar_set_cursor<br/>browser.c:385"]:::external
     n_src_browser_c__browser_url_bar_select_all["browser.browser_url_bar_select_all<br/>browser.c:393"]:::external
-    n_gui_browser_ui_c__apply_operator_override["browser_ui.apply_operator_override<br/>browser_ui.c:1517"]:::external
-    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1756"]:::external
+    n_gui_browser_ui_c__apply_operator_override["browser_ui.apply_operator_override<br/>browser_ui.c:1518"]:::external
+    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1757"]:::external
     n_include_request_policy_h__rp_host_of["request_policy.rp_host_of<br/>Lowercased host of an absolute URL into out.<br/>request_policy.h:30"]:::external
     n_src_freedom_c__main -.->|"recursion"| n_src_freedom_c__main
     n_src_freedom_c__main -->|"1"| n_gui_browser_ui_c__strcmp

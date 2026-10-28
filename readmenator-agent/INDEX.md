@@ -5,7 +5,7 @@
 | `app.py` | Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL... | root | 3 | 0 |
 | `docker-entrypoint.sh` | - | root | 0 | 0 |
 | `docker_run.sh` | Thin wrapper. | root | 0 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 642 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 650 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -46,7 +46,7 @@
 | `include/form.h` | fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *... | include | 12 | 3 |
 | `include/frame_broker.h` | fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for... | include | 17 | 3 |
 | `include/frame_clock.h` | active: frame_clock (fc_) — pure animation frame scheduler. | include | 7 | 3 |
-| `include/frame_host.h` | fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource... | include | 8 | 3 |
+| `include/frame_host.h` | fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource... | include | 11 | 4 |
 | `include/freebug.h` | fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated).... | include | 18 | 13 |
 | `include/freedom_config.h` | - | include | 15 | 5 |
 | `include/hls.h` | hls_segment: or variant info. | include | 8 | 4 |
@@ -72,7 +72,7 @@
 | `include/media_decoder.h` | md_cmd: Communicates with the parent over two pipes: out_fd: decoder → parent (frames, stream... | include | 12 | 4 |
 | `include/net_realm.h` | nr_realm_allows_http: 1 iff plain http:// is acceptable for this realm. | include | 10 | 4 |
 | `include/os_sandbox.h` | os_violation: function (os_policy_allows) that mirrors the installed BPF program. | include | 12 | 4 |
-| `include/page_view.h` | pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt... | include | 91 | 11 |
+| `include/page_view.h` | pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt... | include | 92 | 12 |
 | `include/pdf_export.h` | pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order)... | include | 10 | 4 |
 | `include/perf_trace.h` | pt_init: #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t... | include | 17 | 3 |
 | `include/pq_seal.h` | pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der... | include | 8 | 3 |
@@ -87,6 +87,7 @@
 | `include/secure_fetch.h` | sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *... | include | 48 | 8 |
 | `include/sha2.h` | sha_digest_len: sha2 -- one-shot SHA-1 / SHA-256 / SHA-384 / SHA-512 (FIPS 180-4), pure and... | include | 6 | 3 |
 | `include/shm_slots.h` | ss_committed: Chooses the slot to paint into: the current one if free, else the other free one. | include | 7 | 2 |
+| `include/subreq_batch.h` | sqb_res: #ifndef SUBREQ_BATCH_H #define SUBREQ_BATCH_H #include <stddef.h> #define SQB_MAX_JOBS... | include | 13 | 3 |
 | `include/svg_paint.h` | svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred... | include | 2 | 2 |
 | `include/svg_render.h` | sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>... | include | 19 | 5 |
 | `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 49 | 6 |
@@ -94,7 +95,7 @@
 | `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 24 | 6 |
 | `include/textfield.h` | tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at... | include | 15 | 3 |
 | `include/tls_impersonate.h` | ti_req: Request: parent -> helper. | include | 23 | 4 |
-| `include/ui.h` | ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no... | include | 19 | 6 |
+| `include/ui.h` | ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no... | include | 20 | 6 |
 | `include/url.h` | url_parts: Components of a validated absolute https URL, sliced for a JS location object. | include | 14 | 16 |
 | `include/util.h` | — shared pure helpers (no I/O except where noted). | include | 6 | 10 |
 | `include/web_storage.h` | wst_new: web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing... | include | 13 | 8 |
@@ -141,9 +142,9 @@
 | `src/form.c` | put_char: No I/O, no global state. | src | 8 | 0 |
 | `src/frame_broker.c` | target_admits: int changed = 1;                                  /* fixpoint: slots are reused... | src | 10 | 0 |
 | `src/frame_clock.c` | - | src | 4 | 0 |
-| `src/frame_host.c` | reap: fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn... | src | 13 | 0 |
+| `src/frame_host.c` | reap: h->fetch = fetch; h->fetch_ctx = fetch_ctx; h->top_msg = top_msg; h->top_ctx = top_ctx... | src | 16 | 0 |
 | `src/freebug.c` | - | src | 9 | 0 |
-| `src/freedom.c` | is_overlay_http: fprintf(fp, "  --dump-video-url: headless, print the first detected video... | src | 48 | 0 |
+| `src/freedom.c` | hl_frames: Frames of a trusted page, headless: the same frame_host the window drives, so the... | src | 50 | 0 |
 | `src/hls.c` | last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not... | src | 10 | 0 |
 | `src/host_conf.c` | read_conf: add_dir(out, env); if (home != NULL && home[0] != '\0') { char user[HCF_PATH_MAX]... | src | 9 | 0 |
 | `src/hostblock.c` | table_probe: Finds the slot for key (length klen) in t, which must have a free slot. | src | 19 | 0 |
@@ -163,7 +164,7 @@
 | `src/js_embed.c` | try_create_iframe_from_script: Scans an inline script body for `video[N]` or `video_data`... | src | 6 | 0 |
 | `src/js_env.c` | m_perf_now: performance.now: coarsened elapsed since the origin bound at install time, so * it... | src | 35 | 0 |
 | `src/js_events.c` | jd_eval_default_action: Runs one engine event-dispatch expression and maps its result to the C... | src | 10 | 0 |
-| `src/js_fetch.c` | jd_pack_ptr: Carry the host fetch fn + its ctx as a function's closure data, each split into... | src | 7 | 0 |
+| `src/js_fetch.c` | jd_pack_ptr: Carry the host fetch fn + its ctx as a function's closure data, each split into... | src | 11 | 0 |
 | `src/js_geom.c` | unite: Bounding box of a and b into a; returns 1 if a changed. | src | 21 | 0 |
 | `src/js_location.c` | jd_lp_set: Defines a string property on the __locParts data object from a (ptr,len) span. * The... | src | 6 | 0 |
 | `src/js_location_internal.h` | Private to js_dom.c / js_location.c: the dom.histTarget native lives with the | src | 2 | 2 |
@@ -171,11 +172,11 @@
 | `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 61 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 18 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
-| `src/local_store.c` | - | src | 335 | 0 |
+| `src/local_store.c` | - | src | 339 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 255 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 259 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/pq_seal.c` | derive_key: pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out) { if (der ==... | src | 11 | 0 |
@@ -188,8 +189,9 @@
 | `src/request_policy.c` | public_suffix_labels: Number of labels of the public suffix (eTLD) of a lowercased host... | src | 17 | 0 |
 | `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 79 | 0 |
 | `src/sha2.c` | pad_tail: Pads the tail of a message into at most two blocks of `bs` bytes with a... | src | 15 | 0 |
+| `src/subreq_batch.c` | subreq_batch -- see include/subreq_batch.h and spec/subreq_async.md. | src | 14 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 34 | 0 |
-| `src/tab.c` | clip_pm_ok: A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile... | src | 147 | 0 |
+| `src/tab.c` | net_reply: jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp). | src | 167 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
 | `src/text_shape.c` | load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *... | src | 61 | 0 |
 | `src/textfield.c` | - | src | 12 | 0 |
@@ -233,12 +235,12 @@
 | `tests/test_dom_debug.c` | build: #include "dom_debug.h" #include "page_view.h" #include "render_doc.h" #include... | tests | 11 | 0 |
 | `tests/test_download.c` | - | tests | 21 | 0 |
 | `tests/test_fb_cmdline.c` | - | tests | 7 | 0 |
-| `tests/test_fb_panes.c` | test_profile_and_throws_tabs: Profile and Throws read the engine's sampler/tracer through the... | tests | 10 | 0 |
+| `tests/test_fb_panes.c` | test_net_pane_shows_timing_and_headers: assert_int_equal(fbp_expr(FBP_CONSOLE, "", 0, out... | tests | 11 | 0 |
 | `tests/test_flex_layout.c` | test_autofill_count: assert_item(out[0], 0.0, 100.0);  /* no divide-by-zero, behaves like start... | tests | 71 | 0 |
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_broker.c` | test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router. | tests | 10 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
-| `tests/test_frame_host.c` | - | tests | 8 | 0 |
+| `tests/test_frame_host.c` | test_frame_view_is_exposed_for_painting: The painter asks the host for the document of the frame... | tests | 9 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
 | `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 111 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
@@ -251,7 +253,7 @@
 | `tests/test_image_decode.c` | - | tests | 37 | 0 |
 | `tests/test_import_map.c` | tres: Test URL resolver: absolute https passes, "/x" is origin-relative, "./x" and "../x" * are... | tests | 8 | 0 |
 | `tests/test_interp.c` | assert_float_equal: ip_ease_fn fns_0to0[] = { { .kind = IP_EASE_LINEAR }, { .kind = IP_EASE_EASE... | tests | 37 | 0 |
-| `tests/test_js_dom.c` | fake_net: HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and... | tests | 268 | 0 |
+| `tests/test_js_dom.c` | fake_net: HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and... | tests | 271 | 0 |
 | `tests/test_js_env.c` | test_install_identity_override: /* --- install --- static void test_install_null_args(void... | tests | 32 | 0 |
 | `tests/test_js_geom.c` | test_same_node_unions: assert_int_equal(jg_add(&t, 2, 0, 0, 5, 5), 0)... | tests | 11 | 0 |
 | `tests/test_js_policy.c` | test_trusted_requires_both_signals: Hito 28: a host is TRUSTED (full author CSS + images, on top... | tests | 5 | 0 |
@@ -261,7 +263,7 @@
 | `tests/test_media_decoder.c` | test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and... | tests | 6 | 0 |
 | `tests/test_net_realm.c` | test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state... | tests | 13 | 0 |
 | `tests/test_os_sandbox.c` | test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations... | tests | 19 | 0 |
-| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 213 | 0 |
+| `tests/test_page_view.c` | parse: #include <setjmp.h> #include <stdio.h> #include <string.h> #include <cmocka.h> #include... | tests | 214 | 0 |
 | `tests/test_pdf_export.c` | - | tests | 30 | 0 |
 | `tests/test_perf_trace.c` | - | tests | 12 | 0 |
 | `tests/test_pq_seal.c` | test_requires_both_secrets_and_detects_tamper: static void test_each_seal_is_fresh(void **state)... | tests | 7 | 0 |
@@ -275,8 +277,9 @@
 | `tests/test_secure_fetch.c` | test_default_groups_offer_p384: Some servers (justpaste.it, 2026 Let's Encrypt P-384 chain)... | tests | 58 | 0 |
 | `tests/test_sha2.c` | test_sha2 -- CMocka suite for the pure SHA-1/256/384/512 (FIPS 180-4 vectors). | tests | 7 | 0 |
 | `tests/test_shm_slots.c` | - | tests | 4 | 0 |
+| `tests/test_subreq_batch.c` | subreq_batch (spec/subreq_async.md): parallelism, issue order, refusals, reuse. | tests | 9 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
-| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 150 | 0 |
+| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 153 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
 | `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 23 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |

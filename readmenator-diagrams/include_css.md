@@ -14,15 +14,15 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (1.1)
+## include (2.1)
 
 include groups 18 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
-## src (1.2)
+## src (2.2)
 
 src groups 18 files (c) around BT_LEN_AUTO, layout_block, bt_nn, BT_WRAP_EPS, height. layout_block: Block container: stack non-none children vertically, collapsing each...
 
-## tests (1.3)
+## tests (2.3)
 
 tests groups 16 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
 

@@ -1,10 +1,10 @@
 # `include/ui.h`
 
-> Source: [include/ui.h:1](../../include/ui.h#L1) | language `h` | coverage 31.6% | [API index](../index.md)
+> Source: [include/ui.h:1](../../include/ui.h#L1) | language `h` | coverage 35.0% | [API index](../index.md)
 
 ## Contents
 
-- **Structs:** [`ui_line`](#ui_line), [`ui_layout`](#ui_layout), [`rd_doc`](#rd_doc), [`jg_table`](#jg_table), [`tab`](#tab)
+- **Structs:** [`ui_line`](#ui_line), [`ui_layout`](#ui_layout), [`rd_doc`](#rd_doc), [`jg_table`](#jg_table), [`tab`](#tab), [`fh_host`](#fh_host)
 - **Enums:** [`ui_status`](#ui_status)
 - **Type Aliases:** [`offset`](#offset)
 - **Functions:** [`space`](#space), [`ui_layout_free`](#ui_layout_free), [`ui_clamp_scroll`](#ui_clamp_scroll), [`shortcut`](#shortcut), [`available`](#available), [`out`](#out), [`placeholders`](#placeholders), [`disk`](#disk), [`images`](#images), [`ui_render_viewport_w`](#ui_render_viewport_w), [`ui_persisted_prefs`](#ui_persisted_prefs)
@@ -28,6 +28,8 @@ classDiagram
     <<struct>> jg_table
     class tab
     <<struct>> tab
+    class fh_host
+    <<struct>> fh_host
 ```
 
 ## Structs
@@ -91,6 +93,20 @@ struct jg_table;
 ```c
 struct tab;
 ```
+
+---
+
+<a id="fh_host"></a>
+
+### `fh_host`
+
+`struct` | [include/ui.h:130](../../include/ui.h#L130)
+
+```c
+struct fh_host;
+```
+
+ui_render_png_images, plus the live <iframe>s of a trusted page: [`frames`](src.tab.c.md#frames) (may be NULL) is the frame host whose documents are painted into the frame boxes, exactly as the window does.
 
 ---
 
@@ -314,7 +330,7 @@ Clamps desired to [0, max(0, total_lines - viewport_lines)].
 
 ### `ui_render_viewport_w`
 
-`function` | [include/ui.h:147](../../include/ui.h#L147)
+`function` | [include/ui.h:156](../../include/ui.h#L156)
 
 ```c
 int ui_render_viewport_w(void);
@@ -332,7 +348,7 @@ The headless driver feeds it to tab_set_viewport_w so @media width queries match
 
 ### `ui_persisted_prefs`
 
-`function` | [include/ui.h:152](../../include/ui.h#L152)
+`function` | [include/ui.h:161](../../include/ui.h#L161)
 
 ```c
 int ui_persisted_prefs(prefs_state *out);

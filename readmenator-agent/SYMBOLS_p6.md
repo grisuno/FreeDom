@@ -3,6 +3,32 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `CSS_INLINE_DECLS` | macro | `src/css.c:69` | `#define CSS_INLINE_DECLS` |
+| `CSS_MAX_FONT_FACES` | macro | `src/css.c:164` | `#define CSS_MAX_FONT_FACES` |
+| `CSS_MAX_RAW` | macro | `src/css.c:86` | `#define CSS_MAX_RAW` |
+| `CSS_MEDIA_MAX_DEPTH` | macro | `src/css.c:4695` | `#define CSS_MEDIA_MAX_DEPTH` |
+| `CSS_SELS_PER_GROUP` | macro | `src/css.c:68` | `#define CSS_SELS_PER_GROUP` |
+| `CSS_VAR_POOL` | macro | `src/css.c:6003` | `#define CSS_VAR_POOL` |
+| `CSS_WIDE_RESET` | macro | `src/css.c:221` | `#define CSS_WIDE_RESET` |
+| `LIST` | function | `src/css.c:2516` | `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...` |
+| `NULL` | function | `src/css.c:6422` | `* Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...` |
+| `P_META_CUSTOM` | macro | `src/css.c:82` | `#define P_META_CUSTOM` |
+| `P_META_VARSRC` | macro | `src/css.c:83` | `#define P_META_VARSRC` |
+| `add_rule` | function | `src/css.c:4411` | `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,                      siz...` |
+| `anim_easing_iv` | function | `src/css.c:1186` | `static int anim_easing_iv(const char *tok)` |
+| `apply_decl` | function | `src/css.c:5449` | `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
+| `apply_rule` | function | `src/css.c:6034` | `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
+| `apply_var_source` | function | `src/css.c:6007` | `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,         ...` |
+| `at_is_media` | function | `src/css.c:4562` | `static int at_is_media(const char *s, size_t i, size_t n)` |
+| `at_keyword` | function | `src/css.c:4573` | `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` |
+| `axis` | function | `src/css.c:1512` | `* bare center displaces it to the free axis (`center right` = x:right, y:center).  * Any other co...` |
+| `bg_alpha_of` | function | `src/css.c:235` | `static int bg_alpha_of(const char *v)` |
+| `block_end` | function | `src/css.c:4540` | `static size_t block_end(const char *s, size_t open, size_t n)` |
+| `blur` | function | `src/css.c:1475` | `* consumes ONLY blur(Npx);` |
+| `box_shadow_layer` | function | `src/css.c:1970` | `static int box_shadow_layer(const char *val, size_t len, int out[6])` |
+| `caller` | function | `src/css.c:3402` | `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...` |
+| `cand_cmp` | function | `src/css.c:5942` | `static int cand_cmp(const void *pa, const void *pb)` |
+| `cap` | function | `src/css.c:1744` | `* string past the cap (emit_content): a conforming declaration must not * count as a discard just because an icon...` |
 | `collect_custom_props_scoped` | function | `src/css.c:4704` | `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,                 ...` |
 | `column` | function | `src/css.c:2071` | `* column (`flex: 1 1 0%`);` |
 | `computed_font_size` | function | `src/css.c:5925` | `static double computed_font_size(const css_style *o, const css_element *el)` |
@@ -470,31 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `not3` | function | `src/css_mq.c:78` | `static int not3(int a)` |
 | `or3` | function | `src/css_mq.c:72` | `static int or3(int a, int b)` |
 | `parse_value` | function | `src/css_mq.c:167` | `static int parse_value(const char *t, int unit, double *out)` |
-| `peek_word` | function | `src/css_mq.c:61` | `static int peek_word(const mq_cur *c, char *w, size_t cap)` |
-| `read_num` | function | `src/css_mq.c:162` | `static int read_num(const char *t, double *out, const char **end)` |
-| `read_op` | function | `src/css_mq.c:266` | `static int read_op(const char **p)` |
-| `read_word` | function | `src/css_mq.c:49` | `static int read_word(mq_cur *c, char *w, size_t cap)` |
-| `skip_ws` | function | `src/css_mq.c:44` | `static void skip_ws(mq_cur *c)` |
-| `HAS_MAX_DEPTH` | macro | `src/css_select.c:909` | `#define HAS_MAX_DEPTH` |
-| `attr_matches` | function | `src/css_select.c:758` | `static int attr_matches(const css_attr_match *am, const css_element *el)` |
-| `between` | function | `src/css_select.c:382` | `* between ( and ) is split on commas (not inside [] or ());` |
-| `built` | function | `src/css_select.c:1085` | `* chains the caller built (an element without parent/prev links never matches  * through that com...` |
-| `compound_matches` | function | `src/css_select.c:1050` | `static int compound_matches(const css_compound *c, const css_element *el,                        ...` |
-| `compute_anc_req` | function | `src/css_select.c:600` | `static unsigned long long compute_anc_req(const css_sel *sel)` |
-| `compute_subj_req` | function | `src/css_select.c:704` | `static unsigned long long compute_subj_req(const css_sel *sel)` |
-| `csel_decl_end` | function | `src/css_select.c:104` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace)` |
-| `csel_element_feature_bits` | function | `src/css_select.c:585` | `unsigned long long csel_element_feature_bits(const css_element *e)` |
-| `csel_emit_utf8` | function | `src/css_select.c:30` | `size_t csel_emit_utf8(unsigned int cp, char *out)` |
-| `csel_escape_len` | function | `src/css_select.c:91` | `size_t csel_escape_len(const char *s, size_t i, size_t b)` |
-| `csel_hex_val` | function | `src/css_select.c:23` | `int csel_hex_val(char c)` |
-| `csel_ident_eq` | function | `src/css_select.c:142` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen)` |
-| `csel_ident_fold` | function | `src/css_select.c:127` | `void csel_ident_fold(const char *src, size_t len, char *dst)` |
-| `csel_matches` | function | `src/css_select.c:1163` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,               ...` |
-| `csel_needs_structure` | function | `src/css_select.c:1140` | `int csel_needs_structure(const css_sel *sel)` |
-| `csel_parse` | function | `src/css_select.c:715` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel)` |
-| `csel_parse_core` | function | `src/css_select.c:613` | `static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel)` |
-| `csel_read_ident` | function | `src/css_select.c:150` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower)` |
-| `csel_unescape` | function | `src/css_select.c:52` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n)` |
-| `el_attr_value` | function | `src/css_select.c:725` | `static const char *el_attr_value(const css_element *el, const char *name)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

@@ -94,6 +94,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/dom.h` -> `include/html_parse.h`
 - `include/dom_debug.h` -> `include/render_doc.h`
 - `include/form.h` -> `include/url.h`
+- `include/frame_host.h` -> `include/page_view.h`
 - `include/frame_host.h` -> `include/tab.h`
 - `include/host_conf.h` -> `include/hostblock.h`
 - `include/http_cache.h` -> `include/local_store.h`
@@ -228,6 +229,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/freebug.c` -> `include/freebug.h`
 - `src/freedom.c` -> `include/dom_debug.h`
 - `src/freedom.c` -> `include/fb_panes.h`
+- `src/freedom.c` -> `include/frame_host.h`
 - `src/freedom.c` -> `include/freebug.h`
 - `src/freedom.c` -> `include/hls.h`
 - `src/freedom.c` -> `include/host_conf.h`
@@ -368,6 +370,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/secure_fetch.c` -> `include/secure_fetch.h`
 - `src/secure_fetch.c` -> `include/url.h`
 - `src/sha2.c` -> `include/sha2.h`
+- `src/subreq_batch.c` -> `include/subreq_batch.h`
 - `src/svg_render.c` -> `include/css_color.h`
 - `src/svg_render.c` -> `include/svg_render.h`
 - `src/tab.c` -> `include/anti_fp.h`
@@ -393,6 +396,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/page_view.h`
 - `src/tab.c` -> `include/request_policy.h`
 - `src/tab.c` -> `include/secure_fetch.h`
+- `src/tab.c` -> `include/subreq_batch.h`
 - `src/tab.c` -> `include/tab.h`
 - `src/tab.c` -> `include/url.h`
 - `src/tab.c` -> `include/util.h`
@@ -492,9 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_interp.c` -> `include/interp.h`
 - `tests/test_js_dom.c` -> `include/dom.h`
 - `tests/test_js_dom.c` -> `include/fb_cmdline.h`
-- `tests/test_js_dom.c` -> `include/fb_panes.h`
-- `tests/test_js_dom.c` -> `include/html_parse.h`
-- `tests/test_js_dom.c` -> `include/js_dom.h`
-- `tests/test_js_dom.c` -> `include/js_geom.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

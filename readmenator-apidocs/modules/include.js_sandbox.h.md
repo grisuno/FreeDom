@@ -456,6 +456,8 @@ Job exceptions (rejected promises with no handler, etc.) are swallowed -- a job 
 
 **Returns:** `int`
 
+*Called by:* [`replies`](src.tab.c.md#replies)
+
 ---
 
 <a id="handle"></a>

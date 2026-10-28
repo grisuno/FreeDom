@@ -432,16 +432,19 @@ Previous: [KB_include.md](KB_include.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `fh_host` (type_alias, line 18) `typedef struct fh_host fh_host;`
-  - `fh_new` (function, line 27) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);`
-  - `fh_free` (function, line 31) `void fh_free(fh_host *h);`
-  - `fh_apply_top` (function, line 35) `void fh_apply_top(fh_host *h, const tab_page *page);`
-  - `fh_tick` (function, line 39) `int fh_tick(fh_host *h, int elapsed_ms);`
-  - `fh_count` (function, line 42) `int fh_count(const fh_host *h);`
+  - `fh_host` (type_alias, line 19) `typedef struct fh_host fh_host;`
+  - `fh_new` (function, line 28) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);`
+  - `fh_free` (function, line 32) `void fh_free(fh_host *h);`
+  - `fh_apply_top` (function, line 36) `void fh_apply_top(fh_host *h, const tab_page *page);`
+  - `fh_tick` (function, line 40) `int fh_tick(fh_host *h, int elapsed_ms);`
+  - `fh_count` (function, line 43) `int fh_count(const fh_host *h);`
+  - `it` (function, line 46) `* confined worker last built it (NULL when no live frame has that URL);`
+  - `fh_frame_view` (function, line 49) `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);`
+  - `fh_generation` (function, line 52) `unsigned fh_generation(const fh_host *h);`
   - `FREEDOM_FRAME_HOST_H` (macro, line 2) `#define FREEDOM_FRAME_HOST_H`
-  - `FH_MAX_DEPTH` (macro, line 17) `#define FH_MAX_DEPTH`
-- Depends on: `include/tab.h`
-- Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `tests/test_frame_host.c`
+  - `FH_MAX_DEPTH` (macro, line 18) `#define FH_MAX_DEPTH`
+- Depends on: `include/page_view.h`, `include/tab.h`
+- Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `src/freedom.c`, `tests/test_frame_host.c`
 
 ## include/freebug.h
 - Doc: fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated)....

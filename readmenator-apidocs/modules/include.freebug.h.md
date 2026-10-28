@@ -112,7 +112,7 @@ Zero-initialise b (no allocation).
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
-*Called by:* [`tab_eval`](src.tab.c.md#tab_eval), [`tab_load_full`](src.tab.c.md#tab_load_full)
+*Called by:* [`tab_load_full`](src.tab.c.md#tab_load_full)
 
 ---
 
@@ -230,7 +230,7 @@ Idempotent; safe on NULL.
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
-*Called by:* [`tab_eval`](src.tab.c.md#tab_eval), [`tab_load_full`](src.tab.c.md#tab_load_full)
+*Called by:* [`tab_load_full`](src.tab.c.md#tab_load_full)
 
 ---
 

@@ -109,24 +109,24 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `rd_push_input` (function, line 212) `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)`
   - `resolve_image_decision` (function, line 248) `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
         ...`
-  - `rd_build` (function, line 270) `rd_status rd_build(const pv_view *view, rdp_caps caps,
+  - `rd_build` (function, line 274) `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-  - `unset` (function, line 681) `* background paints as if unset (no border/box-shadow-style
+  - `unset` (function, line 685) `* background paints as if unset (no border/box-shadow-style
                  * "broken image" pla...`
-  - `rd_free` (function, line 746) `void rd_free(rd_doc *d)`
-  - `rd_count` (function, line 763) `size_t rd_count(const rd_doc *d)`
-  - `rd_at` (function, line 767) `const rd_block *rd_at(const rd_doc *d, size_t i)`
-  - `rd_box_count` (function, line 772) `size_t rd_box_count(const rd_doc *d)`
-  - `rd_box_at` (function, line 776) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-  - `rd_cont_count` (function, line 781) `size_t rd_cont_count(const rd_doc *d)`
-  - `rd_cont_at` (function, line 785) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
-  - `rd_kind_name` (function, line 790) `const char *rd_kind_name(rd_kind k)`
-  - `rd_block_heading_level` (function, line 804) `int rd_block_heading_level(const rd_block *b)`
-  - `rd_block_tag` (function, line 815) `const char *rd_block_tag(const rd_block *b)`
-  - `rd_input_label` (function, line 846) `const char *rd_input_label(int input_type)`
-  - `rd_input_invisible` (function, line 866) `int rd_input_invisible(int input_type)`
-  - `rd_image_label` (function, line 870) `const char *rd_image_label(rdp_img_decision d)`
-  - `rd_image_fail_label` (function, line 881) `const char *rd_image_fail_label(img_fail_reason reason)`
+  - `rd_free` (function, line 750) `void rd_free(rd_doc *d)`
+  - `rd_count` (function, line 767) `size_t rd_count(const rd_doc *d)`
+  - `rd_at` (function, line 771) `const rd_block *rd_at(const rd_doc *d, size_t i)`
+  - `rd_box_count` (function, line 776) `size_t rd_box_count(const rd_doc *d)`
+  - `rd_box_at` (function, line 780) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
+  - `rd_cont_count` (function, line 785) `size_t rd_cont_count(const rd_doc *d)`
+  - `rd_cont_at` (function, line 789) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
+  - `rd_kind_name` (function, line 794) `const char *rd_kind_name(rd_kind k)`
+  - `rd_block_heading_level` (function, line 808) `int rd_block_heading_level(const rd_block *b)`
+  - `rd_block_tag` (function, line 819) `const char *rd_block_tag(const rd_block *b)`
+  - `rd_input_label` (function, line 850) `const char *rd_input_label(int input_type)`
+  - `rd_input_invisible` (function, line 870) `int rd_input_invisible(int input_type)`
+  - `rd_image_label` (function, line 874) `const char *rd_image_label(rdp_img_decision d)`
+  - `rd_image_fail_label` (function, line 885) `const char *rd_image_fail_label(img_fail_reason reason)`
   - `place` (function, line 238) `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
@@ -301,6 +301,27 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `ROL32` (macro, line 9) `#define ROL32(x, n)`
   - `ROR64` (macro, line 10) `#define ROR64(x, n)`
 - Depends on: `include/sha2.h`
+
+## src/subreq_batch.c
+- Doc: subreq_batch -- see include/subreq_batch.h and spec/subreq_async.md.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `sqb_job` (struct, line 11)
+  - `sqb` (struct, line 21)
+  - `dup_n` (function, line 30) `static char *dup_n(const char *s, size_t n)`
+  - `res_clear` (function, line 39) `static void res_clear(sqb_res *r)`
+  - `job_free` (function, line 44) `static void job_free(sqb_job *j)`
+  - `job_main` (function, line 51) `static void *job_main(void *arg)`
+  - `sqb_new` (function, line 75) `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx)`
+  - `sqb_submit` (function, line 86) `int sqb_submit(sqb *b, int refused, const sqb_req *req)`
+  - `sqb_count` (function, line 112) `size_t sqb_count(const sqb *b)`
+  - `sqb_wait_all` (function, line 114) `void sqb_wait_all(sqb *b)`
+  - `sqb_result` (function, line 122) `const sqb_res *sqb_result(const sqb *b, size_t i)`
+  - `sqb_reset` (function, line 126) `void sqb_reset(sqb *b)`
+  - `sqb_free` (function, line 133) `void sqb_free(sqb *b)`
+  - `_GNU_SOURCE` (macro, line 2) `#define _GNU_SOURCE`
+- Depends on: `include/subreq_batch.h`
 
 ## src/svg_render.c
 - Doc: svg_render — inline <svg> markup -> a bounded list of geometric shapes.

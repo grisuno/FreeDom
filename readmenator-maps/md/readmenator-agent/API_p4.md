@@ -1,6 +1,26 @@
 # API (page 4 of 12)
 Previous: [API_p3.md](API_p3.md)
 
+## include/css_text.h
+Depends on: `include/css_decl.h`
+Imported by: `src/css.c`, `src/css_text.c`, `tests/test_css_text.c`
+- `ct_interp_fontfamily` (function) `include/css_text.h:10` `int ct_interp_fontfamily(const char *v);`
+- `ct_interp_texttransform` (function) `include/css_text.h:11` `int ct_interp_texttransform(const char *v);`
+- `ct_interp_opacity` (function) `include/css_text.h:12` `int ct_interp_opacity(const char *v);`
+- `ct_interp_valign` (function) `include/css_text.h:13` `int ct_interp_valign(const char *v);`
+- `ct_expand_valign` (function) `include/css_text.h:14` `int ct_expand_valign(const char *val, css_decl *dst, int cap);`
+- `ct_interp_transition_property` (function) `include/css_text.h:15` `int ct_interp_transition_property(const char *v);`
+- `ct_interp_whitespace` (function) `include/css_text.h:16` `int ct_interp_whitespace(const char *v);`
+- `ct_interp_tabsize` (function) `include/css_text.h:17` `int ct_interp_tabsize(const char *v);`
+- `ct_interp_textdeco_style` (function) `include/css_text.h:18` `int ct_interp_textdeco_style(const char *v);`
+- `ct_interp_textdeco_thickness` (function) `include/css_text.h:19` `int ct_interp_textdeco_thickness(const char *v);`
+- `ct_interp_aspect_ratio` (function) `include/css_text.h:20` `int ct_interp_aspect_ratio(const char *v, int *num, int *den);`
+- `ct_interp_direction` (function) `include/css_text.h:21` `int ct_interp_direction(const char *v);`
+- `ct_interp_liststyle` (function) `include/css_text.h:22` `int ct_interp_liststyle(const char *v);`
+- `ct_interp_spacing` (function) `include/css_text.h:23` `int ct_interp_spacing(const char *v, int *out);`
+- `ct_emit_spacing` (function) `include/css_text.h:24` `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val);`
+- `ct_expand_shadow` (function) `include/css_text.h:25` `int ct_expand_shadow(const char *val, css_decl *dst, int cap);`
+
 ## include/css_values.h
 Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `tests/test_css_values.c`
 - `cv_parse_color` (function) `include/css_values.h:12` `int cv_parse_color(const char *v);`
@@ -133,13 +153,16 @@ Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
 - `fc_interval_ms` (function) `include/frame_clock.h:23` `int fc_interval_ms(const fc_clock *c);`
 
 ## include/frame_host.h
-Depends on: `include/tab.h`
-Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `tests/test_frame_host.c`
-- `fh_new` (function) `include/frame_host.h:27` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` -- top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame...
-- `fh_free` (function) `include/frame_host.h:31` `void fh_free(fh_host *h);` -- top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame...
-- `fh_apply_top` (function) `include/frame_host.h:35` `void fh_apply_top(fh_host *h, const tab_page *page);` -- Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP document; other * kinds are ignored.
-- `fh_tick` (function) `include/frame_host.h:39` `int fh_tick(fh_host *h, int elapsed_ms);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
-- `fh_count` (function) `include/frame_host.h:42` `int fh_count(const fh_host *h);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
+Depends on: `include/page_view.h`, `include/tab.h`
+Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `src/freedom.c`, `tests/test_frame_host.c`
+- `fh_new` (function) `include/frame_host.h:28` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` -- top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame...
+- `fh_free` (function) `include/frame_host.h:32` `void fh_free(fh_host *h);` -- top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame...
+- `fh_apply_top` (function) `include/frame_host.h:36` `void fh_apply_top(fh_host *h, const tab_page *page);` -- Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP document; other * kinds are ignored.
+- `fh_tick` (function) `include/frame_host.h:40` `int fh_tick(fh_host *h, int elapsed_ms);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
+- `fh_count` (function) `include/frame_host.h:43` `int fh_count(const fh_host *h);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
+- `it` (function) `include/frame_host.h:46` `* confined worker last built it (NULL when no live frame has that URL);`
+- `fh_frame_view` (function) `include/frame_host.h:49` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);` -- Painting (spec/frame_broker.md section 5).
+- `fh_generation` (function) `include/frame_host.h:52` `unsigned fh_generation(const fh_host *h);` -- Painting (spec/frame_broker.md section 5).
 
 ## include/freebug.h
 Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/fb_cmdline.c`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_fb_cmdline.c`, `tests/test_freebug.c`
@@ -267,10 +290,10 @@ Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `s
 - `host` (function) `include/js_dom.h:163` `* for a trusted host (allow.conf AND js.conf);`
 - `jd_get_cookies` (function) `include/js_dom.h:174` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` -- Serialises the page's current cookie jar ("name=value; ...") into buf (bounded, NUL-terminated) and returns its...
 - `out_status` (function) `include/js_dom.h:182` `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-- `jd_process_iframes` (function) `include/js_dom.h:207` `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-- `URLs` (function) `include/js_dom.h:214` `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-- `jd_video_from_scripts` (function) `include/js_dom.h:228` `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` -- Creates <iframe> elements in the DOM from video data (`video[N]` / `video_data`) found in inline script text...
-- `jd_flush_custom_elements` (function) `include/js_dom.h:239` `void jd_flush_custom_elements(js_context *ctx);` -- Reconciles Custom Elements (spec/js_custom_elements.md): upgrades the elements whose tag was just defined and fires...
+- `jd_process_iframes` (function) `include/js_dom.h:222` `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
+- `URLs` (function) `include/js_dom.h:229` `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
+- `jd_video_from_scripts` (function) `include/js_dom.h:243` `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` -- Creates <iframe> elements in the DOM from video data (`video[N]` / `video_data`) found in inline script text...
+- `jd_flush_custom_elements` (function) `include/js_dom.h:254` `void jd_flush_custom_elements(js_context *ctx);` -- Reconciles Custom Elements (spec/js_custom_elements.md): upgrades the elements whose tag was just defined and fires...
 
 ## include/js_env.h
 Depends on: `include/js_sandbox.h`
@@ -375,7 +398,7 @@ Imported by: `src/os_sandbox.c`, `src/renderer.c`, `src/tab.c`, `tests/test_os_s
 
 ## include/page_view.h
 Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
-Imported by: `include/box_tree.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+Imported by: `include/box_tree.h`, `include/frame_host.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 - `container` (function) `include/page_view.h:230` `* cont_id groups runs of one container (-1 = none);`
 - `bx_display` (function) `include/page_view.h:231` `* bx_display (flex/grid);`
 - `order` (function) `include/page_view.h:295` `* groups the runs of ONE floated element in document order (-1 = not in a float);`
@@ -462,36 +485,6 @@ Depends on: `include/local_store.h`
 Imported by: `src/http_cache.c`, `src/pq_seal.c`, `tests/test_pq_seal.c`
 - `pqs_free` (function) `include/pq_seal.h:41` `void pqs_free(pqs_keys *k);`
 - `pqs_buf_free` (function) `include/pq_seal.h:51` `void pqs_buf_free(uint8_t *buf, size_t len);` -- DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der is owned * (release with...
-
-## include/prefetch.h
-Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/prefetch.c`, `tests/test_prefetch.c`
-- `pf_scan` (function) `include/prefetch.h:62` `int pf_scan(const char *html, size_t len, pf_list *out);` -- Lookahead scan of hostile HTML.
-- `pf_list_free` (function) `include/prefetch.h:63` `void pf_list_free(pf_list *l);`
-- `specifiers` (function) `include/prefetch.h:110` `* specifiers (each < PF_SPEC_MAX) into out[k] and returns how many. Pure. */ size_t pf_scan_imports(const char *js...`
-- `pf_find_importmap` (function) `include/prefetch.h:115` `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n);` -- Span of the first <script type=importmap> body in html (pure, bounded): 1 with * [*start, *start + *n) set, or 0...
-- `started` (function) `include/prefetch.h:121` `* to fetch or no thread started (the caller fetches serially). */ int pf_pool_start_page(pf_pool *p, const char...`
-- `pf_pool_add` (function) `include/prefetch.h:127` `int pf_pool_add(pf_pool *p, const char *url);` -- Queues one more URL on a started pool (deduplicated, bounded by PF_MAX_JOBS). * Returns 1 when added, 0 when already...
-- `fetch` (function) `include/prefetch.h:132` `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or * -1 when no thread could start...`
-- `pf_pool_take` (function) `include/prefetch.h:145` `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);` -- Cache-first take.
-- `pf_pool_finish` (function) `include/prefetch.h:151` `void pf_pool_finish(pf_pool *p);` -- Joins the worker threads and frees every unconsumed result.
-- `pool` (function) `include/prefetch.h:155` `* whose URL is pooled is served from the pool (a failed prefetch propagates the * failure -- never refetched);`
-- `pf_pooled_fetch` (function) `include/prefetch.h:165` `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...`
-
-## include/prefs.h
-Imported by: `gui/browser_ui.c`, `include/profile.h`, `include/ui.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
-- `prefs_init` (function) `include/prefs.h:66` `void prefs_init(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
-- `prefs_free` (function) `include/prefs.h:69` `void prefs_free(prefs_state *p);` -- Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
-- `free` (function) `include/prefs.h:72` `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);`
-- `prefs_bookmark_index` (function) `include/prefs.h:82` `int prefs_bookmark_index(const prefs_state *p, const char *url);` -- Parses text[0..len) over an out ALREADY initialised with prefs_init.
-- `prefs_suggest` (function) `include/prefs.h:101` `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);` -- Omnibox autocomplete: up to max_rows distinct URLs matching query (case- insensitive) written to out (rows of...
-- `anyway` (function) `include/prefs.h:106` `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());`
-
-## include/profile.h
-Depends on: `include/local_store.h`, `include/prefs.h`
-Imported by: `gui/browser_ui.c`, `src/profile.c`, `tests/test_profile.c`
-- `absent` (function) `include/profile.h:53` `* the keyfile when absent (0600, atomic write);`
-- `closed` (function) `include/profile.h:54` `* wrong size fails closed (PROFILE_ERR_KEY, never overwritten). Derives the * AEAD key (Argon2id, per-device salt)...`
-- `profile_close` (function) `include/profile.h:67` `void profile_close(profile_ctx *ctx);` -- Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init).
 
 
 Next: [API_p5.md](API_p5.md)

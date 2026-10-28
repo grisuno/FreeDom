@@ -1,6 +1,6 @@
 # include: css
 
-*Community 0 | 52 files | cohesion 0.72*
+*Community 1 | 52 files | cohesion 0.72*
 
 ## Definition
 
@@ -86,11 +86,10 @@ This community groups 52 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/compositor.h.
-- [EXTRACTED] depends_on community 7 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/bui_theme.c imports include/css.h.
-- [EXTRACTED] depends_on community 5 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
-- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
-- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
+- [EXTRACTED] depends_on community 0 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/compositor.h.
+- [EXTRACTED] depends_on community 4 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
+- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
+- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_chain.h.
 
 ## Risks
 

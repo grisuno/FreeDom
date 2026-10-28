@@ -14,7 +14,7 @@ pinta lo que este módulo describe y reenvía la expresión al worker del REPL; 
 | `FBP_HTML` | HTML | selector CSS (vacío = `<html>`) | árbol del DOM con atributos y texto, sangrado |
 | `FBP_CSS` | CSS | selector CSS (vacío = `body`) | reglas que coinciden (la ganadora primero, `~` = pisada), estilo calculado y caja |
 | `FBP_SCRIPT` | Script | número 1..N (vacío = lista) | lista de `<script>`; con número, su código con líneas numeradas |
-| `FBP_NET` | Net | subcadena de URL (vacío = todo) | peticiones XHR/fetch de la página: método, estado, tipo, URL, tamaño |
+| `FBP_NET` | Net | subcadena de URL (vacío = todo) | peticiones XHR/fetch de la página: método, estado, **tiempo (ms)**, tipo, URL, tamaño; con varias, un total; con UNA coincidencia, cabeceras de petición y respuesta |
 
 ## Contrato
 - **Dado** un id fuera de rango, **cuando** se pide etiqueta, vecino o expresión, **entonces** se trata
@@ -38,8 +38,8 @@ pinta lo que este módulo describe y reenvía la expresión al worker del REPL; 
 
 ## Fuera de alcance (honesto)
 Depurador con puntos de ruptura/paso a paso (QuickJS-ng embebido no expone un depurador al worker
-confinado), edición en vivo de CSS desde el panel (el REPL ya permite `insertRule`), tiempos de red
-(el registro `net()` no guarda marcas de tiempo) y selección de elemento con el ratón sobre la página.
+confinado), edición en vivo de CSS desde el panel (el REPL ya permite `insertRule`), tiempos de red de
+peticiones **síncronas** (`ms = -1`; las asíncronas sí se miden, `spec/subreq_async.md`) y selección de elemento con el ratón sobre la página.
 
 ## Pestañas DOM y Storage
 

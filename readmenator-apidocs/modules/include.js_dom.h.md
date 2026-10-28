@@ -336,7 +336,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_process_iframes`
 
-`function` | [include/js_dom.h:207](../../include/js_dom.h#L207)
+`function` | [include/js_dom.h:222](../../include/js_dom.h#L222)
 
 ```c
 * BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */ jd_status jd_inject_video_shim(js_context *ctx);
@@ -350,7 +350,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `URLs`
 
-`function` | [include/js_dom.h:214](../../include/js_dom.h#L214)
+`function` | [include/js_dom.h:229](../../include/js_dom.h#L229)
 
 ```c
 * video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT re-process iframes already processed (tracks them by node_id in * jd_opaque.iframe_track
@@ -370,7 +370,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_video_from_scripts`
 
-`function` | [include/js_dom.h:228](../../include/js_dom.h#L228)
+`function` | [include/js_dom.h:243](../../include/js_dom.h#L243)
 
 ```c
 size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t nscripts, const char *page_url);
@@ -398,7 +398,7 @@ Runs before the pre-script preserve_view snapshot so video elements survive jQue
 
 ### `jd_flush_custom_elements`
 
-`function` | [include/js_dom.h:239](../../include/js_dom.h#L239)
+`function` | [include/js_dom.h:254](../../include/js_dom.h#L254)
 
 ```c
 void jd_flush_custom_elements(js_context *ctx);

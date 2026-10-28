@@ -13,7 +13,7 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/data_url.c` | c | data_access | 10 | no |
-| `src/freedom.c` | c | utility | 48 | no |
+| `src/freedom.c` | c | utility | 50 | no |
 | `src/hls.c` | c | utility | 10 | no |
 | `src/js_policy.c` | c | business_logic | 6 | no |
 | `src/link_nav.c` | c | utility | 10 | no |
@@ -82,20 +82,21 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 50
-- Cross-boundary resolved imports (EXTRACTED): 42
+- Cross-boundary resolved imports (EXTRACTED): 43
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
-- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
-- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
+- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
+- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
+- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
 
 ## Risks
 
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `src/render_doc.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `src/render_policy.c` (presentation) -> `include/data_url.h` (data_access)
-- [dataflow UNCHECKED_ALLOC] `src/freedom.c:542` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
+- [dataflow UNCHECKED_ALLOC] `src/freedom.c:561` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
 
 ## Open Questions
 

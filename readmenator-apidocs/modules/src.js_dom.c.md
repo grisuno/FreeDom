@@ -220,7 +220,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `ms`
 
-`function` `virtual` | [src/js_dom.c:1245](../../src/js_dom.c#L1245)
+`function` `virtual` | [src/js_dom.c:1272](../../src/js_dom.c#L1272)
 
 ```c
 * due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);
@@ -240,7 +240,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `empty`
 
-`function` | [src/js_dom.c:1436](../../src/js_dom.c#L1436)
+`function` | [src/js_dom.c:1463](../../src/js_dom.c#L1463)
 
 ```c
 * inert: DOM interface constructors are empty (instanceof yields false, harmless);
@@ -260,7 +260,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `geometry`
 
-`function` | [src/js_dom.c:1438](../../src/js_dom.c#L1438)
+`function` | [src/js_dom.c:1465](../../src/js_dom.c#L1465)
 
 ```c
 * constant geometry (zero real leak);
@@ -280,7 +280,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `size`
 
-`function` | [src/js_dom.c:1441](../../src/js_dom.c#L1441)
+`function` | [src/js_dom.c:1468](../../src/js_dom.c#L1468)
 
 ```c
 * the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);
@@ -301,7 +301,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `js_env`
 
-`function` | [src/js_dom.c:1444](../../src/js_dom.c#L1444)
+`function` | [src/js_dom.c:1471](../../src/js_dom.c#L1471)
 
 ```c
 * are owned by js_env (anti_fp) and are NOT redefined here. Runs after the * document shim (uses...
@@ -315,7 +315,7 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 ### `jd_install`
 
-`function` | [src/js_dom.c:1981](../../src/js_dom.c#L1981)
+`function` | [src/js_dom.c:2008](../../src/js_dom.c#L2008)
 
 ```c
 jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
@@ -339,7 +339,7 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
 
 ### `jd_flush_custom_elements`
 
-`function` | [src/js_dom.c:2063](../../src/js_dom.c#L2063)
+`function` | [src/js_dom.c:2090](../../src/js_dom.c#L2090)
 
 ```c
 void jd_flush_custom_elements(js_context *ctx)
@@ -355,7 +355,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 |---|---|---|---|
 | `ctx` | `js_context *` |  |  |
 
-> **Inherited:** Documentation from [`jd_flush_custom_elements`](#jd_flush_custom_elements) (include/js_dom.h:239).
+> **Inherited:** Documentation from [`jd_flush_custom_elements`](#jd_flush_custom_elements) (include/js_dom.h:254).
 
 ---
 
@@ -363,7 +363,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 
 ### `fails`
 
-`function` | [src/js_dom.c:2077](../../src/js_dom.c#L2077)
+`function` | [src/js_dom.c:2104](../../src/js_dom.c#L2104)
 
 ```c
 * cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...
@@ -383,7 +383,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 
 ### `jd_install_console`
 
-`function` | [src/js_dom.c:2191](../../src/js_dom.c#L2191)
+`function` | [src/js_dom.c:2218](../../src/js_dom.c#L2218)
 
 ```c
 jd_status jd_install_console(js_context *ctx, fb_buffer *log)
@@ -406,7 +406,7 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log)
 
 ### `jd_set_cookies`
 
-`function` | [src/js_dom.c:2228](../../src/js_dom.c#L2228)
+`function` | [src/js_dom.c:2255](../../src/js_dom.c#L2255)
 
 ```c
 jd_status jd_set_cookies(js_context *ctx, const char *cookies)
@@ -427,7 +427,7 @@ jd_status jd_set_cookies(js_context *ctx, const char *cookies)
 
 ### `jd_get_cookies`
 
-`function` | [src/js_dom.c:2248](../../src/js_dom.c#L2248)
+`function` | [src/js_dom.c:2275](../../src/js_dom.c#L2275)
 
 ```c
 int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)
@@ -455,7 +455,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_set_computed`
 
-`function` | [src/js_dom.c:2271](../../src/js_dom.c#L2271)
+`function` | [src/js_dom.c:2298](../../src/js_dom.c#L2298)
 
 ```c
 jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)
@@ -477,7 +477,7 @@ jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)
 
 ### `jd_set_geometry`
 
-`function` | [src/js_dom.c:2282](../../src/js_dom.c#L2282)
+`function` | [src/js_dom.c:2309](../../src/js_dom.c#L2309)
 
 ```c
 jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)

@@ -1,6 +1,6 @@
 # `include/page_view.h`
 
-> Source: [include/page_view.h:1](../../include/page_view.h#L1) | language `h` | coverage 59.3% | [API index](../index.md)
+> Source: [include/page_view.h:1](../../include/page_view.h#L1) | language `h` | coverage 59.8% | [API index](../index.md)
 
 ## Contents
 
@@ -8,7 +8,7 @@
 - **Enums:** [`pv_status`](#pv_status), [`pv_kind`](#pv_kind), [`pv_input_type`](#pv_input_type), [`pv_form_method`](#pv_form_method)
 - **Type Aliases:** [`kind`](#kind), [`parent_id`](#parent_id), [`parent_id`](#parent_id), [`pv_computed`](#pv_computed)
 - **Functions:** [`declare`](#declare), [`nonzero`](#nonzero), [`resolved`](#resolved), [`policy`](#policy), [`pv_computed_new`](#pv_computed_new), [`pv_computed_get`](#pv_computed_get), [`pv_computed_free`](#pv_computed_free), [`cause`](#cause), [`pv_new`](#pv_new), [`form`](#form), [`pv_set_emphasis`](#pv_set_emphasis), [`default`](#default), [`pv_set_color`](#pv_set_color), [`pv_set_bgcolor`](#pv_set_bgcolor), [`pv_set_text_style`](#pv_set_text_style), [`pv_text_ext_reset`](#pv_text_ext_reset), [`ancestors`](#ancestors), [`pv_set_text_ext`](#pv_set_text_ext), [`pv_set_grad_text`](#pv_set_grad_text), [`run`](#run), [`pv_set_row_span`](#pv_set_row_span), [`pv_set_grid_area`](#pv_set_grid_area), [`pv_set_grid_rows`](#pv_set_grid_rows), [`pv_set_ua_tag`](#pv_set_ua_tag), [`pv_set_cont_box`](#pv_set_cont_box), [`pv_set_grid`](#pv_set_grid), [`pv_set_flex`](#pv_set_flex), [`pv_set_flex_mauto`](#pv_set_flex_mauto), [`pv_set_cont_item`](#pv_set_cont_item), [`pv_set_float_w`](#pv_set_float_w), [`pv_set_float`](#pv_set_float), [`pv_set_box`](#pv_set_box), [`pv_set_box_pct`](#pv_set_box_pct), [`pv_set_box_maxw`](#pv_set_box_maxw), [`pv_set_node_id`](#pv_set_node_id), [`pv_set_block_id`](#pv_set_block_id), [`pv_set_own_box`](#pv_set_own_box), [`pv_set_oof`](#pv_set_oof), [`pv_set_justify_self`](#pv_set_justify_self), [`pv_set_block_node`](#pv_set_block_node), [`pv_set_br_line`](#pv_set_br_line), [`pv_cont_count`](#pv_cont_count), [`pv_cont_at`](#pv_cont_at), [`pv_set_input_checked`](#pv_set_input_checked), [`pv_set_input_placeholder`](#pv_set_input_placeholder), [`pv_svg_append_root_attrs`](#pv_svg_append_root_attrs), [`pv_placeholder_color`](#pv_placeholder_color), [`pv_set_input_select_opts`](#pv_set_input_select_opts), [`pv_free`](#pv_free), [`pv_count`](#pv_count), [`pv_at`](#pv_at), [`pv_box_count`](#pv_box_count), [`pv_box_at`](#pv_box_at)
-- **Macros:** [`PV_BSHADOW_LAYERS`](#pv_bshadow_layers), [`PV_MAUTO_LEFT`](#pv_mauto_left), [`PV_MAUTO_RIGHT`](#pv_mauto_right), [`PV_MAUTO_TOP`](#pv_mauto_top), [`PV_MAUTO_BOTTOM`](#pv_mauto_bottom), [`PV_LEN_UNSET`](#pv_len_unset), [`PV_LEN_AUTO`](#pv_len_auto), [`PV_LEN_END`](#pv_len_end), [`PV_GRID_TRACKS`](#pv_grid_tracks), [`PV_CONT_DEPTH`](#pv_cont_depth), [`PV_BG_URL_MAX`](#pv_bg_url_max), [`PV_UA_BODY_MARGIN`](#pv_ua_body_margin), [`PV_BR_EMPTY`](#pv_br_empty), [`PV_BR_CONT`](#pv_br_cont), [`PV_PH_THEME`](#pv_ph_theme), [`PV_PH_HIDDEN`](#pv_ph_hidden)
+- **Macros:** [`PV_BSHADOW_LAYERS`](#pv_bshadow_layers), [`PV_MAUTO_LEFT`](#pv_mauto_left), [`PV_MAUTO_RIGHT`](#pv_mauto_right), [`PV_MAUTO_TOP`](#pv_mauto_top), [`PV_MAUTO_BOTTOM`](#pv_mauto_bottom), [`PV_LEN_UNSET`](#pv_len_unset), [`PV_LEN_AUTO`](#pv_len_auto), [`PV_LEN_END`](#pv_len_end), [`PV_GRID_TRACKS`](#pv_grid_tracks), [`PV_CONT_DEPTH`](#pv_cont_depth), [`PV_BG_URL_MAX`](#pv_bg_url_max), [`PV_UA_BODY_MARGIN`](#pv_ua_body_margin), [`PV_BR_EMPTY`](#pv_br_empty), [`PV_BR_CONT`](#pv_br_cont), [`PV_PH_THEME`](#pv_ph_theme), [`PV_PH_HIDDEN`](#pv_ph_hidden), [`PV_FRAME_SCHEME`](#pv_frame_scheme)
 
 ## Type Diagram
 
@@ -1877,5 +1877,21 @@ pv_run.br_line flags.
 ```c
 #define PV_PH_HIDDEN
 ```
+
+---
+
+<a id="pv_frame_scheme"></a>
+
+### `PV_FRAME_SCHEME`
+
+`macro` | [include/page_view.h:1256](../../include/page_view.h#L1256)
+
+```c
+#define PV_FRAME_SCHEME
+```
+
+Internal scheme of the src of a live <iframe> run (a PV_IMAGE): the frame's own document is its pixels, never a fetched image (spec/frame_broker.md section 5).
+
+No <img> can resolve it.
 
 ---

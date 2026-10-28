@@ -3,6 +3,17 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `IDN_GEO_ACC_MIN` | macro | `include/identity.h:22` | `#define IDN_GEO_ACC_MIN` |
+| `IDN_LANG_MAX` | macro | `include/identity.h:17` | `#define IDN_LANG_MAX` |
+| `IDN_LANG_TAGS_MAX` | macro | `include/identity.h:18` | `#define IDN_LANG_TAGS_MAX` |
+| `IDN_PAGE_MAX` | macro | `include/identity.h:20` | `#define IDN_PAGE_MAX` |
+| `IDN_SERIAL_MAX` | macro | `include/identity.h:19` | `#define IDN_SERIAL_MAX` |
+| `IDN_UA_MAX` | macro | `include/identity.h:16` | `#define IDN_UA_MAX` |
+| `idn_accept_language` | function | `include/identity.h:58` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);` |
+| `idn_apply_query` | function | `include/identity.h:70` | `unsigned idn_apply_query(idn_config *c, const char *query);` |
+| `idn_clear_geo` | function | `include/identity.h:54` | `void idn_clear_geo(idn_config *c);` |
+| `idn_config` | struct | `include/identity.h:37` | `` |
+| `idn_defaults` | function | `include/identity.h:45` | `void idn_defaults(idn_config *c);` |
 | `idn_geo_mode` | enum | `include/identity.h:25` | `` |
 | `idn_is_default` | function | `include/identity.h:48` | `int idn_is_default(const idn_config *c);` |
 | `idn_parse` | function | `include/identity.h:67` | `void idn_parse(idn_config *c, const char *text);` |
@@ -62,20 +73,20 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `FREEDOM_JS_DOM_H` | macro | `include/js_dom.h:2` | `#define FREEDOM_JS_DOM_H` |
 | `JD_IFRAME_TRACK_MAX` | macro | `include/js_dom.h:40` | `#define JD_IFRAME_TRACK_MAX` |
 | `JD_REPL_CSS_MAX` | macro | `include/js_dom.h:79` | `#define JD_REPL_CSS_MAX` |
-| `URLs` | function | `include/js_dom.h:214` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
+| `URLs` | function | `include/js_dom.h:229` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
 | `getComputedStyle` | function | `include/js_dom.h:108` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
 | `global` | function | `include/js_dom.h:73` | `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...` |
 | `host` | function | `include/js_dom.h:163` | `* for a trusted host (allow.conf AND js.conf);` |
 | `jd_click_state` | type_alias | `include/js_dom.h:35` | `typedef struct jd_click_state jd_click_state;` |
 | `jd_click_state_free` | function | `include/js_dom.h:118` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
-| `jd_flush_custom_elements` | function | `include/js_dom.h:239` | `void jd_flush_custom_elements(js_context *ctx);` |
+| `jd_flush_custom_elements` | function | `include/js_dom.h:254` | `void jd_flush_custom_elements(js_context *ctx);` |
 | `jd_get_cookies` | function | `include/js_dom.h:174` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
 | `jd_iframe_track` | struct | `include/js_dom.h:41` | `` |
 | `jd_install_repl_api` | function | `include/js_dom.h:82` | `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...` |
 | `jd_opaque` | struct | `include/js_dom.h:46` | `` |
-| `jd_process_iframes` | function | `include/js_dom.h:207` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
+| `jd_process_iframes` | function | `include/js_dom.h:222` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
 | `jd_status` | enum | `include/js_dom.h:25` | `` |
-| `jd_video_from_scripts` | function | `include/js_dom.h:228` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
+| `jd_video_from_scripts` | function | `include/js_dom.h:243` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
 | `opaque` | function | `include/js_dom.h:66` | `* the engine runtime opaque (unreachable from script);` |
 | `out_status` | function | `include/js_dom.h:182` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
 | `place` | function | `include/js_dom.h:87` | `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...` |
@@ -235,6 +246,7 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `PV_BR_EMPTY` | macro | `include/page_view.h:1197` | `#define PV_BR_EMPTY` |
 | `PV_BSHADOW_LAYERS` | macro | `include/page_view.h:44` | `#define PV_BSHADOW_LAYERS` |
 | `PV_CONT_DEPTH` | macro | `include/page_view.h:63` | `#define PV_CONT_DEPTH` |
+| `PV_FRAME_SCHEME` | macro | `include/page_view.h:1256` | `#define PV_FRAME_SCHEME` |
 | `PV_GRID_TRACKS` | macro | `include/page_view.h:58` | `#define PV_GRID_TRACKS` |
 | `PV_LEN_AUTO` | macro | `include/page_view.h:54` | `#define PV_LEN_AUTO` |
 | `PV_LEN_END` | macro | `include/page_view.h:55` | `#define PV_LEN_END` |
@@ -484,17 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `SF_MAX_URL` | macro | `include/secure_fetch.h:219` | `#define SF_MAX_URL` |
 | `SF_META_MAX` | macro | `include/secure_fetch.h:77` | `#define SF_META_MAX` |
 | `SF_RESPONSE_HEADERS_MAX` | macro | `include/secure_fetch.h:78` | `#define SF_RESPONSE_HEADERS_MAX` |
-| `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:217` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
-| `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:324` | `#define SF_WS_MAX_MESSAGE` |
-| `bits` | function | `include/secure_fetch.h:342` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
-| `connection` | function | `include/secure_fetch.h:356` | `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...` |
-| `exhausted` | function | `include/secure_fetch.h:387` | `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...` |
-| `policy` | type_alias | `include/secure_fetch.h:79` | `typedef struct sf_config { sf_policy policy;` |
-| `rp_sanitize_request_headers` | function | `include/secure_fetch.h:109` | `* rp_sanitize_request_headers ("Name: value\n" lines);` |
-| `sf_accept_language_or_default` | function | `include/secure_fetch.h:258` | `const char *sf_accept_language_or_default(const char *lang);` |
-| `sf_chain_info` | struct | `include/secure_fetch.h:61` | `` |
-| `sf_config` | struct | `include/secure_fetch.h:80` | `` |
-| `sf_cookie_line_matches` | function | `include/secure_fetch.h:245` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
-| `sf_cookie_put` | function | `include/secure_fetch.h:240` | `void sf_cookie_put(const char *url, const char *namevalue);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

@@ -1077,18 +1077,27 @@ static const char JD_DOCUMENT_SHIM[] =
      * ShadyDOM builds its ShadowRoot as createDocumentFragment() with __proto__ = ShadyRoot.prototype,
      * and the engine's physical child list hid the logical one (Polymer @query found nothing).
      * protoYield makes each own function/accessor defer to the CURRENT prototype once it is no
-     * longer the original; an untouched fragment pays one getPrototypeOf compare per access. */
+     * longer the original; an untouched fragment pays one getPrototypeOf compare per access.
+     * The delegation is NON-reentrant per member: the new prototype's version reads the engine's
+     * native accessor, which resolves back to this own member, and that nested call must run the
+     * engine's own implementation instead of delegating again (an endless loop otherwise). The
+     * wrapper keeps the original as `_orig`: the native aliases (Node.prototype accessors that
+     * polyfills capture as __shady_native_*) call THAT, never the replacement prototype's version. */
     "  function protoLookup(o,n){ for(;o;o=Object.getPrototypeOf(o)){ var d=Object.getOwnPropertyDescriptor(o,n); if(d) return d; } return null; }"
     "  function protoYield(f){ var base=Object.getPrototypeOf(f), names=Object.getOwnPropertyNames(f);"
     "    names.forEach(function(n){ if(n.charAt(0)==='_') return; var d=Object.getOwnPropertyDescriptor(f,n); if(!d||!d.configurable) return;"
-    "      if(d.get){ var g=d.get, st=d.set;"
+    "      if(d.get){ var g=d.get, st=d.set, busy=false;"
     "        var ng=function(){ var s=(this&&typeof this==='object')?this:f, p=Object.getPrototypeOf(s);"
-    "          if(p!==base){ var pd=protoLookup(p,n); if(pd&&pd.get&&pd.get!==ng) return pd.get.call(s); if(pd&&!pd.get&&('value' in pd)) return pd.value; } return g.call(s); };"
-    "        Object.defineProperty(f,n,{configurable:true,enumerable:d.enumerable,get:ng,set:st}); }"
-    "      else if(typeof d.value==='function'){ var fn=d.value;"
+    "          if(p!==base&&!busy){ var pd=protoLookup(p,n);"
+    "            if(pd&&pd.get&&pd.get!==ng){ busy=true; try{ return pd.get.call(s); }finally{ busy=false; } }"
+    "            if(pd&&!pd.get&&('value' in pd)) return pd.value; } return g.call(s); };"
+    "        Object.defineProperty(ng,'_orig',{value:g}); Object.defineProperty(f,n,{configurable:true,enumerable:d.enumerable,get:ng,set:st}); }"
+    "      else if(typeof d.value==='function'){ var fn=d.value, busyF=false;"
     "        var nf=function(){ var s=(this&&typeof this==='object')?this:f, p=Object.getPrototypeOf(s);"
-    "          if(p!==base){ var pd=protoLookup(p,n); if(pd&&typeof pd.value==='function'&&pd.value!==nf) return pd.value.apply(s,arguments); } return fn.apply(s,arguments); };"
-    "        Object.defineProperty(f,n,{configurable:true,enumerable:d.enumerable,writable:true,value:nf}); } });"
+    "          if(p!==base&&!busyF){ var pd=protoLookup(p,n);"
+    "            if(pd&&typeof pd.value==='function'&&pd.value!==nf){ busyF=true; try{ return pd.value.apply(s,arguments); }finally{ busyF=false; } } }"
+    "          return fn.apply(s,arguments); };"
+    "        Object.defineProperty(nf,'_orig',{value:fn}); Object.defineProperty(f,n,{configurable:true,enumerable:d.enumerable,writable:true,value:nf}); } });"
     "    return f; }"
     "  function mkFrag(){ var kids=[]; var fk=null;"
     "    function fkey(){ if(fk===null){ fk='oF'+(++fragSeq); __G.__objRegister('F'+fragSeq,f); } return fk; }"
@@ -1118,7 +1127,7 @@ static const char JD_DOCUMENT_SHIM[] =
     /* A DocumentFragment over real nodes: every member delegates to the holder element that owns
      * them. __frag is a fresh snapshot, which nodesOf() moves natively into the new parent. */
     "  function mkHolderFrag(h){"
-    "    var f={nodeType:11, nodeName:'#document-fragment', nodeValue:null, DOCUMENT_FRAGMENT_NODE:11,"
+    "    var f={nodeType:11, nodeName:'#document-fragment', nodeValue:null, DOCUMENT_FRAGMENT_NODE:11, _h:h._h,"
     "      get __frag(){ return Array.prototype.slice.call(h.childNodes); },"
     "      appendChild:function(c){ h.appendChild(c); return c; },"
     "      insertBefore:function(n,r){ h.insertBefore(n,r||null); return n; },"

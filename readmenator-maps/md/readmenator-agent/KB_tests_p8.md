@@ -1,6 +1,21 @@
 # Subsystem: tests (page 8 of 8)
 Previous: [KB_tests_p7.md](KB_tests_p7.md)
 
+## tests/test_web_storage.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `build` (function, line 24) `static size_t build(char *b, const char *const *kv, uint32_t n)`
+  - `test_unknown_origin_encodes_empty` (function, line 34) `static void test_unknown_origin_encodes_empty(void **state)`
+  - `test_replace_then_encode_roundtrip` (function, line 49) `static void test_replace_then_encode_roundtrip(void **state)`
+  - `test_hostile_snapshots_rejected_and_db_unchanged` (function, line 73) `static void test_hostile_snapshots_rejected_and_db_unchanged(void **state)`
+  - `test_quota_enforced` (function, line 112) `static void test_quota_enforced(void **state)`
+  - `test_origin_table_is_bounded_lru` (function, line 129) `static void test_origin_table_is_bounded_lru(void **state)`
+  - `count_pair` (function, line 147) `static void count_pair(void *ctx, const char *k, size_t kl, const char *v, size_t vl)`
+  - `test_pack_foreach_roundtrip` (function, line 154) `static void test_pack_foreach_roundtrip(void **state)`
+  - `main` (function, line 182) `int main(void)`
+- Depends on: `include/web_storage.h`
+
 ## tests/test_webcaps.c
 - Doc: mk: projection, and the headless operator-flag path.  #include <setjmp.h> #include <stdarg.h>...
 - Layer: testing

@@ -326,16 +326,16 @@ Depends on: `include/fb_cmdline.h`, `include/fb_panes.h`, `include/freebug.h`
 
 ## src/fb_panes.c
 Depends on: `include/fb_panes.h`
-- `tab_ok` (function) `src/fb_panes.c:107` `static int tab_ok(int tab)`
-- `fbp_tab_label` (function) `src/fb_panes.c:109` `const char *fbp_tab_label(int tab)`
-- `ieq` (function) `src/fb_panes.c:111` `static int ieq(const char *a, const char *b)`
-- `fbp_tab_from_name` (function) `src/fb_panes.c:120` `int fbp_tab_from_name(const char *name)`
-- `fbp_tab_wrap` (function) `src/fb_panes.c:127` `int fbp_tab_wrap(int tab, int dir)`
-- `fbp_tab_span` (function) `src/fb_panes.c:133` `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
-- `fbp_tab_at` (function) `src/fb_panes.c:142` `int fbp_tab_at(double px, double cell_w, double pad_cells)`
-- `fbp_is_pane` (function) `src/fb_panes.c:152` `int fbp_is_pane(int tab)`
-- `fbp_js_quote` (function) `src/fb_panes.c:154` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
-- `fbp_expr` (function) `src/fb_panes.c:183` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
+- `tab_ok` (function) `src/fb_panes.c:110` `static int tab_ok(int tab)`
+- `fbp_tab_label` (function) `src/fb_panes.c:112` `const char *fbp_tab_label(int tab)`
+- `ieq` (function) `src/fb_panes.c:114` `static int ieq(const char *a, const char *b)`
+- `fbp_tab_from_name` (function) `src/fb_panes.c:123` `int fbp_tab_from_name(const char *name)`
+- `fbp_tab_wrap` (function) `src/fb_panes.c:130` `int fbp_tab_wrap(int tab, int dir)`
+- `fbp_tab_span` (function) `src/fb_panes.c:136` `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
+- `fbp_tab_at` (function) `src/fb_panes.c:145` `int fbp_tab_at(double px, double cell_w, double pad_cells)`
+- `fbp_is_pane` (function) `src/fb_panes.c:155` `int fbp_is_pane(int tab)`
+- `fbp_js_quote` (function) `src/fb_panes.c:157` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
+- `fbp_expr` (function) `src/fb_panes.c:186` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
 
 ## src/flex_layout.c
 Depends on: `include/flex_layout.h`
@@ -426,18 +426,21 @@ Depends on: `include/frame_clock.h`
 
 ## src/frame_host.c
 Depends on: `include/frame_broker.h`, `include/frame_host.h`
-- `fh_new` (function) `src/frame_host.c:32` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
+- `fh_new` (function) `src/frame_host.c:35` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
                 fh_top_...`
-- `reap` (function) `src/frame_host.c:45` `static void reap(fh_host *h)` -- fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx) { if...
-- `fh_free` (function) `src/frame_host.c:55` `void fh_free(fh_host *h)`
-- `fh_count` (function) `src/frame_host.c:63` `int fh_count(const fh_host *h)`
-- `load_frame` (function) `src/frame_host.c:72` `static void load_frame(fh_host *h, int id, const char *url)` -- Loads the document of frame `id` (already registered in the table).
-- `find_child` (function) `src/frame_host.c:105` `static int find_child(const fh_host *h, int parent, int token)`
-- `token_seen_by` (function) `src/frame_host.c:113` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
-- `post_op` (function) `src/frame_host.c:119` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
-- `apply_ops` (function) `src/frame_host.c:174` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
-- `fh_apply_top` (function) `src/frame_host.c:197` `void fh_apply_top(fh_host *h, const tab_page *page)`
-- `fh_tick` (function) `src/frame_host.c:202` `int fh_tick(fh_host *h, int elapsed_ms)`
+- `slot_release_view` (function) `src/frame_host.c:47` `static void slot_release_view(fh_slot *sl)`
+- `reap` (function) `src/frame_host.c:55` `static void reap(fh_host *h)` -- h->fetch = fetch; h->fetch_ctx = fetch_ctx; h->top_msg = top_msg; h->top_ctx = top_ctx; for (int i = 0; i <...
+- `fh_free` (function) `src/frame_host.c:67` `void fh_free(fh_host *h)`
+- `fh_count` (function) `src/frame_host.c:76` `int fh_count(const fh_host *h)`
+- `load_frame` (function) `src/frame_host.c:85` `static void load_frame(fh_host *h, int id, const char *url)` -- Loads the document of frame `id` (already registered in the table).
+- `find_child` (function) `src/frame_host.c:129` `static int find_child(const fh_host *h, int parent, int token)`
+- `token_seen_by` (function) `src/frame_host.c:137` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
+- `post_op` (function) `src/frame_host.c:143` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
+- `apply_ops` (function) `src/frame_host.c:198` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
+- `fh_apply_top` (function) `src/frame_host.c:221` `void fh_apply_top(fh_host *h, const tab_page *page)`
+- `fh_tick` (function) `src/frame_host.c:226` `int fh_tick(fh_host *h, int elapsed_ms)`
+- `fh_generation` (function) `src/frame_host.c:250` `unsigned fh_generation(const fh_host *h)`
+- `fh_frame_view` (function) `src/frame_host.c:252` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
 
 ## src/freebug.c
 Depends on: `include/freebug.h`
