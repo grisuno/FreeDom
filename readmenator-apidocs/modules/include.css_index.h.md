@@ -1,12 +1,12 @@
 # `include/css_index.h`
 
-> Source: [include/css_index.h:1](../../include/css_index.h#L1) | language `h` | coverage 42.9% | [API index](../index.md)
+> Source: [include/css_index.h:1](../../include/css_index.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cix_entry`](#cix_entry), [`cix_index`](#cix_index)
 - **Type Aliases:** [`key`](#key)
-- **Functions:** [`cix_build`](#cix_build), [`cix_free`](#cix_free), [`index`](#index)
+- **Functions:** [`cix_build`](#cix_build), [`cix_build_ptrs`](#cix_build_ptrs), [`cix_free`](#cix_free), [`index`](#index)
 
 ## Type Diagram
 
@@ -89,11 +89,33 @@ On OOM leaves *idx invalid (valid == 0).
 
 ---
 
+<a id="cix_build_ptrs"></a>
+
+### `cix_build_ptrs`
+
+`function` | [include/css_index.h:37](../../include/css_index.h#L37)
+
+```c
+void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);
+```
+
+Same over a table of pointers (a sheet keeps its selectors compact, one allocation each).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `sels` | `css_sel *const *` |  |  |
+| `n` | `size_t` |  |  |
+| `idx` | `cix_index *` |  |  |
+
+---
+
 <a id="cix_free"></a>
 
 ### `cix_free`
 
-`function` | [include/css_index.h:37](../../include/css_index.h#L37)
+`function` | [include/css_index.h:40](../../include/css_index.h#L40)
 
 ```c
 void cix_free(cix_index *idx);
@@ -115,7 +137,7 @@ Leaves it invalid.
 
 ### `index`
 
-`function` | [include/css_index.h:41](../../include/css_index.h#L41)
+`function` | [include/css_index.h:44](../../include/css_index.h#L44)
 
 ```c
 * index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el, uint32_t **buf, size_t *cap);

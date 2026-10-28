@@ -1,6 +1,22 @@
 # API (page 7 of 12)
 Previous: [API_p6.md](API_p6.md)
 
+## src/css_index.c
+Depends on: `include/css_index.h`
+- `key_of` (function) `src/css_index.c:11` `static uint64_t key_of(int kind, const char *s, size_t n, int lower)` -- FNV-1a over the kind byte then the name; the tag is hashed lowercased because * compound_matches compares it with...
+- `key_of_token` (function) `src/css_index.c:26` `static uint64_t key_of_token(int kind, const char *tok)` -- An element token in the canonical form csel_ident_eq compares against: as-is * when it fits CSS_TOK_MAX, folded...
+- `entry_cmp` (function) `src/css_index.c:34` `static int entry_cmp(const void *a, const void *b)`
+- `cix_free` (function) `src/css_index.c:40` `void cix_free(cix_index *idx)`
+- `build` (function) `src/css_index.c:47` `static void build(const css_sel *arr, css_sel *const *ptrs, size_t n, cix_index *idx)`
+- `lower_bound` (function) `src/css_index.c:86` `static size_t lower_bound(const cix_index *idx, uint64_t k)` -- keyed[nk].key = k; keyed[nk].sel = (uint32_t)i; ++nk; } qsort(keyed, nk, sizeof *keyed, entry_cmp); idx->keyed =...
+- `run_head` (function) `src/css_index.c:104` `static uint32_t run_head(const cix_run *r)`
+- `add_bucket` (function) `src/css_index.c:106` `static void add_bucket(const cix_index *idx, uint64_t k, cix_run *runs, size_t *nr)`
+- `push` (function) `src/css_index.c:114` `static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v)`
+- `cix_candidates` (function) `src/css_index.c:129` `size_t cix_candidates(const cix_index *idx, const css_element *el,
+                      uint32_t...` -- Candidates in ascending selector order without duplicates: a k-way merge of the (already * sorted) universal list...
+- `cix_build` (function) `src/css_index.c:166` `void cix_build(const css_sel *sels, size_t n, cix_index *idx)`
+- `cix_build_ptrs` (function) `src/css_index.c:168` `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx)`
+
 ## src/css_length.c
 Depends on: `include/css.h`, `include/css_length.h`
 - `know` (function) `src/css_length.c:7` `* this module cannot know (real font metrics, the viewport) arrives through
@@ -65,45 +81,49 @@ Depends on: `include/css_length.h`, `include/css_mq.h`
 
 ## src/css_select.c
 Depends on: `include/css_select.h`
-- `csel_hex_val` (function) `src/css_select.c:23` `int csel_hex_val(char c)` -- CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content values and selector identifiers).
-- `csel_emit_utf8` (function) `src/css_select.c:30` `size_t csel_emit_utf8(unsigned int cp, char *out)`
-- `csel_unescape` (function) `src/css_select.c:52` `void csel_unescape(char *dst, size_t cap, const char *src, size_t n)`
-- `csel_escape_len` (function) `src/css_select.c:91` `size_t csel_escape_len(const char *s, size_t i, size_t b)`
-- `csel_decl_end` (function) `src/css_select.c:104` `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace)`
-- `ident_hash` (function) `src/css_select.c:121` `static unsigned long long ident_hash(const char *s, size_t n)` -- 64-bit FNV-1a of the whole identifier: what makes a folded long name exact up to * a hash collision -- and a...
-- `csel_ident_fold` (function) `src/css_select.c:127` `void csel_ident_fold(const char *src, size_t len, char *dst)`
-- `csel_ident_eq` (function) `src/css_select.c:142` `int csel_ident_eq(const char *stored, const char *tok, size_t tlen)`
-- `csel_read_ident` (function) `src/css_select.c:150` `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower)`
-- `parse_attr_sel` (function) `src/css_select.c:184` `static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am)` -- Parses one attribute selector starting at s[*ip] == '[' (within s[.,b)) into *am.
-- `parse_nth_arg` (function) `src/css_select.c:241` `static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B)` -- Parses the An+B argument of the nth-child family, s[a,b) (surrounding space trimmed here).
-- `take_sub_arg` (function) `src/css_select.c:293` `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
-- `between` (function) `src/css_select.c:382` `* between ( and ) is split on commas (not inside [] or ());`
-- `simple_pseudo_kind` (function) `src/css_select.c:437` `static int simple_pseudo_kind(const char *nm)` -- The PSEUDO_* kind of an argument-less pseudo-class usable inside a * sub-selector, or -1.
-- `parse_sub_compound` (function) `src/css_select.c:458` `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)` -- Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only tag name, .class, #id, or [attr] (no...
-- `parse_compound` (function) `src/css_select.c:523` `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
+- `csel_hex_val` (function) `src/css_select.c:25` `int csel_hex_val(char c)` -- CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content values and selector identifiers).
+- `csel_emit_utf8` (function) `src/css_select.c:32` `size_t csel_emit_utf8(unsigned int cp, char *out)`
+- `csel_unescape` (function) `src/css_select.c:54` `void csel_unescape(char *dst, size_t cap, const char *src, size_t n)`
+- `csel_escape_len` (function) `src/css_select.c:93` `size_t csel_escape_len(const char *s, size_t i, size_t b)`
+- `csel_decl_end` (function) `src/css_select.c:106` `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace)`
+- `ident_hash` (function) `src/css_select.c:123` `static unsigned long long ident_hash(const char *s, size_t n)` -- 64-bit FNV-1a of the whole identifier: what makes a folded long name exact up to * a hash collision -- and a...
+- `csel_ident_fold` (function) `src/css_select.c:129` `void csel_ident_fold(const char *src, size_t len, char *dst)`
+- `csel_ident_eq` (function) `src/css_select.c:144` `int csel_ident_eq(const char *stored, const char *tok, size_t tlen)`
+- `csel_read_ident` (function) `src/css_select.c:152` `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower)`
+- `parse_attr_sel` (function) `src/css_select.c:186` `static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am)` -- Parses one attribute selector starting at s[*ip] == '[' (within s[.,b)) into *am.
+- `parse_nth_arg` (function) `src/css_select.c:243` `static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B)` -- Parses the An+B argument of the nth-child family, s[a,b) (surrounding space trimmed here).
+- `take_sub_arg` (function) `src/css_select.c:295` `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
+- `between` (function) `src/css_select.c:384` `* between ( and ) is split on commas (not inside [] or ());`
+- `simple_pseudo_kind` (function) `src/css_select.c:439` `static int simple_pseudo_kind(const char *nm)` -- The PSEUDO_* kind of an argument-less pseudo-class usable inside a * sub-selector, or -1.
+- `parse_sub_compound` (function) `src/css_select.c:460` `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)` -- Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only tag name, .class, #id, or [attr] (no...
+- `parse_compound` (function) `src/css_select.c:525` `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
                   ...` -- Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space) into *cp. sel holds the sub-selector...
-- `selector` (function) `src/css_select.c:565` `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
+- `selector` (function) `src/css_select.c:567` `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
  * dropped. Whitespa...`
-- `csel_element_feature_bits` (function) `src/css_select.c:585` `unsigned long long csel_element_feature_bits(const css_element *e)`
-- `compute_anc_req` (function) `src/css_select.c:600` `static unsigned long long compute_anc_req(const css_sel *sel)` -- What the ancestors of the subject must contain: walk left from the subject while the combinator is descendant or...
-- `csel_parse_core` (function) `src/css_select.c:613` `static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel)`
-- `compute_subj_req` (function) `src/css_select.c:704` `static unsigned long long compute_subj_req(const css_sel *sel)` -- } else { psel += 10; } } spec += 100 * (sel->parts[k].has_id ?
-- `csel_parse` (function) `src/css_select.c:715` `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel)`
-- `el_attr_value` (function) `src/css_select.c:725` `static const char *el_attr_value(const css_element *el, const char *name)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
-- `ends_with` (function) `src/css_select.c:735` `static int ends_with(const char *v, const char *suf, int ci)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
-- `has_word` (function) `src/css_select.c:743` `static int has_word(const char *v, const char *w, int ci)` -- True if `v` is a whitespace-separated list containing the word `w` (non-empty), * case-folded when ci (the `~=`...
-- `attr_matches` (function) `src/css_select.c:758` `static int attr_matches(const css_attr_match *am, const css_element *el)` -- size_t wl = strlen(w); if (wl == 0) return 0; const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t'...
-- `nth_matches` (function) `src/css_select.c:778` `static int nth_matches(int A, int B, int idx)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
-- `is_form_control` (function) `src/css_select.c:787` `static int is_form_control(const char *tag)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
-- `pseudo_matches` (function) `src/css_select.c:796` `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...` -- if (A > 0) return d >= 0 && d % A == 0; return d <= 0 && (-d) % (long)(-A) == 0; } /* Form controls for :enabled...
-- `sub_sel_matches` (function) `src/css_select.c:800` `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
-- `compound_matches` (function) `src/css_select.c:1050` `static int compound_matches(const css_compound *c, const css_element *el,
+- `csel_element_feature_bits` (function) `src/css_select.c:587` `unsigned long long csel_element_feature_bits(const css_element *e)`
+- `compute_anc_req` (function) `src/css_select.c:602` `static unsigned long long compute_anc_req(const css_sel *sel)` -- What the ancestors of the subject must contain: walk left from the subject while the combinator is descendant or...
+- `csel_parse_core` (function) `src/css_select.c:615` `static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel)`
+- `seven` (function) `src/css_select.c:621` `* pay for the other seven (a css_sel is ~12.8 KiB). */ memset(sel, 0, offsetof(css_sel, parts));`
+- `compound_req` (function) `src/css_select.c:709` `static unsigned long long compound_req(const css_compound *c)` -- } else { psel += 10; } } spec += 100 * (sel->parts[k].has_id ?
+- `compute_subj_req` (function) `src/css_select.c:718` `static unsigned long long compute_subj_req(const css_sel *sel)`
+- `csel_compact_size` (function) `src/css_select.c:729` `size_t csel_compact_size(int nparts)`
+- `csel_compact_dup` (function) `src/css_select.c:735` `css_sel *csel_compact_dup(const css_sel *sel)`
+- `csel_parse` (function) `src/css_select.c:744` `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel)`
+- `el_attr_value` (function) `src/css_select.c:755` `static const char *el_attr_value(const css_element *el, const char *name)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
+- `ends_with` (function) `src/css_select.c:765` `static int ends_with(const char *v, const char *suf, int ci)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
+- `has_word` (function) `src/css_select.c:773` `static int has_word(const char *v, const char *w, int ci)` -- True if `v` is a whitespace-separated list containing the word `w` (non-empty), * case-folded when ci (the `~=`...
+- `attr_matches` (function) `src/css_select.c:788` `static int attr_matches(const css_attr_match *am, const css_element *el)` -- size_t wl = strlen(w); if (wl == 0) return 0; const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t'...
+- `nth_matches` (function) `src/css_select.c:808` `static int nth_matches(int A, int B, int idx)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
+- `is_form_control` (function) `src/css_select.c:817` `static int is_form_control(const char *tag)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
+- `pseudo_matches` (function) `src/css_select.c:826` `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...` -- if (A > 0) return d >= 0 && d % A == 0; return d <= 0 && (-d) % (long)(-A) == 0; } /* Form controls for :enabled...
+- `sub_sel_matches` (function) `src/css_select.c:830` `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
+- `compound_matches` (function) `src/css_select.c:1080` `static int compound_matches(const css_compound *c, const css_element *el,
                        ...` -- True if one compound matches one element (no ancestor context).
-- `built` (function) `src/css_select.c:1085` `* chains the caller built (an element without parent/prev links never matches
+- `built` (function) `src/css_select.c:1115` `* chains the caller built (an element without parent/prev links never matches
  * through that com...`
-- `pseudo_is_local` (function) `src/css_select.c:1127` `static int pseudo_is_local(int kind)` -- case COMB_ADJACENT: return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el...
-- `csel_needs_structure` (function) `src/css_select.c:1140` `int csel_needs_structure(const css_sel *sel)`
-- `csel_matches` (function) `src/css_select.c:1163` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+- `pseudo_is_local` (function) `src/css_select.c:1160` `static int pseudo_is_local(int kind)` -- case COMB_ADJACENT: return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el...
+- `csel_needs_structure` (function) `src/css_select.c:1173` `int csel_needs_structure(const css_sel *sel)`
+- `csel_matches` (function) `src/css_select.c:1196` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
 
 ## src/css_text.c

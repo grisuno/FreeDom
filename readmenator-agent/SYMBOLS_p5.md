@@ -3,6 +3,9 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `SF_MAX_URL` | macro | `include/secure_fetch.h:219` | `#define SF_MAX_URL` |
+| `SF_META_MAX` | macro | `include/secure_fetch.h:77` | `#define SF_META_MAX` |
+| `SF_RESPONSE_HEADERS_MAX` | macro | `include/secure_fetch.h:78` | `#define SF_RESPONSE_HEADERS_MAX` |
 | `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:217` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
 | `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:324` | `#define SF_WS_MAX_MESSAGE` |
 | `bits` | function | `include/secure_fetch.h:342` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
@@ -86,52 +89,56 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `verb` | type_alias | `include/svg_render.h:64` | `typedef struct sv_seg { int verb;` |
 | `FREEDOM_TAB_H` | macro | `include/tab.h:2` | `#define FREEDOM_TAB_H` |
 | `TAB_MAX_INPUT` | macro | `include/tab.h:152` | `#define TAB_MAX_INPUT` |
-| `bytes` | function | `include/tab.h:204` | `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....` |
-| `decode` | function | `include/tab.h:387` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
-| `exclusively` | function | `include/tab.h:255` | `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...` |
-| `granted` | function | `include/tab.h:361` | `* granted (allow.conf AND js.conf);` |
-| `jar` | function | `include/tab.h:240` | `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...` |
+| `bytes` | function | `include/tab.h:218` | `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....` |
+| `decode` | function | `include/tab.h:401` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
+| `exclusively` | function | `include/tab.h:269` | `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...` |
+| `granted` | function | `include/tab.h:375` | `* granted (allow.conf AND js.conf);` |
+| `jar` | function | `include/tab.h:254` | `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...` |
 | `kind` | type_alias | `include/tab.h:71` | `typedef struct tab_ws_op { int kind;` |
-| `load` | function | `include/tab.h:267` | `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);` |
-| `origin` | function | `include/tab.h:247` | `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);` |
-| `out_status` | function | `include/tab.h:179` | `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...` |
-| `popstate` | function | `include/tab.h:368` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
+| `load` | function | `include/tab.h:281` | `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);` |
+| `origin` | function | `include/tab.h:261` | `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);` |
+| `out_status` | function | `include/tab.h:193` | `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...` |
+| `popstate` | function | `include/tab.h:382` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
 | `replace` | type_alias | `include/tab.h:54` | `typedef struct tab_hist_op { int replace;` |
-| `returned` | function | `include/tab.h:362` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
-| `string` | function | `include/tab.h:312` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
+| `returned` | function | `include/tab.h:376` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
+| `string` | function | `include/tab.h:326` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
 | `tab` | type_alias | `include/tab.h:46` | `typedef struct tab tab;` |
-| `tab_alive` | function | `include/tab.h:400` | `int tab_alive(const tab *t);` |
-| `tab_async_busy` | function | `include/tab.h:233` | `int tab_async_busy(const tab *t);` |
-| `tab_async_fd` | function | `include/tab.h:227` | `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...` |
-| `tab_child_pid` | function | `include/tab.h:403` | `pid_t tab_child_pid(const tab *t);` |
-| `tab_close` | function | `include/tab.h:406` | `void tab_close(tab *t);` |
+| `tab_alive` | function | `include/tab.h:414` | `int tab_alive(const tab *t);` |
+| `tab_async_busy` | function | `include/tab.h:247` | `int tab_async_busy(const tab *t);` |
+| `tab_async_fd` | function | `include/tab.h:241` | `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...` |
+| `tab_child_pid` | function | `include/tab.h:417` | `pid_t tab_child_pid(const tab *t);` |
+| `tab_close` | function | `include/tab.h:420` | `void tab_close(tab *t);` |
 | `tab_eval_result` | struct | `include/tab.h:131` | `` |
-| `tab_eval_result_free` | function | `include/tab.h:410` | `void tab_eval_result_free(tab_eval_result *r);` |
+| `tab_eval_result_free` | function | `include/tab.h:424` | `void tab_eval_result_free(tab_eval_result *r);` |
 | `tab_hist_op` | struct | `include/tab.h:54` | `` |
 | `tab_image` | struct | `include/tab.h:144` | `` |
-| `tab_image_free` | function | `include/tab.h:411` | `void tab_image_free(tab_image *img);` |
-| `tab_inflight_request_headers` | function | `include/tab.h:195` | `const char *tab_inflight_request_headers(void);` |
-| `tab_last_subreq_stats` | function | `include/tab.h:279` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` |
+| `tab_image_free` | function | `include/tab.h:425` | `void tab_image_free(tab_image *img);` |
+| `tab_inflight_request_headers` | function | `include/tab.h:209` | `const char *tab_inflight_request_headers(void);` |
+| `tab_last_subreq_stats` | function | `include/tab.h:293` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` |
 | `tab_open` | function | `include/tab.h:160` | `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...` |
 | `tab_page` | struct | `include/tab.h:79` | `` |
-| `tab_page_free` | function | `include/tab.h:409` | `void tab_page_free(tab_page *p);` |
+| `tab_page_free` | function | `include/tab.h:423` | `void tab_page_free(tab_page *p);` |
 | `tab_parse_worker_args` | function | `include/tab.h:167` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` |
-| `tab_report_response_headers` | function | `include/tab.h:200` | `void tab_report_response_headers(const char *lines);` |
-| `tab_set_cookies` | function | `include/tab.h:244` | `void tab_set_cookies(tab *t, const char *cookies);` |
-| `tab_set_css_sink` | function | `include/tab.h:213` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
-| `tab_set_fetcher` | function | `include/tab.h:190` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` |
-| `tab_set_identity` | function | `include/tab.h:273` | `void tab_set_identity(tab *t, const char *serialized);` |
-| `tab_set_net_allowed` | function | `include/tab.h:218` | `void tab_set_net_allowed(tab *t, int allowed);` |
-| `tab_set_op_net_budget_ms` | function | `include/tab.h:222` | `void tab_set_op_net_budget_ms(tab *t, int ms);` |
-| `tab_set_storage` | function | `include/tab.h:249` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
-| `tab_set_viewport_w` | function | `include/tab.h:263` | `void tab_set_viewport_w(tab *t, int px);` |
+| `tab_prewarm` | function | `include/tab.h:176` | `void tab_prewarm(void);` |
+| `tab_prewarmed` | function | `include/tab.h:179` | `int tab_prewarmed(void);` |
+| `tab_prewarmed_pid` | function | `include/tab.h:182` | `int tab_prewarmed_pid(void);` |
+| `tab_report_response_headers` | function | `include/tab.h:214` | `void tab_report_response_headers(const char *lines);` |
+| `tab_set_cookies` | function | `include/tab.h:258` | `void tab_set_cookies(tab *t, const char *cookies);` |
+| `tab_set_css_sink` | function | `include/tab.h:227` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
+| `tab_set_fetcher` | function | `include/tab.h:204` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` |
+| `tab_set_identity` | function | `include/tab.h:287` | `void tab_set_identity(tab *t, const char *serialized);` |
+| `tab_set_net_allowed` | function | `include/tab.h:232` | `void tab_set_net_allowed(tab *t, int allowed);` |
+| `tab_set_op_net_budget_ms` | function | `include/tab.h:236` | `void tab_set_op_net_budget_ms(tab *t, int ms);` |
+| `tab_set_storage` | function | `include/tab.h:263` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
+| `tab_set_viewport_w` | function | `include/tab.h:277` | `void tab_set_viewport_w(tab *t, int px);` |
+| `tab_shutdown_spare` | function | `include/tab.h:185` | `void tab_shutdown_spare(void);` |
 | `tab_status` | enum | `include/tab.h:31` | `` |
-| `tab_subreq_permitted` | function | `include/tab.h:284` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
+| `tab_subreq_permitted` | function | `include/tab.h:298` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
 | `tab_worker_dispatch` | function | `include/tab.h:156` | `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...` |
 | `tab_ws_event_kind` | enum | `include/tab.h:67` | `` |
 | `tab_ws_kind` | enum | `include/tab.h:61` | `` |
 | `tab_ws_op` | struct | `include/tab.h:72` | `` |
-| `view` | function | `include/tab.h:292` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
+| `view` | function | `include/tab.h:306` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
 | `width` | type_alias | `include/tab.h:144` | `typedef struct tab_image { uint32_t width;` |
 | `FREEDOM_TEXT_CASE_H` | macro | `include/text_case.h:2` | `#define FREEDOM_TEXT_CASE_H` |
 | `TC_SMALLCAPS_SCALE` | macro | `include/text_case.h:15` | `#define TC_SMALLCAPS_SCALE` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `AUTO_REJECT` | macro | `src/css.c:274` | `#define AUTO_REJECT` |
 | `AUTO_RESET` | macro | `src/css.c:276` | `#define AUTO_RESET` |
 | `AUTO_RESET_NONE` | macro | `src/css.c:277` | `#define AUTO_RESET_NONE` |
-| `AUTO_VALUE` | macro | `src/css.c:275` | `#define AUTO_VALUE` |
-| `CSS_ATTR_MARK` | macro | `src/css.c:1685` | `#define CSS_ATTR_MARK` |
-| `CSS_ATTR_SEP` | macro | `src/css.c:1686` | `#define CSS_ATTR_SEP` |
-| `CSS_DECL_SLOTS_MIN` | macro | `src/css.c:66` | `#define CSS_DECL_SLOTS_MIN` |
-| `CSS_INIT_DECLS` | macro | `src/css.c:51` | `#define CSS_INIT_DECLS` |
-| `CSS_INIT_RULES` | macro | `src/css.c:67` | `#define CSS_INIT_RULES` |
-| `CSS_INIT_SELS` | macro | `src/css.c:50` | `#define CSS_INIT_SELS` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

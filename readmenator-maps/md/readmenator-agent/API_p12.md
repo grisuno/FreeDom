@@ -1,6 +1,32 @@
 # API (page 12 of 12)
 Previous: [API_p11.md](API_p11.md)
 
+## src/web_storage.c
+Depends on: `include/web_storage.h`
+- `get_u32` (function) `src/web_storage.c:25` `static uint32_t get_u32(const unsigned char *p)`
+- `utf8_ok` (function) `src/web_storage.c:32` `static int utf8_ok(const unsigned char *s, size_t n)` -- Well-formed UTF-8, allowing encoded surrogates (WTF-8): a JS string may hold a lone surrogate and rejecting it would...
+- `key_cmp` (function) `src/web_storage.c:56` `static int key_cmp(const void *a, const void *b)`
+- `check` (function) `src/web_storage.c:65` `static int check(const char *blob, size_t len, size_t *bytes_out)` -- return 1; } typedef struct key_ref { const unsigned char *p; uint32_t n; } key_ref; static int key_cmp(const void...
+- `wst_decode_check` (function) `src/web_storage.c:101` `int wst_decode_check(const char *blob, size_t len)`
+- `wst_new` (function) `src/web_storage.c:105` `wst_db *wst_new(void)`
+- `wst_free` (function) `src/web_storage.c:109` `void wst_free(wst_db *db)`
+- `find` (function) `src/web_storage.c:118` `static wst_origin *find(const wst_db *db, const char *origin)`
+- `wst_encode` (function) `src/web_storage.c:125` `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len)`
+- `wst_replace` (function) `src/web_storage.c:140` `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len)`
+- `wst_origin_bytes` (function) `src/web_storage.c:175` `size_t wst_origin_bytes(const wst_db *db, const char *origin)`
+- `wst_foreach` (function) `src/web_storage.c:181` `int wst_foreach(const char *blob, size_t len,
+                void (*fn)(void *ctx, const char *k...`
+- `put_u32` (function) `src/web_storage.c:201` `static void put_u32(char *b, uint32_t v)`
+- `wst_pack` (function) `src/web_storage.c:206` `int wst_pack(const char *const *keys, const size_t *klens,
+             const char *const *vals, ...`
+
+## src/webcaps.c
+Depends on: `include/webcaps.h`
+- `wc_safe` (function) `src/webcaps.c:10` `wc_caps wc_safe(void)`
+- `wc_derive` (function) `src/webcaps.c:15` `wc_caps wc_derive(wc_input in)`
+- `wc_from_flags` (function) `src/webcaps.c:35` `wc_caps wc_from_flags(bool js, bool css, bool images)`
+- `wc_render_caps` (function) `src/webcaps.c:46` `rdp_caps wc_render_caps(wc_caps c)`
+
 ## src/webfont.c
 Depends on: `include/data_url.h`, `include/webfont.h`
 - `candidates` (function) `src/webfont.c:7` `* understanding just far enough to find candidates (family + first url() per * src entry + weight/style descriptors);`

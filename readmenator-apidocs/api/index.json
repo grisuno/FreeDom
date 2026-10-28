@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 217,
-  "entities": 3750,
+  "entities": 3777,
   "languages": {
    "c": 101,
    "h": 100,
@@ -13,11 +13,11 @@
   "kinds": {
    "constant": 23,
    "enum": 160,
-   "function": 1931,
-   "macro": 997,
+   "function": 1947,
+   "macro": 1004,
    "method": 24,
    "module": 217,
-   "struct": 254,
+   "struct": 258,
    "type_alias": 137,
    "variable": 7
   },
@@ -27,9 +27,9 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1486,
-   "total": 3720,
-   "percent": 39.9
+   "documented": 1507,
+   "total": 3747,
+   "percent": 40.2
   },
   "by_kind": {
    "enum": {
@@ -38,13 +38,13 @@
     "percent": 50.0
    },
    "function": {
-    "documented": 849,
-    "total": 1931,
-    "percent": 44.0
+    "documented": 864,
+    "total": 1947,
+    "percent": 44.4
    },
    "macro": {
-    "documented": 317,
-    "total": 997,
+    "documented": 319,
+    "total": 1004,
     "percent": 31.8
    },
    "method": {
@@ -58,9 +58,9 @@
     "percent": 13.8
    },
    "struct": {
-    "documented": 110,
-    "total": 254,
-    "percent": 43.3
+    "documented": 114,
+    "total": 258,
+    "percent": 44.2
    },
    "type_alias": {
     "documented": 100,
@@ -195,9 +195,9 @@
     "percent": 30.8
    },
    "include/css_index.h": {
-    "documented": 3,
-    "total": 7,
-    "percent": 42.9
+    "documented": 4,
+    "total": 8,
+    "percent": 50.0
    },
    "include/css_length.h": {
     "documented": 11,
@@ -215,9 +215,9 @@
     "percent": 50.0
    },
    "include/css_select.h": {
-    "documented": 22,
-    "total": 37,
-    "percent": 59.5
+    "documented": 24,
+    "total": 39,
+    "percent": 61.5
    },
    "include/css_text.h": {
     "documented": 0,
@@ -510,9 +510,9 @@
     "percent": 38.9
    },
    "include/tab.h": {
-    "documented": 23,
-    "total": 49,
-    "percent": 46.9
+    "documented": 27,
+    "total": 53,
+    "percent": 50.9
    },
    "include/text_case.h": {
     "documented": 6,
@@ -675,9 +675,9 @@
     "percent": 18.8
    },
    "src/css_index.c": {
-    "documented": 3,
-    "total": 4,
-    "percent": 75.0
+    "documented": 6,
+    "total": 6,
+    "percent": 100.0
    },
    "src/css_length.c": {
     "documented": 3,
@@ -695,9 +695,9 @@
     "percent": 18.2
    },
    "src/css_select.c": {
-    "documented": 11,
-    "total": 17,
-    "percent": 64.7
+    "documented": 13,
+    "total": 20,
+    "percent": 65.0
    },
    "src/css_text.c": {
     "documented": 11,
@@ -921,7 +921,7 @@
    },
    "src/local_store.c": {
     "documented": 5,
-    "total": 334,
+    "total": 338,
     "percent": 1.5
    },
    "src/media_decoder.c": {
@@ -1015,9 +1015,9 @@
     "percent": 55.6
    },
    "src/tab.c": {
-    "documented": 37,
-    "total": 91,
-    "percent": 40.7
+    "documented": 42,
+    "total": 97,
+    "percent": 43.3
    },
    "src/text_case.c": {
     "documented": 3,
@@ -1025,9 +1025,9 @@
     "percent": 50.0
    },
    "src/text_shape.c": {
-    "documented": 16,
-    "total": 35,
-    "percent": 45.7
+    "documented": 20,
+    "total": 40,
+    "percent": 50.0
    },
    "src/textfield.c": {
     "documented": 6,
@@ -1285,7 +1285,7 @@
   {
    "uid": "include/css_index.h",
    "path": "modules/include.css_index.h.jsonl",
-   "entities": 7
+   "entities": 8
   },
   {
    "uid": "include/css_length.h",
@@ -1305,7 +1305,7 @@
   {
    "uid": "include/css_select.h",
    "path": "modules/include.css_select.h.jsonl",
-   "entities": 37
+   "entities": 39
   },
   {
    "uid": "include/css_text.h",
@@ -1600,7 +1600,7 @@
   {
    "uid": "include/tab.h",
    "path": "modules/include.tab.h.jsonl",
-   "entities": 49
+   "entities": 53
   },
   {
    "uid": "include/text_case.h",
@@ -1765,7 +1765,7 @@
   {
    "uid": "src/css_index.c",
    "path": "modules/src.css_index.c.jsonl",
-   "entities": 4
+   "entities": 6
   },
   {
    "uid": "src/css_length.c",
@@ -1785,7 +1785,7 @@
   {
    "uid": "src/css_select.c",
    "path": "modules/src.css_select.c.jsonl",
-   "entities": 17
+   "entities": 20
   },
   {
    "uid": "src/css_text.c",
@@ -2010,7 +2010,7 @@
   {
    "uid": "src/local_store.c",
    "path": "modules/src.local_store.c.jsonl",
-   "entities": 334
+   "entities": 338
   },
   {
    "uid": "src/media_decoder.c",
@@ -2105,7 +2105,7 @@
   {
    "uid": "src/tab.c",
    "path": "modules/src.tab.c.jsonl",
-   "entities": 91
+   "entities": 97
   },
   {
    "uid": "src/text_case.c",
@@ -2115,7 +2115,7 @@
   {
    "uid": "src/text_shape.c",
    "path": "modules/src.text_shape.c.jsonl",
-   "entities": 35
+   "entities": 40
   },
   {
    "uid": "src/textfield.c",
@@ -2245,7 +2245,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2235
+  "total": 2241
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

@@ -3,50 +3,87 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `fc_resolve` | function | `src/text_shape.c:429` | `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)` |
-| `file` | type_alias | `src/text_shape.c:657` | `typedef struct tsh_fb { char file[512];` |
-| `generic_name` | function | `src/text_shape.c:55` | `static const char *generic_name(int family)` |
-| `get_entry` | function | `src/text_shape.c:173` | `static tsh_entry *get_entry(int family, int bold, int italic)` |
-| `get_entry_ex` | function | `src/text_shape.c:531` | `static tsh_entry *get_entry_ex(const tsh_font *f)` |
-| `is_private_use` | function | `src/text_shape.c:616` | `static int is_private_use(unsigned cp)` |
-| `lfam_index` | function | `src/text_shape.c:484` | `static int lfam_index(const char *fam)` |
-| `load_entry` | function | `src/text_shape.c:169` | `static int load_entry(tsh_entry *e, int family, int bold, int italic)` |
-| `load_entry_file` | function | `src/text_shape.c:133` | `static int load_entry_file(tsh_entry *e, const char *path, int index)` |
-| `load_entry_named` | function | `src/text_shape.c:103` | `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)` |
-| `loaded` | type_alias | `src/text_shape.c:34` | `typedef struct tsh_entry { int loaded;` |
-| `local_clear` | function | `src/text_shape.c:474` | `static void local_clear(void)` |
-| `local_entry` | function | `src/text_shape.c:511` | `static tsh_entry *local_entry(int handle, int bold, int italic)` |
-| `name` | type_alias | `src/text_shape.c:457` | `typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];` |
-| `read_font_file` | function | `src/text_shape.c:82` | `static unsigned char *read_font_file(const char *path, long *out_n)` |
-| `rides_previous` | function | `src/text_shape.c:621` | `static int rides_previous(unsigned cp)` |
-| `shape_entry` | function | `src/text_shape.c:764` | `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,             ...` |
-| `shape_runs` | function | `src/text_shape.c:800` | `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,                ...` |
-| `slice` | function | `src/text_shape.c:213` | `* woff2 slice (spec/webfont.md);` |
-| `tsh_cover_ctx` | struct | `src/text_shape.c:741` | `` |
-| `tsh_draw` | function | `src/text_shape.c:852` | `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,                     double x, doub...` |
-| `tsh_entry` | struct | `src/text_shape.c:35` | `` |
-| `tsh_face` | function | `src/text_shape.c:859` | `cairo_font_face_t *tsh_face(const tsh_font *f)` |
-| `tsh_family_is_generic` | function | `src/text_shape.c:340` | `int tsh_family_is_generic(const char *name)` |
-| `tsh_fb` | struct | `src/text_shape.c:658` | `` |
-| `tsh_lfam` | struct | `src/text_shape.c:458` | `` |
-| `tsh_llist` | struct | `src/text_shape.c:464` | `` |
-| `tsh_local_handle` | function | `src/text_shape.c:492` | `int tsh_local_handle(const char *list)` |
-| `tsh_measure` | function | `src/text_shape.c:846` | `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)` |
-| `tsh_pick_family` | function | `src/text_shape.c:373` | `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,         ...` |
-| `tsh_pick_from_list` | function | `src/text_shape.c:352` | `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,                   ...` |
-| `tsh_ready` | function | `src/text_shape.c:543` | `int tsh_ready(void)` |
-| `tsh_segment` | function | `src/text_shape.c:629` | `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,                 tsh_...` |
-| `tsh_shape` | function | `src/text_shape.c:548` | `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,                 ...` |
-| `tsh_shutdown` | function | `src/text_shape.c:865` | `void tsh_shutdown(void)` |
-| `tsh_web` | struct | `src/text_shape.c:191` | `` |
-| `tsh_webfont_clear` | function | `src/text_shape.c:301` | `void tsh_webfont_clear(void)` |
-| `tsh_webfont_register` | function | `src/text_shape.c:267` | `int tsh_webfont_register(const char *name,                          const unsigned char *bytes, s...` |
-| `used` | type_alias | `src/text_shape.c:190` | `typedef struct tsh_web { int used;` |
-| `utf8_next` | function | `src/text_shape.c:597` | `static unsigned utf8_next(const char *s, size_t n, size_t *len)` |
-| `web_entry_free` | function | `src/text_shape.c:201` | `static void web_entry_free(tsh_web *w)` |
-| `web_find` | function | `src/text_shape.c:306` | `static tsh_entry *web_find(unsigned h, int bold, int italic)` |
-| `web_magic_ok` | function | `src/text_shape.c:214` | `static int web_magic_ok(const unsigned char *b, size_t n)` |
-| `web_make_entry` | function | `src/text_shape.c:227` | `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` |
+| `write_opens` | function | `src/tab.c:1722` | `static int write_opens(int wfd, child_state *cs)` |
+| `write_storage` | function | `src/tab.c:1708` | `static int write_storage(int wfd, child_state *cs)` |
+| `write_ws` | function | `src/tab.c:1691` | `static int write_ws(int wfd, child_state *cs)` |
+| `ws_ops_free` | function | `src/tab.c:3536` | `static void ws_ops_free(tab_ws_op *ops, size_t n)` |
+| `pair_parity` | function | `src/text_case.c:8` | `static int pair_parity(uint32_t cp)` |
+| `tc_is_lower` | function | `src/text_case.c:54` | `int tc_is_lower(uint32_t cp)` |
+| `tc_lower` | function | `src/text_case.c:37` | `uint32_t tc_lower(uint32_t cp)` |
+| `tc_smallcaps_runs` | function | `src/text_case.c:117` | `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap)` |
+| `tc_transform` | function | `src/text_case.c:95` | `size_t tc_transform(const char *s, size_t n, int transform, int word_start,                     c...` |
+| `tc_upper` | function | `src/text_case.c:18` | `uint32_t tc_upper(uint32_t cp)` |
+| `utf8_decode` | function | `src/text_case.c:61` | `static size_t utf8_decode(const unsigned char *s, size_t n, uint32_t *cp)` |
+| `utf8_len_of` | function | `src/text_case.c:91` | `static size_t utf8_len_of(uint32_t cp)` |
+| `utf8_put` | function | `src/text_case.c:79` | `static void utf8_put(uint32_t cp, size_t len, unsigned char *out)` |
+| `TSH_BLANK_GLYPH` | macro | `src/text_shape.c:620` | `#define TSH_BLANK_GLYPH` |
+| `TSH_CACHE_SLOTS` | macro | `src/text_shape.c:34` | `#define TSH_CACHE_SLOTS` |
+| `TSH_FB_BLOCKS` | macro | `src/text_shape.c:663` | `#define TSH_FB_BLOCKS` |
+| `TSH_FB_CP_SLOTS` | macro | `src/text_shape.c:680` | `#define TSH_FB_CP_SLOTS` |
+| `TSH_FB_SLOTS` | macro | `src/text_shape.c:662` | `#define TSH_FB_SLOTS` |
+| `TSH_MAX_FONT_BYTES` | macro | `src/text_shape.c:30` | `#define TSH_MAX_FONT_BYTES` |
+| `TSH_MAX_RUNS` | macro | `src/text_shape.c:864` | `#define TSH_MAX_RUNS` |
+| `TSH_MEASURE_SLOTS` | macro | `src/text_shape.c:917` | `#define TSH_MEASURE_SLOTS` |
+| `TSH_MEASURE_TEXT_MAX` | macro | `src/text_shape.c:918` | `#define TSH_MEASURE_TEXT_MAX` |
+| `TSH_SUBS_MAX` | macro | `src/text_shape.c:406` | `#define TSH_SUBS_MAX` |
+| `TSH_WEB_SLOTS` | macro | `src/text_shape.c:190` | `#define TSH_WEB_SLOTS` |
+| `_POSIX_C_SOURCE` | macro | `src/text_shape.c:12` | `#define _POSIX_C_SOURCE` |
+| `ascii_ieq` | function | `src/text_shape.c:337` | `static int ascii_ieq(const char *a, const char *b)` |
+| `backend_init` | function | `src/text_shape.c:66` | `static int backend_init(void)` |
+| `characters` | function | `src/text_shape.c:101` | `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...` |
+| `cover_cp` | function | `src/text_shape.c:818` | `static int cover_cp(unsigned cp, void *vctx)` |
+| `entry_free` | function | `src/text_shape.c:324` | `static void entry_free(tsh_entry *e)` |
+| `fb_clear` | function | `src/text_shape.c:689` | `static void fb_clear(void)` |
+| `fb_entry` | function | `src/text_shape.c:731` | `static tsh_entry *fb_entry(unsigned cp, int bold)` |
+| `fb_entry_uncached` | function | `src/text_shape.c:748` | `static tsh_entry *fb_entry_uncached(unsigned cp, int bold)` |
+| `fb_match_covering` | function | `src/text_shape.c:709` | `static FcPattern *fb_match_covering(FcPattern *pat, FcCharSet *cs)` |
+| `fc_installed` | function | `src/text_shape.c:392` | `static int fc_installed(const char *name, void *ctx)` |
+| `fc_resolve` | function | `src/text_shape.c:435` | `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)` |
+| `file` | type_alias | `src/text_shape.c:664` | `typedef struct tsh_fb { char file[512];` |
+| `generic_name` | function | `src/text_shape.c:56` | `static const char *generic_name(int family)` |
+| `get_entry` | function | `src/text_shape.c:174` | `static tsh_entry *get_entry(int family, int bold, int italic)` |
+| `get_entry_ex` | function | `src/text_shape.c:538` | `static tsh_entry *get_entry_ex(const tsh_font *f)` |
+| `is_private_use` | function | `src/text_shape.c:623` | `static int is_private_use(unsigned cp)` |
+| `lfam_index` | function | `src/text_shape.c:491` | `static int lfam_index(const char *fam)` |
+| `load_entry` | function | `src/text_shape.c:170` | `static int load_entry(tsh_entry *e, int family, int bold, int italic)` |
+| `load_entry_file` | function | `src/text_shape.c:134` | `static int load_entry_file(tsh_entry *e, const char *path, int index)` |
+| `load_entry_named` | function | `src/text_shape.c:104` | `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)` |
+| `loaded` | type_alias | `src/text_shape.c:35` | `typedef struct tsh_entry { int loaded;` |
+| `local_clear` | function | `src/text_shape.c:480` | `static void local_clear(void)` |
+| `local_entry` | function | `src/text_shape.c:518` | `static tsh_entry *local_entry(int handle, int bold, int italic)` |
+| `name` | type_alias | `src/text_shape.c:463` | `typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];` |
+| `read_font_file` | function | `src/text_shape.c:83` | `static unsigned char *read_font_file(const char *path, long *out_n)` |
+| `rides_previous` | function | `src/text_shape.c:628` | `static int rides_previous(unsigned cp)` |
+| `shape_entry` | function | `src/text_shape.c:832` | `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,             ...` |
+| `shape_runs` | function | `src/text_shape.c:868` | `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,                ...` |
+| `slice` | function | `src/text_shape.c:214` | `* woff2 slice (spec/webfont.md);` |
+| `tsh_cover_ctx` | struct | `src/text_shape.c:809` | `` |
+| `tsh_draw` | function | `src/text_shape.c:964` | `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,                     double x, doub...` |
+| `tsh_entry` | struct | `src/text_shape.c:36` | `` |
+| `tsh_face` | function | `src/text_shape.c:971` | `cairo_font_face_t *tsh_face(const tsh_font *f)` |
+| `tsh_family_is_generic` | function | `src/text_shape.c:346` | `int tsh_family_is_generic(const char *name)` |
+| `tsh_fb` | struct | `src/text_shape.c:665` | `` |
+| `tsh_fb_cp` | struct | `src/text_shape.c:681` | `` |
+| `tsh_lfam` | struct | `src/text_shape.c:464` | `` |
+| `tsh_llist` | struct | `src/text_shape.c:470` | `` |
+| `tsh_local_handle` | function | `src/text_shape.c:499` | `int tsh_local_handle(const char *list)` |
+| `tsh_measure` | function | `src/text_shape.c:929` | `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)` |
+| `tsh_measure_slot` | struct | `src/text_shape.c:919` | `` |
+| `tsh_pick_family` | function | `src/text_shape.c:379` | `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,         ...` |
+| `tsh_pick_from_list` | function | `src/text_shape.c:358` | `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,                   ...` |
+| `tsh_ready` | function | `src/text_shape.c:550` | `int tsh_ready(void)` |
+| `tsh_segment` | function | `src/text_shape.c:636` | `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,                 tsh_...` |
+| `tsh_shape` | function | `src/text_shape.c:555` | `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,                 ...` |
+| `tsh_shutdown` | function | `src/text_shape.c:977` | `void tsh_shutdown(void)` |
+| `tsh_web` | struct | `src/text_shape.c:192` | `` |
+| `tsh_webfont_clear` | function | `src/text_shape.c:306` | `void tsh_webfont_clear(void)` |
+| `tsh_webfont_register` | function | `src/text_shape.c:271` | `int tsh_webfont_register(const char *name,                          const unsigned char *bytes, s...` |
+| `used` | type_alias | `src/text_shape.c:191` | `typedef struct tsh_web { int used;` |
+| `utf8_next` | function | `src/text_shape.c:604` | `static unsigned utf8_next(const char *s, size_t n, size_t *len)` |
+| `web_entry_free` | function | `src/text_shape.c:202` | `static void web_entry_free(tsh_web *w)` |
+| `web_find` | function | `src/text_shape.c:312` | `static tsh_entry *web_find(unsigned h, int bold, int italic)` |
+| `web_magic_ok` | function | `src/text_shape.c:215` | `static int web_magic_ok(const unsigned char *b, size_t n)` |
+| `web_make_entry` | function | `src/text_shape.c:228` | `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` |
 | `tf_backspace` | function | `src/textfield.c:47` | `void tf_backspace(tf_field *f)` |
 | `tf_clear` | function | `src/textfield.c:20` | `void tf_clear(tf_field *f)` |
 | `tf_cursor` | function | `src/textfield.c:91` | `size_t tf_cursor(const tf_field *f)` |
@@ -459,42 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_attr_in_combinator` | function | `tests/test_css.c:2505` | `static void test_attr_in_combinator(void **state)` |
 | `test_attr_malformed_fail_closed` | function | `tests/test_css.c:2521` | `static void test_attr_malformed_fail_closed(void **state)` |
 | `test_attr_name_case_insensitive` | function | `tests/test_css.c:2463` | `static void test_attr_name_case_insensitive(void **state)` |
-| `test_attr_operators` | function | `tests/test_css.c:2416` | `static void test_attr_operators(void **state)` |
-| `test_attr_presence` | function | `tests/test_css.c:2385` | `static void test_attr_presence(void **state)` |
-| `test_attr_quoted_value_with_space` | function | `tests/test_css.c:2474` | `static void test_attr_quoted_value_with_space(void **state)` |
-| `test_attr_specificity_and_compound` | function | `tests/test_css.c:2488` | `static void test_attr_specificity_and_compound(void **state)` |
-| `test_backdrop_filter_blur` | function | `tests/test_css.c:5177` | `static void test_backdrop_filter_blur(void **state)` |
-| `test_background_clip_text` | function | `tests/test_css.c:5052` | `static void test_background_clip_text(void **state)` |
-| `test_background_rgba_alpha` | function | `tests/test_css.c:5023` | `static void test_background_rgba_alpha(void **state)` |
-| `test_background_shorthand_resets_gradient` | function | `tests/test_css.c:621` | `static void test_background_shorthand_resets_gradient(void **state)` |
-| `test_bare_ms_box_sizing_drops` | function | `tests/test_css.c:3785` | `static void test_bare_ms_box_sizing_drops(void **state)` |
-| `test_bg_image_url_absolute` | function | `tests/test_css.c:660` | `static void test_bg_image_url_absolute(void **state)` |
-| `test_bg_image_url_basic` | function | `tests/test_css.c:642` | `static void test_bg_image_url_basic(void **state)` |
-| `test_bg_image_url_gradient_mutually_exclusive` | function | `tests/test_css.c:696` | `static void test_bg_image_url_gradient_mutually_exclusive(void **state)` |
-| `test_bg_image_url_none_and_junk_reset` | function | `tests/test_css.c:669` | `static void test_bg_image_url_none_and_junk_reset(void **state)` |
-| `test_bg_image_url_overlong_fails_closed` | function | `tests/test_css.c:683` | `static void test_bg_image_url_overlong_fails_closed(void **state)` |
-| `test_bg_image_url_quoted` | function | `tests/test_css.c:649` | `static void test_bg_image_url_quoted(void **state)` |
-| `test_bg_position_center_by_identity` | function | `tests/test_css.c:3495` | `static void test_bg_position_center_by_identity(void **state)` |
-| `test_bg_position_collision_drops` | function | `tests/test_css.c:3516` | `static void test_bg_position_collision_drops(void **state)` |
-| `test_bg_position_edge_offset` | function | `tests/test_css.c:3483` | `static void test_bg_position_edge_offset(void **state)` |
-| `test_bg_position_four_value` | function | `tests/test_css.c:3506` | `static void test_bg_position_four_value(void **state)` |
-| `test_bg_shorthand_captures_url_and_resets_color` | function | `tests/test_css.c:704` | `static void test_bg_shorthand_captures_url_and_resets_color(void **state)` |
-| `test_bg_size_and_repeat` | function | `tests/test_css.c:723` | `static void test_bg_size_and_repeat(void **state)` |
-| `test_border_longhands` | function | `tests/test_css.c:3867` | `static void test_border_longhands(void **state)` |
-| `test_border_shorthand` | function | `tests/test_css.c:3837` | `static void test_border_shorthand(void **state)` |
-| `test_box_auto_and_centering` | function | `tests/test_css.c:2832` | `static void test_box_auto_and_centering(void **state)` |
-| `test_box_clamp_anti_dos` | function | `tests/test_css.c:3089` | `static void test_box_clamp_anti_dos(void **state)` |
-| `test_box_extension_sheet_cascade` | function | `tests/test_css.c:3139` | `static void test_box_extension_sheet_cascade(void **state)` |
-| `test_box_orient_maps_to_flex_direction` | function | `tests/test_css.c:4015` | `static void test_box_orient_maps_to_flex_direction(void **state)` |
-| `test_box_shadow_and_outline` | function | `tests/test_css.c:3893` | `static void test_box_shadow_and_outline(void **state)` |
-| `test_box_shadow_layers_and_alpha` | function | `tests/test_css.c:5629` | `static void test_box_shadow_layers_and_alpha(void **state)` |
-| `test_box_sheet_cascade_inline_wins` | function | `tests/test_css.c:3266` | `static void test_box_sheet_cascade_inline_wins(void **state)` |
-| `test_box_shorthand_expansion` | function | `tests/test_css.c:2804` | `static void test_box_shorthand_expansion(void **state)` |
-| `test_box_sizing` | function | `tests/test_css.c:3829` | `static void test_box_sizing(void **state)` |
-| `test_box_units_and_failclosed` | function | `tests/test_css.c:2849` | `static void test_box_units_and_failclosed(void **state)` |
-| `test_calc_basic_arithmetic` | function | `tests/test_css.c:2945` | `static void test_calc_basic_arithmetic(void **state)` |
-| `test_calc_clamped_anti_dos` | function | `tests/test_css.c:2991` | `static void test_calc_clamped_anti_dos(void **state)` |
-| `test_calc_dimension_errors_fail_closed` | function | `tests/test_css.c:2969` | `static void test_calc_dimension_errors_fail_closed(void **state)` |
-| `test_calc_inside_shorthands` | function | `tests/test_css.c:3044` | `static void test_calc_inside_shorthands(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

@@ -3,6 +3,43 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_decode_dimensions_and_stride` | function | `tests/test_image_decode.c:166` | `static void test_decode_dimensions_and_stride(void **state)` |
+| `test_decode_dispatch_rejects_unknown` | function | `tests/test_image_decode.c:279` | `static void test_decode_dispatch_rejects_unknown(void **state)` |
+| `test_decode_dispatch_routes_gif` | function | `tests/test_image_decode.c:430` | `static void test_decode_dispatch_routes_gif(void **state)` |
+| `test_decode_dispatch_routes_jpeg_and_png` | function | `tests/test_image_decode.c:267` | `static void test_decode_dispatch_routes_jpeg_and_png(void **state)` |
+| `test_decode_dispatch_routes_webp` | function | `tests/test_image_decode.c:483` | `static void test_decode_dispatch_routes_webp(void **state)` |
+| `test_decode_gif_animated_first_frame` | function | `tests/test_image_decode.c:405` | `static void test_decode_gif_animated_first_frame(void **state)` |
+| `test_decode_gif_fail_closed` | function | `tests/test_image_decode.c:414` | `static void test_decode_gif_fail_closed(void **state)` |
+| `test_decode_gif_interlaced` | function | `tests/test_image_decode.c:390` | `static void test_decode_gif_interlaced(void **state)` |
+| `test_decode_gif_pixels` | function | `tests/test_image_decode.c:363` | `static void test_decode_gif_pixels(void **state)` |
+| `test_decode_gif_transparency` | function | `tests/test_image_decode.c:378` | `static void test_decode_gif_transparency(void **state)` |
+| `test_decode_jpeg_dimensions_and_alpha` | function | `tests/test_image_decode.c:244` | `static void test_decode_jpeg_dimensions_and_alpha(void **state)` |
+| `test_decode_jpeg_null_args` | function | `tests/test_image_decode.c:302` | `static void test_decode_jpeg_null_args(void **state)` |
+| `test_decode_jpeg_rejects_non_jpeg` | function | `tests/test_image_decode.c:295` | `static void test_decode_jpeg_rejects_non_jpeg(void **state)` |
+| `test_decode_jpeg_rejects_truncated` | function | `tests/test_image_decode.c:287` | `static void test_decode_jpeg_rejects_truncated(void **state)` |
+| `test_decode_null_args` | function | `tests/test_image_decode.c:210` | `static void test_decode_null_args(void **state)` |
+| `test_decode_pixels_premultiplied` | function | `tests/test_image_decode.c:178` | `static void test_decode_pixels_premultiplied(void **state)` |
+| `test_decode_rejects_non_png` | function | `tests/test_image_decode.c:190` | `static void test_decode_rejects_non_png(void **state)` |
+| `test_decode_rejects_truncated` | function | `tests/test_image_decode.c:200` | `static void test_decode_rejects_truncated(void **state)` |
+| `test_decode_webp_dimensions_and_pixels` | function | `tests/test_image_decode.c:454` | `static void test_decode_webp_dimensions_and_pixels(void **state)` |
+| `test_decode_webp_fail_closed` | function | `tests/test_image_decode.c:471` | `static void test_decode_webp_fail_closed(void **state)` |
+| `test_dimensions_from_ihdr` | function | `tests/test_image_decode.c:89` | `static void test_dimensions_from_ihdr(void **state)` |
+| `test_dimensions_non_png` | function | `tests/test_image_decode.c:104` | `static void test_dimensions_non_png(void **state)` |
+| `test_dimensions_null` | function | `tests/test_image_decode.c:111` | `static void test_dimensions_null(void **state)` |
+| `test_dimensions_ok_bounds` | function | `tests/test_image_decode.c:120` | `static void test_dimensions_ok_bounds(void **state)` |
+| `test_dimensions_truncated` | function | `tests/test_image_decode.c:97` | `static void test_dimensions_truncated(void **state)` |
+| `test_fit_degenerate` | function | `tests/test_image_decode.c:154` | `static void test_fit_degenerate(void **state)` |
+| `test_fit_landscape_into_square` | function | `tests/test_image_decode.c:136` | `static void test_fit_landscape_into_square(void **state)` |
+| `test_fit_portrait_into_box` | function | `tests/test_image_decode.c:145` | `static void test_fit_portrait_into_box(void **state)` |
+| `test_format_name` | function | `tests/test_image_decode.c:227` | `static void test_format_name(void **state)` |
+| `test_pixels_free_idempotent` | function | `tests/test_image_decode.c:218` | `static void test_pixels_free_idempotent(void **state)` |
+| `test_sniff_gif` | function | `tests/test_image_decode.c:356` | `static void test_sniff_gif(void **state)` |
+| `test_sniff_jpeg` | function | `tests/test_image_decode.c:236` | `static void test_sniff_jpeg(void **state)` |
+| `test_sniff_png` | function | `tests/test_image_decode.c:75` | `static void test_sniff_png(void **state)` |
+| `test_sniff_unsupported` | function | `tests/test_image_decode.c:80` | `static void test_sniff_unsupported(void **state)` |
+| `test_sniff_webp` | function | `tests/test_image_decode.c:448` | `static void test_sniff_webp(void **state)` |
+| `DOC` | macro | `tests/test_import_map.c:36` | `#define DOC` |
+| `expect_res` | function | `tests/test_import_map.c:38` | `static void expect_res(const im_map *m, const char *base, const char *spec, const char *want)` |
 | `main` | function | `tests/test_import_map.c:123` | `int main(void)` |
 | `test_exact_and_prefix_imports` | function | `tests/test_import_map.c:48` | `static void test_exact_and_prefix_imports(void **state)` |
 | `test_invalid_input_yields_empty_map` | function | `tests/test_import_map.c:102` | `static void test_invalid_input_yields_empty_map(void **state)` |
@@ -459,42 +496,5 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_pacer_lag_reanchors` | function | `tests/test_media_decoder.c:52` | `static void test_pacer_lag_reanchors(void **state)` |
 | `test_pacer_null_safe` | function | `tests/test_media_decoder.c:84` | `static void test_pacer_null_safe(void **state)` |
 | `test_pacer_paces_by_pts_delta` | function | `tests/test_media_decoder.c:28` | `static void test_pacer_paces_by_pts_delta(void **state)` |
-| `main` | function | `tests/test_net_realm.c:140` | `int main(void)` |
-| `test_classify_host_clearnet` | function | `tests/test_net_realm.c:37` | `static void test_classify_host_clearnet(void **state)` |
-| `test_classify_host_edges` | function | `tests/test_net_realm.c:54` | `static void test_classify_host_edges(void **state)` |
-| `test_classify_host_i2p` | function | `tests/test_net_realm.c:30` | `static void test_classify_host_i2p(void **state)` |
-| `test_classify_host_lookalikes` | function | `tests/test_net_realm.c:44` | `static void test_classify_host_lookalikes(void **state)` |
-| `test_classify_host_onion` | function | `tests/test_net_realm.c:22` | `static void test_classify_host_onion(void **state)` |
-| `test_classify_url` | function | `tests/test_net_realm.c:67` | `static void test_classify_url(void **state)` |
-| `test_names` | function | `tests/test_net_realm.c:126` | `static void test_names(void **state)` |
-| `test_realm_allows_http` | function | `tests/test_net_realm.c:118` | `static void test_realm_allows_http(void **state)` |
-| `test_route_clearnet` | function | `tests/test_net_realm.c:96` | `static void test_route_clearnet(void **state)` |
-| `test_route_i2p` | function | `tests/test_net_realm.c:88` | `static void test_route_i2p(void **state)` |
-| `test_route_null_blocked` | function | `tests/test_net_realm.c:110` | `static void test_route_null_blocked(void **state)` |
-| `test_route_onion` | function | `tests/test_net_realm.c:79` | `static void test_route_onion(void **state)` |
-| `_GNU_SOURCE` | macro | `tests/test_os_sandbox.c:14` | `#define _GNU_SOURCE` |
-| `main` | function | `tests/test_os_sandbox.c:335` | `int main(void)` |
-| `net_ns_inode` | function | `tests/test_os_sandbox.c:304` | `static unsigned long net_ns_inode(void)` |
-| `suite` | function | `tests/test_os_sandbox.c:313` | `* suite (it is best-effort defense in depth), and on a host that allows them the  * isolation mus...` |
-| `test_harden_allows_permitted_syscall` | function | `tests/test_os_sandbox.c:96` | `static void test_harden_allows_permitted_syscall(void **state)` |
-| `test_harden_blocks_exec_mmap` | function | `tests/test_os_sandbox.c:162` | `static void test_harden_blocks_exec_mmap(void **state)` |
-| `test_harden_blocks_exec_mprotect` | function | `tests/test_os_sandbox.c:182` | `static void test_harden_blocks_exec_mprotect(void **state)` |
-| `test_harden_errno_denies_with_eperm` | function | `tests/test_os_sandbox.c:112` | `static void test_harden_errno_denies_with_eperm(void **state)` |
-| `test_harden_kills_denied_syscall` | function | `tests/test_os_sandbox.c:79` | `static void test_harden_kills_denied_syscall(void **state)` |
-| `test_harden_kills_io_uring_setup` | function | `tests/test_os_sandbox.c:130` | `static void test_harden_kills_io_uring_setup(void **state)` |
-| `test_landlock_abi_present` | function | `tests/test_os_sandbox.c:233` | `static void test_landlock_abi_present(void **state)` |
-| `test_landlock_allow_read` | function | `tests/test_os_sandbox.c:257` | `static void test_landlock_allow_read(void **state)` |
-| `test_landlock_deny_all` | function | `tests/test_os_sandbox.c:239` | `static void test_landlock_deny_all(void **state)` |
-| `test_no_dump_undumpable` | function | `tests/test_os_sandbox.c:214` | `static void test_no_dump_undumpable(void **state)` |
-| `test_policy_allows_safe` | function | `tests/test_os_sandbox.c:43` | `static void test_policy_allows_safe(void **state)` |
-| `test_policy_denies_dangerous` | function | `tests/test_os_sandbox.c:51` | `static void test_policy_denies_dangerous(void **state)` |
-| `test_policy_denies_io_uring` | function | `tests/test_os_sandbox.c:64` | `static void test_policy_denies_io_uring(void **state)` |
-| `test_policy_size` | function | `tests/test_os_sandbox.c:71` | `static void test_policy_size(void **state)` |
-| `test_prot_allowed_wx` | function | `tests/test_os_sandbox.c:151` | `static void test_prot_allowed_wx(void **state)` |
-| `applies` | function | `tests/test_page_view.c:4528` | `* <style>: an extern rule applies (presentation and display:none alike);` |
-| `box_of_run_with_bg` | function | `tests/test_page_view.c:3738` | `static const pv_box_def *box_of_run_with_bg(const pv_view *v, int bg)` |
-| `break` | function | `tests/test_page_view.c:703` | `* block break (from entering <p>);` |
-| `count_empty_lines` | function | `tests/test_page_view.c:3441` | `static int count_empty_lines(const pv_view *v)` |
-| `count_inputs` | function | `tests/test_page_view.c:3338` | `static size_t count_inputs(const pv_view *v, int type)` |
 
 Next: [SYMBOLS_p15.md](SYMBOLS_p15.md)

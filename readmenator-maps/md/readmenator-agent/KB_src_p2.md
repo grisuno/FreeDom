@@ -8,12 +8,12 @@ Previous: [KB_src.md](KB_src.md)
 - Symbols:
   - `css_sheet` (struct, line 103)
   - `css_keyframe_stop` (struct, line 143)
-  - `len_rebase_ctx` (struct, line 5103)
-  - `css_match` (struct, line 5931)
-  - `css_cand` (struct, line 5937)
+  - `len_rebase_ctx` (struct, line 5166)
+  - `css_match` (struct, line 5995)
+  - `css_cand` (struct, line 6001)
   - `css_rule` (struct, line 101)
-  - `rem_px` (type_alias, line 5103) `typedef struct len_rebase_ctx { double rem_px;`
-  - `idx` (type_alias, line 5937) `typedef struct css_cand { int imp, espec, ord, idx;`
+  - `rem_px` (type_alias, line 5166) `typedef struct len_rebase_ctx { double rem_px;`
+  - `idx` (type_alias, line 6001) `typedef struct css_cand { int imp, espec, ord, idx;`
   - `parse_num` (function, line 180) `static int parse_num(const char *s, double *out, const char **endp)`
   - `parse_color` (function, line 191) `static int parse_color(const char *v)`
   - `interp_color` (function, line 195) `static int interp_color(const char *v)`
@@ -158,112 +158,115 @@ static int interp_border_s...`
   - `strip_important` (function, line 2244) `static int strip_important(char *val)`
   - `var` (function, line 2269) `* cvr_resolve then substitutes var() references when a declaration's value is
  * interpreted (par...`
-  - `selector_matches_root` (function, line 2291) `static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m)`
-  - `tr_mul` (function, line 2418) `static void tr_mul(double out[6], const double l[6], const double r[6])`
-  - `tr_decompose` (function, line 2438) `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
+  - `has_double_dash` (function, line 2291) `static int has_double_dash(const char *p, size_t n)`
+  - `subject_may_be_root` (function, line 2300) `static int subject_may_be_root(const char *s, size_t a, size_t b, const char *root_scope)`
+  - `selector_matches_root` (function, line 2348) `static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m,
+         ...`
+  - `tr_mul` (function, line 2477) `static void tr_mul(double out[6], const double l[6], const double r[6])`
+  - `tr_decompose` (function, line 2497) `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
                         in...`
-  - `parse_matrix6` (function, line 2461) `static int parse_matrix6(const char *p, size_t argn, double m6[6])`
-  - `split_top_args` (function, line 2493) `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
+  - `parse_matrix6` (function, line 2520) `static int parse_matrix6(const char *p, size_t argn, double m6[6])`
+  - `split_top_args` (function, line 2552) `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
                ...`
-  - `translate3d` (function, line 2523) `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
+  - `translate3d` (function, line 2582) `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
  * renders z as nothing,...`
-  - `function` (function, line 2797) `* transform function (perspective/rotate3d/...), or unparseable syntax,
+  - `function` (function, line 2856) `* transform function (perspective/rotate3d/...), or unparseable syntax,
  * rejects the WHOLE decl...`
-  - `origin_component` (function, line 2994) `static int origin_component(const char *tok, int axis, int *out)`
-  - `expand_transform_origin` (function, line 3020) `static int expand_transform_origin(const char *val, css_decl *dst, int cap)`
-  - `expand_gap` (function, line 3052) `static int expand_gap(const char *val, css_decl *dst, int cap)`
-  - `shorthand` (function, line 3076) `* An uninterpretable token drops the whole shorthand (fail closed). */
+  - `origin_component` (function, line 3053) `static int origin_component(const char *tok, int axis, int *out)`
+  - `expand_transform_origin` (function, line 3079) `static int expand_transform_origin(const char *val, css_decl *dst, int cap)`
+  - `expand_gap` (function, line 3111) `static int expand_gap(const char *val, css_decl *dst, int cap)`
+  - `shorthand` (function, line 3135) `* An uninterpretable token drops the whole shorthand (fail closed). */
 static int expand_place(co...`
-  - `property` (function, line 3111) `* error drops the whole property (fail closed). */
+  - `property` (function, line 3170) `* error drops the whole property (fail closed). */
 static int expand_clip(const char *val, css_de...`
-  - `expand_clip_path` (function, line 3155) `static int expand_clip_path(const char *val, css_decl *dst, int cap)`
-  - `font_list_alias` (function, line 3202) `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)`
-  - `font_list_norm` (function, line 3236) `static int font_list_norm(const char *val, char *out, size_t cap)`
-  - `writing` (function, line 3280) `* Wide keywords claim BOTH slots without writing (inheritance then flows, as
+  - `expand_clip_path` (function, line 3214) `static int expand_clip_path(const char *val, css_decl *dst, int cap)`
+  - `font_list_alias` (function, line 3261) `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)`
+  - `font_list_norm` (function, line 3295) `static int font_list_norm(const char *val, char *out, size_t cap)`
+  - `writing` (function, line 3339) `* Wide keywords claim BOTH slots without writing (inheritance then flows, as
  * the tail does for...`
-  - `shorthand` (function, line 3322) `* generic bucket keeps the rest of the shorthand (same net effect as the
+  - `shorthand` (function, line 3381) `* generic bucket keeps the rest of the shorthand (same net effect as the
  * font-family longhand ...`
-  - `interpret_prop_dispatch` (function, line 3414) `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
+  - `interpret_prop_dispatch` (function, line 3473) `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
    ...`
-  - `wide_claim` (function, line 4122) `static int wide_claim(const char *prop, css_decl *dst, int cap,
+  - `wide_claim` (function, line 4181) `static int wide_claim(const char *prop, css_decl *dst, int cap,
                       char (*urlt...`
-  - `interpret_prop` (function, line 4162) `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
+  - `interpret_prop` (function, line 4221) `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
             ...`
-  - `drop_copy_text` (function, line 4189) `static void drop_copy_text(char *dst, size_t cap, const char *src)`
-  - `drop_record` (function, line 4208) `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)`
-  - `raw_add` (function, line 4234) `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)`
-  - `interpret_decls` (function, line 4347) `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
+  - `drop_copy_text` (function, line 4248) `static void drop_copy_text(char *dst, size_t cap, const char *src)`
+  - `drop_record` (function, line 4267) `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)`
+  - `raw_add` (function, line 4293) `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)`
+  - `interpret_decls` (function, line 4406) `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
                ...`
-  - `sheet_pools_reserve` (function, line 4405) `static void sheet_pools_reserve(css_sheet *sh)`
-  - `add_rule` (function, line 4411) `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
+  - `sheet_pools_reserve` (function, line 4464) `static void sheet_pools_reserve(css_sheet *sh)`
+  - `add_rule` (function, line 4470) `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      siz...`
-  - `skip_at_rule` (function, line 4524) `static size_t skip_at_rule(const char *s, size_t i, size_t n)`
-  - `block_end` (function, line 4540) `static size_t block_end(const char *s, size_t open, size_t n)`
-  - `at_is_media` (function, line 4562) `static int at_is_media(const char *s, size_t i, size_t n)`
-  - `at_keyword` (function, line 4573) `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)`
-  - `supports_selector_ok` (function, line 4598) `static int supports_selector_ok(void *ctx, const char *sel)`
-  - `supports_matches` (function, line 4607) `static int supports_matches(const char *s, size_t a, size_t b)`
-  - `layer_register` (function, line 4661) `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,
+  - `skip_at_rule` (function, line 4583) `static size_t skip_at_rule(const char *s, size_t i, size_t n)`
+  - `block_end` (function, line 4599) `static size_t block_end(const char *s, size_t open, size_t n)`
+  - `at_is_media` (function, line 4621) `static int at_is_media(const char *s, size_t i, size_t n)`
+  - `at_keyword` (function, line 4632) `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)`
+  - `supports_selector_ok` (function, line 4657) `static int supports_selector_ok(void *ctx, const char *sel)`
+  - `supports_matches` (function, line 4666) `static int supports_matches(const char *s, size_t a, size_t b)`
+  - `layer_register` (function, line 4720) `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,
                      ...`
-  - `collect_custom_props_scoped` (function, line 4704) `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
+  - `collect_custom_props_scoped` (function, line 4763) `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                 ...`
-  - `parse_block` (function, line 4779) `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
+  - `parse_block` (function, line 4842) `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                  ...`
-  - `download` (function, line 4935) `* the download (spec/webfont.md b3b). An empty src_url
+  - `download` (function, line 4998) `* the download (spec/webfont.md b3b). An empty src_url
                      * simply never resolv...`
-  - `rem_ident_ch` (function, line 5067) `static int rem_ident_ch(char c)`
-  - `rem_num_starts_after` (function, line 5075) `static int rem_num_starts_after(char prev)`
-  - `rem_emit_px` (function, line 5085) `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)`
-  - `len_unit_px` (function, line 5115) `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)`
-  - `len_rebase` (function, line 5145) `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)`
-  - `rem_rebase` (function, line 5211) `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
-  - `sheet_index` (function, line 5219) `static void sheet_index(css_sheet *sh)`
-  - `sheet_rewind` (function, line 5224) `static void sheet_rewind(css_sheet *sh)`
-  - `sheet_root_font_px` (function, line 5269) `static double sheet_root_font_px(const css_sheet *sh)`
-  - `strip_comments` (function, line 5277) `static char *strip_comments(const char *text, size_t len, size_t *outlen)`
-  - `var` (function, line 5287) `* collected and forty var() declarations -- font sizes, widths, radii, the
+  - `rem_ident_ch` (function, line 5130) `static int rem_ident_ch(char c)`
+  - `rem_num_starts_after` (function, line 5138) `static int rem_num_starts_after(char prev)`
+  - `rem_emit_px` (function, line 5148) `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)`
+  - `len_unit_px` (function, line 5178) `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)`
+  - `len_rebase` (function, line 5208) `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)`
+  - `rem_rebase` (function, line 5274) `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
+  - `sheet_index` (function, line 5282) `static void sheet_index(css_sheet *sh)`
+  - `sheet_rewind` (function, line 5287) `static void sheet_rewind(css_sheet *sh)`
+  - `sheet_root_font_px` (function, line 5332) `static double sheet_root_font_px(const css_sheet *sh)`
+  - `strip_comments` (function, line 5340) `static char *strip_comments(const char *text, size_t len, size_t *outlen)`
+  - `var` (function, line 5350) `* collected and forty var() declarations -- font sizes, widths, radii, the
      * whole theme -- ...`
-  - `css_parse` (function, line 5312) `css_status css_parse(const char *text, size_t len, css_sheet **out)`
-  - `css_parse_media` (function, line 5316) `css_status css_parse_media(const char *text, size_t len, const css_media *media,
+  - `css_parse` (function, line 5375) `css_status css_parse(const char *text, size_t len, css_sheet **out)`
+  - `css_parse_media` (function, line 5379) `css_status css_parse_media(const char *text, size_t len, const css_media *media,
                 ...`
-  - `css_parse_scoped` (function, line 5321) `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
+  - `css_parse_scoped` (function, line 5384) `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
                ...`
-  - `css_parse_logged` (function, line 5326) `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
+  - `css_parse_logged` (function, line 5389) `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
                ...`
-  - `consumer` (function, line 5360) `* consumer (shorthands, calc(), var() values) gets it with no context
+  - `consumer` (function, line 5423) `* consumer (shorthands, calc(), var() values) gets it with no context
          * threaded through...`
-  - `css_free` (function, line 5418) `void css_free(css_sheet *s)`
-  - `content_attr_of` (function, line 5440) `static const char *content_attr_of(const css_element *el, const char *name)`
-  - `apply_decl` (function, line 5449) `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+  - `css_free` (function, line 5481) `void css_free(css_sheet *s)`
+  - `content_attr_of` (function, line 5504) `static const char *content_attr_of(const css_element *el, const char *name)`
+  - `apply_decl` (function, line 5513) `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
               ...`
-  - `parent` (function, line 5489) `* property from the parent (`inherit`), and an unset non-inherited one
+  - `parent` (function, line 5553) `* property from the parent (`inherit`), and an unset non-inherited one
          * stands at its i...`
-  - `css_ua_heading_em` (function, line 5912) `double css_ua_heading_em(int level)`
-  - `css_computed_font_size_for_tag` (function, line 5917) `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)`
-  - `computed_font_size` (function, line 5925) `static double computed_font_size(const css_style *o, const css_element *el)`
-  - `cand_cmp` (function, line 5942) `static int cand_cmp(const void *pa, const void *pb)`
-  - `apply_var_source` (function, line 6007) `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+  - `css_ua_heading_em` (function, line 5976) `double css_ua_heading_em(int level)`
+  - `css_computed_font_size_for_tag` (function, line 5981) `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)`
+  - `computed_font_size` (function, line 5989) `static double computed_font_size(const css_style *o, const css_element *el)`
+  - `cand_cmp` (function, line 6006) `static int cand_cmp(const void *pa, const void *pb)`
+  - `apply_var_source` (function, line 6071) `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
         ...`
-  - `apply_rule` (function, line 6034) `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+  - `apply_rule` (function, line 6098) `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
               ...`
-  - `fold_font_relative` (function, line 6072) `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
+  - `fold_font_relative` (function, line 6136) `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
                          ...`
-  - `css_resolve_el` (function, line 6103) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
+  - `css_resolve_el` (function, line 6167) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          ...`
-  - `css_resolve_el_ex` (function, line 6112) `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
+  - `css_resolve_el_ex` (function, line 6176) `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
                       ...`
-  - `pseudo_of` (function, line 6119) `static int pseudo_of(int which)`
-  - `css_resolve_pseudo` (function, line 6128) `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
-  - `resolve_core` (function, line 6139) `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
+  - `pseudo_of` (function, line 6183) `static int pseudo_of(int which)`
+  - `css_resolve_pseudo` (function, line 6192) `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
+  - `resolve_core` (function, line 6203) `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
                     ...`
-  - `css_resolve` (function, line 6398) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+  - `css_resolve` (function, line 6462) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                   ...`
-  - `NULL` (function, line 6422) `* Sheet can be NULL (inline style, no @keyframes). */
+  - `NULL` (function, line 6486) `* Sheet can be NULL (inline style, no @keyframes). */
 void css_resolve_anim_keyframes(css_style *...`
-  - `css_font_face_count` (function, line 6454) `size_t css_font_face_count(const css_sheet *sheet)`
-  - `css_font_face_at` (function, line 6458) `int css_font_face_at(const css_sheet *sheet, size_t i,
+  - `css_font_face_count` (function, line 6518) `size_t css_font_face_count(const css_sheet *sheet)`
+  - `css_font_face_at` (function, line 6522) `int css_font_face_at(const css_sheet *sheet, size_t i,
                      char *family, size_t ...`
-  - `css_parse_inline` (function, line 6468) `css_style css_parse_inline(const char *style, size_t len)`
+  - `css_parse_inline` (function, line 6532) `css_style css_parse_inline(const char *style, size_t len)`
   - `emit` (function, line 63) `* * It must exceed the most slots ANY single declaration can emit (the widest today * is the `background` shorthand...`
   - `css_decl` (function, line 90) `* text and stores the INDEX in the css_decl (int-only, see P_BG_IMAGE_URL);`
   - `order` (function, line 1440) `* declaration order (dx, dy, optional blur >= 0);`
@@ -272,18 +275,18 @@ void css_resolve_anim_keyframes(css_style *...`
   - `empty` (function, line 1778) `* the slot with an explicit empty (ival -1) instead of dropping, or a * lower-priority string would leak through and...`
   - `sel_list_comma` (function, line 1963) `static size_t sel_list_comma(const char *s, size_t i, size_t end);`
   - `column` (function, line 2071) `* column (`flex: 1 1 0%`);`
-  - `matrix` (function, line 2431) `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands...`
-  - `LIST` (function, line 2516) `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...`
-  - `translateX` (function, line 2786) `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...`
-  - `parse_angle_deg` (function, line 2790) `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);`
-  - `expand_transform_list` (function, line 2793) `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);`
-  - `translateZ` (function, line 2795) `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);`
-  - `caller` (function, line 3402) `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...`
-  - `slots` (function, line 3573) `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...`
-  - `sentinel` (function, line 3688) `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);`
-  - `here` (function, line 3891) `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);`
-  - `csel_substr` (function, line 4595) `return known && csel_substr(val, "var(", 1);`
-  - `page_view` (function, line 5456) `* the generated text reaches page_view (which materialises it as a synthetic * run);`
+  - `matrix` (function, line 2490) `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands...`
+  - `LIST` (function, line 2575) `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...`
+  - `translateX` (function, line 2845) `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...`
+  - `parse_angle_deg` (function, line 2849) `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);`
+  - `expand_transform_list` (function, line 2852) `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);`
+  - `translateZ` (function, line 2854) `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);`
+  - `caller` (function, line 3461) `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...`
+  - `slots` (function, line 3632) `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...`
+  - `sentinel` (function, line 3747) `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);`
+  - `here` (function, line 3950) `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);`
+  - `csel_substr` (function, line 4654) `return known && csel_substr(val, "var(", 1);`
+  - `page_view` (function, line 5520) `* the generated text reaches page_view (which materialises it as a synthetic * run);`
   - `CSS_INIT_SELS` (macro, line 50) `#define CSS_INIT_SELS`
   - `CSS_INIT_DECLS` (macro, line 51) `#define CSS_INIT_DECLS`
   - `CSS_DECL_SLOTS_MIN` (macro, line 66) `#define CSS_DECL_SLOTS_MIN`
@@ -301,8 +304,8 @@ void css_resolve_anim_keyframes(css_style *...`
   - `AUTO_RESET_NONE` (macro, line 277) `#define AUTO_RESET_NONE`
   - `CSS_ATTR_MARK` (macro, line 1685) `#define CSS_ATTR_MARK`
   - `CSS_ATTR_SEP` (macro, line 1686) `#define CSS_ATTR_SEP`
-  - `CSS_MEDIA_MAX_DEPTH` (macro, line 4695) `#define CSS_MEDIA_MAX_DEPTH`
-  - `CSS_VAR_POOL` (macro, line 6003) `#define CSS_VAR_POOL`
+  - `CSS_MEDIA_MAX_DEPTH` (macro, line 4754) `#define CSS_MEDIA_MAX_DEPTH`
+  - `CSS_VAR_POOL` (macro, line 6067) `#define CSS_VAR_POOL`
 - Depends on: `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_index.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_mq.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/css_vars.h`, `include/flex_layout.h`, `include/webfont.h`
 
 ## src/css_atrule.c

@@ -91,10 +91,11 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `zero` | function | `include/css_gradient.h:41` | `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....` |
 | `FREEDOM_CSS_INDEX_H` | macro | `include/css_index.h:11` | `#define FREEDOM_CSS_INDEX_H` |
 | `cix_build` | function | `include/css_index.h:34` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` |
+| `cix_build_ptrs` | function | `include/css_index.h:37` | `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);` |
 | `cix_entry` | struct | `include/css_index.h:18` | `` |
-| `cix_free` | function | `include/css_index.h:37` | `void cix_free(cix_index *idx);` |
+| `cix_free` | function | `include/css_index.h:40` | `void cix_free(cix_index *idx);` |
 | `cix_index` | struct | `include/css_index.h:23` | `` |
-| `index` | function | `include/css_index.h:41` | `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...` |
+| `index` | function | `include/css_index.h:44` | `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...` |
 | `key` | type_alias | `include/css_index.h:17` | `typedef struct cix_entry { uint64_t key;` |
 | `CL_FALLBACK_CAP_RATIO` | macro | `include/css_length.h:58` | `#define CL_FALLBACK_CAP_RATIO` |
 | `CL_FALLBACK_CH_RATIO` | macro | `include/css_length.h:57` | `#define CL_FALLBACK_CH_RATIO` |
@@ -132,41 +133,43 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `cmq_env` | struct | `include/css_mq.h:19` | `` |
 | `cmq_matches` | function | `include/css_mq.h:28` | `int cmq_matches(const char *s, size_t len, const cmq_env *env);` |
 | `width_px` | type_alias | `include/css_mq.h:18` | `typedef struct cmq_env { int width_px;` |
-| `CSEL_FOLD_MARK` | macro | `include/css_select.h:199` | `#define CSEL_FOLD_MARK` |
-| `CSEL_FOLD_PREFIX` | macro | `include/css_select.h:198` | `#define CSEL_FOLD_PREFIX` |
-| `CSEL_IDENT_SCRATCH` | macro | `include/css_select.h:200` | `#define CSEL_IDENT_SCRATCH` |
+| `CSEL_FOLD_MARK` | macro | `include/css_select.h:215` | `#define CSEL_FOLD_MARK` |
+| `CSEL_FOLD_PREFIX` | macro | `include/css_select.h:214` | `#define CSEL_FOLD_PREFIX` |
+| `CSEL_IDENT_SCRATCH` | macro | `include/css_select.h:216` | `#define CSEL_IDENT_SCRATCH` |
 | `CSS_MAX_CLASSES_PER_SEL` | macro | `include/css_select.h:28` | `#define CSS_MAX_CLASSES_PER_SEL` |
 | `CSS_MAX_SUB_SELS` | macro | `include/css_select.h:83` | `#define CSS_MAX_SUB_SELS` |
 | `CSS_SUB_MAX_ATTRS` | macro | `include/css_select.h:84` | `#define CSS_SUB_MAX_ATTRS` |
 | `CSS_SUB_MAX_PSEUDOS` | macro | `include/css_select.h:85` | `#define CSS_SUB_MAX_PSEUDOS` |
 | `CSS_TOK_MAX` | macro | `include/css_select.h:27` | `#define CSS_TOK_MAX` |
 | `FREEDOM_CSS_SELECT_H` | macro | `include/css_select.h:2` | `#define FREEDOM_CSS_SELECT_H` |
-| `conservative` | function | `include/css_select.h:185` | `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...` |
-| `csel_anc_reject` | function | `include/css_select.h:178` | `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)` |
-| `csel_ci_eq` | function | `include/css_select.h:227` | `static inline int csel_ci_eq(const char *a, const char *b)` |
-| `csel_decl_end` | function | `include/css_select.h:219` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` |
-| `csel_element_feature_bits` | function | `include/css_select.h:177` | `unsigned long long csel_element_feature_bits(const css_element *e);` |
-| `csel_emit_utf8` | function | `include/css_select.h:203` | `size_t csel_emit_utf8(unsigned int cp, char *out);` |
-| `csel_escape_len` | function | `include/css_select.h:207` | `size_t csel_escape_len(const char *s, size_t i, size_t b);` |
-| `csel_ident_ch` | function | `include/css_select.h:255` | `static inline int csel_ident_ch(char c)` |
-| `csel_ident_eq` | function | `include/css_select.h:211` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` |
-| `csel_ident_fold` | function | `include/css_select.h:209` | `void csel_ident_fold(const char *src, size_t len, char *dst);` |
-| `csel_lower_ch` | function | `include/css_select.h:223` | `static inline char csel_lower_ch(char c)` |
-| `csel_matches` | function | `include/css_select.h:169` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` |
-| `csel_parse` | function | `include/css_select.h:160` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` |
-| `csel_read_ident` | function | `include/css_select.h:214` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` |
-| `csel_span_eq` | function | `include/css_select.h:236` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
-| `csel_substr` | function | `include/css_select.h:247` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
-| `csel_unescape` | function | `include/css_select.h:205` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
+| `comb` | type_alias | `include/css_select.h:139` | `typedef struct css_sel { int comb[CSS_MAX_COMPOUNDS];` |
+| `conservative` | function | `include/css_select.h:201` | `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...` |
+| `csel_anc_reject` | function | `include/css_select.h:194` | `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)` |
+| `csel_ci_eq` | function | `include/css_select.h:243` | `static inline int csel_ci_eq(const char *a, const char *b)` |
+| `csel_compact_dup` | function | `include/css_select.h:172` | `css_sel *csel_compact_dup(const css_sel *sel);` |
+| `csel_compact_size` | function | `include/css_select.h:167` | `size_t csel_compact_size(int nparts);` |
+| `csel_decl_end` | function | `include/css_select.h:235` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` |
+| `csel_element_feature_bits` | function | `include/css_select.h:193` | `unsigned long long csel_element_feature_bits(const css_element *e);` |
+| `csel_emit_utf8` | function | `include/css_select.h:219` | `size_t csel_emit_utf8(unsigned int cp, char *out);` |
+| `csel_escape_len` | function | `include/css_select.h:223` | `size_t csel_escape_len(const char *s, size_t i, size_t b);` |
+| `csel_ident_ch` | function | `include/css_select.h:271` | `static inline int csel_ident_ch(char c)` |
+| `csel_ident_eq` | function | `include/css_select.h:227` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` |
+| `csel_ident_fold` | function | `include/css_select.h:225` | `void csel_ident_fold(const char *src, size_t len, char *dst);` |
+| `csel_lower_ch` | function | `include/css_select.h:239` | `static inline char csel_lower_ch(char c)` |
+| `csel_matches` | function | `include/css_select.h:185` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` |
+| `csel_parse` | function | `include/css_select.h:176` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` |
+| `csel_read_ident` | function | `include/css_select.h:230` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` |
+| `csel_span_eq` | function | `include/css_select.h:252` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
+| `csel_substr` | function | `include/css_select.h:263` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
+| `csel_unescape` | function | `include/css_select.h:221` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
 | `css_attr_match` | struct | `include/css_select.h:88` | `` |
 | `css_compound` | struct | `include/css_select.h:122` | `` |
 | `css_pseudo_match` | struct | `include/css_select.h:112` | `` |
 | `css_sel` | struct | `include/css_select.h:139` | `` |
 | `css_sub_sel` | struct | `include/css_select.h:95` | `` |
-| `identifier` | function | `include/css_select.h:191` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
+| `identifier` | function | `include/css_select.h:207` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
 | `kind` | type_alias | `include/css_select.h:112` | `typedef struct css_pseudo_match { int kind;` |
 | `name` | type_alias | `include/css_select.h:88` | `typedef struct css_attr_match { char name[CSS_TOK_MAX];` |
-| `parts` | type_alias | `include/css_select.h:139` | `typedef struct css_sel { css_compound parts[CSS_MAX_COMPOUNDS];` |
 | `tag` | type_alias | `include/css_select.h:94` | `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];` |
 | `tag` | type_alias | `include/css_select.h:122` | `typedef struct css_compound { char tag[CSS_TOK_MAX];` |
 | `FREEDOM_CSS_TEXT_H` | macro | `include/css_text.h:2` | `#define FREEDOM_CSS_TEXT_H` |
@@ -493,8 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `hc_meta` | struct | `include/http_cache.h:44` | `` |
 | `hc_parse_http_date` | function | `include/http_cache.h:56` | `time_t hc_parse_http_date(const char *s);` |
 | `hc_status` | enum | `include/http_cache.h:28` | `` |
-| `hc_store` | type_alias | `include/http_cache.h:66` | `typedef struct hc_store hc_store;` |
-| `FREEDOM_IDENTITY_H` | macro | `include/identity.h:2` | `#define FREEDOM_IDENTITY_H` |
-| `IDN_GEO_ACC_MAX` | macro | `include/identity.h:23` | `#define IDN_GEO_ACC_MAX` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

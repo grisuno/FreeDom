@@ -2334,6 +2334,9 @@ typedef struct pv_style_cache {
      * (entries are written once and never change). Doubling bounds this at ~log2(count). */
     css_style             *retired[PV_STYLE_RETIRE_MAX];
     size_t                 nretired;
+    /* flex_column_flows_as_block verdict per container: the test walks every child, and every
+     * child of a column asks it again (quadratic in a wide column). */
+    pv_ptrmap              flowcol;
 } pv_style_cache;
 
 static size_t pv_ptr_hash(const void *p) {
@@ -2383,6 +2386,7 @@ static void pv_style_cache_free(pv_style_cache *c) {
         free(c->vn[k]);
     }
     free(c->vn);
+    pv_ptrmap_free(&c->flowcol);
     memset(c, 0, sizeof *c);
 }
 
@@ -2972,8 +2976,20 @@ static int col_has_free_space(const css_style *cs) {
  * engine -- floats, boxes, margins, replaced rows -- instead of the column branch of
  * layout_container, which flowed bare text and lost every float on lobste.rs'
  * `body{display:flex;flex-direction:column}`. spec/page_view.md "Flex en COLUMNA". */
+static int flex_column_flows_as_block_uncached(const lxb_dom_node_t *el, const css_style *cs,
+                                               const css_sheet *sheet, pv_style_cache *cache);
+
 static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
                                       const css_sheet *sheet, pv_style_cache *cache) {
+    int verdict;
+    if (cache != NULL && pv_ptrmap_get(&cache->flowcol, el, &verdict)) return verdict;
+    verdict = flex_column_flows_as_block_uncached(el, cs, sheet, cache);
+    if (cache != NULL) pv_ptrmap_put(&cache->flowcol, el, verdict);
+    return verdict;
+}
+
+static int flex_column_flows_as_block_uncached(const lxb_dom_node_t *el, const css_style *cs,
+                                               const css_sheet *sheet, pv_style_cache *cache) {
     if (!(cs->display == CSS_DISP_FLEX
           && cs->flex_direction == CSS_FD_COLUMN
           && (cs->flex_wrap == CSS_FW_UNSET || cs->flex_wrap == CSS_FW_NOWRAP)

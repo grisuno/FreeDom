@@ -1,6 +1,20 @@
 # Subsystem: src (page 10 of 10)
 Previous: [KB_src_p9.md](KB_src_p9.md)
 
+## src/wl_display.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `wd_index` (function, line 13) `static int wd_index(const char *name, unsigned long *idx)`
+  - `wd_pick` (function, line 27) `int wd_pick(const char *const *names, size_t n, char *out, size_t cap)`
+  - `wd_resolve_env` (function, line 42) `int wd_resolve_env(void)`
+  - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
+  - `WD_PREFIX` (macro, line 8) `#define WD_PREFIX`
+  - `WD_PREFIX_LEN` (macro, line 9) `#define WD_PREFIX_LEN`
+  - `WD_MAX_NAMES` (macro, line 10) `#define WD_MAX_NAMES`
+  - `WD_NAME_MAX` (macro, line 11) `#define WD_NAME_MAX`
+- Depends on: `include/wl_display.h`
+
 ## src/wl_guard.c
 - Layer: utility
 - Language: c

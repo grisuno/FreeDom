@@ -27,11 +27,11 @@
 | `include/css_computed.h` | ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL... | include | 6 | 3 |
 | `include/css_decl.h` | The sheet's two string pools -- background url()s, and the ::before/::after | include | 14 | 12 |
 | `include/css_gradient.h` | cg_radial_shape: Radial-gradient geometry (spec/css_gradient.md 3b). | include | 13 | 6 |
-| `include/css_index.h` | cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *... | include | 7 | 3 |
+| `include/css_index.h` | cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *... | include | 8 | 3 |
 | `include/css_length.h` | cl_ctx: The state a <length> is measured against. | include | 20 | 9 |
 | `include/css_mask.h` | CSS Masking 1, alpha gradients only (spec/css_mask.md). | include | 10 | 4 |
 | `include/css_mq.h` | cmq_matches: 1 iff the media query list s[0,len) matches env; malformed/unknown parts fail * closed. | include | 6 | 3 |
-| `include/css_select.h` | css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only... | include | 37 | 14 |
+| `include/css_select.h` | css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only... | include | 39 | 14 |
 | `include/css_text.h` | - | include | 17 | 3 |
 | `include/css_values.h` | Single owner of CSS value interpretation for colors and backgrounds. | include | 9 | 7 |
 | `include/css_vars.h` | cvr_table: Zero-initialise ({0}) before first use. | include | 19 | 5 |
@@ -90,7 +90,7 @@
 | `include/subreq_batch.h` | sqb_res: #ifndef SUBREQ_BATCH_H #define SUBREQ_BATCH_H #include <stddef.h> #define SQB_MAX_JOBS... | include | 13 | 3 |
 | `include/svg_paint.h` | svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred... | include | 2 | 2 |
 | `include/svg_render.h` | sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>... | include | 19 | 5 |
-| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 49 | 6 |
+| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 53 | 6 |
 | `include/text_case.h` | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | include | 8 | 3 |
 | `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 24 | 6 |
 | `include/textfield.h` | tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at... | include | 15 | 3 |
@@ -116,18 +116,18 @@
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 41 | 0 |
 | `src/cached_fetch.c` | trace: fetcher, and so the same policy, as an uncached request.  #define _POSIX_C_SOURCE 200809L... | src | 14 | 0 |
 | `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 5 | 0 |
-| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 247 | 0 |
+| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 249 | 0 |
 | `src/css_atrule.c` | keyword_at: Scratch size for one declaration or selector handed to the caller. | src | 11 | 0 |
 | `src/css_box.c` | calc_val: `pct` is the percentage component, carried through the arithmetic exactly like `em`... | src | 52 | 0 |
 | `src/css_chain.c` | cch_node: One element's selector inputs (tag/id/classes) plus its css_element view, with *... | src | 21 | 0 |
 | `src/css_color.c` | normalize: Trims surrounding ASCII spaces and lowercases into out (CC_TOKEN_MAX bytes). *... | src | 27 | 0 |
 | `src/css_computed.c` | ua_display: The HTML Rendering UA sheet's `display` for a tag when the cascade declared none *... | src | 45 | 0 |
 | `src/css_gradient.c` | find_gradient_call: Locates a gradient function call `fn` (e.g. "linear-gradient(") in v... | src | 31 | 0 |
-| `src/css_index.c` | css_index -- see include/css_index.h and spec/css_index.md. | src | 10 | 0 |
+| `src/css_index.c` | css_index -- see include/css_index.h and spec/css_index.md. | src | 13 | 0 |
 | `src/css_length.c` | cl_unit_eq: ASCII case-insensitive compare of a possibly-unterminated unit slice against a... | src | 18 | 0 |
 | `src/css_mask.c` | split: out->kind = 1; out->nst = (meta >> 4) & 0xf; if (out->nst < 2) out->nst = 2; if (out->nst... | src | 12 | 0 |
 | `src/css_mq.c` | read_word: static int is_space(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r'... | src | 34 | 0 |
-| `src/css_select.c` | csel_hex_val: CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content... | src | 36 | 0 |
+| `src/css_select.c` | csel_hex_val: CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content... | src | 40 | 0 |
 | `src/css_text.c` | --- text-presentation extensions (Hito 23b-6) --- | src | 17 | 0 |
 | `src/css_values.c` | - | src | 9 | 0 |
 | `src/css_vars.c` | find_slot: Index into t->slot where name lives, or the empty slot where it would go. * Requires... | src | 16 | 0 |
@@ -172,11 +172,11 @@
 | `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 61 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 18 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
-| `src/local_store.c` | - | src | 339 | 0 |
+| `src/local_store.c` | - | src | 343 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 259 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 260 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/pq_seal.c` | derive_key: pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out) { if (der ==... | src | 11 | 0 |
@@ -191,9 +191,9 @@
 | `src/sha2.c` | pad_tail: Pads the tail of a message into at most two blocks of `bs` bytes with a... | src | 15 | 0 |
 | `src/subreq_batch.c` | subreq_batch -- see include/subreq_batch.h and spec/subreq_async.md. | src | 14 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 34 | 0 |
-| `src/tab.c` | net_reply: jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp). | src | 167 | 0 |
+| `src/tab.c` | net_reply: jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp). | src | 176 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
-| `src/text_shape.c` | load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *... | src | 61 | 0 |
+| `src/text_shape.c` | tsh_fb_cp: Per-code-point verdicts of fb_entry. | src | 68 | 0 |
 | `src/textfield.c` | - | src | 12 | 0 |
 | `src/tls_impersonate.c` | get_bytes: \| ((uint32_t)r->p[r->off + 3] << 24); r->off += 4; return v; } static uint64_t... | src | 20 | 0 |
 | `src/ui_layout.c` | - | src | 4 | 0 |
@@ -279,7 +279,7 @@
 | `tests/test_shm_slots.c` | - | tests | 4 | 0 |
 | `tests/test_subreq_batch.c` | subreq_batch (spec/subreq_async.md): parallelism, issue order, refusals, reuse. | tests | 9 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
-| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 153 | 0 |
+| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 156 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
 | `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 23 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |

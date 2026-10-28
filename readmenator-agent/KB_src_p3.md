@@ -105,18 +105,20 @@ int cg_expand_bg_imag...`
 - Layer: utility
 - Language: c
 - Symbols:
+  - `cix_run` (struct, line 98)
   - `key_of` (function, line 11) `static uint64_t key_of(int kind, const char *s, size_t n, int lower)`
   - `key_of_token` (function, line 26) `static uint64_t key_of_token(int kind, const char *tok)`
   - `entry_cmp` (function, line 34) `static int entry_cmp(const void *a, const void *b)`
-  - `u32_cmp` (function, line 40) `static int u32_cmp(const void *a, const void *b)`
-  - `cix_free` (function, line 45) `void cix_free(cix_index *idx)`
-  - `cix_build` (function, line 52) `void cix_build(const css_sel *sels, size_t n, cix_index *idx)`
-  - `lower_bound` (function, line 90) `static size_t lower_bound(const cix_index *idx, uint64_t k)`
-  - `push` (function, line 100) `static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v)`
-  - `push_bucket` (function, line 113) `static int push_bucket(const cix_index *idx, uint64_t k,
-                       uint32_t **buf, s...`
-  - `cix_candidates` (function, line 120) `size_t cix_candidates(const cix_index *idx, const css_element *el,
+  - `cix_free` (function, line 40) `void cix_free(cix_index *idx)`
+  - `build` (function, line 47) `static void build(const css_sel *arr, css_sel *const *ptrs, size_t n, cix_index *idx)`
+  - `lower_bound` (function, line 86) `static size_t lower_bound(const cix_index *idx, uint64_t k)`
+  - `run_head` (function, line 104) `static uint32_t run_head(const cix_run *r)`
+  - `add_bucket` (function, line 106) `static void add_bucket(const cix_index *idx, uint64_t k, cix_run *runs, size_t *nr)`
+  - `push` (function, line 114) `static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v)`
+  - `cix_candidates` (function, line 129) `size_t cix_candidates(const cix_index *idx, const css_element *el,
                       uint32_t...`
+  - `cix_build` (function, line 166) `void cix_build(const css_sel *sels, size_t n, cix_index *idx)`
+  - `cix_build_ptrs` (function, line 168) `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx)`
 - Depends on: `include/css_index.h`
 
 ## src/css_length.c
@@ -211,47 +213,51 @@ int cg_expand_bg_imag...`
 - Layer: utility
 - Language: c
 - Symbols:
-  - `csel_hex_val` (function, line 23) `int csel_hex_val(char c)`
-  - `csel_emit_utf8` (function, line 30) `size_t csel_emit_utf8(unsigned int cp, char *out)`
-  - `csel_unescape` (function, line 52) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n)`
-  - `csel_escape_len` (function, line 91) `size_t csel_escape_len(const char *s, size_t i, size_t b)`
-  - `csel_decl_end` (function, line 104) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace)`
-  - `ident_hash` (function, line 121) `static unsigned long long ident_hash(const char *s, size_t n)`
-  - `csel_ident_fold` (function, line 127) `void csel_ident_fold(const char *src, size_t len, char *dst)`
-  - `csel_ident_eq` (function, line 142) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen)`
-  - `csel_read_ident` (function, line 150) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower)`
-  - `parse_attr_sel` (function, line 184) `static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am)`
-  - `parse_nth_arg` (function, line 241) `static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B)`
-  - `simple_pseudo_kind` (function, line 437) `static int simple_pseudo_kind(const char *nm)`
-  - `parse_sub_compound` (function, line 458) `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)`
-  - `parse_compound` (function, line 523) `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
+  - `csel_hex_val` (function, line 25) `int csel_hex_val(char c)`
+  - `csel_emit_utf8` (function, line 32) `size_t csel_emit_utf8(unsigned int cp, char *out)`
+  - `csel_unescape` (function, line 54) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n)`
+  - `csel_escape_len` (function, line 93) `size_t csel_escape_len(const char *s, size_t i, size_t b)`
+  - `csel_decl_end` (function, line 106) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace)`
+  - `ident_hash` (function, line 123) `static unsigned long long ident_hash(const char *s, size_t n)`
+  - `csel_ident_fold` (function, line 129) `void csel_ident_fold(const char *src, size_t len, char *dst)`
+  - `csel_ident_eq` (function, line 144) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen)`
+  - `csel_read_ident` (function, line 152) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower)`
+  - `parse_attr_sel` (function, line 186) `static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am)`
+  - `parse_nth_arg` (function, line 243) `static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B)`
+  - `simple_pseudo_kind` (function, line 439) `static int simple_pseudo_kind(const char *nm)`
+  - `parse_sub_compound` (function, line 460) `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)`
+  - `parse_compound` (function, line 525) `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
                   ...`
-  - `selector` (function, line 565) `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
+  - `selector` (function, line 567) `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
  * dropped. Whitespa...`
-  - `csel_element_feature_bits` (function, line 585) `unsigned long long csel_element_feature_bits(const css_element *e)`
-  - `compute_anc_req` (function, line 600) `static unsigned long long compute_anc_req(const css_sel *sel)`
-  - `csel_parse_core` (function, line 613) `static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel)`
-  - `compute_subj_req` (function, line 704) `static unsigned long long compute_subj_req(const css_sel *sel)`
-  - `csel_parse` (function, line 715) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel)`
-  - `el_attr_value` (function, line 725) `static const char *el_attr_value(const css_element *el, const char *name)`
-  - `ends_with` (function, line 735) `static int ends_with(const char *v, const char *suf, int ci)`
-  - `has_word` (function, line 743) `static int has_word(const char *v, const char *w, int ci)`
-  - `attr_matches` (function, line 758) `static int attr_matches(const css_attr_match *am, const css_element *el)`
-  - `nth_matches` (function, line 778) `static int nth_matches(int A, int B, int idx)`
-  - `is_form_control` (function, line 787) `static int is_form_control(const char *tag)`
-  - `sub_sel_matches` (function, line 800) `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
-  - `compound_matches` (function, line 1050) `static int compound_matches(const css_compound *c, const css_element *el,
+  - `csel_element_feature_bits` (function, line 587) `unsigned long long csel_element_feature_bits(const css_element *e)`
+  - `compute_anc_req` (function, line 602) `static unsigned long long compute_anc_req(const css_sel *sel)`
+  - `csel_parse_core` (function, line 615) `static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel)`
+  - `compound_req` (function, line 709) `static unsigned long long compound_req(const css_compound *c)`
+  - `compute_subj_req` (function, line 718) `static unsigned long long compute_subj_req(const css_sel *sel)`
+  - `csel_compact_size` (function, line 729) `size_t csel_compact_size(int nparts)`
+  - `csel_compact_dup` (function, line 735) `css_sel *csel_compact_dup(const css_sel *sel)`
+  - `csel_parse` (function, line 744) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel)`
+  - `el_attr_value` (function, line 755) `static const char *el_attr_value(const css_element *el, const char *name)`
+  - `ends_with` (function, line 765) `static int ends_with(const char *v, const char *suf, int ci)`
+  - `has_word` (function, line 773) `static int has_word(const char *v, const char *w, int ci)`
+  - `attr_matches` (function, line 788) `static int attr_matches(const css_attr_match *am, const css_element *el)`
+  - `nth_matches` (function, line 808) `static int nth_matches(int A, int B, int idx)`
+  - `is_form_control` (function, line 817) `static int is_form_control(const char *tag)`
+  - `sub_sel_matches` (function, line 830) `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
+  - `compound_matches` (function, line 1080) `static int compound_matches(const css_compound *c, const css_element *el,
                        ...`
-  - `built` (function, line 1085) `* chains the caller built (an element without parent/prev links never matches
+  - `built` (function, line 1115) `* chains the caller built (an element without parent/prev links never matches
  * through that com...`
-  - `pseudo_is_local` (function, line 1127) `static int pseudo_is_local(int kind)`
-  - `csel_needs_structure` (function, line 1140) `int csel_needs_structure(const css_sel *sel)`
-  - `csel_matches` (function, line 1163) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+  - `pseudo_is_local` (function, line 1160) `static int pseudo_is_local(int kind)`
+  - `csel_needs_structure` (function, line 1173) `int csel_needs_structure(const css_sel *sel)`
+  - `csel_matches` (function, line 1196) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
-  - `take_sub_arg` (function, line 293) `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
-  - `between` (function, line 382) `* between ( and ) is split on commas (not inside [] or ());`
-  - `pseudo_matches` (function, line 796) `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...`
-  - `HAS_MAX_DEPTH` (macro, line 909) `#define HAS_MAX_DEPTH`
+  - `take_sub_arg` (function, line 295) `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
+  - `between` (function, line 384) `* between ( and ) is split on commas (not inside [] or ());`
+  - `seven` (function, line 621) `* pay for the other seven (a css_sel is ~12.8 KiB). */ memset(sel, 0, offsetof(css_sel, parts));`
+  - `pseudo_matches` (function, line 826) `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...`
+  - `HAS_MAX_DEPTH` (macro, line 939) `#define HAS_MAX_DEPTH`
 - Depends on: `include/css_select.h`
 
 ## src/css_text.c

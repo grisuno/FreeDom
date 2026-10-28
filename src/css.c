@@ -109,7 +109,7 @@ struct css_sheet {
     size_t    rules_cap;
     size_t    nrules;
 
-    css_sel  *sels;
+    css_sel **sels;   /* each compact (csel_compact_dup): only the compounds it uses */
     size_t    sels_cap;
     size_t    nsels;
     /* Rule index over sels[] (spec/css_index.md): rebuilt after every full parse,
@@ -2288,8 +2288,67 @@ static int scope_has_class(const char *list, const char *name, size_t len) {
  * the real root carries it; the css module never sees the DOM, the caller answers
  * with the same matcher the cascade uses. No matcher, or a selector csel_parse
  * refuses: not root-scoped (fail safe). */
-static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m) {
+static int has_double_dash(const char *p, size_t n) {
+    for (const char *e = p + n; p + 1 < e; ++p) {
+        p = (const char *)memchr(p, '-', (size_t)(e - p));
+        if (p == NULL || p + 1 >= e) return 0;
+        if (p[1] == '-') return 1;
+    }
+    return 0;
+}
+
+static int subject_may_be_root(const char *s, size_t a, size_t b, const char *root_scope) {
+    size_t start = a;
+    int depth = 0;
+    char quote = 0;
+    for (size_t i = a; i < b; ++i) {
+        char c = s[i];
+        if (quote) { if (c == quote) quote = 0; else if (c == '\\') ++i; continue; }
+        if (c == '"' || c == '\'') { quote = c; continue; }
+        if (c == '\\') { ++i; continue; }
+        if (c == '[' || c == '(') { ++depth; continue; }
+        if (c == ']' || c == ')') { if (depth > 0) --depth; continue; }
+        if (depth == 0 && (c == ' ' || c == '\t' || c == '\n' || c == '\r' ||
+                           c == '>' || c == '+' || c == '~'))
+            start = i + 1;
+    }
+    if (start >= b) return 1;
+    /* A class in the subject compound must be on <html> or <body> for it to match either. */
+    depth = 0;
+    for (size_t i = start; i < b; ++i) {
+        char c = s[i];
+        if (c == '[' || c == '(') ++depth;
+        else if (c == ']' || c == ')') { if (depth > 0) --depth; }
+        else if (c == '\\' || c == '"' || c == '\'') break;
+        else if (c == '.' && depth == 0) {
+            size_t j = i + 1;
+            while (j < b && csel_ident_ch(s[j])) ++j;
+            if (j > i + 1 && !scope_has_class(root_scope, s + i + 1, j - i - 1)) return 0;
+            i = j - 1;
+        }
+    }
+    char c0 = s[start];
+    if (!((c0 >= 'a' && c0 <= 'z') || (c0 >= 'A' && c0 <= 'Z'))) return 1;
+    size_t e = start;
+    while (e < b && csel_ident_ch(s[e])) ++e;
+    size_t n = e - start;
+    if (n == 4) {
+        const char *h = "html", *bd = "body";
+        int is_h = 1, is_b = 1;
+        for (size_t k = 0; k < 4; ++k) {
+            char l = csel_lower_ch(s[start + k]);
+            if (l != h[k]) is_h = 0;
+            if (l != bd[k]) is_b = 0;
+        }
+        return is_h || is_b;
+    }
+    return 0;
+}
+
+static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m,
+                                 const char *root_scope) {
     if (m == NULL || m->scope_match == NULL) return 0;
+    if (!subject_may_be_root(s, a, b, root_scope)) return 0;
     css_sel sel;
     memset(&sel, 0, sizeof sel);
     if (!csel_parse(s, a, b, &sel)) return 0;
@@ -4505,17 +4564,17 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
     for (int g = 0; g < got; ++g) {
         if (sh->nsels >= sh->sels_cap) {
             size_t nc = sh->sels_cap ? sh->sels_cap * 2 : CSS_INIT_SELS;
-            css_sel *gr = (css_sel *)realloc(sh->sels, nc * sizeof *gr);
+            css_sel **gr = (css_sel **)realloc(sh->sels, nc * sizeof *gr);
             if (gr == NULL) break;  /* keep what we have */
             sh->sels = gr;
             sh->sels_cap = nc;
         }
-        css_sel *dst = &sh->sels[sh->nsels];
-        *dst = tmp[g];
-        dst->rule = (int)rule_idx;
-        dst->layer = sh->cur_layer;
-        dst->order = (int)sh->nsels;
-        ++sh->nsels;
+        tmp[g].rule = (int)rule_idx;
+        tmp[g].layer = sh->cur_layer;
+        tmp[g].order = (int)sh->nsels;
+        css_sel *dst = csel_compact_dup(&tmp[g]);
+        if (dst == NULL) break;
+        sh->sels[sh->nsels++] = dst;
     }
 }
 
@@ -4761,11 +4820,15 @@ static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
         size_t de = i;
         if (i < end) ++i;
 
+        /* Only a rule that declares a custom property can contribute one: most have no `--` at all,
+         * and testing their selectors against the root is the cost of this whole pass. */
+        if (!has_double_dash(s + ds, de > ds ? de - ds : 0)) continue;
+
         size_t p = ss;
         while (p < se) {
             size_t q = sel_list_comma(s, p, se);
             if (selector_is_root_scoped(s, p, q, root_scope) ||
-                selector_matches_root(s, p, q, m)) {
+                selector_matches_root(s, p, q, m, root_scope)) {
                 cvr_collect_decls(tab, s, ds, de);
                 break;
             }
@@ -5218,7 +5281,7 @@ static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen) 
 /* (Re)builds the rule index once a full parse has filled sels[]. */
 static void sheet_index(css_sheet *sh) {
     cix_free(&sh->idx);
-    cix_build(sh->sels, sh->nsels, &sh->idx);
+    cix_build_ptrs(sh->sels, sh->nsels, &sh->idx);
 }
 
 static void sheet_rewind(css_sheet *sh) {
@@ -5231,7 +5294,7 @@ static void sheet_rewind(css_sheet *sh) {
         memset(sh->decls, 0, sh->decls_cap * sizeof *sh->decls);
     sh->ndecls = 0;
     sh->nrules = 0;
-    sh->nsels = 0;
+    while (sh->nsels > 0) free(sh->sels[--sh->nsels]);
     cix_free(&sh->idx);
     cvr_reset(&sh->vars);
     sh->nbg_urls = 0;
@@ -5346,7 +5409,7 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
     sh->decls_cap = sh->decls ? CSS_INIT_DECLS : 0;
     sh->rules = (css_rule *)malloc(CSS_INIT_RULES * sizeof(css_rule));
     sh->rules_cap = sh->rules ? CSS_INIT_RULES : 0;
-    sh->sels = (css_sel *)malloc(CSS_INIT_SELS * sizeof(css_sel));
+    sh->sels = (css_sel **)malloc(CSS_INIT_SELS * sizeof(css_sel *));
     sh->sels_cap = sh->sels ? CSS_INIT_SELS : 0;
 
     if (text != NULL) {
@@ -5419,6 +5482,7 @@ void css_free(css_sheet *s) {
     if (s == NULL) return;
     free(s->decls);
     free(s->rules);
+    while (s->nsels > 0) free(s->sels[--s->nsels]);
     free(s->sels);
     cix_free(&s->idx);
     cvr_free(&s->vars);
@@ -6273,7 +6337,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         for (size_t ci = 0; ci < nloop; ++ci) {
             const size_t si = scan_all ? ci : (size_t)cand[ci];
             if (si >= sheet->nsels) continue;
-            const css_sel *sel = &sheet->sels[si];
+            const css_sel *sel = sheet->sels[si];
             int pseudo_kind = -1;
             if (csel_anc_reject(sel, el)) continue;   /* an ancestor it needs is absent */
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
@@ -6350,7 +6414,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
     }
     if (m_oom && sheet != NULL && el != NULL) {
         for (size_t si = 0; si < sheet->nsels; ++si) {
-            const css_sel *sel = &sheet->sels[si];
+            const css_sel *sel = sheet->sels[si];
             int pseudo_kind = -1;
             if (csel_anc_reject(sel, el)) continue;   /* an ancestor it needs is absent */
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;

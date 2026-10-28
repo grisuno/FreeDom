@@ -9,6 +9,7 @@ Previous: [KB_src_p8.md](KB_src_p8.md)
   - `child_state` (struct, line 156)
   - `net_reply` (struct, line 317)
   - `tab` (struct, line 2344)
+  - `tab_spawned` (struct, line 3036)
   - `status` (type_alias, line 317) `typedef struct net_reply { int32_t status;`
   - `clip_pm_ok` (function, line 78) `static int clip_pm_ok(int32_t v)`
   - `rad_len_ok` (function, line 84) `static int rad_len_ok(int32_t v, int dflt)`
@@ -85,78 +86,86 @@ static void child_fetch_stylesheets(child_state *cs)`
   - `send_request` (function, line 2998) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)`
   - `io_failure` (function, line 3008) `static tab_status io_failure(tab *t)`
   - `exec_worker_child` (function, line 3016) `static void exec_worker_child(int rfd, int wfd)`
-  - `tab_set_fetcher` (function, line 3088) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-  - `tab_set_css_sink` (function, line 3094) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
-  - `tab_set_op_net_budget_ms` (function, line 3100) `void tab_set_op_net_budget_ms(tab *t, int ms)`
-  - `tab_set_net_allowed` (function, line 3104) `void tab_set_net_allowed(tab *t, int allowed)`
-  - `tab_set_css_allowed` (function, line 3109) `void tab_set_css_allowed(tab *t, int allowed)`
-  - `tab_last_subreq_stats` (function, line 3114) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
-  - `tab_set_identity` (function, line 3119) `void tab_set_identity(tab *t, const char *serialized)`
-  - `tab_set_frame_id` (function, line 3127) `void tab_set_frame_id(tab *t, int id)`
-  - `tab_set_viewport_w` (function, line 3132) `void tab_set_viewport_w(tab *t, int px)`
-  - `tab_set_cookies` (function, line 3137) `void tab_set_cookies(tab *t, const char *cookies)`
-  - `tab_subreq_permitted` (function, line 3143) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-  - `tab_report_response_headers` (function, line 3157) `void tab_report_response_headers(const char *lines)`
-  - `tab_inflight_request_headers` (function, line 3169) `const char *tab_inflight_request_headers(void)`
-  - `tab_write_reply` (function, line 3175) `static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t rlen,
+  - `spawn_worker` (function, line 3048) `static tab_status spawn_worker(tab_spawned *sp)`
+  - `reap_spawned` (function, line 3078) `static void reap_spawned(const tab_spawned *sp, int kill_it)`
+  - `adopt_worker` (function, line 3087) `static tab_status adopt_worker(const tab_spawned *sp, tab **out)`
+  - `tab_prewarm` (function, line 3109) `void tab_prewarm(void)`
+  - `tab_prewarmed` (function, line 3115) `int tab_prewarmed(void)`
+  - `tab_prewarmed_pid` (function, line 3122) `int tab_prewarmed_pid(void)`
+  - `tab_shutdown_spare` (function, line 3129) `void tab_shutdown_spare(void)`
+  - `tab_open` (function, line 3138) `tab_status tab_open(tab **out)`
+  - `tab_set_fetcher` (function, line 3161) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
+  - `tab_set_css_sink` (function, line 3167) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
+  - `tab_set_op_net_budget_ms` (function, line 3173) `void tab_set_op_net_budget_ms(tab *t, int ms)`
+  - `tab_set_net_allowed` (function, line 3177) `void tab_set_net_allowed(tab *t, int allowed)`
+  - `tab_set_css_allowed` (function, line 3182) `void tab_set_css_allowed(tab *t, int allowed)`
+  - `tab_last_subreq_stats` (function, line 3187) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
+  - `tab_set_identity` (function, line 3192) `void tab_set_identity(tab *t, const char *serialized)`
+  - `tab_set_frame_id` (function, line 3200) `void tab_set_frame_id(tab *t, int id)`
+  - `tab_set_viewport_w` (function, line 3205) `void tab_set_viewport_w(tab *t, int px)`
+  - `tab_set_cookies` (function, line 3210) `void tab_set_cookies(tab *t, const char *cookies)`
+  - `tab_subreq_permitted` (function, line 3216) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
+  - `tab_report_response_headers` (function, line 3230) `void tab_report_response_headers(const char *lines)`
+  - `tab_inflight_request_headers` (function, line 3242) `const char *tab_inflight_request_headers(void)`
+  - `tab_write_reply` (function, line 3248) `static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t rlen,
           ...`
-  - `tab_read_subreq_fields` (function, line 3220) `static int tab_read_subreq_fields(tab *t, char **method, char **url, char **body, size_t *blen,
+  - `tab_read_subreq_fields` (function, line 3293) `static int tab_read_subreq_fields(tab *t, char **method, char **url, char **body, size_t *blen,
  ...`
-  - `tab_op_budget_us` (function, line 3231) `static int64_t tab_op_budget_us(const tab *t)`
-  - `tab_note_css_served` (function, line 3235) `static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,
+  - `tab_op_budget_us` (function, line 3304) `static int64_t tab_op_budget_us(const tab *t)`
+  - `tab_note_css_served` (function, line 3308) `static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,
  ...`
-  - `tab_serve_subreq` (function, line 3251) `static int tab_serve_subreq(tab *t, int net_granted, int css_granted)`
-  - `tab_batch_run` (function, line 3278) `static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out)`
-  - `tab_submit_async` (function, line 3293) `static int tab_submit_async(tab *t, int net_granted, int css_granted)`
-  - `tab_serve_netwait` (function, line 3315) `static int tab_serve_netwait(tab *t)`
-  - `tab_serve_tag` (function, line 3337) `static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted)`
-  - `tab_batch_discard` (function, line 3345) `static void tab_batch_discard(tab *t)`
-  - `hist_ops_free` (function, line 3350) `static void hist_ops_free(tab_hist_op *ops, size_t n)`
-  - `is_activation_event` (function, line 3415) `static int is_activation_event(const char *type)`
-  - `open_urls_free` (function, line 3424) `static void open_urls_free(char **u, size_t n)`
-  - `read_opens` (function, line 3434) `static tab_status read_opens(tab *t, const char *page_url, int gesture,
+  - `tab_serve_subreq` (function, line 3324) `static int tab_serve_subreq(tab *t, int net_granted, int css_granted)`
+  - `tab_batch_run` (function, line 3351) `static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out)`
+  - `tab_submit_async` (function, line 3366) `static int tab_submit_async(tab *t, int net_granted, int css_granted)`
+  - `tab_serve_netwait` (function, line 3388) `static int tab_serve_netwait(tab *t)`
+  - `tab_serve_tag` (function, line 3410) `static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted)`
+  - `tab_batch_discard` (function, line 3418) `static void tab_batch_discard(tab *t)`
+  - `hist_ops_free` (function, line 3423) `static void hist_ops_free(tab_hist_op *ops, size_t n)`
+  - `is_activation_event` (function, line 3488) `static int is_activation_event(const char *type)`
+  - `open_urls_free` (function, line 3497) `static void open_urls_free(char **u, size_t n)`
+  - `read_opens` (function, line 3507) `static tab_status read_opens(tab *t, const char *page_url, int gesture,
                          ...`
-  - `ws_ops_free` (function, line 3463) `static void ws_ops_free(tab_ws_op *ops, size_t n)`
-  - `read_ws` (function, line 3472) `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)`
-  - `gate_js_nav` (function, line 3541) `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)`
-  - `tab_load` (function, line 3551) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-  - `tab_load_ex` (function, line 3555) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-  - `tab_load_full` (function, line 3559) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+  - `ws_ops_free` (function, line 3536) `static void ws_ops_free(tab_ws_op *ops, size_t n)`
+  - `read_ws` (function, line 3545) `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)`
+  - `gate_js_nav` (function, line 3614) `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)`
+  - `tab_load` (function, line 3624) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
+  - `tab_load_ex` (function, line 3628) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
+  - `tab_load_full` (function, line 3632) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-  - `tab_click` (function, line 3760) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-  - `tab_tick` (function, line 3768) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-  - `tab_submit` (function, line 3778) `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
-  - `tab_read_view` (function, line 3886) `tab_status tab_read_view(tab *t, tab_page *out)`
-  - `tab_await_result` (function, line 3895) `static tab_status tab_await_result(tab *t)`
-  - `tab_await_result_inner` (function, line 3903) `static tab_status tab_await_result_inner(tab *t)`
-  - `tab_read_view_ex` (function, line 3912) `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
-  - `tab_eval` (function, line 4007) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-  - `tab_decode_image_op` (function, line 4048) `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
+  - `tab_click` (function, line 3833) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
+  - `tab_tick` (function, line 3841) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
+  - `tab_submit` (function, line 3851) `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
+  - `tab_read_view` (function, line 3959) `tab_status tab_read_view(tab *t, tab_page *out)`
+  - `tab_await_result` (function, line 3968) `static tab_status tab_await_result(tab *t)`
+  - `tab_await_result_inner` (function, line 3976) `static tab_status tab_await_result_inner(tab *t)`
+  - `tab_read_view_ex` (function, line 3985) `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
+  - `tab_eval` (function, line 4080) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
+  - `tab_decode_image_op` (function, line 4121) `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...`
-  - `tab_decode_image` (function, line 4090) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-  - `tab_decode_image_data_url` (function, line 4097) `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-  - `tab_alive` (function, line 4116) `int tab_alive(const tab *t)`
-  - `tab_child_pid` (function, line 4122) `pid_t tab_child_pid(const tab *t)`
-  - `tab_close` (function, line 4126) `void tab_close(tab *t)`
-  - `tab_page_free` (function, line 4144) `void tab_page_free(tab_page *p)`
-  - `tab_eval_result_free` (function, line 4174) `void tab_eval_result_free(tab_eval_result *r)`
-  - `tab_image_free` (function, line 4183) `void tab_image_free(tab_image *img)`
-  - `tab_geometry_send` (function, line 4195) `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)`
-  - `geometry_encode` (function, line 4213) `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)`
-  - `tab_set_geometry` (function, line 4223) `tab_status tab_set_geometry(tab *t, const jg_table *g)`
-  - `job_discard` (function, line 4237) `static void job_discard(tab *t)`
-  - `tab_async_sync` (function, line 4249) `static void tab_async_sync(tab *t)`
-  - `job_main` (function, line 4259) `static void *job_main(void *arg)`
-  - `tab_async_fd` (function, line 4275) `int tab_async_fd(tab *t)`
-  - `tab_async_busy` (function, line 4284) `int tab_async_busy(const tab *t)`
-  - `job_start` (function, line 4288) `static tab_status job_start(tab *t)`
-  - `tab_tick_async` (function, line 4301) `tab_status tab_tick_async(tab *t, int elapsed_ms)`
-  - `tab_geometry_async` (function, line 4311) `tab_status tab_geometry_async(tab *t, const jg_table *g)`
-  - `tab_async_finish` (function, line 4326) `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)`
-  - `tab_popstate` (function, line 4348) `tab_status tab_popstate(tab *t, int index, tab_page *out)`
-  - `tab_ws_event` (function, line 4355) `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
+  - `tab_decode_image` (function, line 4163) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
+  - `tab_decode_image_data_url` (function, line 4170) `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
+  - `tab_alive` (function, line 4189) `int tab_alive(const tab *t)`
+  - `tab_child_pid` (function, line 4195) `pid_t tab_child_pid(const tab *t)`
+  - `tab_close` (function, line 4199) `void tab_close(tab *t)`
+  - `tab_page_free` (function, line 4217) `void tab_page_free(tab_page *p)`
+  - `tab_eval_result_free` (function, line 4247) `void tab_eval_result_free(tab_eval_result *r)`
+  - `tab_image_free` (function, line 4256) `void tab_image_free(tab_image *img)`
+  - `tab_geometry_send` (function, line 4268) `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)`
+  - `geometry_encode` (function, line 4286) `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)`
+  - `tab_set_geometry` (function, line 4296) `tab_status tab_set_geometry(tab *t, const jg_table *g)`
+  - `job_discard` (function, line 4310) `static void job_discard(tab *t)`
+  - `tab_async_sync` (function, line 4322) `static void tab_async_sync(tab *t)`
+  - `job_main` (function, line 4332) `static void *job_main(void *arg)`
+  - `tab_async_fd` (function, line 4348) `int tab_async_fd(tab *t)`
+  - `tab_async_busy` (function, line 4357) `int tab_async_busy(const tab *t)`
+  - `job_start` (function, line 4361) `static tab_status job_start(tab *t)`
+  - `tab_tick_async` (function, line 4374) `tab_status tab_tick_async(tab *t, int elapsed_ms)`
+  - `tab_geometry_async` (function, line 4384) `tab_status tab_geometry_async(tab *t, const jg_table *g)`
+  - `tab_async_finish` (function, line 4399) `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)`
+  - `tab_popstate` (function, line 4421) `tab_status tab_popstate(tab *t, int index, tab_page *out)`
+  - `tab_ws_event` (function, line 4428) `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
        ...`
-  - `tab_set_storage` (function, line 4375) `void tab_set_storage(tab *t, const char *blob, size_t len)`
+  - `tab_set_storage` (function, line 4448) `void tab_set_storage(tab *t, const char *blob, size_t len)`
   - `buffer` (function, line 505) `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of...`
   - `fallback` (function, line 1336) `* <noscript> fallback (rendered only under js=0) inflates the block * count and the fuller-view heuristic picks it...`
   - `WHERE` (function, line 1526) `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
@@ -170,7 +179,7 @@ static void child_fetch_stylesheets(child_state *cs)`
   - `tests` (function, line 2508) `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
   - `layout` (function, line 2615) `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
   - `column` (function, line 2626) `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
-  - `frames` (function, line 3892) `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...`
+  - `frames` (function, line 3965) `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...`
   - `_GNU_SOURCE` (macro, line 14) `#define _GNU_SOURCE`
   - `TAB_SCREEN_W` (macro, line 65) `#define TAB_SCREEN_W`
   - `TAB_SCREEN_H` (macro, line 66) `#define TAB_SCREEN_H`
@@ -217,79 +226,86 @@ static void child_fetch_stylesheets(child_state *cs)`
 - Depends on: `include/css.h`, `include/text_case.h`
 
 ## src/text_shape.c
-- Doc: load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *...
+- Doc: tsh_fb_cp: Per-code-point verdicts of fb_entry.
 - Layer: utility
 - Language: c
 - Symbols:
-  - `tsh_entry` (struct, line 35)
-  - `tsh_web` (struct, line 191)
-  - `tsh_lfam` (struct, line 458)
-  - `tsh_llist` (struct, line 464)
-  - `tsh_fb` (struct, line 658)
-  - `tsh_cover_ctx` (struct, line 741)
-  - `loaded` (type_alias, line 34) `typedef struct tsh_entry { int loaded;`
-  - `used` (type_alias, line 190) `typedef struct tsh_web { int used;`
-  - `name` (type_alias, line 457) `typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];`
-  - `file` (type_alias, line 657) `typedef struct tsh_fb { char file[512];`
-  - `generic_name` (function, line 55) `static const char *generic_name(int family)`
-  - `backend_init` (function, line 65) `static int backend_init(void)`
-  - `read_font_file` (function, line 82) `static unsigned char *read_font_file(const char *path, long *out_n)`
-  - `load_entry_named` (function, line 103) `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)`
-  - `load_entry_file` (function, line 133) `static int load_entry_file(tsh_entry *e, const char *path, int index)`
-  - `load_entry` (function, line 169) `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
-  - `get_entry` (function, line 173) `static tsh_entry *get_entry(int family, int bold, int italic)`
-  - `web_entry_free` (function, line 201) `static void web_entry_free(tsh_web *w)`
-  - `web_magic_ok` (function, line 214) `static int web_magic_ok(const unsigned char *b, size_t n)`
-  - `web_make_entry` (function, line 227) `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)`
-  - `tsh_webfont_register` (function, line 267) `int tsh_webfont_register(const char *name,
+  - `tsh_entry` (struct, line 36)
+  - `tsh_web` (struct, line 192)
+  - `tsh_lfam` (struct, line 464)
+  - `tsh_llist` (struct, line 470)
+  - `tsh_fb` (struct, line 665)
+  - `tsh_cover_ctx` (struct, line 809)
+  - `tsh_fb_cp` (struct, line 681)
+  - `tsh_measure_slot` (struct, line 919)
+  - `loaded` (type_alias, line 35) `typedef struct tsh_entry { int loaded;`
+  - `used` (type_alias, line 191) `typedef struct tsh_web { int used;`
+  - `name` (type_alias, line 463) `typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];`
+  - `file` (type_alias, line 664) `typedef struct tsh_fb { char file[512];`
+  - `generic_name` (function, line 56) `static const char *generic_name(int family)`
+  - `backend_init` (function, line 66) `static int backend_init(void)`
+  - `read_font_file` (function, line 83) `static unsigned char *read_font_file(const char *path, long *out_n)`
+  - `load_entry_named` (function, line 104) `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)`
+  - `load_entry_file` (function, line 134) `static int load_entry_file(tsh_entry *e, const char *path, int index)`
+  - `load_entry` (function, line 170) `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
+  - `get_entry` (function, line 174) `static tsh_entry *get_entry(int family, int bold, int italic)`
+  - `web_entry_free` (function, line 202) `static void web_entry_free(tsh_web *w)`
+  - `web_magic_ok` (function, line 215) `static int web_magic_ok(const unsigned char *b, size_t n)`
+  - `web_make_entry` (function, line 228) `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)`
+  - `tsh_webfont_register` (function, line 271) `int tsh_webfont_register(const char *name,
                          const unsigned char *bytes, s...`
-  - `tsh_webfont_clear` (function, line 301) `void tsh_webfont_clear(void)`
-  - `web_find` (function, line 306) `static tsh_entry *web_find(unsigned h, int bold, int italic)`
-  - `entry_free` (function, line 318) `static void entry_free(tsh_entry *e)`
-  - `ascii_ieq` (function, line 331) `static int ascii_ieq(const char *a, const char *b)`
-  - `tsh_family_is_generic` (function, line 340) `int tsh_family_is_generic(const char *name)`
-  - `tsh_pick_from_list` (function, line 352) `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
+  - `tsh_webfont_clear` (function, line 306) `void tsh_webfont_clear(void)`
+  - `web_find` (function, line 312) `static tsh_entry *web_find(unsigned h, int bold, int italic)`
+  - `entry_free` (function, line 324) `static void entry_free(tsh_entry *e)`
+  - `ascii_ieq` (function, line 337) `static int ascii_ieq(const char *a, const char *b)`
+  - `tsh_family_is_generic` (function, line 346) `int tsh_family_is_generic(const char *name)`
+  - `tsh_pick_from_list` (function, line 358) `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
                   ...`
-  - `tsh_pick_family` (function, line 373) `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
+  - `tsh_pick_family` (function, line 379) `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
         ...`
-  - `fc_installed` (function, line 386) `static int fc_installed(const char *name, void *ctx)`
-  - `fc_resolve` (function, line 429) `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
-  - `local_clear` (function, line 474) `static void local_clear(void)`
-  - `lfam_index` (function, line 484) `static int lfam_index(const char *fam)`
-  - `tsh_local_handle` (function, line 492) `int tsh_local_handle(const char *list)`
-  - `local_entry` (function, line 511) `static tsh_entry *local_entry(int handle, int bold, int italic)`
-  - `get_entry_ex` (function, line 531) `static tsh_entry *get_entry_ex(const tsh_font *f)`
-  - `tsh_ready` (function, line 543) `int tsh_ready(void)`
-  - `tsh_shape` (function, line 548) `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
+  - `fc_installed` (function, line 392) `static int fc_installed(const char *name, void *ctx)`
+  - `fc_resolve` (function, line 435) `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
+  - `local_clear` (function, line 480) `static void local_clear(void)`
+  - `lfam_index` (function, line 491) `static int lfam_index(const char *fam)`
+  - `tsh_local_handle` (function, line 499) `int tsh_local_handle(const char *list)`
+  - `local_entry` (function, line 518) `static tsh_entry *local_entry(int handle, int bold, int italic)`
+  - `get_entry_ex` (function, line 538) `static tsh_entry *get_entry_ex(const tsh_font *f)`
+  - `tsh_ready` (function, line 550) `int tsh_ready(void)`
+  - `tsh_shape` (function, line 555) `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
                 ...`
-  - `utf8_next` (function, line 597) `static unsigned utf8_next(const char *s, size_t n, size_t *len)`
-  - `is_private_use` (function, line 616) `static int is_private_use(unsigned cp)`
-  - `rides_previous` (function, line 621) `static int rides_previous(unsigned cp)`
-  - `tsh_segment` (function, line 629) `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
+  - `utf8_next` (function, line 604) `static unsigned utf8_next(const char *s, size_t n, size_t *len)`
+  - `is_private_use` (function, line 623) `static int is_private_use(unsigned cp)`
+  - `rides_previous` (function, line 628) `static int rides_previous(unsigned cp)`
+  - `tsh_segment` (function, line 636) `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
                 tsh_...`
-  - `fb_clear` (function, line 669) `static void fb_clear(void)`
-  - `fb_entry` (function, line 679) `static tsh_entry *fb_entry(unsigned cp, int bold)`
-  - `cover_cp` (function, line 750) `static int cover_cp(unsigned cp, void *vctx)`
-  - `shape_entry` (function, line 764) `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
+  - `fb_clear` (function, line 689) `static void fb_clear(void)`
+  - `fb_match_covering` (function, line 709) `static FcPattern *fb_match_covering(FcPattern *pat, FcCharSet *cs)`
+  - `fb_entry` (function, line 731) `static tsh_entry *fb_entry(unsigned cp, int bold)`
+  - `fb_entry_uncached` (function, line 748) `static tsh_entry *fb_entry_uncached(unsigned cp, int bold)`
+  - `cover_cp` (function, line 818) `static int cover_cp(unsigned cp, void *vctx)`
+  - `shape_entry` (function, line 832) `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
             ...`
-  - `shape_runs` (function, line 800) `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
+  - `shape_runs` (function, line 868) `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
                ...`
-  - `tsh_measure` (function, line 846) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
-  - `tsh_draw` (function, line 852) `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
+  - `tsh_measure` (function, line 929) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
+  - `tsh_draw` (function, line 964) `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
                     double x, doub...`
-  - `tsh_face` (function, line 859) `cairo_font_face_t *tsh_face(const tsh_font *f)`
-  - `tsh_shutdown` (function, line 865) `void tsh_shutdown(void)`
-  - `characters` (function, line 100) `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
-  - `slice` (function, line 213) `* woff2 slice (spec/webfont.md);`
+  - `tsh_face` (function, line 971) `cairo_font_face_t *tsh_face(const tsh_font *f)`
+  - `tsh_shutdown` (function, line 977) `void tsh_shutdown(void)`
+  - `characters` (function, line 101) `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
+  - `slice` (function, line 214) `* woff2 slice (spec/webfont.md);`
   - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
-  - `TSH_MAX_FONT_BYTES` (macro, line 29) `#define TSH_MAX_FONT_BYTES`
-  - `TSH_CACHE_SLOTS` (macro, line 33) `#define TSH_CACHE_SLOTS`
-  - `TSH_WEB_SLOTS` (macro, line 189) `#define TSH_WEB_SLOTS`
-  - `TSH_SUBS_MAX` (macro, line 400) `#define TSH_SUBS_MAX`
-  - `TSH_BLANK_GLYPH` (macro, line 613) `#define TSH_BLANK_GLYPH`
-  - `TSH_FB_SLOTS` (macro, line 655) `#define TSH_FB_SLOTS`
-  - `TSH_FB_BLOCKS` (macro, line 656) `#define TSH_FB_BLOCKS`
-  - `TSH_MAX_RUNS` (macro, line 796) `#define TSH_MAX_RUNS`
+  - `TSH_MAX_FONT_BYTES` (macro, line 30) `#define TSH_MAX_FONT_BYTES`
+  - `TSH_CACHE_SLOTS` (macro, line 34) `#define TSH_CACHE_SLOTS`
+  - `TSH_WEB_SLOTS` (macro, line 190) `#define TSH_WEB_SLOTS`
+  - `TSH_SUBS_MAX` (macro, line 406) `#define TSH_SUBS_MAX`
+  - `TSH_BLANK_GLYPH` (macro, line 620) `#define TSH_BLANK_GLYPH`
+  - `TSH_FB_SLOTS` (macro, line 662) `#define TSH_FB_SLOTS`
+  - `TSH_FB_BLOCKS` (macro, line 663) `#define TSH_FB_BLOCKS`
+  - `TSH_FB_CP_SLOTS` (macro, line 680) `#define TSH_FB_CP_SLOTS`
+  - `TSH_MAX_RUNS` (macro, line 864) `#define TSH_MAX_RUNS`
+  - `TSH_MEASURE_SLOTS` (macro, line 917) `#define TSH_MEASURE_SLOTS`
+  - `TSH_MEASURE_TEXT_MAX` (macro, line 918) `#define TSH_MEASURE_TEXT_MAX`
 - Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
 
 ## src/textfield.c
@@ -472,20 +488,6 @@ static int looks_like_host(const c...`
   - `ref` (function, line 167) `* their ref (the register call copies what it keeps). */ if (!is_data) free(fbytes);`
   - `WF_DATA_URL_MAX` (macro, line 91) `#define WF_DATA_URL_MAX`
 - Depends on: `include/data_url.h`, `include/text_shape.h`, `include/url.h`, `include/webfont.h`, `include/webfont_load.h`
-
-## src/wl_display.c
-- Layer: utility
-- Language: c
-- Symbols:
-  - `wd_index` (function, line 13) `static int wd_index(const char *name, unsigned long *idx)`
-  - `wd_pick` (function, line 27) `int wd_pick(const char *const *names, size_t n, char *out, size_t cap)`
-  - `wd_resolve_env` (function, line 42) `int wd_resolve_env(void)`
-  - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
-  - `WD_PREFIX` (macro, line 8) `#define WD_PREFIX`
-  - `WD_PREFIX_LEN` (macro, line 9) `#define WD_PREFIX_LEN`
-  - `WD_MAX_NAMES` (macro, line 10) `#define WD_MAX_NAMES`
-  - `WD_NAME_MAX` (macro, line 11) `#define WD_NAME_MAX`
-- Depends on: `include/wl_display.h`
 
 
 Next: [KB_src_p10.md](KB_src_p10.md)

@@ -15,6 +15,7 @@
 #include "css.h"
 #include "webfont.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -264,6 +265,9 @@ static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbyte
     return 1;
 }
 
+/* Bumped whenever a face may be freed or replaced: memoized measures hold entry pointers. */
+static unsigned g_measure_gen = 1;
+
 int tsh_webfont_register(const char *name,
                          const unsigned char *bytes, size_t nbytes,
                          int bold, int italic) {
@@ -271,6 +275,7 @@ int tsh_webfont_register(const char *name,
     if (bytes == NULL || nbytes == 0 || nbytes > WF_MAX_FACE_BYTES) return -1;
     if (!web_magic_ok(bytes, nbytes)) return -1;
     if (!backend_init()) return -1;
+    ++g_measure_gen;
     unsigned h = wf_name_hash(name, strlen(name));
     if (h == 0) return -1;
     int bb = bold ? 1 : 0;
@@ -299,6 +304,7 @@ int tsh_webfont_register(const char *name,
 }
 
 void tsh_webfont_clear(void) {
+    ++g_measure_gen;
     for (int i = 0; i < TSH_WEB_SLOTS; ++i)
         if (g_web[i].used) web_entry_free(&g_web[i]);
 }
@@ -472,6 +478,7 @@ static tsh_llist g_llist[TSH_LOCAL_LISTS];
 static size_t    g_nllist;
 
 static void local_clear(void) {
+    ++g_measure_gen;
     for (size_t i = 0; i < g_nlfam; ++i)
         for (int k = 0; k < 4; ++k) entry_free(&g_lfam[i].e[k]);
     for (size_t i = 0; i < g_nllist; ++i) free(g_llist[i].list);
@@ -666,17 +673,79 @@ static tsh_fb g_fb[TSH_FB_SLOTS];
 static size_t g_nfb;
 static short  g_fb_block[2][TSH_FB_BLOCKS];
 
+/* Per-code-point verdicts of fb_entry. The block cache above only remembers which face a
+ * 256-code-point block asked for first; a code point that face lacks used to go back to
+ * fontconfig on every occurrence (Wikipedia: a third of its render time). Direct-mapped,
+ * stale entries simply miss. */
+#define TSH_FB_CP_SLOTS 1024u
+typedef struct {
+    unsigned cp;
+    int      bold;
+    int      valid;
+    short    slot;   /* index into g_fb, or -1 = no installed face has it */
+} tsh_fb_cp;
+static tsh_fb_cp g_fb_cp[TSH_FB_CP_SLOTS];
+
 static void fb_clear(void) {
+    ++g_measure_gen;
     for (size_t i = 0; i < g_nfb; ++i) entry_free(&g_fb[i].e);
     memset(g_fb, 0, sizeof g_fb);
     memset(g_fb_block, 0, sizeof g_fb_block);
+    memset(g_fb_cp, 0, sizeof g_fb_cp);
     g_nfb = 0;
 }
 
 /* The fallback entry covering cp (bold or regular), or NULL. Looks up
  * fontconfig once per 256-code-point block: scripts live in blocks, so one
  * match serves a whole language. */
+static tsh_entry *fb_entry_uncached(unsigned cp, int bold);
+
+/* Best fontconfig match for `pat` among the installed fonts that contain every code point of
+ * `cs`. FcFontMatch scores ALL installed fonts (thousands, against a sans-serif alias list of
+ * hundreds of names): ~2 ms per lookup, and a page naming languages in thirty scripts paid it
+ * thirty times. Listing the covering fonts first is a charset subset test per font, and the
+ * match then scores only those, with the same properties. Falls back to the plain match when the
+ * list cannot be built. Caller destroys the result. */
+static FcPattern *fb_match_covering(FcPattern *pat, FcCharSet *cs) {
+    FcResult res;
+    FcPattern *lp = FcPatternCreate();
+    FcObjectSet *os = FcObjectSetBuild(FC_FILE, FC_INDEX, FC_FAMILY, FC_FAMILYLANG, FC_STYLE,
+                                       FC_WEIGHT, FC_SLANT, FC_WIDTH, FC_CHARSET, FC_LANG,
+                                       FC_SCALABLE, FC_COLOR, FC_FONTFORMAT, FC_SPACING,
+                                       FC_OUTLINE, FC_FOUNDRY, (char *)NULL);
+    FcFontSet *fs = NULL;
+    if (lp != NULL && os != NULL && FcPatternAddCharSet(lp, FC_CHARSET, cs))
+        fs = FcFontList(NULL, lp, os);
+    if (lp != NULL) FcPatternDestroy(lp);
+    if (os != NULL) FcObjectSetDestroy(os);
+    if (fs == NULL) return FcFontMatch(NULL, pat, &res);
+    FcPattern *match = NULL;
+    if (fs->nfont > 0) {
+        FcFontSet *sets[1] = { fs };
+        match = FcFontSetMatch(NULL, sets, 1, pat, &res);
+    }
+    FcFontSetDestroy(fs);
+    return match;
+}
+
 static tsh_entry *fb_entry(unsigned cp, int bold) {
+    if (cp >= 0x110000u) return NULL;
+    tsh_fb_cp *c = &g_fb_cp[(cp * 2654435761u + (unsigned)(bold ? 1 : 0)) % TSH_FB_CP_SLOTS];
+    if (c->valid && c->cp == cp && c->bold == (bold ? 1 : 0))
+        return c->slot >= 0 ? &g_fb[c->slot].e : NULL;
+    tsh_entry *e = fb_entry_uncached(cp, bold);
+    if (!backend_init()) return e;
+    short slot = -1;
+    for (size_t i = 0; e != NULL && i < g_nfb; ++i)
+        if (&g_fb[i].e == e) { slot = (short)i; break; }
+    c->cp = cp;
+    c->bold = bold ? 1 : 0;
+    c->slot = slot;
+    c->valid = 1;
+    return e;
+}
+
+static tsh_entry *fb_entry_uncached(unsigned cp, int bold) {
     if (cp >= 0x110000u || !backend_init()) return NULL;
     short *slot = &g_fb_block[bold ? 1 : 0][cp >> 8];
     if (*slot > 0) {
@@ -699,8 +768,7 @@ static tsh_entry *fb_entry(unsigned cp, int bold) {
     FcPatternAddInteger(pat, FC_WEIGHT, bold ? FC_WEIGHT_BOLD : FC_WEIGHT_NORMAL);
     FcConfigSubstitute(NULL, pat, FcMatchPattern);
     FcDefaultSubstitute(pat);
-    FcResult res;
-    FcPattern *match = FcFontMatch(NULL, pat, &res);
+    FcPattern *match = fb_match_covering(pat, cs);
     FcPatternDestroy(pat);
     FcCharSetDestroy(cs);
     tsh_entry *found = NULL;
@@ -843,8 +911,52 @@ static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x
     return TSH_OK;
 }
 
+/* Memoized measures. A page measures the same words over and over (every line break decision,
+ * every flex basis probe), and each miss is a HarfBuzz shape plus fontconfig coverage lookups.
+ * Direct-mapped; the key is the RESOLVED face, so two descriptors that land on one face share. */
+#define TSH_MEASURE_SLOTS 4096u
+#define TSH_MEASURE_TEXT_MAX 48u
+typedef struct {
+    const tsh_entry *e;
+    unsigned         gen;
+    int              scale, bold;
+    size_t           len;
+    double           adv;
+    char             text[TSH_MEASURE_TEXT_MAX];
+} tsh_measure_slot;
+static tsh_measure_slot g_measure[TSH_MEASURE_SLOTS];
+
 double tsh_measure(const tsh_font *f, double px, const char *text, size_t len) {
     double adv = 0.0;
+    tsh_measure_slot *slot = NULL;
+    if (f != NULL && text != NULL && len > 0 && len <= TSH_MEASURE_TEXT_MAX && px > 0.0 &&
+        px <= 1.0e9 && backend_init()) {
+        const tsh_entry *e = get_entry_ex(f);
+        if (e != NULL) {
+            int scale = (int)(px * 64.0 + 0.5);
+            unsigned long long h = 1469598103934665603ull ^ (unsigned long long)(uintptr_t)e;
+            h = (h ^ (unsigned)scale) * 1099511628211ull;
+            h = (h ^ (unsigned)(f->bold ? 1 : 0)) * 1099511628211ull;
+            for (size_t i = 0; i < len; ++i) h = (h ^ (unsigned char)text[i]) * 1099511628211ull;
+            slot = &g_measure[(h ^ (h >> 29)) % TSH_MEASURE_SLOTS];
+            if (slot->e == e && slot->gen == g_measure_gen && slot->scale == scale &&
+                slot->bold == (f->bold ? 1 : 0) && slot->len == len &&
+                memcmp(slot->text, text, len) == 0)
+                return slot->adv;
+            slot->e = NULL;   /* a failed shape below must not leave a half-written key */
+            slot->gen = g_measure_gen;
+            slot->scale = scale;
+            slot->bold = f->bold ? 1 : 0;
+            slot->len = len;
+            memcpy(slot->text, text, len);
+            slot->adv = 0.0;
+            slot->e = e;
+            tsh_status st0 = shape_runs(NULL, f, px, 0.0, 0.0, text, len, &adv);
+            if (st0 == TSH_OK) { slot->adv = adv; return adv; }
+            slot->e = NULL;
+            return -1.0;
+        }
+    }
     tsh_status st = shape_runs(NULL, f, px, 0.0, 0.0, text, len, &adv);
     return (st == TSH_OK) ? adv : -1.0;
 }

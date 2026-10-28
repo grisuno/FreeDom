@@ -1,6 +1,6 @@
 # Documentation Coverage
 
-Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data members are excluded from the ratio.
+Overall: **40.2%** (1507 of 3747 public modules, types, and callables). Data members are excluded from the ratio.
 
 [Back to index](index.md)
 
@@ -9,11 +9,11 @@ Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data mem
 | Kind | Documented | Total | Coverage |
 |---|---|---|---|
 | enum | 80 | 160 | 50.0% |
-| function | 849 | 1931 | 44.0% |
-| macro | 317 | 997 | 31.8% |
+| function | 864 | 1947 | 44.4% |
+| macro | 319 | 1004 | 31.8% |
 | method | 0 | 24 | 0.0% |
 | module | 30 | 217 | 13.8% |
-| struct | 110 | 254 | 43.3% |
+| struct | 114 | 258 | 44.2% |
 | type_alias | 100 | 137 | 73.0% |
 
 ## By module (lowest first)
@@ -34,7 +34,7 @@ Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data mem
 | [`src/webcaps.c`](modules/src.webcaps.c.md) | 0 | 5 | 0.0% |
 | [`src/webfont.c`](modules/src.webfont.c.md) | 0 | 7 | 0.0% |
 | [`tools/gen_psl.c`](modules/tools.gen_psl.c.md) | 0 | 4 | 0.0% |
-| [`src/local_store.c`](modules/src.local_store.c.md) | 5 | 334 | 1.5% |
+| [`src/local_store.c`](modules/src.local_store.c.md) | 5 | 338 | 1.5% |
 | [`src/pq_seal.c`](modules/src.pq_seal.c.md) | 1 | 10 | 10.0% |
 | [`src/tls_impersonate.c`](modules/src.tls_impersonate.c.md) | 1 | 10 | 10.0% |
 | [`include/download.h`](modules/include.download.h.md) | 1 | 9 | 11.1% |
@@ -118,32 +118,30 @@ Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data mem
 | [`src/hostedit.c`](modules/src.hostedit.c.md) | 2 | 5 | 40.0% |
 | [`src/js_embed.c`](modules/src.js_embed.c.md) | 2 | 5 | 40.0% |
 | [`tools.snapshot`](modules/tools.snapshot.py.md) | 2 | 5 | 40.0% |
-| [`src/tab.c`](modules/src.tab.c.md) | 37 | 91 | 40.7% |
 | [`src/hostblock.c`](modules/src.hostblock.c.md) | 5 | 12 | 41.7% |
 | [`include/css_color.h`](modules/include.css_color.h.md) | 3 | 7 | 42.9% |
-| [`include/css_index.h`](modules/include.css_index.h.md) | 3 | 7 | 42.9% |
 | [`include/js_policy.h`](modules/include.js_policy.h.md) | 3 | 7 | 42.9% |
 | [`include/shm_slots.h`](modules/include.shm_slots.h.md) | 3 | 7 | 42.9% |
 | [`src/prefetch.c`](modules/src.prefetch.c.md) | 6 | 14 | 42.9% |
 | [`src/sha2.c`](modules/src.sha2.c.md) | 3 | 7 | 42.9% |
+| [`src/tab.c`](modules/src.tab.c.md) | 42 | 97 | 43.3% |
 | [`src/css_chain.c`](modules/src.css_chain.c.md) | 7 | 16 | 43.8% |
 | [`src/page_view.c`](modules/src.page_view.c.md) | 61 | 139 | 43.9% |
 | [`tools/pngdiff.c`](modules/tools.pngdiff.c.md) | 4 | 9 | 44.4% |
 | [`src/css_box.c`](modules/src.css_box.c.md) | 15 | 33 | 45.5% |
 | [`src/import_map.c`](modules/src.import_map.c.md) | 5 | 11 | 45.5% |
 | [`src/subreq_batch.c`](modules/src.subreq_batch.c.md) | 5 | 11 | 45.5% |
-| [`src/text_shape.c`](modules/src.text_shape.c.md) | 16 | 35 | 45.7% |
 | [`include/identity.h`](modules/include.identity.h.md) | 11 | 24 | 45.8% |
 | [`include/image_decode.h`](modules/include.image_decode.h.md) | 6 | 13 | 46.2% |
 | [`include/subreq_batch.h`](modules/include.subreq_batch.h.md) | 6 | 13 | 46.2% |
 | [`src/textfield.c`](modules/src.textfield.c.md) | 6 | 13 | 46.2% |
-| [`include/tab.h`](modules/include.tab.h.md) | 23 | 49 | 46.9% |
 | [`include/browser.h`](modules/include.browser.h.md) | 9 | 19 | 47.4% |
 | [`src/html_parse.c`](modules/src.html_parse.c.md) | 9 | 19 | 47.4% |
 | [`include/render_doc.h`](modules/include.render_doc.h.md) | 13 | 27 | 48.1% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) | 5 | 10 | 50.0% |
 | [`include/block_flow.h`](modules/include.block_flow.h.md) | 2 | 4 | 50.0% |
 | [`include/cached_fetch.h`](modules/include.cached_fetch.h.md) | 2 | 4 | 50.0% |
+| [`include/css_index.h`](modules/include.css_index.h.md) | 4 | 8 | 50.0% |
 | [`include/css_mask.h`](modules/include.css_mask.h.md) | 5 | 10 | 50.0% |
 | [`include/css_mq.h`](modules/include.css_mq.h.md) | 3 | 6 | 50.0% |
 | [`include/hostblock.h`](modules/include.hostblock.h.md) | 5 | 10 | 50.0% |
@@ -164,6 +162,7 @@ Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data mem
 | [`src/render_doc.c`](modules/src.render_doc.c.md) | 9 | 18 | 50.0% |
 | [`src/render_policy.c`](modules/src.render_policy.c.md) | 3 | 6 | 50.0% |
 | [`src/text_case.c`](modules/src.text_case.c.md) | 3 | 6 | 50.0% |
+| [`src/text_shape.c`](modules/src.text_shape.c.md) | 20 | 40 | 50.0% |
 | [`src/ui_layout.c`](modules/src.ui_layout.c.md) | 2 | 4 | 50.0% |
 | [`src/web_storage.c`](modules/src.web_storage.c.md) | 6 | 12 | 50.0% |
 | [`tools.ffq`](modules/tools.ffq.py.md) | 1 | 2 | 50.0% |
@@ -172,6 +171,7 @@ Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data mem
 | [`tools.guitime`](modules/tools.guitime.py.md) | 2 | 4 | 50.0% |
 | [`tools.prune`](modules/tools.prune.py.md) | 1 | 2 | 50.0% |
 | [`tools.snapshot_age`](modules/tools.snapshot_age.py.md) | 1 | 2 | 50.0% |
+| [`include/tab.h`](modules/include.tab.h.md) | 27 | 53 | 50.9% |
 | [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) | 25 | 48 | 52.1% |
 | [`include/perf_trace.h`](modules/include.perf_trace.h.md) | 9 | 17 | 52.9% |
 | [`include/textfield.h`](modules/include.textfield.h.md) | 8 | 15 | 53.3% |
@@ -185,7 +185,6 @@ Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data mem
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | 5 | 9 | 55.6% |
 | [`src/webfont_load.c`](modules/src.webfont_load.c.md) | 5 | 9 | 55.6% |
 | [`src/host_conf.c`](modules/src.host_conf.c.md) | 4 | 7 | 57.1% |
-| [`include/css_select.h`](modules/include.css_select.h.md) | 22 | 37 | 59.5% |
 | [`include/page_view.h`](modules/include.page_view.h.md) | 55 | 92 | 59.8% |
 | [`include/anti_fp.h`](modules/include.anti_fp.h.md) | 21 | 35 | 60.0% |
 | [`include/dom.h`](modules/include.dom.h.md) | 18 | 30 | 60.0% |
@@ -194,11 +193,12 @@ Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data mem
 | [`include/zoom.h`](modules/include.zoom.h.md) | 6 | 10 | 60.0% |
 | [`src/compositor.c`](modules/src.compositor.c.md) | 3 | 5 | 60.0% |
 | [`include/fb_cmdline.h`](modules/include.fb_cmdline.h.md) | 11 | 18 | 61.1% |
+| [`include/css_select.h`](modules/include.css_select.h.md) | 24 | 39 | 61.5% |
 | [`include/web_storage.h`](modules/include.web_storage.h.md) | 8 | 13 | 61.5% |
 | [`include/hls.h`](modules/include.hls.h.md) | 5 | 8 | 62.5% |
 | [`src/request_policy.c`](modules/src.request_policy.c.md) | 5 | 8 | 62.5% |
 | [`include/box_style.h`](modules/include.box_style.h.md) | 20 | 31 | 64.5% |
-| [`src/css_select.c`](modules/src.css_select.c.md) | 11 | 17 | 64.7% |
+| [`src/css_select.c`](modules/src.css_select.c.md) | 13 | 20 | 65.0% |
 | [`src/fb_cmdline.c`](modules/src.fb_cmdline.c.md) | 8 | 12 | 66.7% |
 | [`include/css_atrule.h`](modules/include.css_atrule.h.md) | 7 | 10 | 70.0% |
 | [`src/frame_host.c`](modules/src.frame_host.c.md) | 7 | 10 | 70.0% |
@@ -218,7 +218,6 @@ Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data mem
 | [`include/fb_panes.h`](modules/include.fb_panes.h.md) | 9 | 12 | 75.0% |
 | [`include/media_decoder.h`](modules/include.media_decoder.h.md) | 9 | 12 | 75.0% |
 | [`include/text_case.h`](modules/include.text_case.h.md) | 6 | 8 | 75.0% |
-| [`src/css_index.c`](modules/src.css_index.c.md) | 3 | 4 | 75.0% |
 | [`src/dom_debug.c`](modules/src.dom_debug.c.md) | 3 | 4 | 75.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) | 9 | 12 | 75.0% |
 | [`src/zoom.c`](modules/src.zoom.c.md) | 6 | 8 | 75.0% |
@@ -237,12 +236,13 @@ Overall: **39.9%** (1486 of 3720 public modules, types, and callables). Data mem
 | [`gui/svg_paint.c`](modules/gui.svg_paint.c.md) | 2 | 2 | 100.0% |
 | [`install.sh`](modules/install.sh.md) | 1 | 1 | 100.0% |
 | [`run_freedom.sh`](modules/run_freedom.sh.md) | 1 | 1 | 100.0% |
+| [`src/css_index.c`](modules/src.css_index.c.md) | 6 | 6 | 100.0% |
 
 ## Warnings
 
 DOC001 undocumented public item, DOC002 parameter not documented, DOC003 documented parameter missing from the signature (stale doc), DOC004 return value not documented, DOC005 raised exception not documented.
 
-DOC001: 2234, DOC004: 1
+DOC001: 2240, DOC004: 1
 
 - DOC004 `app.py:47` return value of run_freedom_headless is not documented
 - DOC001 `docker-entrypoint.sh:1` module docker-entrypoint.sh is not documented
@@ -411,10 +411,10 @@ DOC001: 2234, DOC004: 1
 - DOC001 `gui/browser_ui.c:17767` function down is not documented
 - DOC001 `gui/browser_ui.c:18355` function loop is not documented
 - DOC001 `gui/browser_ui.c:19167` function ui_run_browser is not documented
-- DOC001 `gui/browser_ui.c:19186` function saving is not documented
-- DOC001 `gui/browser_ui.c:19279` function redraws is not documented
-- DOC001 `gui/browser_ui.c:19292` function moves is not documented
-- DOC001 `gui/browser_ui.c:19628` function cost is not documented
+- DOC001 `gui/browser_ui.c:19189` function saving is not documented
+- DOC001 `gui/browser_ui.c:19282` function redraws is not documented
+- DOC001 `gui/browser_ui.c:19295` function moves is not documented
+- DOC001 `gui/browser_ui.c:19634` function cost is not documented
 - DOC001 `gui/browser_ui_internal.h:1` module gui/browser_ui_internal.h is not documented
 - DOC001 `gui/browser_ui_internal.h:31` macro UI_TEXT_MARGIN is not documented
 - DOC001 `gui/browser_ui_internal.h:41` struct ui_rgb is not documented
@@ -598,7 +598,7 @@ DOC001: 2234, DOC004: 1
 - DOC001 `include/css_index.h:1` module include/css_index.h is not documented
 - DOC001 `include/css_index.h:18` struct cix_entry is not documented
 - DOC001 `include/css_index.h:23` struct cix_index is not documented
-- DOC001 `include/css_index.h:41` function index is not documented
+- DOC001 `include/css_index.h:44` function index is not documented
 - DOC001 `include/css_length.h:1` module include/css_length.h is not documented
 - DOC001 `include/css_length.h:57` macro CL_FALLBACK_CH_RATIO is not documented
 - DOC001 `include/css_length.h:58` macro CL_FALLBACK_CAP_RATIO is not documented
@@ -622,15 +622,15 @@ DOC001: 2234, DOC004: 1
 - DOC001 `include/css_select.h:85` macro CSS_SUB_MAX_PSEUDOS is not documented
 - DOC001 `include/css_select.h:94` type_alias tag is not documented
 - DOC001 `include/css_select.h:95` struct css_sub_sel is not documented
-- DOC001 `include/css_select.h:178` function csel_anc_reject is not documented
-- DOC001 `include/css_select.h:185` function conservative is not documented
-- DOC001 `include/css_select.h:191` function identifier is not documented
-- DOC001 `include/css_select.h:199` macro CSEL_FOLD_MARK is not documented
-- DOC001 `include/css_select.h:200` macro CSEL_IDENT_SCRATCH is not documented
-- DOC001 `include/css_select.h:203` function csel_emit_utf8 is not documented
-- DOC001 `include/css_select.h:223` function csel_lower_ch is not documented
-- DOC001 `include/css_select.h:227` function csel_ci_eq is not documented
-- DOC001 `include/css_select.h:255` function csel_ident_ch is not documented
+- DOC001 `include/css_select.h:194` function csel_anc_reject is not documented
+- DOC001 `include/css_select.h:201` function conservative is not documented
+- DOC001 `include/css_select.h:207` function identifier is not documented
+- DOC001 `include/css_select.h:215` macro CSEL_FOLD_MARK is not documented
+- DOC001 `include/css_select.h:216` macro CSEL_IDENT_SCRATCH is not documented
+- DOC001 `include/css_select.h:219` function csel_emit_utf8 is not documented
+- DOC001 `include/css_select.h:239` function csel_lower_ch is not documented
+- DOC001 `include/css_select.h:243` function csel_ci_eq is not documented
+- DOC001 `include/css_select.h:271` function csel_ident_ch is not documented
 - DOC001 `include/css_text.h:1` module include/css_text.h is not documented
 - DOC001 `include/css_text.h:10` function ct_interp_fontfamily is not documented
 - DOC001 `include/css_text.h:11` function ct_interp_texttransform is not documented
@@ -744,4 +744,4 @@ DOC001: 2234, DOC004: 1
 - DOC001 `include/frame_clock.h:23` function fc_interval_ms is not documented
 - DOC001 `include/frame_host.h:1` module include/frame_host.h is not documented
 - DOC001 `include/frame_host.h:18` macro FH_MAX_DEPTH is not documented
-- ... 1735 more in `api/warnings.jsonl`
+- ... 1741 more in `api/warnings.jsonl`

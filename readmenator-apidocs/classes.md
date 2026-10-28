@@ -51,6 +51,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`child_state`](modules/src.tab.c.md#child_state) struct in `src/tab.c`
 - [`cix_entry`](modules/include.css_index.h.md#cix_entry) struct in `include/css_index.h`
 - [`cix_index`](modules/include.css_index.h.md#cix_index) struct in `include/css_index.h`
+- [`cix_run`](modules/src.css_index.c.md#cix_run) struct in `src/css_index.c`
 - [`cl_ctx`](modules/include.css_length.h.md#cl_ctx) struct in `include/css_length.h`
 - [`cl_lp`](modules/include.css_length.h.md#cl_lp) struct in `include/css_length.h`
 - [`cl_status`](modules/include.css_length.h.md#cl_status) enum in `include/css_length.h`
@@ -63,6 +64,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`color`](modules/include.css.h.md#color) type_alias in `include/css.h`
 - [`cols`](modules/include.flex_layout.h.md#cols) type_alias in `include/flex_layout.h`
 - [`cols`](modules/src.page_view.c.md#cols) type_alias in `src/page_view.c`
+- [`comb`](modules/include.css_select.h.md#comb) type_alias in `include/css_select.h`
 - [`css_align`](modules/include.css.h.md#css_align) enum in `include/css.h`
 - [`css_align_kw`](modules/include.css.h.md#css_align_kw) enum in `include/css.h`
 - [`css_appearance`](modules/include.css.h.md#css_appearance) enum in `include/css.h`
@@ -345,7 +347,6 @@ Project types nested under the project types they derive from. External bases ar
 - [`out_fd`](modules/src.media_decoder.c.md#out_fd) type_alias in `src/media_decoder.c`
 - [`parent_id`](modules/include.page_view.h.md#parent_id) type_alias in `include/page_view.h`
 - [`parent_id`](modules/include.page_view.h.md#parent_id) type_alias in `include/page_view.h`
-- [`css_sel.parts`](modules/include.css_select.h.md#css_sel-parts) type_alias in `include/css_select.h`
 - [`pct`](modules/include.interp.h.md#pct) type_alias in `include/interp.h`
 - [`pd_profile`](modules/tools.pngdiff.c.md#pd_profile) struct in `tools/pngdiff.c`
 - [`pd_reader`](modules/tools.pngdiff.c.md#pd_reader) struct in `tools/pngdiff.c`
@@ -481,6 +482,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`tab_hist_op`](modules/include.tab.h.md#tab_hist_op) struct in `include/tab.h`
 - [`tab_image`](modules/include.tab.h.md#tab_image) struct in `include/tab.h`
 - [`tab_page`](modules/include.tab.h.md#tab_page) struct in `include/tab.h`
+- [`tab_spawned`](modules/src.tab.c.md#tab_spawned) struct in `src/tab.c`
 - [`tab_status`](modules/include.tab.h.md#tab_status) enum in `include/tab.h`
 - [`tab_ws_event_kind`](modules/include.tab.h.md#tab_ws_event_kind) enum in `include/tab.h`
 - [`tab_ws_kind`](modules/include.tab.h.md#tab_ws_kind) enum in `include/tab.h`
@@ -503,9 +505,11 @@ Project types nested under the project types they derive from. External bases ar
 - [`tsh_cover_ctx`](modules/src.text_shape.c.md#tsh_cover_ctx) struct in `src/text_shape.c`
 - [`tsh_entry`](modules/src.text_shape.c.md#tsh_entry) struct in `src/text_shape.c`
 - [`tsh_fb`](modules/src.text_shape.c.md#tsh_fb) struct in `src/text_shape.c`
+- [`tsh_fb_cp`](modules/src.text_shape.c.md#tsh_fb_cp) struct in `src/text_shape.c`
 - [`tsh_font`](modules/include.text_shape.h.md#tsh_font) struct in `include/text_shape.h`
 - [`tsh_lfam`](modules/src.text_shape.c.md#tsh_lfam) struct in `src/text_shape.c`
 - [`tsh_llist`](modules/src.text_shape.c.md#tsh_llist) struct in `src/text_shape.c`
+- [`tsh_measure_slot`](modules/src.text_shape.c.md#tsh_measure_slot) struct in `src/text_shape.c`
 - [`tsh_run`](modules/include.text_shape.h.md#tsh_run) struct in `include/text_shape.h`
 - [`tsh_status`](modules/include.text_shape.h.md#tsh_status) enum in `include/text_shape.h`
 - [`tsh_web`](modules/src.text_shape.c.md#tsh_web) struct in `src/text_shape.c`

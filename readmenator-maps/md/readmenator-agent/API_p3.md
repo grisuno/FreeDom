@@ -172,10 +172,10 @@ static void do_submit_post(browser_w...`
 - `gui_timing_step` (function) `gui/browser_ui.c:19141` `static int gui_timing_step(browser_window *w, uint64_t now)` -- Called every loop turn while FREEDOM_GUI_TIMING is set.
 - `startup_abort_release` (function) `gui/browser_ui.c:19158` `static void startup_abort_release(browser_window *w)` -- Release what ui_run_browser opened before the window exists (profile, sealed cache, prefs) so a * failed start -- no...
 - `ui_run_browser` (function) `gui/browser_ui.c:19167` `ui_status ui_run_browser(const char *start_url)`
-- `saving` (function) `gui/browser_ui.c:19186` `* disables saving (never clobber);`
-- `redraws` (function) `gui/browser_ui.c:19279` `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
-- `moves` (function) `gui/browser_ui.c:19292` `* client that stops reading its socket while the pointer moves (spec/wl_guard.md). */ if...`
-- `cost` (function) `gui/browser_ui.c:19628` `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
+- `saving` (function) `gui/browser_ui.c:19189` `* disables saving (never clobber);`
+- `redraws` (function) `gui/browser_ui.c:19282` `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
+- `moves` (function) `gui/browser_ui.c:19295` `* client that stops reading its socket while the pointer moves (spec/wl_guard.md). */ if...`
+- `cost` (function) `gui/browser_ui.c:19634` `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
 
 ## gui/browser_ui_internal.h
@@ -435,8 +435,9 @@ Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_gradient.c`, `src/css_mas
 Depends on: `include/css_select.h`
 Imported by: `src/css.c`, `src/css_index.c`, `tests/test_css_index.c`
 - `cix_build` (function) `include/css_index.h:34` `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` -- Builds the index over sels[0,n) into *idx, overwriting it (a built index must be * cix_free'd first).
-- `cix_free` (function) `include/css_index.h:37` `void cix_free(cix_index *idx);` -- Builds the index over sels[0,n) into *idx, overwriting it (a built index must be * cix_free'd first).
-- `index` (function) `include/css_index.h:41` `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...`
+- `cix_build_ptrs` (function) `include/css_index.h:37` `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);` -- Builds the index over sels[0,n) into *idx, overwriting it (a built index must be * cix_free'd first).
+- `cix_free` (function) `include/css_index.h:40` `void cix_free(cix_index *idx);` -- Builds the index over sels[0,n) into *idx, overwriting it (a built index must be * cix_free'd first).
+- `index` (function) `include/css_index.h:44` `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...`
 
 ## include/css_length.h
 Imported by: `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_length.c`, `src/css_mq.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_length.c`
@@ -463,24 +464,26 @@ Imported by: `src/css.c`, `src/css_mq.c`, `tests/test_css_mq.c`
 ## include/css_select.h
 Depends on: `include/css.h`
 Imported by: `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `tests/test_css.c`
-- `csel_parse` (function) `include/css_select.h:160` `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` -- Parses the complex selector s[a,b) into *sel (spec computed; order/rule left to * the caller).
-- `csel_matches` (function) `include/css_select.h:169` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` -- True if *sel matches element *el against its ancestor chain. target_id (optional) is the URL fragment for :target...
-- `csel_element_feature_bits` (function) `include/css_select.h:177` `unsigned long long csel_element_feature_bits(const css_element *e);` -- Ancestor filter. csel_element_feature_bits: the bits of one element's tag, id and classes (two bits per feature...
-- `csel_anc_reject` (function) `include/css_select.h:178` `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
-- `conservative` (function) `include/css_select.h:185` `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
-- `identifier` (function) `include/css_select.h:191` `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
-- `csel_emit_utf8` (function) `include/css_select.h:203` `size_t csel_emit_utf8(unsigned int cp, char *out);`
-- `csel_unescape` (function) `include/css_select.h:205` `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` -- A selector identifier (tag, .class, #id) is read with CSS escapes decoded (`.md\:flex` is the class "md:flex") and...
-- `csel_escape_len` (function) `include/css_select.h:207` `size_t csel_escape_len(const char *s, size_t i, size_t b);` -- does not fit is FOLDED: its first CSEL_FOLD_PREFIX bytes, CSEL_FOLD_MARK (a byte no identifier contains) and 16 hex...
-- `csel_ident_fold` (function) `include/css_select.h:209` `void csel_ident_fold(const char *src, size_t len, char *dst);` -- csel_ident_eq folds the element's token the same way, so a CSS Modules name such as...
-- `csel_ident_eq` (function) `include/css_select.h:211` `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` -- instead of being truncated and never matching. #define CSEL_FOLD_PREFIX   40u #define CSEL_FOLD_MARK     '\x1f'...
-- `csel_read_ident` (function) `include/css_select.h:214` `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` -- Reads an identifier at s[*ip] (escapes decoded, non-ASCII kept, lowercased when * lower != 0) into dst (CSS_TOK_MAX).
-- `csel_decl_end` (function) `include/css_select.h:219` `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` -- Index of the ';' ending the declaration that starts at s[i] (or of a '}' when stop_brace), or b: separators inside...
-- `csel_lower_ch` (function) `include/css_select.h:223` `static inline char csel_lower_ch(char c)`
-- `csel_ci_eq` (function) `include/css_select.h:227` `static inline int csel_ci_eq(const char *a, const char *b)`
-- `csel_span_eq` (function) `include/css_select.h:236` `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` -- static inline char csel_lower_ch(char c) { return (c >= 'A' && c <= 'Z') ?
-- `csel_substr` (function) `include/css_select.h:247` `static inline int csel_substr(const char *hay, const char *needle, int ci)` -- Substring test (used both to drop any value carrying url() — always ci — and by * the attribute `*=` operator).
-- `csel_ident_ch` (function) `include/css_select.h:255` `static inline int csel_ident_ch(char c)`
+- `csel_compact_size` (function) `include/css_select.h:167` `size_t csel_compact_size(int nparts);` -- Bytes a selector with `nparts` compounds needs: the header plus the compounds it uses.
+- `csel_compact_dup` (function) `include/css_select.h:172` `css_sel *csel_compact_dup(const css_sel *sel);` -- Heap copy of *sel holding only the compounds in use (free()d by the caller); NULL on OOM or a selector with nparts...
+- `csel_parse` (function) `include/css_select.h:176` `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` -- Parses the complex selector s[a,b) into *sel (spec computed; order/rule left to * the caller).
+- `csel_matches` (function) `include/css_select.h:185` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` -- True if *sel matches element *el against its ancestor chain. target_id (optional) is the URL fragment for :target...
+- `csel_element_feature_bits` (function) `include/css_select.h:193` `unsigned long long csel_element_feature_bits(const css_element *e);` -- Ancestor filter. csel_element_feature_bits: the bits of one element's tag, id and classes (two bits per feature...
+- `csel_anc_reject` (function) `include/css_select.h:194` `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
+- `conservative` (function) `include/css_select.h:201` `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
+- `identifier` (function) `include/css_select.h:207` `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
+- `csel_emit_utf8` (function) `include/css_select.h:219` `size_t csel_emit_utf8(unsigned int cp, char *out);`
+- `csel_unescape` (function) `include/css_select.h:221` `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` -- A selector identifier (tag, .class, #id) is read with CSS escapes decoded (`.md\:flex` is the class "md:flex") and...
+- `csel_escape_len` (function) `include/css_select.h:223` `size_t csel_escape_len(const char *s, size_t i, size_t b);` -- does not fit is FOLDED: its first CSEL_FOLD_PREFIX bytes, CSEL_FOLD_MARK (a byte no identifier contains) and 16 hex...
+- `csel_ident_fold` (function) `include/css_select.h:225` `void csel_ident_fold(const char *src, size_t len, char *dst);` -- csel_ident_eq folds the element's token the same way, so a CSS Modules name such as...
+- `csel_ident_eq` (function) `include/css_select.h:227` `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` -- instead of being truncated and never matching. #define CSEL_FOLD_PREFIX   40u #define CSEL_FOLD_MARK     '\x1f'...
+- `csel_read_ident` (function) `include/css_select.h:230` `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` -- Reads an identifier at s[*ip] (escapes decoded, non-ASCII kept, lowercased when * lower != 0) into dst (CSS_TOK_MAX).
+- `csel_decl_end` (function) `include/css_select.h:235` `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` -- Index of the ';' ending the declaration that starts at s[i] (or of a '}' when stop_brace), or b: separators inside...
+- `csel_lower_ch` (function) `include/css_select.h:239` `static inline char csel_lower_ch(char c)`
+- `csel_ci_eq` (function) `include/css_select.h:243` `static inline int csel_ci_eq(const char *a, const char *b)`
+- `csel_span_eq` (function) `include/css_select.h:252` `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` -- static inline char csel_lower_ch(char c) { return (c >= 'A' && c <= 'Z') ?
+- `csel_substr` (function) `include/css_select.h:263` `static inline int csel_substr(const char *hay, const char *needle, int ci)` -- Substring test (used both to drop any value carrying url() — always ci — and by * the attribute `*=` operator).
+- `csel_ident_ch` (function) `include/css_select.h:271` `static inline int csel_ident_ch(char c)`
 
 
 Next: [API_p4.md](API_p4.md)

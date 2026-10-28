@@ -73,7 +73,6 @@ flowchart LR
     n_src_page_view_c__pv_append_image(["pv_append_image"])
     n_src_page_view_c__pv_append_input(["pv_append_input"])
     n_src_page_view_c__pv_append_svg(["pv_append_svg"])
-    n_src_page_view_c__pv_append_video(["pv_append_video"])
     n_src_page_view_c__pv_free(["pv_free"])
     n_src_page_view_c__pv_new(["pv_new"])
     n_src_page_view_c__pv_placeholder_color(["pv_placeholder_color"])
@@ -90,6 +89,7 @@ flowchart LR
     n_src_page_view_c__pv_set_flex_mauto(["pv_set_flex_mauto"])
     n_src_page_view_c__pv_set_float(["pv_set_float"])
     n_src_page_view_c__pv_set_float_w(["pv_set_float_w"])
+    n_src_page_view_c__pv_set_grid(["pv_set_grid"])
     n_src_page_view_c__pv_build --> n_src_page_view_c__pv_build_full
     n_src_page_view_c__pv_build_ex --> n_src_page_view_c__pv_build_full
     n_src_page_view_c__pv_build_full --> n_src_page_view_c__pv_build_styled
@@ -97,7 +97,6 @@ flowchart LR
     n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_append_image
     n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_append_input
     n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_append_svg
-    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_append_video
     n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_free
     n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_new
     n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_placeholder_color
@@ -114,6 +113,7 @@ flowchart LR
     n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_flex_mauto
     n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_float
     n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_float_w
+    n_src_page_view_c__pv_build_styled --> n_src_page_view_c__pv_set_grid
 ```
 
 ## Structs
@@ -309,7 +309,7 @@ typedef struct pv_style_cache
 
 ### `pv_flow_reg`
 
-`struct` | [src/page_view.c:3341](../../src/page_view.c#L3341)
+`struct` | [src/page_view.c:3357](../../src/page_view.c#L3357)
 
 ```c
 struct pv_flow_reg;
@@ -323,7 +323,7 @@ Nonzero when cell (a td/th) is a WALKED cell of a FLOW table (defined after the 
 
 ### `sz_fill`
 
-`struct` | [src/page_view.c:4147](../../src/page_view.c#L4147)
+`struct` | [src/page_view.c:4163](../../src/page_view.c#L4163)
 
 ```c
 typedef struct sz_fill
@@ -335,7 +335,7 @@ typedef struct sz_fill
 
 ### `pv_root_els`
 
-`struct` | [src/page_view.c:4418](../../src/page_view.c#L4418)
+`struct` | [src/page_view.c:4434](../../src/page_view.c#L4434)
 
 ```c
 typedef struct pv_root_els
@@ -349,7 +349,7 @@ The document's <html> and <body> elements (either may be NULL): the roots a cust
 
 ### `form_rec`
 
-`struct` | [src/page_view.c:4484](../../src/page_view.c#L4484)
+`struct` | [src/page_view.c:4500](../../src/page_view.c#L4500)
 
 ```c
 typedef struct form_rec
@@ -363,7 +363,7 @@ One <form> seen in document order: its grouping id is its index. action is an ow
 
 ### `form_table`
 
-`struct` | [src/page_view.c:4490](../../src/page_view.c#L4490)
+`struct` | [src/page_view.c:4506](../../src/page_view.c#L4506)
 
 ```c
 typedef struct form_table
@@ -375,7 +375,7 @@ typedef struct form_table
 
 ### `pv_flow_reg`
 
-`struct` | [src/page_view.c:4846](../../src/page_view.c#L4846)
+`struct` | [src/page_view.c:4862](../../src/page_view.c#L4862)
 
 ```c
 typedef struct pv_flow_reg
@@ -395,7 +395,7 @@ needs the cascade, and the memo cache is what keeps that from being quadratic.
 
 ### `pv_computed`
 
-`struct` | [src/page_view.c:7067](../../src/page_view.c#L7067)
+`struct` | [src/page_view.c:7083](../../src/page_view.c#L7083)
 
 ```c
 struct pv_computed
@@ -600,7 +600,7 @@ pv_status pv_append_video(pv_view *v, int heading, int block_break, const char *
 
 **Returns:** `pv_status`
 
-*Called by:* [`pv_build_styled`](#pv_build_styled), [`run`](src.tab.c.md#run)
+*Called by:* [`run`](src.tab.c.md#run)
 
 ---
 
@@ -1986,7 +1986,7 @@ NULL-safe.
 
 ### `none`
 
-`function` | [src/page_view.c:2727](../../src/page_view.c#L2727)
+`function` | [src/page_view.c:2731](../../src/page_view.c#L2731)
 
 ```c
 * inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot know it from its style alone. */ if (id >= 0 && r->count > before && cs->background ==
@@ -2006,7 +2006,7 @@ NULL-safe.
 
 ### `size`
 
-`function` | [src/page_view.c:2798](../../src/page_view.c#L2798)
+`function` | [src/page_view.c:2802](../../src/page_view.c#L2802)
 
 ```c
 * viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */ static void app...
@@ -2026,7 +2026,7 @@ NULL-safe.
 
 ### `builder`
 
-`function` | [src/page_view.c:2825](../../src/page_view.c#L2825)
+`function` | [src/page_view.c:2829](../../src/page_view.c#L2829)
 
 ```c
 * unresolvable in this flat builder (no containing width in hand). box-sizing:border-box * (the ...
@@ -2046,7 +2046,7 @@ NULL-safe.
 
 ### `outermost`
 
-`function` | [src/page_view.c:3610](../../src/page_view.c#L3610)
+`function` | [src/page_view.c:3626](../../src/page_view.c#L3626)
 
 ```c
 * nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);
@@ -2067,7 +2067,7 @@ NULL-safe.
 
 ### `opens`
 
-`function` | [src/page_view.c:3667](../../src/page_view.c#L3667)
+`function` | [src/page_view.c:3683](../../src/page_view.c#L3683)
 
 ```c
 * painter applies it when the box opens (band/shared context) — seeding * it onto ru...
@@ -2087,7 +2087,7 @@ NULL-safe.
 
 ### `css_inline_boxdeco`
 
-`function` | [src/page_view.c:3707](../../src/page_view.c#L3707)
+`function` | [src/page_view.c:3723](../../src/page_view.c#L3723)
 
 ```c
 css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
@@ -2099,7 +2099,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `margins`
 
-`function` | [src/page_view.c:3747](../../src/page_view.c#L3747)
+`function` | [src/page_view.c:3763](../../src/page_view.c#L3763)
 
 ```c
 * margins (boxdef_from_style) and the painter applies them when * it ope...
@@ -2113,7 +2113,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `container`
 
-`function` | [src/page_view.c:3870](../../src/page_view.c#L3870)
+`function` | [src/page_view.c:3886](../../src/page_view.c#L3886)
 
 ```c
 * membership in this container (and none in any container further out, * since it is out of flow with respect to those too), while the * container itself is still registered by the in-flow siblings that DO * belong to it. Without this an absolutely positioned sibling ate a * full item share and starved the growing items beside it. */ if (reg != NULL && (is_real || is_anon) && !oof_below)
@@ -2136,7 +2136,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `walk`
 
-`function` | [src/page_view.c:3968](../../src/page_view.c#L3968)
+`function` | [src/page_view.c:3984](../../src/page_view.c#L3984)
 
 ```c
 * far on this walk (they are all inside this element). */ /* The innermo...
@@ -2158,7 +2158,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `float`
 
-`function` | [src/page_view.c:4093](../../src/page_view.c#L4093)
+`function` | [src/page_view.c:4109](../../src/page_view.c#L4109)
 
 ```c
 * genuinely nested float (oid != id) takes the deferred-column path. */ if (cont->float_oid =...
@@ -2178,7 +2178,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `present`
 
-`function` | [src/page_view.c:4236](../../src/page_view.c#L4236)
+`function` | [src/page_view.c:4252](../../src/page_view.c#L4252)
 
 ```c
 * when no width descriptors are present (density-only or bare URLs). */ static void srcset_best_u...
@@ -2198,7 +2198,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `dimensions`
 
-`function` | [src/page_view.c:4377](../../src/page_view.c#L4377)
+`function` | [src/page_view.c:4393](../../src/page_view.c#L4393)
 
 ```c
 * viewport dimensions (data: inline detection, <picture> <source> scanning). */ static void srcse...
@@ -2221,7 +2221,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `attributes`
 
-`function` | [src/page_view.c:4436](../../src/page_view.c#L4436)
+`function` | [src/page_view.c:4452](../../src/page_view.c#L4452)
 
 ```c
 * carries those attributes (spec/css.md, "Root matcher"). */ static int root_els_match(void *ctx,...
@@ -2244,7 +2244,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `string`
 
-`function` | [src/page_view.c:4447](../../src/page_view.c#L4447)
+`function` | [src/page_view.c:4463](../../src/page_view.c#L4463)
 
 ```c
 * Returns a heap string (caller frees) or NULL when neither carries a class — * NULL simply mean...
@@ -2264,7 +2264,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `links`
 
-`function` | [src/page_view.c:4997](../../src/page_view.c#L4997)
+`function` | [src/page_view.c:5013](../../src/page_view.c#L5013)
 
 ```c
 * its links (the Hacker News case: every story link lives inside a <td>), so the * caller flows ...
@@ -2284,7 +2284,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `table`
 
-`function` | [src/page_view.c:5039](../../src/page_view.c#L5039)
+`function` | [src/page_view.c:5055](../../src/page_view.c#L5055)
 
 ```c
 * FLOW table (multi-link: walked so its links survive) do NOT suppress their * content -- their ...
@@ -2304,7 +2304,7 @@ css_inline_boxdeco(cs) && !is_layout_item(p, sheet, style_cache))
 
 ### `pv_build`
 
-`function` | [src/page_view.c:5193](../../src/page_view.c#L5193)
+`function` | [src/page_view.c:5209](../../src/page_view.c#L5209)
 
 ```c
 pv_status pv_build(const hp_document *doc, pv_view **out)
@@ -2327,7 +2327,7 @@ pv_status pv_build(const hp_document *doc, pv_view **out)
 
 ### `pv_build_ex`
 
-`function` | [src/page_view.c:5197](../../src/page_view.c#L5197)
+`function` | [src/page_view.c:5213](../../src/page_view.c#L5213)
 
 ```c
 pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)
@@ -2351,7 +2351,7 @@ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)
 
 ### `pv_build_full`
 
-`function` | [src/page_view.c:5201](../../src/page_view.c#L5201)
+`function` | [src/page_view.c:5217](../../src/page_view.c#L5217)
 
 ```c
 pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader, int prefers_dark, pv_view **out)
@@ -2379,7 +2379,7 @@ pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader, int 
 
 ### `pv_root_insets`
 
-`function` | [src/page_view.c:5296](../../src/page_view.c#L5296)
+`function` | [src/page_view.c:5312](../../src/page_view.c#L5312)
 
 ```c
 void pv_root_insets(const css_style *body, int out[4])
@@ -2400,7 +2400,7 @@ void pv_root_insets(const css_style *body, int out[4])
 
 ### `pv_build_styled`
 
-`function` | [src/page_view.c:5335](../../src/page_view.c#L5335)
+`function` | [src/page_view.c:5351](../../src/page_view.c#L5351)
 
 ```c
 pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, int prefers_dark, const char *extern_css, size_t extern_len, int viewport_w, pv_view **out)
@@ -2421,7 +2421,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 **Returns:** `pv_status`
 
-*Calls:* [`css_style.element`](include.css.h.md#css_style-element), [`hp_document_root`](include.html_parse.h.md#hp_document_root), [`mem_contains_ci`](include.util.h.md#mem_contains_ci), [`css_parse_scoped`](src.css.c.md#css_parse_scoped), [`cch_element_style`](src.css_chain.c.md#cch_element_style), [`cch_pseudo_style`](src.css_chain.c.md#cch_pseudo_style), [`pv_append`](#pv_append), [`pv_append_image`](#pv_append_image), [`pv_append_input`](#pv_append_input), [`pv_append_svg`](#pv_append_svg), [`pv_append_video`](#pv_append_video), [`pv_free`](#pv_free) and 30 more
+*Calls:* [`css_style.element`](include.css.h.md#css_style-element), [`hp_document_root`](include.html_parse.h.md#hp_document_root), [`mem_contains_ci`](include.util.h.md#mem_contains_ci), [`css_parse_scoped`](src.css.c.md#css_parse_scoped), [`cch_element_style`](src.css_chain.c.md#cch_element_style), [`cch_pseudo_style`](src.css_chain.c.md#cch_pseudo_style), [`pv_append`](#pv_append), [`pv_append_image`](#pv_append_image), [`pv_append_input`](#pv_append_input), [`pv_append_svg`](#pv_append_svg), [`pv_free`](#pv_free), [`pv_new`](#pv_new) and 29 more
 
 *Called by:* [`pv_build_full`](#pv_build_full)
 
@@ -2431,7 +2431,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `inside`
 
-`function` | [src/page_view.c:5445](../../src/page_view.c#L5445)
+`function` | [src/page_view.c:5461](../../src/page_view.c#L5461)
 
 ```c
 * page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */ pv_root_insets(body_cs, v->root_m);
@@ -2451,7 +2451,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `control`
 
-`function` | [src/page_view.c:5754](../../src/page_view.c#L5754)
+`function` | [src/page_view.c:5770](../../src/page_view.c#L5770)
 
 ```c
 * caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);
@@ -2473,7 +2473,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `px`
 
-`function` | [src/page_view.c:5932](../../src/page_view.c#L5932)
+`function` | [src/page_view.c:5948](../../src/page_view.c#L5948)
 
 ```c
 * the viewBox extent for intrinsic px (slashdot social-icon balloon). */ if (iw <...
@@ -2493,7 +2493,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `band`
 
-`function` | [src/page_view.c:5998](../../src/page_view.c#L5998)
+`function` | [src/page_view.c:6014](../../src/page_view.c#L6014)
 
 ```c
 * run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float of text plus loose icons). */ pv_set_float(v, svg_cont.float_side, svg_cont.float_id
@@ -2513,7 +2513,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `height`
 
-`function` | [src/page_view.c:6025](../../src/page_view.c#L6025)
+`function` | [src/page_view.c:6041](../../src/page_view.c#L6041)
 
 ```c
 * times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);
@@ -2533,7 +2533,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `block_id`
 
-`function` | [src/page_view.c:6183](../../src/page_view.c#L6183)
+`function` | [src/page_view.c:6199](../../src/page_view.c#L6199)
 
 ```c
 * box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it falls * into flow as a full-width row. Gated on img_oof, so every * in-flow image keep
@@ -2554,7 +2554,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `URL`
 
-`function` | [src/page_view.c:6324](../../src/page_view.c#L6324)
+`function` | [src/page_view.c:6340](../../src/page_view.c#L6340)
 
 ```c
 * path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);
@@ -2568,7 +2568,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `block`
 
-`function` | [src/page_view.c:6612](../../src/page_view.c#L6612)
+`function` | [src/page_view.c:6628](../../src/page_view.c#L6628)
 
 ```c
 * block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block != prev_block);
@@ -2582,7 +2582,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `flow`
 
-`function` | [src/page_view.c:6790](../../src/page_view.c#L6790)
+`function` | [src/page_view.c:6806](../../src/page_view.c#L6806)
 
 ```c
 * it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through it. Subtree-wide: the run * may sit deep inside an undecorated abspos wrapper, where
@@ -2602,7 +2602,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `engine`
 
-`function` | [src/page_view.c:6896](../../src/page_view.c#L6896)
+`function` | [src/page_view.c:6912](../../src/page_view.c#L6912)
 
 ```c
 * layout engine (contiguous item gather) drops every cell onto its own row and * a 2-col...
@@ -2622,7 +2622,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `line`
 
-`function` | [src/page_view.c:6905](../../src/page_view.c#L6905)
+`function` | [src/page_view.c:6921](../../src/page_view.c#L6921)
 
 ```c
 * to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);
@@ -2642,7 +2642,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader, in
 
 ### `pv_css_drops`
 
-`function` | [src/page_view.c:7038](../../src/page_view.c#L7038)
+`function` | [src/page_view.c:7054](../../src/page_view.c#L7054)
 
 ```c
 pv_status pv_css_drops(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len, int viewport_w, css_drop_log *log)
@@ -2671,7 +2671,7 @@ Nothing here can influence a render; see spec/css_drops.md for why the cause spl
 
 ### `pv_computed_new`
 
-`function` | [src/page_view.c:7072](../../src/page_view.c#L7072)
+`function` | [src/page_view.c:7088](../../src/page_view.c#L7088)
 
 ```c
 pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len, int viewport_w)
@@ -2695,7 +2695,7 @@ pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const cha
 
 ### `pv_computed_get`
 
-`function` | [src/page_view.c:7091](../../src/page_view.c#L7091)
+`function` | [src/page_view.c:7107](../../src/page_view.c#L7107)
 
 ```c
 int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color)
@@ -2725,7 +2725,7 @@ Resolves native_el (a dom_native_node pointer of the SAME document) into *st; wh
 
 ### `pv_computed_free`
 
-`function` | [src/page_view.c:7113](../../src/page_view.c#L7113)
+`function` | [src/page_view.c:7129](../../src/page_view.c#L7129)
 
 ```c
 void pv_computed_free(pv_computed *pc)
@@ -2923,7 +2923,7 @@ Distinct from PV_MAX_CONTAINERS: a flex/grid container is a rare element, while 
 
 ### `PV_MAX_INLINE_ROW_ITEMS`
 
-`macro` | [src/page_view.c:2911](../../src/page_view.c#L2911)
+`macro` | [src/page_view.c:2915](../../src/page_view.c#L2915)
 
 ```c
 #define PV_MAX_INLINE_ROW_ITEMS
@@ -2945,7 +2945,7 @@ degrade the container to plain flow anyway.
 
 ### `PV_TEXTLESS_DEPTH_MAX`
 
-`macro` | [src/page_view.c:3241](../../src/page_view.c#L3241)
+`macro` | [src/page_view.c:3257](../../src/page_view.c#L3257)
 
 ```c
 #define PV_TEXTLESS_DEPTH_MAX
@@ -2959,7 +2959,7 @@ Depth cap for subtree_has_own_text: attacker-controlled nesting fails open to "h
 
 ### `PV_FRAME_DEF_W`
 
-`macro` | [src/page_view.c:4206](../../src/page_view.c#L4206)
+`macro` | [src/page_view.c:4222](../../src/page_view.c#L4222)
 
 ```c
 #define PV_FRAME_DEF_W
@@ -2973,7 +2973,7 @@ An <iframe> the confined worker marked live (data-fzf: only the trusted-host fra
 
 ### `PV_FRAME_URL_MAX`
 
-`macro` | [src/page_view.c:4208](../../src/page_view.c#L4208)
+`macro` | [src/page_view.c:4224](../../src/page_view.c#L4224)
 
 ```c
 #define PV_FRAME_URL_MAX
@@ -2985,7 +2985,7 @@ An <iframe> the confined worker marked live (data-fzf: only the trusted-host fra
 
 ### `PV_MAX_STYLE_BYTES`
 
-`macro` | [src/page_view.c:5084](../../src/page_view.c#L5084)
+`macro` | [src/page_view.c:5100](../../src/page_view.c#L5100)
 
 ```c
 #define PV_MAX_STYLE_BYTES

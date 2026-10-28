@@ -26,7 +26,7 @@ This community groups 52 file(s) rooted at `include` with dominant language c (c
 |------|----------|-------|---------|-----|
 | `src/box_tree.c` | c | utility | 25 | no |
 | `src/compositor.c` | c | utility | 5 | no |
-| `src/css.c` | c | utility | 247 | no |
+| `src/css.c` | c | utility | 249 | no |
 | `src/css_atrule.c` | c | utility | 11 | no |
 | `src/css_box.c` | c | utility | 52 | no |
 | `src/css_chain.c` | c | utility | 21 | no |
@@ -102,7 +102,7 @@ This community groups 52 file(s) rooted at `include` with dominant language c (c
 - [dataflow DEAD_STORE] `src/box_tree.c:562` `bt_containing_block` `ancestor`: `ancestor` assigned at line 562 but never read afterwards.
 - [dataflow DEAD_STORE] `src/box_tree.c:716` `bt_resolve_positioning_ex` `z_auto`: `z_auto` assigned at line 716 but never read afterwards.
 - [dataflow UNINIT_USE] `src/box_tree.c:865` `bt_defer_roots` `by_order`: `by_order` may be read before initialization (declared line 864).
-- [dataflow DEAD_STORE] `src/css.c:5481` `page_view` `had_winner`: `had_winner` assigned at line 5481 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css.c:5545` `page_view` `had_winner`: `had_winner` assigned at line 5545 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:155` `parse_hex` `r`: `r` assigned at line 155 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:156` `parse_hex` `g`: `g` assigned at line 156 but never read afterwards.
 

@@ -9,7 +9,7 @@ Every edge is tagged. Extracted means parsed from source; inferred means derived
 | Confidence | Count | Meaning |
 |------------|-------|---------|
 | EXTRACTED | 570 | Resolved import edges parsed from source |
-| EXTRACTED | 1759 | Raw import statements (may include externals) |
+| EXTRACTED | 1762 | Raw import statements (may include externals) |
 | INFERRED | 5 | Surprising cross-community bridges |
 | AMBIGUOUS | 0 | No uncertain edges are emitted by the static scanner |
 
@@ -31,7 +31,7 @@ Every edge is tagged. Extracted means parsed from source; inferred means derived
 
 ## Token Benchmark
 
-- Wiki index plus community pages estimate: ~226139 tokens (chars/4).
+- Wiki index plus community pages estimate: ~227492 tokens (chars/4).
 - Full re-read of every source file would cost strictly more on any non-trivial project; this wiki is the cheaper entry point.
 - Generation cost: $0, offline, no network calls.
 

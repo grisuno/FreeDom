@@ -19167,6 +19167,9 @@ static void startup_abort_release(browser_window *w) {
 ui_status ui_run_browser(const char *start_url) {
     browser_window w;
     memset(&w, 0, sizeof w);
+    /* The worker's fork + exec + sandbox setup (~14 ms) runs while the profile key is derived and
+     * the window comes up, instead of in front of the first render (spec/tab.md). */
+    tab_prewarm();
     w.decoder_cmd_fd = -1;
     w.decoder_out_fd = -1;
     w.audio_fd = -1;
@@ -19400,6 +19403,9 @@ ui_status ui_run_browser(const char *start_url) {
      * fire the toast's auto-hide without racing the Wayland queue. The timeout is
      * the remaining lifetime of an active toast, or infinite when there is none. */
     while (w.running) {
+        /* The render that consumed the spare is under way; start the next one now so a re-render
+         * (zoom, theme, reload, a link) does not wait for a fork either. Cheap when one exists. */
+        if (!tab_prewarmed()) tab_prewarm();
         /* Before the read is prepared: the probe may end the session, and the loop must notice. */
         int tw_step = gui_timing_step(&w, now_ms());
         if (!w.running) break;
@@ -19671,6 +19677,7 @@ ui_status ui_run_browser(const char *start_url) {
     if (w.registry) wl_registry_destroy(w.registry);
     wlg_stop(w.wl_guard);
     w.wl_guard = NULL;
+    tab_shutdown_spare();
     wl_display_disconnect(w.display);
 
     if (w.repeat_timer_fd >= 0) close(w.repeat_timer_fd);

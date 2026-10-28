@@ -21,24 +21,24 @@ flowchart TB
     end
     subgraph lane_1["Tier 2"]
         direction LR
-        n_c6["src: local_store<br/>11 files, 462 symbols<br/>Data access"]:::cycle
-        n_c3["src: text_shape<br/>29 files, 408 symbols<br/>Core / utility"]:::cycle
+        n_c6["src: local_store<br/>11 files, 466 symbols<br/>Data access"]:::cycle
+        n_c3["src: text_shape<br/>29 files, 415 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c4["include: page_view<br/>12 files, 627 symbols<br/>Presentation / entry"]:::cycle
+        n_c4["include: page_view<br/>12 files, 628 symbols<br/>Presentation / entry"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
-        n_c2["src: tab<br/>36 files, 833 symbols<br/>Core / utility"]:::cycle
+        n_c2["src: tab<br/>36 files, 842 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_4["Tier 5 - foundation"]
         direction LR
         n_c9["include: prefetch<br/>4 files, 90 symbols<br/>Core / utility"]:::cycle
-        n_c8["include: tab<br/>5 files, 103 symbols<br/>Core / utility"]:::cycle
+        n_c8["include: tab<br/>5 files, 107 symbols<br/>Core / utility"]:::cycle
         n_c7["include: secure_fetch<br/>8 files, 276 symbols<br/>Core / utility"]:::cycle
         n_c5["include: browser<br/>13 files, 196 symbols<br/>Core / utility"]:::cycle
-        n_c1["include: css<br/>36 files, 993 symbols<br/>Core / utility"]:::cycle
+        n_c1["include: css<br/>36 files, 1005 symbols<br/>Core / utility"]:::cycle
         n_c11["include: subreq_batch<br/>2 files, 27 symbols<br/>Core / utility"]:::default
         n_c10["include: sha2<br/>2 files, 21 symbols<br/>Core / utility"]:::default
     end

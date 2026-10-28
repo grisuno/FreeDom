@@ -139,7 +139,7 @@ static void do_submit_post(browser_w...`
   - `gui_timing_step` (function, line 19141) `static int gui_timing_step(browser_window *w, uint64_t now)`
   - `startup_abort_release` (function, line 19158) `static void startup_abort_release(browser_window *w)`
   - `ui_run_browser` (function, line 19167) `ui_status ui_run_browser(const char *start_url)`
-  - `cost` (function, line 19628) `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
+  - `cost` (function, line 19634) `* measured cost (floor 33 ms = the existing ~30 fps ceiling):
              * cheap pages paint at...`
   - `offset` (function, line 179) `* offset (labels and the flag live in one place, no magic indices);`
   - `fields` (function, line 291) `* fields (so the 200+ render/event call sites stay unchanged);`
@@ -219,9 +219,9 @@ static void do_submit_post(browser_w...`
   - `resizes` (function, line 16849) `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);`
   - `down` (function, line 17767) `* defined further down (after dispatch_js_event) but called from ptr_enter/leave * /motion too. */ static void...`
   - `loop` (function, line 18355) `* we return to the event loop (without this, the clipboard offer stays queued * and a paste that follows immediately...`
-  - `saving` (function, line 19186) `* disables saving (never clobber);`
-  - `redraws` (function, line 19279) `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
-  - `moves` (function, line 19292) `* client that stops reading its socket while the pointer moves (spec/wl_guard.md). */ if...`
+  - `saving` (function, line 19189) `* disables saving (never clobber);`
+  - `redraws` (function, line 19282) `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...`
+  - `moves` (function, line 19295) `* client that stops reading its socket while the pointer moves (spec/wl_guard.md). */ if...`
   - `_GNU_SOURCE` (macro, line 12) `#define _GNU_SOURCE`
   - `UI_TOOLBAR_H` (macro, line 96) `#define UI_TOOLBAR_H`
   - `UI_TITLEBAR_H` (macro, line 97) `#define UI_TITLEBAR_H`

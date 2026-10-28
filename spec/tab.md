@@ -436,3 +436,19 @@ int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);
   (navegación, ediciones de listas, pestañas). El sumidero de CSS (`css_sink`) no se invoca desde el hilo.
 - Efecto medido: con 3 XHR de 150 ms dentro de un timer, `tab_tick_async` vuelve en < 100 ms y la ventana
   sigue pintando y desplazándose; antes la GUI esperaba los 450 ms.
+
+## Worker de repuesto: `tab_prewarm` (2026-10-28)
+Cada `tab_open` paga fork + re-exec (~100 librerías enlazadas) + confinamiento: ~14 ms medidos con una
+página mínima, en el camino crítico de cada render. El costo no depende de la página, así que se paga ANTES.
+- **Dado** que la GUI llama `tab_prewarm`, **cuando** no hay repuesto, **entonces** se lanza un worker
+  (mismo `exec_worker_child`, mismos pipes, misma confinación) y NO se espera su handshake; llamarla con un
+  repuesto ya presente no hace nada (idempotente, `tab_prewarmed` = 1).
+- **Dado** un repuesto, **cuando** `tab_open`, **entonces** lo consume (el handshake `TAB_READY` se lee igual:
+  la garantía "confinado antes de recibir contenido" no cambia) y `tab_prewarmed` pasa a 0. Sin repuesto,
+  o si el repuesto murió antes del handshake, `tab_open` lanza uno nuevo como siempre.
+- El repuesto es un worker ocioso: no ha recibido ningún byte de contenido. Los extremos del padre son
+  `O_CLOEXEC` para que ningún otro hijo (decodificador, etc.) los herede.
+- `tab_open` NO relanza el repuesto solo (los arneses headless y los tests no pagan un fork de más): el
+  que quiere el repuesto siguiente llama `tab_prewarm`. `tab_shutdown_spare` lo mata y lo cosecha.
+- Hilos: un mutex protege el repuesto; `tab_prewarm`/`tab_open`/`tab_shutdown_spare` pueden llamarse desde
+  cualquier hilo.

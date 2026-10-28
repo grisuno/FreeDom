@@ -3,6 +3,43 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `main` | function | `tests/test_net_realm.c:140` | `int main(void)` |
+| `test_classify_host_clearnet` | function | `tests/test_net_realm.c:37` | `static void test_classify_host_clearnet(void **state)` |
+| `test_classify_host_edges` | function | `tests/test_net_realm.c:54` | `static void test_classify_host_edges(void **state)` |
+| `test_classify_host_i2p` | function | `tests/test_net_realm.c:30` | `static void test_classify_host_i2p(void **state)` |
+| `test_classify_host_lookalikes` | function | `tests/test_net_realm.c:44` | `static void test_classify_host_lookalikes(void **state)` |
+| `test_classify_host_onion` | function | `tests/test_net_realm.c:22` | `static void test_classify_host_onion(void **state)` |
+| `test_classify_url` | function | `tests/test_net_realm.c:67` | `static void test_classify_url(void **state)` |
+| `test_names` | function | `tests/test_net_realm.c:126` | `static void test_names(void **state)` |
+| `test_realm_allows_http` | function | `tests/test_net_realm.c:118` | `static void test_realm_allows_http(void **state)` |
+| `test_route_clearnet` | function | `tests/test_net_realm.c:96` | `static void test_route_clearnet(void **state)` |
+| `test_route_i2p` | function | `tests/test_net_realm.c:88` | `static void test_route_i2p(void **state)` |
+| `test_route_null_blocked` | function | `tests/test_net_realm.c:110` | `static void test_route_null_blocked(void **state)` |
+| `test_route_onion` | function | `tests/test_net_realm.c:79` | `static void test_route_onion(void **state)` |
+| `_GNU_SOURCE` | macro | `tests/test_os_sandbox.c:14` | `#define _GNU_SOURCE` |
+| `main` | function | `tests/test_os_sandbox.c:335` | `int main(void)` |
+| `net_ns_inode` | function | `tests/test_os_sandbox.c:304` | `static unsigned long net_ns_inode(void)` |
+| `suite` | function | `tests/test_os_sandbox.c:313` | `* suite (it is best-effort defense in depth), and on a host that allows them the  * isolation mus...` |
+| `test_harden_allows_permitted_syscall` | function | `tests/test_os_sandbox.c:96` | `static void test_harden_allows_permitted_syscall(void **state)` |
+| `test_harden_blocks_exec_mmap` | function | `tests/test_os_sandbox.c:162` | `static void test_harden_blocks_exec_mmap(void **state)` |
+| `test_harden_blocks_exec_mprotect` | function | `tests/test_os_sandbox.c:182` | `static void test_harden_blocks_exec_mprotect(void **state)` |
+| `test_harden_errno_denies_with_eperm` | function | `tests/test_os_sandbox.c:112` | `static void test_harden_errno_denies_with_eperm(void **state)` |
+| `test_harden_kills_denied_syscall` | function | `tests/test_os_sandbox.c:79` | `static void test_harden_kills_denied_syscall(void **state)` |
+| `test_harden_kills_io_uring_setup` | function | `tests/test_os_sandbox.c:130` | `static void test_harden_kills_io_uring_setup(void **state)` |
+| `test_landlock_abi_present` | function | `tests/test_os_sandbox.c:233` | `static void test_landlock_abi_present(void **state)` |
+| `test_landlock_allow_read` | function | `tests/test_os_sandbox.c:257` | `static void test_landlock_allow_read(void **state)` |
+| `test_landlock_deny_all` | function | `tests/test_os_sandbox.c:239` | `static void test_landlock_deny_all(void **state)` |
+| `test_no_dump_undumpable` | function | `tests/test_os_sandbox.c:214` | `static void test_no_dump_undumpable(void **state)` |
+| `test_policy_allows_safe` | function | `tests/test_os_sandbox.c:43` | `static void test_policy_allows_safe(void **state)` |
+| `test_policy_denies_dangerous` | function | `tests/test_os_sandbox.c:51` | `static void test_policy_denies_dangerous(void **state)` |
+| `test_policy_denies_io_uring` | function | `tests/test_os_sandbox.c:64` | `static void test_policy_denies_io_uring(void **state)` |
+| `test_policy_size` | function | `tests/test_os_sandbox.c:71` | `static void test_policy_size(void **state)` |
+| `test_prot_allowed_wx` | function | `tests/test_os_sandbox.c:151` | `static void test_prot_allowed_wx(void **state)` |
+| `applies` | function | `tests/test_page_view.c:4528` | `* <style>: an extern rule applies (presentation and display:none alike);` |
+| `box_of_run_with_bg` | function | `tests/test_page_view.c:3738` | `static const pv_box_def *box_of_run_with_bg(const pv_view *v, int bg)` |
+| `break` | function | `tests/test_page_view.c:703` | `* block break (from entering <p>);` |
+| `count_empty_lines` | function | `tests/test_page_view.c:3441` | `static int count_empty_lines(const pv_view *v)` |
+| `count_inputs` | function | `tests/test_page_view.c:3338` | `static size_t count_inputs(const pv_view *v, int type)` |
 | `dropped` | function | `tests/test_page_view.c:427` | `* either flank is dropped (the inter-cell rule above stays). */ static void test_build_table_inli...` |
 | `find_image` | function | `tests/test_page_view.c:55` | `static const pv_run *find_image(const pv_view *v, const char *src)` |
 | `find_input` | function | `tests/test_page_view.c:3240` | `static const pv_run *find_input(const pv_view *v, const char *name)` |
@@ -459,42 +496,5 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_empty_and_long` | function | `tests/test_sha2.c:39` | `static void test_empty_and_long(void **state)` |
 | `test_names_and_errors` | function | `tests/test_sha2.c:60` | `static void test_names_and_errors(void **state)` |
 | `test_padding_boundaries` | function | `tests/test_sha2.c:52` | `static void test_padding_boundaries(void **state)` |
-| `main` | function | `tests/test_shm_slots.c:42` | `int main(void)` |
-| `test_alternates_and_never_paints_a_held_slot` | function | `tests/test_shm_slots.c:8` | `static void test_alternates_and_never_paints_a_held_slot(void **state)` |
-| `test_release_of_unknown_or_idle_slot_is_ignored` | function | `tests/test_shm_slots.c:23` | `static void test_release_of_unknown_or_idle_slot_is_ignored(void **state)` |
-| `test_repaint_before_commit_reuses_the_same_free_slot` | function | `tests/test_shm_slots.c:34` | `static void test_repaint_before_commit_reuses_the_same_free_slot(void **state)` |
-| `_GNU_SOURCE` | macro | `tests/test_subreq_batch.c:2` | `#define _GNU_SOURCE` |
-| `main` | function | `tests/test_subreq_batch.c:99` | `int main(void)` |
-| `mk` | function | `tests/test_subreq_batch.c:30` | `static sqb_req mk(const char *u)` |
-| `slow_run` | function | `tests/test_subreq_batch.c:18` | `static int slow_run(void *ctx, const sqb_req *rq, sqb_res *out)` |
-| `test_full_batch_refuses_and_reset_reuses` | function | `tests/test_subreq_batch.c:75` | `static void test_full_batch_refuses_and_reset_reuses(void **st)` |
-| `test_null_args_fail_closed` | function | `tests/test_subreq_batch.c:89` | `static void test_null_args_fail_closed(void **st)` |
-| `test_refused_and_failed_keep_their_slot` | function | `tests/test_subreq_batch.c:60` | `static void test_refused_and_failed_keep_their_slot(void **st)` |
-| `test_results_in_issue_order_and_overlap` | function | `tests/test_subreq_batch.c:32` | `static void test_results_in_issue_order_and_overlap(void **st)` |
-| `test_thread_limit_is_respected` | function | `tests/test_subreq_batch.c:50` | `static void test_thread_limit_is_respected(void **st)` |
-| `main` | function | `tests/test_svg_render.c:344` | `int main(void)` |
-| `parse` | function | `tests/test_svg_render.c:26` | `static sv_status parse(sv_image *im, const char *s)` |
-| `test_basic_shapes` | function | `tests/test_svg_render.c:71` | `static void test_basic_shapes(void **state)` |
-| `test_bounds_are_enforced` | function | `tests/test_svg_render.c:248` | `static void test_bounds_are_enforced(void **state)` |
-| `test_dimensions_and_viewbox` | function | `tests/test_svg_render.c:50` | `static void test_dimensions_and_viewbox(void **state)` |
-| `test_empty_and_garbage_do_not_parse` | function | `tests/test_svg_render.c:38` | `static void test_empty_and_garbage_do_not_parse(void **state)` |
-| `test_fit_uniform_and_centered` | function | `tests/test_svg_render.c:320` | `static void test_fit_uniform_and_centered(void **state)` |
-| `test_group_inheritance_and_transform` | function | `tests/test_svg_render.c:118` | `static void test_group_inheritance_and_transform(void **state)` |
-| `test_malformed_values_degrade` | function | `tests/test_svg_render.c:285` | `static void test_malformed_values_degrade(void **state)` |
-| `test_null_args` | function | `tests/test_svg_render.c:30` | `static void test_null_args(void **state)` |
-| `test_paint_attributes` | function | `tests/test_svg_render.c:96` | `static void test_paint_attributes(void **state)` |
-| `test_path_arc_compact_flags` | function | `tests/test_svg_render.c:208` | `static void test_path_arc_compact_flags(void **state)` |
-| `test_path_arc_reaches_endpoint` | function | `tests/test_svg_render.c:192` | `static void test_path_arc_reaches_endpoint(void **state)` |
-| `test_path_commands` | function | `tests/test_svg_render.c:159` | `static void test_path_commands(void **state)` |
-| `test_polygon_points` | function | `tests/test_svg_render.c:140` | `static void test_polygon_points(void **state)` |
-| `test_text_element` | function | `tests/test_svg_render.c:304` | `static void test_text_element(void **state)` |
-| `test_url_bearing_elements_are_dropped` | function | `tests/test_svg_render.c:224` | `static void test_url_bearing_elements_are_dropped(void **state)` |
-| `CSS_PAGE` | macro | `tests/test_tab.c:1954` | `#define CSS_PAGE(HREF)` |
-| `EXT_PAGE` | macro | `tests/test_tab.c:1827` | `#define EXT_PAGE(SRC)` |
-| `XHR_PAGE` | macro | `tests/test_tab.c:1732` | `#define XHR_PAGE(URL)` |
-| `_DEFAULT_SOURCE` | macro | `tests/test_tab.c:1` | `#define _DEFAULT_SOURCE` |
-| `_POSIX_C_SOURCE` | macro | `tests/test_tab.c:15` | `#define _POSIX_C_SOURCE` |
-| `console_find` | function | `tests/test_tab.c:1306` | `static const fb_entry *console_find(const fb_buffer *log, int level, const char *needle)` |
-| `cs_eval` | function | `tests/test_tab.c:2217` | `static void cs_eval(tab *t, const char *js, char *out, size_t outsz)` |
 
 Next: [SYMBOLS_p16.md](SYMBOLS_p16.md)

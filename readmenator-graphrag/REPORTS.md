@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 8255 | Relationships: 14399 | Communities: 13 | Themes: 4 | Text units: 7788
+Entities: 8295 | Relationships: 14453 | Communities: 13 | Themes: 4 | Text units: 7828
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -31,8 +31,8 @@ Theme of 4 communities and 120 files: include: css (52 files, rating 7.0); src: 
 - [include: page_view] `include/page_view.h` ranks 1 by PageRank, 12 importers, 92 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - [include: page_view] `include/render_policy.h` ranks 2 by PageRank, 8 importers, 9 symbols: rdp_caps: Render capabilities for a page.
 - [include: tab] `include/frame_broker.h` ranks 1 by PageRank, 3 importers, 17 symbols: fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for opaque/non-https/unparseable. * 0 on success, -1 if out does not fit or args are NULL.
-- [include: tab] `include/tab.h` ranks 2 by PageRank, 6 importers, 49 symbols: tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState (replace == 0) or replaceState (replace == 1) to url, an absolute same-origin URL * the parent re-validated against the page URL.
-- Key entities: file:tests/test_css.c, file:src/css.c, file:src/freedom.c, file:src/text_shape.c, file:src/page_view.c, file:tests/test_page_view.c, file:include/tab.h, file:include/frame_broker.h
+- [include: tab] `include/tab.h` ranks 2 by PageRank, 6 importers, 53 symbols: tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState (replace == 0) or replaceState (replace == 1) to url, an absolute same-origin URL * the parent re-validated against the page URL.
+- Key entities: file:tests/test_css.c, file:src/css.c, file:src/text_shape.c, file:src/freedom.c, file:src/page_view.c, file:tests/test_page_view.c, file:include/tab.h, file:include/frame_broker.h
 - Children: c1, c3, c4, c8
 - Theme rating = highest child community rating.
 
@@ -84,8 +84,8 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 
 - `include/css.h` ranks 1 by PageRank, 36 importers, 140 symbols: css_style: A resolved presentation.
 - `include/css_color.h` ranks 2 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
-- `include/css_select.h` ranks 3 by PageRank, 14 importers, 37 symbols: css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only tag/.class/#id/[attr] (no combinators, no pseudo-classes inside * sub-selectors).
-- Hotspot `src/css.c`: 247 symbols, 38 connections (score 0.31).
+- `include/css_select.h` ranks 3 by PageRank, 14 importers, 39 symbols: css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only tag/.class/#id/[attr] (no combinators, no pseudo-classes inside * sub-selectors).
+- Hotspot `src/css.c`: 249 symbols, 38 connections (score 0.31).
 - Hotspot `tests/test_css.c`: 354 symbols, 19 connections (score 0.30).
 - 1 layer violations, e.g. test_css.c (testing) -> flex_layout.h (presentation).
 - Dataflow: 11 INFERRED issues (first: DEAD_STORE in layout_grid).
@@ -99,7 +99,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/html_parse.h` ranks 1 by PageRank, 18 importers, 24 symbols: hp_script: One executable <script>.
 - `include/dom.h` ranks 2 by PageRank, 17 importers, 30 symbols: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node" and "first" cannot be expressed by an element-only reference).
 - `include/url.h` ranks 3 by PageRank, 16 importers, 14 symbols: url_parts: Components of a validated absolute https URL, sliced for a JS location object.
-- Hotspot `src/tab.c`: 167 symbols, 70 connections (score 0.40).
+- Hotspot `src/tab.c`: 176 symbols, 70 connections (score 0.40).
 - Hotspot `tests/test_js_dom.c`: 271 symbols, 28 connections (score 0.28).
 - Dependency cycle: js_dom.h -> js_location.h -> js_dom.h.
 - Dataflow: 2 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
@@ -117,7 +117,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - Hotspot `tests/test_freedom.c`: 111 symbols, 12 connections (score 0.12).
 - 4 layer violations, e.g. browser_ui.c (presentation) -> data_url.h (data_access).
 - Dataflow: 35 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
-- Key entities: file:gui/browser_ui.c, file:tests/test_freedom.c, file:tests/test_interp.c, file:src/svg_render.c, file:tests/test_image_decode.c, file:gui/ui_render.c, file:tests/test_pdf_export.c, file:src/image_decode.c
+- Key entities: file:gui/browser_ui.c, file:tests/test_freedom.c, file:tests/test_interp.c, file:tests/test_image_decode.c, file:src/svg_render.c, file:gui/ui_render.c, file:tests/test_pdf_export.c, file:src/image_decode.c
 - Rating 4.7/10 = 7 x PageRank share 0.67 + 3 x risk 0.00. Internal imports: 68.
 
 ## src: text_shape (`c3`, community, rating 3.2)
@@ -128,10 +128,10 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/data_url.h` ranks 2 by PageRank, 8 importers, 6 symbols: du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/ logo/image, bounding the allocation before decoding a payload whose size a * remote, hostile document controls. #define DU_MAX_ENCODED_LEN...
 - `include/webfont.h` ranks 3 by PageRank, 11 importers, 17 symbols: wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names.
 - Hotspot `src/freedom.c`: 50 symbols, 64 connections (score 0.30).
-- Hotspot `src/text_shape.c`: 61 symbols, 13 connections (score 0.09).
+- Hotspot `src/text_shape.c`: 68 symbols, 14 connections (score 0.10).
 - 1 layer violations, e.g. render_policy.c (presentation) -> data_url.h (data_access).
 - Dataflow: 1 INFERRED issues (first: UNCHECKED_ALLOC in headless_fetch).
-- Key entities: file:src/freedom.c, file:src/text_shape.c, file:include/text_shape.h, file:tests/test_text_shape.c, file:include/tls_impersonate.h, file:tests/test_data_url.c, file:include/webfont.h, file:tests/test_link_nav.c
+- Key entities: file:src/text_shape.c, file:src/freedom.c, file:include/text_shape.h, file:tests/test_text_shape.c, file:include/tls_impersonate.h, file:tests/test_data_url.c, file:include/webfont.h, file:tests/test_link_nav.c
 - Rating 3.2/10 = 7 x PageRank share 0.46 + 3 x risk 0.00. Internal imports: 50.
 
 ## include: page_view (`c4`, community, rating 1.7)
@@ -141,7 +141,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/page_view.h` ranks 1 by PageRank, 12 importers, 92 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - `include/render_policy.h` ranks 2 by PageRank, 8 importers, 9 symbols: rdp_caps: Render capabilities for a page.
 - `include/box_style.h` ranks 3 by PageRank, 11 importers, 31 symbols: bx_edges: anything longer fails closed instead of truncating into a wrong match. #define BX_TAG_NAME_MAX 32u typedef enum bx_display { BX_DISPLAY_BLOCK = 0,     /* stacks vertically, takes the available width BX_DISPLAY_INLINE...
-- Hotspot `src/page_view.c`: 259 symbols, 39 connections (score 0.32).
+- Hotspot `src/page_view.c`: 260 symbols, 39 connections (score 0.32).
 - Hotspot `tests/test_page_view.c`: 214 symbols, 22 connections (score 0.22).
 - 14 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
 - Key entities: file:src/page_view.c, file:tests/test_page_view.c, file:include/page_view.h, file:tests/test_flex_layout.c, file:tests/test_box_tree.c, file:tests/test_box_style.c, file:include/flex_layout.h, file:src/box_style.c
@@ -154,7 +154,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - `include/local_store.h` ranks 1 by PageRank, 8 importers, 11 symbols: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len...
 - `include/http_cache.h` ranks 2 by PageRank, 3 importers, 19 symbols: hc_parse_http_date: } hc_class; typedef struct hc_meta { char   final_url[HC_URL_MAX]; char   content_type[HC_TYPE_MAX]; char   etag[HC_VAL_MAX]; char   last_modified[HC_VAL_MAX]; char   cache_control[HC_VAL_MAX]; char...
 - `include/pq_seal.h` ranks 3 by PageRank, 3 importers, 8 symbols: pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der is owned * (release with pqs_buf_free). pqs_status pqs_export(const pqs_keys *k, uint8_t **der, size_t *len); pqs_status pqs_import(const...
-- Hotspot `src/local_store.c`: 339 symbols, 10 connections (score 0.25).
+- Hotspot `src/local_store.c`: 343 symbols, 10 connections (score 0.25).
 - Hotspot `src/http_cache.c`: 38 symbols, 20 connections (score 0.11).
 - 3 layer violations, e.g. http_cache.h (presentation) -> local_store.h (data_access).
 - Surprising bridge: pq_seal.c <-> sha2.c (9 hops across communities).
@@ -197,7 +197,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 - Hotspot `tools/guitime.py`: 3 symbols, 8 connections (score 0.04).
 - Hotspot `tools/fftime.py`: 1 symbols, 8 connections (score 0.03).
 - Taint: 6 paths reach this group via subprocess, urllib.request.
-- Key entities: file:tools/pngdiff.c, file:tools/gen_psl.c, file:tools/ffgeom.py, file:tools/fbench.py, file:tools/guitime.py, file:tools/mutate.py, file:tools/fftime.py, file:tools/snapshot.py
+- Key entities: file:tools/pngdiff.c, file:tools/gen_psl.c, file:tools/ffgeom.py, file:tools/fbench.py, file:tools/guitime.py, file:tools/mutate.py, file:tools/snapshot.py, file:tools/fftime.py
 - Rating 0.9/10 = 7 x PageRank share 0.13 + 3 x risk 0.00. Internal imports: 0.
 
 ## include: tab (`c8`, community, rating 0.6)
@@ -205,9 +205,9 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.9).
 7 files under include (c 4, h 3), mostly utility. Core file include/frame_broker.h (PageRank 0.0053, imported by 3 files): fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for opaque/non-https/unparseable. * 0 on success, -1 if out does not fit or args are NULL. Key abstractions: fbk_rel, fbk_verdict, fbk_frame, fbk_table, FREEDOM_FRAME_BROKER_H, FBK_MAX_FRAMES. Depends on src: tab (2), include: page_view (2). Used by include: browser_ui (2), src: tab (2), src: text_shape (2).
 
 - `include/frame_broker.h` ranks 1 by PageRank, 3 importers, 17 symbols: fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for opaque/non-https/unparseable. * 0 on success, -1 if out does not fit or args are NULL.
-- `include/tab.h` ranks 2 by PageRank, 6 importers, 49 symbols: tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState (replace == 0) or replaceState (replace == 1) to url, an absolute same-origin URL * the parent re-validated against the page URL.
+- `include/tab.h` ranks 2 by PageRank, 6 importers, 53 symbols: tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState (replace == 0) or replaceState (replace == 1) to url, an absolute same-origin URL * the parent re-validated against the page URL.
 - `include/frame_host.h` ranks 3 by PageRank, 4 importers, 11 symbols: fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame document and handed to each frame worker for its own XHR/fetch).
-- Hotspot `include/tab.h`: 49 symbols, 15 connections (score 0.09).
+- Hotspot `include/tab.h`: 53 symbols, 15 connections (score 0.10).
 - Hotspot `tests/test_frame_host.c`: 9 symbols, 12 connections (score 0.06).
 - Surprising bridge: frame_broker.c <-> sha2.c (9 hops across communities).
 - Key entities: file:include/tab.h, file:include/frame_broker.h, file:src/frame_host.c, file:include/frame_host.h, file:tests/test_frame_host.c, file:tests/test_frame_broker.c, file:src/frame_broker.c, sym:include/tab.h::replace@54

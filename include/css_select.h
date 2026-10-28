@@ -137,7 +137,6 @@ typedef struct css_compound {
  * comb[0] is unused. A single compound is nparts == 1. subs[] holds sub-selectors
  * for :not()/:is()/:where() pseudo-classes, indexed by css_pseudo_match.sub_first. */
 typedef struct css_sel {
-    css_compound parts[CSS_MAX_COMPOUNDS];
     int  comb[CSS_MAX_COMPOUNDS];
     int  nparts;
     int  spec;
@@ -153,7 +152,24 @@ typedef struct css_sel {
     /* Feature bits the SUBJECT element itself must have (its compound's tag, id and every class):
      * the index keys a selector by only one of them, this checks the rest without evaluating. */
     unsigned long long subj_req;
+    /* Feature bits compound i alone requires of whatever element it is tested against. Lets the
+     * ancestor walk of a descendant combinator skip, without comparing a single string, every
+     * ancestor whose own feature bits lack one (see complex_matches). */
+    unsigned long long part_req[CSS_MAX_COMPOUNDS];
+    /* MUST stay the last member: a selector stored in a sheet keeps only the nparts compounds it
+     * uses (csel_compact_size), so everything after this offset is not allocated for it. */
+    css_compound parts[CSS_MAX_COMPOUNDS];
 } css_sel;
+
+/* Bytes a selector with `nparts` compounds needs: the header plus the compounds it uses. A full
+ * css_sel is ~12.8 KiB; a typical rule selector (1-3 compounds) needs a third of that, and a
+ * stylesheet holds tens of thousands of them. */
+size_t csel_compact_size(int nparts);
+
+/* Heap copy of *sel holding only the compounds in use (free()d by the caller); NULL on OOM or a
+ * selector with nparts outside [1, CSS_MAX_COMPOUNDS]. The copy is read-only for matching:
+ * parts[k] for k >= nparts is not backed by memory. */
+css_sel *csel_compact_dup(const css_sel *sel);
 
 /* Parses the complex selector s[a,b) into *sel (spec computed; order/rule left to
  * the caller). Returns 1 if supported, 0 to drop the selector (fail closed). */

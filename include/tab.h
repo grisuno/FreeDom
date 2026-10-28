@@ -170,6 +170,20 @@ int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)
  * tab_close. Returns TAB_ERR_CONFINE if the child could not sandbox itself. */
 tab_status tab_open(tab **out);
 
+/* Starts one idle, confined worker in advance so the next tab_open does not wait for fork +
+ * exec + sandbox setup (spec/tab.md "Worker de repuesto"). Idempotent; best-effort (a failed
+ * spawn just means tab_open spawns on demand). The spare has received no content. */
+void tab_prewarm(void);
+
+/* 1 while a spare worker is waiting for the next tab_open. */
+int tab_prewarmed(void);
+
+/* Process id of that spare, 0 when there is none (diagnostics and tests). */
+int tab_prewarmed_pid(void);
+
+/* Kills and reaps the spare, if any. Safe to call when there is none. */
+void tab_shutdown_spare(void);
+
 /* Subresource (XMLHttpRequest/fetch) network bridge. The confined worker has no network;
  * when the page's script issues an XHR/fetch the worker proxies the request to the parent,
  * which calls this callback to perform the policy-checked fetch (host blocklist/tracker

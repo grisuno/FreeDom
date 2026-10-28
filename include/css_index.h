@@ -33,6 +33,9 @@ typedef struct cix_index {
  * cix_free'd first). On OOM leaves *idx invalid (valid == 0). */
 void cix_build(const css_sel *sels, size_t n, cix_index *idx);
 
+/* Same over a table of pointers (a sheet keeps its selectors compact, one allocation each). */
+void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);
+
 /* Releases the index; idempotent. Leaves it invalid. */
 void cix_free(cix_index *idx);
 

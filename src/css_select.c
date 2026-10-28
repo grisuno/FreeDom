@@ -10,6 +10,8 @@
 
 /* For :has() pseudo-class: descendant DOM traversal via el->dom_node. */
 #include <lexbor/html/html.h>
+#include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted
@@ -615,7 +617,9 @@ static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel) {
     while (b > a && (s[b-1] == ' ' || s[b-1] == '\t' || s[b-1] == '\n' || s[b-1] == '\r')) --b;
     if (a >= b) return 0;
 
-    memset(sel, 0, sizeof *sel);
+    /* Header only: each compound is cleared as it is started, so a one-compound selector does not
+     * pay for the other seven (a css_sel is ~12.8 KiB). */
+    memset(sel, 0, offsetof(css_sel, parts));
     int n = 0;
     size_t i = a;
     while (i < b) {
@@ -656,6 +660,7 @@ static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel) {
         }
         if (par != 0) return 0;                        /* unbalanced parenthesis */
         if (n >= CSS_MAX_COMPOUNDS) return 0;          /* too deep: fail closed */
+        memset(&sel->parts[n], 0, sizeof sel->parts[n]);
         if (!parse_compound(s, ts, i, &sel->parts[n], sel)) return 0;
         sel->comb[n] = (n == 0) ? COMB_DESCENDANT : comb;
         ++n;
@@ -701,6 +706,15 @@ static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel) {
 }
 
 /* What the subject element must itself carry. */
+static unsigned long long compound_req(const css_compound *c) {
+    unsigned long long req = 0;
+    if (c->has_tag && c->tag[0] != '\0') req |= feat_bits(FEAT_TAG, c->tag, strlen(c->tag));
+    if (c->has_id && c->id[0] != '\0') req |= feat_bits(FEAT_ID, c->id, strlen(c->id));
+    for (int k = 0; k < c->ncls; ++k)
+        if (c->cls[k][0] != '\0') req |= feat_bits(FEAT_CLASS, c->cls[k], strlen(c->cls[k]));
+    return req;
+}
+
 static unsigned long long compute_subj_req(const css_sel *sel) {
     if (sel->nparts < 1) return 0;
     const css_compound *c = &sel->parts[sel->nparts - 1];
@@ -712,11 +726,27 @@ static unsigned long long compute_subj_req(const css_sel *sel) {
     return req;
 }
 
+size_t csel_compact_size(int nparts) {
+    if (nparts < 1) nparts = 1;
+    if (nparts > CSS_MAX_COMPOUNDS) nparts = CSS_MAX_COMPOUNDS;
+    return offsetof(css_sel, parts) + (size_t)nparts * sizeof(css_compound);
+}
+
+css_sel *csel_compact_dup(const css_sel *sel) {
+    if (sel == NULL || sel->nparts < 1 || sel->nparts > CSS_MAX_COMPOUNDS) return NULL;
+    size_t n = csel_compact_size(sel->nparts);
+    css_sel *d = (css_sel *)malloc(n);
+    if (d == NULL) return NULL;
+    memcpy(d, sel, n);
+    return d;
+}
+
 int csel_parse(const char *s, size_t a, size_t b, css_sel *sel) {
     if (sel == NULL) return 0;
     if (!csel_parse_core(s, a, b, sel)) return 0;
     sel->anc_req = compute_anc_req(sel);
     sel->subj_req = compute_subj_req(sel);
+    for (int i = 0; i < sel->nparts; ++i) sel->part_req[i] = compound_req(&sel->parts[i]);
     return 1;
 }
 
@@ -1089,6 +1119,9 @@ static int compound_matches(const css_compound *c, const css_element *el,
 static int complex_matches(const css_sel *sel, int k, const css_element *el,
                            const char *target_id, int allow_pseudo_el,
                            int *pseudo_kind) {
+    /* The element's own tag/id/class bits are only known for chain elements (anc_bloom_valid). */
+    if (el != NULL && el->anc_bloom_valid && (sel->part_req[k] & ~el->own_bloom) != 0ull)
+        return 0;
     if (!compound_matches(&sel->parts[k], el, sel, target_id, allow_pseudo_el, pseudo_kind))
         return 0;
     if (k == 0) return 1;

@@ -88,6 +88,50 @@ static void test_open_close(void **state) {
     tab_close(t);
 }
 
+/* A prewarmed worker is consumed by the next tab_open and behaves like any other: it is
+ * confined and loads a page. tab_open does not respawn the spare by itself. */
+static void test_prewarm_is_consumed_by_open(void **state) {
+    (void)state;
+    tab_shutdown_spare();
+    assert_int_equal(tab_prewarmed(), 0);
+    tab_prewarm();
+    assert_int_equal(tab_prewarmed(), 1);
+    tab_prewarm();                      /* idempotent */
+    assert_int_equal(tab_prewarmed(), 1);
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    assert_int_equal(tab_prewarmed(), 0);
+    assert_true(tab_alive(t));
+    tab_page p;
+    assert_int_equal(tab_load(t, HTML, sizeof HTML - 1, &p), TAB_OK);
+    assert_string_equal(p.title, "Isolated");
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* A spare that dies before it is used must not fail the open: a fresh worker is spawned. */
+static void test_prewarm_dead_spare_falls_back(void **state) {
+    (void)state;
+    tab_shutdown_spare();
+    tab_prewarm();
+    assert_int_equal(tab_prewarmed(), 1);
+    int spare = tab_prewarmed_pid();
+    assert_true(spare > 0);
+    assert_int_equal(kill((pid_t)spare, SIGKILL), 0);
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    assert_true(tab_alive(t));
+    tab_close(t);
+    assert_int_equal(tab_prewarmed(), 0);
+}
+
+static void test_shutdown_spare_is_safe_without_one(void **state) {
+    (void)state;
+    tab_shutdown_spare();
+    tab_shutdown_spare();
+    assert_int_equal(tab_prewarmed(), 0);
+}
+
 static void test_open_null(void **state) {
     (void)state;
     assert_int_equal(tab_open(NULL), TAB_ERR_NULL_ARG);
@@ -3738,6 +3782,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_decode_image_data_url_rejects_malformed),
         cmocka_unit_test(test_decode_image_data_url_null_args),
         cmocka_unit_test(test_free_null_and_double),
+        cmocka_unit_test(test_prewarm_is_consumed_by_open),
+        cmocka_unit_test(test_prewarm_dead_spare_falls_back),
+        cmocka_unit_test(test_shutdown_spare_is_safe_without_one),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

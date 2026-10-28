@@ -3032,13 +3032,23 @@ static void exec_worker_child(int rfd, int wfd) {
      * sees EOF and returns TAB_ERR_CONFINE (fail closed). */
 }
 
-tab_status tab_open(tab **out) {
-    if (out == NULL) return TAB_ERR_NULL_ARG;
-    *out = NULL;
+/* An idle worker waiting for the next tab_open (spec/tab.md "Worker de repuesto"). */
+typedef struct {
+    int req_w;    /* parent's write end of the worker's request pipe */
+    int resp_r;   /* parent's read end of its response pipe */
+    pid_t pid;
+} tab_spawned;
 
+static pthread_mutex_t g_spare_mu = PTHREAD_MUTEX_INITIALIZER;
+static tab_spawned g_spare;
+static int g_have_spare;
+
+/* Forks and execs one confined worker WITHOUT waiting for its handshake. The parent's pipe ends
+ * are close-on-exec so no other child inherits a way to talk to (or keep alive) this worker. */
+static tab_status spawn_worker(tab_spawned *sp) {
     int req[2], resp[2];
-    if (pipe(req) != 0) return TAB_ERR_SPAWN;
-    if (pipe(resp) != 0) {
+    if (pipe2(req, O_CLOEXEC) != 0) return TAB_ERR_SPAWN;
+    if (pipe2(resp, O_CLOEXEC) != 0) {
         close(req[0]); close(req[1]);
         return TAB_ERR_SPAWN;
     }
@@ -3059,30 +3069,93 @@ tab_status tab_open(tab **out) {
     /* Parent: keep the request-write and response-read ends only. */
     close(req[0]);
     close(resp[1]);
+    sp->req_w = req[1];
+    sp->resp_r = resp[0];
+    sp->pid = pid;
+    return TAB_OK;
+}
 
-    /* Confirm the child confined itself before trusting it with content. */
+static void reap_spawned(const tab_spawned *sp, int kill_it) {
+    close(sp->req_w);
+    close(sp->resp_r);
+    if (kill_it) kill(sp->pid, SIGKILL);
+    int st;
+    while (waitpid(sp->pid, &st, 0) < 0 && errno == EINTR) { /* retry */ }
+}
+
+/* Confirms the child confined itself before trusting it with content, then wraps it. */
+static tab_status adopt_worker(const tab_spawned *sp, tab **out) {
     uint8_t hs = 0;
-    if (read_full(resp[0], &hs, 1) != 0 || hs != TAB_READY) {
-        close(req[1]); close(resp[0]);
-        int st; while (waitpid(pid, &st, 0) < 0 && errno == EINTR) { /* retry */ }
+    if (read_full(sp->resp_r, &hs, 1) != 0 || hs != TAB_READY) {
+        reap_spawned(sp, 0);
         return TAB_ERR_CONFINE;
     }
 
     tab *t = (tab *)calloc(1, sizeof *t);
     if (t == NULL) {
-        close(req[1]); close(resp[0]);
-        kill(pid, SIGKILL);
-        int st; while (waitpid(pid, &st, 0) < 0 && errno == EINTR) { /* retry */ }
+        reap_spawned(sp, 1);
         return TAB_ERR_OOM;
     }
-    t->pid = pid;
-    t->req_fd = req[1];
-    t->resp_fd = resp[0];
+    t->pid = sp->pid;
+    t->req_fd = sp->req_w;
+    t->resp_fd = sp->resp_r;
     t->alive = 1;
     t->reaped = 0;
     t->job_efd = -1;
     *out = t;
     return TAB_OK;
+}
+
+void tab_prewarm(void) {
+    pthread_mutex_lock(&g_spare_mu);
+    if (!g_have_spare && spawn_worker(&g_spare) == TAB_OK) g_have_spare = 1;
+    pthread_mutex_unlock(&g_spare_mu);
+}
+
+int tab_prewarmed(void) {
+    pthread_mutex_lock(&g_spare_mu);
+    int r = g_have_spare;
+    pthread_mutex_unlock(&g_spare_mu);
+    return r;
+}
+
+int tab_prewarmed_pid(void) {
+    pthread_mutex_lock(&g_spare_mu);
+    int r = g_have_spare ? (int)g_spare.pid : 0;
+    pthread_mutex_unlock(&g_spare_mu);
+    return r;
+}
+
+void tab_shutdown_spare(void) {
+    pthread_mutex_lock(&g_spare_mu);
+    if (g_have_spare) {
+        reap_spawned(&g_spare, 1);
+        g_have_spare = 0;
+    }
+    pthread_mutex_unlock(&g_spare_mu);
+}
+
+tab_status tab_open(tab **out) {
+    if (out == NULL) return TAB_ERR_NULL_ARG;
+    *out = NULL;
+
+    tab_spawned sp;
+    int have = 0;
+    pthread_mutex_lock(&g_spare_mu);
+    if (g_have_spare) {
+        sp = g_spare;
+        g_have_spare = 0;
+        have = 1;
+    }
+    pthread_mutex_unlock(&g_spare_mu);
+
+    if (have) {
+        if (adopt_worker(&sp, out) == TAB_OK) return TAB_OK;
+        /* The spare died before it was used: fall through to a fresh worker. */
+    }
+    tab_status st = spawn_worker(&sp);
+    if (st != TAB_OK) return st;
+    return adopt_worker(&sp, out);
 }
 
 void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx) {

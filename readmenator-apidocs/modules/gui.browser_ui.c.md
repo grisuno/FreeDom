@@ -3250,7 +3250,7 @@ ui_status ui_run_browser(const char *start_url)
 
 ### `saving`
 
-`function` | [gui/browser_ui.c:19186](../../gui/browser_ui.c#L19186)
+`function` | [gui/browser_ui.c:19189](../../gui/browser_ui.c#L19189)
 
 ```c
 * disables saving (never clobber);
@@ -3270,7 +3270,7 @@ ui_status ui_run_browser(const char *start_url)
 
 ### `redraws`
 
-`function` | [gui/browser_ui.c:19279](../../gui/browser_ui.c#L19279)
+`function` | [gui/browser_ui.c:19282](../../gui/browser_ui.c#L19282)
 
 ```c
 * so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A 4 KiB buffer overflows when * accumulated messages exceed that, since manual flushes
@@ -3291,7 +3291,7 @@ ui_status ui_run_browser(const char *start_url)
 
 ### `moves`
 
-`function` | [gui/browser_ui.c:19292](../../gui/browser_ui.c#L19292)
+`function` | [gui/browser_ui.c:19295](../../gui/browser_ui.c#L19295)
 
 ```c
 * client that stops reading its socket while the pointer moves (spec/wl_guard.md). */ if (getenv("FREEDOM_NO_WL_GUARD") == NULL) w.wl_guard = wlg_start(w.display);
@@ -3311,7 +3311,7 @@ ui_status ui_run_browser(const char *start_url)
 
 ### `cost`
 
-`function` | [gui/browser_ui.c:19628](../../gui/browser_ui.c#L19628)
+`function` | [gui/browser_ui.c:19634](../../gui/browser_ui.c#L19634)
 
 ```c
 * measured cost (floor 33 ms = the existing ~30 fps ceiling): * cheap pages paint at...

@@ -210,7 +210,7 @@ Pages: [SYMBOLS.md](SYMBOLS.md), [SYMBOLS_p2.md](SYMBOLS_p2.md), [SYMBOLS_p3.md]
 | `content_width` | function | `gui/browser_ui.c:3111` | `static double content_width(const browser_window *w)` |
 | `context` | function | `gui/browser_ui.c:8206` | `* side by side inside the current box context (spec/float.md). Blocks are grouped by * float_id into items (document...` |
 | `convention` | function | `gui/browser_ui.c:12121` | `* on the 3D bevel convention (light top/left, dark right/bottom). */ int is_3d = (style == CSS_BST_GROOVE \|\| style...` |
-| `cost` | function | `gui/browser_ui.c:19628` | `* measured cost (floor 33 ms = the existing ~30 fps ceiling):              * cheap pages paint at...` |
+| `cost` | function | `gui/browser_ui.c:19634` | `* measured cost (floor 33 ms = the existing ~30 fps ceiling):              * cheap pages paint at...` |
 | `count` | function | `gui/browser_ui.c:9811` | `* the box count (a hostile parent cycle terminates). */ static int oof_depth(const rd_doc *doc, s...` |
 | `css_replaced_box` | function | `gui/browser_ui.c:4892` | `static int css_replaced_box(const rd_doc *doc, const rd_block *b, double avail_w,                ...` |
 | `cursor_at_point` | function | `gui/browser_ui.c:15323` | `static int cursor_at_point(browser_window *w, double px, double py)` |
@@ -427,7 +427,7 @@ Pages: [SYMBOLS.md](SYMBOLS.md), [SYMBOLS_p2.md](SYMBOLS_p2.md), [SYMBOLS_p3.md]
 | `menu_item_toggle` | function | `gui/browser_ui.c:16125` | `static void menu_item_toggle(browser_window *w, size_t i)` |
 | `menu_panel_rect` | function | `gui/browser_ui.c:3269` | `static void menu_panel_rect(const browser_window *w, double *x, double *y,                       ...` |
 | `mime_is_text` | function | `gui/browser_ui.c:18182` | `static int mime_is_text(const char *mime)` |
-| `moves` | function | `gui/browser_ui.c:19292` | `* client that stops reading its socket while the pointer moves (spec/wl_guard.md). */ if...` |
+| `moves` | function | `gui/browser_ui.c:19295` | `* client that stops reading its socket while the pointer moves (spec/wl_guard.md). */ if...` |
 | `mr` | type_alias | `gui/browser_ui.c:5364` | `typedef struct item_sides { double ml, mr;` |
 | `multicol_fragment` | function | `gui/browser_ui.c:7191` | `static double multicol_fragment(rc_layout *L, const rc_open_box *ob, double content_bottom);` |
 | `nested_cont_basis` | function | `gui/browser_ui.c:5799` | `static double nested_cont_basis(cairo_t *cr, const browser_window *w,                            ...` |

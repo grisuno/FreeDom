@@ -1,13 +1,13 @@
 # `include/tab.h`
 
-> Source: [include/tab.h:1](../../include/tab.h#L1) | language `h` | coverage 46.9% | [API index](../index.md)
+> Source: [include/tab.h:1](../../include/tab.h#L1) | language `h` | coverage 50.9% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`tab_hist_op`](#tab_hist_op), [`tab_ws_op`](#tab_ws_op), [`tab_page`](#tab_page), [`tab_eval_result`](#tab_eval_result), [`tab_image`](#tab_image)
 - **Enums:** [`tab_status`](#tab_status), [`tab_ws_kind`](#tab_ws_kind), [`tab_ws_event_kind`](#tab_ws_event_kind)
 - **Type Aliases:** [`tab`](#tab), [`replace`](#replace), [`kind`](#kind)
-- **Functions:** [`tab_worker_dispatch`](#tab_worker_dispatch), [`tab_open`](#tab_open), [`tab_parse_worker_args`](#tab_parse_worker_args), [`out_status`](#out_status), [`tab_set_fetcher`](#tab_set_fetcher), [`tab_inflight_request_headers`](#tab_inflight_request_headers), [`tab_report_response_headers`](#tab_report_response_headers), [`bytes`](#bytes), [`tab_set_css_sink`](#tab_set_css_sink), [`tab_set_net_allowed`](#tab_set_net_allowed), [`tab_set_op_net_budget_ms`](#tab_set_op_net_budget_ms), [`tab_async_fd`](#tab_async_fd), [`tab_async_busy`](#tab_async_busy), [`jar`](#jar), [`tab_set_cookies`](#tab_set_cookies), [`origin`](#origin), [`tab_set_storage`](#tab_set_storage), [`exclusively`](#exclusively), [`tab_set_viewport_w`](#tab_set_viewport_w), [`load`](#load), [`tab_set_identity`](#tab_set_identity), [`tab_last_subreq_stats`](#tab_last_subreq_stats), [`tab_subreq_permitted`](#tab_subreq_permitted), [`view`](#view), [`string`](#string), [`granted`](#granted), [`returned`](#returned), [`popstate`](#popstate), [`decode`](#decode), [`tab_alive`](#tab_alive), [`tab_child_pid`](#tab_child_pid), [`tab_close`](#tab_close), [`tab_page_free`](#tab_page_free), [`tab_eval_result_free`](#tab_eval_result_free), [`tab_image_free`](#tab_image_free)
+- **Functions:** [`tab_worker_dispatch`](#tab_worker_dispatch), [`tab_open`](#tab_open), [`tab_parse_worker_args`](#tab_parse_worker_args), [`tab_prewarm`](#tab_prewarm), [`tab_prewarmed`](#tab_prewarmed), [`tab_prewarmed_pid`](#tab_prewarmed_pid), [`tab_shutdown_spare`](#tab_shutdown_spare), [`out_status`](#out_status), [`tab_set_fetcher`](#tab_set_fetcher), [`tab_inflight_request_headers`](#tab_inflight_request_headers), [`tab_report_response_headers`](#tab_report_response_headers), [`bytes`](#bytes), [`tab_set_css_sink`](#tab_set_css_sink), [`tab_set_net_allowed`](#tab_set_net_allowed), [`tab_set_op_net_budget_ms`](#tab_set_op_net_budget_ms), [`tab_async_fd`](#tab_async_fd), [`tab_async_busy`](#tab_async_busy), [`jar`](#jar), [`tab_set_cookies`](#tab_set_cookies), [`origin`](#origin), [`tab_set_storage`](#tab_set_storage), [`exclusively`](#exclusively), [`tab_set_viewport_w`](#tab_set_viewport_w), [`load`](#load), [`tab_set_identity`](#tab_set_identity), [`tab_last_subreq_stats`](#tab_last_subreq_stats), [`tab_subreq_permitted`](#tab_subreq_permitted), [`view`](#view), [`string`](#string), [`granted`](#granted), [`returned`](#returned), [`popstate`](#popstate), [`decode`](#decode), [`tab_alive`](#tab_alive), [`tab_child_pid`](#tab_child_pid), [`tab_close`](#tab_close), [`tab_page_free`](#tab_page_free), [`tab_eval_result_free`](#tab_eval_result_free), [`tab_image_free`](#tab_image_free)
 - **Macros:** [`TAB_MAX_INPUT`](#tab_max_input)
 
 ## Type Diagram
@@ -280,11 +280,75 @@ No side effects; fail-closed (any malformation => 0).
 
 ---
 
+<a id="tab_prewarm"></a>
+
+### `tab_prewarm`
+
+`function` | [include/tab.h:176](../../include/tab.h#L176)
+
+```c
+void tab_prewarm(void);
+```
+
+Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup (spec/tab.md "Worker de repuesto").
+
+Idempotent; best-effort (a failed spawn just means tab_open spawns on demand). The spare has received no content.
+
+---
+
+<a id="tab_prewarmed"></a>
+
+### `tab_prewarmed`
+
+`function` | [include/tab.h:179](../../include/tab.h#L179)
+
+```c
+int tab_prewarmed(void);
+```
+
+1 while a spare worker is waiting for the next tab_open.
+
+**Returns:** `int`
+
+---
+
+<a id="tab_prewarmed_pid"></a>
+
+### `tab_prewarmed_pid`
+
+`function` | [include/tab.h:182](../../include/tab.h#L182)
+
+```c
+int tab_prewarmed_pid(void);
+```
+
+Process id of that spare, 0 when there is none (diagnostics and tests).
+
+**Returns:** `int`
+
+---
+
+<a id="tab_shutdown_spare"></a>
+
+### `tab_shutdown_spare`
+
+`function` | [include/tab.h:185](../../include/tab.h#L185)
+
+```c
+void tab_shutdown_spare(void);
+```
+
+Kills and reaps the spare, if any.
+
+Safe to call when there is none.
+
+---
+
 <a id="out_status"></a>
 
 ### `out_status`
 
-`function` | [include/tab.h:179](../../include/tab.h#L179)
+`function` | [include/tab.h:193](../../include/tab.h#L193)
 
 ```c
 * On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab frees with free()), *out_ctype (malloc'd Content-Type, * may be NULL). Return non-zer
@@ -304,7 +368,7 @@ No side effects; fail-closed (any malformation => 0).
 
 ### `tab_set_fetcher`
 
-`function` | [include/tab.h:190](../../include/tab.h#L190)
+`function` | [include/tab.h:204](../../include/tab.h#L204)
 
 ```c
 void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);
@@ -326,7 +390,7 @@ Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests ar
 
 ### `tab_inflight_request_headers`
 
-`function` `const` | [include/tab.h:195](../../include/tab.h#L195)
+`function` `const` | [include/tab.h:209](../../include/tab.h#L209)
 
 ```c
 const char *tab_inflight_request_headers(void);
@@ -346,7 +410,7 @@ Valid only for the duration of that call, on the calling thread; NULL anywhere e
 
 ### `tab_report_response_headers`
 
-`function` | [include/tab.h:200](../../include/tab.h#L200)
+`function` | [include/tab.h:214](../../include/tab.h#L214)
 
 ```c
 void tab_report_response_headers(const char *lines);
@@ -370,7 +434,7 @@ Copied (bounded); the fetcher keeps ownership of `lines`. Outside a fetcher call
 
 ### `bytes`
 
-`function` | [include/tab.h:204](../../include/tab.h#L204)
+`function` | [include/tab.h:218](../../include/tab.h#L218)
 
 ```c
 * so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets). url is the RAW worker-requested URL * (possibly relative: resolve it against the page
@@ -390,7 +454,7 @@ Copied (bounded); the fetcher keeps ownership of `lines`. Outside a fetcher call
 
 ### `tab_set_css_sink`
 
-`function` | [include/tab.h:213](../../include/tab.h#L213)
+`function` | [include/tab.h:227](../../include/tab.h#L227)
 
 ```c
 void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);
@@ -410,7 +474,7 @@ void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);
 
 ### `tab_set_net_allowed`
 
-`function` | [include/tab.h:218](../../include/tab.h#L218)
+`function` | [include/tab.h:232](../../include/tab.h#L232)
 
 ```c
 void tab_set_net_allowed(tab *t, int allowed);
@@ -433,7 +497,7 @@ Set it true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sov
 
 ### `tab_set_op_net_budget_ms`
 
-`function` | [include/tab.h:222](../../include/tab.h#L222)
+`function` | [include/tab.h:236](../../include/tab.h#L236)
 
 ```c
 void tab_set_op_net_budget_ms(tab *t, int ms);
@@ -456,7 +520,7 @@ Tests lower it.
 
 ### `tab_async_fd`
 
-`function` | [include/tab.h:227](../../include/tab.h#L227)
+`function` | [include/tab.h:241](../../include/tab.h#L241)
 
 ```c
 * the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY other worker call first waits for the job and DISCARDS its (now stale) * result. Everyt
@@ -470,7 +534,7 @@ Tests lower it.
 
 ### `tab_async_busy`
 
-`function` | [include/tab.h:233](../../include/tab.h#L233)
+`function` | [include/tab.h:247](../../include/tab.h#L247)
 
 ```c
 int tab_async_busy(const tab *t);
@@ -490,7 +554,7 @@ int tab_async_busy(const tab *t);
 
 ### `jar`
 
-`function` | [include/tab.h:240](../../include/tab.h#L240)
+`function` | [include/tab.h:254](../../include/tab.h#L254)
 
 ```c
 * the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted host (allow.conf AND js.conf);
@@ -504,7 +568,7 @@ int tab_async_busy(const tab *t);
 
 ### `tab_set_cookies`
 
-`function` | [include/tab.h:244](../../include/tab.h#L244)
+`function` | [include/tab.h:258](../../include/tab.h#L258)
 
 ```c
 void tab_set_cookies(tab *t, const char *cookies);
@@ -527,7 +591,7 @@ Only meaningful for a trusted host (allow.conf AND js.conf); pass NULL/"" otherw
 
 ### `origin`
 
-`function` | [include/tab.h:247](../../include/tab.h#L247)
+`function` | [include/tab.h:261](../../include/tab.h#L261)
 
 ```c
 * page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);
@@ -547,7 +611,7 @@ Only meaningful for a trusted host (allow.conf AND js.conf); pass NULL/"" otherw
 
 ### `tab_set_storage`
 
-`function` | [include/tab.h:249](../../include/tab.h#L249)
+`function` | [include/tab.h:263](../../include/tab.h#L263)
 
 ```c
 void tab_set_storage(tab *t, const char *blob, size_t len);
@@ -571,7 +635,7 @@ Used only when the load is trusted (net granted); NULL/0 clears it. See spec/web
 
 ### `exclusively`
 
-`function` | [include/tab.h:255](../../include/tab.h#L255)
+`function` | [include/tab.h:269](../../include/tab.h#L269)
 
 ```c
 * exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab *t, int allowed);
@@ -585,7 +649,7 @@ Used only when the load is trusted (net granted); NULL/0 clears it. See spec/web
 
 ### `tab_set_viewport_w`
 
-`function` | [include/tab.h:263](../../include/tab.h#L263)
+`function` | [include/tab.h:277](../../include/tab.h#L277)
 
 ```c
 void tab_set_viewport_w(tab *t, int px);
@@ -608,7 +672,7 @@ Only the @media width query sees it; viewport UNITS (vw/vh) still resolve agains
 
 ### `load`
 
-`function` | [include/tab.h:267](../../include/tab.h#L267)
+`function` | [include/tab.h:281](../../include/tab.h#L281)
 
 ```c
 * trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);
@@ -628,7 +692,7 @@ Only the @media width query sees it; viewport UNITS (vw/vh) still resolve agains
 
 ### `tab_set_identity`
 
-`function` | [include/tab.h:273](../../include/tab.h#L273)
+`function` | [include/tab.h:287](../../include/tab.h#L287)
 
 ```c
 void tab_set_identity(tab *t, const char *serialized);
@@ -651,7 +715,7 @@ The user's identity override (idn_serialize text, spec/identity.md) for the NEXT
 
 ### `tab_last_subreq_stats`
 
-`function` | [include/tab.h:279](../../include/tab.h#L279)
+`function` | [include/tab.h:293](../../include/tab.h#L293)
 
 ```c
 void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);
@@ -675,7 +739,7 @@ A diagnostic (FREEDOM_PERF): it separates "the page's JS is slow" from "the page
 
 ### `tab_subreq_permitted`
 
-`function` | [include/tab.h:284](../../include/tab.h#L284)
+`function` | [include/tab.h:298](../../include/tab.h#L298)
 
 ```c
 int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);
@@ -699,7 +763,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `view`
 
-`function` | [include/tab.h:292](../../include/tab.h#L292)
+`function` | [include/tab.h:306](../../include/tab.h#L306)
 
 ```c
 * <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted page-script execution will hook in (live-DOM milestone). * tab_load is tab_load_ex with run
@@ -720,7 +784,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `string`
 
-`function` | [include/tab.h:312](../../include/tab.h#L312)
+`function` | [include/tab.h:326](../../include/tab.h#L326)
 
 ```c
 * event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be NULL). * key_code is the numeric keyCode/key value. * value is the element's current
@@ -742,7 +806,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `granted`
 
-`function` | [include/tab.h:361](../../include/tab.h#L361)
+`function` | [include/tab.h:375](../../include/tab.h#L375)
 
 ```c
 * granted (allow.conf AND js.conf);
@@ -762,7 +826,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `returned`
 
-`function` | [include/tab.h:362](../../include/tab.h#L362)
+`function` | [include/tab.h:376](../../include/tab.h#L376)
 
 ```c
 * returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */ tab_status tab_set_geometry(tab *t, const jg_table *g);
@@ -782,7 +846,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `popstate`
 
-`function` | [include/tab.h:368](../../include/tab.h#L368)
+`function` | [include/tab.h:382](../../include/tab.h#L382)
 
 ```c
 * popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index, tab_page *out);
@@ -802,7 +866,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `decode`
 
-`function` | [include/tab.h:387](../../include/tab.h#L387)
+`function` | [include/tab.h:401](../../include/tab.h#L401)
 
 ```c
 * could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for transport/worker failures. */ tab_status tab_decode_image(tab *t, const uint8_t *bytes, s
@@ -822,7 +886,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `tab_alive`
 
-`function` | [include/tab.h:400](../../include/tab.h#L400)
+`function` | [include/tab.h:414](../../include/tab.h#L414)
 
 ```c
 int tab_alive(const tab *t);
@@ -844,7 +908,7 @@ Nonzero while the worker process is believed alive.
 
 ### `tab_child_pid`
 
-`function` | [include/tab.h:403](../../include/tab.h#L403)
+`function` | [include/tab.h:417](../../include/tab.h#L417)
 
 ```c
 pid_t tab_child_pid(const tab *t);
@@ -866,7 +930,7 @@ The worker's process id (for monitoring), or -1.
 
 ### `tab_close`
 
-`function` | [include/tab.h:406](../../include/tab.h#L406)
+`function` | [include/tab.h:420](../../include/tab.h#L420)
 
 ```c
 void tab_close(tab *t);
@@ -888,7 +952,7 @@ Safe on NULL.
 
 ### `tab_page_free`
 
-`function` | [include/tab.h:409](../../include/tab.h#L409)
+`function` | [include/tab.h:423](../../include/tab.h#L423)
 
 ```c
 void tab_page_free(tab_page *p);
@@ -910,7 +974,7 @@ Safe on NULL / zeroed structs.
 
 ### `tab_eval_result_free`
 
-`function` | [include/tab.h:410](../../include/tab.h#L410)
+`function` | [include/tab.h:424](../../include/tab.h#L424)
 
 ```c
 void tab_eval_result_free(tab_eval_result *r);
@@ -928,7 +992,7 @@ void tab_eval_result_free(tab_eval_result *r);
 
 ### `tab_image_free`
 
-`function` | [include/tab.h:411](../../include/tab.h#L411)
+`function` | [include/tab.h:425](../../include/tab.h#L425)
 
 ```c
 void tab_image_free(tab_image *img);

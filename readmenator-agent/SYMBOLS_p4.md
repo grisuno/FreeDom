@@ -3,6 +3,9 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `hc_store` | type_alias | `include/http_cache.h:66` | `typedef struct hc_store hc_store;` |
+| `FREEDOM_IDENTITY_H` | macro | `include/identity.h:2` | `#define FREEDOM_IDENTITY_H` |
+| `IDN_GEO_ACC_MAX` | macro | `include/identity.h:23` | `#define IDN_GEO_ACC_MAX` |
 | `IDN_GEO_ACC_MIN` | macro | `include/identity.h:22` | `#define IDN_GEO_ACC_MIN` |
 | `IDN_LANG_MAX` | macro | `include/identity.h:17` | `#define IDN_LANG_MAX` |
 | `IDN_LANG_TAGS_MAX` | macro | `include/identity.h:18` | `#define IDN_LANG_TAGS_MAX` |
@@ -493,8 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:175` | `#define SF_IMPERSONATE_KEX_GROUPS` |
 | `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:180` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
 | `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:176` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
-| `SF_MAX_URL` | macro | `include/secure_fetch.h:219` | `#define SF_MAX_URL` |
-| `SF_META_MAX` | macro | `include/secure_fetch.h:77` | `#define SF_META_MAX` |
-| `SF_RESPONSE_HEADERS_MAX` | macro | `include/secure_fetch.h:78` | `#define SF_RESPONSE_HEADERS_MAX` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

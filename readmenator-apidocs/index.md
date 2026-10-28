@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 217 modules, 3750 documented entities, documentation coverage 39.9% (1486/3720 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 217 modules, 3777 documented entities, documentation coverage 40.2% (1507/3747 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -49,11 +49,11 @@ Languages: c (101), h (100), py (12), sh (4)
 | [`include/css_computed.h`](modules/include.css_computed.h.md) |  | 1 | 4 | 33.3% |
 | [`include/css_decl.h`](modules/include.css_decl.h.md) |  | 2 | 11 | 14.3% |
 | [`include/css_gradient.h`](modules/include.css_gradient.h.md) |  | 4 | 8 | 30.8% |
-| [`include/css_index.h`](modules/include.css_index.h.md) |  | 3 | 3 | 42.9% |
+| [`include/css_index.h`](modules/include.css_index.h.md) |  | 3 | 4 | 50.0% |
 | [`include/css_length.h`](modules/include.css_length.h.md) |  | 5 | 14 | 55.0% |
 | [`include/css_mask.h`](modules/include.css_mask.h.md) | CSS Masking 1, alpha gradients only (spec/css_mask.md). | 4 | 5 | 50.0% |
 | [`include/css_mq.h`](modules/include.css_mq.h.md) |  | 2 | 3 | 50.0% |
-| [`include/css_select.h`](modules/include.css_select.h.md) |  | 10 | 26 | 59.5% |
+| [`include/css_select.h`](modules/include.css_select.h.md) |  | 10 | 28 | 61.5% |
 | [`include/css_text.h`](modules/include.css_text.h.md) |  | 0 | 16 | 0.0% |
 | [`include/css_values.h`](modules/include.css_values.h.md) | Single owner of CSS value interpretation for colors and backgrounds. | 0 | 8 | 33.3% |
 | [`include/css_vars.h`](modules/include.css_vars.h.md) |  | 4 | 14 | 73.7% |
@@ -112,7 +112,7 @@ Languages: c (101), h (100), py (12), sh (4)
 | [`include/subreq_batch.h`](modules/include.subreq_batch.h.md) |  | 4 | 8 | 46.2% |
 | [`include/svg_paint.h`](modules/include.svg_paint.h.md) |  | 0 | 1 | 50.0% |
 | [`include/svg_render.h`](modules/include.svg_render.h.md) |  | 9 | 8 | 38.9% |
-| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 36 | 46.9% |
+| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 40 | 50.9% |
 | [`include/text_case.h`](modules/include.text_case.h.md) | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | 1 | 6 | 75.0% |
 | [`include/text_shape.h`](modules/include.text_shape.h.md) |  | 5 | 18 | 70.8% |
 | [`include/textfield.h`](modules/include.textfield.h.md) |  | 3 | 11 | 53.3% |
@@ -148,11 +148,11 @@ Languages: c (101), h (100), py (12), sh (4)
 | [`src/css_color.c`](modules/src.css_color.c.md) |  | 1 | 11 | 38.5% |
 | [`src/css_computed.c`](modules/src.css_computed.c.md) |  | 1 | 5 | 28.6% |
 | [`src/css_gradient.c`](modules/src.css_gradient.c.md) |  | 0 | 15 | 18.8% |
-| [`src/css_index.c`](modules/src.css_index.c.md) | css_index -- see include/css_index.h and spec/css_index.md. | 0 | 3 | 75.0% |
+| [`src/css_index.c`](modules/src.css_index.c.md) | css_index -- see include/css_index.h and spec/css_index.md. | 1 | 4 | 100.0% |
 | [`src/css_length.c`](modules/src.css_length.c.md) |  | 0 | 11 | 25.0% |
 | [`src/css_mask.c`](modules/src.css_mask.c.md) |  | 0 | 6 | 28.6% |
 | [`src/css_mq.c`](modules/src.css_mq.c.md) |  | 3 | 7 | 18.2% |
-| [`src/css_select.c`](modules/src.css_select.c.md) |  | 0 | 16 | 64.7% |
+| [`src/css_select.c`](modules/src.css_select.c.md) |  | 0 | 19 | 65.0% |
 | [`src/css_text.c`](modules/src.css_text.c.md) | --- text-presentation extensions (Hito 23b-6) --- | 0 | 14 | 73.3% |
 | [`src/css_values.c`](modules/src.css_values.c.md) |  | 0 | 8 | 22.2% |
 | [`src/css_vars.c`](modules/src.css_vars.c.md) |  | 0 | 8 | 55.6% |
@@ -197,7 +197,7 @@ Languages: c (101), h (100), py (12), sh (4)
 | [`src/js_sandbox.c`](modules/src.js_sandbox.c.md) |  | 3 | 29 | 39.4% |
 | [`src/js_trusted.c`](modules/src.js_trusted.c.md) |  | 1 | 14 | 31.2% |
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
-| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 333 | 1.5% |
+| [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 337 | 1.5% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
@@ -216,9 +216,9 @@ Languages: c (101), h (100), py (12), sh (4)
 | [`src/sha2.c`](modules/src.sha2.c.md) |  | 0 | 6 | 42.9% |
 | [`src/subreq_batch.c`](modules/src.subreq_batch.c.md) |  | 2 | 8 | 45.5% |
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
-| [`src/tab.c`](modules/src.tab.c.md) |  | 4 | 86 | 40.7% |
+| [`src/tab.c`](modules/src.tab.c.md) |  | 5 | 91 | 43.3% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |
-| [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 10 | 24 | 45.7% |
+| [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 12 | 27 | 50.0% |
 | [`src/textfield.c`](modules/src.textfield.c.md) |  | 0 | 12 | 46.2% |
 | [`src/tls_impersonate.c`](modules/src.tls_impersonate.c.md) |  | 2 | 7 | 10.0% |
 | [`src/ui_layout.c`](modules/src.ui_layout.c.md) |  | 0 | 3 | 50.0% |

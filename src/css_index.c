@@ -37,11 +37,6 @@ static int entry_cmp(const void *a, const void *b) {
     return (x->sel > y->sel) - (x->sel < y->sel);
 }
 
-static int u32_cmp(const void *a, const void *b) {
-    uint32_t x = *(const uint32_t *)a, y = *(const uint32_t *)b;
-    return (x > y) - (x < y);
-}
-
 void cix_free(cix_index *idx) {
     if (idx == NULL) return;
     free(idx->keyed);
@@ -49,7 +44,8 @@ void cix_free(cix_index *idx) {
     memset(idx, 0, sizeof *idx);
 }
 
-void cix_build(const css_sel *sels, size_t n, cix_index *idx) {
+static void build(const css_sel *arr, css_sel *const *ptrs, size_t n, cix_index *idx) {
+    const void *sels = ptrs != NULL ? (const void *)ptrs : (const void *)arr;
     if (idx == NULL) return;
     memset(idx, 0, sizeof *idx);
     if (sels == NULL || n == 0 || n > UINT32_MAX) {
@@ -62,7 +58,7 @@ void cix_build(const css_sel *sels, size_t n, cix_index *idx) {
     if (keyed == NULL || uni == NULL) { free(keyed); free(uni); return; }
     size_t nk = 0, nu = 0;
     for (size_t i = 0; i < n; ++i) {
-        const css_sel *s = &sels[i];
+        const css_sel *s = ptrs != NULL ? ptrs[i] : &arr[i];
         if (s->nparts <= 0 || s->nparts > CSS_MAX_COMPOUNDS) { uni[nu++] = (uint32_t)i; continue; }
         const css_compound *c = &s->parts[s->nparts - 1];
         uint64_t k;
@@ -97,6 +93,24 @@ static size_t lower_bound(const cix_index *idx, uint64_t k) {
     return lo;
 }
 
+/* One sorted run of selector ordinals: the universal list, or the bucket of one key (entries
+ * with equal keys are stored in ascending selector order, see entry_cmp). */
+typedef struct {
+    const uint32_t  *u;
+    const cix_entry *e;
+    size_t           i, n;
+} cix_run;
+
+static uint32_t run_head(const cix_run *r) { return r->u != NULL ? r->u[r->i] : r->e[r->i].sel; }
+
+static void add_bucket(const cix_index *idx, uint64_t k, cix_run *runs, size_t *nr) {
+    size_t lo = lower_bound(idx, k), hi = lo;
+    while (hi < idx->nkeyed && idx->keyed[hi].key == k) ++hi;
+    if (hi == lo) return;
+    runs[*nr] = (cix_run){ NULL, idx->keyed + lo, 0, hi - lo };
+    ++*nr;
+}
+
 static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v) {
     if (*n == *cap) {
         size_t nc = *cap ? *cap * 2 : 64;
@@ -110,36 +124,45 @@ static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v) {
     return 1;
 }
 
-static int push_bucket(const cix_index *idx, uint64_t k,
-                       uint32_t **buf, size_t *cap, size_t *n) {
-    for (size_t i = lower_bound(idx, k); i < idx->nkeyed && idx->keyed[i].key == k; ++i)
-        if (!push(buf, cap, n, idx->keyed[i].sel)) return 0;
-    return 1;
-}
-
+/* Candidates in ascending selector order without duplicates: a k-way merge of the (already
+ * sorted) universal list and the id, tag and class buckets, so no sort is needed. */
 size_t cix_candidates(const cix_index *idx, const css_element *el,
                       uint32_t **buf, size_t *cap) {
     if (idx == NULL || !idx->valid || el == NULL || buf == NULL || cap == NULL)
         return (size_t)-1;
-    size_t n = 0;
-    for (size_t i = 0; i < idx->nuniversal; ++i)
-        if (!push(buf, cap, &n, idx->universal[i])) return (size_t)-1;
-    if (el->id != NULL && !push_bucket(idx, key_of_token(KEY_ID, el->id), buf, cap, &n))
-        return (size_t)-1;
-    if (el->tag != NULL &&
-        !push_bucket(idx, key_of(KEY_TAG, el->tag, strlen(el->tag), 1), buf, cap, &n))
-        return (size_t)-1;
+    if (el->nclasses > SIZE_MAX / sizeof(cix_run) - 3) return (size_t)-1;
+    cix_run *runs = calloc(el->nclasses + 3, sizeof *runs);
+    if (runs == NULL) return (size_t)-1;
+    size_t nr = 0;
+    if (idx->nuniversal > 0) runs[nr++] = (cix_run){ idx->universal, NULL, 0, idx->nuniversal };
+    if (el->id != NULL) add_bucket(idx, key_of_token(KEY_ID, el->id), runs, &nr);
+    if (el->tag != NULL) add_bucket(idx, key_of(KEY_TAG, el->tag, strlen(el->tag), 1), runs, &nr);
     for (size_t j = 0; j < el->nclasses; ++j) {
         if (el->classes == NULL || el->classes[j] == NULL) continue;
-        if (!push_bucket(idx, key_of_token(KEY_CLASS, el->classes[j]), buf, cap, &n))
-            return (size_t)-1;
+        add_bucket(idx, key_of_token(KEY_CLASS, el->classes[j]), runs, &nr);
     }
-    if (n > 1) {
-        qsort(*buf, n, sizeof **buf, u32_cmp);
-        size_t w = 1;
-        for (size_t i = 1; i < n; ++i)
-            if ((*buf)[i] != (*buf)[w - 1]) (*buf)[w++] = (*buf)[i];
-        n = w;
+    size_t n = 0;
+    int have_last = 0;
+    uint32_t last = 0;
+    for (;;) {
+        size_t best = nr;
+        uint32_t bv = 0;
+        for (size_t r = 0; r < nr; ++r) {
+            if (runs[r].i >= runs[r].n) continue;
+            uint32_t v = run_head(&runs[r]);
+            if (best == nr || v < bv) { best = r; bv = v; }
+        }
+        if (best == nr) break;
+        ++runs[best].i;
+        if (have_last && bv == last) continue;
+        if (!push(buf, cap, &n, bv)) { free(runs); return (size_t)-1; }
+        last = bv;
+        have_last = 1;
     }
+    free(runs);
     return n;
 }
+
+void cix_build(const css_sel *sels, size_t n, cix_index *idx) { build(sels, NULL, n, idx); }
+
+void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx) { build(NULL, sels, n, idx); }

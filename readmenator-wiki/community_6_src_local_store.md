@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 16 file(s) rooted at `src` with dominant language c (cohesion 0.79). Central symbols: `FREEDOM_CACHED_FETCH_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `HC_EVICT_EVERY`, `HC_HEURISTIC_CAP`, `HC_KEY_FILE`. Core file: `src/local_store.c` (339 symbols).
+This community groups 16 file(s) rooted at `src` with dominant language c (cohesion 0.79). Central symbols: `FREEDOM_CACHED_FETCH_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `HC_EVICT_EVERY`, `HC_HEURISTIC_CAP`, `HC_KEY_FILE`. Core file: `src/local_store.c` (343 symbols).
 
 ## Files
 
@@ -18,7 +18,7 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 | `src/cached_fetch.c` | c | infrastructure | 14 | no |
 | `src/disk_store.c` | c | data_access | 6 | no |
 | `src/http_cache.c` | c | presentation | 38 | no |
-| `src/local_store.c` | c | data_access | 339 | no |
+| `src/local_store.c` | c | data_access | 343 | no |
 | `src/pq_seal.c` | c | utility | 11 | no |
 | `src/profile.c` | c | utility | 9 | no |
 | `tests/test_cached_fetch.c` | c | testing | 14 | no |

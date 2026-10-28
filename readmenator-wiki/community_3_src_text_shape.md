@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 42 file(s) rooted at `src` with dominant language c (cohesion 0.54). Central symbols: `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FREEDOM_DATA_URL_H`, `FREEDOM_HLS_H`. Core file: `src/text_shape.c` (61 symbols). Documented purpose: test_wl_display — CMocka suite for the pure Wayland socket picker..
+This community groups 42 file(s) rooted at `src` with dominant language c (cohesion 0.54). Central symbols: `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FREEDOM_DATA_URL_H`, `FREEDOM_HLS_H`. Core file: `src/text_shape.c` (68 symbols). Documented purpose: test_wl_display — CMocka suite for the pure Wayland socket picker..
 
 ## Files
 

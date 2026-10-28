@@ -248,79 +248,87 @@ static void child_fetch_stylesheets(child_state *cs)`
 - `send_request` (function) `src/tab.c:2998` `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` -- if (elen != 0) { txt = (char *)malloc(elen); if (txt == NULL) { free(file); return -1; } if (read_full(fd, txt...
 - `io_failure` (function) `src/tab.c:3008` `static tab_status io_failure(tab *t)`
 - `exec_worker_child` (function) `src/tab.c:3016` `static void exec_worker_child(int rfd, int wfd)` -- Child half of the fork: re-exec a fresh worker image so it inherits NONE of the parent's address space (no other...
-- `tab_set_fetcher` (function) `src/tab.c:3088` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-- `tab_set_css_sink` (function) `src/tab.c:3094` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
-- `tab_set_op_net_budget_ms` (function) `src/tab.c:3100` `void tab_set_op_net_budget_ms(tab *t, int ms)`
-- `tab_set_net_allowed` (function) `src/tab.c:3104` `void tab_set_net_allowed(tab *t, int allowed)`
-- `tab_set_css_allowed` (function) `src/tab.c:3109` `void tab_set_css_allowed(tab *t, int allowed)`
-- `tab_last_subreq_stats` (function) `src/tab.c:3114` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
-- `tab_set_identity` (function) `src/tab.c:3119` `void tab_set_identity(tab *t, const char *serialized)`
-- `tab_set_frame_id` (function) `src/tab.c:3127` `void tab_set_frame_id(tab *t, int id)`
-- `tab_set_viewport_w` (function) `src/tab.c:3132` `void tab_set_viewport_w(tab *t, int px)`
-- `tab_set_cookies` (function) `src/tab.c:3137` `void tab_set_cookies(tab *t, const char *cookies)`
-- `tab_subreq_permitted` (function) `src/tab.c:3143` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-- `tab_report_response_headers` (function) `src/tab.c:3157` `void tab_report_response_headers(const char *lines)`
-- `tab_inflight_request_headers` (function) `src/tab.c:3169` `const char *tab_inflight_request_headers(void)`
-- `tab_write_reply` (function) `src/tab.c:3175` `static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t rlen,
+- `spawn_worker` (function) `src/tab.c:3048` `static tab_status spawn_worker(tab_spawned *sp)` -- Forks and execs one confined worker WITHOUT waiting for its handshake.
+- `reap_spawned` (function) `src/tab.c:3078` `static void reap_spawned(const tab_spawned *sp, int kill_it)`
+- `adopt_worker` (function) `src/tab.c:3087` `static tab_status adopt_worker(const tab_spawned *sp, tab **out)` -- sp->resp_r = resp[0]; sp->pid = pid; return TAB_OK; } static void reap_spawned(const tab_spawned *sp, int kill_it) {...
+- `tab_prewarm` (function) `src/tab.c:3109` `void tab_prewarm(void)`
+- `tab_prewarmed` (function) `src/tab.c:3115` `int tab_prewarmed(void)`
+- `tab_prewarmed_pid` (function) `src/tab.c:3122` `int tab_prewarmed_pid(void)`
+- `tab_shutdown_spare` (function) `src/tab.c:3129` `void tab_shutdown_spare(void)`
+- `tab_open` (function) `src/tab.c:3138` `tab_status tab_open(tab **out)`
+- `tab_set_fetcher` (function) `src/tab.c:3161` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
+- `tab_set_css_sink` (function) `src/tab.c:3167` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
+- `tab_set_op_net_budget_ms` (function) `src/tab.c:3173` `void tab_set_op_net_budget_ms(tab *t, int ms)`
+- `tab_set_net_allowed` (function) `src/tab.c:3177` `void tab_set_net_allowed(tab *t, int allowed)`
+- `tab_set_css_allowed` (function) `src/tab.c:3182` `void tab_set_css_allowed(tab *t, int allowed)`
+- `tab_last_subreq_stats` (function) `src/tab.c:3187` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
+- `tab_set_identity` (function) `src/tab.c:3192` `void tab_set_identity(tab *t, const char *serialized)`
+- `tab_set_frame_id` (function) `src/tab.c:3200` `void tab_set_frame_id(tab *t, int id)`
+- `tab_set_viewport_w` (function) `src/tab.c:3205` `void tab_set_viewport_w(tab *t, int px)`
+- `tab_set_cookies` (function) `src/tab.c:3210` `void tab_set_cookies(tab *t, const char *cookies)`
+- `tab_subreq_permitted` (function) `src/tab.c:3216` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
+- `tab_report_response_headers` (function) `src/tab.c:3230` `void tab_report_response_headers(const char *lines)`
+- `tab_inflight_request_headers` (function) `src/tab.c:3242` `const char *tab_inflight_request_headers(void)`
+- `tab_write_reply` (function) `src/tab.c:3248` `static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t rlen,
           ...` -- Writes one reply [status:int32][body_len][body][ctype_len][ctype][hdr_len][hdrs][ms:int32] on req_fd * (the worker...
-- `tab_read_subreq_fields` (function) `src/tab.c:3220` `static int tab_read_subreq_fields(tab *t, char **method, char **url, char **body, size_t *blen,
+- `tab_read_subreq_fields` (function) `src/tab.c:3293` `static int tab_read_subreq_fields(tab *t, char **method, char **url, char **body, size_t *blen,
  ...` -- g_inflight_headers = hdrs; free(g_inflight_resp); g_inflight_resp = NULL; g_inflight_active = 1; int ok =...
-- `tab_op_budget_us` (function) `src/tab.c:3231` `static int64_t tab_op_budget_us(const tab *t)`
-- `tab_note_css_served` (function) `src/tab.c:3235` `static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,
+- `tab_op_budget_us` (function) `src/tab.c:3304` `static int64_t tab_op_budget_us(const tab *t)`
+- `tab_note_css_served` (function) `src/tab.c:3308` `static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,
  ...`
-- `tab_serve_subreq` (function) `src/tab.c:3251` `static int tab_serve_subreq(tab *t, int net_granted, int css_granted)` -- Handles one TAG_SUBREQ frame on the response pipe: reads the worker's subresource request, gates it on the grants...
-- `tab_batch_run` (function) `src/tab.c:3278` `static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out)` -- The fetch of one deferred request, on a batch thread.
-- `tab_submit_async` (function) `src/tab.c:3293` `static int tab_submit_async(tab *t, int net_granted, int css_granted)` -- TAG_SUBREQ_ASYNC: reads and gates the frame like tab_serve_subreq, then starts the fetch on a batch thread and goes...
-- `tab_serve_netwait` (function) `src/tab.c:3315` `static int tab_serve_netwait(tab *t)` -- TAG_NETWAIT: joins the batch and writes one reply per deferred request, in issue order.
-- `tab_serve_tag` (function) `src/tab.c:3337` `static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted)` -- Serves the frame kinds the worker may send while it runs: 1 = served, 0 = not a subrequest * tag, -1 = pipe/protocol...
-- `tab_batch_discard` (function) `src/tab.c:3345` `static void tab_batch_discard(tab *t)` -- Serves the frame kinds the worker may send while it runs: 1 = served, 0 = not a subrequest * tag, -1 = pipe/protocol...
-- `hist_ops_free` (function) `src/tab.c:3350` `static void hist_ops_free(tab_hist_op *ops, size_t n)`
-- `is_activation_event` (function) `src/tab.c:3415` `static int is_activation_event(const char *type)` -- HTML 6.4.2 activation-triggering input events: only these let a page open a * window.
-- `open_urls_free` (function) `src/tab.c:3424` `static void open_urls_free(char **u, size_t n)`
-- `read_opens` (function) `src/tab.c:3434` `static tab_status read_opens(tab *t, const char *page_url, int gesture,
+- `tab_serve_subreq` (function) `src/tab.c:3324` `static int tab_serve_subreq(tab *t, int net_granted, int css_granted)` -- Handles one TAG_SUBREQ frame on the response pipe: reads the worker's subresource request, gates it on the grants...
+- `tab_batch_run` (function) `src/tab.c:3351` `static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out)` -- The fetch of one deferred request, on a batch thread.
+- `tab_submit_async` (function) `src/tab.c:3366` `static int tab_submit_async(tab *t, int net_granted, int css_granted)` -- TAG_SUBREQ_ASYNC: reads and gates the frame like tab_serve_subreq, then starts the fetch on a batch thread and goes...
+- `tab_serve_netwait` (function) `src/tab.c:3388` `static int tab_serve_netwait(tab *t)` -- TAG_NETWAIT: joins the batch and writes one reply per deferred request, in issue order.
+- `tab_serve_tag` (function) `src/tab.c:3410` `static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted)` -- Serves the frame kinds the worker may send while it runs: 1 = served, 0 = not a subrequest * tag, -1 = pipe/protocol...
+- `tab_batch_discard` (function) `src/tab.c:3418` `static void tab_batch_discard(tab *t)` -- Serves the frame kinds the worker may send while it runs: 1 = served, 0 = not a subrequest * tag, -1 = pipe/protocol...
+- `hist_ops_free` (function) `src/tab.c:3423` `static void hist_ops_free(tab_hist_op *ops, size_t n)`
+- `is_activation_event` (function) `src/tab.c:3488` `static int is_activation_event(const char *type)` -- HTML 6.4.2 activation-triggering input events: only these let a page open a * window.
+- `open_urls_free` (function) `src/tab.c:3497` `static void open_urls_free(char **u, size_t n)`
+- `read_opens` (function) `src/tab.c:3507` `static tab_status read_opens(tab *t, const char *page_url, int gesture,
                          ...` -- Reads the window.open block (see write_opens).
-- `ws_ops_free` (function) `src/tab.c:3463` `static void ws_ops_free(tab_ws_op *ops, size_t n)`
-- `read_ws` (function) `src/tab.c:3472` `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` -- Reads the WebSocket block (see write_ws), bounded by JT_WS_MAX_OPS ops and JT_WS_MAX_BYTES of payload.
-- `gate_js_nav` (function) `src/tab.c:3541` `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` -- Gates a raw JS navigation request against the page URL in the trusted parent (Zero Trust: a compromised worker...
-- `tab_load` (function) `src/tab.c:3551` `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-- `tab_load_ex` (function) `src/tab.c:3555` `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-- `tab_load_full` (function) `src/tab.c:3559` `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+- `ws_ops_free` (function) `src/tab.c:3536` `static void ws_ops_free(tab_ws_op *ops, size_t n)`
+- `read_ws` (function) `src/tab.c:3545` `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` -- Reads the WebSocket block (see write_ws), bounded by JT_WS_MAX_OPS ops and JT_WS_MAX_BYTES of payload.
+- `gate_js_nav` (function) `src/tab.c:3614` `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` -- Gates a raw JS navigation request against the page URL in the trusted parent (Zero Trust: a compromised worker...
+- `tab_load` (function) `src/tab.c:3624` `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
+- `tab_load_ex` (function) `src/tab.c:3628` `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
+- `tab_load_full` (function) `src/tab.c:3632` `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-- `tab_click` (function) `src/tab.c:3760` `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-- `tab_tick` (function) `src/tab.c:3768` `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-- `tab_submit` (function) `src/tab.c:3778` `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` -- Dispatches a submit event on the form enclosing node_id.
-- `tab_read_view` (function) `src/tab.c:3886` `tab_status tab_read_view(tab *t, tab_page *out)` -- Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request...
-- `frames` (function) `src/tab.c:3892` `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...`
-- `tab_await_result` (function) `src/tab.c:3895` `static tab_status tab_await_result(tab *t)`
-- `tab_await_result_inner` (function) `src/tab.c:3903` `static tab_status tab_await_result_inner(tab *t)`
-- `tab_read_view_ex` (function) `src/tab.c:3912` `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
-- `tab_eval` (function) `src/tab.c:4007` `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-- `tab_decode_image_op` (function) `src/tab.c:4048` `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
+- `tab_click` (function) `src/tab.c:3833` `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
+- `tab_tick` (function) `src/tab.c:3841` `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
+- `tab_submit` (function) `src/tab.c:3851` `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` -- Dispatches a submit event on the form enclosing node_id.
+- `tab_read_view` (function) `src/tab.c:3959` `tab_status tab_read_view(tab *t, tab_page *out)` -- Reads the TAG_RESULT + TAG_VIEW response into *out (titles + view + console). * Used by tab_mutation_request...
+- `frames` (function) `src/tab.c:3965` `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...`
+- `tab_await_result` (function) `src/tab.c:3968` `static tab_status tab_await_result(tab *t)`
+- `tab_await_result_inner` (function) `src/tab.c:3976` `static tab_status tab_await_result_inner(tab *t)`
+- `tab_read_view_ex` (function) `src/tab.c:3985` `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
+- `tab_eval` (function) `src/tab.c:4080` `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
+- `tab_decode_image_op` (function) `src/tab.c:4121` `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...` -- Shared by tab_decode_image and tab_decode_image_data_url: sends `bytes` under opcode `op` and parses the...
-- `tab_decode_image` (function) `src/tab.c:4090` `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-- `tab_decode_image_data_url` (function) `src/tab.c:4097` `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-- `tab_alive` (function) `src/tab.c:4116` `int tab_alive(const tab *t)`
-- `tab_child_pid` (function) `src/tab.c:4122` `pid_t tab_child_pid(const tab *t)`
-- `tab_close` (function) `src/tab.c:4126` `void tab_close(tab *t)`
-- `tab_page_free` (function) `src/tab.c:4144` `void tab_page_free(tab_page *p)`
-- `tab_eval_result_free` (function) `src/tab.c:4174` `void tab_eval_result_free(tab_eval_result *r)`
-- `tab_image_free` (function) `src/tab.c:4183` `void tab_image_free(tab_image *img)`
-- `tab_geometry_send` (function) `src/tab.c:4195` `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)` -- Writes one encoded geometry table and waits for its acknowledgement (serving any network the * observer callbacks it...
-- `geometry_encode` (function) `src/tab.c:4213` `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)`
-- `tab_set_geometry` (function) `src/tab.c:4223` `tab_status tab_set_geometry(tab *t, const jg_table *g)`
-- `job_discard` (function) `src/tab.c:4237` `static void job_discard(tab *t)`
-- `tab_async_sync` (function) `src/tab.c:4249` `static void tab_async_sync(tab *t)` -- Waits for a running job and DISCARDS its result: any other worker call is about to change * the page, so the...
-- `job_main` (function) `src/tab.c:4259` `static void *job_main(void *arg)`
-- `tab_async_fd` (function) `src/tab.c:4275` `int tab_async_fd(tab *t)`
-- `tab_async_busy` (function) `src/tab.c:4284` `int tab_async_busy(const tab *t)`
-- `job_start` (function) `src/tab.c:4288` `static tab_status job_start(tab *t)`
-- `tab_tick_async` (function) `src/tab.c:4301` `tab_status tab_tick_async(tab *t, int elapsed_ms)`
-- `tab_geometry_async` (function) `src/tab.c:4311` `tab_status tab_geometry_async(tab *t, const jg_table *g)`
-- `tab_async_finish` (function) `src/tab.c:4326` `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)`
-- `tab_popstate` (function) `src/tab.c:4348` `tab_status tab_popstate(tab *t, int index, tab_page *out)`
-- `tab_ws_event` (function) `src/tab.c:4355` `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
+- `tab_decode_image` (function) `src/tab.c:4163` `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
+- `tab_decode_image_data_url` (function) `src/tab.c:4170` `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
+- `tab_alive` (function) `src/tab.c:4189` `int tab_alive(const tab *t)`
+- `tab_child_pid` (function) `src/tab.c:4195` `pid_t tab_child_pid(const tab *t)`
+- `tab_close` (function) `src/tab.c:4199` `void tab_close(tab *t)`
+- `tab_page_free` (function) `src/tab.c:4217` `void tab_page_free(tab_page *p)`
+- `tab_eval_result_free` (function) `src/tab.c:4247` `void tab_eval_result_free(tab_eval_result *r)`
+- `tab_image_free` (function) `src/tab.c:4256` `void tab_image_free(tab_image *img)`
+- `tab_geometry_send` (function) `src/tab.c:4268` `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)` -- Writes one encoded geometry table and waits for its acknowledgement (serving any network the * observer callbacks it...
+- `geometry_encode` (function) `src/tab.c:4286` `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)`
+- `tab_set_geometry` (function) `src/tab.c:4296` `tab_status tab_set_geometry(tab *t, const jg_table *g)`
+- `job_discard` (function) `src/tab.c:4310` `static void job_discard(tab *t)`
+- `tab_async_sync` (function) `src/tab.c:4322` `static void tab_async_sync(tab *t)` -- Waits for a running job and DISCARDS its result: any other worker call is about to change * the page, so the...
+- `job_main` (function) `src/tab.c:4332` `static void *job_main(void *arg)`
+- `tab_async_fd` (function) `src/tab.c:4348` `int tab_async_fd(tab *t)`
+- `tab_async_busy` (function) `src/tab.c:4357` `int tab_async_busy(const tab *t)`
+- `job_start` (function) `src/tab.c:4361` `static tab_status job_start(tab *t)`
+- `tab_tick_async` (function) `src/tab.c:4374` `tab_status tab_tick_async(tab *t, int elapsed_ms)`
+- `tab_geometry_async` (function) `src/tab.c:4384` `tab_status tab_geometry_async(tab *t, const jg_table *g)`
+- `tab_async_finish` (function) `src/tab.c:4399` `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)`
+- `tab_popstate` (function) `src/tab.c:4421` `tab_status tab_popstate(tab *t, int index, tab_page *out)`
+- `tab_ws_event` (function) `src/tab.c:4428` `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
        ...`
-- `tab_set_storage` (function) `src/tab.c:4375` `void tab_set_storage(tab *t, const char *blob, size_t len)`
+- `tab_set_storage` (function) `src/tab.c:4448` `void tab_set_storage(tab *t, const char *blob, size_t len)`
 
 ## src/text_case.c
 Depends on: `include/css.h`, `include/text_case.h`
@@ -337,56 +345,58 @@ Depends on: `include/css.h`, `include/text_case.h`
 
 ## src/text_shape.c
 Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
-- `generic_name` (function) `src/text_shape.c:55` `static const char *generic_name(int family)`
-- `backend_init` (function) `src/text_shape.c:65` `static int backend_init(void)`
-- `read_font_file` (function) `src/text_shape.c:82` `static unsigned char *read_font_file(const char *path, long *out_n)`
-- `characters` (function) `src/text_shape.c:100` `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
-- `load_entry_named` (function) `src/text_shape.c:103` `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)`
-- `load_entry_file` (function) `src/text_shape.c:133` `static int load_entry_file(tsh_entry *e, const char *path, int index)` -- Loads face `index` of the font file at `path` into e (FreeType + cairo + * HarfBuzz over one owned copy of the bytes).
-- `load_entry` (function) `src/text_shape.c:169` `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
-- `get_entry` (function) `src/text_shape.c:173` `static tsh_entry *get_entry(int family, int bold, int italic)`
-- `web_entry_free` (function) `src/text_shape.c:201` `static void web_entry_free(tsh_web *w)`
-- `slice` (function) `src/text_shape.c:213` `* woff2 slice (spec/webfont.md);`
-- `web_magic_ok` (function) `src/text_shape.c:214` `static int web_magic_ok(const unsigned char *b, size_t n)` -- True for font programs FreeType parses without new decoders: wOFF/TrueType/ CFF-OpenType (and the mac aliases). wOF2...
-- `web_make_entry` (function) `src/text_shape.c:227` `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` -- Builds the shaping faces over an OWNED copy of bytes[0,nbytes) into e (shared tail with load_entry's file path: same...
-- `tsh_webfont_register` (function) `src/text_shape.c:267` `int tsh_webfont_register(const char *name,
+- `generic_name` (function) `src/text_shape.c:56` `static const char *generic_name(int family)`
+- `backend_init` (function) `src/text_shape.c:66` `static int backend_init(void)`
+- `read_font_file` (function) `src/text_shape.c:83` `static unsigned char *read_font_file(const char *path, long *out_n)`
+- `characters` (function) `src/text_shape.c:101` `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
+- `load_entry_named` (function) `src/text_shape.c:104` `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)`
+- `load_entry_file` (function) `src/text_shape.c:134` `static int load_entry_file(tsh_entry *e, const char *path, int index)` -- Loads face `index` of the font file at `path` into e (FreeType + cairo + * HarfBuzz over one owned copy of the bytes).
+- `load_entry` (function) `src/text_shape.c:170` `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
+- `get_entry` (function) `src/text_shape.c:174` `static tsh_entry *get_entry(int family, int bold, int italic)`
+- `web_entry_free` (function) `src/text_shape.c:202` `static void web_entry_free(tsh_web *w)`
+- `slice` (function) `src/text_shape.c:214` `* woff2 slice (spec/webfont.md);`
+- `web_magic_ok` (function) `src/text_shape.c:215` `static int web_magic_ok(const unsigned char *b, size_t n)` -- True for font programs FreeType parses without new decoders: wOFF/TrueType/ CFF-OpenType (and the mac aliases). wOF2...
+- `web_make_entry` (function) `src/text_shape.c:228` `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` -- Builds the shaping faces over an OWNED copy of bytes[0,nbytes) into e (shared tail with load_entry's file path: same...
+- `tsh_webfont_register` (function) `src/text_shape.c:271` `int tsh_webfont_register(const char *name,
                          const unsigned char *bytes, s...`
-- `tsh_webfont_clear` (function) `src/text_shape.c:301` `void tsh_webfont_clear(void)`
-- `web_find` (function) `src/text_shape.c:306` `static tsh_entry *web_find(unsigned h, int bold, int italic)`
-- `entry_free` (function) `src/text_shape.c:318` `static void entry_free(tsh_entry *e)`
-- `ascii_ieq` (function) `src/text_shape.c:331` `static int ascii_ieq(const char *a, const char *b)`
-- `tsh_family_is_generic` (function) `src/text_shape.c:340` `int tsh_family_is_generic(const char *name)`
-- `tsh_pick_from_list` (function) `src/text_shape.c:352` `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
+- `tsh_webfont_clear` (function) `src/text_shape.c:306` `void tsh_webfont_clear(void)`
+- `web_find` (function) `src/text_shape.c:312` `static tsh_entry *web_find(unsigned h, int bold, int italic)`
+- `entry_free` (function) `src/text_shape.c:324` `static void entry_free(tsh_entry *e)`
+- `ascii_ieq` (function) `src/text_shape.c:337` `static int ascii_ieq(const char *a, const char *b)`
+- `tsh_family_is_generic` (function) `src/text_shape.c:346` `int tsh_family_is_generic(const char *name)`
+- `tsh_pick_from_list` (function) `src/text_shape.c:358` `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
                   ...`
-- `tsh_pick_family` (function) `src/text_shape.c:373` `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
+- `tsh_pick_family` (function) `src/text_shape.c:379` `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
         ...`
-- `fc_installed` (function) `src/text_shape.c:386` `static int fc_installed(const char *name, void *ctx)` -- const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...
-- `fc_resolve` (function) `src/text_shape.c:429` `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
-- `local_clear` (function) `src/text_shape.c:474` `static void local_clear(void)`
-- `lfam_index` (function) `src/text_shape.c:484` `static int lfam_index(const char *fam)`
-- `tsh_local_handle` (function) `src/text_shape.c:492` `int tsh_local_handle(const char *list)`
-- `local_entry` (function) `src/text_shape.c:511` `static tsh_entry *local_entry(int handle, int bold, int italic)`
-- `get_entry_ex` (function) `src/text_shape.c:531` `static tsh_entry *get_entry_ex(const tsh_font *f)` -- Entry for a full font selector: a registered @font-face wins over the local bucket stack; a set-but-unregistered...
-- `tsh_ready` (function) `src/text_shape.c:543` `int tsh_ready(void)`
-- `tsh_shape` (function) `src/text_shape.c:548` `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
+- `fc_installed` (function) `src/text_shape.c:392` `static int fc_installed(const char *name, void *ctx)` -- const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...
+- `fc_resolve` (function) `src/text_shape.c:435` `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
+- `local_clear` (function) `src/text_shape.c:480` `static void local_clear(void)`
+- `lfam_index` (function) `src/text_shape.c:491` `static int lfam_index(const char *fam)`
+- `tsh_local_handle` (function) `src/text_shape.c:499` `int tsh_local_handle(const char *list)`
+- `local_entry` (function) `src/text_shape.c:518` `static tsh_entry *local_entry(int handle, int bold, int italic)`
+- `get_entry_ex` (function) `src/text_shape.c:538` `static tsh_entry *get_entry_ex(const tsh_font *f)` -- Entry for a full font selector: a registered @font-face wins over the local bucket stack; a set-but-unregistered...
+- `tsh_ready` (function) `src/text_shape.c:550` `int tsh_ready(void)`
+- `tsh_shape` (function) `src/text_shape.c:555` `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
                 ...`
-- `utf8_next` (function) `src/text_shape.c:597` `static unsigned utf8_next(const char *s, size_t n, size_t *len)` -- Decodes one UTF-8 sequence at s[0..n): the code point (U+FFFD for a malformed * sequence) and its byte length (>= 1...
-- `is_private_use` (function) `src/text_shape.c:616` `static int is_private_use(unsigned cp)` -- if (l > n) l = 1; if (l == 1) { *len = 1; return (c < 0x80) ? c : 0xFFFDu; } unsigned cp = c & (0x7fu >> l); for...
-- `rides_previous` (function) `src/text_shape.c:621` `static int rides_previous(unsigned cp)` -- cp = (cp << 6) | (u[k] & 0x3fu); } len = l; return cp; } #define TSH_BLANK_GLYPH ((unsigned long)-1) /* Private Use...
-- `tsh_segment` (function) `src/text_shape.c:629` `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
+- `utf8_next` (function) `src/text_shape.c:604` `static unsigned utf8_next(const char *s, size_t n, size_t *len)` -- Decodes one UTF-8 sequence at s[0..n): the code point (U+FFFD for a malformed * sequence) and its byte length (>= 1...
+- `is_private_use` (function) `src/text_shape.c:623` `static int is_private_use(unsigned cp)` -- if (l > n) l = 1; if (l == 1) { *len = 1; return (c < 0x80) ? c : 0xFFFDu; } unsigned cp = c & (0x7fu >> l); for...
+- `rides_previous` (function) `src/text_shape.c:628` `static int rides_previous(unsigned cp)` -- cp = (cp << 6) | (u[k] & 0x3fu); } len = l; return cp; } #define TSH_BLANK_GLYPH ((unsigned long)-1) /* Private Use...
+- `tsh_segment` (function) `src/text_shape.c:636` `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
                 tsh_...`
-- `fb_clear` (function) `src/text_shape.c:669` `static void fb_clear(void)`
-- `fb_entry` (function) `src/text_shape.c:679` `static tsh_entry *fb_entry(unsigned cp, int bold)` -- The fallback entry covering cp (bold or regular), or NULL.
-- `cover_cp` (function) `src/text_shape.c:750` `static int cover_cp(unsigned cp, void *vctx)` -- cover callback: 0 when the requested face has the glyph (or nothing else * does), else the id of the fallback face...
-- `shape_entry` (function) `src/text_shape.c:764` `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
+- `fb_clear` (function) `src/text_shape.c:689` `static void fb_clear(void)`
+- `fb_match_covering` (function) `src/text_shape.c:709` `static FcPattern *fb_match_covering(FcPattern *pat, FcCharSet *cs)` -- Best fontconfig match for `pat` among the installed fonts that contain every code point of `cs`.
+- `fb_entry` (function) `src/text_shape.c:731` `static tsh_entry *fb_entry(unsigned cp, int bold)`
+- `fb_entry_uncached` (function) `src/text_shape.c:748` `static tsh_entry *fb_entry_uncached(unsigned cp, int bold)`
+- `cover_cp` (function) `src/text_shape.c:818` `static int cover_cp(unsigned cp, void *vctx)` -- cover callback: 0 when the requested face has the glyph (or nothing else * does), else the id of the fallback face...
+- `shape_entry` (function) `src/text_shape.c:832` `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
             ...` -- static int cover_cp(unsigned cp, void *vctx) { tsh_cover_ctx *c = (tsh_cover_ctx *)vctx; hb_codepoint_t g; if (cp ==...
-- `shape_runs` (function) `src/text_shape.c:800` `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
+- `shape_runs` (function) `src/text_shape.c:868` `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
                ...` -- Measures (cr == NULL) or draws [text,len) run by run, each with the face that * has its glyphs.
-- `tsh_measure` (function) `src/text_shape.c:846` `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
-- `tsh_draw` (function) `src/text_shape.c:852` `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
+- `tsh_measure` (function) `src/text_shape.c:929` `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
+- `tsh_draw` (function) `src/text_shape.c:964` `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
                     double x, doub...`
-- `tsh_face` (function) `src/text_shape.c:859` `cairo_font_face_t *tsh_face(const tsh_font *f)`
-- `tsh_shutdown` (function) `src/text_shape.c:865` `void tsh_shutdown(void)`
+- `tsh_face` (function) `src/text_shape.c:971` `cairo_font_face_t *tsh_face(const tsh_font *f)`
+- `tsh_shutdown` (function) `src/text_shape.c:977` `void tsh_shutdown(void)`
 
 ## src/textfield.c
 Depends on: `include/textfield.h`
@@ -469,32 +479,6 @@ static int looks_like_host(const c...`
 - `copy_bounded` (function) `src/url.c:645` `static url_status copy_bounded(char *out, size_t outsz, const char *a, size_t alen,
              ...`
 - `url_history_target` (function) `src/url.c:654` `url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz)`
-
-## src/web_storage.c
-Depends on: `include/web_storage.h`
-- `get_u32` (function) `src/web_storage.c:25` `static uint32_t get_u32(const unsigned char *p)`
-- `utf8_ok` (function) `src/web_storage.c:32` `static int utf8_ok(const unsigned char *s, size_t n)` -- Well-formed UTF-8, allowing encoded surrogates (WTF-8): a JS string may hold a lone surrogate and rejecting it would...
-- `key_cmp` (function) `src/web_storage.c:56` `static int key_cmp(const void *a, const void *b)`
-- `check` (function) `src/web_storage.c:65` `static int check(const char *blob, size_t len, size_t *bytes_out)` -- return 1; } typedef struct key_ref { const unsigned char *p; uint32_t n; } key_ref; static int key_cmp(const void...
-- `wst_decode_check` (function) `src/web_storage.c:101` `int wst_decode_check(const char *blob, size_t len)`
-- `wst_new` (function) `src/web_storage.c:105` `wst_db *wst_new(void)`
-- `wst_free` (function) `src/web_storage.c:109` `void wst_free(wst_db *db)`
-- `find` (function) `src/web_storage.c:118` `static wst_origin *find(const wst_db *db, const char *origin)`
-- `wst_encode` (function) `src/web_storage.c:125` `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len)`
-- `wst_replace` (function) `src/web_storage.c:140` `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len)`
-- `wst_origin_bytes` (function) `src/web_storage.c:175` `size_t wst_origin_bytes(const wst_db *db, const char *origin)`
-- `wst_foreach` (function) `src/web_storage.c:181` `int wst_foreach(const char *blob, size_t len,
-                void (*fn)(void *ctx, const char *k...`
-- `put_u32` (function) `src/web_storage.c:201` `static void put_u32(char *b, uint32_t v)`
-- `wst_pack` (function) `src/web_storage.c:206` `int wst_pack(const char *const *keys, const size_t *klens,
-             const char *const *vals, ...`
-
-## src/webcaps.c
-Depends on: `include/webcaps.h`
-- `wc_safe` (function) `src/webcaps.c:10` `wc_caps wc_safe(void)`
-- `wc_derive` (function) `src/webcaps.c:15` `wc_caps wc_derive(wc_input in)`
-- `wc_from_flags` (function) `src/webcaps.c:35` `wc_caps wc_from_flags(bool js, bool css, bool images)`
-- `wc_render_caps` (function) `src/webcaps.c:46` `rdp_caps wc_render_caps(wc_caps c)`
 
 
 Next: [API_p12.md](API_p12.md)

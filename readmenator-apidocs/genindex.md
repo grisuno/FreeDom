@@ -389,11 +389,14 @@
 - [`children`](modules/gui.browser_ui.c.md#children) function in `gui/browser_ui.c`
 - [`cix_build`](modules/include.css_index.h.md#cix_build) function in `include/css_index.h`
 - [`cix_build`](modules/src.css_index.c.md#cix_build) function in `src/css_index.c`
+- [`cix_build_ptrs`](modules/include.css_index.h.md#cix_build_ptrs) function in `include/css_index.h`
+- [`cix_build_ptrs`](modules/src.css_index.c.md#cix_build_ptrs) function in `src/css_index.c`
 - [`cix_candidates`](modules/src.css_index.c.md#cix_candidates) function in `src/css_index.c`
 - [`cix_entry`](modules/include.css_index.h.md#cix_entry) struct in `include/css_index.h`
 - [`cix_free`](modules/include.css_index.h.md#cix_free) function in `include/css_index.h`
 - [`cix_free`](modules/src.css_index.c.md#cix_free) function in `src/css_index.c`
 - [`cix_index`](modules/include.css_index.h.md#cix_index) struct in `include/css_index.h`
+- [`cix_run`](modules/src.css_index.c.md#cix_run) struct in `src/css_index.c`
 - [`cl_ctx`](modules/include.css_length.h.md#cl_ctx) struct in `include/css_length.h`
 - [`cl_ctx_initial`](modules/src.css_length.c.md#cl_ctx_initial) function in `src/css_length.c`
 - [`cl_em_refit`](modules/src.css_length.c.md#cl_em_refit) function in `src/css_length.c`
@@ -453,6 +456,7 @@
 - [`column`](modules/src.css.c.md#column) function in `src/css.c`
 - [`column`](modules/src.tab.c.md#column) function in `src/tab.c`
 - [`columns`](modules/gui.browser_ui.c.md#columns) function in `gui/browser_ui.c`
+- [`comb`](modules/include.css_select.h.md#comb) type_alias in `include/css_select.h`
 - [`compositing`](modules/gui.browser_ui.c.md#compositing) function in `gui/browser_ui.c`
 - [`connection`](modules/include.secure_fetch.h.md#connection) function in `include/secure_fetch.h`
 - [`conservative`](modules/include.css_select.h.md#conservative) function in `include/css_select.h`
@@ -476,6 +480,10 @@
 - [`cp`](modules/include.text_case.h.md#cp) function in `include/text_case.h`
 - [`csel_anc_reject`](modules/include.css_select.h.md#csel_anc_reject) function in `include/css_select.h`
 - [`csel_ci_eq`](modules/include.css_select.h.md#csel_ci_eq) function in `include/css_select.h`
+- [`csel_compact_dup`](modules/include.css_select.h.md#csel_compact_dup) function in `include/css_select.h`
+- [`csel_compact_dup`](modules/src.css_select.c.md#csel_compact_dup) function in `src/css_select.c`
+- [`csel_compact_size`](modules/include.css_select.h.md#csel_compact_size) function in `include/css_select.h`
+- [`csel_compact_size`](modules/src.css_select.c.md#csel_compact_size) function in `src/css_select.c`
 - [`csel_decl_end`](modules/include.css_select.h.md#csel_decl_end) function in `include/css_select.h`
 - [`csel_decl_end`](modules/src.css_select.c.md#csel_decl_end) function in `src/css_select.c`
 - [`csel_element_feature_bits`](modules/include.css_select.h.md#csel_element_feature_bits) function in `include/css_select.h`
@@ -1272,6 +1280,7 @@
 - [`_GNU_SOURCE`](modules/src.js_embed.c.md#_gnu_source) macro in `src/js_embed.c`
 - [`_GNU_SOURCE`](modules/src.js_events.c.md#_gnu_source) macro in `src/js_events.c`
 - [`_GNU_SOURCE`](modules/src.js_fetch.c.md#_gnu_source) macro in `src/js_fetch.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
@@ -2188,6 +2197,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2267,6 +2277,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2379,7 +2391,6 @@
 - [`parent_id`](modules/include.page_view.h.md#parent_id) type_alias in `include/page_view.h`
 - [`PARITY`](modules/tools.fbench.py.md#parity) constant in `tools.fbench`
 - [`parse_angle_deg`](modules/src.css.c.md#parse_angle_deg) function in `src/css.c`
-- [`parts`](modules/include.css_select.h.md#css_sel-parts) type_alias of `css_sel` in `include/css_select.h`
 - [`password`](modules/include.url.h.md#password) function in `include/url.h`
 - [`path`](modules/gui.browser_ui.c.md#path) function in `gui/browser_ui.c`
 - [`path`](modules/include.tls_impersonate.h.md#path) function in `include/tls_impersonate.h`
@@ -2918,6 +2929,7 @@
 - [`set_rgb`](modules/gui.browser_ui.c.md#set_rgb) function in `gui/browser_ui.c`
 - [`set_rgb`](modules/gui.browser_ui_internal.h.md#set_rgb) function in `gui/browser_ui_internal.h`
 - [`set_rgb`](modules/gui.bui_theme.c.md#set_rgb) function in `gui/bui_theme.c`
+- [`seven`](modules/src.css_select.c.md#seven) function in `src/css_select.c`
 - [`sf_accept_language_or_default`](modules/include.secure_fetch.h.md#sf_accept_language_or_default) function in `include/secure_fetch.h`
 - [`sf_accept_language_or_default`](modules/src.secure_fetch.c.md#sf_accept_language_or_default) function in `src/secure_fetch.c`
 - [`sf_chain_info`](modules/include.secure_fetch.h.md#sf_chain_info) struct in `include/secure_fetch.h`
@@ -3169,12 +3181,19 @@
 - [`TAB_MAX_URL`](modules/src.tab.c.md#tab_max_url) macro in `src/tab.c`
 - [`TAB_MAX_WS_MSG`](modules/src.tab.c.md#tab_max_ws_msg) macro in `src/tab.c`
 - [`tab_open`](modules/include.tab.h.md#tab_open) function in `include/tab.h`
+- [`tab_open`](modules/src.tab.c.md#tab_open) function in `src/tab.c`
 - [`tab_page`](modules/include.tab.h.md#tab_page) struct in `include/tab.h`
 - [`tab_page_free`](modules/include.tab.h.md#tab_page_free) function in `include/tab.h`
 - [`tab_page_free`](modules/src.tab.c.md#tab_page_free) function in `src/tab.c`
 - [`tab_parse_worker_args`](modules/include.tab.h.md#tab_parse_worker_args) function in `include/tab.h`
 - [`tab_parse_worker_args`](modules/src.tab.c.md#tab_parse_worker_args) function in `src/tab.c`
 - [`tab_popstate`](modules/src.tab.c.md#tab_popstate) function in `src/tab.c`
+- [`tab_prewarm`](modules/include.tab.h.md#tab_prewarm) function in `include/tab.h`
+- [`tab_prewarm`](modules/src.tab.c.md#tab_prewarm) function in `src/tab.c`
+- [`tab_prewarmed`](modules/include.tab.h.md#tab_prewarmed) function in `include/tab.h`
+- [`tab_prewarmed`](modules/src.tab.c.md#tab_prewarmed) function in `src/tab.c`
+- [`tab_prewarmed_pid`](modules/include.tab.h.md#tab_prewarmed_pid) function in `include/tab.h`
+- [`tab_prewarmed_pid`](modules/src.tab.c.md#tab_prewarmed_pid) function in `src/tab.c`
 - [`tab_read_view`](modules/src.tab.c.md#tab_read_view) function in `src/tab.c`
 - [`tab_report_response_headers`](modules/include.tab.h.md#tab_report_response_headers) function in `include/tab.h`
 - [`tab_report_response_headers`](modules/src.tab.c.md#tab_report_response_headers) function in `src/tab.c`
@@ -3198,6 +3217,9 @@
 - [`tab_set_storage`](modules/src.tab.c.md#tab_set_storage) function in `src/tab.c`
 - [`tab_set_viewport_w`](modules/include.tab.h.md#tab_set_viewport_w) function in `include/tab.h`
 - [`tab_set_viewport_w`](modules/src.tab.c.md#tab_set_viewport_w) function in `src/tab.c`
+- [`tab_shutdown_spare`](modules/include.tab.h.md#tab_shutdown_spare) function in `include/tab.h`
+- [`tab_shutdown_spare`](modules/src.tab.c.md#tab_shutdown_spare) function in `src/tab.c`
+- [`tab_spawned`](modules/src.tab.c.md#tab_spawned) struct in `src/tab.c`
 - [`tab_status`](modules/include.tab.h.md#tab_status) enum in `include/tab.h`
 - [`tab_submit`](modules/src.tab.c.md#tab_submit) function in `src/tab.c`
 - [`tab_subreq_permitted`](modules/include.tab.h.md#tab_subreq_permitted) function in `include/tab.h`
@@ -3328,6 +3350,8 @@
 - [`TSH_FAMILY_MAX`](modules/include.text_shape.h.md#tsh_family_max) macro in `include/text_shape.h`
 - [`tsh_fb`](modules/src.text_shape.c.md#tsh_fb) struct in `src/text_shape.c`
 - [`TSH_FB_BLOCKS`](modules/src.text_shape.c.md#tsh_fb_blocks) macro in `src/text_shape.c`
+- [`tsh_fb_cp`](modules/src.text_shape.c.md#tsh_fb_cp) struct in `src/text_shape.c`
+- [`TSH_FB_CP_SLOTS`](modules/src.text_shape.c.md#tsh_fb_cp_slots) macro in `src/text_shape.c`
 - [`TSH_FB_SLOTS`](modules/src.text_shape.c.md#tsh_fb_slots) macro in `src/text_shape.c`
 - [`tsh_font`](modules/include.text_shape.h.md#tsh_font) struct in `include/text_shape.h`
 - [`tsh_lfam`](modules/src.text_shape.c.md#tsh_lfam) struct in `src/text_shape.c`
@@ -3342,6 +3366,9 @@
 - [`TSH_MAX_TEXT`](modules/include.text_shape.h.md#tsh_max_text) macro in `include/text_shape.h`
 - [`tsh_measure`](modules/include.text_shape.h.md#tsh_measure) function in `include/text_shape.h`
 - [`tsh_measure`](modules/src.text_shape.c.md#tsh_measure) function in `src/text_shape.c`
+- [`tsh_measure_slot`](modules/src.text_shape.c.md#tsh_measure_slot) struct in `src/text_shape.c`
+- [`TSH_MEASURE_SLOTS`](modules/src.text_shape.c.md#tsh_measure_slots) macro in `src/text_shape.c`
+- [`TSH_MEASURE_TEXT_MAX`](modules/src.text_shape.c.md#tsh_measure_text_max) macro in `src/text_shape.c`
 - [`tsh_pick_family`](modules/include.text_shape.h.md#tsh_pick_family) function in `include/text_shape.h`
 - [`tsh_pick_family`](modules/src.text_shape.c.md#tsh_pick_family) function in `src/text_shape.c`
 - [`tsh_pick_from_list`](modules/src.text_shape.c.md#tsh_pick_from_list) function in `src/text_shape.c`

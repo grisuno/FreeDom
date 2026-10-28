@@ -182,7 +182,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/css_length.c` -> math.h, string.h
 - `src/css_mask.c` -> ctype.h, string.h
 - `src/css_mq.c` -> string.h
-- `src/css_select.c` -> lexbor/html/html.h, string.h
+- `src/css_select.c` -> lexbor/html/html.h, stddef.h, stdlib.h, string.h
 - `src/css_text.c` -> stdlib.h, string.h
 - `src/css_values.c` -> ctype.h, string.h
 - `src/css_vars.c` -> stdint.h, stdlib.h, string.h
@@ -244,7 +244,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/subreq_batch.c` -> pthread.h, semaphore.h, stdlib.h, string.h, time.h
 - `src/svg_render.c` -> math.h, stddef.h, string.h
 - `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, pthread.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/random.h, sys/wait.h, time.h, unistd.h
-- `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, stdio.h, stdlib.h, string.h
+- `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/textfield.c` -> string.h
 - `src/tls_impersonate.c` -> stdlib.h, string.h
 - `src/ui_layout.c` -> stdlib.h

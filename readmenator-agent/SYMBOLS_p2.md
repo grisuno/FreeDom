@@ -36,7 +36,7 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `reconcile_boxes_below` | function | `gui/browser_ui.c:7931` | `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,                          ...` |
 | `rect` | function | `gui/browser_ui.c:11656` | `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops...` |
 | `redraw` | function | `gui/browser_ui.c:16796` | `static void redraw(browser_window *w)` |
-| `redraws` | function | `gui/browser_ui.c:19279` | `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...` |
+| `redraws` | function | `gui/browser_ui.c:19282` | `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...` |
 | `reference` | function | `gui/browser_ui.c:15469` | `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:  * hostile content...` |
 | `refresh_frame_images` | function | `gui/browser_ui.c:14935` | `static void refresh_frame_images(browser_window *w)` |
 | `registry_global` | function | `gui/browser_ui.c:19097` | `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,                  ...` |
@@ -69,7 +69,7 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `run_width_cap` | function | `gui/browser_ui.c:5770` | `static double run_width_cap(const rd_block *b, double avail_w)` |
 | `save_current_page` | function | `gui/browser_ui.c:15923` | `static void save_current_page(browser_window *w)` |
 | `save_download` | function | `gui/browser_ui.c:15890` | `static void save_download(browser_window *w, const char *url, const char *bytes,                 ...` |
-| `saving` | function | `gui/browser_ui.c:19186` | `* disables saving (never clobber);` |
+| `saving` | function | `gui/browser_ui.c:19189` | `* disables saving (never clobber);` |
 | `schedule_js_tick` | function | `gui/browser_ui.c:2406` | `static void schedule_js_tick(browser_window *w, int next_ms)` |
 | `screen_flow_ctx` | struct | `gui/browser_ui.c:14101` | `` |
 | `scroll_line_px` | function | `gui/browser_ui.c:18138` | `static double scroll_line_px(const browser_window *w)` |

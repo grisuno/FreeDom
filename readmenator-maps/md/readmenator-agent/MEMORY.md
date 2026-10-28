@@ -2,16 +2,16 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 305 files at commit `3a6845d517f7`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 305 files at commit `5d498d9a3176`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (164), `max` (137), `size` (128), `include` (126), `out` (125), `not` (125), `one` (124), `freedom` (119), `char` (113), `free` (112), `const` (109), `its` (100), `void` (98), `css` (97), `name` (97)
+- Domain vocabulary (term, files): `null` (164), `max` (137), `size` (128), `one` (126), `include` (126), `out` (125), `not` (125), `freedom` (119), `char` (113), `free` (113), `const` (110), `its` (101), `void` (98), `css` (97), `name` (97)
 - Subsystem `include: browser_ui`: 59 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
 - Subsystem `include: css`: 52 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
 - Subsystem `src: tab`: 48 files, core `src/tab.c`: net_reply: jd_fetch_fn: the confined worker has NO network (CLONE_NEWNET + seccomp).
-- Subsystem `src: text_shape`: 42 files, core `src/text_shape.c`: load_entry_file: Loads face `index` of the font file at `path` into e (FreeType + cairo + *...
+- Subsystem `src: text_shape`: 42 files, core `src/text_shape.c`: tsh_fb_cp: Per-code-point verdicts of fb_entry.
 - Subsystem `include: page_view`: 19 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - Subsystem `include: browser`: 19 files, core `src/browser.c`: clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {...
 - Subsystem `src: local_store`: 16 files, core `src/local_store.c`
@@ -68,8 +68,8 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 189 files, 6146 symbols; docstrings on 27% of symbols; functions snake_case (99%); types PascalCase (0%); median file 237 lines, max 19727.
-- h: 100 files, 1605 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 73 lines, max 1258.
+- c: 189 files, 6179 symbols; docstrings on 27% of symbols; functions snake_case (99%); types PascalCase (0%); median file 237 lines, max 19734.
+- h: 100 files, 1612 symbols; docstrings on 39% of symbols; functions snake_case (98%); types PascalCase (0%); median file 73 lines, max 1258.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
 - sh: 4 files, 0 symbols; median file 39 lines, max 91.
 - Tests: 88 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
