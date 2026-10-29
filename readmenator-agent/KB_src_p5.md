@@ -198,14 +198,15 @@ Previous: [KB_src_p4.md](KB_src_p4.md)
   - `js_env` (function, line 1471) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
   - `jd_install` (function, line 2008) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-  - `jd_flush_custom_elements` (function, line 2090) `void jd_flush_custom_elements(js_context *ctx)`
-  - `fails` (function, line 2104) `* cap is reached or an allocation fails (caller stops), else 0. */
+  - `jd_rebind` (function, line 2090) `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)`
+  - `jd_flush_custom_elements` (function, line 2100) `void jd_flush_custom_elements(js_context *ctx)`
+  - `fails` (function, line 2114) `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-  - `jd_install_console` (function, line 2218) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-  - `jd_set_cookies` (function, line 2255) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-  - `jd_get_cookies` (function, line 2275) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-  - `jd_set_computed` (function, line 2298) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-  - `jd_set_geometry` (function, line 2309) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+  - `jd_install_console` (function, line 2228) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+  - `jd_set_cookies` (function, line 2265) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+  - `jd_get_cookies` (function, line 2285) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+  - `jd_set_computed` (function, line 2308) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+  - `jd_set_geometry` (function, line 2319) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
   - `table` (function, line 643) `* a table (dom.viewport() non-null);`
   - `scripts` (function, line 894) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
   - `enough` (function, line 1067) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`

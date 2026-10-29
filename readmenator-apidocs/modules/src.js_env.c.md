@@ -143,7 +143,7 @@ je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`je_install_identity`](#je_install_identity), [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`je_install_identity`](#je_install_identity)
 
 ---
 
@@ -167,8 +167,6 @@ je_status je_install_canvas(js_context *ctx, uint64_t readback_key)
 **Returns:** `je_status`
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
-
-*Called by:* [`run_js`](src.tab.c.md#run_js)
 
 ---
 

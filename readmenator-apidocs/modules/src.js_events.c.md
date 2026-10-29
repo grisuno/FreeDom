@@ -55,8 +55,6 @@ jd_click_state *jd_click_state_new(void)
 
 **Returns:** `jd_click_state *`
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
-
 ---
 
 <a id="jd_click_state_free"></a>
@@ -97,8 +95,6 @@ jd_status jd_install_events(js_context *ctx, jd_click_state *state)
 **Returns:** `jd_status`
 
 *Calls:* [`jd_opaque_get`](src.js_dom_internal.h.md#jd_opaque_get), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
-
-*Called by:* [`run_js`](src.tab.c.md#run_js)
 
 ---
 

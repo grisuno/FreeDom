@@ -1,10 +1,10 @@
 ```mermaid
 graph LR
     include_browser_ui["include: browser_ui"]
-    include_css["include: css"]
     src_tab["src: tab"]
     src_text_shape["src: text_shape"]
     include_page_view["include: page_view"]
+    include_css["include: css"]
     include_browser["include: browser"]
     src_local_store["src: local_store"]
     include_secure_fetch["include: secure_fetch"]
@@ -13,71 +13,71 @@ graph LR
     include_sha2["include: sha2"]
     include_subreq_batch["include: subreq_batch"]
     include_browser_ui -- "calls into" --> include_prefetch
-    include_browser_ui -- "calls into" --> include_css
     include_browser_ui -- "calls into" --> src_tab
     include_browser_ui -- "calls into" --> src_text_shape
     include_browser_ui -- "calls into" --> include_page_view
+    include_browser_ui -- "calls into" --> include_css
     include_browser_ui -- "calls into" --> include_browser
     include_browser_ui -- "calls into" --> src_local_store
     include_browser_ui -- "calls into" --> include_secure_fetch
     include_browser_ui -- "calls into" --> include_tab
     include_prefetch -- "calls into" --> include_browser_ui
-    include_prefetch -- "calls into" --> include_css
     include_prefetch -- "calls into" --> src_tab
+    include_prefetch -- "calls into" --> include_css
     include_subreq_batch -- "calls into" --> src_tab
-    include_css -- "calls into" --> include_browser_ui
-    include_css -- "calls into" --> src_tab
-    include_css -- "calls into" --> src_text_shape
-    include_css -- "calls into" --> include_page_view
-    include_css -- "calls into" --> src_local_store
-    include_css -- "calls into" --> include_secure_fetch
-    include_css -- "calls into" --> include_tab
     src_tab -- "calls into" --> include_browser_ui
     src_tab -- "calls into" --> include_prefetch
     src_tab -- "calls into" --> include_sha2
     src_tab -- "calls into" --> include_subreq_batch
-    src_tab -- "calls into" --> include_css
     src_tab -- "calls into" --> src_text_shape
     src_tab -- "calls into" --> include_page_view
+    src_tab -- "calls into" --> include_css
     src_tab -- "calls into" --> include_browser
     src_tab -- "calls into" --> include_secure_fetch
     src_tab -- "calls into" --> include_tab
     src_text_shape -- "calls into" --> include_browser_ui
     src_text_shape -- "calls into" --> include_prefetch
-    src_text_shape -- "calls into" --> include_css
     src_text_shape -- "calls into" --> src_tab
     src_text_shape -- "calls into" --> include_page_view
+    src_text_shape -- "calls into" --> include_css
     src_text_shape -- "calls into" --> include_browser
     src_text_shape -- "calls into" --> include_secure_fetch
     src_text_shape -- "calls into" --> include_tab
     include_page_view -- "calls into" --> include_browser_ui
-    include_page_view -- "calls into" --> include_css
     include_page_view -- "calls into" --> src_tab
     include_page_view -- "calls into" --> src_text_shape
+    include_page_view -- "calls into" --> include_css
     include_page_view -- "calls into" --> include_browser
+    include_page_view -- "calls into" --> include_secure_fetch
+    include_css -- "calls into" --> include_browser_ui
+    include_css -- "calls into" --> src_tab
+    include_css -- "calls into" --> src_text_shape
+    include_css -- "calls into" --> include_page_view
+    include_css -- "calls into" --> src_local_store
+    include_css -- "calls into" --> include_tab
     include_browser -- "calls into" --> include_browser_ui
-    include_browser -- "calls into" --> include_css
     include_browser -- "calls into" --> src_tab
     include_browser -- "calls into" --> include_page_view
+    include_browser -- "calls into" --> include_css
     src_local_store -- "calls into" --> include_browser_ui
-    src_local_store -- "calls into" --> include_css
     src_local_store -- "calls into" --> src_tab
     src_local_store -- "calls into" --> src_text_shape
+    src_local_store -- "calls into" --> include_css
     src_local_store -- "calls into" --> include_browser
     src_local_store -- "calls into" --> include_secure_fetch
     include_secure_fetch -- "calls into" --> include_browser_ui
-    include_secure_fetch -- "calls into" --> include_css
     include_secure_fetch -- "calls into" --> src_tab
     include_secure_fetch -- "calls into" --> src_text_shape
+    include_secure_fetch -- "calls into" --> include_css
     include_tab -- "calls into" --> include_browser_ui
-    include_tab -- "calls into" --> include_css
     include_tab -- "calls into" --> src_tab
     include_tab -- "depends on" --> include_page_view
+    include_tab -- "calls into" --> include_css
     click include_browser_ui href "./include_browser_ui.md" "Details"
-    click include_css href "./include_css.md" "Details"
     click src_tab href "./src_tab.md" "Details"
     click src_text_shape href "./src_text_shape.md" "Details"
     click include_page_view href "./include_page_view.md" "Details"
+    click include_css href "./include_css.md" "Details"
     click include_browser href "./include_browser.md" "Details"
     click src_local_store href "./src_local_store.md" "Details"
     click include_secure_fetch href "./include_secure_fetch.md" "Details"
@@ -87,7 +87,7 @@ graph LR
 
 ## Details
 
-Static architecture map of 305 files (c, h, py, sh) in 12 components: include: browser_ui, include: css, src: tab, src: text_shape, include: page_view, include: browser, src: local_store, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 305 files (c, h, py, sh) in 12 components: include: browser_ui, src: tab, src: text_shape, include: page_view, include: css, include: browser, src: local_store, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### include: browser_ui (1)
 
@@ -104,24 +104,9 @@ include: browser_ui groups 59 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION
 - <a href="../include/prefs.h#L31-L33">include/prefs.h::PREFS_MAX_TEXT</a>
 - <a href="../include/prefs.h#L34-L35">include/prefs.h::PREFS_PAGE_HISTORY</a>
 
-### include: css (2)
+### src: tab (2)
 
-include: css groups 52 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
-
-**Related Classes/Methods**:
-
-- <a href="../include/css.h#L2-L27">include/css.h::FREEDOM_CSS_H</a>
-- <a href="../include/css.h#L28-L33">include/css.h::css_status</a>
-- <a href="../include/css.h#L34-L41">include/css.h::css_align</a>
-- <a href="../include/css.h#L42-L68">include/css.h::css_display</a>
-- <a href="../include/css.h#L69-L79">include/css.h::css_justify</a>
-- <a href="../include/css.h">include/css.h::CSS_GAP_MAX</a>
-- <a href="../include/css.h">include/css.h::CSS_GRID_COLS_MAX</a>
-- <a href="../include/css.h#L82-L83">include/css.h::CSS_GRID_TRACKS_MAX</a>
-
-### src: tab (3)
-
-src: tab groups 48 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
+src: tab groups 51 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
 
 **Related Classes/Methods**:
 
@@ -134,9 +119,9 @@ src: tab groups 48 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_byte
 - <a href="../include/html_parse.h">include/html_parse.h::dropped</a>
 - <a href="../include/html_parse.h#L48-L56">include/html_parse.h::HP_MAX_SCRIPTS</a>
 
-### src: text_shape (4)
+### src: text_shape (3)
 
-src: text_shape groups 42 files (c, h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
+src: text_shape groups 39 files (c, h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
 
 **Related Classes/Methods**:
 
@@ -149,20 +134,35 @@ src: text_shape groups 42 files (c, h) around FREEDOM_JS_POLICY_H, membership, j
 - <a href="../include/js_policy.h#L64-L66">include/js_policy.h::jsp_mode_str</a>
 - <a href="../include/data_url.h#L2-L20">include/data_url.h::FREEDOM_DATA_URL_H</a>
 
-### include: page_view (5)
+### include: page_view (4)
 
-include: page_view groups 19 files (c, h) around FREEDOM_PAGE_VIEW_H, pv_status, PV_BSHADOW_LAYERS, PV_MAUTO_LEFT, PV_MAUTO_RIGHT. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+include: page_view groups 36 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
 
 **Related Classes/Methods**:
 
-- <a href="../include/page_view.h#L2-L33">include/page_view.h::FREEDOM_PAGE_VIEW_H</a>
-- <a href="../include/page_view.h#L34-L43">include/page_view.h::pv_status</a>
-- <a href="../include/page_view.h#L44-L45">include/page_view.h::PV_BSHADOW_LAYERS</a>
-- <a href="../include/page_view.h">include/page_view.h::PV_MAUTO_LEFT</a>
-- <a href="../include/page_view.h">include/page_view.h::PV_MAUTO_RIGHT</a>
-- <a href="../include/page_view.h">include/page_view.h::PV_MAUTO_TOP</a>
-- <a href="../include/page_view.h#L49-L52">include/page_view.h::PV_MAUTO_BOTTOM</a>
-- <a href="../include/page_view.h">include/page_view.h::PV_LEN_UNSET</a>
+- <a href="../include/css.h#L2-L27">include/css.h::FREEDOM_CSS_H</a>
+- <a href="../include/css.h#L28-L33">include/css.h::css_status</a>
+- <a href="../include/css.h#L34-L41">include/css.h::css_align</a>
+- <a href="../include/css.h#L42-L68">include/css.h::css_display</a>
+- <a href="../include/css.h#L69-L79">include/css.h::css_justify</a>
+- <a href="../include/css.h">include/css.h::CSS_GAP_MAX</a>
+- <a href="../include/css.h">include/css.h::CSS_GRID_COLS_MAX</a>
+- <a href="../include/css.h#L82-L83">include/css.h::CSS_GRID_TRACKS_MAX</a>
+
+### include: css (5)
+
+include: css groups 35 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. car_ops: The questions @supports asks the caller's own engine. prop is lowercased and...
+
+**Related Classes/Methods**:
+
+- <a href="../include/css_color.h#L2-L25">include/css_color.h::FREEDOM_CSS_COLOR_H</a>
+- <a href="../include/css_color.h">include/css_color.h::b</a>
+- <a href="../include/css_color.h#L27-L30">include/css_color.h::cc_rgb</a>
+- <a href="../include/css_color.h#L31-L48">include/css_color.h::cc_status</a>
+- <a href="../include/css_color.h#L49-L58">include/css_color.h::cc_pack</a>
+- <a href="../include/css_color.h">include/css_color.h::CC_COLOR_CURRENT</a>
+- <a href="../include/css_color.h#L60-L62">include/css_color.h::CC_COLOR_TRANSPARENT</a>
+- <a href="../include/css_select.h#L2-L26">include/css_select.h::FREEDOM_CSS_SELECT_H</a>
 
 ### include: browser (6)
 

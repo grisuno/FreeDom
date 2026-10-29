@@ -3,6 +3,9 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `AUTO_REJECT` | macro | `src/css.c:274` | `#define AUTO_REJECT` |
+| `AUTO_RESET` | macro | `src/css.c:276` | `#define AUTO_RESET` |
+| `AUTO_RESET_NONE` | macro | `src/css.c:277` | `#define AUTO_RESET_NONE` |
 | `AUTO_VALUE` | macro | `src/css.c:275` | `#define AUTO_VALUE` |
 | `CSS_ATTR_MARK` | macro | `src/css.c:1685` | `#define CSS_ATTR_MARK` |
 | `CSS_ATTR_SEP` | macro | `src/css.c:1686` | `#define CSS_ATTR_SEP` |
@@ -319,16 +322,21 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `CCH_MAX_ATTRS` | macro | `src/css_chain.c:22` | `#define CCH_MAX_ATTRS` |
 | `CCH_MAX_CLASSES` | macro | `src/css_chain.c:18` | `#define CCH_MAX_CLASSES` |
 | `CCH_TAG_MAX` | macro | `src/css_chain.c:15` | `#define CCH_TAG_MAX` |
-| `cch_element_matches` | function | `src/css_chain.c:364` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)` |
-| `cch_element_matches_any` | function | `src/css_chain.c:378` | `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)` |
-| `cch_element_style` | function | `src/css_chain.c:360` | `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)` |
+| `cch_element_matches` | function | `src/css_chain.c:462` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)` |
+| `cch_element_matches_any` | function | `src/css_chain.c:476` | `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)` |
+| `cch_element_style` | function | `src/css_chain.c:458` | `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)` |
+| `cch_element_style_path` | function | `src/css_chain.c:372` | `css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,    ...` |
 | `cch_element_style_vars` | function | `src/css_chain.c:310` | `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,                  ...` |
 | `cch_node` | struct | `src/css_chain.c:27` | `` |
-| `cch_pseudo_style` | function | `src/css_chain.c:341` | `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,             ...` |
+| `cch_path` | struct | `src/css_chain.c:347` | `` |
+| `cch_path_free` | function | `src/css_chain.c:365` | `void cch_path_free(cch_path *pa)` |
+| `cch_path_new` | function | `src/css_chain.c:353` | `cch_path *cch_path_new(void)` |
+| `cch_pseudo_style` | function | `src/css_chain.c:439` | `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,             ...` |
 | `cls_space` | function | `src/css_chain.c:42` | `static int cls_space(char c)` |
 | `count_children` | function | `src/css_chain.c:227` | `static int count_children(lxb_dom_node_t *n)` |
 | `fill_css_node` | function | `src/css_chain.c:99` | `static void fill_css_node(lxb_dom_element_t *e, cch_node *node)` |
 | `inputs` | function | `src/css_chain.c:241` | `* identical inputs (single source of truth). */ static const css_element *build_chain(lxb_dom_ele...` |
+| `path_truncate` | function | `src/css_chain.c:357` | `static void path_truncate(cch_path *pa, int keep)` |
 | `release_nodes` | function | `src/css_chain.c:90` | `static void release_nodes(cch_node *nodes, int n)` |
 | `sibling_position` | function | `src/css_chain.c:181` | `static void sibling_position(lxb_dom_node_t *n, int *nth, int *nsib)` |
 | `sibling_type_position` | function | `src/css_chain.c:199` | `static void sibling_type_position(lxb_dom_node_t *n, int *nth, int *nsib)` |
@@ -488,13 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `MQ_EPS` | macro | `src/css_mq.c:203` | `#define MQ_EPS` |
 | `and3` | function | `src/css_mq.c:66` | `static int and3(int a, int b)` |
 | `bool_ctx` | function | `src/css_mq.c:229` | `static int bool_ctx(const fval *v)` |
-| `cmp_op` | function | `src/css_mq.c:206` | `static int cmp_op(double lhs, int op, double rhs)` |
-| `cmq_matches` | function | `src/css_mq.c:458` | `int cmq_matches(const char *s, size_t len, const cmq_env *env)` |
-| `copy_trim_lower` | function | `src/css_mq.c:83` | `static int copy_trim_lower(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
-| `eval_cond` | function | `src/css_mq.c:380` | `static int eval_cond(mq_cur *c, int depth)` |
-| `eval_feature` | function | `src/css_mq.c:328` | `static int eval_feature(const char *s, size_t a, size_t b, const cmq_env *env)` |
-| `eval_in_parens` | function | `src/css_mq.c:353` | `static int eval_in_parens(mq_cur *c, int depth)` |
-| `eval_plain` | function | `src/css_mq.c:237` | `static int eval_plain(const char *name, const char *value, const cmq_env *env)` |
-| `eval_query` | function | `src/css_mq.c:404` | `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

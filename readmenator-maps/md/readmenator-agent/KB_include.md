@@ -407,15 +407,18 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Symbols:
   - `cvr_chain` (struct, line 51)
   - `cvr_table` (struct, line 52)
-  - `cch_element_matches` (function, line 69) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);`
-  - `lacks` (function, line 73) `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...`
-  - `box` (function, line 79) `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
+  - `cch_path` (type_alias, line 69) `typedef struct cch_path cch_path;`
+  - `cch_path_new` (function, line 70) `cch_path *cch_path_new(void);`
+  - `cch_path_free` (function, line 71) `void cch_path_free(cch_path *pa);`
+  - `cch_element_matches` (function, line 81) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);`
+  - `lacks` (function, line 85) `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...`
+  - `box` (function, line 91) `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
   - `FREEDOM_CSS_CHAIN_H` (macro, line 2) `#define FREEDOM_CSS_CHAIN_H`
   - `CCH_CHAIN_MAX` (macro, line 26) `#define CCH_CHAIN_MAX`
   - `CCH_SIB_MAX` (macro, line 27) `#define CCH_SIB_MAX`
   - `CCH_NTH_MAX` (macro, line 28) `#define CCH_NTH_MAX`
 - Depends on: `include/css.h`, `include/css_select.h`
-- Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`
+- Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`, `tests/test_page_view.c`
 
 ## include/css_color.h
 - Doc: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for...

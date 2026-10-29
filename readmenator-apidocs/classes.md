@@ -42,6 +42,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`cc_rgb`](modules/include.css_color.h.md#cc_rgb) struct in `include/css_color.h`
 - [`cc_status`](modules/include.css_color.h.md#cc_status) enum in `include/css_color.h`
 - [`cch_node`](modules/src.css_chain.c.md#cch_node) struct in `src/css_chain.c`
+- [`cch_path`](modules/include.css_chain.h.md#cch_path) type_alias in `include/css_chain.h`
+- [`cch_path`](modules/src.css_chain.c.md#cch_path) struct in `src/css_chain.c`
 - [`ccm_input`](modules/include.css_computed.h.md#ccm_input) struct in `include/css_computed.h`
 - [`ccm_prop`](modules/src.css_computed.c.md#ccm_prop) struct in `src/css_computed.c`
 - [`cg_radial`](modules/include.css_gradient.h.md#cg_radial) struct in `include/css_gradient.h`
@@ -186,6 +188,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`fbk_verdict`](modules/include.frame_broker.h.md#fbk_verdict) enum in `include/frame_broker.h`
 - [`fbp_tab`](modules/include.fb_panes.h.md#fbp_tab) enum in `include/fb_panes.h`
 - [`fc_clock`](modules/include.frame_clock.h.md#fc_clock) struct in `include/frame_clock.h`
+- [`fd`](modules/src.tab.c.md#fd) type_alias in `src/tab.c`
 - [`fetch`](modules/src.webfont_load.c.md#fetch) type_alias in `src/webfont_load.c`
 - [`fetch_ctx`](modules/src.secure_fetch.c.md#fetch_ctx) struct in `src/secure_fetch.c`
 - [`fetch_job`](modules/gui.browser_ui.c.md#fetch_job) struct in `gui/browser_ui.c`
@@ -481,6 +484,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`tab_eval_result`](modules/include.tab.h.md#tab_eval_result) struct in `include/tab.h`
 - [`tab_hist_op`](modules/include.tab.h.md#tab_hist_op) struct in `include/tab.h`
 - [`tab_image`](modules/include.tab.h.md#tab_image) struct in `include/tab.h`
+- [`tab_iobuf`](modules/src.tab.c.md#tab_iobuf) struct in `src/tab.c`
 - [`tab_page`](modules/include.tab.h.md#tab_page) struct in `include/tab.h`
 - [`tab_spawned`](modules/src.tab.c.md#tab_spawned) struct in `src/tab.c`
 - [`tab_status`](modules/include.tab.h.md#tab_status) enum in `include/tab.h`

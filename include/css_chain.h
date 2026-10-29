@@ -61,6 +61,18 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
                                  double parent_font_size,
                                  const struct cvr_chain *inherited,
                                  struct cvr_table *own_out);
+/* A persistent root->element path shared by consecutive resolutions in ONE build over a document
+ * that does not change meanwhile (spec/css_chain.md). cch_element_style_path is
+ * cch_element_style_vars with the ancestor chain reused from the previous call instead of rebuilt;
+ * the result is identical. pa == NULL (or a chain deeper than CCH_CHAIN_MAX) takes the uncached
+ * route. The path must not outlive a DOM mutation: free it when the build ends. */
+typedef struct cch_path cch_path;
+cch_path *cch_path_new(void);
+void cch_path_free(cch_path *pa);
+css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,
+                                 double parent_font_size, const struct cvr_chain *inherited,
+                                 struct cvr_table *own_out);
+
 /* Nonzero iff the parsed selector *sel matches element `el`, built against the
  * same bounded ancestor/sibling/attribute context as cch_element_style. This is
  * the single source of truth for selector matching: the DOM's querySelector and

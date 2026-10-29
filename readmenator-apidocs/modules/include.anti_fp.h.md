@@ -454,8 +454,6 @@ Same (session_key, domain) => same key (poisoning is stable within a site); diff
 
 **Returns:** `uint64_t`
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
-
 ---
 
 ## Macros

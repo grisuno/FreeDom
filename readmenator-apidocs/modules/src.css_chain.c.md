@@ -1,11 +1,11 @@
 # `src/css_chain.c`
 
-> Source: [src/css_chain.c:1](../../src/css_chain.c#L1) | language `c` | coverage 43.8% | [API index](../index.md)
+> Source: [src/css_chain.c:1](../../src/css_chain.c#L1) | language `c` | coverage 40.0% | [API index](../index.md)
 
 ## Contents
 
-- **Structs:** [`cch_node`](#cch_node)
-- **Functions:** [`inputs`](#inputs), [`cch_element_style_vars`](#cch_element_style_vars), [`cch_pseudo_style`](#cch_pseudo_style), [`cch_element_style`](#cch_element_style), [`cch_element_matches`](#cch_element_matches), [`cch_element_matches_any`](#cch_element_matches_any)
+- **Structs:** [`cch_node`](#cch_node), [`cch_path`](#cch_path)
+- **Functions:** [`inputs`](#inputs), [`cch_element_style_vars`](#cch_element_style_vars), [`cch_path_new`](#cch_path_new), [`cch_path_free`](#cch_path_free), [`cch_element_style_path`](#cch_element_style_path), [`cch_pseudo_style`](#cch_pseudo_style), [`cch_element_style`](#cch_element_style), [`cch_element_matches`](#cch_element_matches), [`cch_element_matches_any`](#cch_element_matches_any)
 - **Macros:** [`CCH_TAG_MAX`](#cch_tag_max), [`CCH_ID_MAX`](#cch_id_max), [`CCH_CLASS_BUF`](#cch_class_buf), [`CCH_MAX_CLASSES`](#cch_max_classes), [`CCH_CLASS_SPILL_MAX`](#cch_class_spill_max), [`CCH_MAX_ATTRS`](#cch_max_attrs), [`CCH_ATTR_BUF`](#cch_attr_buf)
 
 ## Type Diagram
@@ -17,6 +17,8 @@ classDiagram
     <<struct>> cch_node
     class cch_node_tag
     <<type_alias>> cch_node_tag
+    class cch_path
+    <<struct>> cch_path
 ```
 
 ## Call Graph
@@ -25,19 +27,23 @@ Solid arrows stay in this module, dashed arrows leave it.
 
 ```mermaid
 flowchart LR
+    n_src_css_chain_c__cch_element_style_path(["cch_element_style_path"])
+    n_src_css_chain_c__cch_element_style_vars(["cch_element_style_vars"])
     n_src_css_chain_c__cch_element_matches_any(["cch_element_matches_any"])
     n_src_css_chain_c__cch_element_matches(["cch_element_matches"])
     n_src_css_chain_c__inputs(["inputs"])
     n_include_css_select_h__csel_element_feature_bits["css_select.csel_element_feature_bits"]
-    n_src_css_chain_c__cch_element_style_vars(["cch_element_style_vars"])
     n_src_css_c__css_resolve_el_ex["css.css_resolve_el_ex"]
     n_src_css_chain_c__cch_pseudo_style(["cch_pseudo_style"])
     n_src_css_c__css_resolve_pseudo["css.css_resolve_pseudo"]
     n_include_css_select_h__csel_matches["css_select.csel_matches"]
     n_src_css_select_c__csel_needs_structure["css_select.csel_needs_structure"]
+    n_src_css_chain_c__cch_element_style_path --> n_src_css_chain_c__cch_element_style_vars
     n_src_css_chain_c__cch_element_matches_any --> n_src_css_chain_c__cch_element_matches
     n_src_css_chain_c__inputs -.-> n_include_css_select_h__csel_element_feature_bits
     n_src_css_chain_c__cch_element_style_vars -.-> n_src_css_c__css_resolve_el_ex
+    n_src_css_chain_c__cch_element_style_path -.-> n_include_css_select_h__csel_element_feature_bits
+    n_src_css_chain_c__cch_element_style_path -.-> n_src_css_c__css_resolve_el_ex
     n_src_css_chain_c__cch_pseudo_style -.-> n_src_css_c__css_resolve_pseudo
     n_src_css_chain_c__cch_element_matches -.-> n_include_css_select_h__csel_matches
     n_src_css_chain_c__cch_element_matches -.-> n_src_css_select_c__csel_needs_structure
@@ -75,6 +81,22 @@ typedef struct cch_node { char tag[CCH_TAG_MAX];
 ```
 
 One element's selector inputs (tag/id/classes) plus its css_element view, with backing storage so the css_element pointers stay valid for the chain's lifetime.
+
+---
+
+<a id="cch_path"></a>
+
+### `cch_path`
+
+`struct` | [src/css_chain.c:347](../../src/css_chain.c#L347)
+
+```c
+struct cch_path
+```
+
+The root->element path of the last element resolved, kept between calls.
+
+A cascade walks the document in tree order, so consecutive elements share all but the tail of their ancestor chain: rebuilding every ancestor's selector view (attributes, classes, sibling position, bloom) per element made the cascade O(elements x depth). Here only the part of the path that changed is refilled. nodes[i].el.parent points at nodes[i-1]; the matcher follows parent links only, so the root-first storage is equivalent to build_chain's subject-first one.
 
 ---
 
@@ -126,13 +148,74 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet, 
 
 *Calls:* [`css_resolve_el_ex`](src.css.c.md#css_resolve_el_ex)
 
+*Called by:* [`cch_element_style_path`](#cch_element_style_path)
+
+---
+
+<a id="cch_path_new"></a>
+
+### `cch_path_new`
+
+`function` | [src/css_chain.c:353](../../src/css_chain.c#L353)
+
+```c
+cch_path *cch_path_new(void)
+```
+
+**Returns:** `cch_path *`
+
+---
+
+<a id="cch_path_free"></a>
+
+### `cch_path_free`
+
+`function` | [src/css_chain.c:365](../../src/css_chain.c#L365)
+
+```c
+void cch_path_free(cch_path *pa)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `pa` | `cch_path *` |  |  |
+
+---
+
+<a id="cch_element_style_path"></a>
+
+### `cch_element_style_path`
+
+`function` | [src/css_chain.c:372](../../src/css_chain.c#L372)
+
+```c
+css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet, double parent_font_size, const struct cvr_chain *inherited, struct cvr_table *own_out)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `pa` | `cch_path *` |  |  |
+| `el` | `lxb_dom_element_t *` |  |  |
+| `sheet` | `css_sheet *` |  |  |
+| `parent_font_size` | `double` |  |  |
+| `inherited` | `struct cvr_chain *` |  |  |
+| `own_out` | `struct cvr_table *` |  |  |
+
+**Returns:** `css_style`
+
+*Calls:* [`csel_element_feature_bits`](include.css_select.h.md#csel_element_feature_bits), [`css_resolve_el_ex`](src.css.c.md#css_resolve_el_ex), [`cch_element_style_vars`](#cch_element_style_vars)
+
 ---
 
 <a id="cch_pseudo_style"></a>
 
 ### `cch_pseudo_style`
 
-`function` | [src/css_chain.c:341](../../src/css_chain.c#L341)
+`function` | [src/css_chain.c:439](../../src/css_chain.c#L439)
 
 ```c
 css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which, double font_size, const struct cvr_chain *inherited)
@@ -160,7 +243,7 @@ css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int wh
 
 ### `cch_element_style`
 
-`function` | [src/css_chain.c:360](../../src/css_chain.c#L360)
+`function` | [src/css_chain.c:458](../../src/css_chain.c#L458)
 
 ```c
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
@@ -183,7 +266,7 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
 
 ### `cch_element_matches`
 
-`function` | [src/css_chain.c:364](../../src/css_chain.c#L364)
+`function` | [src/css_chain.c:462](../../src/css_chain.c#L462)
 
 ```c
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)
@@ -202,7 +285,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`cch_element_matches`](#cch_element_matches) (include/css_chain.h:69).
+> **Inherited:** Documentation from [`cch_element_matches`](#cch_element_matches) (include/css_chain.h:81).
 
 *Calls:* [`csel_matches`](include.css_select.h.md#csel_matches), [`csel_needs_structure`](src.css_select.c.md#csel_needs_structure)
 
@@ -214,7 +297,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ### `cch_element_matches_any`
 
-`function` | [src/css_chain.c:378](../../src/css_chain.c#L378)
+`function` | [src/css_chain.c:476](../../src/css_chain.c#L476)
 
 ```c
 int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)

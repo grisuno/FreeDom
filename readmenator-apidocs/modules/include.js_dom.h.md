@@ -115,7 +115,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `opaque`
 
-`function` | [include/js_dom.h:66](../../include/js_dom.h#L66)
+`function` | [include/js_dom.h:73](../../include/js_dom.h#L73)
 
 ```c
 * the engine runtime opaque (unreachable from script);
@@ -135,7 +135,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `global`
 
-`function` | [include/js_dom.h:73](../../include/js_dom.h#L73)
+`function` | [include/js_dom.h:80](../../include/js_dom.h#L80)
 
 ```c
 * globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only helpers over the sealed document facade -- no new capability. * spec/freebug_repl.md. *
@@ -155,7 +155,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `jd_install_repl_api`
 
-`function` | [include/js_dom.h:82](../../include/js_dom.h#L82)
+`function` | [include/js_dom.h:89](../../include/js_dom.h#L89)
 
 ```c
 * jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL clears. ctx == NULL => JD_ERR_NULL_ARG. */ jd_status jd_set_repl_css(js_context *ct
@@ -176,7 +176,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `place`
 
-`function` | [include/js_dom.h:87](../../include/js_dom.h#L87)
+`function` | [include/js_dom.h:94](../../include/js_dom.h#L94)
 
 ```c
 * configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set to fixed. Out-of-range or non-finite values are refused with * JD_ERR_INTERNAL and
@@ -196,7 +196,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `getComputedStyle`
 
-`function` | [include/js_dom.h:108](../../include/js_dom.h#L108)
+`function` | [include/js_dom.h:115](../../include/js_dom.h#L115)
 
 ```c
 * getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h into out (cap bytes) and returns its length, 0 for * an unknown property (out "");
@@ -216,7 +216,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `jd_click_state_free`
 
-`function` | [include/js_dom.h:118](../../include/js_dom.h#L118)
+`function` | [include/js_dom.h:125](../../include/js_dom.h#L125)
 
 ```c
 * jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);
@@ -224,15 +224,13 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 **Returns:** `*`
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
-
 ---
 
 <a id="run"></a>
 
 ### `run`
 
-`function` | [include/js_dom.h:127](../../include/js_dom.h#L127)
+`function` | [include/js_dom.h:134](../../include/js_dom.h#L134)
 
 ```c
 * run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called preventDefault(). ctx == NULL => 1 (fail-open for the * default action, since no script can
@@ -253,7 +251,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `preventDefault`
 
-`function` | [include/js_dom.h:134](../../include/js_dom.h#L134)
+`function` | [include/js_dom.h:141](../../include/js_dom.h#L141)
 
 ```c
 * preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found => 1 (fail-open: submission proceeds). */ int jd_fire_submit(js_context *ctx, dom_node_
@@ -267,7 +265,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `host`
 
-`function` | [include/js_dom.h:163](../../include/js_dom.h#L163)
+`function` | [include/js_dom.h:170](../../include/js_dom.h#L170)
 
 ```c
 * for a trusted host (allow.conf AND js.conf);
@@ -289,7 +287,7 @@ Lives in the caller's stack (or struct) and must outlive ctx. The caller zero-in
 
 ### `jd_get_cookies`
 
-`function` | [include/js_dom.h:174](../../include/js_dom.h#L174)
+`function` | [include/js_dom.h:181](../../include/js_dom.h#L181)
 
 ```c
 int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);
@@ -315,7 +313,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `out_status`
 
-`function` | [include/js_dom.h:182](../../include/js_dom.h#L182)
+`function` | [include/js_dom.h:189](../../include/js_dom.h#L189)
 
 ```c
 * On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response bytes, malloc'd -- the bridge frees with free()), and * *out_ctype (Content-Type, malloc'
@@ -336,7 +334,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_process_iframes`
 
-`function` | [include/js_dom.h:222](../../include/js_dom.h#L222)
+`function` | [include/js_dom.h:229](../../include/js_dom.h#L229)
 
 ```c
 * BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */ jd_status jd_inject_video_shim(js_context *ctx);
@@ -350,7 +348,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `URLs`
 
-`function` | [include/js_dom.h:229](../../include/js_dom.h#L229)
+`function` | [include/js_dom.h:236](../../include/js_dom.h#L236)
 
 ```c
 * video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT re-process iframes already processed (tracks them by node_id in * jd_opaque.iframe_track
@@ -370,7 +368,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_video_from_scripts`
 
-`function` | [include/js_dom.h:243](../../include/js_dom.h#L243)
+`function` | [include/js_dom.h:250](../../include/js_dom.h#L250)
 
 ```c
 size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t nscripts, const char *page_url);
@@ -398,7 +396,7 @@ Runs before the pre-script preserve_view snapshot so video elements survive jQue
 
 ### `jd_flush_custom_elements`
 
-`function` | [include/js_dom.h:254](../../include/js_dom.h#L254)
+`function` | [include/js_dom.h:261](../../include/js_dom.h#L261)
 
 ```c
 void jd_flush_custom_elements(js_context *ctx);
@@ -438,7 +436,7 @@ Lives in jd_opaque (caller's stack), not in a static — eliminates cross-page s
 
 ### `JD_REPL_CSS_MAX`
 
-`macro` | [include/js_dom.h:79](../../include/js_dom.h#L79)
+`macro` | [include/js_dom.h:86](../../include/js_dom.h#L86)
 
 ```c
 #define JD_REPL_CSS_MAX

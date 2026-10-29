@@ -1,11 +1,12 @@
 # `include/css_chain.h`
 
-> Source: [include/css_chain.h:1](../../include/css_chain.h#L1) | language `h` | coverage 22.2% | [API index](../index.md)
+> Source: [include/css_chain.h:1](../../include/css_chain.h#L1) | language `h` | coverage 25.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cvr_chain`](#cvr_chain), [`cvr_table`](#cvr_table)
-- **Functions:** [`cch_element_matches`](#cch_element_matches), [`lacks`](#lacks), [`box`](#box)
+- **Type Aliases:** [`cch_path`](#cch_path)
+- **Functions:** [`cch_path_new`](#cch_path_new), [`cch_path_free`](#cch_path_free), [`cch_element_matches`](#cch_element_matches), [`lacks`](#lacks), [`box`](#box)
 - **Macros:** [`CCH_CHAIN_MAX`](#cch_chain_max), [`CCH_SIB_MAX`](#cch_sib_max), [`CCH_NTH_MAX`](#cch_nth_max)
 
 ## Type Diagram
@@ -17,6 +18,8 @@ classDiagram
     <<struct>> cvr_chain
     class cvr_table
     <<struct>> cvr_table
+    class cch_path
+    <<type_alias>> cch_path
 ```
 
 ## Structs
@@ -45,13 +48,67 @@ struct cvr_table;
 
 ---
 
+## Type Aliases
+
+<a id="cch_path"></a>
+
+### `cch_path`
+
+`type_alias` | [include/css_chain.h:69](../../include/css_chain.h#L69)
+
+```c
+typedef struct cch_path cch_path;
+```
+
+A persistent root->element path shared by consecutive resolutions in ONE build over a document that does not change meanwhile (spec/css_chain.md). cch_element_style_path is cch_element_style_vars with the ancestor chain reused from the previous call instead of rebuilt; the result is identical. pa == NULL (or a chain deeper than CCH_CHAIN_MAX) takes the uncached route.
+
+The path must not outlive a DOM mutation: free it when the build ends.
+
+---
+
 ## Functions
+
+<a id="cch_path_new"></a>
+
+### `cch_path_new`
+
+`function` | [include/css_chain.h:70](../../include/css_chain.h#L70)
+
+```c
+cch_path *cch_path_new(void);
+```
+
+**Returns:** `cch_path *`
+
+*Called by:* [`PV_STYLE_RESERVE_MAX`](src.page_view.c.md#pv_style_reserve_max)
+
+---
+
+<a id="cch_path_free"></a>
+
+### `cch_path_free`
+
+`function` | [include/css_chain.h:71](../../include/css_chain.h#L71)
+
+```c
+void cch_path_free(cch_path *pa);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `pa` | `cch_path *` |  |  |
+
+*Called by:* [`PV_STYLE_RESERVE_MAX`](src.page_view.c.md#pv_style_reserve_max)
+
+---
 
 <a id="cch_element_matches"></a>
 
 ### `cch_element_matches`
 
-`function` | [include/css_chain.h:69](../../include/css_chain.h#L69)
+`function` | [include/css_chain.h:81](../../include/css_chain.h#L81)
 
 ```c
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);
@@ -78,7 +135,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ### `lacks`
 
-`function` | [include/css_chain.h:73](../../include/css_chain.h#L73)
+`function` | [include/css_chain.h:85](../../include/css_chain.h#L85)
 
 ```c
 * the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a whole document nearly every candidate dies there, so the scan no longer * pays O(depth)
@@ -98,7 +155,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ### `box`
 
-`function` | [include/css_chain.h:79](../../include/css_chain.h#L79)
+`function` | [include/css_chain.h:91](../../include/css_chain.h#L91)
 
 ```c
 * generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size (the pseudo inherits it) and * inherited el's own custom-property chain (NULL = none).

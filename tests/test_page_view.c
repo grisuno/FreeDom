@@ -23,6 +23,7 @@
 #include "flex_layout.h"
 #include "html_parse.h"
 #include "page_view.h"
+#include "css_chain.h"
 #include "webfont.h"
 
 /* Parse helper: aborts the test on parse failure. Caller frees *doc. */
@@ -4129,7 +4130,7 @@ static void test_build_attr_selectors_and_important(void **state) {
     assert_int_equal(secure->fg_rgb, 0x003399);  /* https prefix matched */
     const pv_run *plain = find_text(v, "plain");
     assert_non_null(plain);
-    assert_int_equal(plain->fg_rgb, -1);          /* http: no match (fail closed) */
+    assert_int_equal(plain->fg_rgb, 0x0000EE);    /* http: author rule no match; UA link blue */
 
     const pv_run *imp = find_text(v, "important wins");
     assert_non_null(imp);
@@ -4282,6 +4283,56 @@ static void test_build_style_cache_distinct_siblings(void **state) {
     assert_int_equal(find_text(v, "bravo")->fg_rgb, 0x222222);
     assert_int_equal(find_text(v, "charlie")->fg_rgb, 0x333333);
     pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The selector path reused between resolutions (cch_path) is an optimisation, not a behaviour:
+ * every element must resolve to exactly what the uncached chain gives, whatever order the
+ * elements are visited in (tree order reuses the shared ancestors; the reverse order throws the
+ * path away at every step). Rules cover the inputs a stale path would corrupt: descendant and
+ * child combinators, :nth-child (sibling position), `+` (preceding sibling) and a class. */
+static void collect_elements(lxb_dom_node_t *n, lxb_dom_element_t **out, size_t *cnt, size_t cap) {
+    for (lxb_dom_node_t *c = n->first_child; c != NULL; c = c->next) {
+        if (c->type == LXB_DOM_NODE_TYPE_ELEMENT && *cnt < cap)
+            out[(*cnt)++] = lxb_dom_interface_element(c);
+        collect_elements(c, out, cnt, cap);
+    }
+}
+
+static void test_style_path_matches_uncached_chain(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><style>"
+        ".a .b > span{background:#0000ff} li:nth-child(2){color:#00ff00} h1+p{margin-top:7px}"
+        "div p{color:#ff0000} .b{color:#123456} section > p:first-child{background:#abcdef}"
+        "</style>"
+        "<div class='a'><section><p>one</p><p>two</p></section>"
+        "<div class='b'><span>deep</span><ul><li>x</li><li>y</li><li>z</li></ul></div></div>"
+        "<h1>t</h1><p>after</p><p>again</p></body>");
+    lxb_dom_element_t *els[64];
+    size_t n = 0;
+    collect_elements((lxb_dom_node_t *)hp_document_root(doc), els, &n, 64);
+    assert_true(n > 10);
+    css_sheet *sheet = NULL;
+    static const char css[] =
+        ".a .b > span{background:#0000ff} li:nth-child(2){color:#00ff00} h1+p{margin-top:7px}"
+        "div p{color:#ff0000} .b{color:#123456} section > p:first-child{background:#abcdef}";
+    assert_int_equal(css_parse(css, sizeof css - 1, &sheet), CSS_OK);
+    cch_path *path = cch_path_new();
+    assert_non_null(path);
+    for (int pass = 0; pass < 2; ++pass) {
+        for (size_t k = 0; k < n; ++k) {
+            lxb_dom_element_t *el = els[pass == 0 ? k : n - 1 - k];
+            css_style want = cch_element_style_vars(el, sheet, 16.0, NULL, NULL);
+            css_style got = cch_element_style_path(path, el, sheet, 16.0, NULL, NULL);
+            assert_int_equal(got.color, want.color);
+            assert_int_equal(got.background, want.background);
+            assert_int_equal(got.margin_top, want.margin_top);
+            assert_int_equal(got.display, want.display);
+        }
+    }
+    cch_path_free(path);
+    css_free(sheet);
     hp_document_free(doc);
 }
 
@@ -5465,6 +5516,7 @@ int main(void) {
         cmocka_unit_test(test_build_style_sheet_color),
         cmocka_unit_test(test_build_style_cache_distinct_siblings),
         cmocka_unit_test(test_build_attr_selectors_and_important),
+        cmocka_unit_test(test_style_path_matches_uncached_chain),
         cmocka_unit_test(test_build_pseudo_classes_and_siblings),
         cmocka_unit_test(test_build_table_cell_author_styles),
         cmocka_unit_test(test_build_prefers_color_scheme),

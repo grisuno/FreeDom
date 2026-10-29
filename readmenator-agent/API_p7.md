@@ -1,6 +1,43 @@
 # API (page 7 of 12)
 Previous: [API_p6.md](API_p6.md)
 
+## src/css_gradient.c
+Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
+- `cg_parse_num` (function) `src/css_gradient.c:13` `static int cg_parse_num(const char *s, double *out, const char **endp)`
+- `cg_wide_keyword` (function) `src/css_gradient.c:18` `static int cg_wide_keyword(const char *v)`
+- `gradient` (function) `src/css_gradient.c:28` `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
+ * the whole decl...`
+- `find_gradient_call` (function) `src/css_gradient.c:77` `static int find_gradient_call(const char *v, const char *fn, size_t *start,
+                     ...` -- Locates a gradient function call `fn` (e.g. "linear-gradient(") in v (case-insensitive; an occurrence that is the...
+- `conic_prelude` (function) `src/css_gradient.c:111` `static int conic_prelude(const char *seg, int *angle)` -- conic-gradient prelude: `from <int>deg`, optionally followed by `at <pos>` (position accepted and ignored -- always...
+- `grad_stop_pos` (function) `src/css_gradient.c:153` `static int grad_stop_pos(const char *pp, int conic, const char **endp)` -- One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts `Ndeg` -> the same 0-1000 turn fraction...
+- `CSS_GRAD_STOPS_MAX` (function) `src/css_gradient.c:184` `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
+ * the gradient fai...`
+- `emit_gradient` (function) `src/css_gradient.c:291` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
+                         ...` -- Emits the gradient decl group. nstops == 0 emits only the explicit reset * (P_BG_GRAD_N = 0), which is how a...
+- `find_radial_gradient` (function) `src/css_gradient.c:348` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+                      ...` -- R5c: detects radial-gradient(circle at center, color1, color2).
+- `emit_radial_geom` (function) `src/css_gradient.c:387` `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` -- char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) { if (cap < 1) return 0; dst[0].prop = P_BG_IMAGE_URL; if...
+- `pool` (function) `src/css_gradient.c:400` `* pool (gradient explicitly reset);`
+- `downstream` (function) `src/css_gradient.c:404` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+int cg_expand_bg_imag...`
+- `declaration` (function) `src/css_gradient.c:465` `* declaration (fail closed);`
+- `bg_layer_tokens_ok` (function) `src/css_gradient.c:472` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
+- `cg_expand_background` (function) `src/css_gradient.c:512` `int cg_expand_background(const char *val, css_decl *dst, int cap,
+                             ch...`
+- `rad_ieq` (function) `src/css_gradient.c:600` `static int rad_ieq(const char *a, const char *b)`
+- `rad_len` (function) `src/css_gradient.c:608` `static int rad_len(const char *tok, int *enc)` -- One <length-percentage> token (`12px`, `40%`, `0`) -> the cg_radial encoding; 1 = ok.
+- `rad_is_len_start` (function) `src/css_gradient.c:629` `static int rad_is_len_start(const char *t)`
+- `rad_pos_kw` (function) `src/css_gradient.c:634` `static int rad_pos_kw(const char *t, int *axis)` -- if (*e == '\0' && v == 0.0) { *enc = 0; return 1; }   /* unitless 0 is a zero length if (rad_ieq(e, "px")) { if (v >...
+- `rad_parse_position` (function) `src/css_gradient.c:643` `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
+- `cg_parse_radial_prelude` (function) `src/css_gradient.c:672` `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
+- `cg_radial_len_px` (function) `src/css_gradient.c:748` `double cg_radial_len_px(int enc, double dim)`
+- `cg_dmin` (function) `src/css_gradient.c:757` `static double cg_dmin(double a, double b)`
+- `cg_dmax` (function) `src/css_gradient.c:758` `static double cg_dmax(double a, double b)`
+- `cg_radial_geometry` (function) `src/css_gradient.c:760` `void cg_radial_geometry(const cg_radial *r, double w, double h,
+                        double *c...`
+- `cg_parse_linear` (function) `src/css_gradient.c:797` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
+
 ## src/css_index.c
 Depends on: `include/css_index.h`
 - `key_of` (function) `src/css_index.c:11` `static uint64_t key_of(int kind, const char *s, size_t n, int lower)` -- FNV-1a over the kind byte then the name; the tag is hashed lowercased because * compound_matches compares it with...
@@ -443,37 +480,6 @@ Depends on: `include/frame_clock.h`
 - `fc_set_active` (function) `src/frame_clock.c:16` `void fc_set_active(fc_clock *c, int active)`
 - `fc_needs_tick` (function) `src/frame_clock.c:21` `int fc_needs_tick(const fc_clock *c)`
 - `fc_interval_ms` (function) `src/frame_clock.c:26` `int fc_interval_ms(const fc_clock *c)`
-
-## src/frame_host.c
-Depends on: `include/frame_broker.h`, `include/frame_host.h`
-- `fh_new` (function) `src/frame_host.c:35` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
-                fh_top_...`
-- `slot_release_view` (function) `src/frame_host.c:47` `static void slot_release_view(fh_slot *sl)`
-- `reap` (function) `src/frame_host.c:55` `static void reap(fh_host *h)` -- h->fetch = fetch; h->fetch_ctx = fetch_ctx; h->top_msg = top_msg; h->top_ctx = top_ctx; for (int i = 0; i <...
-- `fh_free` (function) `src/frame_host.c:67` `void fh_free(fh_host *h)`
-- `fh_count` (function) `src/frame_host.c:76` `int fh_count(const fh_host *h)`
-- `load_frame` (function) `src/frame_host.c:85` `static void load_frame(fh_host *h, int id, const char *url)` -- Loads the document of frame `id` (already registered in the table).
-- `find_child` (function) `src/frame_host.c:129` `static int find_child(const fh_host *h, int parent, int token)`
-- `token_seen_by` (function) `src/frame_host.c:137` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
-- `post_op` (function) `src/frame_host.c:143` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
-- `apply_ops` (function) `src/frame_host.c:198` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
-- `fh_apply_top` (function) `src/frame_host.c:221` `void fh_apply_top(fh_host *h, const tab_page *page)`
-- `fh_tick` (function) `src/frame_host.c:226` `int fh_tick(fh_host *h, int elapsed_ms)`
-- `fh_generation` (function) `src/frame_host.c:250` `unsigned fh_generation(const fh_host *h)`
-- `fh_frame_view` (function) `src/frame_host.c:252` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
-
-## src/freebug.c
-Depends on: `include/freebug.h`
-- `whole` (function) `src/freebug.c:5` `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);`
-- `fb_buffer_init` (function) `src/freebug.c:15` `void fb_buffer_init(fb_buffer *b)`
-- `fb_buffer_push` (function) `src/freebug.c:19` `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)`
-- `fb_buffer_push_loc` (function) `src/freebug.c:23` `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,
-                   ...`
-- `fb_buffer_reset` (function) `src/freebug.c:78` `void fb_buffer_reset(fb_buffer *b)`
-- `fb_buffer_free` (function) `src/freebug.c:91` `void fb_buffer_free(fb_buffer *b)`
-- `fb_buffer_count` (function) `src/freebug.c:101` `size_t fb_buffer_count(const fb_buffer *b)`
-- `fb_buffer_at` (function) `src/freebug.c:105` `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)`
-- `fb_level_name` (function) `src/freebug.c:110` `const char *fb_level_name(int level)`
 
 
 Next: [API_p8.md](API_p8.md)

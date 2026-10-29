@@ -3,6 +3,9 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `hc_meta` | struct | `include/http_cache.h:44` | `` |
+| `hc_parse_http_date` | function | `include/http_cache.h:56` | `time_t hc_parse_http_date(const char *s);` |
+| `hc_status` | enum | `include/http_cache.h:28` | `` |
 | `hc_store` | type_alias | `include/http_cache.h:66` | `typedef struct hc_store hc_store;` |
 | `FREEDOM_IDENTITY_H` | macro | `include/identity.h:2` | `#define FREEDOM_IDENTITY_H` |
 | `IDN_GEO_ACC_MAX` | macro | `include/identity.h:23` | `#define IDN_GEO_ACC_MAX` |
@@ -75,27 +78,27 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `val_kind` | type_alias | `include/interp.h:100` | `typedef struct ip_anim { ip_val_kind val_kind;` |
 | `FREEDOM_JS_DOM_H` | macro | `include/js_dom.h:2` | `#define FREEDOM_JS_DOM_H` |
 | `JD_IFRAME_TRACK_MAX` | macro | `include/js_dom.h:40` | `#define JD_IFRAME_TRACK_MAX` |
-| `JD_REPL_CSS_MAX` | macro | `include/js_dom.h:79` | `#define JD_REPL_CSS_MAX` |
-| `URLs` | function | `include/js_dom.h:229` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
-| `getComputedStyle` | function | `include/js_dom.h:108` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
-| `global` | function | `include/js_dom.h:73` | `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...` |
-| `host` | function | `include/js_dom.h:163` | `* for a trusted host (allow.conf AND js.conf);` |
+| `JD_REPL_CSS_MAX` | macro | `include/js_dom.h:86` | `#define JD_REPL_CSS_MAX` |
+| `URLs` | function | `include/js_dom.h:236` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
+| `getComputedStyle` | function | `include/js_dom.h:115` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
+| `global` | function | `include/js_dom.h:80` | `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...` |
+| `host` | function | `include/js_dom.h:170` | `* for a trusted host (allow.conf AND js.conf);` |
 | `jd_click_state` | type_alias | `include/js_dom.h:35` | `typedef struct jd_click_state jd_click_state;` |
-| `jd_click_state_free` | function | `include/js_dom.h:118` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
-| `jd_flush_custom_elements` | function | `include/js_dom.h:254` | `void jd_flush_custom_elements(js_context *ctx);` |
-| `jd_get_cookies` | function | `include/js_dom.h:174` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
+| `jd_click_state_free` | function | `include/js_dom.h:125` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
+| `jd_flush_custom_elements` | function | `include/js_dom.h:261` | `void jd_flush_custom_elements(js_context *ctx);` |
+| `jd_get_cookies` | function | `include/js_dom.h:181` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
 | `jd_iframe_track` | struct | `include/js_dom.h:41` | `` |
-| `jd_install_repl_api` | function | `include/js_dom.h:82` | `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...` |
+| `jd_install_repl_api` | function | `include/js_dom.h:89` | `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...` |
 | `jd_opaque` | struct | `include/js_dom.h:46` | `` |
-| `jd_process_iframes` | function | `include/js_dom.h:222` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
+| `jd_process_iframes` | function | `include/js_dom.h:229` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
 | `jd_status` | enum | `include/js_dom.h:25` | `` |
-| `jd_video_from_scripts` | function | `include/js_dom.h:243` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
-| `opaque` | function | `include/js_dom.h:66` | `* the engine runtime opaque (unreachable from script);` |
-| `out_status` | function | `include/js_dom.h:182` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
-| `place` | function | `include/js_dom.h:87` | `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...` |
-| `preventDefault` | function | `include/js_dom.h:134` | `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...` |
+| `jd_video_from_scripts` | function | `include/js_dom.h:250` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
+| `opaque` | function | `include/js_dom.h:73` | `* the engine runtime opaque (unreachable from script);` |
+| `out_status` | function | `include/js_dom.h:189` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
+| `place` | function | `include/js_dom.h:94` | `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...` |
+| `preventDefault` | function | `include/js_dom.h:141` | `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...` |
 | `processed` | type_alias | `include/js_dom.h:41` | `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];` |
-| `run` | function | `include/js_dom.h:127` | `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...` |
+| `run` | function | `include/js_dom.h:134` | `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...` |
 | `FREEDOM_JS_ENV_H` | macro | `include/js_env.h:2` | `#define FREEDOM_JS_ENV_H` |
 | `JE_READBACK_EXACT` | macro | `include/js_env.h:59` | `#define JE_READBACK_EXACT` |
 | `je_status` | enum | `include/js_env.h:27` | `` |
@@ -493,8 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:218` | `#define SF_DEFAULT_MAX_REDIRECTS` |
 | `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:193` | `#define SF_DEFAULT_TIMEOUT_MS` |
 | `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:191` | `#define SF_DEFAULT_USER_AGENT` |
-| `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:175` | `#define SF_IMPERSONATE_KEX_GROUPS` |
-| `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:180` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
-| `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:176` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

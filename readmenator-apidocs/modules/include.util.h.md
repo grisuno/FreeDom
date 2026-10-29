@@ -56,7 +56,7 @@ static inline int read_full(int fd, void *buf, size_t n)
 
 **Returns:** `int`
 
-*Called by:* [`ds_read`](src.disk_store.c.md#ds_read), [`media_decoder_run`](src.media_decoder.c.md#media_decoder_run), [`tab_load_full`](src.tab.c.md#tab_load_full), [`tab_submit`](src.tab.c.md#tab_submit)
+*Called by:* [`ds_read`](src.disk_store.c.md#ds_read), [`media_decoder_run`](src.media_decoder.c.md#media_decoder_run)
 
 ---
 
@@ -83,8 +83,6 @@ The `| 0x20` fold maps A-Z to a-z and leaves digits unchanged.
 | `needle` | `char *` |  |  |
 
 **Returns:** `int`
-
-*Called by:* [`pv_build_styled`](src.page_view.c.md#pv_build_styled)
 
 ---
 

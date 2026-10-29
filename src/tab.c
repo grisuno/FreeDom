@@ -43,6 +43,73 @@
 #include "subreq_batch.h"
 #include "util.h"
 
+/*
+ * Batched pipe I/O for the view codec. write_view/read_view move one int32 block and one
+ * length-prefixed string at a time: ~46 000 read(2) and as many write(2) calls for a single
+ * Wikipedia page, each a context switch for 4-64 bytes. Inside those two functions the traffic
+ * goes through a per-THREAD 64 KiB buffer instead (no state is shared: the async tick thread
+ * and the caller each have their own). The byte stream is unchanged. Writes are flushed before
+ * write_view returns. A read buffer may hold the bytes that follow the view in the same reply:
+ * they stay in it and the next read on that fd consumes them first, so no byte is ever lost; the
+ * protocol is request/response lockstep, so nothing beyond the reply can be in the pipe.
+ */
+#define TAB_IOBUF_BYTES (64u * 1024u)
+typedef struct tab_iobuf {
+    int     fd;           /* -1 = idle */
+    size_t  pos, len;     /* read: next byte / valid bytes; write: len = pending bytes */
+    int     armed;        /* read: refill from the pipe; write: collect instead of write(2) */
+    uint8_t buf[TAB_IOBUF_BYTES];
+} tab_iobuf;
+static _Thread_local tab_iobuf tl_rbuf = { .fd = -1 };
+static _Thread_local tab_iobuf tl_wbuf = { .fd = -1 };
+
+static int tab_wflush(void) {
+    int rc = 0;
+    if (tl_wbuf.fd >= 0 && tl_wbuf.len > 0) rc = write_full(tl_wbuf.fd, tl_wbuf.buf, tl_wbuf.len);
+    tl_wbuf.len = 0;
+    return rc;
+}
+
+static int tab_write_full(int fd, const void *buf, size_t n) {
+    if (!tl_wbuf.armed || tl_wbuf.fd != fd) return write_full(fd, buf, n);
+    if (n > TAB_IOBUF_BYTES) {                       /* big payload: order first, then direct */
+        if (tab_wflush() != 0) return -1;
+        return write_full(fd, buf, n);
+    }
+    if (tl_wbuf.len + n > TAB_IOBUF_BYTES && tab_wflush() != 0) return -1;
+    memcpy(tl_wbuf.buf + tl_wbuf.len, buf, n);
+    tl_wbuf.len += n;
+    return 0;
+}
+
+static int tab_read_full(int fd, void *buf, size_t n) {
+    uint8_t *out = (uint8_t *)buf;
+    if (tl_rbuf.fd == fd && tl_rbuf.pos < tl_rbuf.len) {
+        size_t take = tl_rbuf.len - tl_rbuf.pos;
+        if (take > n) take = n;
+        memcpy(out, tl_rbuf.buf + tl_rbuf.pos, take);
+        tl_rbuf.pos += take;
+        out += take;
+        n -= take;
+        if (n == 0) return 0;
+    }
+    if (!tl_rbuf.armed || tl_rbuf.fd != fd || n >= TAB_IOBUF_BYTES) return read_full(fd, out, n);
+    while (n > 0) {
+        ssize_t r = read(fd, tl_rbuf.buf, TAB_IOBUF_BYTES);
+        if (r < 0) { if (errno == EINTR) continue; tl_rbuf.pos = tl_rbuf.len = 0; return -1; }
+        if (r == 0) { tl_rbuf.pos = tl_rbuf.len = 0; return -1; }
+        size_t take = (size_t)r < n ? (size_t)r : n;
+        memcpy(out, tl_rbuf.buf, take);
+        tl_rbuf.pos = take;
+        tl_rbuf.len = (size_t)r;
+        out += take;
+        n -= take;
+    }
+    return 0;
+}
+#define write_full(fd, buf, n) tab_write_full((fd), (buf), (n))
+#define read_full(fd, buf, n)  tab_read_full((fd), (buf), (n))
+
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -183,6 +250,13 @@ typedef struct child_state {
     jg_table        geom;              /* laid-out geometry installed into js (OP_GEOM) */
     pv_computed    *computed;          /* retained cascade behind getComputedStyle (trusted) */
     uint64_t        computed_sig;      /* css_signature the cascade snapshot was taken at */
+    /* A JS context with the page-independent shims already installed over a blank document,
+     * built while the worker was idle (child_prepare_js) so the ~13 ms of shim compilation is
+     * not on the load's critical path. Own opaque: the live page's cs->jd_op must not be touched. */
+    js_context     *prep_js;
+    hp_document    *prep_doc;
+    dom_index      *prep_idx;
+    jd_opaque       prep_op;
     char   prelude[32768];  /* FREEDOM_JS_PRELUDE text, read before seccomp */
     size_t prelude_len;
 } child_state;
@@ -453,6 +527,29 @@ static void prof_lap(const char *what, double *t0) {
  * them; event-handler attributes (on*) are stripped regardless. page_url (may be
  * NULL/empty) backs the page JS's real `location.*`; navigation capture is armed
  * regardless of run_js (a no-JS load simply never records a request). */
+/* Installs the page-independent part of the JS environment into a spare context, once, before
+ * the worker's first request. Any failure just leaves no prepared context and child_load builds
+ * one the ordinary way. */
+static void child_prepare_js(child_state *cs) {
+    if (cs->prep_js != NULL) return;
+    static const char blank[] = "<html><head></head><body></body></html>";
+    hp_config cfg = hp_config_default();
+    cfg.strip_scripts = 1;
+    hp_document *d = NULL;
+    dom_index *ix = NULL;
+    js_context *js = NULL;
+    if (hp_parse(blank, sizeof blank - 1, &cfg, &d) != HP_OK) return;
+    if (dom_build(d, &ix) != DOM_OK) { hp_document_free(d); return; }
+    if (js_context_new(NULL, &js) != JS_OK) { dom_free(ix); hp_document_free(d); return; }
+    if (jd_install(js, ix, &cs->prep_op) != JD_OK) {
+        js_context_free(js); dom_free(ix); hp_document_free(d);
+        return;
+    }
+    cs->prep_js = js;
+    cs->prep_doc = d;
+    cs->prep_idx = ix;
+}
+
 static int child_load(child_state *cs, const char *html, size_t len, int run_js,
                       int net_allowed, const char *page_url) {
     child_reset_page(cs);
@@ -472,9 +569,27 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
     prof_lap("dom-index", &pt);
 
     js_context *js = NULL;
-    if (js_context_new(NULL, &js) != JS_OK) {
+    int adopted = 0;
+    if (cs->prep_js != NULL) {
+        /* The shims are already installed (child_prepare_js): move the context onto this page. */
+        js = cs->prep_js;
+        if (jd_rebind(js, idx, &cs->prep_op, &cs->jd_op) == JD_OK) {
+            adopted = 1;
+            dom_free(cs->prep_idx);
+            hp_document_free(cs->prep_doc);
+            cs->prep_js = NULL; cs->prep_idx = NULL; cs->prep_doc = NULL;
+        } else {
+            js = NULL;       /* unusable: drop it and build the ordinary way */
+            js_context_free(cs->prep_js);
+            dom_free(cs->prep_idx);
+            hp_document_free(cs->prep_doc);
+            cs->prep_js = NULL; cs->prep_idx = NULL; cs->prep_doc = NULL;
+        }
+    }
+    if (js == NULL && js_context_new(NULL, &js) != JS_OK) {
         dom_free(idx); hp_document_free(doc); return -1;
     }
+    prof_lap("js-context-new", &pt);
     /* Per-origin canvas/audio readback key: combine the per-worker session secret
      * with the page's registrable domain (eTLD+1) so two sites rendered by the same
      * worker get unlinkable poisoning. A URL with no host (file://, empty) yields no
@@ -493,7 +608,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
     uint64_t readback_key = fp_origin_key(cs->session_key, rb_origin);
     idn_config idn_cfg;
     idn_parse(&idn_cfg, cs->identity);              /* an unreadable line is the default identity */
-    if (jd_install(js, idx, &cs->jd_op) != JD_OK
+    if ((!adopted && jd_install(js, idx, &cs->jd_op) != JD_OK)
      || jd_install_events(js, cs->click) != JD_OK
      || je_install_identity_trusted(js, TAB_SCREEN_W, TAB_SCREEN_H, idn_cfg.user_agent, idn_cfg.languages,
                                     net_allowed && run_js) != JE_OK
@@ -501,6 +616,7 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
         js_context_free(js); jd_click_state_free(cs->click); cs->click = NULL;
         dom_free(idx); hp_document_free(doc); return -1;
     }
+    prof_lap("js-install", &pt);   /* ~13 ms: the document/modern/url/ext shims are compiled per page */
     /* Capturing console for Freebug: a fresh page starts with an empty transcript;
      * the buffer (stable child_state member) is wired into the new context's runtime
      * opaque. Installed regardless of run_js so the REPL works on any page. */
@@ -574,7 +690,19 @@ static int write_field(int fd, const char *s) {
  * one in the read extraction, like the box def. NO tags/versioning: the worker is the
  * SAME binary as the parent (/proc/self/exe --tab-worker), so write_view and read_view
  * are always the same build -- there is no version skew to tolerate. */
+static int write_view_raw(int wfd, const pv_view *v);
 static int write_view(int wfd, const pv_view *v) {
+    int saved_armed = tl_wbuf.armed, saved_fd = tl_wbuf.fd;
+    tl_wbuf.fd = wfd;
+    tl_wbuf.len = 0;
+    tl_wbuf.armed = 1;
+    int rc = write_view_raw(wfd, v);
+    if (tab_wflush() != 0) rc = -1;
+    tl_wbuf.armed = saved_armed;
+    tl_wbuf.fd = saved_fd;
+    return rc;
+}
+static int write_view_raw(int wfd, const pv_view *v) {
     size_t n = pv_count(v);
     if (write_full(wfd, &n, sizeof n) != 0) return -1;
     for (size_t i = 0; i < n; ++i) {
@@ -1252,6 +1380,44 @@ static void child_fetch_stylesheets(child_state *cs) {
 
 static int32_t child_next_timer_ms(child_state *cs);
 
+/*
+ * The pre-script view, rebuilt on demand. It used to be built eagerly before every script run
+ * (a full second cascade, ~55 ms on Wikipedia and far more on a design-system page) only to be
+ * thrown away unless the scripts shrank the DOM. It is now rebuilt from the page SOURCE, after
+ * the fact, and only when the DOM lost elements: a fresh parse plus the same native video
+ * extraction is exactly the pre-script tree, and node ids are document-order so the view agrees
+ * with the live index. Returns NULL on any failure (the caller keeps the post-script view).
+ */
+static pv_view *child_prescript_view(child_state *cs, const char *html, size_t len,
+                                     const char *page_url, int run_js, int reader,
+                                     int prefers_dark) {
+    hp_config cfg = hp_config_default();
+    cfg.strip_scripts = run_js ? 0 : 1;
+    hp_document *doc = NULL;
+    if (hp_parse(html, len, &cfg, &doc) != HP_OK) return NULL;
+    dom_index *idx = NULL;
+    if (dom_build(doc, &idx) != DOM_OK) { hp_document_free(doc); return NULL; }
+    size_t nscripts = 0;
+    hp_script *scripts = hp_extract_script_list(doc, &nscripts);
+    if (nscripts > 0) {
+        const char **texts = (const char **)calloc(nscripts, sizeof(char *));
+        size_t *lens = (size_t *)calloc(nscripts, sizeof(size_t));
+        if (texts != NULL && lens != NULL) {
+            for (size_t i = 0; i < nscripts; i++) { texts[i] = scripts[i].text; lens[i] = scripts[i].len; }
+            (void)jd_video_from_scripts(idx, texts, lens, nscripts, page_url);
+        }
+        free(texts);
+        free(lens);
+    }
+    hp_free_scripts(scripts, nscripts);
+    pv_view *view = NULL;
+    if (pv_build_styled(doc, run_js, reader, prefers_dark, cs->extern_css, cs->extern_css_len,
+                        cs->last_viewport_w, &view) != PV_OK) view = NULL;
+    dom_free(idx);
+    hp_document_free(doc);
+    return view;
+}
+
 static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
                               int run_js, int net, int reader, int prefers_dark,
                               int css, int viewport_w, const char *page_url,
@@ -1290,6 +1456,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         cs->net_active = 1;
         child_fetch_stylesheets(cs);
         cs->net_active = 0;
+        prof_lap("stylesheets", &ph);
     }
     /* Extract inline scripts BEFORE the preserve_view snapshot, so the native
      * video data scanner can read their text and create <iframe> elements in the
@@ -1300,6 +1467,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     hp_script *scripts = NULL;
     if (ok) {
         scripts = hp_extract_script_list(cs->doc, &nscripts);
+        prof_lap("script-list", &ph);
         /* Native (non-JS) extraction of video data from inline scripts: scan for
          * `video[N]='<iframe src=...>'` or `video_data='<iframe src=...>'` and
          * create <iframe> elements in the DOM. This runs BEFORE JS execution, so
@@ -1326,24 +1494,20 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
      * it has more blocks -- and now includes the <iframe> elements created
      * by the native video extractor above, so video blocks survive the
      * fallback. */
-    pv_view *preserve_view = NULL;
-    /* Only scripts can corrupt the DOM, so the snapshot is built only when some will run: with JS
-     * off, or a page without scripts, the final view IS the pre-script view and a second full
-     * style cascade (170 ms on Wikipedia) bought nothing. */
-    if (ok && run_js && nscripts > 0) {
-        /* The snapshot preserves the PRE-SCRIPT DOM, not no-JS semantics:
-         * it must carry the same js_enabled flag as the final view, or the
-         * <noscript> fallback (rendered only under js=0) inflates the block
-         * count and the fuller-view heuristic picks it even with JS on. */
-        (void)pv_build_styled(cs->doc, run_js, reader, prefers_dark,
-                              cs->extern_css, cs->extern_css_len,
-                              cs->last_viewport_w, &preserve_view);
-    }
+    prof_lap(run_js ? "video-scan[js]" : "video-scan[nojs]", &ph);
+    /* Only scripts can corrupt the DOM, so the fallback exists only when some will run. It is NOT
+     * built here: the element count is the cheap tripwire (a sibling-pointer corruption or a
+     * removal makes the traversal see fewer elements), and the view is rebuilt from the source
+     * only if the count dropped (child_prescript_view). */
+    size_t pre_elems = (ok && run_js && nscripts > 0) ? hp_element_count(cs->doc) : 0;
     if (ok && run_js) {
         /* window.open exists only for a trusted host (plan B4c); installed before the
          * scripts so feature detection sees it. */
-        if (net) { (void)jt_enable_open(cs->js); (void)jt_enable_ws(cs->js); (void)jt_enable_frames(cs->js, cs->frame_id); (void)jt_enable_worker(cs->js);
-                     (void)jt_enable_observers(cs->js);
+        if (net) { (void)jt_enable_open(cs->js); prof_lap("en-open", &ph);
+                     (void)jt_enable_ws(cs->js); prof_lap("en-ws", &ph);
+                     (void)jt_enable_frames(cs->js, cs->frame_id); prof_lap("en-frames", &ph);
+                     (void)jt_enable_worker(cs->js); prof_lap("en-worker", &ph);
+                     (void)jt_enable_observers(cs->js); prof_lap("en-observers", &ph);
                      (void)jd_set_computed(cs->js, child_computed, cs); }
         /* Open the network window: XHR/fetch (if installed) may now reach the parent.
          * Closed again before deriving the view so a later REPL eval cannot use it. */
@@ -1361,6 +1525,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         /* Trusted hosts (allow.conf AND js.conf) get a larger JS budget: they
          * load heavier libraries (jQuery, Bootstrap, etc.) that need more time.
          * Untrusted hosts get the default budget (1s) to limit abuse. */
+        prof_lap("js-enable", &ph);
         uint64_t total_budget = net ? FC_TRUSTED_JS_BUDGET_MS : JS_DEFAULT_TIME_BUDGET;
         struct timespec t0;
         clock_gettime(CLOCK_MONOTONIC, &t0);
@@ -1549,6 +1714,7 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         }
         } /* pass loop: sync first, then deferred */
         hp_free_scripts(scripts, nscripts);
+        prof_lap("js-run", &ph);
         /* Fire synthetic DOMContentLoaded/load handlers + flush queued timers once
          * (bounded; not a real event loop), so onload-wrapped code runs -- under the
          * same remaining page budget. */
@@ -1581,8 +1747,10 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                 fb_buffer_push(&cs->log, FB_INFO, pr.value, pr.value_len);
             js_result_free(&pr);
         }
+        prof_lap("js-fire-drain", &ph);
         if (cs->js != NULL)
             jd_inject_video_shim(cs->js);
+        prof_lap("video-shim", &ph);
         /* Process any <iframe src=...> elements created by the page's scripts
          * (including via innerHTML= or the video shim above). Fetch the iframe
          * content (same-origin fetches through the trusted parent), scan for
@@ -1607,8 +1775,10 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
     }
     if (ok) {
         if (cs->js != NULL) jd_flush_custom_elements(cs->js);
+        prof_lap("scripts", &ph);
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
+        prof_lap("extract-text", &ph);
         double pt2 = prof_now_ms();
         int pv_ok = !(title == NULL || text == NULL
             || pv_build_styled(cs->doc, run_js, reader, prefers_dark,
@@ -1623,10 +1793,10 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
              * AND for mutation fallback (jQuery's support tests corrupt the tree).
              * Ownership goes to cs->preserved_view; the initial write below uses
              * whichever view is fuller without transferring ownership. */
-            if (preserve_view != NULL) {
+            if (pre_elems > 0 && hp_element_count(cs->doc) + 1 < pre_elems) {
                 pv_free(cs->preserved_view);
-                cs->preserved_view = preserve_view;
-                preserve_view = NULL;
+                cs->preserved_view = child_prescript_view(cs, html, len, page_url, run_js,
+                                                          reader, prefers_dark);
             }
         }
     }
@@ -2127,6 +2297,10 @@ static void tab_worker_run(int rfd, int wfd) {
         _exit(hs == TAB_READY ? 0 : 70);
     }
 
+    /* A spare worker (tab_prewarm) waits here for its page: spend that idle time installing the
+     * page-independent JS shims. Not repeated between requests -- poll(2) is not on the seccomp
+     * allowlist and a prepare in front of a pending click would only add latency. */
+    child_prepare_js(&cs);
     for (;;) {
         uint8_t op;
         if (read_full(rfd, &op, 1) != 0) break; /* EOF / error => quit */
@@ -2430,7 +2604,16 @@ static int read_field(int fd, char **out, size_t *out_len) {
 
 /* Reads a display list serialised by write_view into a fresh pv_view. The run
  * count and each field are capped against amplification from a hostile child. */
+static int read_view_raw(int fd, pv_view **out);
 static int read_view(int fd, pv_view **out) {
+    if (tl_rbuf.fd != fd) { tl_rbuf.fd = fd; tl_rbuf.pos = tl_rbuf.len = 0; }
+    tl_rbuf.armed = 1;
+    int rc = read_view_raw(fd, out);
+    tl_rbuf.armed = 0;      /* leftover bytes stay for the next reader of this fd */
+    if (rc != 0) tl_rbuf.pos = tl_rbuf.len = 0;
+    return rc;
+}
+static int read_view_raw(int fd, pv_view **out) {
     *out = NULL;
     size_t n = 0;
     if (read_full(fd, &n, sizeof n) != 0) return -1;

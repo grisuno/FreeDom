@@ -60,6 +60,13 @@ typedef struct jd_opaque {
  * untrusted script runs. opaque must outlive ctx. */
 jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque);
 
+/* Moves a context installed over a placeholder index (jd_install on a blank document, done
+ * while the worker was idle) onto the real page: `from` is the opaque it was installed with,
+ * `to` the opaque the page will use (may be the same). The natives read the index through the
+ * opaque at CALL time, so repointing it is all the install state there is. Fails (JD_ERR_INTERNAL)
+ * when `from` is not the context's current opaque. */
+jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to);
+
 /* Installs a capturing `console` (log/info/warn/error/debug + no-op group/time/...)
  * that appends each call's formatted message into log, so the developer console
  * ("Freebug") can show page-script output and errors. The buffer pointer is held in

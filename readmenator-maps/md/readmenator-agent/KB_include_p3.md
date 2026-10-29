@@ -227,24 +227,24 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `jd_status` (enum, line 25)
   - `jd_click_state` (type_alias, line 35) `typedef struct jd_click_state jd_click_state;`
   - `processed` (type_alias, line 41) `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];`
-  - `opaque` (function, line 66) `* the engine runtime opaque (unreachable from script);`
-  - `global` (function, line 73) `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...`
-  - `jd_install_repl_api` (function, line 82) `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...`
-  - `place` (function, line 87) `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...`
-  - `getComputedStyle` (function, line 108) `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...`
-  - `jd_click_state_free` (function, line 118) `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
-  - `run` (function, line 127) `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
-  - `preventDefault` (function, line 134) `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
-  - `host` (function, line 163) `* for a trusted host (allow.conf AND js.conf);`
-  - `jd_get_cookies` (function, line 174) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
-  - `out_status` (function, line 182) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-  - `jd_process_iframes` (function, line 222) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-  - `URLs` (function, line 229) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-  - `jd_video_from_scripts` (function, line 243) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
-  - `jd_flush_custom_elements` (function, line 254) `void jd_flush_custom_elements(js_context *ctx);`
+  - `opaque` (function, line 73) `* the engine runtime opaque (unreachable from script);`
+  - `global` (function, line 80) `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...`
+  - `jd_install_repl_api` (function, line 89) `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...`
+  - `place` (function, line 94) `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...`
+  - `getComputedStyle` (function, line 115) `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...`
+  - `jd_click_state_free` (function, line 125) `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
+  - `run` (function, line 134) `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
+  - `preventDefault` (function, line 141) `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
+  - `host` (function, line 170) `* for a trusted host (allow.conf AND js.conf);`
+  - `jd_get_cookies` (function, line 181) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
+  - `out_status` (function, line 189) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
+  - `jd_process_iframes` (function, line 229) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
+  - `URLs` (function, line 236) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
+  - `jd_video_from_scripts` (function, line 250) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
+  - `jd_flush_custom_elements` (function, line 261) `void jd_flush_custom_elements(js_context *ctx);`
   - `FREEDOM_JS_DOM_H` (macro, line 2) `#define FREEDOM_JS_DOM_H`
   - `JD_IFRAME_TRACK_MAX` (macro, line 40) `#define JD_IFRAME_TRACK_MAX`
-  - `JD_REPL_CSS_MAX` (macro, line 79) `#define JD_REPL_CSS_MAX`
+  - `JD_REPL_CSS_MAX` (macro, line 86) `#define JD_REPL_CSS_MAX`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/url.h`
 - Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`
 

@@ -43,3 +43,15 @@
 Cachear posiciones de hermanos entre elementos (coste acotado ya; optimización,
 no contrato), `prev` en ancestros, y cualquier semántica de selector (vive en
 `spec/css.md` / `spec/css_select.md`).
+
+## Camino persistente (`cch_path`, tanda 78)
+
+`cch_element_style_path(pa, el, ...)` es `cch_element_style_vars` con la cadena de ancestros reutilizada:
+el camino raíz→elemento de la última resolución se conserva y solo se rellena la cola que cambió
+(`parent` apunta al nodo anterior; el matcher solo sigue `parent`, así que el almacenamiento raíz-primero
+es equivalente al subjeto-primero de `build_chain`). Reglas:
+- Vive tanto como UNA construcción de vista (`pv_style_cache.path`): el DOM no cambia bajo él.
+- Lo que solo tiene un sujeto (`prev`, `font_size`, `vars`) se limpia al terminar, porque el nodo pasa a
+  ser ancestro del siguiente.
+- Cadena más profunda que `CCH_CHAIN_MAX` o sin memoria: ruta sin caché (resultado idéntico).
+- Prueba: `test_style_path_matches_uncached_chain` (orden de árbol y orden inverso; mutante verificado).

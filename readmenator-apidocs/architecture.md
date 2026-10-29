@@ -4,9 +4,9 @@
 
 ## Architecture Overview
 
-14 components stacked in 5 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 15 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
+14 components stacked in 6 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 14 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
 
-Upward dependencies to fix first: `include: css` -> `include: page_view` (3 imports); `src: tab` -> `src: text_shape` (3 imports); `src: tab` -> `include: page_view` (3 imports); `src: tab` -> `include: browser_ui` (2 imports); `include: page_view` -> `include: browser_ui` (2 imports); `include: tab` -> `src: tab` (2 imports); `include: tab` -> `include: page_view` (2 imports); `include: css` -> `src: text_shape` (1 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: browser` -> `src: tab` (1 imports); `src: local_store` -> `include: browser_ui` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `include: prefetch` -> `src: tab` (1 imports)
+Upward dependencies to fix first: `include: page_view` -> `include: css` (7 imports); `include: page_view` -> `src: tab` (5 imports); `src: tab` -> `include: browser_ui` (2 imports); `src: tab` -> `src: text_shape` (2 imports); `include: page_view` -> `include: browser_ui` (2 imports); `include: tab` -> `src: tab` (2 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: css` -> `src: text_shape` (1 imports); `include: browser` -> `src: tab` (1 imports); `src: local_store` -> `include: browser_ui` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `include: prefetch` -> `src: tab` (1 imports)
 
 ```mermaid
 flowchart TB
@@ -21,60 +21,64 @@ flowchart TB
     end
     subgraph lane_1["Tier 2"]
         direction LR
-        n_c6["src: local_store<br/>11 files, 466 symbols<br/>Data access"]:::cycle
-        n_c3["src: text_shape<br/>29 files, 415 symbols<br/>Core / utility"]:::cycle
+        n_c6["src: local_store<br/>11 files, 470 symbols<br/>Data access"]:::cycle
+        n_c2["src: text_shape<br/>27 files, 394 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c4["include: page_view<br/>12 files, 628 symbols<br/>Presentation / entry"]:::cycle
+        n_c1["src: tab<br/>38 files, 877 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
-        n_c2["src: tab<br/>36 files, 842 symbols<br/>Core / utility"]:::cycle
-    end
-    subgraph lane_4["Tier 5 - foundation"]
-        direction LR
-        n_c9["include: prefetch<br/>4 files, 90 symbols<br/>Core / utility"]:::cycle
         n_c8["include: tab<br/>5 files, 107 symbols<br/>Core / utility"]:::cycle
+        n_c4["include: css<br/>26 files, 736 symbols<br/>Core / utility"]:::cycle
+        n_c9["include: prefetch<br/>4 files, 90 symbols<br/>Core / utility"]:::cycle
         n_c7["include: secure_fetch<br/>8 files, 276 symbols<br/>Core / utility"]:::cycle
-        n_c5["include: browser<br/>13 files, 196 symbols<br/>Core / utility"]:::cycle
-        n_c1["include: css<br/>36 files, 1005 symbols<br/>Core / utility"]:::cycle
         n_c11["include: subreq_batch<br/>2 files, 27 symbols<br/>Core / utility"]:::default
         n_c10["include: sha2<br/>2 files, 21 symbols<br/>Core / utility"]:::default
     end
-    n_c0 ==>|"11"| n_c3
-    n_c0 -->|"2"| n_c6
-    n_c2 ==>|"5"| n_c1
-    n_c2 -->|"1"| n_c10
-    n_c2 -->|"1"| n_c11
-    n_c2 -->|"4"| n_c5
-    n_c2 -->|"4"| n_c7
-    n_c2 -->|"1"| n_c8
-    n_c2 -->|"1"| n_c9
-    n_c3 ==>|"6"| n_c4
-    n_c4 ==>|"5"| n_c2
+    subgraph lane_4["Tier 5"]
+        direction LR
+        n_c3["include: page_view<br/>22 files, 906 symbols<br/>Core / utility"]:::cycle
+    end
+    subgraph lane_5["Tier 6 - foundation"]
+        direction LR
+        n_c5["include: browser<br/>13 files, 196 symbols<br/>Core / utility"]:::cycle
+    end
+    n_c0 ==>|"10"| n_c2
+    n_c0 ==>|"2"| n_c6
+    n_c1 -->|"1"| n_c10
+    n_c1 -->|"1"| n_c11
+    n_c1 ==>|"2"| n_c4
+    n_c1 ==>|"4"| n_c7
+    n_c1 -->|"1"| n_c8
+    n_c1 -->|"1"| n_c9
+    n_c2 ==>|"6"| n_c1
+    n_c3 ==>|"2"| n_c5
+    n_c4 ==>|"8"| n_c3
     n_c6 -->|"1"| n_c5
     n_c6 -->|"1"| n_c7
-    n_c3 <-.-|"1 upward"| n_c1
-    n_c4 <-.-|"3 upward"| n_c1
-    n_c0 <-.-|"2 upward"| n_c2
-    n_c3 <-.-|"3 upward"| n_c2
-    n_c4 <-.-|"3 upward"| n_c2
-    n_c0 <-.-|"1 upward"| n_c3
-    n_c0 <-.-|"2 upward"| n_c4
-    n_c3 <-.-|"1 upward"| n_c4
-    n_c2 <-.-|"1 upward"| n_c5
+    n_c8 ==>|"2"| n_c3
+    n_c0 <-.-|"2 upward"| n_c1
+    n_c2 <-.-|"2 upward"| n_c1
+    n_c0 <-.-|"1 upward"| n_c2
+    n_c0 <-.-|"2 upward"| n_c3
+    n_c1 <-.-|"5 upward"| n_c3
+    n_c2 <-.-|"1 upward"| n_c3
+    n_c4 <-.-|"7 upward"| n_c3
+    n_c2 <-.-|"1 upward"| n_c4
+    n_c1 <-.-|"1 upward"| n_c5
     n_c0 <-.-|"1 upward"| n_c6
+    n_c1 <-.-|"1 upward"| n_c7
     n_c2 <-.-|"1 upward"| n_c7
-    n_c3 <-.-|"1 upward"| n_c7
-    n_c2 <-.-|"2 upward"| n_c8
-    n_c4 <-.-|"2 upward"| n_c8
-    n_c2 <-.-|"1 upward"| n_c9
-    linkStyle 13,14,15,16,17,18,19,20,21,22,23,24,25,26,27 stroke:#f87171,stroke-width:2px;
+    n_c1 <-.-|"2 upward"| n_c8
+    n_c1 <-.-|"1 upward"| n_c9
+    linkStyle 14,15,16,17,18,19,20,21,22,23,24,25,26,27 stroke:#f87171,stroke-width:2px;
     n_c0 ~~~ n_c6
-    n_c6 ~~~ n_c4
-    n_c4 ~~~ n_c2
-    n_c2 ~~~ n_c9
+    n_c6 ~~~ n_c1
+    n_c1 ~~~ n_c8
+    n_c8 ~~~ n_c3
+    n_c3 ~~~ n_c5
 ```
 
 ---

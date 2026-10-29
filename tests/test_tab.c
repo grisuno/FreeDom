@@ -1095,6 +1095,28 @@ static void test_load_ex_runs_script_and_mutates(void **state) {
     tab_close(t);
 }
 
+static const pv_run *view_find_text(const pv_view *v, const char *needle);
+
+/* The pre-script view is rebuilt lazily from the page source, and only when the scripts shrank
+ * the DOM by 2+ elements (a corrupted or emptied tree). Given a script that removes three
+ * paragraphs, When loaded with run_js, Then the pre-script text is still shown (the old eager
+ * snapshot behaviour); and a script that only edits text keeps the post-script view. */
+static void test_load_ex_prescript_view_rebuilt_when_dom_shrinks(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><div id=\"w\"><p>alpha</p><p>bravo</p><p>charlie</p></div>"
+        "<script>var w=document.getElementById('w');"
+        "while(w.firstChild){w.removeChild(w.firstChild);}</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    assert_non_null(view_find_text(p.view, "alpha"));
+    assert_non_null(view_find_text(p.view, "charlie"));
+    tab_page_free(&p);
+    tab_close(t);
+}
+
 /* Given a page with a <noscript> fallback and a script, When loaded with
  * run_js, Then the fallback text is absent from the view. Regression lock:
  * the pre-script preserve snapshot was built with js_enabled=0, inflating
@@ -3755,6 +3777,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_lazy_script_src_and_import_after_load),
         cmocka_unit_test(test_post_load_network_time_is_bounded_per_operation),
         cmocka_unit_test(test_async_tick_returns_at_once_and_delivers_through_eventfd),
+        cmocka_unit_test(test_load_ex_prescript_view_rebuilt_when_dom_shrinks),
         cmocka_unit_test(test_other_worker_calls_wait_for_the_job_and_discard_its_view),
         cmocka_unit_test(test_import_map_resolves_bare_specifier),
         cmocka_unit_test(test_data_url_classic_script_runs_without_network),

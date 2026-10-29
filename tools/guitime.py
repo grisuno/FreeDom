@@ -68,8 +68,10 @@ def one_run(binary, page, env, hosts_dir, tmp):
         os.unlink(out)
     renv = dict(env, FREEDOM_GUI_TIMING=out, FREEDOM_GUI_EXIT_AT_IDLE="1",
                 FREEDOM_AS_HOST="corpus.test", FREEDOM_JS="off", FREEDOM_HOSTS_DIR=hosts_dir)
-    proc = subprocess.Popen([binary, page], env=renv, stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
+    # GUITIME_STDERR=file keeps the window's stderr (FREEDOM_JS_PROFILE stage lines) for the last run.
+    errpath = os.environ.get("GUITIME_STDERR")
+    errf = open(errpath, "w") if errpath else subprocess.DEVNULL
+    proc = subprocess.Popen([binary, page], env=renv, stdout=subprocess.DEVNULL, stderr=errf)
     deadline = time.time() + PER_RUN_TIMEOUT_S
     try:
         while time.time() < deadline:

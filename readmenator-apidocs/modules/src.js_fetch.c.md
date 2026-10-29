@@ -137,7 +137,7 @@ jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx, jd
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`jd_install_xhr`](#jd_install_xhr), [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`jd_install_xhr`](#jd_install_xhr)
 
 ---
 

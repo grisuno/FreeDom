@@ -398,6 +398,7 @@ void css_resolve_anim_keyframes(css_style *...`
 - Language: c
 - Symbols:
   - `cch_node` (struct, line 27)
+  - `cch_path` (struct, line 347)
   - `tag` (type_alias, line 27) `typedef struct cch_node { char tag[CCH_TAG_MAX];`
   - `cls_space` (function, line 42) `static int cls_space(char c)`
   - `release_nodes` (function, line 90) `static void release_nodes(cch_node *nodes, int n)`
@@ -409,11 +410,16 @@ void css_resolve_anim_keyframes(css_style *...`
 static const css_element *build_chain(lxb_dom_ele...`
   - `cch_element_style_vars` (function, line 310) `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
                  ...`
-  - `cch_pseudo_style` (function, line 341) `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+  - `cch_path_new` (function, line 353) `cch_path *cch_path_new(void)`
+  - `path_truncate` (function, line 357) `static void path_truncate(cch_path *pa, int keep)`
+  - `cch_path_free` (function, line 365) `void cch_path_free(cch_path *pa)`
+  - `cch_element_style_path` (function, line 372) `css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,
+   ...`
+  - `cch_pseudo_style` (function, line 439) `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
             ...`
-  - `cch_element_style` (function, line 360) `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
-  - `cch_element_matches` (function, line 364) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
-  - `cch_element_matches_any` (function, line 378) `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
+  - `cch_element_style` (function, line 458) `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
+  - `cch_element_matches` (function, line 462) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+  - `cch_element_matches_any` (function, line 476) `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
   - `CCH_TAG_MAX` (macro, line 15) `#define CCH_TAG_MAX`
   - `CCH_ID_MAX` (macro, line 16) `#define CCH_ID_MAX`
   - `CCH_CLASS_BUF` (macro, line 17) `#define CCH_CLASS_BUF`

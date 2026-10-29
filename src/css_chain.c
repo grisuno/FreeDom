@@ -338,6 +338,104 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
     return out;
 }
 
+/* The root->element path of the last element resolved, kept between calls. A cascade walks the
+ * document in tree order, so consecutive elements share all but the tail of their ancestor chain:
+ * rebuilding every ancestor's selector view (attributes, classes, sibling position, bloom) per
+ * element made the cascade O(elements x depth). Here only the part of the path that changed is
+ * refilled. nodes[i].el.parent points at nodes[i-1]; the matcher follows parent links only, so the
+ * root-first storage is equivalent to build_chain's subject-first one. */
+struct cch_path {
+    cch_node         *nodes;                 /* CCH_CHAIN_MAX, allocated on first use */
+    lxb_dom_node_t   *dom[CCH_CHAIN_MAX];
+    int               n;
+};
+
+cch_path *cch_path_new(void) {
+    return (cch_path *)calloc(1, sizeof(cch_path));
+}
+
+static void path_truncate(cch_path *pa, int keep) {
+    for (int i = keep; i < pa->n; ++i) {
+        free(pa->nodes[i].spill);
+        pa->nodes[i].spill = NULL;
+    }
+    if (keep < pa->n) pa->n = keep;
+}
+
+void cch_path_free(cch_path *pa) {
+    if (pa == NULL) return;
+    path_truncate(pa, 0);
+    free(pa->nodes);
+    free(pa);
+}
+
+css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,
+                                 double parent_font_size, const struct cvr_chain *inherited,
+                                 struct cvr_table *own_out) {
+    lxb_dom_node_t *up[CCH_CHAIN_MAX];
+    int d = 0;
+    int overflow = 0;
+    for (lxb_dom_node_t *p = (lxb_dom_node_t *)el;
+         p != NULL && p->type == LXB_DOM_NODE_TYPE_ELEMENT; p = p->parent) {
+        if (d == CCH_CHAIN_MAX) { overflow = 1; break; }
+        up[d++] = p;
+    }
+    /* A deeper chain keeps only its nearest ancestors (build_chain's rule), which a root-first
+     * path cannot express: take the uncached route. */
+    if (pa == NULL || overflow || d == 0) 
+        return cch_element_style_vars(el, sheet, parent_font_size, inherited, own_out);
+    if (pa->nodes == NULL) {
+        pa->nodes = (cch_node *)calloc(CCH_CHAIN_MAX, sizeof(cch_node));
+        if (pa->nodes == NULL)
+            return cch_element_style_vars(el, sheet, parent_font_size, inherited, own_out);
+    }
+    int common = 0;
+    while (common < pa->n && common < d && pa->dom[common] == up[d - 1 - common]) ++common;
+    path_truncate(pa, common);
+    for (int i = common; i < d; ++i) {
+        lxb_dom_node_t *dn = up[d - 1 - i];
+        cch_node *nd = &pa->nodes[i];
+        fill_css_node(lxb_dom_interface_element(dn), nd);
+        nd->el.parent = (i > 0) ? &pa->nodes[i - 1].el : NULL;
+        nd->el.anc_bloom = (i > 0) ? (pa->nodes[i - 1].el.anc_bloom | pa->nodes[i - 1].el.own_bloom) : 0ull;
+        nd->el.anc_bloom_valid = 1;
+        nd->el.own_bloom = csel_element_feature_bits(&nd->el);
+        sibling_position(dn, &nd->el.nth, &nd->el.nsib);
+        sibling_type_position(dn, &nd->el.nth_of_type, &nd->el.nsib_of_type);
+        nd->el.child_count = count_children(dn);
+        pa->dom[i] = dn;
+        pa->n = i + 1;
+    }
+    cch_node *subj = &pa->nodes[d - 1];
+    cch_node sibs[CCH_SIB_MAX];
+    int ns = 0;
+    for (lxb_dom_node_t *p = pa->dom[d - 1]->prev; p != NULL && ns < CCH_SIB_MAX; p = p->prev) {
+        if (p->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        fill_css_node(lxb_dom_interface_element(p), &sibs[ns]);
+        sibs[ns].el.parent = subj->el.parent;
+        if (subj->el.nth > ns + 1) {
+            sibs[ns].el.nth = subj->el.nth - (ns + 1);
+            sibs[ns].el.nsib = subj->el.nsib;
+        }
+        sibs[ns].el.child_count = count_children(p);
+        ++ns;
+    }
+    subj->el.prev = (ns > 0) ? &sibs[0].el : NULL;
+    for (int i = 0; i + 1 < ns; ++i) sibs[i].el.prev = &sibs[i + 1].el;
+    subj->el.font_size = parent_font_size;
+    subj->el.vars = inherited;
+
+    size_t sl = 0;
+    const lxb_char_t *st = lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
+    css_style out = css_resolve_el_ex(sheet, &subj->el, (const char *)st, sl, own_out);
+    release_nodes(sibs, ns);
+    /* The node stays in the path as an ancestor of what follows: drop what only a subject has. */
+    subj->el.prev = NULL;
+    subj->el.font_size = 0.0;
+    subj->el.vars = NULL;
+    return out;
+}
+
 css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
                            double font_size, const struct cvr_chain *inherited) {
     cch_node chain[CCH_CHAIN_MAX];

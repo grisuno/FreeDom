@@ -311,8 +311,6 @@ Always leaves c valid.
 | `c` | `idn_config *` |  |  |
 | `text` | `char *` |  |  |
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
-
 ---
 
 <a id="idn_apply_query"></a>

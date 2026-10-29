@@ -1158,7 +1158,7 @@ css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el, const
 
 **Returns:** `css_style`
 
-*Called by:* [`cch_element_style_vars`](src.css_chain.c.md#cch_element_style_vars)
+*Called by:* [`cch_element_style_path`](src.css_chain.c.md#cch_element_style_path), [`cch_element_style_vars`](src.css_chain.c.md#cch_element_style_vars)
 
 ---
 

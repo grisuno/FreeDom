@@ -44,11 +44,14 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CCH_NTH_MAX` | macro | `include/css_chain.h:28` | `#define CCH_NTH_MAX` |
 | `CCH_SIB_MAX` | macro | `include/css_chain.h:27` | `#define CCH_SIB_MAX` |
 | `FREEDOM_CSS_CHAIN_H` | macro | `include/css_chain.h:2` | `#define FREEDOM_CSS_CHAIN_H` |
-| `box` | function | `include/css_chain.h:79` | `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...` |
-| `cch_element_matches` | function | `include/css_chain.h:69` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` |
+| `box` | function | `include/css_chain.h:91` | `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...` |
+| `cch_element_matches` | function | `include/css_chain.h:81` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` |
+| `cch_path` | type_alias | `include/css_chain.h:69` | `typedef struct cch_path cch_path;` |
+| `cch_path_free` | function | `include/css_chain.h:71` | `void cch_path_free(cch_path *pa);` |
+| `cch_path_new` | function | `include/css_chain.h:70` | `cch_path *cch_path_new(void);` |
 | `cvr_chain` | struct | `include/css_chain.h:51` | `` |
 | `cvr_table` | struct | `include/css_chain.h:52` | `` |
-| `lacks` | function | `include/css_chain.h:73` | `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...` |
+| `lacks` | function | `include/css_chain.h:85` | `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...` |
 | `CC_COLOR_CURRENT` | macro | `include/css_color.h:59` | `#define CC_COLOR_CURRENT` |
 | `CC_COLOR_TRANSPARENT` | macro | `include/css_color.h:60` | `#define CC_COLOR_TRANSPARENT` |
 | `FREEDOM_CSS_COLOR_H` | macro | `include/css_color.h:2` | `#define FREEDOM_CSS_COLOR_H` |
@@ -493,8 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `hc_clear` | function | `include/http_cache.h:84` | `void hc_clear(hc_store *s);` |
 | `hc_close` | function | `include/http_cache.h:72` | `void hc_close(hc_store *s);` |
 | `hc_lifetime` | function | `include/http_cache.h:63` | `long hc_lifetime(const hc_meta *m);` |
-| `hc_meta` | struct | `include/http_cache.h:44` | `` |
-| `hc_parse_http_date` | function | `include/http_cache.h:56` | `time_t hc_parse_http_date(const char *s);` |
-| `hc_status` | enum | `include/http_cache.h:28` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

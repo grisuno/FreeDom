@@ -381,11 +381,16 @@ Depends on: `include/css_chain.h`, `include/css_select.h`
 static const css_element *build_chain(lxb_dom_ele...`
 - `cch_element_style_vars` (function) `src/css_chain.c:310` `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
                  ...`
-- `cch_pseudo_style` (function) `src/css_chain.c:341` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+- `cch_path_new` (function) `src/css_chain.c:353` `cch_path *cch_path_new(void)`
+- `path_truncate` (function) `src/css_chain.c:357` `static void path_truncate(cch_path *pa, int keep)`
+- `cch_path_free` (function) `src/css_chain.c:365` `void cch_path_free(cch_path *pa)`
+- `cch_element_style_path` (function) `src/css_chain.c:372` `css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,
+   ...`
+- `cch_pseudo_style` (function) `src/css_chain.c:439` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
             ...`
-- `cch_element_style` (function) `src/css_chain.c:360` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
-- `cch_element_matches` (function) `src/css_chain.c:364` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
-- `cch_element_matches_any` (function) `src/css_chain.c:378` `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
+- `cch_element_style` (function) `src/css_chain.c:458` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
+- `cch_element_matches` (function) `src/css_chain.c:462` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+- `cch_element_matches_any` (function) `src/css_chain.c:476` `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
 
 ## src/css_color.c
 Depends on: `include/css_color.h`
@@ -456,43 +461,6 @@ Depends on: `include/css_computed.h`
 - `ccm_get` (function) `src/css_computed.c:310` `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)`
 - `ccm_property_count` (function) `src/css_computed.c:323` `size_t ccm_property_count(void)`
 - `ccm_property_name` (function) `src/css_computed.c:325` `const char *ccm_property_name(size_t i)`
-
-## src/css_gradient.c
-Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
-- `cg_parse_num` (function) `src/css_gradient.c:13` `static int cg_parse_num(const char *s, double *out, const char **endp)`
-- `cg_wide_keyword` (function) `src/css_gradient.c:18` `static int cg_wide_keyword(const char *v)`
-- `gradient` (function) `src/css_gradient.c:28` `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
- * the whole decl...`
-- `find_gradient_call` (function) `src/css_gradient.c:77` `static int find_gradient_call(const char *v, const char *fn, size_t *start,
-                     ...` -- Locates a gradient function call `fn` (e.g. "linear-gradient(") in v (case-insensitive; an occurrence that is the...
-- `conic_prelude` (function) `src/css_gradient.c:111` `static int conic_prelude(const char *seg, int *angle)` -- conic-gradient prelude: `from <int>deg`, optionally followed by `at <pos>` (position accepted and ignored -- always...
-- `grad_stop_pos` (function) `src/css_gradient.c:153` `static int grad_stop_pos(const char *pp, int conic, const char **endp)` -- One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts `Ndeg` -> the same 0-1000 turn fraction...
-- `CSS_GRAD_STOPS_MAX` (function) `src/css_gradient.c:184` `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
- * the gradient fai...`
-- `emit_gradient` (function) `src/css_gradient.c:291` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
-                         ...` -- Emits the gradient decl group. nstops == 0 emits only the explicit reset * (P_BG_GRAD_N = 0), which is how a...
-- `find_radial_gradient` (function) `src/css_gradient.c:348` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
-                      ...` -- R5c: detects radial-gradient(circle at center, color1, color2).
-- `emit_radial_geom` (function) `src/css_gradient.c:387` `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` -- char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) { if (cap < 1) return 0; dst[0].prop = P_BG_IMAGE_URL; if...
-- `pool` (function) `src/css_gradient.c:400` `* pool (gradient explicitly reset);`
-- `downstream` (function) `src/css_gradient.c:404` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
-int cg_expand_bg_imag...`
-- `declaration` (function) `src/css_gradient.c:465` `* declaration (fail closed);`
-- `bg_layer_tokens_ok` (function) `src/css_gradient.c:472` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
-- `cg_expand_background` (function) `src/css_gradient.c:512` `int cg_expand_background(const char *val, css_decl *dst, int cap,
-                             ch...`
-- `rad_ieq` (function) `src/css_gradient.c:600` `static int rad_ieq(const char *a, const char *b)`
-- `rad_len` (function) `src/css_gradient.c:608` `static int rad_len(const char *tok, int *enc)` -- One <length-percentage> token (`12px`, `40%`, `0`) -> the cg_radial encoding; 1 = ok.
-- `rad_is_len_start` (function) `src/css_gradient.c:629` `static int rad_is_len_start(const char *t)`
-- `rad_pos_kw` (function) `src/css_gradient.c:634` `static int rad_pos_kw(const char *t, int *axis)` -- if (*e == '\0' && v == 0.0) { *enc = 0; return 1; }   /* unitless 0 is a zero length if (rad_ieq(e, "px")) { if (v >...
-- `rad_parse_position` (function) `src/css_gradient.c:643` `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
-- `cg_parse_radial_prelude` (function) `src/css_gradient.c:672` `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
-- `cg_radial_len_px` (function) `src/css_gradient.c:748` `double cg_radial_len_px(int enc, double dim)`
-- `cg_dmin` (function) `src/css_gradient.c:757` `static double cg_dmin(double a, double b)`
-- `cg_dmax` (function) `src/css_gradient.c:758` `static double cg_dmax(double a, double b)`
-- `cg_radial_geometry` (function) `src/css_gradient.c:760` `void cg_radial_geometry(const cg_radial *r, double w, double h,
-                        double *c...`
-- `cg_parse_linear` (function) `src/css_gradient.c:797` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
 
 
 Next: [API_p7.md](API_p7.md)

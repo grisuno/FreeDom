@@ -2087,6 +2087,16 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
     return (ce_ok && frozen == 0) ? JD_OK : JD_ERR_INTERNAL;
 }
 
+jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to) {
+    if (ctx == NULL || idx == NULL || from == NULL || to == NULL) return JD_ERR_NULL_ARG;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL || JS_GetContextOpaque(jsctx) != (void *)from) return JD_ERR_INTERNAL;
+    if (to != from) *to = *from;
+    to->idx = idx;
+    JS_SetContextOpaque(jsctx, (void *)to);
+    return JD_OK;
+}
+
 void jd_flush_custom_elements(js_context *ctx) {
     if (ctx == NULL) return;
     static const char flush[] = "if(typeof __ceFlush==='function')__ceFlush();if(typeof __shSync==='function')__shSync();";

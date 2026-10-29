@@ -125,8 +125,6 @@ jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double
 
 **Returns:** `jd_status`
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
-
 ---
 
 <a id="jd_install_indexeddb"></a>
@@ -146,7 +144,5 @@ jd_status jd_install_indexeddb(js_context *ctx)
 | `ctx` | `js_context *` |  |  |
 
 **Returns:** `jd_status`
-
-*Called by:* [`run_js`](src.tab.c.md#run_js)
 
 ---

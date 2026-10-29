@@ -89,7 +89,7 @@ def one_run(binary, page, env, hosts_dir, tmp)
 
 ### `main`
 
-`function` | [tools/guitime.py:92](../../tools/guitime.py#L92)
+`function` | [tools/guitime.py:94](../../tools/guitime.py#L94)
 
 ```python
 def main()

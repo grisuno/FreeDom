@@ -206,8 +206,6 @@ Safe on NULL / a zeroed struct.
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
-
 ---
 
 <a id="fb_buffer_free"></a>

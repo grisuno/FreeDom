@@ -334,12 +334,19 @@
 - [`cch_element_matches`](modules/src.css_chain.c.md#cch_element_matches) function in `src/css_chain.c`
 - [`cch_element_matches_any`](modules/src.css_chain.c.md#cch_element_matches_any) function in `src/css_chain.c`
 - [`cch_element_style`](modules/src.css_chain.c.md#cch_element_style) function in `src/css_chain.c`
+- [`cch_element_style_path`](modules/src.css_chain.c.md#cch_element_style_path) function in `src/css_chain.c`
 - [`cch_element_style_vars`](modules/src.css_chain.c.md#cch_element_style_vars) function in `src/css_chain.c`
 - [`CCH_ID_MAX`](modules/src.css_chain.c.md#cch_id_max) macro in `src/css_chain.c`
 - [`CCH_MAX_ATTRS`](modules/src.css_chain.c.md#cch_max_attrs) macro in `src/css_chain.c`
 - [`CCH_MAX_CLASSES`](modules/src.css_chain.c.md#cch_max_classes) macro in `src/css_chain.c`
 - [`cch_node`](modules/src.css_chain.c.md#cch_node) struct in `src/css_chain.c`
 - [`CCH_NTH_MAX`](modules/include.css_chain.h.md#cch_nth_max) macro in `include/css_chain.h`
+- [`cch_path`](modules/include.css_chain.h.md#cch_path) type_alias in `include/css_chain.h`
+- [`cch_path`](modules/src.css_chain.c.md#cch_path) struct in `src/css_chain.c`
+- [`cch_path_free`](modules/include.css_chain.h.md#cch_path_free) function in `include/css_chain.h`
+- [`cch_path_free`](modules/src.css_chain.c.md#cch_path_free) function in `src/css_chain.c`
+- [`cch_path_new`](modules/include.css_chain.h.md#cch_path_new) function in `include/css_chain.h`
+- [`cch_path_new`](modules/src.css_chain.c.md#cch_path_new) function in `src/css_chain.c`
 - [`cch_pseudo_style`](modules/src.css_chain.c.md#cch_pseudo_style) function in `src/css_chain.c`
 - [`CCH_SIB_MAX`](modules/include.css_chain.h.md#cch_sib_max) macro in `include/css_chain.h`
 - [`CCH_TAG_MAX`](modules/src.css_chain.c.md#cch_tag_max) macro in `src/css_chain.c`
@@ -949,7 +956,6 @@
 - [`f`](modules/include.frame_broker.h.md#f) type_alias in `include/frame_broker.h`
 - [`fails`](modules/src.js_dom.c.md#fails) function in `src/js_dom.c`
 - [`fallback`](modules/include.pdf_export.h.md#fallback) function in `include/pdf_export.h`
-- [`fallback`](modules/src.tab.c.md#fallback) function in `src/tab.c`
 - [`family`](modules/include.css.h.md#css_style-family) method of `css_style` in `include/css.h`
 - [`family`](modules/gui.browser_ui.c.md#family) type_alias in `gui/browser_ui.c`
 - [`family`](modules/include.text_shape.h.md#family) type_alias in `include/text_shape.h`
@@ -1077,6 +1083,7 @@
 - [`FC_TRUSTED_JS_BUDGET_MS`](modules/include.freedom_config.h.md#fc_trusted_js_budget_ms) macro in `include/freedom_config.h`
 - [`FC_UI_FONT_SIZE`](modules/include.freedom_config.h.md#fc_ui_font_size) macro in `include/freedom_config.h`
 - [`fd`](modules/src.media_decoder.c.md#fd) function in `src/media_decoder.c`
+- [`fd`](modules/src.tab.c.md#fd) type_alias in `src/tab.c`
 - [`fetch`](modules/include.prefetch.h.md#fetch) function in `include/prefetch.h`
 - [`fetch`](modules/src.webfont_load.c.md#fetch) type_alias in `src/webfont_load.c`
 - [`fetch`](modules/tools.snapshot.py.md#fetch) function in `tools.snapshot`
@@ -1280,6 +1287,7 @@
 - [`_GNU_SOURCE`](modules/src.js_embed.c.md#_gnu_source) macro in `src/js_embed.c`
 - [`_GNU_SOURCE`](modules/src.js_events.c.md#_gnu_source) macro in `src/js_events.c`
 - [`_GNU_SOURCE`](modules/src.js_fetch.c.md#_gnu_source) macro in `src/js_fetch.c`
+- [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
 - [`_GNU_SOURCE`](modules/src.local_store.c.md#_gnu_source) macro in `src/local_store.c`
@@ -1708,6 +1716,7 @@
 - [`jd_process_iframes`](modules/include.js_dom.h.md#jd_process_iframes) function in `include/js_dom.h`
 - [`jd_process_iframes`](modules/src.js_embed.c.md#jd_process_iframes) function in `src/js_embed.c`
 - [`JD_QSA_INLINE`](modules/src.js_dom.c.md#jd_qsa_inline) macro in `src/js_dom.c`
+- [`jd_rebind`](modules/src.js_dom.c.md#jd_rebind) function in `src/js_dom.c`
 - [`JD_REPL_CSS_MAX`](modules/include.js_dom.h.md#jd_repl_css_max) macro in `include/js_dom.h`
 - [`jd_set_computed`](modules/src.js_dom.c.md#jd_set_computed) function in `src/js_dom.c`
 - [`jd_set_cookies`](modules/src.js_dom.c.md#jd_set_cookies) function in `src/js_dom.c`
@@ -1899,6 +1908,7 @@
 - [`length`](modules/include.css_length.h.md#length) function in `include/css_length.h`
 - [`length`](modules/include.dom.h.md#length) function in `include/dom.h`
 - [`level`](modules/include.freebug.h.md#fb_entry-level) type_alias of `fb_entry` in `include/freebug.h`
+- [`libraries`](modules/src.tab.c.md#libraries) function in `src/tab.c`
 - [`limit`](modules/src.js_sandbox.c.md#js_mem_state-limit) type_alias of `js_mem_state` in `src/js_sandbox.c`
 - [`limits`](modules/gui.browser_ui.c.md#limits) function in `gui/browser_ui.c`
 - [`line`](modules/include.box_tree.h.md#bt_node-line) method of `bt_node` in `include/box_tree.h`
@@ -2198,6 +2208,7 @@
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_LANES`](modules/src.local_store.c.md#ossl_kdf_param_argon2_lanes) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
@@ -2278,6 +2289,8 @@
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_ARGON2_MEMCOST`](modules/src.local_store.c.md#ossl_kdf_param_argon2_memcost) macro in `src/local_store.c`
+- [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
 - [`OSSL_KDF_PARAM_THREADS`](modules/src.local_store.c.md#ossl_kdf_param_threads) macro in `src/local_store.c`
@@ -2748,6 +2761,7 @@
 - [`pv_set_ua_tag`](modules/src.page_view.c.md#pv_set_ua_tag) function in `src/page_view.c`
 - [`pv_status`](modules/include.page_view.h.md#pv_status) enum in `include/page_view.h`
 - [`pv_style_cache`](modules/src.page_view.c.md#pv_style_cache) struct in `src/page_view.c`
+- [`PV_STYLE_RESERVE_MAX`](modules/src.page_view.c.md#pv_style_reserve_max) macro in `src/page_view.c`
 - [`PV_STYLE_RETIRE_MAX`](modules/src.page_view.c.md#pv_style_retire_max) macro in `src/page_view.c`
 - [`pv_svg_append_root_attrs`](modules/include.page_view.h.md#pv_svg_append_root_attrs) function in `include/page_view.h`
 - [`pv_svg_append_root_attrs`](modules/src.page_view.c.md#pv_svg_append_root_attrs) function in `src/page_view.c`
@@ -2842,6 +2856,7 @@
 - [`rdp_is_tracking_pixel`](modules/src.render_policy.c.md#rdp_is_tracking_pixel) function in `src/render_policy.c`
 - [`RDP_TRACKER_MAX_DIM`](modules/include.render_policy.h.md#rdp_tracker_max_dim) macro in `include/render_policy.h`
 - [`read_full`](modules/include.util.h.md#read_full) function in `include/util.h`
+- [`read_full`](modules/src.tab.c.md#read_full) macro in `src/tab.c`
 - [`read_fuzz_stats`](modules/app.py.md#read_fuzz_stats) function in `app`
 - [`README_PAGES`](modules/tools.fbench.py.md#readme_pages) constant in `tools.fbench`
 - [`README_ROWS`](modules/tools.fbench.py.md#readme_rows) constant in `tools.fbench`
@@ -3158,6 +3173,8 @@
 - [`tab_image_free`](modules/src.tab.c.md#tab_image_free) function in `src/tab.c`
 - [`tab_inflight_request_headers`](modules/include.tab.h.md#tab_inflight_request_headers) function in `include/tab.h`
 - [`tab_inflight_request_headers`](modules/src.tab.c.md#tab_inflight_request_headers) function in `src/tab.c`
+- [`tab_iobuf`](modules/src.tab.c.md#tab_iobuf) struct in `src/tab.c`
+- [`TAB_IOBUF_BYTES`](modules/src.tab.c.md#tab_iobuf_bytes) macro in `src/tab.c`
 - [`tab_last_subreq_stats`](modules/include.tab.h.md#tab_last_subreq_stats) function in `include/tab.h`
 - [`tab_last_subreq_stats`](modules/src.tab.c.md#tab_last_subreq_stats) function in `src/tab.c`
 - [`tab_load`](modules/src.tab.c.md#tab_load) function in `src/tab.c`
@@ -3629,6 +3646,7 @@
 - [`word_spacing`](modules/include.page_view.h.md#pv_text_ext-word_spacing) type_alias of `pv_text_ext` in `include/page_view.h`
 - [`write_full`](modules/include.util.h.md#write_full) function in `include/util.h`
 - [`write_full`](modules/src.renderer.c.md#write_full) function in `src/renderer.c`
+- [`write_full`](modules/src.tab.c.md#write_full) macro in `src/tab.c`
 - [`write_full`](modules/src.tab.c.md#write_full) function in `src/tab.c`
 - [`writing`](modules/src.css.c.md#writing) function in `src/css.c`
 - [`wst_db`](modules/include.web_storage.h.md#wst_db) type_alias in `include/web_storage.h`

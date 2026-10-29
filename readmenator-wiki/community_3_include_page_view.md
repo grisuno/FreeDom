@@ -1,34 +1,50 @@
 # include: page_view
 
-*Community 4 | 19 files | cohesion 0.45*
+*Community 3 | 36 files | cohesion 0.53*
 
 ## Definition
 
-This community groups 19 file(s) rooted at `include` with dominant language c (cohesion 0.45). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`, `BT_MAX_CHILDREN`. Core file: `src/page_view.c` (260 symbols).
+This community groups 36 file(s) rooted at `tests` with dominant language c (cohesion 0.53). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (261 symbols). Documented purpose: Case mapping for text-transform and synthesized small caps (spec/text_case.md). Pure: no I/O, no state, no allocation..
 
 ## Files
+
+### `tests` (14 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `tests/test_box_style.c` | c | testing | 49 | no |
+| `tests/test_box_tree.c` | c | testing | 69 | no |
+| `tests/test_compositor.c` | c | testing | 21 | no |
+| `tests/test_css_computed.c` | c | testing | 9 | no |
+| `tests/test_css_drops.c` | c | testing | 25 | yes |
+| `tests/test_css_gradient.c` | c | testing | 13 | no |
+| `tests/test_css_length.c` | c | testing | 25 | no |
+
+### `include` (12 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/box_style.h` | h | utility | 31 | no |
 | `include/box_tree.h` | h | utility | 34 | no |
+| `include/compositor.h` | h | utility | 9 | no |
+| `include/css.h` | h | utility | 140 | no |
+| `include/css_chain.h` | h | utility | 12 | no |
+| `include/css_computed.h` | h | utility | 6 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
-| `include/flex_layout.h` | h | presentation | 43 | no |
-| `include/page_view.h` | h | presentation | 92 | no |
-| `include/render_doc.h` | h | presentation | 27 | no |
-| `include/render_policy.h` | h | presentation | 9 | no |
+
+### `src` (10 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
 | `src/box_style.c` | c | utility | 48 | no |
+| `src/box_tree.c` | c | utility | 25 | no |
+| `src/compositor.c` | c | utility | 5 | no |
+| `src/css_computed.c` | c | utility | 45 | no |
+| `src/css_length.c` | c | utility | 18 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
-| `src/flex_layout.c` | c | presentation | 35 | no |
-| `src/page_view.c` | c | presentation | 260 | no |
-| `src/render_doc.c` | c | presentation | 21 | no |
-| `tests/test_box_style.c` | c | testing | 49 | no |
-| `tests/test_box_tree.c` | c | testing | 69 | no |
-| `tests/test_dom_debug.c` | c | testing | 11 | no |
-| `tests/test_flex_layout.c` | c | testing | 71 | no |
-| `tests/test_page_view.c` | c | testing | 214 | no |
-| `tests/test_render_doc.c` | c | testing | 37 | no |
-| `tests/test_render_policy.c` | c | testing | 21 | no |
+
+*... and 16 more files in this community.*
+
 
 ## Key Symbols
 
@@ -65,16 +81,16 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 37
-- Cross-boundary resolved imports (EXTRACTED): 46
+- Internal resolved imports (EXTRACTED): 69
+- Cross-boundary resolved imports (EXTRACTED): 60
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 4 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/box_style.h imports include/css.h.
-- [EXTRACTED] depends_on community 8 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
-- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
+- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/css.h imports include/css_color.h.
+- [EXTRACTED] depends_on community 8 <-> 3 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
+- [EXTRACTED] depends_on community 3 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
 
 ## Risks
 
@@ -96,28 +112,30 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 
 ## Open Questions
 
-- Why do 19 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
+- Why do 33 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.45?
+- Should include: page_view be split, given cohesion 0.53?
 
 ## Sources
 
 - `include/box_style.h`
 - `include/box_tree.h`
+- `include/compositor.h`
+- `include/css.h`
+- `include/css_chain.h`
+- `include/css_computed.h`
 - `include/dom_debug.h`
 - `include/flex_layout.h`
 - `include/page_view.h`
 - `include/render_doc.h`
 - `include/render_policy.h`
+- `include/text_case.h`
 - `src/box_style.c`
+- `src/box_tree.c`
+- `src/compositor.c`
+- `src/css_computed.c`
+- `src/css_length.c`
 - `src/dom_debug.c`
 - `src/flex_layout.c`
 - `src/page_view.c`
-- `src/render_doc.c`
-- `tests/test_box_style.c`
-- `tests/test_box_tree.c`
-- `tests/test_dom_debug.c`
-- `tests/test_flex_layout.c`
-- `tests/test_page_view.c`
-- `tests/test_render_doc.c`
-- `tests/test_render_policy.c`
+- *... and 16 more*

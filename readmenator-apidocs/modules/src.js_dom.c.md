@@ -1,11 +1,11 @@
 # `src/js_dom.c`
 
-> Source: [src/js_dom.c:1](../../src/js_dom.c#L1) | language `c` | coverage 11.5% | [API index](../index.md)
+> Source: [src/js_dom.c:1](../../src/js_dom.c#L1) | language `c` | coverage 11.1% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`jd_method`](#jd_method)
-- **Functions:** [`jd_opaque_get`](#jd_opaque_get), [`jd_idx`](#jd_idx), [`jd_handle`](#jd_handle), [`jd_handle_or_null`](#jd_handle_or_null), [`table`](#table), [`attrNames`](#attrnames), [`scripts`](#scripts), [`enough`](#enough), [`ms`](#ms), [`empty`](#empty), [`geometry`](#geometry), [`size`](#size), [`js_env`](#js_env), [`jd_install`](#jd_install), [`jd_flush_custom_elements`](#jd_flush_custom_elements), [`fails`](#fails), [`jd_install_console`](#jd_install_console), [`jd_set_cookies`](#jd_set_cookies), [`jd_get_cookies`](#jd_get_cookies), [`jd_set_computed`](#jd_set_computed), [`jd_set_geometry`](#jd_set_geometry)
+- **Functions:** [`jd_opaque_get`](#jd_opaque_get), [`jd_idx`](#jd_idx), [`jd_handle`](#jd_handle), [`jd_handle_or_null`](#jd_handle_or_null), [`table`](#table), [`attrNames`](#attrnames), [`scripts`](#scripts), [`enough`](#enough), [`ms`](#ms), [`empty`](#empty), [`geometry`](#geometry), [`size`](#size), [`js_env`](#js_env), [`jd_install`](#jd_install), [`jd_rebind`](#jd_rebind), [`jd_flush_custom_elements`](#jd_flush_custom_elements), [`fails`](#fails), [`jd_install_console`](#jd_install_console), [`jd_set_cookies`](#jd_set_cookies), [`jd_get_cookies`](#jd_get_cookies), [`jd_set_computed`](#jd_set_computed), [`jd_set_geometry`](#jd_set_geometry)
 - **Macros:** [`_GNU_SOURCE`](#_gnu_source), [`JD_COMPUTED_VALUE_MAX`](#jd_computed_value_max), [`JD_QSA_INLINE`](#jd_qsa_inline)
 
 ## Call Graph
@@ -234,6 +234,8 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 **Returns:** `* due is the remaining`
 
+*Called by:* [`pv_build_styled`](src.page_view.c.md#pv_build_styled)
+
 ---
 
 <a id="empty"></a>
@@ -335,11 +337,34 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
 
 ---
 
+<a id="jd_rebind"></a>
+
+### `jd_rebind`
+
+`function` | [src/js_dom.c:2090](../../src/js_dom.c#L2090)
+
+```c
+jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `idx` | `dom_index *` |  |  |
+| `from` | `jd_opaque *` |  |  |
+| `to` | `jd_opaque *` |  |  |
+
+**Returns:** `jd_status`
+
+---
+
 <a id="jd_flush_custom_elements"></a>
 
 ### `jd_flush_custom_elements`
 
-`function` | [src/js_dom.c:2090](../../src/js_dom.c#L2090)
+`function` | [src/js_dom.c:2100](../../src/js_dom.c#L2100)
 
 ```c
 void jd_flush_custom_elements(js_context *ctx)
@@ -355,7 +380,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 |---|---|---|---|
 | `ctx` | `js_context *` |  |  |
 
-> **Inherited:** Documentation from [`jd_flush_custom_elements`](#jd_flush_custom_elements) (include/js_dom.h:254).
+> **Inherited:** Documentation from [`jd_flush_custom_elements`](#jd_flush_custom_elements) (include/js_dom.h:261).
 
 ---
 
@@ -363,7 +388,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 
 ### `fails`
 
-`function` | [src/js_dom.c:2104](../../src/js_dom.c#L2104)
+`function` | [src/js_dom.c:2114](../../src/js_dom.c#L2114)
 
 ```c
 * cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...
@@ -383,7 +408,7 @@ The embedder calls it after each script, so the page sees the lifecycle a real b
 
 ### `jd_install_console`
 
-`function` | [src/js_dom.c:2218](../../src/js_dom.c#L2218)
+`function` | [src/js_dom.c:2228](../../src/js_dom.c#L2228)
 
 ```c
 jd_status jd_install_console(js_context *ctx, fb_buffer *log)
@@ -398,15 +423,13 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log)
 
 **Returns:** `jd_status`
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
-
 ---
 
 <a id="jd_set_cookies"></a>
 
 ### `jd_set_cookies`
 
-`function` | [src/js_dom.c:2255](../../src/js_dom.c#L2255)
+`function` | [src/js_dom.c:2265](../../src/js_dom.c#L2265)
 
 ```c
 jd_status jd_set_cookies(js_context *ctx, const char *cookies)
@@ -427,7 +450,7 @@ jd_status jd_set_cookies(js_context *ctx, const char *cookies)
 
 ### `jd_get_cookies`
 
-`function` | [src/js_dom.c:2275](../../src/js_dom.c#L2275)
+`function` | [src/js_dom.c:2285](../../src/js_dom.c#L2285)
 
 ```c
 int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)
@@ -447,7 +470,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`jd_get_cookies`](#jd_get_cookies) (include/js_dom.h:174).
+> **Inherited:** Documentation from [`jd_get_cookies`](#jd_get_cookies) (include/js_dom.h:181).
 
 ---
 
@@ -455,7 +478,7 @@ Returns 0 when the jar is disabled/empty or on any error. Never throws into the 
 
 ### `jd_set_computed`
 
-`function` | [src/js_dom.c:2298](../../src/js_dom.c#L2298)
+`function` | [src/js_dom.c:2308](../../src/js_dom.c#L2308)
 
 ```c
 jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)
@@ -477,7 +500,7 @@ jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)
 
 ### `jd_set_geometry`
 
-`function` | [src/js_dom.c:2309](../../src/js_dom.c#L2309)
+`function` | [src/js_dom.c:2319](../../src/js_dom.c#L2319)
 
 ```c
 jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)

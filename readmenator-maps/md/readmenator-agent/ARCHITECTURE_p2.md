@@ -25,6 +25,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_os_sandbox.c` -> `include/os_sandbox.h`
 - `tests/test_page_view.c` -> `include/box_style.h`
 - `tests/test_page_view.c` -> `include/css.h`
+- `tests/test_page_view.c` -> `include/css_chain.h`
 - `tests/test_page_view.c` -> `include/dom.h`
 - `tests/test_page_view.c` -> `include/flex_layout.h`
 - `tests/test_page_view.c` -> `include/html_parse.h`
@@ -229,7 +230,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/media_decoder.c` -> errno.h, libavcodec/avcodec.h, libavformat/avformat.h, libavutil/avutil.h, libavutil/imgutils.h, libswscale/swscale.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, unistd.h
 - `src/net_realm.c` -> stddef.h, string.h
 - `src/os_sandbox.c` -> errno.h, fcntl.h, linux/audit.h, linux/filter.h, linux/landlock.h, linux/seccomp.h, sched.h, stddef.h, stdint.h, string.h, sys/mman.h, sys/prctl.h, sys/resource.h, sys/syscall.h, unistd.h
-- `src/page_view.c` -> ctype.h, lexbor/html/html.h, lexbor/tag/const.h, limits.h, stdint.h, stdio.h, stdlib.h, string.h, strings.h
+- `src/page_view.c` -> ctype.h, lexbor/html/html.h, lexbor/tag/const.h, limits.h, stdint.h, stdio.h, stdlib.h, string.h, strings.h, time.h
 - `src/pdf_export.c` -> string.h
 - `src/perf_trace.c` -> stdio.h, stdlib.h, string.h
 - `src/pq_seal.c` -> openssl/core_names.h, openssl/crypto.h, openssl/evp.h, openssl/kdf.h, openssl/x509.h, stdlib.h, string.h

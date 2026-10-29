@@ -1,6 +1,26 @@
 # Subsystem: src (page 10 of 10)
 Previous: [KB_src_p9.md](KB_src_p9.md)
 
+## src/webfont_load.c
+- Doc: wf_key: size_t k = 0; while (PREF[i][k] != '\0') ++k; size_t j = 0; for (; j < k; ++j) { char a...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `wf_key` (struct, line 46)
+  - `wf_cursor` (struct, line 56)
+  - `hash` (type_alias, line 46) `typedef struct wf_key { unsigned hash;`
+  - `fetch` (type_alias, line 56) `typedef struct wf_cursor { wf_fetch_fn fetch;`
+  - `ctype_ok` (function, line 24) `static int ctype_ok(const char *ct)`
+  - `key_find` (function, line 66) `static int key_find(wf_key *keys, size_t nkeys, unsigned h, int b, int i)`
+  - `scan_inline` (function, line 178) `static void scan_inline(const char *html, size_t len, const char *page_url,
+                     ...`
+  - `wf_load_document` (function, line 229) `int wf_load_document(wf_fetch_fn fetch, void *fctx, const char *page_url,
+                     co...`
+  - `here` (function, line 22) `* filtered here (a "" hint may still name one);`
+  - `ref` (function, line 167) `* their ref (the register call copies what it keeps). */ if (!is_data) free(fbytes);`
+  - `WF_DATA_URL_MAX` (macro, line 91) `#define WF_DATA_URL_MAX`
+- Depends on: `include/data_url.h`, `include/text_shape.h`, `include/url.h`, `include/webfont.h`, `include/webfont_load.h`
+
 ## src/wl_display.c
 - Layer: utility
 - Language: c

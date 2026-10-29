@@ -1,6 +1,6 @@
 # include: css
 
-include: css groups 52 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
+include: css groups 35 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. car_ops: The questions @supports asks the caller's own engine. prop is lowercased and...
 
 ```mermaid
 graph LR
@@ -14,27 +14,23 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (2.1)
+## include (5.1)
 
-include groups 18 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
+include groups 13 files (h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. car_ops: The questions @supports asks the caller's own engine. prop is lowercased and...
 
-## src (2.2)
+## src (5.2)
 
-src groups 18 files (c) around BT_LEN_AUTO, layout_block, bt_nn, BT_WRAP_EPS, height. layout_block: Block container: stack non-none children vertically, collapsing each...
+src groups 13 files (c) around CSS_INIT_SELS, CSS_INIT_DECLS, emit, CSS_DECL_SLOTS_MIN, CSS_INIT_RULES. len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r...
 
-## tests (2.3)
+## tests (5.3)
 
-tests groups 16 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
+tests groups 9 files (c) around test_inline_text_align, test_inline_font_size, test_inline_font_size_absolute_flag, test_inline_line_height, test_inline_font_weight_style. test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its...
 
 **Files**:
 
-- include/compositor.h
-- include/css.h
 - include/css_atrule.h
 - include/css_box.h
-- include/css_chain.h
 - include/css_color.h
-- include/css_computed.h
 - include/css_decl.h
 - include/css_gradient.h
 - include/css_index.h
@@ -45,38 +41,25 @@ tests groups 16 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - include/css_text.h
 - include/css_values.h
 - include/css_vars.h
-- include/text_case.h
-- src/box_tree.c
-- src/compositor.c
 - src/css.c
 - src/css_atrule.c
 - src/css_box.c
 - src/css_chain.c
 - src/css_color.c
-- src/css_computed.c
 - src/css_gradient.c
 - src/css_index.c
-- src/css_length.c
 - src/css_mask.c
 - src/css_mq.c
 - src/css_select.c
 - src/css_text.c
 - src/css_values.c
 - src/css_vars.c
-- src/text_case.c
-- tests/test_compositor.c
 - tests/test_css.c
 - tests/test_css_atrule.c
 - tests/test_css_box.c
 - tests/test_css_color.c
-- tests/test_css_computed.c
-- tests/test_css_drops.c
-- tests/test_css_gradient.c
 - tests/test_css_index.c
-- tests/test_css_length.c
 - tests/test_css_mask.c
 - tests/test_css_mq.c
 - tests/test_css_text.c
-- tests/test_css_values.c
 - tests/test_css_vars.c
-- tests/test_text_case.c

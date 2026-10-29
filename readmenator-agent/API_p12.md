@@ -148,7 +148,7 @@ Depends on: `include/zoom.h`
 ## tools/guitime.py
 - `start_display` (function) `tools/guitime.py:34` `def start_display(workdir)` -- Starts Xvfb and a nested weston; returns (env, processes) or None when unavailable.
 - `one_run` (function) `tools/guitime.py:65` `def one_run(binary, page, env, hosts_dir, tmp)`
-- `main` (function) `tools/guitime.py:92` `def main()`
+- `main` (function) `tools/guitime.py:94` `def main()`
 
 ## tools/mutate.py
 - `line_sites` (function) `tools/mutate.py:41` `def line_sites(text)`

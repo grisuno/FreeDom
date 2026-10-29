@@ -214,8 +214,6 @@ void js_devtools_enable(js_context *ctx)
 
 *Calls:* [`js_profile_enable`](#js_profile_enable), [`js_throws_enable`](#js_throws_enable)
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
-
 ---
 
 <a id="js_devtools_expose"></a>

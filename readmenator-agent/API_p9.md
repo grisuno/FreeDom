@@ -1,6 +1,68 @@
 # API (page 9 of 12)
 Previous: [API_p8.md](API_p8.md)
 
+## src/js_env.c
+Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/sha2.h`
+- `primitives` (function) `src/js_env.c:6` `* the pure anti_fp primitives (one audited source of normalized constants);`
+- `wall_clock_ms` (function) `src/js_env.c:36` `static uint64_t wall_clock_ms(void)`
+- `monotonic_ms` (function) `src/js_env.c:42` `static double monotonic_ms(void)`
+- `m_date_now` (function) `src/js_env.c:50` `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+- `m_perf_now` (function) `src/js_env.c:58` `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,
+                          int ar...` -- performance.now: coarsened elapsed since the origin bound at install time, so * it never leaks the host uptime.
+- `m_date_now_exact` (function) `src/js_env.c:72` `static JSValue m_date_now_exact(JSContext *ctx, JSValueConst this_val,
+                          ...` -- Trusted-host clocks (owner decision 2026-10-26): 1 ms like a stock Firefox, no coarse grid, and *...
+- `m_perf_now_exact` (function) `src/js_env.c:78` `static JSValue m_perf_now_exact(JSContext *ctx, JSValueConst this_val,
+                          ...`
+- `m_empty_array` (function) `src/js_env.c:98` `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
+                             ...`
+- `m_get_random_values` (function) `src/js_env.c:116` `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
+                       ...`
+- `m_random_uuid` (function) `src/js_env.c:146` `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
+                             ...`
+- `m_subtle_null` (function) `src/js_env.c:163` `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,
+                             ...`
+- `reject_named` (function) `src/js_env.c:172` `static JSValue reject_named(JSContext *ctx, const char *name, const char *msg)` -- Rejected promise carrying an Error of the given name (WebCrypto reports through DOMException * names; the engine has...
+- `m_subtle_digest` (function) `src/js_env.c:189` `static JSValue m_subtle_digest(JSContext *ctx, JSValueConst this_val,
+                           ...` -- crypto.subtle.digest(algorithm, data): a Promise of the ArrayBuffer digest.
+- `def_val` (function) `src/js_env.c:242` `static int def_val(JSContext *ctx, JSValueConst obj, const char *name, JSValue v)` -- Always takes ownership of v: JS_DefinePropertyValueStr consumes it (freeing it even when the define fails).
+- `def_str` (function) `src/js_env.c:248` `static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const char *s)`
+- `def_int` (function) `src/js_env.c:252` `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)`
+- `def_fn` (function) `src/js_env.c:256` `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
+                  JSCFuncti...`
+- `build_languages` (function) `src/js_env.c:263` `static JSValue build_languages(JSContext *ctx, const char *langs)` -- navigator.languages: a sealed array built by splitting fp_accept_language() * (e.g. "en-US,en") on commas.
+- `build_navigator` (function) `src/js_env.c:286` `static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,
+        ...`
+- `methods` (function) `src/js_env.c:290` `* capability methods (sendBeacon, spec/js_dom.md 7h) without touching any * fingerprintable field. An untrusted...`
+- `build_screen` (function) `src/js_env.c:397` `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)`
+- `build_crypto` (function) `src/js_env.c:441` `static int build_crypto(JSContext *ctx, JSValueConst global)`
+- `build_perf_timing` (function) `src/js_env.c:469` `static int build_perf_timing(JSContext *ctx, JSValueConst perf)`
+- `build_perf_navigation` (function) `src/js_env.c:483` `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)`
+- `build_performance` (function) `src/js_env.c:495` `static int build_performance(JSContext *ctx, JSValueConst global, int exact)`
+- `override_date_now` (function) `src/js_env.c:527` `static int override_date_now(JSContext *ctx, JSValueConst global, int exact)` -- Replaces the built-in Date.now with the coarsened version, non-writable and * non-configurable so a script cannot...
+- `make_readback` (function) `src/js_env.c:571` `static JSValue make_readback(JSContext *ctx, uint64_t key)`
+- `build_readback_obj` (function) `src/js_env.c:579` `static int build_readback_obj(JSContext *ctx, JSValueConst global,
+                              ...`
+- `je_install` (function) `src/js_env.c:592` `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
+- `je_install_identity` (function) `src/js_env.c:596` `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
+                      ...`
+- `je_install_identity_trusted` (function) `src/js_env.c:601` `je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_h,
+              ...`
+- `je_install_canvas` (function) `src/js_env.c:622` `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
+
+## src/js_events.c
+Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
+- `jd_click_state_new` (function) `src/js_events.c:29` `jd_click_state *jd_click_state_new(void)`
+- `jd_click_state_free` (function) `src/js_events.c:34` `void jd_click_state_free(jd_click_state *s)`
+- `jd_install_events` (function) `src/js_events.c:38` `jd_status jd_install_events(js_context *ctx, jd_click_state *state)`
+- `jd_eval_default_action` (function) `src/js_events.c:52` `static int jd_eval_default_action(JSContext *jsctx, const char *src, size_t n,
+                  ...` -- Runs one engine event-dispatch expression and maps its result to the C contract: 1 = default action proceeds, 0 = a...
+- `jd_fire_click` (function) `src/js_events.c:66` `int jd_fire_click(js_context *ctx, dom_node_id node_id)`
+- `jd_fire_submit` (function) `src/js_events.c:78` `int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)` -- Fires the submit event for form_node_id.
+- `jd_escape_js_str` (function) `src/js_events.c:91` `static size_t jd_escape_js_str(const char *src, char *dst, size_t dstsz)` -- Escapes a string for safe interpolation into JS double-quoted string literal: replaces backslash with \\ and...
+- `jd_fire_mouse_event` (function) `src/js_events.c:163` `int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
+                        const char ...`
+
 ## src/js_fetch.c
 Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
 - `jd_pack_ptr` (function) `src/js_fetch.c:28` `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` -- Carry the host fetch fn + its ctx as a function's closure data, each split into 32-bit halves (no assumption about...
@@ -167,28 +229,28 @@ Depends on: `include/link_nav.h`, `include/url.h`
 
 ## src/local_store.c
 Depends on: `include/local_store.h`
-- `cipher_for` (function) `src/local_store.c:926` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
-- `argon2id_derive` (function) `src/local_store.c:936` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+- `cipher_for` (function) `src/local_store.c:937` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
+- `argon2id_derive` (function) `src/local_store.c:947` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...`
-- `ls_derive_key` (function) `src/local_store.c:965` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+- `ls_derive_key` (function) `src/local_store.c:976` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-- `aead_encrypt` (function) `src/local_store.c:974` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_encrypt` (function) `src/local_store.c:985` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `aead_decrypt` (function) `src/local_store.c:1000` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_decrypt` (function) `src/local_store.c:1011` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `seal_core` (function) `src/local_store.c:1028` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+- `seal_core` (function) `src/local_store.c:1039` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...`
-- `decrypt_blob` (function) `src/local_store.c:1065` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+- `decrypt_blob` (function) `src/local_store.c:1076` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-- `ls_seal` (function) `src/local_store.c:1096` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+- `ls_seal` (function) `src/local_store.c:1107` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...`
-- `ls_open` (function) `src/local_store.c:1109` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+- `ls_open` (function) `src/local_store.c:1120` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-- `ls_seal_passphrase` (function) `src/local_store.c:1120` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+- `ls_seal_passphrase` (function) `src/local_store.c:1131` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...`
-- `ls_open_passphrase` (function) `src/local_store.c:1141` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+- `ls_open_passphrase` (function) `src/local_store.c:1152` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-- `ls_free` (function) `src/local_store.c:1161` `void ls_free(uint8_t *buf, size_t len)`
+- `ls_free` (function) `src/local_store.c:1172` `void ls_free(uint8_t *buf, size_t len)`
 
 ## src/media_decoder.c
 Depends on: `include/media_decoder.h`, `include/util.h`

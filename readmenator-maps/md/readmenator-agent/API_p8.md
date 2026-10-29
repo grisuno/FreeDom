@@ -1,6 +1,37 @@
 # API (page 8 of 12)
 Previous: [API_p7.md](API_p7.md)
 
+## src/frame_host.c
+Depends on: `include/frame_broker.h`, `include/frame_host.h`
+- `fh_new` (function) `src/frame_host.c:35` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
+                fh_top_...`
+- `slot_release_view` (function) `src/frame_host.c:47` `static void slot_release_view(fh_slot *sl)`
+- `reap` (function) `src/frame_host.c:55` `static void reap(fh_host *h)` -- h->fetch = fetch; h->fetch_ctx = fetch_ctx; h->top_msg = top_msg; h->top_ctx = top_ctx; for (int i = 0; i <...
+- `fh_free` (function) `src/frame_host.c:67` `void fh_free(fh_host *h)`
+- `fh_count` (function) `src/frame_host.c:76` `int fh_count(const fh_host *h)`
+- `load_frame` (function) `src/frame_host.c:85` `static void load_frame(fh_host *h, int id, const char *url)` -- Loads the document of frame `id` (already registered in the table).
+- `find_child` (function) `src/frame_host.c:129` `static int find_child(const fh_host *h, int parent, int token)`
+- `token_seen_by` (function) `src/frame_host.c:137` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
+- `post_op` (function) `src/frame_host.c:143` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
+- `apply_ops` (function) `src/frame_host.c:198` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
+- `fh_apply_top` (function) `src/frame_host.c:221` `void fh_apply_top(fh_host *h, const tab_page *page)`
+- `fh_tick` (function) `src/frame_host.c:226` `int fh_tick(fh_host *h, int elapsed_ms)`
+- `fh_generation` (function) `src/frame_host.c:250` `unsigned fh_generation(const fh_host *h)`
+- `fh_frame_view` (function) `src/frame_host.c:252` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
+
+## src/freebug.c
+Depends on: `include/freebug.h`
+- `whole` (function) `src/freebug.c:5` `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);`
+- `fb_buffer_init` (function) `src/freebug.c:15` `void fb_buffer_init(fb_buffer *b)`
+- `fb_buffer_push` (function) `src/freebug.c:19` `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)`
+- `fb_buffer_push_loc` (function) `src/freebug.c:23` `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,
+                   ...`
+- `fb_buffer_reset` (function) `src/freebug.c:78` `void fb_buffer_reset(fb_buffer *b)`
+- `fb_buffer_free` (function) `src/freebug.c:91` `void fb_buffer_free(fb_buffer *b)`
+- `fb_buffer_count` (function) `src/freebug.c:101` `size_t fb_buffer_count(const fb_buffer *b)`
+- `fb_buffer_at` (function) `src/freebug.c:105` `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)`
+- `fb_level_name` (function) `src/freebug.c:110` `const char *fb_level_name(int level)`
+
 ## src/freedom.c
 Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 - `print_usage` (function) `src/freedom.c:55` `static void print_usage(FILE *fp, const char *prog)`
@@ -375,14 +406,15 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `js_env` (function) `src/js_dom.c:1471` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
 - `jd_install` (function) `src/js_dom.c:2008` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-- `jd_flush_custom_elements` (function) `src/js_dom.c:2090` `void jd_flush_custom_elements(js_context *ctx)`
-- `fails` (function) `src/js_dom.c:2104` `* cap is reached or an allocation fails (caller stops), else 0. */
+- `jd_rebind` (function) `src/js_dom.c:2090` `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)`
+- `jd_flush_custom_elements` (function) `src/js_dom.c:2100` `void jd_flush_custom_elements(js_context *ctx)`
+- `fails` (function) `src/js_dom.c:2114` `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-- `jd_install_console` (function) `src/js_dom.c:2218` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-- `jd_set_cookies` (function) `src/js_dom.c:2255` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-- `jd_get_cookies` (function) `src/js_dom.c:2275` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-- `jd_set_computed` (function) `src/js_dom.c:2298` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-- `jd_set_geometry` (function) `src/js_dom.c:2309` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+- `jd_install_console` (function) `src/js_dom.c:2228` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+- `jd_set_cookies` (function) `src/js_dom.c:2265` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+- `jd_get_cookies` (function) `src/js_dom.c:2285` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+- `jd_set_computed` (function) `src/js_dom.c:2308` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+- `jd_set_geometry` (function) `src/js_dom.c:2319` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
 
 ## src/js_dom_ext.c
 Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`
@@ -418,68 +450,6 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
                            char *out, si...` -- Scans a body buffer for `.m3u8` (HLS) or `.mp4` (progressive) video URLs.
 - `jd_process_iframes` (function) `src/js_embed.c:294` `void jd_process_iframes(js_context *ctx, dom_index *idx,
                         jd_fetch_fn fn, ...`
-
-## src/js_env.c
-Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/sha2.h`
-- `primitives` (function) `src/js_env.c:6` `* the pure anti_fp primitives (one audited source of normalized constants);`
-- `wall_clock_ms` (function) `src/js_env.c:36` `static uint64_t wall_clock_ms(void)`
-- `monotonic_ms` (function) `src/js_env.c:42` `static double monotonic_ms(void)`
-- `m_date_now` (function) `src/js_env.c:50` `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-- `m_perf_now` (function) `src/js_env.c:58` `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,
-                          int ar...` -- performance.now: coarsened elapsed since the origin bound at install time, so * it never leaks the host uptime.
-- `m_date_now_exact` (function) `src/js_env.c:72` `static JSValue m_date_now_exact(JSContext *ctx, JSValueConst this_val,
-                          ...` -- Trusted-host clocks (owner decision 2026-10-26): 1 ms like a stock Firefox, no coarse grid, and *...
-- `m_perf_now_exact` (function) `src/js_env.c:78` `static JSValue m_perf_now_exact(JSContext *ctx, JSValueConst this_val,
-                          ...`
-- `m_empty_array` (function) `src/js_env.c:98` `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
-                             ...`
-- `m_get_random_values` (function) `src/js_env.c:116` `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
-                       ...`
-- `m_random_uuid` (function) `src/js_env.c:146` `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
-                             ...`
-- `m_subtle_null` (function) `src/js_env.c:163` `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,
-                             ...`
-- `reject_named` (function) `src/js_env.c:172` `static JSValue reject_named(JSContext *ctx, const char *name, const char *msg)` -- Rejected promise carrying an Error of the given name (WebCrypto reports through DOMException * names; the engine has...
-- `m_subtle_digest` (function) `src/js_env.c:189` `static JSValue m_subtle_digest(JSContext *ctx, JSValueConst this_val,
-                           ...` -- crypto.subtle.digest(algorithm, data): a Promise of the ArrayBuffer digest.
-- `def_val` (function) `src/js_env.c:242` `static int def_val(JSContext *ctx, JSValueConst obj, const char *name, JSValue v)` -- Always takes ownership of v: JS_DefinePropertyValueStr consumes it (freeing it even when the define fails).
-- `def_str` (function) `src/js_env.c:248` `static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const char *s)`
-- `def_int` (function) `src/js_env.c:252` `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)`
-- `def_fn` (function) `src/js_env.c:256` `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
-                  JSCFuncti...`
-- `build_languages` (function) `src/js_env.c:263` `static JSValue build_languages(JSContext *ctx, const char *langs)` -- navigator.languages: a sealed array built by splitting fp_accept_language() * (e.g. "en-US,en") on commas.
-- `build_navigator` (function) `src/js_env.c:286` `static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,
-        ...`
-- `methods` (function) `src/js_env.c:290` `* capability methods (sendBeacon, spec/js_dom.md 7h) without touching any * fingerprintable field. An untrusted...`
-- `build_screen` (function) `src/js_env.c:397` `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)`
-- `build_crypto` (function) `src/js_env.c:441` `static int build_crypto(JSContext *ctx, JSValueConst global)`
-- `build_perf_timing` (function) `src/js_env.c:469` `static int build_perf_timing(JSContext *ctx, JSValueConst perf)`
-- `build_perf_navigation` (function) `src/js_env.c:483` `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)`
-- `build_performance` (function) `src/js_env.c:495` `static int build_performance(JSContext *ctx, JSValueConst global, int exact)`
-- `override_date_now` (function) `src/js_env.c:527` `static int override_date_now(JSContext *ctx, JSValueConst global, int exact)` -- Replaces the built-in Date.now with the coarsened version, non-writable and * non-configurable so a script cannot...
-- `make_readback` (function) `src/js_env.c:571` `static JSValue make_readback(JSContext *ctx, uint64_t key)`
-- `build_readback_obj` (function) `src/js_env.c:579` `static int build_readback_obj(JSContext *ctx, JSValueConst global,
-                              ...`
-- `je_install` (function) `src/js_env.c:592` `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
-- `je_install_identity` (function) `src/js_env.c:596` `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
-                      ...`
-- `je_install_identity_trusted` (function) `src/js_env.c:601` `je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_h,
-              ...`
-- `je_install_canvas` (function) `src/js_env.c:622` `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
-
-## src/js_events.c
-Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
-- `jd_click_state_new` (function) `src/js_events.c:29` `jd_click_state *jd_click_state_new(void)`
-- `jd_click_state_free` (function) `src/js_events.c:34` `void jd_click_state_free(jd_click_state *s)`
-- `jd_install_events` (function) `src/js_events.c:38` `jd_status jd_install_events(js_context *ctx, jd_click_state *state)`
-- `jd_eval_default_action` (function) `src/js_events.c:52` `static int jd_eval_default_action(JSContext *jsctx, const char *src, size_t n,
-                  ...` -- Runs one engine event-dispatch expression and maps its result to the C contract: 1 = default action proceeds, 0 = a...
-- `jd_fire_click` (function) `src/js_events.c:66` `int jd_fire_click(js_context *ctx, dom_node_id node_id)`
-- `jd_fire_submit` (function) `src/js_events.c:78` `int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)` -- Fires the submit event for form_node_id.
-- `jd_escape_js_str` (function) `src/js_events.c:91` `static size_t jd_escape_js_str(const char *src, char *dst, size_t dstsz)` -- Escapes a string for safe interpolation into JS double-quoted string literal: replaces backslash with \\ and...
-- `jd_fire_mouse_event` (function) `src/js_events.c:163` `int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
-                        const char ...`
 
 
 Next: [API_p9.md](API_p9.md)

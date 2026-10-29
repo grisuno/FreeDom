@@ -5876,12 +5876,20 @@ static double flex_item_basis(cairo_t *cr, const browser_window *w,
                               double content_w) {
     const rd_block *bk = rd_at(doc, b0);
     double edges = sd->ml + sd->mr;
-    if (bk->flex_basis >= 0) return (double)bk->flex_basis + edges;
+    /* A flex-basis sizes the CONTENT box unless the item is border-box (Flexbox 9.2
+     * 3.E): its outer base size adds the padding and border. Without this a Bootstrap
+     * `.col-9 + .col-3` pair (75% + 25%, 30px padding each, no border-box reset)
+     * fitted one line where every browser wraps it. */
+    const pv_box_def *fbd = (sd->box >= 0) ? rd_box_at(doc, (size_t)sd->box) : NULL;
+    double fb_edges = edges;
+    if (fbd == NULL || fbd->box_sizing != CSS_BOXS_BORDER)
+        fb_edges += sd->pl + sd->pr + sd->bl + sd->br;
+    if (bk->flex_basis >= 0) return (double)bk->flex_basis + fb_edges;
     /* Percentage flex-basis encoded as -(1000000 + per_mille) in the int
      * field (same per-mille convention as box_w_pct / emit_pct). */
     if (bk->flex_basis <= -1000000 && bk->flex_basis > -2000000) {
         double pm = (double)(-bk->flex_basis - 1000000);
-        return (content_w * pm / 1000.0) + edges;
+        return (content_w * pm / 1000.0) + fb_edges;
     }
     /* The ITEM's declared width is its base size. When the item has a box of its
      * own, that box answers; the first run's width is some DESCENDANT's (a
@@ -6764,7 +6772,10 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     /* Which items were laid out by a NESTED container (their rows already carry an
      * x of their own, so the translation pass adds instead of overwriting). */
     int item_nested[BT_MAX_CHILDREN];
-    for (size_t jz = 0; jz < g; ++jz) item_nested[jz] = 0;
+    /* The nested container of such an item: its justify-content needs the item's final
+     * (cross-stretched) height, which only this level knows. */
+    int item_seg_cont[BT_MAX_CHILDREN];
+    for (size_t jz = 0; jz < g; ++jz) { item_nested[jz] = 0; item_seg_cont[jz] = -1; }
     for (size_t j = 0; j < g; ++j) {
         rc_state si;
         memset(&si, 0, sizeof si);
@@ -6903,6 +6914,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                                  k, seg_end, seg_cont);
                 flush_line(L, &si, th);
                 item_nested[j] = 1;
+                item_seg_cont[j] = seg_cont;
             } else
             for (size_t m = k; m < seg_end; ++m) {
                 const rd_block *bk = rd_at(doc, m);
@@ -7148,7 +7160,23 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
      * box loop the flat path uses. */
     for (size_t j = 0; j < g; ++j) {
         const bt_node *kid = &kids[pos_of[j]];
+        /* A nested flex COLUMN laid out at its content height and then stretched by its
+         * row (align-items:stretch) has free main space: justify-content places its
+         * content in it (Flexbox 8.2). Only start/center/end are positionable by one
+         * shift; the space-* modes need per-item distribution and stay at start. */
+        double jshift = 0.0;
+        if (item_nested[j] && item_seg_cont[j] >= 0) {
+            const pv_cont_def *ncd = rd_cont_at(doc, (size_t)item_seg_cont[j]);
+            double extra = kid->h - kid->content_h;
+            if (ncd != NULL && extra > 0.0 &&
+                (ncd->direction == CSS_FD_COLUMN || ncd->direction == CSS_FD_COLUMN_REVERSE) &&
+                container_inner_h(doc, ncd, content_w) <= 0.0) {
+                if (ncd->justify == FX_JUSTIFY_CENTER) jshift = extra / 2.0;
+                else if (ncd->justify == FX_JUSTIFY_END) jshift = extra;
+            }
+        }
         for (size_t r = row_start[j]; r < row_start[j] + row_count[j]; ++r) {
+            L->rows[r].top += jshift;
             L->rows[r].top += base_top + kid->y + item_oy[j];
             /* Every row is item-local: a recursed item's rows carry the nested
              * container's placement and a flat item's rows carry the inset of the
@@ -7163,6 +7191,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                                             && bi < L->nbox; ++bi) {
             L->boxes[bi].x += origin_x + kid->x + item_ox[j];
             L->boxes[bi].top += base_top + kid->y + item_oy[j];
+            if (bi != item_root_idx[j]) L->boxes[bi].top += jshift;
         }
         if (item_box[j] >= 0 && item_root_idx[j] < L->nbox) {
             const pv_box_def *def = rd_box_at(doc, (size_t)item_box[j]);

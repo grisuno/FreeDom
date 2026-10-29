@@ -1397,8 +1397,6 @@ pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] (i == 
 
 **Returns:** `size_t`
 
-*Called by:* [`blocks`](src.tab.c.md#blocks)
-
 ---
 
 <a id="pv_cont_at"></a>
@@ -1419,8 +1417,6 @@ const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);
 | `i` | `size_t` |  |  |
 
 **Returns:** `pv_cont_def *`
-
-*Called by:* [`blocks`](src.tab.c.md#blocks)
 
 ---
 
@@ -1584,7 +1580,7 @@ NULL-safe.
 
 **Returns:** `size_t`
 
-*Called by:* [`blocks`](src.tab.c.md#blocks), [`run`](src.tab.c.md#run), [`swap`](src.tab.c.md#swap)
+*Called by:* [`run`](src.tab.c.md#run), [`swap`](src.tab.c.md#swap)
 
 ---
 
@@ -1607,7 +1603,7 @@ const pv_run *pv_at(const pv_view *v, size_t i);
 
 **Returns:** `pv_run *`
 
-*Called by:* [`blocks`](src.tab.c.md#blocks), [`run`](src.tab.c.md#run)
+*Called by:* [`run`](src.tab.c.md#run)
 
 ---
 
@@ -1631,8 +1627,6 @@ Box tree accessors (Step D). pv_box_count is the number of box definitions; pv_b
 
 **Returns:** `size_t`
 
-*Called by:* [`blocks`](src.tab.c.md#blocks)
-
 ---
 
 <a id="pv_box_at"></a>
@@ -1653,8 +1647,6 @@ const pv_box_def *pv_box_at(const pv_view *v, size_t i);
 | `i` | `size_t` |  |  |
 
 **Returns:** `pv_box_def *`
-
-*Called by:* [`blocks`](src.tab.c.md#blocks)
 
 ---
 

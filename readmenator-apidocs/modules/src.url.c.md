@@ -412,7 +412,7 @@ url_status url_split(const char *url, url_parts *out)
 
 *Calls:* [`url_authority_len`](#url_authority_len), [`url_is_https`](#url_is_https)
 
-*Called by:* [`jl_m_hist_target`](src.js_location.c.md#jl_m_hist_target), [`run_js`](src.tab.c.md#run_js), [`url_history_target`](#url_history_target), [`url_search_rewrite`](#url_search_rewrite)
+*Called by:* [`jl_m_hist_target`](src.js_location.c.md#jl_m_hist_target), [`url_history_target`](#url_history_target), [`url_search_rewrite`](#url_search_rewrite)
 
 ---
 

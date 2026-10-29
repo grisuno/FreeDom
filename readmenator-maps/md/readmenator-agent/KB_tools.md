@@ -77,7 +77,7 @@
 - Symbols:
   - `start_display` (function, line 34) `def start_display(workdir)`
   - `one_run` (function, line 65) `def one_run(binary, page, env, hosts_dir, tmp)`
-  - `main` (function, line 92) `def main()`
+  - `main` (function, line 94) `def main()`
 
 ## tools/mutate.py
 - Doc: mutate -- compile-time mutation testing for the CMocka suites.

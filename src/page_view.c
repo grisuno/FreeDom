@@ -30,6 +30,7 @@ _Static_assert(PV_BSHADOW_LAYERS == CSS_BSHADOW_LAYERS,
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 /* The per-run sized-track cap mirrors the css module's; a divergence would
  * silently truncate track sizes on the wire. */
@@ -2337,6 +2338,7 @@ typedef struct pv_style_cache {
     /* flex_column_flows_as_block verdict per container: the test walks every child, and every
      * child of a column asks it again (quadratic in a wide column). */
     pv_ptrmap              flowcol;
+    cch_path   *path;     /* root->element selector path reused between resolutions */
 } pv_style_cache;
 
 static size_t pv_ptr_hash(const void *p) {
@@ -2357,6 +2359,10 @@ static void pv_cache_reindex(pv_style_cache *c) {
     }
 }
 
+/* Ceiling on the up-front reservation: a hostile document cannot make the cache claim more
+ * address space than this many styles (~7 KB each) before it has resolved one. */
+#define PV_STYLE_RESERVE_MAX ((size_t)65536)
+
 static int pv_style_cache_init(pv_style_cache *c) {
     memset(c, 0, sizeof *c);
     c->cap = 64;
@@ -2367,10 +2373,12 @@ static int pv_style_cache_init(pv_style_cache *c) {
     c->vars = (const cvr_chain **)calloc(c->cap, sizeof *c->vars);
     c->def_h = (pv_def_h *)calloc(c->cap, sizeof *c->def_h);
     c->hidx = (size_t *)calloc(c->hcap, sizeof *c->hidx);
+    c->path = cch_path_new();   /* NULL on OOM: every resolution takes the uncached route */
     if (c->node == NULL || c->style == NULL || c->font_size == NULL || c->vars == NULL ||
         c->def_h == NULL || c->hidx == NULL) {
         free(c->node); free(c->style); free(c->font_size); free(c->vars); free(c->def_h);
         free(c->hidx);
+        cch_path_free(c->path);
         memset(c, 0, sizeof *c);
         return -1;
     }
@@ -2381,6 +2389,7 @@ static void pv_style_cache_free(pv_style_cache *c) {
     for (size_t k = 0; k < c->nretired; ++k) free(c->retired[k]);
     free(c->node); free(c->style); free(c->font_size); free(c->vars); free(c->def_h);
     free(c->hidx);
+    cch_path_free(c->path);
     for (size_t k = 0; k < c->nvn; ++k) {
         cvr_free(&c->vn[k]->own);
         free(c->vn[k]);
@@ -2388,6 +2397,32 @@ static void pv_style_cache_free(pv_style_cache *c) {
     free(c->vn);
     pv_ptrmap_free(&c->flowcol);
     memset(c, 0, sizeof *c);
+}
+
+/* Sizes an EMPTY cache for n elements up front. Growing it one doubling at a time copied the
+ * whole 7 KB-per-element style array each time and kept every old block alive (the pointers
+ * handed out stay valid); the document's element count is known before the first resolution.
+ * The arrays are calloc'd, so untouched capacity costs address space, not memory. On any
+ * failure the cache is left as it was and simply grows on demand. */
+static void pv_style_cache_reserve(pv_style_cache *c, size_t n) {
+    if (c->hidx == NULL || c->count != 0 || n <= c->cap) return;
+    if (n > PV_STYLE_RESERVE_MAX) n = PV_STYLE_RESERVE_MAX;
+    size_t hc = 128;
+    while (hc < n * 2) hc *= 2;
+    const lxb_dom_node_t **nn = (const lxb_dom_node_t **)calloc(n, sizeof *nn);
+    css_style *ns = (css_style *)calloc(n, sizeof *ns);
+    double *nf = (double *)calloc(n, sizeof *nf);
+    const cvr_chain **nv = (const cvr_chain **)calloc(n, sizeof *nv);
+    pv_def_h *nd = (pv_def_h *)calloc(n, sizeof *nd);
+    size_t *nh = (size_t *)calloc(hc, sizeof *nh);
+    if (nn == NULL || ns == NULL || nf == NULL || nv == NULL || nd == NULL || nh == NULL) {
+        free(nn); free(ns); free(nf); free(nv); free(nd); free(nh);
+        return;
+    }
+    free(c->node); free(c->style); free(c->font_size); free(c->vars); free(c->def_h); free(c->hidx);
+    c->node = nn; c->style = ns; c->font_size = nf; c->vars = nv; c->def_h = nd; c->hidx = nh;
+    c->cap = n;
+    c->hcap = hc;
 }
 
 /* cch_element_style(el, sheet), memoized in *cache. A NULL cache (OOM at init,
@@ -2609,7 +2644,7 @@ static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const cs
     css_style cs = { 0 };
     for (size_t k = n; k-- > 0; ) {
         cvr_table own = { 0 };
-        cs = cch_element_style_vars(stack[k], sheet, inherited, vars, &own);
+        cs = cch_element_style_path(cache != NULL ? cache->path : NULL, stack[k], sheet, inherited, vars, &own);
         {
             size_t tl = 0;
             const lxb_char_t *tn = lxb_dom_element_local_name(stack[k], &tl);
@@ -5291,6 +5326,8 @@ static const char PV_UA_CSS[] =
     "u,ins{text-decoration:underline}"
     "s,strike,del{text-decoration:line-through}"
     "mark{background-color:#ff0;color:#000}"
+    /* Firefox's UA link colour. Only :link: with no history there is no :visited. */
+    "a:link,area:link{color:#0000ee}"
     "abbr[title],acronym[title]{text-decoration:underline dotted}"
     "}\n";
 
@@ -5387,7 +5424,13 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     pv_root_els roots = find_root_els(root);
     css_media media = { prefers_dark ? 1 : 0, 0, media_w, root_els_match, &roots };
     char *root_scope = collect_root_scope(root);
+    struct timespec pt0, pt1;
+    clock_gettime(CLOCK_MONOTONIC, &pt0);
     (void)css_parse_scoped(style_text, style_len, &media, root_scope, &sheet);
+    clock_gettime(CLOCK_MONOTONIC, &pt1);
+    if (getenv("FREEDOM_JS_PROFILE") != NULL)
+        fprintf(stderr, "pv-profile css-parse %.1f ms (%zu bytes)\n",
+                (double)(pt1.tv_sec - pt0.tv_sec) * 1e3 + (double)(pt1.tv_nsec - pt0.tv_nsec) / 1e6, style_len);
     free(root_scope);
     free(style_text);
 
@@ -5412,6 +5455,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     memset(&after_p, 0, sizeof after_p);
     after_p.box = -1;
     (void)pv_style_cache_init(&cache);  /* on OOM: cap stays 0, every lookup degrades to uncached */
+    pv_style_cache_reserve(&cache, node_map.count);
     /* Per-table flow-vs-grid decisions, plus the style context the table role
      * resolution needs (a role is a computed `display`, spec/css.md). Declared
      * after `cache` because it borrows it. */

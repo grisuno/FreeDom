@@ -81,8 +81,6 @@ jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *pa
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
-
 ---
 
 <a id="jd_take_nav_request"></a>

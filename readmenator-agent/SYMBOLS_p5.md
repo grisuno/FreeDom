@@ -3,6 +3,9 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:175` | `#define SF_IMPERSONATE_KEX_GROUPS` |
+| `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:180` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
+| `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:176` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
 | `SF_MAX_URL` | macro | `include/secure_fetch.h:219` | `#define SF_MAX_URL` |
 | `SF_META_MAX` | macro | `include/secure_fetch.h:77` | `#define SF_META_MAX` |
 | `SF_RESPONSE_HEADERS_MAX` | macro | `include/secure_fetch.h:78` | `#define SF_RESPONSE_HEADERS_MAX` |
@@ -493,8 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `cx_item_compare` | function | `src/compositor.c:54` | `int cx_item_compare(const cx_item *a, const cx_item *b)` |
 | `cx_sort` | function | `src/compositor.c:70` | `void cx_sort(cx_item *items, size_t n)` |
 | `eff_z` | function | `src/compositor.c:50` | `static int eff_z(const cx_item *it)` |
-| `AUTO_REJECT` | macro | `src/css.c:274` | `#define AUTO_REJECT` |
-| `AUTO_RESET` | macro | `src/css.c:276` | `#define AUTO_RESET` |
-| `AUTO_RESET_NONE` | macro | `src/css.c:277` | `#define AUTO_RESET_NONE` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)
