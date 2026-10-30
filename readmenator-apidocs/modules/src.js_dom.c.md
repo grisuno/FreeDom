@@ -194,6 +194,8 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 **Returns:** `* player`
 
+*Called by:* [`idn_render_page`](src.identity.c.md#idn_render_page)
+
 ---
 
 <a id="enough"></a>

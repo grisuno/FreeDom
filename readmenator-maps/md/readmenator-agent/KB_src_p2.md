@@ -8,12 +8,12 @@ Previous: [KB_src.md](KB_src.md)
 - Symbols:
   - `css_sheet` (struct, line 103)
   - `css_keyframe_stop` (struct, line 143)
-  - `len_rebase_ctx` (struct, line 5166)
-  - `css_match` (struct, line 5995)
-  - `css_cand` (struct, line 6001)
+  - `len_rebase_ctx` (struct, line 5350)
+  - `css_match` (struct, line 6192)
+  - `css_cand` (struct, line 6198)
   - `css_rule` (struct, line 101)
-  - `rem_px` (type_alias, line 5166) `typedef struct len_rebase_ctx { double rem_px;`
-  - `idx` (type_alias, line 6001) `typedef struct css_cand { int imp, espec, ord, idx;`
+  - `rem_px` (type_alias, line 5350) `typedef struct len_rebase_ctx { double rem_px;`
+  - `idx` (type_alias, line 6198) `typedef struct css_cand { int imp, espec, ord, idx;`
   - `parse_num` (function, line 180) `static int parse_num(const char *s, double *out, const char **endp)`
   - `parse_color` (function, line 191) `static int parse_color(const char *v)`
   - `interp_color` (function, line 195) `static int interp_color(const char *v)`
@@ -97,196 +97,203 @@ static int interp_border_s...`
   - `interp_print_color_adjust` (function, line 720) `static int interp_print_color_adjust(const char *v)`
   - `interp_forced_color_adjust` (function, line 726) `static int interp_forced_color_adjust(const char *v)`
   - `interp_mix_blend_mode` (function, line 733) `static int interp_mix_blend_mode(const char *v)`
-  - `interp_object_fit` (function, line 752) `static int interp_object_fit(const char *v)`
-  - `interp_list_style_pos` (function, line 761) `static int interp_list_style_pos(const char *v)`
-  - `interp_font_kerning` (function, line 767) `static int interp_font_kerning(const char *v)`
-  - `interp_text_rendering` (function, line 774) `static int interp_text_rendering(const char *v)`
-  - `interp_font_stretch` (function, line 782) `static int interp_font_stretch(const char *v)`
-  - `interp_resize` (function, line 795) `static int interp_resize(const char *v)`
-  - `interp_scroll_behavior` (function, line 803) `static int interp_scroll_behavior(const char *v)`
-  - `interp_overscroll_behavior` (function, line 825) `static int interp_overscroll_behavior(const char *v)`
-  - `interp_backface_visibility` (function, line 832) `static int interp_backface_visibility(const char *v)`
-  - `interp_border_style` (function, line 855) `static int interp_border_style(const char *v)`
-  - `interp_bwidth1` (function, line 881) `static int interp_bwidth1(const char *v)`
-  - `interp_time_ms` (function, line 890) `static int interp_time_ms(const char *v)`
-  - `emit_radius_corner` (function, line 923) `static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)`
-  - `interp_bw_tok` (function, line 931) `static int interp_bw_tok(const char *t, int *o)`
-  - `interp_bs_tok` (function, line 932) `static int interp_bs_tok(const char *t, int *o)`
-  - `interp_bc_tok` (function, line 933) `static int interp_bc_tok(const char *t, int *o)`
-  - `expand_outline` (function, line 998) `static int expand_outline(const char *val, css_decl *dst, int cap)`
-  - `interp_column_count` (function, line 1014) `static int interp_column_count(const char *v)`
-  - `interp_column_width` (function, line 1026) `static int interp_column_width(const char *v)`
-  - `expand_columns` (function, line 1037) `static int expand_columns(const char *val, css_decl *dst, int cap)`
-  - `expand_flex_flow` (function, line 1071) `static int expand_flex_flow(const char *val, css_decl *dst, int cap)`
-  - `expand_column_rule` (function, line 1093) `static int expand_column_rule(const char *val, css_decl *dst, int cap)`
-  - `interp_filter_pct` (function, line 1105) `static int interp_filter_pct(const char *s)`
-  - `interp_filter_deg` (function, line 1119) `static int interp_filter_deg(const char *s)`
-  - `filter_paren_body` (function, line 1134) `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)`
-  - `item` (function, line 1147) `* timing list takes its first item (CSS Animations/Transitions 1: with one
+  - `interp_object_pos` (function, line 756) `static int interp_object_pos(const char *v)`
+  - `interp_object_fit` (function, line 798) `static int interp_object_fit(const char *v)`
+  - `interp_list_style_pos` (function, line 807) `static int interp_list_style_pos(const char *v)`
+  - `interp_font_kerning` (function, line 813) `static int interp_font_kerning(const char *v)`
+  - `interp_text_rendering` (function, line 820) `static int interp_text_rendering(const char *v)`
+  - `interp_font_stretch` (function, line 828) `static int interp_font_stretch(const char *v)`
+  - `interp_resize` (function, line 841) `static int interp_resize(const char *v)`
+  - `interp_scroll_behavior` (function, line 849) `static int interp_scroll_behavior(const char *v)`
+  - `interp_overscroll_behavior` (function, line 871) `static int interp_overscroll_behavior(const char *v)`
+  - `interp_backface_visibility` (function, line 878) `static int interp_backface_visibility(const char *v)`
+  - `interp_border_style` (function, line 901) `static int interp_border_style(const char *v)`
+  - `interp_bwidth1` (function, line 927) `static int interp_bwidth1(const char *v)`
+  - `interp_time_ms` (function, line 936) `static int interp_time_ms(const char *v)`
+  - `emit_radius_corner` (function, line 969) `static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)`
+  - `interp_bw_tok` (function, line 977) `static int interp_bw_tok(const char *t, int *o)`
+  - `interp_bs_tok` (function, line 978) `static int interp_bs_tok(const char *t, int *o)`
+  - `interp_bc_tok` (function, line 979) `static int interp_bc_tok(const char *t, int *o)`
+  - `expand_outline` (function, line 1044) `static int expand_outline(const char *val, css_decl *dst, int cap)`
+  - `interp_column_count` (function, line 1060) `static int interp_column_count(const char *v)`
+  - `interp_column_width` (function, line 1072) `static int interp_column_width(const char *v)`
+  - `expand_columns` (function, line 1083) `static int expand_columns(const char *val, css_decl *dst, int cap)`
+  - `expand_flex_flow` (function, line 1117) `static int expand_flex_flow(const char *val, css_decl *dst, int cap)`
+  - `expand_column_rule` (function, line 1139) `static int expand_column_rule(const char *val, css_decl *dst, int cap)`
+  - `interp_filter_pct` (function, line 1151) `static int interp_filter_pct(const char *s)`
+  - `interp_filter_deg` (function, line 1165) `static int interp_filter_deg(const char *s)`
+  - `filter_paren_body` (function, line 1180) `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)`
+  - `item` (function, line 1193) `* timing list takes its first item (CSS Animations/Transitions 1: with one
  * transition/animatio...`
-  - `anim_easing_iv` (function, line 1186) `static int anim_easing_iv(const char *tok)`
-  - `is_anim_ident` (function, line 1198) `static int is_anim_ident(const char *tok)`
-  - `expand_animation` (function, line 1214) `static int expand_animation(const char *val, css_decl *dst, int cap)`
-  - `expand_backdrop_filter` (function, line 1478) `static int expand_backdrop_filter(const char *val, css_decl *dst, int cap)`
-  - `axis` (function, line 1512) `* bare center displaces it to the free axis (`center right` = x:right, y:center).
+  - `anim_easing_iv` (function, line 1232) `static int anim_easing_iv(const char *tok)`
+  - `is_anim_ident` (function, line 1244) `static int is_anim_ident(const char *tok)`
+  - `expand_animation` (function, line 1260) `static int expand_animation(const char *val, css_decl *dst, int cap)`
+  - `expand_backdrop_filter` (function, line 1524) `static int expand_backdrop_filter(const char *val, css_decl *dst, int cap)`
+  - `axis` (function, line 1558) `* bare center displaces it to the free axis (`center right` = x:right, y:center).
  * Any other co...`
-  - `expand_bg_size` (function, line 1628) `static int expand_bg_size(const char *val, css_decl *dst, int cap)`
-  - `emit_content` (function, line 1668) `static int emit_content(css_decl *dst, int cap, const char *str,
+  - `expand_bg_size` (function, line 1674) `static int expand_bg_size(const char *val, css_decl *dst, int cap)`
+  - `emit_content` (function, line 1714) `static int emit_content(css_decl *dst, int cap, const char *str,
                         char (*c...`
-  - `expand_content` (function, line 1774) `static int expand_content(const char *val, css_decl *dst, int cap,
+  - `expand_counter_decls` (function, line 1821) `static int expand_counter_decls(const char *prop, const char *val, css_decl *dst, int cap,
+      ...`
+  - `expand_content` (function, line 1839) `static int expand_content(const char *val, css_decl *dst, int cap,
                           char...`
-  - `expand_grid_areas` (function, line 1817) `static int expand_grid_areas(const char *val, css_decl *dst, int cap,
+  - `expand_grid_areas` (function, line 1890) `static int expand_grid_areas(const char *val, css_decl *dst, int cap,
                            ...`
-  - `expand_grid_area_lines` (function, line 1845) `static int expand_grid_area_lines(const char *val, css_decl *dst, int cap)`
-  - `expand_grid_line` (function, line 1870) `static int expand_grid_line(const char *val, css_decl *dst, int cap, int p_start, int p_end)`
-  - `expand_grid_area` (function, line 1879) `static int expand_grid_area(const char *val, css_decl *dst, int cap)`
-  - `expand_grid_template` (function, line 1918) `static int expand_grid_template(const char *val, css_decl *dst, int cap,
+  - `expand_grid_area_lines` (function, line 1918) `static int expand_grid_area_lines(const char *val, css_decl *dst, int cap)`
+  - `expand_grid_line` (function, line 1943) `static int expand_grid_line(const char *val, css_decl *dst, int cap, int p_start, int p_end)`
+  - `expand_grid_area` (function, line 1952) `static int expand_grid_area(const char *val, css_decl *dst, int cap)`
+  - `expand_grid_template` (function, line 1991) `static int expand_grid_template(const char *val, css_decl *dst, int cap,
                         ...`
-  - `box_shadow_layer` (function, line 1970) `static int box_shadow_layer(const char *val, size_t len, int out[6])`
-  - `declaration` (function, line 2006) `* invalid layer drops the whole declaration (fail closed). `none` is an explicit
+  - `box_shadow_layer` (function, line 2043) `static int box_shadow_layer(const char *val, size_t len, int out[6])`
+  - `declaration` (function, line 2079) `* invalid layer drops the whole declaration (fail closed). `none` is an explicit
  * no-shadow. ur...`
-  - `interp_flex_factor` (function, line 2048) `static int interp_flex_factor(const char *v)`
-  - `interp_flex_basis` (function, line 2058) `static int interp_flex_basis(const char *v, int *out)`
-  - `expand_flex` (function, line 2092) `static int expand_flex(const char *val, css_decl *dst, int cap)`
-  - `interp_align_kw` (function, line 2137) `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)`
-  - `interp_flex_direction` (function, line 2150) `static int interp_flex_direction(const char *v)`
-  - `interp_box_orient` (function, line 2168) `static int interp_box_orient(const char *v)`
-  - `interp_flex_line_pack` (function, line 2195) `static int interp_flex_line_pack(const char *v)`
-  - `interp_flex_wrap` (function, line 2205) `static int interp_flex_wrap(const char *v)`
-  - `interp_grid_flow` (function, line 2213) `static int interp_grid_flow(const char *v)`
-  - `copy_trim` (function, line 2231) `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
-  - `strip_important` (function, line 2244) `static int strip_important(char *val)`
-  - `var` (function, line 2269) `* cvr_resolve then substitutes var() references when a declaration's value is
+  - `interp_flex_factor` (function, line 2121) `static int interp_flex_factor(const char *v)`
+  - `interp_flex_basis` (function, line 2131) `static int interp_flex_basis(const char *v, int *out)`
+  - `expand_flex` (function, line 2165) `static int expand_flex(const char *val, css_decl *dst, int cap)`
+  - `interp_align_kw` (function, line 2210) `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)`
+  - `interp_flex_direction` (function, line 2223) `static int interp_flex_direction(const char *v)`
+  - `interp_box_orient` (function, line 2241) `static int interp_box_orient(const char *v)`
+  - `interp_flex_line_pack` (function, line 2268) `static int interp_flex_line_pack(const char *v)`
+  - `interp_flex_wrap` (function, line 2278) `static int interp_flex_wrap(const char *v)`
+  - `interp_grid_flow` (function, line 2286) `static int interp_grid_flow(const char *v)`
+  - `copy_trim` (function, line 2304) `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
+  - `strip_important` (function, line 2317) `static int strip_important(char *val)`
+  - `var` (function, line 2342) `* cvr_resolve then substitutes var() references when a declaration's value is
  * interpreted (par...`
-  - `has_double_dash` (function, line 2291) `static int has_double_dash(const char *p, size_t n)`
-  - `subject_may_be_root` (function, line 2300) `static int subject_may_be_root(const char *s, size_t a, size_t b, const char *root_scope)`
-  - `selector_matches_root` (function, line 2348) `static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m,
+  - `has_double_dash` (function, line 2364) `static int has_double_dash(const char *p, size_t n)`
+  - `subject_may_be_root` (function, line 2373) `static int subject_may_be_root(const char *s, size_t a, size_t b, const char *root_scope)`
+  - `selector_matches_root` (function, line 2421) `static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m,
          ...`
-  - `tr_mul` (function, line 2477) `static void tr_mul(double out[6], const double l[6], const double r[6])`
-  - `tr_decompose` (function, line 2497) `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
+  - `tr_mul` (function, line 2550) `static void tr_mul(double out[6], const double l[6], const double r[6])`
+  - `tr_decompose` (function, line 2570) `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
                         in...`
-  - `parse_matrix6` (function, line 2520) `static int parse_matrix6(const char *p, size_t argn, double m6[6])`
-  - `split_top_args` (function, line 2552) `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
+  - `parse_matrix6` (function, line 2593) `static int parse_matrix6(const char *p, size_t argn, double m6[6])`
+  - `split_top_args` (function, line 2625) `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
                ...`
-  - `translate3d` (function, line 2582) `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
+  - `translate3d` (function, line 2655) `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
  * renders z as nothing,...`
-  - `function` (function, line 2856) `* transform function (perspective/rotate3d/...), or unparseable syntax,
+  - `function` (function, line 2929) `* transform function (perspective/rotate3d/...), or unparseable syntax,
  * rejects the WHOLE decl...`
-  - `origin_component` (function, line 3053) `static int origin_component(const char *tok, int axis, int *out)`
-  - `expand_transform_origin` (function, line 3079) `static int expand_transform_origin(const char *val, css_decl *dst, int cap)`
-  - `expand_gap` (function, line 3111) `static int expand_gap(const char *val, css_decl *dst, int cap)`
-  - `shorthand` (function, line 3135) `* An uninterpretable token drops the whole shorthand (fail closed). */
+  - `origin_component` (function, line 3126) `static int origin_component(const char *tok, int axis, int *out)`
+  - `expand_transform_origin` (function, line 3152) `static int expand_transform_origin(const char *val, css_decl *dst, int cap)`
+  - `expand_gap` (function, line 3184) `static int expand_gap(const char *val, css_decl *dst, int cap)`
+  - `shorthand` (function, line 3208) `* An uninterpretable token drops the whole shorthand (fail closed). */
 static int expand_place(co...`
-  - `property` (function, line 3170) `* error drops the whole property (fail closed). */
+  - `property` (function, line 3243) `* error drops the whole property (fail closed). */
 static int expand_clip(const char *val, css_de...`
-  - `expand_clip_path` (function, line 3214) `static int expand_clip_path(const char *val, css_decl *dst, int cap)`
-  - `font_list_alias` (function, line 3261) `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)`
-  - `font_list_norm` (function, line 3295) `static int font_list_norm(const char *val, char *out, size_t cap)`
-  - `writing` (function, line 3339) `* Wide keywords claim BOTH slots without writing (inheritance then flows, as
+  - `expand_clip_path` (function, line 3287) `static int expand_clip_path(const char *val, css_decl *dst, int cap)`
+  - `font_list_alias` (function, line 3334) `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)`
+  - `font_list_norm` (function, line 3368) `static int font_list_norm(const char *val, char *out, size_t cap)`
+  - `writing` (function, line 3412) `* Wide keywords claim BOTH slots without writing (inheritance then flows, as
  * the tail does for...`
-  - `shorthand` (function, line 3381) `* generic bucket keeps the rest of the shorthand (same net effect as the
+  - `shorthand` (function, line 3454) `* generic bucket keeps the rest of the shorthand (same net effect as the
  * font-family longhand ...`
-  - `interpret_prop_dispatch` (function, line 3473) `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
+  - `multiplying` (function, line 3551) `* instead of the two multiplying (no page measured needs both on one element).
+ * A third (z) com...`
+  - `is_inert_prop` (function, line 3604) `static int is_inert_prop(const char *prop)`
+  - `interpret_prop_dispatch` (function, line 3620) `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
    ...`
-  - `wide_claim` (function, line 4181) `static int wide_claim(const char *prop, css_decl *dst, int cap,
+  - `wide_claim` (function, line 4365) `static int wide_claim(const char *prop, css_decl *dst, int cap,
                       char (*urlt...`
-  - `interpret_prop` (function, line 4221) `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
+  - `interpret_prop` (function, line 4405) `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
             ...`
-  - `drop_copy_text` (function, line 4248) `static void drop_copy_text(char *dst, size_t cap, const char *src)`
-  - `drop_record` (function, line 4267) `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)`
-  - `raw_add` (function, line 4293) `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)`
-  - `interpret_decls` (function, line 4406) `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
+  - `drop_copy_text` (function, line 4432) `static void drop_copy_text(char *dst, size_t cap, const char *src)`
+  - `drop_record` (function, line 4451) `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)`
+  - `raw_add` (function, line 4477) `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)`
+  - `interpret_decls` (function, line 4590) `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
                ...`
-  - `sheet_pools_reserve` (function, line 4464) `static void sheet_pools_reserve(css_sheet *sh)`
-  - `add_rule` (function, line 4470) `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
+  - `sheet_pools_reserve` (function, line 4648) `static void sheet_pools_reserve(css_sheet *sh)`
+  - `add_rule` (function, line 4654) `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
                      siz...`
-  - `skip_at_rule` (function, line 4583) `static size_t skip_at_rule(const char *s, size_t i, size_t n)`
-  - `block_end` (function, line 4599) `static size_t block_end(const char *s, size_t open, size_t n)`
-  - `at_is_media` (function, line 4621) `static int at_is_media(const char *s, size_t i, size_t n)`
-  - `at_keyword` (function, line 4632) `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)`
-  - `supports_selector_ok` (function, line 4657) `static int supports_selector_ok(void *ctx, const char *sel)`
-  - `supports_matches` (function, line 4666) `static int supports_matches(const char *s, size_t a, size_t b)`
-  - `layer_register` (function, line 4720) `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,
+  - `skip_at_rule` (function, line 4767) `static size_t skip_at_rule(const char *s, size_t i, size_t n)`
+  - `block_end` (function, line 4783) `static size_t block_end(const char *s, size_t open, size_t n)`
+  - `at_is_media` (function, line 4805) `static int at_is_media(const char *s, size_t i, size_t n)`
+  - `at_keyword` (function, line 4816) `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)`
+  - `supports_selector_ok` (function, line 4841) `static int supports_selector_ok(void *ctx, const char *sel)`
+  - `supports_matches` (function, line 4850) `static int supports_matches(const char *s, size_t a, size_t b)`
+  - `layer_register` (function, line 4904) `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,
                      ...`
-  - `collect_custom_props_scoped` (function, line 4763) `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
+  - `collect_custom_props_scoped` (function, line 4947) `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
                 ...`
-  - `parse_block` (function, line 4842) `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
+  - `parse_block` (function, line 5026) `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                  ...`
-  - `download` (function, line 4998) `* the download (spec/webfont.md b3b). An empty src_url
+  - `download` (function, line 5182) `* the download (spec/webfont.md b3b). An empty src_url
                      * simply never resolv...`
-  - `rem_ident_ch` (function, line 5130) `static int rem_ident_ch(char c)`
-  - `rem_num_starts_after` (function, line 5138) `static int rem_num_starts_after(char prev)`
-  - `rem_emit_px` (function, line 5148) `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)`
-  - `len_unit_px` (function, line 5178) `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)`
-  - `len_rebase` (function, line 5208) `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)`
-  - `rem_rebase` (function, line 5274) `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
-  - `sheet_index` (function, line 5282) `static void sheet_index(css_sheet *sh)`
-  - `sheet_rewind` (function, line 5287) `static void sheet_rewind(css_sheet *sh)`
-  - `sheet_root_font_px` (function, line 5332) `static double sheet_root_font_px(const css_sheet *sh)`
-  - `strip_comments` (function, line 5340) `static char *strip_comments(const char *text, size_t len, size_t *outlen)`
-  - `var` (function, line 5350) `* collected and forty var() declarations -- font sizes, widths, radii, the
+  - `rem_ident_ch` (function, line 5314) `static int rem_ident_ch(char c)`
+  - `rem_num_starts_after` (function, line 5322) `static int rem_num_starts_after(char prev)`
+  - `rem_emit_px` (function, line 5332) `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)`
+  - `len_unit_px` (function, line 5362) `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)`
+  - `len_rebase` (function, line 5392) `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)`
+  - `rem_rebase` (function, line 5458) `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
+  - `sheet_index` (function, line 5466) `static void sheet_index(css_sheet *sh)`
+  - `sheet_rewind` (function, line 5471) `static void sheet_rewind(css_sheet *sh)`
+  - `sheet_root_font_px` (function, line 5516) `static double sheet_root_font_px(const css_sheet *sh)`
+  - `strip_comments` (function, line 5524) `static char *strip_comments(const char *text, size_t len, size_t *outlen)`
+  - `var` (function, line 5534) `* collected and forty var() declarations -- font sizes, widths, radii, the
      * whole theme -- ...`
-  - `css_parse` (function, line 5375) `css_status css_parse(const char *text, size_t len, css_sheet **out)`
-  - `css_parse_media` (function, line 5379) `css_status css_parse_media(const char *text, size_t len, const css_media *media,
+  - `css_parse` (function, line 5559) `css_status css_parse(const char *text, size_t len, css_sheet **out)`
+  - `css_parse_media` (function, line 5563) `css_status css_parse_media(const char *text, size_t len, const css_media *media,
                 ...`
-  - `css_parse_scoped` (function, line 5384) `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
+  - `css_parse_scoped` (function, line 5568) `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
                ...`
-  - `css_parse_logged` (function, line 5389) `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
+  - `css_parse_logged` (function, line 5573) `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
                ...`
-  - `consumer` (function, line 5423) `* consumer (shorthands, calc(), var() values) gets it with no context
+  - `consumer` (function, line 5607) `* consumer (shorthands, calc(), var() values) gets it with no context
          * threaded through...`
-  - `css_free` (function, line 5481) `void css_free(css_sheet *s)`
-  - `content_attr_of` (function, line 5504) `static const char *content_attr_of(const css_element *el, const char *name)`
-  - `apply_decl` (function, line 5513) `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+  - `css_free` (function, line 5665) `void css_free(css_sheet *s)`
+  - `content_attr_of` (function, line 5688) `static const char *content_attr_of(const css_element *el, const char *name)`
+  - `apply_decl` (function, line 5697) `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
               ...`
-  - `parent` (function, line 5553) `* property from the parent (`inherit`), and an unset non-inherited one
+  - `parent` (function, line 5737) `* property from the parent (`inherit`), and an unset non-inherited one
          * stands at its i...`
-  - `css_ua_heading_em` (function, line 5976) `double css_ua_heading_em(int level)`
-  - `css_computed_font_size_for_tag` (function, line 5981) `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)`
-  - `computed_font_size` (function, line 5989) `static double computed_font_size(const css_style *o, const css_element *el)`
-  - `cand_cmp` (function, line 6006) `static int cand_cmp(const void *pa, const void *pb)`
-  - `apply_var_source` (function, line 6071) `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+  - `css_ua_heading_em` (function, line 6173) `double css_ua_heading_em(int level)`
+  - `css_computed_font_size_for_tag` (function, line 6178) `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)`
+  - `computed_font_size` (function, line 6186) `static double computed_font_size(const css_style *o, const css_element *el)`
+  - `cand_cmp` (function, line 6203) `static int cand_cmp(const void *pa, const void *pb)`
+  - `apply_var_source` (function, line 6268) `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
         ...`
-  - `apply_rule` (function, line 6098) `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+  - `apply_rule` (function, line 6295) `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
               ...`
-  - `fold_font_relative` (function, line 6136) `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
+  - `fold_font_relative` (function, line 6333) `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
                          ...`
-  - `css_resolve_el` (function, line 6167) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
+  - `css_resolve_el` (function, line 6364) `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
                          ...`
-  - `css_resolve_el_ex` (function, line 6176) `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
+  - `css_resolve_el_ex` (function, line 6373) `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
                       ...`
-  - `pseudo_of` (function, line 6183) `static int pseudo_of(int which)`
-  - `css_resolve_pseudo` (function, line 6192) `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
-  - `resolve_core` (function, line 6203) `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
+  - `pseudo_of` (function, line 6380) `static int pseudo_of(int which)`
+  - `css_resolve_pseudo` (function, line 6389) `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
+  - `resolve_core` (function, line 6400) `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
                     ...`
-  - `css_resolve` (function, line 6462) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+  - `css_resolve` (function, line 6659) `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
                   ...`
-  - `NULL` (function, line 6486) `* Sheet can be NULL (inline style, no @keyframes). */
+  - `NULL` (function, line 6683) `* Sheet can be NULL (inline style, no @keyframes). */
 void css_resolve_anim_keyframes(css_style *...`
-  - `css_font_face_count` (function, line 6518) `size_t css_font_face_count(const css_sheet *sheet)`
-  - `css_font_face_at` (function, line 6522) `int css_font_face_at(const css_sheet *sheet, size_t i,
+  - `css_font_face_count` (function, line 6715) `size_t css_font_face_count(const css_sheet *sheet)`
+  - `css_font_face_at` (function, line 6719) `int css_font_face_at(const css_sheet *sheet, size_t i,
                      char *family, size_t ...`
-  - `css_parse_inline` (function, line 6532) `css_style css_parse_inline(const char *style, size_t len)`
+  - `css_parse_inline` (function, line 6729) `css_style css_parse_inline(const char *style, size_t len)`
+  - `css_sheet_uses_counters` (function, line 6733) `int css_sheet_uses_counters(const css_sheet *sheet)`
   - `emit` (function, line 63) `* * It must exceed the most slots ANY single declaration can emit (the widest today * is the `background` shorthand...`
   - `css_decl` (function, line 90) `* text and stores the INDEX in the css_decl (int-only, see P_BG_IMAGE_URL);`
-  - `order` (function, line 1440) `* declaration order (dx, dy, optional blur >= 0);`
-  - `blur` (function, line 1475) `* consumes ONLY blur(Npx);`
-  - `cap` (function, line 1744) `* string past the cap (emit_content): a conforming declaration must not * count as a discard just because an icon...`
-  - `empty` (function, line 1778) `* the slot with an explicit empty (ival -1) instead of dropping, or a * lower-priority string would leak through and...`
-  - `sel_list_comma` (function, line 1963) `static size_t sel_list_comma(const char *s, size_t i, size_t end);`
-  - `column` (function, line 2071) `* column (`flex: 1 1 0%`);`
-  - `matrix` (function, line 2490) `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands...`
-  - `LIST` (function, line 2575) `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...`
-  - `translateX` (function, line 2845) `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...`
-  - `parse_angle_deg` (function, line 2849) `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);`
-  - `expand_transform_list` (function, line 2852) `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);`
-  - `translateZ` (function, line 2854) `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);`
-  - `caller` (function, line 3461) `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...`
-  - `slots` (function, line 3632) `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...`
-  - `sentinel` (function, line 3747) `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);`
-  - `here` (function, line 3950) `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);`
-  - `csel_substr` (function, line 4654) `return known && csel_substr(val, "var(", 1);`
-  - `page_view` (function, line 5520) `* the generated text reaches page_view (which materialises it as a synthetic * run);`
+  - `order` (function, line 1486) `* declaration order (dx, dy, optional blur >= 0);`
+  - `blur` (function, line 1521) `* consumes ONLY blur(Npx);`
+  - `cap` (function, line 1790) `* string past the cap (emit_content): a conforming declaration must not * count as a discard just because an icon...`
+  - `empty` (function, line 1843) `* the slot with an explicit empty (ival -1) instead of dropping, or a * lower-priority string would leak through and...`
+  - `sel_list_comma` (function, line 2036) `static size_t sel_list_comma(const char *s, size_t i, size_t end);`
+  - `column` (function, line 2144) `* column (`flex: 1 1 0%`);`
+  - `matrix` (function, line 2563) `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands...`
+  - `LIST` (function, line 2648) `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...`
+  - `translateX` (function, line 2918) `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...`
+  - `parse_angle_deg` (function, line 2922) `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);`
+  - `expand_transform_list` (function, line 2925) `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);`
+  - `translateZ` (function, line 2927) `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);`
+  - `caller` (function, line 3534) `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...`
+  - `slots` (function, line 3789) `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...`
+  - `sentinel` (function, line 3904) `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);`
+  - `here` (function, line 4107) `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);`
+  - `csel_substr` (function, line 4838) `return known && csel_substr(val, "var(", 1);`
+  - `page_view` (function, line 5704) `* the generated text reaches page_view (which materialises it as a synthetic * run);`
   - `CSS_INIT_SELS` (macro, line 50) `#define CSS_INIT_SELS`
   - `CSS_INIT_DECLS` (macro, line 51) `#define CSS_INIT_DECLS`
   - `CSS_DECL_SLOTS_MIN` (macro, line 66) `#define CSS_DECL_SLOTS_MIN`
@@ -302,10 +309,10 @@ void css_resolve_anim_keyframes(css_style *...`
   - `AUTO_VALUE` (macro, line 275) `#define AUTO_VALUE`
   - `AUTO_RESET` (macro, line 276) `#define AUTO_RESET`
   - `AUTO_RESET_NONE` (macro, line 277) `#define AUTO_RESET_NONE`
-  - `CSS_ATTR_MARK` (macro, line 1685) `#define CSS_ATTR_MARK`
-  - `CSS_ATTR_SEP` (macro, line 1686) `#define CSS_ATTR_SEP`
-  - `CSS_MEDIA_MAX_DEPTH` (macro, line 4754) `#define CSS_MEDIA_MAX_DEPTH`
-  - `CSS_VAR_POOL` (macro, line 6067) `#define CSS_VAR_POOL`
+  - `CSS_ATTR_MARK` (macro, line 1731) `#define CSS_ATTR_MARK`
+  - `CSS_ATTR_SEP` (macro, line 1732) `#define CSS_ATTR_SEP`
+  - `CSS_MEDIA_MAX_DEPTH` (macro, line 4938) `#define CSS_MEDIA_MAX_DEPTH`
+  - `CSS_VAR_POOL` (macro, line 6264) `#define CSS_VAR_POOL`
 - Depends on: `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_index.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_mq.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/css_vars.h`, `include/flex_layout.h`, `include/webfont.h`
 
 ## src/css_atrule.c

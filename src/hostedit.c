@@ -169,3 +169,31 @@ int he_suggest(const char *text, const char *query,
     if (c.n < max) { c.prefix_only = 0; he_scan(text, suggest_cb, &c); }  /* pass 2 */
     return c.n;
 }
+
+he_cdn_kind_t he_cdn_kind(const char *url) {
+    if (url == NULL) return HE_CDN_RES;
+    const char *p = strstr(url, "://");
+    p = (p != NULL) ? p + 3 : url;
+    p = strchr(p, '/');
+    if (p == NULL) return HE_CDN_RES;
+    size_t n = strcspn(p, "?#");
+    const char *last = p;
+    for (size_t i = 0; i < n; ++i)
+        if (p[i] == '/') last = p + i + 1;
+    size_t len = (size_t)(p + n - last);
+    const char *dot = NULL;
+    for (size_t i = 0; i < len; ++i)
+        if (last[i] == '.') dot = last + i;
+    if (dot == NULL) return HE_CDN_RES;
+    size_t el = (size_t)(last + len - dot) - 1;
+    char ext[8];
+    if (el == 0 || el >= sizeof ext) return HE_CDN_RES;
+    for (size_t i = 0; i < el; ++i) {
+        char c = dot[1 + i];
+        ext[i] = (c >= 'A' && c <= 'Z') ? (char)(c + 32) : c;
+    }
+    ext[el] = '\0';
+    if (strcmp(ext, "css") == 0) return HE_CDN_CSS;
+    if (strcmp(ext, "js") == 0 || strcmp(ext, "mjs") == 0 || strcmp(ext, "cjs") == 0) return HE_CDN_JS;
+    return HE_CDN_RES;
+}

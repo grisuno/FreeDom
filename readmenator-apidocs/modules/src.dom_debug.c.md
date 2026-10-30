@@ -29,7 +29,7 @@ Bounded write cursor: [`pos`](include.flex_layout.h.md#fx_result-pos) bytes are 
 
 ### `dd_format`
 
-`function` | [src/dom_debug.c:399](../../src/dom_debug.c#L399)
+`function` | [src/dom_debug.c:400](../../src/dom_debug.c#L400)
 
 ```c
 size_t dd_format(const rd_doc *doc, char *out, size_t cap)
@@ -57,7 +57,7 @@ Returns the number of bytes that WOULD be written excluding the NUL (snprintf se
 
 ### `dd_format_css`
 
-`function` | [src/dom_debug.c:431](../../src/dom_debug.c#L431)
+`function` | [src/dom_debug.c:432](../../src/dom_debug.c#L432)
 
 ```c
 size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)

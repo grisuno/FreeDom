@@ -163,6 +163,7 @@ typedef struct pv_run {
     int     text_decoration_color;
     int     text_decoration_style;
     int     text_decoration_thickness;
+    int     text_underline_offset;   /* px, CSS_LEN_UNSET/CSS_LEN_AUTO = font default */
     /* Author text-presentation extensions (Hito 23b-6), each resolved from the
      * nearest ancestor that sets it (they inherit). Presentation: render_doc applies
      * them only with caps.css. Defaults (no author value): font_family 0 (unset ->
@@ -216,6 +217,7 @@ typedef struct pv_run {
      * scale-down. 0 = unset (fill). Non-inherited; meaningful only on PV_IMAGE and
      * PV_VIDEO runs but carried on all for simplicity. */
     int     object_fit;      /* css_object_fit, 0 (unset, same as fill) */
+    int     object_pos;      /* CSS_OBJPOS_PACK, 0 (unset) = centred */
     /* Gradient text (2026-07-19): the nearest ancestor with background-clip:
      * text + -webkit-text-fill-color:transparent hands its background gradient
      * to the runs inside it; the painter fills the glyphs with it (the band
@@ -1044,6 +1046,7 @@ typedef struct pv_text_ext {
     int text_decoration_color;     /* 0xRRGGBB, or -1 (unset) */
     int text_decoration_style;     /* css_text_decoration_style, 0 unset */
     int text_decoration_thickness; /* px, -1 unset, 0 from-font */
+    int text_underline_offset;     /* px, CSS_LEN_UNSET/CSS_LEN_AUTO = font default */
     int tab_size;        /* 0 unset -> 8 at paint time */
     int direction;       /* css_direction */
     int font_variant;    /* css_font_variant */
@@ -1052,6 +1055,7 @@ typedef struct pv_text_ext {
     int image_rendering; /* css_image_rendering, 0 unset */
     int caret_color;     /* 0xRRGGBB, -1 unset; CSS_LEN_AUTO = explicit auto */
     int object_fit;      /* css_object_fit; 0 (unset) = fill */
+    int object_pos;      /* CSS_OBJPOS_PACK; 0 (unset) = centred */
     /* Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the
      * nearest ancestor that sets it (packed / CC_COLOR_TRANSPARENT / -1 unset).
      * bgclip_seen latches the NEAREST ancestor with background-clip:text; that

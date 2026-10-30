@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 59 file(s) rooted at `include` with dominant language c (cohesion 0.57). Central symbols: `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`, `DL_MAX_BYTES`. Core file: `gui/browser_ui.c` (650 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
+This community groups 59 file(s) rooted at `include` with dominant language c (cohesion 0.57). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (654 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
 
 ## Files
 
@@ -42,7 +42,7 @@ This community groups 59 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 650 | no |
+| `gui/browser_ui.c` | c | presentation | 654 | no |
 | `gui/browser_ui_internal.h` | h | presentation | 10 | no |
 | `gui/bui_theme.c` | c | utility | 6 | no |
 | `gui/freedom_view.c` | c | presentation | 2 | no |
@@ -92,9 +92,9 @@ This community groups 59 file(s) rooted at `include` with dominant language c (c
 ## Connections
 
 - [EXTRACTED] depends_on community 0 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
-- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
 - [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/css_color.h.
-- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
 - [EXTRACTED] depends_on community 0 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
 - [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
 - [EXTRACTED] depends_on community 0 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
@@ -107,17 +107,17 @@ This community groups 59 file(s) rooted at `include` with dominant language c (c
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
 - [layer strict] `tests/test_svg_render.c` (testing) -> `include/svg_render.h` (presentation)
 - [layer strict] `tests/test_ui.c` (testing) -> `include/ui.h` (presentation)
-- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1588` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:1754` `first` `dg`: `dg` assigned at line 1754 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4474` `flow_text` `space_w`: `space_w` assigned at line 4474 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4476` `flow_text` `i`: `i` assigned at line 4476 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5510` `table` `parent`: `parent` assigned at line 5510 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5511` `table` `seen`: `seen` assigned at line 5511 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5513` `table` `j`: `j` assigned at line 5513 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5813` `nested_cont_basis` `total`: `total` assigned at line 5813 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5814` `nested_cont_basis` `n_items`: `n_items` assigned at line 5814 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6897` `builds` `sl`: `sl` assigned at line 6897 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:8587` `defer_flush` `fw`: `fw` assigned at line 8587 but never read afterwards.
+- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1679` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:1845` `first` `dg`: `dg` assigned at line 1845 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4571` `flow_text` `space_w`: `space_w` assigned at line 4571 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4573` `flow_text` `i`: `i` assigned at line 4573 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5608` `table` `parent`: `parent` assigned at line 5608 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5609` `table` `seen`: `seen` assigned at line 5609 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5611` `table` `j`: `j` assigned at line 5611 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5911` `nested_cont_basis` `total`: `total` assigned at line 5911 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5912` `nested_cont_basis` `n_items`: `n_items` assigned at line 5912 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6996` `builds` `sl`: `sl` assigned at line 6996 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:8704` `defer_flush` `fw`: `fw` assigned at line 8704 but never read afterwards.
 
 ## Open Questions
 

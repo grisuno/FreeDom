@@ -1,33 +1,23 @@
 Telegram Messenger
-CSS drops: 57 declaration(s) dropped, 30 distinct
+CSS drops: 39 declaration(s) dropped, 20 distinct
   count  cause         property                     first value
       6  unknown-prop  -webkit-mask-size            420px auto
-      5  unknown-prop  -webkit-font-smoothing       antialiased
       5  unknown-prop  mask-size                    16px 16px
       3  bad-value     outline                      5px auto -webkit-focus-ring-color
-      3  unknown-prop  scrollbar-width              thin
-      2  bad-value     margin-top                   1px \9
-      2  unknown-prop  -webkit-overflow-scrolling   touch
       2  bad-value     transform                    scale3d(0, 0, 1)
+      2  bad-value     margin-top                   1px \9
       2  bad-value     animation-timing-function    steps(18)
+      2  bad-value     width                        100% \9
       2  unknown-prop  -webkit-mask-repeat          no-repeat
       2  unknown-prop  mask-repeat                  no-repeat
       2  unknown-prop  -webkit-mask-position        0 0
       2  unknown-prop  mask-position                0 0
-      2  bad-value     width                        100% \9
-      2  unknown-prop  scrollbar-color              rgba(28, 147, 227, 0.35) transparent
-      1  bad-value     -webkit-mask                 center repeat
-      1  unknown-prop  -ms-text-size-adjust         100%
-      1  unknown-prop  -webkit-text-size-adjust     100%
       1  unknown-prop  background-position-y        calc(50% + 1px)
-      1  bad-value     line-height                  1.42857143 \0
-      1  bad-value     padding-bottom               calc(max(16px, env(safe-area-inset-bottom)))
-      1  unknown-prop  -webkit-tap-highlight-color  rgba(0,0,0,0)
       1  bad-value     -moz-background-clip         padding
+      1  bad-value     padding-bottom               calc(max(16px, env(safe-area-inset-bottom)))
       1  unknown-prop  // float                     left
       1  unknown-prop  // margin-right              25px
-      1  unknown-prop  -webkit-user-drag            none
-      1  bad-value     background-position          start 0.68em
-      1  unknown-prop  user-drag                    none
+      1  bad-value     line-height                  1.42857143 \0
+      1  bad-value     -webkit-mask                 center repeat
       1  bad-value     filter                       progid:DXImageTransform.Microsoft.gradient(enabled = false)
-      1  unknown-prop  view-transition-name         theme-toggle
+      1  bad-value     background-position          start 0.68em

@@ -1,22 +1,15 @@
 YouTube
-CSS drops: 5469 declaration(s) dropped, 93 distinct
+CSS drops: 5246 declaration(s) dropped, 73 distinct
   count  cause         property                     first value
    2207  unknown-prop  -moz-box-direction           normal
    1483  bad-value     display                      box
     960  unknown-prop  -moz-box-flex                1
     345  unknown-prop  font-variation-settings      "wdth" 100
-     44  unknown-prop  -webkit-font-smoothing       antialiased
-     40  unknown-prop  scrollbar-color              hsl(0,0%,67%) transparent
-     35  unknown-prop  scrollbar-width              thin
-     32  unknown-prop  will-change                  opacity,transform
-     22  unknown-prop  -webkit-tap-highlight-color  rgba(0,0,0,0)
      18  bad-value     transition-timing-function   cubic-bezier(.05,0,0,1)
      14  unknown-prop  -moz-padding-start           20px
      13  unknown-prop  -webkit-box-direction        normal
      12  bad-value     background                   linear-gradient(unset,transparent 75%)
-     11  unknown-prop  view-transition-name         learning-journey-accordion
      10  unknown-prop  -moz-margin-end              8px
-     10  unknown-prop  -ms-overflow-style           none
      10  unknown-prop  -moz-box-ordinal-group       2
       9  bad-value     -moz-box-pack                left
       7  unknown-prop  -webkit-box-flex             1
@@ -24,61 +17,49 @@ CSS drops: 5469 declaration(s) dropped, 93 distinct
       7  bad-value     animation-timing-function    cubic-bezier(.4,0,.2,1)
       7  bad-value     outline                      5px auto -webkit-focus-ring-color
       7  unknown-prop  -moz-margin-start            4px
-      6  bad-value     -moz-box-align               normal
       6  bad-value     transition-property          width,background-color
+      6  bad-value     -moz-box-align               normal
       6  bad-value     min-width                    min(324px,100% - 32px)
-      6  bad-value     grid-auto-flow               dense
       6  bad-value     align-items                  normal
-      5  unknown-prop  -webkit-overflow-scrolling   touch
-      5  unknown-prop  -moz-padding-end             4px
-      5  unknown-prop  object-position              top left
+      6  bad-value     grid-auto-flow               dense
       5  bad-value     animation-delay              0
       5  bad-value     width                        round(up,100%,1px)
+      5  unknown-prop  -moz-padding-end             4px
       5  bad-value     mask-image                   linear-gradient(90deg,transparent 51px,#000 77px,#000 calc(100% - 77px),transparent calc(100...
       5  bad-value     mask                         linear-gradient(90deg,rgba(0,0,0,0) 0,90px,rgb(0,0,0) 100px) left/50%,linear-gradient(270deg...
       4  bad-value     -webkit-animation-timing-function cubic-bezier(.4,0,.2,1)
       4  unknown-prop  mask-repeat                  no-repeat
       4  bad-value     backdrop-filter              none
-      3  unknown-prop  scroll-snap-type             y mandatory
-      3  unknown-prop  scroll-margin-top            56px
       3  bad-value     grid-template-columns        repeat(auto-fit,minmax(0,1fr))
       3  unknown-prop  view-transition-class        ytd-playlist-voting-animation-group
       3  bad-value     transform                    scale3d(.75,.75,1)
       3  bad-value     margin                       10 0 -6
-      2  bad-value     padding-left                 -20px
-      2  bad-value     padding-right                -20px
       2  bad-value     flex-basis                   calc(50% - 6px)
-      2  unknown-prop  -webkit-text-stroke          .5px #000
       2  unknown-prop  container-type               inline-size
-      2  unknown-prop  scroll-snap-align            start
-      2  unknown-prop  scrollbar-gutter             stable
-      2  unknown-prop  fill-opacity                 .5
       2  unknown-prop  overflow-clip-margin         content-box
+      2  unknown-prop  -webkit-text-stroke          .5px #000
+      2  unknown-prop  fill-opacity                 .5
       2  unknown-prop  stop-color                   #fff
       2  bad-value     padding-bottom               max(12%,42px)
       2  bad-value     background-size              100% 100%,100% auto,100% 320px
       2  unknown-prop  unicode-bidi                 -moz-plaintext
-      2  unknown-prop  scroll-snap-stop             always
-      2  unknown-prop  scroll-padding-top           0
+      2  bad-value     padding-left                 -20px
+      2  bad-value     padding-right                -20px
       1  bad-value     word-wrap                    none
       1  bad-value     word-break                   none
       1  bad-value     border-radius                none
       1  bad-value     right                        env(safe-area-inset-right)
-      1  bad-value     white-space                  wrap
-      1  unknown-prop  grid-auto-rows               auto
-      1  unknown-prop  grid-row-gap                 2px
-      1  unknown-prop  scroll-margin                20px
-      1  unknown-prop  scroll-padding-right         12px
-      1  unknown-prop  border-image                 linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.1) 5%,rgba(0,0,0,0.1) 95%,transparent 1...
       1  unknown-prop  overflow-anchor              none
+      1  bad-value     white-space                  wrap
+      1  unknown-prop  border-image                 linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.1) 5%,rgba(0,0,0,0.1) 95%,transparent 1...
+      1  unknown-prop  overscroll-behavior-y        contain
       1  bad-value     top                          env(safe-area-inset-top)
       1  unknown-prop  writing-mode                 vertical-rl
       1  bad-value     -webkit-transform            scale3d(.75,.75,1)
       1  bad-value     outline-color                transparent
-      1  unknown-prop  overscroll-behavior-y        contain
+      1  bad-value     left                         env(safe-area-inset-left)
       1  unknown-prop  stroke-linecap               square
       1  unknown-prop  stroke-dasharray             62.8318
-      1  bad-value     left                         env(safe-area-inset-left)
       1  unknown-prop  transition-behavior          allow-discrete
       1  bad-value     margin-left                  max(24px,(100% - (4 * (500px + 16px) - 16px))/2)
       1  bad-value     margin-right                 max(24px,(100% - (4 * (500px + 16px) - 16px))/2)
@@ -93,4 +74,3 @@ CSS drops: 5469 declaration(s) dropped, 93 distinct
       1  unknown-prop  overscroll-behavior-x        contain
       1  bad-value     bottom                       env(safe-area-inset-bottom)
       1  unknown-prop  transform-style              preserve-3d
-      1  unknown-prop  -webkit-text-size-adjust     none

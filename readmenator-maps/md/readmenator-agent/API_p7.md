@@ -1,6 +1,82 @@
 # API (page 7 of 12)
 Previous: [API_p6.md](API_p6.md)
 
+## src/css_computed.c
+Depends on: `include/css_computed.h`
+- `put` (function) `src/css_computed.c:9` `static size_t put(char *out, size_t cap, const char *s)`
+- `putf` (function) `src/css_computed.c:17` `static size_t putf(char *out, size_t cap, const char *fmt, ...)`
+- `put_rgb` (function) `src/css_computed.c:26` `static size_t put_rgb(char *out, size_t cap, int rgb, int alpha_pct)`
+- `put_len` (function) `src/css_computed.c:37` `static size_t put_len(char *out, size_t cap, int v, const char *unset_text)`
+- `put_enum` (function) `src/css_computed.c:42` `static size_t put_enum(char *out, size_t cap, int v, const char *const *names, size_t n,
+        ...`
+- `ua_display` (function) `src/css_computed.c:49` `static const char *ua_display(const char *tag)` -- The HTML Rendering UA sheet's `display` for a tag when the cascade declared none * (the engine keeps block-ness of...
+- `f_display` (function) `src/css_computed.c:77` `static size_t f_display(const ccm_input *in, char *out, size_t cap)`
+- `f_position` (function) `src/css_computed.c:95` `static size_t f_position(const ccm_input *in, char *out, size_t cap)`
+- `f_visibility` (function) `src/css_computed.c:100` `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)`
+- `f_float` (function) `src/css_computed.c:105` `static size_t f_float(const ccm_input *in, char *out, size_t cap)`
+- `f_clear` (function) `src/css_computed.c:110` `static size_t f_clear(const ccm_input *in, char *out, size_t cap)`
+- `f_overflow_x` (function) `src/css_computed.c:115` `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)`
+- `f_overflow_y` (function) `src/css_computed.c:120` `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)`
+- `f_text_align` (function) `src/css_computed.c:125` `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)`
+- `f_box_sizing` (function) `src/css_computed.c:130` `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)`
+- `f_flex_direction` (function) `src/css_computed.c:135` `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)`
+- `f_flex_wrap` (function) `src/css_computed.c:140` `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)`
+- `f_justify` (function) `src/css_computed.c:145` `static size_t f_justify(const ccm_input *in, char *out, size_t cap)`
+- `f_align_items` (function) `src/css_computed.c:151` `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)`
+- `f_cursor` (function) `src/css_computed.c:157` `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)`
+- `f_white_space` (function) `src/css_computed.c:163` `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)`
+- `f_text_transform` (function) `src/css_computed.c:168` `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)`
+- `f_font_style` (function) `src/css_computed.c:173` `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)`
+- `f_font_weight` (function) `src/css_computed.c:177` `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)`
+- `f_font_size` (function) `src/css_computed.c:181` `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)`
+- `f_line_height` (function) `src/css_computed.c:187` `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)`
+- `f_color` (function) `src/css_computed.c:193` `static size_t f_color(const ccm_input *in, char *out, size_t cap)`
+- `f_background_color` (function) `src/css_computed.c:198` `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)`
+- `f_opacity` (function) `src/css_computed.c:204` `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)`
+- `f_z_index` (function) `src/css_computed.c:212` `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)`
+- `f_border_style` (function) `src/css_computed.c:217` `static size_t f_border_style(int v, char *out, size_t cap)`
+- `NAME` (function) `src/css_computed.c:224` `static size_t NAME(const ccm_input *in, char *out, size_t cap)` -- define LEN_FIELD(NAME, FIELD, UNSET) \
+- `f_gap` (function) `src/css_computed.c:244` `static size_t f_gap(const ccm_input *in, char *out, size_t cap)`
+- `f_border_top_style` (function) `src/css_computed.c:256` `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)`
+- `f_border_right_style` (function) `src/css_computed.c:259` `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)`
+- `f_border_bottom_style` (function) `src/css_computed.c:262` `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)`
+- `f_border_left_style` (function) `src/css_computed.c:265` `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)`
+- `f_flex_grow` (function) `src/css_computed.c:269` `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)`
+- `f_flex_shrink` (function) `src/css_computed.c:272` `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)`
+- `ccm_get` (function) `src/css_computed.c:310` `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)`
+- `ccm_property_count` (function) `src/css_computed.c:323` `size_t ccm_property_count(void)`
+- `ccm_property_name` (function) `src/css_computed.c:325` `const char *ccm_property_name(size_t i)`
+
+## src/css_counter.c
+Depends on: `include/css_counter.h`
+- `cnt_hash` (function) `src/css_counter.c:18` `unsigned cnt_hash(const char *name, size_t len)`
+- `is_ws` (function) `src/css_counter.c:27` `static int is_ws(char c)`
+- `is_ident_start` (function) `src/css_counter.c:29` `static int is_ident_start(unsigned char c)`
+- `is_ident_char` (function) `src/css_counter.c:32` `static int is_ident_char(unsigned char c)`
+- `ci_eq` (function) `src/css_counter.c:34` `static int ci_eq(const char *a, const char *b)`
+- `valid_name` (function) `src/css_counter.c:45` `static int valid_name(const char *s, size_t n)` -- A <custom-ident> usable as a counter name: identifier syntax, not a CSS-wide * keyword or `none`, and short enough...
+- `cnt_parse_decls` (function) `src/css_counter.c:59` `int cnt_parse_decls(const char *val, int dflt, cnt_decl out[CNT_MAX_DECL])`
+- `put` (function) `src/css_counter.c:102` `static size_t put(char *out, size_t cap, size_t o, const char *s)`
+- `utf8_put` (function) `src/css_counter.c:107` `static void utf8_put(char *buf, unsigned cp)`
+- `cnt_format` (function) `src/css_counter.c:120` `size_t cnt_format(int style, long value, char *out, size_t cap)`
+- `style_of` (function) `src/css_counter.c:174` `static int style_of(const char *name)`
+- `sk_char` (function) `src/css_counter.c:192` `static void sk_char(sink *k, char c)`
+- `sk_str` (function) `src/css_counter.c:196` `static void sk_str(sink *k, const char *s)`
+- `read_string` (function) `src/css_counter.c:201` `static const char *read_string(const char *p, char *dst, size_t cap)` -- A quoted string at p (p[0] is the quote).
+- `split_args` (function) `src/css_counter.c:238` `static int split_args(const char *a, const char *b, char (*f)[CNT_STR_MAX], int max)` -- continue; } cp = (unsigned char)*p; } if (cp >= 0x20 && o + 1 < cap) dst[o++] = (char)cp; else if (cp >= 0x20)...
+- `cnt_is_marker` (function) `src/css_counter.c:272` `int cnt_is_marker(const char *s)`
+- `has_counter_fn` (function) `src/css_counter.c:276` `static int has_counter_fn(const char *v)`
+- `cnt_parse_content` (function) `src/css_counter.c:286` `int cnt_parse_content(const char *val, char *out, size_t cap)`
+- `cnt_state_new` (function) `src/css_counter.c:366` `cnt_state *cnt_state_new(void)`
+- `cnt_state_free` (function) `src/css_counter.c:367` `void cnt_state_free(cnt_state *s)`
+- `top_of` (function) `src/css_counter.c:369` `static cnt_inst *top_of(cnt_state *s, unsigned name)`
+- `clampv` (function) `src/css_counter.c:375` `static int clampv(long v)`
+- `cnt_reset` (function) `src/css_counter.c:379` `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n)`
+- `cnt_increment` (function) `src/css_counter.c:392` `void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n)`
+- `cnt_leave` (function) `src/css_counter.c:407` `void cnt_leave(cnt_state *s, int depth)`
+- `cnt_resolve` (function) `src/css_counter.c:412` `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx,
+         ...`
+
 ## src/css_gradient.c
 Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 - `cg_parse_num` (function) `src/css_gradient.c:13` `static int cg_parse_num(const char *s, double *out, const char **endp)`
@@ -345,8 +421,8 @@ Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `incl
 - `dd_border_style_name` (function) `src/dom_debug.c:228` `static const char *dd_border_style_name(int s)`
 - `dd_box_line` (function) `src/dom_debug.c:261` `static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b)`
 - `dd_block_line` (function) `src/dom_debug.c:323` `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
-- `dd_format` (function) `src/dom_debug.c:399` `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
-- `dd_format_css` (function) `src/dom_debug.c:431` `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)` -- } dd_puts(&c, "[blocks]\n"); for (size_t i = 0; i < nblocks; ++i) { const rd_block *b = rd_at(doc, i); if (b !=...
+- `dd_format` (function) `src/dom_debug.c:400` `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
+- `dd_format_css` (function) `src/dom_debug.c:432` `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)` -- } dd_puts(&c, "[blocks]\n"); for (size_t i = 0; i < nblocks; ++i) { const rd_block *b = rd_at(doc, i); if (b !=...
 
 ## src/download.c
 Depends on: `include/download.h`, `include/pdf_export.h`
@@ -393,93 +469,6 @@ Depends on: `include/fb_panes.h`
 - `fbp_is_pane` (function) `src/fb_panes.c:155` `int fbp_is_pane(int tab)`
 - `fbp_js_quote` (function) `src/fb_panes.c:157` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
 - `fbp_expr` (function) `src/fb_panes.c:186` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
-
-## src/flex_layout.c
-Depends on: `include/flex_layout.h`
-- `nn` (function) `src/flex_layout.c:19` `static double nn(double v)` -- bounded by FX_MAX_ITEMS (no VLAs).
-- `fx_flex_line` (function) `src/flex_layout.c:23` `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
-                ...`
-- `fx_grid_columns` (function) `src/flex_layout.c:128` `fx_status fx_grid_columns(double avail, size_t ncols, double gap,
-                          doubl...`
-- `fx_autofill_count` (function) `src/flex_layout.c:133` `size_t fx_autofill_count(double avail, double gap, double minw)`
-- `fx_grid_columns_weighted` (function) `src/flex_layout.c:143` `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
-                      ...`
-- `fx_grid_place_span` (function) `src/flex_layout.c:177` `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
-                      ...`
-- `fx_grid_area_hash` (function) `src/flex_layout.c:319` `unsigned fx_grid_area_hash(const char *name)`
-- `area_token_is_null_cell` (function) `src/flex_layout.c:343` `static int area_token_is_null_cell(const char *tok, size_t len)` -- 0 is reserved for "no name" (the null cell token), so a name that hashes to * it is nudged; the alternative is a...
-- `fx_grid_areas_parse` (function) `src/flex_layout.c:349` `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)`
-- `fx_grid_area_rect` (function) `src/flex_layout.c:424` `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
-                            int ...`
-- `float_pack_impl` (function) `src/flex_layout.c:466` `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
-                ...` -- Shared packer: wrap == 0 is the single-row v1 contract (overflow clamps in place); wrap != 0 starts a new row...
-- `fx_float_insets` (function) `src/flex_layout.c:506` `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
-                 ...`
-- `fx_float_pack` (function) `src/flex_layout.c:546` `fx_status fx_float_pack(const double *width, const int *side, size_t n,
-                        d...`
-- `fx_float_pack_wrap` (function) `src/flex_layout.c:551` `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
-                    ...`
-- `fx_grid_cell` (function) `src/flex_layout.c:593` `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
-- `fx_auto_margins` (function) `src/flex_layout.c:605` `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
-                ...` -- } void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) { if (row == NULL || col == NULL) return...
-- `fx_auto_min_size` (function) `src/flex_layout.c:628` `double fx_auto_min_size(double min_content, double basis, double author_min,
-                    ...`
-- `fx_multicol_used` (function) `src/flex_layout.c:645` `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
-               ...`
-- `fx_multicol_balance` (function) `src/flex_layout.c:682` `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
-                        ...`
-- `fx_justify_name` (function) `src/flex_layout.c:713` `const char *fx_justify_name(fx_justify j)`
-- `fx_column_place` (function) `src/flex_layout.c:725` `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
-            ...`
-- `fx_column_place_m` (function) `src/flex_layout.c:732` `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
-              ...`
-- `fx_cross_offset` (function) `src/flex_layout.c:793` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
-- `gl_ws` (function) `src/flex_layout.c:805` `static int gl_ws(char c)` -- } double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r) { double room = avail - w; if...
-- `gl_lower` (function) `src/flex_layout.c:809` `static int gl_lower(char c)`
-- `gl_kw` (function) `src/flex_layout.c:812` `static int gl_kw(const char *p, const char *end, const char *kw)` -- if (mauto_r) return 0.0; if (align == 1) return room / 2.0; if (align == 2) return room; return 0.0; } /* ASCII...
-- `gl_int` (function) `src/flex_layout.c:822` `static int gl_int(const char *p, const char *end, long cap, long *out)` -- A CSS <integer> (optional sign, digits only) filling exactly [p, end).
-- `gl_side_range` (function) `src/flex_layout.c:837` `static int gl_side_range(const char *p, const char *end, int *out)` -- int neg = 0; if (p < end && (*p == '+' || *p == '-')) { neg = (*p == '-'); ++p; } if (p >= end) return 0; long v =...
-- `fx_grid_line_side` (function) `src/flex_layout.c:860` `int fx_grid_line_side(const char *s, int *out)`
-- `fx_grid_line_parse` (function) `src/flex_layout.c:868` `int fx_grid_line_parse(const char *v, int *start, int *end)`
-- `gl_is_span` (function) `src/flex_layout.c:885` `static int gl_is_span(int v)`
-- `gl_is_line` (function) `src/flex_layout.c:886` `static int gl_is_line(int v)`
-- `fx_grid_line_resolve` (function) `src/flex_layout.c:888` `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
-- `fx_col_free_split` (function) `src/flex_layout.c:930` `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
-        ...`
-
-## src/form.c
-Depends on: `include/form.h`
-- `put_char` (function) `src/form.c:17` `static int put_char(char *out, size_t outsz, size_t *pos, char c)` -- No I/O, no global state.
-- `enc_component` (function) `src/form.c:25` `static int enc_component(const char *s, char *out, size_t outsz, size_t *pos)` -- Encodes one component per the WHATWG application/x-www-form-urlencoded byte * serialiser.
-- `fm_encode` (function) `src/form.c:43` `fm_status fm_encode(const fm_field *fields, size_t n,
-                    char *out, size_t outsz...`
-- `copy_fit` (function) `src/form.c:66` `static int copy_fit(char *dst, size_t dstsz, const char *src)` -- if (fields[i].name == NULL) continue; /* a nameless control is not submitted if (!first && put_char(out, outsz...
-- `clean_action` (function) `src/form.c:75` `static int clean_action(const char *action, char *out, size_t outsz)` -- Removes TAB/LF/CR and trims leading/trailing ASCII spaces (WHATWG cleaning of a * URL-bearing attribute).
-- `strip_query` (function) `src/form.c:93` `static void strip_query(char *url)` -- if (c == '\t' || c == '\n' || c == '\r') continue; if (o + 1 >= outsz) return -1; out[o++] = c; } out[o] = '\0'...
-- `resolve_target` (function) `src/form.c:101` `static fm_block_reason resolve_target(const char *base, const char *act,
-                        ...` -- Resolves the cleaned action into a validated absolute https URL R, or returns a * block reason.
-- `fm_build` (function) `src/form.c:120` `fm_status fm_build(const char *base, const char *action, fm_method method,
-                   con...`
-
-## src/frame_broker.c
-Depends on: `include/frame_broker.h`
-- `lc` (function) `src/frame_broker.c:9` `static char lc(char c)`
-- `host_char_ok` (function) `src/frame_broker.c:11` `static int host_char_ok(char c)`
-- `fbk_origin_of` (function) `src/frame_broker.c:15` `int fbk_origin_of(const char *url, char *out, size_t cap)`
-- `fbk_init` (function) `src/frame_broker.c:53` `int fbk_init(fbk_table *t, const char *top_url)`
-- `live` (function) `src/frame_broker.c:62` `static int live(const fbk_table *t, int id)`
-- `fbk_add` (function) `src/frame_broker.c:66` `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id)`
-- `fbk_remove` (function) `src/frame_broker.c:84` `void fbk_remove(fbk_table *t, int id)`
-- `fbk_origin` (function) `src/frame_broker.c:96` `const char *fbk_origin(const fbk_table *t, int id)`
-- `target_admits` (function) `src/frame_broker.c:101` `static int target_admits(const char *target, const char *snd, const char *recv)` -- int changed = 1;                                  /* fixpoint: slots are reused, order is not a tree order while...
-- `fbk_route` (function) `src/frame_broker.c:118` `fbk_verdict fbk_route(const fbk_table *t, int from, fbk_rel rel, int child,
-                     ...`
-
-## src/frame_clock.c
-Depends on: `include/frame_clock.h`
-- `fc_set_active` (function) `src/frame_clock.c:16` `void fc_set_active(fc_clock *c, int active)`
-- `fc_needs_tick` (function) `src/frame_clock.c:21` `int fc_needs_tick(const fc_clock *c)`
-- `fc_interval_ms` (function) `src/frame_clock.c:26` `int fc_interval_ms(const fc_clock *c)`
 
 
 Next: [API_p8.md](API_p8.md)

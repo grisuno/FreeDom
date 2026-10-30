@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include "css_color.h"
+#include "css_counter.h"
 
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."
@@ -386,6 +387,13 @@ typedef enum css_object_fit {
     CSS_OFI_UNSET = 0, CSS_OFI_FILL, CSS_OFI_CONTAIN, CSS_OFI_COVER,
     CSS_OFI_NONE, CSS_OFI_SCALE_DOWN
 } css_object_fit;
+
+/* object-position packed in one int so it crosses the IPC codec as ONE field:
+ * ((x_pm + 1) << 16) | (y_pm + 1), each axis in per-mille of the free space
+ * (0 = start edge, 500 = centre, 1000 = end edge). 0 = not declared = centred. */
+#define CSS_OBJPOS_PACK(x_pm, y_pm) ((((x_pm) + 1) << 16) | ((y_pm) + 1))
+#define CSS_OBJPOS_X(p) ((((p) >> 16) & 0xFFFF) - 1)
+#define CSS_OBJPOS_Y(p) (((p) & 0xFFFF) - 1)
 /* list-style-position. 0 unset. */
 typedef enum css_list_pos {
     CSS_LP_UNSET = 0, CSS_LP_OUTSIDE, CSS_LP_INSIDE
@@ -638,6 +646,7 @@ typedef struct css_style {
     int         text_decoration; /* OR of CSS_DECO_*; 0 = none; -1 = unset */
     int         text_decoration_color; /* 0xRRGGBB or -1 (unset) */
     int         text_decoration_style; /* css_text_decoration_style, 0 (unset) */
+    int         text_underline_offset;     /* px, CSS_LEN_AUTO = auto, CSS_LEN_UNSET = not declared */
     int         text_decoration_thickness; /* px for underline/strike/overline line width,
                                               or -1 unset, or 0 for from-font */
     int         bold;        /* 1, 0, or -1 (unset) */
@@ -840,6 +849,11 @@ typedef struct css_style {
     int         forced_color_adjust;  /* css_forced_color_adjust, 0 (unset) */
     int         mix_blend_mode;   /* css_mix_blend, 0 (unset) */
     int         object_fit;       /* css_object_fit, 0 (unset) */
+    int         object_pos;       /* CSS_OBJPOS_PACK, 0 (unset) = centred */
+    /* counter-reset / counter-increment (spec/css_counter.md). Not inherited; the
+     * values are applied by page_view in document order, never by the cascade. */
+    cnt_decl    cnt_reset[CNT_MAX_DECL], cnt_inc[CNT_MAX_DECL];
+    int         cnt_reset_n, cnt_inc_n;
     int         list_style_pos;   /* css_list_pos, 0 (unset) */
     int         font_kerning;     /* css_font_kerning, 0 (unset) */
     int         text_rendering;   /* css_text_rendering, 0 (unset) */
@@ -1012,6 +1026,10 @@ typedef struct css_media {
  * CSS_OK, *out must be freed with css_free. Equivalent to css_parse_media with a
  * default screen / light / 1920px context. */
 css_status css_parse(const char *text, size_t len, css_sheet **out);
+
+/* 1 when any rule of the sheet declares counter-reset / counter-increment. page_view
+ * runs its document-order counter pass only then (it costs a second tree walk). */
+int css_sheet_uses_counters(const css_sheet *sheet);
 
 /* As css_parse, but @media blocks are gated against *media (prefers-color-scheme,
  * screen/print/all, min/max-width). media == NULL uses the default screen/light/

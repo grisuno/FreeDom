@@ -9,8 +9,8 @@ Previous: [KB_src_p8.md](KB_src_p8.md)
   - `tab_iobuf` (struct, line 57)
   - `child_state` (struct, line 223)
   - `net_reply` (struct, line 391)
-  - `tab` (struct, line 2518)
-  - `tab_spawned` (struct, line 3219)
+  - `tab` (struct, line 2520)
+  - `tab_spawned` (struct, line 3227)
   - `fd` (type_alias, line 57) `typedef struct tab_iobuf { int fd;`
   - `status` (type_alias, line 391) `typedef struct net_reply { int32_t status;`
   - `tab_wflush` (function, line 66) `static int tab_wflush(void)`
@@ -41,155 +41,155 @@ static void child_net_drain(child_state *cs)`
   - `write_field` (function, line 652) `static int write_field(int fd, const char *s)`
   - `write_view` (function, line 694) `static int write_view(int wfd, const pv_view *v)`
   - `write_view_raw` (function, line 705) `static int write_view_raw(int wfd, const pv_view *v)`
-  - `FB_MAX_FILE_BYTES` (function, line 1130) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
+  - `FB_MAX_FILE_BYTES` (function, line 1132) `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify
  * the stream. ...`
-  - `budget_remaining_ms` (function, line 1160) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)`
-  - `ctype_is_javascript` (function, line 1174) `static int ctype_is_javascript(const char *ctype)`
-  - `ctype_is_css` (function, line 1183) `static int ctype_is_css(const char *ctype)`
-  - `log_external_skip` (function, line 1191) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
+  - `budget_remaining_ms` (function, line 1162) `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)`
+  - `ctype_is_javascript` (function, line 1176) `static int ctype_is_javascript(const char *ctype)`
+  - `ctype_is_css` (function, line 1185) `static int ctype_is_css(const char *ctype)`
+  - `log_external_skip` (function, line 1193) `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,
                 ...`
-  - `run` (function, line 1209) `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
+  - `run` (function, line 1211) `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).
  * Call after every ...`
-  - `tab_url_resolve` (function, line 1258) `static int tab_url_resolve(void *ctx, const char *base, const char *ref,
+  - `tab_url_resolve` (function, line 1260) `static int tab_url_resolve(void *ctx, const char *base, const char *ref,
                         ...`
-  - `tab_mod_resolve` (function, line 1267) `static int tab_mod_resolve(void *host, const char *base, const char *spec,
+  - `tab_mod_resolve` (function, line 1269) `static int tab_mod_resolve(void *host, const char *base, const char *spec,
                       ...`
-  - `tab_mod_fetch` (function, line 1297) `static char *tab_mod_fetch(void *host, const char *url, size_t *len)`
-  - `write_history` (function, line 1319) `static int write_history(int wfd, child_state *cs)`
-  - `window` (function, line 1338) `* net window (cs->net_active). */
+  - `tab_mod_fetch` (function, line 1299) `static char *tab_mod_fetch(void *host, const char *url, size_t *len)`
+  - `write_history` (function, line 1321) `static int write_history(int wfd, child_state *cs)`
+  - `window` (function, line 1340) `* net window (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs)`
-  - `child_prescript_view` (function, line 1391) `static pv_view *child_prescript_view(child_state *cs, const char *html, size_t len,
+  - `child_prescript_view` (function, line 1393) `static pv_view *child_prescript_view(child_state *cs, const char *html, size_t len,
              ...`
-  - `child_handle_load` (function, line 1421) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
+  - `child_handle_load` (function, line 1423) `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,
            ...`
-  - `swap` (function, line 1816) `* display:none hiding an element via class swap (CSS, not
+  - `swap` (function, line 1818) `* display:none hiding an element via class swap (CSS, not
      * DOM removal). */
     if (ok && v...`
-  - `write_ws` (function, line 1861) `static int write_ws(int wfd, child_state *cs)`
-  - `write_storage` (function, line 1878) `static int write_storage(int wfd, child_state *cs)`
-  - `write_opens` (function, line 1892) `static int write_opens(int wfd, child_state *cs)`
-  - `child_next_timer_ms` (function, line 1904) `static int32_t child_next_timer_ms(child_state *cs)`
-  - `child_handle_mutation` (function, line 1919) `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
+  - `write_ws` (function, line 1863) `static int write_ws(int wfd, child_state *cs)`
+  - `write_storage` (function, line 1880) `static int write_storage(int wfd, child_state *cs)`
+  - `write_opens` (function, line 1894) `static int write_opens(int wfd, child_state *cs)`
+  - `child_next_timer_ms` (function, line 1906) `static int32_t child_next_timer_ms(child_state *cs)`
+  - `child_handle_mutation` (function, line 1921) `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                         ...`
-  - `child_handle_click` (function, line 2000) `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
-  - `child_handle_tick` (function, line 2004) `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
-  - `child_handle_event` (function, line 2014) `static void child_handle_event(int wfd, child_state *cs)`
-  - `child_handle_mouse` (function, line 2062) `static void child_handle_mouse(int wfd, child_state *cs)`
-  - `geom_parent` (function, line 2092) `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
-  - `child_handle_geom` (function, line 2100) `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)`
-  - `child_handle_submit` (function, line 2126) `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)`
-  - `child_handle_eval` (function, line 2160) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)`
-  - `child_handle_decode_image` (function, line 2201) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)`
-  - `child_handle_decode_image_b64` (function, line 2223) `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)`
-  - `gen_session_key` (function, line 2235) `static uint64_t gen_session_key(void)`
-  - `tab_worker_run` (function, line 2255) `static void tab_worker_run(int rfd, int wfd)`
-  - `parse_worker_fd` (function, line 2486) `static int parse_worker_fd(const char *s, int *out)`
-  - `tab_parse_worker_args` (function, line 2498) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
-  - `tab_worker_dispatch` (function, line 2508) `void tab_worker_dispatch(int argc, char **argv)`
-  - `ignore_sigpipe` (function, line 2565) `static void ignore_sigpipe(void)`
-  - `tab_refresh_alive` (function, line 2572) `static void tab_refresh_alive(tab *t)`
-  - `read_field` (function, line 2591) `static int read_field(int fd, char **out, size_t *out_len)`
-  - `read_view` (function, line 2608) `static int read_view(int fd, pv_view **out)`
-  - `read_view_raw` (function, line 2616) `static int read_view_raw(int fd, pv_view **out)`
-  - `read_console` (function, line 3144) `static int read_console(int fd, fb_buffer *out)`
-  - `send_request` (function, line 3181) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)`
-  - `io_failure` (function, line 3191) `static tab_status io_failure(tab *t)`
-  - `exec_worker_child` (function, line 3199) `static void exec_worker_child(int rfd, int wfd)`
-  - `spawn_worker` (function, line 3231) `static tab_status spawn_worker(tab_spawned *sp)`
-  - `reap_spawned` (function, line 3261) `static void reap_spawned(const tab_spawned *sp, int kill_it)`
-  - `adopt_worker` (function, line 3270) `static tab_status adopt_worker(const tab_spawned *sp, tab **out)`
-  - `tab_prewarm` (function, line 3292) `void tab_prewarm(void)`
-  - `tab_prewarmed` (function, line 3298) `int tab_prewarmed(void)`
-  - `tab_prewarmed_pid` (function, line 3305) `int tab_prewarmed_pid(void)`
-  - `tab_shutdown_spare` (function, line 3312) `void tab_shutdown_spare(void)`
-  - `tab_open` (function, line 3321) `tab_status tab_open(tab **out)`
-  - `tab_set_fetcher` (function, line 3344) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
-  - `tab_set_css_sink` (function, line 3350) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
-  - `tab_set_op_net_budget_ms` (function, line 3356) `void tab_set_op_net_budget_ms(tab *t, int ms)`
-  - `tab_set_net_allowed` (function, line 3360) `void tab_set_net_allowed(tab *t, int allowed)`
-  - `tab_set_css_allowed` (function, line 3365) `void tab_set_css_allowed(tab *t, int allowed)`
-  - `tab_last_subreq_stats` (function, line 3370) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
-  - `tab_set_identity` (function, line 3375) `void tab_set_identity(tab *t, const char *serialized)`
-  - `tab_set_frame_id` (function, line 3383) `void tab_set_frame_id(tab *t, int id)`
-  - `tab_set_viewport_w` (function, line 3388) `void tab_set_viewport_w(tab *t, int px)`
-  - `tab_set_cookies` (function, line 3393) `void tab_set_cookies(tab *t, const char *cookies)`
-  - `tab_subreq_permitted` (function, line 3399) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
-  - `tab_report_response_headers` (function, line 3413) `void tab_report_response_headers(const char *lines)`
-  - `tab_inflight_request_headers` (function, line 3425) `const char *tab_inflight_request_headers(void)`
-  - `tab_write_reply` (function, line 3431) `static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t rlen,
+  - `child_handle_click` (function, line 2002) `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)`
+  - `child_handle_tick` (function, line 2006) `static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms)`
+  - `child_handle_event` (function, line 2016) `static void child_handle_event(int wfd, child_state *cs)`
+  - `child_handle_mouse` (function, line 2064) `static void child_handle_mouse(int wfd, child_state *cs)`
+  - `geom_parent` (function, line 2094) `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
+  - `child_handle_geom` (function, line 2102) `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)`
+  - `child_handle_submit` (function, line 2128) `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)`
+  - `child_handle_eval` (function, line 2162) `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)`
+  - `child_handle_decode_image` (function, line 2203) `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)`
+  - `child_handle_decode_image_b64` (function, line 2225) `static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len)`
+  - `gen_session_key` (function, line 2237) `static uint64_t gen_session_key(void)`
+  - `tab_worker_run` (function, line 2257) `static void tab_worker_run(int rfd, int wfd)`
+  - `parse_worker_fd` (function, line 2488) `static int parse_worker_fd(const char *s, int *out)`
+  - `tab_parse_worker_args` (function, line 2500) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)`
+  - `tab_worker_dispatch` (function, line 2510) `void tab_worker_dispatch(int argc, char **argv)`
+  - `ignore_sigpipe` (function, line 2567) `static void ignore_sigpipe(void)`
+  - `tab_refresh_alive` (function, line 2574) `static void tab_refresh_alive(tab *t)`
+  - `read_field` (function, line 2593) `static int read_field(int fd, char **out, size_t *out_len)`
+  - `read_view` (function, line 2610) `static int read_view(int fd, pv_view **out)`
+  - `read_view_raw` (function, line 2618) `static int read_view_raw(int fd, pv_view **out)`
+  - `read_console` (function, line 3152) `static int read_console(int fd, fb_buffer *out)`
+  - `send_request` (function, line 3189) `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)`
+  - `io_failure` (function, line 3199) `static tab_status io_failure(tab *t)`
+  - `exec_worker_child` (function, line 3207) `static void exec_worker_child(int rfd, int wfd)`
+  - `spawn_worker` (function, line 3239) `static tab_status spawn_worker(tab_spawned *sp)`
+  - `reap_spawned` (function, line 3269) `static void reap_spawned(const tab_spawned *sp, int kill_it)`
+  - `adopt_worker` (function, line 3278) `static tab_status adopt_worker(const tab_spawned *sp, tab **out)`
+  - `tab_prewarm` (function, line 3300) `void tab_prewarm(void)`
+  - `tab_prewarmed` (function, line 3306) `int tab_prewarmed(void)`
+  - `tab_prewarmed_pid` (function, line 3313) `int tab_prewarmed_pid(void)`
+  - `tab_shutdown_spare` (function, line 3320) `void tab_shutdown_spare(void)`
+  - `tab_open` (function, line 3329) `tab_status tab_open(tab **out)`
+  - `tab_set_fetcher` (function, line 3352) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)`
+  - `tab_set_css_sink` (function, line 3358) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)`
+  - `tab_set_op_net_budget_ms` (function, line 3364) `void tab_set_op_net_budget_ms(tab *t, int ms)`
+  - `tab_set_net_allowed` (function, line 3368) `void tab_set_net_allowed(tab *t, int allowed)`
+  - `tab_set_css_allowed` (function, line 3373) `void tab_set_css_allowed(tab *t, int allowed)`
+  - `tab_last_subreq_stats` (function, line 3378) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)`
+  - `tab_set_identity` (function, line 3383) `void tab_set_identity(tab *t, const char *serialized)`
+  - `tab_set_frame_id` (function, line 3391) `void tab_set_frame_id(tab *t, int id)`
+  - `tab_set_viewport_w` (function, line 3396) `void tab_set_viewport_w(tab *t, int px)`
+  - `tab_set_cookies` (function, line 3401) `void tab_set_cookies(tab *t, const char *cookies)`
+  - `tab_subreq_permitted` (function, line 3407) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)`
+  - `tab_report_response_headers` (function, line 3421) `void tab_report_response_headers(const char *lines)`
+  - `tab_inflight_request_headers` (function, line 3433) `const char *tab_inflight_request_headers(void)`
+  - `tab_write_reply` (function, line 3439) `static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t rlen,
           ...`
-  - `tab_read_subreq_fields` (function, line 3476) `static int tab_read_subreq_fields(tab *t, char **method, char **url, char **body, size_t *blen,
+  - `tab_read_subreq_fields` (function, line 3484) `static int tab_read_subreq_fields(tab *t, char **method, char **url, char **body, size_t *blen,
  ...`
-  - `tab_op_budget_us` (function, line 3487) `static int64_t tab_op_budget_us(const tab *t)`
-  - `tab_note_css_served` (function, line 3491) `static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,
+  - `tab_op_budget_us` (function, line 3495) `static int64_t tab_op_budget_us(const tab *t)`
+  - `tab_note_css_served` (function, line 3499) `static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,
  ...`
-  - `tab_serve_subreq` (function, line 3507) `static int tab_serve_subreq(tab *t, int net_granted, int css_granted)`
-  - `tab_batch_run` (function, line 3534) `static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out)`
-  - `tab_submit_async` (function, line 3549) `static int tab_submit_async(tab *t, int net_granted, int css_granted)`
-  - `tab_serve_netwait` (function, line 3571) `static int tab_serve_netwait(tab *t)`
-  - `tab_serve_tag` (function, line 3593) `static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted)`
-  - `tab_batch_discard` (function, line 3601) `static void tab_batch_discard(tab *t)`
-  - `hist_ops_free` (function, line 3606) `static void hist_ops_free(tab_hist_op *ops, size_t n)`
-  - `is_activation_event` (function, line 3671) `static int is_activation_event(const char *type)`
-  - `open_urls_free` (function, line 3680) `static void open_urls_free(char **u, size_t n)`
-  - `read_opens` (function, line 3690) `static tab_status read_opens(tab *t, const char *page_url, int gesture,
+  - `tab_serve_subreq` (function, line 3515) `static int tab_serve_subreq(tab *t, int net_granted, int css_granted)`
+  - `tab_batch_run` (function, line 3542) `static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out)`
+  - `tab_submit_async` (function, line 3557) `static int tab_submit_async(tab *t, int net_granted, int css_granted)`
+  - `tab_serve_netwait` (function, line 3579) `static int tab_serve_netwait(tab *t)`
+  - `tab_serve_tag` (function, line 3601) `static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted)`
+  - `tab_batch_discard` (function, line 3609) `static void tab_batch_discard(tab *t)`
+  - `hist_ops_free` (function, line 3614) `static void hist_ops_free(tab_hist_op *ops, size_t n)`
+  - `is_activation_event` (function, line 3679) `static int is_activation_event(const char *type)`
+  - `open_urls_free` (function, line 3688) `static void open_urls_free(char **u, size_t n)`
+  - `read_opens` (function, line 3698) `static tab_status read_opens(tab *t, const char *page_url, int gesture,
                          ...`
-  - `ws_ops_free` (function, line 3719) `static void ws_ops_free(tab_ws_op *ops, size_t n)`
-  - `read_ws` (function, line 3728) `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)`
-  - `gate_js_nav` (function, line 3797) `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)`
-  - `tab_load` (function, line 3807) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
-  - `tab_load_ex` (function, line 3811) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
-  - `tab_load_full` (function, line 3815) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
+  - `ws_ops_free` (function, line 3727) `static void ws_ops_free(tab_ws_op *ops, size_t n)`
+  - `read_ws` (function, line 3736) `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)`
+  - `gate_js_nav` (function, line 3805) `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)`
+  - `tab_load` (function, line 3815) `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)`
+  - `tab_load_ex` (function, line 3819) `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)`
+  - `tab_load_full` (function, line 3823) `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,
             ...`
-  - `tab_click` (function, line 4016) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
-  - `tab_tick` (function, line 4024) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
-  - `tab_submit` (function, line 4034) `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
-  - `tab_read_view` (function, line 4142) `tab_status tab_read_view(tab *t, tab_page *out)`
-  - `tab_await_result` (function, line 4151) `static tab_status tab_await_result(tab *t)`
-  - `tab_await_result_inner` (function, line 4159) `static tab_status tab_await_result_inner(tab *t)`
-  - `tab_read_view_ex` (function, line 4168) `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
-  - `tab_eval` (function, line 4263) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
-  - `tab_decode_image_op` (function, line 4304) `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
+  - `tab_click` (function, line 4024) `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)`
+  - `tab_tick` (function, line 4032) `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)`
+  - `tab_submit` (function, line 4042) `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)`
+  - `tab_read_view` (function, line 4150) `tab_status tab_read_view(tab *t, tab_page *out)`
+  - `tab_await_result` (function, line 4159) `static tab_status tab_await_result(tab *t)`
+  - `tab_await_result_inner` (function, line 4167) `static tab_status tab_await_result_inner(tab *t)`
+  - `tab_read_view_ex` (function, line 4176) `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)`
+  - `tab_eval` (function, line 4271) `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)`
+  - `tab_decode_image_op` (function, line 4312) `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,
         ...`
-  - `tab_decode_image` (function, line 4346) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
-  - `tab_decode_image_data_url` (function, line 4353) `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
-  - `tab_alive` (function, line 4372) `int tab_alive(const tab *t)`
-  - `tab_child_pid` (function, line 4378) `pid_t tab_child_pid(const tab *t)`
-  - `tab_close` (function, line 4382) `void tab_close(tab *t)`
-  - `tab_page_free` (function, line 4400) `void tab_page_free(tab_page *p)`
-  - `tab_eval_result_free` (function, line 4430) `void tab_eval_result_free(tab_eval_result *r)`
-  - `tab_image_free` (function, line 4439) `void tab_image_free(tab_image *img)`
-  - `tab_geometry_send` (function, line 4451) `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)`
-  - `geometry_encode` (function, line 4469) `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)`
-  - `tab_set_geometry` (function, line 4479) `tab_status tab_set_geometry(tab *t, const jg_table *g)`
-  - `job_discard` (function, line 4493) `static void job_discard(tab *t)`
-  - `tab_async_sync` (function, line 4505) `static void tab_async_sync(tab *t)`
-  - `job_main` (function, line 4515) `static void *job_main(void *arg)`
-  - `tab_async_fd` (function, line 4531) `int tab_async_fd(tab *t)`
-  - `tab_async_busy` (function, line 4540) `int tab_async_busy(const tab *t)`
-  - `job_start` (function, line 4544) `static tab_status job_start(tab *t)`
-  - `tab_tick_async` (function, line 4557) `tab_status tab_tick_async(tab *t, int elapsed_ms)`
-  - `tab_geometry_async` (function, line 4567) `tab_status tab_geometry_async(tab *t, const jg_table *g)`
-  - `tab_async_finish` (function, line 4582) `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)`
-  - `tab_popstate` (function, line 4604) `tab_status tab_popstate(tab *t, int index, tab_page *out)`
-  - `tab_ws_event` (function, line 4611) `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
+  - `tab_decode_image` (function, line 4354) `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)`
+  - `tab_decode_image_data_url` (function, line 4361) `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)`
+  - `tab_alive` (function, line 4380) `int tab_alive(const tab *t)`
+  - `tab_child_pid` (function, line 4386) `pid_t tab_child_pid(const tab *t)`
+  - `tab_close` (function, line 4390) `void tab_close(tab *t)`
+  - `tab_page_free` (function, line 4408) `void tab_page_free(tab_page *p)`
+  - `tab_eval_result_free` (function, line 4438) `void tab_eval_result_free(tab_eval_result *r)`
+  - `tab_image_free` (function, line 4447) `void tab_image_free(tab_image *img)`
+  - `tab_geometry_send` (function, line 4459) `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)`
+  - `geometry_encode` (function, line 4477) `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)`
+  - `tab_set_geometry` (function, line 4487) `tab_status tab_set_geometry(tab *t, const jg_table *g)`
+  - `job_discard` (function, line 4501) `static void job_discard(tab *t)`
+  - `tab_async_sync` (function, line 4513) `static void tab_async_sync(tab *t)`
+  - `job_main` (function, line 4523) `static void *job_main(void *arg)`
+  - `tab_async_fd` (function, line 4539) `int tab_async_fd(tab *t)`
+  - `tab_async_busy` (function, line 4548) `int tab_async_busy(const tab *t)`
+  - `job_start` (function, line 4552) `static tab_status job_start(tab *t)`
+  - `tab_tick_async` (function, line 4565) `tab_status tab_tick_async(tab *t, int elapsed_ms)`
+  - `tab_geometry_async` (function, line 4575) `tab_status tab_geometry_async(tab *t, const jg_table *g)`
+  - `tab_async_finish` (function, line 4590) `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)`
+  - `tab_popstate` (function, line 4612) `tab_status tab_popstate(tab *t, int index, tab_page *out)`
+  - `tab_ws_event` (function, line 4619) `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,
        ...`
-  - `tab_set_storage` (function, line 4631) `void tab_set_storage(tab *t, const char *blob, size_t len)`
+  - `tab_set_storage` (function, line 4639) `void tab_set_storage(tab *t, const char *blob, size_t len)`
   - `buffer` (function, line 621) `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of...`
   - `blocks` (function, line 686) `* * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the * grid array, block B[26])...`
-  - `libraries` (function, line 1526) `* load heavier libraries (jQuery, Bootstrap, etc.) that need more time. * Untrusted hosts get the default budget...`
-  - `WHERE` (function, line 1691) `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
-  - `content` (function, line 1756) `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...`
-  - `once` (function, line 1807) `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
-  - `write_full` (function, line 1837) `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd...`
-  - `EPIPE` (function, line 2257) `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
-  - `tzset` (function, line 2273) `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
-  - `depth` (function, line 2287) `* defense in depth (seccomp already excludes open/socket/exec);`
-  - `load` (function, line 2525) `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
-  - `tests` (function, line 2691) `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
-  - `layout` (function, line 2798) `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
-  - `column` (function, line 2809) `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
-  - `frames` (function, line 4148) `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...`
+  - `libraries` (function, line 1528) `* load heavier libraries (jQuery, Bootstrap, etc.) that need more time. * Untrusted hosts get the default budget...`
+  - `WHERE` (function, line 1693) `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...`
+  - `content` (function, line 1758) `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...`
+  - `once` (function, line 1809) `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);`
+  - `write_full` (function, line 1839) `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd...`
+  - `EPIPE` (function, line 2259) `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();`
+  - `tzset` (function, line 2275) `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);`
+  - `depth` (function, line 2289) `* defense in depth (seccomp already excludes open/socket/exec);`
+  - `load` (function, line 2527) `* subresource requests this load (set per page: host in allow.conf AND js.conf);`
+  - `tests` (function, line 2693) `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...`
+  - `layout` (function, line 2806) `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....`
+  - `column` (function, line 2817) `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...`
+  - `frames` (function, line 4156) `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...`
   - `_GNU_SOURCE` (macro, line 14) `#define _GNU_SOURCE`
   - `TAB_IOBUF_BYTES` (macro, line 56) `#define TAB_IOBUF_BYTES`
   - `write_full` (macro, line 110) `#define write_full(fd, buf, n)`
@@ -218,7 +218,7 @@ static void child_fetch_stylesheets(child_state *cs)`
   - `TAB_MAX_SUBREQ` (macro, line 210) `#define TAB_MAX_SUBREQ`
   - `TAB_MAX_SUBRESOURCE` (macro, line 211) `#define TAB_MAX_SUBRESOURCE`
   - `TAB_MAX_JS_JOBS` (macro, line 212) `#define TAB_MAX_JS_JOBS`
-  - `TAB_MAX_EXTERN_CSS` (macro, line 1203) `#define TAB_MAX_EXTERN_CSS`
+  - `TAB_MAX_EXTERN_CSS` (macro, line 1205) `#define TAB_MAX_EXTERN_CSS`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/data_url.h`, `include/dom.h`, `include/flex_layout.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/identity.h`, `include/image_decode.h`, `include/import_map.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/js_trusted.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/subreq_batch.h`, `include/tab.h`, `include/url.h`, `include/util.h`, `include/web_storage.h`
 
 ## src/text_case.c

@@ -1,5 +1,5 @@
 Animate.css | A cross-browser library of CSS animations.
-CSS drops: 58 declaration(s) dropped, 14 distinct
+CSS drops: 55 declaration(s) dropped, 12 distinct
   count  cause         property                     first value
      10  bad-value     -webkit-animation-duration   calc(1s/2)
      10  bad-value     animation-duration           calc(1s/2)
@@ -11,7 +11,5 @@ CSS drops: 58 declaration(s) dropped, 14 distinct
       3  bad-value     animation-timing-function    cubic-bezier(.215,.61,.355,1)
       2  bad-value     -webkit-animation-iteration-count calc(1*2)
       2  bad-value     animation-iteration-count    calc(1*2)
-      2  unknown-prop  grid-column-gap              0
-      1  bad-value     -webkit-transition-timing-function cubic-bezier(.215,.61,.355,1)
       1  bad-value     transition-timing-function   cubic-bezier(.215,.61,.355,1)
-      1  unknown-prop  grid-row-gap                 18.08px
+      1  bad-value     -webkit-transition-timing-function cubic-bezier(.215,.61,.355,1)

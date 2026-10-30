@@ -1,14 +1,14 @@
 # `include/flex_layout.h`
 
-> Source: [include/flex_layout.h:1](../../include/flex_layout.h#L1) | language `h` | coverage 53.5% | [API index](../index.md)
+> Source: [include/flex_layout.h:1](../../include/flex_layout.h#L1) | language `h` | coverage 55.6% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`fx_item`](#fx_item), [`fx_result`](#fx_result), [`fx_area_map`](#fx_area_map), [`fx_float_rect`](#fx_float_rect)
 - **Enums:** [`fx_justify`](#fx_justify), [`fx_status`](#fx_status)
 - **Type Aliases:** [`basis`](#basis), [`cols`](#cols), [`bottom`](#bottom)
-- **Functions:** [`size`](#size), [`out`](#out), [`fx_grid_cell`](#fx_grid_cell), [`number`](#number), [`fx_grid_line_parse`](#fx_grid_line_parse), [`fx_grid_line_resolve`](#fx_grid_line_resolve), [`fx_autofill_count`](#fx_autofill_count), [`fx_grid_area_hash`](#fx_grid_area_hash), [`offset`](#offset), [`required`](#required), [`widths`](#widths), [`FX_ERR_NULL_ARG`](#fx_err_null_arg), [`space`](#space), [`fx_auto_min_size`](#fx_auto_min_size), [`fx_justify_name`](#fx_justify_name), [`height`](#height), [`it`](#it), [`win`](#win), [`fx_cross_offset`](#fx_cross_offset)
-- **Macros:** [`FX_MAX_ITEMS`](#fx_max_items), [`FX_GL_AUTO`](#fx_gl_auto), [`FX_GL_SPAN_BASE`](#fx_gl_span_base), [`FX_GL_SPAN_MAX`](#fx_gl_span_max), [`FX_GL_LINE_MAX`](#fx_gl_line_max), [`FX_AREA_MAX_ROWS`](#fx_area_max_rows), [`FX_AREA_MAX_COLS`](#fx_area_max_cols), [`FX_AREA_MAX_CELLS`](#fx_area_max_cells), [`FX_AREA_NAME_MAX`](#fx_area_name_max), [`FX_FLOAT_MIN_LINE`](#fx_float_min_line), [`FX_MAX_COLUMNS`](#fx_max_columns), [`FX_MAUTO_TOP`](#fx_mauto_top), [`FX_MAUTO_BOTTOM`](#fx_mauto_bottom)
+- **Functions:** [`size`](#size), [`out`](#out), [`fx_grid_cell`](#fx_grid_cell), [`number`](#number), [`fx_grid_line_parse`](#fx_grid_line_parse), [`fx_grid_line_resolve`](#fx_grid_line_resolve), [`fx_autofill_count`](#fx_autofill_count), [`fx_grid_column_count`](#fx_grid_column_count), [`fx_grid_area_hash`](#fx_grid_area_hash), [`offset`](#offset), [`required`](#required), [`widths`](#widths), [`FX_ERR_NULL_ARG`](#fx_err_null_arg), [`space`](#space), [`fx_auto_min_size`](#fx_auto_min_size), [`fx_justify_name`](#fx_justify_name), [`height`](#height), [`it`](#it), [`win`](#win), [`fx_cross_offset`](#fx_cross_offset)
+- **Macros:** [`FX_MAX_ITEMS`](#fx_max_items), [`FX_GL_AUTO`](#fx_gl_auto), [`FX_GL_SPAN_BASE`](#fx_gl_span_base), [`FX_GL_SPAN_MAX`](#fx_gl_span_max), [`FX_GL_LINE_MAX`](#fx_gl_line_max), [`FX_GRID_COLS_MAX`](#fx_grid_cols_max), [`FX_AREA_MAX_ROWS`](#fx_area_max_rows), [`FX_AREA_MAX_COLS`](#fx_area_max_cols), [`FX_AREA_MAX_CELLS`](#fx_area_max_cells), [`FX_AREA_NAME_MAX`](#fx_area_name_max), [`FX_FLOAT_MIN_LINE`](#fx_float_min_line), [`FX_MAX_COLUMNS`](#fx_max_columns), [`FX_MAUTO_TOP`](#fx_mauto_top), [`FX_MAUTO_BOTTOM`](#fx_mauto_bottom)
 
 ## Type Diagram
 
@@ -91,7 +91,7 @@ One resolved item: main-axis offset from the container content start, and size.
 
 ### `fx_area_map`
 
-`struct` | [include/flex_layout.h:144](../../include/flex_layout.h#L144)
+`struct` | [include/flex_layout.h:154](../../include/flex_layout.h#L154)
 
 ```c
 typedef struct fx_area_map
@@ -107,7 +107,7 @@ A parsed grid-template-areas: a rows x cols grid of NAME HASHES in row-major ord
 
 ### `fx_float_rect`
 
-`struct` | [include/flex_layout.h:214](../../include/flex_layout.h#L214)
+`struct` | [include/flex_layout.h:224](../../include/flex_layout.h#L224)
 
 ```c
 typedef struct fx_float_rect
@@ -167,7 +167,7 @@ Negative fields are treated as 0.
 
 ### `cols`
 
-`type_alias` | [include/flex_layout.h:144](../../include/flex_layout.h#L144)
+`type_alias` | [include/flex_layout.h:154](../../include/flex_layout.h#L154)
 
 ```c
 typedef struct fx_area_map { int rows, cols;
@@ -183,7 +183,7 @@ A parsed grid-template-areas: a rows x cols grid of NAME HASHES in row-major ord
 
 ### `bottom`
 
-`type_alias` | [include/flex_layout.h:214](../../include/flex_layout.h#L214)
+`type_alias` | [include/flex_layout.h:224](../../include/flex_layout.h#L224)
 
 ```c
 typedef struct fx_float_rect { double top, bottom;
@@ -354,11 +354,38 @@ Pure: floor((avail+gap)/(min+gap)) clamped to [1, FX_MAX_ITEMS]. Non-positive/Na
 
 ---
 
+<a id="fx_grid_column_count"></a>
+
+### `fx_grid_column_count`
+
+`function` | [include/flex_layout.h:139](../../include/flex_layout.h#L139)
+
+```c
+int fx_grid_column_count(int flow, int cols, int rows, size_t items);
+```
+
+Column count of a grid container (CSS Grid 1 8.5).
+
+With `grid-auto-flow: column` (flow == 2, css_grid_flow) and no explicit rows, items fill a single row and each one opens an implicit column, so the count is max(declared, items); every other case keeps [`cols`](#cols). Never below 1, never above FX_GRID_COLS_MAX: [`items`](gui.browser_ui.c.md#items) comes from the confined worker. Pure.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `flow` | `int` |  |  |
+| `cols` | `int` |  |  |
+| `rows` | `int` |  |  |
+| `items` | `size_t` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="fx_grid_area_hash"></a>
 
 ### `fx_grid_area_hash`
 
-`function` | [include/flex_layout.h:153](../../include/flex_layout.h#L153)
+`function` | [include/flex_layout.h:163](../../include/flex_layout.h#L163)
 
 ```c
 unsigned fx_grid_area_hash(const char *name);
@@ -382,7 +409,7 @@ NULL/empty/blank -> 0. Comparing hashes rather than strings is what lets an item
 
 ### `offset`
 
-`function` | [include/flex_layout.h:171](../../include/flex_layout.h#L171)
+`function` | [include/flex_layout.h:181](../../include/flex_layout.h#L181)
 
 ```c
 * offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would overflow still gets a clamped position. Pure, no allocation. * n == 0 is a no-op (poin
@@ -403,7 +430,7 @@ NULL/empty/blank -> 0. Comparing hashes rather than strings is what lets an item
 
 ### `required`
 
-`function` | [include/flex_layout.h:184](../../include/flex_layout.h#L184)
+`function` | [include/flex_layout.h:194](../../include/flex_layout.h#L194)
 
 ```c
 * out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);
@@ -423,7 +450,7 @@ NULL/empty/blank -> 0. Comparing hashes rather than strings is what lets an item
 
 ### `widths`
 
-`function` | [include/flex_layout.h:194](../../include/flex_layout.h#L194)
+`function` | [include/flex_layout.h:204](../../include/flex_layout.h#L204)
 
 ```c
 * the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens it) with the wrap cursor discipline, then * reports the BORDER x (packed outer posi
@@ -445,7 +472,7 @@ NULL/empty/blank -> 0. Comparing hashes rather than strings is what lets an item
 
 ### `FX_ERR_NULL_ARG`
 
-`function` | [include/flex_layout.h:228](../../include/flex_layout.h#L228)
+`function` | [include/flex_layout.h:238](../../include/flex_layout.h#L238)
 
 ```c
 * Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);
@@ -465,7 +492,7 @@ NULL/empty/blank -> 0. Comparing hashes rather than strings is what lets an item
 
 ### `space`
 
-`function` | [include/flex_layout.h:234](../../include/flex_layout.h#L234)
+`function` | [include/flex_layout.h:244](../../include/flex_layout.h#L244)
 
 ```c
 * line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin (auto_l[i]/auto_r[i] non-zero), which overrides justify-content. With no * auto margin or no positiv
@@ -485,7 +512,7 @@ NULL/empty/blank -> 0. Comparing hashes rather than strings is what lets an item
 
 ### `fx_auto_min_size`
 
-`function` | [include/flex_layout.h:265](../../include/flex_layout.h#L265)
+`function` | [include/flex_layout.h:275](../../include/flex_layout.h#L275)
 
 ```c
 double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);
@@ -529,7 +556,7 @@ Pure, total, no allocation. The result is never negative.
 
 ### `fx_justify_name`
 
-`function` `const` | [include/flex_layout.h:321](../../include/flex_layout.h#L321)
+`function` `const` | [include/flex_layout.h:331](../../include/flex_layout.h#L331)
 
 ```c
 const char *fx_justify_name(fx_justify j);
@@ -553,7 +580,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `height`
 
-`function` | [include/flex_layout.h:327](../../include/flex_layout.h#L327)
+`function` | [include/flex_layout.h:337](../../include/flex_layout.h#L337)
 
 ```c
 * used height (h_out);
@@ -567,7 +594,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `it`
 
-`function` | [include/flex_layout.h:344](../../include/flex_layout.h#L344)
+`function` | [include/flex_layout.h:354](../../include/flex_layout.h#L354)
 
 ```c
 * children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else equally among the auto margins in * mauto[i] (FX_MAUTO_TOP -> before[i], FX_MAUTO_BOTT
@@ -588,7 +615,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `win`
 
-`function` | [include/flex_layout.h:352](../../include/flex_layout.h#L352)
+`function` | [include/flex_layout.h:362](../../include/flex_layout.h#L362)
 
 ```c
 * margins win (both = centre, left only = end);
@@ -608,7 +635,7 @@ Never NULL; an unknown enum value yields "start".
 
 ### `fx_cross_offset`
 
-`function` | [include/flex_layout.h:354](../../include/flex_layout.h#L354)
+`function` | [include/flex_layout.h:364](../../include/flex_layout.h#L364)
 
 ```c
 double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);
@@ -705,11 +732,25 @@ line number (negative counts from the end).
 
 ---
 
+<a id="fx_grid_cols_max"></a>
+
+### `FX_GRID_COLS_MAX`
+
+`macro` | [include/flex_layout.h:132](../../include/flex_layout.h#L132)
+
+```c
+#define FX_GRID_COLS_MAX
+```
+
+Upper bound of grid columns the engine places (BT_MAX_CHILDREN, box_tree.h).
+
+---
+
 <a id="fx_area_max_rows"></a>
 
 ### `FX_AREA_MAX_ROWS`
 
-`macro` | [include/flex_layout.h:136](../../include/flex_layout.h#L136)
+`macro` | [include/flex_layout.h:146](../../include/flex_layout.h#L146)
 
 ```c
 #define FX_AREA_MAX_ROWS
@@ -725,7 +766,7 @@ The template is author CSS -- i.e. attacker chosen -- so every one of these is c
 
 ### `FX_AREA_MAX_COLS`
 
-`macro` | [include/flex_layout.h:137](../../include/flex_layout.h#L137)
+`macro` | [include/flex_layout.h:147](../../include/flex_layout.h#L147)
 
 ```c
 #define FX_AREA_MAX_COLS
@@ -737,7 +778,7 @@ The template is author CSS -- i.e. attacker chosen -- so every one of these is c
 
 ### `FX_AREA_MAX_CELLS`
 
-`macro` | [include/flex_layout.h:138](../../include/flex_layout.h#L138)
+`macro` | [include/flex_layout.h:148](../../include/flex_layout.h#L148)
 
 ```c
 #define FX_AREA_MAX_CELLS
@@ -749,7 +790,7 @@ The template is author CSS -- i.e. attacker chosen -- so every one of these is c
 
 ### `FX_AREA_NAME_MAX`
 
-`macro` | [include/flex_layout.h:139](../../include/flex_layout.h#L139)
+`macro` | [include/flex_layout.h:149](../../include/flex_layout.h#L149)
 
 ```c
 #define FX_AREA_NAME_MAX
@@ -761,7 +802,7 @@ The template is author CSS -- i.e. attacker chosen -- so every one of these is c
 
 ### `FX_FLOAT_MIN_LINE`
 
-`macro` | [include/flex_layout.h:208](../../include/flex_layout.h#L208)
+`macro` | [include/flex_layout.h:218](../../include/flex_layout.h#L218)
 
 ```c
 #define FX_FLOAT_MIN_LINE
@@ -777,7 +818,7 @@ A float wider than its container must still leave a usable line rather than a ze
 
 ### `FX_MAX_COLUMNS`
 
-`macro` | [include/flex_layout.h:270](../../include/flex_layout.h#L270)
+`macro` | [include/flex_layout.h:280](../../include/flex_layout.h#L280)
 
 ```c
 #define FX_MAX_COLUMNS
@@ -793,7 +834,7 @@ A larger `column-count` is clamped to it; real stylesheets ask for two to four.
 
 ### `FX_MAUTO_TOP`
 
-`macro` | [include/flex_layout.h:337](../../include/flex_layout.h#L337)
+`macro` | [include/flex_layout.h:347](../../include/flex_layout.h#L347)
 
 ```c
 #define FX_MAUTO_TOP
@@ -807,7 +848,7 @@ As fx_column_place, plus each item's main-axis auto margins (mauto[i]: bits FX_M
 
 ### `FX_MAUTO_BOTTOM`
 
-`macro` | [include/flex_layout.h:338](../../include/flex_layout.h#L338)
+`macro` | [include/flex_layout.h:348](../../include/flex_layout.h#L348)
 
 ```c
 #define FX_MAUTO_BOTTOM

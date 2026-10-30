@@ -206,147 +206,151 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_style` (struct, line 584)
-  - `css_sel` (struct, line 988)
-  - `css_media` (struct, line 990)
-  - `css_drop` (struct, line 1054)
-  - `css_drop_log` (struct, line 1066)
-  - `css_attr` (struct, line 1095)
-  - `css_element` (struct, line 1105)
-  - `cvr_table` (struct, line 1173)
-  - `css_status` (enum, line 28)
-  - `css_align` (enum, line 34)
-  - `css_display` (enum, line 42)
-  - `css_justify` (enum, line 69)
-  - `css_font_family` (enum, line 111)
-  - `css_text_transform` (enum, line 117)
-  - `css_valign` (enum, line 122)
-  - `css_white_space` (enum, line 128)
-  - `css_list_style` (enum, line 134)
-  - `css_position` (enum, line 146)
-  - `css_box_sizing` (enum, line 153)
-  - `css_border_style` (enum, line 160)
-  - `css_flex_direction` (enum, line 167)
-  - `css_flex_wrap` (enum, line 173)
-  - `css_align_kw` (enum, line 179)
-  - `css_grid_flow` (enum, line 186)
-  - `css_float` (enum, line 192)
-  - `css_clear` (enum, line 198)
-  - `css_visibility` (enum, line 206)
-  - `css_overflow` (enum, line 215)
-  - `css_cursor` (enum, line 225)
-  - `css_text_overflow` (enum, line 238)
-  - `css_word_break` (enum, line 252)
-  - `css_text_decoration_style` (enum, line 259)
-  - `css_direction` (enum, line 266)
-  - `css_border_collapse` (enum, line 272)
-  - `css_empty_cells` (enum, line 278)
-  - `css_caption_side` (enum, line 284)
-  - `css_table_layout` (enum, line 290)
-  - `css_font_variant` (enum, line 296)
-  - `css_hyphens` (enum, line 302)
-  - `css_user_select` (enum, line 308)
-  - `css_appearance` (enum, line 314)
-  - `css_pointer_events` (enum, line 320)
-  - `css_bg_repeat` (enum, line 325)
-  - `css_bg_size` (enum, line 330)
-  - `css_bg_clip` (enum, line 334)
-  - `css_bg_origin` (enum, line 339)
-  - `css_bg_attachment` (enum, line 343)
-  - `css_isolation` (enum, line 347)
-  - `css_content_visibility` (enum, line 356)
-  - `css_image_rendering` (enum, line 360)
-  - `css_color_scheme` (enum, line 364)
-  - `css_print_color_adjust` (enum, line 368)
-  - `css_forced_color_adjust` (enum, line 372)
-  - `css_mix_blend` (enum, line 377)
-  - `css_object_fit` (enum, line 385)
-  - `css_list_pos` (enum, line 390)
-  - `css_font_kerning` (enum, line 394)
-  - `css_text_rendering` (enum, line 398)
-  - `css_font_stretch` (enum, line 403)
-  - `css_resize` (enum, line 409)
-  - `css_scroll_behavior` (enum, line 413)
-  - `css_touch_action` (enum, line 417)
-  - `css_overscroll` (enum, line 421)
-  - `css_column_fill` (enum, line 426)
-  - `css_column_span` (enum, line 431)
-  - `css_backface` (enum, line 435)
-  - `css_pct_slot` (enum, line 512)
-  - `css_drop_cause` (enum, line 1041)
-  - `color` (type_alias, line 584) `typedef struct css_style { int color;`
-  - `css_sheet` (type_alias, line 982) `typedef struct css_sheet css_sheet;`
-  - `prefers_dark` (type_alias, line 989) `typedef struct css_media { int prefers_dark;`
-  - `prop` (type_alias, line 1054) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
-  - `verbatim` (function, line 84) `* the quoted row strings verbatim (flex_layout parses them);`
-  - `POINTER` (function, line 220) `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
-  - `family` (function, line 690) `* LOCAL family (spec/text_shape.md section 7);`
-  - `translate` (function, line 856) `* translate()/translateX()/translateY();`
-  - `scaleY` (function, line 857) `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
-  - `declared` (function, line 861) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
-  - `element` (function, line 866) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
-  - `slots` (function, line 873) `* parse time into ALL seven slots (singular matrices fail closed);`
-  - `palette` (function, line 1031) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
-  - `css_free` (function, line 1081) `void css_free(css_sheet *s);`
-  - `order` (function, line 1084) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
-  - `inherited_px` (function, line 1197) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
-  - `css_ua_heading_em` (function, line 1209) `double css_ua_heading_em(int level);`
-  - `name` (function, line 1214) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
-  - `css_font_face_count` (function, line 1224) `size_t css_font_face_count(const css_sheet *sheet);`
-  - `css_font_face_at` (function, line 1225) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
-  - `css_resolve_anim_keyframes` (function, line 1233) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
+  - `css_style` (struct, line 592)
+  - `css_sel` (struct, line 1002)
+  - `css_media` (struct, line 1004)
+  - `css_drop` (struct, line 1072)
+  - `css_drop_log` (struct, line 1084)
+  - `css_attr` (struct, line 1113)
+  - `css_element` (struct, line 1123)
+  - `cvr_table` (struct, line 1191)
+  - `css_status` (enum, line 29)
+  - `css_align` (enum, line 35)
+  - `css_display` (enum, line 43)
+  - `css_justify` (enum, line 70)
+  - `css_font_family` (enum, line 112)
+  - `css_text_transform` (enum, line 118)
+  - `css_valign` (enum, line 123)
+  - `css_white_space` (enum, line 129)
+  - `css_list_style` (enum, line 135)
+  - `css_position` (enum, line 147)
+  - `css_box_sizing` (enum, line 154)
+  - `css_border_style` (enum, line 161)
+  - `css_flex_direction` (enum, line 168)
+  - `css_flex_wrap` (enum, line 174)
+  - `css_align_kw` (enum, line 180)
+  - `css_grid_flow` (enum, line 187)
+  - `css_float` (enum, line 193)
+  - `css_clear` (enum, line 199)
+  - `css_visibility` (enum, line 207)
+  - `css_overflow` (enum, line 216)
+  - `css_cursor` (enum, line 226)
+  - `css_text_overflow` (enum, line 239)
+  - `css_word_break` (enum, line 253)
+  - `css_text_decoration_style` (enum, line 260)
+  - `css_direction` (enum, line 267)
+  - `css_border_collapse` (enum, line 273)
+  - `css_empty_cells` (enum, line 279)
+  - `css_caption_side` (enum, line 285)
+  - `css_table_layout` (enum, line 291)
+  - `css_font_variant` (enum, line 297)
+  - `css_hyphens` (enum, line 303)
+  - `css_user_select` (enum, line 309)
+  - `css_appearance` (enum, line 315)
+  - `css_pointer_events` (enum, line 321)
+  - `css_bg_repeat` (enum, line 326)
+  - `css_bg_size` (enum, line 331)
+  - `css_bg_clip` (enum, line 335)
+  - `css_bg_origin` (enum, line 340)
+  - `css_bg_attachment` (enum, line 344)
+  - `css_isolation` (enum, line 348)
+  - `css_content_visibility` (enum, line 357)
+  - `css_image_rendering` (enum, line 361)
+  - `css_color_scheme` (enum, line 365)
+  - `css_print_color_adjust` (enum, line 369)
+  - `css_forced_color_adjust` (enum, line 373)
+  - `css_mix_blend` (enum, line 378)
+  - `css_object_fit` (enum, line 386)
+  - `css_list_pos` (enum, line 398)
+  - `css_font_kerning` (enum, line 402)
+  - `css_text_rendering` (enum, line 406)
+  - `css_font_stretch` (enum, line 411)
+  - `css_resize` (enum, line 417)
+  - `css_scroll_behavior` (enum, line 421)
+  - `css_touch_action` (enum, line 425)
+  - `css_overscroll` (enum, line 429)
+  - `css_column_fill` (enum, line 434)
+  - `css_column_span` (enum, line 439)
+  - `css_backface` (enum, line 443)
+  - `css_pct_slot` (enum, line 520)
+  - `css_drop_cause` (enum, line 1059)
+  - `color` (type_alias, line 592) `typedef struct css_style { int color;`
+  - `css_sheet` (type_alias, line 996) `typedef struct css_sheet css_sheet;`
+  - `prefers_dark` (type_alias, line 1003) `typedef struct css_media { int prefers_dark;`
+  - `prop` (type_alias, line 1072) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
+  - `verbatim` (function, line 85) `* the quoted row strings verbatim (flex_layout parses them);`
+  - `POINTER` (function, line 221) `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
+  - `family` (function, line 699) `* LOCAL family (spec/text_shape.md section 7);`
+  - `translate` (function, line 870) `* translate()/translateX()/translateY();`
+  - `scaleY` (function, line 871) `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
+  - `declared` (function, line 875) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
+  - `element` (function, line 880) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
+  - `slots` (function, line 887) `* parse time into ALL seven slots (singular matrices fail closed);`
+  - `css_sheet_uses_counters` (function, line 1032) `int css_sheet_uses_counters(const css_sheet *sheet);`
+  - `palette` (function, line 1049) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
+  - `css_free` (function, line 1099) `void css_free(css_sheet *s);`
+  - `order` (function, line 1102) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
+  - `inherited_px` (function, line 1215) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
+  - `css_ua_heading_em` (function, line 1227) `double css_ua_heading_em(int level);`
+  - `name` (function, line 1232) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
+  - `css_font_face_count` (function, line 1242) `size_t css_font_face_count(const css_sheet *sheet);`
+  - `css_font_face_at` (function, line 1243) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+  - `css_resolve_anim_keyframes` (function, line 1251) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
   - `FREEDOM_CSS_H` (macro, line 2) `#define FREEDOM_CSS_H`
-  - `CSS_GAP_MAX` (macro, line 80) `#define CSS_GAP_MAX`
-  - `CSS_GRID_COLS_MAX` (macro, line 81) `#define CSS_GRID_COLS_MAX`
-  - `CSS_GRID_TRACKS_MAX` (macro, line 82) `#define CSS_GRID_TRACKS_MAX`
-  - `CSS_GRID_AREAS_MAX` (macro, line 88) `#define CSS_GRID_AREAS_MAX`
-  - `CSS_GRAD_STOPS_MAX` (macro, line 89) `#define CSS_GRAD_STOPS_MAX`
-  - `CSS_LINE_MIN` (macro, line 90) `#define CSS_LINE_MIN`
-  - `CSS_LINE_MAX` (macro, line 91) `#define CSS_LINE_MAX`
-  - `CSS_LINE_ABS_BASE` (macro, line 96) `#define CSS_LINE_ABS_BASE`
-  - `CSS_LINE_ABS_MAX_PX` (macro, line 97) `#define CSS_LINE_ABS_MAX_PX`
-  - `CSS_SVG_PAINT_NONE` (macro, line 98) `#define CSS_SVG_PAINT_NONE`
-  - `CSS_FONT_LIST_MAX` (macro, line 99) `#define CSS_FONT_LIST_MAX`
-  - `CSS_URL_MAX` (macro, line 100) `#define CSS_URL_MAX`
-  - `CSS_DECO_UNDERLINE` (macro, line 105) `#define CSS_DECO_UNDERLINE`
-  - `CSS_DECO_LINE_THROUGH` (macro, line 106) `#define CSS_DECO_LINE_THROUGH`
-  - `CSS_DECO_OVERLINE` (macro, line 107) `#define CSS_DECO_OVERLINE`
-  - `CSS_CONTAIN_SIZE` (macro, line 351) `#define CSS_CONTAIN_SIZE`
-  - `CSS_CONTAIN_LAYOUT` (macro, line 352) `#define CSS_CONTAIN_LAYOUT`
-  - `CSS_CONTAIN_STYLE` (macro, line 353) `#define CSS_CONTAIN_STYLE`
-  - `CSS_CONTAIN_PAINT` (macro, line 354) `#define CSS_CONTAIN_PAINT`
-  - `CSS_BORDER_W_MAX` (macro, line 442) `#define CSS_BORDER_W_MAX`
-  - `CSS_BORDER_SPACING_MAX` (macro, line 443) `#define CSS_BORDER_SPACING_MAX`
-  - `CSS_FLEX_FACTOR_MAX` (macro, line 444) `#define CSS_FLEX_FACTOR_MAX`
-  - `CSS_GRID_SPAN_MAX` (macro, line 445) `#define CSS_GRID_SPAN_MAX`
-  - `CSS_SPACING_MAX` (macro, line 449) `#define CSS_SPACING_MAX`
-  - `CSS_SHADOW_MAX` (macro, line 450) `#define CSS_SHADOW_MAX`
-  - `CSS_BSHADOW_LAYERS` (macro, line 451) `#define CSS_BSHADOW_LAYERS`
-  - `CSS_LEN_MAX` (macro, line 456) `#define CSS_LEN_MAX`
-  - `CSS_LEN_UNSET` (macro, line 457) `#define CSS_LEN_UNSET`
-  - `CSS_LEN_AUTO` (macro, line 458) `#define CSS_LEN_AUTO`
-  - `CSS_LEN_END` (macro, line 459) `#define CSS_LEN_END`
-  - `CSS_LEN_MIN_CONTENT` (macro, line 466) `#define CSS_LEN_MIN_CONTENT`
-  - `CSS_LEN_MAX_CONTENT` (macro, line 467) `#define CSS_LEN_MAX_CONTENT`
-  - `CSS_LEN_FIT_CONTENT` (macro, line 468) `#define CSS_LEN_FIT_CONTENT`
-  - `CSS_LEN_IS_INTRINSIC` (macro, line 471) `#define CSS_LEN_IS_INTRINSIC(v)`
-  - `CSS_PCT_MAX` (macro, line 494) `#define CSS_PCT_MAX`
-  - `CSS_EM_MILLI_MAX` (macro, line 500) `#define CSS_EM_MILLI_MAX`
-  - `CSS_FONT_SIZE_MAX` (macro, line 506) `#define CSS_FONT_SIZE_MAX`
-  - `CSS_COLUMN_COUNT_MAX` (macro, line 510) `#define CSS_COLUMN_COUNT_MAX`
-  - `CSS_MAX_COMPOUNDS` (macro, line 565) `#define CSS_MAX_COMPOUNDS`
-  - `CSS_MAX_ATTR_SEL` (macro, line 569) `#define CSS_MAX_ATTR_SEL`
-  - `CSS_MAX_PSEUDO_SEL` (macro, line 573) `#define CSS_MAX_PSEUDO_SEL`
-  - `CSS_NTH_MAX` (macro, line 577) `#define CSS_NTH_MAX`
-  - `CSS_MAX_KF_STOPS` (macro, line 896) `#define CSS_MAX_KF_STOPS`
-  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 1002) `#define CSS_MEDIA_DEFAULT_WIDTH`
-  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 1007) `#define CSS_MEDIA_DEFAULT_HEIGHT`
-  - `CSS_DROP_PROP_MAX` (macro, line 1046) `#define CSS_DROP_PROP_MAX`
-  - `CSS_DROP_VAL_MAX` (macro, line 1047) `#define CSS_DROP_VAL_MAX`
-  - `CSS_PSEUDO_BEFORE` (macro, line 1183) `#define CSS_PSEUDO_BEFORE`
-  - `CSS_PSEUDO_AFTER` (macro, line 1184) `#define CSS_PSEUDO_AFTER`
-  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1185) `#define CSS_PSEUDO_PLACEHOLDER`
-- Depends on: `include/css_color.h`
+  - `CSS_GAP_MAX` (macro, line 81) `#define CSS_GAP_MAX`
+  - `CSS_GRID_COLS_MAX` (macro, line 82) `#define CSS_GRID_COLS_MAX`
+  - `CSS_GRID_TRACKS_MAX` (macro, line 83) `#define CSS_GRID_TRACKS_MAX`
+  - `CSS_GRID_AREAS_MAX` (macro, line 89) `#define CSS_GRID_AREAS_MAX`
+  - `CSS_GRAD_STOPS_MAX` (macro, line 90) `#define CSS_GRAD_STOPS_MAX`
+  - `CSS_LINE_MIN` (macro, line 91) `#define CSS_LINE_MIN`
+  - `CSS_LINE_MAX` (macro, line 92) `#define CSS_LINE_MAX`
+  - `CSS_LINE_ABS_BASE` (macro, line 97) `#define CSS_LINE_ABS_BASE`
+  - `CSS_LINE_ABS_MAX_PX` (macro, line 98) `#define CSS_LINE_ABS_MAX_PX`
+  - `CSS_SVG_PAINT_NONE` (macro, line 99) `#define CSS_SVG_PAINT_NONE`
+  - `CSS_FONT_LIST_MAX` (macro, line 100) `#define CSS_FONT_LIST_MAX`
+  - `CSS_URL_MAX` (macro, line 101) `#define CSS_URL_MAX`
+  - `CSS_DECO_UNDERLINE` (macro, line 106) `#define CSS_DECO_UNDERLINE`
+  - `CSS_DECO_LINE_THROUGH` (macro, line 107) `#define CSS_DECO_LINE_THROUGH`
+  - `CSS_DECO_OVERLINE` (macro, line 108) `#define CSS_DECO_OVERLINE`
+  - `CSS_CONTAIN_SIZE` (macro, line 352) `#define CSS_CONTAIN_SIZE`
+  - `CSS_CONTAIN_LAYOUT` (macro, line 353) `#define CSS_CONTAIN_LAYOUT`
+  - `CSS_CONTAIN_STYLE` (macro, line 354) `#define CSS_CONTAIN_STYLE`
+  - `CSS_CONTAIN_PAINT` (macro, line 355) `#define CSS_CONTAIN_PAINT`
+  - `CSS_OBJPOS_PACK` (macro, line 394) `#define CSS_OBJPOS_PACK(x_pm, y_pm)`
+  - `CSS_OBJPOS_X` (macro, line 395) `#define CSS_OBJPOS_X(p)`
+  - `CSS_OBJPOS_Y` (macro, line 396) `#define CSS_OBJPOS_Y(p)`
+  - `CSS_BORDER_W_MAX` (macro, line 450) `#define CSS_BORDER_W_MAX`
+  - `CSS_BORDER_SPACING_MAX` (macro, line 451) `#define CSS_BORDER_SPACING_MAX`
+  - `CSS_FLEX_FACTOR_MAX` (macro, line 452) `#define CSS_FLEX_FACTOR_MAX`
+  - `CSS_GRID_SPAN_MAX` (macro, line 453) `#define CSS_GRID_SPAN_MAX`
+  - `CSS_SPACING_MAX` (macro, line 457) `#define CSS_SPACING_MAX`
+  - `CSS_SHADOW_MAX` (macro, line 458) `#define CSS_SHADOW_MAX`
+  - `CSS_BSHADOW_LAYERS` (macro, line 459) `#define CSS_BSHADOW_LAYERS`
+  - `CSS_LEN_MAX` (macro, line 464) `#define CSS_LEN_MAX`
+  - `CSS_LEN_UNSET` (macro, line 465) `#define CSS_LEN_UNSET`
+  - `CSS_LEN_AUTO` (macro, line 466) `#define CSS_LEN_AUTO`
+  - `CSS_LEN_END` (macro, line 467) `#define CSS_LEN_END`
+  - `CSS_LEN_MIN_CONTENT` (macro, line 474) `#define CSS_LEN_MIN_CONTENT`
+  - `CSS_LEN_MAX_CONTENT` (macro, line 475) `#define CSS_LEN_MAX_CONTENT`
+  - `CSS_LEN_FIT_CONTENT` (macro, line 476) `#define CSS_LEN_FIT_CONTENT`
+  - `CSS_LEN_IS_INTRINSIC` (macro, line 479) `#define CSS_LEN_IS_INTRINSIC(v)`
+  - `CSS_PCT_MAX` (macro, line 502) `#define CSS_PCT_MAX`
+  - `CSS_EM_MILLI_MAX` (macro, line 508) `#define CSS_EM_MILLI_MAX`
+  - `CSS_FONT_SIZE_MAX` (macro, line 514) `#define CSS_FONT_SIZE_MAX`
+  - `CSS_COLUMN_COUNT_MAX` (macro, line 518) `#define CSS_COLUMN_COUNT_MAX`
+  - `CSS_MAX_COMPOUNDS` (macro, line 573) `#define CSS_MAX_COMPOUNDS`
+  - `CSS_MAX_ATTR_SEL` (macro, line 577) `#define CSS_MAX_ATTR_SEL`
+  - `CSS_MAX_PSEUDO_SEL` (macro, line 581) `#define CSS_MAX_PSEUDO_SEL`
+  - `CSS_NTH_MAX` (macro, line 585) `#define CSS_NTH_MAX`
+  - `CSS_MAX_KF_STOPS` (macro, line 910) `#define CSS_MAX_KF_STOPS`
+  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 1016) `#define CSS_MEDIA_DEFAULT_WIDTH`
+  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 1021) `#define CSS_MEDIA_DEFAULT_HEIGHT`
+  - `CSS_DROP_PROP_MAX` (macro, line 1064) `#define CSS_DROP_PROP_MAX`
+  - `CSS_DROP_VAL_MAX` (macro, line 1065) `#define CSS_DROP_VAL_MAX`
+  - `CSS_PSEUDO_BEFORE` (macro, line 1201) `#define CSS_PSEUDO_BEFORE`
+  - `CSS_PSEUDO_AFTER` (macro, line 1202) `#define CSS_PSEUDO_AFTER`
+  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1203) `#define CSS_PSEUDO_PLACEHOLDER`
+- Depends on: `include/css_color.h`, `include/css_counter.h`
 - Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 
 ## include/css_atrule.h
@@ -448,48 +452,31 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Depends on: `include/css.h`
 - Imported by: `src/css_computed.c`, `src/tab.c`, `tests/test_css_computed.c`
 
-## include/css_decl.h
-- Doc: The sheet's two string pools -- background url()s, and the ::before/::after
+## include/css_counter.h
+- Doc: cnt_hash: FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are *...
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_decl` (struct, line 220)
-  - `prop` (type_alias, line 219) `typedef struct css_decl { int prop;`
-  - `order` (function, line 50) `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
-  - `contiguous` (function, line 65) `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
-  - `FREEDOM_CSS_DECL_H` (macro, line 2) `#define FREEDOM_CSS_DECL_H`
-  - `CSS_POOL_INIT` (macro, line 20) `#define CSS_POOL_INIT`
-  - `CSS_POOL_HEADROOM` (macro, line 21) `#define CSS_POOL_HEADROOM`
-  - `CSS_MAX_BG_URLS` (macro, line 22) `#define CSS_MAX_BG_URLS`
-  - `CSS_MAX_CONTENT_URLS` (macro, line 23) `#define CSS_MAX_CONTENT_URLS`
-  - `CSS_MAX_KEYFRAMES` (macro, line 25) `#define CSS_MAX_KEYFRAMES`
-  - `CSS_MAX_KEYFRAME_STOPS` (macro, line 26) `#define CSS_MAX_KEYFRAME_STOPS`
-  - `CSS_MAX_KEYFRAME_DECLS` (macro, line 27) `#define CSS_MAX_KEYFRAME_DECLS`
-  - `CSS_INLINE_BG_URLS` (macro, line 28) `#define CSS_INLINE_BG_URLS`
-  - `CSS_WIDE_PROBE_DECLS` (macro, line 35) `#define CSS_WIDE_PROBE_DECLS`
-- Depends on: `include/css.h`, `include/css_select.h`
-- Imported by: `include/css_box.h`, `include/css_gradient.h`, `include/css_mask.h`, `include/css_text.h`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_box.c`, `tests/test_css_text.c`
-
-## include/css_gradient.h
-- Doc: cg_radial_shape: Radial-gradient geometry (spec/css_gradient.md 3b).
-- Layer: utility
-- Language: h
-- Symbols:
-  - `cg_radial` (struct, line 24)
-  - `cg_radial_shape` (enum, line 19)
-  - `cg_radial_size` (enum, line 20)
-  - `shape` (type_alias, line 24) `typedef struct cg_radial { int shape;`
-  - `cg_expand_bg_image` (function, line 11) `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
-  - `cg_expand_background` (function, line 13) `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
-  - `width` (function, line 17) `* width (x, rx) or height (y, ry);`
-  - `out` (function, line 32) `* Returns 1 and fills *out (defaults first) when seg is a valid prelude, 0 when seg is not * one (it is a colour...`
-  - `cg_radial_len_px` (function, line 37) `double cg_radial_len_px(int enc, double dim);`
-  - `zero` (function, line 41) `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....`
-  - `cg_parse_linear` (function, line 51) `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions);`
-  - `FREEDOM_CSS_GRADIENT_H` (macro, line 2) `#define FREEDOM_CSS_GRADIENT_H`
-  - `CG_LEN_UNSET` (macro, line 18) `#define CG_LEN_UNSET`
-- Depends on: `include/css_decl.h`
-- Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_gradient.c`, `src/css_mask.c`, `src/tab.c`, `tests/test_css_gradient.c`
+  - `cnt_decl` (struct, line 21)
+  - `cnt_style` (enum, line 26)
+  - `name` (type_alias, line 20) `typedef struct cnt_decl { unsigned name;`
+  - `cnt_state` (type_alias, line 50) `typedef struct cnt_state cnt_state;`
+  - `cnt_hash` (function, line 34) `unsigned cnt_hash(const char *name, size_t len);`
+  - `written` (function, line 37) `* written (0 for `none`) or -1 when invalid. `dflt` is the value of an entry with no * integer: 0 for reset, 1 for...`
+  - `cnt_parse_content` (function, line 44) `int cnt_parse_content(const char *val, char *out, size_t cap);`
+  - `cnt_is_marker` (function, line 45) `int cnt_is_marker(const char *s);`
+  - `cnt_format` (function, line 49) `size_t cnt_format(int style, long value, char *out, size_t cap);`
+  - `cnt_state_new` (function, line 52) `cnt_state *cnt_state_new(void);`
+  - `cnt_state_free` (function, line 53) `void cnt_state_free(cnt_state *s);`
+  - `cnt_reset` (function, line 56) `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n);`
+  - `cnt_increment` (function, line 57) `void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n);`
+  - `cnt_leave` (function, line 60) `void cnt_leave(cnt_state *s, int depth);`
+  - `cnt_resolve` (function, line 67) `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx, char *out, size_t cap);`
+  - `FREEDOM_CSS_COUNTER_H` (macro, line 9) `#define FREEDOM_CSS_COUNTER_H`
+  - `CNT_MAX_DECL` (macro, line 17) `#define CNT_MAX_DECL`
+  - `CNT_MAX_INSTANCES` (macro, line 18) `#define CNT_MAX_INSTANCES`
+  - `CNT_NAME_MAX` (macro, line 19) `#define CNT_NAME_MAX`
+- Imported by: `include/css.h`, `src/css_counter.c`, `tests/test_css_counter.c`
 
 
 Next: [KB_include_p2.md](KB_include_p2.md)

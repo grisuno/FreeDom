@@ -28,7 +28,8 @@ void idn_defaults(idn_config *c) {
 
 int idn_is_default(const idn_config *c) {
     if (c == NULL) return 1;
-    return c->user_agent[0] == '\0' && c->languages[0] == '\0' && c->geo_mode == IDN_GEO_OFF;
+    return c->user_agent[0] == '\0' && c->languages[0] == '\0' && c->geo_mode == IDN_GEO_OFF
+           && c->auto_allow == 0;
 }
 
 int idn_set_user_agent(idn_config *c, const char *ua) {
@@ -216,6 +217,10 @@ size_t idn_serialize(const idn_config *c, char *out, size_t cap) {
         out[0] = '\0';
         return 0;
     }
+    if (c->auto_allow != 0 && append(out, &n, cap, "|aa=%u", c->auto_allow & IDN_AA_ALL) != 0) {
+        out[0] = '\0';
+        return 0;
+    }
     return n;
 }
 
@@ -251,6 +256,8 @@ void idn_parse(idn_config *c, const char *text) {
                 if (pct_decode(val, vl, dec, sizeof dec, 0) >= 0) (void)idn_set_user_agent(c, dec);
             } else if (kl == 4 && memcmp(p, "lang", 4) == 0) {
                 if (pct_decode(val, vl, dec, sizeof dec, 0) >= 0) (void)idn_set_languages(c, dec);
+            } else if (kl == 2 && memcmp(p, "aa", 2) == 0 && vl == 1 && val[0] >= '0' && val[0] <= '7') {
+                c->auto_allow = (unsigned)(val[0] - '0');
             } else if (kl == 3 && memcmp(p, "geo", 3) == 0 && vl > 0 && vl < sizeof dec) {
                 memcpy(dec, val, vl);
                 dec[vl] = '\0';
@@ -276,6 +283,8 @@ unsigned idn_apply_query(idn_config *c, const char *query) {
     if (c == NULL || query == NULL) return 0;
     char ua[IDN_QUERY_FIELD_MAX], lang[IDN_QUERY_FIELD_MAX], geo[32], lat[64], lon[64], acc[64];
     int has_ua = 0, has_lang = 0, has_geo = 0, has_lat = 0, has_lon = 0, has_acc = 0, reset = 0;
+    int has_aa = 0;
+    unsigned aa_bits = 0;
     unsigned rej = 0;
     const char *p = query;
     if (*p == '?') ++p;
@@ -307,6 +316,11 @@ unsigned idn_apply_query(idn_config *c, const char *query) {
                 } else if (strcmp(key, "acc") == 0) {
                     has_acc = 1;
                     if (pct_decode(val, vl, acc, sizeof acc, 1) < 0) strcpy(acc, "?");
+                } else if (strcmp(key, "aa") == 0 && vl == 1 && val[0] == '1') {
+                    has_aa = 1;   /* the config form's marker: absent boxes then mean OFF */
+                } else if (strcmp(key, "aacss") == 0) { aa_bits |= IDN_AA_CSS;
+                } else if (strcmp(key, "aajs") == 0)  { aa_bits |= IDN_AA_JS;
+                } else if (strcmp(key, "aares") == 0) { aa_bits |= IDN_AA_RES;
                 } else if (strcmp(key, "reset") == 0 && vl == 1 && val[0] == '1') {
                     reset = 1;
                 }
@@ -316,6 +330,7 @@ unsigned idn_apply_query(idn_config *c, const char *query) {
         p = amp + 1;
     }
     if (reset) { idn_defaults(c); return 0; }
+    if (has_aa) c->auto_allow = aa_bits;
     if (has_ua && idn_set_user_agent(c, ua) != 0) rej |= IDN_REJ_UA;
     if (has_lang && idn_set_languages(c, lang) != 0) rej |= IDN_REJ_LANG;
     if (has_geo || has_lat || has_lon || has_acc) {
@@ -398,7 +413,20 @@ size_t idn_render_page(const idn_config *c, char *out, size_t cap) {
     bad |= append(out, &n, cap, "\" size=\"12\"> Accuracy in metres: <input type=\"text\" name=\"acc\" value=\"") != 0;
     if (fixed) bad |= append(out, &n, cap, "%.0f", c->geo_accuracy_m) != 0;
     bad |= append(out, &n, cap,
-        "\" size=\"8\"></p><p><input type=\"submit\" value=\"Apply\"></p></form>"
+        "\" size=\"8\"></p><h2>Auto-allow CDN hosts</h2>"
+        "<p>When a site you put on allow.conf pulls a stylesheet, a script or another resource from a "
+        "different host, that host is appended to allow.conf so the site looks right and you can see and "
+        "edit it. Allowed means allowed: the host gets the same sovereignty as any allow.conf entry (the "
+        "certificate is still always verified). A host on block.conf stays blocked. Off by default.</p>"
+        "<input type=\"hidden\" name=\"aa\" value=\"1\">"
+        "<p><label><input type=\"checkbox\" name=\"aacss\"") != 0;
+    bad |= append(out, &n, cap, "%s> stylesheets (CSS)</label></p>", (c->auto_allow & IDN_AA_CSS) ? " checked" : "") != 0;
+    bad |= append(out, &n, cap, "<p><label><input type=\"checkbox\" name=\"aajs\"%s> scripts (JS)</label></p>",
+                  (c->auto_allow & IDN_AA_JS) ? " checked" : "") != 0;
+    bad |= append(out, &n, cap, "<p><label><input type=\"checkbox\" name=\"aares\"%s> other resources (images, fonts, media, data)</label></p>",
+                  (c->auto_allow & IDN_AA_RES) ? " checked" : "") != 0;
+    bad |= append(out, &n, cap,
+        "<p><input type=\"submit\" value=\"Apply\"></p></form>"
         "<form method=\"get\" action=\"about:config\"><input type=\"hidden\" name=\"reset\" value=\"1\">"
         "<p><input type=\"submit\" value=\"Reset everything to the Freedom default\"></p></form>"
         "<h2>Not available in this engine</h2><ul>"

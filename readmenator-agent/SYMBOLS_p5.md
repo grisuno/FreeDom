@@ -3,6 +3,38 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `rdp_caps` | struct | `include/render_policy.h:32` | `` |
+| `rdp_images_warning` | function | `include/render_policy.h:69` | `const char *rdp_images_warning(void);` |
+| `rdp_img_decision` | enum | `include/render_policy.h:39` | `` |
+| `rdp_img_reason` | function | `include/render_policy.h:66` | `const char *rdp_img_reason(rdp_img_decision d);` |
+| `rdp_is_tracking_pixel` | function | `include/render_policy.h:53` | `int rdp_is_tracking_pixel(int w, int h);` |
+| `size` | function | `include/render_policy.h:56` | `* announced size (e.g. <img width height>);` |
+| `FREEDOM_RENDERER_H` | macro | `include/renderer.h:2` | `#define FREEDOM_RENDERER_H` |
+| `RD_MAX_FIELD` | macro | `include/renderer.h:38` | `#define RD_MAX_FIELD` |
+| `RD_MAX_INPUT` | macro | `include/renderer.h:37` | `#define RD_MAX_INPUT` |
+| `rd_result` | struct | `include/renderer.h:29` | `` |
+| `rd_result_free` | function | `include/renderer.h:46` | `void rd_result_free(rd_result *out);` |
+| `rd_status` | enum | `include/renderer.h:20` | `` |
+| `status` | type_alias | `include/renderer.h:28` | `typedef struct rd_result { rd_status status;` |
+| `FREEDOM_REQUEST_POLICY_H` | macro | `include/request_policy.h:2` | `#define FREEDOM_REQUEST_POLICY_H` |
+| `RP_HDR_MAX_BYTES` | macro | `include/request_policy.h:44` | `#define RP_HDR_MAX_BYTES` |
+| `RP_HDR_MAX_COUNT` | macro | `include/request_policy.h:43` | `#define RP_HDR_MAX_COUNT` |
+| `RP_HDR_NAME_MAX` | macro | `include/request_policy.h:45` | `#define RP_HDR_NAME_MAX` |
+| `RP_HDR_VALUE_MAX` | macro | `include/request_policy.h:46` | `#define RP_HDR_VALUE_MAX` |
+| `rp_decision` | enum | `include/request_policy.h:21` | `` |
+| `rp_headers_have` | function | `include/request_policy.h:61` | `static inline int rp_headers_have(const char *lines, const char *name)` |
+| `rp_host_of` | function | `include/request_policy.h:30` | `int rp_host_of(const char *url, char *out, size_t out_size);` |
+| `rp_same_site` | function | `include/request_policy.h:37` | `int rp_same_site(const char *top_level_url, const char *request_url);` |
+| `rp_sanitize_request_headers` | function | `include/request_policy.h:57` | `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);` |
+| `rp_site_of` | function | `include/request_policy.h:34` | `int rp_site_of(const char *host, char *out, size_t out_size);` |
+| `EXCLUDED` | function | `include/secure_fetch.h:233` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
+| `FREEDOM_SECURE_FETCH_H` | macro | `include/secure_fetch.h:2` | `#define FREEDOM_SECURE_FETCH_H` |
+| `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:216` | `#define SF_CONNECT_TIMEOUT_MS` |
+| `SF_DEFAULT_KEX_GROUPS` | macro | `include/secure_fetch.h:166` | `#define SF_DEFAULT_KEX_GROUPS` |
+| `SF_DEFAULT_MAX_BODY` | macro | `include/secure_fetch.h:192` | `#define SF_DEFAULT_MAX_BODY` |
+| `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:218` | `#define SF_DEFAULT_MAX_REDIRECTS` |
+| `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:193` | `#define SF_DEFAULT_TIMEOUT_MS` |
+| `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:191` | `#define SF_DEFAULT_USER_AGENT` |
 | `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:175` | `#define SF_IMPERSONATE_KEX_GROUPS` |
 | `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:180` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
 | `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:176` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
@@ -464,37 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `browser_url_bar_insert` | function | `src/browser.c:326` | `browser_status browser_url_bar_insert(browser_state *bs, char c)` |
 | `browser_url_bar_move_cursor` | function | `src/browser.c:366` | `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)` |
 | `browser_url_bar_select_all` | function | `src/browser.c:393` | `browser_status browser_url_bar_select_all(browser_state *bs)` |
-| `browser_url_bar_selection` | function | `src/browser.c:305` | `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)` |
-| `browser_url_bar_set_cursor` | function | `src/browser.c:385` | `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)` |
-| `clear_status` | function | `src/browser.c:25` | `static void clear_status(browser_state *bs)` |
-| `cp1252_to_ucs` | function | `src/browser.c:88` | `static unsigned int cp1252_to_ucs(unsigned char c)` |
-| `free_exceptions` | function | `src/browser.c:42` | `static void free_exceptions(browser_state *bs)` |
-| `free_history` | function | `src/browser.c:30` | `static void free_history(browser_state *bs)` |
-| `free_page` | function | `src/browser.c:15` | `static void free_page(browser_state *bs)` |
-| `host_equal` | function | `src/browser.c:453` | `static int host_equal(const char *a, const char *b)` |
-| `is_https_url` | function | `src/browser.c:51` | `static int is_https_url(const char *s)` |
-| `is_local_path` | function | `src/browser.c:55` | `static int is_local_path(const char *s)` |
-| `url_is_allowed` | function | `src/browser.c:60` | `static int url_is_allowed(const char *url)` |
-| `utf8_encode` | function | `src/browser.c:102` | `static size_t utf8_encode(unsigned int cp, char *out)` |
-| `xstrdup` | function | `src/browser.c:74` | `static char *xstrdup(const char *s)` |
-| `_POSIX_C_SOURCE` | macro | `src/cached_fetch.c:7` | `#define _POSIX_C_SOURCE` |
-| `cacheable_request` | function | `src/cached_fetch.c:26` | `static int cacheable_request(const sf_config *cfg, const char *url)` |
-| `cf_attach_redirect_memory` | function | `src/cached_fetch.c:148` | `void cf_attach_redirect_memory(hc_store *store)` |
-| `cf_get` | function | `src/cached_fetch.c:133` | `sf_status cf_get(const char *partition, const char *url, sf_config *cfg, sf_response *out,       ...` |
-| `cf_get_with` | function | `src/cached_fetch.c:85` | `sf_status cf_get_with(hc_store *store, cf_fetch_fn fetch, const char *partition, const char *url,...` |
-| `cf_set_store` | function | `src/cached_fetch.c:22` | `void cf_set_store(hc_store *store)` |
-| `cf_store` | function | `src/cached_fetch.c:23` | `hc_store *cf_store(void)` |
-| `copy_val` | function | `src/cached_fetch.c:33` | `static void copy_val(char *dst, size_t cap, const char *src)` |
-| `meta_from_response` | function | `src/cached_fetch.c:40` | `static void meta_from_response(hc_meta *m, const sf_response *r, const char *url, time_t now)` |
-| `redirect_load` | function | `src/cached_fetch.c:140` | `static int redirect_load(void *ctx, const char *from, time_t now, char *out, size_t cap)` |
-| `redirect_save` | function | `src/cached_fetch.c:144` | `static void redirect_save(void *ctx, const char *from, const char *to, time_t now)` |
-| `remember` | function | `src/cached_fetch.c:77` | `static void remember(hc_store *store, const char *partition, const char *url,                    ...` |
-| `response_from_cache` | function | `src/cached_fetch.c:53` | `static int response_from_cache(sf_response *out, const hc_meta *m, uint8_t *body, size_t len)` |
-| `trace` | function | `src/cached_fetch.c:18` | `static void trace(const char *what, const char *url)` |
-| `cx_box_layer` | function | `src/compositor.c:34` | `cx_layer cx_box_layer(const cx_style *s)` |
-| `cx_forms_stacking_context` | function | `src/compositor.c:16` | `int cx_forms_stacking_context(const cx_style *s)` |
-| `cx_item_compare` | function | `src/compositor.c:54` | `int cx_item_compare(const cx_item *a, const cx_item *b)` |
-| `cx_sort` | function | `src/compositor.c:70` | `void cx_sort(cx_item *items, size_t n)` |
-| `eff_z` | function | `src/compositor.c:50` | `static int eff_z(const cx_item *it)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

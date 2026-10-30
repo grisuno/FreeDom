@@ -3,6 +3,38 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `hp_document` | type_alias | `include/html_parse.h:39` | `typedef struct hp_document hp_document;` |
+| `hp_document_free` | function | `include/html_parse.h:136` | `void hp_document_free(hp_document *doc);` |
+| `hp_document_root` | function | `include/html_parse.h:142` | `const void *hp_document_root(const hp_document *doc);` |
+| `hp_element_count` | function | `include/html_parse.h:63` | `size_t hp_element_count(const hp_document *doc);` |
+| `hp_event_handler_count` | function | `include/html_parse.h:65` | `size_t hp_event_handler_count(const hp_document *doc);` |
+| `hp_extract_stylesheet_hrefs` | function | `include/html_parse.h:127` | `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count);` |
+| `hp_extract_text` | function | `include/html_parse.h:69` | `char *hp_extract_text(const hp_document *doc, size_t *out_len);` |
+| `hp_free` | function | `include/html_parse.h:133` | `void hp_free(char *buf);` |
+| `hp_free_scripts` | function | `include/html_parse.h:111` | `void hp_free_scripts(hp_script *scripts, size_t count);` |
+| `hp_free_stylesheet_hrefs` | function | `include/html_parse.h:130` | `void hp_free_stylesheet_hrefs(char **hrefs, size_t count);` |
+| `hp_get_title` | function | `include/html_parse.h:70` | `char *hp_get_title(const hp_document *doc, size_t *out_len);` |
+| `hp_script` | struct | `include/html_parse.h:76` | `` |
+| `hp_script_count` | function | `include/html_parse.h:64` | `size_t hp_script_count(const hp_document *doc);` |
+| `hp_status` | enum | `include/html_parse.h:22` | `` |
+| `max_bytes` | type_alias | `include/html_parse.h:31` | `typedef struct hp_config { size_t max_bytes;` |
+| `modules` | function | `include/html_parse.h:94` | `* ES modules (import/export cannot run as a classic script), and template blocks * (text/x-jquery-tmpl, text/html...` |
+| `src` | function | `include/html_parse.h:90` | `* carry their raw src (a <script src> with an inline body lists ONLY the src -- * browser rule: when src is present...` |
+| `FREEDOM_HTTP_CACHE_H` | macro | `include/http_cache.h:2` | `#define FREEDOM_HTTP_CACHE_H` |
+| `HC_HEURISTIC_CAP` | macro | `include/http_cache.h:26` | `#define HC_HEURISTIC_CAP` |
+| `HC_MAX_ENTRY` | macro | `include/http_cache.h:23` | `#define HC_MAX_ENTRY` |
+| `HC_MAX_TOTAL` | macro | `include/http_cache.h:24` | `#define HC_MAX_TOTAL` |
+| `HC_REDIRECT_TTL` | macro | `include/http_cache.h:25` | `#define HC_REDIRECT_TTL` |
+| `HC_TYPE_MAX` | macro | `include/http_cache.h:22` | `#define HC_TYPE_MAX` |
+| `HC_URL_MAX` | macro | `include/http_cache.h:21` | `#define HC_URL_MAX` |
+| `HC_VAL_MAX` | macro | `include/http_cache.h:20` | `#define HC_VAL_MAX` |
+| `by` | function | `include/http_cache.h:59` | `* something to reuse it by (validator, max-age or Expires). */ int hc_storable(long http_code, const hc_meta *m...` |
+| `final_url` | type_alias | `include/http_cache.h:43` | `typedef struct hc_meta { char final_url[HC_URL_MAX];` |
+| `hc_body_free` | function | `include/http_cache.h:78` | `void hc_body_free(uint8_t *body, size_t len);` |
+| `hc_class` | enum | `include/http_cache.h:38` | `` |
+| `hc_clear` | function | `include/http_cache.h:84` | `void hc_clear(hc_store *s);` |
+| `hc_close` | function | `include/http_cache.h:72` | `void hc_close(hc_store *s);` |
+| `hc_lifetime` | function | `include/http_cache.h:63` | `long hc_lifetime(const hc_meta *m);` |
 | `hc_meta` | struct | `include/http_cache.h:44` | `` |
 | `hc_parse_http_date` | function | `include/http_cache.h:56` | `time_t hc_parse_http_date(const char *s);` |
 | `hc_status` | enum | `include/http_cache.h:28` | `` |
@@ -15,21 +47,21 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `IDN_PAGE_MAX` | macro | `include/identity.h:20` | `#define IDN_PAGE_MAX` |
 | `IDN_SERIAL_MAX` | macro | `include/identity.h:19` | `#define IDN_SERIAL_MAX` |
 | `IDN_UA_MAX` | macro | `include/identity.h:16` | `#define IDN_UA_MAX` |
-| `idn_accept_language` | function | `include/identity.h:58` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);` |
-| `idn_apply_query` | function | `include/identity.h:70` | `unsigned idn_apply_query(idn_config *c, const char *query);` |
-| `idn_clear_geo` | function | `include/identity.h:54` | `void idn_clear_geo(idn_config *c);` |
+| `idn_accept_language` | function | `include/identity.h:63` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);` |
+| `idn_apply_query` | function | `include/identity.h:75` | `unsigned idn_apply_query(idn_config *c, const char *query);` |
+| `idn_clear_geo` | function | `include/identity.h:59` | `void idn_clear_geo(idn_config *c);` |
 | `idn_config` | struct | `include/identity.h:37` | `` |
-| `idn_defaults` | function | `include/identity.h:45` | `void idn_defaults(idn_config *c);` |
+| `idn_defaults` | function | `include/identity.h:50` | `void idn_defaults(idn_config *c);` |
 | `idn_geo_mode` | enum | `include/identity.h:25` | `` |
-| `idn_is_default` | function | `include/identity.h:48` | `int idn_is_default(const idn_config *c);` |
-| `idn_parse` | function | `include/identity.h:67` | `void idn_parse(idn_config *c, const char *text);` |
-| `idn_primary_language` | function | `include/identity.h:59` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);` |
-| `idn_render_page` | function | `include/identity.h:73` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` |
-| `idn_serialize` | function | `include/identity.h:63` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` |
-| `idn_set_geo` | function | `include/identity.h:53` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);` |
-| `idn_set_languages` | function | `include/identity.h:52` | `int idn_set_languages(idn_config *c, const char *list);` |
-| `idn_set_user_agent` | function | `include/identity.h:51` | `int idn_set_user_agent(idn_config *c, const char *ua);` |
-| `idn_user_agent` | function | `include/identity.h:57` | `const char *idn_user_agent(const idn_config *c);` |
+| `idn_is_default` | function | `include/identity.h:53` | `int idn_is_default(const idn_config *c);` |
+| `idn_parse` | function | `include/identity.h:72` | `void idn_parse(idn_config *c, const char *text);` |
+| `idn_primary_language` | function | `include/identity.h:64` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);` |
+| `idn_render_page` | function | `include/identity.h:78` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` |
+| `idn_serialize` | function | `include/identity.h:68` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` |
+| `idn_set_geo` | function | `include/identity.h:58` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);` |
+| `idn_set_languages` | function | `include/identity.h:57` | `int idn_set_languages(idn_config *c, const char *list);` |
+| `idn_set_user_agent` | function | `include/identity.h:56` | `int idn_set_user_agent(idn_config *c, const char *ua);` |
+| `idn_user_agent` | function | `include/identity.h:62` | `const char *idn_user_agent(const idn_config *c);` |
 | `user_agent` | type_alias | `include/identity.h:36` | `typedef struct idn_config { char user_agent[IDN_UA_MAX];` |
 | `FREEDOM_IMAGE_DECODE_H` | macro | `include/image_decode.h:2` | `#define FREEDOM_IMAGE_DECODE_H` |
 | `IMG_MAX_DIM` | macro | `include/image_decode.h:65` | `#define IMG_MAX_DIM` |
@@ -245,14 +277,14 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `os_prot_allowed` | function | `include/os_sandbox.h:52` | `int os_prot_allowed(long syscall_nr, unsigned long prot);` |
 | `os_status` | enum | `include/os_sandbox.h:21` | `` |
 | `os_violation` | enum | `include/os_sandbox.h:30` | `` |
-| `CSS_LEN_UNSET` | function | `include/page_view.h:558` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...` |
+| `CSS_LEN_UNSET` | function | `include/page_view.h:560` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...` |
 | `FREEDOM_PAGE_VIEW_H` | macro | `include/page_view.h:2` | `#define FREEDOM_PAGE_VIEW_H` |
 | `PV_BG_URL_MAX` | macro | `include/page_view.h:69` | `#define PV_BG_URL_MAX` |
-| `PV_BR_CONT` | macro | `include/page_view.h:1198` | `#define PV_BR_CONT` |
-| `PV_BR_EMPTY` | macro | `include/page_view.h:1197` | `#define PV_BR_EMPTY` |
+| `PV_BR_CONT` | macro | `include/page_view.h:1202` | `#define PV_BR_CONT` |
+| `PV_BR_EMPTY` | macro | `include/page_view.h:1201` | `#define PV_BR_EMPTY` |
 | `PV_BSHADOW_LAYERS` | macro | `include/page_view.h:44` | `#define PV_BSHADOW_LAYERS` |
 | `PV_CONT_DEPTH` | macro | `include/page_view.h:63` | `#define PV_CONT_DEPTH` |
-| `PV_FRAME_SCHEME` | macro | `include/page_view.h:1256` | `#define PV_FRAME_SCHEME` |
+| `PV_FRAME_SCHEME` | macro | `include/page_view.h:1260` | `#define PV_FRAME_SCHEME` |
 | `PV_GRID_TRACKS` | macro | `include/page_view.h:58` | `#define PV_GRID_TRACKS` |
 | `PV_LEN_AUTO` | macro | `include/page_view.h:54` | `#define PV_LEN_AUTO` |
 | `PV_LEN_END` | macro | `include/page_view.h:55` | `#define PV_LEN_END` |
@@ -261,82 +293,82 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `PV_MAUTO_LEFT` | macro | `include/page_view.h:46` | `#define PV_MAUTO_LEFT` |
 | `PV_MAUTO_RIGHT` | macro | `include/page_view.h:47` | `#define PV_MAUTO_RIGHT` |
 | `PV_MAUTO_TOP` | macro | `include/page_view.h:48` | `#define PV_MAUTO_TOP` |
-| `PV_PH_HIDDEN` | macro | `include/page_view.h:1224` | `#define PV_PH_HIDDEN` |
-| `PV_PH_THEME` | macro | `include/page_view.h:1223` | `#define PV_PH_THEME` |
-| `PV_UA_BODY_MARGIN` | macro | `include/page_view.h:860` | `#define PV_UA_BODY_MARGIN` |
-| `ancestors` | function | `include/page_view.h:1073` | `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...` |
-| `bx_display` | function | `include/page_view.h:231` | `* bx_display (flex/grid);` |
-| `cause` | function | `include/page_view.h:926` | `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...` |
-| `container` | function | `include/page_view.h:230` | `* cont_id groups runs of one container (-1 = none);` |
-| `declare` | function | `include/page_view.h:863` | `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...` |
-| `default` | function | `include/page_view.h:994` | `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);` |
-| `form` | function | `include/page_view.h:957` | `* form (-1 if none);` |
-| `itself` | function | `include/page_view.h:359` | `* by itself (bx_width_cap2);` |
+| `PV_PH_HIDDEN` | macro | `include/page_view.h:1228` | `#define PV_PH_HIDDEN` |
+| `PV_PH_THEME` | macro | `include/page_view.h:1227` | `#define PV_PH_THEME` |
+| `PV_UA_BODY_MARGIN` | macro | `include/page_view.h:862` | `#define PV_UA_BODY_MARGIN` |
+| `ancestors` | function | `include/page_view.h:1077` | `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...` |
+| `bx_display` | function | `include/page_view.h:233` | `* bx_display (flex/grid);` |
+| `cause` | function | `include/page_view.h:928` | `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...` |
+| `container` | function | `include/page_view.h:232` | `* cont_id groups runs of one container (-1 = none);` |
+| `declare` | function | `include/page_view.h:865` | `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...` |
+| `default` | function | `include/page_view.h:996` | `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);` |
+| `form` | function | `include/page_view.h:959` | `* form (-1 if none);` |
+| `itself` | function | `include/page_view.h:361` | `* by itself (bx_width_cap2);` |
 | `kind` | type_alias | `include/page_view.h:121` | `typedef struct pv_run { pv_kind kind;` |
-| `nonzero` | function | `include/page_view.h:875` | `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...` |
-| `order` | function | `include/page_view.h:295` | `* groups the runs of ONE floated element in document order (-1 = not in a float);` |
-| `parent_id` | type_alias | `include/page_view.h:460` | `typedef struct pv_box_def { int parent_id;` |
-| `parent_id` | type_alias | `include/page_view.h:789` | `typedef struct pv_cont_def { int parent_id;` |
-| `policy` | function | `include/page_view.h:890` | `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...` |
-| `pv_at` | function | `include/page_view.h:1246` | `const pv_run *pv_at(const pv_view *v, size_t i);` |
-| `pv_box_at` | function | `include/page_view.h:1251` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i);` |
-| `pv_box_count` | function | `include/page_view.h:1250` | `size_t pv_box_count(const pv_view *v);` |
-| `pv_box_def` | struct | `include/page_view.h:460` | `` |
-| `pv_computed` | type_alias | `include/page_view.h:911` | `typedef struct pv_computed pv_computed;` |
-| `pv_computed_free` | function | `include/page_view.h:922` | `void pv_computed_free(pv_computed *pc);` |
-| `pv_computed_get` | function | `include/page_view.h:919` | `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);` |
-| `pv_computed_new` | function | `include/page_view.h:912` | `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...` |
-| `pv_cont_at` | function | `include/page_view.h:1218` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);` |
-| `pv_cont_count` | function | `include/page_view.h:1217` | `size_t pv_cont_count(const pv_view *v);` |
-| `pv_cont_def` | struct | `include/page_view.h:789` | `` |
-| `pv_count` | function | `include/page_view.h:1245` | `size_t pv_count(const pv_view *v);` |
+| `nonzero` | function | `include/page_view.h:877` | `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...` |
+| `order` | function | `include/page_view.h:297` | `* groups the runs of ONE floated element in document order (-1 = not in a float);` |
+| `parent_id` | type_alias | `include/page_view.h:462` | `typedef struct pv_box_def { int parent_id;` |
+| `parent_id` | type_alias | `include/page_view.h:791` | `typedef struct pv_cont_def { int parent_id;` |
+| `policy` | function | `include/page_view.h:892` | `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...` |
+| `pv_at` | function | `include/page_view.h:1250` | `const pv_run *pv_at(const pv_view *v, size_t i);` |
+| `pv_box_at` | function | `include/page_view.h:1255` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i);` |
+| `pv_box_count` | function | `include/page_view.h:1254` | `size_t pv_box_count(const pv_view *v);` |
+| `pv_box_def` | struct | `include/page_view.h:462` | `` |
+| `pv_computed` | type_alias | `include/page_view.h:913` | `typedef struct pv_computed pv_computed;` |
+| `pv_computed_free` | function | `include/page_view.h:924` | `void pv_computed_free(pv_computed *pc);` |
+| `pv_computed_get` | function | `include/page_view.h:921` | `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);` |
+| `pv_computed_new` | function | `include/page_view.h:914` | `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...` |
+| `pv_cont_at` | function | `include/page_view.h:1222` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);` |
+| `pv_cont_count` | function | `include/page_view.h:1221` | `size_t pv_cont_count(const pv_view *v);` |
+| `pv_cont_def` | struct | `include/page_view.h:791` | `` |
+| `pv_count` | function | `include/page_view.h:1249` | `size_t pv_count(const pv_view *v);` |
 | `pv_form_method` | enum | `include/page_view.h:107` | `` |
-| `pv_free` | function | `include/page_view.h:1242` | `void pv_free(pv_view *v);` |
+| `pv_free` | function | `include/page_view.h:1246` | `void pv_free(pv_view *v);` |
 | `pv_input_type` | enum | `include/page_view.h:87` | `` |
 | `pv_kind` | enum | `include/page_view.h:71` | `` |
-| `pv_new` | function | `include/page_view.h:938` | `pv_view *pv_new(void);` |
-| `pv_placeholder_color` | function | `include/page_view.h:1235` | `int pv_placeholder_color(const css_style *ph);` |
+| `pv_new` | function | `include/page_view.h:940` | `pv_view *pv_new(void);` |
+| `pv_placeholder_color` | function | `include/page_view.h:1239` | `int pv_placeholder_color(const css_style *ph);` |
 | `pv_run` | struct | `include/page_view.h:121` | `` |
-| `pv_set_bgcolor` | function | `include/page_view.h:1004` | `void pv_set_bgcolor(pv_view *v, int bg_rgb);` |
-| `pv_set_block_id` | function | `include/page_view.h:1180` | `void pv_set_block_id(pv_view *v, int block_id);` |
-| `pv_set_block_node` | function | `include/page_view.h:1194` | `void pv_set_block_node(pv_view *v, dom_node_id id);` |
-| `pv_set_box` | function | `include/page_view.h:1159` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` |
-| `pv_set_box_maxw` | function | `include/page_view.h:1170` | `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` |
-| `pv_set_box_pct` | function | `include/page_view.h:1165` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` |
-| `pv_set_br_line` | function | `include/page_view.h:1202` | `void pv_set_br_line(pv_view *v, int br_line);` |
-| `pv_set_color` | function | `include/page_view.h:997` | `void pv_set_color(pv_view *v, int fg_rgb);` |
-| `pv_set_cont_box` | function | `include/page_view.h:1119` | `void pv_set_cont_box(pv_view *v, int cont_box_id);` |
-| `pv_set_cont_item` | function | `include/page_view.h:1135` | `void pv_set_cont_item(pv_view *v, int cont_item);` |
-| `pv_set_emphasis` | function | `include/page_view.h:989` | `void pv_set_emphasis(pv_view *v, int bold, int italic);` |
-| `pv_set_flex` | function | `include/page_view.h:1128` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` |
-| `pv_set_flex_mauto` | function | `include/page_view.h:1131` | `void pv_set_flex_mauto(pv_view *v, int mauto);` |
-| `pv_set_float` | function | `include/page_view.h:1149` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...` |
-| `pv_set_float_w` | function | `include/page_view.h:1146` | `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...` |
-| `pv_set_grad_text` | function | `include/page_view.h:1089` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` |
-| `pv_set_grid` | function | `include/page_view.h:1120` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);` |
-| `pv_set_grid_area` | function | `include/page_view.h:1109` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` |
-| `pv_set_grid_rows` | function | `include/page_view.h:1110` | `void pv_set_grid_rows(pv_view *v, int grid_rows);` |
-| `pv_set_input_checked` | function | `include/page_view.h:1222` | `void pv_set_input_checked(pv_view *v, int checked);` |
-| `pv_set_input_placeholder` | function | `include/page_view.h:1226` | `void pv_set_input_placeholder(pv_view *v, int ph_color);` |
-| `pv_set_input_select_opts` | function | `include/page_view.h:1239` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` |
-| `pv_set_justify_self` | function | `include/page_view.h:1191` | `void pv_set_justify_self(pv_view *v, int justify_self);` |
-| `pv_set_node_id` | function | `include/page_view.h:1175` | `void pv_set_node_id(pv_view *v, dom_node_id node_id);` |
-| `pv_set_oof` | function | `include/page_view.h:1188` | `void pv_set_oof(pv_view *v, int oof);` |
-| `pv_set_own_box` | function | `include/page_view.h:1184` | `void pv_set_own_box(pv_view *v, int box_id);` |
-| `pv_set_row_span` | function | `include/page_view.h:1105` | `void pv_set_row_span(pv_view *v, int row_span);` |
-| `pv_set_text_ext` | function | `include/page_view.h:1083` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);` |
-| `pv_set_text_style` | function | `include/page_view.h:1013` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` |
-| `pv_set_ua_tag` | function | `include/page_view.h:1115` | `void pv_set_ua_tag(pv_view *v, int ua_tag);` |
+| `pv_set_bgcolor` | function | `include/page_view.h:1006` | `void pv_set_bgcolor(pv_view *v, int bg_rgb);` |
+| `pv_set_block_id` | function | `include/page_view.h:1184` | `void pv_set_block_id(pv_view *v, int block_id);` |
+| `pv_set_block_node` | function | `include/page_view.h:1198` | `void pv_set_block_node(pv_view *v, dom_node_id id);` |
+| `pv_set_box` | function | `include/page_view.h:1163` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` |
+| `pv_set_box_maxw` | function | `include/page_view.h:1174` | `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` |
+| `pv_set_box_pct` | function | `include/page_view.h:1169` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` |
+| `pv_set_br_line` | function | `include/page_view.h:1206` | `void pv_set_br_line(pv_view *v, int br_line);` |
+| `pv_set_color` | function | `include/page_view.h:999` | `void pv_set_color(pv_view *v, int fg_rgb);` |
+| `pv_set_cont_box` | function | `include/page_view.h:1123` | `void pv_set_cont_box(pv_view *v, int cont_box_id);` |
+| `pv_set_cont_item` | function | `include/page_view.h:1139` | `void pv_set_cont_item(pv_view *v, int cont_item);` |
+| `pv_set_emphasis` | function | `include/page_view.h:991` | `void pv_set_emphasis(pv_view *v, int bold, int italic);` |
+| `pv_set_flex` | function | `include/page_view.h:1132` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` |
+| `pv_set_flex_mauto` | function | `include/page_view.h:1135` | `void pv_set_flex_mauto(pv_view *v, int mauto);` |
+| `pv_set_float` | function | `include/page_view.h:1153` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...` |
+| `pv_set_float_w` | function | `include/page_view.h:1150` | `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...` |
+| `pv_set_grad_text` | function | `include/page_view.h:1093` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` |
+| `pv_set_grid` | function | `include/page_view.h:1124` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);` |
+| `pv_set_grid_area` | function | `include/page_view.h:1113` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` |
+| `pv_set_grid_rows` | function | `include/page_view.h:1114` | `void pv_set_grid_rows(pv_view *v, int grid_rows);` |
+| `pv_set_input_checked` | function | `include/page_view.h:1226` | `void pv_set_input_checked(pv_view *v, int checked);` |
+| `pv_set_input_placeholder` | function | `include/page_view.h:1230` | `void pv_set_input_placeholder(pv_view *v, int ph_color);` |
+| `pv_set_input_select_opts` | function | `include/page_view.h:1243` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` |
+| `pv_set_justify_self` | function | `include/page_view.h:1195` | `void pv_set_justify_self(pv_view *v, int justify_self);` |
+| `pv_set_node_id` | function | `include/page_view.h:1179` | `void pv_set_node_id(pv_view *v, dom_node_id node_id);` |
+| `pv_set_oof` | function | `include/page_view.h:1192` | `void pv_set_oof(pv_view *v, int oof);` |
+| `pv_set_own_box` | function | `include/page_view.h:1188` | `void pv_set_own_box(pv_view *v, int box_id);` |
+| `pv_set_row_span` | function | `include/page_view.h:1109` | `void pv_set_row_span(pv_view *v, int row_span);` |
+| `pv_set_text_ext` | function | `include/page_view.h:1087` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);` |
+| `pv_set_text_style` | function | `include/page_view.h:1015` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` |
+| `pv_set_ua_tag` | function | `include/page_view.h:1119` | `void pv_set_ua_tag(pv_view *v, int ua_tag);` |
 | `pv_status` | enum | `include/page_view.h:34` | `` |
-| `pv_svg_append_root_attrs` | function | `include/page_view.h:1232` | `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` |
-| `pv_text_ext` | struct | `include/page_view.h:1029` | `` |
-| `pv_text_ext_reset` | function | `include/page_view.h:1068` | `void pv_text_ext_reset(pv_text_ext *e);` |
-| `pv_view` | struct | `include/page_view.h:839` | `` |
-| `resolved` | function | `include/page_view.h:882` | `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...` |
-| `run` | function | `include/page_view.h:1092` | `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...` |
-| `scale` | function | `include/page_view.h:633` | `* scale(1)) and rotate in whole degrees (transform_rotate);` |
-| `tree` | function | `include/page_view.h:674` | `* box tree (a mask covers its whole subtree);` |
-| `word_spacing` | type_alias | `include/page_view.h:1029` | `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;` |
+| `pv_svg_append_root_attrs` | function | `include/page_view.h:1236` | `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` |
+| `pv_text_ext` | struct | `include/page_view.h:1031` | `` |
+| `pv_text_ext_reset` | function | `include/page_view.h:1072` | `void pv_text_ext_reset(pv_text_ext *e);` |
+| `pv_view` | struct | `include/page_view.h:841` | `` |
+| `resolved` | function | `include/page_view.h:884` | `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...` |
+| `run` | function | `include/page_view.h:1096` | `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...` |
+| `scale` | function | `include/page_view.h:635` | `* scale(1)) and rotate in whole degrees (transform_rotate);` |
+| `tree` | function | `include/page_view.h:676` | `* box tree (a mask covers its whole subtree);` |
+| `word_spacing` | type_alias | `include/page_view.h:1031` | `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;` |
 | `FREEDOM_PDF_EXPORT_H` | macro | `include/pdf_export.h:2` | `#define FREEDOM_PDF_EXPORT_H` |
 | `PE_EXT` | macro | `include/pdf_export.h:29` | `#define PE_EXT` |
 | `PE_EXT_PNG` | macro | `include/pdf_export.h:30` | `#define PE_EXT_PNG` |
@@ -435,66 +467,34 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `psl_wildcards` | variable | `include/psl_data.h:23` | `extern const char *const psl_wildcards[];` |
 | `psl_wildcards_n` | variable | `include/psl_data.h:24` | `extern const size_t psl_wildcards_n;` |
 | `FREEDOM_RENDER_DOC_H` | macro | `include/render_doc.h:2` | `#define FREEDOM_RENDER_DOC_H` |
-| `IMG_FAIL_OK` | function | `include/render_doc.h:358` | `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);` |
+| `IMG_FAIL_OK` | function | `include/render_doc.h:360` | `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);` |
 | `RD_IMAGE` | function | `include/render_doc.h:59` | `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);` |
-| `decision` | function | `include/render_doc.h:352` | `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...` |
-| `default` | function | `include/render_doc.h:151` | `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...` |
+| `decision` | function | `include/render_doc.h:354` | `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...` |
+| `default` | function | `include/render_doc.h:153` | `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...` |
 | `form` | function | `include/render_doc.h:63` | `* form (-1 = none);` |
 | `img_fail_reason` | enum | `include/render_doc.h:34` | `` |
 | `kind` | type_alias | `include/render_doc.h:64` | `typedef struct rd_block { rd_kind kind;` |
 | `list` | function | `include/render_doc.h:18` | `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...` |
-| `rd_at` | function | `include/render_doc.h:320` | `const rd_block *rd_at(const rd_doc *d, size_t i);` |
+| `rd_at` | function | `include/render_doc.h:322` | `const rd_block *rd_at(const rd_doc *d, size_t i);` |
 | `rd_block` | struct | `include/render_doc.h:64` | `` |
-| `rd_block_heading_level` | function | `include/render_doc.h:349` | `int rd_block_heading_level(const rd_block *b);` |
-| `rd_block_tag` | function | `include/render_doc.h:342` | `const char *rd_block_tag(const rd_block *b);` |
-| `rd_box_at` | function | `include/render_doc.h:325` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);` |
-| `rd_box_count` | function | `include/render_doc.h:324` | `size_t rd_box_count(const rd_doc *d);` |
-| `rd_cont_at` | function | `include/render_doc.h:330` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);` |
-| `rd_cont_count` | function | `include/render_doc.h:329` | `size_t rd_cont_count(const rd_doc *d);` |
-| `rd_count` | function | `include/render_doc.h:319` | `size_t rd_count(const rd_doc *d);` |
-| `rd_doc` | struct | `include/render_doc.h:265` | `` |
-| `rd_free` | function | `include/render_doc.h:316` | `void rd_free(rd_doc *d);` |
-| `rd_input_invisible` | function | `include/render_doc.h:368` | `int rd_input_invisible(int input_type);` |
-| `rd_input_label` | function | `include/render_doc.h:363` | `const char *rd_input_label(int input_type);` |
+| `rd_block_heading_level` | function | `include/render_doc.h:351` | `int rd_block_heading_level(const rd_block *b);` |
+| `rd_block_tag` | function | `include/render_doc.h:344` | `const char *rd_block_tag(const rd_block *b);` |
+| `rd_box_at` | function | `include/render_doc.h:327` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);` |
+| `rd_box_count` | function | `include/render_doc.h:326` | `size_t rd_box_count(const rd_doc *d);` |
+| `rd_cont_at` | function | `include/render_doc.h:332` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);` |
+| `rd_cont_count` | function | `include/render_doc.h:331` | `size_t rd_cont_count(const rd_doc *d);` |
+| `rd_count` | function | `include/render_doc.h:321` | `size_t rd_count(const rd_doc *d);` |
+| `rd_doc` | struct | `include/render_doc.h:267` | `` |
+| `rd_free` | function | `include/render_doc.h:318` | `void rd_free(rd_doc *d);` |
+| `rd_input_invisible` | function | `include/render_doc.h:370` | `int rd_input_invisible(int input_type);` |
+| `rd_input_label` | function | `include/render_doc.h:365` | `const char *rd_input_label(int input_type);` |
 | `rd_kind` | enum | `include/render_doc.h:42` | `` |
-| `rd_kind_name` | function | `include/render_doc.h:334` | `const char *rd_kind_name(rd_kind k);` |
-| `rd_status` | enum | `include/render_doc.h:297` | `` |
-| `rdp_images_warning` | function | `include/render_doc.h:306` | `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...` |
-| `to` | function | `include/render_doc.h:251` | `* belongs to (-1 = none);` |
+| `rd_kind_name` | function | `include/render_doc.h:336` | `const char *rd_kind_name(rd_kind k);` |
+| `rd_status` | enum | `include/render_doc.h:299` | `` |
+| `rdp_images_warning` | function | `include/render_doc.h:308` | `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...` |
+| `to` | function | `include/render_doc.h:253` | `* belongs to (-1 = none);` |
 | `FREEDOM_RENDER_POLICY_H` | macro | `include/render_policy.h:2` | `#define FREEDOM_RENDER_POLICY_H` |
 | `RDP_TRACKER_MAX_DIM` | macro | `include/render_policy.h:27` | `#define RDP_TRACKER_MAX_DIM` |
 | `images` | type_alias | `include/render_policy.h:32` | `typedef struct rdp_caps { bool images;` |
-| `rdp_caps` | struct | `include/render_policy.h:32` | `` |
-| `rdp_images_warning` | function | `include/render_policy.h:69` | `const char *rdp_images_warning(void);` |
-| `rdp_img_decision` | enum | `include/render_policy.h:39` | `` |
-| `rdp_img_reason` | function | `include/render_policy.h:66` | `const char *rdp_img_reason(rdp_img_decision d);` |
-| `rdp_is_tracking_pixel` | function | `include/render_policy.h:53` | `int rdp_is_tracking_pixel(int w, int h);` |
-| `size` | function | `include/render_policy.h:56` | `* announced size (e.g. <img width height>);` |
-| `FREEDOM_RENDERER_H` | macro | `include/renderer.h:2` | `#define FREEDOM_RENDERER_H` |
-| `RD_MAX_FIELD` | macro | `include/renderer.h:38` | `#define RD_MAX_FIELD` |
-| `RD_MAX_INPUT` | macro | `include/renderer.h:37` | `#define RD_MAX_INPUT` |
-| `rd_result` | struct | `include/renderer.h:29` | `` |
-| `rd_result_free` | function | `include/renderer.h:46` | `void rd_result_free(rd_result *out);` |
-| `rd_status` | enum | `include/renderer.h:20` | `` |
-| `status` | type_alias | `include/renderer.h:28` | `typedef struct rd_result { rd_status status;` |
-| `FREEDOM_REQUEST_POLICY_H` | macro | `include/request_policy.h:2` | `#define FREEDOM_REQUEST_POLICY_H` |
-| `RP_HDR_MAX_BYTES` | macro | `include/request_policy.h:44` | `#define RP_HDR_MAX_BYTES` |
-| `RP_HDR_MAX_COUNT` | macro | `include/request_policy.h:43` | `#define RP_HDR_MAX_COUNT` |
-| `RP_HDR_NAME_MAX` | macro | `include/request_policy.h:45` | `#define RP_HDR_NAME_MAX` |
-| `RP_HDR_VALUE_MAX` | macro | `include/request_policy.h:46` | `#define RP_HDR_VALUE_MAX` |
-| `rp_decision` | enum | `include/request_policy.h:21` | `` |
-| `rp_headers_have` | function | `include/request_policy.h:61` | `static inline int rp_headers_have(const char *lines, const char *name)` |
-| `rp_host_of` | function | `include/request_policy.h:30` | `int rp_host_of(const char *url, char *out, size_t out_size);` |
-| `rp_same_site` | function | `include/request_policy.h:37` | `int rp_same_site(const char *top_level_url, const char *request_url);` |
-| `rp_sanitize_request_headers` | function | `include/request_policy.h:57` | `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);` |
-| `rp_site_of` | function | `include/request_policy.h:34` | `int rp_site_of(const char *host, char *out, size_t out_size);` |
-| `EXCLUDED` | function | `include/secure_fetch.h:233` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
-| `FREEDOM_SECURE_FETCH_H` | macro | `include/secure_fetch.h:2` | `#define FREEDOM_SECURE_FETCH_H` |
-| `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:216` | `#define SF_CONNECT_TIMEOUT_MS` |
-| `SF_DEFAULT_KEX_GROUPS` | macro | `include/secure_fetch.h:166` | `#define SF_DEFAULT_KEX_GROUPS` |
-| `SF_DEFAULT_MAX_BODY` | macro | `include/secure_fetch.h:192` | `#define SF_DEFAULT_MAX_BODY` |
-| `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:218` | `#define SF_DEFAULT_MAX_REDIRECTS` |
-| `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:193` | `#define SF_DEFAULT_TIMEOUT_MS` |
-| `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:191` | `#define SF_DEFAULT_USER_AGENT` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

@@ -58,7 +58,7 @@ Never NULL.
 int fbp_tab_from_name(const char *name);
 ```
 
-Tab named [`name`](src.text_shape.c.md#name) (case-insensitive), or -1 when unknown / NULL.
+Tab named `name` (case-insensitive), or -1 when unknown / NULL.
 
 **Parameters**
 

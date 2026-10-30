@@ -92,7 +92,7 @@ An image is never a link, so href and src are never both set. fg_rgb carries the
 
 #### `pv_run.container`
 
-`method` | [include/page_view.h:230](../../include/page_view.h#L230)
+`method` | [include/page_view.h:232](../../include/page_view.h#L232)
 
 ```c
 * cont_id groups runs of one container (-1 = none);
@@ -110,7 +110,7 @@ An image is never a link, so href and src are never both set. fg_rgb carries the
 
 #### `pv_run.bx_display`
 
-`method` | [include/page_view.h:231](../../include/page_view.h#L231)
+`method` | [include/page_view.h:233](../../include/page_view.h#L233)
 
 ```c
 * bx_display (flex/grid);
@@ -130,7 +130,7 @@ An image is never a link, so href and src are never both set. fg_rgb carries the
 
 #### `pv_run.order`
 
-`method` | [include/page_view.h:295](../../include/page_view.h#L295)
+`method` | [include/page_view.h:297](../../include/page_view.h#L297)
 
 ```c
 * groups the runs of ONE floated element in document order (-1 = not in a float);
@@ -148,7 +148,7 @@ An image is never a link, so href and src are never both set. fg_rgb carries the
 
 #### `pv_run.itself`
 
-`method` | [include/page_view.h:359](../../include/page_view.h#L359)
+`method` | [include/page_view.h:361](../../include/page_view.h#L361)
 
 ```c
 * by itself (bx_width_cap2);
@@ -162,7 +162,7 @@ An image is never a link, so href and src are never both set. fg_rgb carries the
 
 ### `pv_box_def`
 
-`struct` | [include/page_view.h:460](../../include/page_view.h#L460)
+`struct` | [include/page_view.h:462](../../include/page_view.h#L462)
 
 ```c
 typedef struct pv_box_def
@@ -184,7 +184,7 @@ The box decoration and the parent link live here, not on each run, so a box is d
 
 #### `pv_box_def.CSS_LEN_UNSET`
 
-`method` | [include/page_view.h:558](../../include/page_view.h#L558)
+`method` | [include/page_view.h:560](../../include/page_view.h#L560)
 
 ```c
 * CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an in-flow offset, reader-safe);
@@ -198,7 +198,7 @@ The box decoration and the parent link live here, not on each run, so a box is d
 
 #### `pv_box_def.scale`
 
-`method` | [include/page_view.h:633](../../include/page_view.h#L633)
+`method` | [include/page_view.h:635](../../include/page_view.h#L635)
 
 ```c
 * scale(1)) and rotate in whole degrees (transform_rotate);
@@ -218,7 +218,7 @@ The box decoration and the parent link live here, not on each run, so a box is d
 
 #### `pv_box_def.tree`
 
-`method` | [include/page_view.h:674](../../include/page_view.h#L674)
+`method` | [include/page_view.h:676](../../include/page_view.h#L676)
 
 ```c
 * box tree (a mask covers its whole subtree);
@@ -240,7 +240,7 @@ The box decoration and the parent link live here, not on each run, so a box is d
 
 ### `pv_cont_def`
 
-`struct` | [include/page_view.h:789](../../include/page_view.h#L789)
+`struct` | [include/page_view.h:791](../../include/page_view.h#L791)
 
 ```c
 typedef struct pv_cont_def
@@ -268,7 +268,7 @@ of its parent. Structure (like cont_id itself), carried regardless of caps.css.
 
 ### `pv_view`
 
-`struct` | [include/page_view.h:839](../../include/page_view.h#L839)
+`struct` | [include/page_view.h:841](../../include/page_view.h#L841)
 
 ```c
 typedef struct pv_view
@@ -280,7 +280,7 @@ typedef struct pv_view
 
 ### `pv_text_ext`
 
-`struct` | [include/page_view.h:1029](../../include/page_view.h#L1029)
+`struct` | [include/page_view.h:1031](../../include/page_view.h#L1031)
 
 ```c
 typedef struct pv_text_ext
@@ -300,7 +300,7 @@ The 20+ fields used to be positional parameters of pv_set_text_ext -- a signatur
 
 #### `pv_text_ext.word_spacing`
 
-`type_alias` | [include/page_view.h:1029](../../include/page_view.h#L1029)
+`type_alias` | [include/page_view.h:1031](../../include/page_view.h#L1031)
 
 ```c
 typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;
@@ -390,7 +390,7 @@ An image is never a link, so href and src are never both set. fg_rgb carries the
 
 ### `parent_id`
 
-`type_alias` | [include/page_view.h:460](../../include/page_view.h#L460)
+`type_alias` | [include/page_view.h:462](../../include/page_view.h#L462)
 
 ```c
 typedef struct pv_box_def { int parent_id;
@@ -406,7 +406,7 @@ The box decoration and the parent link live here, not on each run, so a box is d
 
 ### `parent_id`
 
-`type_alias` | [include/page_view.h:789](../../include/page_view.h#L789)
+`type_alias` | [include/page_view.h:791](../../include/page_view.h#L791)
 
 ```c
 typedef struct pv_cont_def { int parent_id;
@@ -434,7 +434,7 @@ of its parent. Structure (like cont_id itself), carried regardless of caps.css.
 
 ### `pv_computed`
 
-`type_alias` | [include/page_view.h:911](../../include/page_view.h#L911)
+`type_alias` | [include/page_view.h:913](../../include/page_view.h#L913)
 
 ```c
 typedef struct pv_computed pv_computed;
@@ -452,7 +452,7 @@ A pv_computed retains the parsed sheet of a document so single elements can be r
 
 ### `declare`
 
-`function` | [include/page_view.h:863](../../include/page_view.h#L863)
+`function` | [include/page_view.h:865](../../include/page_view.h#L865)
 
 ```c
 * margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns it). Order top, right, bottom, left. Pure. */ void pv_root_insets(const css_style *bod
@@ -472,7 +472,7 @@ A pv_computed retains the parsed sheet of a document so single elements can be r
 
 ### `nonzero`
 
-`function` | [include/page_view.h:875](../../include/page_view.h#L875)
+`function` | [include/page_view.h:877](../../include/page_view.h#L877)
 
 ```c
 * when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out);
@@ -492,7 +492,7 @@ A pv_computed retains the parsed sheet of a document so single elements can be r
 
 ### `resolved`
 
-`function` | [include/page_view.h:882](../../include/page_view.h#L882)
+`function` | [include/page_view.h:884](../../include/page_view.h#L884)
 
 ```c
 * author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full with reader == 0 and prefers_dark == 0. */ pv_status pv_build_full(const hp_document
@@ -512,7 +512,7 @@ A pv_computed retains the parsed sheet of a document so single elements can be r
 
 ### `policy`
 
-`function` | [include/page_view.h:890](../../include/page_view.h#L890)
+`function` | [include/page_view.h:892](../../include/page_view.h#L892)
 
 ```c
 * TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The external text precedes the document's own <style> * blocks in the parsed sheet (document-or
@@ -534,7 +534,7 @@ A pv_computed retains the parsed sheet of a document so single elements can be r
 
 ### `pv_computed_new`
 
-`function` | [include/page_view.h:912](../../include/page_view.h#L912)
+`function` | [include/page_view.h:914](../../include/page_view.h#L914)
 
 ```c
 pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len, int viewport_w);
@@ -558,7 +558,7 @@ pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const cha
 
 ### `pv_computed_get`
 
-`function` | [include/page_view.h:919](../../include/page_view.h#L919)
+`function` | [include/page_view.h:921](../../include/page_view.h#L921)
 
 ```c
 int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);
@@ -586,7 +586,7 @@ Resolves native_el (a dom_native_node pointer of the SAME document) into *st; wh
 
 ### `pv_computed_free`
 
-`function` | [include/page_view.h:922](../../include/page_view.h#L922)
+`function` | [include/page_view.h:924](../../include/page_view.h#L924)
 
 ```c
 void pv_computed_free(pv_computed *pc);
@@ -604,7 +604,7 @@ void pv_computed_free(pv_computed *pc);
 
 ### `cause`
 
-`function` | [include/page_view.h:926](../../include/page_view.h#L926)
+`function` | [include/page_view.h:928](../../include/page_view.h#L928)
 
 ```c
 * cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?" is a measurement instead of a grep over the * dispatch, which sees property names on
@@ -624,7 +624,7 @@ void pv_computed_free(pv_computed *pc);
 
 ### `pv_new`
 
-`function` | [include/page_view.h:938](../../include/page_view.h#L938)
+`function` | [include/page_view.h:940](../../include/page_view.h#L940)
 
 ```c
 pv_view *pv_new(void);
@@ -642,7 +642,7 @@ Returns NULL on allocation failure.
 
 ### `form`
 
-`function` | [include/page_view.h:957](../../include/page_view.h#L957)
+`function` | [include/page_view.h:959](../../include/page_view.h#L959)
 
 ```c
 * form (-1 if none);
@@ -662,7 +662,7 @@ Returns NULL on allocation failure.
 
 ### `pv_set_emphasis`
 
-`function` | [include/page_view.h:989](../../include/page_view.h#L989)
+`function` | [include/page_view.h:991](../../include/page_view.h#L991)
 
 ```c
 void pv_set_emphasis(pv_view *v, int bold, int italic);
@@ -686,7 +686,7 @@ No-op on an empty or NULL view. Both append helpers default a new run to bold=0,
 
 ### `default`
 
-`function` | [include/page_view.h:994](../../include/page_view.h#L994)
+`function` | [include/page_view.h:996](../../include/page_view.h#L996)
 
 ```c
 * structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);
@@ -706,7 +706,7 @@ No-op on an empty or NULL view. Both append helpers default a new run to bold=0,
 
 ### `pv_set_color`
 
-`function` | [include/page_view.h:997](../../include/page_view.h#L997)
+`function` | [include/page_view.h:999](../../include/page_view.h#L999)
 
 ```c
 void pv_set_color(pv_view *v, int fg_rgb);
@@ -725,7 +725,7 @@ void pv_set_color(pv_view *v, int fg_rgb);
 
 ### `pv_set_bgcolor`
 
-`function` | [include/page_view.h:1004](../../include/page_view.h#L1004)
+`function` | [include/page_view.h:1006](../../include/page_view.h#L1006)
 
 ```c
 void pv_set_bgcolor(pv_view *v, int bg_rgb);
@@ -748,7 +748,7 @@ No-op when the view is empty or NULL. Both append helpers default a new run's bg
 
 ### `pv_set_text_style`
 
-`function` | [include/page_view.h:1013](../../include/page_view.h#L1013)
+`function` | [include/page_view.h:1015](../../include/page_view.h#L1015)
 
 ```c
 void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);
@@ -775,7 +775,7 @@ No-op on an empty or NULL view. The append helpers default text_align/font_scale
 
 ### `pv_text_ext_reset`
 
-`function` | [include/page_view.h:1068](../../include/page_view.h#L1068)
+`function` | [include/page_view.h:1072](../../include/page_view.h#L1072)
 
 ```c
 void pv_text_ext_reset(pv_text_ext *e);
@@ -797,7 +797,7 @@ NULL-safe.
 
 ### `ancestors`
 
-`function` | [include/page_view.h:1073](../../include/page_view.h#L1073)
+`function` | [include/page_view.h:1077](../../include/page_view.h#L1077)
 
 ```c
 * itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box stack in both directions: that is * what makes `visibility` inherited-but-overridable,
@@ -817,7 +817,7 @@ NULL-safe.
 
 ### `pv_set_text_ext`
 
-`function` | [include/page_view.h:1083](../../include/page_view.h#L1083)
+`function` | [include/page_view.h:1087](../../include/page_view.h#L1087)
 
 ```c
 void pv_set_text_ext(pv_view *v, const pv_text_ext *e);
@@ -836,7 +836,7 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e);
 
 ### `pv_set_grad_text`
 
-`function` | [include/page_view.h:1089](../../include/page_view.h#L1089)
+`function` | [include/page_view.h:1093](../../include/page_view.h#L1093)
 
 ```c
 void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);
@@ -861,7 +861,7 @@ Used by the IPC read path, which receives the already-resolved fields; the build
 
 ### `run`
 
-`function` | [include/page_view.h:1092](../../include/page_view.h#L1092)
+`function` | [include/page_view.h:1096](../../include/page_view.h#L1096)
 
 ```c
 * run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an empty or NULL view. Both append helpers * default cont_id to -1 (no container), cont_wr
@@ -883,7 +883,7 @@ Used by the IPC read path, which receives the already-resolved fields; the build
 
 ### `pv_set_row_span`
 
-`function` | [include/page_view.h:1105](../../include/page_view.h#L1105)
+`function` | [include/page_view.h:1109](../../include/page_view.h#L1109)
 
 ```c
 void pv_set_row_span(pv_view *v, int row_span);
@@ -906,7 +906,7 @@ No-op on an empty or NULL view. The append helpers default everything to 0.
 
 ### `pv_set_grid_area`
 
-`function` | [include/page_view.h:1109](../../include/page_view.h#L1109)
+`function` | [include/page_view.h:1113](../../include/page_view.h#L1113)
 
 ```c
 void pv_set_grid_area(pv_view *v, int row_start, int col_start);
@@ -930,7 +930,7 @@ See spec/grid_areas.md; the name matching happens in pv_build, never downstream.
 
 ### `pv_set_grid_rows`
 
-`function` | [include/page_view.h:1110](../../include/page_view.h#L1110)
+`function` | [include/page_view.h:1114](../../include/page_view.h#L1114)
 
 ```c
 void pv_set_grid_rows(pv_view *v, int grid_rows);
@@ -949,7 +949,7 @@ void pv_set_grid_rows(pv_view *v, int grid_rows);
 
 ### `pv_set_ua_tag`
 
-`function` | [include/page_view.h:1115](../../include/page_view.h#L1115)
+`function` | [include/page_view.h:1119](../../include/page_view.h#L1119)
 
 ```c
 void pv_set_ua_tag(pv_view *v, int ua_tag);
@@ -972,7 +972,7 @@ Out-of-range values fail closed to BX_UA_NONE, i.e. no user-agent margin. No-op 
 
 ### `pv_set_cont_box`
 
-`function` | [include/page_view.h:1119](../../include/page_view.h#L1119)
+`function` | [include/page_view.h:1123](../../include/page_view.h#L1123)
 
 ```c
 void pv_set_cont_box(pv_view *v, int cont_box_id);
@@ -995,7 +995,7 @@ No-op on an empty view.
 
 ### `pv_set_grid`
 
-`function` | [include/page_view.h:1120](../../include/page_view.h#L1120)
+`function` | [include/page_view.h:1124](../../include/page_view.h#L1124)
 
 ```c
 void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);
@@ -1016,7 +1016,7 @@ void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);
 
 ### `pv_set_flex`
 
-`function` | [include/page_view.h:1128](../../include/page_view.h#L1128)
+`function` | [include/page_view.h:1132](../../include/page_view.h#L1132)
 
 ```c
 void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int flex_align_self);
@@ -1044,7 +1044,7 @@ No-op on an empty or NULL view. The append helpers default them to the unset sen
 
 ### `pv_set_flex_mauto`
 
-`function` | [include/page_view.h:1131](../../include/page_view.h#L1131)
+`function` | [include/page_view.h:1135](../../include/page_view.h#L1135)
 
 ```c
 void pv_set_flex_mauto(pv_view *v, int mauto);
@@ -1065,7 +1065,7 @@ Stamps the last run's PV_MAUTO_* bits (other bits dropped).
 
 ### `pv_set_cont_item`
 
-`function` | [include/page_view.h:1135](../../include/page_view.h#L1135)
+`function` | [include/page_view.h:1139](../../include/page_view.h#L1139)
 
 ```c
 void pv_set_cont_item(pv_view *v, int cont_item);
@@ -1088,7 +1088,7 @@ No-op on an empty or NULL view; the append helpers default cont_item to -1.
 
 ### `pv_set_float_w`
 
-`function` | [include/page_view.h:1146](../../include/page_view.h#L1146)
+`function` | [include/page_view.h:1150](../../include/page_view.h#L1150)
 
 ```c
 void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int float_obox);
@@ -1114,7 +1114,7 @@ Stamps the float founder's own declared width halves (pv_run.float_w) on the mos
 
 ### `pv_set_float`
 
-`function` | [include/page_view.h:1149](../../include/page_view.h#L1149)
+`function` | [include/page_view.h:1153](../../include/page_view.h#L1153)
 
 ```c
 void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int float_mr, int float_mr_pct, int float_oid, int float_oside, int float_oml, int float_oml_pct, int float_omr, int float_omr_pct)
@@ -1145,7 +1145,7 @@ void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int
 
 ### `pv_set_box`
 
-`function` | [include/page_view.h:1159](../../include/page_view.h#L1159)
+`function` | [include/page_view.h:1163](../../include/page_view.h#L1163)
 
 ```c
 void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);
@@ -1173,7 +1173,7 @@ No-op on an empty or NULL view. The append helpers default box_l/r/w/center to 0
 
 ### `pv_set_box_pct`
 
-`function` | [include/page_view.h:1165](../../include/page_view.h#L1165)
+`function` | [include/page_view.h:1169](../../include/page_view.h#L1169)
 
 ```c
 void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);
@@ -1200,7 +1200,7 @@ No-op on an empty or NULL view; the append helpers default box_w_pct to 0.
 
 ### `pv_set_box_maxw`
 
-`function` | [include/page_view.h:1170](../../include/page_view.h#L1170)
+`function` | [include/page_view.h:1174](../../include/page_view.h#L1174)
 
 ```c
 void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);
@@ -1224,7 +1224,7 @@ No-op on an empty or NULL view; appends default to 0/0.
 
 ### `pv_set_node_id`
 
-`function` | [include/page_view.h:1175](../../include/page_view.h#L1175)
+`function` | [include/page_view.h:1179](../../include/page_view.h#L1179)
 
 ```c
 void pv_set_node_id(pv_view *v, dom_node_id node_id);
@@ -1247,7 +1247,7 @@ No-op on an empty or NULL view; the append helpers default node_id to DOM_NODE_N
 
 ### `pv_set_block_id`
 
-`function` | [include/page_view.h:1180](../../include/page_view.h#L1180)
+`function` | [include/page_view.h:1184](../../include/page_view.h#L1184)
 
 ```c
 void pv_set_block_id(pv_view *v, int block_id);
@@ -1270,7 +1270,7 @@ No-op on an empty or NULL view; the append helpers default block_id to -1. The b
 
 ### `pv_set_own_box`
 
-`function` | [include/page_view.h:1184](../../include/page_view.h#L1184)
+`function` | [include/page_view.h:1188](../../include/page_view.h#L1188)
 
 ```c
 void pv_set_own_box(pv_view *v, int box_id);
@@ -1293,7 +1293,7 @@ See pv_run.own_box_id for why this is separate from pv_set_block_id.
 
 ### `pv_set_oof`
 
-`function` | [include/page_view.h:1188](../../include/page_view.h#L1188)
+`function` | [include/page_view.h:1192](../../include/page_view.h#L1192)
 
 ```c
 void pv_set_oof(pv_view *v, int oof);
@@ -1316,7 +1316,7 @@ No-op on an empty or NULL view.
 
 ### `pv_set_justify_self`
 
-`function` | [include/page_view.h:1191](../../include/page_view.h#L1191)
+`function` | [include/page_view.h:1195](../../include/page_view.h#L1195)
 
 ```c
 void pv_set_justify_self(pv_view *v, int justify_self);
@@ -1337,7 +1337,7 @@ Sets the last appended run's justify_self (see pv_run.justify_self).
 
 ### `pv_set_block_node`
 
-`function` | [include/page_view.h:1194](../../include/page_view.h#L1194)
+`function` | [include/page_view.h:1198](../../include/page_view.h#L1198)
 
 ```c
 void pv_set_block_node(pv_view *v, dom_node_id id);
@@ -1358,7 +1358,7 @@ Sets the last appended run's block_node (see pv_run.block_node).
 
 ### `pv_set_br_line`
 
-`function` | [include/page_view.h:1202](../../include/page_view.h#L1202)
+`function` | [include/page_view.h:1206](../../include/page_view.h#L1206)
 
 ```c
 void pv_set_br_line(pv_view *v, int br_line);
@@ -1381,7 +1381,7 @@ No-op on an empty or NULL view.
 
 ### `pv_cont_count`
 
-`function` | [include/page_view.h:1217](../../include/page_view.h#L1217)
+`function` | [include/page_view.h:1221](../../include/page_view.h#L1221)
 
 ```c
 size_t pv_cont_count(const pv_view *v);
@@ -1403,7 +1403,7 @@ pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] (i == 
 
 ### `pv_cont_at`
 
-`function` `const` | [include/page_view.h:1218](../../include/page_view.h#L1218)
+`function` `const` | [include/page_view.h:1222](../../include/page_view.h#L1222)
 
 ```c
 const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);
@@ -1424,7 +1424,7 @@ const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);
 
 ### `pv_set_input_checked`
 
-`function` | [include/page_view.h:1222](../../include/page_view.h#L1222)
+`function` | [include/page_view.h:1226](../../include/page_view.h#L1226)
 
 ```c
 void pv_set_input_checked(pv_view *v, int checked);
@@ -1447,7 +1447,7 @@ No-op on an empty or NULL view.
 
 ### `pv_set_input_placeholder`
 
-`function` | [include/page_view.h:1226](../../include/page_view.h#L1226)
+`function` | [include/page_view.h:1230](../../include/page_view.h#L1230)
 
 ```c
 void pv_set_input_placeholder(pv_view *v, int ph_color);
@@ -1468,7 +1468,7 @@ Sets the last run's ph_color (PV_PH_THEME, PV_PH_HIDDEN or 0xRRGGBB).
 
 ### `pv_svg_append_root_attrs`
 
-`function` | [include/page_view.h:1232](../../include/page_view.h#L1232)
+`function` | [include/page_view.h:1236](../../include/page_view.h#L1236)
 
 ```c
 char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);
@@ -1495,7 +1495,7 @@ Appends attrs (e.g.
 
 ### `pv_placeholder_color`
 
-`function` | [include/page_view.h:1235](../../include/page_view.h#L1235)
+`function` | [include/page_view.h:1239](../../include/page_view.h#L1239)
 
 ```c
 int pv_placeholder_color(const css_style *ph);
@@ -1517,7 +1517,7 @@ ph_color for a resolved ::placeholder style (pure).
 
 ### `pv_set_input_select_opts`
 
-`function` | [include/page_view.h:1239](../../include/page_view.h#L1239)
+`function` | [include/page_view.h:1243](../../include/page_view.h#L1243)
 
 ```c
 void pv_set_input_select_opts(pv_view *v, const char *select_opts);
@@ -1540,7 +1540,7 @@ No-op on a NULL view or empty cap.
 
 ### `pv_free`
 
-`function` | [include/page_view.h:1242](../../include/page_view.h#L1242)
+`function` | [include/page_view.h:1246](../../include/page_view.h#L1246)
 
 ```c
 void pv_free(pv_view *v);
@@ -1562,7 +1562,7 @@ Idempotent; safe on NULL and safe to call twice.
 
 ### `pv_count`
 
-`function` | [include/page_view.h:1245](../../include/page_view.h#L1245)
+`function` | [include/page_view.h:1249](../../include/page_view.h#L1249)
 
 ```c
 size_t pv_count(const pv_view *v);
@@ -1588,7 +1588,7 @@ NULL-safe.
 
 ### `pv_at`
 
-`function` `const` | [include/page_view.h:1246](../../include/page_view.h#L1246)
+`function` `const` | [include/page_view.h:1250](../../include/page_view.h#L1250)
 
 ```c
 const pv_run *pv_at(const pv_view *v, size_t i);
@@ -1611,7 +1611,7 @@ const pv_run *pv_at(const pv_view *v, size_t i);
 
 ### `pv_box_count`
 
-`function` | [include/page_view.h:1250](../../include/page_view.h#L1250)
+`function` | [include/page_view.h:1254](../../include/page_view.h#L1254)
 
 ```c
 size_t pv_box_count(const pv_view *v);
@@ -1633,7 +1633,7 @@ Box tree accessors (Step D). pv_box_count is the number of box definitions; pv_b
 
 ### `pv_box_at`
 
-`function` `const` | [include/page_view.h:1251](../../include/page_view.h#L1251)
+`function` `const` | [include/page_view.h:1255](../../include/page_view.h#L1255)
 
 ```c
 const pv_box_def *pv_box_at(const pv_view *v, size_t i);
@@ -1812,7 +1812,7 @@ Mirrors CSS_URL_MAX in css.h (page_view.c static-asserts they agree); page_view 
 
 ### `PV_UA_BODY_MARGIN`
 
-`macro` | [include/page_view.h:860](../../include/page_view.h#L860)
+`macro` | [include/page_view.h:862](../../include/page_view.h#L862)
 
 ```c
 #define PV_UA_BODY_MARGIN
@@ -1826,7 +1826,7 @@ The UA stylesheet's body margin (HTML Rendering 15.3.1).
 
 ### `PV_BR_EMPTY`
 
-`macro` | [include/page_view.h:1197](../../include/page_view.h#L1197)
+`macro` | [include/page_view.h:1201](../../include/page_view.h#L1201)
 
 ```c
 #define PV_BR_EMPTY
@@ -1840,7 +1840,7 @@ pv_run.br_line flags.
 
 ### `PV_BR_CONT`
 
-`macro` | [include/page_view.h:1198](../../include/page_view.h#L1198)
+`macro` | [include/page_view.h:1202](../../include/page_view.h#L1202)
 
 ```c
 #define PV_BR_CONT
@@ -1852,7 +1852,7 @@ pv_run.br_line flags.
 
 ### `PV_PH_THEME`
 
-`macro` | [include/page_view.h:1223](../../include/page_view.h#L1223)
+`macro` | [include/page_view.h:1227](../../include/page_view.h#L1227)
 
 ```c
 #define PV_PH_THEME
@@ -1864,7 +1864,7 @@ pv_run.br_line flags.
 
 ### `PV_PH_HIDDEN`
 
-`macro` | [include/page_view.h:1224](../../include/page_view.h#L1224)
+`macro` | [include/page_view.h:1228](../../include/page_view.h#L1228)
 
 ```c
 #define PV_PH_HIDDEN
@@ -1876,7 +1876,7 @@ pv_run.br_line flags.
 
 ### `PV_FRAME_SCHEME`
 
-`macro` | [include/page_view.h:1256](../../include/page_view.h#L1256)
+`macro` | [include/page_view.h:1260](../../include/page_view.h#L1260)
 
 ```c
 #define PV_FRAME_SCHEME

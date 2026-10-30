@@ -1,12 +1,12 @@
 # `include/css_decl.h`
 
-> Source: [include/css_decl.h:1](../../include/css_decl.h#L1) | language `h` | coverage 14.3% | [API index](../index.md)
+> Source: [include/css_decl.h:1](../../include/css_decl.h#L1) | language `h` | coverage 13.3% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`css_decl`](#css_decl)
 - **Type Aliases:** [`prop`](#prop)
-- **Functions:** [`order`](#order), [`contiguous`](#contiguous)
+- **Functions:** [`order`](#order), [`contiguous`](#contiguous), [`part`](#part)
 - **Macros:** [`CSS_POOL_INIT`](#css_pool_init), [`CSS_POOL_HEADROOM`](#css_pool_headroom), [`CSS_MAX_BG_URLS`](#css_max_bg_urls), [`CSS_MAX_CONTENT_URLS`](#css_max_content_urls), [`CSS_MAX_KEYFRAMES`](#css_max_keyframes), [`CSS_MAX_KEYFRAME_STOPS`](#css_max_keyframe_stops), [`CSS_MAX_KEYFRAME_DECLS`](#css_max_keyframe_decls), [`CSS_INLINE_BG_URLS`](#css_inline_bg_urls), [`CSS_WIDE_PROBE_DECLS`](#css_wide_probe_decls)
 
 ## Type Diagram
@@ -26,7 +26,7 @@ classDiagram
 
 ### `css_decl`
 
-`struct` | [include/css_decl.h:220](../../include/css_decl.h#L220)
+`struct` | [include/css_decl.h:232](../../include/css_decl.h#L232)
 
 ```c
 typedef struct css_decl
@@ -40,7 +40,7 @@ typedef struct css_decl
 
 ### `prop`
 
-`type_alias` | [include/css_decl.h:219](../../include/css_decl.h#L219)
+`type_alias` | [include/css_decl.h:231](../../include/css_decl.h#L231)
 
 ```c
 typedef struct css_decl { int prop;
@@ -81,6 +81,26 @@ typedef struct css_decl { int prop;
 ```
 
 **Returns:** `*`
+
+---
+
+<a id="part"></a>
+
+### `part`
+
+`function` | [include/css_decl.h:216](../../include/css_decl.h#L216)
+
+```c
+* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM, P_CLIP_RIGHT_PM, P_CLIP_BOTTOM_PM, P_CLIP_LEFT_PM, /* A valid property with no effect on a static,
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `percentage` | `the other half of a <length- >` |  |  |
+
+**Returns:** `* each P_CLIP_* edge adds to its px`
 
 ---
 

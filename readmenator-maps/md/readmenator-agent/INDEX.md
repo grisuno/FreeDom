@@ -5,7 +5,7 @@
 | `app.py` | Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL... | root | 3 | 0 |
 | `docker-entrypoint.sh` | - | root | 0 | 0 |
 | `docker_run.sh` | Thin wrapper. | root | 0 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 650 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 654 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 10 | 2 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -19,13 +19,14 @@
 | `include/browser.h` | browser_free: Zero-initialise or reset a state. | include | 19 | 3 |
 | `include/cached_fetch.h` | cf_set_store: Cache-aware GET. | include | 4 | 3 |
 | `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 9 | 4 |
-| `include/css.h` | css_style: A resolved presentation. | include | 140 | 36 |
+| `include/css.h` | css_style: A resolved presentation. | include | 144 | 36 |
 | `include/css_atrule.h` | car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both... | include | 10 | 3 |
 | `include/css_box.h` | - | include | 27 | 4 |
 | `include/css_chain.h` | cch_element_matches: Nonzero iff the parsed selector *sel matches element `el`, built against... | include | 12 | 4 |
 | `include/css_color.h` | cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for... | include | 7 | 13 |
 | `include/css_computed.h` | ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL... | include | 6 | 3 |
-| `include/css_decl.h` | The sheet's two string pools -- background url()s, and the ::before/::after | include | 14 | 12 |
+| `include/css_counter.h` | cnt_hash: FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are *... | include | 19 | 3 |
+| `include/css_decl.h` | The sheet's two string pools -- background url()s, and the ::before/::after | include | 15 | 12 |
 | `include/css_gradient.h` | cg_radial_shape: Radial-gradient geometry (spec/css_gradient.md 3b). | include | 13 | 6 |
 | `include/css_index.h` | cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *... | include | 8 | 3 |
 | `include/css_length.h` | cl_ctx: The state a <length> is measured against. | include | 20 | 9 |
@@ -42,7 +43,7 @@
 | `include/download.h` | dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media... | include | 9 | 3 |
 | `include/fb_cmdline.h` | fbc_history_push: #define FBC_BASE_MAX   256    /* bytes of a completion base path #define... | include | 18 | 4 |
 | `include/fb_panes.h` | fbp_tab_label: FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where the JS time went (sampling... | include | 12 | 6 |
-| `include/flex_layout.h` | fx_item: Upper bound on items per flex line / grid columns. | include | 43 | 11 |
+| `include/flex_layout.h` | fx_item: Upper bound on items per flex line / grid columns. | include | 45 | 11 |
 | `include/form.h` | fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *... | include | 12 | 3 |
 | `include/frame_broker.h` | fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for... | include | 17 | 3 |
 | `include/frame_clock.h` | active: frame_clock (fc_) — pure animation frame scheduler. | include | 7 | 3 |
@@ -52,10 +53,10 @@
 | `include/hls.h` | hls_segment: or variant info. | include | 8 | 4 |
 | `include/host_conf.h` | hcf_search_dirs: Pure. | include | 9 | 4 |
 | `include/hostblock.h` | hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted... | include | 10 | 5 |
-| `include/hostedit.h` | he_text_has_host: Returns 1 if text (the body of a hosts-format file) already lists host as a... | include | 5 | 3 |
+| `include/hostedit.h` | he_cdn_kind_t: Which auto-allow switch (config page) a subresource falls under, decided from the... | include | 7 | 3 |
 | `include/html_parse.h` | hp_script: One executable <script>. | include | 24 | 18 |
 | `include/http_cache.h` | hc_parse_http_date: } hc_class; typedef struct hc_meta { char   final_url[HC_URL_MAX]; char... | include | 19 | 3 |
-| `include/identity.h` | idn_defaults: enum { IDN_REJ_UA   = 1 << 0, IDN_REJ_LANG = 1 << 1, IDN_REJ_GEO  = 1 << 2 }... | include | 24 | 5 |
+| `include/identity.h` | idn_defaults: typedef struct idn_config { char   user_agent[IDN_UA_MAX];  /* "" = FP_USER_AGENT... | include | 24 | 5 |
 | `include/image_decode.h` | img_pixels: A decoded bitmap that owns its pixel buffer. | include | 13 | 5 |
 | `include/import_map.h` | im_resolve: Resolves specifier as imported from base (the importing module's URL). | include | 10 | 4 |
 | `include/interp.h` | ip_ease: Compute eased t for normalized t ∈ [0,1]. | include | 22 | 3 |
@@ -116,12 +117,13 @@
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 41 | 0 |
 | `src/cached_fetch.c` | trace: fetcher, and so the same policy, as an uncached request.  #define _POSIX_C_SOURCE 200809L... | src | 14 | 0 |
 | `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 5 | 0 |
-| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 249 | 0 |
+| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 254 | 0 |
 | `src/css_atrule.c` | keyword_at: Scratch size for one declaration or selector handed to the caller. | src | 11 | 0 |
 | `src/css_box.c` | calc_val: `pct` is the percentage component, carried through the arithmetic exactly like `em`... | src | 52 | 0 |
 | `src/css_chain.c` | cch_node: One element's selector inputs (tag/id/classes) plus its css_element view, with *... | src | 26 | 0 |
 | `src/css_color.c` | normalize: Trims surrounding ASCII spaces and lowercases into out (CC_TOKEN_MAX bytes). *... | src | 27 | 0 |
 | `src/css_computed.c` | ua_display: The HTML Rendering UA sheet's `display` for a tag when the cascade declared none *... | src | 45 | 0 |
+| `src/css_counter.c` | valid_name: A <custom-ident> usable as a counter name: identifier syntax, not a CSS-wide *... | src | 34 | 0 |
 | `src/css_gradient.c` | find_gradient_call: Locates a gradient function call `fn` (e.g. "linear-gradient(") in v... | src | 31 | 0 |
 | `src/css_index.c` | css_index -- see include/css_index.h and spec/css_index.md. | src | 13 | 0 |
 | `src/css_length.c` | cl_unit_eq: ASCII case-insensitive compare of a possibly-unterminated unit slice against a... | src | 18 | 0 |
@@ -138,7 +140,7 @@
 | `src/download.c` | lc: download — pure helpers for "save this resource to disk". | src | 12 | 0 |
 | `src/fb_cmdline.c` | - | src | 13 | 0 |
 | `src/fb_panes.c` | - | src | 10 | 0 |
-| `src/flex_layout.c` | nn: bounded by FX_MAX_ITEMS (no VLAs). | src | 35 | 0 |
+| `src/flex_layout.c` | nn: bounded by FX_MAX_ITEMS (no VLAs). | src | 36 | 0 |
 | `src/form.c` | put_char: No I/O, no global state. | src | 8 | 0 |
 | `src/frame_broker.c` | target_admits: int changed = 1;                                  /* fixpoint: slots are reused... | src | 10 | 0 |
 | `src/frame_clock.c` | - | src | 4 | 0 |
@@ -148,7 +150,7 @@
 | `src/hls.c` | last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not... | src | 10 | 0 |
 | `src/host_conf.c` | read_conf: add_dir(out, env); if (home != NULL && home[0] != '\0') { char user[HCF_PATH_MAX]... | src | 9 | 0 |
 | `src/hostblock.c` | table_probe: Finds the slot for key (length klen) in t, which must have a free slot. | src | 19 | 0 |
-| `src/hostedit.c` | valid_host: #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c... | src | 13 | 0 |
+| `src/hostedit.c` | valid_host: #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c... | src | 14 | 0 |
 | `src/html_parse.c` | node_next: }; /* --- helpers --- static char *dup_bytes(const lxb_char_t *src, size_t len) { if... | src | 29 | 0 |
 | `src/http_cache.c` | days_from_civil: #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY... | src | 38 | 0 |
 | `src/identity.c` | tag_valid: size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t... | src | 25 | 0 |
@@ -172,11 +174,11 @@
 | `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 61 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 18 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
-| `src/local_store.c` | - | src | 347 | 0 |
+| `src/local_store.c` | - | src | 31 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 261 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 267 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/pq_seal.c` | derive_key: pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out) { if (der ==... | src | 11 | 0 |
@@ -215,12 +217,13 @@
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
 | `tests/test_cached_fetch.c` | - | tests | 14 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
-| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 354 | 0 |
+| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 355 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
 | `tests/test_css_box.c` | test_lineheight_abs_vs_scale: line-height (CSS 2.1 10.8.1): a number, a percentage and an em... | tests | 13 | 0 |
 | `tests/test_css_color.c` | test_hsl_fractional_hue: A fractional hue is a <number> too (and hsl() takes an <angle>, whose... | tests | 36 | 0 |
 | `tests/test_css_computed.c` | - | tests | 9 | 0 |
-| `tests/test_css_drops.c` | Suite for the parser drop log (spec/css_drops.md). | tests | 25 | 0 |
+| `tests/test_css_counter.c` | Suite for css_counter (spec/css_counter.md). | tests | 12 | 0 |
+| `tests/test_css_drops.c` | Suite for the parser drop log (spec/css_drops.md). | tests | 30 | 0 |
 | `tests/test_css_gradient.c` | - | tests | 13 | 0 |
 | `tests/test_css_index.c` | test_css_index -- cascade rule index (spec/css_index.md). | tests | 14 | 0 |
 | `tests/test_css_length.c` | test_unitless: static double px_of(const char *value, const cl_ctx *ctx) { double px = -12345.0... | tests | 25 | 0 |
@@ -236,7 +239,7 @@
 | `tests/test_download.c` | - | tests | 21 | 0 |
 | `tests/test_fb_cmdline.c` | - | tests | 7 | 0 |
 | `tests/test_fb_panes.c` | test_net_pane_shows_timing_and_headers: assert_int_equal(fbp_expr(FBP_CONSOLE, "", 0, out... | tests | 11 | 0 |
-| `tests/test_flex_layout.c` | test_autofill_count: assert_item(out[0], 0.0, 100.0);  /* no divide-by-zero, behaves like start... | tests | 71 | 0 |
+| `tests/test_flex_layout.c` | test_grid_column_count_for_column_flow: Given `grid-auto-flow: column` with no explicit rows... | tests | 72 | 0 |
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_broker.c` | test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router. | tests | 10 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
@@ -246,10 +249,10 @@
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_host_conf.c` | - | tests | 8 | 0 |
 | `tests/test_hostblock.c` | test_tld_entry_blocks_every_host_under_it: A bare top-level label blocks the whole TLD (.cyou is... | tests | 24 | 0 |
-| `tests/test_hostedit.c` | - | tests | 11 | 0 |
+| `tests/test_hostedit.c` | test_cdn_kind_from_url_path: Which auto-allow switch a subresource falls under, from its URL... | tests | 12 | 0 |
 | `tests/test_html_parse.c` | test_extract_script_list_external_semantics: External-script semantics (Hito 24 EXT): a <script... | tests | 24 | 0 |
 | `tests/test_http_cache.c` | - | tests | 17 | 0 |
-| `tests/test_identity.c` | - | tests | 9 | 0 |
+| `tests/test_identity.c` | test_auto_allow_defaults_off_and_counts_as_a_change: assert_non_null(strstr(page... | tests | 12 | 0 |
 | `tests/test_image_decode.c` | - | tests | 37 | 0 |
 | `tests/test_import_map.c` | tres: Test URL resolver: absolute https passes, "/x" is origin-relative, "./x" and "../x" * are... | tests | 8 | 0 |
 | `tests/test_interp.c` | assert_float_equal: ip_ease_fn fns_0to0[] = { { .kind = IP_EASE_LINEAR }, { .kind = IP_EASE_EASE... | tests | 37 | 0 |
@@ -263,7 +266,7 @@
 | `tests/test_media_decoder.c` | test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and... | tests | 6 | 0 |
 | `tests/test_net_realm.c` | test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state... | tests | 13 | 0 |
 | `tests/test_os_sandbox.c` | test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations... | tests | 19 | 0 |
-| `tests/test_page_view.c` | parse: #include <stdio.h> #include <string.h> #include <cmocka.h> #include "box_style.h"... | tests | 216 | 0 |
+| `tests/test_page_view.c` | parse: #include <stdio.h> #include <string.h> #include <cmocka.h> #include "box_style.h"... | tests | 218 | 0 |
 | `tests/test_pdf_export.c` | - | tests | 30 | 0 |
 | `tests/test_perf_trace.c` | - | tests | 12 | 0 |
 | `tests/test_pq_seal.c` | test_requires_both_secrets_and_detects_tamper: static void test_each_seal_is_fresh(void **state)... | tests | 7 | 0 |

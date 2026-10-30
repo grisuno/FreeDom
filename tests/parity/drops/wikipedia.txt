@@ -1,5 +1,5 @@
 Web browser - Wikipedia
-CSS drops: 173 declaration(s) dropped, 24 distinct
+CSS drops: 154 declaration(s) dropped, 18 distinct
   count  cause         property                     first value
      27  unknown-prop  mask-size                    calc(1rem - 4px)
      26  unknown-prop  -webkit-mask-size            calc(1rem - 4px)
@@ -10,18 +10,12 @@ CSS drops: 173 declaration(s) dropped, 24 distinct
      13  bad-value     -webkit-mask-image           url("data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\...
      13  bad-value     mask-image                   url("data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\...
       8  unknown-prop  unicode-bidi                 -moz-isolate
-      7  unknown-prop  counter-reset                mw-ref-details-parent mw-references list-item
-      6  unknown-prop  counter-increment            mw-ref-details-parent mw-references
       5  bad-value     transition-property          background-color,color,border-color,box-shadow
-      3  bad-value     content                      counter(mw-references,decimal) '.' counter(mw-ref-linkback,decimal)
       2  bad-value     height                       min(50px,70%)
       2  unknown-prop  quotes                       '"' '"' "'" "'"
       1  unknown-prop  list-style-image             none
-      1  bad-value     list-style-type              myanmar_with_period
-      1  unknown-prop  scroll-padding-top           3.125rem
-      1  unknown-prop  page-break-inside            avoid
-      1  unknown-prop  -webkit-tap-highlight-color  rgba(0,0,0,0)
-      1  bad-value     box-shadow                   inset 0 0 0 1px #36c inset 0 0 0 2px #fff
-      1  unknown-prop  scroll-margin-top            75px
       1  unknown-prop  break-inside                 avoid-column
+      1  bad-value     box-shadow                   inset 0 0 0 1px #36c inset 0 0 0 2px #fff
+      1  bad-value     list-style-type              myanmar_with_period
+      1  unknown-prop  page-break-inside            avoid
       1  unknown-prop  font-variant-numeric         lining-nums tabular-nums

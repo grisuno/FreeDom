@@ -1,14 +1,14 @@
 # include: page_view
 
-*Community 3 | 36 files | cohesion 0.53*
+*Community 2 | 39 files | cohesion 0.55*
 
 ## Definition
 
-This community groups 36 file(s) rooted at `tests` with dominant language c (cohesion 0.53). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (261 symbols). Documented purpose: Case mapping for text-transform and synthesized small caps (spec/text_case.md). Pure: no I/O, no state, no allocation..
+This community groups 39 file(s) rooted at `tests` with dominant language c (cohesion 0.55). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (267 symbols). Documented purpose: Case mapping for text-transform and synthesized small caps (spec/text_case.md). Pure: no I/O, no state, no allocation..
 
 ## Files
 
-### `tests` (14 files)
+### `tests` (15 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -16,23 +16,23 @@ This community groups 36 file(s) rooted at `tests` with dominant language c (coh
 | `tests/test_box_tree.c` | c | testing | 69 | no |
 | `tests/test_compositor.c` | c | testing | 21 | no |
 | `tests/test_css_computed.c` | c | testing | 9 | no |
-| `tests/test_css_drops.c` | c | testing | 25 | yes |
+| `tests/test_css_counter.c` | c | testing | 12 | yes |
+| `tests/test_css_drops.c` | c | testing | 30 | yes |
 | `tests/test_css_gradient.c` | c | testing | 13 | no |
-| `tests/test_css_length.c` | c | testing | 25 | no |
 
-### `include` (12 files)
+### `include` (13 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/box_style.h` | h | utility | 31 | no |
 | `include/box_tree.h` | h | utility | 34 | no |
 | `include/compositor.h` | h | utility | 9 | no |
-| `include/css.h` | h | utility | 140 | no |
+| `include/css.h` | h | utility | 144 | no |
 | `include/css_chain.h` | h | utility | 12 | no |
 | `include/css_computed.h` | h | utility | 6 | no |
-| `include/dom_debug.h` | h | utility | 4 | no |
+| `include/css_counter.h` | h | utility | 19 | no |
 
-### `src` (10 files)
+### `src` (11 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -40,10 +40,10 @@ This community groups 36 file(s) rooted at `tests` with dominant language c (coh
 | `src/box_tree.c` | c | utility | 25 | no |
 | `src/compositor.c` | c | utility | 5 | no |
 | `src/css_computed.c` | c | utility | 45 | no |
+| `src/css_counter.c` | c | utility | 34 | no |
 | `src/css_length.c` | c | utility | 18 | no |
-| `src/dom_debug.c` | c | utility | 24 | no |
 
-*... and 16 more files in this community.*
+*... and 19 more files in this community.*
 
 
 ## Key Symbols
@@ -81,16 +81,16 @@ This community groups 36 file(s) rooted at `tests` with dominant language c (coh
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 69
+- Internal resolved imports (EXTRACTED): 72
 - Cross-boundary resolved imports (EXTRACTED): 60
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/css.h imports include/css_color.h.
-- [EXTRACTED] depends_on community 8 <-> 3 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
-- [EXTRACTED] depends_on community 3 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
+- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/css.h imports include/css_color.h.
+- [EXTRACTED] depends_on community 8 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
+- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
 
 ## Risks
 
@@ -112,9 +112,9 @@ This community groups 36 file(s) rooted at `tests` with dominant language c (coh
 
 ## Open Questions
 
-- Why do 33 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
+- Why do 35 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.53?
+- Should include: page_view be split, given cohesion 0.55?
 
 ## Sources
 
@@ -124,6 +124,7 @@ This community groups 36 file(s) rooted at `tests` with dominant language c (coh
 - `include/css.h`
 - `include/css_chain.h`
 - `include/css_computed.h`
+- `include/css_counter.h`
 - `include/dom_debug.h`
 - `include/flex_layout.h`
 - `include/page_view.h`
@@ -134,8 +135,7 @@ This community groups 36 file(s) rooted at `tests` with dominant language c (coh
 - `src/box_tree.c`
 - `src/compositor.c`
 - `src/css_computed.c`
+- `src/css_counter.c`
 - `src/css_length.c`
 - `src/dom_debug.c`
-- `src/flex_layout.c`
-- `src/page_view.c`
-- *... and 16 more*
+- *... and 19 more*

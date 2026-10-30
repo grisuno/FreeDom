@@ -1,6 +1,6 @@
 # src: text_shape
 
-*Community 2 | 39 files | cohesion 0.53*
+*Community 3 | 39 files | cohesion 0.53*
 
 ## Definition
 
@@ -86,10 +86,10 @@ This community groups 39 file(s) rooted at `src` with dominant language c (cohes
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
-- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
-- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
-- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
+- [EXTRACTED] depends_on community 4 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
+- [EXTRACTED] depends_on community 3 <-> 1 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
 
 ## Risks
 

@@ -749,6 +749,52 @@ static int interp_mix_blend_mode(const char *v) {
     return -1;
 }
 /* object-fit: fill/contain/cover/none/scale-down. -1 unknown. */
+/* object-position: <position> restricted to keywords and percentages (a length
+ * would need the free space at paint time, so it fails closed). Returns a
+ * CSS_OBJPOS_PACK value or -1. One value sets one axis and centres the other;
+ * with two, a vertical keyword first (or a horizontal one second) swaps the axes. */
+static int interp_object_pos(const char *v) {
+    char t[2][CSS_TOK_MAX];
+    const char *q = v;
+    int n = 0;
+    while (n < 2 && next_ws_token(&q, t[n], sizeof t[n])) ++n;
+    char extra[CSS_TOK_MAX];
+    if (n == 0 || next_ws_token(&q, extra, sizeof extra)) return -1;
+    /* axis: 1 = horizontal only, 2 = vertical only, 0 = either. */
+    int pm[2], axis[2];
+    for (int i = 0; i < n; ++i) {
+        if (csel_ci_eq(t[i], "left"))        { pm[i] = 0;    axis[i] = 1; }
+        else if (csel_ci_eq(t[i], "right"))  { pm[i] = 1000; axis[i] = 1; }
+        else if (csel_ci_eq(t[i], "top"))    { pm[i] = 0;    axis[i] = 2; }
+        else if (csel_ci_eq(t[i], "bottom")) { pm[i] = 1000; axis[i] = 2; }
+        else if (csel_ci_eq(t[i], "center")) { pm[i] = 500;  axis[i] = 0; }
+        else {
+            size_t len = strlen(t[i]);
+            if (len < 2 || t[i][len - 1] != '%') return -1;
+            char num[CSS_TOK_MAX];
+            memcpy(num, t[i], len - 1);
+            num[len - 1] = '\0';
+            char *end = NULL;
+            double d = strtod(num, &end);
+            if (end == num || *end != '\0' || d < 0.0 || d > 100.0) return -1;
+            pm[i] = (int)(d * 10.0 + 0.5);
+            axis[i] = 0;
+        }
+    }
+    int x = 500, y = 500;
+    if (n == 1) {
+        if (axis[0] == 2) y = pm[0]; else x = pm[0];
+    } else {
+        int swap = (axis[0] == 2) || (axis[1] == 1);
+        if (swap && (axis[0] == 1 || axis[1] == 2)) return -1;
+        if (axis[0] == 1 && axis[1] == 1) return -1;
+        if (axis[0] == 2 && axis[1] == 2) return -1;
+        x = swap ? pm[1] : pm[0];
+        y = swap ? pm[0] : pm[1];
+    }
+    return CSS_OBJPOS_PACK(x, y);
+}
+
 static int interp_object_fit(const char *v) {
     if (csel_ci_eq(v, "fill"))        return CSS_OFI_FILL;
     if (csel_ci_eq(v, "contain"))     return CSS_OFI_CONTAIN;
@@ -1769,6 +1815,25 @@ static int expand_content_attr(const char *val, css_decl *dst, int cap,
     return 1;
 }
 
+/* counter-reset / counter-increment: validated here (hostile text), stored VERBATIM in the
+ * content pool and re-parsed when the declaration is applied. `none` claims the slot with
+ * -1. An invalid list drops the whole declaration (fail closed). */
+static int expand_counter_decls(const char *prop, const char *val, css_decl *dst, int cap,
+                                char (*contenttab)[CSS_URL_MAX], size_t *ncontent,
+                                size_t contentcap) {
+    if (cap < 1) return 0;
+    int inc = (prop[8] == 'i');   /* counter-increment, not counter-reset */
+    cnt_decl tmp[CNT_MAX_DECL];
+    int n = cnt_parse_decls(val, inc ? 1 : 0, tmp);
+    if (n < 0) return 0;
+    dst[0].prop = inc ? P_CNT_INC : P_CNT_RESET;
+    if (n == 0 || *ncontent >= contentcap || strlen(val) >= CSS_URL_MAX) { dst[0].ival = -1; return 1; }
+    memcpy(contenttab[*ncontent], val, strlen(val) + 1);
+    dst[0].ival = (int)*ncontent;
+    ++*ncontent;
+    return 1;
+}
+
 /* R8: content property. Extracts quoted string, stores in content pool, emits
  * P_CONTENT with pool index. Returns 1 if parsed. */
 static int expand_content(const char *val, css_decl *dst, int cap,
@@ -1787,6 +1852,14 @@ static int expand_content(const char *val, css_decl *dst, int cap,
         if ((t[0]=='a'||t[0]=='A')&&(t[1]=='t'||t[1]=='T')&&(t[2]=='t'||t[2]=='T')
             &&(t[3]=='r'||t[3]=='R')&&t[4]=='(')
             return expand_content_attr(val, dst, cap, contenttab, ncontent, contentcap);
+    }
+    {
+        /* counter()/counters() (spec/css_counter.md): a marker the document-order pass
+         * of page_view expands. 0 = no counter function, the string path below. */
+        char marker[CSS_URL_MAX];
+        int cr = cnt_parse_content(val, marker, sizeof marker);
+        if (cr < 0) return 0;
+        if (cr > 0) return emit_content(dst, cap, marker, contenttab, ncontent, contentcap);
     }
     int q = (val[0] == '"' || val[0] == '\'') ? val[0] : 0;
     if (!q) return 0;
@@ -3470,6 +3543,80 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
                            char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
                            int *known);
 
+/* CSS Transforms 2: the individual `translate`, `scale` and `rotate` properties.
+ * Each is the single-function `transform` it names and writes ONLY that function's
+ * slots, so the three compose with one another (`translate:10px; rotate:5deg`) the
+ * way they do in a browser, and `none` resets just its own slots. Limitation: when
+ * one of them AND `transform` write the same slot, the later declaration wins
+ * instead of the two multiplying (no page measured needs both on one element).
+ * A third (z) component or a 3D rotation axis fails closed, as in the list path. */
+static int expand_individual_transform(const char *prop, const char *val,
+                                       css_decl *dst, int cap) {
+    char t1[CSS_TOK_MAX], t2[CSS_TOK_MAX], t3[CSS_TOK_MAX], fn[3 * CSS_TOK_MAX + 16];
+    const char *q = val;
+    int n = 0;
+    if (next_ws_token(&q, t1, sizeof t1)) ++n;
+    if (n == 1 && next_ws_token(&q, t2, sizeof t2)) ++n;
+    if (n == 2 && next_ws_token(&q, t3, sizeof t3)) ++n;
+    if (n == 0 || next_ws_token(&q, fn, sizeof fn)) return 0;
+    int is_tr = strcmp(prop, "translate") == 0;
+    int is_sc = strcmp(prop, "scale") == 0;
+    if (n == 1 && csel_ci_eq(t1, "none")) {
+        if (is_tr) {
+            if (cap < 2) return 0;
+            dst[0].prop = P_TRANSFORM_TX; dst[0].ival = 0;
+            dst[1].prop = P_TRANSFORM_TY; dst[1].ival = 0;
+            return 2;
+        }
+        if (is_sc) {
+            if (cap < 2) return 0;
+            dst[0].prop = P_TRANSFORM_SX; dst[0].ival = 100;
+            dst[1].prop = P_TRANSFORM_SY; dst[1].ival = 100;
+            return 2;
+        }
+        dst[0].prop = P_TRANSFORM_ROTATE; dst[0].ival = 0;
+        return 1;
+    }
+    int w;
+    if (!is_tr && !is_sc) {
+        /* rotate: <angle> | z <angle>. x / y / <vector> would need 3D. */
+        if (n == 1) w = snprintf(fn, sizeof fn, "rotate(%s)", t1);
+        else if (n == 2 && csel_ci_eq(t1, "z")) w = snprintf(fn, sizeof fn, "rotate(%s)", t2);
+        else return 0;
+    } else {
+        const char *name = is_tr ? "translate" : "scale";
+        if (n == 3) {
+            if (!is_tr || !(csel_ci_eq(t3, "0") || csel_ci_eq(t3, "0px"))) return 0;
+            n = 2;
+        }
+        w = (n == 1) ? snprintf(fn, sizeof fn, "%s(%s)", name, t1)
+                     : snprintf(fn, sizeof fn, "%s(%s, %s)", name, t1, t2);
+    }
+    if (w < 0 || (size_t)w >= sizeof fn) return 0;
+    return expand_transform(fn, dst, cap);
+}
+
+/* Properties that are valid CSS but change nothing in a static, non-interactive
+ * render: scrolling affordances, compositor hints, text-size inflation and
+ * accessibility/speech hints. Names are given WITHOUT a vendor prefix (the dispatch
+ * strips it first). Recognising them keeps `@supports` truthful and leaves the drop
+ * log listing only real gaps. A prefix entry ends in '-'. */
+static int is_inert_prop(const char *prop) {
+    static const char *const EXACT[] = {
+        "will-change", "scrollbar-width", "scrollbar-color", "scrollbar-gutter",
+        "font-smoothing", "osx-font-smoothing", "tap-highlight-color", "overflow-scrolling",
+        "text-size-adjust", "overflow-style", "speak", "view-transition-name",
+        "contain-intrinsic-size", "contain-intrinsic-width", "contain-intrinsic-height",
+        "touch-callout", "user-drag", "scroll-timeline", "view-timeline",
+    };
+    static const char *const PREFIX[] = { "scroll-margin", "scroll-padding", "scroll-snap-" };
+    for (size_t i = 0; i < sizeof EXACT / sizeof *EXACT; ++i)
+        if (strcmp(prop, EXACT[i]) == 0) return 1;
+    for (size_t i = 0; i < sizeof PREFIX / sizeof *PREFIX; ++i)
+        if (strncmp(prop, PREFIX[i], strlen(PREFIX[i])) == 0) return 1;
+    return 0;
+}
+
 static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
                            char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
@@ -3509,6 +3656,16 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         }
         if (known != NULL) *known = 0;
         return 0;   /* an unknown vendor prefix: fail closed */
+    }
+
+    /* CSS Grid 1 section 10.2: `grid-column-gap` / `grid-row-gap` are the legacy
+     * spellings of `column-gap` / `row-gap`. A rename, asked again once. */
+    if (strncmp(prop, "grid-", 5) == 0) {
+        const char *std = (strcmp(prop, "grid-column-gap") == 0) ? "column-gap"
+                        : (strcmp(prop, "grid-row-gap") == 0)    ? "row-gap" : NULL;
+        if (std != NULL)
+            return interpret_prop(std, val, dst, cap, urltab, nurl, urlcap,
+                                  contenttab, ncontent, contentcap, known);
     }
 
     /* Logical BORDERS (CSS Logical 1 section 6), in the same horizontal-tb LTR
@@ -3983,6 +4140,7 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "forced-color-adjust") == 0)  { prop_id = P_FORCED_COLOR_ADJUST;  ival = interp_forced_color_adjust(val); }
     else if (strcmp(prop, "mix-blend-mode") == 0)       { prop_id = P_MIX_BLEND_MODE;   ival = interp_mix_blend_mode(val); }
     else if (strcmp(prop, "object-fit") == 0)           { prop_id = P_OBJECT_FIT;       ival = interp_object_fit(val); }
+    else if (strcmp(prop, "object-position") == 0)      { prop_id = P_OBJECT_POS;       ival = interp_object_pos(val); }
     else if (strcmp(prop, "list-style-position") == 0)  { prop_id = P_LIST_STYLE_POS;   ival = interp_list_style_pos(val); }
     else if (strcmp(prop, "font-kerning") == 0)         { prop_id = P_FONT_KERNING;     ival = interp_font_kerning(val); }
     else if (strcmp(prop, "text-rendering") == 0)       { prop_id = P_TEXT_RENDERING;   ival = interp_text_rendering(val); }
@@ -4090,6 +4248,10 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
              strcmp(prop, "-webkit-backdrop-filter") == 0)
         return expand_backdrop_filter(val, dst, cap);
     else if (strcmp(prop, "background-position") == 0)   return expand_bg_position(val, dst, cap);
+    else if (strcmp(prop, "text-underline-offset") == 0)
+        return emit_len(dst, cap, P_TEXT_UL_OFFSET, val, CB_AUTO_VALUE, 1);
+    else if (strcmp(prop, "counter-reset") == 0 || strcmp(prop, "counter-increment") == 0)
+        return expand_counter_decls(prop, val, dst, cap, contenttab, ncontent, contentcap);
     else if (strcmp(prop, "content") == 0)                return expand_content(val, dst, cap, contenttab, ncontent, contentcap);
     else if (strcmp(prop, "grid-template-areas") == 0)
         return expand_grid_areas(val, dst, cap, contenttab, ncontent, contentcap);
@@ -4100,6 +4262,28 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         return expand_grid_line(val, dst, cap, P_GRID_ROW_START, P_GRID_ROW_END);
     else if (strcmp(prop, "grid-template") == 0 || strcmp(prop, "grid") == 0)
         return expand_grid_template(val, dst, cap, contenttab, ncontent, contentcap);
+    else if (strcmp(prop, "translate") == 0 || strcmp(prop, "scale") == 0 ||
+             strcmp(prop, "rotate") == 0)
+        return expand_individual_transform(prop, val, dst, cap);
+    else if (strcmp(prop, "grid-auto-columns") == 0 || strcmp(prop, "grid-auto-rows") == 0) {
+        /* Implicit tracks are shared equally by the layout, which is exactly auto and
+         * 1fr (a stretched auto track grows by an equal share). A fixed size would
+         * be a lie, so it stays a visible drop. */
+        int rows = (prop[10] == 'r');   /* grid-auto-rows: 1fr would equalise heights */
+        if (!(csel_ci_eq(val, "auto") ||
+              (!rows && (csel_ci_eq(val, "1fr") || csel_ci_eq(val, "minmax(0,1fr)") ||
+                         csel_ci_eq(val, "minmax(0, 1fr)")))))
+            return 0;
+        memset(&dst[0], 0, sizeof dst[0]);
+        dst[0].prop = P_INERT;
+        return 1;
+    }
+    else if (is_inert_prop(prop) && val[0] != '\0' && cap > 0) {
+        /* Last on purpose: a known property never pays for this table. */
+        memset(&dst[0], 0, sizeof dst[0]);
+        dst[0].prop = P_INERT;
+        return 1;
+    }
     else { if (known != NULL) *known = 0; return 0; }
 
     /* `transparent` (-3) and `currentColor` (-2) are VALUES, not failures: the
@@ -4160,7 +4344,7 @@ static int devendor_value(const char *v, char *out, size_t outcap) {
  * dispatch that will parse the page's real declarations. */
 static const char *const WIDE_PROBES[] = {
     "0", "none", "auto", "normal", "0 0", "medium serif", "1 1 auto",
-    "medium none currentcolor", "0 0 0 0",
+    "medium none currentcolor", "0 0 0 0", "0s", "ease", "currentcolor",
 };
 
 /* CSS Cascade 5 section 7.3: a CSS-wide keyword is valid on EVERY property, and on a
@@ -5793,6 +5977,18 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_TRANSFORM_OX:        o->transform_ox = d->ival; break;
             case P_TRANSFORM_OY:        o->transform_oy = d->ival; break;
             case P_OBJECT_FIT:          o->object_fit = d->ival; break;
+            case P_OBJECT_POS:          o->object_pos = d->ival; break;
+            case P_CNT_RESET:
+            case P_CNT_INC: {
+                int is_inc = (d->prop == P_CNT_INC);
+                cnt_decl *dstc = is_inc ? o->cnt_inc : o->cnt_reset;
+                int *dn = is_inc ? &o->cnt_inc_n : &o->cnt_reset_n;
+                int pn = 0;
+                if (d->ival >= 0 && contenttab != NULL)
+                    pn = cnt_parse_decls(contenttab[d->ival], is_inc ? 1 : 0, dstc);
+                *dn = (pn > 0) ? pn : 0;
+                break;
+            }
             case P_LIST_STYLE_POS:      o->list_style_pos = d->ival; break;
             case P_FONT_KERNING:        o->font_kerning = d->ival; break;
             case P_TEXT_RENDERING:      o->text_rendering = d->ival; break;
@@ -5803,6 +5999,7 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_OVERSCROLL_BEHAVIOR: o->overscroll_behavior = d->ival; break;
             case P_BACKFACE_VISIBILITY: o->backface_visibility = d->ival; break;
             case P_TEXTDECO_THICKNESS:  o->text_decoration_thickness = d->ival; break;
+            case P_TEXT_UL_OFFSET:      o->text_underline_offset = d->ival; break;
             case P_ASPECT_NUM:          o->aspect_num = d->ival; break;
             case P_ASPECT_DEN:          o->aspect_den = d->ival; break;
             case P_ANIM_DURATION:       o->anim_duration_ms = d->ival; break;
@@ -6281,7 +6478,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         .resize = CSS_RS_UNSET, .scroll_behavior = CSS_SB_UNSET,
         .touch_action = CSS_TA_UNSET, .overscroll_behavior = CSS_OS_UNSET,
         .backface_visibility = CSS_BF_UNSET,
-        .text_decoration_thickness = -1,
+        .text_decoration_thickness = -1, .text_underline_offset = CSS_LEN_UNSET,
         .aspect_num = 0, .aspect_den = 0,
         .bg_grad_n = 0, .bg_grad_angle = 180, .bg_grad_radial = 0,
         .bg_rad_size = 0, .bg_rad_cx = 500, .bg_rad_cy = 500,
@@ -6531,4 +6728,11 @@ int css_font_face_at(const css_sheet *sheet, size_t i,
 
 css_style css_parse_inline(const char *style, size_t len) {
     return css_resolve(NULL, NULL, NULL, NULL, 0, style, len);
+}
+
+int css_sheet_uses_counters(const css_sheet *sheet) {
+    if (sheet == NULL) return 0;
+    for (size_t i = 0; i < sheet->ndecls; ++i)
+        if (sheet->decls[i].prop == P_CNT_RESET || sheet->decls[i].prop == P_CNT_INC) return 1;
+    return 0;
 }

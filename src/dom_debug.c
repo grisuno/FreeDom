@@ -384,6 +384,7 @@ static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b) {
     if (b->word_break == CSS_WB_BREAK)      dd_puts(c, " word-break=break");
     else if (b->word_break == CSS_WB_BREAK_WORD) dd_puts(c, " word-break=break-word");
 
+    if (b->kind == RD_INPUT) dd_printf(c, " in=%d ck=%d", (int)b->input_type, (int)b->checked);
     if (b->kind == RD_IMAGE) {
         if (b->object_fit)      dd_printf(c, " of=%s", dd_object_fit_name(b->object_fit));
         if (b->image_rendering) dd_printf(c, " ir=%s", dd_image_rendering_name(b->image_rendering));

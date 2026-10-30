@@ -130,6 +130,14 @@ fx_status fx_grid_columns(double avail, size_t ncols, double gap,
     return fx_grid_columns_weighted(avail, ncols, gap, NULL, 0, col_x, col_w);
 }
 
+int fx_grid_column_count(int flow, int cols, int rows, size_t items) {
+    long n = (cols > 0) ? cols : 1;
+    if (flow == 2 && rows <= 0 && items > (size_t)n)
+        n = (items > FX_GRID_COLS_MAX) ? (long)FX_GRID_COLS_MAX : (long)items;
+    if (n > (long)FX_GRID_COLS_MAX) n = (long)FX_GRID_COLS_MAX;
+    return (int)n;
+}
+
 size_t fx_autofill_count(double avail, double gap, double minw) {
     if (!(avail >= 0.0) || !(gap >= 0.0) || !(minw > 0.0)) return 1;
     double denom = minw + gap;

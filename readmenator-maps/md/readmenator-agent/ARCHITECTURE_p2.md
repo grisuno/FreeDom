@@ -2,6 +2,9 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_interp.c` -> `include/interp.h`
+- `tests/test_js_dom.c` -> `include/dom.h`
+- `tests/test_js_dom.c` -> `include/fb_cmdline.h`
 - `tests/test_js_dom.c` -> `include/fb_panes.h`
 - `tests/test_js_dom.c` -> `include/html_parse.h`
 - `tests/test_js_dom.c` -> `include/js_dom.h`
@@ -98,6 +101,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/css_atrule.h` -> stddef.h
 - `include/css_chain.h` -> lexbor/html/html.h
 - `include/css_computed.h` -> stddef.h
+- `include/css_counter.h` -> stddef.h
 - `include/css_gradient.h` -> stddef.h
 - `include/css_index.h` -> stddef.h, stdint.h
 - `include/css_length.h` -> stddef.h
@@ -178,6 +182,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/css_chain.c` -> stdlib.h, string.h
 - `src/css_color.c` -> math.h, stdlib.h, string.h
 - `src/css_computed.c` -> stdarg.h, stdio.h, string.h
+- `src/css_counter.c` -> stdint.h, stdio.h, stdlib.h, string.h
 - `src/css_gradient.c` -> ctype.h, math.h, stdlib.h, string.h
 - `src/css_index.c` -> stdlib.h, string.h
 - `src/css_length.c` -> math.h, string.h
@@ -270,6 +275,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_css_box.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_css_color.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_css_computed.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_css_counter.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_css_drops.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_gradient.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_css_index.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h

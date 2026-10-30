@@ -8,30 +8,35 @@ Previous: [KB_tests_p2.md](KB_tests_p2.md)
 - Symbols:
   - `find_drop` (function, line 31) `static const css_drop *find_drop(const css_drop_log *log, const char *prop)`
   - `test_unknown_property_is_logged` (function, line 39) `static void test_unknown_property_is_logged(void **state)`
-  - `test_bad_value_is_distinguished` (function, line 56) `static void test_bad_value_is_distinguished(void **state)`
-  - `test_accepted_declaration_is_not_logged` (function, line 69) `static void test_accepted_declaration_is_not_logged(void **state)`
-  - `test_repeats_coalesce_by_property_and_cause` (function, line 82) `static void test_repeats_coalesce_by_property_and_cause(void **state)`
-  - `test_custom_property_is_not_a_drop` (function, line 109) `static void test_custom_property_is_not_a_drop(void **state)`
-  - `test_full_log_still_counts_total` (function, line 121) `static void test_full_log_still_counts_total(void **state)`
-  - `test_null_items_disables_listing` (function, line 132) `static void test_null_items_disables_listing(void **state)`
-  - `test_long_value_truncates_and_control_bytes_are_stripped` (function, line 145) `static void test_long_value_truncates_and_control_bytes_are_stripped(void **state)`
-  - `test_log_does_not_change_resolution` (function, line 173) `static void test_log_does_not_change_resolution(void **state)`
-  - `parse_nodrop` (function, line 199) `static css_sheet *parse_nodrop(const char *text)`
-  - `var` (function, line 213) `* was never collected and 40 var() declarations died as bad values. */
+  - `test_legacy_grid_gap_aliases_are_the_standard_properties` (function, line 55) `static void test_legacy_grid_gap_aliases_are_the_standard_properties(void **state)`
+  - `test_inert_properties_are_recognised` (function, line 69) `static void test_inert_properties_are_recognised(void **state)`
+  - `test_css_wide_keyword_on_time_easing_color_is_not_dropped` (function, line 91) `static void test_css_wide_keyword_on_time_easing_color_is_not_dropped(void **state)`
+  - `test_individual_transform_properties` (function, line 105) `static void test_individual_transform_properties(void **state)`
+  - `test_grid_auto_tracks_only_what_the_engine_does` (function, line 131) `static void test_grid_auto_tracks_only_what_the_engine_does(void **state)`
+  - `test_bad_value_is_distinguished` (function, line 147) `static void test_bad_value_is_distinguished(void **state)`
+  - `test_accepted_declaration_is_not_logged` (function, line 160) `static void test_accepted_declaration_is_not_logged(void **state)`
+  - `test_repeats_coalesce_by_property_and_cause` (function, line 173) `static void test_repeats_coalesce_by_property_and_cause(void **state)`
+  - `test_custom_property_is_not_a_drop` (function, line 200) `static void test_custom_property_is_not_a_drop(void **state)`
+  - `test_full_log_still_counts_total` (function, line 212) `static void test_full_log_still_counts_total(void **state)`
+  - `test_null_items_disables_listing` (function, line 223) `static void test_null_items_disables_listing(void **state)`
+  - `test_long_value_truncates_and_control_bytes_are_stripped` (function, line 236) `static void test_long_value_truncates_and_control_bytes_are_stripped(void **state)`
+  - `test_log_does_not_change_resolution` (function, line 264) `static void test_log_does_not_change_resolution(void **state)`
+  - `parse_nodrop` (function, line 290) `static css_sheet *parse_nodrop(const char *text)`
+  - `var` (function, line 304) `* was never collected and 40 var() declarations died as bad values. */
 static void test_leading_b...`
-  - `test_transform_function_names_are_case_insensitive` (function, line 238) `static void test_transform_function_names_are_case_insensitive(void **state)`
-  - `test_transform_angle_units` (function, line 249) `static void test_transform_angle_units(void **state)`
-  - `test_transform_3d_flattens` (function, line 260) `static void test_transform_3d_flattens(void **state)`
-  - `test_transform_origin_number_component` (function, line 272) `static void test_transform_origin_number_component(void **state)`
-  - `test_background_size_two_lengths` (function, line 283) `static void test_background_size_two_lengths(void **state)`
-  - `test_background_position_percentages` (function, line 294) `static void test_background_position_percentages(void **state)`
-  - `test_vertical_align_length` (function, line 313) `static void test_vertical_align_length(void **state)`
-  - `test_css_wide_keyword_on_shorthand` (function, line 324) `static void test_css_wide_keyword_on_shorthand(void **state)`
-  - `test_overflow_two_values` (function, line 334) `static void test_overflow_two_values(void **state)`
-  - `test_intrinsic_sizing_keywords` (function, line 360) `static void test_intrinsic_sizing_keywords(void **state)`
-  - `test_vendor_prefixed_value_keyword` (function, line 372) `static void test_vendor_prefixed_value_keyword(void **state)`
-  - `test_font_shorthand_with_line_height` (function, line 382) `static void test_font_shorthand_with_line_height(void **state)`
-  - `main` (function, line 392) `int main(void)`
+  - `test_transform_function_names_are_case_insensitive` (function, line 329) `static void test_transform_function_names_are_case_insensitive(void **state)`
+  - `test_transform_angle_units` (function, line 340) `static void test_transform_angle_units(void **state)`
+  - `test_transform_3d_flattens` (function, line 351) `static void test_transform_3d_flattens(void **state)`
+  - `test_transform_origin_number_component` (function, line 363) `static void test_transform_origin_number_component(void **state)`
+  - `test_background_size_two_lengths` (function, line 374) `static void test_background_size_two_lengths(void **state)`
+  - `test_background_position_percentages` (function, line 385) `static void test_background_position_percentages(void **state)`
+  - `test_vertical_align_length` (function, line 404) `static void test_vertical_align_length(void **state)`
+  - `test_css_wide_keyword_on_shorthand` (function, line 415) `static void test_css_wide_keyword_on_shorthand(void **state)`
+  - `test_overflow_two_values` (function, line 425) `static void test_overflow_two_values(void **state)`
+  - `test_intrinsic_sizing_keywords` (function, line 451) `static void test_intrinsic_sizing_keywords(void **state)`
+  - `test_vendor_prefixed_value_keyword` (function, line 463) `static void test_vendor_prefixed_value_keyword(void **state)`
+  - `test_font_shorthand_with_line_height` (function, line 473) `static void test_font_shorthand_with_line_height(void **state)`
+  - `main` (function, line 483) `int main(void)`
 - Depends on: `include/css.h`
 
 ## tests/test_css_gradient.c
@@ -374,7 +379,7 @@ static void test_leading_b...`
 - Depends on: `include/fb_panes.h`
 
 ## tests/test_flex_layout.c
-- Doc: test_autofill_count: assert_item(out[0], 0.0, 100.0);  /* no divide-by-zero, behaves like start...
+- Doc: test_grid_column_count_for_column_flow: Given `grid-auto-flow: column` with no explicit rows...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -391,66 +396,67 @@ static void test_leading_b...`
   - `test_justify_space_evenly` (function, line 113) `static void test_justify_space_evenly(void **state)`
   - `test_space_between_single_item_is_start` (function, line 123) `static void test_space_between_single_item_is_start(void **state)`
   - `test_negative_fields_clamped` (function, line 131) `static void test_negative_fields_clamped(void **state)`
-  - `test_autofill_count` (function, line 142) `static void test_autofill_count(void **state)`
-  - `test_flex_zero_items_is_noop` (function, line 152) `static void test_flex_zero_items_is_noop(void **state)`
-  - `test_flex_errors` (function, line 157) `static void test_flex_errors(void **state)`
-  - `test_grid_columns` (function, line 169) `static void test_grid_columns(void **state)`
-  - `test_grid_columns_too_narrow_clamps_to_zero` (function, line 181) `static void test_grid_columns_too_narrow_clamps_to_zero(void **state)`
-  - `test_grid_columns_edges` (function, line 188) `static void test_grid_columns_edges(void **state)`
-  - `test_grid_cell` (function, line 198) `static void test_grid_cell(void **state)`
-  - `test_grid_weighted_fr` (function, line 209) `static void test_grid_weighted_fr(void **state)`
-  - `test_grid_weighted_fixed_px_reserved_first` (function, line 221) `static void test_grid_weighted_fixed_px_reserved_first(void **state)`
-  - `test_grid_weighted_all_auto_matches_equal` (function, line 233) `static void test_grid_weighted_all_auto_matches_equal(void **state)`
-  - `test_grid_weighted_fixed_overflow_zeroes_fr` (function, line 246) `static void test_grid_weighted_fixed_overflow_zeroes_fr(void **state)`
-  - `test_grid_weighted_errors` (function, line 256) `static void test_grid_weighted_errors(void **state)`
-  - `test_grid_place_span_basic` (function, line 266) `static void test_grid_place_span_basic(void **state)`
-  - `test_grid_place_span_wraps_when_it_does_not_fit` (function, line 277) `static void test_grid_place_span_wraps_when_it_does_not_fit(void **state)`
-  - `test_grid_place_span_clamps_and_defaults` (function, line 289) `static void test_grid_place_span_clamps_and_defaults(void **state)`
-  - `test_grid_place_rowspan` (function, line 305) `static void test_grid_place_rowspan(void **state)`
-  - `test_float_pack_left` (function, line 322) `static void test_float_pack_left(void **state)`
-  - `test_float_pack_left_and_right` (function, line 333) `static void test_float_pack_left_and_right(void **state)`
-  - `test_float_pack_two_right` (function, line 345) `static void test_float_pack_two_right(void **state)`
-  - `article` (function, line 362) `* article (slashdot-cols probe: score 13.41). */
+  - `test_grid_column_count_for_column_flow` (function, line 145) `static void test_grid_column_count_for_column_flow(void **state)`
+  - `test_autofill_count` (function, line 158) `static void test_autofill_count(void **state)`
+  - `test_flex_zero_items_is_noop` (function, line 168) `static void test_flex_zero_items_is_noop(void **state)`
+  - `test_flex_errors` (function, line 173) `static void test_flex_errors(void **state)`
+  - `test_grid_columns` (function, line 185) `static void test_grid_columns(void **state)`
+  - `test_grid_columns_too_narrow_clamps_to_zero` (function, line 197) `static void test_grid_columns_too_narrow_clamps_to_zero(void **state)`
+  - `test_grid_columns_edges` (function, line 204) `static void test_grid_columns_edges(void **state)`
+  - `test_grid_cell` (function, line 214) `static void test_grid_cell(void **state)`
+  - `test_grid_weighted_fr` (function, line 225) `static void test_grid_weighted_fr(void **state)`
+  - `test_grid_weighted_fixed_px_reserved_first` (function, line 237) `static void test_grid_weighted_fixed_px_reserved_first(void **state)`
+  - `test_grid_weighted_all_auto_matches_equal` (function, line 249) `static void test_grid_weighted_all_auto_matches_equal(void **state)`
+  - `test_grid_weighted_fixed_overflow_zeroes_fr` (function, line 262) `static void test_grid_weighted_fixed_overflow_zeroes_fr(void **state)`
+  - `test_grid_weighted_errors` (function, line 272) `static void test_grid_weighted_errors(void **state)`
+  - `test_grid_place_span_basic` (function, line 282) `static void test_grid_place_span_basic(void **state)`
+  - `test_grid_place_span_wraps_when_it_does_not_fit` (function, line 293) `static void test_grid_place_span_wraps_when_it_does_not_fit(void **state)`
+  - `test_grid_place_span_clamps_and_defaults` (function, line 305) `static void test_grid_place_span_clamps_and_defaults(void **state)`
+  - `test_grid_place_rowspan` (function, line 321) `static void test_grid_place_rowspan(void **state)`
+  - `test_float_pack_left` (function, line 338) `static void test_float_pack_left(void **state)`
+  - `test_float_pack_left_and_right` (function, line 349) `static void test_float_pack_left_and_right(void **state)`
+  - `test_float_pack_two_right` (function, line 361) `static void test_float_pack_two_right(void **state)`
+  - `article` (function, line 378) `* article (slashdot-cols probe: score 13.41). */
 
 static void test_float_pack_m_holy_grail_pull_u...`
-  - `test_float_pack_m_zero_margins_match_wrap` (function, line 381) `static void test_float_pack_m_zero_margins_match_wrap(void **state)`
-  - `test_float_pack_m_positive_margin_widens` (function, line 401) `static void test_float_pack_m_positive_margin_widens(void **state)`
-  - `test_float_pack_m_right_float_negative_margin` (function, line 417) `static void test_float_pack_m_right_float_negative_margin(void **state)`
-  - `test_float_pack_m_errors` (function, line 433) `static void test_float_pack_m_errors(void **state)`
-  - `test_float_insets_left_overlapping_line` (function, line 458) `static void test_float_insets_left_overlapping_line(void **state)`
-  - `test_float_insets_line_past_bottom_is_full_width` (function, line 468) `static void test_float_insets_line_past_bottom_is_full_width(void **state)`
-  - `test_float_insets_right` (function, line 485) `static void test_float_insets_right(void **state)`
-  - `test_float_insets_both_sides_take_the_tightest` (function, line 495) `static void test_float_insets_both_sides_take_the_tightest(void **state)`
-  - `test_float_insets_never_starve_the_line` (function, line 510) `static void test_float_insets_never_starve_the_line(void **state)`
-  - `test_float_insets_edges` (function, line 532) `static void test_float_insets_edges(void **state)`
-  - `test_float_pack_edges` (function, line 552) `static void test_float_pack_edges(void **state)`
-  - `test_float_pack_wrap_full_width_stack` (function, line 568) `static void test_float_pack_wrap_full_width_stack(void **state)`
-  - `test_float_pack_wrap_fits_matches_v1` (function, line 582) `static void test_float_pack_wrap_fits_matches_v1(void **state)`
-  - `test_float_pack_wrap_partial` (function, line 605) `static void test_float_pack_wrap_partial(void **state)`
-  - `test_float_pack_wrap_errors` (function, line 628) `static void test_float_pack_wrap_errors(void **state)`
-  - `test_justify_name` (function, line 637) `static void test_justify_name(void **state)`
-  - `test_auto_min_size_is_min_content` (function, line 653) `static void test_auto_min_size_is_min_content(void **state)`
-  - `test_multicol_used_counts` (function, line 686) `static void test_multicol_used_counts(void **state)`
-  - `test_multicol_used_edges` (function, line 723) `static void test_multicol_used_edges(void **state)`
-  - `test_area_hash_basics` (function, line 792) `static void test_area_hash_basics(void **state)`
-  - `test_areas_parse_and_resolve` (function, line 804) `static void test_areas_parse_and_resolve(void **state)`
-  - `test_areas_null_cell` (function, line 838) `static void test_areas_null_cell(void **state)`
-  - `test_areas_rect_spans_rows_and_cols` (function, line 853) `static void test_areas_rect_spans_rows_and_cols(void **state)`
-  - `test_areas_non_rectangular_is_rejected` (function, line 870) `static void test_areas_non_rectangular_is_rejected(void **state)`
-  - `test_areas_parse_fails_closed` (function, line 884) `static void test_areas_parse_fails_closed(void **state)`
-  - `test_areas_parse_bounds` (function, line 902) `static void test_areas_parse_bounds(void **state)`
-  - `test_grid_line_side` (function, line 931) `static void test_grid_line_side(void **state)`
-  - `test_grid_line_parse` (function, line 959) `static void test_grid_line_parse(void **state)`
-  - `test_grid_line_resolve_table` (function, line 978) `static void test_grid_line_resolve_table(void **state)`
-  - `test_grid_place_fixed_col_auto_row` (function, line 1009) `static void test_grid_place_fixed_col_auto_row(void **state)`
-  - `test_grid_place_null_fixed_is_unchanged` (function, line 1040) `static void test_grid_place_null_fixed_is_unchanged(void **state)`
-  - `test_grid_place_explicit_out_of_range_clamps` (function, line 1052) `static void test_grid_place_explicit_out_of_range_clamps(void **state)`
-  - `test_auto_margins_push_right_and_center` (function, line 1063) `static void test_auto_margins_push_right_and_center(void **state)`
-  - `test_column_place_stack_and_justify` (function, line 1096) `static void test_column_place_stack_and_justify(void **state)`
-  - `test_cross_offset` (function, line 1125) `static void test_cross_offset(void **state)`
-  - `test_column_place_auto_margins` (function, line 1139) `static void test_column_place_auto_margins(void **state)`
-  - `main` (function, line 1180) `int main(void)`
-  - `to` (function, line 280) `* jumps to (1,0);`
+  - `test_float_pack_m_zero_margins_match_wrap` (function, line 397) `static void test_float_pack_m_zero_margins_match_wrap(void **state)`
+  - `test_float_pack_m_positive_margin_widens` (function, line 417) `static void test_float_pack_m_positive_margin_widens(void **state)`
+  - `test_float_pack_m_right_float_negative_margin` (function, line 433) `static void test_float_pack_m_right_float_negative_margin(void **state)`
+  - `test_float_pack_m_errors` (function, line 449) `static void test_float_pack_m_errors(void **state)`
+  - `test_float_insets_left_overlapping_line` (function, line 474) `static void test_float_insets_left_overlapping_line(void **state)`
+  - `test_float_insets_line_past_bottom_is_full_width` (function, line 484) `static void test_float_insets_line_past_bottom_is_full_width(void **state)`
+  - `test_float_insets_right` (function, line 501) `static void test_float_insets_right(void **state)`
+  - `test_float_insets_both_sides_take_the_tightest` (function, line 511) `static void test_float_insets_both_sides_take_the_tightest(void **state)`
+  - `test_float_insets_never_starve_the_line` (function, line 526) `static void test_float_insets_never_starve_the_line(void **state)`
+  - `test_float_insets_edges` (function, line 548) `static void test_float_insets_edges(void **state)`
+  - `test_float_pack_edges` (function, line 568) `static void test_float_pack_edges(void **state)`
+  - `test_float_pack_wrap_full_width_stack` (function, line 584) `static void test_float_pack_wrap_full_width_stack(void **state)`
+  - `test_float_pack_wrap_fits_matches_v1` (function, line 598) `static void test_float_pack_wrap_fits_matches_v1(void **state)`
+  - `test_float_pack_wrap_partial` (function, line 621) `static void test_float_pack_wrap_partial(void **state)`
+  - `test_float_pack_wrap_errors` (function, line 644) `static void test_float_pack_wrap_errors(void **state)`
+  - `test_justify_name` (function, line 653) `static void test_justify_name(void **state)`
+  - `test_auto_min_size_is_min_content` (function, line 669) `static void test_auto_min_size_is_min_content(void **state)`
+  - `test_multicol_used_counts` (function, line 702) `static void test_multicol_used_counts(void **state)`
+  - `test_multicol_used_edges` (function, line 739) `static void test_multicol_used_edges(void **state)`
+  - `test_area_hash_basics` (function, line 808) `static void test_area_hash_basics(void **state)`
+  - `test_areas_parse_and_resolve` (function, line 820) `static void test_areas_parse_and_resolve(void **state)`
+  - `test_areas_null_cell` (function, line 854) `static void test_areas_null_cell(void **state)`
+  - `test_areas_rect_spans_rows_and_cols` (function, line 869) `static void test_areas_rect_spans_rows_and_cols(void **state)`
+  - `test_areas_non_rectangular_is_rejected` (function, line 886) `static void test_areas_non_rectangular_is_rejected(void **state)`
+  - `test_areas_parse_fails_closed` (function, line 900) `static void test_areas_parse_fails_closed(void **state)`
+  - `test_areas_parse_bounds` (function, line 918) `static void test_areas_parse_bounds(void **state)`
+  - `test_grid_line_side` (function, line 947) `static void test_grid_line_side(void **state)`
+  - `test_grid_line_parse` (function, line 975) `static void test_grid_line_parse(void **state)`
+  - `test_grid_line_resolve_table` (function, line 994) `static void test_grid_line_resolve_table(void **state)`
+  - `test_grid_place_fixed_col_auto_row` (function, line 1025) `static void test_grid_place_fixed_col_auto_row(void **state)`
+  - `test_grid_place_null_fixed_is_unchanged` (function, line 1056) `static void test_grid_place_null_fixed_is_unchanged(void **state)`
+  - `test_grid_place_explicit_out_of_range_clamps` (function, line 1068) `static void test_grid_place_explicit_out_of_range_clamps(void **state)`
+  - `test_auto_margins_push_right_and_center` (function, line 1079) `static void test_auto_margins_push_right_and_center(void **state)`
+  - `test_column_place_stack_and_justify` (function, line 1112) `static void test_column_place_stack_and_justify(void **state)`
+  - `test_cross_offset` (function, line 1141) `static void test_cross_offset(void **state)`
+  - `test_column_place_auto_margins` (function, line 1155) `static void test_column_place_auto_margins(void **state)`
+  - `main` (function, line 1196) `int main(void)`
+  - `to` (function, line 296) `* jumps to (1,0);`
 - Depends on: `include/flex_layout.h`
 
 ## tests/test_form.c
@@ -478,23 +484,6 @@ static void test_float_pack_m_holy_grail_pull_u...`
   - `test_get_no_fields_still_navigates` (function, line 199) `static void test_get_no_fields_still_navigates(void **state)`
   - `main` (function, line 207) `int main(void)`
 - Depends on: `include/form.h`
-
-## tests/test_frame_broker.c
-- Doc: test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router.
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_origin_of` (function, line 12) `static void test_origin_of(void **state)`
-  - `build` (function, line 27) `static void build(fbk_table *t, int *a, int *b)`
-  - `test_parent_top_child_routes` (function, line 33) `static void test_parent_top_child_routes(void **state)`
-  - `test_siblings_not_addressable` (function, line 45) `static void test_siblings_not_addressable(void **state)`
-  - `test_target_origin` (function, line 55) `static void test_target_origin(void **state)`
-  - `test_opaque_never_matches_exact` (function, line 69) `static void test_opaque_never_matches_exact(void **state)`
-  - `test_size_and_dead_frames` (function, line 78) `static void test_size_and_dead_frames(void **state)`
-  - `test_limits_fail_closed` (function, line 90) `static void test_limits_fail_closed(void **state)`
-  - `test_remove_subtree_and_top` (function, line 102) `static void test_remove_subtree_and_top(void **state)`
-  - `main` (function, line 116) `int main(void)`
-- Depends on: `include/frame_broker.h`
 
 
 Next: [KB_tests_p4.md](KB_tests_p4.md)

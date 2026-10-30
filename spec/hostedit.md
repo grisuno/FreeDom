@@ -48,3 +48,9 @@
 Resolver el host desde la URL (lo hace el orquestador con `rp_host_of`/`url_split`),
 elegir el directorio de escritura, el formato `0.0.0.0 host` (se escribe el dominio
 desnudo, que `hostblock` acepta), y borrar entradas.
+
+## `he_cdn_kind` (2026-10-30)
+
+`he_cdn_kind_t he_cdn_kind(const char *url)`: `HE_CDN_CSS` / `HE_CDN_JS` / `HE_CDN_RES` por la extensión del ÚLTIMO
+segmento de la ruta (sin consulta ni fragmento, sin distinguir mayúsculas). Sin ruta, sin extensión, extensión larga
+o `NULL` ⇒ `HE_CDN_RES`. Pura, sin asignación; `fuzz-idn`.

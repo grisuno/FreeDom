@@ -1,6 +1,23 @@
 # Subsystem: tests (page 4 of 8)
 Previous: [KB_tests_p3.md](KB_tests_p3.md)
 
+## tests/test_frame_broker.c
+- Doc: test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router.
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_origin_of` (function, line 12) `static void test_origin_of(void **state)`
+  - `build` (function, line 27) `static void build(fbk_table *t, int *a, int *b)`
+  - `test_parent_top_child_routes` (function, line 33) `static void test_parent_top_child_routes(void **state)`
+  - `test_siblings_not_addressable` (function, line 45) `static void test_siblings_not_addressable(void **state)`
+  - `test_target_origin` (function, line 55) `static void test_target_origin(void **state)`
+  - `test_opaque_never_matches_exact` (function, line 69) `static void test_opaque_never_matches_exact(void **state)`
+  - `test_size_and_dead_frames` (function, line 78) `static void test_size_and_dead_frames(void **state)`
+  - `test_limits_fail_closed` (function, line 90) `static void test_limits_fail_closed(void **state)`
+  - `test_remove_subtree_and_top` (function, line 102) `static void test_remove_subtree_and_top(void **state)`
+  - `main` (function, line 116) `int main(void)`
+- Depends on: `include/frame_broker.h`
+
 ## tests/test_frame_clock.c
 - Layer: testing
 - Language: c
@@ -241,6 +258,7 @@ static void tes...`
 - Depends on: `include/hostblock.h`
 
 ## tests/test_hostedit.c
+- Doc: test_cdn_kind_from_url_path: Which auto-allow switch a subresource falls under, from its URL...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -254,7 +272,8 @@ static void tes...`
   - `test_suggest_prefix_first` (function, line 76) `static void test_suggest_prefix_first(void **state)`
   - `test_suggest_case_insensitive_and_dedup` (function, line 92) `static void test_suggest_case_insensitive_and_dedup(void **state)`
   - `test_suggest_empty_query_and_cap` (function, line 101) `static void test_suggest_empty_query_and_cap(void **state)`
-  - `main` (function, line 114) `int main(void)`
+  - `test_cdn_kind_from_url_path` (function, line 116) `static void test_cdn_kind_from_url_path(void **state)`
+  - `main` (function, line 130) `int main(void)`
 - Depends on: `include/hostedit.h`
 
 ## tests/test_html_parse.c
@@ -313,6 +332,7 @@ static void tes...`
 - Depends on: `include/http_cache.h`
 
 ## tests/test_identity.c
+- Doc: test_auto_allow_defaults_off_and_counts_as_a_change: assert_non_null(strstr(page...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -324,7 +344,10 @@ static void tes...`
   - `test_parse_keeps_valid_fields_and_defaults_the_bad` (function, line 113) `static void test_parse_keeps_valid_fields_and_defaults_the_bad(void **state)`
   - `test_apply_query` (function, line 127) `static void test_apply_query(void **state)`
   - `test_page_escapes_user_values_and_states_unavailable_apis` (function, line 160) `static void test_page_escapes_user_values_and_states_unavailable_apis(void **state)`
-  - `main` (function, line 182) `int main(void)`
+  - `test_auto_allow_defaults_off_and_counts_as_a_change` (function, line 183) `static void test_auto_allow_defaults_off_and_counts_as_a_change(void **state)`
+  - `test_auto_allow_query_needs_the_marker` (function, line 194) `static void test_auto_allow_query_needs_the_marker(void **state)`
+  - `test_auto_allow_roundtrips_and_is_rendered` (function, line 211) `static void test_auto_allow_roundtrips_and_is_rendered(void **state)`
+  - `main` (function, line 230) `int main(void)`
 - Depends on: `include/anti_fp.h`, `include/identity.h`
 
 ## tests/test_image_decode.c

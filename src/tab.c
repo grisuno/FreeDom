@@ -135,7 +135,7 @@ static void ignore_sigpipe(void);
 /* IPC wire block widths. Single source of truth for write_view/read_view.
  * Change requires same-diff in both functions; _Static_assert below enforces. */
 #define TAB_WIRE_HEAD_N 6
-#define TAB_WIRE_A_N 38
+#define TAB_WIRE_A_N 40
 #define TAB_WIRE_B_N 70
 #define TAB_WIRE_BOX_F_N 268
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
@@ -713,7 +713,7 @@ static int write_view_raw(int wfd, const pv_view *v) {
         };
         /* Block A: fixed-width scalars between the head strings and the grid array
          * (image dims, colors, the whole text-presentation set, container params). */
-        int32_t a[38] = {
+        int32_t a[TAB_WIRE_A_N] = {
             (int32_t)r->img_w, (int32_t)r->img_h, (int32_t)r->fg_rgb, (int32_t)r->bg_rgb,
             (int32_t)r->text_align, (int32_t)r->font_scale, (int32_t)r->line_scale,
             (int32_t)r->text_decoration, (int32_t)r->font_family, (int32_t)r->text_transform,
@@ -730,6 +730,8 @@ static int write_view_raw(int wfd, const pv_view *v) {
             (int32_t)r->cont_justify, (int32_t)r->cont_cols, (int32_t)r->cont_rows,
             /* inherited visibility (appended; read_view mirrors this) */
             (int32_t)r->visibility,
+            (int32_t)r->object_pos,
+            (int32_t)r->text_underline_offset,
         };
         int32_t gtw[PV_GRID_TRACKS + 1];
         for (int gk = 0; gk < PV_GRID_TRACKS; ++gk)
@@ -2638,7 +2640,7 @@ static int read_view_raw(int fd, pv_view **out) {
          * write_view emits them. Reading each block in one shot (not field by field)
          * makes a wire desync structurally hard -- the arrays list the fields once,
          * exactly like the box-def f[] array below. */
-        int32_t a[38], gtw[PV_GRID_TRACKS + 1], b[TAB_WIRE_B_N];
+        int32_t a[TAB_WIRE_A_N], gtw[PV_GRID_TRACKS + 1], b[TAB_WIRE_B_N];
         if (read_full(fd, a, sizeof a) != 0
          || read_full(fd, gtw, sizeof gtw) != 0
          || read_full(fd, b, sizeof b) != 0) {
@@ -2652,7 +2654,7 @@ static int read_view_raw(int fd, pv_view **out) {
                 tdeco_thick = a[23], ttsize = a[24], tdir = a[25], tfvar = a[26],
                 tlpos = a[27], tirend = a[28], tcaret = a[29], tobject_fit = a[30],
                 cid = a[31], cdisp = a[32], cgap = a[33], cjust = a[34], ccols = a[35], crows = a[36],
-                rvis = a[37];
+                rvis = a[37], robjpos = a[38], tul_off = a[39];
         int32_t fgrow = b[0], fshrink = b[1], fbasis = b[2], forder = b[3], fdir = b[4],
                 citem = b[5], cwrap = b[6], crgap = b[7], calign = b[8], fself = b[9],
                 flside = b[10], flid = b[11], flclear = b[12], bl = b[13], br = b[14],
@@ -2742,10 +2744,16 @@ static int read_view_raw(int fd, pv_view **out) {
             e.text_decoration_color = (int)tdeco_color;
             e.text_decoration_style = (int)tdeco_style;
             e.text_decoration_thickness = (int)tdeco_thick;
+            e.text_underline_offset = (int)tul_off;
             e.tab_size = (int)ttsize; e.direction = (int)tdir;
             e.font_variant = (int)tfvar; e.list_style_pos = (int)tlpos;
             e.image_rendering = (int)tirend; e.caret_color = (int)tcaret;
             e.object_fit = (int)tobject_fit;
+            /* A hostile worker's packed position is range-checked like every
+             * other field it sends: out of range means "not declared". */
+            e.object_pos = (CSS_OBJPOS_X(robjpos) >= 0 && CSS_OBJPOS_X(robjpos) <= 1000 &&
+                            CSS_OBJPOS_Y(robjpos) >= 0 && CSS_OBJPOS_Y(robjpos) <= 1000)
+                           ? (int)robjpos : 0;
             e.fontface = (unsigned)b[57];
             e.text_balance = (b[59] & 1) ? 1 : 0;
             /* A hostile worker's list is bounded like the cascade's own (anything

@@ -61,6 +61,11 @@ Project types nested under the project types they derive from. External bases ar
 - [`cm_comp`](modules/include.css_mask.h.md#cm_comp) enum in `include/css_mask.h`
 - [`cm_layer`](modules/include.css_mask.h.md#cm_layer) struct in `include/css_mask.h`
 - [`cmq_env`](modules/include.css_mq.h.md#cmq_env) struct in `include/css_mq.h`
+- [`cnt_decl`](modules/include.css_counter.h.md#cnt_decl) struct in `include/css_counter.h`
+- [`cnt_inst`](modules/src.css_counter.c.md#cnt_inst) struct in `src/css_counter.c`
+- [`cnt_state`](modules/include.css_counter.h.md#cnt_state) type_alias in `include/css_counter.h`
+- [`cnt_state`](modules/src.css_counter.c.md#cnt_state) struct in `src/css_counter.c`
+- [`cnt_style`](modules/include.css_counter.h.md#cnt_style) enum in `include/css_counter.h`
 - [`col`](modules/gui.browser_ui.c.md#col) type_alias in `gui/browser_ui.c`
 - [`col_founder_box`](modules/gui.browser_ui.c.md#col_founder_box) type_alias in `gui/browser_ui.c`
 - [`color`](modules/include.css.h.md#color) type_alias in `include/css.h`
@@ -234,6 +239,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`hc_store`](modules/include.http_cache.h.md#hc_store) type_alias in `include/http_cache.h`
 - [`hc_store`](modules/src.http_cache.c.md#hc_store) struct in `src/http_cache.c`
 - [`hcf_dirs`](modules/include.host_conf.h.md#hcf_dirs) struct in `include/host_conf.h`
+- [`he_cdn_kind_t`](modules/include.hostedit.h.md#he_cdn_kind_t) enum in `include/hostedit.h`
 - [`he_status`](modules/include.hostedit.h.md#he_status) enum in `include/hostedit.h`
 - [`height`](modules/include.svg_render.h.md#height) type_alias in `include/svg_render.h`
 - [`height`](modules/tools.pngdiff.c.md#height) type_alias in `tools/pngdiff.c`
@@ -332,6 +338,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`md_resp`](modules/include.media_decoder.h.md#md_resp) enum in `include/media_decoder.h`
 - [`mq_cur`](modules/src.css_mq.c.md#mq_cur) struct in `src/css_mq.c`
 - [`item_sides.mr`](modules/gui.browser_ui.c.md#item_sides-mr) type_alias in `gui/browser_ui.c`
+- [`name`](modules/include.css_counter.h.md#name) type_alias in `include/css_counter.h`
 - [`css_attr_match.name`](modules/include.css_select.h.md#css_attr_match-name) type_alias in `include/css_select.h`
 - [`name`](modules/src.text_shape.c.md#name) type_alias in `src/text_shape.c`
 - [`bx_bg_layer.nat_h`](modules/include.box_style.h.md#bx_bg_layer-nat_h) type_alias in `include/box_style.h`
@@ -386,6 +393,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`pv_box_def`](modules/include.page_view.h.md#pv_box_def) struct in `include/page_view.h`
 - [`pv_box_info`](modules/src.page_view.c.md#pv_box_info) struct in `src/page_view.c`
 - [`pv_box_reg`](modules/src.page_view.c.md#pv_box_reg) struct in `src/page_view.c`
+- [`pv_cnt_attr_ctx`](modules/src.page_view.c.md#pv_cnt_attr_ctx) struct in `src/page_view.c`
 - [`pv_computed`](modules/include.page_view.h.md#pv_computed) type_alias in `include/page_view.h`
 - [`pv_computed`](modules/src.page_view.c.md#pv_computed) struct in `src/page_view.c`
 - [`pv_cont_def`](modules/include.page_view.h.md#pv_cont_def) struct in `include/page_view.h`
@@ -451,6 +459,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`sf_ws`](modules/src.secure_fetch.c.md#sf_ws) struct in `src/secure_fetch.c`
 - [`sha_alg`](modules/include.sha2.h.md#sha_alg) enum in `include/sha2.h`
 - [`cg_radial.shape`](modules/include.css_gradient.h.md#cg_radial-shape) type_alias in `include/css_gradient.h`
+- [`sink`](modules/src.css_counter.c.md#sink) struct in `src/css_counter.c`
 - [`sink`](modules/src.secure_fetch.c.md#sink) type_alias in `src/secure_fetch.c`
 - [`sm_entry`](modules/src.dom.c.md#sm_entry) struct in `src/dom.c`
 - [`sqb`](modules/include.subreq_batch.h.md#sqb) type_alias in `include/subreq_batch.h`

@@ -215,6 +215,18 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
         /* clip-path: inset() (2026-10-21; APPENDED): the per-mille share of the border box that
          * each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */
         P_CLIP_TOP_PM, P_CLIP_RIGHT_PM, P_CLIP_BOTTOM_PM, P_CLIP_LEFT_PM,
+        /* A valid property with no effect on a static, non-interactive render
+         * (will-change, scrollbar-*, scroll-snap-*, font-smoothing...). It claims
+         * a slot and writes nothing, so it is "implemented" for @supports and the
+         * drop log without inventing behaviour (APPENDED, never renumber). */
+        P_INERT,
+        /* object-position, packed (css.h CSS_OBJPOS_PACK); APPENDED. */
+        P_OBJECT_POS,
+        /* counter-reset / counter-increment: ival = index into the content pool of the
+         * verbatim value, -1 = none (APPENDED). */
+        P_CNT_RESET, P_CNT_INC,
+        /* text-underline-offset: px (CSS_LEN_AUTO = auto), APPENDED. */
+        P_TEXT_UL_OFFSET,
         P_NSLOTS };
 
 typedef struct css_decl {

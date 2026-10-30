@@ -1,10 +1,10 @@
-# src: local_store
+# src: http_cache
 
 *Community 6 | 16 files | cohesion 0.79*
 
 ## Definition
 
-This community groups 16 file(s) rooted at `src` with dominant language c (cohesion 0.79). Central symbols: `FREEDOM_CACHED_FETCH_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `HC_EVICT_EVERY`, `HC_HEURISTIC_CAP`, `HC_KEY_FILE`. Core file: `src/local_store.c` (347 symbols).
+This community groups 16 file(s) rooted at `src` with dominant language c (cohesion 0.79). Central symbols: `FREEDOM_CACHED_FETCH_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `HC_EVICT_EVERY`, `HC_HEURISTIC_CAP`, `HC_KEY_FILE`. Core file: `src/http_cache.c` (38 symbols).
 
 ## Files
 
@@ -18,7 +18,7 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 | `src/cached_fetch.c` | c | infrastructure | 14 | no |
 | `src/disk_store.c` | c | data_access | 6 | no |
 | `src/http_cache.c` | c | presentation | 38 | no |
-| `src/local_store.c` | c | data_access | 347 | no |
+| `src/local_store.c` | c | data_access | 31 | no |
 | `src/pq_seal.c` | c | utility | 11 | no |
 | `src/profile.c` | c | utility | 9 | no |
 | `tests/test_cached_fetch.c` | c | testing | 14 | no |
@@ -80,8 +80,8 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 ## Open Questions
 
 - Why do 16 file(s) lack file-level docs (e.g. `include/cached_fetch.h`)? What purpose do they serve?
-- What would break if the most connected file in src: local_store changed?
-- Should src: local_store be split, given cohesion 0.79?
+- What would break if the most connected file in src: http_cache changed?
+- Should src: http_cache be split, given cohesion 0.79?
 
 ## Sources
 

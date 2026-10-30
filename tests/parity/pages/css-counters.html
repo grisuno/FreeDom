@@ -1,0 +1,21 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+body{margin:10px;font:16px sans-serif;counter-reset:sec}
+h2{counter-increment:sec;counter-reset:sub;margin:6px 0}
+h2::before{content:counter(sec) ". "}
+h3{counter-increment:sub;margin:4px 0 4px 20px;font-size:14px}
+h3::before{content:counter(sec) "." counter(sub, lower-alpha) " "}
+ol{counter-reset:item;list-style:none;margin:4px 0;padding-left:18px}
+li{counter-increment:item}
+li::before{content:counters(item, ".") " "}
+.fig{counter-increment:fig}
+.fig::after{content:" (Figure " counter(fig, upper-roman) ")"}
+.p::before{counter-increment:pp;content:"[" counter(pp, decimal-leading-zero) "] "}
+.hide{display:none;counter-increment:sec}
+.tall{height:1100px}
+</style></head><body>
+<h2>Intro</h2><h3>First</h3><h3>Second</h3>
+<h2>Body</h2><div class="hide">x</div><h3>Third</h3>
+<ol><li>a<ol><li>b</li><li>c</li></ol></li><li>d</li></ol>
+<div class="fig">chart</div><div class="fig">map</div>
+<div class="p">one</div><div class="p">two</div>
+<div class="tall"></div></body></html>

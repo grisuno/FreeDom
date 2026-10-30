@@ -1,6 +1,6 @@
 # include: page_view
 
-include: page_view groups 36 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+include: page_view groups 39 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
 
 ```mermaid
 graph LR
@@ -14,17 +14,17 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (4.1)
+## include (3.1)
 
-include groups 12 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+include groups 13 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
 
-## src (4.2)
+## src (3.2)
 
-src groups 10 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet.
+src groups 11 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet.
 
-## tests (4.3)
+## tests (3.3)
 
-tests groups 14 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, test_paragraph, test_heading_ladder. dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include...
+tests groups 15 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, test_paragraph, test_heading_ladder. dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include...
 
 **Files**:
 
@@ -34,6 +34,7 @@ tests groups 14 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, 
 - include/css.h
 - include/css_chain.h
 - include/css_computed.h
+- include/css_counter.h
 - include/dom_debug.h
 - include/flex_layout.h
 - include/page_view.h
@@ -44,6 +45,7 @@ tests groups 14 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, 
 - src/box_tree.c
 - src/compositor.c
 - src/css_computed.c
+- src/css_counter.c
 - src/css_length.c
 - src/dom_debug.c
 - src/flex_layout.c
@@ -54,6 +56,7 @@ tests groups 14 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, 
 - tests/test_box_tree.c
 - tests/test_compositor.c
 - tests/test_css_computed.c
+- tests/test_css_counter.c
 - tests/test_css_drops.c
 - tests/test_css_gradient.c
 - tests/test_css_length.c

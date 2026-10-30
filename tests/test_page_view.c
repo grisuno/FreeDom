@@ -3225,6 +3225,27 @@ static void test_build_sourceless_video_keeps_its_box(void **state) {
     hp_document_free(doc);
 }
 
+/* A child's `height:100%` inside an auto-height aspect-ratio box has no definite
+ * height in the style pass (it follows the width), so the percentage must reach
+ * the layout instead of collapsing the child to 0 (CSS Sizing 4 5.1). */
+static void test_build_pct_height_under_aspect_parent_reaches_layout(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class=\"f\"><div class=\"c\">x</div></div></body>");
+    static const char CSS[] =
+        ".f{aspect-ratio:3/2;background:#222}"
+        ".c{height:100%;background:#468}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    int found = 0;
+    for (size_t i = 0; i < pv_box_count(v); ++i) {
+        const pv_box_def *d = pv_box_at(v, i);
+        if (d != NULL && d->bg_rgb == 0x446688 && d->box_h_pct == 1000) found = 1;
+    }
+    assert_int_equal(found, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A page with no author box has an empty box tree (default render byte-identical). */
 static void test_build_box_tree_empty_no_box(void **state) {
     (void)state;
@@ -3776,6 +3797,102 @@ static void test_pct_padding_generates_box(void **state) {
     const pv_box_def *d = box_of_run_with_bg(v, 0xcccccc);
     assert_non_null(d);
     assert_int_equal(d->pad_t_pct, 200);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Given boolean `checked` attributes (no value), then a checkbox/radio carries checked=1 and
+ * an unmarked one 0: lxb_dom_element_get_attribute returns NULL for a valueless attribute, so
+ * presence has to be asked with has_attribute. */
+static void test_checked_boolean_attribute_is_detected(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><form><input type='checkbox' name='a' checked>"
+                             "<input type='checkbox' name='b'>"
+                             "<input type='radio' name='r' value='x' checked=''>"
+                             "<input type='checkbox' name='c' CHECKED></form></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, NULL, 0, 0, &v), PV_OK);
+    int seen = 0, vals[4] = { -9, -9, -9, -9 };
+    for (size_t i = 0; i < pv_count(v) && seen < 4; ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->kind == PV_INPUT) vals[seen++] = r->checked;
+    }
+    assert_int_equal(seen, 4);
+    assert_int_equal(vals[0], 1);
+    assert_int_equal(vals[1], 0);
+    assert_int_equal(vals[2], 1);
+    assert_int_equal(vals[3], 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Finds the first run whose text is exactly `text`, or NULL. */
+static const pv_run *run_with_text(const pv_view *v, const char *text) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && strcmp(r->text, text) == 0) return r;
+    }
+    return NULL;
+}
+
+/* Given numbered headings built with counter-reset / counter-increment and a ::before that
+ * prints counter(), when the view is built, then each generated run carries its section
+ * number, the display:none sibling does not count, and the marker never reaches the text. */
+static void test_counters_number_sections_in_document_order(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><h2>A</h2><div class='x'>z</div><h2>B</h2><h2>C</h2></body>");
+    static const char CSS[] = "body{counter-reset:s}h2{counter-increment:s}"
+        ".x{display:none;counter-increment:s}h2::before{content:counter(s) \". \"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_non_null(run_with_text(v, "1. "));
+    assert_non_null(run_with_text(v, "2. "));
+    assert_non_null(run_with_text(v, "3. "));
+    assert_null(run_with_text(v, "4. "));
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        assert_true(r->text == NULL || r->text[0] != '\x01');
+    }
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Given nested lists with counters(item, "."), then the inner items read 2.1, 2.2 and the
+ * outer scope resumes at 3 afterwards (the nested reset ends with its parent). */
+static void test_counters_nested_scope_joins_and_unwinds(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><ol><li>a</li><li>b<ol><li>c</li><li>d</li></ol></li>"
+                             "<li>e</li></ol></body>");
+    static const char CSS[] = "ol{counter-reset:i}li{counter-increment:i}"
+        "li::before{content:counters(i,\".\") \" \"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_non_null(run_with_text(v, "1 "));
+    assert_non_null(run_with_text(v, "2 "));
+    assert_non_null(run_with_text(v, "2.1 "));
+    assert_non_null(run_with_text(v, "2.2 "));
+    assert_non_null(run_with_text(v, "3 "));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Given a heading with a generated ::before and inline children, then every run of the
+ * heading rides the heading's text style and only the first one opens a block: the marker
+ * and the text share the line (CSS 2.1 12.1). */
+static void test_before_in_heading_shares_the_line(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><h2>Intro</h2></body>");
+    static const char CSS[] = "h2::before{content:\"1. \"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *m = run_with_text(v, "1. ");
+    const pv_run *t = run_with_text(v, "Intro");
+    assert_non_null(m);
+    assert_non_null(t);
+    assert_int_equal(m->heading, t->heading);
+    assert_true(m->heading > 0);
+    assert_int_equal(m->block_break, 1);
+    assert_int_equal(t->block_break, 0);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -5497,6 +5614,10 @@ int main(void) {
         cmocka_unit_test(test_link_color_inherit),
         cmocka_unit_test(test_pct_padding_generates_box),
         cmocka_unit_test(test_before_box_on_empty_element),
+        cmocka_unit_test(test_counters_number_sections_in_document_order),
+        cmocka_unit_test(test_counters_nested_scope_joins_and_unwinds),
+        cmocka_unit_test(test_before_in_heading_shares_the_line),
+        cmocka_unit_test(test_checked_boolean_attribute_is_detected),
         cmocka_unit_test(test_before_box_before_text),
         cmocka_unit_test(test_before_box_of_hidden_only_host_emitted_once),
         cmocka_unit_test(test_mask_reaches_the_box),
@@ -5566,6 +5687,7 @@ int main(void) {
         cmocka_unit_test(test_block_node_identity),
         cmocka_unit_test(test_float_inner_blocks_keep_breaks),
         cmocka_unit_test(test_hidden_attribute_is_display_none),
+        cmocka_unit_test(test_build_pct_height_under_aspect_parent_reaches_layout),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

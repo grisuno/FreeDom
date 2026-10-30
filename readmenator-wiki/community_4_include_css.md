@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 35 file(s) rooted at `include` with dominant language c (cohesion 0.68). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (354 symbols). Documented purpose: The sheet's two string pools -- background url()s, and the ::before/::after.
+This community groups 35 file(s) rooted at `include` with dominant language c (cohesion 0.68). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (355 symbols). Documented purpose: The sheet's two string pools -- background url()s, and the ::before/::after.
 
 ## Files
 
@@ -15,7 +15,7 @@ This community groups 35 file(s) rooted at `include` with dominant language c (c
 | `include/css_atrule.h` | h | utility | 10 | no |
 | `include/css_box.h` | h | utility | 27 | no |
 | `include/css_color.h` | h | utility | 7 | no |
-| `include/css_decl.h` | h | utility | 14 | yes |
+| `include/css_decl.h` | h | utility | 15 | yes |
 | `include/css_gradient.h` | h | utility | 13 | no |
 | `include/css_index.h` | h | utility | 8 | no |
 | `include/css_length.h` | h | utility | 20 | no |
@@ -24,7 +24,7 @@ This community groups 35 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `src/css.c` | c | utility | 249 | no |
+| `src/css.c` | c | utility | 254 | no |
 | `src/css_atrule.c` | c | utility | 11 | no |
 | `src/css_box.c` | c | utility | 52 | no |
 | `src/css_chain.c` | c | utility | 26 | no |
@@ -36,7 +36,7 @@ This community groups 35 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `tests/test_css.c` | c | testing | 354 | no |
+| `tests/test_css.c` | c | testing | 355 | no |
 | `tests/test_css_atrule.c` | c | testing | 10 | yes |
 | `tests/test_css_box.c` | c | testing | 13 | no |
 | `tests/test_css_color.c` | c | testing | 36 | no |
@@ -87,14 +87,14 @@ This community groups 35 file(s) rooted at `include` with dominant language c (c
 ## Connections
 
 - [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/css_color.h.
-- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/css.h imports include/css_color.h.
-- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
+- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/css.h imports include/css_color.h.
+- [EXTRACTED] depends_on community 4 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
 - [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_select.h.
 
 ## Risks
 
 - [layer strict] `tests/test_css.c` (testing) -> `include/flex_layout.h` (presentation)
-- [dataflow DEAD_STORE] `src/css.c:5545` `page_view` `had_winner`: `had_winner` assigned at line 5545 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css.c:5729` `page_view` `had_winner`: `had_winner` assigned at line 5729 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:155` `parse_hex` `r`: `r` assigned at line 155 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:156` `parse_hex` `g`: `g` assigned at line 156 but never read afterwards.
 

@@ -183,6 +183,7 @@ static void run_init_common(pv_run *r) {
     r->bg_rgb = -1;
     r->text_align = 0;
     r->font_scale = 0;
+    r->text_underline_offset = CSS_LEN_UNSET;
     r->font_abs = 0;
     r->line_scale = 0;
     r->text_decoration = -1;
@@ -209,6 +210,7 @@ static void run_init_common(pv_run *r) {
     r->image_rendering = 0;
     r->caret_color = -1;
     r->object_fit = 0;
+    r->object_pos = 0;
     r->grad_text_n = 0;
     r->grad_text_angle = 0;
     for (int gt = 0; gt < 4; ++gt) r->grad_text_c[gt] = -1;
@@ -658,6 +660,7 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
     r->text_decoration_color = e->text_decoration_color;
     r->text_decoration_style = e->text_decoration_style;
     r->text_decoration_thickness = e->text_decoration_thickness;
+    r->text_underline_offset = e->text_underline_offset;
     r->tab_size = e->tab_size;
     r->direction = e->direction;
     r->font_variant = e->font_variant;
@@ -667,6 +670,7 @@ void pv_set_text_ext(pv_view *v, const pv_text_ext *e) {
      * caret is the effect, so the run carries the same -1 as unset. */
     r->caret_color = (e->caret_color == CSS_LEN_AUTO) ? -1 : e->caret_color;
     r->object_fit = e->object_fit;
+    r->object_pos = e->object_pos;
     /* Gradient text (2026-07-19). Engaged only by the full pattern:
      * -webkit-text-fill-color:transparent WITH a background-clip:text source
      * (gradient -> grad_text_*, solid -> fg override). transparent without a
@@ -1407,10 +1411,12 @@ void pv_text_ext_reset(pv_text_ext *e) {
     e->text_decoration_color = -1;
     e->text_decoration_style = 0;
     e->text_decoration_thickness = -1;
+    e->text_underline_offset = CSS_LEN_UNSET;
     e->tab_size = 0; e->direction = 0; e->font_variant = 0; e->list_style_pos = 0;
     e->image_rendering = 0;
     e->caret_color = -1;
     e->object_fit = 0;
+    e->object_pos = 0;
     e->text_fill = -1;
     e->bgclip_seen = 0;
     e->bgclip_src_bg = -1;
@@ -1454,6 +1460,8 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
         e->text_decoration_style = cs->text_decoration_style;
     if (e->text_decoration_thickness == -1 && cs->text_decoration_thickness != -1)
         e->text_decoration_thickness = cs->text_decoration_thickness;
+    if (e->text_underline_offset == CSS_LEN_UNSET && cs->text_underline_offset != CSS_LEN_UNSET)
+        e->text_underline_offset = cs->text_underline_offset;
     if (e->tab_size == 0 && cs->tab_size > 0) e->tab_size = cs->tab_size;
     if (e->direction == 0 && cs->direction != CSS_DIR_UNSET) e->direction = cs->direction;
     if (e->font_variant == 0 && cs->font_variant != CSS_FV_UNSET) e->font_variant = cs->font_variant;
@@ -1464,6 +1472,7 @@ static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
      * resolved value -- it stops the walk, and pv_set_text_ext maps it to -1. */
     if (e->caret_color == -1 && cs->caret_color != -1) e->caret_color = cs->caret_color;
     if (e->object_fit == 0 && cs->object_fit != CSS_OFI_UNSET) e->object_fit = cs->object_fit;
+    if (e->object_pos == 0 && cs->object_pos != 0) e->object_pos = cs->object_pos;
     /* Gradient text (2026-07-19): -webkit-text-fill-color inherits like color;
      * the NEAREST ancestor with background-clip:text latches its background
      * (gradient or solid) as the glyph fill source. */
@@ -1870,6 +1879,7 @@ typedef struct pv_after_pending {
     int box;                    /* generated box id, -1 = none */
     int brk;                    /* generated box is block-level */
     int bdeco, indent;          /* the element's own block box and list indent */
+    int heading;                /* the element's heading level: generated text rides its text style */
     int align, font_scale, font_abs, line_scale, text_decoration;
     int color;                  /* inherited colour of the element, -1 = none declared */
     pv_cont_info cont;
@@ -1880,7 +1890,7 @@ typedef struct pv_after_pending {
 static pv_status after_pending_emit(pv_view *v, pv_container_reg *reg, pv_item_track *items,
                                     pv_after_pending *ap, int node_id,
                                     const css_style *acs, int *pending_break) {
-    pv_status st = pv_append(v, PV_TEXT, 0, (ap->box >= 0) ? ap->brk : 0, ap->text, NULL);
+    pv_status st = pv_append(v, PV_TEXT, ap->heading, (ap->box >= 0) ? ap->brk : 0, ap->text, NULL);
     if (st != PV_OK) return st;
     pv_set_node_id(v, node_id);
     if (ap->color >= 0) pv_set_color(v, ap->color);
@@ -1961,7 +1971,7 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->box_l = hb.l; d->box_r = hb.r; d->box_w = hb.w; d->box_center = hb.center;
     d->box_w_pct = hb.w_pct;
     d->box_mw = hb.mw; d->box_mw_pct = hb.mw_pct;
-    d->box_h_pct = (cs->position == CSS_POS_ABSOLUTE) ? cs->pct[CSS_PCT_HEIGHT] : 0;
+    d->box_h_pct = cs->pct[CSS_PCT_HEIGHT];
     d->box_l_pct = hb.l_pct; d->box_r_pct = hb.r_pct;
     /* The box's own vertical margins, straight from its cascade. They are NOT
      * folded into box_l/box_r like the horizontal ones: a vertical margin has to
@@ -2305,6 +2315,10 @@ typedef struct pv_var_node {
 typedef struct {
     double content;
     double padbox;
+    /* The parent has an aspect-ratio and no declared height: its height is only
+     * known once its width is, so a child's `height:%` cannot resolve in the
+     * style pass and travels to the layout symbolically (CSS Sizing 4 5.1). */
+    int aspect_auto;
 } pv_def_h;
 
 #define PV_STYLE_RETIRE_MAX 40
@@ -2551,6 +2565,10 @@ static pv_def_h pv_resolve_block_sizes(css_style *cs, pv_def_h in) {
     if (cs->position == CSS_POS_FIXED) cb_h = (double)CSS_MEDIA_DEFAULT_HEIGHT;
     else if (cs->position == CSS_POS_ABSOLUTE) cb_h = in.padbox;
     int keep = (cs->position == CSS_POS_ABSOLUTE && cb_h < 0.0);
+    if (in.aspect_auto && cb_h < 0.0 && cs->position != CSS_POS_ABSOLUTE &&
+        cs->position != CSS_POS_FIXED && cs->pct[CSS_PCT_HEIGHT] != 0 &&
+        !CSS_LEN_IS_INTRINSIC(cs->height))
+        keep = 1;
     if (!keep && cs->pct[CSS_PCT_HEIGHT] != 0 && !CSS_LEN_IS_INTRINSIC(cs->height)) {
         int px = (cs->height == CSS_LEN_UNSET || cs->height == CSS_LEN_AUTO) ? 0 : cs->height;
         double v = bx_pct_block_size(px, cs->pct[CSS_PCT_HEIGHT], cb_h);
@@ -2584,6 +2602,9 @@ static pv_def_h pv_resolve_block_sizes(css_style *cs, pv_def_h in) {
     /* A positioned element is the containing block of the absolutes below it;
      * a static one passes its ancestor's through. */
     out.padbox = in.padbox;
+    out.aspect_auto = (cs->aspect_num > 0 && cs->aspect_den > 0 && out.content < 0.0 &&
+                       cs->pct[CSS_PCT_HEIGHT] == 0 &&
+                       (cs->height == CSS_LEN_UNSET || cs->height == CSS_LEN_AUTO));
     if (cs->position != CSS_POS_UNSET && cs->position != CSS_POS_STATIC) {
         double pe = 0.0;
         if (cs->pad_top > 0) pe += cs->pad_top;
@@ -2614,7 +2635,7 @@ static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const cs
     size_t n = 0;
     double inherited = CL_INITIAL_FONT_SIZE;
     const cvr_chain *vars = NULL;   /* the inherited custom-property chain */
-    pv_def_h cb_h = { -1.0, -1.0 }; /* what the parent hands its children */
+    pv_def_h cb_h = { -1.0, -1.0, 0 }; /* what the parent hands its children */
     lxb_dom_element_t *cur = el;
     while (cur != NULL && n < PV_FONT_CHAIN_MAX) {
         long h = pv_cache_find(cache, (const lxb_dom_node_t *)cur);
@@ -4781,10 +4802,9 @@ static int describe_control(lxb_dom_element_t *el, lxb_tag_id_t tag,
     *out_value = attr_dup(el, "value", 5);
     /* checked attribute for checkbox/radio */
     if (*out_type == PV_IN_CHECKBOX || *out_type == PV_IN_RADIO) {
-        size_t cl = 0;
-        const lxb_char_t *ch =
-            lxb_dom_element_get_attribute(el, (const lxb_char_t *)"checked", 7, &cl);
-        *out_checked = (ch != NULL) ? 1 : 0;
+        /* A boolean attribute has no value, and get_attribute returns NULL for that:
+         * presence is the question (HTML 2.4.2), so ask for presence. */
+        *out_checked = lxb_dom_element_has_attribute(el, (const lxb_char_t *)"checked", 7) ? 1 : 0;
     }
     if (*out_type == PV_IN_RANGE) {
         /* Encode "min,max" as the label for the painter */
@@ -5385,6 +5405,103 @@ static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
     return style_text;
 }
 
+/* --- CSS counters (spec/css_counter.md) ------------------------------------------------
+ * A counter's value depends on the element's position in the document, so it cannot be
+ * resolved by the per-element, memoized cascade. This pass walks the DOM once in document
+ * order (iteratively: depth is attacker-chosen), feeds each element's counter-reset /
+ * counter-increment to the pure cnt_state, and rewrites the generated-content strings that
+ * carry a counter marker with their resolved text, IN the style cache. Every later reader
+ * of content_str / content_before_str / content_after_str then sees plain text, so the
+ * emission code needs no counter awareness. It runs only when the sheet declares counters. */
+typedef struct {
+    lxb_dom_element_t *el;
+    char               val[256];
+} pv_cnt_attr_ctx;
+
+static const char *pv_cnt_attr(void *ctx, const char *name) {
+    pv_cnt_attr_ctx *c = (pv_cnt_attr_ctx *)ctx;
+    size_t vl = 0;
+    const lxb_char_t *v = lxb_dom_element_get_attribute(c->el, (const lxb_char_t *)name,
+                                                        strlen(name), &vl);
+    if (v == NULL) return NULL;
+    if (vl >= sizeof c->val) vl = sizeof c->val - 1;
+    memcpy(c->val, v, vl);
+    c->val[vl] = '\0';
+    return c->val;
+}
+
+/* Replaces `field` (CSS_URL_MAX bytes) by its resolved text when it holds a marker. */
+static void pv_cnt_resolve_field(const cnt_state *st, lxb_dom_element_t *el, char *field) {
+    if (!cnt_is_marker(field)) return;
+    char out[CSS_URL_MAX];
+    pv_cnt_attr_ctx ctx = { el, { 0 } };
+    cnt_resolve(st, field, pv_cnt_attr, &ctx, out, sizeof out);
+    memcpy(field, out, sizeof out);
+}
+
+/* Element entry: its own counter operations, then its ::before's, then the resolution of
+ * the generated text. Returns 0 for display:none (no box, so no counter effects and no
+ * descent), 1 otherwise. */
+static int pv_cnt_enter(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
+                        pv_style_cache *cache) {
+    lxb_dom_element_t *el = lxb_dom_interface_element(n);
+    const css_style *cs = cached_element_style_ref(el, sheet, cache);
+    if (cs->display == CSS_DISP_NONE) return 0;
+    cnt_reset(st, depth, cs->cnt_reset, cs->cnt_reset_n);
+    cnt_increment(st, depth, cs->cnt_inc, cs->cnt_inc_n);
+    int before = cs->content_before_on, own = cs->content_on;
+    if (before) {
+        css_style bps = cached_pseudo_style(el, sheet, cache, CSS_PSEUDO_BEFORE);
+        cnt_reset(st, depth + 1, bps.cnt_reset, bps.cnt_reset_n);
+        cnt_increment(st, depth + 1, bps.cnt_inc, bps.cnt_inc_n);
+    }
+    if (before || own) {
+        /* Re-read the entry: asking for the pseudo style may have grown (and retired)
+         * the block the first pointer pointed into. */
+        css_style *w = (css_style *)cached_element_style_ref(el, sheet, cache);
+        pv_cnt_resolve_field(st, el, w->content_before_str);
+        pv_cnt_resolve_field(st, el, w->content_str);
+    }
+    return 1;
+}
+
+/* Element exit (its children are done): its ::after. */
+static void pv_cnt_exit(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
+                        pv_style_cache *cache) {
+    lxb_dom_element_t *el = lxb_dom_interface_element(n);
+    const css_style *cs = cached_element_style_ref(el, sheet, cache);
+    if (cs->display == CSS_DISP_NONE || !cs->content_after_on) return;
+    css_style aps = cached_pseudo_style(el, sheet, cache, CSS_PSEUDO_AFTER);
+    cnt_reset(st, depth + 1, aps.cnt_reset, aps.cnt_reset_n);
+    cnt_increment(st, depth + 1, aps.cnt_inc, aps.cnt_inc_n);
+    css_style *w = (css_style *)cached_element_style_ref(el, sheet, cache);
+    pv_cnt_resolve_field(st, el, w->content_after_str);
+}
+
+static void pv_counters_pass(lxb_dom_node_t *root, const css_sheet *sheet, pv_style_cache *cache) {
+    if (!css_sheet_uses_counters(sheet)) return;
+    cnt_state *st = cnt_state_new();
+    if (st == NULL) return;
+    int depth = 0;
+    int enter = 1;
+    lxb_dom_node_t *n = root;
+    while (n != NULL) {
+        int is_el = (n->type == LXB_DOM_NODE_TYPE_ELEMENT);
+        if (enter) {
+            int descend = is_el ? pv_cnt_enter(st, n, depth, sheet, cache) : 1;
+            if (descend && n->first_child != NULL) { n = n->first_child; ++depth; continue; }
+        }
+        if (is_el) pv_cnt_exit(st, n, depth, sheet, cache);
+        if (n == root) break;
+        if (n->next != NULL) { n = n->next; enter = 1; continue; }
+        n = n->parent;
+        --depth;
+        cnt_leave(st, depth + 1);
+        enter = 0;
+    }
+    cnt_state_free(st);
+}
+
 pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
                           int viewport_w, pv_view **out) {
@@ -5460,6 +5577,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
      * resolution needs (a role is a computed `display`, spec/css.md). Declared
      * after `cache` because it borrows it. */
     pv_flow_reg flowreg = { { NULL }, { 0 }, 0, sheet, &cache };
+    pv_counters_pass(root, sheet, &cache);
 
     /* CSS 2.1 §14.2: the root <html> element's background-color propagates to the
      * canvas (the full viewport). If <html> itself has no background set, <body>'s
@@ -6749,7 +6867,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     if (!fresh_pseudo) continue;   /* emitted with the first text */
                     int pblk = pseudo_is_block(&pps), poof = pseudo_is_oof(&pps);
                     int pbrk = (pblk || pending_break || block != prev_block) && !poof;
-                    pv_status pst = pv_append(v, PV_TEXT, 0, pbrk, pcs->content_str, NULL);
+                    pv_status pst = pv_append(v, PV_TEXT, heading, pbrk, pcs->content_str, NULL);
                     if (pst != PV_OK) { free(collapsed); rc = pst; goto cleanup; }
                     pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
                     pv_set_oof(v, poof || subtree_is_oof(n->parent, sheet, &cache));
@@ -6804,7 +6922,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                     int before_brk = (pending_break || block != prev_block) ? 1 : 0;
                     int before_oof = subtree_is_oof(n->parent, sheet, &cache);
                     before_brk = before_brk && !before_oof;
-                    pv_status st = pv_append(v, PV_TEXT, 0, before_brk,
+                    pv_status st = pv_append(v, PV_TEXT, heading, before_brk,
                                              content_dup, NULL);
                     free(content_dup);
                     if (st != PV_OK) { free(collapsed); rc = st; goto cleanup; }
@@ -6829,6 +6947,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                          strlen(pcs->content_after_str));
                     if (after_p.text == NULL) { free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
                     after_p.el = n->parent;
+                    after_p.heading = heading;
                     after_p.box = pafter_box;
                     after_p.brk = pafter_blk;
                     after_p.bdeco = bdeco;

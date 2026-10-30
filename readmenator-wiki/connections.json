@@ -9,7 +9,7 @@
   },
   {
     "community_a": 0,
-    "community_b": 3,
+    "community_b": 2,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.",
     "strength": 0.9,
@@ -25,7 +25,7 @@
   },
   {
     "community_a": 0,
-    "community_b": 2,
+    "community_b": 3,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.",
     "strength": 0.9,
@@ -80,7 +80,7 @@
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 3,
+    "community_a": 2,
     "community_b": 4,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: include/css.h imports include/css_color.h.",
@@ -89,14 +89,14 @@
   },
   {
     "community_a": 8,
-    "community_b": 3,
+    "community_b": 2,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 3,
+    "community_a": 2,
     "community_b": 1,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: include/page_view.h imports include/dom.h.",
@@ -112,8 +112,8 @@
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 2,
-    "community_b": 3,
+    "community_a": 3,
+    "community_b": 2,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.",
     "strength": 0.9,
@@ -121,7 +121,7 @@
   },
   {
     "community_a": 4,
-    "community_b": 2,
+    "community_b": 3,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: src/css.c imports include/webfont.h.",
     "strength": 0.9,
@@ -152,7 +152,7 @@
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 2,
+    "community_a": 3,
     "community_b": 1,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.",

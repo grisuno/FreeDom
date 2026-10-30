@@ -1,85 +1,121 @@
 # Subsystem: include (page 4 of 5)
 Previous: [KB_include_p3.md](KB_include_p3.md)
 
+## include/net_realm.h
+- Doc: nr_realm_allows_http: 1 iff plain http:// is acceptable for this realm.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `nr_config` (struct, line 42)
+  - `nr_realm` (enum, line 29)
+  - `nr_route` (enum, line 35)
+  - `tor_enabled` (type_alias, line 41) `typedef struct nr_config { int tor_enabled;`
+  - `NR_ROUTE_BLOCKED` (function, line 57) `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm * whose proxy is not enabled =>...`
+  - `address` (function, line 62) `* and encrypts by its address (the I2P destination / onion key), so http over it is * not a downgrade. Currently...`
+  - `nr_realm_allows_http` (function, line 66) `int nr_realm_allows_http(nr_realm r);`
+  - `nr_realm_name` (function, line 69) `const char *nr_realm_name(nr_realm r);`
+  - `nr_route_name` (function, line 70) `const char *nr_route_name(nr_route r);`
+  - `FREEDOM_NET_REALM_H` (macro, line 2) `#define FREEDOM_NET_REALM_H`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/net_realm.c`, `tests/test_net_realm.c`
+
+## include/os_sandbox.h
+- Doc: os_violation: function (os_policy_allows) that mirrors the installed BPF program.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `os_fs_rule` (struct, line 108)
+  - `os_status` (enum, line 21)
+  - `os_violation` (enum, line 30)
+  - `os_fs_access` (enum, line 102)
+  - `flags` (function, line 39) `* permission also depends on the protection flags (see os_prot_allowed / W^X). */ int os_policy_allows(long syscall_nr);`
+  - `os_policy_size` (function, line 43) `size_t os_policy_size(void);`
+  - `os_prot_allowed` (function, line 52) `int os_prot_allowed(long syscall_nr, unsigned long prot);`
+  - `denied` (function, line 59) `* request PROT_EXEC are denied (see os_prot_allowed). * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf...`
+  - `namespace` (function, line 75) `* namespace (the unprivileged enabler), network (the worker never needs the * network -- the parent fetches and...`
+  - `os_namespace_flags` (function, line 81) `int os_namespace_flags(void);`
+  - `os_landlock_abi` (function, line 114) `int os_landlock_abi(void);`
+  - `FREEDOM_OS_SANDBOX_H` (macro, line 2) `#define FREEDOM_OS_SANDBOX_H`
+- Imported by: `src/os_sandbox.c`, `src/renderer.c`, `src/tab.c`, `tests/test_os_sandbox.c`
+
 ## include/page_view.h
 - Doc: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt...
 - Layer: presentation
 - Language: h
 - Symbols:
   - `pv_run` (struct, line 121)
-  - `pv_box_def` (struct, line 460)
-  - `pv_cont_def` (struct, line 789)
-  - `pv_view` (struct, line 839)
-  - `pv_text_ext` (struct, line 1029)
+  - `pv_box_def` (struct, line 462)
+  - `pv_cont_def` (struct, line 791)
+  - `pv_view` (struct, line 841)
+  - `pv_text_ext` (struct, line 1031)
   - `pv_status` (enum, line 34)
   - `pv_kind` (enum, line 71)
   - `pv_input_type` (enum, line 87)
   - `pv_form_method` (enum, line 107)
   - `kind` (type_alias, line 121) `typedef struct pv_run { pv_kind kind;`
-  - `parent_id` (type_alias, line 460) `typedef struct pv_box_def { int parent_id;`
-  - `parent_id` (type_alias, line 789) `typedef struct pv_cont_def { int parent_id;`
-  - `pv_computed` (type_alias, line 911) `typedef struct pv_computed pv_computed;`
-  - `word_spacing` (type_alias, line 1029) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
-  - `container` (function, line 230) `* cont_id groups runs of one container (-1 = none);`
-  - `bx_display` (function, line 231) `* bx_display (flex/grid);`
-  - `order` (function, line 295) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
-  - `itself` (function, line 359) `* by itself (bx_width_cap2);`
-  - `CSS_LEN_UNSET` (function, line 558) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
-  - `scale` (function, line 633) `* scale(1)) and rotate in whole degrees (transform_rotate);`
-  - `tree` (function, line 674) `* box tree (a mask covers its whole subtree);`
-  - `declare` (function, line 863) `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
-  - `nonzero` (function, line 875) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
-  - `resolved` (function, line 882) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
-  - `policy` (function, line 890) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
-  - `pv_computed_new` (function, line 912) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
-  - `pv_computed_get` (function, line 919) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);`
-  - `pv_computed_free` (function, line 922) `void pv_computed_free(pv_computed *pc);`
-  - `cause` (function, line 926) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
-  - `pv_new` (function, line 938) `pv_view *pv_new(void);`
-  - `form` (function, line 957) `* form (-1 if none);`
-  - `pv_set_emphasis` (function, line 989) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
-  - `default` (function, line 994) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
-  - `pv_set_color` (function, line 997) `void pv_set_color(pv_view *v, int fg_rgb);`
-  - `pv_set_bgcolor` (function, line 1004) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
-  - `pv_set_text_style` (function, line 1013) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
-  - `pv_text_ext_reset` (function, line 1068) `void pv_text_ext_reset(pv_text_ext *e);`
-  - `ancestors` (function, line 1073) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
-  - `pv_set_text_ext` (function, line 1083) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
-  - `pv_set_grad_text` (function, line 1089) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
-  - `run` (function, line 1092) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
-  - `pv_set_row_span` (function, line 1105) `void pv_set_row_span(pv_view *v, int row_span);`
-  - `pv_set_grid_area` (function, line 1109) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
-  - `pv_set_grid_rows` (function, line 1110) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
-  - `pv_set_ua_tag` (function, line 1115) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
-  - `pv_set_cont_box` (function, line 1119) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
-  - `pv_set_grid` (function, line 1120) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
-  - `pv_set_flex` (function, line 1128) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...`
-  - `pv_set_flex_mauto` (function, line 1131) `void pv_set_flex_mauto(pv_view *v, int mauto);`
-  - `pv_set_cont_item` (function, line 1135) `void pv_set_cont_item(pv_view *v, int cont_item);`
-  - `pv_set_float_w` (function, line 1146) `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...`
-  - `pv_set_float` (function, line 1149) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
-  - `pv_set_box` (function, line 1159) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
-  - `pv_set_box_pct` (function, line 1165) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
-  - `pv_set_box_maxw` (function, line 1170) `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);`
-  - `pv_set_node_id` (function, line 1175) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
-  - `pv_set_block_id` (function, line 1180) `void pv_set_block_id(pv_view *v, int block_id);`
-  - `pv_set_own_box` (function, line 1184) `void pv_set_own_box(pv_view *v, int box_id);`
-  - `pv_set_oof` (function, line 1188) `void pv_set_oof(pv_view *v, int oof);`
-  - `pv_set_justify_self` (function, line 1191) `void pv_set_justify_self(pv_view *v, int justify_self);`
-  - `pv_set_block_node` (function, line 1194) `void pv_set_block_node(pv_view *v, dom_node_id id);`
-  - `pv_set_br_line` (function, line 1202) `void pv_set_br_line(pv_view *v, int br_line);`
-  - `pv_cont_count` (function, line 1217) `size_t pv_cont_count(const pv_view *v);`
-  - `pv_cont_at` (function, line 1218) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
-  - `pv_set_input_checked` (function, line 1222) `void pv_set_input_checked(pv_view *v, int checked);`
-  - `pv_set_input_placeholder` (function, line 1226) `void pv_set_input_placeholder(pv_view *v, int ph_color);`
-  - `pv_svg_append_root_attrs` (function, line 1232) `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);`
-  - `pv_placeholder_color` (function, line 1235) `int pv_placeholder_color(const css_style *ph);`
-  - `pv_set_input_select_opts` (function, line 1239) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
-  - `pv_free` (function, line 1242) `void pv_free(pv_view *v);`
-  - `pv_count` (function, line 1245) `size_t pv_count(const pv_view *v);`
-  - `pv_at` (function, line 1246) `const pv_run *pv_at(const pv_view *v, size_t i);`
-  - `pv_box_count` (function, line 1250) `size_t pv_box_count(const pv_view *v);`
-  - `pv_box_at` (function, line 1251) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+  - `parent_id` (type_alias, line 462) `typedef struct pv_box_def { int parent_id;`
+  - `parent_id` (type_alias, line 791) `typedef struct pv_cont_def { int parent_id;`
+  - `pv_computed` (type_alias, line 913) `typedef struct pv_computed pv_computed;`
+  - `word_spacing` (type_alias, line 1031) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
+  - `container` (function, line 232) `* cont_id groups runs of one container (-1 = none);`
+  - `bx_display` (function, line 233) `* bx_display (flex/grid);`
+  - `order` (function, line 297) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
+  - `itself` (function, line 361) `* by itself (bx_width_cap2);`
+  - `CSS_LEN_UNSET` (function, line 560) `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
+  - `scale` (function, line 635) `* scale(1)) and rotate in whole degrees (transform_rotate);`
+  - `tree` (function, line 676) `* box tree (a mask covers its whole subtree);`
+  - `declare` (function, line 865) `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
+  - `nonzero` (function, line 877) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
+  - `resolved` (function, line 884) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
+  - `policy` (function, line 892) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
+  - `pv_computed_new` (function, line 914) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
+  - `pv_computed_get` (function, line 921) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);`
+  - `pv_computed_free` (function, line 924) `void pv_computed_free(pv_computed *pc);`
+  - `cause` (function, line 928) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
+  - `pv_new` (function, line 940) `pv_view *pv_new(void);`
+  - `form` (function, line 959) `* form (-1 if none);`
+  - `pv_set_emphasis` (function, line 991) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
+  - `default` (function, line 996) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+  - `pv_set_color` (function, line 999) `void pv_set_color(pv_view *v, int fg_rgb);`
+  - `pv_set_bgcolor` (function, line 1006) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
+  - `pv_set_text_style` (function, line 1015) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
+  - `pv_text_ext_reset` (function, line 1072) `void pv_text_ext_reset(pv_text_ext *e);`
+  - `ancestors` (function, line 1077) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
+  - `pv_set_text_ext` (function, line 1087) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+  - `pv_set_grad_text` (function, line 1093) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
+  - `run` (function, line 1096) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
+  - `pv_set_row_span` (function, line 1109) `void pv_set_row_span(pv_view *v, int row_span);`
+  - `pv_set_grid_area` (function, line 1113) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
+  - `pv_set_grid_rows` (function, line 1114) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+  - `pv_set_ua_tag` (function, line 1119) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
+  - `pv_set_cont_box` (function, line 1123) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
+  - `pv_set_grid` (function, line 1124) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+  - `pv_set_flex` (function, line 1132) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...`
+  - `pv_set_flex_mauto` (function, line 1135) `void pv_set_flex_mauto(pv_view *v, int mauto);`
+  - `pv_set_cont_item` (function, line 1139) `void pv_set_cont_item(pv_view *v, int cont_item);`
+  - `pv_set_float_w` (function, line 1150) `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...`
+  - `pv_set_float` (function, line 1153) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
+  - `pv_set_box` (function, line 1163) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
+  - `pv_set_box_pct` (function, line 1169) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
+  - `pv_set_box_maxw` (function, line 1174) `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);`
+  - `pv_set_node_id` (function, line 1179) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
+  - `pv_set_block_id` (function, line 1184) `void pv_set_block_id(pv_view *v, int block_id);`
+  - `pv_set_own_box` (function, line 1188) `void pv_set_own_box(pv_view *v, int box_id);`
+  - `pv_set_oof` (function, line 1192) `void pv_set_oof(pv_view *v, int oof);`
+  - `pv_set_justify_self` (function, line 1195) `void pv_set_justify_self(pv_view *v, int justify_self);`
+  - `pv_set_block_node` (function, line 1198) `void pv_set_block_node(pv_view *v, dom_node_id id);`
+  - `pv_set_br_line` (function, line 1206) `void pv_set_br_line(pv_view *v, int br_line);`
+  - `pv_cont_count` (function, line 1221) `size_t pv_cont_count(const pv_view *v);`
+  - `pv_cont_at` (function, line 1222) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+  - `pv_set_input_checked` (function, line 1226) `void pv_set_input_checked(pv_view *v, int checked);`
+  - `pv_set_input_placeholder` (function, line 1230) `void pv_set_input_placeholder(pv_view *v, int ph_color);`
+  - `pv_svg_append_root_attrs` (function, line 1236) `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);`
+  - `pv_placeholder_color` (function, line 1239) `int pv_placeholder_color(const css_style *ph);`
+  - `pv_set_input_select_opts` (function, line 1243) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
+  - `pv_free` (function, line 1246) `void pv_free(pv_view *v);`
+  - `pv_count` (function, line 1249) `size_t pv_count(const pv_view *v);`
+  - `pv_at` (function, line 1250) `const pv_run *pv_at(const pv_view *v, size_t i);`
+  - `pv_box_count` (function, line 1254) `size_t pv_box_count(const pv_view *v);`
+  - `pv_box_at` (function, line 1255) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
   - `FREEDOM_PAGE_VIEW_H` (macro, line 2) `#define FREEDOM_PAGE_VIEW_H`
   - `PV_BSHADOW_LAYERS` (macro, line 44) `#define PV_BSHADOW_LAYERS`
   - `PV_MAUTO_LEFT` (macro, line 46) `#define PV_MAUTO_LEFT`
@@ -92,12 +128,12 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `PV_GRID_TRACKS` (macro, line 58) `#define PV_GRID_TRACKS`
   - `PV_CONT_DEPTH` (macro, line 63) `#define PV_CONT_DEPTH`
   - `PV_BG_URL_MAX` (macro, line 69) `#define PV_BG_URL_MAX`
-  - `PV_UA_BODY_MARGIN` (macro, line 860) `#define PV_UA_BODY_MARGIN`
-  - `PV_BR_EMPTY` (macro, line 1197) `#define PV_BR_EMPTY`
-  - `PV_BR_CONT` (macro, line 1198) `#define PV_BR_CONT`
-  - `PV_PH_THEME` (macro, line 1223) `#define PV_PH_THEME`
-  - `PV_PH_HIDDEN` (macro, line 1224) `#define PV_PH_HIDDEN`
-  - `PV_FRAME_SCHEME` (macro, line 1256) `#define PV_FRAME_SCHEME`
+  - `PV_UA_BODY_MARGIN` (macro, line 862) `#define PV_UA_BODY_MARGIN`
+  - `PV_BR_EMPTY` (macro, line 1201) `#define PV_BR_EMPTY`
+  - `PV_BR_CONT` (macro, line 1202) `#define PV_BR_CONT`
+  - `PV_PH_THEME` (macro, line 1227) `#define PV_PH_THEME`
+  - `PV_PH_HIDDEN` (macro, line 1228) `#define PV_PH_HIDDEN`
+  - `PV_FRAME_SCHEME` (macro, line 1260) `#define PV_FRAME_SCHEME`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `include/box_tree.h`, `include/frame_host.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
@@ -254,31 +290,31 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Language: h
 - Symbols:
   - `rd_block` (struct, line 64)
-  - `rd_doc` (struct, line 265)
+  - `rd_doc` (struct, line 267)
   - `img_fail_reason` (enum, line 34)
   - `rd_kind` (enum, line 42)
-  - `rd_status` (enum, line 297)
+  - `rd_status` (enum, line 299)
   - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
   - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
   - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
   - `form` (function, line 63) `* form (-1 = none);`
-  - `default` (function, line 151) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
-  - `to` (function, line 251) `* belongs to (-1 = none);`
-  - `rdp_images_warning` (function, line 306) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-  - `rd_free` (function, line 316) `void rd_free(rd_doc *d);`
-  - `rd_count` (function, line 319) `size_t rd_count(const rd_doc *d);`
-  - `rd_at` (function, line 320) `const rd_block *rd_at(const rd_doc *d, size_t i);`
-  - `rd_box_count` (function, line 324) `size_t rd_box_count(const rd_doc *d);`
-  - `rd_box_at` (function, line 325) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-  - `rd_cont_count` (function, line 329) `size_t rd_cont_count(const rd_doc *d);`
-  - `rd_cont_at` (function, line 330) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-  - `rd_kind_name` (function, line 334) `const char *rd_kind_name(rd_kind k);`
-  - `rd_block_tag` (function, line 342) `const char *rd_block_tag(const rd_block *b);`
-  - `rd_block_heading_level` (function, line 349) `int rd_block_heading_level(const rd_block *b);`
-  - `decision` (function, line 352) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-  - `IMG_FAIL_OK` (function, line 358) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-  - `rd_input_label` (function, line 363) `const char *rd_input_label(int input_type);`
-  - `rd_input_invisible` (function, line 368) `int rd_input_invisible(int input_type);`
+  - `default` (function, line 153) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
+  - `to` (function, line 253) `* belongs to (-1 = none);`
+  - `rdp_images_warning` (function, line 308) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+  - `rd_free` (function, line 318) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 321) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 322) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 326) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 327) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 331) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 332) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 336) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 344) `const char *rd_block_tag(const rd_block *b);`
+  - `rd_block_heading_level` (function, line 351) `int rd_block_heading_level(const rd_block *b);`
+  - `decision` (function, line 354) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 360) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 365) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 370) `int rd_input_invisible(int input_type);`
   - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
@@ -443,32 +479,6 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `FREEDOM_SVG_PAINT_H` (macro, line 2) `#define FREEDOM_SVG_PAINT_H`
 - Depends on: `include/svg_render.h`
 - Imported by: `gui/browser_ui.c`, `gui/svg_paint.c`
-
-## include/svg_render.h
-- Doc: sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>...
-- Layer: presentation
-- Language: h
-- Symbols:
-  - `sv_seg` (struct, line 65)
-  - `sv_shape` (struct, line 75)
-  - `sv_image` (struct, line 104)
-  - `sv_status` (enum, line 25)
-  - `sv_shape_kind` (enum, line 44)
-  - `sv_verb` (enum, line 58)
-  - `verb` (type_alias, line 64) `typedef struct sv_seg { int verb;`
-  - `kind` (type_alias, line 75) `typedef struct sv_shape { int kind;`
-  - `height` (type_alias, line 104) `typedef struct sv_image { double width, height;`
-  - `sv_fit` (function, line 131) `void sv_fit(const sv_image *img, double dw, double dh, double *scale, double *off_x, double *off_y);`
-  - `FREEDOM_SVG_RENDER_H` (macro, line 2) `#define FREEDOM_SVG_RENDER_H`
-  - `SV_MAX_SHAPES` (macro, line 32) `#define SV_MAX_SHAPES`
-  - `SV_MAX_POINTS` (macro, line 33) `#define SV_MAX_POINTS`
-  - `SV_MAX_SEGS` (macro, line 34) `#define SV_MAX_SEGS`
-  - `SV_MAX_DEPTH` (macro, line 35) `#define SV_MAX_DEPTH`
-  - `SV_TEXT_MAX` (macro, line 36) `#define SV_TEXT_MAX`
-  - `SV_MAX_INPUT` (macro, line 37) `#define SV_MAX_INPUT`
-  - `SV_DEFAULT_W` (macro, line 41) `#define SV_DEFAULT_W`
-  - `SV_DEFAULT_H` (macro, line 42) `#define SV_DEFAULT_H`
-- Imported by: `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_render.c`, `tests/test_svg_render.c`
 
 
 Next: [KB_include_p5.md](KB_include_p5.md)

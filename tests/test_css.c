@@ -4765,6 +4765,45 @@ static void test_inline_transform_independent_cascade_combines(void **state) {
     css_free(sh);
 }
 
+/* text-underline-offset (Text Decoration 4 section 3): `auto` or a length, negative allowed; it
+ * is inherited like the rest of the decoration set (page_view merges it), so the style only
+ * records what was declared. */
+static void test_inline_text_underline_offset(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("color:red", 0).text_underline_offset, CSS_LEN_UNSET);
+    assert_int_equal(css_parse_inline("text-underline-offset:3px", 0).text_underline_offset, 3);
+    assert_int_equal(css_parse_inline("text-underline-offset:-2px", 0).text_underline_offset, -2);
+    assert_int_equal(css_parse_inline("text-underline-offset:0", 0).text_underline_offset, 0);
+    assert_int_equal(css_parse_inline("text-underline-offset:auto", 0).text_underline_offset,
+                     CSS_LEN_AUTO);
+    assert_int_equal(css_parse_inline("text-underline-offset:0.5em", 0).text_underline_offset, 8);
+    assert_int_equal(css_parse_inline("text-underline-offset:bogus", 0).text_underline_offset,
+                     CSS_LEN_UNSET);
+}
+
+/* object-position (CSS Images 3 5.4): keywords and percentages, one or two values,
+ * either axis order; packed as ((x_pm+1)<<16)|(y_pm+1), 0 = not declared. */
+static void test_inline_object_position(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("color:red", 0).object_pos, 0);
+    assert_int_equal(css_parse_inline("object-position:center", 0).object_pos,
+                     CSS_OBJPOS_PACK(500, 500));
+    assert_int_equal(css_parse_inline("object-position:left top", 0).object_pos,
+                     CSS_OBJPOS_PACK(0, 0));
+    assert_int_equal(css_parse_inline("object-position:top", 0).object_pos,
+                     CSS_OBJPOS_PACK(500, 0));
+    assert_int_equal(css_parse_inline("object-position:bottom right", 0).object_pos,
+                     CSS_OBJPOS_PACK(1000, 1000));
+    assert_int_equal(css_parse_inline("object-position:50% 20%", 0).object_pos,
+                     CSS_OBJPOS_PACK(500, 200));
+    assert_int_equal(css_parse_inline("object-position:25%", 0).object_pos,
+                     CSS_OBJPOS_PACK(250, 500));
+    assert_int_equal(css_parse_inline("object-position:left 10px", 0).object_pos, 0);
+    assert_int_equal(css_parse_inline("object-position:top left", 0).object_pos,
+                     CSS_OBJPOS_PACK(0, 0));
+    assert_int_equal(css_parse_inline("object-position:left right", 0).object_pos, 0);
+}
+
 static void test_inline_object_fit(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("object-fit:fill", 0).object_fit, CSS_OFI_FILL);
@@ -5954,6 +5993,8 @@ int main(void) {
         cmocka_unit_test(test_transform_origin),
         cmocka_unit_test(test_inline_transform_independent_cascade_combines),
         cmocka_unit_test(test_inline_object_fit),
+        cmocka_unit_test(test_inline_object_position),
+        cmocka_unit_test(test_inline_text_underline_offset),
         cmocka_unit_test(test_inline_list_style_pos),
         cmocka_unit_test(test_inline_font_kerning),
         cmocka_unit_test(test_inline_text_rendering),

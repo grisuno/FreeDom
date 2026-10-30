@@ -45,7 +45,6 @@ fi
 # 4. Aplicar parches de compatibilidad de código (OpenSSL < 3.3)
 echo -e "${BLUE}[*] Patching source code files for target environment...${NC}"
 if [ -f src/local_store.c ]; then
-    sed -i '1s/^/#include <openssl\/kdf.h>\n#ifndef OSSL_KDF_PARAM_ARGON2_LANES\n#define OSSL_KDF_PARAM_ARGON2_LANES "lanes"\n#endif\n#ifndef OSSL_KDF_PARAM_ARGON2_MEMCOST\n#define OSSL_KDF_PARAM_ARGON2_MEMCOST "memcost"\n#endif\n#ifndef OSSL_KDF_PARAM_THREADS\n#define OSSL_KDF_PARAM_THREADS "threads"\n#endif\n#define _GNU_SOURCE\n/' src/local_store.c
 fi
 
 echo -e "${GREEN}[+] Configuration complete. You can now run 'make && sudo make install'.${NC}"

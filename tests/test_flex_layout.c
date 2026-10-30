@@ -139,6 +139,22 @@ static void test_negative_fields_clamped(void **state) {
 }
 
 /* repeat(auto-fill, minmax(min, max)): fit of min-wide tracks (2026-10-09). */
+/* Given `grid-auto-flow: column` with no explicit rows, then every item gets its own
+ * (implicit) column, never fewer than the template declared; any other flow, or
+ * explicit rows, keeps the declared count. A hostile item count is clamped. */
+static void test_grid_column_count_for_column_flow(void **state) {
+    (void)state;
+    assert_int_equal(fx_grid_column_count(2 /* column */, 1, 0, 3), 3);
+    assert_int_equal(fx_grid_column_count(2, 0, 0, 5), 5);
+    assert_int_equal(fx_grid_column_count(1 /* row */, 1, 0, 3), 1);
+    assert_int_equal(fx_grid_column_count(0 /* unset */, 4, 0, 9), 4);
+    assert_int_equal(fx_grid_column_count(2, 1, 2, 6), 1);
+    assert_int_equal(fx_grid_column_count(2, 3, 0, 2), 3);
+    assert_int_equal(fx_grid_column_count(2, 1, 0, 0), 1);
+    assert_int_equal(fx_grid_column_count(2, 1, 0, 100000), (int)FX_GRID_COLS_MAX);
+    assert_int_equal(fx_grid_column_count(2, -7, 0, 3), 3);
+}
+
 static void test_autofill_count(void **state) {
     (void)state;
     assert_int_equal(fx_autofill_count(1000.0, 10.0, 224.0), 4);
@@ -1246,6 +1262,7 @@ int main(void) {
         cmocka_unit_test(test_multicol_balance),
         cmocka_unit_test(test_auto_margins_push_right_and_center),
         cmocka_unit_test(test_autofill_count),
+        cmocka_unit_test(test_grid_column_count_for_column_flow),
         cmocka_unit_test(test_grid_line_side),
         cmocka_unit_test(test_grid_line_parse),
         cmocka_unit_test(test_grid_line_resolve_table),

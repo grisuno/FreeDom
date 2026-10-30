@@ -1,6 +1,134 @@
 # API (page 9 of 12)
 Previous: [API_p8.md](API_p8.md)
 
+## src/js_dom.c
+Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `include/web_storage.h`, `src/js_custom_elements.h`, `src/js_dom_ext.h`, `src/js_dom_internal.h`, `src/js_location_internal.h`
+- `jd_opaque_get` (function) `src/js_dom.c:27` `jd_opaque *jd_opaque_get(JSContext *ctx)`
+- `jd_idx` (function) `src/js_dom.c:31` `dom_index *jd_idx(JSContext *ctx)`
+- `jd_handle` (function) `src/js_dom.c:40` `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)` -- Coerces a JS argument to a node handle.
+- `jd_handle_or_null` (function) `src/js_dom.c:47` `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)`
+- `m_node_count` (function) `src/js_dom.c:53` `static JSValue m_node_count(JSContext *ctx, JSValueConst this_val,
+                            in...`
+- `m_get_element_by_id` (function) `src/js_dom.c:59` `static JSValue m_get_element_by_id(JSContext *ctx, JSValueConst this_val,
+                       ...`
+- `jd_query_list` (function) `src/js_dom.c:70` `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)` -- return JS_NewInt64(ctx, (int64_t)dom_node_count(jd_idx(ctx))); } static JSValue m_get_element_by_id(JSContext *ctx...
+- `m_get_by_tag` (function) `src/js_dom.c:100` `static JSValue m_get_by_tag(JSContext *ctx, JSValueConst this_val,
+                            in...`
+- `m_get_by_class` (function) `src/js_dom.c:106` `static JSValue m_get_by_class(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_tag_name` (function) `src/js_dom.c:112` `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+- `m_get_attribute` (function) `src/js_dom.c:122` `static JSValue m_get_attribute(JSContext *ctx, JSValueConst this_val,
+                           ...`
+- `m_parent` (function) `src/js_dom.c:135` `static JSValue m_parent(JSContext *ctx, JSValueConst this_val,
+                        int argc, ...`
+- `m_first_child` (function) `src/js_dom.c:143` `static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,
+                             ...`
+- `m_node_kind` (function) `src/js_dom.c:152` `static JSValue m_node_kind(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom_node_id h; if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION; return jd_handle_or_null(ctx...
+- `m_child_node` (function) `src/js_dom.c:159` `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
+- `m_sibling_node` (function) `src/js_dom.c:166` `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
+- `m_create_char` (function) `src/js_dom.c:174` `static JSValue m_create_char(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- (void)this_val; (void)argc; dom_node_id h; if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION; return...
+- `m_next_sibling` (function) `src/js_dom.c:188` `static JSValue m_next_sibling(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_precedes` (function) `src/js_dom.c:196` `static JSValue m_precedes(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+- `m_text_content` (function) `src/js_dom.c:207` `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_set_text` (function) `src/js_dom.c:217` `static JSValue m_set_text(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+- `m_get_title` (function) `src/js_dom.c:231` `static JSValue m_get_title(JSContext *ctx, JSValueConst this_val,
+                           int ...`
+- `m_set_title` (function) `src/js_dom.c:239` `static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,
+                           int ...`
+- `m_create_element` (function) `src/js_dom.c:252` `static JSValue m_create_element(JSContext *ctx, JSValueConst this_val,
+                          ...`
+- `m_append_child` (function) `src/js_dom.c:264` `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_move_children` (function) `src/js_dom.c:275` `static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.moveChildren(src, parent, where, ref|null): every child node of src (text * included) into parent at where (0...
+- `m_clone_node` (function) `src/js_dom.c:289` `static JSValue m_clone_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {...
+- `m_insert_before` (function) `src/js_dom.c:299` `static JSValue m_insert_before(JSContext *ctx, JSValueConst this_val,
+                           ...` -- return JS_NewBool(ctx, dom_move_children(jd_idx(ctx), src, parent, (dom_place)where, ref) == DOM_OK); } /*...
+- `m_remove_child` (function) `src/js_dom.c:311` `static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,
+                            ...`
+- `m_set_attribute` (function) `src/js_dom.c:320` `static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,
+                           ...`
+- `m_remove_attribute` (function) `src/js_dom.c:336` `static JSValue m_remove_attribute(JSContext *ctx, JSValueConst this_val,
+                        ...`
+- `m_set_inner_html` (function) `src/js_dom.c:348` `static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,
+                          ...`
+- `m_get_inner_html` (function) `src/js_dom.c:364` `static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,
+                          ...` -- innerHTML getter (2026-07-11): serializes the node's children (bounded in dom.c; * over-cap or invalid handle yields...
+- `m_rect` (function) `src/js_dom.c:397` `static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.rect(h): [x, y, w, h] of h in document coordinates from the installed * layout geometry, or null (no table, or...
+- `m_computed` (function) `src/js_dom.c:418` `static JSValue m_computed(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.computed(h, prop): the cascade's computed value of `prop` (kebab-case) for h as a string, "" for an unknown...
+- `m_query_selector` (function) `src/js_dom.c:463` `static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,
+                          ...` -- return a; } /* --- install --- typedef struct jd_method { const char *name; JSCFunction *fn; int          nargs; }...
+- `m_query_selector_all` (function) `src/js_dom.c:478` `static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,
+                      ...` -- int argc, JSValueConst *argv) { (void)this_val; (void)argc; dom_node_id root; if (jd_handle(ctx, argv[0], &root) <...
+- `m_matches` (function) `src/js_dom.c:512` `static JSValue m_matches(JSContext *ctx, JSValueConst this_val,
+                         int argc...`
+- `m_closest` (function) `src/js_dom.c:524` `static JSValue m_closest(JSContext *ctx, JSValueConst this_val,
+                         int argc...`
+- `m_attr_names` (function) `src/js_dom.c:536` `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,
+                            in...`
+- `jd_is_mutator` (function) `src/js_dom.c:603` `static int jd_is_mutator(const char *name)`
+- `jd_freeze_mutators` (function) `src/js_dom.c:609` `static int jd_freeze_mutators(JSContext *jsctx)`
+- `table` (function) `src/js_dom.c:643` `* a table (dom.viewport() non-null);`
+- `attrNames` (function) `src/js_dom.c:695` `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
+     * a missing '...`
+- `scripts` (function) `src/js_dom.c:894` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+- `enough` (function) `src/js_dom.c:1067` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+- `ms` (function) `src/js_dom.c:1272` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+- `empty` (function) `src/js_dom.c:1463` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+- `geometry` (function) `src/js_dom.c:1465` `* constant geometry (zero real leak);`
+- `size` (function) `src/js_dom.c:1468` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+- `js_env` (function) `src/js_dom.c:1471` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+ * document shim (uses...`
+- `jd_install` (function) `src/js_dom.c:2008` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+- `jd_rebind` (function) `src/js_dom.c:2090` `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)`
+- `jd_flush_custom_elements` (function) `src/js_dom.c:2100` `void jd_flush_custom_elements(js_context *ctx)`
+- `fails` (function) `src/js_dom.c:2114` `* cap is reached or an allocation fails (caller stops), else 0. */
+static int cb_append(char **bu...`
+- `jd_install_console` (function) `src/js_dom.c:2228` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+- `jd_set_cookies` (function) `src/js_dom.c:2265` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+- `jd_get_cookies` (function) `src/js_dom.c:2285` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+- `jd_set_computed` (function) `src/js_dom.c:2308` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+- `jd_set_geometry` (function) `src/js_dom.c:2319` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+
+## src/js_dom_ext.c
+Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`
+- `identity` (function) `src/js_dom_ext.c:104` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
+- `registration` (function) `src/js_dom_ext.c:481` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
+ * observer...`
+- `run` (function) `src/js_dom_ext.c:1265` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+- `jdx_install` (function) `src/js_dom_ext.c:1330` `int jdx_install(JSContext *ctx)`
+- `jd_install_repl_api` (function) `src/js_dom_ext.c:1339` `jd_status jd_install_repl_api(js_context *ctx)`
+- `jd_set_repl_css` (function) `src/js_dom_ext.c:1347` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+- `jd_install_geolocation` (function) `src/js_dom_ext.c:1360` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1379` `jd_status jd_install_indexeddb(js_context *ctx)`
+
+## src/js_dom_ext.h
+Imported by: `src/js_dom.c`, `src/js_dom_ext.c`
+- `jdx_install` (function) `src/js_dom_ext.h:10` `int jdx_install(JSContext *ctx);`
+
+## src/js_dom_internal.h
+Depends on: `include/dom.h`, `include/js_dom.h`
+Imported by: `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`
+- `jd_opaque_get` (function) `src/js_dom_internal.h:11` `jd_opaque *jd_opaque_get(JSContext *ctx);`
+- `jd_idx` (function) `src/js_dom_internal.h:12` `dom_index *jd_idx(JSContext *ctx);`
+- `jd_handle` (function) `src/js_dom_internal.h:14` `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out);` -- Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): * the context accessors every native...
+
+## src/js_embed.c
+Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
+- `try_create_iframe_from_script` (function) `src/js_embed.c:86` `static int try_create_iframe_from_script(dom_index *idx,
+                                        ...` -- Scans an inline script body for `video[N]` or `video_data` assignment and extracts the first usable iframe src.
+- `jd_video_from_scripts` (function) `src/js_embed.c:203` `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,
+                   ...`
+- `jd_inject_video_shim` (function) `src/js_embed.c:242` `jd_status jd_inject_video_shim(js_context *ctx)`
+- `scan_video_url` (function) `src/js_embed.c:256` `static int scan_video_url(const char *body, size_t blen,
+                           char *out, si...` -- Scans a body buffer for `.m3u8` (HLS) or `.mp4` (progressive) video URLs.
+- `jd_process_iframes` (function) `src/js_embed.c:294` `void jd_process_iframes(js_context *ctx, dom_index *idx,
+                        jd_fetch_fn fn, ...`
+
 ## src/js_env.c
 Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/sha2.h`
 - `primitives` (function) `src/js_env.c:6` `* the pure anti_fp primitives (one audited source of normalized constants);`
@@ -229,28 +357,28 @@ Depends on: `include/link_nav.h`, `include/url.h`
 
 ## src/local_store.c
 Depends on: `include/local_store.h`
-- `cipher_for` (function) `src/local_store.c:937` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
-- `argon2id_derive` (function) `src/local_store.c:947` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
+- `cipher_for` (function) `src/local_store.c:69` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
+- `argon2id_derive` (function) `src/local_store.c:79` `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,
                           ...`
-- `ls_derive_key` (function) `src/local_store.c:976` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
+- `ls_derive_key` (function) `src/local_store.c:108` `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,
                         const...`
-- `aead_encrypt` (function) `src/local_store.c:985` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_encrypt` (function) `src/local_store.c:117` `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `aead_decrypt` (function) `src/local_store.c:1011` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
+- `aead_decrypt` (function) `src/local_store.c:143` `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,
                      ...`
-- `seal_core` (function) `src/local_store.c:1039` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
+- `seal_core` (function) `src/local_store.c:171` `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,
                     ...`
-- `decrypt_blob` (function) `src/local_store.c:1076` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
+- `decrypt_blob` (function) `src/local_store.c:208` `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,
          ...`
-- `ls_seal` (function) `src/local_store.c:1107` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
+- `ls_seal` (function) `src/local_store.c:239` `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,
                   const uint8_t *p...`
-- `ls_open` (function) `src/local_store.c:1120` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
+- `ls_open` (function) `src/local_store.c:252` `ls_status ls_open(const uint8_t key[LS_KEY_LEN],
                   const uint8_t *blob, size_t bl...`
-- `ls_seal_passphrase` (function) `src/local_store.c:1131` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
+- `ls_seal_passphrase` (function) `src/local_store.c:263` `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,
           ...`
-- `ls_open_passphrase` (function) `src/local_store.c:1152` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
+- `ls_open_passphrase` (function) `src/local_store.c:284` `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,
                         ...`
-- `ls_free` (function) `src/local_store.c:1172` `void ls_free(uint8_t *buf, size_t len)`
+- `ls_free` (function) `src/local_store.c:304` `void ls_free(uint8_t *buf, size_t len)`
 
 ## src/media_decoder.c
 Depends on: `include/media_decoder.h`, `include/util.h`

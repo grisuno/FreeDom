@@ -99,6 +99,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->text_decoration_color = -1;
     b->text_decoration_style = 0;
     b->text_decoration_thickness = -1;
+    b->text_underline_offset = CSS_LEN_UNSET;
     b->font_family = 0;
     b->fontface = 0u;
     b->font_list = NULL;
@@ -127,6 +128,7 @@ static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
     b->image_rendering = 0;
     b->caret_color = -1;
     b->object_fit = 0;
+    b->object_pos = 0;
     b->grad_text_n = 0;
     b->grad_text_angle = 0;
     for (int gt = 0; gt < 4; ++gt) b->grad_text_c[gt] = -1;
@@ -421,7 +423,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         if (caps.css && d->count > 0) {
             rd_block *nb = &d->blocks[d->count - 1];
             if (r->kind == PV_IMAGE) nb->image_rendering = r->image_rendering;
-            if (r->kind == PV_IMAGE) nb->object_fit = r->object_fit;
+            if (r->kind == PV_IMAGE) { nb->object_fit = r->object_fit; nb->object_pos = r->object_pos; }
             /* The element's own width % (used width, CSS 2.1 §10.3.2 -- not a
              * cap, so only this half travels, never box_w). Without it a
              * responsive `img{width:50%}` keeps its intrinsic size. */
@@ -475,6 +477,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                 lb->text_decoration_color = r->text_decoration_color;
                 lb->text_decoration_style = r->text_decoration_style;
                 lb->text_decoration_thickness = r->text_decoration_thickness;
+                lb->text_underline_offset = r->text_underline_offset;
             }
             /* Author text-presentation extensions: same caps.css gate as above. When
              * off they keep their no-effect defaults (set by rd_push). */

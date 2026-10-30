@@ -1,20 +1,10 @@
 JustPaste.it - paste text and share with your friends
-CSS drops: 28 declaration(s) dropped, 17 distinct
+CSS drops: 13 declaration(s) dropped, 7 distinct
   count  cause         property                     first value
-      4  unknown-prop  text-underline-offset        .25em
       4  unknown-prop  animation-play-state         paused
-      3  unknown-prop  -webkit-overflow-scrolling   touch
       2  bad-value     background-position          right .75rem center,center right 2.25rem
       2  bad-value     background-size              16px 12px,calc(.75em + .375rem) calc(.75em + .375rem)
       2  bad-value     animation-timing-function    cubic-bezier(.18,.89,.32,1.28)
-      1  bad-value     border-color                 inherit
-      1  unknown-prop  -webkit-text-size-adjust     100%
-      1  unknown-prop  -webkit-tap-highlight-color  rgba(0,0,0,0)
-      1  unknown-prop  text-decoration-skip-ink     none
-      1  unknown-prop  counter-reset                section
-      1  bad-value     content                      counters(section,".") ". "
-      1  unknown-prop  counter-increment            section
-      1  unknown-prop  -webkit-font-smoothing       antialiased
       1  bad-value     filter                       url(#gaussian-blur)
-      1  unknown-prop  -moz-osx-font-smoothing      grayscale
+      1  unknown-prop  text-decoration-skip-ink     none
       1  bad-value     text-align                   -webkit-match-parent

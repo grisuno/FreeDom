@@ -3,6 +3,79 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `lower` | function | `src/hostblock.c:107` | `static char lower(char c)` |
+| `table_contains` | function | `src/hostblock.c:92` | `static int table_contains(const hb_table *t, const char *key)` |
+| `table_free` | function | `src/hostblock.c:98` | `static void table_free(hb_table *t)` |
+| `table_grow` | function | `src/hostblock.c:49` | `static int table_grow(hb_table *t, size_t newcap)` |
+| `table_insert` | function | `src/hostblock.c:71` | `static int table_insert(hb_table *t, const char *key, size_t klen)` |
+| `table_probe` | function | `src/hostblock.c:38` | `static size_t table_probe(const hb_table *t, const char *key, size_t klen)` |
+| `contains_ci` | function | `src/hostedit.c:115` | `static int contains_ci(const char *hs, size_t hl, const char *needle)` |
+| `has_host_cb` | function | `src/hostedit.c:105` | `static int has_host_cb(const char *ts, size_t tl, void *ctx)` |
+| `he_cdn_kind` | function | `src/hostedit.c:173` | `he_cdn_kind_t he_cdn_kind(const char *url)` |
+| `he_lower` | function | `src/hostedit.c:12` | `static char he_lower(char c)` |
+| `he_make_line` | function | `src/hostedit.c:41` | `he_status he_make_line(const char *host, char *out, size_t cap)` |
+| `he_scan` | function | `src/hostedit.c:80` | `static int he_scan(const char *text, int (*fn)(const char *, size_t, void *), void *ctx)` |
+| `he_suggest` | function | `src/hostedit.c:164` | `int he_suggest(const char *text, const char *query,                char results[][HE_MAX_HOST + 1...` |
+| `he_text_has_host` | function | `src/hostedit.c:109` | `int he_text_has_host(const char *text, const char *host)` |
+| `is_ip_token` | function | `src/hostedit.c:67` | `static int is_ip_token(const char *ts, const char *te)` |
+| `is_label_char` | function | `src/hostedit.c:16` | `static int is_label_char(char c)` |
+| `starts_with_ci` | function | `src/hostedit.c:128` | `static int starts_with_ci(const char *hs, size_t hl, const char *pfx)` |
+| `suggest_cb` | function | `src/hostedit.c:144` | `static int suggest_cb(const char *ts, size_t tl, void *vctx)` |
+| `suggest_ctx` | struct | `src/hostedit.c:136` | `` |
+| `valid_host` | function | `src/hostedit.c:22` | `static int valid_host(const char *host, size_t n)` |
+| `_POSIX_C_SOURCE` | macro | `src/html_parse.c:9` | `#define _POSIX_C_SOURCE` |
+| `attr_has_token_ci` | function | `src/html_parse.c:251` | `static int attr_has_token_ci(const lxb_char_t *val, size_t vlen, const char *needle)` |
+| `attr_is_event_handler` | function | `src/html_parse.c:47` | `static int attr_is_event_handler(const lxb_dom_attr_t *attr)` |
+| `dup_bytes` | function | `src/html_parse.c:27` | `static char *dup_bytes(const lxb_char_t *src, size_t len)` |
+| `hp_config_default` | function | `src/html_parse.c:357` | `hp_config hp_config_default(void)` |
+| `hp_document` | struct | `src/html_parse.c:21` | `` |
+| `hp_document_free` | function | `src/html_parse.c:483` | `void hp_document_free(hp_document *doc)` |
+| `hp_document_root` | function | `src/html_parse.c:489` | `const void *hp_document_root(const hp_document *doc)` |
+| `hp_element_count` | function | `src/html_parse.c:409` | `size_t hp_element_count(const hp_document *doc)` |
+| `hp_event_handler_count` | function | `src/html_parse.c:429` | `size_t hp_event_handler_count(const hp_document *doc)` |
+| `hp_extract_script_list` | function | `src/html_parse.c:164` | `hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count)` |
+| `hp_extract_stylesheet_hrefs` | function | `src/html_parse.c:294` | `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count)` |
+| `hp_extract_text` | function | `src/html_parse.c:445` | `char *hp_extract_text(const hp_document *doc, size_t *out_len)` |
+| `hp_free` | function | `src/html_parse.c:479` | `void hp_free(char *buf)` |
+| `hp_free_scripts` | function | `src/html_parse.c:238` | `void hp_free_scripts(hp_script *scripts, size_t count)` |
+| `hp_free_stylesheet_hrefs` | function | `src/html_parse.c:328` | `void hp_free_stylesheet_hrefs(char **hrefs, size_t count)` |
+| `hp_get_title` | function | `src/html_parse.c:464` | `char *hp_get_title(const hp_document *doc, size_t *out_len)` |
+| `hp_parse` | function | `src/html_parse.c:375` | `hp_status hp_parse(const char *html, size_t len, const hp_config *cfg, hp_document **out)` |
+| `hp_script_count` | function | `src/html_parse.c:419` | `size_t hp_script_count(const hp_document *doc)` |
+| `hp_validate_input` | function | `src/html_parse.c:365` | `hp_status hp_validate_input(const char *html, size_t len, const hp_config *cfg)` |
+| `link_is_active_stylesheet` | function | `src/html_parse.c:272` | `static int link_is_active_stylesheet(lxb_dom_element_t *el,                                      ...` |
+| `lxb_dom_element_has_attribute` | function | `src/html_parse.c:230` | `&& lxb_dom_element_has_attribute(sel, (const lxb_char_t *)"nomodule", 8);` |
+| `node_is_script` | function | `src/html_parse.c:54` | `static int node_is_script(const lxb_dom_node_t *node)` |
+| `node_next` | function | `src/html_parse.c:37` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
+| `script_classify` | function | `src/html_parse.c:121` | `static int script_classify(const lxb_dom_node_t *n,                            const lxb_char_t *...` |
+| `strip_event_handlers` | function | `src/html_parse.c:334` | `static void strip_event_handlers(lxb_html_document_t *document)` |
+| `strip_scripts` | function | `src/html_parse.c:60` | `static void strip_scripts(lxb_html_document_t *document)` |
+| `type_is` | function | `src/html_parse.c:100` | `static int type_is(const lxb_char_t *t, size_t len, const char *word)` |
+| `type_is_module` | function | `src/html_parse.c:117` | `static int type_is_module(const lxb_char_t *t, size_t len)` |
+| `HC_EVICT_EVERY` | macro | `src/http_cache.c:34` | `#define HC_EVICT_EVERY` |
+| `HC_KEY_FILE` | macro | `src/http_cache.c:31` | `#define HC_KEY_FILE` |
+| `HC_MAGIC` | macro | `src/http_cache.c:32` | `#define HC_MAGIC` |
+| `HC_MAX_AGE_CAP` | macro | `src/http_cache.c:35` | `#define HC_MAX_AGE_CAP` |
+| `HC_NAME_HEX` | macro | `src/http_cache.c:33` | `#define HC_NAME_HEX` |
+| `_POSIX_C_SOURCE` | macro | `src/http_cache.c:7` | `#define _POSIX_C_SOURCE` |
+| `cc_find` | function | `src/http_cache.c:74` | `static int cc_find(const char *cc, const char *name, const char **val)` |
+| `cc_max_age` | function | `src/http_cache.c:92` | `static int cc_max_age(const char *cc, long *out)` |
+| `days_from_civil` | function | `src/http_cache.c:46` | `static long days_from_civil(int y, int m, int d)` |
+| `days_in_month` | function | `src/http_cache.c:39` | `static int days_in_month(int y, int m)` |
+| `ent` | struct | `src/http_cache.c:397` | `` |
+| `entry_path` | function | `src/http_cache.c:162` | `static int entry_path(const hc_store *s, char kind, const char *partition, const char *url,      ...` |
+| `evict` | function | `src/http_cache.c:396` | `static void evict(hc_store *s)` |
+| `get_locked` | function | `src/http_cache.c:385` | `static hc_status get_locked(hc_store *s, const char *partition, const char *url, hc_meta *meta,  ...` |
+| `has_nl` | function | `src/http_cache.c:293` | `static int has_nl(const char *s)` |
+| `hc_body_free` | function | `src/http_cache.c:287` | `void hc_body_free(uint8_t *body, size_t len)` |
+| `hc_classify` | function | `src/http_cache.c:136` | `hc_class hc_classify(const hc_meta *m, time_t now)` |
+| `hc_clear` | function | `src/http_cache.c:473` | `void hc_clear(hc_store *s)` |
+| `hc_close` | function | `src/http_cache.c:279` | `void hc_close(hc_store *s)` |
+| `hc_get` | function | `src/http_cache.c:480` | `hc_status hc_get(hc_store *s, const char *partition, const char *url, hc_meta *meta,             ...` |
+| `hc_lifetime` | function | `src/http_cache.c:115` | `long hc_lifetime(const hc_meta *m)` |
+| `hc_open` | function | `src/http_cache.c:230` | `hc_status hc_open(hc_store **out, const char *dir, const uint8_t wrap[LS_KEY_LEN])` |
+| `hc_parse_http_date` | function | `src/http_cache.c:55` | `time_t hc_parse_http_date(const char *s)` |
+| `hc_put` | function | `src/http_cache.c:489` | `hc_status hc_put(hc_store *s, const char *partition, const char *url, const hc_meta *meta,       ...` |
 | `hc_redirect_get` | function | `src/http_cache.c:506` | `hc_status hc_redirect_get(hc_store *s, const char *from, time_t now, char *out, size_t cap)` |
 | `hc_redirect_put` | function | `src/http_cache.c:498` | `hc_status hc_redirect_put(hc_store *s, const char *from, const char *to, time_t now)` |
 | `hc_storable` | function | `src/http_cache.c:107` | `int hc_storable(long http_code, const hc_meta *m, size_t body_len)` |
@@ -19,29 +92,29 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `write_atomic` | function | `src/http_cache.c:192` | `static int write_atomic(const char *path, const uint8_t *data, size_t len)` |
 | `IDN_QUERY_FIELD_MAX` | macro | `src/identity.c:18` | `#define IDN_QUERY_FIELD_MAX` |
 | `_GNU_SOURCE` | macro | `src/identity.c:7` | `#define _GNU_SOURCE` |
-| `append` | function | `src/identity.c:186` | `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)` |
-| `append_pct` | function | `src/identity.c:197` | `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)` |
-| `esc_append` | function | `src/identity.c:346` | `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)` |
-| `hexval` | function | `src/identity.c:157` | `static int hexval(int ch)` |
-| `idn_accept_language` | function | `src/identity.c:113` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)` |
-| `idn_apply_query` | function | `src/identity.c:275` | `unsigned idn_apply_query(idn_config *c, const char *query)` |
-| `idn_clear_geo` | function | `src/identity.c:103` | `void idn_clear_geo(idn_config *c)` |
+| `append` | function | `src/identity.c:187` | `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)` |
+| `append_pct` | function | `src/identity.c:198` | `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)` |
+| `esc_append` | function | `src/identity.c:361` | `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)` |
+| `hexval` | function | `src/identity.c:158` | `static int hexval(int ch)` |
+| `idn_accept_language` | function | `src/identity.c:114` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)` |
+| `idn_apply_query` | function | `src/identity.c:282` | `unsigned idn_apply_query(idn_config *c, const char *query)` |
+| `idn_clear_geo` | function | `src/identity.c:104` | `void idn_clear_geo(idn_config *c)` |
 | `idn_defaults` | function | `src/identity.c:23` | `void idn_defaults(idn_config *c)` |
 | `idn_is_default` | function | `src/identity.c:29` | `int idn_is_default(const idn_config *c)` |
-| `idn_parse` | function | `src/identity.c:236` | `void idn_parse(idn_config *c, const char *text)` |
-| `idn_primary_language` | function | `src/identity.c:143` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)` |
-| `idn_render_page` | function | `src/identity.c:362` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap)` |
-| `idn_serialize` | function | `src/identity.c:206` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap)` |
-| `idn_set_geo` | function | `src/identity.c:91` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)` |
-| `idn_set_languages` | function | `src/identity.c:63` | `int idn_set_languages(idn_config *c, const char *list)` |
-| `idn_set_user_agent` | function | `src/identity.c:34` | `int idn_set_user_agent(idn_config *c, const char *ua)` |
-| `idn_user_agent` | function | `src/identity.c:109` | `const char *idn_user_agent(const idn_config *c)` |
+| `idn_parse` | function | `src/identity.c:241` | `void idn_parse(idn_config *c, const char *text)` |
+| `idn_primary_language` | function | `src/identity.c:144` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)` |
+| `idn_render_page` | function | `src/identity.c:377` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap)` |
+| `idn_serialize` | function | `src/identity.c:207` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap)` |
+| `idn_set_geo` | function | `src/identity.c:92` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)` |
+| `idn_set_languages` | function | `src/identity.c:64` | `int idn_set_languages(idn_config *c, const char *list)` |
+| `idn_set_user_agent` | function | `src/identity.c:35` | `int idn_set_user_agent(idn_config *c, const char *ua)` |
+| `idn_user_agent` | function | `src/identity.c:110` | `const char *idn_user_agent(const idn_config *c)` |
 | `is_alnum` | function | `src/identity.c:21` | `static int is_alnum(char c)` |
 | `is_alpha` | function | `src/identity.c:20` | `static int is_alpha(char c)` |
-| `parse_geo` | function | `src/identity.c:223` | `static int parse_geo(const char *s, double *lat, double *lon, double *acc)` |
-| `parse_number` | function | `src/identity.c:268` | `static int parse_number(const char *s, double *out)` |
-| `pct_decode` | function | `src/identity.c:166` | `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)` |
-| `tag_valid` | function | `src/identity.c:50` | `static int tag_valid(const char *s, size_t n)` |
+| `parse_geo` | function | `src/identity.c:228` | `static int parse_geo(const char *s, double *lat, double *lon, double *acc)` |
+| `parse_number` | function | `src/identity.c:275` | `static int parse_number(const char *s, double *out)` |
+| `pct_decode` | function | `src/identity.c:167` | `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)` |
+| `tag_valid` | function | `src/identity.c:51` | `static int tag_valid(const char *s, size_t n)` |
 | `GIF_LZW_MAX_CODES` | macro | `src/image_decode.c:253` | `#define GIF_LZW_MAX_CODES` |
 | `PNG_IHDR_MIN` | macro | `src/image_decode.c:34` | `#define PNG_IHDR_MIN` |
 | `exit` | function | `src/image_decode.c:6` | `* malformed stream fails closed instead of calling exit(). GIF uses an own pure-C * bounded LZW decoder (no giflib)....` |
@@ -377,124 +450,51 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `ln_resolve` | function | `src/link_nav.c:172` | `ln_status ln_resolve(const char *base, const char *href, ln_result *out)` |
 | `pop_seg` | function | `src/link_nav.c:98` | `static void pop_seg(char *body, size_t *blen)` |
 | `resolve_file` | function | `src/link_nav.c:149` | `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)` |
-| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:922` | `#define LS_ARGON2_M_KIB` |
-| `LS_ARGON2_P` | macro | `src/local_store.c:923` | `#define LS_ARGON2_P` |
-| `LS_ARGON2_T` | macro | `src/local_store.c:921` | `#define LS_ARGON2_T` |
-| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:918` | `#define LS_KDF_ARGON2ID` |
-| `LS_KDF_NONE` | macro | `src/local_store.c:917` | `#define LS_KDF_NONE` |
-| `LS_VERSION` | macro | `src/local_store.c:916` | `#define LS_VERSION` |
-| `OFF_AEAD` | macro | `src/local_store.c:928` | `#define OFF_AEAD` |
-| `OFF_KDF` | macro | `src/local_store.c:929` | `#define OFF_KDF` |
-| `OFF_MAGIC` | macro | `src/local_store.c:926` | `#define OFF_MAGIC` |
-| `OFF_NONCE` | macro | `src/local_store.c:931` | `#define OFF_NONCE` |
-| `OFF_SALT` | macro | `src/local_store.c:930` | `#define OFF_SALT` |
-| `OFF_VERSION` | macro | `src/local_store.c:927` | `#define OFF_VERSION` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:3` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:14` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
+| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:54` | `#define LS_ARGON2_M_KIB` |
+| `LS_ARGON2_P` | macro | `src/local_store.c:55` | `#define LS_ARGON2_P` |
+| `LS_ARGON2_T` | macro | `src/local_store.c:53` | `#define LS_ARGON2_T` |
+| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:50` | `#define LS_KDF_ARGON2ID` |
+| `LS_KDF_NONE` | macro | `src/local_store.c:49` | `#define LS_KDF_NONE` |
+| `LS_VERSION` | macro | `src/local_store.c:48` | `#define LS_VERSION` |
+| `OFF_AEAD` | macro | `src/local_store.c:60` | `#define OFF_AEAD` |
+| `OFF_KDF` | macro | `src/local_store.c:61` | `#define OFF_KDF` |
+| `OFF_MAGIC` | macro | `src/local_store.c:58` | `#define OFF_MAGIC` |
+| `OFF_NONCE` | macro | `src/local_store.c:63` | `#define OFF_NONCE` |
+| `OFF_SALT` | macro | `src/local_store.c:62` | `#define OFF_SALT` |
+| `OFF_VERSION` | macro | `src/local_store.c:59` | `#define OFF_VERSION` |
 | `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:25` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:36` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:47` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:58` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:69` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:80` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:91` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:102` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:113` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:124` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:135` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:146` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:157` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:168` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:179` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:190` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:201` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:212` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:223` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:234` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:245` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:256` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:267` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:278` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:289` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:300` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:311` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:322` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:333` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:344` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:355` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:366` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:377` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:388` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:399` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:410` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:421` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:432` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:443` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:454` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:465` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:476` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:487` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:498` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:509` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:520` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:531` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:542` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:553` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:564` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:575` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:586` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:597` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:608` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:619` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:630` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:641` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:652` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:663` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:674` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:685` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:696` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:707` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:718` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:729` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:740` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:751` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:762` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:773` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:784` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:795` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:806` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:817` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:828` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:839` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:850` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:861` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:872` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:907` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:6` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:17` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
+| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:39` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
 | `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:28` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:39` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:50` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:61` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:72` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:83` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:94` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:105` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:116` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:127` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:138` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:149` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:160` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:171` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:182` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:193` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:204` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:215` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:226` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:237` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:248` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:259` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:270` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:281` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
+| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:42` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
+| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:31` | `#define OSSL_KDF_PARAM_THREADS` |
+| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:45` | `#define OSSL_KDF_PARAM_THREADS` |
+| `_GNU_SOURCE` | macro | `src/local_store.c:13` | `#define _GNU_SOURCE` |
+| `aead_decrypt` | function | `src/local_store.c:143` | `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
+| `aead_encrypt` | function | `src/local_store.c:117` | `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
+| `argon2id_derive` | function | `src/local_store.c:79` | `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,                           ...` |
+| `cipher_for` | function | `src/local_store.c:69` | `static const EVP_CIPHER *cipher_for(ls_aead aead)` |
+| `decrypt_blob` | function | `src/local_store.c:208` | `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,          ...` |
+| `ls_derive_key` | function | `src/local_store.c:108` | `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,                         const...` |
+| `ls_free` | function | `src/local_store.c:304` | `void ls_free(uint8_t *buf, size_t len)` |
+| `ls_open` | function | `src/local_store.c:252` | `ls_status ls_open(const uint8_t key[LS_KEY_LEN],                   const uint8_t *blob, size_t bl...` |
+| `ls_open_passphrase` | function | `src/local_store.c:284` | `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,                         ...` |
+| `ls_seal` | function | `src/local_store.c:239` | `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,                   const uint8_t *p...` |
+| `ls_seal_passphrase` | function | `src/local_store.c:263` | `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,           ...` |
+| `seal_core` | function | `src/local_store.c:171` | `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,                     ...` |
+| `_POSIX_C_SOURCE` | macro | `src/media_decoder.c:23` | `#define _POSIX_C_SOURCE` |
+| `av_rescale_q` | function | `src/media_decoder.c:217` | `return av_rescale_q(f->pts, tb, (AVRational)` |
+| `decode_segment` | function | `src/media_decoder.c:276` | `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)` |
+| `decoder_close` | function | `src/media_decoder.c:78` | `static void decoder_close(decoder_ctx *dc)` |
+| `decoder_ctx` | struct | `src/media_decoder.c:54` | `` |
+| `decoder_init` | function | `src/media_decoder.c:96` | `static int decoder_init(decoder_ctx *dc, const uint8_t *data, size_t len)` |
+| `dropped` | function | `src/media_decoder.c:369` | `* the codec in permanent EOF state: every segment after the first decoded * one was silently dropped ("plays a...` |
+| `fd` | function | `src/media_decoder.c:469` | `* prevent the Wayland display fd (inherited from the parent) from * surviving the exec. An inherited Wayland fd...` |
+| `frame_pts_us` | function | `src/media_decoder.c:215` | `static int64_t frame_pts_us(const AVFrame *f, AVRational tb, int64_t fallback)` |
+| `media_decoder_run` | function | `src/media_decoder.c:379` | `void media_decoder_run(int out_fd, int cmd_fd)` |
+| `media_decoder_spawn` | function | `src/media_decoder.c:449` | `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)` |
+| `open` | function | `src/media_decoder.c:18` | `*  * Sandbox: the decoder needs open() for shared libraries (.so loading) and  * brk/mmap for FFm...` |
+| `out_fd` | type_alias | `src/media_decoder.c:53` | `typedef struct decoder_ctx { int out_fd;` |
+| `send_audio_frame` | function | `src/media_decoder.c:242` | `static void send_audio_frame(decoder_ctx *dc, int64_t pts_us)` |
+| `send_video_frame` | function | `src/media_decoder.c:222` | `static void send_video_frame(decoder_ctx *dc, int64_t pts_us)` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

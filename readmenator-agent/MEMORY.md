@@ -2,19 +2,19 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 305 files at commit `01ca900fba20`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 308 files at commit `fa54718fe05d`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (164), `max` (137), `size` (128), `one` (127), `not` (126), `include` (126), `out` (125), `freedom` (119), `free` (115), `char` (113), `const` (110), `its` (101), `void` (98), `css` (97), `name` (97)
+- Domain vocabulary (term, files): `null` (165), `max` (138), `not` (131), `size` (129), `one` (128), `include` (127), `out` (126), `freedom` (120), `free` (117), `char` (116), `const` (110), `its` (103), `css` (101), `void` (100), `name` (100)
 - Subsystem `include: browser_ui`: 59 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
 - Subsystem `src: tab`: 51 files, core `src/tab.c`: tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and...
+- Subsystem `include: page_view`: 39 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - Subsystem `src: text_shape`: 39 files, core `src/text_shape.c`: tsh_fb_cp: Per-code-point verdicts of fb_entry.
-- Subsystem `include: page_view`: 36 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - Subsystem `include: css`: 35 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
 - Subsystem `include: browser`: 19 files, core `src/browser.c`: clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {...
-- Subsystem `src: local_store`: 16 files, core `src/local_store.c`
+- Subsystem `src: http_cache`: 16 files, core `src/http_cache.c`: days_from_civil: #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY...
 - Subsystem `include: secure_fetch`: 13 files, core `src/secure_fetch.c`: tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a...
 - Business rules that the code cannot show live in section 7: record them there.
 
@@ -68,11 +68,11 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 189 files, 6206 symbols; docstrings on 27% of symbols; functions snake_case (99%); types PascalCase (0%); median file 237 lines, max 19763.
-- h: 100 files, 1615 symbols; docstrings on 39% of symbols; functions snake_case (98%); types PascalCase (0%); median file 73 lines, max 1258.
+- c: 191 files, 5966 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (0%); median file 238 lines, max 19942.
+- h: 101 files, 1643 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 72 lines, max 1262.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
-- sh: 4 files, 0 symbols; median file 39 lines, max 91.
-- Tests: 88 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
+- sh: 4 files, 0 symbols; median file 39 lines, max 90.
+- Tests: 89 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
 
 ## 5. Minimum deliverables
 
@@ -81,7 +81,7 @@ Declared:
 
 Measured baseline:
 - Tests pass: `python -m pytest -q`.
-- Docstring coverage stays at or above 29%.
+- Docstring coverage stays at or above 31%.
 - No new security findings at medium or above (current: 0).
 - No new dependency cycles (current: 1).
 - Files stay under 300 lines where possible (`readmenator . lint`).

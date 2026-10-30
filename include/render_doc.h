@@ -98,6 +98,7 @@ typedef struct rd_block {
     int              text_decoration_color;
     int              text_decoration_style;
     int              text_decoration_thickness;
+    int              text_underline_offset;   /* px; CSS_LEN_UNSET/CSS_LEN_AUTO = font default */
     /* Author text-presentation extensions (Hito 23b-6); set only with caps.css, else
      * their no-effect defaults (font_family 0, text_transform 0, letter/word/indent
      * PV_LEN_UNSET, shadow_color -1, opacity -1, valign 0, white_space 0). */
@@ -142,6 +143,7 @@ typedef struct rd_block {
     int              ph_color;        /* pv_run.ph_color with caps.css, else PV_PH_THEME */
     int              ctl_bare;        /* pv_run.ctl_bare with caps.css, else 0 */
     int              object_fit;      /* css_object_fit; set only with caps.css, else 0 */
+    int              object_pos;      /* CSS_OBJPOS_PACK; set only with caps.css, else 0 */
     /* Gradient text (2026-07-19): glyph fill gradient from the nearest
      * background-clip:text ancestor. Set only with caps.css, else n = 0. */
     int              grad_text_n;

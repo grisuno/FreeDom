@@ -28,6 +28,8 @@ flowchart LR
     n_include_anti_fp_h__fp_accept_language_header["anti_fp.fp_accept_language_header"]
     n_include_anti_fp_h__fp_accept_language["anti_fp.fp_accept_language"]
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
+    n_gui_browser_ui_c__stylesheets["browser_ui.stylesheets"]
+    n_src_js_dom_c__scripts["js_dom.scripts"]
     n_src_identity_c__idn_parse --> n_src_identity_c__idn_defaults
     n_src_identity_c__idn_parse --> n_src_identity_c__idn_set_geo
     n_src_identity_c__idn_parse --> n_src_identity_c__idn_set_languages
@@ -44,7 +46,9 @@ flowchart LR
     n_src_identity_c__idn_accept_language -.-> n_include_anti_fp_h__fp_accept_language_header
     n_src_identity_c__idn_primary_language -.-> n_include_anti_fp_h__fp_accept_language
     n_src_identity_c__idn_apply_query -.-> n_gui_browser_ui_c__strcmp
+    n_src_identity_c__idn_render_page -.-> n_gui_browser_ui_c__stylesheets
     n_src_identity_c__idn_render_page -.-> n_include_anti_fp_h__fp_accept_language
+    n_src_identity_c__idn_render_page -.-> n_src_js_dom_c__scripts
 ```
 
 ## Functions
@@ -69,7 +73,7 @@ NULL-safe.
 |---|---|---|---|
 | `c` | `idn_config *` |  |  |
 
-> **Inherited:** Documentation from [`idn_defaults`](#idn_defaults) (include/identity.h:45).
+> **Inherited:** Documentation from [`idn_defaults`](#idn_defaults) (include/identity.h:50).
 
 *Called by:* [`idn_apply_query`](#idn_apply_query), [`idn_parse`](#idn_parse), [`idn_render_page`](#idn_render_page)
 
@@ -95,7 +99,7 @@ int idn_is_default(const idn_config *c)
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`idn_is_default`](#idn_is_default) (include/identity.h:48).
+> **Inherited:** Documentation from [`idn_is_default`](#idn_is_default) (include/identity.h:53).
 
 ---
 
@@ -103,7 +107,7 @@ int idn_is_default(const idn_config *c)
 
 ### `idn_set_user_agent`
 
-`function` | [src/identity.c:34](../../src/identity.c#L34)
+`function` | [src/identity.c:35](../../src/identity.c#L35)
 
 ```c
 int idn_set_user_agent(idn_config *c, const char *ua)
@@ -120,7 +124,7 @@ Validated setters: 0 on success, -1 (c untouched) when the value is not represen
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`idn_set_user_agent`](#idn_set_user_agent) (include/identity.h:51).
+> **Inherited:** Documentation from [`idn_set_user_agent`](#idn_set_user_agent) (include/identity.h:56).
 
 *Called by:* [`idn_apply_query`](#idn_apply_query), [`idn_parse`](#idn_parse)
 
@@ -130,7 +134,7 @@ Validated setters: 0 on success, -1 (c untouched) when the value is not represen
 
 ### `idn_set_languages`
 
-`function` | [src/identity.c:63](../../src/identity.c#L63)
+`function` | [src/identity.c:64](../../src/identity.c#L64)
 
 ```c
 int idn_set_languages(idn_config *c, const char *list)
@@ -153,7 +157,7 @@ int idn_set_languages(idn_config *c, const char *list)
 
 ### `idn_set_geo`
 
-`function` | [src/identity.c:91](../../src/identity.c#L91)
+`function` | [src/identity.c:92](../../src/identity.c#L92)
 
 ```c
 int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)
@@ -178,7 +182,7 @@ int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)
 
 ### `idn_clear_geo`
 
-`function` | [src/identity.c:103](../../src/identity.c#L103)
+`function` | [src/identity.c:104](../../src/identity.c#L104)
 
 ```c
 void idn_clear_geo(idn_config *c)
@@ -198,7 +202,7 @@ void idn_clear_geo(idn_config *c)
 
 ### `idn_user_agent`
 
-`function` `const` | [src/identity.c:109](../../src/identity.c#L109)
+`function` `const` | [src/identity.c:110](../../src/identity.c#L110)
 
 ```c
 const char *idn_user_agent(const idn_config *c)
@@ -216,7 +220,7 @@ Never NULL / always terminated.
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`idn_user_agent`](#idn_user_agent) (include/identity.h:57).
+> **Inherited:** Documentation from [`idn_user_agent`](#idn_user_agent) (include/identity.h:62).
 
 *Calls:* [`fp_user_agent`](include.anti_fp.h.md#fp_user_agent)
 
@@ -228,7 +232,7 @@ Never NULL / always terminated.
 
 ### `idn_accept_language`
 
-`function` | [src/identity.c:113](../../src/identity.c#L113)
+`function` | [src/identity.c:114](../../src/identity.c#L114)
 
 ```c
 size_t idn_accept_language(const idn_config *c, char *out, size_t cap)
@@ -252,7 +256,7 @@ size_t idn_accept_language(const idn_config *c, char *out, size_t cap)
 
 ### `idn_primary_language`
 
-`function` | [src/identity.c:143](../../src/identity.c#L143)
+`function` | [src/identity.c:144](../../src/identity.c#L144)
 
 ```c
 size_t idn_primary_language(const idn_config *c, char *out, size_t cap)
@@ -278,7 +282,7 @@ size_t idn_primary_language(const idn_config *c, char *out, size_t cap)
 
 ### `idn_serialize`
 
-`function` | [src/identity.c:206](../../src/identity.c#L206)
+`function` | [src/identity.c:207](../../src/identity.c#L207)
 
 ```c
 size_t idn_serialize(const idn_config *c, char *out, size_t cap)
@@ -298,7 +302,7 @@ Returns the length (0 on cap overflow, out then "").
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`idn_serialize`](#idn_serialize) (include/identity.h:63).
+> **Inherited:** Documentation from [`idn_serialize`](#idn_serialize) (include/identity.h:68).
 
 ---
 
@@ -306,7 +310,7 @@ Returns the length (0 on cap overflow, out then "").
 
 ### `idn_parse`
 
-`function` | [src/identity.c:236](../../src/identity.c#L236)
+`function` | [src/identity.c:241](../../src/identity.c#L241)
 
 ```c
 void idn_parse(idn_config *c, const char *text)
@@ -323,7 +327,7 @@ Always leaves c valid.
 | `c` | `idn_config *` |  |  |
 | `text` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`idn_parse`](#idn_parse) (include/identity.h:67).
+> **Inherited:** Documentation from [`idn_parse`](#idn_parse) (include/identity.h:72).
 
 *Calls:* [`idn_defaults`](#idn_defaults), [`idn_set_geo`](#idn_set_geo), [`idn_set_languages`](#idn_set_languages), [`idn_set_user_agent`](#idn_set_user_agent)
 
@@ -333,7 +337,7 @@ Always leaves c valid.
 
 ### `idn_apply_query`
 
-`function` | [src/identity.c:275](../../src/identity.c#L275)
+`function` | [src/identity.c:282](../../src/identity.c#L282)
 
 ```c
 unsigned idn_apply_query(idn_config *c, const char *query)
@@ -352,7 +356,7 @@ Returns the IDN_REJ_* mask.
 
 **Returns:** `unsigned`
 
-> **Inherited:** Documentation from [`idn_apply_query`](#idn_apply_query) (include/identity.h:70).
+> **Inherited:** Documentation from [`idn_apply_query`](#idn_apply_query) (include/identity.h:75).
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`idn_clear_geo`](#idn_clear_geo), [`idn_defaults`](#idn_defaults), [`idn_set_geo`](#idn_set_geo), [`idn_set_languages`](#idn_set_languages), [`idn_set_user_agent`](#idn_set_user_agent)
 
@@ -362,7 +366,7 @@ Returns the IDN_REJ_* mask.
 
 ### `idn_render_page`
 
-`function` | [src/identity.c:362](../../src/identity.c#L362)
+`function` | [src/identity.c:377](../../src/identity.c#L377)
 
 ```c
 size_t idn_render_page(const idn_config *c, char *out, size_t cap)
@@ -382,9 +386,9 @@ Returns its length (0 when cap is too small, out "").
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`idn_render_page`](#idn_render_page) (include/identity.h:73).
+> **Inherited:** Documentation from [`idn_render_page`](#idn_render_page) (include/identity.h:78).
 
-*Calls:* [`fp_accept_language`](include.anti_fp.h.md#fp_accept_language), [`idn_defaults`](#idn_defaults), [`idn_primary_language`](#idn_primary_language), [`idn_user_agent`](#idn_user_agent)
+*Calls:* [`stylesheets`](gui.browser_ui.c.md#stylesheets), [`fp_accept_language`](include.anti_fp.h.md#fp_accept_language), [`idn_defaults`](#idn_defaults), [`idn_primary_language`](#idn_primary_language), [`idn_user_agent`](#idn_user_agent), [`scripts`](src.js_dom.c.md#scripts)
 
 ---
 

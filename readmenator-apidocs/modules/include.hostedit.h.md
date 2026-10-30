@@ -1,12 +1,23 @@
 # `include/hostedit.h`
 
-> Source: [include/hostedit.h:1](../../include/hostedit.h#L1) | language `h` | coverage 60.0% | [API index](../index.md)
+> Source: [include/hostedit.h:1](../../include/hostedit.h#L1) | language `h` | coverage 57.1% | [API index](../index.md)
 
 ## Contents
 
-- **Enums:** [`he_status`](#he_status)
-- **Functions:** [`he_text_has_host`](#he_text_has_host), [`he_suggest`](#he_suggest)
+- **Enums:** [`he_status`](#he_status), [`he_cdn_kind_t`](#he_cdn_kind_t)
+- **Functions:** [`he_text_has_host`](#he_text_has_host), [`he_suggest`](#he_suggest), [`he_cdn_kind`](#he_cdn_kind)
 - **Macros:** [`HE_MAX_HOST`](#he_max_host)
+
+## Type Diagram
+
+```mermaid
+classDiagram
+    direction LR
+    class he_status
+    <<enum>> he_status
+    class he_cdn_kind_t
+    <<enum>> he_cdn_kind_t
+```
 
 ## Enums
 
@@ -19,6 +30,22 @@
 ```c
 typedef enum he_status
 ```
+
+---
+
+<a id="he_cdn_kind_t"></a>
+
+### `he_cdn_kind_t`
+
+`enum` | [include/hostedit.h:61](../../include/hostedit.h#L61)
+
+```c
+typedef enum he_cdn_kind_t { HE_CDN_CSS = 0, HE_CDN_JS = 1, HE_CDN_RES = 2 } he_cdn_kind_t;
+```
+
+Which auto-allow switch (config page) a subresource falls under, decided from the URL PATH only (the query and fragment never count): a stylesheet, a script, or any other resource (images, fonts, media, XHR).
+
+Pure; NULL -> HE_CDN_RES.
 
 ---
 
@@ -73,6 +100,24 @@ Fills results[0..max) with up to max distinct domain tokens of text that match q
 | `max` | `int` |  |  |
 
 **Returns:** `int`
+
+---
+
+<a id="he_cdn_kind"></a>
+
+### `he_cdn_kind`
+
+`function` | [include/hostedit.h:62](../../include/hostedit.h#L62)
+
+```c
+he_cdn_kind_t he_cdn_kind(const char *url);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `url` | `char *` |  |  |
 
 ---
 

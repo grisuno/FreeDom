@@ -80,7 +80,6 @@ jobs:
     - name: make all
       run: |
         # Parche: Asegurar cabeceras OpenSSL y definir macros de Argon2 si faltan en versiones < 3.3
-        sed -i '1s/^/#include <openssl\/kdf.h>\n#ifndef OSSL_KDF_PARAM_ARGON2_LANES\n#define OSSL_KDF_PARAM_ARGON2_LANES "lanes"\n#endif\n#ifndef OSSL_KDF_PARAM_ARGON2_MEMCOST\n#define OSSL_KDF_PARAM_ARGON2_MEMCOST "memcost"\n#endif\n#ifndef OSSL_KDF_PARAM_THREADS\n#define OSSL_KDF_PARAM_THREADS "threads"\n#endif\n#define _GNU_SOURCE\n/' src/local_store.c
 
         # Exportamos rutas de librerías para Lexbor (NO exportar CFLAGS:
         # eso previene que el Makefile asigne CFLAGS ?= con -Iinclude y demás flags).

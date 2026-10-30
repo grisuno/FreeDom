@@ -2107,3 +2107,66 @@ como `unknown` también; aceptarlas sería inventar), y `-ms-flex-direction`/
   recortar; `none` suelta ambos. Fuera de alcance: `round` (radios) y recorte de cajas en flujo.
 - Caso medido: `.HeroCarouselControls:before{filter:blur(42px);clip-path:inset(135% 0 -100%)}` de GitHub pintaba su brillo
   entero (100px) sobre el video; ahora solo la franja bajo el borde.
+
+## Tanda 80 (2026-10-29) — alias legacy, propiedades inertes, `translate`/`scale`/`rotate`, `object-position`
+
+Cada punto es Dado-Cuando-Entonces y tiene su test en `tests/test_css_drops.c` o `tests/test_css.c`.
+
+- **Alias legacy de grid (CSS Grid 1 §10.2).** Dado `grid-column-gap` / `grid-row-gap`, cuando se
+  parsean, entonces SON `column-gap` / `row-gap` (renombre, se pregunta una vez, mismo choke point que
+  el prefijo de vendor y los bordes lógicos). ~1400 declaraciones del corpus se descartaban.
+- **Propiedades inertes (`P_INERT`).** Dado una propiedad válida sin efecto en un render estático y no
+  interactivo (`will-change`, `scrollbar-*`, `scroll-margin/padding/snap-*`, `font-smoothing`,
+  `tap-highlight-color`, `overflow-scrolling`, `text-size-adjust`, `speak`, `contain-intrinsic-*`,
+  `view-transition-name`...), cuando se parsea, entonces reclama un slot sin escribir nada:
+  `@supports` la acepta y el informe de descartes solo lista brechas reales. La lista (`is_inert_prop`)
+  es corta a propósito: una propiedad con efecto visual NO va ahí, se implementa.
+- **Palabras CSS-wide en `<time>`, `<easing>` y `<color>`.** Las sondas de `wide_claim` ahora incluyen
+  `0s`, `ease` y `currentcolor`, así que `transition-duration:initial` y `border-color:inherit` reclaman
+  sus slots (Cascade 5 §7.3). Medido: el `filter: initial initial ...` de Tailwind NO es esto — es un
+  `var()` inválido en tiempo de cómputo y descartarlo es correcto.
+- **`translate` / `scale` / `rotate` (Transforms 2).** Cada una es la función única de `transform` que
+  nombra y escribe SOLO sus slots, así que componen entre sí; `none` resetea solo los suyos. Límite
+  conocido: si una de ellas y `transform` escriben el mismo slot gana la última, no se multiplican.
+  Un componente z o un eje 3D falla cerrado.
+- **`object-position` (Images 3 §5.4).** Palabras clave y porcentajes, uno o dos valores, cualquier
+  orden de ejes; una longitud falla cerrado (necesitaría el espacio libre al pintar). Viaja EMPAQUETADA
+  en un solo entero (`CSS_OBJPOS_PACK`, por mil con sesgo +1; 0 = sin declarar = centrado) por
+  `css_style` → `pv_run` → códec IPC (`TAB_WIRE_A_N` 38→39, validado por rango en `read_view`) →
+  `rd_block` → `blit_image_box`, que reparte el espacio libre de `contain`/`cover`/`none`/`scale-down`.
+- **`grid-auto-flow: column` (CSS Grid 1 §8.5).** Dado un grid con `grid-auto-flow: column` y sin
+  filas explícitas, cuando se maqueta, entonces cada ítem abre una columna implícita (`fx_grid_column_count`,
+  pura, tope `FX_GRID_COLS_MAX`): el layout ya recibía `grid_flow` por el IPC pero no lo leía y apilaba todo.
+  `grid-auto-columns` (`auto`/`1fr`/`minmax(0,1fr)`) y `grid-auto-rows: auto` se aceptan porque son
+  exactamente el reparto igual que hace el motor; cualquier otro tamaño sigue siendo un descarte visible.
+  Medido con `make geom` (sonda `tests/parity/pages/grid-auto-flow-col.html`): 193/213/417 px = Firefox.
+
+## Tanda 81 (2026-10-30) — contadores y encabezados en línea
+
+- **Contadores** (contrato completo en `spec/css_counter.md`): `counter-reset`/`counter-increment` viajan
+  como índice al pool de cadenas (como `grid-template-areas`), `content` con `counter()`/`counters()` como
+  un marcador `\x01seq:` que la cascada NO resuelve (depende de la posición). `page_view` lo resuelve en
+  `pv_counters_pass`, un recorrido iterativo en orden de documento que salta `display:none`, aplica las
+  operaciones del elemento, de su `::before` (a profundidad+1), recorre los hijos y cierra con el `::after`.
+- **Encabezado en línea (CSS 2.1 §9.4.2).** Dado `<h2>A<b>B</b></h2>` o un `::before` en un `<h2>`,
+  cuando se maqueta, entonces todo el contenido comparte la línea: una ejecución `RD_HEADING` solo es un
+  bloque independiente (flush + márgenes) si abre bloque (`block_break`). El texto generado lleva el mismo
+  `heading` que el texto propio (`pv_after_pending.heading` para el `::after`).
+
+## Controles de formulario: casillas y radios (2026-10-30)
+
+- `checked` es un atributo BOOLEANO sin valor: `lxb_dom_element_get_attribute` devuelve `NULL`, así que se pregunta
+  presencia con `has_attribute` (HTML §2.4.2). Antes ninguna casilla marcada se pintó nunca como marcada.
+- Estado vivo por control (`ui_input_state.checked`, sembrado desde el marcado): un clic alterna una casilla; en un radio
+  lo selecciona y limpia los demás del grupo (mismo formulario y mismo `name` no vacío); un radio ya marcado se mantiene.
+- Envío: solo los controles marcados son "exitosos" (HTML §4.10.21.4), con su `value` o `on` por defecto. Abierto: eventos
+  `click`/`change` hacia el JS de la página y el teclado (espacio) sobre el control enfocado.
+
+## `text-underline-offset` (2026-10-30)
+
+Dado `text-underline-offset: auto | <length>` (negativo permitido; `em` se pliega con el `font-size` del elemento por el
+mismo `fold_font_relative` que cualquier longitud), cuando el texto lleva `underline`, entonces la línea se pinta
+`offset` px bajo la línea base (borde superior de la línea, como Gecko); `auto` o sin declarar = posición derivada de la
+fuente. Cruza `css_style` → `pv_run` → códec IPC (`TAB_WIRE_A_N` 40) → `rd_block` → fragmento (`deco_ul_on`/`deco_ul_px`:
+un fragmento cero-inicializado significa "sin declarar"). Sonda `underline-offset` 0.33 contra Firefox. Abierto:
+`text-decoration-skip-ink` (Firefox salta los descendentes; Freedom dibuja la línea continua).

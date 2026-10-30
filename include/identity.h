@@ -39,7 +39,12 @@ typedef struct idn_config {
     char   languages[IDN_LANG_MAX]; /* "" = the anti_fp default; comma-separated tags */
     int    geo_mode;                /* idn_geo_mode */
     double geo_lat, geo_lon, geo_accuracy_m;
+    unsigned auto_allow;            /* IDN_AA_* switches: hosts a page on allow.conf pulls CSS/JS/
+                                       resources from are appended to allow.conf (0 = off) */
 } idn_config;
+
+/* Auto-allow switches (spec/identity.md "Auto-allow de CDN"). */
+enum { IDN_AA_CSS = 1u << 0, IDN_AA_JS = 1u << 1, IDN_AA_RES = 1u << 2, IDN_AA_ALL = 7u };
 
 /* The anti_fp identity, geolocation off. NULL-safe. */
 void idn_defaults(idn_config *c);

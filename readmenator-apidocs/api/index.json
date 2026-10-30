@@ -2,50 +2,50 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 217,
-  "entities": 3795,
+  "modules": 219,
+  "entities": 3533,
   "languages": {
-   "c": 101,
-   "h": 100,
+   "c": 102,
+   "h": 101,
    "py": 12,
    "sh": 4
   },
   "kinds": {
    "constant": 23,
-   "enum": 160,
-   "function": 1953,
-   "macro": 1012,
+   "enum": 162,
+   "function": 1983,
+   "macro": 709,
    "method": 24,
-   "module": 217,
-   "struct": 260,
-   "type_alias": 139,
+   "module": 219,
+   "struct": 265,
+   "type_alias": 141,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 88,
+  "skipped_files": 89,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1513,
-   "total": 3765,
-   "percent": 40.2
+   "documented": 1534,
+   "total": 3503,
+   "percent": 43.8
   },
   "by_kind": {
    "enum": {
-    "documented": 80,
-    "total": 160,
+    "documented": 81,
+    "total": 162,
     "percent": 50.0
    },
    "function": {
-    "documented": 864,
-    "total": 1953,
-    "percent": 44.2
+    "documented": 880,
+    "total": 1983,
+    "percent": 44.4
    },
    "macro": {
-    "documented": 321,
-    "total": 1012,
-    "percent": 31.7
+    "documented": 323,
+    "total": 709,
+    "percent": 45.6
    },
    "method": {
     "documented": 0,
@@ -54,18 +54,18 @@
    },
    "module": {
     "documented": 30,
-    "total": 217,
-    "percent": 13.8
+    "total": 219,
+    "percent": 13.7
    },
    "struct": {
-    "documented": 116,
-    "total": 260,
-    "percent": 44.6
+    "documented": 117,
+    "total": 265,
+    "percent": 44.2
    },
    "type_alias": {
-    "documented": 102,
-    "total": 139,
-    "percent": 73.4
+    "documented": 103,
+    "total": 141,
+    "percent": 73.0
    }
   },
   "by_module": {
@@ -86,8 +86,8 @@
    },
    "gui/browser_ui.c": {
     "documented": 83,
-    "total": 252,
-    "percent": 32.9
+    "total": 253,
+    "percent": 32.8
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -155,9 +155,9 @@
     "percent": 88.9
    },
    "include/css.h": {
-    "documented": 102,
-    "total": 140,
-    "percent": 72.9
+    "documented": 104,
+    "total": 144,
+    "percent": 72.2
    },
    "include/css_atrule.h": {
     "documented": 7,
@@ -184,10 +184,15 @@
     "total": 6,
     "percent": 33.3
    },
+   "include/css_counter.h": {
+    "documented": 7,
+    "total": 19,
+    "percent": 36.8
+   },
    "include/css_decl.h": {
     "documented": 2,
-    "total": 14,
-    "percent": 14.3
+    "total": 15,
+    "percent": 13.3
    },
    "include/css_gradient.h": {
     "documented": 4,
@@ -270,9 +275,9 @@
     "percent": 75.0
    },
    "include/flex_layout.h": {
-    "documented": 23,
-    "total": 43,
-    "percent": 53.5
+    "documented": 25,
+    "total": 45,
+    "percent": 55.6
    },
    "include/form.h": {
     "documented": 3,
@@ -320,9 +325,9 @@
     "percent": 50.0
    },
    "include/hostedit.h": {
-    "documented": 3,
-    "total": 5,
-    "percent": 60.0
+    "documented": 4,
+    "total": 7,
+    "percent": 57.1
    },
    "include/html_parse.h": {
     "documented": 12,
@@ -640,9 +645,9 @@
     "percent": 60.0
    },
    "src/css.c": {
-    "documented": 19,
-    "total": 79,
-    "percent": 24.1
+    "documented": 20,
+    "total": 81,
+    "percent": 24.7
    },
    "src/css_atrule.c": {
     "documented": 4,
@@ -668,6 +673,11 @@
     "documented": 2,
     "total": 7,
     "percent": 28.6
+   },
+   "src/css_counter.c": {
+    "documented": 6,
+    "total": 20,
+    "percent": 30.0
    },
    "src/css_gradient.c": {
     "documented": 3,
@@ -750,9 +760,9 @@
     "percent": 88.9
    },
    "src/flex_layout.c": {
-    "documented": 9,
-    "total": 26,
-    "percent": 34.6
+    "documented": 10,
+    "total": 27,
+    "percent": 37.0
    },
    "src/form.c": {
     "documented": 0,
@@ -801,8 +811,8 @@
    },
    "src/hostedit.c": {
     "documented": 2,
-    "total": 5,
-    "percent": 40.0
+    "total": 6,
+    "percent": 33.3
    },
    "src/html_parse.c": {
     "documented": 9,
@@ -921,8 +931,8 @@
    },
    "src/local_store.c": {
     "documented": 5,
-    "total": 342,
-    "percent": 1.5
+    "total": 26,
+    "percent": 19.2
    },
    "src/media_decoder.c": {
     "documented": 3,
@@ -940,9 +950,9 @@
     "percent": 33.3
    },
    "src/page_view.c": {
-    "documented": 62,
-    "total": 140,
-    "percent": 44.3
+    "documented": 63,
+    "total": 141,
+    "percent": 44.7
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -1175,7 +1185,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 252
+   "entities": 253
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1245,7 +1255,7 @@
   {
    "uid": "include/css.h",
    "path": "modules/include.css.h.jsonl",
-   "entities": 140
+   "entities": 144
   },
   {
    "uid": "include/css_atrule.h",
@@ -1273,9 +1283,14 @@
    "entities": 6
   },
   {
+   "uid": "include/css_counter.h",
+   "path": "modules/include.css_counter.h.jsonl",
+   "entities": 19
+  },
+  {
    "uid": "include/css_decl.h",
    "path": "modules/include.css_decl.h.jsonl",
-   "entities": 14
+   "entities": 15
   },
   {
    "uid": "include/css_gradient.h",
@@ -1360,7 +1375,7 @@
   {
    "uid": "include/flex_layout.h",
    "path": "modules/include.flex_layout.h.jsonl",
-   "entities": 43
+   "entities": 45
   },
   {
    "uid": "include/form.h",
@@ -1410,7 +1425,7 @@
   {
    "uid": "include/hostedit.h",
    "path": "modules/include.hostedit.h.jsonl",
-   "entities": 5
+   "entities": 7
   },
   {
    "uid": "include/html_parse.h",
@@ -1730,7 +1745,7 @@
   {
    "uid": "src/css.c",
    "path": "modules/src.css.c.jsonl",
-   "entities": 79
+   "entities": 81
   },
   {
    "uid": "src/css_atrule.c",
@@ -1756,6 +1771,11 @@
    "uid": "src/css_computed.c",
    "path": "modules/src.css_computed.c.jsonl",
    "entities": 7
+  },
+  {
+   "uid": "src/css_counter.c",
+   "path": "modules/src.css_counter.c.jsonl",
+   "entities": 20
   },
   {
    "uid": "src/css_gradient.c",
@@ -1840,7 +1860,7 @@
   {
    "uid": "src/flex_layout.c",
    "path": "modules/src.flex_layout.c.jsonl",
-   "entities": 26
+   "entities": 27
   },
   {
    "uid": "src/form.c",
@@ -1890,7 +1910,7 @@
   {
    "uid": "src/hostedit.c",
    "path": "modules/src.hostedit.c.jsonl",
-   "entities": 5
+   "entities": 6
   },
   {
    "uid": "src/html_parse.c",
@@ -2010,7 +2030,7 @@
   {
    "uid": "src/local_store.c",
    "path": "modules/src.local_store.c.jsonl",
-   "entities": 342
+   "entities": 26
   },
   {
    "uid": "src/media_decoder.c",
@@ -2030,7 +2050,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 140
+   "entities": 141
   },
   {
    "uid": "src/pdf_export.c",
@@ -2245,7 +2265,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2253
+  "total": 1970
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

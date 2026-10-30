@@ -1,6 +1,52 @@
 # Subsystem: include (page 3 of 5)
 Previous: [KB_include_p2.md](KB_include_p2.md)
 
+## include/freebug.h
+- Doc: fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated)....
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fb_entry` (struct, line 36)
+  - `fb_buffer` (struct, line 46)
+  - `fb_level` (enum, line 24)
+  - `level` (type_alias, line 36) `typedef struct fb_entry { int level;`
+  - `fb_buffer_init` (function, line 65) `void fb_buffer_init(fb_buffer *b);`
+  - `truncated` (function, line 69) `* A message longer than FB_MAX_ENTRY_BYTES is stored truncated (not dropped). A * dropped push raises b->overflow...`
+  - `copied` (function, line 75) `* copied (truncated to FB_MAX_FILE_BYTES);`
+  - `fb_buffer_push_loc` (function, line 78) `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len, const char *file, int line, int col);`
+  - `fb_buffer_reset` (function, line 83) `void fb_buffer_reset(fb_buffer *b);`
+  - `fb_buffer_free` (function, line 86) `void fb_buffer_free(fb_buffer *b);`
+  - `fb_buffer_count` (function, line 89) `size_t fb_buffer_count(const fb_buffer *b);`
+  - `fb_buffer_at` (function, line 92) `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i);`
+  - `fb_level_name` (function, line 96) `const char *fb_level_name(int level);`
+  - `FREEDOM_FREEBUG_H` (macro, line 2) `#define FREEDOM_FREEBUG_H`
+  - `FB_MAX_ENTRIES` (macro, line 56) `#define FB_MAX_ENTRIES`
+  - `FB_MAX_ENTRY_BYTES` (macro, line 57) `#define FB_MAX_ENTRY_BYTES`
+  - `FB_MAX_TOTAL_BYTES` (macro, line 58) `#define FB_MAX_TOTAL_BYTES`
+  - `FB_MAX_FILE_BYTES` (macro, line 62) `#define FB_MAX_FILE_BYTES`
+- Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/fb_cmdline.c`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_fb_cmdline.c`, `tests/test_freebug.c`
+
+## include/freedom_config.h
+- Layer: infrastructure
+- Language: h
+- Symbols:
+  - `FREEDOM_CONFIG_H` (macro, line 14) `#define FREEDOM_CONFIG_H`
+  - `FC_PNG_PAGE_W` (macro, line 20) `#define FC_PNG_PAGE_W`
+  - `FC_HEADLESS_VIEW_H` (macro, line 24) `#define FC_HEADLESS_VIEW_H`
+  - `FC_TRUSTED_JS_BUDGET_MS` (macro, line 30) `#define FC_TRUSTED_JS_BUDGET_MS`
+  - `FC_PNG_MARGIN` (macro, line 34) `#define FC_PNG_MARGIN`
+  - `FC_PNG_MAX_H` (macro, line 39) `#define FC_PNG_MAX_H`
+  - `FC_FLEX_MEASURE_W` (macro, line 45) `#define FC_FLEX_MEASURE_W`
+  - `FC_FLEX_MIN_MEASURE_W` (macro, line 51) `#define FC_FLEX_MIN_MEASURE_W`
+  - `FC_FONT_CHAIN_MAX` (macro, line 56) `#define FC_FONT_CHAIN_MAX`
+  - `FC_MAX_BOXES` (macro, line 61) `#define FC_MAX_BOXES`
+  - `FC_FONT_FALLBACK_PX` (macro, line 66) `#define FC_FONT_FALLBACK_PX`
+  - `FC_UI_FONT_SIZE` (macro, line 70) `#define FC_UI_FONT_SIZE`
+  - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 78) `#define FC_MAX_AUTHOR_CSS_BYTES`
+  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 81) `#define FC_LAZY_IMAGE_MARGIN_PX`
+  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 87) `#define FC_TAB_OP_NET_BUDGET_MS`
+- Imported by: `gui/browser_ui_internal.h`, `gui/svg_paint.c`, `gui/ui_render.c`, `src/page_view.c`, `src/tab.c`
+
 ## include/hls.h
 - Doc: hls_segment: or variant info.
 - Layer: utility
@@ -51,13 +97,15 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
 - Imported by: `gui/browser_ui.c`, `include/host_conf.h`, `src/freedom.c`, `src/hostblock.c`, `tests/test_hostblock.c`
 
 ## include/hostedit.h
-- Doc: he_text_has_host: Returns 1 if text (the body of a hosts-format file) already lists host as a...
+- Doc: he_cdn_kind_t: Which auto-allow switch (config page) a subresource falls under, decided from the...
 - Layer: utility
 - Language: h
 - Symbols:
   - `he_status` (enum, line 24)
+  - `he_cdn_kind_t` (enum, line 61)
   - `he_text_has_host` (function, line 46) `int he_text_has_host(const char *text, const char *host);`
   - `he_suggest` (function, line 55) `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);`
+  - `he_cdn_kind` (function, line 62) `he_cdn_kind_t he_cdn_kind(const char *url);`
   - `FREEDOM_HOSTEDIT_H` (macro, line 2) `#define FREEDOM_HOSTEDIT_H`
   - `HE_MAX_HOST` (macro, line 32) `#define HE_MAX_HOST`
 - Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
@@ -121,26 +169,26 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
 - Imported by: `include/cached_fetch.h`, `src/http_cache.c`, `tests/test_http_cache.c`
 
 ## include/identity.h
-- Doc: idn_defaults: enum { IDN_REJ_UA   = 1 << 0, IDN_REJ_LANG = 1 << 1, IDN_REJ_GEO  = 1 << 2 }...
+- Doc: idn_defaults: typedef struct idn_config { char   user_agent[IDN_UA_MAX];  /* "" = FP_USER_AGENT...
 - Layer: utility
 - Language: h
 - Symbols:
   - `idn_config` (struct, line 37)
   - `idn_geo_mode` (enum, line 25)
   - `user_agent` (type_alias, line 36) `typedef struct idn_config { char user_agent[IDN_UA_MAX];`
-  - `idn_defaults` (function, line 45) `void idn_defaults(idn_config *c);`
-  - `idn_is_default` (function, line 48) `int idn_is_default(const idn_config *c);`
-  - `idn_set_user_agent` (function, line 51) `int idn_set_user_agent(idn_config *c, const char *ua);`
-  - `idn_set_languages` (function, line 52) `int idn_set_languages(idn_config *c, const char *list);`
-  - `idn_set_geo` (function, line 53) `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);`
-  - `idn_clear_geo` (function, line 54) `void idn_clear_geo(idn_config *c);`
-  - `idn_user_agent` (function, line 57) `const char *idn_user_agent(const idn_config *c);`
-  - `idn_accept_language` (function, line 58) `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);`
-  - `idn_primary_language` (function, line 59) `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);`
-  - `idn_serialize` (function, line 63) `size_t idn_serialize(const idn_config *c, char *out, size_t cap);`
-  - `idn_parse` (function, line 67) `void idn_parse(idn_config *c, const char *text);`
-  - `idn_apply_query` (function, line 70) `unsigned idn_apply_query(idn_config *c, const char *query);`
-  - `idn_render_page` (function, line 73) `size_t idn_render_page(const idn_config *c, char *out, size_t cap);`
+  - `idn_defaults` (function, line 50) `void idn_defaults(idn_config *c);`
+  - `idn_is_default` (function, line 53) `int idn_is_default(const idn_config *c);`
+  - `idn_set_user_agent` (function, line 56) `int idn_set_user_agent(idn_config *c, const char *ua);`
+  - `idn_set_languages` (function, line 57) `int idn_set_languages(idn_config *c, const char *list);`
+  - `idn_set_geo` (function, line 58) `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);`
+  - `idn_clear_geo` (function, line 59) `void idn_clear_geo(idn_config *c);`
+  - `idn_user_agent` (function, line 62) `const char *idn_user_agent(const idn_config *c);`
+  - `idn_accept_language` (function, line 63) `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);`
+  - `idn_primary_language` (function, line 64) `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);`
+  - `idn_serialize` (function, line 68) `size_t idn_serialize(const idn_config *c, char *out, size_t cap);`
+  - `idn_parse` (function, line 72) `void idn_parse(idn_config *c, const char *text);`
+  - `idn_apply_query` (function, line 75) `unsigned idn_apply_query(idn_config *c, const char *query);`
+  - `idn_render_page` (function, line 78) `size_t idn_render_page(const idn_config *c, char *out, size_t cap);`
   - `FREEDOM_IDENTITY_H` (macro, line 2) `#define FREEDOM_IDENTITY_H`
   - `IDN_UA_MAX` (macro, line 16) `#define IDN_UA_MAX`
   - `IDN_LANG_MAX` (macro, line 17) `#define IDN_LANG_MAX`
@@ -444,42 +492,6 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `MD_PACE_MAX_STEP_MS` (macro, line 62) `#define MD_PACE_MAX_STEP_MS`
   - `MD_MAX_CATCHUP_READS` (macro, line 65) `#define MD_MAX_CATCHUP_READS`
 - Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/media_decoder.c`, `tests/test_media_decoder.c`
-
-## include/net_realm.h
-- Doc: nr_realm_allows_http: 1 iff plain http:// is acceptable for this realm.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `nr_config` (struct, line 42)
-  - `nr_realm` (enum, line 29)
-  - `nr_route` (enum, line 35)
-  - `tor_enabled` (type_alias, line 41) `typedef struct nr_config { int tor_enabled;`
-  - `NR_ROUTE_BLOCKED` (function, line 57) `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm * whose proxy is not enabled =>...`
-  - `address` (function, line 62) `* and encrypts by its address (the I2P destination / onion key), so http over it is * not a downgrade. Currently...`
-  - `nr_realm_allows_http` (function, line 66) `int nr_realm_allows_http(nr_realm r);`
-  - `nr_realm_name` (function, line 69) `const char *nr_realm_name(nr_realm r);`
-  - `nr_route_name` (function, line 70) `const char *nr_route_name(nr_route r);`
-  - `FREEDOM_NET_REALM_H` (macro, line 2) `#define FREEDOM_NET_REALM_H`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/net_realm.c`, `tests/test_net_realm.c`
-
-## include/os_sandbox.h
-- Doc: os_violation: function (os_policy_allows) that mirrors the installed BPF program.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `os_fs_rule` (struct, line 108)
-  - `os_status` (enum, line 21)
-  - `os_violation` (enum, line 30)
-  - `os_fs_access` (enum, line 102)
-  - `flags` (function, line 39) `* permission also depends on the protection flags (see os_prot_allowed / W^X). */ int os_policy_allows(long syscall_nr);`
-  - `os_policy_size` (function, line 43) `size_t os_policy_size(void);`
-  - `os_prot_allowed` (function, line 52) `int os_prot_allowed(long syscall_nr, unsigned long prot);`
-  - `denied` (function, line 59) `* request PROT_EXEC are denied (see os_prot_allowed). * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf...`
-  - `namespace` (function, line 75) `* namespace (the unprivileged enabler), network (the worker never needs the * network -- the parent fetches and...`
-  - `os_namespace_flags` (function, line 81) `int os_namespace_flags(void);`
-  - `os_landlock_abi` (function, line 114) `int os_landlock_abi(void);`
-  - `FREEDOM_OS_SANDBOX_H` (macro, line 2) `#define FREEDOM_OS_SANDBOX_H`
-- Imported by: `src/os_sandbox.c`, `src/renderer.c`, `src/tab.c`, `tests/test_os_sandbox.c`
 
 
 Next: [KB_include_p4.md](KB_include_p4.md)

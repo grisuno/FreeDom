@@ -87,11 +87,11 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 ## Connections
 
 - [EXTRACTED] depends_on community 0 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 3 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
 - [EXTRACTED] depends_on community 8 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
 - [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_select.h.
 - [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
-- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 3 <-> 1 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
 
 ## Risks
 

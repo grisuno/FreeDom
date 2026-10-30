@@ -179,6 +179,54 @@ static void test_page_escapes_user_values_and_states_unavailable_apis(void **sta
     assert_string_equal(page, "");
 }
 
+/* Auto-allow of CDN hosts (spec/identity.md): three opt-in switches, off by default. */
+static void test_auto_allow_defaults_off_and_counts_as_a_change(void **state) {
+    (void)state;
+    idn_config c;
+    idn_defaults(&c);
+    assert_int_equal((int)c.auto_allow, 0);
+    c.auto_allow = IDN_AA_JS;
+    assert_false(idn_is_default(&c));
+}
+
+/* The page's form sends a hidden `aa=1` marker: with it, a box that is absent means OFF
+ * (an unchecked checkbox is not sent); without it (another form) the switches are untouched. */
+static void test_auto_allow_query_needs_the_marker(void **state) {
+    (void)state;
+    idn_config c;
+    idn_defaults(&c);
+    assert_int_equal((int)idn_apply_query(&c, "?aa=1&aacss=1&aares=1"), 0);
+    assert_int_equal((int)c.auto_allow, IDN_AA_CSS | IDN_AA_RES);
+    assert_int_equal((int)idn_apply_query(&c, "?ua=Mozilla%2F5.0"), 0);
+    assert_int_equal((int)c.auto_allow, IDN_AA_CSS | IDN_AA_RES);
+    assert_int_equal((int)idn_apply_query(&c, "?aa=1&aajs=1"), 0);
+    assert_int_equal((int)c.auto_allow, IDN_AA_JS);
+    assert_int_equal((int)idn_apply_query(&c, "?aa=1"), 0);
+    assert_int_equal((int)c.auto_allow, 0);
+    idn_apply_query(&c, "?aa=1&aajs=1&aacss=1&aares=1");
+    idn_apply_query(&c, "?reset=1");
+    assert_int_equal((int)c.auto_allow, 0);
+}
+
+static void test_auto_allow_roundtrips_and_is_rendered(void **state) {
+    (void)state;
+    idn_config c, d;
+    idn_defaults(&c);
+    c.auto_allow = IDN_AA_CSS | IDN_AA_JS;
+    char line[256];
+    assert_true(idn_serialize(&c, line, sizeof line) > 0);
+    idn_parse(&d, line);
+    assert_int_equal((int)d.auto_allow, IDN_AA_CSS | IDN_AA_JS);
+    char page[8192];
+    assert_true(idn_render_page(&c, page, sizeof page) > 0);
+    assert_non_null(strstr(page, "name=\"aa\""));
+    assert_non_null(strstr(page, "name=\"aacss\" checked"));
+    assert_non_null(strstr(page, "name=\"aajs\" checked"));
+    assert_null(strstr(page, "name=\"aares\" checked"));
+    idn_parse(&d, "ua=|lang=|geo=|aa=99");
+    assert_int_equal((int)d.auto_allow, 0);   /* out of range fails closed */
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_defaults_are_the_anti_fp_identity),
@@ -189,6 +237,9 @@ int main(void) {
         cmocka_unit_test(test_parse_keeps_valid_fields_and_defaults_the_bad),
         cmocka_unit_test(test_apply_query),
         cmocka_unit_test(test_page_escapes_user_values_and_states_unavailable_apis),
+        cmocka_unit_test(test_auto_allow_defaults_off_and_counts_as_a_change),
+        cmocka_unit_test(test_auto_allow_query_needs_the_marker),
+        cmocka_unit_test(test_auto_allow_roundtrips_and_is_rendered),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -54,6 +54,48 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
   - `CCM_NPROPS` (macro, line 308) `#define CCM_NPROPS`
 - Depends on: `include/css_computed.h`
 
+## src/css_counter.c
+- Doc: valid_name: A <custom-ident> usable as a counter name: identifier syntax, not a CSS-wide *...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `cnt_state` (struct, line 361)
+  - `sink` (struct, line 190)
+  - `cnt_inst` (struct, line 359)
+  - `cnt_hash` (function, line 18) `unsigned cnt_hash(const char *name, size_t len)`
+  - `is_ws` (function, line 27) `static int is_ws(char c)`
+  - `is_ident_start` (function, line 29) `static int is_ident_start(unsigned char c)`
+  - `is_ident_char` (function, line 32) `static int is_ident_char(unsigned char c)`
+  - `ci_eq` (function, line 34) `static int ci_eq(const char *a, const char *b)`
+  - `valid_name` (function, line 45) `static int valid_name(const char *s, size_t n)`
+  - `cnt_parse_decls` (function, line 59) `int cnt_parse_decls(const char *val, int dflt, cnt_decl out[CNT_MAX_DECL])`
+  - `put` (function, line 102) `static size_t put(char *out, size_t cap, size_t o, const char *s)`
+  - `utf8_put` (function, line 107) `static void utf8_put(char *buf, unsigned cp)`
+  - `cnt_format` (function, line 120) `size_t cnt_format(int style, long value, char *out, size_t cap)`
+  - `style_of` (function, line 174) `static int style_of(const char *name)`
+  - `sk_char` (function, line 192) `static void sk_char(sink *k, char c)`
+  - `sk_str` (function, line 196) `static void sk_str(sink *k, const char *s)`
+  - `read_string` (function, line 201) `static const char *read_string(const char *p, char *dst, size_t cap)`
+  - `split_args` (function, line 238) `static int split_args(const char *a, const char *b, char (*f)[CNT_STR_MAX], int max)`
+  - `cnt_is_marker` (function, line 272) `int cnt_is_marker(const char *s)`
+  - `has_counter_fn` (function, line 276) `static int has_counter_fn(const char *v)`
+  - `cnt_parse_content` (function, line 286) `int cnt_parse_content(const char *val, char *out, size_t cap)`
+  - `cnt_state_new` (function, line 366) `cnt_state *cnt_state_new(void)`
+  - `cnt_state_free` (function, line 367) `void cnt_state_free(cnt_state *s)`
+  - `top_of` (function, line 369) `static cnt_inst *top_of(cnt_state *s, unsigned name)`
+  - `clampv` (function, line 375) `static int clampv(long v)`
+  - `cnt_reset` (function, line 379) `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n)`
+  - `cnt_increment` (function, line 392) `void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n)`
+  - `cnt_leave` (function, line 407) `void cnt_leave(cnt_state *s, int depth)`
+  - `cnt_resolve` (function, line 412) `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx,
+         ...`
+  - `CNT_SEQ_MARK` (macro, line 12) `#define CNT_SEQ_MARK`
+  - `CNT_ITEM_END` (macro, line 13) `#define CNT_ITEM_END`
+  - `CNT_FIELD_SEP` (macro, line 14) `#define CNT_FIELD_SEP`
+  - `CNT_VALUE_LIMIT` (macro, line 15) `#define CNT_VALUE_LIMIT`
+  - `CNT_STR_MAX` (macro, line 16) `#define CNT_STR_MAX`
+- Depends on: `include/css_counter.h`
+
 ## src/css_gradient.c
 - Doc: find_gradient_call: Locates a gradient function call `fn` (e.g. "linear-gradient(") in v...
 - Layer: utility
@@ -452,37 +494,6 @@ static dom_node_id qs_walk(const dom_inde...`
   - `DOM_QS_MAX_SELECTORS` (macro, line 413) `#define DOM_QS_MAX_SELECTORS`
   - `IH_BLOCK_SIZE` (macro, line 848) `#define IH_BLOCK_SIZE`
 - Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `include/html_parse.h`, `include/util.h`
-
-## src/dom_debug.c
-- Doc: dd_cursor: Bounded write cursor: `pos` bytes are committed to `out` (always leaving room for the...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `dd_cursor` (struct, line 24)
-  - `dd_putc` (function, line 31) `static void dd_putc(dd_cursor *c, char ch)`
-  - `dd_emit` (function, line 36) `static void dd_emit(dd_cursor *c, const char *s, size_t len)`
-  - `dd_puts` (function, line 40) `static void dd_puts(dd_cursor *c, const char *s)`
-  - `dd_printf` (function, line 48) `static void dd_printf(dd_cursor *c, const char *fmt, ...)`
-  - `dd_w` (function, line 80) `static int dd_w(int v)`
-  - `dd_color` (function, line 83) `static void dd_color(dd_cursor *c, int rgb)`
-  - `dd_display_name` (function, line 88) `static const char *dd_display_name(int d)`
-  - `dd_justify_name` (function, line 96) `static const char *dd_justify_name(int j)`
-  - `dd_align_name` (function, line 108) `static const char *dd_align_name(int a)`
-  - `dd_position_name` (function, line 118) `static const char *dd_position_name(int p)`
-  - `dd_visibility_name` (function, line 129) `static const char *dd_visibility_name(int v)`
-  - `dd_mix_blend_name` (function, line 137) `static const char *dd_mix_blend_name(int m)`
-  - `dd_overflow_name` (function, line 157) `static const char *dd_overflow_name(int o)`
-  - `dd_cursor_name` (function, line 166) `static const char *dd_cursor_name(int c)`
-  - `dd_text_overflow_name` (function, line 199) `static const char *dd_text_overflow_name(int t)`
-  - `dd_inset` (function, line 204) `static int dd_inset(int v)`
-  - `dd_object_fit_name` (function, line 208) `static const char *dd_object_fit_name(int o)`
-  - `dd_image_rendering_name` (function, line 219) `static const char *dd_image_rendering_name(int r)`
-  - `dd_border_style_name` (function, line 228) `static const char *dd_border_style_name(int s)`
-  - `dd_box_line` (function, line 261) `static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b)`
-  - `dd_block_line` (function, line 323) `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
-  - `dd_format` (function, line 399) `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
-  - `dd_format_css` (function, line 431) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)`
-- Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
 
 
 Next: [KB_src_p4.md](KB_src_p4.md)

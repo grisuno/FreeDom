@@ -174,6 +174,7 @@ static uint64_t now_ms(void) {
 
 /* Which host list a UI_MENU_HOSTADD item edits (carried in the item's theme_val). */
 enum { HOSTLIST_BLOCK = 0, HOSTLIST_ALLOW = 1, HOSTLIST_JS = 2 };
+#define AA_QUEUE_MAX 32   /* hosts queued per load; the rest are caught on the next one */
 
 /* The options-menu items. A capability item toggles a bool in rdp_caps by field
  * offset (labels and the flag live in one place, no magic indices); a theme item
@@ -238,6 +239,7 @@ typedef enum ui_hot {
 typedef struct ui_input_state {
     const rd_block *blk;   /* the RD_INPUT block (aliases w->doc) */
     tf_field        field; /* live editable value */
+    int             checked; /* live state of a checkbox / radio (seeded from the markup) */
 } ui_input_state;
 
 /* Hard cap on the response body of an image subresource (a PNG/JPEG; the decoder
@@ -441,6 +443,12 @@ typedef struct browser_window {
     int         config_page;     /* the page on screen IS the internal about:config (set only by do_load) */
     idn_config  identity;        /* user identity override (spec/identity.md), one source for wire + navigator */
     char        accept_lang[160]; /* idn_accept_language of identity, for sf_config.accept_language */
+    /* Auto-allow of CDN hosts (spec/identity.md): the fetch threads only QUEUE a host here
+     * (they read w->hosts, which must not change under them); the GUI thread commits the queue
+     * to allow.conf at a point where no fetch thread is alive (aa_commit). */
+    pthread_mutex_t aa_lock;
+    char        aa_host[AA_QUEUE_MAX][HE_MAX_HOST + 1];
+    size_t      aa_n;
 
     /* Cached source of the current page, so a capability toggle re-renders without
      * a network round-trip. cur_top is the https origin (image policy) or NULL. */
@@ -837,37 +845,21 @@ static int freedom_write_dir(char *out, size_t cap) {
 static void render_current(browser_window *w);  /* defined below; used by list editing */
 static void load_favorites(browser_window *w);  /* defined below; refreshed after allow edit */
 
-/* Appends the current page's host to one of the user's .conf lists (block/allow/js),
- * then reloads the in-memory filter so it applies. The host is hostile data with
- * provenance: the pure hostedit validates it fail-closed and builds the line; a
- * duplicate is skipped. Feedback goes through the status toast. */
-static void add_current_host_to_list(browser_window *w, int sel) {
-    gui_quiesce(w);   /* a background tick reads what this changes */
-    const char *filename = (sel == HOSTLIST_BLOCK) ? "block.conf"
-                         : (sel == HOSTLIST_ALLOW) ? "allow.conf" : "js.conf";
-    w->menu_open = 0;
-    char host[HE_MAX_HOST + 1];
-    if (rp_host_of(browser_current_url(&w->bs), host, sizeof host) != 0) {
-        browser_set_status(&w->bs, "Cannot edit lists: this page has no host.", now_ms());
-        return;
-    }
+/* Outcomes of list_append_host. */
+enum { LIST_APPENDED = 1, LIST_DUPLICATE = 0, LIST_ERR_HOST = -1, LIST_ERR_DIR = -2,
+       LIST_ERR_PATH = -3, LIST_ERR_WRITE = -4 };
+
+/* Appends `host` to one of the user's .conf lists in the writable config dir, skipping a
+ * duplicate. The host is hostile data with provenance: the pure hostedit validates it
+ * fail-closed and builds the line. Touches the file only; reloading the in-memory filter is
+ * the caller's job (the one place that knows when it is safe). */
+static int list_append_host(const char *filename, const char *host) {
     char line[HE_MAX_HOST + 2];
-    if (he_make_line(host, line, sizeof line) != HE_OK) {
-        browser_set_status(&w->bs, "Cannot edit lists: invalid host.", now_ms());
-        return;
-    }
+    if (he_make_line(host, line, sizeof line) != HE_OK) return LIST_ERR_HOST;
     char dir[PATH_MAX], path[PATH_MAX];
-    if (freedom_write_dir(dir, sizeof dir) != 0) {
-        browser_set_status(&w->bs, "Cannot edit lists: no writable config dir.", now_ms());
-        return;
-    }
+    if (freedom_write_dir(dir, sizeof dir) != 0) return LIST_ERR_DIR;
     int pn = snprintf(path, sizeof path, "%s/%s", dir, filename);
-    if (pn <= 0 || (size_t)pn >= sizeof path) {
-        browser_set_status(&w->bs, "Cannot edit lists: path too long.", now_ms());
-        return;
-    }
-    char msg[HE_MAX_HOST + 80];
-    /* Skip a duplicate: read the file (bounded) and check for the host already listed. */
+    if (pn <= 0 || (size_t)pn >= sizeof path) return LIST_ERR_PATH;
     size_t cur_len = 0;
     uint8_t *cur = read_file_bounded(path, 1u << 20, &cur_len);
     if (cur != NULL) {
@@ -880,20 +872,19 @@ static void add_current_host_to_list(browser_window *w, int sel) {
             free(txt);
         }
         free(cur);
-        if (dup) {
-            snprintf(msg, sizeof msg, "%s is already in %s.", host, filename);
-            browser_set_status(&w->bs, msg, now_ms());
-            return;
-        }
+        if (dup) return LIST_DUPLICATE;
     }
     int fd = open(path, O_WRONLY | O_CREAT | O_APPEND, 0600);
     if (fd < 0 || write(fd, line, strlen(line)) != (ssize_t)strlen(line)) {
         if (fd >= 0) close(fd);
-        browser_set_status(&w->bs, "Cannot edit lists: write failed.", now_ms());
-        return;
+        return LIST_ERR_WRITE;
     }
     close(fd);
-    /* Reload the affected in-memory filter so it applies immediately on the next fetch. */
+    return LIST_APPENDED;
+}
+
+/* Rebuilds the in-memory filter of the list that just changed so it applies on the next fetch. */
+static void reload_host_list(browser_window *w, int sel) {
     if (sel == HOSTLIST_JS) {
         hb_free(w->js_hosts);
         w->js_hosts = build_js_filter();
@@ -902,6 +893,71 @@ static void add_current_host_to_list(browser_window *w, int sel) {
         w->hosts = build_host_filter();
         if (sel == HOSTLIST_ALLOW) load_favorites(w);  /* refresh omnibox favorites */
     }
+}
+
+/* Commits the queued auto-allow hosts to allow.conf and reloads the filter. GUI thread only, and
+ * only where no fetch thread is alive (after the page's image pass). */
+static void aa_commit(browser_window *w) {
+    pthread_mutex_lock(&w->aa_lock);
+    size_t n = w->aa_n;
+    char batch[AA_QUEUE_MAX][HE_MAX_HOST + 1];
+    memcpy(batch, w->aa_host, n * sizeof batch[0]);
+    w->aa_n = 0;
+    pthread_mutex_unlock(&w->aa_lock);
+    if (getenv("FREEDOM_TRACE_FETCH") != NULL && n != 0)
+        fprintf(stderr, "aa[commit] %zu queued\n", n);
+    if (n == 0) return;
+    gui_quiesce(w);
+    size_t added = 0;
+    char names[200];
+    names[0] = '\0';
+    for (size_t i = 0; i < n; ++i) {
+        if (list_append_host("allow.conf", batch[i]) != LIST_APPENDED) continue;
+        if (added < 3) {
+            size_t used = strlen(names);
+            size_t space = sizeof names - used;
+            int r = snprintf(names + used, space, "%s%.*s", added ? ", " : "",
+                             (int)(HE_MAX_HOST), batch[i]);
+            if (r < 0 || (size_t)r >= space) names[used] = '\0';   /* does not fit: leave it out */
+        }
+        ++added;
+    }
+    if (added == 0) return;
+    reload_host_list(w, HOSTLIST_ALLOW);
+    char msg[300];
+    snprintf(msg, sizeof msg, "Auto-allowed %zu host%s: %s%s", added, added == 1 ? "" : "s",
+             names, added > 3 ? ", ..." : "");
+    browser_set_status(&w->bs, msg, now_ms());
+}
+
+/* Appends the current page's host to one of the user's .conf lists (block/allow/js),
+ * then reloads the in-memory filter so it applies. Feedback goes through the status toast. */
+static void add_current_host_to_list(browser_window *w, int sel) {
+    gui_quiesce(w);   /* a background tick reads what this changes */
+    const char *filename = (sel == HOSTLIST_BLOCK) ? "block.conf"
+                         : (sel == HOSTLIST_ALLOW) ? "allow.conf" : "js.conf";
+    w->menu_open = 0;
+    char host[HE_MAX_HOST + 1];
+    if (rp_host_of(browser_current_url(&w->bs), host, sizeof host) != 0) {
+        browser_set_status(&w->bs, "Cannot edit lists: this page has no host.", now_ms());
+        return;
+    }
+    char msg[HE_MAX_HOST + 80];
+    int r = list_append_host(filename, host);
+    if (r == LIST_DUPLICATE) {
+        snprintf(msg, sizeof msg, "%s is already in %s.", host, filename);
+        browser_set_status(&w->bs, msg, now_ms());
+        return;
+    }
+    if (r != LIST_APPENDED) {
+        browser_set_status(&w->bs,
+            r == LIST_ERR_HOST ? "Cannot edit lists: invalid host."
+          : r == LIST_ERR_DIR  ? "Cannot edit lists: no writable config dir."
+          : r == LIST_ERR_PATH ? "Cannot edit lists: path too long."
+                               : "Cannot edit lists: write failed.", now_ms());
+        return;
+    }
+    reload_host_list(w, sel);
     snprintf(msg, sizeof msg, "Added %s to %s. Reload to apply.", host, filename);
     browser_set_status(&w->bs, msg, now_ms());
     render_current(w);
@@ -1370,6 +1426,7 @@ static void rebuild_inputs(browser_window *w) {
         st->blk = b;
         tf_init(&st->field);
         if (b->value != NULL) tf_set(&st->field, b->value);
+        st->checked = (b->checked >= 1);
     }
     w->input_count = k;
 }
@@ -1526,6 +1583,39 @@ static void apply_operator_override(sf_config *cfg) {
  * click/load gets -- https-only resolution (cross-host allowed), the host blocklist
  * (tracker filter), realm routing (fail-closed), TLS-PQ with the navigability fallbacks --
  * so a trusted page can talk to the network without ever bypassing policy. */
+static int page_host_allowlisted(const browser_window *w);
+
+/* A fetch thread asks: should `host` (pulled by the page at `abs`) be auto-allowed? The answer is
+ * only QUEUED. It applies when the matching switch is on, the PAGE itself is on allow.conf (the
+ * user trusts it), the host is a real third-party name not already allowed, and the user's
+ * block.conf does not block it -- an explicit block stays the user's last word. */
+static void aa_note(browser_window *w, const char *abs, const char *host) {
+    unsigned bits = w->identity.auto_allow;
+    if (getenv("FREEDOM_TRACE_FETCH") != NULL)
+        fprintf(stderr, "aa[note] %s bits=%u page_allow=%d\n", host != NULL ? host : "?", bits,
+                page_host_allowlisted(w));
+    if (bits == 0 || host == NULL || strchr(host, '.') == NULL) return;
+    he_cdn_kind_t k = he_cdn_kind(abs);
+    unsigned need = (k == HE_CDN_CSS) ? IDN_AA_CSS : (k == HE_CDN_JS) ? IDN_AA_JS : IDN_AA_RES;
+    if ((bits & need) == 0 || !page_host_allowlisted(w)) return;
+    if (hb_is_allowlisted(w->hosts, host) || hb_check(w->hosts, host) == HB_BLOCK) return;
+    char line[HE_MAX_HOST + 2];
+    if (he_make_line(host, line, sizeof line) != HE_OK) return;
+    int numeric = 1;                       /* an IP literal is not a CDN name */
+    for (const char *c = host; *c != '\0'; ++c)
+        if (!((*c >= '0' && *c <= '9') || *c == '.')) { numeric = 0; break; }
+    if (numeric) return;
+    pthread_mutex_lock(&w->aa_lock);
+    int have = 0;
+    for (size_t i = 0; i < w->aa_n && !have; ++i)
+        have = strcasecmp(w->aa_host[i], host) == 0;
+    if (!have && w->aa_n < AA_QUEUE_MAX) {
+        snprintf(w->aa_host[w->aa_n], sizeof w->aa_host[0], "%s", host);
+        ++w->aa_n;
+    }
+    pthread_mutex_unlock(&w->aa_lock);
+}
+
 static int page_trusted(const browser_window *w);
 
 static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
@@ -1546,6 +1636,7 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     /* tracker/host blocklist -- except for a trusted page (allow.conf AND js.conf): its
      * third parties (CDN, captcha, API) load; owner decision 2026-10-26. */
     if (hb_check_subresource(w->hosts, host, page_trusted(w)) == HB_BLOCK) return -1;
+    aa_note(w, abs, host);
 
     sf_config cfg = sf_config_default();
     apply_operator_override(&cfg);
@@ -1755,6 +1846,7 @@ static int gui_image_fetch(void *vctx, const char *method, const char *url,
     char ihost[256];
     int img_allow = host_from_url(abs, ihost, sizeof ihost)
                     && hb_is_allowlisted(w->hosts, ihost);
+    if (ihost[0] != '\0') aa_note(w, abs, ihost);
     /* EXTENSION: also check if the PAGE's host is on the allowlist. This means
      * CDN-hosted images on an allowlisted page get the same sovereign TLS fallback
      * as the page itself: without it, many websites with images on cdn.example.com
@@ -2562,6 +2654,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     rebuild_inputs(w); /* seed live editable state for this page's controls */
     load_images(w, t, gui_image_fetch, w, 1); /* fetch + decode allowed images in the still-open worker; lazy ones wait */
     load_bg_images(w, t, gui_image_fetch, w, 1); /* register CSS background-images; they load lazily near the viewport */
+    aa_commit(w);   /* hosts the page pulled that the user asked to auto-allow (no fetch thread alive here) */
 
     /* Video playback is user-initiated (click), not auto-played. The auto-play
      * via video_play() would block the Wayland event loop with a synchronous
@@ -3348,6 +3441,8 @@ typedef struct rc_frag {
     int         deco_color;   /* 0xRRGGBB, or -1 (use fragment color) */
     int         deco_style;   /* css_text_decoration_style */
     int         deco_thick;   /* px, or -1 (use default 1.0) */
+    int         deco_ul_on;   /* an explicit text-underline-offset was declared (0 = font default) */
+    int         deco_ul_px;   /* its value in px, meaningful only when deco_ul_on */
     /* 2026-07-10 text-extension batch. font_variant applies small-caps to the
      * fragment (uppercase + scaled font when set; baked at flow time so the
      * layout/paint stay consistent). */
@@ -4265,7 +4360,7 @@ typedef struct rc_ext {
     int    opacity;       /* 0..100, or -1 */
     /* Author text-decoration sub-properties (per-fragment). Same semantics as on
      * rc_frag. */
-    int    deco_color, deco_style, deco_thick;
+    int    deco_color, deco_style, deco_thick, deco_ul_off;   /* deco_ul_off: CSS_LEN_UNSET/AUTO = none */
     /* 2026-07-10 text-extension batch. tab_size 0 -> 8 (CSS default) at the
      * pre block; font_variant is applied via uppercase transform (v1 small-caps
      * approximation: see flow_text); list_style_pos CSS_LP_INSIDE means the
@@ -4309,6 +4404,8 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
         f->shadow_color = x->shadow_color; f->opacity = x->opacity;
         f->deco_color = x->deco_color; f->deco_style = x->deco_style;
         f->deco_thick = x->deco_thick;
+        f->deco_ul_on = (x->deco_ul_off != CSS_LEN_UNSET && x->deco_ul_off != CSS_LEN_AUTO);
+        f->deco_ul_px = f->deco_ul_on ? x->deco_ul_off : 0;
         f->font_variant = x->font_variant;
         f->grad_n = x->grad_n; f->grad_angle = x->grad_angle;
         for (int gt = 0; gt < 4; ++gt) f->grad_c[gt] = x->grad_c[gt];
@@ -5078,6 +5175,7 @@ static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
     x.deco_color = b->text_decoration_color;
     x.deco_style = b->text_decoration_style;
     x.deco_thick = b->text_decoration_thickness;
+    x.deco_ul_off = b->text_underline_offset;
     /* 2026-07-10 text-extension batch. */
     x.tab_size = b->tab_size;
     x.direction = b->direction;
@@ -6307,7 +6405,8 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
             for (size_t t = 1; t < lim; ++t) cdv.col_w[t] = cdv.col_w[0];
         }
     } else {
-        ncols = is_grid ? (size_t)cdv.cols : g;
+        ncols = is_grid ? (size_t)fx_grid_column_count(cdv.grid_flow, cdv.cols, cdv.rows, g)
+                        : g;
     }
     if (ncols < 1) ncols = 1;
 
@@ -7636,6 +7735,24 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
          * smaller; box_h sets a fixed height (the content still flows; the painted
          * box keeps the larger of content vs box_h). aspect-ratio is honoured below. */
         rc_box_copy_decoration(bx, def);
+        /* `height:%` of a parent whose height comes from its aspect-ratio: the
+         * parent's width is known now, so its content height is too. */
+        if (def->box_h_pct != 0 && def->box_h <= 0 && !def->box_h_set &&
+            def->position != BT_POS_ABSOLUTE && s->box_depth > 0) {
+            const rc_open_box *pob = &s->box_stack[s->box_depth - 1];
+            const rc_box *pbx = (pob->box_idx < L->nbox) ? &L->boxes[pob->box_idx] : NULL;
+            if (pbx != NULL && pbx->aspect_num > 0 && pbx->aspect_den > 0 &&
+                !pbx->box_h_set && pbx->box_h <= 0) {
+                double ph = pob->border_box
+                    ? pbx->w * (double)pbx->aspect_den / (double)pbx->aspect_num
+                      - pob->pt - pob->pb - pob->bt - pob->bb
+                    : pob->inner_w * (double)pbx->aspect_den / (double)pbx->aspect_num;
+                if (ph > 0.0) {
+                    bx->box_h = (int)(ph * (double)def->box_h_pct / 1000.0 + 0.5);
+                    bx->box_h_set = 1;
+                }
+            }
+        }
         bx->hidden = inherited_hidden || this_hidden;
         if (def->box_min_w > 0 && box_width < (double)def->box_min_w) {
             box_width = (double)def->box_min_w;
@@ -9626,9 +9743,14 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * the element a row of its own -- R7). */
         size_t line_mate = replaced_opens_inline_line(doc, i, rd_count(doc));
         int inline_replaced = replaced_is_inline_level(&s, b) || line_mate > 0;
+        /* A heading run is its own row only when it OPENS the block: the rest of the
+         * heading's inline content (`<h2>A<b>B</b></h2>`, a ::before marker) continues
+         * the line, and flushing there split it in two rows with the heading margins
+         * applied twice. */
         int standalone = !inline_replaced
                       && (b->kind == RD_IMAGE || b->kind == RD_NOTICE
-                       || b->kind == RD_HEADING || b->kind == RD_INPUT
+                       || (b->kind == RD_HEADING && (b->block_break || i == 0))
+                       || b->kind == RD_INPUT
                        || b->kind == RD_VIDEO);
         /* Box engine (Hito 23b-8 Step D): reconcile the open-box stack with this
          * block's box path (root..block_id) from the box-def parent chain, so a child
@@ -9936,6 +10058,18 @@ static void oof_sublayouts(cairo_t *cr, const browser_window *w, double content_
              * + padding + border) plus the horizontal margins. */
             int declared_w = (bd->box_w > 0 || bd->box_w_pct != 0);
             double W = avail_w;
+            if (declared_w) {
+                /* A declared width wins over the room left by the insets
+                 * (CSS 2.1 10.3.7): `left:50%; width:100%` is as wide as the
+                 * containing block, not as wide as what remains of it. */
+                double dw = (bd->box_w > 0) ? (double)bd->box_w
+                                            : cbw * (double)bd->box_w_pct / 1000.0;
+                if (bd->box_sizing != CSS_BOXS_BORDER)
+                    dw += box_pad_px(bd->pad_l, bd->pad_l_pct, cbw)
+                        + box_pad_px(bd->pad_r, bd->pad_r_pct, cbw)
+                        + box_edge_px(bd->bord_lw) + box_edge_px(bd->bord_rw);
+                if (dw > 0.0) W = dw;
+            }
             if (!declared_w && !both_w) {
                 double pl = box_pad_px(bd->pad_l, bd->pad_l_pct, cbw);
                 double pr = box_pad_px(bd->pad_r, bd->pad_r_pct, cbw);
@@ -10331,6 +10465,8 @@ static void draw_input_row(cairo_t *cr, browser_window *w, const rd_block *b,
         /* Checkbox: square box; Radio: circle. Both 14×14 px, UX clickable. */
         double bx = left, by = ry + (height - 14.0) * 0.5;
         int is_checked = (b->checked >= 1) ? 1 : 0;
+        for (size_t ci = 0; ci < w->input_count; ++ci)       /* the live state wins over the markup */
+            if (w->inputs[ci].blk == b) { is_checked = w->inputs[ci].checked; break; }
         double lw = 1.5;
         set_rgb(cr, focused ? th->link : th->input_border);
         cairo_set_line_width(cr, lw);
@@ -10725,6 +10861,13 @@ static void blit_image_box(cairo_t *cr, browser_window *w, const rd_block *blk,
     {
         int of = blk->object_fit;
         if (of == 0) of = CSS_OFI_FILL; /* unset = fill */
+        /* object-position: the share of the free space before the image (0.5 =
+         * centred, the initial value; CSS Images 3 5.4). */
+        double opx = 0.5, opy = 0.5;
+        if (blk->object_pos != 0) {
+            opx = (double)CSS_OBJPOS_X(blk->object_pos) / 1000.0;
+            opy = (double)CSS_OBJPOS_Y(blk->object_pos) / 1000.0;
+        }
         cairo_save(cr);
         cairo_translate(cr, x, y);
         cairo_rectangle(cr, 0.0, 0.0, dw, dh);
@@ -10738,31 +10881,31 @@ static void blit_image_box(cairo_t *cr, browser_window *w, const rd_block *blk,
                 /* Fit within box, aspect preserved, centred. */
                 { double sx = dw / (double)im->nat_w, sy = dh / (double)im->nat_h;
                   double s = (sx < sy) ? sx : sy;
-                  cairo_translate(cr, (dw - im->nat_w * s) * 0.5, (dh - im->nat_h * s) * 0.5);
+                  cairo_translate(cr, (dw - im->nat_w * s) * opx, (dh - im->nat_h * s) * opy);
                   cairo_scale(cr, s, s); }
                 break;
             case CSS_OFI_COVER:
                 /* Fill box, aspect preserved, cropped. */
                 { double sx = dw / (double)im->nat_w, sy = dh / (double)im->nat_h;
                   double s = (sx > sy) ? sx : sy;
-                  cairo_translate(cr, (dw - im->nat_w * s) * 0.5, (dh - im->nat_h * s) * 0.5);
+                  cairo_translate(cr, (dw - im->nat_w * s) * opx, (dh - im->nat_h * s) * opy);
                   cairo_scale(cr, s, s); }
                 break;
             case CSS_OFI_NONE:
                 /* No scaling, centred in box. */
-                cairo_translate(cr, (dw - (double)im->nat_w) * 0.5,
-                                (dh - (double)im->nat_h) * 0.5);
+                cairo_translate(cr, (dw - (double)im->nat_w) * opx,
+                                (dh - (double)im->nat_h) * opy);
                 break;
             case CSS_OFI_SCALE_DOWN:
                 /* Like none or contain, whichever gives a SMALLER image. */
                 { double sx = dw / (double)im->nat_w, sy = dh / (double)im->nat_h;
                   double s = (sx < sy) ? sx : sy;
                   if (s > 1.0) { s = 1.0;
-                      cairo_translate(cr, (dw - (double)im->nat_w) * 0.5,
-                                      (dh - (double)im->nat_h) * 0.5);
+                      cairo_translate(cr, (dw - (double)im->nat_w) * opx,
+                                      (dh - (double)im->nat_h) * opy);
                   } else {
-                      cairo_translate(cr, (dw - im->nat_w * s) * 0.5,
-                                      (dh - im->nat_h * s) * 0.5);
+                      cairo_translate(cr, (dw - im->nat_w * s) * opx,
+                                      (dh - im->nat_h * s) * opy);
                   }
                   cairo_scale(cr, s, s); }
                 break;
@@ -12571,7 +12714,11 @@ static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout
                 nf->x > f->x + f->width && nf->x - (f->x + f->width) < f->font_size)
                 xn = rx + nf->x + jdx;
             if (f->underline) {
-                double uy = fbaseline + f->font_size * UI_UNDERLINE_OFFSET;
+                /* text-underline-offset: the line sits that far below the alphabetic baseline
+                 * (its top edge, as Gecko places it), instead of the font-derived default. */
+                double uy = f->deco_ul_on
+                          ? fbaseline + (double)f->deco_ul_px + deco_thick * 0.5
+                          : fbaseline + f->font_size * UI_UNDERLINE_OFFSET;
                 paint_deco_line(cr, x0, (nf != NULL && nf->underline) ? xn : x1, uy,
                                 deco_thick, f->deco_style);
             }
@@ -16021,6 +16168,27 @@ static void drain_fetch_results(browser_window *w) {
     }
 }
 
+/* A click on a checkbox flips it; on a radio it selects it and clears the others of the same
+ * group (same form, same non-empty name) -- HTML 4.10.5.1.16 / .17. Only the live state changes:
+ * the markup is never rewritten, and a submit reads this state. */
+static void toggle_choice(browser_window *w, const rd_block *ctl) {
+    ui_input_state *st = find_input_state(w, ctl);
+    if (st == NULL) return;
+    if (ctl->input_type == PV_IN_CHECKBOX) {
+        st->checked = !st->checked;
+        return;
+    }
+    if (st->checked) return;                       /* a selected radio stays selected */
+    for (size_t i = 0; i < w->input_count; ++i) {
+        const rd_block *o = w->inputs[i].blk;
+        if (o != NULL && o->input_type == PV_IN_RADIO && o->form_id == ctl->form_id
+            && o->name != NULL && ctl->name != NULL && o->name[0] != '\0'
+            && strcmp(o->name, ctl->name) == 0)
+            w->inputs[i].checked = 0;
+    }
+    st->checked = 1;
+}
+
 /* Submits the form that owns rep (any control of the form supplies the action and
  * method). Gathers the named controls' current values, builds the plan with the
  * pure form module (fail closed to https), and dispatches GET (navigate) or POST.
@@ -16044,6 +16212,11 @@ static void submit_form(browser_window *w, const rd_block *rep) {
             value = (st != NULL) ? tf_text(&st->field) : (b->value != NULL ? b->value : "");
         } else if (b->input_type == PV_IN_HIDDEN) {
             value = (b->value != NULL) ? b->value : "";
+        } else if (b->input_type == PV_IN_CHECKBOX || b->input_type == PV_IN_RADIO) {
+            /* Successful only when checked (HTML 4.10.21.4); the value defaults to "on". */
+            ui_input_state *st = find_input_state(w, b);
+            if (st == NULL || !st->checked) continue;
+            value = (b->value != NULL && b->value[0] != '\0') ? b->value : "on";
         } else {
             continue; /* submit/button controls are not value fields (v1) */
         }
@@ -18122,6 +18295,8 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
                 if (old_nid != DOM_NODE_NONE)
                     dispatch_js_event(w, old_nid, "blur", NULL, 0, NULL);
                 submit_form(w, ctl);
+            } else if (ctl->input_type == PV_IN_CHECKBOX || ctl->input_type == PV_IN_RADIO) {
+                toggle_choice(w, ctl);
             } else if (input_is_editable(ctl->input_type)) {
                 for (size_t i = 0; i < w->input_count; ++i) {
                     if (w->inputs[i].blk == ctl) {
@@ -19277,6 +19452,7 @@ ui_status ui_run_browser(const char *start_url) {
     /* Streaming progressive render: eventfd the fetch thread signals when new
      * body data arrives; the main loop picks it up and re-renders the page. */
     pthread_mutex_init(&w.stream_lock, NULL);
+    pthread_mutex_init(&w.aa_lock, NULL);
     w.stream_body = NULL;
     w.stream_body_len = 0;
     w.stream_evfd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
@@ -19435,6 +19611,9 @@ ui_status ui_run_browser(const char *start_url) {
         /* The render that consumed the spare is under way; start the next one now so a re-render
          * (zoom, theme, reload, a link) does not wait for a fork either. Cheap when one exists. */
         if (!tab_prewarmed()) tab_prewarm();
+        /* Hosts that lazy loads queued for auto-allow. Every fetch pool is joined by now, and
+         * aa_commit quiesces the async tick before it touches the lists. */
+        aa_commit(&w);
         /* Before the read is prepared: the probe may end the session, and the loop must notice. */
         int tw_step = gui_timing_step(&w, now_ms());
         if (!w.running) break;

@@ -1,6 +1,37 @@
 # Subsystem: src (page 4 of 10)
 Previous: [KB_src_p3.md](KB_src_p3.md)
 
+## src/dom_debug.c
+- Doc: dd_cursor: Bounded write cursor: `pos` bytes are committed to `out` (always leaving room for the...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `dd_cursor` (struct, line 24)
+  - `dd_putc` (function, line 31) `static void dd_putc(dd_cursor *c, char ch)`
+  - `dd_emit` (function, line 36) `static void dd_emit(dd_cursor *c, const char *s, size_t len)`
+  - `dd_puts` (function, line 40) `static void dd_puts(dd_cursor *c, const char *s)`
+  - `dd_printf` (function, line 48) `static void dd_printf(dd_cursor *c, const char *fmt, ...)`
+  - `dd_w` (function, line 80) `static int dd_w(int v)`
+  - `dd_color` (function, line 83) `static void dd_color(dd_cursor *c, int rgb)`
+  - `dd_display_name` (function, line 88) `static const char *dd_display_name(int d)`
+  - `dd_justify_name` (function, line 96) `static const char *dd_justify_name(int j)`
+  - `dd_align_name` (function, line 108) `static const char *dd_align_name(int a)`
+  - `dd_position_name` (function, line 118) `static const char *dd_position_name(int p)`
+  - `dd_visibility_name` (function, line 129) `static const char *dd_visibility_name(int v)`
+  - `dd_mix_blend_name` (function, line 137) `static const char *dd_mix_blend_name(int m)`
+  - `dd_overflow_name` (function, line 157) `static const char *dd_overflow_name(int o)`
+  - `dd_cursor_name` (function, line 166) `static const char *dd_cursor_name(int c)`
+  - `dd_text_overflow_name` (function, line 199) `static const char *dd_text_overflow_name(int t)`
+  - `dd_inset` (function, line 204) `static int dd_inset(int v)`
+  - `dd_object_fit_name` (function, line 208) `static const char *dd_object_fit_name(int o)`
+  - `dd_image_rendering_name` (function, line 219) `static const char *dd_image_rendering_name(int r)`
+  - `dd_border_style_name` (function, line 228) `static const char *dd_border_style_name(int s)`
+  - `dd_box_line` (function, line 261) `static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b)`
+  - `dd_block_line` (function, line 323) `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
+  - `dd_format` (function, line 400) `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
+  - `dd_format_css` (function, line 432) `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)`
+- Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
+
 ## src/download.c
 - Doc: lc: download — pure helpers for "save this resource to disk".
 - Layer: utility
@@ -67,50 +98,51 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
                 ...`
   - `fx_grid_columns` (function, line 128) `fx_status fx_grid_columns(double avail, size_t ncols, double gap,
                           doubl...`
-  - `fx_autofill_count` (function, line 133) `size_t fx_autofill_count(double avail, double gap, double minw)`
-  - `fx_grid_columns_weighted` (function, line 143) `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
+  - `fx_grid_column_count` (function, line 133) `int fx_grid_column_count(int flow, int cols, int rows, size_t items)`
+  - `fx_autofill_count` (function, line 141) `size_t fx_autofill_count(double avail, double gap, double minw)`
+  - `fx_grid_columns_weighted` (function, line 151) `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
                       ...`
-  - `fx_grid_place_span` (function, line 177) `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
+  - `fx_grid_place_span` (function, line 185) `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
                       ...`
-  - `fx_grid_area_hash` (function, line 319) `unsigned fx_grid_area_hash(const char *name)`
-  - `area_token_is_null_cell` (function, line 343) `static int area_token_is_null_cell(const char *tok, size_t len)`
-  - `fx_grid_areas_parse` (function, line 349) `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)`
-  - `fx_grid_area_rect` (function, line 424) `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
+  - `fx_grid_area_hash` (function, line 327) `unsigned fx_grid_area_hash(const char *name)`
+  - `area_token_is_null_cell` (function, line 351) `static int area_token_is_null_cell(const char *tok, size_t len)`
+  - `fx_grid_areas_parse` (function, line 357) `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)`
+  - `fx_grid_area_rect` (function, line 432) `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
                             int ...`
-  - `float_pack_impl` (function, line 466) `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
+  - `float_pack_impl` (function, line 474) `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
                 ...`
-  - `fx_float_insets` (function, line 506) `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
+  - `fx_float_insets` (function, line 514) `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
                  ...`
-  - `fx_float_pack` (function, line 546) `fx_status fx_float_pack(const double *width, const int *side, size_t n,
+  - `fx_float_pack` (function, line 554) `fx_status fx_float_pack(const double *width, const int *side, size_t n,
                         d...`
-  - `fx_float_pack_wrap` (function, line 551) `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
+  - `fx_float_pack_wrap` (function, line 559) `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
                     ...`
-  - `fx_grid_cell` (function, line 593) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
-  - `fx_auto_margins` (function, line 605) `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
+  - `fx_grid_cell` (function, line 601) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
+  - `fx_auto_margins` (function, line 613) `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
                 ...`
-  - `fx_auto_min_size` (function, line 628) `double fx_auto_min_size(double min_content, double basis, double author_min,
+  - `fx_auto_min_size` (function, line 636) `double fx_auto_min_size(double min_content, double basis, double author_min,
                     ...`
-  - `fx_multicol_used` (function, line 645) `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
+  - `fx_multicol_used` (function, line 653) `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
                ...`
-  - `fx_multicol_balance` (function, line 682) `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
+  - `fx_multicol_balance` (function, line 690) `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
                         ...`
-  - `fx_justify_name` (function, line 713) `const char *fx_justify_name(fx_justify j)`
-  - `fx_column_place` (function, line 725) `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
+  - `fx_justify_name` (function, line 721) `const char *fx_justify_name(fx_justify j)`
+  - `fx_column_place` (function, line 733) `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
             ...`
-  - `fx_column_place_m` (function, line 732) `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
+  - `fx_column_place_m` (function, line 740) `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
               ...`
-  - `fx_cross_offset` (function, line 793) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
-  - `gl_ws` (function, line 805) `static int gl_ws(char c)`
-  - `gl_lower` (function, line 809) `static int gl_lower(char c)`
-  - `gl_kw` (function, line 812) `static int gl_kw(const char *p, const char *end, const char *kw)`
-  - `gl_int` (function, line 822) `static int gl_int(const char *p, const char *end, long cap, long *out)`
-  - `gl_side_range` (function, line 837) `static int gl_side_range(const char *p, const char *end, int *out)`
-  - `fx_grid_line_side` (function, line 860) `int fx_grid_line_side(const char *s, int *out)`
-  - `fx_grid_line_parse` (function, line 868) `int fx_grid_line_parse(const char *v, int *start, int *end)`
-  - `gl_is_span` (function, line 885) `static int gl_is_span(int v)`
-  - `gl_is_line` (function, line 886) `static int gl_is_line(int v)`
-  - `fx_grid_line_resolve` (function, line 888) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
-  - `fx_col_free_split` (function, line 930) `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
+  - `fx_cross_offset` (function, line 801) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
+  - `gl_ws` (function, line 813) `static int gl_ws(char c)`
+  - `gl_lower` (function, line 817) `static int gl_lower(char c)`
+  - `gl_kw` (function, line 820) `static int gl_kw(const char *p, const char *end, const char *kw)`
+  - `gl_int` (function, line 830) `static int gl_int(const char *p, const char *end, long cap, long *out)`
+  - `gl_side_range` (function, line 845) `static int gl_side_range(const char *p, const char *end, int *out)`
+  - `fx_grid_line_side` (function, line 868) `int fx_grid_line_side(const char *s, int *out)`
+  - `fx_grid_line_parse` (function, line 876) `int fx_grid_line_parse(const char *v, int *start, int *end)`
+  - `gl_is_span` (function, line 893) `static int gl_is_span(int v)`
+  - `gl_is_line` (function, line 894) `static int gl_is_line(int v)`
+  - `fx_grid_line_resolve` (function, line 896) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
+  - `fx_col_free_split` (function, line 938) `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
         ...`
   - `FX_EPS` (macro, line 16) `#define FX_EPS`
 - Depends on: `include/flex_layout.h`
@@ -347,6 +379,7 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `suggest_cb` (function, line 144) `static int suggest_cb(const char *ts, size_t tl, void *vctx)`
   - `he_suggest` (function, line 164) `int he_suggest(const char *text, const char *query,
                char results[][HE_MAX_HOST + 1...`
+  - `he_cdn_kind` (function, line 173) `he_cdn_kind_t he_cdn_kind(const char *url)`
 - Depends on: `include/hostedit.h`
 
 ## src/html_parse.c
@@ -437,38 +470,6 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `HC_EVICT_EVERY` (macro, line 34) `#define HC_EVICT_EVERY`
   - `HC_MAX_AGE_CAP` (macro, line 35) `#define HC_MAX_AGE_CAP`
 - Depends on: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`
-
-## src/identity.c
-- Doc: tag_valid: size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `is_alpha` (function, line 20) `static int is_alpha(char c)`
-  - `is_alnum` (function, line 21) `static int is_alnum(char c)`
-  - `idn_defaults` (function, line 23) `void idn_defaults(idn_config *c)`
-  - `idn_is_default` (function, line 29) `int idn_is_default(const idn_config *c)`
-  - `idn_set_user_agent` (function, line 34) `int idn_set_user_agent(idn_config *c, const char *ua)`
-  - `tag_valid` (function, line 50) `static int tag_valid(const char *s, size_t n)`
-  - `idn_set_languages` (function, line 63) `int idn_set_languages(idn_config *c, const char *list)`
-  - `idn_set_geo` (function, line 91) `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)`
-  - `idn_clear_geo` (function, line 103) `void idn_clear_geo(idn_config *c)`
-  - `idn_user_agent` (function, line 109) `const char *idn_user_agent(const idn_config *c)`
-  - `idn_accept_language` (function, line 113) `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)`
-  - `idn_primary_language` (function, line 143) `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)`
-  - `hexval` (function, line 157) `static int hexval(int ch)`
-  - `pct_decode` (function, line 166) `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)`
-  - `append` (function, line 186) `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)`
-  - `append_pct` (function, line 197) `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)`
-  - `idn_serialize` (function, line 206) `size_t idn_serialize(const idn_config *c, char *out, size_t cap)`
-  - `parse_geo` (function, line 223) `static int parse_geo(const char *s, double *lat, double *lon, double *acc)`
-  - `idn_parse` (function, line 236) `void idn_parse(idn_config *c, const char *text)`
-  - `parse_number` (function, line 268) `static int parse_number(const char *s, double *out)`
-  - `idn_apply_query` (function, line 275) `unsigned idn_apply_query(idn_config *c, const char *query)`
-  - `esc_append` (function, line 346) `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)`
-  - `idn_render_page` (function, line 362) `size_t idn_render_page(const idn_config *c, char *out, size_t cap)`
-  - `_GNU_SOURCE` (macro, line 7) `#define _GNU_SOURCE`
-  - `IDN_QUERY_FIELD_MAX` (macro, line 18) `#define IDN_QUERY_FIELD_MAX`
-- Depends on: `include/anti_fp.h`, `include/identity.h`
 
 
 Next: [KB_src_p5.md](KB_src_p5.md)

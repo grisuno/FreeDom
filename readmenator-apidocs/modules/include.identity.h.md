@@ -71,7 +71,7 @@ typedef struct idn_config { char user_agent[IDN_UA_MAX];
 
 ### `idn_defaults`
 
-`function` | [include/identity.h:45](../../include/identity.h#L45)
+`function` | [include/identity.h:50](../../include/identity.h#L50)
 
 ```c
 void idn_defaults(idn_config *c);
@@ -93,7 +93,7 @@ NULL-safe.
 
 ### `idn_is_default`
 
-`function` | [include/identity.h:48](../../include/identity.h#L48)
+`function` | [include/identity.h:53](../../include/identity.h#L53)
 
 ```c
 int idn_is_default(const idn_config *c);
@@ -115,7 +115,7 @@ int idn_is_default(const idn_config *c);
 
 ### `idn_set_user_agent`
 
-`function` | [include/identity.h:51](../../include/identity.h#L51)
+`function` | [include/identity.h:56](../../include/identity.h#L56)
 
 ```c
 int idn_set_user_agent(idn_config *c, const char *ua);
@@ -138,7 +138,7 @@ Validated setters: 0 on success, -1 (c untouched) when the value is not represen
 
 ### `idn_set_languages`
 
-`function` | [include/identity.h:52](../../include/identity.h#L52)
+`function` | [include/identity.h:57](../../include/identity.h#L57)
 
 ```c
 int idn_set_languages(idn_config *c, const char *list);
@@ -159,7 +159,7 @@ int idn_set_languages(idn_config *c, const char *list);
 
 ### `idn_set_geo`
 
-`function` | [include/identity.h:53](../../include/identity.h#L53)
+`function` | [include/identity.h:58](../../include/identity.h#L58)
 
 ```c
 int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);
@@ -182,7 +182,7 @@ int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);
 
 ### `idn_clear_geo`
 
-`function` | [include/identity.h:54](../../include/identity.h#L54)
+`function` | [include/identity.h:59](../../include/identity.h#L59)
 
 ```c
 void idn_clear_geo(idn_config *c);
@@ -200,7 +200,7 @@ void idn_clear_geo(idn_config *c);
 
 ### `idn_user_agent`
 
-`function` `const` | [include/identity.h:57](../../include/identity.h#L57)
+`function` `const` | [include/identity.h:62](../../include/identity.h#L62)
 
 ```c
 const char *idn_user_agent(const idn_config *c);
@@ -224,7 +224,7 @@ Never NULL / always terminated.
 
 ### `idn_accept_language`
 
-`function` | [include/identity.h:58](../../include/identity.h#L58)
+`function` | [include/identity.h:63](../../include/identity.h#L63)
 
 ```c
 size_t idn_accept_language(const idn_config *c, char *out, size_t cap);
@@ -246,7 +246,7 @@ size_t idn_accept_language(const idn_config *c, char *out, size_t cap);
 
 ### `idn_primary_language`
 
-`function` | [include/identity.h:59](../../include/identity.h#L59)
+`function` | [include/identity.h:64](../../include/identity.h#L64)
 
 ```c
 size_t idn_primary_language(const idn_config *c, char *out, size_t cap);
@@ -268,7 +268,7 @@ size_t idn_primary_language(const idn_config *c, char *out, size_t cap);
 
 ### `idn_serialize`
 
-`function` | [include/identity.h:63](../../include/identity.h#L63)
+`function` | [include/identity.h:68](../../include/identity.h#L68)
 
 ```c
 size_t idn_serialize(const idn_config *c, char *out, size_t cap);
@@ -294,7 +294,7 @@ Returns the length (0 on cap overflow, out then "").
 
 ### `idn_parse`
 
-`function` | [include/identity.h:67](../../include/identity.h#L67)
+`function` | [include/identity.h:72](../../include/identity.h#L72)
 
 ```c
 void idn_parse(idn_config *c, const char *text);
@@ -317,7 +317,7 @@ Always leaves c valid.
 
 ### `idn_apply_query`
 
-`function` | [include/identity.h:70](../../include/identity.h#L70)
+`function` | [include/identity.h:75](../../include/identity.h#L75)
 
 ```c
 unsigned idn_apply_query(idn_config *c, const char *query);
@@ -344,7 +344,7 @@ Returns the IDN_REJ_* mask.
 
 ### `idn_render_page`
 
-`function` | [include/identity.h:73](../../include/identity.h#L73)
+`function` | [include/identity.h:78](../../include/identity.h#L78)
 
 ```c
 size_t idn_render_page(const idn_config *c, char *out, size_t cap);

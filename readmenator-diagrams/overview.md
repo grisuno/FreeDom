@@ -2,11 +2,11 @@
 graph LR
     include_browser_ui["include: browser_ui"]
     src_tab["src: tab"]
-    src_text_shape["src: text_shape"]
     include_page_view["include: page_view"]
+    src_text_shape["src: text_shape"]
     include_css["include: css"]
     include_browser["include: browser"]
-    src_local_store["src: local_store"]
+    src_http_cache["src: http_cache"]
     include_secure_fetch["include: secure_fetch"]
     include_tab["include: tab"]
     include_prefetch["include: prefetch"]
@@ -14,11 +14,11 @@ graph LR
     include_subreq_batch["include: subreq_batch"]
     include_browser_ui -- "calls into" --> include_prefetch
     include_browser_ui -- "calls into" --> src_tab
-    include_browser_ui -- "calls into" --> src_text_shape
     include_browser_ui -- "calls into" --> include_page_view
+    include_browser_ui -- "calls into" --> src_text_shape
     include_browser_ui -- "calls into" --> include_css
     include_browser_ui -- "calls into" --> include_browser
-    include_browser_ui -- "calls into" --> src_local_store
+    include_browser_ui -- "calls into" --> src_http_cache
     include_browser_ui -- "calls into" --> include_secure_fetch
     include_browser_ui -- "calls into" --> include_tab
     include_prefetch -- "calls into" --> include_browser_ui
@@ -29,12 +29,18 @@ graph LR
     src_tab -- "calls into" --> include_prefetch
     src_tab -- "calls into" --> include_sha2
     src_tab -- "calls into" --> include_subreq_batch
-    src_tab -- "calls into" --> src_text_shape
     src_tab -- "calls into" --> include_page_view
+    src_tab -- "calls into" --> src_text_shape
     src_tab -- "calls into" --> include_css
     src_tab -- "calls into" --> include_browser
     src_tab -- "calls into" --> include_secure_fetch
     src_tab -- "calls into" --> include_tab
+    include_page_view -- "calls into" --> include_browser_ui
+    include_page_view -- "calls into" --> src_tab
+    include_page_view -- "calls into" --> src_text_shape
+    include_page_view -- "calls into" --> include_css
+    include_page_view -- "calls into" --> include_browser
+    include_page_view -- "calls into" --> include_secure_fetch
     src_text_shape -- "calls into" --> include_browser_ui
     src_text_shape -- "calls into" --> include_prefetch
     src_text_shape -- "calls into" --> src_tab
@@ -43,28 +49,22 @@ graph LR
     src_text_shape -- "calls into" --> include_browser
     src_text_shape -- "calls into" --> include_secure_fetch
     src_text_shape -- "calls into" --> include_tab
-    include_page_view -- "calls into" --> include_browser_ui
-    include_page_view -- "calls into" --> src_tab
-    include_page_view -- "calls into" --> src_text_shape
-    include_page_view -- "calls into" --> include_css
-    include_page_view -- "calls into" --> include_browser
-    include_page_view -- "calls into" --> include_secure_fetch
     include_css -- "calls into" --> include_browser_ui
     include_css -- "calls into" --> src_tab
-    include_css -- "calls into" --> src_text_shape
     include_css -- "calls into" --> include_page_view
-    include_css -- "calls into" --> src_local_store
+    include_css -- "calls into" --> src_text_shape
+    include_css -- "calls into" --> src_http_cache
     include_css -- "calls into" --> include_tab
     include_browser -- "calls into" --> include_browser_ui
     include_browser -- "calls into" --> src_tab
     include_browser -- "calls into" --> include_page_view
     include_browser -- "calls into" --> include_css
-    src_local_store -- "calls into" --> include_browser_ui
-    src_local_store -- "calls into" --> src_tab
-    src_local_store -- "calls into" --> src_text_shape
-    src_local_store -- "calls into" --> include_css
-    src_local_store -- "calls into" --> include_browser
-    src_local_store -- "calls into" --> include_secure_fetch
+    src_http_cache -- "calls into" --> include_browser_ui
+    src_http_cache -- "calls into" --> src_tab
+    src_http_cache -- "calls into" --> src_text_shape
+    src_http_cache -- "calls into" --> include_css
+    src_http_cache -- "calls into" --> include_browser
+    src_http_cache -- "calls into" --> include_secure_fetch
     include_secure_fetch -- "calls into" --> include_browser_ui
     include_secure_fetch -- "calls into" --> src_tab
     include_secure_fetch -- "calls into" --> src_text_shape
@@ -75,11 +75,11 @@ graph LR
     include_tab -- "calls into" --> include_css
     click include_browser_ui href "./include_browser_ui.md" "Details"
     click src_tab href "./src_tab.md" "Details"
-    click src_text_shape href "./src_text_shape.md" "Details"
     click include_page_view href "./include_page_view.md" "Details"
+    click src_text_shape href "./src_text_shape.md" "Details"
     click include_css href "./include_css.md" "Details"
     click include_browser href "./include_browser.md" "Details"
-    click src_local_store href "./src_local_store.md" "Details"
+    click src_http_cache href "./src_http_cache.md" "Details"
     click include_secure_fetch href "./include_secure_fetch.md" "Details"
     click include_tab href "./include_tab.md" "Details"
     click include_prefetch href "./include_prefetch.md" "Details"
@@ -87,7 +87,7 @@ graph LR
 
 ## Details
 
-Static architecture map of 305 files (c, h, py, sh) in 12 components: include: browser_ui, src: tab, src: text_shape, include: page_view, include: css, include: browser, src: local_store, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 308 files (c, h, py, sh) in 12 components: include: browser_ui, src: tab, include: page_view, src: text_shape, include: css, include: browser, src: http_cache, include: secure_fetch. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### include: browser_ui (1)
 
@@ -119,7 +119,22 @@ src: tab groups 51 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_byte
 - <a href="../include/html_parse.h">include/html_parse.h::dropped</a>
 - <a href="../include/html_parse.h#L48-L56">include/html_parse.h::HP_MAX_SCRIPTS</a>
 
-### src: text_shape (3)
+### include: page_view (3)
+
+include: page_view groups 39 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+
+**Related Classes/Methods**:
+
+- <a href="../include/css.h#L2-L28">include/css.h::FREEDOM_CSS_H</a>
+- <a href="../include/css.h#L29-L34">include/css.h::css_status</a>
+- <a href="../include/css.h#L35-L42">include/css.h::css_align</a>
+- <a href="../include/css.h#L43-L69">include/css.h::css_display</a>
+- <a href="../include/css.h#L70-L80">include/css.h::css_justify</a>
+- <a href="../include/css.h">include/css.h::CSS_GAP_MAX</a>
+- <a href="../include/css.h">include/css.h::CSS_GRID_COLS_MAX</a>
+- <a href="../include/css.h#L83-L84">include/css.h::CSS_GRID_TRACKS_MAX</a>
+
+### src: text_shape (4)
 
 src: text_shape groups 39 files (c, h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
 
@@ -133,21 +148,6 @@ src: text_shape groups 39 files (c, h) around FREEDOM_JS_POLICY_H, membership, j
 - <a href="../include/js_policy.h#L54-L63">include/js_policy.h::jsp_present_trusted</a>
 - <a href="../include/js_policy.h#L64-L66">include/js_policy.h::jsp_mode_str</a>
 - <a href="../include/data_url.h#L2-L20">include/data_url.h::FREEDOM_DATA_URL_H</a>
-
-### include: page_view (4)
-
-include: page_view groups 36 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
-
-**Related Classes/Methods**:
-
-- <a href="../include/css.h#L2-L27">include/css.h::FREEDOM_CSS_H</a>
-- <a href="../include/css.h#L28-L33">include/css.h::css_status</a>
-- <a href="../include/css.h#L34-L41">include/css.h::css_align</a>
-- <a href="../include/css.h#L42-L68">include/css.h::css_display</a>
-- <a href="../include/css.h#L69-L79">include/css.h::css_justify</a>
-- <a href="../include/css.h">include/css.h::CSS_GAP_MAX</a>
-- <a href="../include/css.h">include/css.h::CSS_GRID_COLS_MAX</a>
-- <a href="../include/css.h#L82-L83">include/css.h::CSS_GRID_TRACKS_MAX</a>
 
 ### include: css (5)
 
@@ -179,9 +179,9 @@ include: browser groups 19 files (c, h) around FREEDOM_HOSTBLOCK_H, hb_set, hb_l
 - <a href="../include/hostblock.h#L52-L64">include/hostblock.h::hb_free</a>
 - <a href="../include/hostblock.h#L65-L74">include/hostblock.h::walked</a>
 
-### src: local_store (7)
+### src: http_cache (7)
 
-src: local_store groups 16 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. cf_set_store: Cache-aware GET.
+src: http_cache groups 16 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. cf_set_store: Cache-aware GET.
 
 **Related Classes/Methods**:
 

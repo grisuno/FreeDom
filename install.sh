@@ -74,7 +74,6 @@ echo -e "${BLUE}[*] Preparing source files and applying environment patches...${
 
 if [ -f src/local_store.c ]; then
     # Patch 2: Inject missing Argon2 macros if the host runs an OpenSSL version < 3.3
-    sed -i '1s/^/#include <openssl\/kdf.h>\n#ifndef OSSL_KDF_PARAM_ARGON2_LANES\n#define OSSL_KDF_PARAM_ARGON2_LANES "lanes"\n#endif\n#ifndef OSSL_KDF_PARAM_ARGON2_MEMCOST\n#define OSSL_KDF_PARAM_ARGON2_MEMCOST "memcost"\n#endif\n#ifndef OSSL_KDF_PARAM_THREADS\n#define OSSL_KDF_PARAM_THREADS "threads"\n#endif\n#define _GNU_SOURCE\n/' src/local_store.c
 fi
 
 # 5. Export explicit search paths for headers and shared libraries

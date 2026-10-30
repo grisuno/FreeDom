@@ -1,6 +1,30 @@
 # API (page 4 of 12)
 Previous: [API_p3.md](API_p3.md)
 
+## include/css_select.h
+Depends on: `include/css.h`
+Imported by: `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `tests/test_css.c`
+- `csel_compact_size` (function) `include/css_select.h:167` `size_t csel_compact_size(int nparts);` -- Bytes a selector with `nparts` compounds needs: the header plus the compounds it uses.
+- `csel_compact_dup` (function) `include/css_select.h:172` `css_sel *csel_compact_dup(const css_sel *sel);` -- Heap copy of *sel holding only the compounds in use (free()d by the caller); NULL on OOM or a selector with nparts...
+- `csel_parse` (function) `include/css_select.h:176` `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` -- Parses the complex selector s[a,b) into *sel (spec computed; order/rule left to * the caller).
+- `csel_matches` (function) `include/css_select.h:185` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` -- True if *sel matches element *el against its ancestor chain. target_id (optional) is the URL fragment for :target...
+- `csel_element_feature_bits` (function) `include/css_select.h:193` `unsigned long long csel_element_feature_bits(const css_element *e);` -- Ancestor filter. csel_element_feature_bits: the bits of one element's tag, id and classes (two bits per feature...
+- `csel_anc_reject` (function) `include/css_select.h:194` `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
+- `conservative` (function) `include/css_select.h:201` `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
+- `identifier` (function) `include/css_select.h:207` `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
+- `csel_emit_utf8` (function) `include/css_select.h:219` `size_t csel_emit_utf8(unsigned int cp, char *out);`
+- `csel_unescape` (function) `include/css_select.h:221` `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` -- A selector identifier (tag, .class, #id) is read with CSS escapes decoded (`.md\:flex` is the class "md:flex") and...
+- `csel_escape_len` (function) `include/css_select.h:223` `size_t csel_escape_len(const char *s, size_t i, size_t b);` -- does not fit is FOLDED: its first CSEL_FOLD_PREFIX bytes, CSEL_FOLD_MARK (a byte no identifier contains) and 16 hex...
+- `csel_ident_fold` (function) `include/css_select.h:225` `void csel_ident_fold(const char *src, size_t len, char *dst);` -- csel_ident_eq folds the element's token the same way, so a CSS Modules name such as...
+- `csel_ident_eq` (function) `include/css_select.h:227` `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` -- instead of being truncated and never matching. #define CSEL_FOLD_PREFIX   40u #define CSEL_FOLD_MARK     '\x1f'...
+- `csel_read_ident` (function) `include/css_select.h:230` `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` -- Reads an identifier at s[*ip] (escapes decoded, non-ASCII kept, lowercased when * lower != 0) into dst (CSS_TOK_MAX).
+- `csel_decl_end` (function) `include/css_select.h:235` `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` -- Index of the ';' ending the declaration that starts at s[i] (or of a '}' when stop_brace), or b: separators inside...
+- `csel_lower_ch` (function) `include/css_select.h:239` `static inline char csel_lower_ch(char c)`
+- `csel_ci_eq` (function) `include/css_select.h:243` `static inline int csel_ci_eq(const char *a, const char *b)`
+- `csel_span_eq` (function) `include/css_select.h:252` `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` -- static inline char csel_lower_ch(char c) { return (c >= 'A' && c <= 'Z') ?
+- `csel_substr` (function) `include/css_select.h:263` `static inline int csel_substr(const char *hay, const char *needle, int ci)` -- Substring test (used both to drop any value carrying url() — always ci — and by * the attribute `*=` operator).
+- `csel_ident_ch` (function) `include/css_select.h:271` `static inline int csel_ident_ch(char c)`
+
 ## include/css_text.h
 Depends on: `include/css_decl.h`
 Imported by: `src/css.c`, `src/css_text.c`, `tests/test_css_text.c`
@@ -124,18 +148,19 @@ Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_lay
 - `fx_grid_line_parse` (function) `include/flex_layout.h:117` `int fx_grid_line_parse(const char *v, int *start, int *end);` -- The shorthand `<side> [ / <side> ]` (no slash => end is auto).
 - `fx_grid_line_resolve` (function) `include/flex_layout.h:122` `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);` -- Resolves a start/end pair against ntracks explicit tracks: *pos0 = 0-based start track or -1 (auto-place), *span >= 1.
 - `fx_autofill_count` (function) `include/flex_layout.h:129` `size_t fx_autofill_count(double avail, double gap, double minw);` -- repeat(auto-fill, minmax(min, max)): how many min-wide tracks fit in avail (CSS Grid 1 7.2.3.2; one gap between tracks).
-- `fx_grid_area_hash` (function) `include/flex_layout.h:153` `unsigned fx_grid_area_hash(const char *name);` -- FNV-1a of a trimmed, case-sensitive CSS identifier; never returns 0 for a non-empty name (0 is reserved for "unnamed").
-- `offset` (function) `include/flex_layout.h:171` `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...`
-- `required` (function) `include/flex_layout.h:184` `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
-- `widths` (function) `include/flex_layout.h:194` `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...`
-- `FX_ERR_NULL_ARG` (function) `include/flex_layout.h:228` `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
-- `space` (function) `include/flex_layout.h:234` `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...`
-- `fx_auto_min_size` (function) `include/flex_layout.h:265` `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` -- units as fx_item.basis.
-- `fx_justify_name` (function) `include/flex_layout.h:321` `const char *fx_justify_name(fx_justify j);` -- Stable, short English name of a justify mode for structured/agent output.
-- `height` (function) `include/flex_layout.h:327` `* used height (h_out);`
-- `it` (function) `include/flex_layout.h:344` `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
-- `win` (function) `include/flex_layout.h:352` `* margins win (both = centre, left only = end);`
-- `fx_cross_offset` (function) `include/flex_layout.h:354` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` -- Cross-axis (horizontal) offset of a column item of width w in avail px. auto margins win (both = centre, left only =...
+- `fx_grid_column_count` (function) `include/flex_layout.h:139` `int fx_grid_column_count(int flow, int cols, int rows, size_t items);` -- Column count of a grid container (CSS Grid 1 8.5).
+- `fx_grid_area_hash` (function) `include/flex_layout.h:163` `unsigned fx_grid_area_hash(const char *name);` -- FNV-1a of a trimmed, case-sensitive CSS identifier; never returns 0 for a non-empty name (0 is reserved for "unnamed").
+- `offset` (function) `include/flex_layout.h:181` `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...`
+- `required` (function) `include/flex_layout.h:194` `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
+- `widths` (function) `include/flex_layout.h:204` `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...`
+- `FX_ERR_NULL_ARG` (function) `include/flex_layout.h:238` `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
+- `space` (function) `include/flex_layout.h:244` `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...`
+- `fx_auto_min_size` (function) `include/flex_layout.h:275` `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` -- units as fx_item.basis.
+- `fx_justify_name` (function) `include/flex_layout.h:331` `const char *fx_justify_name(fx_justify j);` -- Stable, short English name of a justify mode for structured/agent output.
+- `height` (function) `include/flex_layout.h:337` `* used height (h_out);`
+- `it` (function) `include/flex_layout.h:354` `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
+- `win` (function) `include/flex_layout.h:362` `* margins win (both = centre, left only = end);`
+- `fx_cross_offset` (function) `include/flex_layout.h:364` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` -- Cross-axis (horizontal) offset of a column item of width w in avail px. auto margins win (both = centre, left only =...
 
 ## include/frame_broker.h
 Imported by: `src/frame_broker.c`, `src/frame_host.c`, `tests/test_frame_broker.c`
@@ -202,6 +227,7 @@ Imported by: `gui/browser_ui.c`, `include/host_conf.h`, `src/freedom.c`, `src/ho
 Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
 - `he_text_has_host` (function) `include/hostedit.h:46` `int he_text_has_host(const char *text, const char *host);` -- Returns 1 if text (the body of a hosts-format file) already lists host as a domain token on a non-comment line...
 - `he_suggest` (function) `include/hostedit.h:55` `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);` -- Omnibar autocomplete: treats allow.conf (a hosts-format text) as a favorites list.
+- `he_cdn_kind` (function) `include/hostedit.h:62` `he_cdn_kind_t he_cdn_kind(const char *url);`
 
 ## include/html_parse.h
 Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
@@ -233,19 +259,19 @@ Imported by: `include/cached_fetch.h`, `src/http_cache.c`, `tests/test_http_cach
 
 ## include/identity.h
 Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/identity.c`, `src/tab.c`, `tests/test_identity.c`
-- `idn_defaults` (function) `include/identity.h:45` `void idn_defaults(idn_config *c);` -- enum { IDN_REJ_UA   = 1 << 0, IDN_REJ_LANG = 1 << 1, IDN_REJ_GEO  = 1 << 2 }; typedef struct idn_config { char...
-- `idn_is_default` (function) `include/identity.h:48` `int idn_is_default(const idn_config *c);` -- IDN_REJ_GEO  = 1 << 2 }; typedef struct idn_config { char   user_agent[IDN_UA_MAX];  /* "" = FP_USER_AGENT char...
-- `idn_set_user_agent` (function) `include/identity.h:51` `int idn_set_user_agent(idn_config *c, const char *ua);` -- typedef struct idn_config { char   user_agent[IDN_UA_MAX];  /* "" = FP_USER_AGENT char   languages[IDN_LANG_MAX]; /*...
-- `idn_set_languages` (function) `include/identity.h:52` `int idn_set_languages(idn_config *c, const char *list);`
-- `idn_set_geo` (function) `include/identity.h:53` `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);`
-- `idn_clear_geo` (function) `include/identity.h:54` `void idn_clear_geo(idn_config *c);`
-- `idn_user_agent` (function) `include/identity.h:57` `const char *idn_user_agent(const idn_config *c);` -- /* The anti_fp identity, geolocation off.
-- `idn_accept_language` (function) `include/identity.h:58` `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);`
-- `idn_primary_language` (function) `include/identity.h:59` `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);`
-- `idn_serialize` (function) `include/identity.h:63` `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` -- One-line text form for prefs and the worker IPC.
-- `idn_parse` (function) `include/identity.h:67` `void idn_parse(idn_config *c, const char *text);` -- Parses idn_serialize output field by field; an invalid field keeps its default.
-- `idn_apply_query` (function) `include/identity.h:70` `unsigned idn_apply_query(idn_config *c, const char *query);` -- Parses idn_serialize output field by field; an invalid field keeps its default.
-- `idn_render_page` (function) `include/identity.h:73` `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` -- Parses idn_serialize output field by field; an invalid field keeps its default.
+- `idn_defaults` (function) `include/identity.h:50` `void idn_defaults(idn_config *c);` -- typedef struct idn_config { char   user_agent[IDN_UA_MAX];  /* "" = FP_USER_AGENT char   languages[IDN_LANG_MAX]; /*...
+- `idn_is_default` (function) `include/identity.h:53` `int idn_is_default(const idn_config *c);` -- char   languages[IDN_LANG_MAX]; /* "" = the anti_fp default; comma-separated tags int    geo_mode;                /*...
+- `idn_set_user_agent` (function) `include/identity.h:56` `int idn_set_user_agent(idn_config *c, const char *ua);` -- unsigned auto_allow;            /* IDN_AA_* switches: hosts a page on allow.conf pulls CSS/JS/ resources from are...
+- `idn_set_languages` (function) `include/identity.h:57` `int idn_set_languages(idn_config *c, const char *list);`
+- `idn_set_geo` (function) `include/identity.h:58` `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);`
+- `idn_clear_geo` (function) `include/identity.h:59` `void idn_clear_geo(idn_config *c);`
+- `idn_user_agent` (function) `include/identity.h:62` `const char *idn_user_agent(const idn_config *c);` -- /* The anti_fp identity, geolocation off.
+- `idn_accept_language` (function) `include/identity.h:63` `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);`
+- `idn_primary_language` (function) `include/identity.h:64` `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);`
+- `idn_serialize` (function) `include/identity.h:68` `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` -- One-line text form for prefs and the worker IPC.
+- `idn_parse` (function) `include/identity.h:72` `void idn_parse(idn_config *c, const char *text);` -- Parses idn_serialize output field by field; an invalid field keeps its default.
+- `idn_apply_query` (function) `include/identity.h:75` `unsigned idn_apply_query(idn_config *c, const char *query);` -- Parses idn_serialize output field by field; an invalid field keeps its default.
+- `idn_render_page` (function) `include/identity.h:78` `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` -- Parses idn_serialize output field by field; an invalid field keeps its default.
 
 ## include/image_decode.h
 Imported by: `gui/browser_ui.c`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
@@ -399,66 +425,66 @@ Imported by: `src/os_sandbox.c`, `src/renderer.c`, `src/tab.c`, `tests/test_os_s
 ## include/page_view.h
 Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 Imported by: `include/box_tree.h`, `include/frame_host.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
-- `container` (function) `include/page_view.h:230` `* cont_id groups runs of one container (-1 = none);`
-- `bx_display` (function) `include/page_view.h:231` `* bx_display (flex/grid);`
-- `order` (function) `include/page_view.h:295` `* groups the runs of ONE floated element in document order (-1 = not in a float);`
-- `itself` (function) `include/page_view.h:359` `* by itself (bx_width_cap2);`
-- `CSS_LEN_UNSET` (function) `include/page_view.h:558` `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
-- `scale` (function) `include/page_view.h:633` `* scale(1)) and rotate in whole degrees (transform_rotate);`
-- `tree` (function) `include/page_view.h:674` `* box tree (a mask covers its whole subtree);`
-- `declare` (function) `include/page_view.h:863` `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
-- `nonzero` (function) `include/page_view.h:875` `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
-- `resolved` (function) `include/page_view.h:882` `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
-- `policy` (function) `include/page_view.h:890` `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
-- `pv_computed_new` (function) `include/page_view.h:912` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
-- `pv_computed_get` (function) `include/page_view.h:919` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);` -- Resolves native_el (a dom_native_node pointer of the SAME document) into *st; when non-NULL, *font_px receives its...
-- `pv_computed_free` (function) `include/page_view.h:922` `void pv_computed_free(pv_computed *pc);`
-- `cause` (function) `include/page_view.h:926` `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
-- `pv_new` (function) `include/page_view.h:938` `pv_view *pv_new(void);` -- Allocates an empty view (used by the IPC deserialiser to rebuild a view on the * receiving side).
-- `form` (function) `include/page_view.h:957` `* form (-1 if none);`
-- `pv_set_emphasis` (function) `include/page_view.h:989` `void pv_set_emphasis(pv_view *v, int bold, int italic);` -- Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run.
-- `default` (function) `include/page_view.h:994` `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
-- `pv_set_color` (function) `include/page_view.h:997` `void pv_set_color(pv_view *v, int fg_rgb);`
-- `pv_set_bgcolor` (function) `include/page_view.h:1004` `void pv_set_bgcolor(pv_view *v, int bg_rgb);` -- Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run.
-- `pv_set_text_style` (function) `include/page_view.h:1013` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` -- Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1...
-- `pv_text_ext_reset` (function) `include/page_view.h:1068` `void pv_text_ext_reset(pv_text_ext *e);` -- Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the nearest ancestor that sets it (packed /...
-- `ancestors` (function) `include/page_view.h:1073` `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
-- `pv_set_text_ext` (function) `include/page_view.h:1083` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
-- `pv_set_grad_text` (function) `include/page_view.h:1089` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` -- Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient).
-- `run` (function) `include/page_view.h:1092` `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
-- `pv_set_row_span` (function) `include/page_view.h:1105` `void pv_set_row_span(pv_view *v, int row_span);` -- Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run...
-- `pv_set_grid_area` (function) `include/page_view.h:1109` `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` -- Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed).
-- `pv_set_grid_rows` (function) `include/page_view.h:1110` `void pv_set_grid_rows(pv_view *v, int grid_rows);`
-- `pv_set_ua_tag` (function) `include/page_view.h:1115` `void pv_set_ua_tag(pv_view *v, int ua_tag);` -- Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor).
-- `pv_set_cont_box` (function) `include/page_view.h:1119` `void pv_set_cont_box(pv_view *v, int cont_box_id);` -- Sets the last run's cont_box_id (the box enclosing its container's items; -1 = * none).
-- `pv_set_grid` (function) `include/page_view.h:1120` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
-- `pv_set_flex` (function) `include/page_view.h:1128` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
-- `pv_set_flex_mauto` (function) `include/page_view.h:1131` `void pv_set_flex_mauto(pv_view *v, int mauto);` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
-- `pv_set_cont_item` (function) `include/page_view.h:1135` `void pv_set_cont_item(pv_view *v, int cont_item);` -- Sets the container-item ordinal on the most recently appended run (-1 = none). * No-op on an empty or NULL view; the...
-- `pv_set_float_w` (function) `include/page_view.h:1146` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...` -- Stamps the float founder's own declared width halves (pv_run.float_w) on the * most recently appended run.
-- `pv_set_float` (function) `include/page_view.h:1149` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
-- `pv_set_box` (function) `include/page_view.h:1159` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` -- Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and...
-- `pv_set_box_pct` (function) `include/page_view.h:1165` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` -- Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run.
-- `pv_set_box_maxw` (function) `include/page_view.h:1170` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` -- Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most * recently appended run.
-- `pv_set_node_id` (function) `include/page_view.h:1175` `void pv_set_node_id(pv_view *v, dom_node_id node_id);` -- Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element.
-- `pv_set_block_id` (function) `include/page_view.h:1180` `void pv_set_block_id(pv_view *v, int block_id);` -- Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs...
-- `pv_set_own_box` (function) `include/page_view.h:1184` `void pv_set_own_box(pv_view *v, int box_id);` -- Records the replaced element's own box def index on the last appended run.
-- `pv_set_oof` (function) `include/page_view.h:1188` `void pv_set_oof(pv_view *v, int oof);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_set_justify_self` (function) `include/page_view.h:1191` `void pv_set_justify_self(pv_view *v, int justify_self);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_set_block_node` (function) `include/page_view.h:1194` `void pv_set_block_node(pv_view *v, dom_node_id id);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_set_br_line` (function) `include/page_view.h:1202` `void pv_set_br_line(pv_view *v, int br_line);` -- Sets the last appended run's PV_BR_* flags (see pv_run.br_line); other bits * are dropped.
-- `pv_cont_count` (function) `include/page_view.h:1217` `size_t pv_cont_count(const pv_view *v);` -- pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] * (i == a cont_id) or NULL when out of...
-- `pv_cont_at` (function) `include/page_view.h:1218` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
-- `pv_set_input_checked` (function) `include/page_view.h:1222` `void pv_set_input_checked(pv_view *v, int checked);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
-- `pv_set_input_placeholder` (function) `include/page_view.h:1226` `void pv_set_input_placeholder(pv_view *v, int ph_color);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
-- `pv_svg_append_root_attrs` (function) `include/page_view.h:1232` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` -- Appends attrs (e.g.
-- `pv_placeholder_color` (function) `include/page_view.h:1235` `int pv_placeholder_color(const css_style *ph);` -- Appends attrs (e.g.
-- `pv_set_input_select_opts` (function) `include/page_view.h:1239` `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_free` (function) `include/page_view.h:1242` `void pv_free(pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_count` (function) `include/page_view.h:1245` `size_t pv_count(const pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_at` (function) `include/page_view.h:1246` `const pv_run *pv_at(const pv_view *v, size_t i);`
-- `pv_box_count` (function) `include/page_view.h:1250` `size_t pv_box_count(const pv_view *v);` -- Box tree accessors (Step D). pv_box_count is the number of box definitions; * pv_box_at returns boxes[i] (i == a...
-- `pv_box_at` (function) `include/page_view.h:1251` `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+- `container` (function) `include/page_view.h:232` `* cont_id groups runs of one container (-1 = none);`
+- `bx_display` (function) `include/page_view.h:233` `* bx_display (flex/grid);`
+- `order` (function) `include/page_view.h:297` `* groups the runs of ONE floated element in document order (-1 = not in a float);`
+- `itself` (function) `include/page_view.h:361` `* by itself (bx_width_cap2);`
+- `CSS_LEN_UNSET` (function) `include/page_view.h:560` `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
+- `scale` (function) `include/page_view.h:635` `* scale(1)) and rotate in whole degrees (transform_rotate);`
+- `tree` (function) `include/page_view.h:676` `* box tree (a mask covers its whole subtree);`
+- `declare` (function) `include/page_view.h:865` `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
+- `nonzero` (function) `include/page_view.h:877` `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
+- `resolved` (function) `include/page_view.h:884` `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
+- `policy` (function) `include/page_view.h:892` `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
+- `pv_computed_new` (function) `include/page_view.h:914` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
+- `pv_computed_get` (function) `include/page_view.h:921` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);` -- Resolves native_el (a dom_native_node pointer of the SAME document) into *st; when non-NULL, *font_px receives its...
+- `pv_computed_free` (function) `include/page_view.h:924` `void pv_computed_free(pv_computed *pc);`
+- `cause` (function) `include/page_view.h:928` `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
+- `pv_new` (function) `include/page_view.h:940` `pv_view *pv_new(void);` -- Allocates an empty view (used by the IPC deserialiser to rebuild a view on the * receiving side).
+- `form` (function) `include/page_view.h:959` `* form (-1 if none);`
+- `pv_set_emphasis` (function) `include/page_view.h:991` `void pv_set_emphasis(pv_view *v, int bold, int italic);` -- Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run.
+- `default` (function) `include/page_view.h:996` `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+- `pv_set_color` (function) `include/page_view.h:999` `void pv_set_color(pv_view *v, int fg_rgb);`
+- `pv_set_bgcolor` (function) `include/page_view.h:1006` `void pv_set_bgcolor(pv_view *v, int bg_rgb);` -- Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run.
+- `pv_set_text_style` (function) `include/page_view.h:1015` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` -- Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1...
+- `pv_text_ext_reset` (function) `include/page_view.h:1072` `void pv_text_ext_reset(pv_text_ext *e);` -- Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the nearest ancestor that sets it (packed /...
+- `ancestors` (function) `include/page_view.h:1077` `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
+- `pv_set_text_ext` (function) `include/page_view.h:1087` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+- `pv_set_grad_text` (function) `include/page_view.h:1093` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` -- Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient).
+- `run` (function) `include/page_view.h:1096` `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
+- `pv_set_row_span` (function) `include/page_view.h:1109` `void pv_set_row_span(pv_view *v, int row_span);` -- Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run...
+- `pv_set_grid_area` (function) `include/page_view.h:1113` `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` -- Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed).
+- `pv_set_grid_rows` (function) `include/page_view.h:1114` `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+- `pv_set_ua_tag` (function) `include/page_view.h:1119` `void pv_set_ua_tag(pv_view *v, int ua_tag);` -- Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor).
+- `pv_set_cont_box` (function) `include/page_view.h:1123` `void pv_set_cont_box(pv_view *v, int cont_box_id);` -- Sets the last run's cont_box_id (the box enclosing its container's items; -1 = * none).
+- `pv_set_grid` (function) `include/page_view.h:1124` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+- `pv_set_flex` (function) `include/page_view.h:1132` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
+- `pv_set_flex_mauto` (function) `include/page_view.h:1135` `void pv_set_flex_mauto(pv_view *v, int mauto);` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
+- `pv_set_cont_item` (function) `include/page_view.h:1139` `void pv_set_cont_item(pv_view *v, int cont_item);` -- Sets the container-item ordinal on the most recently appended run (-1 = none). * No-op on an empty or NULL view; the...
+- `pv_set_float_w` (function) `include/page_view.h:1150` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...` -- Stamps the float founder's own declared width halves (pv_run.float_w) on the * most recently appended run.
+- `pv_set_float` (function) `include/page_view.h:1153` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
+- `pv_set_box` (function) `include/page_view.h:1163` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` -- Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and...
+- `pv_set_box_pct` (function) `include/page_view.h:1169` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` -- Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run.
+- `pv_set_box_maxw` (function) `include/page_view.h:1174` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` -- Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most * recently appended run.
+- `pv_set_node_id` (function) `include/page_view.h:1179` `void pv_set_node_id(pv_view *v, dom_node_id node_id);` -- Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element.
+- `pv_set_block_id` (function) `include/page_view.h:1184` `void pv_set_block_id(pv_view *v, int block_id);` -- Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs...
+- `pv_set_own_box` (function) `include/page_view.h:1188` `void pv_set_own_box(pv_view *v, int box_id);` -- Records the replaced element's own box def index on the last appended run.
+- `pv_set_oof` (function) `include/page_view.h:1192` `void pv_set_oof(pv_view *v, int oof);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_justify_self` (function) `include/page_view.h:1195` `void pv_set_justify_self(pv_view *v, int justify_self);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_block_node` (function) `include/page_view.h:1198` `void pv_set_block_node(pv_view *v, dom_node_id id);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_br_line` (function) `include/page_view.h:1206` `void pv_set_br_line(pv_view *v, int br_line);` -- Sets the last appended run's PV_BR_* flags (see pv_run.br_line); other bits * are dropped.
+- `pv_cont_count` (function) `include/page_view.h:1221` `size_t pv_cont_count(const pv_view *v);` -- pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] * (i == a cont_id) or NULL when out of...
+- `pv_cont_at` (function) `include/page_view.h:1222` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+- `pv_set_input_checked` (function) `include/page_view.h:1226` `void pv_set_input_checked(pv_view *v, int checked);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
+- `pv_set_input_placeholder` (function) `include/page_view.h:1230` `void pv_set_input_placeholder(pv_view *v, int ph_color);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
+- `pv_svg_append_root_attrs` (function) `include/page_view.h:1236` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` -- Appends attrs (e.g.
+- `pv_placeholder_color` (function) `include/page_view.h:1239` `int pv_placeholder_color(const css_style *ph);` -- Appends attrs (e.g.
+- `pv_set_input_select_opts` (function) `include/page_view.h:1243` `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_free` (function) `include/page_view.h:1246` `void pv_free(pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_count` (function) `include/page_view.h:1249` `size_t pv_count(const pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_at` (function) `include/page_view.h:1250` `const pv_run *pv_at(const pv_view *v, size_t i);`
+- `pv_box_count` (function) `include/page_view.h:1254` `size_t pv_box_count(const pv_view *v);` -- Box tree accessors (Step D). pv_box_count is the number of box definitions; * pv_box_at returns boxes[i] (i == a...
+- `pv_box_at` (function) `include/page_view.h:1255` `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
 
 ## include/pdf_export.h
 Imported by: `gui/browser_ui.c`, `src/download.c`, `src/pdf_export.c`, `tests/test_pdf_export.c`
@@ -466,25 +492,6 @@ Imported by: `gui/browser_ui.c`, `src/download.c`, `src/pdf_export.c`, `tests/te
 - `trusted` (function) `include/pdf_export.h:51` `* dir is trusted (chosen by the app from XDG/$HOME);`
 - `literal` (function) `include/pdf_export.h:52` `* trusted literal (e.g. PE_EXT / PE_EXT_PNG);`
 - `pe_paginate` (function) `include/pdf_export.h:70` `size_t pe_paginate(const double *tops, const double *heights, size_t n, double page_h, int *out_page, double...` -- Deterministic pagination: lays the rows (document-space tops + heights, in order) onto pages of usable height page_h...
-
-## include/perf_trace.h
-Imported by: `src/freedom.c`, `src/perf_trace.c`, `tests/test_perf_trace.c`
-- `pt_init` (function) `include/perf_trace.h:46` `void pt_init(pt_trace *t);` -- #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t samples[PT_MAX_SAMPLES]; size_t   fill;   /*...
-- `pt_elapsed_us` (function) `include/perf_trace.h:50` `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us);` -- end_us - start_us with an anti-underflow guard: end < start yields 0 * instead of wrapping to a huge uint64_t.
-- `pt_record` (function) `include/perf_trace.h:54` `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us);` -- Record one sample (microseconds) for the given stage.
-- `pt_count` (function) `include/perf_trace.h:57` `size_t pt_count(const pt_trace *t, pt_stage stage);` -- Record one sample (microseconds) for the given stage.
-- `pt_last_us` (function) `include/perf_trace.h:60` `uint64_t pt_last_us(const pt_trace *t, pt_stage stage);` -- Record one sample (microseconds) for the given stage.
-- `pt_min_us` (function) `include/perf_trace.h:63` `uint64_t pt_min_us(const pt_trace *t, pt_stage stage);` -- Record one sample (microseconds) for the given stage.
-- `pt_max_us` (function) `include/perf_trace.h:64` `uint64_t pt_max_us(const pt_trace *t, pt_stage stage);`
-- `pt_median_us` (function) `include/perf_trace.h:65` `uint64_t pt_median_us(const pt_trace *t, pt_stage stage);`
-- `pt_stage_name` (function) `include/perf_trace.h:69` `const char *pt_stage_name(pt_stage stage);` -- Short lowercase stage name ("fetch".."shape"); "unknown" if out of range. * Static string, never NULL.
-- `pt_format` (function) `include/perf_trace.h:76` `size_t pt_format(const pt_trace *t, char *buf, size_t cap);` -- Deterministic dump, one line per stage with count > 0, enum order: stage=<name> n=<total> last_us=<n> min_us=<n>...
-
-## include/pq_seal.h
-Depends on: `include/local_store.h`
-Imported by: `src/http_cache.c`, `src/pq_seal.c`, `tests/test_pq_seal.c`
-- `pqs_free` (function) `include/pq_seal.h:41` `void pqs_free(pqs_keys *k);`
-- `pqs_buf_free` (function) `include/pq_seal.h:51` `void pqs_buf_free(uint8_t *buf, size_t len);` -- DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der is owned * (release with...
 
 
 Next: [API_p5.md](API_p5.md)

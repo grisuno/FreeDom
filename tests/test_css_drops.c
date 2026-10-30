@@ -50,6 +50,97 @@ static void test_unknown_property_is_logged(void **state) {
     css_free(sh);
 }
 
+/* Given the legacy CSS Grid 1 gap spellings (`grid-column-gap`, `grid-row-gap`),
+ * when parsed, then they are the standard properties: no drop, same computed gap. */
+static void test_legacy_grid_gap_aliases_are_the_standard_properties(void **state) {
+    (void)state;
+    css_drop items[8];
+    css_drop_log log;
+    css_sheet *sh = parse_logged("a{grid-column-gap:12px;grid-row-gap:4px}", items, 8, &log);
+    assert_int_equal((int)log.total, 0);
+    css_free(sh);
+    assert_int_equal(css_parse_inline("grid-column-gap:6px", 0).gap, 6);
+    assert_int_equal(css_parse_inline("grid-row-gap:5px", 0).row_gap, 5);
+}
+
+/* Given properties that are valid CSS but have no effect on a static, non-
+ * interactive render, when parsed, then they are recognised (not "unknown") and
+ * @supports reports them as supported -- the log must only list real gaps. */
+static void test_inert_properties_are_recognised(void **state) {
+    (void)state;
+    css_drop items[16];
+    css_drop_log log;
+    css_sheet *sh = parse_logged(
+        "a{will-change:transform;scrollbar-width:none;scrollbar-color:red blue;"
+        "-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;"
+        "-webkit-tap-highlight-color:transparent;-webkit-overflow-scrolling:touch;"
+        "-webkit-text-size-adjust:100%;-ms-overflow-style:none;speak:none;"
+        "contain-intrinsic-size:auto 300px;view-transition-name:hero;"
+        "scroll-margin-top:4px;scroll-snap-type:x mandatory;scroll-snap-align:start}",
+        items, 16, &log);
+    assert_int_equal((int)log.total, 0);
+    css_free(sh);
+    sh = parse_logged("@supports (will-change: transform) { a { color: red } }", items, 16, &log);
+    assert_non_null(sh);
+    css_free(sh);
+}
+
+/* Given a CSS-wide keyword on a property whose grammar is a <time>, an <easing>
+ * or a <color> (not covered by the numeric probes), when parsed, then it still
+ * claims the property's slots (Cascade 5 7.3) instead of being dropped. */
+static void test_css_wide_keyword_on_time_easing_color_is_not_dropped(void **state) {
+    (void)state;
+    css_drop items[8];
+    css_drop_log log;
+    css_sheet *sh = parse_logged(
+        "a{transition-duration:initial;transition-timing-function:initial;"
+        "border-color:inherit;transition-delay:unset}", items, 8, &log);
+    assert_int_equal((int)log.total, 0);
+    css_free(sh);
+}
+
+/* Given the individual transform properties (CSS Transforms 2), when parsed, then
+ * each writes only its own slots, so `translate`, `rotate` and `scale` compose
+ * with one another, and `none` resets only that property's slots. */
+static void test_individual_transform_properties(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("translate:10px 20px;rotate:45deg;scale:1.5", 0);
+    assert_int_equal(s.transform_tx, 10);
+    assert_int_equal(s.transform_ty, 20);
+    assert_int_equal(s.transform_rotate, 45);
+    assert_int_equal(s.transform_sx, 150);
+    assert_int_equal(s.transform_sy, 150);
+    s = css_parse_inline("translate:7px;scale:2 3", 0);
+    assert_int_equal(s.transform_tx, 7);
+    assert_int_equal(s.transform_ty, 0);
+    assert_int_equal(s.transform_sx, 200);
+    assert_int_equal(s.transform_sy, 300);
+    s = css_parse_inline("rotate:30deg;translate:none", 0);
+    assert_int_equal(s.transform_rotate, 30);
+    assert_int_equal(s.transform_tx, 0);
+    css_drop items[8];
+    css_drop_log log;
+    css_sheet *sh = parse_logged("a{translate:1px 2px;scale:2;rotate:z 10deg}", items, 8, &log);
+    assert_int_equal((int)log.total, 0);
+    css_free(sh);
+}
+
+/* Given grid-auto-columns / grid-auto-rows, then only the sizings the engine really
+ * performs (an equal share: auto, 1fr, minmax(0,1fr)) are accepted; a fixed track size
+ * stays a visible drop instead of pretending to be supported. */
+static void test_grid_auto_tracks_only_what_the_engine_does(void **state) {
+    (void)state;
+    css_drop items[8];
+    css_drop_log log;
+    css_sheet *sh = parse_logged("a{grid-auto-columns:1fr;grid-auto-rows:auto;"
+                                 "grid-auto-columns:minmax(0, 1fr)}", items, 8, &log);
+    assert_int_equal((int)log.total, 0);
+    css_free(sh);
+    sh = parse_logged("a{grid-auto-columns:200px;grid-auto-rows:1fr}", items, 8, &log);
+    assert_int_equal((int)log.total, 2);
+    css_free(sh);
+}
+
 /* Given an implemented property with a value the grammar rejects, then the cause is
  * BAD_VALUE -- the distinction that matters, because the property "exists" and the
  * declaration is lost anyway. */
@@ -392,6 +483,11 @@ static void test_font_shorthand_with_line_height(void **state) {
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_unknown_property_is_logged),
+        cmocka_unit_test(test_legacy_grid_gap_aliases_are_the_standard_properties),
+        cmocka_unit_test(test_inert_properties_are_recognised),
+        cmocka_unit_test(test_individual_transform_properties),
+        cmocka_unit_test(test_grid_auto_tracks_only_what_the_engine_does),
+        cmocka_unit_test(test_css_wide_keyword_on_time_easing_color_is_not_dropped),
         cmocka_unit_test(test_bad_value_is_distinguished),
         cmocka_unit_test(test_accepted_declaration_is_not_logged),
         cmocka_unit_test(test_repeats_coalesce_by_property_and_cause),

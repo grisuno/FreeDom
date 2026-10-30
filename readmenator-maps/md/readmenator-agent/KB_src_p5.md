@@ -1,6 +1,38 @@
 # Subsystem: src (page 5 of 10)
 Previous: [KB_src_p4.md](KB_src_p4.md)
 
+## src/identity.c
+- Doc: tag_valid: size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `is_alpha` (function, line 20) `static int is_alpha(char c)`
+  - `is_alnum` (function, line 21) `static int is_alnum(char c)`
+  - `idn_defaults` (function, line 23) `void idn_defaults(idn_config *c)`
+  - `idn_is_default` (function, line 29) `int idn_is_default(const idn_config *c)`
+  - `idn_set_user_agent` (function, line 35) `int idn_set_user_agent(idn_config *c, const char *ua)`
+  - `tag_valid` (function, line 51) `static int tag_valid(const char *s, size_t n)`
+  - `idn_set_languages` (function, line 64) `int idn_set_languages(idn_config *c, const char *list)`
+  - `idn_set_geo` (function, line 92) `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)`
+  - `idn_clear_geo` (function, line 104) `void idn_clear_geo(idn_config *c)`
+  - `idn_user_agent` (function, line 110) `const char *idn_user_agent(const idn_config *c)`
+  - `idn_accept_language` (function, line 114) `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)`
+  - `idn_primary_language` (function, line 144) `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)`
+  - `hexval` (function, line 158) `static int hexval(int ch)`
+  - `pct_decode` (function, line 167) `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)`
+  - `append` (function, line 187) `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)`
+  - `append_pct` (function, line 198) `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)`
+  - `idn_serialize` (function, line 207) `size_t idn_serialize(const idn_config *c, char *out, size_t cap)`
+  - `parse_geo` (function, line 228) `static int parse_geo(const char *s, double *lat, double *lon, double *acc)`
+  - `idn_parse` (function, line 241) `void idn_parse(idn_config *c, const char *text)`
+  - `parse_number` (function, line 275) `static int parse_number(const char *s, double *out)`
+  - `idn_apply_query` (function, line 282) `unsigned idn_apply_query(idn_config *c, const char *query)`
+  - `esc_append` (function, line 361) `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)`
+  - `idn_render_page` (function, line 377) `size_t idn_render_page(const idn_config *c, char *out, size_t cap)`
+  - `_GNU_SOURCE` (macro, line 7) `#define _GNU_SOURCE`
+  - `IDN_QUERY_FIELD_MAX` (macro, line 18) `#define IDN_QUERY_FIELD_MAX`
+- Depends on: `include/anti_fp.h`, `include/identity.h`
+
 ## src/image_decode.c
 - Doc: jpeg_err_ctx: libjpeg error manager that longjmps instead of calling exit(), so a hostile JPEG *...
 - Layer: utility

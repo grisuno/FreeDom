@@ -50,3 +50,21 @@ pagina actual es la interna (bandera puesta por la propia ruta `about:config` de
 `cur_top == NULL`). Un formulario de una pagina web cuyo `action` apunte a `about:config?...` NO
 cambia nada (seria una pagina remota reescribiendo la identidad del usuario); sigue el camino normal
 y `fm_build` lo bloquea por no ser https.
+
+## Auto-allow de CDN (2026-10-30)
+
+- **Qué.** Tres interruptores (`IDN_AA_CSS`, `IDN_AA_JS`, `IDN_AA_RES`, máscara `idn_config.auto_allow`, apagados
+  por defecto) en la página `about:config`. Dado un sitio que el usuario puso en `allow.conf`, cuando pide una hoja de
+  estilo, un script u otro recurso (imágenes, fuentes, medios, XHR) a OTRO host, entonces ese host se AÑADE a
+  `allow.conf`. **Si está en allow es allow: el usuario manda** — recibe la misma soberanía que cualquier entrada
+  (TLS relajable, certificado siempre verificado). Excepciones deliberadas: un host de `block.conf` sigue bloqueado
+  (también es palabra del usuario), una IP literal no es un CDN, y la página debe estar ella misma en `allow.conf`.
+- **Clasificación.** `he_cdn_kind(url)` (pura, fuzzeada, `spec/hostedit.md`) decide por la RUTA: `.css`, `.js/.mjs/.cjs`,
+  el resto = recursos; la consulta y el fragmento nunca cuentan.
+- **Concurrencia.** Los fetchers corren en hilos del pool y leen `w->hosts`: solo ENCOLAN (`aa_note`, cola de 32 con mutex);
+  `aa_commit` escribe `allow.conf` (`list_append_host`, atómico y sin duplicados) y recarga el filtro desde el hilo de la
+  GUI, una vez por vuelta del bucle, tras `gui_quiesce`. Aviso en la barra de estado: "Auto-allowed N host(s)".
+- **Formulario.** El campo oculto `aa=1` distingue "se envió el formulario con todo desmarcado" de otra consulta
+  (`?ua=...`), que deja los interruptores intactos. Persistencia: `aa=N` en la línea de identidad (valor fuera de 0..7 ⇒ 0).
+- **Fuera de alcance.** El arnés headless (`--as-gui`, `make parity`) NO auto-permite: no debe reescribir listas durante
+  una medición. Diagnóstico: `FREEDOM_TRACE_FETCH=1` imprime `aa[note]`/`aa[commit]`.

@@ -167,7 +167,7 @@ def sbs(name, start, nrows)
 def publish_readme(name, score)
 ```
 
-Rewrite the README picture of [`name`](src.text_shape.c.md#name) and the score printed beside its label.
+Rewrite the README picture of `name` and the score printed beside its label.
 
 **Parameters**
 

@@ -79,6 +79,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/cached_fetch.h` -> `include/http_cache.h`
 - `include/cached_fetch.h` -> `include/secure_fetch.h`
 - `include/css.h` -> `include/css_color.h`
+- `include/css.h` -> `include/css_counter.h`
 - `include/css_box.h` -> `include/css_decl.h`
 - `include/css_chain.h` -> `include/css.h`
 - `include/css_chain.h` -> `include/css_select.h`
@@ -170,6 +171,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/css_chain.c` -> `include/css_select.h`
 - `src/css_color.c` -> `include/css_color.h`
 - `src/css_computed.c` -> `include/css_computed.h`
+- `src/css_counter.c` -> `include/css_counter.h`
 - `src/css_gradient.c` -> `include/css_color.h`
 - `src/css_gradient.c` -> `include/css_decl.h`
 - `src/css_gradient.c` -> `include/css_gradient.h`
@@ -445,6 +447,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_css_box.c` -> `include/css_decl.h`
 - `tests/test_css_color.c` -> `include/css_color.h`
 - `tests/test_css_computed.c` -> `include/css_computed.h`
+- `tests/test_css_counter.c` -> `include/css_counter.h`
 - `tests/test_css_drops.c` -> `include/css.h`
 - `tests/test_css_gradient.c` -> `include/css.h`
 - `tests/test_css_gradient.c` -> `include/css_gradient.h`
@@ -493,8 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_identity.c` -> `include/identity.h`
 - `tests/test_image_decode.c` -> `include/image_decode.h`
 - `tests/test_import_map.c` -> `include/import_map.h`
-- `tests/test_interp.c` -> `include/interp.h`
-- `tests/test_js_dom.c` -> `include/dom.h`
-- `tests/test_js_dom.c` -> `include/fb_cmdline.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

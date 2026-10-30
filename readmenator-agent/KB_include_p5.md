@@ -1,6 +1,32 @@
 # Subsystem: include (page 5 of 5)
 Previous: [KB_include_p4.md](KB_include_p4.md)
 
+## include/svg_render.h
+- Doc: sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `sv_seg` (struct, line 65)
+  - `sv_shape` (struct, line 75)
+  - `sv_image` (struct, line 104)
+  - `sv_status` (enum, line 25)
+  - `sv_shape_kind` (enum, line 44)
+  - `sv_verb` (enum, line 58)
+  - `verb` (type_alias, line 64) `typedef struct sv_seg { int verb;`
+  - `kind` (type_alias, line 75) `typedef struct sv_shape { int kind;`
+  - `height` (type_alias, line 104) `typedef struct sv_image { double width, height;`
+  - `sv_fit` (function, line 131) `void sv_fit(const sv_image *img, double dw, double dh, double *scale, double *off_x, double *off_y);`
+  - `FREEDOM_SVG_RENDER_H` (macro, line 2) `#define FREEDOM_SVG_RENDER_H`
+  - `SV_MAX_SHAPES` (macro, line 32) `#define SV_MAX_SHAPES`
+  - `SV_MAX_POINTS` (macro, line 33) `#define SV_MAX_POINTS`
+  - `SV_MAX_SEGS` (macro, line 34) `#define SV_MAX_SEGS`
+  - `SV_MAX_DEPTH` (macro, line 35) `#define SV_MAX_DEPTH`
+  - `SV_TEXT_MAX` (macro, line 36) `#define SV_TEXT_MAX`
+  - `SV_MAX_INPUT` (macro, line 37) `#define SV_MAX_INPUT`
+  - `SV_DEFAULT_W` (macro, line 41) `#define SV_DEFAULT_W`
+  - `SV_DEFAULT_H` (macro, line 42) `#define SV_DEFAULT_H`
+- Imported by: `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_render.c`, `tests/test_svg_render.c`
+
 ## include/tab.h
 - Doc: tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState...
 - Layer: utility

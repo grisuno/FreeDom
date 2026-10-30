@@ -1,6 +1,25 @@
 # API (page 5 of 12)
 Previous: [API_p4.md](API_p4.md)
 
+## include/perf_trace.h
+Imported by: `src/freedom.c`, `src/perf_trace.c`, `tests/test_perf_trace.c`
+- `pt_init` (function) `include/perf_trace.h:46` `void pt_init(pt_trace *t);` -- #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t samples[PT_MAX_SAMPLES]; size_t   fill;   /*...
+- `pt_elapsed_us` (function) `include/perf_trace.h:50` `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us);` -- end_us - start_us with an anti-underflow guard: end < start yields 0 * instead of wrapping to a huge uint64_t.
+- `pt_record` (function) `include/perf_trace.h:54` `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us);` -- Record one sample (microseconds) for the given stage.
+- `pt_count` (function) `include/perf_trace.h:57` `size_t pt_count(const pt_trace *t, pt_stage stage);` -- Record one sample (microseconds) for the given stage.
+- `pt_last_us` (function) `include/perf_trace.h:60` `uint64_t pt_last_us(const pt_trace *t, pt_stage stage);` -- Record one sample (microseconds) for the given stage.
+- `pt_min_us` (function) `include/perf_trace.h:63` `uint64_t pt_min_us(const pt_trace *t, pt_stage stage);` -- Record one sample (microseconds) for the given stage.
+- `pt_max_us` (function) `include/perf_trace.h:64` `uint64_t pt_max_us(const pt_trace *t, pt_stage stage);`
+- `pt_median_us` (function) `include/perf_trace.h:65` `uint64_t pt_median_us(const pt_trace *t, pt_stage stage);`
+- `pt_stage_name` (function) `include/perf_trace.h:69` `const char *pt_stage_name(pt_stage stage);` -- Short lowercase stage name ("fetch".."shape"); "unknown" if out of range. * Static string, never NULL.
+- `pt_format` (function) `include/perf_trace.h:76` `size_t pt_format(const pt_trace *t, char *buf, size_t cap);` -- Deterministic dump, one line per stage with count > 0, enum order: stage=<name> n=<total> last_us=<n> min_us=<n>...
+
+## include/pq_seal.h
+Depends on: `include/local_store.h`
+Imported by: `src/http_cache.c`, `src/pq_seal.c`, `tests/test_pq_seal.c`
+- `pqs_free` (function) `include/pq_seal.h:41` `void pqs_free(pqs_keys *k);`
+- `pqs_buf_free` (function) `include/pq_seal.h:51` `void pqs_buf_free(uint8_t *buf, size_t len);` -- DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der is owned * (release with...
+
 ## include/prefetch.h
 Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/prefetch.c`, `tests/test_prefetch.c`
 - `pf_scan` (function) `include/prefetch.h:62` `int pf_scan(const char *html, size_t len, pf_list *out);` -- Lookahead scan of hostile HTML.
@@ -37,23 +56,23 @@ Imported by: `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/re
 - `list` (function) `include/render_doc.h:18` `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
 - `RD_IMAGE` (function) `include/render_doc.h:59` `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
 - `form` (function) `include/render_doc.h:63` `* form (-1 = none);`
-- `default` (function) `include/render_doc.h:151` `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
-- `to` (function) `include/render_doc.h:251` `* belongs to (-1 = none);`
-- `rdp_images_warning` (function) `include/render_doc.h:306` `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-- `rd_free` (function) `include/render_doc.h:316` `void rd_free(rd_doc *d);` -- Builds the paint-ready document from an inert display list and the page's capabilities. view == NULL is treated as...
-- `rd_count` (function) `include/render_doc.h:319` `size_t rd_count(const rd_doc *d);` -- images and caps.images is false, a single RD_NOTICE block carrying rdp_images_warning() is prepended so the user is...
-- `rd_at` (function) `include/render_doc.h:320` `const rd_block *rd_at(const rd_doc *d, size_t i);`
-- `rd_box_count` (function) `include/render_doc.h:324` `size_t rd_box_count(const rd_doc *d);` -- Box tree accessors (Step D). rd_box_count is the number of box definitions (0 when * caps.css is off); rd_box_at...
-- `rd_box_at` (function) `include/render_doc.h:325` `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-- `rd_cont_count` (function) `include/render_doc.h:329` `size_t rd_cont_count(const rd_doc *d);` -- Container table accessors. rd_cont_count is the number of containers; rd_cont_at * returns conts[i] (i == a run's...
-- `rd_cont_at` (function) `include/render_doc.h:330` `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-- `rd_kind_name` (function) `include/render_doc.h:334` `const char *rd_kind_name(rd_kind k);` -- Stable, short English name of a block kind for structured/agent output.
-- `rd_block_tag` (function) `include/render_doc.h:342` `const char *rd_block_tag(const rd_block *b);` -- Canonical HTML tag name for a block, so the presentation layer can look up its user-agent box (box_style) without...
-- `rd_block_heading_level` (function) `include/render_doc.h:349` `int rd_block_heading_level(const rd_block *b);` -- Effective heading level of a block, 0 when it is not heading content.
-- `decision` (function) `include/render_doc.h:352` `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-- `IMG_FAIL_OK` (function) `include/render_doc.h:358` `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-- `rd_input_label` (function) `include/render_doc.h:363` `const char *rd_input_label(int input_type);` -- Stable, short English name of a form control type (a pv_input_type value), e.g. * "text" / "password" / "submit".
-- `rd_input_invisible` (function) `include/render_doc.h:368` `int rd_input_invisible(int input_type);` -- Nonzero iff a control of this type has no face of its own and is therefore never laid out or painted: a hidden...
+- `default` (function) `include/render_doc.h:153` `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
+- `to` (function) `include/render_doc.h:253` `* belongs to (-1 = none);`
+- `rdp_images_warning` (function) `include/render_doc.h:308` `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+- `rd_free` (function) `include/render_doc.h:318` `void rd_free(rd_doc *d);` -- Builds the paint-ready document from an inert display list and the page's capabilities. view == NULL is treated as...
+- `rd_count` (function) `include/render_doc.h:321` `size_t rd_count(const rd_doc *d);` -- images and caps.images is false, a single RD_NOTICE block carrying rdp_images_warning() is prepended so the user is...
+- `rd_at` (function) `include/render_doc.h:322` `const rd_block *rd_at(const rd_doc *d, size_t i);`
+- `rd_box_count` (function) `include/render_doc.h:326` `size_t rd_box_count(const rd_doc *d);` -- Box tree accessors (Step D). rd_box_count is the number of box definitions (0 when * caps.css is off); rd_box_at...
+- `rd_box_at` (function) `include/render_doc.h:327` `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+- `rd_cont_count` (function) `include/render_doc.h:331` `size_t rd_cont_count(const rd_doc *d);` -- Container table accessors. rd_cont_count is the number of containers; rd_cont_at * returns conts[i] (i == a run's...
+- `rd_cont_at` (function) `include/render_doc.h:332` `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+- `rd_kind_name` (function) `include/render_doc.h:336` `const char *rd_kind_name(rd_kind k);` -- Stable, short English name of a block kind for structured/agent output.
+- `rd_block_tag` (function) `include/render_doc.h:344` `const char *rd_block_tag(const rd_block *b);` -- Canonical HTML tag name for a block, so the presentation layer can look up its user-agent box (box_style) without...
+- `rd_block_heading_level` (function) `include/render_doc.h:351` `int rd_block_heading_level(const rd_block *b);` -- Effective heading level of a block, 0 when it is not heading content.
+- `decision` (function) `include/render_doc.h:354` `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+- `IMG_FAIL_OK` (function) `include/render_doc.h:360` `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+- `rd_input_label` (function) `include/render_doc.h:365` `const char *rd_input_label(int input_type);` -- Stable, short English name of a form control type (a pv_input_type value), e.g. * "text" / "password" / "submit".
+- `rd_input_invisible` (function) `include/render_doc.h:370` `int rd_input_invisible(int input_type);` -- Nonzero iff a control of this type has no face of its own and is therefore never laid out or painted: a hidden...
 
 ## include/render_policy.h
 Imported by: `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
@@ -437,50 +456,6 @@ Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`,
 - `bt_oof_avail` (function) `src/box_tree.c:800` `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
 - `bt_defer_roots` (function) `src/box_tree.c:808` `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
                       const bt_positi...`
-
-## src/browser.c
-Depends on: `include/browser.h`, `include/util.h`
-- `free_page` (function) `src/browser.c:15` `static void free_page(browser_state *bs)`
-- `clear_status` (function) `src/browser.c:25` `static void clear_status(browser_state *bs)` -- #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) { if (bs == NULL) return...
-- `free_history` (function) `src/browser.c:30` `static void free_history(browser_state *bs)`
-- `free_exceptions` (function) `src/browser.c:42` `static void free_exceptions(browser_state *bs)`
-- `is_https_url` (function) `src/browser.c:51` `static int is_https_url(const char *s)`
-- `is_local_path` (function) `src/browser.c:55` `static int is_local_path(const char *s)`
-- `url_is_allowed` (function) `src/browser.c:60` `static int url_is_allowed(const char *url)`
-- `xstrdup` (function) `src/browser.c:74` `static char *xstrdup(const char *s)`
-- `cp1252_to_ucs` (function) `src/browser.c:88` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
-- `utf8_encode` (function) `src/browser.c:102` `static size_t utf8_encode(unsigned int cp, char *out)` -- Encodes a BMP scalar (<= 0xFFFF) as UTF-8 into out (up to 3 bytes); returns the * byte count written.
-- `browser_init` (function) `src/browser.c:156` `browser_status browser_init(browser_state *bs)`
-- `browser_free` (function) `src/browser.c:167` `void browser_free(browser_state *bs)`
-- `browser_set_url_bar` (function) `src/browser.c:178` `browser_status browser_set_url_bar(browser_state *bs, const char *url)`
-- `browser_commit_url_bar` (function) `src/browser.c:190` `browser_status browser_commit_url_bar(browser_state *bs)`
-- `browser_navigate` (function) `src/browser.c:224` `browser_status browser_navigate(browser_state *bs, const char *url)`
-- `browser_push_state` (function) `src/browser.c:236` `browser_status browser_push_state(browser_state *bs, const char *url)`
-- `browser_replace_state` (function) `src/browser.c:243` `browser_status browser_replace_state(browser_state *bs, const char *url)`
-- `browser_entry_doc` (function) `src/browser.c:255` `int browser_entry_doc(const browser_state *bs, size_t pos)`
-- `browser_doc_index` (function) `src/browser.c:260` `int browser_doc_index(const browser_state *bs)`
-- `browser_back` (function) `src/browser.c:268` `browser_status browser_back(browser_state *bs)`
-- `browser_forward` (function) `src/browser.c:280` `browser_status browser_forward(browser_state *bs)`
-- `browser_can_back` (function) `src/browser.c:292` `int browser_can_back(const browser_state *bs)`
-- `browser_can_forward` (function) `src/browser.c:296` `int browser_can_forward(const browser_state *bs)`
-- `browser_current_url` (function) `src/browser.c:300` `const char *browser_current_url(const browser_state *bs)`
-- `browser_url_bar_selection` (function) `src/browser.c:305` `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)`
-- `browser_url_bar_delete_selection` (function) `src/browser.c:316` `int browser_url_bar_delete_selection(browser_state *bs)`
-- `browser_url_bar_insert` (function) `src/browser.c:326` `browser_status browser_url_bar_insert(browser_state *bs, char c)`
-- `browser_url_bar_backspace` (function) `src/browser.c:341` `browser_status browser_url_bar_backspace(browser_state *bs)`
-- `browser_url_bar_delete` (function) `src/browser.c:355` `browser_status browser_url_bar_delete(browser_state *bs)`
-- `browser_url_bar_move_cursor` (function) `src/browser.c:366` `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)`
-- `browser_url_bar_extend_cursor` (function) `src/browser.c:376` `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)`
-- `browser_url_bar_set_cursor` (function) `src/browser.c:385` `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)`
-- `browser_url_bar_select_all` (function) `src/browser.c:393` `browser_status browser_url_bar_select_all(browser_state *bs)`
-- `browser_url_bar_clear` (function) `src/browser.c:400` `browser_status browser_url_bar_clear(browser_state *bs)`
-- `browser_set_page` (function) `src/browser.c:409` `browser_status browser_set_page(browser_state *bs, const char *title,
-                           ...`
-- `browser_set_status` (function) `src/browser.c:431` `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)`
-- `browser_status_text` (function) `src/browser.c:445` `const char *browser_status_text(const browser_state *bs, uint64_t now_ms)`
-- `host_equal` (function) `src/browser.c:453` `static int host_equal(const char *a, const char *b)`
-- `browser_is_exception` (function) `src/browser.c:464` `int browser_is_exception(const browser_state *bs, const char *host)`
-- `browser_add_exception` (function) `src/browser.c:472` `browser_status browser_add_exception(browser_state *bs, const char *host)`
 
 
 Next: [API_p6.md](API_p6.md)

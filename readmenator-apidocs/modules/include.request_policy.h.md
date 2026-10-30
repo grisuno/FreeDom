@@ -137,7 +137,7 @@ A repeated name keeps its first occurrence. Pure; fail-closed (anything doubtful
 static inline int rp_headers_have(const char *lines, const char *name)
 ```
 
-1 when the sanitized block `lines` carries a header called [`name`](src.text_shape.c.md#name) (case-insensitive).
+1 when the sanitized block `lines` carries a header called `name` (case-insensitive).
 
 Inline so secure_fetch can ask it without linking the policy module.
 

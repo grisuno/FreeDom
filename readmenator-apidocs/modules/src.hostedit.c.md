@@ -1,11 +1,22 @@
 # `src/hostedit.c`
 
-> Source: [src/hostedit.c:1](../../src/hostedit.c#L1) | language `c` | coverage 40.0% | [API index](../index.md)
+> Source: [src/hostedit.c:1](../../src/hostedit.c#L1) | language `c` | coverage 33.3% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`suggest_ctx`](#suggest_ctx)
-- **Functions:** [`he_make_line`](#he_make_line), [`he_text_has_host`](#he_text_has_host), [`he_suggest`](#he_suggest)
+- **Functions:** [`he_make_line`](#he_make_line), [`he_text_has_host`](#he_text_has_host), [`he_suggest`](#he_suggest), [`he_cdn_kind`](#he_cdn_kind)
+
+## Call Graph
+
+Solid arrows stay in this module, dashed arrows leave it.
+
+```mermaid
+flowchart LR
+    n_src_hostedit_c__he_cdn_kind(["he_cdn_kind"])
+    n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
+    n_src_hostedit_c__he_cdn_kind -.-> n_gui_browser_ui_c__strcmp
+```
 
 ## Structs
 
@@ -98,5 +109,25 @@ Fills results[0..max) with up to max distinct domain tokens of text that match q
 **Returns:** `int`
 
 > **Inherited:** Documentation from [`he_suggest`](#he_suggest) (include/hostedit.h:55).
+
+---
+
+<a id="he_cdn_kind"></a>
+
+### `he_cdn_kind`
+
+`function` | [src/hostedit.c:173](../../src/hostedit.c#L173)
+
+```c
+he_cdn_kind_t he_cdn_kind(const char *url)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `url` | `char *` |  |  |
+
+*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
 ---

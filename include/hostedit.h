@@ -55,4 +55,10 @@ int he_text_has_host(const char *text, const char *host);
 int he_suggest(const char *text, const char *query,
                char results[][HE_MAX_HOST + 1], int max);
 
+/* Which auto-allow switch (config page) a subresource falls under, decided from the URL
+ * PATH only (the query and fragment never count): a stylesheet, a script, or any other
+ * resource (images, fonts, media, XHR). Pure; NULL -> HE_CDN_RES. */
+typedef enum he_cdn_kind_t { HE_CDN_CSS = 0, HE_CDN_JS = 1, HE_CDN_RES = 2 } he_cdn_kind_t;
+he_cdn_kind_t he_cdn_kind(const char *url);
+
 #endif /* FREEDOM_HOSTEDIT_H */

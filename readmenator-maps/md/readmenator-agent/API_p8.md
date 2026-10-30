@@ -1,6 +1,94 @@
 # API (page 8 of 12)
 Previous: [API_p7.md](API_p7.md)
 
+## src/flex_layout.c
+Depends on: `include/flex_layout.h`
+- `nn` (function) `src/flex_layout.c:19` `static double nn(double v)` -- bounded by FX_MAX_ITEMS (no VLAs).
+- `fx_flex_line` (function) `src/flex_layout.c:23` `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
+                ...`
+- `fx_grid_columns` (function) `src/flex_layout.c:128` `fx_status fx_grid_columns(double avail, size_t ncols, double gap,
+                          doubl...`
+- `fx_grid_column_count` (function) `src/flex_layout.c:133` `int fx_grid_column_count(int flow, int cols, int rows, size_t items)`
+- `fx_autofill_count` (function) `src/flex_layout.c:141` `size_t fx_autofill_count(double avail, double gap, double minw)`
+- `fx_grid_columns_weighted` (function) `src/flex_layout.c:151` `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
+                      ...`
+- `fx_grid_place_span` (function) `src/flex_layout.c:185` `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
+                      ...`
+- `fx_grid_area_hash` (function) `src/flex_layout.c:327` `unsigned fx_grid_area_hash(const char *name)`
+- `area_token_is_null_cell` (function) `src/flex_layout.c:351` `static int area_token_is_null_cell(const char *tok, size_t len)` -- 0 is reserved for "no name" (the null cell token), so a name that hashes to * it is nudged; the alternative is a...
+- `fx_grid_areas_parse` (function) `src/flex_layout.c:357` `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)`
+- `fx_grid_area_rect` (function) `src/flex_layout.c:432` `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
+                            int ...`
+- `float_pack_impl` (function) `src/flex_layout.c:474` `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
+                ...` -- Shared packer: wrap == 0 is the single-row v1 contract (overflow clamps in place); wrap != 0 starts a new row...
+- `fx_float_insets` (function) `src/flex_layout.c:514` `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
+                 ...`
+- `fx_float_pack` (function) `src/flex_layout.c:554` `fx_status fx_float_pack(const double *width, const int *side, size_t n,
+                        d...`
+- `fx_float_pack_wrap` (function) `src/flex_layout.c:559` `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
+                    ...`
+- `fx_grid_cell` (function) `src/flex_layout.c:601` `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
+- `fx_auto_margins` (function) `src/flex_layout.c:613` `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
+                ...` -- } void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) { if (row == NULL || col == NULL) return...
+- `fx_auto_min_size` (function) `src/flex_layout.c:636` `double fx_auto_min_size(double min_content, double basis, double author_min,
+                    ...`
+- `fx_multicol_used` (function) `src/flex_layout.c:653` `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
+               ...`
+- `fx_multicol_balance` (function) `src/flex_layout.c:690` `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
+                        ...`
+- `fx_justify_name` (function) `src/flex_layout.c:721` `const char *fx_justify_name(fx_justify j)`
+- `fx_column_place` (function) `src/flex_layout.c:733` `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
+            ...`
+- `fx_column_place_m` (function) `src/flex_layout.c:740` `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
+              ...`
+- `fx_cross_offset` (function) `src/flex_layout.c:801` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
+- `gl_ws` (function) `src/flex_layout.c:813` `static int gl_ws(char c)` -- } double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r) { double room = avail - w; if...
+- `gl_lower` (function) `src/flex_layout.c:817` `static int gl_lower(char c)`
+- `gl_kw` (function) `src/flex_layout.c:820` `static int gl_kw(const char *p, const char *end, const char *kw)` -- if (mauto_r) return 0.0; if (align == 1) return room / 2.0; if (align == 2) return room; return 0.0; } /* ASCII...
+- `gl_int` (function) `src/flex_layout.c:830` `static int gl_int(const char *p, const char *end, long cap, long *out)` -- A CSS <integer> (optional sign, digits only) filling exactly [p, end).
+- `gl_side_range` (function) `src/flex_layout.c:845` `static int gl_side_range(const char *p, const char *end, int *out)` -- int neg = 0; if (p < end && (*p == '+' || *p == '-')) { neg = (*p == '-'); ++p; } if (p >= end) return 0; long v =...
+- `fx_grid_line_side` (function) `src/flex_layout.c:868` `int fx_grid_line_side(const char *s, int *out)`
+- `fx_grid_line_parse` (function) `src/flex_layout.c:876` `int fx_grid_line_parse(const char *v, int *start, int *end)`
+- `gl_is_span` (function) `src/flex_layout.c:893` `static int gl_is_span(int v)`
+- `gl_is_line` (function) `src/flex_layout.c:894` `static int gl_is_line(int v)`
+- `fx_grid_line_resolve` (function) `src/flex_layout.c:896` `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
+- `fx_col_free_split` (function) `src/flex_layout.c:938` `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
+        ...`
+
+## src/form.c
+Depends on: `include/form.h`
+- `put_char` (function) `src/form.c:17` `static int put_char(char *out, size_t outsz, size_t *pos, char c)` -- No I/O, no global state.
+- `enc_component` (function) `src/form.c:25` `static int enc_component(const char *s, char *out, size_t outsz, size_t *pos)` -- Encodes one component per the WHATWG application/x-www-form-urlencoded byte * serialiser.
+- `fm_encode` (function) `src/form.c:43` `fm_status fm_encode(const fm_field *fields, size_t n,
+                    char *out, size_t outsz...`
+- `copy_fit` (function) `src/form.c:66` `static int copy_fit(char *dst, size_t dstsz, const char *src)` -- if (fields[i].name == NULL) continue; /* a nameless control is not submitted if (!first && put_char(out, outsz...
+- `clean_action` (function) `src/form.c:75` `static int clean_action(const char *action, char *out, size_t outsz)` -- Removes TAB/LF/CR and trims leading/trailing ASCII spaces (WHATWG cleaning of a * URL-bearing attribute).
+- `strip_query` (function) `src/form.c:93` `static void strip_query(char *url)` -- if (c == '\t' || c == '\n' || c == '\r') continue; if (o + 1 >= outsz) return -1; out[o++] = c; } out[o] = '\0'...
+- `resolve_target` (function) `src/form.c:101` `static fm_block_reason resolve_target(const char *base, const char *act,
+                        ...` -- Resolves the cleaned action into a validated absolute https URL R, or returns a * block reason.
+- `fm_build` (function) `src/form.c:120` `fm_status fm_build(const char *base, const char *action, fm_method method,
+                   con...`
+
+## src/frame_broker.c
+Depends on: `include/frame_broker.h`
+- `lc` (function) `src/frame_broker.c:9` `static char lc(char c)`
+- `host_char_ok` (function) `src/frame_broker.c:11` `static int host_char_ok(char c)`
+- `fbk_origin_of` (function) `src/frame_broker.c:15` `int fbk_origin_of(const char *url, char *out, size_t cap)`
+- `fbk_init` (function) `src/frame_broker.c:53` `int fbk_init(fbk_table *t, const char *top_url)`
+- `live` (function) `src/frame_broker.c:62` `static int live(const fbk_table *t, int id)`
+- `fbk_add` (function) `src/frame_broker.c:66` `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id)`
+- `fbk_remove` (function) `src/frame_broker.c:84` `void fbk_remove(fbk_table *t, int id)`
+- `fbk_origin` (function) `src/frame_broker.c:96` `const char *fbk_origin(const fbk_table *t, int id)`
+- `target_admits` (function) `src/frame_broker.c:101` `static int target_admits(const char *target, const char *snd, const char *recv)` -- int changed = 1;                                  /* fixpoint: slots are reused, order is not a tree order while...
+- `fbk_route` (function) `src/frame_broker.c:118` `fbk_verdict fbk_route(const fbk_table *t, int from, fbk_rel rel, int child,
+                     ...`
+
+## src/frame_clock.c
+Depends on: `include/frame_clock.h`
+- `fc_set_active` (function) `src/frame_clock.c:16` `void fc_set_active(fc_clock *c, int active)`
+- `fc_needs_tick` (function) `src/frame_clock.c:21` `int fc_needs_tick(const fc_clock *c)`
+- `fc_interval_ms` (function) `src/frame_clock.c:26` `int fc_interval_ms(const fc_clock *c)`
+
 ## src/frame_host.c
 Depends on: `include/frame_broker.h`, `include/frame_host.h`
 - `fh_new` (function) `src/frame_host.c:35` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
@@ -139,6 +227,7 @@ Depends on: `include/hostedit.h`
 - `suggest_cb` (function) `src/hostedit.c:144` `static int suggest_cb(const char *ts, size_t tl, void *vctx)`
 - `he_suggest` (function) `src/hostedit.c:164` `int he_suggest(const char *text, const char *query,
                char results[][HE_MAX_HOST + 1...`
+- `he_cdn_kind` (function) `src/hostedit.c:173` `he_cdn_kind_t he_cdn_kind(const char *url)`
 
 ## src/html_parse.c
 Depends on: `include/dom.h`, `include/html_parse.h`, `include/util.h`
@@ -217,25 +306,25 @@ Depends on: `include/anti_fp.h`, `include/identity.h`
 - `is_alnum` (function) `src/identity.c:21` `static int is_alnum(char c)`
 - `idn_defaults` (function) `src/identity.c:23` `void idn_defaults(idn_config *c)`
 - `idn_is_default` (function) `src/identity.c:29` `int idn_is_default(const idn_config *c)`
-- `idn_set_user_agent` (function) `src/identity.c:34` `int idn_set_user_agent(idn_config *c, const char *ua)`
-- `tag_valid` (function) `src/identity.c:50` `static int tag_valid(const char *s, size_t n)` -- size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t i = 0; i < n; ++i) { unsigned...
-- `idn_set_languages` (function) `src/identity.c:63` `int idn_set_languages(idn_config *c, const char *list)`
-- `idn_set_geo` (function) `src/identity.c:91` `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)`
-- `idn_clear_geo` (function) `src/identity.c:103` `void idn_clear_geo(idn_config *c)`
-- `idn_user_agent` (function) `src/identity.c:109` `const char *idn_user_agent(const idn_config *c)`
-- `idn_accept_language` (function) `src/identity.c:113` `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)`
-- `idn_primary_language` (function) `src/identity.c:143` `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)`
-- `hexval` (function) `src/identity.c:157` `static int hexval(int ch)`
-- `pct_decode` (function) `src/identity.c:166` `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)` -- Decodes %XX (and '+' when plus) from [s, s+n) into out.
-- `append` (function) `src/identity.c:186` `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)`
-- `append_pct` (function) `src/identity.c:197` `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)`
-- `idn_serialize` (function) `src/identity.c:206` `size_t idn_serialize(const idn_config *c, char *out, size_t cap)`
-- `parse_geo` (function) `src/identity.c:223` `static int parse_geo(const char *s, double *lat, double *lon, double *acc)` -- if (c == NULL) return 0; size_t n = 0; if (append(out, &n, cap, "ua=") != 0 || append_pct(out, &n, cap...
-- `idn_parse` (function) `src/identity.c:236` `void idn_parse(idn_config *c, const char *text)`
-- `parse_number` (function) `src/identity.c:268` `static int parse_number(const char *s, double *out)`
-- `idn_apply_query` (function) `src/identity.c:275` `unsigned idn_apply_query(idn_config *c, const char *query)`
-- `esc_append` (function) `src/identity.c:346` `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)`
-- `idn_render_page` (function) `src/identity.c:362` `size_t idn_render_page(const idn_config *c, char *out, size_t cap)`
+- `idn_set_user_agent` (function) `src/identity.c:35` `int idn_set_user_agent(idn_config *c, const char *ua)`
+- `tag_valid` (function) `src/identity.c:51` `static int tag_valid(const char *s, size_t n)` -- size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t i = 0; i < n; ++i) { unsigned...
+- `idn_set_languages` (function) `src/identity.c:64` `int idn_set_languages(idn_config *c, const char *list)`
+- `idn_set_geo` (function) `src/identity.c:92` `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)`
+- `idn_clear_geo` (function) `src/identity.c:104` `void idn_clear_geo(idn_config *c)`
+- `idn_user_agent` (function) `src/identity.c:110` `const char *idn_user_agent(const idn_config *c)`
+- `idn_accept_language` (function) `src/identity.c:114` `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)`
+- `idn_primary_language` (function) `src/identity.c:144` `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)`
+- `hexval` (function) `src/identity.c:158` `static int hexval(int ch)`
+- `pct_decode` (function) `src/identity.c:167` `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)` -- Decodes %XX (and '+' when plus) from [s, s+n) into out.
+- `append` (function) `src/identity.c:187` `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)`
+- `append_pct` (function) `src/identity.c:198` `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)`
+- `idn_serialize` (function) `src/identity.c:207` `size_t idn_serialize(const idn_config *c, char *out, size_t cap)`
+- `parse_geo` (function) `src/identity.c:228` `static int parse_geo(const char *s, double *lat, double *lon, double *acc)` -- || append(out, &n, cap, "|geo=") != 0) { out[0] = '\0'; return 0; } if (c->geo_mode == IDN_GEO_FIXED && append(out...
+- `idn_parse` (function) `src/identity.c:241` `void idn_parse(idn_config *c, const char *text)`
+- `parse_number` (function) `src/identity.c:275` `static int parse_number(const char *s, double *out)`
+- `idn_apply_query` (function) `src/identity.c:282` `unsigned idn_apply_query(idn_config *c, const char *query)`
+- `esc_append` (function) `src/identity.c:361` `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)`
+- `idn_render_page` (function) `src/identity.c:377` `size_t idn_render_page(const idn_config *c, char *out, size_t cap)`
 
 ## src/image_decode.c
 Depends on: `include/image_decode.h`
@@ -322,134 +411,6 @@ Depends on: `src/js_custom_elements.h`
 ## src/js_custom_elements.h
 Imported by: `src/js_custom_elements.c`, `src/js_dom.c`
 - `jdce_install` (function) `src/js_custom_elements.h:9` `int jdce_install(JSContext *ctx);`
-
-## src/js_dom.c
-Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `include/web_storage.h`, `src/js_custom_elements.h`, `src/js_dom_ext.h`, `src/js_dom_internal.h`, `src/js_location_internal.h`
-- `jd_opaque_get` (function) `src/js_dom.c:27` `jd_opaque *jd_opaque_get(JSContext *ctx)`
-- `jd_idx` (function) `src/js_dom.c:31` `dom_index *jd_idx(JSContext *ctx)`
-- `jd_handle` (function) `src/js_dom.c:40` `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)` -- Coerces a JS argument to a node handle.
-- `jd_handle_or_null` (function) `src/js_dom.c:47` `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)`
-- `m_node_count` (function) `src/js_dom.c:53` `static JSValue m_node_count(JSContext *ctx, JSValueConst this_val,
-                            in...`
-- `m_get_element_by_id` (function) `src/js_dom.c:59` `static JSValue m_get_element_by_id(JSContext *ctx, JSValueConst this_val,
-                       ...`
-- `jd_query_list` (function) `src/js_dom.c:70` `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)` -- return JS_NewInt64(ctx, (int64_t)dom_node_count(jd_idx(ctx))); } static JSValue m_get_element_by_id(JSContext *ctx...
-- `m_get_by_tag` (function) `src/js_dom.c:100` `static JSValue m_get_by_tag(JSContext *ctx, JSValueConst this_val,
-                            in...`
-- `m_get_by_class` (function) `src/js_dom.c:106` `static JSValue m_get_by_class(JSContext *ctx, JSValueConst this_val,
-                            ...`
-- `m_tag_name` (function) `src/js_dom.c:112` `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-- `m_get_attribute` (function) `src/js_dom.c:122` `static JSValue m_get_attribute(JSContext *ctx, JSValueConst this_val,
-                           ...`
-- `m_parent` (function) `src/js_dom.c:135` `static JSValue m_parent(JSContext *ctx, JSValueConst this_val,
-                        int argc, ...`
-- `m_first_child` (function) `src/js_dom.c:143` `static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,
-                             ...`
-- `m_node_kind` (function) `src/js_dom.c:152` `static JSValue m_node_kind(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom_node_id h; if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION; return jd_handle_or_null(ctx...
-- `m_child_node` (function) `src/js_dom.c:159` `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-- `m_sibling_node` (function) `src/js_dom.c:166` `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-- `m_create_char` (function) `src/js_dom.c:174` `static JSValue m_create_char(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- (void)this_val; (void)argc; dom_node_id h; if (jd_handle(ctx, argv[0], &h) < 0) return JS_EXCEPTION; return...
-- `m_next_sibling` (function) `src/js_dom.c:188` `static JSValue m_next_sibling(JSContext *ctx, JSValueConst this_val,
-                            ...`
-- `m_precedes` (function) `src/js_dom.c:196` `static JSValue m_precedes(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-- `m_text_content` (function) `src/js_dom.c:207` `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,
-                            ...`
-- `m_set_text` (function) `src/js_dom.c:217` `static JSValue m_set_text(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-- `m_get_title` (function) `src/js_dom.c:231` `static JSValue m_get_title(JSContext *ctx, JSValueConst this_val,
-                           int ...`
-- `m_set_title` (function) `src/js_dom.c:239` `static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,
-                           int ...`
-- `m_create_element` (function) `src/js_dom.c:252` `static JSValue m_create_element(JSContext *ctx, JSValueConst this_val,
-                          ...`
-- `m_append_child` (function) `src/js_dom.c:264` `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,
-                            ...`
-- `m_move_children` (function) `src/js_dom.c:275` `static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.moveChildren(src, parent, where, ref|null): every child node of src (text * included) into parent at where (0...
-- `m_clone_node` (function) `src/js_dom.c:289` `static JSValue m_clone_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv) {...
-- `m_insert_before` (function) `src/js_dom.c:299` `static JSValue m_insert_before(JSContext *ctx, JSValueConst this_val,
-                           ...` -- return JS_NewBool(ctx, dom_move_children(jd_idx(ctx), src, parent, (dom_place)where, ref) == DOM_OK); } /*...
-- `m_remove_child` (function) `src/js_dom.c:311` `static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,
-                            ...`
-- `m_set_attribute` (function) `src/js_dom.c:320` `static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,
-                           ...`
-- `m_remove_attribute` (function) `src/js_dom.c:336` `static JSValue m_remove_attribute(JSContext *ctx, JSValueConst this_val,
-                        ...`
-- `m_set_inner_html` (function) `src/js_dom.c:348` `static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,
-                          ...`
-- `m_get_inner_html` (function) `src/js_dom.c:364` `static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,
-                          ...` -- innerHTML getter (2026-07-11): serializes the node's children (bounded in dom.c; * over-cap or invalid handle yields...
-- `m_rect` (function) `src/js_dom.c:397` `static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.rect(h): [x, y, w, h] of h in document coordinates from the installed * layout geometry, or null (no table, or...
-- `m_computed` (function) `src/js_dom.c:418` `static JSValue m_computed(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.computed(h, prop): the cascade's computed value of `prop` (kebab-case) for h as a string, "" for an unknown...
-- `m_query_selector` (function) `src/js_dom.c:463` `static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,
-                          ...` -- return a; } /* --- install --- typedef struct jd_method { const char *name; JSCFunction *fn; int          nargs; }...
-- `m_query_selector_all` (function) `src/js_dom.c:478` `static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,
-                      ...` -- int argc, JSValueConst *argv) { (void)this_val; (void)argc; dom_node_id root; if (jd_handle(ctx, argv[0], &root) <...
-- `m_matches` (function) `src/js_dom.c:512` `static JSValue m_matches(JSContext *ctx, JSValueConst this_val,
-                         int argc...`
-- `m_closest` (function) `src/js_dom.c:524` `static JSValue m_closest(JSContext *ctx, JSValueConst this_val,
-                         int argc...`
-- `m_attr_names` (function) `src/js_dom.c:536` `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,
-                            in...`
-- `jd_is_mutator` (function) `src/js_dom.c:603` `static int jd_is_mutator(const char *name)`
-- `jd_freeze_mutators` (function) `src/js_dom.c:609` `static int jd_freeze_mutators(JSContext *jsctx)`
-- `table` (function) `src/js_dom.c:643` `* a table (dom.viewport() non-null);`
-- `attrNames` (function) `src/js_dom.c:695` `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
-     * a missing '...`
-- `scripts` (function) `src/js_dom.c:894` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-- `enough` (function) `src/js_dom.c:1067` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-- `ms` (function) `src/js_dom.c:1272` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-- `empty` (function) `src/js_dom.c:1463` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-- `geometry` (function) `src/js_dom.c:1465` `* constant geometry (zero real leak);`
-- `size` (function) `src/js_dom.c:1468` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
-- `js_env` (function) `src/js_dom.c:1471` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
- * document shim (uses...`
-- `jd_install` (function) `src/js_dom.c:2008` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-- `jd_rebind` (function) `src/js_dom.c:2090` `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)`
-- `jd_flush_custom_elements` (function) `src/js_dom.c:2100` `void jd_flush_custom_elements(js_context *ctx)`
-- `fails` (function) `src/js_dom.c:2114` `* cap is reached or an allocation fails (caller stops), else 0. */
-static int cb_append(char **bu...`
-- `jd_install_console` (function) `src/js_dom.c:2228` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-- `jd_set_cookies` (function) `src/js_dom.c:2265` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-- `jd_get_cookies` (function) `src/js_dom.c:2285` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-- `jd_set_computed` (function) `src/js_dom.c:2308` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-- `jd_set_geometry` (function) `src/js_dom.c:2319` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
-
-## src/js_dom_ext.c
-Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`
-- `identity` (function) `src/js_dom_ext.c:104` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
-- `registration` (function) `src/js_dom_ext.c:481` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
- * observer...`
-- `run` (function) `src/js_dom_ext.c:1265` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-- `jdx_install` (function) `src/js_dom_ext.c:1330` `int jdx_install(JSContext *ctx)`
-- `jd_install_repl_api` (function) `src/js_dom_ext.c:1339` `jd_status jd_install_repl_api(js_context *ctx)`
-- `jd_set_repl_css` (function) `src/js_dom_ext.c:1347` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
-- `jd_install_geolocation` (function) `src/js_dom_ext.c:1360` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
-- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1379` `jd_status jd_install_indexeddb(js_context *ctx)`
-
-## src/js_dom_ext.h
-Imported by: `src/js_dom.c`, `src/js_dom_ext.c`
-- `jdx_install` (function) `src/js_dom_ext.h:10` `int jdx_install(JSContext *ctx);`
-
-## src/js_dom_internal.h
-Depends on: `include/dom.h`, `include/js_dom.h`
-Imported by: `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`
-- `jd_opaque_get` (function) `src/js_dom_internal.h:11` `jd_opaque *jd_opaque_get(JSContext *ctx);`
-- `jd_idx` (function) `src/js_dom_internal.h:12` `dom_index *jd_idx(JSContext *ctx);`
-- `jd_handle` (function) `src/js_dom_internal.h:14` `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out);` -- Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): * the context accessors every native...
-
-## src/js_embed.c
-Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
-- `try_create_iframe_from_script` (function) `src/js_embed.c:86` `static int try_create_iframe_from_script(dom_index *idx,
-                                        ...` -- Scans an inline script body for `video[N]` or `video_data` assignment and extracts the first usable iframe src.
-- `jd_video_from_scripts` (function) `src/js_embed.c:203` `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,
-                   ...`
-- `jd_inject_video_shim` (function) `src/js_embed.c:242` `jd_status jd_inject_video_shim(js_context *ctx)`
-- `scan_video_url` (function) `src/js_embed.c:256` `static int scan_video_url(const char *body, size_t blen,
-                           char *out, si...` -- Scans a body buffer for `.m3u8` (HLS) or `.mp4` (progressive) video URLs.
-- `jd_process_iframes` (function) `src/js_embed.c:294` `void jd_process_iframes(js_context *ctx, dom_index *idx,
-                        jd_fetch_fn fn, ...`
 
 
 Next: [API_p9.md](API_p9.md)

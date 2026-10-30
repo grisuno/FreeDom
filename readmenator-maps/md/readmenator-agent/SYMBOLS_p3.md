@@ -3,6 +3,14 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `order` | function | `include/css.h:1102` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
+| `palette` | function | `include/css.h:1049` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
+| `prefers_dark` | type_alias | `include/css.h:1003` | `typedef struct css_media { int prefers_dark;` |
+| `prop` | type_alias | `include/css.h:1072` | `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];` |
+| `scaleY` | function | `include/css.h:871` | `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);` |
+| `slots` | function | `include/css.h:887` | `* parse time into ALL seven slots (singular matrices fail closed);` |
+| `translate` | function | `include/css.h:870` | `* translate()/translateX()/translateY();` |
+| `verbatim` | function | `include/css.h:85` | `* the quoted row strings verbatim (flex_layout parses them);` |
 | `CAR_INLINE_SPEC` | macro | `include/css_atrule.h:18` | `#define CAR_INLINE_SPEC` |
 | `CAR_LAYER_NAME_MAX` | macro | `include/css_atrule.h:17` | `#define CAR_LAYER_NAME_MAX` |
 | `CAR_MAX_DEPTH` | macro | `include/css_atrule.h:15` | `#define CAR_MAX_DEPTH` |
@@ -65,6 +73,25 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `ccm_input` | struct | `include/css_computed.h:19` | `` |
 | `ccm_property_count` | function | `include/css_computed.h:32` | `size_t ccm_property_count(void);` |
 | `ccm_property_name` | function | `include/css_computed.h:33` | `const char *ccm_property_name(size_t i);` |
+| `CNT_MAX_DECL` | macro | `include/css_counter.h:17` | `#define CNT_MAX_DECL` |
+| `CNT_MAX_INSTANCES` | macro | `include/css_counter.h:18` | `#define CNT_MAX_INSTANCES` |
+| `CNT_NAME_MAX` | macro | `include/css_counter.h:19` | `#define CNT_NAME_MAX` |
+| `FREEDOM_CSS_COUNTER_H` | macro | `include/css_counter.h:9` | `#define FREEDOM_CSS_COUNTER_H` |
+| `cnt_decl` | struct | `include/css_counter.h:21` | `` |
+| `cnt_format` | function | `include/css_counter.h:49` | `size_t cnt_format(int style, long value, char *out, size_t cap);` |
+| `cnt_hash` | function | `include/css_counter.h:34` | `unsigned cnt_hash(const char *name, size_t len);` |
+| `cnt_increment` | function | `include/css_counter.h:57` | `void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n);` |
+| `cnt_is_marker` | function | `include/css_counter.h:45` | `int cnt_is_marker(const char *s);` |
+| `cnt_leave` | function | `include/css_counter.h:60` | `void cnt_leave(cnt_state *s, int depth);` |
+| `cnt_parse_content` | function | `include/css_counter.h:44` | `int cnt_parse_content(const char *val, char *out, size_t cap);` |
+| `cnt_reset` | function | `include/css_counter.h:56` | `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n);` |
+| `cnt_resolve` | function | `include/css_counter.h:67` | `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx, char *out, size_t cap);` |
+| `cnt_state` | type_alias | `include/css_counter.h:50` | `typedef struct cnt_state cnt_state;` |
+| `cnt_state_free` | function | `include/css_counter.h:53` | `void cnt_state_free(cnt_state *s);` |
+| `cnt_state_new` | function | `include/css_counter.h:52` | `cnt_state *cnt_state_new(void);` |
+| `cnt_style` | enum | `include/css_counter.h:26` | `` |
+| `name` | type_alias | `include/css_counter.h:20` | `typedef struct cnt_decl { unsigned name;` |
+| `written` | function | `include/css_counter.h:37` | `* written (0 for `none`) or -1 when invalid. `dflt` is the value of an entry with no * integer: 0 for reset, 1 for...` |
 | `CSS_INLINE_BG_URLS` | macro | `include/css_decl.h:28` | `#define CSS_INLINE_BG_URLS` |
 | `CSS_MAX_BG_URLS` | macro | `include/css_decl.h:22` | `#define CSS_MAX_BG_URLS` |
 | `CSS_MAX_CONTENT_URLS` | macro | `include/css_decl.h:23` | `#define CSS_MAX_CONTENT_URLS` |
@@ -76,9 +103,10 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CSS_WIDE_PROBE_DECLS` | macro | `include/css_decl.h:35` | `#define CSS_WIDE_PROBE_DECLS` |
 | `FREEDOM_CSS_DECL_H` | macro | `include/css_decl.h:2` | `#define FREEDOM_CSS_DECL_H` |
 | `contiguous` | function | `include/css_decl.h:65` | `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...` |
-| `css_decl` | struct | `include/css_decl.h:220` | `` |
+| `css_decl` | struct | `include/css_decl.h:232` | `` |
 | `order` | function | `include/css_decl.h:50` | `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);` |
-| `prop` | type_alias | `include/css_decl.h:219` | `typedef struct css_decl { int prop;` |
+| `part` | function | `include/css_decl.h:216` | `* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM...` |
+| `prop` | type_alias | `include/css_decl.h:231` | `typedef struct css_decl { int prop;` |
 | `CG_LEN_UNSET` | macro | `include/css_gradient.h:18` | `#define CG_LEN_UNSET` |
 | `FREEDOM_CSS_GRADIENT_H` | macro | `include/css_gradient.h:2` | `#define FREEDOM_CSS_GRADIENT_H` |
 | `cg_expand_background` | function | `include/css_gradient.h:13` | `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
@@ -303,48 +331,50 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `fbp_tab_span` | function | `include/fb_panes.h:43` | `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` |
 | `fbp_tab_wrap` | function | `include/fb_panes.h:40` | `int fbp_tab_wrap(int tab, int dir);` |
 | `FREEDOM_FLEX_LAYOUT_H` | macro | `include/flex_layout.h:2` | `#define FREEDOM_FLEX_LAYOUT_H` |
-| `FX_AREA_MAX_CELLS` | macro | `include/flex_layout.h:138` | `#define FX_AREA_MAX_CELLS` |
-| `FX_AREA_MAX_COLS` | macro | `include/flex_layout.h:137` | `#define FX_AREA_MAX_COLS` |
-| `FX_AREA_MAX_ROWS` | macro | `include/flex_layout.h:136` | `#define FX_AREA_MAX_ROWS` |
-| `FX_AREA_NAME_MAX` | macro | `include/flex_layout.h:139` | `#define FX_AREA_NAME_MAX` |
-| `FX_ERR_NULL_ARG` | function | `include/flex_layout.h:228` | `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);` |
-| `FX_FLOAT_MIN_LINE` | macro | `include/flex_layout.h:208` | `#define FX_FLOAT_MIN_LINE` |
+| `FX_AREA_MAX_CELLS` | macro | `include/flex_layout.h:148` | `#define FX_AREA_MAX_CELLS` |
+| `FX_AREA_MAX_COLS` | macro | `include/flex_layout.h:147` | `#define FX_AREA_MAX_COLS` |
+| `FX_AREA_MAX_ROWS` | macro | `include/flex_layout.h:146` | `#define FX_AREA_MAX_ROWS` |
+| `FX_AREA_NAME_MAX` | macro | `include/flex_layout.h:149` | `#define FX_AREA_NAME_MAX` |
+| `FX_ERR_NULL_ARG` | function | `include/flex_layout.h:238` | `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);` |
+| `FX_FLOAT_MIN_LINE` | macro | `include/flex_layout.h:218` | `#define FX_FLOAT_MIN_LINE` |
 | `FX_GL_AUTO` | macro | `include/flex_layout.h:107` | `#define FX_GL_AUTO` |
 | `FX_GL_LINE_MAX` | macro | `include/flex_layout.h:110` | `#define FX_GL_LINE_MAX` |
 | `FX_GL_SPAN_BASE` | macro | `include/flex_layout.h:108` | `#define FX_GL_SPAN_BASE` |
 | `FX_GL_SPAN_MAX` | macro | `include/flex_layout.h:109` | `#define FX_GL_SPAN_MAX` |
-| `FX_MAUTO_BOTTOM` | macro | `include/flex_layout.h:338` | `#define FX_MAUTO_BOTTOM` |
-| `FX_MAUTO_TOP` | macro | `include/flex_layout.h:337` | `#define FX_MAUTO_TOP` |
-| `FX_MAX_COLUMNS` | macro | `include/flex_layout.h:270` | `#define FX_MAX_COLUMNS` |
+| `FX_GRID_COLS_MAX` | macro | `include/flex_layout.h:132` | `#define FX_GRID_COLS_MAX` |
+| `FX_MAUTO_BOTTOM` | macro | `include/flex_layout.h:348` | `#define FX_MAUTO_BOTTOM` |
+| `FX_MAUTO_TOP` | macro | `include/flex_layout.h:347` | `#define FX_MAUTO_TOP` |
+| `FX_MAX_COLUMNS` | macro | `include/flex_layout.h:280` | `#define FX_MAX_COLUMNS` |
 | `FX_MAX_ITEMS` | macro | `include/flex_layout.h:28` | `#define FX_MAX_ITEMS` |
 | `basis` | type_alias | `include/flex_layout.h:40` | `typedef struct fx_item { double basis;` |
-| `bottom` | type_alias | `include/flex_layout.h:214` | `typedef struct fx_float_rect { double top, bottom;` |
-| `cols` | type_alias | `include/flex_layout.h:144` | `typedef struct fx_area_map { int rows, cols;` |
-| `fx_area_map` | struct | `include/flex_layout.h:144` | `` |
-| `fx_auto_min_size` | function | `include/flex_layout.h:265` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
+| `bottom` | type_alias | `include/flex_layout.h:224` | `typedef struct fx_float_rect { double top, bottom;` |
+| `cols` | type_alias | `include/flex_layout.h:154` | `typedef struct fx_area_map { int rows, cols;` |
+| `fx_area_map` | struct | `include/flex_layout.h:154` | `` |
+| `fx_auto_min_size` | function | `include/flex_layout.h:275` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
 | `fx_autofill_count` | function | `include/flex_layout.h:129` | `size_t fx_autofill_count(double avail, double gap, double minw);` |
-| `fx_cross_offset` | function | `include/flex_layout.h:354` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` |
-| `fx_float_rect` | struct | `include/flex_layout.h:214` | `` |
-| `fx_grid_area_hash` | function | `include/flex_layout.h:153` | `unsigned fx_grid_area_hash(const char *name);` |
+| `fx_cross_offset` | function | `include/flex_layout.h:364` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` |
+| `fx_float_rect` | struct | `include/flex_layout.h:224` | `` |
+| `fx_grid_area_hash` | function | `include/flex_layout.h:163` | `unsigned fx_grid_area_hash(const char *name);` |
 | `fx_grid_cell` | function | `include/flex_layout.h:74` | `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);` |
+| `fx_grid_column_count` | function | `include/flex_layout.h:139` | `int fx_grid_column_count(int flow, int cols, int rows, size_t items);` |
 | `fx_grid_line_parse` | function | `include/flex_layout.h:117` | `int fx_grid_line_parse(const char *v, int *start, int *end);` |
 | `fx_grid_line_resolve` | function | `include/flex_layout.h:122` | `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);` |
 | `fx_item` | struct | `include/flex_layout.h:40` | `` |
 | `fx_justify` | enum | `include/flex_layout.h:30` | `` |
-| `fx_justify_name` | function | `include/flex_layout.h:321` | `const char *fx_justify_name(fx_justify j);` |
+| `fx_justify_name` | function | `include/flex_layout.h:331` | `const char *fx_justify_name(fx_justify j);` |
 | `fx_result` | struct | `include/flex_layout.h:48` | `` |
 | `fx_status` | enum | `include/flex_layout.h:53` | `` |
-| `height` | function | `include/flex_layout.h:327` | `* used height (h_out);` |
-| `it` | function | `include/flex_layout.h:344` | `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...` |
+| `height` | function | `include/flex_layout.h:337` | `* used height (h_out);` |
+| `it` | function | `include/flex_layout.h:354` | `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...` |
 | `number` | function | `include/flex_layout.h:106` | `* line number (negative counts from the end). */ #define FX_GL_AUTO 0 #define FX_GL_SPAN_BASE (1 << 20) #define...` |
-| `offset` | function | `include/flex_layout.h:171` | `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...` |
+| `offset` | function | `include/flex_layout.h:181` | `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...` |
 | `out` | function | `include/flex_layout.h:62` | `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item...` |
 | `pos` | type_alias | `include/flex_layout.h:48` | `typedef struct fx_result { double pos;` |
-| `required` | function | `include/flex_layout.h:184` | `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);` |
+| `required` | function | `include/flex_layout.h:194` | `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);` |
 | `size` | function | `include/flex_layout.h:60` | `* content size (px);` |
-| `space` | function | `include/flex_layout.h:234` | `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...` |
-| `widths` | function | `include/flex_layout.h:194` | `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...` |
-| `win` | function | `include/flex_layout.h:352` | `* margins win (both = centre, left only = end);` |
+| `space` | function | `include/flex_layout.h:244` | `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...` |
+| `widths` | function | `include/flex_layout.h:204` | `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...` |
+| `win` | function | `include/flex_layout.h:362` | `* margins win (both = centre, left only = end);` |
 | `FM_BODY_MAX` | macro | `include/form.h:30` | `#define FM_BODY_MAX` |
 | `FM_CONTENT_TYPE_URLENCODED` | variable | `include/form.h:68` | `extern const char FM_CONTENT_TYPE_URLENCODED[];` |
 | `FM_MAX_FIELDS` | macro | `include/form.h:31` | `#define FM_MAX_FIELDS` |
@@ -454,6 +484,8 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `walked` | function | `include/hostblock.h:65` | `* walked (the host, then without its first label, ...): any suffix on the allowlist * => HB_ALLOW (allow wins...` |
 | `FREEDOM_HOSTEDIT_H` | macro | `include/hostedit.h:2` | `#define FREEDOM_HOSTEDIT_H` |
 | `HE_MAX_HOST` | macro | `include/hostedit.h:32` | `#define HE_MAX_HOST` |
+| `he_cdn_kind` | function | `include/hostedit.h:62` | `he_cdn_kind_t he_cdn_kind(const char *url);` |
+| `he_cdn_kind_t` | enum | `include/hostedit.h:61` | `` |
 | `he_status` | enum | `include/hostedit.h:24` | `` |
 | `he_suggest` | function | `include/hostedit.h:55` | `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);` |
 | `he_text_has_host` | function | `include/hostedit.h:46` | `int he_text_has_host(const char *text, const char *host);` |
@@ -464,37 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `cfg` | function | `include/html_parse.h:57` | `* policy in cfg (cfg == NULL => secure defaults). No script is ever executed. * html == NULL or out == NULL =>...` |
 | `dropped` | function | `include/html_parse.h:47` | `* dropped (not executed). */ #define HP_MAX_SCRIPTS ((size_t)4096) /* Returns a configuration with the secure...` |
 | `hp_config` | struct | `include/html_parse.h:32` | `` |
-| `hp_document` | type_alias | `include/html_parse.h:39` | `typedef struct hp_document hp_document;` |
-| `hp_document_free` | function | `include/html_parse.h:136` | `void hp_document_free(hp_document *doc);` |
-| `hp_document_root` | function | `include/html_parse.h:142` | `const void *hp_document_root(const hp_document *doc);` |
-| `hp_element_count` | function | `include/html_parse.h:63` | `size_t hp_element_count(const hp_document *doc);` |
-| `hp_event_handler_count` | function | `include/html_parse.h:65` | `size_t hp_event_handler_count(const hp_document *doc);` |
-| `hp_extract_stylesheet_hrefs` | function | `include/html_parse.h:127` | `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count);` |
-| `hp_extract_text` | function | `include/html_parse.h:69` | `char *hp_extract_text(const hp_document *doc, size_t *out_len);` |
-| `hp_free` | function | `include/html_parse.h:133` | `void hp_free(char *buf);` |
-| `hp_free_scripts` | function | `include/html_parse.h:111` | `void hp_free_scripts(hp_script *scripts, size_t count);` |
-| `hp_free_stylesheet_hrefs` | function | `include/html_parse.h:130` | `void hp_free_stylesheet_hrefs(char **hrefs, size_t count);` |
-| `hp_get_title` | function | `include/html_parse.h:70` | `char *hp_get_title(const hp_document *doc, size_t *out_len);` |
-| `hp_script` | struct | `include/html_parse.h:76` | `` |
-| `hp_script_count` | function | `include/html_parse.h:64` | `size_t hp_script_count(const hp_document *doc);` |
-| `hp_status` | enum | `include/html_parse.h:22` | `` |
-| `max_bytes` | type_alias | `include/html_parse.h:31` | `typedef struct hp_config { size_t max_bytes;` |
-| `modules` | function | `include/html_parse.h:94` | `* ES modules (import/export cannot run as a classic script), and template blocks * (text/x-jquery-tmpl, text/html...` |
-| `src` | function | `include/html_parse.h:90` | `* carry their raw src (a <script src> with an inline body lists ONLY the src -- * browser rule: when src is present...` |
-| `FREEDOM_HTTP_CACHE_H` | macro | `include/http_cache.h:2` | `#define FREEDOM_HTTP_CACHE_H` |
-| `HC_HEURISTIC_CAP` | macro | `include/http_cache.h:26` | `#define HC_HEURISTIC_CAP` |
-| `HC_MAX_ENTRY` | macro | `include/http_cache.h:23` | `#define HC_MAX_ENTRY` |
-| `HC_MAX_TOTAL` | macro | `include/http_cache.h:24` | `#define HC_MAX_TOTAL` |
-| `HC_REDIRECT_TTL` | macro | `include/http_cache.h:25` | `#define HC_REDIRECT_TTL` |
-| `HC_TYPE_MAX` | macro | `include/http_cache.h:22` | `#define HC_TYPE_MAX` |
-| `HC_URL_MAX` | macro | `include/http_cache.h:21` | `#define HC_URL_MAX` |
-| `HC_VAL_MAX` | macro | `include/http_cache.h:20` | `#define HC_VAL_MAX` |
-| `by` | function | `include/http_cache.h:59` | `* something to reuse it by (validator, max-age or Expires). */ int hc_storable(long http_code, const hc_meta *m...` |
-| `final_url` | type_alias | `include/http_cache.h:43` | `typedef struct hc_meta { char final_url[HC_URL_MAX];` |
-| `hc_body_free` | function | `include/http_cache.h:78` | `void hc_body_free(uint8_t *body, size_t len);` |
-| `hc_class` | enum | `include/http_cache.h:38` | `` |
-| `hc_clear` | function | `include/http_cache.h:84` | `void hc_clear(hc_store *s);` |
-| `hc_close` | function | `include/http_cache.h:72` | `void hc_close(hc_store *s);` |
-| `hc_lifetime` | function | `include/http_cache.h:63` | `long hc_lifetime(const hc_meta *m);` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

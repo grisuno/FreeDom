@@ -614,7 +614,7 @@ static inline int csel_ci_eq(const char *a, const char *b)
 
 *Calls:* [`csel_lower_ch`](#csel_lower_ch)
 
-*Called by:* [`CSS_WIDE_RESET`](src.css.c.md#css_wide_reset), [`axis`](src.css.c.md#axis), [`blur`](src.css.c.md#blur), [`declaration`](src.css.c.md#declaration), [`function`](src.css.c.md#function), [`shorthand`](src.css.c.md#shorthand), [`AUTO_RESET_NONE`](src.css_box.c.md#auto_reset_none), [`cb_expand_grid_template_cols`](src.css_box.c.md#cb_expand_grid_template_cols), [`cb_expand_grid_template_rows`](src.css_box.c.md#cb_expand_grid_template_rows), [`cb_interp_align`](src.css_box.c.md#cb_interp_align), [`cb_interp_display`](src.css_box.c.md#cb_interp_display), [`cb_interp_fontsize_ex`](src.css_box.c.md#cb_interp_fontsize_ex) and 19 more
+*Called by:* [`CSS_WIDE_RESET`](src.css.c.md#css_wide_reset), [`axis`](src.css.c.md#axis), [`blur`](src.css.c.md#blur), [`declaration`](src.css.c.md#declaration), [`function`](src.css.c.md#function), [`multiplying`](src.css.c.md#multiplying), [`shorthand`](src.css.c.md#shorthand), [`AUTO_RESET_NONE`](src.css_box.c.md#auto_reset_none), [`cb_expand_grid_template_cols`](src.css_box.c.md#cb_expand_grid_template_cols), [`cb_expand_grid_template_rows`](src.css_box.c.md#cb_expand_grid_template_rows), [`cb_interp_align`](src.css_box.c.md#cb_interp_align), [`cb_interp_display`](src.css_box.c.md#cb_interp_display) and 20 more
 
 ---
 

@@ -1,6 +1,50 @@
 # Subsystem: include (page 2 of 5)
 Previous: [KB_include.md](KB_include.md)
 
+## include/css_decl.h
+- Doc: The sheet's two string pools -- background url()s, and the ::before/::after
+- Layer: utility
+- Language: h
+- Symbols:
+  - `css_decl` (struct, line 232)
+  - `prop` (type_alias, line 231) `typedef struct css_decl { int prop;`
+  - `order` (function, line 50) `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
+  - `contiguous` (function, line 65) `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
+  - `part` (function, line 216) `* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM...`
+  - `FREEDOM_CSS_DECL_H` (macro, line 2) `#define FREEDOM_CSS_DECL_H`
+  - `CSS_POOL_INIT` (macro, line 20) `#define CSS_POOL_INIT`
+  - `CSS_POOL_HEADROOM` (macro, line 21) `#define CSS_POOL_HEADROOM`
+  - `CSS_MAX_BG_URLS` (macro, line 22) `#define CSS_MAX_BG_URLS`
+  - `CSS_MAX_CONTENT_URLS` (macro, line 23) `#define CSS_MAX_CONTENT_URLS`
+  - `CSS_MAX_KEYFRAMES` (macro, line 25) `#define CSS_MAX_KEYFRAMES`
+  - `CSS_MAX_KEYFRAME_STOPS` (macro, line 26) `#define CSS_MAX_KEYFRAME_STOPS`
+  - `CSS_MAX_KEYFRAME_DECLS` (macro, line 27) `#define CSS_MAX_KEYFRAME_DECLS`
+  - `CSS_INLINE_BG_URLS` (macro, line 28) `#define CSS_INLINE_BG_URLS`
+  - `CSS_WIDE_PROBE_DECLS` (macro, line 35) `#define CSS_WIDE_PROBE_DECLS`
+- Depends on: `include/css.h`, `include/css_select.h`
+- Imported by: `include/css_box.h`, `include/css_gradient.h`, `include/css_mask.h`, `include/css_text.h`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_box.c`, `tests/test_css_text.c`
+
+## include/css_gradient.h
+- Doc: cg_radial_shape: Radial-gradient geometry (spec/css_gradient.md 3b).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `cg_radial` (struct, line 24)
+  - `cg_radial_shape` (enum, line 19)
+  - `cg_radial_size` (enum, line 20)
+  - `shape` (type_alias, line 24) `typedef struct cg_radial { int shape;`
+  - `cg_expand_bg_image` (function, line 11) `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
+  - `cg_expand_background` (function, line 13) `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
+  - `width` (function, line 17) `* width (x, rx) or height (y, ry);`
+  - `out` (function, line 32) `* Returns 1 and fills *out (defaults first) when seg is a valid prelude, 0 when seg is not * one (it is a colour...`
+  - `cg_radial_len_px` (function, line 37) `double cg_radial_len_px(int enc, double dim);`
+  - `zero` (function, line 41) `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....`
+  - `cg_parse_linear` (function, line 51) `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions);`
+  - `FREEDOM_CSS_GRADIENT_H` (macro, line 2) `#define FREEDOM_CSS_GRADIENT_H`
+  - `CG_LEN_UNSET` (macro, line 18) `#define CG_LEN_UNSET`
+- Depends on: `include/css_decl.h`
+- Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_gradient.c`, `src/css_mask.c`, `src/tab.c`, `tests/test_css_gradient.c`
+
 ## include/css_index.h
 - Doc: cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *...
 - Layer: utility
@@ -329,14 +373,14 @@ Previous: [KB_include.md](KB_include.md)
 - Symbols:
   - `fx_item` (struct, line 40)
   - `fx_result` (struct, line 48)
-  - `fx_area_map` (struct, line 144)
-  - `fx_float_rect` (struct, line 214)
+  - `fx_area_map` (struct, line 154)
+  - `fx_float_rect` (struct, line 224)
   - `fx_justify` (enum, line 30)
   - `fx_status` (enum, line 53)
   - `basis` (type_alias, line 40) `typedef struct fx_item { double basis;`
   - `pos` (type_alias, line 48) `typedef struct fx_result { double pos;`
-  - `cols` (type_alias, line 144) `typedef struct fx_area_map { int rows, cols;`
-  - `bottom` (type_alias, line 214) `typedef struct fx_float_rect { double top, bottom;`
+  - `cols` (type_alias, line 154) `typedef struct fx_area_map { int rows, cols;`
+  - `bottom` (type_alias, line 224) `typedef struct fx_float_rect { double top, bottom;`
   - `size` (function, line 60) `* content size (px);`
   - `out` (function, line 62) `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item...`
   - `fx_grid_cell` (function, line 74) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);`
@@ -344,32 +388,34 @@ Previous: [KB_include.md](KB_include.md)
   - `fx_grid_line_parse` (function, line 117) `int fx_grid_line_parse(const char *v, int *start, int *end);`
   - `fx_grid_line_resolve` (function, line 122) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);`
   - `fx_autofill_count` (function, line 129) `size_t fx_autofill_count(double avail, double gap, double minw);`
-  - `fx_grid_area_hash` (function, line 153) `unsigned fx_grid_area_hash(const char *name);`
-  - `offset` (function, line 171) `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...`
-  - `required` (function, line 184) `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
-  - `widths` (function, line 194) `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...`
-  - `FX_ERR_NULL_ARG` (function, line 228) `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
-  - `space` (function, line 234) `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...`
-  - `fx_auto_min_size` (function, line 265) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
-  - `fx_justify_name` (function, line 321) `const char *fx_justify_name(fx_justify j);`
-  - `height` (function, line 327) `* used height (h_out);`
-  - `it` (function, line 344) `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
-  - `win` (function, line 352) `* margins win (both = centre, left only = end);`
-  - `fx_cross_offset` (function, line 354) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
+  - `fx_grid_column_count` (function, line 139) `int fx_grid_column_count(int flow, int cols, int rows, size_t items);`
+  - `fx_grid_area_hash` (function, line 163) `unsigned fx_grid_area_hash(const char *name);`
+  - `offset` (function, line 181) `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...`
+  - `required` (function, line 194) `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
+  - `widths` (function, line 204) `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...`
+  - `FX_ERR_NULL_ARG` (function, line 238) `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
+  - `space` (function, line 244) `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...`
+  - `fx_auto_min_size` (function, line 275) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
+  - `fx_justify_name` (function, line 331) `const char *fx_justify_name(fx_justify j);`
+  - `height` (function, line 337) `* used height (h_out);`
+  - `it` (function, line 354) `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
+  - `win` (function, line 362) `* margins win (both = centre, left only = end);`
+  - `fx_cross_offset` (function, line 364) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
   - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2) `#define FREEDOM_FLEX_LAYOUT_H`
   - `FX_MAX_ITEMS` (macro, line 28) `#define FX_MAX_ITEMS`
   - `FX_GL_AUTO` (macro, line 107) `#define FX_GL_AUTO`
   - `FX_GL_SPAN_BASE` (macro, line 108) `#define FX_GL_SPAN_BASE`
   - `FX_GL_SPAN_MAX` (macro, line 109) `#define FX_GL_SPAN_MAX`
   - `FX_GL_LINE_MAX` (macro, line 110) `#define FX_GL_LINE_MAX`
-  - `FX_AREA_MAX_ROWS` (macro, line 136) `#define FX_AREA_MAX_ROWS`
-  - `FX_AREA_MAX_COLS` (macro, line 137) `#define FX_AREA_MAX_COLS`
-  - `FX_AREA_MAX_CELLS` (macro, line 138) `#define FX_AREA_MAX_CELLS`
-  - `FX_AREA_NAME_MAX` (macro, line 139) `#define FX_AREA_NAME_MAX`
-  - `FX_FLOAT_MIN_LINE` (macro, line 208) `#define FX_FLOAT_MIN_LINE`
-  - `FX_MAX_COLUMNS` (macro, line 270) `#define FX_MAX_COLUMNS`
-  - `FX_MAUTO_TOP` (macro, line 337) `#define FX_MAUTO_TOP`
-  - `FX_MAUTO_BOTTOM` (macro, line 338) `#define FX_MAUTO_BOTTOM`
+  - `FX_GRID_COLS_MAX` (macro, line 132) `#define FX_GRID_COLS_MAX`
+  - `FX_AREA_MAX_ROWS` (macro, line 146) `#define FX_AREA_MAX_ROWS`
+  - `FX_AREA_MAX_COLS` (macro, line 147) `#define FX_AREA_MAX_COLS`
+  - `FX_AREA_MAX_CELLS` (macro, line 148) `#define FX_AREA_MAX_CELLS`
+  - `FX_AREA_NAME_MAX` (macro, line 149) `#define FX_AREA_NAME_MAX`
+  - `FX_FLOAT_MIN_LINE` (macro, line 218) `#define FX_FLOAT_MIN_LINE`
+  - `FX_MAX_COLUMNS` (macro, line 280) `#define FX_MAX_COLUMNS`
+  - `FX_MAUTO_TOP` (macro, line 347) `#define FX_MAUTO_TOP`
+  - `FX_MAUTO_BOTTOM` (macro, line 348) `#define FX_MAUTO_BOTTOM`
 - Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/form.h
@@ -448,52 +494,6 @@ Previous: [KB_include.md](KB_include.md)
   - `FH_MAX_DEPTH` (macro, line 18) `#define FH_MAX_DEPTH`
 - Depends on: `include/page_view.h`, `include/tab.h`
 - Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `src/freedom.c`, `tests/test_frame_host.c`
-
-## include/freebug.h
-- Doc: fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated)....
-- Layer: utility
-- Language: h
-- Symbols:
-  - `fb_entry` (struct, line 36)
-  - `fb_buffer` (struct, line 46)
-  - `fb_level` (enum, line 24)
-  - `level` (type_alias, line 36) `typedef struct fb_entry { int level;`
-  - `fb_buffer_init` (function, line 65) `void fb_buffer_init(fb_buffer *b);`
-  - `truncated` (function, line 69) `* A message longer than FB_MAX_ENTRY_BYTES is stored truncated (not dropped). A * dropped push raises b->overflow...`
-  - `copied` (function, line 75) `* copied (truncated to FB_MAX_FILE_BYTES);`
-  - `fb_buffer_push_loc` (function, line 78) `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len, const char *file, int line, int col);`
-  - `fb_buffer_reset` (function, line 83) `void fb_buffer_reset(fb_buffer *b);`
-  - `fb_buffer_free` (function, line 86) `void fb_buffer_free(fb_buffer *b);`
-  - `fb_buffer_count` (function, line 89) `size_t fb_buffer_count(const fb_buffer *b);`
-  - `fb_buffer_at` (function, line 92) `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i);`
-  - `fb_level_name` (function, line 96) `const char *fb_level_name(int level);`
-  - `FREEDOM_FREEBUG_H` (macro, line 2) `#define FREEDOM_FREEBUG_H`
-  - `FB_MAX_ENTRIES` (macro, line 56) `#define FB_MAX_ENTRIES`
-  - `FB_MAX_ENTRY_BYTES` (macro, line 57) `#define FB_MAX_ENTRY_BYTES`
-  - `FB_MAX_TOTAL_BYTES` (macro, line 58) `#define FB_MAX_TOTAL_BYTES`
-  - `FB_MAX_FILE_BYTES` (macro, line 62) `#define FB_MAX_FILE_BYTES`
-- Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/fb_cmdline.c`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_fb_cmdline.c`, `tests/test_freebug.c`
-
-## include/freedom_config.h
-- Layer: infrastructure
-- Language: h
-- Symbols:
-  - `FREEDOM_CONFIG_H` (macro, line 14) `#define FREEDOM_CONFIG_H`
-  - `FC_PNG_PAGE_W` (macro, line 20) `#define FC_PNG_PAGE_W`
-  - `FC_HEADLESS_VIEW_H` (macro, line 24) `#define FC_HEADLESS_VIEW_H`
-  - `FC_TRUSTED_JS_BUDGET_MS` (macro, line 30) `#define FC_TRUSTED_JS_BUDGET_MS`
-  - `FC_PNG_MARGIN` (macro, line 34) `#define FC_PNG_MARGIN`
-  - `FC_PNG_MAX_H` (macro, line 39) `#define FC_PNG_MAX_H`
-  - `FC_FLEX_MEASURE_W` (macro, line 45) `#define FC_FLEX_MEASURE_W`
-  - `FC_FLEX_MIN_MEASURE_W` (macro, line 51) `#define FC_FLEX_MIN_MEASURE_W`
-  - `FC_FONT_CHAIN_MAX` (macro, line 56) `#define FC_FONT_CHAIN_MAX`
-  - `FC_MAX_BOXES` (macro, line 61) `#define FC_MAX_BOXES`
-  - `FC_FONT_FALLBACK_PX` (macro, line 66) `#define FC_FONT_FALLBACK_PX`
-  - `FC_UI_FONT_SIZE` (macro, line 70) `#define FC_UI_FONT_SIZE`
-  - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 78) `#define FC_MAX_AUTHOR_CSS_BYTES`
-  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 81) `#define FC_LAZY_IMAGE_MARGIN_PX`
-  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 87) `#define FC_TAB_OP_NET_BUDGET_MS`
-- Imported by: `gui/browser_ui_internal.h`, `gui/svg_paint.c`, `gui/ui_render.c`, `src/page_view.c`, `src/tab.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

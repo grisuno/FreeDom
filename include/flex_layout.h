@@ -128,6 +128,16 @@ void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)
  * BT_MAX_CHILDREN. See spec/css.md (2026-10-09). */
 size_t fx_autofill_count(double avail, double gap, double minw);
 
+/* Upper bound of grid columns the engine places (BT_MAX_CHILDREN, box_tree.h). */
+#define FX_GRID_COLS_MAX 128u
+
+/* Column count of a grid container (CSS Grid 1 8.5). With `grid-auto-flow: column`
+ * (flow == 2, css_grid_flow) and no explicit rows, items fill a single row and each
+ * one opens an implicit column, so the count is max(declared, items); every other
+ * case keeps `cols`. Never below 1, never above FX_GRID_COLS_MAX: `items` comes from
+ * the confined worker. Pure. */
+int fx_grid_column_count(int flow, int cols, int rows, size_t items);
+
 /* --- grid-template-areas: named placement (CSS Grid 1 sections 7.3 + 8.4) ------
  * Full contract, error table and out-of-scope list: spec/grid_areas.md. */
 

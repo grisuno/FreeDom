@@ -1,85 +1,6 @@
 # Subsystem: src (page 8 of 10)
 Previous: [KB_src_p7.md](KB_src_p7.md)
 
-## src/prefetch.c
-- Doc: ci_starts: static int is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' ||...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `attr_span` (struct, line 65)
-  - `is_ws` (function, line 26) `static int is_ws(char c)`
-  - `is_name_char` (function, line 30) `static int is_name_char(char c)`
-  - `lower` (function, line 35) `static int lower(int c)`
-  - `ci_starts` (function, line 40) `static int ci_starts(const char *p, const char *end, const char *kw)`
-  - `ci_find` (function, line 49) `static const char *ci_find(const char *p, const char *end, const char *kw)`
-  - `ci_eq_span` (function, line 58) `static int ci_eq_span(const char *s, size_t n, const char *kw)`
-  - `emit` (function, line 120) `static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen)`
-  - `pf_scan` (function, line 133) `int pf_scan(const char *html, size_t len, pf_list *out)`
-  - `pf_list_free` (function, line 196) `void pf_list_free(pf_list *l)`
-  - `js_ident_ch` (function, line 207) `static int js_ident_ch(char c)`
-  - `js_skip_ws` (function, line 212) `static size_t js_skip_ws(const char *s, size_t i, size_t n)`
-  - `js_skip_string` (function, line 219) `static size_t js_skip_string(const char *s, size_t i, size_t n)`
-  - `js_take_spec` (function, line 226) `static void js_take_spec(const char *s, size_t i, size_t n,
-                         char (*out)[...`
-  - `pf_scan_imports` (function, line 241) `size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], size_t cap)`
-  - `pf_pool_add` (function, line 288) `int pf_pool_add(pf_pool *p, const char *url)`
-  - `pf_is_js` (function, line 311) `static int pf_is_js(const char *url, const char *ctype)`
-  - `pf_url_cb` (function, line 319) `static int pf_url_cb(void *ctx, const char *base, const char *ref, char *out, size_t outsz)`
-  - `pf_url_shaped` (function, line 324) `static int pf_url_shaped(const char *sp)`
-  - `pf_follow_imports` (function, line 333) `static void pf_follow_imports(pf_pool *p, const char *base, const char *body, size_t len)`
-  - `pf_worker` (function, line 349) `static void *pf_worker(void *arg)`
-  - `pf_pool_start` (function, line 387) `int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls,
-                  pf_fetch_f...`
-  - `pool_start` (function, line 394) `static int pool_start(pf_pool *p, const char *const *urls, size_t nurls,
-                      pf...`
-  - `pf_pool_take` (function, line 444) `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status,
-                 char **body,...`
-  - `pf_find_importmap` (function, line 483) `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n)`
-  - `pf_pool_start_page` (function, line 504) `int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *page_url,
-          ...`
-  - `pf_pool_finish` (function, line 540) `void pf_pool_finish(pf_pool *p)`
-  - `pf_pooled_fetch` (function, line 561) `int pf_pooled_fetch(void *vctx, const char *method, const char *url,
-                    const ch...`
-  - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
-  - `PF_MAX_URL` (macro, line 24) `#define PF_MAX_URL`
-- Depends on: `include/import_map.h`, `include/prefetch.h`, `include/url.h`
-
-## src/prefs.c
-- Doc: url_valid: A representable URL: 1..PREFS_MAX_URL-1 bytes, no control bytes, no DEL. * Space is...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `sbuf` (struct, line 380)
-  - `url_valid` (function, line 26) `static int url_valid(const char *url)`
-  - `title_clean` (function, line 39) `static char *title_clean(const char *src)`
-  - `prefs_init` (function, line 66) `void prefs_init(prefs_state *p)`
-  - `prefs_free` (function, line 74) `void prefs_free(prefs_state *p)`
-  - `bookmark_push` (function, line 91) `static prefs_status bookmark_push(prefs_state *p, const char *url, const char *title)`
-  - `history_push_back` (function, line 109) `static prefs_status history_push_back(prefs_state *p, const char *url)`
-  - `prefs_bookmark_index` (function, line 125) `int prefs_bookmark_index(const prefs_state *p, const char *url)`
-  - `prefs_bookmark_toggle` (function, line 132) `prefs_status prefs_bookmark_toggle(prefs_state *p, const char *url,
-                             ...`
-  - `prefs_history_add` (function, line 152) `prefs_status prefs_history_add(prefs_state *p, const char *url)`
-  - `prefs_format` (function, line 183) `prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)`
-  - `apply_kv` (function, line 231) `static void apply_kv(prefs_state *out, const char *key, long val)`
-  - `prefs_parse` (function, line 247) `prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)`
-  - `ci_eq` (function, line 313) `static int ci_eq(char a, char b)`
-  - `ci_starts` (function, line 319) `static int ci_starts(const char *s, const char *q)`
-  - `ci_contains` (function, line 327) `static int ci_contains(const char *s, const char *q)`
-  - `url_prefix_match` (function, line 336) `static int url_prefix_match(const char *url, const char *q)`
-  - `sugg_push` (function, line 348) `static void sugg_push(char *out, size_t row_len, int max_rows, int *n,
-                      cons...`
-  - `prefs_suggest` (function, line 357) `int prefs_suggest(const prefs_state *p, const char *query,
-                  char *out, size_t ro...`
-  - `sb_put` (function, line 382) `static void sb_put(sbuf *b, const char *s, size_t n)`
-  - `sb_str` (function, line 397) `static void sb_str(sbuf *b, const char *s)`
-  - `sb_esc` (function, line 400) `static void sb_esc(sbuf *b, const char *s)`
-  - `sb_link_item` (function, line 413) `static void sb_link_item(sbuf *b, const char *url, const char *label)`
-  - `prefs_bookmarks_page` (function, line 421) `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)`
-  - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
-  - `PREFS_MAGIC` (macro, line 20) `#define PREFS_MAGIC`
-- Depends on: `include/prefs.h`, `include/zoom.h`
-
 ## src/profile.c
 - Doc: keyfile_create: #include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h>...
 - Layer: utility
@@ -106,28 +27,28 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `utf8_sanitized_dup` (function, line 28) `static char *utf8_sanitized_dup(const char *s)`
   - `rd_push` (function, line 60) `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
                  ...`
-  - `rd_push_input` (function, line 212) `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)`
-  - `resolve_image_decision` (function, line 248) `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
+  - `rd_push_input` (function, line 214) `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)`
+  - `resolve_image_decision` (function, line 250) `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
         ...`
-  - `rd_build` (function, line 274) `rd_status rd_build(const pv_view *view, rdp_caps caps,
+  - `rd_build` (function, line 276) `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-  - `unset` (function, line 685) `* background paints as if unset (no border/box-shadow-style
+  - `unset` (function, line 688) `* background paints as if unset (no border/box-shadow-style
                  * "broken image" pla...`
-  - `rd_free` (function, line 750) `void rd_free(rd_doc *d)`
-  - `rd_count` (function, line 767) `size_t rd_count(const rd_doc *d)`
-  - `rd_at` (function, line 771) `const rd_block *rd_at(const rd_doc *d, size_t i)`
-  - `rd_box_count` (function, line 776) `size_t rd_box_count(const rd_doc *d)`
-  - `rd_box_at` (function, line 780) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-  - `rd_cont_count` (function, line 785) `size_t rd_cont_count(const rd_doc *d)`
-  - `rd_cont_at` (function, line 789) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
-  - `rd_kind_name` (function, line 794) `const char *rd_kind_name(rd_kind k)`
-  - `rd_block_heading_level` (function, line 808) `int rd_block_heading_level(const rd_block *b)`
-  - `rd_block_tag` (function, line 819) `const char *rd_block_tag(const rd_block *b)`
-  - `rd_input_label` (function, line 850) `const char *rd_input_label(int input_type)`
-  - `rd_input_invisible` (function, line 870) `int rd_input_invisible(int input_type)`
-  - `rd_image_label` (function, line 874) `const char *rd_image_label(rdp_img_decision d)`
-  - `rd_image_fail_label` (function, line 885) `const char *rd_image_fail_label(img_fail_reason reason)`
-  - `place` (function, line 238) `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...`
+  - `rd_free` (function, line 753) `void rd_free(rd_doc *d)`
+  - `rd_count` (function, line 770) `size_t rd_count(const rd_doc *d)`
+  - `rd_at` (function, line 774) `const rd_block *rd_at(const rd_doc *d, size_t i)`
+  - `rd_box_count` (function, line 779) `size_t rd_box_count(const rd_doc *d)`
+  - `rd_box_at` (function, line 783) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
+  - `rd_cont_count` (function, line 788) `size_t rd_cont_count(const rd_doc *d)`
+  - `rd_cont_at` (function, line 792) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
+  - `rd_kind_name` (function, line 797) `const char *rd_kind_name(rd_kind k)`
+  - `rd_block_heading_level` (function, line 811) `int rd_block_heading_level(const rd_block *b)`
+  - `rd_block_tag` (function, line 822) `const char *rd_block_tag(const rd_block *b)`
+  - `rd_input_label` (function, line 853) `const char *rd_input_label(int input_type)`
+  - `rd_input_invisible` (function, line 873) `int rd_input_invisible(int input_type)`
+  - `rd_image_label` (function, line 877) `const char *rd_image_label(rdp_img_decision d)`
+  - `rd_image_fail_label` (function, line 888) `const char *rd_image_fail_label(img_fail_reason reason)`
+  - `place` (function, line 240) `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ## src/render_policy.c

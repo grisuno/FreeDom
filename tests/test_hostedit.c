@@ -111,6 +111,22 @@ static void test_suggest_empty_query_and_cap(void **state) {
     assert_int_equal(he_suggest(fav, "a", res, 0), 0);
 }
 
+/* Which auto-allow switch a subresource falls under, from its URL PATH alone: the query
+ * and fragment never decide, and anything that is not a stylesheet or script is a resource. */
+static void test_cdn_kind_from_url_path(void **state) {
+    (void)state;
+    assert_int_equal(he_cdn_kind("https://cdn.x.com/a/site.css"), HE_CDN_CSS);
+    assert_int_equal(he_cdn_kind("https://cdn.x.com/a/SITE.CSS?v=3#h"), HE_CDN_CSS);
+    assert_int_equal(he_cdn_kind("https://cdn.x.com/app.js"), HE_CDN_JS);
+    assert_int_equal(he_cdn_kind("https://cdn.x.com/app.mjs?x=a.css"), HE_CDN_JS);
+    assert_int_equal(he_cdn_kind("https://cdn.x.com/img/a.png"), HE_CDN_RES);
+    assert_int_equal(he_cdn_kind("https://cdn.x.com/font.woff2"), HE_CDN_RES);
+    assert_int_equal(he_cdn_kind("https://cdn.x.com/"), HE_CDN_RES);
+    assert_int_equal(he_cdn_kind("https://cdn.x.com"), HE_CDN_RES);
+    assert_int_equal(he_cdn_kind("https://cdn.x.com/dir.css/file"), HE_CDN_RES);
+    assert_int_equal(he_cdn_kind(NULL), HE_CDN_RES);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_make_line_lowercases),
@@ -123,6 +139,7 @@ int main(void) {
         cmocka_unit_test(test_suggest_prefix_first),
         cmocka_unit_test(test_suggest_case_insensitive_and_dedup),
         cmocka_unit_test(test_suggest_empty_query_and_cap),
+        cmocka_unit_test(test_cdn_kind_from_url_path),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
