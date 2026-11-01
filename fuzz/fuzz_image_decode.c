@@ -12,6 +12,7 @@
  */
 
 #include "image_decode.h"
+#include "svg_raster.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -35,7 +36,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     uint32_t w = 0, h = 0;
     (void)img_png_dimensions(data, size, &w, &h);
 
-    img_pixels px = {0, 0, 0, NULL};
+    img_pixels px = {0, 0, 0, NULL, 0};
     (void)img_decode_png(data, size, &px);
     poke_and_free(&px);
     (void)img_decode_jpeg(data, size, &px);
@@ -43,5 +44,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     /* The dispatcher the worker uses: sniff -> png/jpeg/format. */
     (void)img_decode(data, size, &px);
     poke_and_free(&px);
+    /* The worker's SVG fallback (spec/svg_raster.md): sniff + parse + raster. */
+    if (sr_sniff(data, size)) {
+        (void)sr_rasterize(data, size, &px);
+        poke_and_free(&px);
+    }
     return 0;
 }

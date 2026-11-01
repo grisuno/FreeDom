@@ -30,25 +30,26 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `rd_push_input` (function, line 214) `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)`
   - `resolve_image_decision` (function, line 250) `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
         ...`
-  - `rd_build` (function, line 276) `rd_status rd_build(const pv_view *view, rdp_caps caps,
+  - `too` (function, line 281) `* that would not fit is cleared too (never truncated-and-fetched). */
+static void gate_box_image_...`
+  - `rd_build` (function, line 293) `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-  - `unset` (function, line 688) `* background paints as if unset (no border/box-shadow-style
-                 * "broken image" pla...`
-  - `rd_free` (function, line 753) `void rd_free(rd_doc *d)`
-  - `rd_count` (function, line 770) `size_t rd_count(const rd_doc *d)`
-  - `rd_at` (function, line 774) `const rd_block *rd_at(const rd_doc *d, size_t i)`
-  - `rd_box_count` (function, line 779) `size_t rd_box_count(const rd_doc *d)`
-  - `rd_box_at` (function, line 783) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-  - `rd_cont_count` (function, line 788) `size_t rd_cont_count(const rd_doc *d)`
-  - `rd_cont_at` (function, line 792) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
-  - `rd_kind_name` (function, line 797) `const char *rd_kind_name(rd_kind k)`
-  - `rd_block_heading_level` (function, line 811) `int rd_block_heading_level(const rd_block *b)`
-  - `rd_block_tag` (function, line 822) `const char *rd_block_tag(const rd_block *b)`
-  - `rd_input_label` (function, line 853) `const char *rd_input_label(int input_type)`
-  - `rd_input_invisible` (function, line 873) `int rd_input_invisible(int input_type)`
-  - `rd_image_label` (function, line 877) `const char *rd_image_label(rdp_img_decision d)`
-  - `rd_image_fail_label` (function, line 888) `const char *rd_image_fail_label(img_fail_reason reason)`
+  - `rd_free` (function, line 744) `void rd_free(rd_doc *d)`
+  - `rd_count` (function, line 761) `size_t rd_count(const rd_doc *d)`
+  - `rd_at` (function, line 765) `const rd_block *rd_at(const rd_doc *d, size_t i)`
+  - `rd_box_count` (function, line 770) `size_t rd_box_count(const rd_doc *d)`
+  - `rd_box_at` (function, line 774) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
+  - `rd_cont_count` (function, line 779) `size_t rd_cont_count(const rd_doc *d)`
+  - `rd_cont_at` (function, line 783) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
+  - `rd_kind_name` (function, line 788) `const char *rd_kind_name(rd_kind k)`
+  - `rd_block_heading_level` (function, line 802) `int rd_block_heading_level(const rd_block *b)`
+  - `rd_block_tag` (function, line 813) `const char *rd_block_tag(const rd_block *b)`
+  - `rd_input_label` (function, line 844) `const char *rd_input_label(int input_type)`
+  - `rd_input_invisible` (function, line 864) `int rd_input_invisible(int input_type)`
+  - `rd_image_label` (function, line 868) `const char *rd_image_label(rdp_img_decision d)`
+  - `rd_image_fail_label` (function, line 879) `const char *rd_image_fail_label(img_fail_reason reason)`
   - `place` (function, line 240) `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...`
+  - `unset` (function, line 706) `* background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not...`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ## src/render_policy.c
@@ -59,8 +60,8 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `rdp_is_tracking_pixel` (function, line 22) `int rdp_is_tracking_pixel(int w, int h)`
   - `rdp_image_decision` (function, line 28) `rdp_img_decision rdp_image_decision(rdp_caps caps,
                                     const char...`
-  - `rdp_img_reason` (function, line 63) `const char *rdp_img_reason(rdp_img_decision d)`
-  - `rdp_images_warning` (function, line 74) `const char *rdp_images_warning(void)`
+  - `rdp_img_reason` (function, line 60) `const char *rdp_img_reason(rdp_img_decision d)`
+  - `rdp_images_warning` (function, line 71) `const char *rdp_images_warning(void)`
 - Depends on: `include/data_url.h`, `include/render_policy.h`, `include/request_policy.h`
 
 ## src/renderer.c
@@ -243,6 +244,32 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `sqb_free` (function, line 133) `void sqb_free(sqb *b)`
   - `_GNU_SOURCE` (macro, line 2) `#define _GNU_SOURCE`
 - Depends on: `include/subreq_batch.h`
+
+## src/svg_paint.c
+- Doc: svg_paint — Cairo back end for the shapes svg_render extracted.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `svp_alpha` (function, line 31) `static double svp_alpha(int opacity, int paint_opacity)`
+  - `svp_rect_path` (function, line 38) `static void svp_rect_path(cairo_t *cr, const sv_shape *sh)`
+  - `svp_shape_path` (function, line 73) `static void svp_shape_path(cairo_t *cr, const sv_image *img, const sv_shape *sh)`
+  - `svp_draw_text` (function, line 126) `static void svp_draw_text(cairo_t *cr, const sv_shape *sh, int current_rgb)`
+  - `svp_draw` (function, line 139) `void svp_draw(cairo_t *cr, const sv_image *img,
+              double x, double y, double w, doubl...`
+  - `svp_draw_ex` (function, line 144) `void svp_draw_ex(cairo_t *cr, const sv_image *img,
+                 double x, double y, double w,...`
+- Depends on: `include/css_color.h`, `include/freedom_config.h`, `include/svg_paint.h`
+
+## src/svg_raster.c
+- Doc: svg_raster -- SVG served as an image, rasterized inside the confined worker. spec/svg_raster.md.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `sr_ws` (function, line 14) `static int sr_ws(uint8_t c)`
+  - `sr_skip_past` (function, line 18) `static size_t sr_skip_past(const uint8_t *b, size_t i, size_t n, const char *end)`
+  - `sr_sniff` (function, line 25) `int sr_sniff(const uint8_t *bytes, size_t len)`
+  - `sr_rasterize` (function, line 50) `img_status sr_rasterize(const uint8_t *bytes, size_t len, img_pixels *out)`
+- Depends on: `include/svg_paint.h`, `include/svg_raster.h`, `include/svg_render.h`
 
 ## src/svg_render.c
 - Doc: svg_render — inline <svg> markup -> a bounded list of geometric shapes.

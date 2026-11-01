@@ -3,6 +3,68 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_build_float_widthless_stays_unset` | function | `tests/test_page_view.c:894` | `static void test_build_float_widthless_stays_unset(void **state)` |
+| `test_build_flow_table_row_is_one_block` | function | `tests/test_page_view.c:2822` | `static void test_build_flow_table_row_is_one_block(void **state)` |
+| `test_build_font_list_inherits` | function | `tests/test_page_view.c:2279` | `static void test_build_font_list_inherits(void **state)` |
+| `test_build_fontface_hash` | function | `tests/test_page_view.c:2014` | `static void test_build_fontface_hash(void **state)` |
+| `test_build_form_post_and_hidden` | function | `tests/test_page_view.c:3305` | `static void test_build_form_post_and_hidden(void **state)` |
+| `test_build_frame_with_only_oof_content_keeps_box` | function | `tests/test_page_view.c:3186` | `static void test_build_frame_with_only_oof_content_keeps_box(void **state)` |
+| `test_build_grid_autofill_marker` | function | `tests/test_page_view.c:1994` | `static void test_build_grid_autofill_marker(void **state)` |
+| `test_build_grid_columns_from_sheet` | function | `tests/test_page_view.c:2472` | `static void test_build_grid_columns_from_sheet(void **state)` |
+| `test_build_grid_container` | function | `tests/test_page_view.c:1974` | `static void test_build_grid_container(void **state)` |
+| `test_build_hbox_container_width_never_seeds_items` | function | `tests/test_page_view.c:1678` | `static void test_build_hbox_container_width_never_seeds_items(void **state)` |
+| `test_build_hbox_margin_above_container_merges` | function | `tests/test_page_view.c:1658` | `static void test_build_hbox_margin_above_container_merges(void **state)` |
+| `test_build_heading_level` | function | `tests/test_page_view.c:247` | `static void test_build_heading_level(void **state)` |
+| `test_build_iframe_display_none_hidden` | function | `tests/test_page_view.c:5445` | `static void test_build_iframe_display_none_hidden(void **state)` |
+| `test_build_iframe_emits_navigable_link` | function | `tests/test_page_view.c:5392` | `static void test_build_iframe_emits_navigable_link(void **state)` |
+| `test_build_iframe_without_src_ignored` | function | `tests/test_page_view.c:5432` | `static void test_build_iframe_without_src_ignored(void **state)` |
+| `test_build_image_auto_size_keeps_attr` | function | `tests/test_page_view.c:930` | `static void test_build_image_auto_size_keeps_attr(void **state)` |
+| `test_build_image_css_size_overrides_attr` | function | `tests/test_page_view.c:913` | `static void test_build_image_css_size_overrides_attr(void **state)` |
+| `test_build_image_in_skipped_subtree_ignored` | function | `tests/test_page_view.c:968` | `static void test_build_image_in_skipped_subtree_ignored(void **state)` |
+| `test_build_image_no_src_and_no_srcset_ignored` | function | `tests/test_page_view.c:1117` | `static void test_build_image_no_src_and_no_srcset_ignored(void **state)` |
+| `test_build_image_plain_src_wins_over_srcset` | function | `tests/test_page_view.c:1074` | `static void test_build_image_plain_src_wins_over_srcset(void **state)` |
+| `test_build_image_px_and_tracking_dims` | function | `tests/test_page_view.c:748` | `static void test_build_image_px_and_tracking_dims(void **state)` |
+| `test_build_image_rendering_inherited` | function | `tests/test_page_view.c:5206` | `static void test_build_image_rendering_inherited(void **state)` |
+| `test_build_image_srcset_data_url_not_truncated_at_comma` | function | `tests/test_page_view.c:1102` | `static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state)` |
+| `test_build_image_srcset_fallback_when_no_src` | function | `tests/test_page_view.c:1058` | `static void test_build_image_srcset_fallback_when_no_src(void **state)` |
+| `test_build_image_srcset_single_no_descriptor` | function | `tests/test_page_view.c:1089` | `static void test_build_image_srcset_single_no_descriptor(void **state)` |
+| `test_build_image_unknown_dims` | function | `tests/test_page_view.c:733` | `static void test_build_image_unknown_dims(void **state)` |
+| `test_build_image_with_dims` | function | `tests/test_page_view.c:716` | `static void test_build_image_with_dims(void **state)` |
+| `test_build_image_without_src_dims_emit_broken` | function | `tests/test_page_view.c:1041` | `static void test_build_image_without_src_dims_emit_broken(void **state)` |
+| `test_build_image_without_src_ignored` | function | `tests/test_page_view.c:1010` | `static void test_build_image_without_src_ignored(void **state)` |
+| `test_build_img_loading_lazy_is_recorded` | function | `tests/test_page_view.c:2110` | `static void test_build_img_loading_lazy_is_recorded(void **state)` |
+| `test_build_inline_block_row_alignment` | function | `tests/test_page_view.c:2086` | `static void test_build_inline_block_row_alignment(void **state)` |
+| `test_build_inline_block_row_ignores_oof_child` | function | `tests/test_page_view.c:2183` | `static void test_build_inline_block_row_ignores_oof_child(void **state)` |
+| `test_build_inline_emphasis` | function | `tests/test_page_view.c:264` | `static void test_build_inline_emphasis(void **state)` |
+| `test_build_inline_link_no_break_within_paragraph` | function | `tests/test_page_view.c:698` | `static void test_build_inline_link_no_break_within_paragraph(void **state)` |
+| `test_build_inline_whitespace_kept` | function | `tests/test_page_view.c:1840` | `static void test_build_inline_whitespace_kept(void **state)` |
+| `test_build_input_bare_chrome` | function | `tests/test_page_view.c:2135` | `static void test_build_input_bare_chrome(void **state)` |
+| `test_build_input_own_box_and_placeholder` | function | `tests/test_page_view.c:2156` | `static void test_build_input_own_box_and_placeholder(void **state)` |
+| `test_build_intrinsic_width_flag` | function | `tests/test_page_view.c:2205` | `static void test_build_intrinsic_width_flag(void **state)` |
+| `test_build_link_with_href` | function | `tests/test_page_view.c:653` | `static void test_build_link_with_href(void **state)` |
+| `test_build_live_iframe_is_a_sized_replaced_run` | function | `tests/test_page_view.c:5412` | `static void test_build_live_iframe_is_a_sized_replaced_run(void **state)` |
+| `test_build_long_class_attribute_keeps_classes` | function | `tests/test_page_view.c:2039` | `static void test_build_long_class_attribute_keeps_classes(void **state)` |
+| `test_build_nested_table_not_flattened` | function | `tests/test_page_view.c:604` | `static void test_build_nested_table_not_flattened(void **state)` |
+| `test_build_node_id_matches_dom_index` | function | `tests/test_page_view.c:5091` | `static void test_build_node_id_matches_dom_index(void **state)` |
+| `test_build_noscript_hidden_when_js_on` | function | `tests/test_page_view.c:997` | `static void test_build_noscript_hidden_when_js_on(void **state)` |
+| `test_build_noscript_shown_when_js_off` | function | `tests/test_page_view.c:984` | `static void test_build_noscript_shown_when_js_off(void **state)` |
+| `test_build_null_args` | function | `tests/test_page_view.c:225` | `static void test_build_null_args(void **state)` |
+| `test_build_oof_flag_badges_idiom` | function | `tests/test_page_view.c:2430` | `static void test_build_oof_flag_badges_idiom(void **state)` |
+| `test_build_oof_flag_via_cascade` | function | `tests/test_page_view.c:2406` | `static void test_build_oof_flag_via_cascade(void **state)` |
+| `test_build_oof_image_carries_block_id` | function | `tests/test_page_view.c:1593` | `static void test_build_oof_image_carries_block_id(void **state)` |
+| `test_build_ordered_and_nested_list` | function | `tests/test_page_view.c:323` | `static void test_build_ordered_and_nested_list(void **state)` |
+| `test_build_plain_text` | function | `tests/test_page_view.c:234` | `static void test_build_plain_text(void **state)` |
+| `test_build_pointer_events_on_box` | function | `tests/test_page_view.c:5161` | `static void test_build_pointer_events_on_box(void **state)` |
+| `test_build_pseudo_classes_and_siblings` | function | `tests/test_page_view.c:4264` | `static void test_build_pseudo_classes_and_siblings(void **state)` |
+| `test_build_reader_skips_boilerplate` | function | `tests/test_page_view.c:5047` | `static void test_build_reader_skips_boilerplate(void **state)` |
+| `test_build_root_element_style_inherits` | function | `tests/test_page_view.c:2311` | `static void test_build_root_element_style_inherits(void **state)` |
+| `test_build_root_font_size_is_overridable` | function | `tests/test_page_view.c:2329` | `static void test_build_root_font_size_is_overridable(void **state)` |
+| `test_build_search_form_get` | function | `tests/test_page_view.c:3272` | `static void test_build_search_form_get(void **state)` |
+| `test_build_select_defaults_to_first_option` | function | `tests/test_page_view.c:4175` | `static void test_build_select_defaults_to_first_option(void **state)` |
+| `test_build_select_shows_selected_option` | function | `tests/test_page_view.c:4136` | `static void test_build_select_shows_selected_option(void **state)` |
+| `test_build_skips_script_and_style` | function | `tests/test_page_view.c:684` | `static void test_build_skips_script_and_style(void **state)` |
+| `test_build_sourceless_video_keeps_its_box` | function | `tests/test_page_view.c:3210` | `static void test_build_sourceless_video_keeps_its_box(void **state)` |
+| `test_build_style_cache_distinct_siblings` | function | `tests/test_page_view.c:4387` | `static void test_build_style_cache_distinct_siblings(void **state)` |
 | `test_build_styled_external_css` | function | `tests/test_page_view.c:4700` | `static void test_build_styled_external_css(void **state)` |
 | `test_build_svg_css_stroke_inherited` | function | `tests/test_page_view.c:2243` | `static void test_build_svg_css_stroke_inherited(void **state)` |
 | `test_build_svg_fills_border_box_ancestor` | function | `tests/test_page_view.c:833` | `static void test_build_svg_fills_border_box_ancestor(void **state)` |
@@ -167,44 +229,44 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_tampered_blob_auth_fails` | function | `tests/test_profile.c:204` | `static void test_tampered_blob_auth_fails(void **state)` |
 | `caps_images_on` | function | `tests/test_render_doc.c:28` | `static rdp_caps caps_images_on(void)` |
 | `first_kind` | function | `tests/test_render_doc.c:35` | `static const rd_block *first_kind(const rd_doc *d, rd_kind k)` |
-| `main` | function | `tests/test_render_doc.c:866` | `int main(void)` |
-| `test_author_color_gated_by_css` | function | `tests/test_render_doc.c:396` | `static void test_author_color_gated_by_css(void **state)` |
-| `test_block_tag_total` | function | `tests/test_render_doc.c:817` | `static void test_block_tag_total(void **state)` |
+| `main` | function | `tests/test_render_doc.c:873` | `int main(void)` |
+| `test_author_color_gated_by_css` | function | `tests/test_render_doc.c:403` | `static void test_author_color_gated_by_css(void **state)` |
+| `test_block_tag_total` | function | `tests/test_render_doc.c:824` | `static void test_block_tag_total(void **state)` |
 | `test_build_null_out` | function | `tests/test_render_doc.c:44` | `static void test_build_null_out(void **state)` |
 | `test_build_null_view_is_empty` | function | `tests/test_render_doc.c:51` | `static void test_build_null_view_is_empty(void **state)` |
-| `test_caret_color_gated_on_input` | function | `tests/test_render_doc.c:530` | `static void test_caret_color_gated_on_input(void **state)` |
-| `test_cont_item_carried_by_default` | function | `tests/test_render_doc.c:652` | `static void test_cont_item_carried_by_default(void **state)` |
-| `test_container_carried_by_default` | function | `tests/test_render_doc.c:620` | `static void test_container_carried_by_default(void **state)` |
+| `test_caret_color_gated_on_input` | function | `tests/test_render_doc.c:537` | `static void test_caret_color_gated_on_input(void **state)` |
+| `test_cont_item_carried_by_default` | function | `tests/test_render_doc.c:659` | `static void test_cont_item_carried_by_default(void **state)` |
+| `test_container_carried_by_default` | function | `tests/test_render_doc.c:627` | `static void test_container_carried_by_default(void **state)` |
 | `test_emphasis_propagates` | function | `tests/test_render_doc.c:94` | `static void test_emphasis_propagates(void **state)` |
-| `test_flex_item_carried_by_default` | function | `tests/test_render_doc.c:721` | `static void test_flex_item_carried_by_default(void **state)` |
-| `test_flex_wrap_align_row_gap_carried_by_default` | function | `tests/test_render_doc.c:769` | `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)` |
-| `test_float_carried_by_default` | function | `tests/test_render_doc.c:685` | `static void test_float_carried_by_default(void **state)` |
-| `test_free_null_and_double` | function | `tests/test_render_doc.c:386` | `static void test_free_null_and_double(void **state)` |
-| `test_heading_level_of_link` | function | `tests/test_render_doc.c:801` | `static void test_heading_level_of_link(void **state)` |
+| `test_flex_item_carried_by_default` | function | `tests/test_render_doc.c:728` | `static void test_flex_item_carried_by_default(void **state)` |
+| `test_flex_wrap_align_row_gap_carried_by_default` | function | `tests/test_render_doc.c:776` | `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)` |
+| `test_float_carried_by_default` | function | `tests/test_render_doc.c:692` | `static void test_float_carried_by_default(void **state)` |
+| `test_free_null_and_double` | function | `tests/test_render_doc.c:393` | `static void test_free_null_and_double(void **state)` |
+| `test_heading_level_of_link` | function | `tests/test_render_doc.c:808` | `static void test_heading_level_of_link(void **state)` |
 | `test_heading_paragraph_link` | function | `tests/test_render_doc.c:64` | `static void test_heading_paragraph_link(void **state)` |
-| `test_href_sanitised` | function | `tests/test_render_doc.c:346` | `static void test_href_sanitised(void **state)` |
+| `test_href_sanitised` | function | `tests/test_render_doc.c:353` | `static void test_href_sanitised(void **state)` |
 | `test_image_data_url_allowed_no_top` | function | `tests/test_render_doc.c:302` | `static void test_image_data_url_allowed_no_top(void **state)` |
 | `test_image_data_url_allowed_remote_top` | function | `tests/test_render_doc.c:284` | `static void test_image_data_url_allowed_remote_top(void **state)` |
 | `test_image_data_url_disabled_by_default` | function | `tests/test_render_doc.c:315` | `static void test_image_data_url_disabled_by_default(void **state)` |
-| `test_image_data_url_percent_encoded_blocked_invalid` | function | `tests/test_render_doc.c:330` | `static void test_image_data_url_percent_encoded_blocked_invalid(void **state)` |
-| `test_image_label_total` | function | `tests/test_render_doc.c:373` | `static void test_image_label_total(void **state)` |
+| `test_image_data_url_percent_encoded_allowed` | function | `tests/test_render_doc.c:331` | `static void test_image_data_url_percent_encoded_allowed(void **state)` |
+| `test_image_label_total` | function | `tests/test_render_doc.c:380` | `static void test_image_label_total(void **state)` |
 | `test_image_off_emits_notice_and_blocked` | function | `tests/test_render_doc.c:125` | `static void test_image_off_emits_notice_and_blocked(void **state)` |
 | `test_image_on_allows_normal` | function | `tests/test_render_doc.c:188` | `static void test_image_on_allows_normal(void **state)` |
 | `test_image_on_blocks_non_https` | function | `tests/test_render_doc.c:249` | `static void test_image_on_blocks_non_https(void **state)` |
 | `test_image_on_blocks_tracker` | function | `tests/test_render_doc.c:236` | `static void test_image_on_blocks_tracker(void **state)` |
 | `test_image_on_resolves_doc_relative_src` | function | `tests/test_render_doc.c:222` | `static void test_image_on_resolves_doc_relative_src(void **state)` |
 | `test_image_on_resolves_relative_src` | function | `tests/test_render_doc.c:206` | `static void test_image_on_resolves_relative_src(void **state)` |
-| `test_image_rendering_gated_on_image` | function | `tests/test_render_doc.c:501` | `static void test_image_rendering_gated_on_image(void **state)` |
-| `test_input_label_total` | function | `tests/test_render_doc.c:595` | `static void test_input_label_total(void **state)` |
-| `test_input_passthrough` | function | `tests/test_render_doc.c:560` | `static void test_input_passthrough(void **state)` |
-| `test_kind_name_total` | function | `tests/test_render_doc.c:363` | `static void test_kind_name_total(void **state)` |
+| `test_image_rendering_gated_on_image` | function | `tests/test_render_doc.c:508` | `static void test_image_rendering_gated_on_image(void **state)` |
+| `test_input_label_total` | function | `tests/test_render_doc.c:602` | `static void test_input_label_total(void **state)` |
+| `test_input_passthrough` | function | `tests/test_render_doc.c:567` | `static void test_input_passthrough(void **state)` |
+| `test_kind_name_total` | function | `tests/test_render_doc.c:370` | `static void test_kind_name_total(void **state)` |
 | `test_no_images_no_notice` | function | `tests/test_render_doc.c:174` | `static void test_no_images_no_notice(void **state)` |
-| `test_node_id_carried_by_default` | function | `tests/test_render_doc.c:853` | `static void test_node_id_carried_by_default(void **state)` |
-| `test_text_ext_2026_07_10_batch_gated_by_css` | function | `tests/test_render_doc.c:461` | `static void test_text_ext_2026_07_10_batch_gated_by_css(void **state)` |
-| `test_text_overflow_word_break_gated_by_css` | function | `tests/test_render_doc.c:426` | `static void test_text_overflow_word_break_gated_by_css(void **state)` |
+| `test_node_id_carried_by_default` | function | `tests/test_render_doc.c:860` | `static void test_node_id_carried_by_default(void **state)` |
+| `test_text_ext_2026_07_10_batch_gated_by_css` | function | `tests/test_render_doc.c:468` | `static void test_text_ext_2026_07_10_batch_gated_by_css(void **state)` |
+| `test_text_overflow_word_break_gated_by_css` | function | `tests/test_render_doc.c:433` | `static void test_text_overflow_word_break_gated_by_css(void **state)` |
 | `caps_images_on` | function | `tests/test_render_policy.c:90` | `static rdp_caps caps_images_on(void)` |
 | `consulted` | function | `tests/test_render_policy.c:76` | `* is not even consulted (a bogus URL still yields BLOCK_DISABLED). */ assert_int_equal( rdp_image_decision(off...` |
-| `main` | function | `tests/test_render_policy.c:241` | `int main(void)` |
+| `main` | function | `tests/test_render_policy.c:243` | `int main(void)` |
 | `test_caps_safe_is_all_off` | function | `tests/test_render_policy.c:18` | `static void test_caps_safe_is_all_off(void **state)` |
 | `test_caps_zero_value_is_safe` | function | `tests/test_render_policy.c:26` | `static void test_caps_zero_value_is_safe(void **state)` |
 | `test_image_allow_cross_site_when_enabled` | function | `tests/test_render_policy.c:108` | `static void test_image_allow_cross_site_when_enabled(void **state)` |
@@ -216,9 +278,9 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_image_data_url_disabled_by_default` | function | `tests/test_render_policy.c:183` | `static void test_image_data_url_disabled_by_default(void **state)` |
 | `test_image_data_url_malformed_is_invalid` | function | `tests/test_render_policy.c:191` | `static void test_image_data_url_malformed_is_invalid(void **state)` |
 | `test_image_disabled_by_default` | function | `tests/test_render_policy.c:72` | `static void test_image_disabled_by_default(void **state)` |
-| `test_image_disabled_precedence` | function | `tests/test_render_policy.c:207` | `static void test_image_disabled_precedence(void **state)` |
-| `test_images_warning_present` | function | `tests/test_render_policy.c:232` | `static void test_images_warning_present(void **state)` |
-| `test_img_reason_total_and_stable` | function | `tests/test_render_policy.c:217` | `static void test_img_reason_total_and_stable(void **state)` |
+| `test_image_disabled_precedence` | function | `tests/test_render_policy.c:209` | `static void test_image_disabled_precedence(void **state)` |
+| `test_images_warning_present` | function | `tests/test_render_policy.c:234` | `static void test_images_warning_present(void **state)` |
+| `test_img_reason_total_and_stable` | function | `tests/test_render_policy.c:219` | `static void test_img_reason_total_and_stable(void **state)` |
 | `test_tracking_pixel_normal` | function | `tests/test_render_policy.c:52` | `static void test_tracking_pixel_normal(void **state)` |
 | `test_tracking_pixel_tiny` | function | `tests/test_render_policy.c:37` | `static void test_tracking_pixel_tiny(void **state)` |
 | `test_tracking_pixel_unknown` | function | `tests/test_render_policy.c:62` | `static void test_tracking_pixel_unknown(void **state)` |
@@ -326,6 +388,16 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_refused_and_failed_keep_their_slot` | function | `tests/test_subreq_batch.c:60` | `static void test_refused_and_failed_keep_their_slot(void **st)` |
 | `test_results_in_issue_order_and_overlap` | function | `tests/test_subreq_batch.c:32` | `static void test_results_in_issue_order_and_overlap(void **st)` |
 | `test_thread_limit_is_respected` | function | `tests/test_subreq_batch.c:50` | `static void test_thread_limit_is_respected(void **st)` |
+| `main` | function | `tests/test_svg_raster.c:111` | `int main(void)` |
+| `pixel` | function | `tests/test_svg_raster.c:18` | `static uint32_t pixel(const img_pixels *px, uint32_t x, uint32_t y)` |
+| `raster` | function | `tests/test_svg_raster.c:14` | `static img_status raster(const char *s, img_pixels *px)` |
+| `test_garbage_fails_closed` | function | `tests/test_svg_raster.c:89` | `static void test_garbage_fails_closed(void **state)` |
+| `test_huge_scales_down` | function | `tests/test_svg_raster.c:79` | `static void test_huge_scales_down(void **state)` |
+| `test_large_svg_is_not_oversampled` | function | `tests/test_svg_raster.c:69` | `static void test_large_svg_is_not_oversampled(void **state)` |
+| `test_rect_fills_red` | function | `tests/test_svg_raster.c:42` | `static void test_rect_fills_red(void **state)` |
+| `test_sniff` | function | `tests/test_svg_raster.c:24` | `static void test_sniff(void **state)` |
+| `test_text_is_skipped_not_fatal` | function | `tests/test_svg_raster.c:101` | `static void test_text_is_skipped_not_fatal(void **state)` |
+| `test_viewbox_sets_size_and_transparent_bg` | function | `tests/test_svg_raster.c:56` | `static void test_viewbox_sets_size_and_transparent_bg(void **state)` |
 | `main` | function | `tests/test_svg_render.c:344` | `int main(void)` |
 | `parse` | function | `tests/test_svg_render.c:26` | `static sv_status parse(sv_image *im, const char *s)` |
 | `test_basic_shapes` | function | `tests/test_svg_render.c:71` | `static void test_basic_shapes(void **state)` |
@@ -361,7 +433,7 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `load` | function | `tests/test_tab.c:2226` | `* table only for a trusted load (net granted: allow.conf AND js.conf);` |
 | `load_js_page` | function | `tests/test_tab.c:2393` | `static void load_js_page(tab **out_t, const char *html, tab_page *p)` |
 | `ls_load` | function | `tests/test_tab.c:2769` | `static void ls_load(int net, tab **t, tab_page *p)` |
-| `main` | function | `tests/test_tab.c:3672` | `int main(int argc, char **argv)` |
+| `main` | function | `tests/test_tab.c:3703` | `int main(int argc, char **argv)` |
 | `module_page` | function | `tests/test_tab.c:2855` | `static const pv_run *module_page(int net, tab **t, tab_page *p, const char *needle)` |
 | `ms_since` | function | `tests/test_tab.c:3002` | `static long ms_since(const struct timespec *a)` |
 | `n` | type_alias | `tests/test_tab.c:2057` | `typedef struct sink_cap { int n;` |
@@ -396,10 +468,11 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_data_module_imports_absolute_https` | function | `tests/test_tab.c:3141` | `static void test_data_module_imports_absolute_https(void **state)` |
 | `test_data_url_classic_script_runs_without_network` | function | `tests/test_tab.c:3071` | `static void test_data_url_classic_script_runs_without_network(void **state)` |
 | `test_decode_image_data_url_in_sandbox` | function | `tests/test_tab.c:3420` | `static void test_decode_image_data_url_in_sandbox(void **state)` |
-| `test_decode_image_data_url_null_args` | function | `tests/test_tab.c:3462` | `static void test_decode_image_data_url_null_args(void **state)` |
+| `test_decode_image_data_url_null_args` | function | `tests/test_tab.c:3493` | `static void test_decode_image_data_url_null_args(void **state)` |
 | `test_decode_image_in_sandbox` | function | `tests/test_tab.c:3364` | `static void test_decode_image_in_sandbox(void **state)` |
 | `test_decode_image_null_args` | function | `tests/test_tab.c:3401` | `static void test_decode_image_null_args(void **state)` |
 | `test_decode_image_rejects_junk` | function | `tests/test_tab.c:3386` | `static void test_decode_image_rejects_junk(void **state)` |
+| `test_decode_svg_image_in_sandbox` | function | `tests/test_tab.c:3465` | `static void test_decode_svg_image_in_sandbox(void **state)` |
 | `test_dynamic_import_from_classic_script_uses_document_base` | function | `tests/test_tab.c:2886` | `static void test_dynamic_import_from_classic_script_uses_document_base(void **state)` |
 | `test_eval_captures_console_output` | function | `tests/test_tab.c:1529` | `static void test_eval_captures_console_output(void **state)` |
 | `test_eval_exception` | function | `tests/test_tab.c:3232` | `static void test_eval_exception(void **state)` |
@@ -423,78 +496,5 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_first_visit_trusted_host_can_set_cookie` | function | `tests/test_tab.c:1203` | `static void test_first_visit_trusted_host_can_set_cookie(void **state)` |
 | `test_focus_ipc_round_trip` | function | `tests/test_tab.c:774` | `static void test_focus_ipc_round_trip(void **state)` |
 | `test_frames_absent_for_untrusted_host` | function | `tests/test_tab.c:2743` | `static void test_frames_absent_for_untrusted_host(void **state)` |
-| `test_frames_cross_the_worker` | function | `tests/test_tab.c:2706` | `static void test_frames_cross_the_worker(void **state)` |
-| `test_free_null_and_double` | function | `tests/test_tab.c:3330` | `static void test_free_null_and_double(void **state)` |
-| `test_geometry_never_reaches_untrusted_page` | function | `tests/test_tab.c:2269` | `static void test_geometry_never_reaches_untrusted_page(void **state)` |
-| `test_geometry_reaches_trusted_page` | function | `tests/test_tab.c:2261` | `static void test_geometry_reaches_trusted_page(void **state)` |
-| `test_history_ops_reach_parent_and_popstate_returns` | function | `tests/test_tab.c:2470` | `static void test_history_ops_reach_parent_and_popstate_returns(void **state)` |
-| `test_identity_override_reaches_worker` | function | `tests/test_tab.c:1243` | `static void test_identity_override_reaches_worker(void **state)` |
-| `test_import_map_resolves_bare_specifier` | function | `tests/test_tab.c:3050` | `static void test_import_map_resolves_bare_specifier(void **state)` |
-| `test_indexeddb_only_for_trusted_host` | function | `tests/test_tab.c:1224` | `static void test_indexeddb_only_for_trusted_host(void **state)` |
-| `test_js_navigation_relative_resolved` | function | `tests/test_tab.c:1595` | `static void test_js_navigation_relative_resolved(void **state)` |
-| `test_js_navigation_unsafe_is_blocked` | function | `tests/test_tab.c:1614` | `static void test_js_navigation_unsafe_is_blocked(void **state)` |
-| `test_lazy_script_src_and_import_after_load` | function | `tests/test_tab.c:2929` | `static void test_lazy_script_src_and_import_after_load(void **state)` |
-| `test_load_basic` | function | `tests/test_tab.c:142` | `static void test_load_basic(void **state)` |
-| `test_load_captures_console_and_error` | function | `tests/test_tab.c:1382` | `static void test_load_captures_console_and_error(void **state)` |
-| `test_load_carries_author_color` | function | `tests/test_tab.c:250` | `static void test_load_carries_author_color(void **state)` |
-| `test_load_carries_box_decoration` | function | `tests/test_tab.c:888` | `static void test_load_carries_box_decoration(void **state)` |
-| `test_load_carries_box_tree` | function | `tests/test_tab.c:924` | `static void test_load_carries_box_tree(void **state)` |
-| `test_load_carries_flex_item` | function | `tests/test_tab.c:277` | `static void test_load_carries_flex_item(void **state)` |
-| `test_load_carries_flex_wrap_align_row_gap` | function | `tests/test_tab.c:364` | `static void test_load_carries_flex_wrap_align_row_gap(void **state)` |
-| `test_load_carries_float` | function | `tests/test_tab.c:439` | `static void test_load_carries_float(void **state)` |
-| `test_load_carries_fontface` | function | `tests/test_tab.c:404` | `static void test_load_carries_fontface(void **state)` |
-| `test_load_carries_input_box_and_clip` | function | `tests/test_tab.c:1011` | `static void test_load_carries_input_box_and_clip(void **state)` |
-| `test_load_carries_node_id` | function | `tests/test_tab.c:566` | `static void test_load_carries_node_id(void **state)` |
-| `test_load_carries_oof_flag` | function | `tests/test_tab.c:600` | `static void test_load_carries_oof_flag(void **state)` |
-| `test_load_carries_visibility_overflow_cursor_and_text_wrap` | function | `tests/test_tab.c:482` | `static void test_load_carries_visibility_overflow_cursor_and_text_wrap(void **state)` |
-| `test_load_document_fonts_stub` | function | `tests/test_tab.c:1493` | `static void test_load_document_fonts_stub(void **state)` |
-| `test_load_element_wrapper_idioms` | function | `tests/test_tab.c:1463` | `static void test_load_element_wrapper_idioms(void **state)` |
-| `test_load_error_carries_location` | function | `tests/test_tab.c:1437` | `static void test_load_error_carries_location(void **state)` |
-| `test_load_ex_builds_dom_and_fires_onload` | function | `tests/test_tab.c:1293` | `static void test_load_ex_builds_dom_and_fires_onload(void **state)` |
-| `test_load_ex_inner_html_renders` | function | `tests/test_tab.c:1321` | `static void test_load_ex_inner_html_renders(void **state)` |
-| `test_load_ex_noscript_hidden_with_js` | function | `tests/test_tab.c:1125` | `static void test_load_ex_noscript_hidden_with_js(void **state)` |
-| `test_load_ex_prescript_view_rebuilt_when_dom_shrinks` | function | `tests/test_tab.c:1104` | `static void test_load_ex_prescript_view_rebuilt_when_dom_shrinks(void **state)` |
-| `test_load_full_location_is_real` | function | `tests/test_tab.c:1558` | `static void test_load_full_location_is_real(void **state)` |
-| `test_load_isolates_script_errors` | function | `tests/test_tab.c:1409` | `static void test_load_isolates_script_errors(void **state)` |
-| `test_load_no_session_cookies_when_untrusted` | function | `tests/test_tab.c:1271` | `static void test_load_no_session_cookies_when_untrusted(void **state)` |
-| `test_load_null_and_too_large` | function | `tests/test_tab.c:1650` | `static void test_load_null_and_too_large(void **state)` |
-| `test_load_returns_image_run` | function | `tests/test_tab.c:186` | `static void test_load_returns_image_run(void **state)` |
-| `test_load_returns_view_with_link` | function | `tests/test_tab.c:159` | `static void test_load_returns_view_with_link(void **state)` |
-| `test_load_strips_script` | function | `tests/test_tab.c:1057` | `static void test_load_strips_script(void **state)` |
-| `test_load_view_codec_full_roundtrip` | function | `tests/test_tab.c:3522` | `static void test_load_view_codec_full_roundtrip(void **state)` |
-| `test_load_without_js_has_empty_console` | function | `tests/test_tab.c:1513` | `static void test_load_without_js_has_empty_console(void **state)` |
-| `test_local_storage_never_seeded_for_untrusted` | function | `tests/test_tab.c:2805` | `static void test_local_storage_never_seeded_for_untrusted(void **state)` |
-| `test_local_storage_seeded_and_collected_for_trusted` | function | `tests/test_tab.c:2783` | `static void test_local_storage_seeded_and_collected_for_trusted(void **state)` |
-| `test_long_data_module_runs_whole` | function | `tests/test_tab.c:3091` | `static void test_long_data_module_runs_whole(void **state)` |
-| `test_module_scripts_run_for_trusted_host` | function | `tests/test_tab.c:2864` | `static void test_module_scripts_run_for_trusted_host(void **state)` |
-| `test_module_src_is_a_url_and_data_modules_run` | function | `tests/test_tab.c:3116` | `static void test_module_src_is_a_url_and_data_modules_run(void **state)` |
-| `test_mouse_ipc_round_trip` | function | `tests/test_tab.c:729` | `static void test_mouse_ipc_round_trip(void **state)` |
-| `test_no_js_no_navigation` | function | `tests/test_tab.c:1636` | `static void test_no_js_no_navigation(void **state)` |
-| `test_nomodule_fallback_for_untrusted_host` | function | `tests/test_tab.c:2873` | `static void test_nomodule_fallback_for_untrusted_host(void **state)` |
-| `test_open_close` | function | `tests/test_tab.c:81` | `static void test_open_close(void **state)` |
-| `test_open_null` | function | `tests/test_tab.c:135` | `static void test_open_null(void **state)` |
-| `test_other_worker_calls_wait_for_the_job_and_discard_its_view` | function | `tests/test_tab.c:3033` | `static void test_other_worker_calls_wait_for_the_job_and_discard_its_view(void **state)` |
-| `test_post_load_network_time_is_bounded_per_operation` | function | `tests/test_tab.c:2958` | `static void test_post_load_network_time_is_bounded_per_operation(void **state)` |
-| `test_postmessage_absent_for_untrusted_host` | function | `tests/test_tab.c:2621` | `static void test_postmessage_absent_for_untrusted_host(void **state)` |
-| `test_prewarm_dead_spare_falls_back` | function | `tests/test_tab.c:113` | `static void test_prewarm_dead_spare_falls_back(void **state)` |
-| `test_prewarm_is_consumed_by_open` | function | `tests/test_tab.c:93` | `static void test_prewarm_is_consumed_by_open(void **state)` |
-| `test_reload_replaces_page` | function | `tests/test_tab.c:3253` | `static void test_reload_replaces_page(void **state)` |
-| `test_repl_net_lists_page_requests` | function | `tests/test_tab.c:2352` | `static void test_repl_net_lists_page_requests(void **state)` |
-| `test_repl_panels_tree_styles_box` | function | `tests/test_tab.c:2372` | `static void test_repl_panels_tree_styles_box(void **state)` |
-| `test_self_postmessage_and_document_domain_trusted` | function | `tests/test_tab.c:2578` | `static void test_self_postmessage_and_document_domain_trusted(void **state)` |
-| `test_shutdown_spare_is_safe_without_one` | function | `tests/test_tab.c:128` | `static void test_shutdown_spare_is_safe_without_one(void **state)` |
-| `test_subreq_permitted_pure` | function | `tests/test_tab.c:3190` | `static void test_subreq_permitted_pure(void **state)` |
-| `test_tick_fires_delayed_timer` | function | `tests/test_tab.c:821` | `static void test_tick_fires_delayed_timer(void **state)` |
-| `test_tick_interval_rearms` | function | `tests/test_tab.c:858` | `static void test_tick_interval_rearms(void **state)` |
-| `test_timer_navigation_reaches_parent` | function | `tests/test_tab.c:2420` | `static void test_timer_navigation_reaches_parent(void **state)` |
-| `test_websocket_absent_for_untrusted_host` | function | `tests/test_tab.c:2673` | `static void test_websocket_absent_for_untrusted_host(void **state)` |
-| `test_websocket_ops_and_events_cross_the_worker` | function | `tests/test_tab.c:2646` | `static void test_websocket_ops_and_events_cross_the_worker(void **state)` |
-| `test_window_open_absent_for_untrusted_host` | function | `tests/test_tab.c:2549` | `static void test_window_open_absent_for_untrusted_host(void **state)` |
-| `test_window_open_on_gesture_for_trusted_host` | function | `tests/test_tab.c:2528` | `static void test_window_open_on_gesture_for_trusted_host(void **state)` |
-| `test_worker_args_malformed` | function | `tests/test_tab.c:3491` | `static void test_worker_args_malformed(void **state)` |
-| `test_worker_args_not_worker` | function | `tests/test_tab.c:3484` | `static void test_worker_args_not_worker(void **state)` |
-| `test_worker_args_null_safe` | function | `tests/test_tab.c:3506` | `static void test_worker_args_null_safe(void **state)` |
-| `test_worker_args_valid` | function | `tests/test_tab.c:3475` | `static void test_worker_args_valid(void **state)` |
-| `test_worker_deep_recursion_and_runaway` | function | `tests/test_tab.c:1686` | `static void test_worker_deep_recursion_and_runaway(void **state)` |
 
 Next: [SYMBOLS_p16.md](SYMBOLS_p16.md)

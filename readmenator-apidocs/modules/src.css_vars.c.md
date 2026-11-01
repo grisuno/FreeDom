@@ -185,7 +185,7 @@ A name is recognised only where it cannot be the tail of a longer identifier.
 
 ### `cvr_resolve`
 
-`function` | [src/css_vars.c:230](../../src/css_vars.c#L230)
+`function` | [src/css_vars.c:281](../../src/css_vars.c#L281)
 
 ```c
 int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)
@@ -208,7 +208,7 @@ int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)
 
 ### `cvr_lookup`
 
-`function` `const` | [src/css_vars.c:239](../../src/css_vars.c#L239)
+`function` `const` | [src/css_vars.c:290](../../src/css_vars.c#L290)
 
 ```c
 const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)

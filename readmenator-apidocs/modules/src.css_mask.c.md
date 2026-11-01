@@ -1,6 +1,6 @@
 # `src/css_mask.c`
 
-> Source: [src/css_mask.c:1](../../src/css_mask.c#L1) | language `c` | coverage 28.6% | [API index](../index.md)
+> Source: [src/css_mask.c:1](../../src/css_mask.c#L1) | language `c` | coverage 42.9% | [API index](../index.md)
 
 ## Contents
 
@@ -26,7 +26,7 @@ flowchart LR
 
 ### `cm_is_mask_prop`
 
-`function` | [src/css_mask.c:17](../../src/css_mask.c#L17)
+`function` | [src/css_mask.c:19](../../src/css_mask.c#L19)
 
 ```c
 int cm_is_mask_prop(const char *prop)
@@ -52,7 +52,7 @@ True for every property name this module owns (after the vendor prefix is remove
 
 ### `cm_encode_layer`
 
-`function` | [src/css_mask.c:24](../../src/css_mask.c#L24)
+`function` | [src/css_mask.c:26](../../src/css_mask.c#L26)
 
 ```c
 void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)
@@ -77,7 +77,7 @@ The three compact words of a layer, and back.
 
 ### `cm_decode_layer`
 
-`function` | [src/css_mask.c:45](../../src/css_mask.c#L45)
+`function` | [src/css_mask.c:47](../../src/css_mask.c#L47)
 
 ```c
 void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)
@@ -98,7 +98,7 @@ void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)
 
 ### `cm_expand`
 
-`function` | [src/css_mask.c:197](../../src/css_mask.c#L197)
+`function` | [src/css_mask.c:201](../../src/css_mask.c#L201)
 
 ```c
 int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)
@@ -126,11 +126,13 @@ int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int web
 
 ### `CM_TOK_MAX`
 
-`macro` | [src/css_mask.c:8](../../src/css_mask.c#L8)
+`macro` | [src/css_mask.c:10](../../src/css_mask.c#L10)
 
 ```c
 #define CM_TOK_MAX
 ```
+
+A layer token can be a whole url(...) (a data: SVG icon is routinely 400-900 bytes): the token cap follows the URL cap plus the `url("")` around it.
 
 ---
 
@@ -138,7 +140,7 @@ int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int web
 
 ### `CM_MAX_TOKS`
 
-`macro` | [src/css_mask.c:9](../../src/css_mask.c#L9)
+`macro` | [src/css_mask.c:11](../../src/css_mask.c#L11)
 
 ```c
 #define CM_MAX_TOKS

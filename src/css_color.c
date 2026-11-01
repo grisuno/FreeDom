@@ -9,6 +9,7 @@
 
 #include "css_color.h"
 
+#include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +17,7 @@
 /* Largest CSS color token accepted. The longest named color
  * ("lightgoldenrodyellow") is 20 bytes; functional rgba() with percentages fits
  * well under this. A longer token is not a color and fails closed. */
-#define CC_TOKEN_MAX 64u
+#define CC_TOKEN_MAX 128u
 
 /* Channel maxima for the rgb() functional form. */
 #define CC_CHANNEL_MAX 255
@@ -211,6 +212,95 @@ static int cc_scan_number(const char *b, const char *e, double *out) {
     return 0;
 }
 
+/* --- calc() inside a colour component (CSS Values 4 section 10) ----------------
+ * A channel may be a calc() over <number>s and <percentage>s (GitHub writes
+ * `hsl(0deg, 0%, calc(var(--switch) * 100%))`, Discord `hsl(235, calc(1*86.1%), 71.8%)`).
+ * The expression is folded to one literal before the component parser sees it, so
+ * the range checks stay in exactly one place. Depth-bounded recursive descent over a
+ * bounded span; a percentage times a percentage, or a sum mixing the two, fails. */
+#define CC_CALC_DEPTH 8
+
+typedef struct cc_cv { double v; int pct; } cc_cv;
+typedef struct cc_cp { const char *p, *e; } cc_cp;
+
+static void cc_cws(cc_cp *c) { while (c->p < c->e && (*c->p == ' ' || *c->p == '\t')) ++c->p; }
+static int cc_cexpr(cc_cp *c, cc_cv *out, int depth);
+
+static int cc_cfactor(cc_cp *c, cc_cv *out, int depth) {
+    cc_cws(c);
+    if (depth > CC_CALC_DEPTH) return -1;
+    if (c->e - c->p >= 5 && strncmp(c->p, "calc(", 5) == 0) c->p += 4;
+    if (c->p < c->e && *c->p == '(') {
+        ++c->p;
+        if (cc_cexpr(c, out, depth + 1) != 0) return -1;
+        cc_cws(c);
+        if (c->p >= c->e || *c->p != ')') return -1;
+        ++c->p;
+        return 0;
+    }
+    const char *b = c->p;
+    if (c->p < c->e && (*c->p == '+' || *c->p == '-')) ++c->p;
+    while (c->p < c->e && ((*c->p >= '0' && *c->p <= '9') || *c->p == '.')) ++c->p;
+    if (cc_scan_number(b, c->p, &out->v) != 0) return -1;
+    out->pct = 0;
+    if (c->p < c->e && *c->p == '%') { out->pct = 1; ++c->p; }
+    return 0;
+}
+
+static int cc_cterm(cc_cp *c, cc_cv *out, int depth) {
+    if (cc_cfactor(c, out, depth) != 0) return -1;
+    for (;;) {
+        cc_cws(c);
+        if (c->p >= c->e || (*c->p != '*' && *c->p != '/')) return 0;
+        char op = *c->p++;
+        cc_cv r;
+        if (cc_cfactor(c, &r, depth) != 0) return -1;
+        if (op == '*') {
+            if (out->pct && r.pct) return -1;
+            out->v *= r.v;
+            out->pct |= r.pct;
+        } else {
+            if (r.pct || r.v == 0.0) return -1;
+            out->v /= r.v;
+        }
+    }
+}
+
+static int cc_cexpr(cc_cp *c, cc_cv *out, int depth) {
+    if (cc_cterm(c, out, depth) != 0) return -1;
+    for (;;) {
+        cc_cws(c);
+        if (c->p >= c->e || (*c->p != '+' && *c->p != '-')) return 0;
+        char op = *c->p++;
+        cc_cv r;
+        if (cc_cterm(c, &r, depth) != 0) return -1;
+        if (r.pct != out->pct) return -1;
+        out->v = (op == '+') ? out->v + r.v : out->v - r.v;
+    }
+}
+
+/* When [*b, *e) is exactly one calc(...), folds it into buf (cap bytes) and
+ * repoints the span there. 0 = span usable (folded or untouched), -1 = a calc()
+ * that does not evaluate. */
+static int cc_fold_calc(const char **b, const char **e, char *buf, size_t cap) {
+    const char *x = *b, *y = *e;
+    while (x < y && *x == ' ') ++x;
+    while (y > x && y[-1] == ' ') --y;
+    if (y - x < 6 || strncmp(x, "calc(", 5) != 0) return 0;
+    cc_cp c = { x, y };
+    cc_cv r;
+    if (cc_cfactor(&c, &r, 0) != 0) return -1;
+    cc_cws(&c);
+    if (c.p != y || r.v != r.v) return -1;
+    if (r.v > 1e6) r.v = 1e6;
+    if (r.v < -1e6) r.v = -1e6;
+    int n = snprintf(buf, cap, "%.4f%s", r.v, r.pct ? "%" : "");
+    if (n < 0 || (size_t)n >= cap) return -1;
+    *b = buf;
+    *e = buf + n;
+    return 0;
+}
+
 /* Rounds a non-negative scanned number to the nearest integer. */
 static long cc_round(double v) { return (long)(v + 0.5); }
 
@@ -256,8 +346,21 @@ static int parse_hsl_comp(const char *b, const char *e, int is_hue, int *out) {
     if (b == e) return -1;
     if (is_hue) {
         if (e[-1] == '%') return -1; /* hue is an <angle>/<number>, never a percentage */
+        /* <angle> units (CSS Values 4 7.1), folded to degrees. */
+        static const struct { const char *u; double deg; } ANG[] = {
+            { "deg", 1.0 }, { "grad", 0.9 }, { "rad", 57.29577951308232 }, { "turn", 360.0 } };
+        double per = 1.0;
+        for (size_t k = 0; k < sizeof ANG / sizeof *ANG; ++k) {
+            size_t ul = strlen(ANG[k].u);
+            if ((size_t)(e - b) > ul && strncmp(e - ul, ANG[k].u, ul) == 0) {
+                e -= ul;
+                per = ANG[k].deg;
+                break;
+            }
+        }
         double num;
         if (cc_scan_number(b, e, &num) != 0) return -1;
+        num *= per;
         long v = (num < 0.0) ? (long)(num - 0.5) : (long)(num + 0.5);
         v = v % 360;
         if (v < 0) v += 360;
@@ -295,9 +398,12 @@ static void hsl_to_rgb(int h, int s, int l, unsigned char *r, unsigned char *g, 
     long chroma = (chroma_scaled * CC_CHANNEL_MAX + denom / 2) / denom;
 
     /* X = chroma * (1 - |(H/60) mod 2 - 1|). */
+    /* (H/60) mod 2 is a triangle of period 120 degrees peaking at 60: the old
+     * period-60 triangle turned hsl(30,...) orange into yellow and hsl(180,...)
+     * cyan into blue. */
     int h_sector = h / 60;       /* 0..5 */
-    int h_remainder = h % 60;    /* 0..59 */
-    long x = chroma * ((h_remainder < 30) ? h_remainder : (60 - h_remainder)) / 30;
+    int h_period = h % 120;      /* 0..119 */
+    long x = (chroma * ((h_period < 60) ? h_period : (120 - h_period)) + 30) / 60;
 
     long r1 = 0, g1 = 0, b1 = 0;
     switch (h_sector) {
@@ -380,7 +486,12 @@ static int cc_split_args(const char *b, const char *e, const char **bs,
             if (cur >= left_e) break;
             if (nc >= 4) return -1;
             const char *tok = cur;
-            while (cur < left_e && *cur != ' ' && *cur != '\t') ++cur;
+            int pd = 0;
+            while (cur < left_e && (pd > 0 || (*cur != ' ' && *cur != '\t'))) {
+                if (*cur == '(') ++pd;
+                else if (*cur == ')') --pd;
+                ++cur;
+            }
             bs[nc] = tok;
             es[nc] = cur;
             ++nc;
@@ -403,7 +514,7 @@ static int parse_func(const char *s, cc_rgb *out) {
     else if (strncmp(s, "hsl(", 4) == 0) { p = s + 4; is_hsl = 1; }
     else return -1;
 
-    const char *close = strchr(p, ')');
+    const char *close = strrchr(p, ')');
     if (close == NULL) return -1;
     for (const char *q = close + 1; *q != '\0'; ++q) {
         if (*q != ' ') return -1; /* only trailing spaces after ')' */
@@ -415,6 +526,9 @@ static int parse_func(const char *s, cc_rgb *out) {
     int comma = 0;
     int nc = cc_split_args(p, close, bs, es, &ab, &ae, &comma);
     if (nc < 0) return -1;
+    char folded[4][32];
+    for (int i = 0; i < nc; ++i)
+        if (cc_fold_calc(&bs[i], &es[i], folded[i], sizeof folded[i]) != 0) return -1;
 
     int comps[3] = { 0, 0, 0 };
     if (is_hsl) {

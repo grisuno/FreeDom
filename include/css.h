@@ -100,6 +100,13 @@ typedef enum css_justify {  /* justify-content (flex/grid main axis) */
 #define CSS_FONT_LIST_MAX 192    /* bytes of a normalized font-family list (truncated at a name boundary) */
 #define CSS_URL_MAX       1024   /* cap on a captured background-image url() text (anti-DoS; longer -> dropped, fail closed, never truncated-and-fetched). Sized to comfortably hold the RESOLVED absolute URL too (render_doc.c resolves in place against the page origin), not just the raw author-CSS token -- real CDN asset URLs with hashed filenames/query strings routinely exceed a bare 256-byte cap. */
 
+/* mask layer geometry slots (css_style.mask_geo / pv_box_def.mask_geo), the same
+ * vocabulary as the background layer: repeat (css_bg_repeat), size keyword
+ * (css_bg_size) + w/h px + w/h per-mille, position x/y px + x/y per-mille. */
+enum { CSS_MG_REPEAT = 0, CSS_MG_SIZE, CSS_MG_SIZE_W, CSS_MG_SIZE_H, CSS_MG_SIZE_WP,
+       CSS_MG_SIZE_HP, CSS_MG_POS_X, CSS_MG_POS_Y, CSS_MG_POS_XP, CSS_MG_POS_YP,
+       CSS_MASK_GEO_N };
+
 /* text-decoration line bits, OR-combined into css_style.text_decoration. The field
  * is -1 when unset and 0 for an explicit `none` (so `a { text-decoration: none }`
  * can drop the default link underline). */
@@ -625,6 +632,10 @@ typedef struct css_style {
      * (clip0 | clip1<<2), and the three compact words of each of the two layers. */
     int         mask_n, mask_comp, mask_clip;
     int         mask_w[6];
+    /* mask-image: url() (tanda 83): the raw URL of the first mask layer ("" = none; gated and
+     * resolved downstream exactly like background-image), and its geometry (CSS_MG_*). */
+    char        mask_url[CSS_URL_MAX];
+    int         mask_geo[CSS_MASK_GEO_N];
     char        content_str[CSS_URL_MAX];                   /* R8: ::before content (backward compat; synced from content_before_str or content_after_str) */
     char        content_before_str[CSS_URL_MAX];            /* R8: ::before{content:"X"} value */
     /* The winning `content` GENERATES a box (any string, `""` included) rather

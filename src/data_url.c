@@ -56,6 +56,15 @@ du_status du_base64_payload(const char *url, const char **payload, size_t *paylo
     return DU_OK;
 }
 
+du_status du_shape_ok(const char *url) {
+    if (url == NULL) return DU_ERR_NULL_ARG;
+    if (!du_is_data_url(url)) return DU_ERR_NOT_DATA_URL;
+    const char *comma = strchr(url + 5, ',');
+    if (comma == NULL) return DU_ERR_NOT_BASE64;
+    if (strlen(comma + 1) > DU_MAX_ENCODED_LEN) return DU_ERR_TOO_LARGE;
+    return DU_OK;
+}
+
 /* 0-63 for a base64 alphabet character, -1 otherwise. Kept as a small function
  * (not a 256-entry table) so the mapping stays trivially auditable. */
 static int b64_val(unsigned char c) {

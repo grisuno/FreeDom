@@ -1,11 +1,11 @@
 # `include/data_url.h`
 
-> Source: [include/data_url.h:1](../../include/data_url.h#L1) | language `h` | coverage 33.3% | [API index](../index.md)
+> Source: [include/data_url.h:1](../../include/data_url.h#L1) | language `h` | coverage 28.6% | [API index](../index.md)
 
 ## Contents
 
 - **Enums:** [`du_status`](#du_status)
-- **Functions:** [`allocation`](#allocation), [`du_is_data_url`](#du_is_data_url), [`closed`](#closed)
+- **Functions:** [`allocation`](#allocation), [`du_is_data_url`](#du_is_data_url), [`worker`](#worker), [`closed`](#closed)
 - **Macros:** [`DU_MAX_ENCODED_LEN`](#du_max_encoded_len)
 
 ## Enums
@@ -70,11 +70,25 @@ NULL => 0.
 
 ---
 
+<a id="worker"></a>
+
+### `worker`
+
+`function` | [include/data_url.h:59](../../include/data_url.h#L59)
+
+```c
+* the confined worker (du_decode). */ du_status du_shape_ok(const char *url);
+```
+
+**Returns:** `* the confined`
+
+---
+
 <a id="closed"></a>
 
 ### `closed`
 
-`function` | [include/data_url.h:59](../../include/data_url.h#L59)
+`function` | [include/data_url.h:65](../../include/data_url.h#L65)
 
 ```c
 * 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/out/out_len == NULL (with b64_len != 0) => DU_ERR_NULL_ARG. */ du_status du_base64_decode(const char *b64, size_t b64_len,

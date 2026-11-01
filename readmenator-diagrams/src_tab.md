@@ -14,15 +14,15 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (2.1)
+## include (1.1)
 
 include groups 14 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
 
-## src (2.2)
+## src (1.2)
 
 src groups 24 files (c, h) around FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install, FREEDOM_JS_DOM_INTERNAL_H, jd_opaque_get, jd_idx. to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
 
-## tests (2.3)
+## tests (1.3)
 
 tests groups 13 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, IDX. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
 
@@ -39,7 +39,7 @@ tests groups 13 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, 
 - include/js_location.h
 - include/js_sandbox.h
 - include/js_trusted.h
-- include/link_nav.h
+- include/sha2.h
 - include/url.h
 - include/web_storage.h
 - src/dom.c
@@ -62,7 +62,7 @@ tests groups 13 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, 
 - src/js_location_internal.h
 - src/js_sandbox.c
 - src/js_trusted.c
-- src/link_nav.c
+- src/sha2.c
 - src/tab.c
 - src/url.c
 - src/web_storage.c
@@ -75,7 +75,7 @@ tests groups 13 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, 
 - tests/test_js_env.c
 - tests/test_js_geom.c
 - tests/test_js_sandbox.c
-- tests/test_link_nav.c
+- tests/test_sha2.c
 - tests/test_tab.c
 - tests/test_url.c
 - tests/test_web_storage.c

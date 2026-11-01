@@ -1,13 +1,13 @@
 # `gui/browser_ui_internal.h`
 
-> Source: [gui/browser_ui_internal.h:1](../../gui/browser_ui_internal.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
+> Source: [gui/browser_ui_internal.h:1](../../gui/browser_ui_internal.h#L1) | language `h` | coverage 45.5% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`ui_rgb`](#ui_rgb), [`ui_theme`](#ui_theme)
 - **Enums:** [`ui_theme_mode`](#ui_theme_mode)
 - **Type Aliases:** [`b`](#b), [`body_font`](#body_font)
-- **Functions:** [`set_rgb`](#set_rgb)
+- **Functions:** [`set_rgb`](#set_rgb), [`area`](#area)
 - **Macros:** [`UI_FONT_SIZE`](#ui_font_size), [`UI_TEXT_MARGIN`](#ui_text_margin), [`UI_HEADING_LEVELS`](#ui_heading_levels)
 
 ## Type Diagram
@@ -122,6 +122,20 @@ void set_rgb(cairo_t *cr, ui_rgb c);
 |---|---|---|---|
 | `cr` | `cairo_t *` |  |  |
 | `c` | `ui_rgb` |  |  |
+
+---
+
+<a id="area"></a>
+
+### `area`
+
+`function` | [gui/browser_ui_internal.h:110](../../gui/browser_ui_internal.h#L110)
+
+```c
+* tiled over the mask area (ax, ay, aw, ah) by the layer geometry `geo` (css.h CSS_MG_*, * resolved by bx_background_layer). 1 = painted, 0 = nothing usable. */ int bui_paint_mask_image(cairo_t *c, ca
+```
+
+**Returns:** `* tiled over the mask`
 
 ---
 

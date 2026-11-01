@@ -1,12 +1,24 @@
-# include: css
+# src: css
 
-*Community 4 | 35 files | cohesion 0.68*
+*Community 3 | 38 files | cohesion 0.68*
 
 ## Definition
 
-This community groups 35 file(s) rooted at `include` with dominant language c (cohesion 0.68). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (355 symbols). Documented purpose: The sheet's two string pools -- background url()s, and the ::before/::after.
+This community groups 38 file(s) rooted at `src` with dominant language c (cohesion 0.68). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `src/css.c` (266 symbols). Documented purpose: The sheet's two string pools -- background url()s, and the ::before/::after.
 
 ## Files
+
+### `src` (14 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `src/css.c` | c | utility | 266 | no |
+| `src/css_atrule.c` | c | utility | 11 | no |
+| `src/css_box.c` | c | utility | 52 | no |
+| `src/css_chain.c` | c | utility | 26 | no |
+| `src/css_color.c` | c | utility | 36 | no |
+| `src/css_gradient.c` | c | utility | 32 | no |
+| `src/css_index.c` | c | utility | 13 | yes |
 
 ### `include` (13 files)
 
@@ -16,34 +28,22 @@ This community groups 35 file(s) rooted at `include` with dominant language c (c
 | `include/css_box.h` | h | utility | 27 | no |
 | `include/css_color.h` | h | utility | 7 | no |
 | `include/css_decl.h` | h | utility | 15 | yes |
-| `include/css_gradient.h` | h | utility | 13 | no |
+| `include/css_gradient.h` | h | utility | 14 | yes |
 | `include/css_index.h` | h | utility | 8 | no |
 | `include/css_length.h` | h | utility | 20 | no |
 
-### `src` (13 files)
+### `tests` (11 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `src/css.c` | c | utility | 254 | no |
-| `src/css_atrule.c` | c | utility | 11 | no |
-| `src/css_box.c` | c | utility | 52 | no |
-| `src/css_chain.c` | c | utility | 26 | no |
-| `src/css_color.c` | c | utility | 27 | no |
-| `src/css_gradient.c` | c | utility | 31 | no |
-| `src/css_index.c` | c | utility | 13 | yes |
-
-### `tests` (9 files)
-
-| File | Language | Layer | Symbols | Doc |
-|------|----------|-------|---------|-----|
-| `tests/test_css.c` | c | testing | 355 | no |
 | `tests/test_css_atrule.c` | c | testing | 10 | yes |
 | `tests/test_css_box.c` | c | testing | 13 | no |
 | `tests/test_css_color.c` | c | testing | 36 | no |
+| `tests/test_css_gradient.c` | c | testing | 13 | no |
 | `tests/test_css_index.c` | c | testing | 14 | yes |
-| `tests/test_css_mask.c` | c | testing | 12 | yes |
+| `tests/test_css_length.c` | c | testing | 25 | no |
 
-*... and 15 more files in this community.*
+*... and 18 more files in this community.*
 
 
 ## Key Symbols
@@ -81,28 +81,27 @@ This community groups 35 file(s) rooted at `include` with dominant language c (c
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 67
+- Internal resolved imports (EXTRACTED): 69
 - Cross-boundary resolved imports (EXTRACTED): 32
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/css_color.h.
-- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/css.h imports include/css_color.h.
-- [EXTRACTED] depends_on community 4 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
-- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_select.h.
+- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/css_color.h.
+- [EXTRACTED] depends_on community 6 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/bui_theme.c imports include/css_color.h.
+- [EXTRACTED] depends_on community 4 <-> 3 (strength 0.9): Extracted import edge crosses communities: include/css.h imports include/css_color.h.
+- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
 
 ## Risks
 
-- [layer strict] `tests/test_css.c` (testing) -> `include/flex_layout.h` (presentation)
-- [dataflow DEAD_STORE] `src/css.c:5729` `page_view` `had_winner`: `had_winner` assigned at line 5729 but never read afterwards.
-- [dataflow DEAD_STORE] `src/css_color.c:155` `parse_hex` `r`: `r` assigned at line 155 but never read afterwards.
-- [dataflow DEAD_STORE] `src/css_color.c:156` `parse_hex` `g`: `g` assigned at line 156 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css.c:6081` `page_view` `had_winner`: `had_winner` assigned at line 6081 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css_color.c:156` `parse_hex` `r`: `r` assigned at line 156 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css_color.c:157` `parse_hex` `g`: `g` assigned at line 157 but never read afterwards.
 
 ## Open Questions
 
-- Why do 26 file(s) lack file-level docs (e.g. `include/css_atrule.h`)? What purpose do they serve?
-- What would break if the most connected file in include: css changed?
-- Should include: css be split, given cohesion 0.68?
+- Why do 27 file(s) lack file-level docs (e.g. `include/css_atrule.h`)? What purpose do they serve?
+- What would break if the most connected file in src: css changed?
+- Should src: css be split, given cohesion 0.68?
 
 ## Sources
 
@@ -126,4 +125,4 @@ This community groups 35 file(s) rooted at `include` with dominant language c (c
 - `src/css_color.c`
 - `src/css_gradient.c`
 - `src/css_index.c`
-- *... and 15 more*
+- *... and 18 more*

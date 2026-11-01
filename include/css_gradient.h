@@ -8,6 +8,10 @@
 #include <stddef.h>
 #include "css_decl.h"
 
+/* The first url(...) token of val, unquoted and trimmed, into out. 1 = found,
+ * 0 = none, -1 = malformed or does not fit (never a truncated URL). */
+int cg_first_url(const char *val, char *out, size_t outcap);
+
 int cg_expand_bg_image(const char *val, css_decl *dst, int cap,
                        char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap);
 int cg_expand_background(const char *val, css_decl *dst, int cap,

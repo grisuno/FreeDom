@@ -31,4 +31,10 @@
 void svp_draw(cairo_t *cr, const sv_image *img,
               double x, double y, double w, double h, int current_rgb);
 
+/* svp_draw with text optional: draw_text 0 skips SV_TEXT shapes. The confined
+ * worker rasterizes SVG images this way (spec/svg_raster.md section 3): drawing text
+ * would open fontconfig, i.e. system files, from inside the sandbox. */
+void svp_draw_ex(cairo_t *cr, const sv_image *img,
+                 double x, double y, double w, double h, int current_rgb, int draw_text);
+
 #endif /* FREEDOM_SVG_PAINT_H */

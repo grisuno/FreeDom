@@ -1,12 +1,12 @@
 # `include/css_select.h`
 
-> Source: [include/css_select.h:1](../../include/css_select.h#L1) | language `h` | coverage 61.5% | [API index](../index.md)
+> Source: [include/css_select.h:1](../../include/css_select.h#L1) | language `h` | coverage 62.5% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`css_attr_match`](#css_attr_match), [`css_sub_sel`](#css_sub_sel), [`css_pseudo_match`](#css_pseudo_match), [`css_compound`](#css_compound), [`css_sel`](#css_sel)
 - **Type Aliases:** [`tag`](#tag), [`comb`](#comb)
-- **Functions:** [`csel_compact_size`](#csel_compact_size), [`csel_compact_dup`](#csel_compact_dup), [`csel_parse`](#csel_parse), [`csel_matches`](#csel_matches), [`csel_element_feature_bits`](#csel_element_feature_bits), [`csel_anc_reject`](#csel_anc_reject), [`conservative`](#conservative), [`identifier`](#identifier), [`csel_emit_utf8`](#csel_emit_utf8), [`csel_unescape`](#csel_unescape), [`csel_escape_len`](#csel_escape_len), [`csel_ident_fold`](#csel_ident_fold), [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`csel_decl_end`](#csel_decl_end), [`csel_lower_ch`](#csel_lower_ch), [`csel_ci_eq`](#csel_ci_eq), [`csel_span_eq`](#csel_span_eq), [`csel_substr`](#csel_substr), [`csel_ident_ch`](#csel_ident_ch)
+- **Functions:** [`csel_compact_size`](#csel_compact_size), [`csel_compact_dup`](#csel_compact_dup), [`csel_parse`](#csel_parse), [`csel_matches`](#csel_matches), [`csel_element_feature_bits`](#csel_element_feature_bits), [`csel_anc_reject`](#csel_anc_reject), [`conservative`](#conservative), [`identifier`](#identifier), [`csel_emit_utf8`](#csel_emit_utf8), [`csel_unescape`](#csel_unescape), [`csel_escape_len`](#csel_escape_len), [`csel_ident_fold`](#csel_ident_fold), [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`csel_decl_end`](#csel_decl_end), [`csel_lower_ch`](#csel_lower_ch), [`csel_ci_eq`](#csel_ci_eq), [`csel_ci_starts`](#csel_ci_starts), [`csel_span_eq`](#csel_span_eq), [`csel_substr`](#csel_substr), [`csel_ident_ch`](#csel_ident_ch)
 - **Macros:** [`CSS_TOK_MAX`](#css_tok_max), [`CSS_MAX_CLASSES_PER_SEL`](#css_max_classes_per_sel), [`CSS_MAX_SUB_SELS`](#css_max_sub_sels), [`CSS_SUB_MAX_ATTRS`](#css_sub_max_attrs), [`CSS_SUB_MAX_PSEUDOS`](#css_sub_max_pseudos), [`CSEL_FOLD_PREFIX`](#csel_fold_prefix), [`CSEL_FOLD_MARK`](#csel_fold_mark), [`CSEL_IDENT_SCRATCH`](#csel_ident_scratch)
 
 ## Type Diagram
@@ -44,9 +44,11 @@ Solid arrows stay in this module, dashed arrows leave it.
 flowchart LR
     n_include_css_select_h__csel_ci_eq(["csel_ci_eq"])
     n_include_css_select_h__csel_lower_ch(["csel_lower_ch"])
+    n_include_css_select_h__csel_ci_starts(["csel_ci_starts"])
     n_include_css_select_h__csel_span_eq(["csel_span_eq"])
     n_include_css_select_h__csel_substr(["csel_substr"])
     n_include_css_select_h__csel_ci_eq --> n_include_css_select_h__csel_lower_ch
+    n_include_css_select_h__csel_ci_starts --> n_include_css_select_h__csel_lower_ch
     n_include_css_select_h__csel_span_eq --> n_include_css_select_h__csel_lower_ch
     n_include_css_select_h__csel_substr --> n_include_css_select_h__csel_span_eq
 ```
@@ -589,7 +591,7 @@ static inline char csel_lower_ch(char c)
 
 **Returns:** `char`
 
-*Called by:* [`csel_ci_eq`](#csel_ci_eq), [`csel_span_eq`](#csel_span_eq), [`CG_RAD_PX_MAX`](src.css_gradient.c.md#cg_rad_px_max), [`gradient`](src.css_gradient.c.md#gradient), [`csel_read_ident`](src.css_select.c.md#csel_read_ident), [`cv_bg_alpha_of`](src.css_values.c.md#cv_bg_alpha_of)
+*Called by:* [`csel_ci_eq`](#csel_ci_eq), [`csel_ci_starts`](#csel_ci_starts), [`csel_span_eq`](#csel_span_eq), [`CG_RAD_PX_MAX`](src.css_gradient.c.md#cg_rad_px_max), [`gradient`](src.css_gradient.c.md#gradient), [`csel_read_ident`](src.css_select.c.md#csel_read_ident), [`cv_bg_alpha_of`](src.css_values.c.md#cv_bg_alpha_of)
 
 ---
 
@@ -614,7 +616,34 @@ static inline int csel_ci_eq(const char *a, const char *b)
 
 *Calls:* [`csel_lower_ch`](#csel_lower_ch)
 
-*Called by:* [`CSS_WIDE_RESET`](src.css.c.md#css_wide_reset), [`axis`](src.css.c.md#axis), [`blur`](src.css.c.md#blur), [`declaration`](src.css.c.md#declaration), [`function`](src.css.c.md#function), [`multiplying`](src.css.c.md#multiplying), [`shorthand`](src.css.c.md#shorthand), [`AUTO_RESET_NONE`](src.css_box.c.md#auto_reset_none), [`cb_expand_grid_template_cols`](src.css_box.c.md#cb_expand_grid_template_cols), [`cb_expand_grid_template_rows`](src.css_box.c.md#cb_expand_grid_template_rows), [`cb_interp_align`](src.css_box.c.md#cb_interp_align), [`cb_interp_display`](src.css_box.c.md#cb_interp_display) and 20 more
+*Called by:* [`CSS_WIDE_RESET`](src.css.c.md#css_wide_reset), [`axis`](src.css.c.md#axis), [`blur`](src.css.c.md#blur), [`declaration`](src.css.c.md#declaration), [`function`](src.css.c.md#function), [`layer`](src.css.c.md#layer), [`AUTO_RESET_NONE`](src.css_box.c.md#auto_reset_none), [`cb_expand_grid_template_cols`](src.css_box.c.md#cb_expand_grid_template_cols), [`cb_expand_grid_template_rows`](src.css_box.c.md#cb_expand_grid_template_rows), [`cb_interp_align`](src.css_box.c.md#cb_interp_align), [`cb_interp_display`](src.css_box.c.md#cb_interp_display), [`cb_interp_fontsize_ex`](src.css_box.c.md#cb_interp_fontsize_ex) and 18 more
+
+---
+
+<a id="csel_ci_starts"></a>
+
+### `csel_ci_starts`
+
+`function` `inline` `static` | [include/css_select.h:252](../../include/css_select.h#L252)
+
+```c
+static inline int csel_ci_starts(const char *a, const char *p)
+```
+
+True if a starts with the (lowercase) prefix p, case-insensitively.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `a` | `char *` |  |  |
+| `p` | `char *` |  |  |
+
+**Returns:** `int`
+
+*Calls:* [`csel_lower_ch`](#csel_lower_ch)
+
+*Called by:* [`cb_interp_justify`](src.css_box.c.md#cb_interp_justify)
 
 ---
 
@@ -622,7 +651,7 @@ static inline int csel_ci_eq(const char *a, const char *b)
 
 ### `csel_span_eq`
 
-`function` `inline` `static` | [include/css_select.h:252](../../include/css_select.h#L252)
+`function` `inline` `static` | [include/css_select.h:261](../../include/css_select.h#L261)
 
 ```c
 static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)
@@ -651,7 +680,7 @@ True if a[0,n) equals b[0,n) up to n chars (b NUL-terminated), case-folded when 
 
 ### `csel_substr`
 
-`function` `inline` `static` | [include/css_select.h:263](../../include/css_select.h#L263)
+`function` `inline` `static` | [include/css_select.h:272](../../include/css_select.h#L272)
 
 ```c
 static inline int csel_substr(const char *hay, const char *needle, int ci)
@@ -681,7 +710,7 @@ A non-empty needle only; an empty one never matches.
 
 ### `csel_ident_ch`
 
-`function` `inline` `static` | [include/css_select.h:271](../../include/css_select.h#L271)
+`function` `inline` `static` | [include/css_select.h:280](../../include/css_select.h#L280)
 
 ```c
 static inline int csel_ident_ch(char c)

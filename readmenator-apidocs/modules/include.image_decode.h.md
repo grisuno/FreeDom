@@ -1,13 +1,13 @@
 # `include/image_decode.h`
 
-> Source: [include/image_decode.h:1](../../include/image_decode.h#L1) | language `h` | coverage 46.2% | [API index](../index.md)
+> Source: [include/image_decode.h:1](../../include/image_decode.h#L1) | language `h` | coverage 42.9% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`img_pixels`](#img_pixels)
 - **Enums:** [`img_format`](#img_format), [`img_status`](#img_status)
 - **Functions:** [`guards`](#guards), [`img_dimensions_ok`](#img_dimensions_ok), [`inputs`](#inputs), [`decode`](#decode), [`img_pixels_free`](#img_pixels_free), [`img_format_name`](#img_format_name)
-- **Macros:** [`IMG_MAX_DIM`](#img_max_dim), [`IMG_MAX_PIXELS`](#img_max_pixels)
+- **Macros:** [`IMG_MAX_SCALE`](#img_max_scale), [`IMG_MAX_DIM`](#img_max_dim), [`IMG_MAX_PIXELS`](#img_max_pixels)
 
 ## Type Diagram
 
@@ -116,7 +116,7 @@ typedef enum img_status
 
 ### `img_dimensions_ok`
 
-`function` | [include/image_decode.h:78](../../include/image_decode.h#L78)
+`function` | [include/image_decode.h:84](../../include/image_decode.h#L84)
 
 ```c
 int img_dimensions_ok(uint32_t w, uint32_t h);
@@ -139,7 +139,7 @@ int img_dimensions_ok(uint32_t w, uint32_t h);
 
 ### `inputs`
 
-`function` | [include/image_decode.h:81](../../include/image_decode.h#L81)
+`function` | [include/image_decode.h:87](../../include/image_decode.h#L87)
 
 ```c
 * Degenerate inputs (<= 0) yield (0,0). Pure. */ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h, double *out_w, double *out_h);
@@ -159,7 +159,7 @@ int img_dimensions_ok(uint32_t w, uint32_t h);
 
 ### `decode`
 
-`function` | [include/image_decode.h:92](../../include/image_decode.h#L92)
+`function` | [include/image_decode.h:98](../../include/image_decode.h#L98)
 
 ```c
 * the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and * expands to BGRA. Rejects non-JPEG (IMG_ERR_FORMAT), out-of-bounds dimensions, CMYK/ * YCCK and corrupt streams (IMG_E
@@ -179,7 +179,7 @@ int img_dimensions_ok(uint32_t w, uint32_t h);
 
 ### `img_pixels_free`
 
-`function` | [include/image_decode.h:121](../../include/image_decode.h#L121)
+`function` | [include/image_decode.h:127](../../include/image_decode.h#L127)
 
 ```c
 void img_pixels_free(img_pixels *p);
@@ -201,7 +201,7 @@ Idempotent; safe on NULL and on a zeroed struct.
 
 ### `img_format_name`
 
-`function` `const` | [include/image_decode.h:124](../../include/image_decode.h#L124)
+`function` `const` | [include/image_decode.h:130](../../include/image_decode.h#L130)
 
 ```c
 const char *img_format_name(img_format f);
@@ -223,11 +223,23 @@ Never NULL.
 
 ## Macros
 
+<a id="img_max_scale"></a>
+
+### `IMG_MAX_SCALE`
+
+`macro` | [include/image_decode.h:67](../../include/image_decode.h#L67)
+
+```c
+#define IMG_MAX_SCALE
+```
+
+---
+
 <a id="img_max_dim"></a>
 
 ### `IMG_MAX_DIM`
 
-`macro` | [include/image_decode.h:65](../../include/image_decode.h#L65)
+`macro` | [include/image_decode.h:71](../../include/image_decode.h#L71)
 
 ```c
 #define IMG_MAX_DIM
@@ -243,7 +255,7 @@ A tiny compressed PNG can declare huge dimensions (a decompression bomb); dimens
 
 ### `IMG_MAX_PIXELS`
 
-`macro` | [include/image_decode.h:66](../../include/image_decode.h#L66)
+`macro` | [include/image_decode.h:72](../../include/image_decode.h#L72)
 
 ```c
 #define IMG_MAX_PIXELS

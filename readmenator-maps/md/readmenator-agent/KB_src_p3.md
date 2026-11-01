@@ -113,33 +113,34 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
  * the gradient fai...`
   - `emit_gradient` (function, line 291) `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
                          ...`
-  - `find_radial_gradient` (function, line 348) `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+  - `find_radial_gradient` (function, line 360) `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
                       ...`
-  - `emit_radial_geom` (function, line 387) `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)`
-  - `downstream` (function, line 404) `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+  - `cg_first_url` (function, line 398) `int cg_first_url(const char *val, char *out, size_t outcap)`
+  - `emit_radial_geom` (function, line 405) `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)`
+  - `downstream` (function, line 422) `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
 int cg_expand_bg_imag...`
-  - `bg_layer_tokens_ok` (function, line 472) `static int bg_layer_tokens_ok(const char *s)`
-  - `cg_expand_background` (function, line 512) `int cg_expand_background(const char *val, css_decl *dst, int cap,
+  - `bg_layer_tokens_ok` (function, line 490) `static int bg_layer_tokens_ok(const char *s)`
+  - `cg_expand_background` (function, line 530) `int cg_expand_background(const char *val, css_decl *dst, int cap,
                              ch...`
-  - `rad_ieq` (function, line 600) `static int rad_ieq(const char *a, const char *b)`
-  - `rad_len` (function, line 608) `static int rad_len(const char *tok, int *enc)`
-  - `rad_is_len_start` (function, line 629) `static int rad_is_len_start(const char *t)`
-  - `rad_pos_kw` (function, line 634) `static int rad_pos_kw(const char *t, int *axis)`
-  - `rad_parse_position` (function, line 643) `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
-  - `cg_parse_radial_prelude` (function, line 672) `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
-  - `cg_radial_len_px` (function, line 748) `double cg_radial_len_px(int enc, double dim)`
-  - `cg_dmin` (function, line 757) `static double cg_dmin(double a, double b)`
-  - `cg_dmax` (function, line 758) `static double cg_dmax(double a, double b)`
-  - `cg_radial_geometry` (function, line 760) `void cg_radial_geometry(const cg_radial *r, double w, double h,
+  - `rad_ieq` (function, line 618) `static int rad_ieq(const char *a, const char *b)`
+  - `rad_len` (function, line 626) `static int rad_len(const char *tok, int *enc)`
+  - `rad_is_len_start` (function, line 647) `static int rad_is_len_start(const char *t)`
+  - `rad_pos_kw` (function, line 652) `static int rad_pos_kw(const char *t, int *axis)`
+  - `rad_parse_position` (function, line 661) `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
+  - `cg_parse_radial_prelude` (function, line 690) `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
+  - `cg_radial_len_px` (function, line 766) `double cg_radial_len_px(int enc, double dim)`
+  - `cg_dmin` (function, line 775) `static double cg_dmin(double a, double b)`
+  - `cg_dmax` (function, line 776) `static double cg_dmax(double a, double b)`
+  - `cg_radial_geometry` (function, line 778) `void cg_radial_geometry(const cg_radial *r, double w, double h,
                         double *c...`
-  - `cg_parse_linear` (function, line 797) `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
-  - `pool` (function, line 400) `* pool (gradient explicitly reset);`
-  - `declaration` (function, line 465) `* declaration (fail closed);`
-  - `CG_RAD_TOKENS` (macro, line 596) `#define CG_RAD_TOKENS`
-  - `CG_RAD_PM_MAX` (macro, line 597) `#define CG_RAD_PM_MAX`
-  - `CG_RAD_PX_MAX` (macro, line 598) `#define CG_RAD_PX_MAX`
-  - `CG_RAD_FLOOR` (macro, line 754) `#define CG_RAD_FLOOR`
-  - `CG_SQRT2` (macro, line 755) `#define CG_SQRT2`
+  - `cg_parse_linear` (function, line 815) `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
+  - `pool` (function, line 418) `* pool (gradient explicitly reset);`
+  - `declaration` (function, line 483) `* declaration (fail closed);`
+  - `CG_RAD_TOKENS` (macro, line 614) `#define CG_RAD_TOKENS`
+  - `CG_RAD_PM_MAX` (macro, line 615) `#define CG_RAD_PM_MAX`
+  - `CG_RAD_PX_MAX` (macro, line 616) `#define CG_RAD_PX_MAX`
+  - `CG_RAD_FLOOR` (macro, line 772) `#define CG_RAD_FLOOR`
+  - `CG_SQRT2` (macro, line 773) `#define CG_SQRT2`
 - Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_index.c
@@ -191,22 +192,22 @@ int cg_expand_bg_imag...`
 - Depends on: `include/css.h`, `include/css_length.h`
 
 ## src/css_mask.c
-- Doc: split: out->kind = 1; out->nst = (meta >> 4) & 0xf; if (out->nst < 2) out->nst = 2; if (out->nst...
+- Doc: A layer token can be a whole url(...) (a data: SVG icon is routinely 400-900 bytes): the token...
 - Layer: utility
 - Language: c
 - Symbols:
-  - `ieq` (function, line 11) `static int ieq(const char *a, const char *b)`
-  - `cm_is_mask_prop` (function, line 17) `int cm_is_mask_prop(const char *prop)`
-  - `cm_encode_layer` (function, line 24) `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)`
-  - `cm_decode_layer` (function, line 45) `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)`
-  - `split` (function, line 63) `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)`
-  - `composite_word` (function, line 90) `static int composite_word(const char *t, int webkit)`
-  - `clip_word` (function, line 104) `static int clip_word(const char *t)`
-  - `image_layer` (function, line 112) `static int image_layer(const char *tok, cm_layer *l)`
-  - `emit_layers` (function, line 130) `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)`
-  - `cm_expand` (function, line 197) `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)`
-  - `CM_TOK_MAX` (macro, line 8) `#define CM_TOK_MAX`
-  - `CM_MAX_TOKS` (macro, line 9) `#define CM_MAX_TOKS`
+  - `ieq` (function, line 13) `static int ieq(const char *a, const char *b)`
+  - `cm_is_mask_prop` (function, line 19) `int cm_is_mask_prop(const char *prop)`
+  - `cm_encode_layer` (function, line 26) `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)`
+  - `cm_decode_layer` (function, line 47) `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)`
+  - `split` (function, line 65) `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)`
+  - `composite_word` (function, line 92) `static int composite_word(const char *t, int webkit)`
+  - `clip_word` (function, line 106) `static int clip_word(const char *t)`
+  - `image_layer` (function, line 114) `static int image_layer(const char *tok, cm_layer *l)`
+  - `emit_layers` (function, line 132) `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)`
+  - `cm_expand` (function, line 201) `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)`
+  - `CM_TOK_MAX` (macro, line 10) `#define CM_TOK_MAX`
+  - `CM_MAX_TOKS` (macro, line 11) `#define CM_MAX_TOKS`
 - Depends on: `include/css_gradient.h`, `include/css_mask.h`
 
 ## src/css_mq.c
@@ -241,6 +242,8 @@ int cg_expand_bg_imag...`
   - `eval_cond` (function, line 380) `static int eval_cond(mq_cur *c, int depth)`
   - `eval_query` (function, line 404) `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)`
   - `cmq_matches` (function, line 458) `int cmq_matches(const char *s, size_t len, const cmq_env *env)`
+  - `has_word` (function, line 479) `static int has_word(const char *t, const char *w)`
+  - `cmq_container_surely` (function, line 489) `int cmq_container_surely(const char *s, size_t len, int max_width)`
   - `CMQ_DEVICE_W` (macro, line 18) `#define CMQ_DEVICE_W`
   - `CMQ_DEVICE_H` (macro, line 19) `#define CMQ_DEVICE_H`
   - `CMQ_DPPX` (macro, line 20) `#define CMQ_DPPX`
@@ -312,18 +315,18 @@ int cg_expand_bg_imag...`
   - `ct_interp_texttransform` (function, line 69) `int ct_interp_texttransform(const char *v)`
   - `ct_interp_valign` (function, line 91) `int ct_interp_valign(const char *v)`
   - `ct_expand_valign` (function, line 122) `int ct_expand_valign(const char *val, css_decl *dst, int cap)`
-  - `ct_interp_transition_property` (function, line 139) `int ct_interp_transition_property(const char *v)`
-  - `ct_interp_whitespace` (function, line 147) `int ct_interp_whitespace(const char *v)`
-  - `ct_interp_tabsize` (function, line 160) `int ct_interp_tabsize(const char *v)`
-  - `ct_interp_textdeco_style` (function, line 171) `int ct_interp_textdeco_style(const char *v)`
-  - `ct_interp_textdeco_thickness` (function, line 182) `int ct_interp_textdeco_thickness(const char *v)`
-  - `ct_interp_aspect_ratio` (function, line 194) `int ct_interp_aspect_ratio(const char *v, int *num, int *den)`
-  - `ct_interp_direction` (function, line 236) `int ct_interp_direction(const char *v)`
-  - `ct_liststyle_kw` (function, line 242) `static int ct_liststyle_kw(const char *t)`
-  - `ct_liststyle_unknown_name` (function, line 263) `static int ct_liststyle_unknown_name(const char *t)`
-  - `ct_interp_liststyle` (function, line 274) `int ct_interp_liststyle(const char *v)`
-  - `ct_emit_spacing` (function, line 309) `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
-  - `ct_expand_shadow` (function, line 322) `int ct_expand_shadow(const char *val, css_decl *dst, int cap)`
+  - `transition_prop_one` (function, line 139) `static int transition_prop_one(const char *v)`
+  - `ct_interp_whitespace` (function, line 182) `int ct_interp_whitespace(const char *v)`
+  - `ct_interp_tabsize` (function, line 195) `int ct_interp_tabsize(const char *v)`
+  - `ct_interp_textdeco_style` (function, line 206) `int ct_interp_textdeco_style(const char *v)`
+  - `ct_interp_textdeco_thickness` (function, line 217) `int ct_interp_textdeco_thickness(const char *v)`
+  - `ct_interp_aspect_ratio` (function, line 229) `int ct_interp_aspect_ratio(const char *v, int *num, int *den)`
+  - `ct_interp_direction` (function, line 271) `int ct_interp_direction(const char *v)`
+  - `ct_liststyle_kw` (function, line 277) `static int ct_liststyle_kw(const char *t)`
+  - `ct_liststyle_unknown_name` (function, line 298) `static int ct_liststyle_unknown_name(const char *t)`
+  - `ct_interp_liststyle` (function, line 309) `int ct_interp_liststyle(const char *v)`
+  - `ct_emit_spacing` (function, line 344) `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
+  - `ct_expand_shadow` (function, line 357) `int ct_expand_shadow(const char *val, css_decl *dst, int cap)`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`
 
 ## src/css_values.c
@@ -359,10 +362,11 @@ int cg_expand_bg_imag...`
   - `without_important` (function, line 124) `static size_t without_important(const char *val, size_t n)`
   - `cvr_collect_decls` (function, line 139) `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b)`
   - `scope_get` (function, line 164) `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)`
-  - `resolve_rec` (function, line 178) `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
+  - `env_value` (function, line 182) `static const char *env_value(const char *name, size_t n)`
+  - `resolve_rec` (function, line 192) `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
                   ...`
-  - `cvr_resolve` (function, line 230) `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
-  - `cvr_lookup` (function, line 239) `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
+  - `cvr_resolve` (function, line 281) `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
+  - `cvr_lookup` (function, line 290) `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
 - Depends on: `include/css_select.h`, `include/css_vars.h`
 
 ## src/data_url.c
@@ -374,12 +378,13 @@ int cg_expand_bg_imag...`
   - `ci_starts_with` (function, line 20) `static int ci_starts_with(const char *s, const char *prefix)`
   - `du_is_data_url` (function, line 28) `int du_is_data_url(const char *url)`
   - `du_base64_payload` (function, line 32) `du_status du_base64_payload(const char *url, const char **payload, size_t *payload_len)`
-  - `b64_val` (function, line 61) `static int b64_val(unsigned char c)`
-  - `du_base64_decode` (function, line 70) `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)`
-  - `hexval` (function, line 108) `static int hexval(char c)`
-  - `ascii_ws` (function, line 115) `static int ascii_ws(char c)`
-  - `ends_ci` (function, line 120) `static int ends_ci(const char *s, size_t n, const char *suf)`
-  - `du_decode` (function, line 131) `du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)`
+  - `du_shape_ok` (function, line 59) `du_status du_shape_ok(const char *url)`
+  - `b64_val` (function, line 70) `static int b64_val(unsigned char c)`
+  - `du_base64_decode` (function, line 79) `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)`
+  - `hexval` (function, line 117) `static int hexval(char c)`
+  - `ascii_ws` (function, line 124) `static int ascii_ws(char c)`
+  - `ends_ci` (function, line 129) `static int ends_ci(const char *s, size_t n, const char *suf)`
+  - `du_decode` (function, line 140) `du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)`
 - Depends on: `include/data_url.h`
 
 ## src/disk_store.c
@@ -396,104 +401,6 @@ int cg_expand_bg_imag...`
   - `ds_free` (function, line 136) `void ds_free(uint8_t *buf, size_t len)`
   - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
 - Depends on: `include/disk_store.h`, `include/local_store.h`, `include/util.h`
-
-## src/dom.c
-- Doc: to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `sm_entry` (struct, line 55)
-  - `strmap` (struct, line 64)
-  - `pm_entry` (struct, line 154)
-  - `ptrmap` (struct, line 160)
-  - `dom_index` (struct, line 220)
-  - `ih_block` (struct, line 850)
-  - `ih_acc` (struct, line 855)
-  - `to_lower_buf` (function, line 33) `static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap)`
-  - `ptr_hash` (function, line 45) `static size_t ptr_hash(const void *p)`
-  - `sm_entry_append` (function, line 70) `static int sm_entry_append(sm_entry *e, dom_node_id id)`
-  - `sm_grow` (function, line 82) `static int sm_grow(strmap *m)`
-  - `sm_put` (function, line 99) `static int sm_put(strmap *m, const char *key, size_t klen, dom_node_id id)`
-  - `sm_find` (function, line 127) `static const sm_entry *sm_find(const strmap *m, const char *key, size_t klen)`
-  - `sm_free` (function, line 139) `static void sm_free(strmap *m)`
-  - `pm_grow` (function, line 166) `static int pm_grow(ptrmap *m)`
-  - `pm_put` (function, line 183) `static int pm_put(ptrmap *m, const void *key, dom_node_id id)`
-  - `pm_get` (function, line 200) `static int pm_get(const ptrmap *m, const void *key, dom_node_id *out)`
-  - `pm_free` (function, line 211) `static void pm_free(ptrmap *m)`
-  - `node_next` (function, line 232) `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)`
-  - `valid` (function, line 242) `static int valid(const dom_index *idx, dom_node_id n)`
-  - `index_element` (function, line 254) `static int index_element(dom_index *idx, lxb_dom_element_t *el, dom_node_id id)`
-  - `dom_build` (function, line 291) `dom_status dom_build(const hp_document *doc, dom_index **out)`
-  - `dom_free` (function, line 332) `void dom_free(dom_index *idx)`
-  - `dom_node_count` (function, line 344) `size_t dom_node_count(const dom_index *idx)`
-  - `node_in_document` (function, line 352) `static int node_in_document(const lxb_dom_node_t *node)`
-  - `dom_get_element_by_id` (function, line 358) `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)`
-  - `dom_get_connected_by_id` (function, line 364) `dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id)`
-  - `copy_ids` (function, line 387) `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
-  - `dom_get_by_tag` (function, line 394) `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
-                      dom_node_id *o...`
-  - `dom_get_by_class` (function, line 403) `size_t dom_get_by_class(const dom_index *idx, const char *cls,
-                        dom_node_i...`
-  - `id_of` (function, line 416) `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)`
-  - `parse_selector_list` (function, line 426) `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)`
-  - `node_matches_any` (function, line 459) `static int node_matches_any(const lxb_dom_node_t *cn,
-                            const css_sel *...`
-  - `count` (function, line 467) `* count (may exceed cap), and returns DOM_NODE_NONE. */
-static dom_node_id qs_walk(const dom_inde...`
-  - `dom_query_selector` (function, line 497) `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
-                          ...`
-  - `dom_query_selector_all` (function, line 506) `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
-                           ...`
-  - `dom_matches` (function, line 517) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
-  - `dom_closest` (function, line 526) `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
-                        const cha...`
-  - `dom_document_position` (function, line 542) `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
-  - `dom_precedes` (function, line 547) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
-  - `dom_node_at` (function, line 552) `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
-  - `dom_parent` (function, line 557) `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
-  - `dom_first_child` (function, line 567) `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
-  - `dom_next_sibling` (function, line 575) `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
-  - `dom_tag_name` (function, line 583) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
-  - `dom_get_attribute` (function, line 594) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
-                           ...`
-  - `dom_attribute_names` (function, line 616) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
-                           con...`
-  - `dom_text_content` (function, line 634) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
-  - `dom_document_title` (function, line 644) `const char *dom_document_title(const dom_index *idx, size_t *len)`
-  - `dom_set_text_content` (function, line 657) `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
-                               ...`
-  - `dom_set_document_title` (function, line 691) `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
-  - `idx_push` (function, line 702) `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)`
-  - `dom_create_element` (function, line 720) `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
-  - `dom_append_child` (function, line 740) `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-  - `dom_remove_child` (function, line 754) `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-  - `dom_set_attribute` (function, line 762) `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
-                             const...`
-  - `dom_remove_attribute` (function, line 791) `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
-  - `index_subtree` (function, line 800) `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)`
-  - `dom_set_inner_html` (function, line 810) `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
-                              con...`
-  - `ih_append` (function, line 863) `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
-  - `ih_free` (function, line 890) `static void ih_free(ih_acc *a)`
-  - `dom_get_inner_html` (function, line 917) `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
-                           ...`
-  - `dom_insert_before` (function, line 947) `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
-             ...`
-  - `dom_clone_node` (function, line 964) `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)`
-  - `dom_move_children` (function, line 978) `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
-               ...`
-  - `char_kind` (function, line 1011) `static int char_kind(const lxb_dom_node_t *n)`
-  - `handle_of` (function, line 1022) `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)`
-  - `dom_node_kind` (function, line 1030) `int dom_node_kind(const dom_index *idx, dom_node_id node)`
-  - `dom_child_node` (function, line 1034) `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)`
-  - `dom_sibling_node` (function, line 1041) `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
-  - `dom_create_char_node` (function, line 1048) `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
-         ...`
-  - `dom_native_node` (function, line 1062) `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
-  - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
-  - `DOM_QS_MAX_SELECTORS` (macro, line 413) `#define DOM_QS_MAX_SELECTORS`
-  - `IH_BLOCK_SIZE` (macro, line 848) `#define IH_BLOCK_SIZE`
-- Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `include/html_parse.h`, `include/util.h`
 
 
 Next: [KB_src_p4.md](KB_src_p4.md)

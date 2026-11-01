@@ -39,11 +39,8 @@ rdp_img_decision rdp_image_decision(rdp_caps caps,
      * a NETWORK fetch) but still needs caps.images, like every other image. An
      * unsupported/malformed data: URI (no base64 payload) fails closed. See
      * spec/data_url.md. */
-    if (du_is_data_url(image_url)) {
-        const char *payload; size_t plen;
-        return du_base64_payload(image_url, &payload, &plen) == DU_OK
-             ? RDP_IMG_ALLOW : RDP_IMG_BLOCK_INVALID;
-    }
+    if (du_is_data_url(image_url))
+        return du_shape_ok(image_url) == DU_OK ? RDP_IMG_ALLOW : RDP_IMG_BLOCK_INVALID;
 
     /* Zero Trust: revalidate scheme + host on every image through request_policy.
      * Cross-site (RP_BLOCK_THIRD_PARTY) is allowed for opt-in images; only an

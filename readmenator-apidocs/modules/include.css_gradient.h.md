@@ -1,12 +1,12 @@
 # `include/css_gradient.h`
 
-> Source: [include/css_gradient.h:1](../../include/css_gradient.h#L1) | language `h` | coverage 30.8% | [API index](../index.md)
+> Source: [include/css_gradient.h:1](../../include/css_gradient.h#L1) | language `h` | coverage 35.7% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cg_radial`](#cg_radial)
 - **Enums:** [`cg_radial_shape`](#cg_radial_shape), [`cg_radial_size`](#cg_radial_size)
-- **Functions:** [`cg_expand_bg_image`](#cg_expand_bg_image), [`cg_expand_background`](#cg_expand_background), [`width`](#width), [`out`](#out), [`cg_radial_len_px`](#cg_radial_len_px), [`zero`](#zero), [`cg_parse_linear`](#cg_parse_linear)
+- **Functions:** [`cg_first_url`](#cg_first_url), [`cg_expand_bg_image`](#cg_expand_bg_image), [`cg_expand_background`](#cg_expand_background), [`width`](#width), [`out`](#out), [`cg_radial_len_px`](#cg_radial_len_px), [`zero`](#zero), [`cg_parse_linear`](#cg_parse_linear)
 - **Macros:** [`CG_LEN_UNSET`](#cg_len_unset)
 
 ## Type Diagram
@@ -30,7 +30,7 @@ classDiagram
 
 ### `cg_radial`
 
-`struct` | [include/css_gradient.h:24](../../include/css_gradient.h#L24)
+`struct` | [include/css_gradient.h:28](../../include/css_gradient.h#L28)
 
 ```c
 typedef struct cg_radial
@@ -46,7 +46,7 @@ typedef struct cg_radial
 
 #### `cg_radial.shape`
 
-`type_alias` | [include/css_gradient.h:24](../../include/css_gradient.h#L24)
+`type_alias` | [include/css_gradient.h:28](../../include/css_gradient.h#L28)
 
 ```c
 typedef struct cg_radial { int shape;
@@ -60,7 +60,7 @@ typedef struct cg_radial { int shape;
 
 ### `cg_radial_shape`
 
-`enum` | [include/css_gradient.h:19](../../include/css_gradient.h#L19)
+`enum` | [include/css_gradient.h:23](../../include/css_gradient.h#L23)
 
 ```c
 typedef enum cg_radial_shape { CG_RAD_ELLIPSE = 0, CG_RAD_CIRCLE = 1 } cg_radial_shape;
@@ -76,7 +76,7 @@ Lengths: >= 0 is per-mille of the box * width (x, rx) or height (y, ry); < 0 is 
 
 ### `cg_radial_size`
 
-`enum` | [include/css_gradient.h:20](../../include/css_gradient.h#L20)
+`enum` | [include/css_gradient.h:24](../../include/css_gradient.h#L24)
 
 ```c
 typedef enum cg_radial_size
@@ -86,11 +86,37 @@ typedef enum cg_radial_size
 
 ## Functions
 
+<a id="cg_first_url"></a>
+
+### `cg_first_url`
+
+`function` | [include/css_gradient.h:13](../../include/css_gradient.h#L13)
+
+```c
+int cg_first_url(const char *val, char *out, size_t outcap);
+```
+
+The first url(...) token of val, unquoted and trimmed, into out.
+
+1 = found, 0 = none, -1 = malformed or does not fit (never a truncated URL).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `val` | `char *` |  |  |
+| `out` | `char *` |  |  |
+| `outcap` | `size_t` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="cg_expand_bg_image"></a>
 
 ### `cg_expand_bg_image`
 
-`function` | [include/css_gradient.h:11](../../include/css_gradient.h#L11)
+`function` | [include/css_gradient.h:15](../../include/css_gradient.h#L15)
 
 ```c
 int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap);
@@ -117,7 +143,7 @@ int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[C
 
 ### `cg_expand_background`
 
-`function` | [include/css_gradient.h:13](../../include/css_gradient.h#L13)
+`function` | [include/css_gradient.h:17](../../include/css_gradient.h#L17)
 
 ```c
 int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap);
@@ -142,7 +168,7 @@ int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)
 
 ### `width`
 
-`function` | [include/css_gradient.h:17](../../include/css_gradient.h#L17)
+`function` | [include/css_gradient.h:21](../../include/css_gradient.h#L21)
 
 ```c
 * width (x, rx) or height (y, ry);
@@ -156,7 +182,7 @@ int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)
 
 ### `out`
 
-`function` | [include/css_gradient.h:32](../../include/css_gradient.h#L32)
+`function` | [include/css_gradient.h:36](../../include/css_gradient.h#L36)
 
 ```c
 * Returns 1 and fills *out (defaults first) when seg is a valid prelude, 0 when seg is not * one (it is a colour stop), -1 when it is malformed (the caller drops the gradient). Pure. */ int cg_parse_r
@@ -176,7 +202,7 @@ int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)
 
 ### `cg_radial_len_px`
 
-`function` | [include/css_gradient.h:37](../../include/css_gradient.h#L37)
+`function` | [include/css_gradient.h:41](../../include/css_gradient.h#L41)
 
 ```c
 double cg_radial_len_px(int enc, double dim);
@@ -199,7 +225,7 @@ A radial length resolved against a box dimension in px.
 
 ### `zero`
 
-`function` | [include/css_gradient.h:41](../../include/css_gradient.h#L41)
+`function` | [include/css_gradient.h:45](../../include/css_gradient.h#L45)
 
 ```c
 * floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure. */ void cg_radial_geometry(const cg_radial *r, double w, double h, double *cx, doub
@@ -219,7 +245,7 @@ A radial length resolved against a box dimension in px.
 
 ### `cg_parse_linear`
 
-`function` | [include/css_gradient.h:51](../../include/css_gradient.h#L51)
+`function` | [include/css_gradient.h:55](../../include/css_gradient.h#L55)
 
 ```c
 int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions);
@@ -248,7 +274,7 @@ Parses one `linear-gradient(...)` function (the whole text, nothing around it) i
 
 ### `CG_LEN_UNSET`
 
-`macro` | [include/css_gradient.h:18](../../include/css_gradient.h#L18)
+`macro` | [include/css_gradient.h:22](../../include/css_gradient.h#L22)
 
 ```c
 #define CG_LEN_UNSET

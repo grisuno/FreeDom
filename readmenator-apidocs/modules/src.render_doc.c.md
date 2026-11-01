@@ -1,10 +1,10 @@
 # `src/render_doc.c`
 
-> Source: [src/render_doc.c:1](../../src/render_doc.c#L1) | language `c` | coverage 50.0% | [API index](../index.md)
+> Source: [src/render_doc.c:1](../../src/render_doc.c#L1) | language `c` | coverage 47.4% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`place`](#place), [`rd_build`](#rd_build), [`unset`](#unset), [`rd_free`](#rd_free), [`rd_count`](#rd_count), [`rd_at`](#rd_at), [`rd_box_count`](#rd_box_count), [`rd_box_at`](#rd_box_at), [`rd_cont_count`](#rd_cont_count), [`rd_cont_at`](#rd_cont_at), [`rd_kind_name`](#rd_kind_name), [`rd_block_heading_level`](#rd_block_heading_level), [`rd_block_tag`](#rd_block_tag), [`rd_input_label`](#rd_input_label), [`rd_input_invisible`](#rd_input_invisible), [`rd_image_label`](#rd_image_label), [`rd_image_fail_label`](#rd_image_fail_label)
+- **Functions:** [`place`](#place), [`too`](#too), [`rd_build`](#rd_build), [`unset`](#unset), [`rd_free`](#rd_free), [`rd_count`](#rd_count), [`rd_at`](#rd_at), [`rd_box_count`](#rd_box_count), [`rd_box_at`](#rd_box_at), [`rd_cont_count`](#rd_cont_count), [`rd_cont_at`](#rd_cont_at), [`rd_kind_name`](#rd_kind_name), [`rd_block_heading_level`](#rd_block_heading_level), [`rd_block_tag`](#rd_block_tag), [`rd_input_label`](#rd_input_label), [`rd_input_invisible`](#rd_input_invisible), [`rd_image_label`](#rd_image_label), [`rd_image_fail_label`](#rd_image_fail_label)
 
 ## Call Graph
 
@@ -44,11 +44,31 @@ flowchart LR
 
 ---
 
+<a id="too"></a>
+
+### `too`
+
+`function` | [src/render_doc.c:281](../../src/render_doc.c#L281)
+
+```c
+* that would not fit is cleared too (never truncated-and-fetched). */ static void gate_box_image_...
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `fetched` | `never truncated-and-` |  |  |
+
+**Returns:** `* that would not fit is cleared`
+
+---
+
 <a id="rd_build"></a>
 
 ### `rd_build`
 
-`function` | [src/render_doc.c:276](../../src/render_doc.c#L276)
+`function` | [src/render_doc.c:293](../../src/render_doc.c#L293)
 
 ```c
 rd_status rd_build(const pv_view *view, rdp_caps caps, const char *top_level_url, rd_doc **out)
@@ -73,10 +93,10 @@ rd_status rd_build(const pv_view *view, rdp_caps caps, const char *top_level_url
 
 ### `unset`
 
-`function` | [src/render_doc.c:688](../../src/render_doc.c#L688)
+`function` | [src/render_doc.c:706](../../src/render_doc.c#L706)
 
 ```c
-* background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not content * with alt text, matching real-browser behaviour. */ if (d->boxes[i].bg_image_url[0] != '\0')
+* background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not content * with alt text, matching real-browser behaviour. */ gate_box_image_url(caps,
 ```
 
 **Parameters**
@@ -95,7 +115,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps, const char *top_level_url
 
 ### `rd_free`
 
-`function` | [src/render_doc.c:753](../../src/render_doc.c#L753)
+`function` | [src/render_doc.c:744](../../src/render_doc.c#L744)
 
 ```c
 void rd_free(rd_doc *d)
@@ -119,7 +139,7 @@ Idempotent; safe on NULL and safe to call twice.
 
 ### `rd_count`
 
-`function` | [src/render_doc.c:770](../../src/render_doc.c#L770)
+`function` | [src/render_doc.c:761](../../src/render_doc.c#L761)
 
 ```c
 size_t rd_count(const rd_doc *d)
@@ -145,7 +165,7 @@ NULL-safe.
 
 ### `rd_at`
 
-`function` `const` | [src/render_doc.c:774](../../src/render_doc.c#L774)
+`function` `const` | [src/render_doc.c:765](../../src/render_doc.c#L765)
 
 ```c
 const rd_block *rd_at(const rd_doc *d, size_t i)
@@ -166,7 +186,7 @@ const rd_block *rd_at(const rd_doc *d, size_t i)
 
 ### `rd_box_count`
 
-`function` | [src/render_doc.c:779](../../src/render_doc.c#L779)
+`function` | [src/render_doc.c:770](../../src/render_doc.c#L770)
 
 ```c
 size_t rd_box_count(const rd_doc *d)
@@ -190,7 +210,7 @@ Box tree accessors (Step D). rd_box_count is the number of box definitions (0 wh
 
 ### `rd_box_at`
 
-`function` `const` | [src/render_doc.c:783](../../src/render_doc.c#L783)
+`function` `const` | [src/render_doc.c:774](../../src/render_doc.c#L774)
 
 ```c
 const pv_box_def *rd_box_at(const rd_doc *d, size_t i)
@@ -211,7 +231,7 @@ const pv_box_def *rd_box_at(const rd_doc *d, size_t i)
 
 ### `rd_cont_count`
 
-`function` | [src/render_doc.c:788](../../src/render_doc.c#L788)
+`function` | [src/render_doc.c:779](../../src/render_doc.c#L779)
 
 ```c
 size_t rd_cont_count(const rd_doc *d)
@@ -235,7 +255,7 @@ Container table accessors. rd_cont_count is the number of containers; rd_cont_at
 
 ### `rd_cont_at`
 
-`function` `const` | [src/render_doc.c:792](../../src/render_doc.c#L792)
+`function` `const` | [src/render_doc.c:783](../../src/render_doc.c#L783)
 
 ```c
 const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)
@@ -256,7 +276,7 @@ const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)
 
 ### `rd_kind_name`
 
-`function` `const` | [src/render_doc.c:797](../../src/render_doc.c#L797)
+`function` `const` | [src/render_doc.c:788](../../src/render_doc.c#L788)
 
 ```c
 const char *rd_kind_name(rd_kind k)
@@ -282,7 +302,7 @@ Never NULL; an unknown enum value yields "block".
 
 ### `rd_block_heading_level`
 
-`function` | [src/render_doc.c:811](../../src/render_doc.c#L811)
+`function` | [src/render_doc.c:802](../../src/render_doc.c#L802)
 
 ```c
 int rd_block_heading_level(const rd_block *b)
@@ -308,7 +328,7 @@ RD_HEADING yields its heading_level clamped to 1..6; an RD_LINK carrying heading
 
 ### `rd_block_tag`
 
-`function` `const` | [src/render_doc.c:822](../../src/render_doc.c#L822)
+`function` `const` | [src/render_doc.c:813](../../src/render_doc.c#L813)
 
 ```c
 const char *rd_block_tag(const rd_block *b)
@@ -334,7 +354,7 @@ RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH -> "p", R
 
 ### `rd_input_label`
 
-`function` `const` | [src/render_doc.c:853](../../src/render_doc.c#L853)
+`function` `const` | [src/render_doc.c:844](../../src/render_doc.c#L844)
 
 ```c
 const char *rd_input_label(int input_type)
@@ -360,7 +380,7 @@ Stable, short English name of a form control type (a pv_input_type value), e.g.
 
 ### `rd_input_invisible`
 
-`function` | [src/render_doc.c:873](../../src/render_doc.c#L873)
+`function` | [src/render_doc.c:864](../../src/render_doc.c#L864)
 
 ```c
 int rd_input_invisible(int input_type)
@@ -386,7 +406,7 @@ Its data still takes part in form submission.
 
 ### `rd_image_label`
 
-`function` `const` | [src/render_doc.c:877](../../src/render_doc.c#L877)
+`function` `const` | [src/render_doc.c:868](../../src/render_doc.c#L868)
 
 ```c
 const char *rd_image_label(rdp_img_decision d)
@@ -406,7 +426,7 @@ const char *rd_image_label(rdp_img_decision d)
 
 ### `rd_image_fail_label`
 
-`function` `const` | [src/render_doc.c:888](../../src/render_doc.c#L888)
+`function` `const` | [src/render_doc.c:879](../../src/render_doc.c#L879)
 
 ```c
 const char *rd_image_fail_label(img_fail_reason reason)

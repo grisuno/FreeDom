@@ -1,12 +1,6 @@
 GitLab - Speed with control for agentic software engineering
-CSS drops: 28 declaration(s) dropped, 14 distinct
+CSS drops: 8 declaration(s) dropped, 8 distinct
   count  cause         property                     first value
-      4  unknown-prop  -webkit-mask-position        center bottom,center bottom
-      4  unknown-prop  mask-position                center bottom,center bottom
-      3  unknown-prop  -webkit-mask-repeat          no-repeat,no-repeat
-      3  unknown-prop  mask-repeat                  no-repeat,no-repeat
-      3  unknown-prop  -webkit-mask-size            100% 100%,100% 100%
-      3  unknown-prop  mask-size                    100% 100%,100% 100%
       1  bad-value     grid-template-rows           none
       1  unknown-prop  writing-mode                 vertical-rl
       1  unknown-prop  overscroll-behavior-x        contain

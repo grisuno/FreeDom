@@ -1,12 +1,12 @@
 # `src/css_mq.c`
 
-> Source: [src/css_mq.c:1](../../src/css_mq.c#L1) | language `c` | coverage 18.2% | [API index](../index.md)
+> Source: [src/css_mq.c:1](../../src/css_mq.c#L1) | language `c` | coverage 25.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`mq_cur`](#mq_cur), [`fval`](#fval)
 - **Type Aliases:** [`kind`](#kind)
-- **Functions:** [`cmq_matches`](#cmq_matches)
+- **Functions:** [`cmq_matches`](#cmq_matches), [`cmq_container_surely`](#cmq_container_surely)
 - **Macros:** [`CMQ_DEVICE_W`](#cmq_device_w), [`CMQ_DPPX`](#cmq_dppx), [`CMQ_COLOR_BITS`](#cmq_color_bits), [`CMQ_DPI_PER_DPPX`](#cmq_dpi_per_dppx), [`CMQ_CM_PER_IN`](#cmq_cm_per_in), [`MQ_EPS`](#mq_eps)
 
 ## Type Diagram
@@ -20,6 +20,21 @@ classDiagram
     <<type_alias>> kind
     class fval
     <<struct>> fval
+```
+
+## Call Graph
+
+Solid arrows stay in this module, dashed arrows leave it.
+
+```mermaid
+flowchart LR
+    n_src_css_mq_c__cmq_container_surely(["cmq_container_surely"])
+    n_src_css_mq_c__cmq_matches(["cmq_matches"])
+    n_src_css_color_c__strncmp["css_color.strncmp"]
+    n_src_webfont_c__lower_ch_306["webfont.lower_ch"]
+    n_src_css_mq_c__cmq_container_surely --> n_src_css_mq_c__cmq_matches
+    n_src_css_mq_c__cmq_container_surely -.-> n_src_css_color_c__strncmp
+    n_src_css_mq_c__cmq_container_surely -.-> n_src_webfont_c__lower_ch_306
 ```
 
 ## Structs
@@ -89,6 +104,38 @@ An empty list matches (all). NULL s or env -> 0.
 **Returns:** `int`
 
 > **Inherited:** Documentation from [`cmq_matches`](#cmq_matches) (include/css_mq.h:28).
+
+*Called by:* [`cmq_container_surely`](#cmq_container_surely)
+
+---
+
+<a id="cmq_container_surely"></a>
+
+### `cmq_container_surely`
+
+`function` | [src/css_mq.c:489](../../src/css_mq.c#L489)
+
+```c
+int cmq_container_surely(const char *s, size_t len, int max_width)
+```
+
+@container condition s[0,len) (optionally led by a container name) is SURELY true for every container no wider than max_width: it must be a pure width interval (width/inline-size comparisons joined by `and`) true at width 0 and at max_width.
+
+Anything else -- or, not, height, style(), unknown -- is 0. spec/css_mq.md.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `s` | `char *` |  |  |
+| `len` | `size_t` |  |  |
+| `max_width` | `int` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`cmq_container_surely`](#cmq_container_surely) (include/css_mq.h:34).
+
+*Calls:* [`strncmp`](src.css_color.c.md#strncmp), [`cmq_matches`](#cmq_matches), [`lower_ch`](src.webfont.c.md#lower_ch)
 
 ---
 

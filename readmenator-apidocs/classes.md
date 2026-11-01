@@ -38,6 +38,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`calc_val`](modules/src.css_box.c.md#calc_val) struct in `src/css_box.c`
 - [`car_layers`](modules/include.css_atrule.h.md#car_layers) struct in `include/css_atrule.h`
 - [`car_ops`](modules/include.css_atrule.h.md#car_ops) struct in `include/css_atrule.h`
+- [`cc_cp`](modules/src.css_color.c.md#cc_cp) struct in `src/css_color.c`
+- [`cc_cv`](modules/src.css_color.c.md#cc_cv) struct in `src/css_color.c`
 - [`cc_named`](modules/src.css_color.c.md#cc_named) struct in `src/css_color.c`
 - [`cc_rgb`](modules/include.css_color.h.md#cc_rgb) struct in `include/css_color.h`
 - [`cc_status`](modules/include.css_color.h.md#cc_status) enum in `include/css_color.h`
@@ -546,6 +548,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`used`](modules/src.text_shape.c.md#used) type_alias in `src/text_shape.c`
 - [`used`](modules/src.ws_hub.c.md#used) type_alias in `src/ws_hub.c`
 - [`user_agent`](modules/include.identity.h.md#user_agent) type_alias in `include/identity.h`
+- [`v`](modules/src.css_color.c.md#v) type_alias in `src/css_color.c`
 - [`val_kind`](modules/include.interp.h.md#val_kind) type_alias in `include/interp.h`
 - [`vec`](modules/tools.gen_psl.c.md#vec) struct in `tools/gen_psl.c`
 - [`verb`](modules/include.svg_render.h.md#verb) type_alias in `include/svg_render.h`

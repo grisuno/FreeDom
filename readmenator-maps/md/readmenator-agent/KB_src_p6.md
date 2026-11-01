@@ -1,6 +1,71 @@
 # Subsystem: src (page 6 of 10)
 Previous: [KB_src_p5.md](KB_src_p5.md)
 
+## src/js_geom.c
+- Doc: unite: Bounding box of a and b into a; returns 1 if a changed.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `jg_init` (function, line 17) `void jg_init(jg_table *t)`
+  - `jg_free` (function, line 21) `void jg_free(jg_table *t)`
+  - `clamp_coord` (function, line 27) `static int32_t clamp_coord(double v, double lo)`
+  - `grow` (function, line 33) `static int grow(jg_table *t)`
+  - `push` (function, line 45) `static int push(jg_table *t, dom_node_id node, int32_t x, int32_t y, int32_t w, int32_t h)`
+  - `jg_add` (function, line 52) `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h)`
+  - `unite` (function, line 63) `static int unite(jg_rect *a, const jg_rect *b)`
+  - `cmp_node` (function, line 78) `static int cmp_node(const void *pa, const void *pb)`
+  - `jg_finish` (function, line 83) `int jg_finish(jg_table *t)`
+  - `jg_find` (function, line 96) `const jg_rect *jg_find(const jg_table *t, dom_node_id node)`
+  - `slot_of` (function, line 102) `static uint32_t slot_of(dom_node_id n)`
+  - `index_of` (function, line 109) `static size_t index_of(jg_table *t, uint32_t *slots, dom_node_id node, const jg_rect *seed,
+     ...`
+  - `jg_aggregate` (function, line 124) `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx)`
+  - `jg_wire_len` (function, line 163) `size_t jg_wire_len(const jg_table *t)`
+  - `jg_encode` (function, line 167) `int jg_encode(const jg_table *t, int32_t *out, size_t cap)`
+  - `in_range` (function, line 182) `static int in_range(int32_t v, int32_t lo)`
+  - `jg_decode` (function, line 186) `int jg_decode(const int32_t *in, size_t n, jg_table *out)`
+  - `fnv` (function, line 212) `static uint64_t fnv(uint64_t h, int32_t v)`
+  - `jg_hash` (function, line 221) `uint64_t jg_hash(const jg_table *t)`
+  - `JG_INDEX_SLOTS` (macro, line 14) `#define JG_INDEX_SLOTS`
+  - `JG_SLOT_EMPTY` (macro, line 15) `#define JG_SLOT_EMPTY`
+- Depends on: `include/js_geom.h`
+
+## src/js_location.c
+- Doc: jd_lp_set: Defines a string property on the __locParts data object from a (ptr,len) span. * The...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `jd_lp_set` (function, line 24) `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
+                      const ...`
+  - `jl_m_hist_target` (function, line 35) `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
+  - `jd_set_location` (function, line 139) `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
+  - `jd_take_nav_request` (function, line 173) `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
+  - `jd_take_history` (function, line 219) `char *jd_take_history(js_context *ctx, int *go)`
+  - `jd_pop_state` (function, line 250) `int jd_pop_state(js_context *ctx, int index)`
+- Depends on: `include/js_dom.h`, `include/url.h`, `src/js_location_internal.h`
+
+## src/js_location_internal.h
+- Doc: Private to js_dom.c / js_location.c: the dom.histTarget native lives with the
+- Layer: utility
+- Language: h
+- Symbols:
+  - `header` (function, line 6) `* stay out of every public header (include/ never sees quickjs.h). */ #include "quickjs.h" JSValue...`
+  - `FREEDOM_JS_LOCATION_INTERNAL_H` (macro, line 2) `#define FREEDOM_JS_LOCATION_INTERNAL_H`
+- Imported by: `src/js_dom.c`, `src/js_location.c`
+
+## src/js_policy.c
+- Doc: eq_ci: js_policy — implementation: pure per-host JavaScript policy decision.
+- Layer: business_logic
+- Language: c
+- Symbols:
+  - `eq_ci` (function, line 12) `static int eq_ci(const char *a, const char *b)`
+  - `jsp_enabled` (function, line 22) `bool jsp_enabled(jsp_mode mode, int host_allowlisted)`
+  - `jsp_trusted` (function, line 31) `bool jsp_trusted(bool js_enabled, int host_allowlisted)`
+  - `jsp_present_trusted` (function, line 35) `bool jsp_present_trusted(int host_allowlisted)`
+  - `jsp_mode_from_str` (function, line 39) `jsp_mode jsp_mode_from_str(const char *s)`
+  - `jsp_mode_str` (function, line 51) `const char *jsp_mode_str(jsp_mode mode)`
+- Depends on: `include/js_policy.h`
+
 ## src/js_sandbox.c
 - Doc: js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs...
 - Layer: utility

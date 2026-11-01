@@ -58,7 +58,13 @@ typedef struct img_pixels {
     uint32_t  height;
     uint32_t  stride;
     uint8_t  *data;
+    /* Device pixels per CSS px (0 and 1 both mean 1x). Only a vector source has a
+     * density to choose: svg_raster oversamples a small SVG so an icon scaled up by
+     * mask-size/background-size stays sharp; its CSS size is width/scale. */
+    uint32_t  scale;
 } img_pixels;
+
+#define IMG_MAX_SCALE 4u
 
 /* Anti-DoS bounds. A tiny compressed PNG can declare huge dimensions (a
  * decompression bomb); dimensions are checked against these BEFORE decoding. */

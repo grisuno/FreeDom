@@ -2107,7 +2107,7 @@ static void test_drops_retry_rewinds_buckets(void **state) {
     static char css[65536];
     size_t o = 0;
     o += (size_t)snprintf(css + o, sizeof css - o,
-                          ".pre{transition-property:color;}");
+                          ".pre{z-index:banana;}");
     /* One decl per filler rule (color:red is always exactly one): 980 decls
      * leave room=44 of the initial 1024 cap, so the 40-decl retry rule below
      * finishes with 4 < 32 slack and deterministically reparses. A multi-decl
@@ -2122,7 +2122,7 @@ static void test_drops_retry_rewinds_buckets(void **state) {
      * placed last would never be reached by attempt 1 (truncated at room) and
      * the test would pass vacantly. */
     o += (size_t)snprintf(css + o, sizeof css - o,
-                          ".retry{transition-property:color;"
+                          ".retry{z-index:banana;"
                           "margin:1px 2px 3px 4px;margin:1px 2px 3px 4px;"
                           "margin:1px 2px 3px 4px;margin:1px 2px 3px 4px;"
                           "margin:1px 2px 3px 4px;margin:1px 2px 3px 4px;"
@@ -2137,7 +2137,7 @@ static void test_drops_retry_rewinds_buckets(void **state) {
      * bump from the failed first attempt. */
     assert_int_equal(log.total, 2);
     assert_int_equal(log.n, 1);
-    assert_string_equal(log.items[0].prop, "transition-property");
+    assert_string_equal(log.items[0].prop, "z-index");
     assert_int_equal(log.items[0].count, 2);
     css_free(sh);
 }
@@ -3758,6 +3758,172 @@ static void test_text_wrap_balance(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).text_balance, -1);
 }
 
+
+/* Tanda 83: values every engine accepts that the parser used to drop. */
+static void test_calc_bare_zero_is_number_under_mul(void **state) {
+    (void)state;
+    /* Tailwind v4 space-x: calc(calc(<len> * -1) * var(--reverse)), --reverse:0. */
+    assert_int_equal(css_parse_inline("margin-left: calc(calc(.25rem * -1) * 0)", 0).margin_left, 0);
+    assert_int_equal(css_parse_inline("margin-left: calc(calc(4px * -1) * (1 - 0))", 0).margin_left, -4);
+    assert_int_equal(css_parse_inline("margin-left: calc(0 * 5px)", 0).margin_left, 0);
+}
+
+static void test_z_index_auto_claims_slot(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse("div{z-index:5} .a{z-index:auto}", 0, &sh), CSS_OK);
+    const char *cl[] = { "a" };
+    assert_int_equal(css_resolve(sh, "div", NULL, cl, 1, NULL, 0).z_index, CSS_LEN_UNSET);
+    css_free(sh);
+}
+
+static void test_alignment_keywords(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("align-items:normal", 0).align_items, CSS_AK_STRETCH);
+    assert_int_equal(css_parse_inline("align-items:safe center", 0).align_items, CSS_AK_CENTER);
+    assert_int_equal(css_parse_inline("align-self:self-end", 0).align_self, CSS_AK_END);
+    assert_int_equal(css_parse_inline("align-items:first baseline", 0).align_items, CSS_AK_BASELINE);
+    assert_int_equal(css_parse_inline("justify-content:left", 0).justify, CSS_JUSTIFY_START);
+    assert_int_equal(css_parse_inline("justify-content:right", 0).justify, CSS_JUSTIFY_END);
+    assert_int_equal(css_parse_inline("justify-content:unsafe center", 0).justify, CSS_JUSTIFY_CENTER);
+}
+
+static void test_layer_lists_take_first(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("background-repeat:no-repeat,repeat", 0);
+    assert_int_equal(s.bg_repeat, CSS_BGR_NO_REPEAT);
+    assert_int_equal(css_parse_inline("background-repeat:repeat no-repeat", 0).bg_repeat, CSS_BGR_REPEAT_X);
+    assert_int_equal(css_parse_inline("background-size:10px 20px,auto", 0).bg_size_w, 10);
+    assert_int_equal(css_parse_inline("transition-property:color,opacity", 0).transition_property, 2);
+    assert_int_equal(css_parse_inline("transition-property:color,background", 0).transition_property, 0);
+    assert_int_equal(css_parse_inline("transition-property:opacity,transform", 0).transition_property, 1);
+}
+
+static void test_easing_functions_map_to_kinds(void **state) {
+    (void)state;
+    /* Material's standard curve sits nearest `ease` (L1 0.30 vs ease-in-out 0.40). */
+    assert_int_equal(css_parse_inline("transition-timing-function:cubic-bezier(.4,0,.2,1)", 0).transition_timing, 1);
+    assert_int_equal(css_parse_inline("transition-timing-function:cubic-bezier(.42,0,.58,1)", 0).transition_timing, 4);
+    assert_int_equal(css_parse_inline("animation-timing-function:cubic-bezier(0,0,1,1)", 0).anim_timing, 0);
+    assert_int_equal(css_parse_inline("animation-timing-function:step-end", 0).anim_timing, 6);
+    assert_int_equal(css_parse_inline("animation-timing-function:steps(1, start)", 0).anim_timing, 5);
+    /* x outside [0,1] is not a valid curve: the declaration drops, leaving the
+     * same value as declaring nothing. */
+    assert_int_equal(css_parse_inline("animation-timing-function:cubic-bezier(2,0,1,1)", 0).anim_timing,
+                     css_parse_inline("color:red", 0).anim_timing);
+}
+
+static void test_env_resolves_insets(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".a{top:env(safe-area-inset-top);left:env(nope, 7px);"
+                               "padding-left:calc(10px + env(safe-area-inset-left))}", 0, &sh), CSS_OK);
+    const char *cl[] = { "a" };
+    css_style s = css_resolve(sh, "div", NULL, cl, 1, NULL, 0);
+    assert_int_equal(s.inset_top, 0);
+    assert_int_equal(s.inset_left, 7);
+    assert_int_equal(s.pad_left, 10);
+    css_free(sh);
+}
+
+static void test_flat_3d_transforms(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("transform:scale3d(.75,.5,1)", 0).transform_sx, 75);
+    assert_int_equal(css_parse_inline("transform:scale3d(.75,.5,1)", 0).transform_sy, 50);
+    assert_int_equal(css_parse_inline("transform:rotate3d(0,0,1,90deg)", 0).transform_rotate, 90);
+    assert_int_equal(css_parse_inline("transform:matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,12,0,0,1)", 0).transform_tx, 12);
+    assert_int_equal(css_parse_inline("transform:rotate3d(1,0,0,45deg)", 0).transform_tx, CSS_LEN_UNSET);
+}
+
+static void test_color_calc_and_angle_hue(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("color:hsl(0deg, 0%, calc(0 * 100%))", 0).color, 0x000000);
+    assert_int_equal(css_parse_inline("color:hsl(0, 0%, calc(1 * 100%))", 0).color, 0xffffff);
+    assert_int_equal(css_parse_inline("color:rgb(calc(255 / 1) 0 0)", 0).color, 0xff0000);
+    assert_int_equal(css_parse_inline("color:hsl(.5turn 100% 50%)", 0).color, 0x00ffff);
+    /* The hue triangle has a 120-degree period: 30 is orange, not yellow. */
+    assert_int_equal(css_parse_inline("color:hsl(30, 100%, 50%)", 0).color, 0xff8000);
+    assert_int_equal(css_parse_inline("color:hsl(210, 100%, 50%)", 0).color, 0x0080ff);
+    assert_int_equal(css_parse_inline("color:hsl(0, calc(1px * 2), 50%)", 0).color, -1);
+}
+
+
+static void test_background_shorthand_sets_layer_longhands(void **state) {
+    (void)state;
+    css_style a = css_parse_inline("background: url(x.svg) no-repeat", 0);
+    assert_int_equal(a.bg_repeat, CSS_BGR_NO_REPEAT);
+    css_style b = css_parse_inline("background: #fff url(x.png) repeat-x 10px 4px / 20px 8px", 0);
+    assert_int_equal(b.bg_repeat, CSS_BGR_REPEAT_X);
+    assert_int_equal(b.bg_pos_x, 10);
+    assert_int_equal(b.bg_size_w, 20);
+    assert_int_equal(b.bg_size_h, 8);
+    css_style c = css_parse_inline("background: url(a.png) center/cover no-repeat", 0);
+    assert_int_equal(c.bg_repeat, CSS_BGR_NO_REPEAT);
+    assert_int_equal(c.bg_size_w, css_parse_inline("background-size:cover", 0).bg_size_w);
+    /* An omitted longhand is RESET: a later shorthand undoes an earlier size. */
+    css_style d = css_parse_inline("background-size: 5px 5px; background: red", 0);
+    assert_int_equal(d.bg_repeat, CSS_BGR_REPEAT);
+    assert_int_not_equal(d.bg_size_w, 5);
+}
+
+
+static void test_mask_image_url_and_geometry(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse(".i{mask-image:url(data:image/svg+xml;base64,PHN2Zz4=);"
+                               "mask-size:75%;mask-position:center;mask-repeat:no-repeat}"
+                               ".j{-webkit-mask:url(\"i.svg\") center/contain no-repeat}", 0, &sh), CSS_OK);
+    const char *ci[] = { "i" }, *cj[] = { "j" };
+    css_style a = css_resolve(sh, "span", NULL, ci, 1, NULL, 0);
+    assert_string_equal(a.mask_url, "data:image/svg+xml;base64,PHN2Zz4=");
+    assert_true(a.mask_n > 0);
+    assert_int_equal(a.mask_geo[CSS_MG_REPEAT], CSS_BGR_NO_REPEAT);
+    assert_int_equal(a.mask_geo[CSS_MG_SIZE_WP], 750);
+    assert_int_equal(a.mask_geo[CSS_MG_POS_XP], 500);
+    assert_int_equal(a.mask_geo[CSS_MG_POS_YP], 500);
+    css_style b = css_resolve(sh, "span", NULL, cj, 1, NULL, 0);
+    assert_string_equal(b.mask_url, "i.svg");
+    assert_int_equal(b.mask_geo[CSS_MG_REPEAT], CSS_BGR_NO_REPEAT);
+    assert_int_equal(b.mask_geo[CSS_MG_SIZE], CSS_BGS_CONTAIN);
+    css_free(sh);
+    /* A quoted inline SVG with parens inside the quotes is ONE url token. */
+    css_style c = css_parse_inline("mask-image:url(\"data:image/svg+xml,<svg transform='rotate(4)'/>\")", 0);
+    assert_string_equal(c.mask_url, "data:image/svg+xml,<svg transform='rotate(4)'/>");
+    /* No mask, no url, default geometry. */
+    css_style d = css_parse_inline("color:red", 0);
+    assert_string_equal(d.mask_url, "");
+    assert_int_equal(d.mask_geo[CSS_MG_SIZE_W], CSS_LEN_UNSET);
+}
+
+
+static void test_container_query_surely_true_applies(void **state) {
+    (void)state;
+    static const char CSS[] =
+        ".a{color:#000}"
+        "@container (width<63rem){.a{color:#f00}}"
+        "@container card (width>=1280px){.a{color:#00f}}"
+        "@container (width<480px){.a{background:#0f0}}"
+        "@container (max-width:900px) or (min-width:2px){.a{border-top:1px solid}}"
+        "@container (width<70rem){:root{--k:7px}}"
+        ".a{padding-left:var(--k);container-type:inline-size;anchor-name:--x}";
+    css_media m = { 0, 0, 1000, NULL, NULL };
+    css_sheet *sh = NULL;
+    assert_int_equal(css_parse_media(CSS, sizeof CSS - 1, &m, &sh), CSS_OK);
+    const char *cl[] = { "a" };
+    css_style st = css_resolve(sh, "div", NULL, cl, 1, NULL, 0);
+    assert_int_equal(st.color, 0xff0000);       /* surely true at every width <= 1000 */
+    assert_int_not_equal(st.color, 0x0000ff);
+    assert_int_equal(st.pad_left, 7);            /* custom properties follow the same gate */
+    css_free(sh);
+    css_drop items[4];
+    css_drop_log log = { items, 4, 0, 0 };
+    sh = NULL;
+    assert_int_equal(css_parse_logged(".a{container-type:inline-size;container:x/size;"
+                                      "anchor-name:--y}", 0, NULL, NULL, &sh, &log), CSS_OK);
+    assert_int_equal(log.total, 0);              /* valid, inert: not drops */
+    css_free(sh);
+}
+
 /* Harmless 3D = identity + stacking context (2026-10-09). */
 static void test_transform_z_identity(void **state) {
     (void)state;
@@ -3770,7 +3936,9 @@ static void test_transform_z_identity(void **state) {
     assert_int_equal(css_parse_inline("transform: rotateX(0)", 0).transform_tx, 0);
     /* Non-zero 3D still drops the whole declaration (fail closed). */
     assert_int_equal(css_parse_inline("transform: rotateX(90deg)", 0).transform_tx, CSS_LEN_UNSET);
-    assert_int_equal(css_parse_inline("transform: perspective(5px)", 0).transform_tx, CSS_LEN_UNSET);
+    /* perspective() alone projects a flat box onto itself (Transforms 2 12):
+     * identity + stacking context, like translateZ(0) -- Firefox keeps it. */
+    assert_int_equal(css_parse_inline("transform: perspective(5px)", 0).transform_tx, 0);
 }
 
 /* Correct fail-closed locks (2026-10-09): invalid per spec, Firefox drops too. */
@@ -5748,6 +5916,17 @@ int main(void) {
         cmocka_unit_test(test_bg_position_collision_drops),
         cmocka_unit_test(test_grid_autofill_marker),
         cmocka_unit_test(test_transform_z_identity),
+        cmocka_unit_test(test_calc_bare_zero_is_number_under_mul),
+        cmocka_unit_test(test_z_index_auto_claims_slot),
+        cmocka_unit_test(test_alignment_keywords),
+        cmocka_unit_test(test_layer_lists_take_first),
+        cmocka_unit_test(test_easing_functions_map_to_kinds),
+        cmocka_unit_test(test_env_resolves_insets),
+        cmocka_unit_test(test_flat_3d_transforms),
+        cmocka_unit_test(test_color_calc_and_angle_hue),
+        cmocka_unit_test(test_background_shorthand_sets_layer_longhands),
+        cmocka_unit_test(test_mask_image_url_and_geometry),
+        cmocka_unit_test(test_container_query_surely_true_applies),
         cmocka_unit_test(test_calc_shape_mismatch_drops),
         cmocka_unit_test(test_font_without_family_drops),
         cmocka_unit_test(test_text_overflow_and_word_break),

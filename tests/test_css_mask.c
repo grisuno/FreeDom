@@ -136,7 +136,9 @@ static void test_unsupported_fails_closed(void **state)
     (void)state;
     css_decl d[16];
     assert_true(cm_expand("mask-image", "url(https://t.example/a.svg)", d, 16, 0) > 0); /* unavailable: hidden */
-    assert_int_equal(cm_expand("mask-image", "url(data:image/svg+xml;base64,AAAA)", d, 16, 0), 0);
+    /* A data: image is a layer too since tanda 83 (the painter takes its pixels from the
+     * worker-decoded URL; until then the layer is transparent). */
+    assert_true(cm_expand("mask-image", "url(data:image/svg+xml;base64,AAAA)", d, 16, 0) > 0);
     assert_int_equal(cm_expand("mask-image", "radial-gradient(#000,#fff)", d, 16, 0), 0);
     assert_int_equal(cm_expand("mask-image", "linear-gradient(red)", d, 16, 0), 0);
     assert_int_equal(cm_expand("mask-image", "linear-gradient(#000,#fff),linear-gradient(#000,#fff),"

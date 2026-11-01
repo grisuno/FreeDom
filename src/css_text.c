@@ -136,12 +136,47 @@ int ct_expand_valign(const char *val, css_decl *dst, int cap) {
 
 /* transition-property value encoding: -1 = unset, 0 = none, 1 = all,
  * 2 = opacity, 3 = transform. Other values not yet supported. */
-int ct_interp_transition_property(const char *v) {
+static int transition_prop_one(const char *v) {
     if (csel_ci_eq(v, "none"))  return 0;
     if (csel_ci_eq(v, "all"))   return 1;
     if (csel_ci_eq(v, "opacity"))    return 2;
     if (csel_ci_eq(v, "transform"))  return 3;
-    return -1;
+    /* Any other property name is valid but not one the painter transitions. */
+    for (const char *p = v; *p != '\0'; ++p) {
+        char c = csel_lower_ch(*p);
+        if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_'))
+            return -1;
+    }
+    return (*v != '\0') ? 0 : -1;
+}
+
+/* The whole comma list: the painter models opacity and transform, so the list
+ * collapses onto which of those two it names (both, or `all`, is `all`). */
+int ct_interp_transition_property(const char *v) {
+    int have_op = 0, have_tr = 0, have_all = 0, n = 0;
+    const char *p = v;
+    while (*p != '\0') {
+        char item[64];
+        size_t k = 0;
+        while (*p == ' ' || *p == '\t') ++p;
+        while (*p != '\0' && *p != ',' && *p != ' ' && *p != '\t') {
+            if (k + 1 >= sizeof item) return -1;
+            item[k++] = *p++;
+        }
+        item[k] = '\0';
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == ',') ++p;
+        else if (*p != '\0') return -1;
+        int r = transition_prop_one(item);
+        if (r < 0 || (r == 0 && csel_ci_eq(item, "none") && n > 0)) return -1;
+        have_all |= (r == 1); have_op |= (r == 2); have_tr |= (r == 3);
+        ++n;
+    }
+    if (n == 0) return -1;
+    if (have_all || (have_op && have_tr)) return 1;
+    if (have_op) return 2;
+    if (have_tr) return 3;
+    return 0;
 }
 
 int ct_interp_whitespace(const char *v) {

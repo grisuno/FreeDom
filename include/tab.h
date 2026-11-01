@@ -147,6 +147,7 @@ typedef struct tab_image {
     uint32_t stride;
     uint8_t *data;
     size_t   data_len;  /* stride * height when data != NULL, else 0 */
+    uint32_t scale;     /* device px per CSS px, 1..IMG_MAX_SCALE (img_pixels.scale) */
 } tab_image;
 
 #define TAB_MAX_INPUT ((size_t)(32u * 1024u * 1024u))

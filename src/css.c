@@ -14,6 +14,7 @@
 #include "css_box.h"
 #include "css_text.h"
 #include "webfont.h"
+#include "interp.h"       /* IP_EASE_*: the easing kinds the painter animates */
 #include "flex_layout.h"  /* fx_grid_area_hash: an area name reduces to one int */
 _Static_assert(FX_GL_SPAN_MAX == CSS_GRID_SPAN_MAX, "grid span caps must agree");
 #include "css_select.h"
@@ -248,6 +249,9 @@ static int expand_bg_image(const char *val, css_decl *dst, int cap,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
     return cg_expand_bg_image(val, dst, cap, urltab, nurl, urlcap);
 }
+
+static int expand_bg_position(const char *val, css_decl *dst, int cap);
+static int expand_bg_size(const char *val, css_decl *dst, int cap);
 
 static int expand_background(const char *val, css_decl *dst, int cap,
                              char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
@@ -623,6 +627,174 @@ static int interp_bg_repeat(const char *v) {
     if (csel_ci_eq(v, "round"))     return CSS_BGR_ROUND;
     return -1;
 }
+/* Two-value background-repeat (CSS Backgrounds 3 3.4): `repeat no-repeat` is
+ * repeat-x, `no-repeat repeat` is repeat-y, a matching pair is the one keyword. */
+static int interp_bg_repeat2(const char *v) {
+    int one = interp_bg_repeat(v);
+    if (one >= 0) return one;
+    char a[24], b[24];
+    const char *p = v;
+    if (!cb_next_ws_token(&p, a, sizeof a) || !cb_next_ws_token(&p, b, sizeof b)) return -1;
+    while (*p == ' ' || *p == '\t') ++p;
+    if (*p != '\0') return -1;
+    int x = interp_bg_repeat(a), y = interp_bg_repeat(b);
+    if (x < 0 || y < 0 || x == CSS_BGR_REPEAT_X || x == CSS_BGR_REPEAT_Y ||
+        y == CSS_BGR_REPEAT_X || y == CSS_BGR_REPEAT_Y)
+        return -1;
+    if (x == y) return x;
+    if (x == CSS_BGR_REPEAT && y == CSS_BGR_NO_REPEAT) return CSS_BGR_REPEAT_X;
+    if (x == CSS_BGR_NO_REPEAT && y == CSS_BGR_REPEAT) return CSS_BGR_REPEAT_Y;
+    return x;
+}
+
+/* The `background` shorthand sets EVERY longhand of its layer (CSS Backgrounds 3
+ * 3.10): what it omits is reset to the initial value. The colour/image half is
+ * cg_expand_background; this is the other half -- repeat, position and size of the
+ * first layer (the one painted) -- so `background: url(x) no-repeat` stops tiling
+ * and a later `background: red` resets an earlier rule's `background-size`. */
+static int is_bg_position_tok(const char *t) {
+    static const char *const KW[] = { "left", "right", "top", "bottom", "center" };
+    for (size_t k = 0; k < sizeof KW / sizeof *KW; ++k) if (csel_ci_eq(t, KW[k])) return 1;
+    int px, pm;
+    return interp_lp(t, AUTO_REJECT, 1, &px, &pm);
+}
+
+static int expand_background_layer(const char *val, css_decl *dst, int cap) {
+    char rep[2][CSS_TOK_MAX], pos[64], size[64];
+    int nrep = 0;
+    size_t np = 0, ns = 0;
+    int in_size = 0, last = 0;
+    pos[0] = size[0] = '\0';
+    const char *p = val;
+    char tok[CSS_TOK_MAX];
+    while (!last && next_ws_token(&p, tok, sizeof tok)) {
+        size_t tl = strlen(tok);
+        int depth = 0;
+        for (size_t k = 0; k < tl; ++k) {              /* a top-level comma ends the layer */
+            if (tok[k] == '(') ++depth;
+            else if (tok[k] == ')') --depth;
+            else if (tok[k] == ',' && depth == 0) { tok[k] = '\0'; tl = k; last = 1; break; }
+        }
+        /* `center/cover` arrives as one token: split it at the top-level slash. */
+        char *sl = NULL;
+        depth = 0;
+        for (size_t k = 0; k < tl; ++k) {
+            if (tok[k] == '(') ++depth;
+            else if (tok[k] == ')') --depth;
+            else if (tok[k] == '/' && depth == 0) { sl = tok + k; break; }
+        }
+        const char *parts[2] = { tok, NULL };
+        if (sl != NULL) { *sl = '\0'; parts[1] = sl + 1; }
+        for (int q = 0; q < 2; ++q) {
+            const char *t = parts[q];
+            if (t == NULL) continue;
+            if (q == 1) in_size = 1;
+            if (*t == '\0') continue;
+            char *dstbuf = in_size ? size : pos;
+            size_t *dn = in_size ? &ns : &np;
+            /* A repeat keyword is never a size, so it is recognised in either half;
+             * any other non-size word ends the size that a slash opened. */
+            if (interp_bg_repeat(t) >= 0) {
+                if (nrep < 2) { snprintf(rep[nrep], sizeof rep[nrep], "%s", t); ++nrep; }
+                in_size = 0;
+                continue;
+            }
+            if (in_size && (csel_ci_eq(t, "auto") || csel_ci_eq(t, "cover") ||
+                            csel_ci_eq(t, "contain") || is_bg_position_tok(t))) {
+                /* fall through to append */
+            } else if (in_size) {
+                in_size = 0;
+                continue;
+            } else if (!is_bg_position_tok(t)) {
+                continue;                       /* colour, image, attachment, box words */
+            }
+            size_t need = strlen(t) + 1;
+            if (*dn + need + 1 >= 64) return 0;
+            if (*dn > 0) dstbuf[(*dn)++] = ' ';
+            memcpy(dstbuf + *dn, t, need);
+            *dn += need - 1;
+        }
+    }
+    int n = 0;
+    if (cap - n < 1) return n;
+    char rv[2 * CSS_TOK_MAX + 2];
+    if (nrep == 2) snprintf(rv, sizeof rv, "%s %s", rep[0], rep[1]);
+    else snprintf(rv, sizeof rv, "%s", nrep == 1 ? rep[0] : "repeat");
+    int r = interp_bg_repeat2(rv);
+    dst[n].prop = P_BG_REPEAT;
+    dst[n].ival = (r >= 0) ? r : CSS_BGR_REPEAT;
+    ++n;
+    n += expand_bg_position(np > 0 ? pos : "0% 0%", dst + n, cap - n);
+    n += expand_bg_size(ns > 0 ? size : "auto", dst + n, cap - n);
+    return n;
+}
+
+/* The mask layer shares the background layer's geometry vocabulary (CSS Masking 1
+ * 7.4-7.6 define mask-repeat/-position/-size by reference to Backgrounds 3), so the
+ * background emitters do the parsing and their output is renamed onto the mask
+ * slots: ONE grammar, two destinations. */
+static void first_comma_item(const char *val, char *buf, size_t cap);
+
+static int bg_to_mask_slot(int prop) {
+    if (prop == P_BG_REPEAT) return P_MASK_GEO0 + CSS_MG_REPEAT;
+    if (prop == P_BG_SIZE) return P_MASK_GEO0 + CSS_MG_SIZE;
+    if (prop == P_BG_SIZE_W) return P_MASK_GEO0 + CSS_MG_SIZE_W;
+    if (prop == P_BG_SIZE_H) return P_MASK_GEO0 + CSS_MG_SIZE_H;
+    if (prop == P_PCT_FIRST + CSS_PCT_BG_SIZE_W) return P_MASK_GEO0 + CSS_MG_SIZE_WP;
+    if (prop == P_PCT_FIRST + CSS_PCT_BG_SIZE_H) return P_MASK_GEO0 + CSS_MG_SIZE_HP;
+    if (prop == P_BG_POS_X) return P_MASK_GEO0 + CSS_MG_POS_X;
+    if (prop == P_BG_POS_Y) return P_MASK_GEO0 + CSS_MG_POS_Y;
+    if (prop == P_PCT_FIRST + CSS_PCT_BG_POS_X) return P_MASK_GEO0 + CSS_MG_POS_XP;
+    if (prop == P_PCT_FIRST + CSS_PCT_BG_POS_Y) return P_MASK_GEO0 + CSS_MG_POS_YP;
+    return -1;
+}
+
+static int remap_to_mask(css_decl *dst, int n) {
+    for (int k = 0; k < n; ++k) {
+        int m = bg_to_mask_slot(dst[k].prop);
+        if (m < 0) return 0;               /* an unexpected slot: drop rather than leak */
+        dst[k].prop = m;
+    }
+    return n;
+}
+
+static int expand_mask_geometry(const char *prop, const char *val, css_decl *dst, int cap) {
+    char first[CSS_TOK_MAX];
+    first_comma_item(val, first, sizeof first);
+    if (strcmp(prop, "mask-repeat") == 0) {
+        int r = interp_bg_repeat2(first);
+        if (r < 0 || cap < 1) return 0;
+        dst[0].prop = P_MASK_GEO0 + CSS_MG_REPEAT;
+        dst[0].ival = r;
+        return 1;
+    }
+    int n = (strcmp(prop, "mask-size") == 0) ? expand_bg_size(first, dst, cap)
+                                             : expand_bg_position(first, dst, cap);
+    return remap_to_mask(dst, n);
+}
+
+/* mask / mask-image with a url(): the URL into the image pool (gated downstream like
+ * a background-image; a data: SVG is decoded by the worker, spec/svg_raster.md) and,
+ * for the shorthand, the layer's repeat/position/size. The longhand leaves the
+ * geometry to its own properties. */
+static int emit_mask_image(const char *prop, const char *val, css_decl *dst, int cap,
+                           char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) {
+    char u[CSS_URL_MAX];
+    int has = (cg_first_url(val, u, sizeof u) == 1);
+    int n = 0;
+    dst[n].prop = P_MASK_URL;
+    dst[n].ival = -1;
+    if (has && urltab != NULL && *nurl < urlcap) {
+        memcpy(urltab[*nurl], u, strlen(u) + 1);
+        dst[n].ival = (int)*nurl;
+        ++*nurl;
+    }
+    ++n;
+    if (strcmp(prop, "mask") == 0 && !css_wide_keyword(val))
+        n += remap_to_mask(dst + n, expand_background_layer(val, dst + n, cap - n));
+    return n;
+}
+
 /* background-size: auto/cover/contain. -1 unknown (lengths dropped). */
 static int interp_bg_size(const char *v) {
     if (csel_ci_eq(v, "auto"))    return CSS_BGS_AUTO;
@@ -1229,12 +1401,71 @@ static void first_comma_item(const char *val, char *buf, size_t cap) {
 /* Named easing shared by the animation/transition timing parsers (CSS Easing 1:
  * the five keywords; cubic-bezier()/steps() need parametric slots this engine
  * does not model, so they stay unrepresentable). Returns the ip_easing code. */
+/* The slot holds one easing KIND, not its parameters, so a parametric curve is
+ * stored as the named curve closest to it: cubic-bezier() by L1 distance over its
+ * four control coordinates against the five keyword curves (CSS Easing 1 2.2), and
+ * steps(n) as step-start/step-end for one step or as its continuous limit (linear)
+ * for several. A curve that does not parse still fails closed. */
+static int easing_nearest_bezier(const char *tok) {
+    static const double KW[5][4] = {
+        { 0.0, 0.0, 1.0, 1.0 }, { 0.25, 0.1, 0.25, 1.0 }, { 0.42, 0.0, 1.0, 1.0 },
+        { 0.0, 0.0, 0.58, 1.0 }, { 0.42, 0.0, 0.58, 1.0 } };
+    const char *p = tok + 13;            /* past "cubic-bezier(" */
+    double c[4];
+    for (int k = 0; k < 4; ++k) {
+        while (*p == ' ' || *p == '\t') ++p;
+        char *e;
+        c[k] = strtod(p, &e);
+        if (e == p || c[k] != c[k]) return -1;
+        p = e;
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p != (k < 3 ? ',' : ')')) return -1;
+        ++p;
+    }
+    if (*p != '\0' || c[0] < 0.0 || c[0] > 1.0 || c[2] < 0.0 || c[2] > 1.0) return -1;
+    int best = 0;
+    double bd = 1e9;
+    for (int i = 0; i < 5; ++i) {
+        double d = 0.0;
+        for (int k = 0; k < 4; ++k) d += (c[k] > KW[i][k]) ? c[k] - KW[i][k] : KW[i][k] - c[k];
+        if (d < bd) { bd = d; best = i; }
+    }
+    return best;
+}
+
+static int easing_steps(const char *tok) {
+    const char *p = tok + 6;             /* past "steps(" */
+    char *e;
+    long n = strtol(p, &e, 10);
+    if (e == p || n < 1) return -1;
+    p = e;
+    while (*p == ' ' || *p == '\t') ++p;
+    int start = 0;
+    if (*p == ',') {
+        ++p;
+        while (*p == ' ' || *p == '\t') ++p;
+        if (csel_ci_starts(p, "jump-start") || csel_ci_starts(p, "start")) start = 1;
+        else if (!(csel_ci_starts(p, "jump-end") || csel_ci_starts(p, "end") ||
+                   csel_ci_starts(p, "jump-none") || csel_ci_starts(p, "jump-both")))
+            return -1;
+        while (*p != '\0' && *p != ')') ++p;
+    }
+    if (*p != ')' || p[1] != '\0') return -1;
+    if (n > 1) return IP_EASE_LINEAR;
+    return start ? IP_EASE_STEP_START : IP_EASE_STEP_END;
+}
+
 static int anim_easing_iv(const char *tok) {
     if (csel_ci_eq(tok, "linear")) return 0;
     if (csel_ci_eq(tok, "ease")) return 1;
     if (csel_ci_eq(tok, "ease-in")) return 2;
     if (csel_ci_eq(tok, "ease-out")) return 3;
     if (csel_ci_eq(tok, "ease-in-out")) return 4;
+    if (csel_ci_eq(tok, "step-start")) return IP_EASE_STEP_START;
+    if (csel_ci_eq(tok, "step-end")) return IP_EASE_STEP_END;
+    if (csel_ci_starts(tok, "cubic-bezier(")) return easing_nearest_bezier(tok);
+    if (csel_ci_starts(tok, "steps(")) return easing_steps(tok);
+    if (csel_ci_starts(tok, "linear(")) return IP_EASE_LINEAR;
     return -1;
 }
 
@@ -2208,7 +2439,18 @@ static int expand_flex(const char *val, css_decl *dst, int cap) {
 /* align-items / align-self / align-content / justify-items keyword. allow_auto is for
  * align-self; allow_dist (space-*) is for align-content. Unknown -> -1 (drop). */
 static int interp_align_kw(const char *v, int allow_auto, int allow_dist) {
+    /* <overflow-position> (safe/unsafe) only matters when the item overflows;
+     * <baseline-position> first/last both align on a baseline here. */
+    if (csel_ci_starts(v, "safe ")) v += 5;
+    else if (csel_ci_starts(v, "unsafe ")) v += 7;
+    else if (csel_ci_starts(v, "first ")) v += 6;
+    else if (csel_ci_starts(v, "last ")) v += 5;
+    while (*v == ' ') ++v;
     if (allow_auto && csel_ci_eq(v, "auto")) return CSS_AK_AUTO;
+    /* `normal` behaves as stretch for flex and grid items (Box Align 3 6.3). */
+    if (!allow_dist && csel_ci_eq(v, "normal")) return CSS_AK_STRETCH;
+    if (csel_ci_eq(v, "self-start") || csel_ci_eq(v, "left")) return CSS_AK_START;
+    if (csel_ci_eq(v, "self-end") || csel_ci_eq(v, "right")) return CSS_AK_END;
     if (csel_ci_eq(v, "stretch")) return CSS_AK_STRETCH;
     if (csel_ci_eq(v, "flex-start") || csel_ci_eq(v, "start")) return CSS_AK_START;
     if (csel_ci_eq(v, "flex-end") || csel_ci_eq(v, "end")) return CSS_AK_END;
@@ -2590,15 +2832,15 @@ static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
  * path. Comma count must be exactly five; each argument is a bare signed
  * decimal. Anything else fails closed.
  */
-static int parse_matrix6(const char *p, size_t argn, double m6[6]) {
+static int parse_numlist(const char *p, size_t argn, double *m6, int count) {
     size_t k = 0;
-    for (int arg = 0; arg < 6; ++arg) {
+    for (int arg = 0; arg < count; ++arg) {
         char tok[CSS_TOK_MAX];
         size_t stop = argn;
         for (size_t q = k; q < argn; ++q) {
             if (p[q] == ',') { stop = q; break; }
         }
-        if ((arg < 5) != (stop < argn)) return 0;
+        if ((arg < count - 1) != (stop < argn)) return 0;
         if (copy_trim(p, k, stop, tok, sizeof tok) == (size_t)-1 || tok[0] == '\0')
             return 0;
         const char *tp = tok;
@@ -2611,6 +2853,10 @@ static int parse_matrix6(const char *p, size_t argn, double m6[6]) {
         k = stop + 1;
     }
     return 1;
+}
+
+static int parse_matrix6(const char *p, size_t argn, double m6[6]) {
+    return parse_numlist(p, argn, m6, 6);
 }
 
 /**
@@ -2702,7 +2948,55 @@ static int expand_transform_list(const char *val, css_decl *dst, int cap) {
         double f[6] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
         size_t starts[3], stops[3];
         char a[CSS_TOK_MAX], b[CSS_TOK_MAX], c[CSS_TOK_MAX];
-        if (strcmp(name, "translatex") == 0 || strcmp(name, "translatey") == 0) {
+        /* 3D functions whose projection onto the z=0 plane under the identity
+         * camera is exactly a 2D function (Transforms 2 section 12): rotateZ is
+         * rotate, scale3d drops its z factor, rotate3d about the z axis is rotate,
+         * scaleZ/perspective leave a flat box unchanged, and a matrix3d whose z
+         * row/column are the identity is its 2D matrix. Anything else still
+         * fails closed: a real tilt has no 2D form. */
+        if (strcmp(name, "rotatez") == 0) memcpy(name, "rotate", 7);
+        if (strcmp(name, "scale3d") == 0) {
+            double s3[3];
+            if (!parse_numlist(ab, argn, s3, 3)) return 0;
+            f[0] = s3[0];
+            f[3] = s3[1];
+            spec |= SPEC_SX | SPEC_SY;
+            any2d = 1;
+        } else if (strcmp(name, "scalez") == 0 || strcmp(name, "perspective") == 0) {
+            if (split_top_args(ab, argn, starts, stops, 3) != 1) return 0;
+            seenz = 1;
+        } else if (strcmp(name, "rotate3d") == 0) {
+            size_t cm = argn;
+            int commas = 0;
+            for (size_t q = 0; q < argn; ++q)
+                if (ab[q] == ',' && ++commas == 3) { cm = q; break; }
+            double ax[3];
+            if (commas != 3 || !parse_numlist(ab, cm, ax, 3)) return 0;
+            if (copy_trim(ab, cm + 1, argn, a, sizeof a) == (size_t)-1 || a[0] == '\0')
+                return 0;
+            int deg;
+            if (!parse_angle_deg(a, &deg)) return 0;
+            if (deg != 0) {
+                if (ax[0] != 0.0 || ax[1] != 0.0 || ax[2] == 0.0) return 0;
+                if (ax[2] < 0.0) deg = -deg;
+                double r = (double)deg * pi / 180.0;
+                f[0] = cos(r); f[1] = sin(r); f[2] = -sin(r); f[3] = cos(r);
+                spec |= SPEC_ROT;
+                any2d = 1;
+            } else {
+                seenz = 1;
+            }
+        } else if (strcmp(name, "matrix3d") == 0) {
+            double q[16];
+            if (!parse_numlist(ab, argn, q, 16)) return 0;
+            if (q[2] != 0.0 || q[3] != 0.0 || q[6] != 0.0 || q[7] != 0.0 ||
+                q[8] != 0.0 || q[9] != 0.0 || q[10] != 1.0 || q[11] != 0.0 ||
+                q[14] != 0.0 || q[15] != 1.0)
+                return 0;
+            f[0] = q[0]; f[1] = q[1]; f[2] = q[4]; f[3] = q[5]; f[4] = q[12]; f[5] = q[13];
+            spec |= SPEC_ALL7;
+            any2d = 1;
+        } else if (strcmp(name, "translatex") == 0 || strcmp(name, "translatey") == 0) {
             if (split_top_args(ab, argn, starts, stops, 3) != 1) return 0;
             if (copy_trim(ab, starts[0], stops[0], a, sizeof a) == (size_t)-1 ||
                 a[0] == '\0')
@@ -2978,6 +3272,10 @@ static int expand_transform(const char *val, css_decl *dst, int cap) {
     else if (csel_span_eq(p, "skewy(", 6, 1))       { kind = SK_Y;    p += 6; }
     else if (csel_span_eq(p, "skew(", 5, 1))        { kind = SK_BOTH; p += 5; }
     else if (csel_span_eq(p, "matrix(", 7, 1))      { kind = MATRIX;  p += 7; }
+    else if (csel_span_eq(p, "scale3d(", 8, 1) || csel_span_eq(p, "scalez(", 7, 1) ||
+             csel_span_eq(p, "rotate3d(", 9, 1) || csel_span_eq(p, "matrix3d(", 9, 1) ||
+             csel_span_eq(p, "perspective(", 12, 1))
+        return expand_transform_list(val, dst, cap);
     else return 0;
 
     size_t n = strlen(p);
@@ -3608,6 +3906,13 @@ static int is_inert_prop(const char *prop) {
         "text-size-adjust", "overflow-style", "speak", "view-transition-name",
         "contain-intrinsic-size", "contain-intrinsic-width", "contain-intrinsic-height",
         "touch-callout", "user-drag", "scroll-timeline", "view-timeline",
+        /* tanda 83: a container/anchor NAME or TYPE changes nothing by itself -- the
+         * queries that read it are evaluated (or not) on their own (cmq_container_surely);
+         * the rendering hints below are quality knobs with no geometry or colour. */
+        "container-type", "container-name", "container", "anchor-name", "anchor-scope",
+        "position-try-fallbacks", "position-try-order", "position-try", "position-visibility",
+        "text-rendering", "forced-color-adjust", "print-color-adjust", "color-adjust",
+        "interpolate-size",
     };
     static const char *const PREFIX[] = { "scroll-margin", "scroll-padding", "scroll-snap-" };
     for (size_t i = 0; i < sizeof EXACT / sizeof *EXACT; ++i)
@@ -3890,9 +4195,22 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     }
     /* mask: alpha gradients only (css_mask.c, spec/css_mask.md). The -webkit- spelling reaches
      * here without its prefix; its composite vocabulary (xor, source-in, ...) is accepted. */
-    if (cm_is_mask_prop(prop)) return cm_expand(prop, val, dst, cap, 1);
+    if (cm_is_mask_prop(prop)) {
+        int n = cm_expand(prop, val, dst, cap, 1);
+        int img = (strcmp(prop, "mask") == 0 || strcmp(prop, "mask-image") == 0);
+        if (n > 0 && img && cap - n >= 1 + CSS_MASK_GEO_N)
+            n += emit_mask_image(prop, val, dst + n, cap - n, urltab, nurl, urlcap);
+        return n;
+    }
+    if (strcmp(prop, "mask-size") == 0 || strcmp(prop, "mask-position") == 0 ||
+        strcmp(prop, "mask-repeat") == 0)
+        return expand_mask_geometry(prop, val, dst, cap);
     if (strcmp(prop, "background") == 0)
-        return expand_background(val, dst, cap, urltab, nurl, urlcap);
+    {
+        int n = expand_background(val, dst, cap, urltab, nurl, urlcap);
+        if (n > 0 && !css_wide_keyword(val)) n += expand_background_layer(val, dst + n, cap - n);
+        return n;
+    }
     if (strcmp(prop, "background-image") == 0)
         return expand_bg_image(val, dst, cap, urltab, nurl, urlcap);
     if (strcmp(prop, "grid-template-columns") == 0)
@@ -4080,8 +4398,18 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     }
     else if (strcmp(prop, "appearance") == 0)            { prop_id = P_APPEARANCE;      ival = interp_appearance(val); }
     else if (strcmp(prop, "pointer-events") == 0)        { prop_id = P_POINTER_EVENTS;  ival = interp_pointer_events(val); }
-    else if (strcmp(prop, "background-repeat") == 0)    { prop_id = P_BG_REPEAT;     ival = interp_bg_repeat(val); }
-    else if (strcmp(prop, "background-size") == 0)      return expand_bg_size(val, dst, cap);
+    /* One background layer is painted: the first, the one background-image keeps
+     * too, so a multi-layer list's per-layer properties take their first item. */
+    else if (strcmp(prop, "background-repeat") == 0) {
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        prop_id = P_BG_REPEAT; ival = interp_bg_repeat2(first);
+    }
+    else if (strcmp(prop, "background-size") == 0) {
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        return expand_bg_size(first, dst, cap);
+    }
     else if (strcmp(prop, "background-clip") == 0 ||
              strcmp(prop, "-webkit-background-clip") == 0)
                                                         { prop_id = P_BG_CLIP;       ival = interp_bg_clip(val); }
@@ -4221,9 +4549,7 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         dst[0].prop = P_TRANSITION_DURATION; dst[0].ival = ms; return 1;
     }
     else if (strcmp(prop, "transition-property") == 0) {
-        char first[CSS_TOK_MAX];
-        first_comma_item(val, first, sizeof first);
-        int v = interp_transition_property(first);
+        int v = interp_transition_property(val);
         if (v < 0) return 0;
         dst[0].prop = P_TRANSITION_PROPERTY; dst[0].ival = v; return 1;
     }
@@ -4247,7 +4573,11 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "backdrop-filter") == 0 ||
              strcmp(prop, "-webkit-backdrop-filter") == 0)
         return expand_backdrop_filter(val, dst, cap);
-    else if (strcmp(prop, "background-position") == 0)   return expand_bg_position(val, dst, cap);
+    else if (strcmp(prop, "background-position") == 0) {
+        char first[CSS_TOK_MAX];
+        first_comma_item(val, first, sizeof first);
+        return expand_bg_position(first, dst, cap);
+    }
     else if (strcmp(prop, "text-underline-offset") == 0)
         return emit_len(dst, cap, P_TEXT_UL_OFFSET, val, CB_AUTO_VALUE, 1);
     else if (strcmp(prop, "counter-reset") == 0 || strcmp(prop, "counter-increment") == 0)
@@ -4419,7 +4749,9 @@ static int interpret_prop(const char *prop, const char *val, css_decl *dst, int 
                                      contenttab, ncontent, contentcap, &inner_known);
         if (nw > 0) return nw;
     }
-    if (css_wide_keyword(val))
+    /* `z-index: auto` IS the initial value (CSS 2.1 9.9.1): it has no slot value of
+     * its own here, but it must still beat a lower-specificity `z-index: 2`. */
+    if (css_wide_keyword(val) || (strcmp(prop, "z-index") == 0 && csel_ci_eq(val, "auto")))
         return wide_claim(prop, dst, cap, urltab, nurl, urlcap,
                           contenttab, ncontent, contentcap);
     return 0;
@@ -4567,6 +4899,12 @@ static int parse_one_decl(const char *s, size_t n, css_decl *dst, int cap,
              * without one it is invalid at computed-value time (CSS Variables 1). */
             if (!marker) drop_record(log, prop, val, CSS_DROP_BAD_VALUE);
             return marker;
+        }
+        use_val = resolved;
+    } else if (csel_substr(val, "env(", 1)) {
+        if (!cvr_resolve(val, resolved, sizeof resolved, vs)) {
+            drop_record(log, prop, val, CSS_DROP_BAD_VALUE);
+            return 0;
         }
         use_val = resolved;
     }
@@ -4980,10 +5318,13 @@ static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
             }
             int is_layer = at_keyword(s, i, end, "layer");
             int is_supports = !is_layer && at_keyword(s, i, end, "supports");
-            if (is_layer || is_supports) {
-                size_t pre = i + (is_layer ? 6 : 9), q, ba, bb, be;
+            int is_container = !is_layer && !is_supports && at_keyword(s, i, end, "container");
+            if (is_layer || is_supports || is_container) {
+                size_t pre = i + (is_layer ? 6 : is_supports ? 9 : 10), q, ba, bb, be;
                 if (at_block(s, pre, end, &q, &ba, &bb, &be) && depth < CSS_MEDIA_MAX_DEPTH &&
-                    (is_layer || supports_matches(s, pre, q)))
+                    (is_layer || (is_supports && supports_matches(s, pre, q)) ||
+                     (is_container && q > pre &&
+                      cmq_container_surely(s + pre, q - pre, m->width_px))))
                     collect_custom_props_scoped(s, ba, bb, m, root_scope, tab, initial,
                                                 depth + 1);
                 i = be;
@@ -5082,6 +5423,17 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                 size_t q, ba, bb, be;
                 if (at_block(s, i + 9, end, &q, &ba, &bb, &be) &&
                     depth < CSS_MEDIA_MAX_DEPTH && supports_matches(s, i + 9, q))
+                    parse_block(sh, s, ba, bb, media, depth + 1, log);
+                i = be;
+                continue;
+            }
+            /* @container: parsed iff its condition holds for EVERY container that fits
+             * in the render width (cmq_container_surely, spec/css_mq.md) -- the cascade
+             * runs before layout, and a contained box is never wider than that. */
+            if (at_keyword(s, i, end, "container")) {
+                size_t q, ba, bb, be;
+                if (at_block(s, i + 10, end, &q, &ba, &bb, &be) && depth < CSS_MEDIA_MAX_DEPTH &&
+                    q > i + 10 && cmq_container_surely(s + i + 10, q - (i + 10), media->width_px))
                     parse_block(sh, s, ba, bb, media, depth + 1, log);
                 i = be;
                 continue;
@@ -5797,6 +6149,19 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
                     o->bg_image_url[CSS_URL_MAX - 1] = '\0';
                 }
                 break;
+            case P_MASK_URL:
+                if (d->ival < 0) {
+                    o->mask_url[0] = '\0';
+                } else {
+                    memcpy(o->mask_url, urltab[d->ival], CSS_URL_MAX);
+                    o->mask_url[CSS_URL_MAX - 1] = '\0';
+                }
+                break;
+            case P_MASK_GEO0: case P_MASK_GEO1: case P_MASK_GEO2: case P_MASK_GEO3:
+            case P_MASK_GEO4: case P_MASK_GEO5: case P_MASK_GEO6: case P_MASK_GEO7:
+            case P_MASK_GEO8: case P_MASK_GEO9:
+                o->mask_geo[d->prop - P_MASK_GEO0] = d->ival;
+                break;
             case P_BG_IMAGE_URL2:
                 if (d->ival < 0) {
                     o->bg_image_url2[0] = '\0';
@@ -6511,6 +6876,8 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         .column_rule_width = CSS_LEN_UNSET, .column_rule_style = CSS_BST_UNSET,
         .column_rule_color = -1,
         .pct = { 0 },
+        .mask_geo = { CSS_BGR_UNSET, CSS_BGS_UNSET, CSS_LEN_UNSET, CSS_LEN_UNSET, 0, 0,
+                      CSS_LEN_UNSET, CSS_LEN_UNSET, 0, 0 },
     };
     int wi[P_NSLOTS], ws[P_NSLOTS], wo[P_NSLOTS], wem[P_NSLOTS], wv[P_NSLOTS];
     for (int k = 0; k < P_NSLOTS; ++k) {

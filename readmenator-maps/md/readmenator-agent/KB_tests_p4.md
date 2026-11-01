@@ -1,6 +1,32 @@
 # Subsystem: tests (page 4 of 8)
 Previous: [KB_tests_p3.md](KB_tests_p3.md)
 
+## tests/test_form.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_encode_basic` (function, line 24) `static void test_encode_basic(void **state)`
+  - `test_encode_space_and_reserved` (function, line 34) `static void test_encode_space_and_reserved(void **state)`
+  - `test_encode_unreserved_kept` (function, line 43) `static void test_encode_unreserved_kept(void **state)`
+  - `test_encode_empty_and_nameless` (function, line 51) `static void test_encode_empty_and_nameless(void **state)`
+  - `test_encode_overflow_fails_closed` (function, line 59) `static void test_encode_overflow_fails_closed(void **state)`
+  - `test_encode_null_args` (function, line 67) `static void test_encode_null_args(void **state)`
+  - `test_get_relative_action_on_https_base` (function, line 78) `static void test_get_relative_action_on_https_base(void **state)`
+  - `test_get_absolute_https_action_ignores_base` (function, line 89) `static void test_get_absolute_https_action_ignores_base(void **state)`
+  - `test_get_empty_action_submits_to_base` (function, line 100) `static void test_get_empty_action_submits_to_base(void **state)`
+  - `test_get_replaces_existing_query` (function, line 109) `static void test_get_replaces_existing_query(void **state)`
+  - `test_get_action_cleaned_of_whitespace` (function, line 119) `static void test_get_action_cleaned_of_whitespace(void **state)`
+  - `test_post_builds_body` (function, line 130) `static void test_post_builds_body(void **state)`
+  - `test_block_http_downgrade` (function, line 145) `static void test_block_http_downgrade(void **state)`
+  - `test_block_foreign_scheme` (function, line 155) `static void test_block_foreign_scheme(void **state)`
+  - `test_block_relative_action_on_local_base` (function, line 164) `static void test_block_relative_action_on_local_base(void **state)`
+  - `test_block_too_many_fields` (function, line 173) `static void test_block_too_many_fields(void **state)`
+  - `test_block_null_field_name` (function, line 183) `static void test_block_null_field_name(void **state)`
+  - `test_build_null_args` (function, line 192) `static void test_build_null_args(void **state)`
+  - `test_get_no_fields_still_navigates` (function, line 199) `static void test_get_no_fields_still_navigates(void **state)`
+  - `main` (function, line 207) `int main(void)`
+- Depends on: `include/form.h`
+
 ## tests/test_frame_broker.c
 - Doc: test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router.
 - Layer: testing

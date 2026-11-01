@@ -91,28 +91,29 @@ Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h
  * the gradient fai...`
 - `emit_gradient` (function) `src/css_gradient.c:291` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
                          ...` -- Emits the gradient decl group. nstops == 0 emits only the explicit reset * (P_BG_GRAD_N = 0), which is how a...
-- `find_radial_gradient` (function) `src/css_gradient.c:348` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+- `find_radial_gradient` (function) `src/css_gradient.c:360` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
                       ...` -- R5c: detects radial-gradient(circle at center, color1, color2).
-- `emit_radial_geom` (function) `src/css_gradient.c:387` `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` -- char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap) { if (cap < 1) return 0; dst[0].prop = P_BG_IMAGE_URL; if...
-- `pool` (function) `src/css_gradient.c:400` `* pool (gradient explicitly reset);`
-- `downstream` (function) `src/css_gradient.c:404` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+- `cg_first_url` (function) `src/css_gradient.c:398` `int cg_first_url(const char *val, char *out, size_t outcap)`
+- `emit_radial_geom` (function) `src/css_gradient.c:405` `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` -- } memcpy(urltab[*nurl], url, strlen(url) + 1); dst[0].ival = (int)*nurl; ++*nurl; return 1; } int cg_first_url(const...
+- `pool` (function) `src/css_gradient.c:418` `* pool (gradient explicitly reset);`
+- `downstream` (function) `src/css_gradient.c:422` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
 int cg_expand_bg_imag...`
-- `declaration` (function) `src/css_gradient.c:465` `* declaration (fail closed);`
-- `bg_layer_tokens_ok` (function) `src/css_gradient.c:472` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
-- `cg_expand_background` (function) `src/css_gradient.c:512` `int cg_expand_background(const char *val, css_decl *dst, int cap,
+- `declaration` (function) `src/css_gradient.c:483` `* declaration (fail closed);`
+- `bg_layer_tokens_ok` (function) `src/css_gradient.c:490` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
+- `cg_expand_background` (function) `src/css_gradient.c:530` `int cg_expand_background(const char *val, css_decl *dst, int cap,
                              ch...`
-- `rad_ieq` (function) `src/css_gradient.c:600` `static int rad_ieq(const char *a, const char *b)`
-- `rad_len` (function) `src/css_gradient.c:608` `static int rad_len(const char *tok, int *enc)` -- One <length-percentage> token (`12px`, `40%`, `0`) -> the cg_radial encoding; 1 = ok.
-- `rad_is_len_start` (function) `src/css_gradient.c:629` `static int rad_is_len_start(const char *t)`
-- `rad_pos_kw` (function) `src/css_gradient.c:634` `static int rad_pos_kw(const char *t, int *axis)` -- if (*e == '\0' && v == 0.0) { *enc = 0; return 1; }   /* unitless 0 is a zero length if (rad_ieq(e, "px")) { if (v >...
-- `rad_parse_position` (function) `src/css_gradient.c:643` `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
-- `cg_parse_radial_prelude` (function) `src/css_gradient.c:672` `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
-- `cg_radial_len_px` (function) `src/css_gradient.c:748` `double cg_radial_len_px(int enc, double dim)`
-- `cg_dmin` (function) `src/css_gradient.c:757` `static double cg_dmin(double a, double b)`
-- `cg_dmax` (function) `src/css_gradient.c:758` `static double cg_dmax(double a, double b)`
-- `cg_radial_geometry` (function) `src/css_gradient.c:760` `void cg_radial_geometry(const cg_radial *r, double w, double h,
+- `rad_ieq` (function) `src/css_gradient.c:618` `static int rad_ieq(const char *a, const char *b)`
+- `rad_len` (function) `src/css_gradient.c:626` `static int rad_len(const char *tok, int *enc)` -- One <length-percentage> token (`12px`, `40%`, `0`) -> the cg_radial encoding; 1 = ok.
+- `rad_is_len_start` (function) `src/css_gradient.c:647` `static int rad_is_len_start(const char *t)`
+- `rad_pos_kw` (function) `src/css_gradient.c:652` `static int rad_pos_kw(const char *t, int *axis)` -- if (*e == '\0' && v == 0.0) { *enc = 0; return 1; }   /* unitless 0 is a zero length if (rad_ieq(e, "px")) { if (v >...
+- `rad_parse_position` (function) `src/css_gradient.c:661` `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
+- `cg_parse_radial_prelude` (function) `src/css_gradient.c:690` `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
+- `cg_radial_len_px` (function) `src/css_gradient.c:766` `double cg_radial_len_px(int enc, double dim)`
+- `cg_dmin` (function) `src/css_gradient.c:775` `static double cg_dmin(double a, double b)`
+- `cg_dmax` (function) `src/css_gradient.c:776` `static double cg_dmax(double a, double b)`
+- `cg_radial_geometry` (function) `src/css_gradient.c:778` `void cg_radial_geometry(const cg_radial *r, double w, double h,
                         double *c...`
-- `cg_parse_linear` (function) `src/css_gradient.c:797` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
+- `cg_parse_linear` (function) `src/css_gradient.c:815` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
 
 ## src/css_index.c
 Depends on: `include/css_index.h`
@@ -154,16 +155,16 @@ Depends on: `include/css.h`, `include/css_length.h`
 
 ## src/css_mask.c
 Depends on: `include/css_gradient.h`, `include/css_mask.h`
-- `ieq` (function) `src/css_mask.c:11` `static int ieq(const char *a, const char *b)`
-- `cm_is_mask_prop` (function) `src/css_mask.c:17` `int cm_is_mask_prop(const char *prop)`
-- `cm_encode_layer` (function) `src/css_mask.c:24` `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)`
-- `cm_decode_layer` (function) `src/css_mask.c:45` `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)`
-- `split` (function) `src/css_mask.c:63` `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)` -- out->kind = 1; out->nst = (meta >> 4) & 0xf; if (out->nst < 2) out->nst = 2; if (out->nst > 4) out->nst = 4...
-- `composite_word` (function) `src/css_mask.c:90` `static int composite_word(const char *t, int webkit)`
-- `clip_word` (function) `src/css_mask.c:104` `static int clip_word(const char *t)`
-- `image_layer` (function) `src/css_mask.c:112` `static int image_layer(const char *tok, cm_layer *l)` -- if (ieq(t, "source-in")) return CM_COMP_INTERSECT; if (ieq(t, "xor")) return CM_COMP_EXCLUDE; } return -1; } static...
-- `emit_layers` (function) `src/css_mask.c:130` `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)`
-- `cm_expand` (function) `src/css_mask.c:197` `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)`
+- `ieq` (function) `src/css_mask.c:13` `static int ieq(const char *a, const char *b)`
+- `cm_is_mask_prop` (function) `src/css_mask.c:19` `int cm_is_mask_prop(const char *prop)`
+- `cm_encode_layer` (function) `src/css_mask.c:26` `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)`
+- `cm_decode_layer` (function) `src/css_mask.c:47` `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)`
+- `split` (function) `src/css_mask.c:65` `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)` -- out->kind = 1; out->nst = (meta >> 4) & 0xf; if (out->nst < 2) out->nst = 2; if (out->nst > 4) out->nst = 4...
+- `composite_word` (function) `src/css_mask.c:92` `static int composite_word(const char *t, int webkit)`
+- `clip_word` (function) `src/css_mask.c:106` `static int clip_word(const char *t)`
+- `image_layer` (function) `src/css_mask.c:114` `static int image_layer(const char *tok, cm_layer *l)` -- if (ieq(t, "source-in")) return CM_COMP_INTERSECT; if (ieq(t, "xor")) return CM_COMP_EXCLUDE; } return -1; } static...
+- `emit_layers` (function) `src/css_mask.c:132` `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)`
+- `cm_expand` (function) `src/css_mask.c:201` `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)`
 
 ## src/css_mq.c
 Depends on: `include/css_length.h`, `include/css_mq.h`
@@ -191,6 +192,8 @@ Depends on: `include/css_length.h`, `include/css_mq.h`
 - `eval_cond` (function) `src/css_mq.c:380` `static int eval_cond(mq_cur *c, int depth)` -- mq_cur in = { c->s, open + 1, close, c->env }; skip_ws(&in); char w[16]; int nested = (in.i < in.b && in.s[in.i] ==...
 - `eval_query` (function) `src/css_mq.c:404` `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)` -- skip_ws(c); if (c->i >= c->b) break; mq_cur save = *c; if (!read_word(c, w, sizeof w)) { *c = save; break; } int m =...
 - `cmq_matches` (function) `src/css_mq.c:458` `int cmq_matches(const char *s, size_t len, const cmq_env *env)`
+- `has_word` (function) `src/css_mq.c:479` `static int has_word(const char *t, const char *w)` -- while (i < len && !(s[i] == ',' && d == 0)) { if (s[i] == '(') ++d; else if (s[i] == ')') --d; ++i; } if...
+- `cmq_container_surely` (function) `src/css_mq.c:489` `int cmq_container_surely(const char *s, size_t len, int max_width)`
 
 ## src/css_select.c
 Depends on: `include/css_select.h`
@@ -246,18 +249,18 @@ Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `includ
 - `ct_interp_texttransform` (function) `src/css_text.c:69` `int ct_interp_texttransform(const char *v)`
 - `ct_interp_valign` (function) `src/css_text.c:91` `int ct_interp_valign(const char *v)`
 - `ct_expand_valign` (function) `src/css_text.c:122` `int ct_expand_valign(const char *val, css_decl *dst, int cap)` -- vertical-align (CSS 2.1 section 10.8.1) has two productions: a keyword, and a <length-percentage> baseline SHIFT...
-- `ct_interp_transition_property` (function) `src/css_text.c:139` `int ct_interp_transition_property(const char *v)`
-- `ct_interp_whitespace` (function) `src/css_text.c:147` `int ct_interp_whitespace(const char *v)`
-- `ct_interp_tabsize` (function) `src/css_text.c:160` `int ct_interp_tabsize(const char *v)` -- break-spaces preserves whitespace and wraps; this engine only models the * wrap/keep distinction, so it collapses to...
-- `ct_interp_textdeco_style` (function) `src/css_text.c:171` `int ct_interp_textdeco_style(const char *v)` -- } /* tab-size: a non-negative integer (number of spaces). -1 if unsupported. int ct_interp_tabsize(const char *v) {...
-- `ct_interp_textdeco_thickness` (function) `src/css_text.c:182` `int ct_interp_textdeco_thickness(const char *v)` -- text-decoration-thickness: `from-font` (keyword -> 0), or a non-negative length * (px -> px, em/rem x16). -1 if...
-- `ct_interp_aspect_ratio` (function) `src/css_text.c:194` `int ct_interp_aspect_ratio(const char *v, int *num, int *den)` -- aspect-ratio: `auto`, a `<ratio>` such as `16/9` or `1.5`, or `auto <ratio>` (auto fallback).
-- `ct_interp_direction` (function) `src/css_text.c:236` `int ct_interp_direction(const char *v)` -- Both halves share ONE scale, so the ratio keeps its shape: clamping each half to * CSS_LEN_MAX on its own turned...
-- `ct_liststyle_kw` (function) `src/css_text.c:242` `static int ct_liststyle_kw(const char *t)`
-- `ct_liststyle_unknown_name` (function) `src/css_text.c:263` `static int ct_liststyle_unknown_name(const char *t)` -- A <counter-style> name this engine has no glyph set for.
-- `ct_interp_liststyle` (function) `src/css_text.c:274` `int ct_interp_liststyle(const char *v)` -- list-style-type, or the type token of the list-style shorthand: the first * recognised keyword wins. url() (a...
-- `ct_emit_spacing` (function) `src/css_text.c:309` `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
-- `ct_expand_shadow` (function) `src/css_text.c:322` `int ct_expand_shadow(const char *val, css_decl *dst, int cap)` -- text-shadow (single layer): collects up to three lengths (dx, dy, blur — blur is ignored) and an optional color, in...
+- `transition_prop_one` (function) `src/css_text.c:139` `static int transition_prop_one(const char *v)`
+- `ct_interp_whitespace` (function) `src/css_text.c:182` `int ct_interp_whitespace(const char *v)`
+- `ct_interp_tabsize` (function) `src/css_text.c:195` `int ct_interp_tabsize(const char *v)` -- break-spaces preserves whitespace and wraps; this engine only models the * wrap/keep distinction, so it collapses to...
+- `ct_interp_textdeco_style` (function) `src/css_text.c:206` `int ct_interp_textdeco_style(const char *v)` -- } /* tab-size: a non-negative integer (number of spaces). -1 if unsupported. int ct_interp_tabsize(const char *v) {...
+- `ct_interp_textdeco_thickness` (function) `src/css_text.c:217` `int ct_interp_textdeco_thickness(const char *v)` -- text-decoration-thickness: `from-font` (keyword -> 0), or a non-negative length * (px -> px, em/rem x16). -1 if...
+- `ct_interp_aspect_ratio` (function) `src/css_text.c:229` `int ct_interp_aspect_ratio(const char *v, int *num, int *den)` -- aspect-ratio: `auto`, a `<ratio>` such as `16/9` or `1.5`, or `auto <ratio>` (auto fallback).
+- `ct_interp_direction` (function) `src/css_text.c:271` `int ct_interp_direction(const char *v)` -- Both halves share ONE scale, so the ratio keeps its shape: clamping each half to * CSS_LEN_MAX on its own turned...
+- `ct_liststyle_kw` (function) `src/css_text.c:277` `static int ct_liststyle_kw(const char *t)`
+- `ct_liststyle_unknown_name` (function) `src/css_text.c:298` `static int ct_liststyle_unknown_name(const char *t)` -- A <counter-style> name this engine has no glyph set for.
+- `ct_interp_liststyle` (function) `src/css_text.c:309` `int ct_interp_liststyle(const char *v)` -- list-style-type, or the type token of the list-style shorthand: the first * recognised keyword wins. url() (a...
+- `ct_emit_spacing` (function) `src/css_text.c:344` `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
+- `ct_expand_shadow` (function) `src/css_text.c:357` `int ct_expand_shadow(const char *val, css_decl *dst, int cap)` -- text-shadow (single layer): collects up to three lengths (dx, dy, blur — blur is ignored) and an optional color, in...
 
 ## src/css_values.c
 Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
@@ -286,10 +289,11 @@ Depends on: `include/css_select.h`, `include/css_vars.h`
 - `without_important` (function) `src/css_vars.c:124` `static size_t without_important(const char *val, size_t n)` -- Length of val[0,n) once a trailing !important (optional blanks around the '!') * is removed, trailing blanks included.
 - `cvr_collect_decls` (function) `src/css_vars.c:139` `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b)`
 - `scope_get` (function) `src/css_vars.c:164` `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)`
-- `resolve_rec` (function) `src/css_vars.c:178` `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
+- `env_value` (function) `src/css_vars.c:182` `static const char *env_value(const char *name, size_t n)` -- The value an env() name resolves to on this device class (CSS Environment Variables 1): a desktop window has no...
+- `resolve_rec` (function) `src/css_vars.c:192` `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
                   ...`
-- `cvr_resolve` (function) `src/css_vars.c:230` `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
-- `cvr_lookup` (function) `src/css_vars.c:239` `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
+- `cvr_resolve` (function) `src/css_vars.c:281` `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
+- `cvr_lookup` (function) `src/css_vars.c:290` `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
 
 ## src/data_url.c
 Depends on: `include/data_url.h`
@@ -297,12 +301,13 @@ Depends on: `include/data_url.h`
 - `ci_starts_with` (function) `src/data_url.c:20` `static int ci_starts_with(const char *s, const char *prefix)`
 - `du_is_data_url` (function) `src/data_url.c:28` `int du_is_data_url(const char *url)`
 - `du_base64_payload` (function) `src/data_url.c:32` `du_status du_base64_payload(const char *url, const char **payload, size_t *payload_len)`
-- `b64_val` (function) `src/data_url.c:61` `static int b64_val(unsigned char c)` -- 0-63 for a base64 alphabet character, -1 otherwise.
-- `du_base64_decode` (function) `src/data_url.c:70` `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)`
-- `hexval` (function) `src/data_url.c:108` `static int hexval(char c)`
-- `ascii_ws` (function) `src/data_url.c:115` `static int ascii_ws(char c)`
-- `ends_ci` (function) `src/data_url.c:120` `static int ends_ci(const char *s, size_t n, const char *suf)` -- } static int hexval(char c) { if (c >= '0' && c <= '9') return c - '0'; if (c >= 'a' && c <= 'f') return c - 'a' +...
-- `du_decode` (function) `src/data_url.c:131` `du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)`
+- `du_shape_ok` (function) `src/data_url.c:59` `du_status du_shape_ok(const char *url)`
+- `b64_val` (function) `src/data_url.c:70` `static int b64_val(unsigned char c)` -- 0-63 for a base64 alphabet character, -1 otherwise.
+- `du_base64_decode` (function) `src/data_url.c:79` `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)`
+- `hexval` (function) `src/data_url.c:117` `static int hexval(char c)`
+- `ascii_ws` (function) `src/data_url.c:124` `static int ascii_ws(char c)`
+- `ends_ci` (function) `src/data_url.c:129` `static int ends_ci(const char *s, size_t n, const char *suf)` -- } static int hexval(char c) { if (c >= '0' && c <= '9') return c - '0'; if (c >= 'a' && c <= 'f') return c - 'a' +...
+- `du_decode` (function) `src/data_url.c:140` `du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)`
 
 ## src/disk_store.c
 Depends on: `include/disk_store.h`, `include/local_store.h`, `include/util.h`

@@ -248,6 +248,15 @@ static inline int csel_ci_eq(const char *a, const char *b) {
     return *a == '\0' && *b == '\0';
 }
 
+/* True if a starts with the (lowercase) prefix p, case-insensitively. */
+static inline int csel_ci_starts(const char *a, const char *p) {
+    while (*p != '\0') {
+        if (*a == '\0' || csel_lower_ch(*a) != *p) return 0;
+        ++a; ++p;
+    }
+    return 1;
+}
+
 /* True if a[0,n) equals b[0,n) up to n chars (b NUL-terminated), case-folded when ci. */
 static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci) {
     for (size_t i = 0; i < n; ++i) {

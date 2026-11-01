@@ -730,6 +730,8 @@ int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, dou
 
 **Returns:** `int`
 
+*Called by:* [`bui_paint_mask_image`](gui.bui_mask_img.c.md#bui_paint_mask_image)
+
 ---
 
 ## Macros

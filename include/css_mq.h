@@ -27,4 +27,10 @@ typedef struct cmq_env {
  * closed. An empty list matches (all). NULL s or env -> 0. */
 int cmq_matches(const char *s, size_t len, const cmq_env *env);
 
+/* @container condition s[0,len) (optionally led by a container name) is SURELY true
+ * for every container no wider than max_width: it must be a pure width interval
+ * (width/inline-size comparisons joined by `and`) true at width 0 and at max_width.
+ * Anything else -- or, not, height, style(), unknown -- is 0. spec/css_mq.md. */
+int cmq_container_surely(const char *s, size_t len, int max_width);
+
 #endif /* FREEDOM_CSS_MQ_H */

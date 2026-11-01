@@ -227,6 +227,12 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
         P_CNT_RESET, P_CNT_INC,
         /* text-underline-offset: px (CSS_LEN_AUTO = auto), APPENDED. */
         P_TEXT_UL_OFFSET,
+        /* mask-image: url() (tanda 83, spec/css_mask.md; APPENDED): ival = url pool index,
+         * -1 = none; then the mask layer's geometry, CSS_MASK_GEO_N ints laid out as
+         * css.h CSS_MG_* (repeat, size kw/w/h/w%/h%, position x/y/x%/y%). */
+        P_MASK_URL,
+        P_MASK_GEO0, P_MASK_GEO1, P_MASK_GEO2, P_MASK_GEO3, P_MASK_GEO4,
+        P_MASK_GEO5, P_MASK_GEO6, P_MASK_GEO7, P_MASK_GEO8, P_MASK_GEO9,
         P_NSLOTS };
 
 typedef struct css_decl {

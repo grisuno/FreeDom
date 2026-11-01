@@ -1,5 +1,5 @@
 Slashdot: News for nerds, stuff that matters, & software
-CSS drops: 31 declaration(s) dropped, 26 distinct
+CSS drops: 30 declaration(s) dropped, 25 distinct
   count  cause         property                     first value
       3  bad-value     font                         normal 24px/1.5
       2  unknown-prop  -border-radius               2px
@@ -20,7 +20,6 @@ CSS drops: 31 declaration(s) dropped, 26 distinct
       1  unknown-prop  border-image-slice           100%
       1  unknown-prop  border-image-source          none
       1  unknown-prop  border-image-width           1
-      1  bad-value     transition-property          background-color, color
       1  bad-value     border-style                 0
       1  unknown-prop  -webkit-column-break-inside  avoid
       1  unknown-prop  page-break-inside            avoid

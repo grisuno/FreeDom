@@ -1,6 +1,95 @@
 # Subsystem: src (page 5 of 10)
 Previous: [KB_src_p4.md](KB_src_p4.md)
 
+## src/html_parse.c
+- Doc: node_next: }; /* --- helpers --- static char *dup_bytes(const lxb_char_t *src, size_t len) { if...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `hp_document` (struct, line 21)
+  - `dup_bytes` (function, line 27) `static char *dup_bytes(const lxb_char_t *src, size_t len)`
+  - `node_next` (function, line 37) `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)`
+  - `attr_is_event_handler` (function, line 47) `static int attr_is_event_handler(const lxb_dom_attr_t *attr)`
+  - `node_is_script` (function, line 54) `static int node_is_script(const lxb_dom_node_t *node)`
+  - `strip_scripts` (function, line 60) `static void strip_scripts(lxb_html_document_t *document)`
+  - `type_is` (function, line 100) `static int type_is(const lxb_char_t *t, size_t len, const char *word)`
+  - `type_is_module` (function, line 117) `static int type_is_module(const lxb_char_t *t, size_t len)`
+  - `script_classify` (function, line 121) `static int script_classify(const lxb_dom_node_t *n,
+                           const lxb_char_t *...`
+  - `hp_extract_script_list` (function, line 164) `hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count)`
+  - `hp_free_scripts` (function, line 238) `void hp_free_scripts(hp_script *scripts, size_t count)`
+  - `attr_has_token_ci` (function, line 251) `static int attr_has_token_ci(const lxb_char_t *val, size_t vlen, const char *needle)`
+  - `link_is_active_stylesheet` (function, line 272) `static int link_is_active_stylesheet(lxb_dom_element_t *el,
+                                     ...`
+  - `hp_extract_stylesheet_hrefs` (function, line 294) `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count)`
+  - `hp_free_stylesheet_hrefs` (function, line 328) `void hp_free_stylesheet_hrefs(char **hrefs, size_t count)`
+  - `strip_event_handlers` (function, line 334) `static void strip_event_handlers(lxb_html_document_t *document)`
+  - `hp_config_default` (function, line 357) `hp_config hp_config_default(void)`
+  - `hp_validate_input` (function, line 365) `hp_status hp_validate_input(const char *html, size_t len, const hp_config *cfg)`
+  - `hp_parse` (function, line 375) `hp_status hp_parse(const char *html, size_t len, const hp_config *cfg, hp_document **out)`
+  - `hp_element_count` (function, line 409) `size_t hp_element_count(const hp_document *doc)`
+  - `hp_script_count` (function, line 419) `size_t hp_script_count(const hp_document *doc)`
+  - `hp_event_handler_count` (function, line 429) `size_t hp_event_handler_count(const hp_document *doc)`
+  - `hp_extract_text` (function, line 445) `char *hp_extract_text(const hp_document *doc, size_t *out_len)`
+  - `hp_get_title` (function, line 464) `char *hp_get_title(const hp_document *doc, size_t *out_len)`
+  - `hp_free` (function, line 479) `void hp_free(char *buf)`
+  - `hp_document_free` (function, line 483) `void hp_document_free(hp_document *doc)`
+  - `hp_document_root` (function, line 489) `const void *hp_document_root(const hp_document *doc)`
+  - `lxb_dom_element_has_attribute` (function, line 230) `&& lxb_dom_element_has_attribute(sel, (const lxb_char_t *)"nomodule", 8);`
+  - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
+- Depends on: `include/dom.h`, `include/html_parse.h`, `include/util.h`
+
+## src/http_cache.c
+- Doc: days_from_civil: #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY...
+- Layer: presentation
+- Language: c
+- Symbols:
+  - `hc_store` (struct, line 146)
+  - `ent` (struct, line 397)
+  - `days_in_month` (function, line 39) `static int days_in_month(int y, int m)`
+  - `days_from_civil` (function, line 46) `static long days_from_civil(int y, int m, int d)`
+  - `hc_parse_http_date` (function, line 55) `time_t hc_parse_http_date(const char *s)`
+  - `cc_find` (function, line 74) `static int cc_find(const char *cc, const char *name, const char **val)`
+  - `cc_max_age` (function, line 92) `static int cc_max_age(const char *cc, long *out)`
+  - `hc_storable` (function, line 107) `int hc_storable(long http_code, const hc_meta *m, size_t body_len)`
+  - `hc_lifetime` (function, line 115) `long hc_lifetime(const hc_meta *m)`
+  - `hc_classify` (function, line 136) `hc_class hc_classify(const hc_meta *m, time_t now)`
+  - `hex_of` (function, line 155) `static void hex_of(const uint8_t *b, size_t n, char *out)`
+  - `entry_path` (function, line 162) `static int entry_path(const hc_store *s, char kind, const char *partition, const char *url,
+     ...`
+  - `remove_entries` (function, line 180) `static void remove_entries(const char *dir)`
+  - `write_atomic` (function, line 192) `static int write_atomic(const char *path, const uint8_t *data, size_t len)`
+  - `read_file` (function, line 208) `static uint8_t *read_file(const char *path, size_t max, size_t *len)`
+  - `hc_open` (function, line 230) `hc_status hc_open(hc_store **out, const char *dir, const uint8_t wrap[LS_KEY_LEN])`
+  - `hc_close` (function, line 279) `void hc_close(hc_store *s)`
+  - `hc_body_free` (function, line 287) `void hc_body_free(uint8_t *body, size_t len)`
+  - `has_nl` (function, line 293) `static int has_nl(const char *s)`
+  - `meta_ok` (function, line 295) `static int meta_ok(const hc_meta *m)`
+  - `store_entry` (function, line 302) `static hc_status store_entry(hc_store *s, const char *path, const hc_meta *m,
+                   ...`
+  - `load_entry` (function, line 327) `static hc_status load_entry(hc_store *s, const char *path, hc_meta *m, uint8_t **body,
+          ...`
+  - `get_locked` (function, line 385) `static hc_status get_locked(hc_store *s, const char *partition, const char *url, hc_meta *meta,
+ ...`
+  - `evict` (function, line 396) `static void evict(hc_store *s)`
+  - `put_locked` (function, line 434) `static hc_status put_locked(hc_store *s, const char *partition, const char *url, const hc_meta *m...`
+  - `redirect_put_locked` (function, line 446) `static hc_status redirect_put_locked(hc_store *s, const char *from, const char *to, time_t now)`
+  - `redirect_get_locked` (function, line 459) `static hc_status redirect_get_locked(hc_store *s, const char *from, time_t now, char *out, size_t...`
+  - `hc_clear` (function, line 473) `void hc_clear(hc_store *s)`
+  - `hc_get` (function, line 480) `hc_status hc_get(hc_store *s, const char *partition, const char *url, hc_meta *meta,
+            ...`
+  - `hc_put` (function, line 489) `hc_status hc_put(hc_store *s, const char *partition, const char *url, const hc_meta *meta,
+      ...`
+  - `hc_redirect_put` (function, line 498) `hc_status hc_redirect_put(hc_store *s, const char *from, const char *to, time_t now)`
+  - `hc_redirect_get` (function, line 506) `hc_status hc_redirect_get(hc_store *s, const char *from, time_t now, char *out, size_t cap)`
+  - `_POSIX_C_SOURCE` (macro, line 7) `#define _POSIX_C_SOURCE`
+  - `HC_KEY_FILE` (macro, line 31) `#define HC_KEY_FILE`
+  - `HC_MAGIC` (macro, line 32) `#define HC_MAGIC`
+  - `HC_NAME_HEX` (macro, line 33) `#define HC_NAME_HEX`
+  - `HC_EVICT_EVERY` (macro, line 34) `#define HC_EVICT_EVERY`
+  - `HC_MAX_AGE_CAP` (macro, line 35) `#define HC_MAX_AGE_CAP`
+- Depends on: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`
+
 ## src/identity.c
 - Doc: tag_valid: size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t...
 - Layer: utility
@@ -401,71 +490,6 @@ static int cb_append(char **bu...`
   - `task` (function, line 311) `* current task (the page never waits on it);`
   - `_GNU_SOURCE` (macro, line 6) `#define _GNU_SOURCE`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`
-
-## src/js_geom.c
-- Doc: unite: Bounding box of a and b into a; returns 1 if a changed.
-- Layer: utility
-- Language: c
-- Symbols:
-  - `jg_init` (function, line 17) `void jg_init(jg_table *t)`
-  - `jg_free` (function, line 21) `void jg_free(jg_table *t)`
-  - `clamp_coord` (function, line 27) `static int32_t clamp_coord(double v, double lo)`
-  - `grow` (function, line 33) `static int grow(jg_table *t)`
-  - `push` (function, line 45) `static int push(jg_table *t, dom_node_id node, int32_t x, int32_t y, int32_t w, int32_t h)`
-  - `jg_add` (function, line 52) `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h)`
-  - `unite` (function, line 63) `static int unite(jg_rect *a, const jg_rect *b)`
-  - `cmp_node` (function, line 78) `static int cmp_node(const void *pa, const void *pb)`
-  - `jg_finish` (function, line 83) `int jg_finish(jg_table *t)`
-  - `jg_find` (function, line 96) `const jg_rect *jg_find(const jg_table *t, dom_node_id node)`
-  - `slot_of` (function, line 102) `static uint32_t slot_of(dom_node_id n)`
-  - `index_of` (function, line 109) `static size_t index_of(jg_table *t, uint32_t *slots, dom_node_id node, const jg_rect *seed,
-     ...`
-  - `jg_aggregate` (function, line 124) `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx)`
-  - `jg_wire_len` (function, line 163) `size_t jg_wire_len(const jg_table *t)`
-  - `jg_encode` (function, line 167) `int jg_encode(const jg_table *t, int32_t *out, size_t cap)`
-  - `in_range` (function, line 182) `static int in_range(int32_t v, int32_t lo)`
-  - `jg_decode` (function, line 186) `int jg_decode(const int32_t *in, size_t n, jg_table *out)`
-  - `fnv` (function, line 212) `static uint64_t fnv(uint64_t h, int32_t v)`
-  - `jg_hash` (function, line 221) `uint64_t jg_hash(const jg_table *t)`
-  - `JG_INDEX_SLOTS` (macro, line 14) `#define JG_INDEX_SLOTS`
-  - `JG_SLOT_EMPTY` (macro, line 15) `#define JG_SLOT_EMPTY`
-- Depends on: `include/js_geom.h`
-
-## src/js_location.c
-- Doc: jd_lp_set: Defines a string property on the __locParts data object from a (ptr,len) span. * The...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `jd_lp_set` (function, line 24) `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
-                      const ...`
-  - `jl_m_hist_target` (function, line 35) `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `jd_set_location` (function, line 139) `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
-  - `jd_take_nav_request` (function, line 173) `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
-  - `jd_take_history` (function, line 219) `char *jd_take_history(js_context *ctx, int *go)`
-  - `jd_pop_state` (function, line 250) `int jd_pop_state(js_context *ctx, int index)`
-- Depends on: `include/js_dom.h`, `include/url.h`, `src/js_location_internal.h`
-
-## src/js_location_internal.h
-- Doc: Private to js_dom.c / js_location.c: the dom.histTarget native lives with the
-- Layer: utility
-- Language: h
-- Symbols:
-  - `header` (function, line 6) `* stay out of every public header (include/ never sees quickjs.h). */ #include "quickjs.h" JSValue...`
-  - `FREEDOM_JS_LOCATION_INTERNAL_H` (macro, line 2) `#define FREEDOM_JS_LOCATION_INTERNAL_H`
-- Imported by: `src/js_dom.c`, `src/js_location.c`
-
-## src/js_policy.c
-- Doc: eq_ci: js_policy — implementation: pure per-host JavaScript policy decision.
-- Layer: business_logic
-- Language: c
-- Symbols:
-  - `eq_ci` (function, line 12) `static int eq_ci(const char *a, const char *b)`
-  - `jsp_enabled` (function, line 22) `bool jsp_enabled(jsp_mode mode, int host_allowlisted)`
-  - `jsp_trusted` (function, line 31) `bool jsp_trusted(bool js_enabled, int host_allowlisted)`
-  - `jsp_present_trusted` (function, line 35) `bool jsp_present_trusted(int host_allowlisted)`
-  - `jsp_mode_from_str` (function, line 39) `jsp_mode jsp_mode_from_str(const char *s)`
-  - `jsp_mode_str` (function, line 51) `const char *jsp_mode_str(jsp_mode mode)`
-- Depends on: `include/js_policy.h`
 
 
 Next: [KB_src_p6.md](KB_src_p6.md)

@@ -1,6 +1,6 @@
 # src: http_cache
 
-*Community 6 | 16 files | cohesion 0.79*
+*Community 7 | 16 files | cohesion 0.79*
 
 ## Definition
 
@@ -67,9 +67,9 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/cached_fetch.h.
-- [EXTRACTED] depends_on community 6 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
-- [EXTRACTED] depends_on community 6 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
+- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/cached_fetch.h.
+- [EXTRACTED] depends_on community 7 <-> 8 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 7 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 
 ## Risks
 

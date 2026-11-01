@@ -175,10 +175,61 @@ static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)
     return v ? v : cvr_get(sc->initial, name, nlen);
 }
 
+/* The value an env() name resolves to on this device class (CSS Environment
+ * Variables 1): a desktop window has no notch, no on-screen keyboard and no
+ * fold, so every inset is 0px -- what Firefox answers too. Any other name is
+ * unknown and takes the fallback. Reveals nothing: the answer is a constant. */
+static const char *env_value(const char *name, size_t n) {
+    static const char *const ZERO_PREFIX[] = {
+        "safe-area-inset-", "safe-area-max-inset-", "keyboard-inset-" };
+    for (size_t k = 0; k < sizeof ZERO_PREFIX / sizeof *ZERO_PREFIX; ++k) {
+        size_t pl = strlen(ZERO_PREFIX[k]);
+        if (n > pl && csel_span_eq(name, ZERO_PREFIX[k], pl, 1)) return "0px";
+    }
+    return NULL;
+}
+
 static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
                        size_t *o, const cvr_scope *sc, int depth, int *budget) {
     size_t i = 0;
     while (i < vlen) {
+        if (i + 4 <= vlen && csel_lower_ch(val[i]) == 'e' && csel_lower_ch(val[i + 1]) == 'n' &&
+            csel_lower_ch(val[i + 2]) == 'v' && val[i + 3] == '(' &&
+            (i == 0 || !csel_ident_ch(val[i - 1]))) {
+            size_t j = i + 4, argstart = j;
+            int pdepth = 1;
+            while (j < vlen) {
+                if (val[j] == '(') ++pdepth;
+                else if (val[j] == ')' && --pdepth == 0) break;
+                ++j;
+            }
+            if (pdepth != 0) return 0;
+            size_t argend = j, comma = argend;
+            int cd = 0;
+            for (size_t k = argstart; k < argend; ++k) {
+                if (val[k] == '(') ++cd;
+                else if (val[k] == ')') --cd;
+                else if (val[k] == ',' && cd == 0) { comma = k; break; }
+            }
+            size_t na = argstart, nb = comma;
+            while (na < nb && is_ws(val[na])) ++na;
+            while (nb > na && is_ws(val[nb - 1])) --nb;
+            if (depth >= CVR_MAX_DEPTH || --*budget < 0) return 0;
+            const char *hit = env_value(val + na, nb - na);
+            if (hit != NULL) {
+                if (!resolve_rec(hit, strlen(hit), out, outcap, o, sc, depth + 1, budget))
+                    return 0;
+            } else {
+                if (comma >= argend) return 0;
+                size_t fa = comma + 1, fb = argend;
+                while (fa < fb && is_ws(val[fa])) ++fa;
+                while (fb > fa && is_ws(val[fb - 1])) --fb;
+                if (!resolve_rec(val + fa, fb - fa, out, outcap, o, sc, depth + 1, budget))
+                    return 0;
+            }
+            i = argend + 1;
+            continue;
+        }
         if (i + 4 <= vlen && csel_lower_ch(val[i]) == 'v' && csel_lower_ch(val[i + 1]) == 'a' &&
             csel_lower_ch(val[i + 2]) == 'r' && val[i + 3] == '(') {
             size_t j = i + 4, argstart = j;

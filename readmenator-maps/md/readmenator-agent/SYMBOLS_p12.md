@@ -3,9 +3,68 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_inline_font_size_absolute_flag` | function | `tests/test_css.c:60` | `static void test_inline_font_size_absolute_flag(void **state)` |
+| `test_inline_font_stretch` | function | `tests/test_css.c:5013` | `static void test_inline_font_stretch(void **state)` |
+| `test_inline_font_variant` | function | `tests/test_css.c:4431` | `static void test_inline_font_variant(void **state)` |
+| `test_inline_font_weight_style` | function | `tests/test_css.c:104` | `static void test_inline_font_weight_style(void **state)` |
+| `test_inline_hyphens` | function | `tests/test_css.c:4440` | `static void test_inline_hyphens(void **state)` |
+| `test_inline_image_rendering` | function | `tests/test_css.c:4615` | `static void test_inline_image_rendering(void **state)` |
+| `test_inline_isolation` | function | `tests/test_css.c:4583` | `static void test_inline_isolation(void **state)` |
+| `test_inline_line_height` | function | `tests/test_css.c:87` | `static void test_inline_line_height(void **state)` |
+| `test_inline_list_style_pos` | function | `tests/test_css.c:4986` | `static void test_inline_list_style_pos(void **state)` |
+| `test_inline_min_max_height` | function | `tests/test_css.c:3125` | `static void test_inline_min_max_height(void **state)` |
+| `test_inline_min_width_height` | function | `tests/test_css.c:3098` | `static void test_inline_min_width_height(void **state)` |
+| `test_inline_mix_blend_mode` | function | `tests/test_css.c:4657` | `static void test_inline_mix_blend_mode(void **state)` |
+| `test_inline_object_fit` | function | `tests/test_css.c:4975` | `static void test_inline_object_fit(void **state)` |
+| `test_inline_object_position` | function | `tests/test_css.c:4954` | `static void test_inline_object_position(void **state)` |
+| `test_inline_outline_longhands` | function | `tests/test_css.c:4353` | `static void test_inline_outline_longhands(void **state)` |
+| `test_inline_outline_offset` | function | `tests/test_css.c:3244` | `static void test_inline_outline_offset(void **state)` |
+| `test_inline_overscroll_behavior` | function | `tests/test_css.c:5058` | `static void test_inline_overscroll_behavior(void **state)` |
+| `test_inline_pointer_events` | function | `tests/test_css.c:4482` | `static void test_inline_pointer_events(void **state)` |
+| `test_inline_print_forced_adjust` | function | `tests/test_css.c:4643` | `static void test_inline_print_forced_adjust(void **state)` |
+| `test_inline_resize` | function | `tests/test_css.c:5028` | `static void test_inline_resize(void **state)` |
+| `test_inline_scroll_behavior` | function | `tests/test_css.c:5038` | `static void test_inline_scroll_behavior(void **state)` |
+| `test_inline_tab_size` | function | `tests/test_css.c:3256` | `static void test_inline_tab_size(void **state)` |
+| `test_inline_table_layout` | function | `tests/test_css.c:4422` | `static void test_inline_table_layout(void **state)` |
+| `test_inline_text_align` | function | `tests/test_css.c:37` | `static void test_inline_text_align(void **state)` |
+| `test_inline_text_decoration` | function | `tests/test_css.c:116` | `static void test_inline_text_decoration(void **state)` |
+| `test_inline_text_decoration_color_style` | function | `tests/test_css.c:3159` | `static void test_inline_text_decoration_color_style(void **state)` |
+| `test_inline_text_decoration_thickness` | function | `tests/test_css.c:3188` | `static void test_inline_text_decoration_thickness(void **state)` |
+| `test_inline_text_rendering` | function | `tests/test_css.c:5003` | `static void test_inline_text_rendering(void **state)` |
+| `test_inline_touch_action` | function | `tests/test_css.c:5046` | `static void test_inline_touch_action(void **state)` |
+| `test_inline_transform_independent_cascade_combines` | function | `tests/test_css.c:4922` | `static void test_inline_transform_independent_cascade_combines(void **state)` |
+| `test_inline_transform_rotate` | function | `tests/test_css.c:4771` | `static void test_inline_transform_rotate(void **state)` |
+| `test_inline_transform_scale` | function | `tests/test_css.c:4731` | `static void test_inline_transform_scale(void **state)` |
+| `test_inline_transform_skew` | function | `tests/test_css.c:4801` | `static void test_inline_transform_skew(void **state)` |
+| `test_inline_transform_translate` | function | `tests/test_css.c:4680` | `static void test_inline_transform_translate(void **state)` |
+| `test_inline_user_select` | function | `tests/test_css.c:4450` | `static void test_inline_user_select(void **state)` |
+| `test_justify_self_parsed` | function | `tests/test_css.c:1997` | `static void test_justify_self_parsed(void **state)` |
+| `test_keyframes_content_does_not_crash` | function | `tests/test_css.c:1130` | `static void test_keyframes_content_does_not_crash(void **state)` |
+| `test_keyframes_overflow_skips_block_not_sheet` | function | `tests/test_css.c:5528` | `static void test_keyframes_overflow_skips_block_not_sheet(void **state)` |
+| `test_layer_block_applies` | function | `tests/test_css.c:1067` | `static void test_layer_block_applies(void **state)` |
+| `test_layer_important_reverses` | function | `tests/test_css.c:1102` | `static void test_layer_important_reverses(void **state)` |
+| `test_layer_inline_still_wins` | function | `tests/test_css.c:1112` | `static void test_layer_inline_still_wins(void **state)` |
+| `test_layer_lists_take_first` | function | `tests/test_css.c:3791` | `static void test_layer_lists_take_first(void **state)` |
+| `test_layer_order_statement` | function | `tests/test_css.c:1089` | `static void test_layer_order_statement(void **state)` |
+| `test_layout_sheet_cascade_and_unset` | function | `tests/test_css.c:4317` | `static void test_layout_sheet_cascade_and_unset(void **state)` |
+| `test_letter_word_spacing` | function | `tests/test_css.c:178` | `static void test_letter_word_spacing(void **state)` |
+| `test_linear_gradient_basic` | function | `tests/test_css.c:543` | `static void test_linear_gradient_basic(void **state)` |
+| `test_linear_gradient_directions` | function | `tests/test_css.c:554` | `static void test_linear_gradient_directions(void **state)` |
+| `test_linear_gradient_fail_closed` | function | `tests/test_css.c:591` | `static void test_linear_gradient_fail_closed(void **state)` |
+| `test_linear_gradient_positions_emitted` | function | `tests/test_css.c:5340` | `static void test_linear_gradient_positions_emitted(void **state)` |
+| `test_linear_gradient_stops` | function | `tests/test_css.c:573` | `static void test_linear_gradient_stops(void **state)` |
+| `test_list_style_type` | function | `tests/test_css.c:266` | `static void test_list_style_type(void **state)` |
+| `test_logical_borders` | function | `tests/test_css.c:3720` | `static void test_logical_borders(void **state)` |
+| `test_logical_inset_and_sizes` | function | `tests/test_css.c:5138` | `static void test_logical_inset_and_sizes(void **state)` |
+| `test_logical_margin_padding` | function | `tests/test_css.c:5112` | `static void test_logical_margin_padding(void **state)` |
+| `test_malformed_inline_no_crash` | function | `tests/test_css.c:737` | `static void test_malformed_inline_no_crash(void **state)` |
+| `test_mask_image_url_and_geometry` | function | `tests/test_css.c:3870` | `static void test_mask_image_url_and_geometry(void **state)` |
+| `test_math_clamp` | function | `tests/test_css.c:5088` | `static void test_math_clamp(void **state)` |
+| `test_math_min_max_top_level` | function | `tests/test_css.c:5076` | `static void test_math_min_max_top_level(void **state)` |
+| `test_math_nested_in_calc` | function | `tests/test_css.c:5098` | `static void test_math_nested_in_calc(void **state)` |
 | `test_media_and_or` | function | `tests/test_css.c:2728` | `static void test_media_and_or(void **state)` |
 | `test_media_prefers_color_scheme` | function | `tests/test_css.c:2697` | `static void test_media_prefers_color_scheme(void **state)` |
-| `test_media_query_length_honours_its_unit` | function | `tests/test_css.c:5544` | `static void test_media_query_length_honours_its_unit(void **state)` |
+| `test_media_query_length_honours_its_unit` | function | `tests/test_css.c:5712` | `static void test_media_query_length_honours_its_unit(void **state)` |
 | `test_media_range_syntax_applies` | function | `tests/test_css.c:1020` | `static void test_media_range_syntax_applies(void **state)` |
 | `test_media_screen_and_print` | function | `tests/test_css.c:2678` | `static void test_media_screen_and_print(void **state)` |
 | `test_media_width_queries` | function | `tests/test_css.c:2713` | `static void test_media_width_queries(void **state)` |
@@ -14,7 +73,7 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_opacity` | function | `tests/test_css.c:215` | `static void test_opacity(void **state)` |
 | `test_overflow` | function | `tests/test_css.c:3353` | `static void test_overflow(void **state)` |
 | `test_parse_null_args` | function | `tests/test_css.c:2762` | `static void test_parse_null_args(void **state)` |
-| `test_place_shorthands` | function | `tests/test_css.c:4992` | `static void test_place_shorthands(void **state)` |
+| `test_place_shorthands` | function | `tests/test_css.c:5160` | `static void test_place_shorthands(void **state)` |
 | `test_placeholder_pseudo_element` | function | `tests/test_css.c:3664` | `static void test_placeholder_pseudo_element(void **state)` |
 | `test_position_and_insets` | function | `tests/test_css.c:3281` | `static void test_position_and_insets(void **state)` |
 | `test_property_initial_value` | function | `tests/test_css.c:1370` | `static void test_property_initial_value(void **state)` |
@@ -48,14 +107,14 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_pseudo_target` | function | `tests/test_css.c:2346` | `static void test_pseudo_target(void **state)` |
 | `test_pseudo_unknown_drops_selector` | function | `tests/test_css.c:1762` | `static void test_pseudo_unknown_drops_selector(void **state)` |
 | `test_pseudo_with_sibling_combinator` | function | `tests/test_css.c:2250` | `static void test_pseudo_with_sibling_combinator(void **state)` |
-| `test_rem_rebase_62_5_percent_idiom` | function | `tests/test_css.c:5529` | `static void test_rem_rebase_62_5_percent_idiom(void **state)` |
-| `test_rem_rebase_absent_root_declaration_is_byte_identical` | function | `tests/test_css.c:5458` | `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)` |
-| `test_rem_rebase_applies_to_box_lengths` | function | `tests/test_css.c:5444` | `static void test_rem_rebase_applies_to_box_lengths(void **state)` |
-| `test_rem_rebase_honours_root_pseudo_class` | function | `tests/test_css.c:5470` | `static void test_rem_rebase_honours_root_pseudo_class(void **state)` |
-| `test_rem_rebase_ignores_identifier_lookalikes` | function | `tests/test_css.c:5514` | `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)` |
-| `test_rem_rebase_leaves_quoted_text_alone` | function | `tests/test_css.c:5503` | `static void test_rem_rebase_leaves_quoted_text_alone(void **state)` |
-| `test_rem_rebase_skips_at_rule_prelude` | function | `tests/test_css.c:5480` | `static void test_rem_rebase_skips_at_rule_prelude(void **state)` |
-| `test_rem_rebased_on_root_font_size` | function | `tests/test_css.c:5432` | `static void test_rem_rebased_on_root_font_size(void **state)` |
+| `test_rem_rebase_62_5_percent_idiom` | function | `tests/test_css.c:5697` | `static void test_rem_rebase_62_5_percent_idiom(void **state)` |
+| `test_rem_rebase_absent_root_declaration_is_byte_identical` | function | `tests/test_css.c:5626` | `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)` |
+| `test_rem_rebase_applies_to_box_lengths` | function | `tests/test_css.c:5612` | `static void test_rem_rebase_applies_to_box_lengths(void **state)` |
+| `test_rem_rebase_honours_root_pseudo_class` | function | `tests/test_css.c:5638` | `static void test_rem_rebase_honours_root_pseudo_class(void **state)` |
+| `test_rem_rebase_ignores_identifier_lookalikes` | function | `tests/test_css.c:5682` | `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)` |
+| `test_rem_rebase_leaves_quoted_text_alone` | function | `tests/test_css.c:5671` | `static void test_rem_rebase_leaves_quoted_text_alone(void **state)` |
+| `test_rem_rebase_skips_at_rule_prelude` | function | `tests/test_css.c:5648` | `static void test_rem_rebase_skips_at_rule_prelude(void **state)` |
+| `test_rem_rebased_on_root_font_size` | function | `tests/test_css.c:5600` | `static void test_rem_rebased_on_root_font_size(void **state)` |
 | `test_resolve_el_inline_only` | function | `tests/test_css.c:2378` | `static void test_resolve_el_inline_only(void **state)` |
 | `test_resolve_null_safe` | function | `tests/test_css.c:2772` | `static void test_resolve_null_safe(void **state)` |
 | `test_selector_escape_inside_not` | function | `tests/test_css.c:1178` | `static void test_selector_escape_inside_not(void **state)` |
@@ -72,24 +131,24 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_supports_collects_custom_props` | function | `tests/test_css.c:1057` | `static void test_supports_collects_custom_props(void **state)` |
 | `test_supports_true_block_applies` | function | `tests/test_css.c:1043` | `static void test_supports_true_block_applies(void **state)` |
 | `test_svg_stroke_and_fill_none` | function | `tests/test_css.c:3738` | `static void test_svg_stroke_and_fill_none(void **state)` |
-| `test_table_sheet_cascade` | function | `tests/test_css.c:4325` | `static void test_table_sheet_cascade(void **state)` |
+| `test_table_sheet_cascade` | function | `tests/test_css.c:4493` | `static void test_table_sheet_cascade(void **state)` |
 | `test_text_decoration_cascade` | function | `tests/test_css.c:1499` | `static void test_text_decoration_cascade(void **state)` |
 | `test_text_decoration_wide_keyword_is_none` | function | `tests/test_css.c:1245` | `static void test_text_decoration_wide_keyword_is_none(void **state)` |
 | `test_text_ext_cascade_and_important` | function | `tests/test_css.c:280` | `static void test_text_ext_cascade_and_important(void **state)` |
-| `test_text_fill_color` | function | `tests/test_css.c:5100` | `static void test_text_fill_color(void **state)` |
+| `test_text_fill_color` | function | `tests/test_css.c:5268` | `static void test_text_fill_color(void **state)` |
 | `test_text_indent` | function | `tests/test_css.c:246` | `static void test_text_indent(void **state)` |
-| `test_text_overflow_and_word_break` | function | `tests/test_css.c:3797` | `static void test_text_overflow_and_word_break(void **state)` |
+| `test_text_overflow_and_word_break` | function | `tests/test_css.c:3965` | `static void test_text_overflow_and_word_break(void **state)` |
 | `test_text_shadow` | function | `tests/test_css.c:193` | `static void test_text_shadow(void **state)` |
 | `test_text_transform` | function | `tests/test_css.c:164` | `static void test_text_transform(void **state)` |
 | `test_text_wrap_balance` | function | `tests/test_css.c:3753` | `static void test_text_wrap_balance(void **state)` |
-| `test_transform_origin` | function | `tests/test_css.c:4712` | `static void test_transform_origin(void **state)` |
-| `test_transform_z_identity` | function | `tests/test_css.c:3762` | `static void test_transform_z_identity(void **state)` |
+| `test_transform_origin` | function | `tests/test_css.c:4880` | `static void test_transform_origin(void **state)` |
+| `test_transform_z_identity` | function | `tests/test_css.c:3928` | `static void test_transform_z_identity(void **state)` |
 | `test_transition_comma_takes_first` | function | `tests/test_css.c:3441` | `static void test_transition_comma_takes_first(void **state)` |
 | `test_tweener_align` | function | `tests/test_css.c:3473` | `static void test_tweener_align(void **state)` |
 | `test_tweener_flex_factors` | function | `tests/test_css.c:3455` | `static void test_tweener_flex_factors(void **state)` |
 | `test_tweener_flex_order` | function | `tests/test_css.c:3449` | `static void test_tweener_flex_order(void **state)` |
 | `test_tweener_pack_vocab` | function | `tests/test_css.c:3463` | `static void test_tweener_pack_vocab(void **state)` |
-| `test_ua_heading_font_size` | function | `tests/test_css.c:3920` | `static void test_ua_heading_font_size(void **state)` |
+| `test_ua_heading_font_size` | function | `tests/test_css.c:4088` | `static void test_ua_heading_font_size(void **state)` |
 | `test_unknown_props_ignored` | function | `tests/test_css.c:534` | `static void test_unknown_props_ignored(void **state)` |
 | `test_unlayered_beats_layer_despite_specificity` | function | `tests/test_css.c:1079` | `static void test_unlayered_beats_layer_despite_specificity(void **state)` |
 | `test_url_value_dropped` | function | `tests/test_css.c:505` | `static void test_url_value_dropped(void **state)` |
@@ -98,10 +157,11 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_viewport_units_in_calc_and_mathfn` | function | `tests/test_css.c:3015` | `static void test_viewport_units_in_calc_and_mathfn(void **state)` |
 | `test_viewport_units_junk_fail_closed` | function | `tests/test_css.c:3031` | `static void test_viewport_units_junk_fail_closed(void **state)` |
 | `test_visibility` | function | `tests/test_css.c:3336` | `static void test_visibility(void **state)` |
-| `test_vw_resolves_against_render_width` | function | `tests/test_css.c:5391` | `static void test_vw_resolves_against_render_width(void **state)` |
+| `test_vw_resolves_against_render_width` | function | `tests/test_css.c:5559` | `static void test_vw_resolves_against_render_width(void **state)` |
 | `test_white_space` | function | `tests/test_css.c:255` | `static void test_white_space(void **state)` |
-| `test_white_space_break_spaces` | function | `tests/test_css.c:5054` | `static void test_white_space_break_spaces(void **state)` |
-| `test_wide_keyword_resets_earlier_loser` | function | `tests/test_css.c:4042` | `static void test_wide_keyword_resets_earlier_loser(void **state)` |
+| `test_white_space_break_spaces` | function | `tests/test_css.c:5222` | `static void test_white_space_break_spaces(void **state)` |
+| `test_wide_keyword_resets_earlier_loser` | function | `tests/test_css.c:4210` | `static void test_wide_keyword_resets_earlier_loser(void **state)` |
+| `test_z_index_auto_claims_slot` | function | `tests/test_css.c:3771` | `static void test_z_index_auto_claims_slot(void **state)` |
 | `main` | function | `tests/test_css_atrule.c:102` | `int main(void)` |
 | `sup` | function | `tests/test_css_atrule.c:30` | `static int sup(const char *c)` |
 | `test_boolean_combinators` | function | `tests/test_css_atrule.c:41` | `static void test_boolean_combinators(void **state)` |
@@ -265,19 +325,21 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_unitless` | function | `tests/test_css_length.c:34` | `static void test_unitless(void **state)` |
 | `test_viewport_units` | function | `tests/test_css_length.c:104` | `static void test_viewport_units(void **state)` |
 | `has` | function | `tests/test_css_mask.c:14` | `static int has(const css_decl *d, int n, int prop)` |
-| `main` | function | `tests/test_css_mask.c:200` | `int main(void)` |
+| `main` | function | `tests/test_css_mask.c:202` | `int main(void)` |
 | `test_clip_property` | function | `tests/test_css_mask.c:122` | `static void test_clip_property(void **state)` |
 | `test_composite_vocabularies` | function | `tests/test_css_mask.c:102` | `static void test_composite_vocabularies(void **state)` |
-| `test_encode_decode_roundtrip` | function | `tests/test_css_mask.c:162` | `static void test_encode_decode_roundtrip(void **state)` |
+| `test_encode_decode_roundtrip` | function | `tests/test_css_mask.c:164` | `static void test_encode_decode_roundtrip(void **state)` |
 | `test_fade_gradient` | function | `tests/test_css_mask.c:32` | `static void test_fade_gradient(void **state)` |
 | `test_gradient_border_technique` | function | `tests/test_css_mask.c:77` | `static void test_gradient_border_technique(void **state)` |
-| `test_none_resets` | function | `tests/test_css_mask.c:149` | `static void test_none_resets(void **state)` |
+| `test_none_resets` | function | `tests/test_css_mask.c:151` | `static void test_none_resets(void **state)` |
 | `test_prop_names` | function | `tests/test_css_mask.c:19` | `static void test_prop_names(void **state)` |
-| `test_split_never_overruns` | function | `tests/test_css_mask.c:185` | `static void test_split_never_overruns(void **state)` |
+| `test_split_never_overruns` | function | `tests/test_css_mask.c:187` | `static void test_split_never_overruns(void **state)` |
 | `test_unsupported_fails_closed` | function | `tests/test_css_mask.c:134` | `static void test_unsupported_fails_closed(void **state)` |
 | `val_of` | function | `tests/test_css_mask.c:10` | `static int val_of(const css_decl *d, int n, int prop, int def)` |
 | `m` | function | `tests/test_css_mq.c:13` | `static int m(const char *q)` |
-| `main` | function | `tests/test_css_mq.c:91` | `int main(void)` |
+| `main` | function | `tests/test_css_mq.c:116` | `int main(void)` |
+| `surely` | function | `tests/test_css_mq.c:92` | `static int surely(const char *q)` |
+| `test_container_surely` | function | `tests/test_css_mq.c:95` | `static void test_container_surely(void **state)` |
 | `test_desktop_identity` | function | `tests/test_css_mq.c:56` | `static void test_desktop_identity(void **state)` |
 | `test_fail_closed` | function | `tests/test_css_mq.c:78` | `static void test_fail_closed(void **state)` |
 | `test_not_or` | function | `tests/test_css_mq.c:44` | `static void test_not_or(void **state)` |
@@ -434,67 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_complete_split` | function | `tests/test_fb_cmdline.c:50` | `static void test_complete_split(void **state)` |
 | `test_filter` | function | `tests/test_fb_cmdline.c:98` | `static void test_filter(void **state)` |
 | `test_history_is_bounded_and_push_returns_to_live` | function | `tests/test_fb_cmdline.c:31` | `static void test_history_is_bounded_and_push_returns_to_live(void **state)` |
-| `test_history_walks_and_restores_the_draft` | function | `tests/test_fb_cmdline.c:11` | `static void test_history_walks_and_restores_the_draft(void **state)` |
-| `test_names_expr_quotes_the_base` | function | `tests/test_fb_cmdline.c:69` | `static void test_names_expr_quotes_the_base(void **state)` |
-| `test_pick_common_prefix_and_list` | function | `tests/test_fb_cmdline.c:79` | `static void test_pick_common_prefix_and_list(void **state)` |
-| `assert_true` | function | `tests/test_fb_panes.c:91` | `assert_true(strncmp(out, "(function(q)` |
-| `main` | function | `tests/test_fb_panes.c:167` | `int main(void)` |
-| `test_dom_and_storage_tabs` | function | `tests/test_fb_panes.c:127` | `static void test_dom_and_storage_tabs(void **state)` |
-| `test_expr_per_tab` | function | `tests/test_fb_panes.c:83` | `static void test_expr_per_tab(void **state)` |
-| `test_expr_selector_cannot_escape_the_literal` | function | `tests/test_fb_panes.c:144` | `static void test_expr_selector_cannot_escape_the_literal(void **state)` |
-| `test_hit_test_inverts_the_layout` | function | `tests/test_fb_panes.c:38` | `static void test_hit_test_inverts_the_layout(void **state)` |
-| `test_labels_and_names` | function | `tests/test_fb_panes.c:9` | `static void test_labels_and_names(void **state)` |
-| `test_net_pane_shows_timing_and_headers` | function | `tests/test_fb_panes.c:100` | `static void test_net_pane_shows_timing_and_headers(void **state)` |
-| `test_profile_and_throws_tabs` | function | `tests/test_fb_panes.c:112` | `static void test_profile_and_throws_tabs(void **state)` |
-| `test_quote_escapes_and_fails_closed` | function | `tests/test_fb_panes.c:57` | `static void test_quote_escapes_and_fails_closed(void **state)` |
-| `test_wrap_is_cyclic_and_total` | function | `tests/test_fb_panes.c:28` | `static void test_wrap_is_cyclic_and_total(void **state)` |
-| `article` | function | `tests/test_flex_layout.c:378` | `* article (slashdot-cols probe: score 13.41). */  static void test_float_pack_m_holy_grail_pull_u...` |
-| `assert_item` | function | `tests/test_flex_layout.c:26` | `static void assert_item(fx_result r, double pos, double size)` |
-| `main` | function | `tests/test_flex_layout.c:1196` | `int main(void)` |
-| `test_area_hash_basics` | function | `tests/test_flex_layout.c:808` | `static void test_area_hash_basics(void **state)` |
-| `test_areas_non_rectangular_is_rejected` | function | `tests/test_flex_layout.c:886` | `static void test_areas_non_rectangular_is_rejected(void **state)` |
-| `test_areas_null_cell` | function | `tests/test_flex_layout.c:854` | `static void test_areas_null_cell(void **state)` |
-| `test_areas_parse_and_resolve` | function | `tests/test_flex_layout.c:820` | `static void test_areas_parse_and_resolve(void **state)` |
-| `test_areas_parse_bounds` | function | `tests/test_flex_layout.c:918` | `static void test_areas_parse_bounds(void **state)` |
-| `test_areas_parse_fails_closed` | function | `tests/test_flex_layout.c:900` | `static void test_areas_parse_fails_closed(void **state)` |
-| `test_areas_rect_spans_rows_and_cols` | function | `tests/test_flex_layout.c:869` | `static void test_areas_rect_spans_rows_and_cols(void **state)` |
-| `test_auto_margins_push_right_and_center` | function | `tests/test_flex_layout.c:1079` | `static void test_auto_margins_push_right_and_center(void **state)` |
-| `test_auto_min_size_is_min_content` | function | `tests/test_flex_layout.c:669` | `static void test_auto_min_size_is_min_content(void **state)` |
-| `test_autofill_count` | function | `tests/test_flex_layout.c:158` | `static void test_autofill_count(void **state)` |
-| `test_column_place_auto_margins` | function | `tests/test_flex_layout.c:1155` | `static void test_column_place_auto_margins(void **state)` |
-| `test_column_place_stack_and_justify` | function | `tests/test_flex_layout.c:1112` | `static void test_column_place_stack_and_justify(void **state)` |
-| `test_cross_offset` | function | `tests/test_flex_layout.c:1141` | `static void test_cross_offset(void **state)` |
-| `test_flex_errors` | function | `tests/test_flex_layout.c:173` | `static void test_flex_errors(void **state)` |
-| `test_flex_zero_items_is_noop` | function | `tests/test_flex_layout.c:168` | `static void test_flex_zero_items_is_noop(void **state)` |
-| `test_float_insets_both_sides_take_the_tightest` | function | `tests/test_flex_layout.c:511` | `static void test_float_insets_both_sides_take_the_tightest(void **state)` |
-| `test_float_insets_edges` | function | `tests/test_flex_layout.c:548` | `static void test_float_insets_edges(void **state)` |
-| `test_float_insets_left_overlapping_line` | function | `tests/test_flex_layout.c:474` | `static void test_float_insets_left_overlapping_line(void **state)` |
-| `test_float_insets_line_past_bottom_is_full_width` | function | `tests/test_flex_layout.c:484` | `static void test_float_insets_line_past_bottom_is_full_width(void **state)` |
-| `test_float_insets_never_starve_the_line` | function | `tests/test_flex_layout.c:526` | `static void test_float_insets_never_starve_the_line(void **state)` |
-| `test_float_insets_right` | function | `tests/test_flex_layout.c:501` | `static void test_float_insets_right(void **state)` |
-| `test_float_pack_edges` | function | `tests/test_flex_layout.c:568` | `static void test_float_pack_edges(void **state)` |
-| `test_float_pack_left` | function | `tests/test_flex_layout.c:338` | `static void test_float_pack_left(void **state)` |
-| `test_float_pack_left_and_right` | function | `tests/test_flex_layout.c:349` | `static void test_float_pack_left_and_right(void **state)` |
-| `test_float_pack_m_errors` | function | `tests/test_flex_layout.c:449` | `static void test_float_pack_m_errors(void **state)` |
-| `test_float_pack_m_positive_margin_widens` | function | `tests/test_flex_layout.c:417` | `static void test_float_pack_m_positive_margin_widens(void **state)` |
-| `test_float_pack_m_right_float_negative_margin` | function | `tests/test_flex_layout.c:433` | `static void test_float_pack_m_right_float_negative_margin(void **state)` |
-| `test_float_pack_m_zero_margins_match_wrap` | function | `tests/test_flex_layout.c:397` | `static void test_float_pack_m_zero_margins_match_wrap(void **state)` |
-| `test_float_pack_two_right` | function | `tests/test_flex_layout.c:361` | `static void test_float_pack_two_right(void **state)` |
-| `test_float_pack_wrap_errors` | function | `tests/test_flex_layout.c:644` | `static void test_float_pack_wrap_errors(void **state)` |
-| `test_float_pack_wrap_fits_matches_v1` | function | `tests/test_flex_layout.c:598` | `static void test_float_pack_wrap_fits_matches_v1(void **state)` |
-| `test_float_pack_wrap_full_width_stack` | function | `tests/test_flex_layout.c:584` | `static void test_float_pack_wrap_full_width_stack(void **state)` |
-| `test_float_pack_wrap_partial` | function | `tests/test_flex_layout.c:621` | `static void test_float_pack_wrap_partial(void **state)` |
-| `test_gap_start` | function | `tests/test_flex_layout.c:68` | `static void test_gap_start(void **state)` |
-| `test_grid_cell` | function | `tests/test_flex_layout.c:214` | `static void test_grid_cell(void **state)` |
-| `test_grid_column_count_for_column_flow` | function | `tests/test_flex_layout.c:145` | `static void test_grid_column_count_for_column_flow(void **state)` |
-| `test_grid_columns` | function | `tests/test_flex_layout.c:185` | `static void test_grid_columns(void **state)` |
-| `test_grid_columns_edges` | function | `tests/test_flex_layout.c:204` | `static void test_grid_columns_edges(void **state)` |
-| `test_grid_columns_too_narrow_clamps_to_zero` | function | `tests/test_flex_layout.c:197` | `static void test_grid_columns_too_narrow_clamps_to_zero(void **state)` |
-| `test_grid_line_parse` | function | `tests/test_flex_layout.c:975` | `static void test_grid_line_parse(void **state)` |
-| `test_grid_line_resolve_table` | function | `tests/test_flex_layout.c:994` | `static void test_grid_line_resolve_table(void **state)` |
-| `test_grid_line_side` | function | `tests/test_flex_layout.c:947` | `static void test_grid_line_side(void **state)` |
-| `test_grid_place_explicit_out_of_range_clamps` | function | `tests/test_flex_layout.c:1068` | `static void test_grid_place_explicit_out_of_range_clamps(void **state)` |
-| `test_grid_place_fixed_col_auto_row` | function | `tests/test_flex_layout.c:1025` | `static void test_grid_place_fixed_col_auto_row(void **state)` |
-| `test_grid_place_null_fixed_is_unchanged` | function | `tests/test_flex_layout.c:1056` | `static void test_grid_place_null_fixed_is_unchanged(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

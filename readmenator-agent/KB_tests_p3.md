@@ -1,6 +1,25 @@
 # Subsystem: tests (page 3 of 8)
 Previous: [KB_tests_p2.md](KB_tests_p2.md)
 
+## tests/test_css_counter.c
+- Doc: Suite for css_counter (spec/css_counter.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `h` (function, line 10) `static unsigned h(const char *s)`
+  - `test_parse_decls_defaults_and_values` (function, line 12) `static void test_parse_decls_defaults_and_values(void **state)`
+  - `test_parse_decls_fails_closed` (function, line 25) `static void test_parse_decls_fails_closed(void **state)`
+  - `test_format_styles` (function, line 37) `static void test_format_styles(void **state)`
+  - `attr_of` (function, line 54) `static const char *attr_of(void *ctx, const char *name)`
+  - `test_content_marker_roundtrip` (function, line 59) `static void test_content_marker_roundtrip(void **state)`
+  - `test_content_marker_malformed` (function, line 80) `static void test_content_marker_malformed(void **state)`
+  - `test_scope_siblings_and_leave` (function, line 92) `static void test_scope_siblings_and_leave(void **state)`
+  - `test_scope_nested_counters_join` (function, line 111) `static void test_scope_nested_counters_join(void **state)`
+  - `test_reset_by_sibling_replaces_not_nests` (function, line 131) `static void test_reset_by_sibling_replaces_not_nests(void **state)`
+  - `test_state_is_bounded` (function, line 146) `static void test_state_is_bounded(void **state)`
+  - `main` (function, line 160) `int main(void)`
+- Depends on: `include/css_counter.h`
+
 ## tests/test_css_drops.c
 - Doc: Suite for the parser drop log (spec/css_drops.md).
 - Layer: testing
@@ -125,13 +144,14 @@ static void test_leading_b...`
   - `test_composite_vocabularies` (function, line 102) `static void test_composite_vocabularies(void **state)`
   - `test_clip_property` (function, line 122) `static void test_clip_property(void **state)`
   - `test_unsupported_fails_closed` (function, line 134) `static void test_unsupported_fails_closed(void **state)`
-  - `test_none_resets` (function, line 149) `static void test_none_resets(void **state)`
-  - `test_encode_decode_roundtrip` (function, line 162) `static void test_encode_decode_roundtrip(void **state)`
-  - `test_split_never_overruns` (function, line 185) `static void test_split_never_overruns(void **state)`
-  - `main` (function, line 200) `int main(void)`
+  - `test_none_resets` (function, line 151) `static void test_none_resets(void **state)`
+  - `test_encode_decode_roundtrip` (function, line 164) `static void test_encode_decode_roundtrip(void **state)`
+  - `test_split_never_overruns` (function, line 187) `static void test_split_never_overruns(void **state)`
+  - `main` (function, line 202) `int main(void)`
 - Depends on: `include/css_mask.h`
 
 ## tests/test_css_mq.c
+- Doc: test_container_surely: assert_false(m("(width >> 3px)")); assert_false(m("(width >= )"))...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -141,7 +161,9 @@ static void test_leading_b...`
   - `test_not_or` (function, line 44) `static void test_not_or(void **state)`
   - `test_desktop_identity` (function, line 56) `static void test_desktop_identity(void **state)`
   - `test_fail_closed` (function, line 78) `static void test_fail_closed(void **state)`
-  - `main` (function, line 91) `int main(void)`
+  - `surely` (function, line 92) `static int surely(const char *q)`
+  - `test_container_surely` (function, line 95) `static void test_container_surely(void **state)`
+  - `main` (function, line 116) `int main(void)`
 - Depends on: `include/css_mq.h`
 
 ## tests/test_css_text.c
@@ -458,32 +480,6 @@ static void test_float_pack_m_holy_grail_pull_u...`
   - `main` (function, line 1196) `int main(void)`
   - `to` (function, line 296) `* jumps to (1,0);`
 - Depends on: `include/flex_layout.h`
-
-## tests/test_form.c
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_encode_basic` (function, line 24) `static void test_encode_basic(void **state)`
-  - `test_encode_space_and_reserved` (function, line 34) `static void test_encode_space_and_reserved(void **state)`
-  - `test_encode_unreserved_kept` (function, line 43) `static void test_encode_unreserved_kept(void **state)`
-  - `test_encode_empty_and_nameless` (function, line 51) `static void test_encode_empty_and_nameless(void **state)`
-  - `test_encode_overflow_fails_closed` (function, line 59) `static void test_encode_overflow_fails_closed(void **state)`
-  - `test_encode_null_args` (function, line 67) `static void test_encode_null_args(void **state)`
-  - `test_get_relative_action_on_https_base` (function, line 78) `static void test_get_relative_action_on_https_base(void **state)`
-  - `test_get_absolute_https_action_ignores_base` (function, line 89) `static void test_get_absolute_https_action_ignores_base(void **state)`
-  - `test_get_empty_action_submits_to_base` (function, line 100) `static void test_get_empty_action_submits_to_base(void **state)`
-  - `test_get_replaces_existing_query` (function, line 109) `static void test_get_replaces_existing_query(void **state)`
-  - `test_get_action_cleaned_of_whitespace` (function, line 119) `static void test_get_action_cleaned_of_whitespace(void **state)`
-  - `test_post_builds_body` (function, line 130) `static void test_post_builds_body(void **state)`
-  - `test_block_http_downgrade` (function, line 145) `static void test_block_http_downgrade(void **state)`
-  - `test_block_foreign_scheme` (function, line 155) `static void test_block_foreign_scheme(void **state)`
-  - `test_block_relative_action_on_local_base` (function, line 164) `static void test_block_relative_action_on_local_base(void **state)`
-  - `test_block_too_many_fields` (function, line 173) `static void test_block_too_many_fields(void **state)`
-  - `test_block_null_field_name` (function, line 183) `static void test_block_null_field_name(void **state)`
-  - `test_build_null_args` (function, line 192) `static void test_build_null_args(void **state)`
-  - `test_get_no_fields_still_navigates` (function, line 199) `static void test_get_no_fields_still_navigates(void **state)`
-  - `main` (function, line 207) `int main(void)`
-- Depends on: `include/form.h`
 
 
 Next: [KB_tests_p4.md](KB_tests_p4.md)

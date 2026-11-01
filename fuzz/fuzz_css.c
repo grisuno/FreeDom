@@ -14,6 +14,7 @@
  */
 
 #include "css.h"
+#include "css_mq.h"
 #include "flex_layout.h"
 #include "css_select.h"
 
@@ -92,6 +93,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     if (buf == NULL) return 0;
     memcpy(buf, data, size);
     buf[size] = '\0';
+
+    /* The layout-free container-query gate (spec/css_mq.md) on the raw bytes. */
+    (void)cmq_container_surely(buf, size, 1000);
 
     /* Split into sheet \n inline (either field may be empty). */
     char *sheet_text = buf;

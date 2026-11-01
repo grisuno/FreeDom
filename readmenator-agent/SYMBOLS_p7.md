@@ -3,25 +3,59 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `cg_parse_radial_prelude` | function | `src/css_gradient.c:672` | `int cg_parse_radial_prelude(const char *seg, cg_radial *out)` |
-| `cg_radial_geometry` | function | `src/css_gradient.c:760` | `void cg_radial_geometry(const cg_radial *r, double w, double h,                         double *c...` |
-| `cg_radial_len_px` | function | `src/css_gradient.c:748` | `double cg_radial_len_px(int enc, double dim)` |
+| `cnt_parse_content` | function | `src/css_counter.c:286` | `int cnt_parse_content(const char *val, char *out, size_t cap)` |
+| `cnt_parse_decls` | function | `src/css_counter.c:59` | `int cnt_parse_decls(const char *val, int dflt, cnt_decl out[CNT_MAX_DECL])` |
+| `cnt_reset` | function | `src/css_counter.c:379` | `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n)` |
+| `cnt_resolve` | function | `src/css_counter.c:412` | `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx,          ...` |
+| `cnt_state` | struct | `src/css_counter.c:361` | `` |
+| `cnt_state_free` | function | `src/css_counter.c:367` | `void cnt_state_free(cnt_state *s)` |
+| `cnt_state_new` | function | `src/css_counter.c:366` | `cnt_state *cnt_state_new(void)` |
+| `has_counter_fn` | function | `src/css_counter.c:276` | `static int has_counter_fn(const char *v)` |
+| `is_ident_char` | function | `src/css_counter.c:32` | `static int is_ident_char(unsigned char c)` |
+| `is_ident_start` | function | `src/css_counter.c:29` | `static int is_ident_start(unsigned char c)` |
+| `is_ws` | function | `src/css_counter.c:27` | `static int is_ws(char c)` |
+| `put` | function | `src/css_counter.c:102` | `static size_t put(char *out, size_t cap, size_t o, const char *s)` |
+| `read_string` | function | `src/css_counter.c:201` | `static const char *read_string(const char *p, char *dst, size_t cap)` |
+| `sink` | struct | `src/css_counter.c:190` | `` |
+| `sk_char` | function | `src/css_counter.c:192` | `static void sk_char(sink *k, char c)` |
+| `sk_str` | function | `src/css_counter.c:196` | `static void sk_str(sink *k, const char *s)` |
+| `split_args` | function | `src/css_counter.c:238` | `static int split_args(const char *a, const char *b, char (*f)[CNT_STR_MAX], int max)` |
+| `style_of` | function | `src/css_counter.c:174` | `static int style_of(const char *name)` |
+| `top_of` | function | `src/css_counter.c:369` | `static cnt_inst *top_of(cnt_state *s, unsigned name)` |
+| `utf8_put` | function | `src/css_counter.c:107` | `static void utf8_put(char *buf, unsigned cp)` |
+| `valid_name` | function | `src/css_counter.c:45` | `static int valid_name(const char *s, size_t n)` |
+| `CG_RAD_FLOOR` | macro | `src/css_gradient.c:772` | `#define CG_RAD_FLOOR` |
+| `CG_RAD_PM_MAX` | macro | `src/css_gradient.c:615` | `#define CG_RAD_PM_MAX` |
+| `CG_RAD_PX_MAX` | macro | `src/css_gradient.c:616` | `#define CG_RAD_PX_MAX` |
+| `CG_RAD_TOKENS` | macro | `src/css_gradient.c:614` | `#define CG_RAD_TOKENS` |
+| `CG_SQRT2` | macro | `src/css_gradient.c:773` | `#define CG_SQRT2` |
+| `CSS_GRAD_STOPS_MAX` | function | `src/css_gradient.c:184` | `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when  * the gradient fai...` |
+| `bg_layer_tokens_ok` | function | `src/css_gradient.c:490` | `static int bg_layer_tokens_ok(const char *s)` |
+| `cg_dmax` | function | `src/css_gradient.c:776` | `static double cg_dmax(double a, double b)` |
+| `cg_dmin` | function | `src/css_gradient.c:775` | `static double cg_dmin(double a, double b)` |
+| `cg_expand_background` | function | `src/css_gradient.c:530` | `int cg_expand_background(const char *val, css_decl *dst, int cap,                              ch...` |
+| `cg_first_url` | function | `src/css_gradient.c:398` | `int cg_first_url(const char *val, char *out, size_t outcap)` |
+| `cg_parse_linear` | function | `src/css_gradient.c:815` | `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)` |
+| `cg_parse_num` | function | `src/css_gradient.c:13` | `static int cg_parse_num(const char *s, double *out, const char **endp)` |
+| `cg_parse_radial_prelude` | function | `src/css_gradient.c:690` | `int cg_parse_radial_prelude(const char *seg, cg_radial *out)` |
+| `cg_radial_geometry` | function | `src/css_gradient.c:778` | `void cg_radial_geometry(const cg_radial *r, double w, double h,                         double *c...` |
+| `cg_radial_len_px` | function | `src/css_gradient.c:766` | `double cg_radial_len_px(int enc, double dim)` |
 | `cg_wide_keyword` | function | `src/css_gradient.c:18` | `static int cg_wide_keyword(const char *v)` |
 | `conic_prelude` | function | `src/css_gradient.c:111` | `static int conic_prelude(const char *seg, int *angle)` |
-| `declaration` | function | `src/css_gradient.c:465` | `* declaration (fail closed);` |
-| `downstream` | function | `src/css_gradient.c:404` | `* happens downstream (render_doc.c), gated by caps.images like an <img>. */ int cg_expand_bg_imag...` |
+| `declaration` | function | `src/css_gradient.c:483` | `* declaration (fail closed);` |
+| `downstream` | function | `src/css_gradient.c:422` | `* happens downstream (render_doc.c), gated by caps.images like an <img>. */ int cg_expand_bg_imag...` |
 | `emit_gradient` | function | `src/css_gradient.c:291` | `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,                          ...` |
-| `emit_radial_geom` | function | `src/css_gradient.c:387` | `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` |
+| `emit_radial_geom` | function | `src/css_gradient.c:405` | `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` |
 | `find_gradient_call` | function | `src/css_gradient.c:77` | `static int find_gradient_call(const char *v, const char *fn, size_t *start,                      ...` |
-| `find_radial_gradient` | function | `src/css_gradient.c:348` | `static int find_radial_gradient(const char *v, size_t *start, size_t *end,                       ...` |
+| `find_radial_gradient` | function | `src/css_gradient.c:360` | `static int find_radial_gradient(const char *v, size_t *start, size_t *end,                       ...` |
 | `grad_stop_pos` | function | `src/css_gradient.c:153` | `static int grad_stop_pos(const char *pp, int conic, const char **endp)` |
 | `gradient` | function | `src/css_gradient.c:28` | `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,  * the whole decl...` |
-| `pool` | function | `src/css_gradient.c:400` | `* pool (gradient explicitly reset);` |
-| `rad_ieq` | function | `src/css_gradient.c:600` | `static int rad_ieq(const char *a, const char *b)` |
-| `rad_is_len_start` | function | `src/css_gradient.c:629` | `static int rad_is_len_start(const char *t)` |
-| `rad_len` | function | `src/css_gradient.c:608` | `static int rad_len(const char *tok, int *enc)` |
-| `rad_parse_position` | function | `src/css_gradient.c:643` | `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)` |
-| `rad_pos_kw` | function | `src/css_gradient.c:634` | `static int rad_pos_kw(const char *t, int *axis)` |
+| `pool` | function | `src/css_gradient.c:418` | `* pool (gradient explicitly reset);` |
+| `rad_ieq` | function | `src/css_gradient.c:618` | `static int rad_ieq(const char *a, const char *b)` |
+| `rad_is_len_start` | function | `src/css_gradient.c:647` | `static int rad_is_len_start(const char *t)` |
+| `rad_len` | function | `src/css_gradient.c:626` | `static int rad_len(const char *tok, int *enc)` |
+| `rad_parse_position` | function | `src/css_gradient.c:661` | `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)` |
+| `rad_pos_kw` | function | `src/css_gradient.c:652` | `static int rad_pos_kw(const char *t, int *axis)` |
 | `add_bucket` | function | `src/css_index.c:106` | `static void add_bucket(const cix_index *idx, uint64_t k, cix_run *runs, size_t *nr)` |
 | `build` | function | `src/css_index.c:47` | `static void build(const css_sel *arr, css_sel *const *ptrs, size_t n, cix_index *idx)` |
 | `cix_build` | function | `src/css_index.c:166` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx)` |
@@ -53,18 +87,18 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `cl_unit_scale` | function | `src/css_length.c:117` | `cl_status cl_unit_scale(const char *unit, size_t unit_len,                         const cl_ctx *...` |
 | `cl_viewport_scale` | function | `src/css_length.c:80` | `static int cl_viewport_scale(const char *u, size_t len, const cl_ctx *ctx, double *per)` |
 | `know` | function | `src/css_length.c:7` | `* this module cannot know (real font metrics, the viewport) arrives through  * cl_ctx rather than...` |
-| `CM_MAX_TOKS` | macro | `src/css_mask.c:9` | `#define CM_MAX_TOKS` |
-| `CM_TOK_MAX` | macro | `src/css_mask.c:8` | `#define CM_TOK_MAX` |
-| `clip_word` | function | `src/css_mask.c:104` | `static int clip_word(const char *t)` |
-| `cm_decode_layer` | function | `src/css_mask.c:45` | `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)` |
-| `cm_encode_layer` | function | `src/css_mask.c:24` | `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)` |
-| `cm_expand` | function | `src/css_mask.c:197` | `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)` |
-| `cm_is_mask_prop` | function | `src/css_mask.c:17` | `int cm_is_mask_prop(const char *prop)` |
-| `composite_word` | function | `src/css_mask.c:90` | `static int composite_word(const char *t, int webkit)` |
-| `emit_layers` | function | `src/css_mask.c:130` | `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)` |
-| `ieq` | function | `src/css_mask.c:11` | `static int ieq(const char *a, const char *b)` |
-| `image_layer` | function | `src/css_mask.c:112` | `static int image_layer(const char *tok, cm_layer *l)` |
-| `split` | function | `src/css_mask.c:63` | `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)` |
+| `CM_MAX_TOKS` | macro | `src/css_mask.c:11` | `#define CM_MAX_TOKS` |
+| `CM_TOK_MAX` | macro | `src/css_mask.c:10` | `#define CM_TOK_MAX` |
+| `clip_word` | function | `src/css_mask.c:106` | `static int clip_word(const char *t)` |
+| `cm_decode_layer` | function | `src/css_mask.c:47` | `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)` |
+| `cm_encode_layer` | function | `src/css_mask.c:26` | `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)` |
+| `cm_expand` | function | `src/css_mask.c:201` | `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)` |
+| `cm_is_mask_prop` | function | `src/css_mask.c:19` | `int cm_is_mask_prop(const char *prop)` |
+| `composite_word` | function | `src/css_mask.c:92` | `static int composite_word(const char *t, int webkit)` |
+| `emit_layers` | function | `src/css_mask.c:132` | `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)` |
+| `ieq` | function | `src/css_mask.c:13` | `static int ieq(const char *a, const char *b)` |
+| `image_layer` | function | `src/css_mask.c:114` | `static int image_layer(const char *tok, cm_layer *l)` |
+| `split` | function | `src/css_mask.c:65` | `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)` |
 | `CMQ_CM_PER_IN` | macro | `src/css_mq.c:23` | `#define CMQ_CM_PER_IN` |
 | `CMQ_COLOR_BITS` | macro | `src/css_mq.c:21` | `#define CMQ_COLOR_BITS` |
 | `CMQ_DEVICE_H` | macro | `src/css_mq.c:19` | `#define CMQ_DEVICE_H` |
@@ -75,6 +109,7 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `and3` | function | `src/css_mq.c:66` | `static int and3(int a, int b)` |
 | `bool_ctx` | function | `src/css_mq.c:229` | `static int bool_ctx(const fval *v)` |
 | `cmp_op` | function | `src/css_mq.c:206` | `static int cmp_op(double lhs, int op, double rhs)` |
+| `cmq_container_surely` | function | `src/css_mq.c:489` | `int cmq_container_surely(const char *s, size_t len, int max_width)` |
 | `cmq_matches` | function | `src/css_mq.c:458` | `int cmq_matches(const char *s, size_t len, const cmq_env *env)` |
 | `copy_trim_lower` | function | `src/css_mq.c:83` | `static int copy_trim_lower(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
 | `eval_cond` | function | `src/css_mq.c:380` | `static int eval_cond(mq_cur *c, int depth)` |
@@ -86,6 +121,7 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `feature_of` | function | `src/css_mq.c:106` | `static fval feature_of(const char *name, const cmq_env *env)` |
 | `flip_op` | function | `src/css_mq.c:218` | `static int flip_op(int op)` |
 | `fval` | struct | `src/css_mq.c:96` | `` |
+| `has_word` | function | `src/css_mq.c:479` | `static int has_word(const char *t, const char *w)` |
 | `is_ident_ch` | function | `src/css_mq.c:39` | `static int is_ident_ch(char c)` |
 | `is_space` | function | `src/css_mq.c:35` | `static int is_space(char c)` |
 | `kind` | type_alias | `src/css_mq.c:95` | `typedef struct fval { fv_kind kind;` |
@@ -139,23 +175,23 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `simple_pseudo_kind` | function | `src/css_select.c:439` | `static int simple_pseudo_kind(const char *nm)` |
 | `sub_sel_matches` | function | `src/css_select.c:830` | `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)` |
 | `take_sub_arg` | function | `src/css_select.c:295` | `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);` |
-| `ct_emit_spacing` | function | `src/css_text.c:309` | `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)` |
-| `ct_expand_shadow` | function | `src/css_text.c:322` | `int ct_expand_shadow(const char *val, css_decl *dst, int cap)` |
+| `ct_emit_spacing` | function | `src/css_text.c:344` | `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)` |
+| `ct_expand_shadow` | function | `src/css_text.c:357` | `int ct_expand_shadow(const char *val, css_decl *dst, int cap)` |
 | `ct_expand_valign` | function | `src/css_text.c:122` | `int ct_expand_valign(const char *val, css_decl *dst, int cap)` |
 | `ct_family_of` | function | `src/css_text.c:18` | `static int ct_family_of(const char *name)` |
-| `ct_interp_aspect_ratio` | function | `src/css_text.c:194` | `int ct_interp_aspect_ratio(const char *v, int *num, int *den)` |
-| `ct_interp_direction` | function | `src/css_text.c:236` | `int ct_interp_direction(const char *v)` |
+| `ct_interp_aspect_ratio` | function | `src/css_text.c:229` | `int ct_interp_aspect_ratio(const char *v, int *num, int *den)` |
+| `ct_interp_direction` | function | `src/css_text.c:271` | `int ct_interp_direction(const char *v)` |
 | `ct_interp_fontfamily` | function | `src/css_text.c:47` | `int ct_interp_fontfamily(const char *v)` |
-| `ct_interp_liststyle` | function | `src/css_text.c:274` | `int ct_interp_liststyle(const char *v)` |
-| `ct_interp_tabsize` | function | `src/css_text.c:160` | `int ct_interp_tabsize(const char *v)` |
-| `ct_interp_textdeco_style` | function | `src/css_text.c:171` | `int ct_interp_textdeco_style(const char *v)` |
-| `ct_interp_textdeco_thickness` | function | `src/css_text.c:182` | `int ct_interp_textdeco_thickness(const char *v)` |
+| `ct_interp_liststyle` | function | `src/css_text.c:309` | `int ct_interp_liststyle(const char *v)` |
+| `ct_interp_tabsize` | function | `src/css_text.c:195` | `int ct_interp_tabsize(const char *v)` |
+| `ct_interp_textdeco_style` | function | `src/css_text.c:206` | `int ct_interp_textdeco_style(const char *v)` |
+| `ct_interp_textdeco_thickness` | function | `src/css_text.c:217` | `int ct_interp_textdeco_thickness(const char *v)` |
 | `ct_interp_texttransform` | function | `src/css_text.c:69` | `int ct_interp_texttransform(const char *v)` |
-| `ct_interp_transition_property` | function | `src/css_text.c:139` | `int ct_interp_transition_property(const char *v)` |
 | `ct_interp_valign` | function | `src/css_text.c:91` | `int ct_interp_valign(const char *v)` |
-| `ct_interp_whitespace` | function | `src/css_text.c:147` | `int ct_interp_whitespace(const char *v)` |
-| `ct_liststyle_kw` | function | `src/css_text.c:242` | `static int ct_liststyle_kw(const char *t)` |
-| `ct_liststyle_unknown_name` | function | `src/css_text.c:263` | `static int ct_liststyle_unknown_name(const char *t)` |
+| `ct_interp_whitespace` | function | `src/css_text.c:182` | `int ct_interp_whitespace(const char *v)` |
+| `ct_liststyle_kw` | function | `src/css_text.c:277` | `static int ct_liststyle_kw(const char *t)` |
+| `ct_liststyle_unknown_name` | function | `src/css_text.c:298` | `static int ct_liststyle_unknown_name(const char *t)` |
+| `transition_prop_one` | function | `src/css_text.c:139` | `static int transition_prop_one(const char *v)` |
 | `cv_bg_alpha_of` | function | `src/css_values.c:46` | `int cv_bg_alpha_of(const char *v)` |
 | `cv_color_ok` | function | `src/css_values.c:41` | `int cv_color_ok(int c)` |
 | `cv_filter_scale` | function | `src/css_values.c:231` | `double cv_filter_scale(int pct)` |
@@ -169,27 +205,29 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `cvr_count` | function | `src/css_vars.c:100` | `size_t cvr_count(const cvr_table *t)` |
 | `cvr_free` | function | `src/css_vars.c:112` | `void cvr_free(cvr_table *t)` |
 | `cvr_get` | function | `src/css_vars.c:94` | `const char *cvr_get(const cvr_table *t, const char *name, size_t nlen)` |
-| `cvr_lookup` | function | `src/css_vars.c:239` | `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)` |
+| `cvr_lookup` | function | `src/css_vars.c:290` | `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)` |
 | `cvr_reset` | function | `src/css_vars.c:102` | `void cvr_reset(cvr_table *t)` |
-| `cvr_resolve` | function | `src/css_vars.c:230` | `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)` |
+| `cvr_resolve` | function | `src/css_vars.c:281` | `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)` |
 | `cvr_set` | function | `src/css_vars.c:67` | `int cvr_set(cvr_table *t, const char *name, size_t nlen, const char *value, size_t vlen)` |
 | `dup_n` | function | `src/css_vars.c:21` | `static char *dup_n(const char *s, size_t n)` |
+| `env_value` | function | `src/css_vars.c:182` | `static const char *env_value(const char *name, size_t n)` |
 | `find_slot` | function | `src/css_vars.c:32` | `static size_t find_slot(const cvr_table *t, const char *name, size_t nlen)` |
 | `grow` | function | `src/css_vars.c:45` | `static int grow(cvr_table *t)` |
 | `is_ws` | function | `src/css_vars.c:120` | `static int is_ws(char c)` |
 | `name_hash` | function | `src/css_vars.c:12` | `static size_t name_hash(const char *s, size_t n)` |
-| `resolve_rec` | function | `src/css_vars.c:178` | `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,                   ...` |
+| `resolve_rec` | function | `src/css_vars.c:192` | `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,                   ...` |
 | `scope_get` | function | `src/css_vars.c:164` | `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)` |
 | `without_important` | function | `src/css_vars.c:124` | `static size_t without_important(const char *val, size_t n)` |
-| `ascii_ws` | function | `src/data_url.c:115` | `static int ascii_ws(char c)` |
-| `b64_val` | function | `src/data_url.c:61` | `static int b64_val(unsigned char c)` |
+| `ascii_ws` | function | `src/data_url.c:124` | `static int ascii_ws(char c)` |
+| `b64_val` | function | `src/data_url.c:70` | `static int b64_val(unsigned char c)` |
 | `ci_starts_with` | function | `src/data_url.c:20` | `static int ci_starts_with(const char *s, const char *prefix)` |
-| `du_base64_decode` | function | `src/data_url.c:70` | `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)` |
+| `du_base64_decode` | function | `src/data_url.c:79` | `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)` |
 | `du_base64_payload` | function | `src/data_url.c:32` | `du_status du_base64_payload(const char *url, const char **payload, size_t *payload_len)` |
-| `du_decode` | function | `src/data_url.c:131` | `du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)` |
+| `du_decode` | function | `src/data_url.c:140` | `du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)` |
 | `du_is_data_url` | function | `src/data_url.c:28` | `int du_is_data_url(const char *url)` |
-| `ends_ci` | function | `src/data_url.c:120` | `static int ends_ci(const char *s, size_t n, const char *suf)` |
-| `hexval` | function | `src/data_url.c:108` | `static int hexval(char c)` |
+| `du_shape_ok` | function | `src/data_url.c:59` | `du_status du_shape_ok(const char *url)` |
+| `ends_ci` | function | `src/data_url.c:129` | `static int ends_ci(const char *s, size_t n, const char *suf)` |
+| `hexval` | function | `src/data_url.c:117` | `static int hexval(char c)` |
 | `lower` | function | `src/data_url.c:16` | `static int lower(char c)` |
 | `_POSIX_C_SOURCE` | macro | `src/disk_store.c:11` | `#define _POSIX_C_SOURCE` |
 | `ds_free` | function | `src/disk_store.c:136` | `void ds_free(uint8_t *buf, size_t len)` |
@@ -458,43 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `render_page` | function | `src/freedom.c:720` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
 | `run_dump_video` | function | `src/freedom.c:1287` | `static int run_dump_video(const char *url)` |
 | `run_headless` | function | `src/freedom.c:1139` | `static int run_headless(const char *target)` |
-| `sf_reason` | function | `src/freedom.c:994` | `static const char *sf_reason(sf_status ss)` |
-| `timings_dump` | function | `src/freedom.c:163` | `static void timings_dump(void)` |
-| `timings_enabled` | function | `src/freedom.c:159` | `static int timings_enabled(void)` |
-| `timings_ensure_init` | function | `src/freedom.c:155` | `static void timings_ensure_init(void)` |
-| `user_impersonate_enabled` | function | `src/freedom.c:236` | `static int user_impersonate_enabled(void)` |
-| `video_fetch_with_fallback` | function | `src/freedom.c:1176` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
-| `_GNU_SOURCE` | macro | `src/hls.c:21` | `#define _GNU_SOURCE` |
-| `_POSIX_C_SOURCE` | macro | `src/hls.c:22` | `#define _POSIX_C_SOURCE` |
-| `hls_parse` | function | `src/hls.c:80` | `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)` |
-| `hls_playlist_free` | function | `src/hls.c:253` | `void hls_playlist_free(hls_playlist *pl)` |
-| `hls_resolve_url` | function | `src/hls.c:223` | `size_t hls_resolve_url(const char *base_url, const char *segment_url,                        char...` |
-| `hls_select_variant` | function | `src/hls.c:202` | `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h)` |
-| `last_char` | function | `src/hls.c:38` | `static const char *last_char(const char *s, size_t n, int c)` |
-| `name` | function | `src/hls.c:46` | `* attr is the attribute name (e.g. "BANDWIDTH=");` |
-| `parse_attr_long` | function | `src/hls.c:48` | `static int parse_attr_long(const char *attrs, const char *end,                            const c...` |
-| `parse_attr_resolution` | function | `src/hls.c:62` | `static void parse_attr_resolution(const char *attrs, const char *end,                            ...` |
-| `HCF_REPO_DIR` | macro | `src/host_conf.c:8` | `#define HCF_REPO_DIR` |
-| `HCF_USER_SUBDIR` | macro | `src/host_conf.c:7` | `#define HCF_USER_SUBDIR` |
-| `add_dir` | function | `src/host_conf.c:10` | `static void add_dir(hcf_dirs *out, const char *path)` |
-| `hcf_load_allowlist` | function | `src/host_conf.c:76` | `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname)` |
-| `hcf_load_filter` | function | `src/host_conf.c:65` | `hb_set *hcf_load_filter(const hcf_dirs *dirs)` |
-| `hcf_search_dirs` | function | `src/host_conf.c:20` | `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out)` |
-| `hcf_search_dirs_from_env` | function | `src/host_conf.c:32` | `void hcf_search_dirs_from_env(hcf_dirs *out)` |
-| `load_into` | function | `src/host_conf.c:58` | `static void load_into(hb_set *s, const char *dir, const char *name, hb_list list)` |
-| `read_conf` | function | `src/host_conf.c:37` | `static char *read_conf(const char *dir, const char *name)` |
-| `HB_INIT_CAP` | macro | `src/hostblock.c:20` | `#define HB_INIT_CAP` |
-| `HB_MAX_HOST` | macro | `src/hostblock.c:19` | `#define HB_MAX_HOST` |
-| `hb_check` | function | `src/hostblock.c:193` | `hb_decision hb_check(const hb_set *s, const char *host)` |
-| `hb_check_subresource` | function | `src/hostblock.c:218` | `hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted)` |
-| `hb_count` | function | `src/hostblock.c:243` | `size_t hb_count(const hb_set *s, hb_list list)` |
-| `hb_free` | function | `src/hostblock.c:149` | `void hb_free(hb_set *s)` |
-| `hb_is_allowlisted` | function | `src/hostblock.c:223` | `int hb_is_allowlisted(const hb_set *s, const char *host)` |
-| `hb_load` | function | `src/hostblock.c:156` | `hb_status hb_load(hb_set *s, const char *text, hb_list list)` |
-| `hb_new` | function | `src/hostblock.c:144` | `hb_set *hb_new(void)` |
-| `hb_set` | struct | `src/hostblock.c:30` | `` |
-| `hb_table` | struct | `src/hostblock.c:24` | `` |
-| `is_domain_char` | function | `src/hostblock.c:122` | `static int is_domain_char(char c)` |
-| `is_ip_token` | function | `src/hostblock.c:113` | `static int is_ip_token(const char *s, size_t n)` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

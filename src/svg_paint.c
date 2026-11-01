@@ -138,6 +138,11 @@ static void svp_draw_text(cairo_t *cr, const sv_shape *sh, int current_rgb) {
 
 void svp_draw(cairo_t *cr, const sv_image *img,
               double x, double y, double w, double h, int current_rgb) {
+    svp_draw_ex(cr, img, x, y, w, h, current_rgb, 1);
+}
+
+void svp_draw_ex(cairo_t *cr, const sv_image *img,
+                 double x, double y, double w, double h, int current_rgb, int draw_text) {
     if (cr == NULL || img == NULL || w <= 0.0 || h <= 0.0) return;
 
     double scale = 1.0, off_x = 0.0, off_y = 0.0;
@@ -160,7 +165,7 @@ void svp_draw(cairo_t *cr, const sv_image *img,
         cairo_transform(cr, &m);
 
         if (sh->kind == SV_TEXT) {
-            svp_draw_text(cr, sh, current_rgb);
+            if (draw_text) svp_draw_text(cr, sh, current_rgb);
             cairo_restore(cr);
             continue;
         }

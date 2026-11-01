@@ -62,14 +62,14 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/ws_hub.h`
 - `gui/browser_ui.c` -> `include/zoom.h`
 - `gui/browser_ui_internal.h` -> `include/freedom_config.h`
+- `gui/bui_mask_img.c` -> `gui/browser_ui_internal.h`
+- `gui/bui_mask_img.c` -> `include/box_style.h`
+- `gui/bui_mask_img.c` -> `include/css.h`
 - `gui/bui_theme.c` -> `gui/browser_ui_internal.h`
 - `gui/bui_theme.c` -> `include/css.h`
 - `gui/bui_theme.c` -> `include/css_color.h`
 - `gui/freedom_view.c` -> `include/html_parse.h`
 - `gui/freedom_view.c` -> `include/ui.h`
-- `gui/svg_paint.c` -> `include/css_color.h`
-- `gui/svg_paint.c` -> `include/freedom_config.h`
-- `gui/svg_paint.c` -> `include/svg_paint.h`
 - `gui/ui_render.c` -> `include/freedom_config.h`
 - `gui/ui_render.c` -> `include/ui.h`
 - `include/box_style.h` -> `include/css.h`
@@ -122,6 +122,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/render_doc.h` -> `include/render_policy.h`
 - `include/secure_fetch.h` -> `include/anti_fp.h`
 - `include/svg_paint.h` -> `include/svg_render.h`
+- `include/svg_raster.h` -> `include/image_decode.h`
 - `include/tab.h` -> `include/freebug.h`
 - `include/tab.h` -> `include/js_geom.h`
 - `include/tab.h` -> `include/page_view.h`
@@ -157,6 +158,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/css.c` -> `include/css_values.h`
 - `src/css.c` -> `include/css_vars.h`
 - `src/css.c` -> `include/flex_layout.h`
+- `src/css.c` -> `include/interp.h`
 - `src/css.c` -> `include/webfont.h`
 - `src/css_atrule.c` -> `include/css_atrule.h`
 - `src/css_atrule.c` -> `include/css_select.h`
@@ -373,6 +375,12 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/secure_fetch.c` -> `include/url.h`
 - `src/sha2.c` -> `include/sha2.h`
 - `src/subreq_batch.c` -> `include/subreq_batch.h`
+- `src/svg_paint.c` -> `include/css_color.h`
+- `src/svg_paint.c` -> `include/freedom_config.h`
+- `src/svg_paint.c` -> `include/svg_paint.h`
+- `src/svg_raster.c` -> `include/svg_paint.h`
+- `src/svg_raster.c` -> `include/svg_raster.h`
+- `src/svg_raster.c` -> `include/svg_render.h`
 - `src/svg_render.c` -> `include/css_color.h`
 - `src/svg_render.c` -> `include/svg_render.h`
 - `src/tab.c` -> `include/anti_fp.h`
@@ -399,6 +407,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/request_policy.h`
 - `src/tab.c` -> `include/secure_fetch.h`
 - `src/tab.c` -> `include/subreq_batch.h`
+- `src/tab.c` -> `include/svg_raster.h`
 - `src/tab.c` -> `include/tab.h`
 - `src/tab.c` -> `include/url.h`
 - `src/tab.c` -> `include/util.h`
@@ -487,14 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_freebug.c` -> `include/freebug.h`
 - `tests/test_freedom.c` -> `include/image_decode.h`
 - `tests/test_hls.c` -> `include/hls.h`
-- `tests/test_host_conf.c` -> `include/host_conf.h`
-- `tests/test_hostblock.c` -> `include/hostblock.h`
-- `tests/test_hostedit.c` -> `include/hostedit.h`
-- `tests/test_html_parse.c` -> `include/html_parse.h`
-- `tests/test_http_cache.c` -> `include/http_cache.h`
-- `tests/test_identity.c` -> `include/anti_fp.h`
-- `tests/test_identity.c` -> `include/identity.h`
-- `tests/test_image_decode.c` -> `include/image_decode.h`
-- `tests/test_import_map.c` -> `include/import_map.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

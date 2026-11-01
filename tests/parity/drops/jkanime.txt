@@ -1,5 +1,5 @@
 Ver Anime Online - todos los animes gratis
-CSS drops: 45 declaration(s) dropped, 27 distinct
+CSS drops: 44 declaration(s) dropped, 26 distinct
   count  cause         property                     first value
       6  bad-value     background                   rgb(255 118 0 / 85%).    z-index: 9
       4  bad-value     -webkit-transform            rotateX(90deg)
@@ -26,5 +26,4 @@ CSS drops: 45 declaration(s) dropped, 27 distinct
       1  unknown-prop  widows                       1
       1  unknown-prop  -webkit-text-decoration-skip-ink none
       1  bad-value     padding-bottom               -50px
-      1  bad-value     animation-timing-function    cubic-bezier(0, 1, 1, 0)
       1  bad-value     box-shadow                   inset 0 -2px 0,.    -2px 4px 0 -2px,.    0 -2px 0 0

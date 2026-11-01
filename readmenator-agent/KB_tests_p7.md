@@ -145,6 +145,23 @@ Previous: [KB_tests_p6.md](KB_tests_p6.md)
   - `_GNU_SOURCE` (macro, line 2) `#define _GNU_SOURCE`
 - Depends on: `include/subreq_batch.h`
 
+## tests/test_svg_raster.c
+- Doc: tests/test_svg_raster.c -- CMocka suite for SVG-as-image rasterization (sr_). spec/svg_raster.md...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `raster` (function, line 14) `static img_status raster(const char *s, img_pixels *px)`
+  - `pixel` (function, line 18) `static uint32_t pixel(const img_pixels *px, uint32_t x, uint32_t y)`
+  - `test_sniff` (function, line 24) `static void test_sniff(void **state)`
+  - `test_rect_fills_red` (function, line 42) `static void test_rect_fills_red(void **state)`
+  - `test_viewbox_sets_size_and_transparent_bg` (function, line 56) `static void test_viewbox_sets_size_and_transparent_bg(void **state)`
+  - `test_large_svg_is_not_oversampled` (function, line 69) `static void test_large_svg_is_not_oversampled(void **state)`
+  - `test_huge_scales_down` (function, line 79) `static void test_huge_scales_down(void **state)`
+  - `test_garbage_fails_closed` (function, line 89) `static void test_garbage_fails_closed(void **state)`
+  - `test_text_is_skipped_not_fatal` (function, line 101) `static void test_text_is_skipped_not_fatal(void **state)`
+  - `main` (function, line 111) `int main(void)`
+- Depends on: `include/svg_raster.h`
+
 ## tests/test_svg_render.c
 - Doc: tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_).
 - Layer: testing
@@ -327,13 +344,14 @@ static void tes...`
   - `test_decode_image_rejects_junk` (function, line 3386) `static void test_decode_image_rejects_junk(void **state)`
   - `test_decode_image_null_args` (function, line 3401) `static void test_decode_image_null_args(void **state)`
   - `test_decode_image_data_url_in_sandbox` (function, line 3420) `static void test_decode_image_data_url_in_sandbox(void **state)`
-  - `test_decode_image_data_url_null_args` (function, line 3462) `static void test_decode_image_data_url_null_args(void **state)`
-  - `test_worker_args_valid` (function, line 3475) `static void test_worker_args_valid(void **state)`
-  - `test_worker_args_not_worker` (function, line 3484) `static void test_worker_args_not_worker(void **state)`
-  - `test_worker_args_malformed` (function, line 3491) `static void test_worker_args_malformed(void **state)`
-  - `test_worker_args_null_safe` (function, line 3506) `static void test_worker_args_null_safe(void **state)`
-  - `test_load_view_codec_full_roundtrip` (function, line 3522) `static void test_load_view_codec_full_roundtrip(void **state)`
-  - `main` (function, line 3672) `int main(int argc, char **argv)`
+  - `test_decode_svg_image_in_sandbox` (function, line 3465) `static void test_decode_svg_image_in_sandbox(void **state)`
+  - `test_decode_image_data_url_null_args` (function, line 3493) `static void test_decode_image_data_url_null_args(void **state)`
+  - `test_worker_args_valid` (function, line 3506) `static void test_worker_args_valid(void **state)`
+  - `test_worker_args_not_worker` (function, line 3515) `static void test_worker_args_not_worker(void **state)`
+  - `test_worker_args_malformed` (function, line 3522) `static void test_worker_args_malformed(void **state)`
+  - `test_worker_args_null_safe` (function, line 3537) `static void test_worker_args_null_safe(void **state)`
+  - `test_load_view_codec_full_roundtrip` (function, line 3553) `static void test_load_view_codec_full_roundtrip(void **state)`
+  - `main` (function, line 3703) `int main(int argc, char **argv)`
   - `document` (function, line 2176) `* listener is on document (the React/jQuery-delegation shape);`
   - `load` (function, line 2226) `* table only for a trusted load (net granted: allow.conf AND js.conf);`
   - `_DEFAULT_SOURCE` (macro, line 1) `#define _DEFAULT_SOURCE`
@@ -434,62 +452,6 @@ static void tes...`
   - `test_lazy_near_viewport` (function, line 133) `static void test_lazy_near_viewport(void **state)`
   - `main` (function, line 146) `int main(void)`
 - Depends on: `include/lazy_load.h`, `include/ui.h`
-
-## tests/test_url.c
-- Doc: test_validate_long_bundle_url: Modern bundle URLs exceed 2048 bytes (google.com's xjs script URL...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_is_https` (function, line 23) `static void test_is_https(void **state)`
-  - `test_validate_https` (function, line 36) `static void test_validate_https(void **state)`
-  - `test_validate_long_bundle_url` (function, line 49) `static void test_validate_long_bundle_url(void **state)`
-  - `test_has_scheme` (function, line 69) `static void test_has_scheme(void **state)`
-  - `test_authority_len` (function, line 86) `static void test_authority_len(void **state)`
-  - `test_remove_dot_segments` (function, line 98) `static void test_remove_dot_segments(void **state)`
-  - `test_remove_dot_segments_nulls` (function, line 127) `static void test_remove_dot_segments_nulls(void **state)`
-  - `test_resolve_absolute` (function, line 138) `static void test_resolve_absolute(void **state)`
-  - `test_resolve_rejects_downgrade_and_schemes` (function, line 146) `static void test_resolve_rejects_downgrade_and_schemes(void **state)`
-  - `test_resolve_scheme_relative` (function, line 161) `static void test_resolve_scheme_relative(void **state)`
-  - `test_resolve_absolute_path` (function, line 169) `static void test_resolve_absolute_path(void **state)`
-  - `test_resolve_relative_path` (function, line 181) `static void test_resolve_relative_path(void **state)`
-  - `test_resolve_dot_segments` (function, line 193) `static void test_resolve_dot_segments(void **state)`
-  - `test_resolve_fail_closed_on_bad_base` (function, line 210) `static void test_resolve_fail_closed_on_bad_base(void **state)`
-  - `test_resolve_null_and_overflow` (function, line 222) `static void test_resolve_null_and_overflow(void **state)`
-  - `test_omnibox_navigate_https` (function, line 238) `static void test_omnibox_navigate_https(void **state)`
-  - `test_omnibox_bare_host_gets_https` (function, line 251) `static void test_omnibox_bare_host_gets_https(void **state)`
-  - `test_omnibox_http_upgraded_to_https` (function, line 268) `static void test_omnibox_http_upgraded_to_https(void **state)`
-  - `test_omnibox_search_for_queries` (function, line 278) `static void test_omnibox_search_for_queries(void **state)`
-  - `test_omnibox_foreign_scheme_is_searched_not_executed` (function, line 298) `static void test_omnibox_foreign_scheme_is_searched_not_executed(void **state)`
-  - `test_omnibox_nulls_and_empty` (function, line 311) `static void test_omnibox_nulls_and_empty(void **state)`
-  - `test_search_rewrite_ddg_spa` (function, line 327) `static void test_search_rewrite_ddg_spa(void **state)`
-  - `test_search_rewrite_leaves_others_alone` (function, line 344) `static void test_search_rewrite_leaves_others_alone(void **state)`
-  - `test_search_rewrite_nulls` (function, line 364) `static void test_search_rewrite_nulls(void **state)`
-  - `test_is_file_and_path` (function, line 379) `static void test_is_file_and_path(void **state)`
-  - `test_resolve_file_relative` (function, line 391) `static void test_resolve_file_relative(void **state)`
-  - `test_resolve_file_confinement_fail_closed` (function, line 411) `static void test_resolve_file_confinement_fail_closed(void **state)`
-  - `test_resolve_file_nulls` (function, line 437) `static void test_resolve_file_nulls(void **state)`
-  - `assert_span` (function, line 449) `static void assert_span(const char *p, size_t len, const char *expect)`
-  - `test_split_full_url` (function, line 454) `static void test_split_full_url(void **state)`
-  - `test_split_no_port_no_path` (function, line 473) `static void test_split_no_port_no_path(void **state)`
-  - `test_split_query_without_fragment` (function, line 486) `static void test_split_query_without_fragment(void **state)`
-  - `test_split_fragment_without_query` (function, line 495) `static void test_split_fragment_without_query(void **state)`
-  - `test_split_ipv6_literal_with_port` (function, line 504) `static void test_split_ipv6_literal_with_port(void **state)`
-  - `test_extract_userinfo_basic` (function, line 516) `static void test_extract_userinfo_basic(void **state)`
-  - `test_extract_userinfo_user_only` (function, line 529) `static void test_extract_userinfo_user_only(void **state)`
-  - `test_extract_userinfo_no_userinfo` (function, line 542) `static void test_extract_userinfo_no_userinfo(void **state)`
-  - `test_extract_userinfo_non_https_passthrough` (function, line 554) `static void test_extract_userinfo_non_https_passthrough(void **state)`
-  - `test_extract_userinfo_https_subresource_no_auth` (function, line 566) `static void test_extract_userinfo_https_subresource_no_auth(void **state)`
-  - `test_extract_userinfo_nulls` (function, line 579) `static void test_extract_userinfo_nulls(void **state)`
-  - `test_extract_userinfo_at_authority_start` (function, line 589) `static void test_extract_userinfo_at_authority_start(void **state)`
-  - `test_extract_userinfo_no_at_sign` (function, line 602) `static void test_extract_userinfo_no_at_sign(void **state)`
-  - `test_extract_userinfo_empty_password` (function, line 615) `static void test_extract_userinfo_empty_password(void **state)`
-  - `test_split_fail_closed_non_https` (function, line 628) `static void test_split_fail_closed_non_https(void **state)`
-  - `test_history_target_same_origin` (function, line 641) `static void test_history_target_same_origin(void **state)`
-  - `test_history_target_cross_origin_rejected` (function, line 662) `static void test_history_target_cross_origin_rejected(void **state)`
-  - `test_history_target_file_query_fragment_only` (function, line 677) `static void test_history_target_file_query_fragment_only(void **state)`
-  - `test_history_target_bad_args` (function, line 690) `static void test_history_target_bad_args(void **state)`
-  - `main` (function, line 701) `int main(void)`
-- Depends on: `include/url.h`
 
 
 Next: [KB_tests_p8.md](KB_tests_p8.md)

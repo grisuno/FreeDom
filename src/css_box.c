@@ -293,9 +293,16 @@ int cb_interp_gap(const char *v) {
 }
 
 int cb_interp_justify(const char *v) {
-    if (csel_ci_eq(v, "flex-start") || csel_ci_eq(v, "start") || csel_ci_eq(v, "normal"))
+    if (csel_ci_starts(v, "safe ")) v += 5;
+    else if (csel_ci_starts(v, "unsafe ")) v += 7;
+    while (*v == ' ') ++v;
+    /* left/right are start/end in a left-to-right writing mode, and `stretch`
+     * packs like flex-start in a flex container (Box Align 3 5.1). */
+    if (csel_ci_eq(v, "flex-start") || csel_ci_eq(v, "start") || csel_ci_eq(v, "normal") ||
+        csel_ci_eq(v, "left") || csel_ci_eq(v, "stretch"))
         return CSS_JUSTIFY_START;
-    if (csel_ci_eq(v, "flex-end") || csel_ci_eq(v, "end")) return CSS_JUSTIFY_END;
+    if (csel_ci_eq(v, "flex-end") || csel_ci_eq(v, "end") || csel_ci_eq(v, "right"))
+        return CSS_JUSTIFY_END;
     if (csel_ci_eq(v, "center")) return CSS_JUSTIFY_CENTER;
     if (csel_ci_eq(v, "space-between")) return CSS_JUSTIFY_SPACE_BETWEEN;
     if (csel_ci_eq(v, "space-around")) return CSS_JUSTIFY_SPACE_AROUND;
@@ -698,7 +705,10 @@ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap) {
  *
  * Before this, calc() understood no percentage at all, so `width: calc(100% - 2rem)`
  * -- the single most common responsive idiom on the web -- was dropped whole. */
-typedef struct calc_val { double px; double em; double pct; int is_length; } calc_val;
+/* bare0: the token was a unitless 0. Under +/- it may stand for a length (lenient,
+ * like every engine's legacy path); under * and / it is the NUMBER zero, or the
+ * Tailwind idiom calc(<length> * var(--reverse)) with --reverse:0 fails as length*length. */
+typedef struct calc_val { double px; double em; double pct; int is_length; int bare0; } calc_val;
 typedef struct calc_parser { const char *s; size_t n, i; } calc_parser;
 
 static void calc_skip_ws(calc_parser *p) {
@@ -800,6 +810,7 @@ static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind) {
 /* One number or length token, a parenthesized sub-expression, a nested calc(),
  * or a math function call (min/max/clamp). */
 static int calc_factor(calc_parser *p, calc_val *out, int depth) {
+    out->bare0 = 0;
     calc_skip_ws(p);
     if (calc_match_fn(p, "min"))   return calc_mathfn(p, out, depth, 0);
     if (calc_match_fn(p, "max"))   return calc_mathfn(p, out, depth, 1);
@@ -867,6 +878,7 @@ static int calc_factor(calc_parser *p, calc_val *out, int depth) {
     out->em = 0.0;
     out->pct = 0.0;
     out->is_length = (num == 0.0);
+    out->bare0 = (num == 0.0);
     return 1;
 }
 
@@ -879,6 +891,9 @@ static int calc_term(calc_parser *p, calc_val *out, int depth) {
         char op = p->s[p->i++];
         calc_val rhs;
         if (!calc_factor(p, &rhs, depth)) return 0;
+        if (rhs.bare0) rhs.is_length = 0;
+        if (op == '*' && out->bare0) out->is_length = 0;
+        out->bare0 = 0;
         if (op == '*') {
             if (out->is_length && rhs.is_length) return 0;   /* length*length: invalid */
             out->em = out->em * rhs.px + rhs.em * out->px;
@@ -903,6 +918,9 @@ static int calc_expr(calc_parser *p, calc_val *out, int depth) {
         char op = p->s[p->i++];
         calc_val rhs;
         if (!calc_term(p, &rhs, depth)) return 0;
+        if (rhs.bare0 && !out->is_length) rhs.is_length = 0;
+        if (out->bare0 && !rhs.is_length) out->is_length = 0;
+        out->bare0 = 0;
         if (out->is_length != rhs.is_length) return 0;       /* length +/- number: invalid */
         out->px = (op == '+') ? out->px + rhs.px : out->px - rhs.px;
         out->em = (op == '+') ? out->em + rhs.em : out->em - rhs.em;

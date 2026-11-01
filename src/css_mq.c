@@ -474,3 +474,54 @@ int cmq_matches(const char *s, size_t len, const cmq_env *env) {
     }
     return !any;
 }
+
+/* True when the lowercase word w occurs in t as a whole word (not inside an ident). */
+static int has_word(const char *t, const char *w) {
+    size_t wl = strlen(w);
+    for (const char *p = strstr(t, w); p != NULL; p = strstr(p + 1, w)) {
+        int before = (p > t) && is_ident_ch(p[-1]);
+        int after = is_ident_ch(p[wl]);
+        if (!before && !after) return 1;
+    }
+    return 0;
+}
+
+int cmq_container_surely(const char *s, size_t len, int max_width) {
+    if (s == NULL || max_width <= 0) return 0;
+    char buf[512];
+    size_t o = 0;
+    for (size_t i = 0; i < len; ++i) {
+        /* inline-size IS width for a horizontal writing mode: one spelling to evaluate. */
+        if (i + 11 <= len && lower_ch(s[i]) == 'i' && strncmp("inline-size", s + i, 11) == 0 &&
+            (i == 0 || !is_ident_ch(s[i - 1])) && (i + 11 == len || !is_ident_ch(s[i + 11]))) {
+            if (o + 5 >= sizeof buf) return 0;
+            memcpy(buf + o, "width", 5);
+            o += 5;
+            i += 10;
+            continue;
+        }
+        if (o + 1 >= sizeof buf) return 0;
+        buf[o++] = lower_ch(s[i]);
+    }
+    buf[o] = '\0';
+    size_t a = 0;
+    while (a < o && is_space(buf[a])) ++a;
+    if (a < o && buf[a] != '(') {               /* a leading container name */
+        size_t b = a;
+        while (b < o && is_ident_ch(buf[b])) ++b;
+        if (b - a == 3 && strncmp(buf + a, "not", 3) == 0) return 0;
+        a = b;
+    }
+    const char *cond = buf + a;
+    static const char *const VETO[] = { "or", "not", "only", "height", "block-size",
+                                        "aspect-ratio", "orientation", "style",
+                                        "scroll-state", "min-height", "max-height" };
+    for (size_t k = 0; k < sizeof VETO / sizeof *VETO; ++k)
+        if (has_word(cond, VETO[k])) return 0;
+    if (strchr(cond, ',') != NULL) return 0;          /* @container takes ONE condition */
+    if (!has_word(cond, "width") && !has_word(cond, "min-width") && !has_word(cond, "max-width"))
+        return 0;                                       /* only width intervals are bounded */
+    size_t cl = strlen(cond);
+    cmq_env lo = { 0, 0, 0, 0 }, hi = { max_width, 0, 0, 0 };
+    return cmq_matches(cond, cl, &lo) && cmq_matches(cond, cl, &hi);
+}

@@ -2,20 +2,20 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 308 files at commit `fa54718fe05d`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 312 files at commit `c014c9ea6634`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (165), `max` (138), `not` (131), `size` (129), `one` (128), `include` (127), `out` (126), `freedom` (120), `free` (117), `char` (116), `const` (110), `its` (103), `css` (101), `void` (100), `name` (100)
-- Subsystem `include: browser_ui`: 59 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
+- Domain vocabulary (term, files): `null` (166), `max` (139), `not` (133), `size` (131), `one` (128), `include` (128), `out` (126), `freedom` (121), `char` (117), `free` (116), `const` (111), `its` (103), `css` (101), `void` (100), `name` (100)
 - Subsystem `src: tab`: 51 files, core `src/tab.c`: tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and...
-- Subsystem `include: page_view`: 39 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
-- Subsystem `src: text_shape`: 39 files, core `src/text_shape.c`: tsh_fb_cp: Per-code-point verdicts of fb_entry.
-- Subsystem `include: css`: 35 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
+- Subsystem `include: browser_ui`: 46 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
+- Subsystem `src: text_shape`: 42 files, core `src/text_shape.c`: tsh_fb_cp: Per-code-point verdicts of fb_entry.
+- Subsystem `src: css`: 38 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
+- Subsystem `include: page_view`: 37 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - Subsystem `include: browser`: 19 files, core `src/browser.c`: clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {...
+- Subsystem `include: svg_render`: 16 files, core `src/svg_render.c`: svg_render — inline <svg> markup -> a bounded list of geometric shapes.
 - Subsystem `src: http_cache`: 16 files, core `src/http_cache.c`: days_from_civil: #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY...
-- Subsystem `include: secure_fetch`: 13 files, core `src/secure_fetch.c`: tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a...
 - Business rules that the code cannot show live in section 7: record them there.
 
 ## 2. Workflow
@@ -68,11 +68,11 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 191 files, 5966 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (0%); median file 238 lines, max 19942.
-- h: 101 files, 1643 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 72 lines, max 1262.
+- c: 194 files, 6026 symbols; docstrings on 28% of symbols; functions snake_case (99%); types PascalCase (0%); median file 237 lines, max 20071.
+- h: 102 files, 1656 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 73 lines, max 1267.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
 - sh: 4 files, 0 symbols; median file 39 lines, max 90.
-- Tests: 89 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
+- Tests: 90 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
 
 ## 5. Minimum deliverables
 
@@ -90,7 +90,7 @@ Measured baseline:
 ## 6. Risks to respect
 
 - God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/freedom.c`, `src/css.c`
-- Hotspots (complex and central): `gui/browser_ui.c`, `src/tab.c`, `src/page_view.c`, `src/css.c`, `src/freedom.c`
+- Hotspots (complex and central): `gui/browser_ui.c`, `src/tab.c`, `src/page_view.c`, `src/css.c`, `tests/test_css.c`
 - Cycle: `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - Full blast radius: `readmenator-agent/GOTCHAS.md`; findings: `readmenator-agent/SECURITY.md`.
 

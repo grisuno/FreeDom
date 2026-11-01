@@ -325,18 +325,25 @@ static void test_image_data_url_disabled_by_default(void **state) {
     pv_free(v);
 }
 
-/* A percent-encoded (non-base64) data: URI is the unsupported variant: fails
+/* A percent-encoded (non-base64) data: URI is a valid image since tanda 83 (the
+ * worker decodes it, spec/svg_raster.md); a data: URI with no comma still fails
  * closed as invalid rather than silently falling through to the https path. */
-static void test_image_data_url_percent_encoded_blocked_invalid(void **state) {
+static void test_image_data_url_percent_encoded_allowed(void **state) {
     (void)state;
     pv_view *v = pv_new();
     assert_int_equal(pv_append_image(v, 0, 0, "", "data:image/svg+xml,<svg/>", 64, 64),
                      PV_OK);
+    assert_int_equal(pv_append_image(v, 0, 1, "", "data:image/svg+xml", 64, 64), PV_OK);
     rd_doc *d = NULL;
     assert_int_equal(rd_build(v, caps_images_on(), TOP, &d), RD_OK);
     const rd_block *img = first_kind(d, RD_IMAGE);
     assert_non_null(img);
-    assert_int_equal(img->img_decision, RDP_IMG_BLOCK_INVALID);
+    assert_int_equal(img->img_decision, RDP_IMG_ALLOW);
+    int saw_invalid = 0;
+    for (size_t i = 0; i < d->count; ++i)
+        if (d->blocks[i].kind == RD_IMAGE && d->blocks[i].img_decision == RDP_IMG_BLOCK_INVALID)
+            saw_invalid = 1;
+    assert_true(saw_invalid);
     rd_free(d);
     pv_free(v);
 }
@@ -887,7 +894,7 @@ int main(void) {
         cmocka_unit_test(test_image_data_url_allowed_remote_top),
         cmocka_unit_test(test_image_data_url_allowed_no_top),
         cmocka_unit_test(test_image_data_url_disabled_by_default),
-        cmocka_unit_test(test_image_data_url_percent_encoded_blocked_invalid),
+        cmocka_unit_test(test_image_data_url_percent_encoded_allowed),
         cmocka_unit_test(test_href_sanitised),
         cmocka_unit_test(test_kind_name_total),
         cmocka_unit_test(test_image_label_total),

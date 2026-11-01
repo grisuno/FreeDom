@@ -1,33 +1,41 @@
 # include: page_view
 
-include: page_view groups 39 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+include: page_view groups 37 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bui_mask_img -- paints a mask-image: url() layer into a mask surface.
 
 ```mermaid
 graph LR
+    gui["gui"]
     include["include"]
     src["src"]
     tests["tests"]
+    gui -- "depends on" --> include
     include -- "calls into" --> src
     include -- "calls into" --> tests
     src -- "calls into" --> include
+    src -- "calls into" --> tests
     tests -- "calls into" --> include
     tests -- "calls into" --> src
 ```
 
-## include (3.1)
+## gui (5.1)
+
+gui groups 1 files (c) around bui_paint_mask_image. bui_mask_img -- paints a mask-image: url() layer into a mask surface.
+
+## include (5.2)
 
 include groups 13 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
 
-## src (3.2)
+## src (5.3)
 
-src groups 11 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet.
+src groups 10 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet.
 
-## tests (3.3)
+## tests (5.4)
 
-tests groups 15 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, test_paragraph, test_heading_ladder. dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include...
+tests groups 13 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, test_paragraph, test_heading_ladder. dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include...
 
 **Files**:
 
+- gui/bui_mask_img.c
 - include/box_style.h
 - include/box_tree.h
 - include/compositor.h
@@ -46,7 +54,6 @@ tests groups 15 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, 
 - src/compositor.c
 - src/css_computed.c
 - src/css_counter.c
-- src/css_length.c
 - src/dom_debug.c
 - src/flex_layout.c
 - src/page_view.c
@@ -55,12 +62,10 @@ tests groups 15 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, 
 - tests/test_box_style.c
 - tests/test_box_tree.c
 - tests/test_compositor.c
+- tests/test_css.c
 - tests/test_css_computed.c
 - tests/test_css_counter.c
 - tests/test_css_drops.c
-- tests/test_css_gradient.c
-- tests/test_css_length.c
-- tests/test_css_values.c
 - tests/test_dom_debug.c
 - tests/test_flex_layout.c
 - tests/test_page_view.c

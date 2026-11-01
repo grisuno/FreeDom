@@ -1,7 +1,6 @@
 Andrea Grandi
-CSS drops: 8 declaration(s) dropped, 5 distinct
+CSS drops: 6 declaration(s) dropped, 4 distinct
   count  cause         property                     first value
-      2  bad-value     transition-timing-function   cubic-bezier(.55,.055,.675,.19)
       2  bad-value     border-inline-start          4pxsolid #34495e
       2  bad-value     box-shadow                   0 -2px rgba(189, 195, 199,0.5)inset
       1  bad-value     margin                       25px0

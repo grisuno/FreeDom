@@ -443,27 +443,27 @@ static void test_build_heading_own_relative_size_replac...`
   - `test_image_data_url_allowed_remote_top` (function, line 284) `static void test_image_data_url_allowed_remote_top(void **state)`
   - `test_image_data_url_allowed_no_top` (function, line 302) `static void test_image_data_url_allowed_no_top(void **state)`
   - `test_image_data_url_disabled_by_default` (function, line 315) `static void test_image_data_url_disabled_by_default(void **state)`
-  - `test_image_data_url_percent_encoded_blocked_invalid` (function, line 330) `static void test_image_data_url_percent_encoded_blocked_invalid(void **state)`
-  - `test_href_sanitised` (function, line 346) `static void test_href_sanitised(void **state)`
-  - `test_kind_name_total` (function, line 363) `static void test_kind_name_total(void **state)`
-  - `test_image_label_total` (function, line 373) `static void test_image_label_total(void **state)`
-  - `test_free_null_and_double` (function, line 386) `static void test_free_null_and_double(void **state)`
-  - `test_author_color_gated_by_css` (function, line 396) `static void test_author_color_gated_by_css(void **state)`
-  - `test_text_overflow_word_break_gated_by_css` (function, line 426) `static void test_text_overflow_word_break_gated_by_css(void **state)`
-  - `test_text_ext_2026_07_10_batch_gated_by_css` (function, line 461) `static void test_text_ext_2026_07_10_batch_gated_by_css(void **state)`
-  - `test_image_rendering_gated_on_image` (function, line 501) `static void test_image_rendering_gated_on_image(void **state)`
-  - `test_caret_color_gated_on_input` (function, line 530) `static void test_caret_color_gated_on_input(void **state)`
-  - `test_input_passthrough` (function, line 560) `static void test_input_passthrough(void **state)`
-  - `test_input_label_total` (function, line 595) `static void test_input_label_total(void **state)`
-  - `test_container_carried_by_default` (function, line 620) `static void test_container_carried_by_default(void **state)`
-  - `test_cont_item_carried_by_default` (function, line 652) `static void test_cont_item_carried_by_default(void **state)`
-  - `test_float_carried_by_default` (function, line 685) `static void test_float_carried_by_default(void **state)`
-  - `test_flex_item_carried_by_default` (function, line 721) `static void test_flex_item_carried_by_default(void **state)`
-  - `test_flex_wrap_align_row_gap_carried_by_default` (function, line 769) `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)`
-  - `test_heading_level_of_link` (function, line 801) `static void test_heading_level_of_link(void **state)`
-  - `test_block_tag_total` (function, line 817) `static void test_block_tag_total(void **state)`
-  - `test_node_id_carried_by_default` (function, line 853) `static void test_node_id_carried_by_default(void **state)`
-  - `main` (function, line 866) `int main(void)`
+  - `test_image_data_url_percent_encoded_allowed` (function, line 331) `static void test_image_data_url_percent_encoded_allowed(void **state)`
+  - `test_href_sanitised` (function, line 353) `static void test_href_sanitised(void **state)`
+  - `test_kind_name_total` (function, line 370) `static void test_kind_name_total(void **state)`
+  - `test_image_label_total` (function, line 380) `static void test_image_label_total(void **state)`
+  - `test_free_null_and_double` (function, line 393) `static void test_free_null_and_double(void **state)`
+  - `test_author_color_gated_by_css` (function, line 403) `static void test_author_color_gated_by_css(void **state)`
+  - `test_text_overflow_word_break_gated_by_css` (function, line 433) `static void test_text_overflow_word_break_gated_by_css(void **state)`
+  - `test_text_ext_2026_07_10_batch_gated_by_css` (function, line 468) `static void test_text_ext_2026_07_10_batch_gated_by_css(void **state)`
+  - `test_image_rendering_gated_on_image` (function, line 508) `static void test_image_rendering_gated_on_image(void **state)`
+  - `test_caret_color_gated_on_input` (function, line 537) `static void test_caret_color_gated_on_input(void **state)`
+  - `test_input_passthrough` (function, line 567) `static void test_input_passthrough(void **state)`
+  - `test_input_label_total` (function, line 602) `static void test_input_label_total(void **state)`
+  - `test_container_carried_by_default` (function, line 627) `static void test_container_carried_by_default(void **state)`
+  - `test_cont_item_carried_by_default` (function, line 659) `static void test_cont_item_carried_by_default(void **state)`
+  - `test_float_carried_by_default` (function, line 692) `static void test_float_carried_by_default(void **state)`
+  - `test_flex_item_carried_by_default` (function, line 728) `static void test_flex_item_carried_by_default(void **state)`
+  - `test_flex_wrap_align_row_gap_carried_by_default` (function, line 776) `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)`
+  - `test_heading_level_of_link` (function, line 808) `static void test_heading_level_of_link(void **state)`
+  - `test_block_tag_total` (function, line 824) `static void test_block_tag_total(void **state)`
+  - `test_node_id_carried_by_default` (function, line 860) `static void test_node_id_carried_by_default(void **state)`
+  - `main` (function, line 873) `int main(void)`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/flex_layout.h`, `include/page_view.h`, `include/render_doc.h`, `include/render_policy.h`
 
 ## tests/test_render_policy.c
@@ -487,10 +487,10 @@ static void test_build_heading_own_relative_size_replac...`
   - `test_image_allow_data_url` (function, line 164) `static void test_image_allow_data_url(void **state)`
   - `test_image_data_url_disabled_by_default` (function, line 183) `static void test_image_data_url_disabled_by_default(void **state)`
   - `test_image_data_url_malformed_is_invalid` (function, line 191) `static void test_image_data_url_malformed_is_invalid(void **state)`
-  - `test_image_disabled_precedence` (function, line 207) `static void test_image_disabled_precedence(void **state)`
-  - `test_img_reason_total_and_stable` (function, line 217) `static void test_img_reason_total_and_stable(void **state)`
-  - `test_images_warning_present` (function, line 232) `static void test_images_warning_present(void **state)`
-  - `main` (function, line 241) `int main(void)`
+  - `test_image_disabled_precedence` (function, line 209) `static void test_image_disabled_precedence(void **state)`
+  - `test_img_reason_total_and_stable` (function, line 219) `static void test_img_reason_total_and_stable(void **state)`
+  - `test_images_warning_present` (function, line 234) `static void test_images_warning_present(void **state)`
+  - `main` (function, line 243) `int main(void)`
   - `consulted` (function, line 76) `* is not even consulted (a bogus URL still yields BLOCK_DISABLED). */ assert_int_equal( rdp_image_decision(off...`
 - Depends on: `include/render_policy.h`
 

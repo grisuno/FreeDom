@@ -29,6 +29,7 @@
 - [`anyway`](modules/include.prefs.h.md#anyway) function in `include/prefs.h`
 - [`approximation`](modules/gui.browser_ui.c.md#approximation) function in `gui/browser_ui.c`
 - [`area`](modules/gui.browser_ui.c.md#area) function in `gui/browser_ui.c`
+- [`area`](modules/gui.browser_ui_internal.h.md#area) function in `gui/browser_ui_internal.h`
 - [`arrives`](modules/gui.browser_ui.c.md#arrives) function in `gui/browser_ui.c`
 - [`assumed`](modules/src.url.c.md#assumed) function in `src/url.c`
 - [`attr_span`](modules/src.prefetch.c.md#attr_span) struct in `src/prefetch.c`
@@ -180,6 +181,7 @@
 - [`buffer`](modules/src.tab.c.md#buffer) function in `src/tab.c`
 - [`BUI_CONIC_SLICES`](modules/gui.browser_ui.c.md#bui_conic_slices) macro in `gui/browser_ui.c`
 - [`bui_mask_ctx`](modules/gui.browser_ui.c.md#bui_mask_ctx) struct in `gui/browser_ui.c`
+- [`bui_paint_mask_image`](modules/gui.bui_mask_img.c.md#bui_paint_mask_image) function in `gui/bui_mask_img.c`
 - [`bui_pop_group_composite`](modules/gui.browser_ui.c.md#bui_pop_group_composite) function in `gui/browser_ui.c`
 - [`bui_pop_group_composite`](modules/gui.browser_ui.c.md#bui_pop_group_composite) function in `gui/browser_ui.c`
 - [`bui_pop_group_composite`](modules/gui.browser_ui.c.md#bui_pop_group_composite) function in `gui/browser_ui.c`
@@ -312,9 +314,12 @@
 - [`cb_next_ws_token`](modules/include.css_box.h.md#cb_next_ws_token) function in `include/css_box.h`
 - [`cb_value_em_milli`](modules/include.css_box.h.md#cb_value_em_milli) function in `include/css_box.h`
 - [`cb_value_em_milli`](modules/src.css_box.c.md#cb_value_em_milli) function in `src/css_box.c`
+- [`CC_CALC_DEPTH`](modules/src.css_color.c.md#cc_calc_depth) macro in `src/css_color.c`
 - [`CC_CHANNEL_MAX`](modules/src.css_color.c.md#cc_channel_max) macro in `src/css_color.c`
 - [`CC_COLOR_CURRENT`](modules/include.css_color.h.md#cc_color_current) macro in `include/css_color.h`
 - [`CC_COLOR_TRANSPARENT`](modules/include.css_color.h.md#cc_color_transparent) macro in `include/css_color.h`
+- [`cc_cp`](modules/src.css_color.c.md#cc_cp) struct in `src/css_color.c`
+- [`cc_cv`](modules/src.css_color.c.md#cc_cv) struct in `src/css_color.c`
 - [`CC_HSL_SCALE`](modules/src.css_color.c.md#cc_hsl_scale) macro in `src/css_color.c`
 - [`cc_named`](modules/src.css_color.c.md#cc_named) struct in `src/css_color.c`
 - [`CC_NUMBER_MAX_DIGITS`](modules/src.css_color.c.md#cc_number_max_digits) macro in `src/css_color.c`
@@ -373,6 +378,8 @@
 - [`cg_expand_background`](modules/include.css_gradient.h.md#cg_expand_background) function in `include/css_gradient.h`
 - [`cg_expand_background`](modules/src.css_gradient.c.md#cg_expand_background) function in `src/css_gradient.c`
 - [`cg_expand_bg_image`](modules/include.css_gradient.h.md#cg_expand_bg_image) function in `include/css_gradient.h`
+- [`cg_first_url`](modules/include.css_gradient.h.md#cg_first_url) function in `include/css_gradient.h`
+- [`cg_first_url`](modules/src.css_gradient.c.md#cg_first_url) function in `src/css_gradient.c`
 - [`CG_LEN_UNSET`](modules/include.css_gradient.h.md#cg_len_unset) macro in `include/css_gradient.h`
 - [`cg_parse_linear`](modules/include.css_gradient.h.md#cg_parse_linear) function in `include/css_gradient.h`
 - [`cg_parse_linear`](modules/src.css_gradient.c.md#cg_parse_linear) function in `src/css_gradient.c`
@@ -447,6 +454,8 @@
 - [`CM_TOK_MAX`](modules/src.css_mask.c.md#cm_tok_max) macro in `src/css_mask.c`
 - [`CMQ_CM_PER_IN`](modules/src.css_mq.c.md#cmq_cm_per_in) macro in `src/css_mq.c`
 - [`CMQ_COLOR_BITS`](modules/src.css_mq.c.md#cmq_color_bits) macro in `src/css_mq.c`
+- [`cmq_container_surely`](modules/include.css_mq.h.md#cmq_container_surely) function in `include/css_mq.h`
+- [`cmq_container_surely`](modules/src.css_mq.c.md#cmq_container_surely) function in `src/css_mq.c`
 - [`CMQ_DEVICE_W`](modules/src.css_mq.c.md#cmq_device_w) macro in `src/css_mq.c`
 - [`CMQ_DPI_PER_DPPX`](modules/src.css_mq.c.md#cmq_dpi_per_dppx) macro in `src/css_mq.c`
 - [`CMQ_DPPX`](modules/src.css_mq.c.md#cmq_dppx) macro in `src/css_mq.c`
@@ -522,6 +531,7 @@
 - [`cp`](modules/include.text_case.h.md#cp) function in `include/text_case.h`
 - [`csel_anc_reject`](modules/include.css_select.h.md#csel_anc_reject) function in `include/css_select.h`
 - [`csel_ci_eq`](modules/include.css_select.h.md#csel_ci_eq) function in `include/css_select.h`
+- [`csel_ci_starts`](modules/include.css_select.h.md#csel_ci_starts) function in `include/css_select.h`
 - [`csel_compact_dup`](modules/include.css_select.h.md#csel_compact_dup) function in `include/css_select.h`
 - [`csel_compact_dup`](modules/src.css_select.c.md#csel_compact_dup) function in `src/css_select.c`
 - [`csel_compact_size`](modules/include.css_select.h.md#csel_compact_size) function in `include/css_select.h`
@@ -768,7 +778,6 @@
 - [`ct_interp_texttransform`](modules/include.css_text.h.md#ct_interp_texttransform) function in `include/css_text.h`
 - [`ct_interp_texttransform`](modules/src.css_text.c.md#ct_interp_texttransform) function in `src/css_text.c`
 - [`ct_interp_transition_property`](modules/include.css_text.h.md#ct_interp_transition_property) function in `include/css_text.h`
-- [`ct_interp_transition_property`](modules/src.css_text.c.md#ct_interp_transition_property) function in `src/css_text.c`
 - [`ct_interp_valign`](modules/include.css_text.h.md#ct_interp_valign) function in `include/css_text.h`
 - [`ct_interp_valign`](modules/src.css_text.c.md#ct_interp_valign) function in `src/css_text.c`
 - [`ct_interp_whitespace`](modules/include.css_text.h.md#ct_interp_whitespace) function in `include/css_text.h`
@@ -957,6 +966,7 @@
 - [`du_is_data_url`](modules/include.data_url.h.md#du_is_data_url) function in `include/data_url.h`
 - [`du_is_data_url`](modules/src.data_url.c.md#du_is_data_url) function in `src/data_url.c`
 - [`DU_MAX_ENCODED_LEN`](modules/include.data_url.h.md#du_max_encoded_len) macro in `include/data_url.h`
+- [`du_shape_ok`](modules/src.data_url.c.md#du_shape_ok) function in `src/data_url.c`
 - [`du_status`](modules/include.data_url.h.md#du_status) enum in `include/data_url.h`
 
 <a id="e"></a>
@@ -976,6 +986,7 @@
 - [`ent`](modules/src.http_cache.c.md#ent) struct in `src/http_cache.c`
 - [`EPIPE`](modules/src.tab.c.md#epipe) function in `src/tab.c`
 - [`epoch_ms`](modules/include.media_decoder.h.md#epoch_ms) type_alias in `include/media_decoder.h`
+- [`evaluated`](modules/src.css.c.md#evaluated) function in `src/css.c`
 - [`exactly`](modules/gui.browser_ui.c.md#exactly) function in `gui/browser_ui.c`
 - [`EXCLUDED`](modules/include.secure_fetch.h.md#excluded) function in `include/secure_fetch.h`
 - [`excluded`](modules/src.os_sandbox.c.md#excluded) function in `src/os_sandbox.c`
@@ -1577,6 +1588,7 @@
 - [`img_format_name`](modules/src.image_decode.c.md#img_format_name) function in `src/image_decode.c`
 - [`IMG_MAX_DIM`](modules/include.image_decode.h.md#img_max_dim) macro in `include/image_decode.h`
 - [`IMG_MAX_PIXELS`](modules/include.image_decode.h.md#img_max_pixels) macro in `include/image_decode.h`
+- [`IMG_MAX_SCALE`](modules/include.image_decode.h.md#img_max_scale) macro in `include/image_decode.h`
 - [`img_pixels`](modules/include.image_decode.h.md#img_pixels) struct in `include/image_decode.h`
 - [`img_pixels_free`](modules/include.image_decode.h.md#img_pixels_free) function in `include/image_decode.h`
 - [`img_pixels_free`](modules/src.image_decode.c.md#img_pixels_free) function in `src/image_decode.c`
@@ -1867,6 +1879,7 @@
 - [`lacks`](modules/include.css_chain.h.md#lacks) function in `include/css_chain.h`
 - [`layer`](modules/include.compositor.h.md#cx_item-layer) type_alias of `cx_item` in `include/compositor.h`
 - [`layer`](modules/gui.browser_ui.c.md#layer) function in `gui/browser_ui.c`
+- [`layer`](modules/src.css.c.md#layer) function in `src/css.c`
 - [`layout`](modules/gui.browser_ui.c.md#layout) function in `gui/browser_ui.c`
 - [`layout`](modules/src.tab.c.md#layout) function in `src/tab.c`
 - [`left`](modules/include.box_style.h.md#bx_edges-left) type_alias of `bx_edges` in `include/box_style.h`
@@ -2408,6 +2421,7 @@
 - [`PV_LEN_AUTO`](modules/include.page_view.h.md#pv_len_auto) macro in `include/page_view.h`
 - [`PV_LEN_END`](modules/include.page_view.h.md#pv_len_end) macro in `include/page_view.h`
 - [`PV_LEN_UNSET`](modules/include.page_view.h.md#pv_len_unset) macro in `include/page_view.h`
+- [`PV_MASK_GEO_N`](modules/include.page_view.h.md#pv_mask_geo_n) macro in `include/page_view.h`
 - [`PV_MAUTO_BOTTOM`](modules/include.page_view.h.md#pv_mauto_bottom) macro in `include/page_view.h`
 - [`PV_MAUTO_LEFT`](modules/include.page_view.h.md#pv_mauto_left) macro in `include/page_view.h`
 - [`PV_MAUTO_RIGHT`](modules/include.page_view.h.md#pv_mauto_right) macro in `include/page_view.h`
@@ -2812,6 +2826,12 @@
 - [`sqb_submit`](modules/src.subreq_batch.c.md#sqb_submit) function in `src/subreq_batch.c`
 - [`sqb_wait_all`](modules/include.subreq_batch.h.md#sqb_wait_all) function in `include/subreq_batch.h`
 - [`sqb_wait_all`](modules/src.subreq_batch.c.md#sqb_wait_all) function in `src/subreq_batch.c`
+- [`SR_MAX_DIM`](modules/include.svg_raster.h.md#sr_max_dim) macro in `include/svg_raster.h`
+- [`SR_MIN_RASTER`](modules/include.svg_raster.h.md#sr_min_raster) macro in `include/svg_raster.h`
+- [`sr_rasterize`](modules/src.svg_raster.c.md#sr_rasterize) function in `src/svg_raster.c`
+- [`sr_sniff`](modules/include.svg_raster.h.md#sr_sniff) function in `include/svg_raster.h`
+- [`sr_sniff`](modules/src.svg_raster.c.md#sr_sniff) function in `src/svg_raster.c`
+- [`SR_SNIFF_MAX`](modules/include.svg_raster.h.md#sr_sniff_max) macro in `include/svg_raster.h`
 - [`src`](modules/include.html_parse.h.md#src) function in `include/html_parse.h`
 - [`ss_committed`](modules/include.shm_slots.h.md#ss_committed) function in `include/shm_slots.h`
 - [`SS_COUNT`](modules/include.shm_slots.h.md#ss_count) macro in `include/shm_slots.h`
@@ -2862,8 +2882,9 @@
 - [`sv_status`](modules/include.svg_render.h.md#sv_status) enum in `include/svg_render.h`
 - [`SV_TEXT_MAX`](modules/include.svg_render.h.md#sv_text_max) macro in `include/svg_render.h`
 - [`sv_verb`](modules/include.svg_render.h.md#sv_verb) enum in `include/svg_render.h`
-- [`svp_draw`](modules/gui.svg_paint.c.md#svp_draw) function in `gui/svg_paint.c`
 - [`svp_draw`](modules/include.svg_paint.h.md#svp_draw) function in `include/svg_paint.h`
+- [`svp_draw`](modules/src.svg_paint.c.md#svp_draw) function in `src/svg_paint.c`
+- [`svp_draw_ex`](modules/src.svg_paint.c.md#svp_draw_ex) function in `src/svg_paint.c`
 - [`swap`](modules/src.tab.c.md#swap) function in `src/tab.c`
 - [`sz_fill`](modules/src.page_view.c.md#sz_fill) struct in `src/page_view.c`
 
@@ -3079,6 +3100,7 @@
 - [`tls_capture`](modules/src.secure_fetch.c.md#tls_capture) struct in `src/secure_fetch.c`
 - [`to`](modules/include.render_doc.h.md#rd_block-to) method of `rd_block` in `include/render_doc.h`
 - [`toggle`](modules/gui.browser_ui.c.md#toggle) function in `gui/browser_ui.c`
+- [`too`](modules/src.render_doc.c.md#too) function in `src/render_doc.c`
 - [`tor_enabled`](modules/include.net_realm.h.md#tor_enabled) type_alias in `include/net_realm.h`
 - [`translate`](modules/include.css.h.md#css_style-translate) method of `css_style` in `include/css.h`
 - [`translate3d`](modules/src.css.c.md#translate3d) function in `src/css.c`
@@ -3265,6 +3287,7 @@
 
 ## V
 
+- [`v`](modules/src.css_color.c.md#v) type_alias in `src/css_color.c`
 - [`val_kind`](modules/include.interp.h.md#val_kind) type_alias in `include/interp.h`
 - [`validators`](modules/include.secure_fetch.h.md#validators) function in `include/secure_fetch.h`
 - [`var`](modules/src.css.c.md#var) function in `src/css.c`
@@ -3283,6 +3306,7 @@
 - [`walk`](modules/src.page_view.c.md#walk) function in `src/page_view.c`
 - [`walked`](modules/include.hostblock.h.md#walked) function in `include/hostblock.h`
 - [`way`](modules/gui.browser_ui.c.md#way) function in `gui/browser_ui.c`
+- [`way`](modules/include.svg_paint.h.md#way) function in `include/svg_paint.h`
 - [`wc_caps`](modules/include.webcaps.h.md#wc_caps) struct in `include/webcaps.h`
 - [`wc_derive`](modules/src.webcaps.c.md#wc_derive) function in `src/webcaps.c`
 - [`wc_from_flags`](modules/src.webcaps.c.md#wc_from_flags) function in `src/webcaps.c`
@@ -3379,6 +3403,7 @@
 - [`wlg_stop`](modules/include.wl_guard.h.md#wlg_stop) function in `include/wl_guard.h`
 - [`wlg_stop`](modules/src.wl_guard.c.md#wlg_stop) function in `src/wl_guard.c`
 - [`word_spacing`](modules/include.page_view.h.md#pv_text_ext-word_spacing) type_alias of `pv_text_ext` in `include/page_view.h`
+- [`worker`](modules/include.data_url.h.md#worker) function in `include/data_url.h`
 - [`write_full`](modules/include.util.h.md#write_full) function in `include/util.h`
 - [`write_full`](modules/src.renderer.c.md#write_full) function in `src/renderer.c`
 - [`write_full`](modules/src.tab.c.md#write_full) macro in `src/tab.c`

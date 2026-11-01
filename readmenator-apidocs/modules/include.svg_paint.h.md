@@ -1,10 +1,10 @@
 # `include/svg_paint.h`
 
-> Source: [include/svg_paint.h:1](../../include/svg_paint.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
+> Source: [include/svg_paint.h:1](../../include/svg_paint.h#L1) | language `h` | coverage 33.3% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`svp_draw`](#svp_draw)
+- **Functions:** [`svp_draw`](#svp_draw), [`way`](#way)
 
 ## Functions
 
@@ -35,5 +35,25 @@ No-ops on a NULL argument or a non-positive rect.
 | `w` | `double` |  |  |
 | `h` | `double` |  |  |
 | `current_rgb` | `int` |  |  |
+
+---
+
+<a id="way"></a>
+
+### `way`
+
+`function` | [include/svg_paint.h:35](../../include/svg_paint.h#L35)
+
+```c
+* worker rasterizes SVG images this way (spec/svg_raster.md section 3): drawing text * would open fontconfig, i.e. system files, from inside the sandbox. */ void svp_draw_ex(cairo_t *cr, const sv_imag
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `section` | `spec/svg_raster.md 3` |  |  |
+
+**Returns:** `drawing text * would open fontconfig, i.e. system files, from inside the sandbox. */ void svp_draw_ex(cairo_t *cr, const sv_imag`
 
 ---

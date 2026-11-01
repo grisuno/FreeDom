@@ -2,33 +2,33 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 219,
-  "entities": 3533,
+  "modules": 222,
+  "entities": 3561,
   "languages": {
-   "c": 102,
-   "h": 101,
+   "c": 104,
+   "h": 102,
    "py": 12,
    "sh": 4
   },
   "kinds": {
    "constant": 23,
    "enum": 162,
-   "function": 1983,
-   "macro": 709,
+   "function": 1999,
+   "macro": 715,
    "method": 24,
-   "module": 219,
-   "struct": 265,
-   "type_alias": 141,
+   "module": 222,
+   "struct": 267,
+   "type_alias": 142,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 89,
+  "skipped_files": 90,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1534,
-   "total": 3503,
+   "documented": 1547,
+   "total": 3531,
    "percent": 43.8
   },
   "by_kind": {
@@ -38,14 +38,14 @@
     "percent": 50.0
    },
    "function": {
-    "documented": 880,
-    "total": 1983,
-    "percent": 44.4
+    "documented": 886,
+    "total": 1999,
+    "percent": 44.3
    },
    "macro": {
-    "documented": 323,
-    "total": 709,
-    "percent": 45.6
+    "documented": 327,
+    "total": 715,
+    "percent": 45.7
    },
    "method": {
     "documented": 0,
@@ -53,19 +53,19 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 30,
-    "total": 219,
-    "percent": 13.7
+    "documented": 32,
+    "total": 222,
+    "percent": 14.4
    },
    "struct": {
     "documented": 117,
-    "total": 265,
-    "percent": 44.2
+    "total": 267,
+    "percent": 43.8
    },
    "type_alias": {
-    "documented": 103,
-    "total": 141,
-    "percent": 73.0
+    "documented": 104,
+    "total": 142,
+    "percent": 73.2
    }
   },
   "by_module": {
@@ -91,7 +91,12 @@
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
-    "total": 10,
+    "total": 11,
+    "percent": 45.5
+   },
+   "gui/bui_mask_img.c": {
+    "documented": 1,
+    "total": 2,
     "percent": 50.0
    },
    "gui/bui_theme.c": {
@@ -103,11 +108,6 @@
     "documented": 0,
     "total": 3,
     "percent": 0.0
-   },
-   "gui/svg_paint.c": {
-    "documented": 2,
-    "total": 2,
-    "percent": 100.0
    },
    "gui/ui_render.c": {
     "documented": 3,
@@ -195,9 +195,9 @@
     "percent": 13.3
    },
    "include/css_gradient.h": {
-    "documented": 4,
-    "total": 13,
-    "percent": 30.8
+    "documented": 5,
+    "total": 14,
+    "percent": 35.7
    },
    "include/css_index.h": {
     "documented": 4,
@@ -215,14 +215,14 @@
     "percent": 50.0
    },
    "include/css_mq.h": {
-    "documented": 3,
-    "total": 6,
-    "percent": 50.0
+    "documented": 4,
+    "total": 7,
+    "percent": 57.1
    },
    "include/css_select.h": {
-    "documented": 24,
-    "total": 39,
-    "percent": 61.5
+    "documented": 25,
+    "total": 40,
+    "percent": 62.5
    },
    "include/css_text.h": {
     "documented": 0,
@@ -241,8 +241,8 @@
    },
    "include/data_url.h": {
     "documented": 2,
-    "total": 6,
-    "percent": 33.3
+    "total": 7,
+    "percent": 28.6
    },
    "include/disk_store.h": {
     "documented": 1,
@@ -346,8 +346,8 @@
    },
    "include/image_decode.h": {
     "documented": 6,
-    "total": 13,
-    "percent": 46.2
+    "total": 14,
+    "percent": 42.9
    },
    "include/import_map.h": {
     "documented": 3,
@@ -426,8 +426,8 @@
    },
    "include/page_view.h": {
     "documented": 55,
-    "total": 92,
-    "percent": 59.8
+    "total": 93,
+    "percent": 59.1
    },
    "include/pdf_export.h": {
     "documented": 3,
@@ -506,8 +506,13 @@
    },
    "include/svg_paint.h": {
     "documented": 1,
-    "total": 2,
-    "percent": 50.0
+    "total": 3,
+    "percent": 33.3
+   },
+   "include/svg_raster.h": {
+    "documented": 3,
+    "total": 5,
+    "percent": 60.0
    },
    "include/svg_render.h": {
     "documented": 7,
@@ -646,8 +651,8 @@
    },
    "src/css.c": {
     "documented": 20,
-    "total": 81,
-    "percent": 24.7
+    "total": 83,
+    "percent": 24.1
    },
    "src/css_atrule.c": {
     "documented": 4,
@@ -665,9 +670,9 @@
     "percent": 40.0
    },
    "src/css_color.c": {
-    "documented": 5,
-    "total": 13,
-    "percent": 38.5
+    "documented": 7,
+    "total": 17,
+    "percent": 41.2
    },
    "src/css_computed.c": {
     "documented": 2,
@@ -680,9 +685,9 @@
     "percent": 30.0
    },
    "src/css_gradient.c": {
-    "documented": 3,
-    "total": 16,
-    "percent": 18.8
+    "documented": 4,
+    "total": 17,
+    "percent": 23.5
    },
    "src/css_index.c": {
     "documented": 6,
@@ -695,14 +700,14 @@
     "percent": 25.0
    },
    "src/css_mask.c": {
-    "documented": 2,
+    "documented": 3,
     "total": 7,
-    "percent": 28.6
+    "percent": 42.9
    },
    "src/css_mq.c": {
-    "documented": 2,
-    "total": 11,
-    "percent": 18.2
+    "documented": 3,
+    "total": 12,
+    "percent": 25.0
    },
    "src/css_select.c": {
     "documented": 13,
@@ -710,9 +715,9 @@
     "percent": 65.0
    },
    "src/css_text.c": {
-    "documented": 11,
-    "total": 15,
-    "percent": 73.3
+    "documented": 10,
+    "total": 14,
+    "percent": 71.4
    },
    "src/css_values.c": {
     "documented": 2,
@@ -726,8 +731,8 @@
    },
    "src/data_url.c": {
     "documented": 1,
-    "total": 5,
-    "percent": 20.0
+    "total": 6,
+    "percent": 16.7
    },
    "src/disk_store.c": {
     "documented": 1,
@@ -986,8 +991,8 @@
    },
    "src/render_doc.c": {
     "documented": 9,
-    "total": 18,
-    "percent": 50.0
+    "total": 19,
+    "percent": 47.4
    },
    "src/render_policy.c": {
     "documented": 3,
@@ -1018,6 +1023,16 @@
     "documented": 5,
     "total": 11,
     "percent": 45.5
+   },
+   "src/svg_paint.c": {
+    "documented": 2,
+    "total": 3,
+    "percent": 66.7
+   },
+   "src/svg_raster.c": {
+    "documented": 2,
+    "total": 3,
+    "percent": 66.7
    },
    "src/svg_render.c": {
     "documented": 5,
@@ -1190,7 +1205,12 @@
   {
    "uid": "gui/browser_ui_internal.h",
    "path": "modules/gui.browser_ui_internal.h.jsonl",
-   "entities": 10
+   "entities": 11
+  },
+  {
+   "uid": "gui/bui_mask_img.c",
+   "path": "modules/gui.bui_mask_img.c.jsonl",
+   "entities": 2
   },
   {
    "uid": "gui/bui_theme.c",
@@ -1201,11 +1221,6 @@
    "uid": "gui/freedom_view.c",
    "path": "modules/gui.freedom_view.c.jsonl",
    "entities": 3
-  },
-  {
-   "uid": "gui/svg_paint.c",
-   "path": "modules/gui.svg_paint.c.jsonl",
-   "entities": 2
   },
   {
    "uid": "gui/ui_render.c",
@@ -1295,7 +1310,7 @@
   {
    "uid": "include/css_gradient.h",
    "path": "modules/include.css_gradient.h.jsonl",
-   "entities": 13
+   "entities": 14
   },
   {
    "uid": "include/css_index.h",
@@ -1315,12 +1330,12 @@
   {
    "uid": "include/css_mq.h",
    "path": "modules/include.css_mq.h.jsonl",
-   "entities": 6
+   "entities": 7
   },
   {
    "uid": "include/css_select.h",
    "path": "modules/include.css_select.h.jsonl",
-   "entities": 39
+   "entities": 40
   },
   {
    "uid": "include/css_text.h",
@@ -1340,7 +1355,7 @@
   {
    "uid": "include/data_url.h",
    "path": "modules/include.data_url.h.jsonl",
-   "entities": 6
+   "entities": 7
   },
   {
    "uid": "include/disk_store.h",
@@ -1445,7 +1460,7 @@
   {
    "uid": "include/image_decode.h",
    "path": "modules/include.image_decode.h.jsonl",
-   "entities": 13
+   "entities": 14
   },
   {
    "uid": "include/import_map.h",
@@ -1525,7 +1540,7 @@
   {
    "uid": "include/page_view.h",
    "path": "modules/include.page_view.h.jsonl",
-   "entities": 92
+   "entities": 93
   },
   {
    "uid": "include/pdf_export.h",
@@ -1605,7 +1620,12 @@
   {
    "uid": "include/svg_paint.h",
    "path": "modules/include.svg_paint.h.jsonl",
-   "entities": 2
+   "entities": 3
+  },
+  {
+   "uid": "include/svg_raster.h",
+   "path": "modules/include.svg_raster.h.jsonl",
+   "entities": 5
   },
   {
    "uid": "include/svg_render.h",
@@ -1745,7 +1765,7 @@
   {
    "uid": "src/css.c",
    "path": "modules/src.css.c.jsonl",
-   "entities": 81
+   "entities": 83
   },
   {
    "uid": "src/css_atrule.c",
@@ -1765,7 +1785,7 @@
   {
    "uid": "src/css_color.c",
    "path": "modules/src.css_color.c.jsonl",
-   "entities": 13
+   "entities": 17
   },
   {
    "uid": "src/css_computed.c",
@@ -1780,7 +1800,7 @@
   {
    "uid": "src/css_gradient.c",
    "path": "modules/src.css_gradient.c.jsonl",
-   "entities": 16
+   "entities": 17
   },
   {
    "uid": "src/css_index.c",
@@ -1800,7 +1820,7 @@
   {
    "uid": "src/css_mq.c",
    "path": "modules/src.css_mq.c.jsonl",
-   "entities": 11
+   "entities": 12
   },
   {
    "uid": "src/css_select.c",
@@ -1810,7 +1830,7 @@
   {
    "uid": "src/css_text.c",
    "path": "modules/src.css_text.c.jsonl",
-   "entities": 15
+   "entities": 14
   },
   {
    "uid": "src/css_values.c",
@@ -1825,7 +1845,7 @@
   {
    "uid": "src/data_url.c",
    "path": "modules/src.data_url.c.jsonl",
-   "entities": 5
+   "entities": 6
   },
   {
    "uid": "src/disk_store.c",
@@ -2085,7 +2105,7 @@
   {
    "uid": "src/render_doc.c",
    "path": "modules/src.render_doc.c.jsonl",
-   "entities": 18
+   "entities": 19
   },
   {
    "uid": "src/render_policy.c",
@@ -2116,6 +2136,16 @@
    "uid": "src/subreq_batch.c",
    "path": "modules/src.subreq_batch.c.jsonl",
    "entities": 11
+  },
+  {
+   "uid": "src/svg_paint.c",
+   "path": "modules/src.svg_paint.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "src/svg_raster.c",
+   "path": "modules/src.svg_raster.c.jsonl",
+   "entities": 3
   },
   {
    "uid": "src/svg_render.c",
@@ -2265,7 +2295,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 1970
+  "total": 1985
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

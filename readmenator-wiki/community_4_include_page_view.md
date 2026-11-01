@@ -1,24 +1,12 @@
 # include: page_view
 
-*Community 2 | 39 files | cohesion 0.55*
+*Community 4 | 37 files | cohesion 0.54*
 
 ## Definition
 
-This community groups 39 file(s) rooted at `tests` with dominant language c (cohesion 0.55). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (267 symbols). Documented purpose: Case mapping for text-transform and synthesized small caps (spec/text_case.md). Pure: no I/O, no state, no allocation..
+This community groups 37 file(s) rooted at `include` with dominant language c (cohesion 0.54). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `tests/test_css.c` (366 symbols). Documented purpose: bui_mask_img -- paints a mask-image: url() layer into a mask surface..
 
 ## Files
-
-### `tests` (15 files)
-
-| File | Language | Layer | Symbols | Doc |
-|------|----------|-------|---------|-----|
-| `tests/test_box_style.c` | c | testing | 49 | no |
-| `tests/test_box_tree.c` | c | testing | 69 | no |
-| `tests/test_compositor.c` | c | testing | 21 | no |
-| `tests/test_css_computed.c` | c | testing | 9 | no |
-| `tests/test_css_counter.c` | c | testing | 12 | yes |
-| `tests/test_css_drops.c` | c | testing | 30 | yes |
-| `tests/test_css_gradient.c` | c | testing | 13 | no |
 
 ### `include` (13 files)
 
@@ -32,7 +20,18 @@ This community groups 39 file(s) rooted at `tests` with dominant language c (coh
 | `include/css_computed.h` | h | utility | 6 | no |
 | `include/css_counter.h` | h | utility | 19 | no |
 
-### `src` (11 files)
+### `tests` (13 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `tests/test_box_style.c` | c | testing | 49 | no |
+| `tests/test_box_tree.c` | c | testing | 69 | no |
+| `tests/test_compositor.c` | c | testing | 21 | no |
+| `tests/test_css.c` | c | testing | 366 | no |
+| `tests/test_css_computed.c` | c | testing | 9 | no |
+| `tests/test_css_counter.c` | c | testing | 12 | yes |
+
+### `src` (10 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -41,13 +40,20 @@ This community groups 39 file(s) rooted at `tests` with dominant language c (coh
 | `src/compositor.c` | c | utility | 5 | no |
 | `src/css_computed.c` | c | utility | 45 | no |
 | `src/css_counter.c` | c | utility | 34 | no |
-| `src/css_length.c` | c | utility | 18 | no |
+| `src/dom_debug.c` | c | utility | 24 | no |
 
-*... and 19 more files in this community.*
+### `gui` (1 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `gui/bui_mask_img.c` | c | utility | 1 | yes |
+
+*... and 17 more files in this community.*
 
 
 ## Key Symbols
 
+- `bui_paint_mask_image` (function, `gui/bui_mask_img.c:17`) `int bui_paint_mask_image(cairo_t *c, cairo_surface_t *img, int nat_w, int nat_h,`
 - `FREEDOM_BOX_STYLE_H` (macro, `include/box_style.h:2`) `#define FREEDOM_BOX_STYLE_H`
 - `BX_TAG_NAME_MAX` (macro, `include/box_style.h:33`) `#define BX_TAG_NAME_MAX`
 - `bx_display` (enum, `include/box_style.h:35`)
@@ -77,20 +83,20 @@ This community groups 39 file(s) rooted at `tests` with dominant language c (coh
 - `bx_flex_max_clamp` (function, `include/box_style.h:292`) `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, doub` - Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size
 - `bx_flex_min_clamp` (function, `include/box_style.h:298`) `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, doubl` - The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (conv
 - `bx_bg_layer` (struct, `include/box_style.h:321`) - the explicit form, each component is a px value (CSS_LEN_AUTO = auto, CSS_LEN_UNSET = not declared,
-- `nat_h` (type_alias, `include/box_style.h:321`) `typedef struct bx_bg_layer { double nat_w, nat_h;` - the explicit form, each component is a px value (CSS_LEN_AUTO = auto, CSS_LEN_UNSET = not declared,
 
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 72
-- Cross-boundary resolved imports (EXTRACTED): 60
+- Cross-boundary resolved imports (EXTRACTED): 62
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/css.h imports include/css_color.h.
-- [EXTRACTED] depends_on community 8 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
-- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
+- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 4 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/bui_mask_img.c imports gui/browser_ui_internal.h.
+- [EXTRACTED] depends_on community 4 <-> 3 (strength 0.9): Extracted import edge crosses communities: include/css.h imports include/css_color.h.
+- [EXTRACTED] depends_on community 9 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
+- [EXTRACTED] depends_on community 4 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
 
 ## Risks
 
@@ -112,12 +118,13 @@ This community groups 39 file(s) rooted at `tests` with dominant language c (coh
 
 ## Open Questions
 
-- Why do 35 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
+- Why do 32 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.55?
+- Should include: page_view be split, given cohesion 0.54?
 
 ## Sources
 
+- `gui/bui_mask_img.c`
 - `include/box_style.h`
 - `include/box_tree.h`
 - `include/compositor.h`
@@ -136,6 +143,5 @@ This community groups 39 file(s) rooted at `tests` with dominant language c (coh
 - `src/compositor.c`
 - `src/css_computed.c`
 - `src/css_counter.c`
-- `src/css_length.c`
 - `src/dom_debug.c`
-- *... and 19 more*
+- *... and 17 more*

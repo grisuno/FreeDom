@@ -2,6 +2,15 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_host_conf.c` -> `include/host_conf.h`
+- `tests/test_hostblock.c` -> `include/hostblock.h`
+- `tests/test_hostedit.c` -> `include/hostedit.h`
+- `tests/test_html_parse.c` -> `include/html_parse.h`
+- `tests/test_http_cache.c` -> `include/http_cache.h`
+- `tests/test_identity.c` -> `include/anti_fp.h`
+- `tests/test_identity.c` -> `include/identity.h`
+- `tests/test_image_decode.c` -> `include/image_decode.h`
+- `tests/test_import_map.c` -> `include/import_map.h`
 - `tests/test_interp.c` -> `include/interp.h`
 - `tests/test_js_dom.c` -> `include/dom.h`
 - `tests/test_js_dom.c` -> `include/fb_cmdline.h`
@@ -55,6 +64,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_sha2.c` -> `include/sha2.h`
 - `tests/test_shm_slots.c` -> `include/shm_slots.h`
 - `tests/test_subreq_batch.c` -> `include/subreq_batch.h`
+- `tests/test_svg_raster.c` -> `include/svg_raster.h`
 - `tests/test_svg_render.c` -> `include/svg_render.h`
 - `tests/test_tab.c` -> `include/css.h`
 - `tests/test_tab.c` -> `include/js_geom.h`
@@ -88,8 +98,8 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `app.py` -> logging, mcp.server.fastmcp, os, subprocess, sys
 - `gui/browser_ui.c` -> cairo/cairo-pdf.h, cairo/cairo.h, errno.h, fcntl.h, fontconfig/fontconfig.h, limits.h, math.h, poll.h, pthread.h, signal.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/mman.h, sys/stat.h, sys/timerfd.h, sys/wait.h, time.h, unistd.h, wayland-client.h, wayland-cursor.h, xdg-decoration-client-protocol.h, xdg-shell-client-protocol.h, xkbcommon/xkbcommon.h
 - `gui/browser_ui_internal.h` -> cairo/cairo.h
+- `gui/bui_mask_img.c` -> cairo.h
 - `gui/freedom_view.c` -> stdio.h, stdlib.h, string.h
-- `gui/svg_paint.c` -> math.h, string.h
 - `gui/ui_render.c` -> cairo/cairo.h, stdio.h, stdlib.h, string.h, sys/mman.h, unistd.h, wayland-client.h, xdg-decoration-client-protocol.h, xdg-shell-client-protocol.h
 - `include/anti_fp.h` -> stddef.h, stdint.h
 - `include/block_flow.h` -> stddef.h
@@ -155,6 +165,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/sha2.h` -> stddef.h, stdint.h
 - `include/subreq_batch.h` -> stddef.h
 - `include/svg_paint.h` -> cairo.h
+- `include/svg_raster.h` -> stddef.h, stdint.h
 - `include/svg_render.h` -> stddef.h
 - `include/tab.h` -> stddef.h, stdint.h, sys/types.h
 - `include/text_case.h` -> stddef.h, stdint.h
@@ -180,7 +191,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/css_atrule.c` -> string.h
 - `src/css_box.c` -> math.h, stdlib.h, string.h
 - `src/css_chain.c` -> stdlib.h, string.h
-- `src/css_color.c` -> math.h, stdlib.h, string.h
+- `src/css_color.c` -> math.h, stdio.h, stdlib.h, string.h
 - `src/css_computed.c` -> stdarg.h, stdio.h, string.h
 - `src/css_counter.c` -> stdint.h, stdio.h, stdlib.h, string.h
 - `src/css_gradient.c` -> ctype.h, math.h, stdlib.h, string.h
@@ -248,6 +259,8 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/secure_fetch.c` -> curl/curl.h, inttypes.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdio.h, stdlib.h, string.h, strings.h, time.h
 - `src/sha2.c` -> string.h
 - `src/subreq_batch.c` -> pthread.h, semaphore.h, stdlib.h, string.h, time.h
+- `src/svg_paint.c` -> math.h, string.h
+- `src/svg_raster.c` -> cairo.h, math.h, stdlib.h, string.h
 - `src/svg_render.c` -> math.h, stddef.h, string.h
 - `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, pthread.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/random.h, sys/wait.h, time.h, unistd.h
 - `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, stdint.h, stdio.h, stdlib.h, string.h
@@ -334,6 +347,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_sha2.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_shm_slots.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_subreq_batch.c` -> cmocka.h, pthread.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h, unistd.h
+- `tests/test_svg_raster.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_tab.c` -> cmocka.h, poll.h, pthread.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h
 - `tests/test_text_case.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h

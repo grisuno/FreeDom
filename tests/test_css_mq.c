@@ -88,6 +88,31 @@ static void test_fail_closed(void **state) {
     assert_false(cmq_matches("(width>0px)", 11, NULL));
 }
 
+
+static int surely(const char *q) { return cmq_container_surely(q, strlen(q), 1000); }
+
+/* spec/css_mq.md "Container queries sin layout". */
+static void test_container_surely(void **state) {
+    (void)state;
+    assert_int_equal(surely("(width<63.25rem)"), 1);
+    assert_int_equal(surely("(max-width: 1200px)"), 1);
+    assert_int_equal(surely("(inline-size <= 1100px)"), 1);
+    assert_int_equal(surely("banner (width < 80rem)"), 1);
+    assert_int_equal(surely("(width>=1280px)"), 0);
+    assert_int_equal(surely("(width<480px)"), 0);
+    assert_int_equal(surely("blankslate (width<=34rem)"), 0);
+    assert_int_equal(surely("(min-width:32px)"), 0);
+    assert_int_equal(surely("(width<80rem) or (width>9px)"), 0);
+    assert_int_equal(surely("not (width>2000px)"), 0);
+    assert_int_equal(surely("(height<10px)"), 0);
+    assert_int_equal(surely("(max-height: 60px)"), 0);
+    assert_int_equal(surely("style(--x: 1)"), 0);
+    assert_int_equal(surely("(width<2000px), (width<1px)"), 0);
+    assert_int_equal(surely("(frob<1px)"), 0);
+    assert_int_equal(cmq_container_surely(NULL, 3, 1000), 0);
+    assert_int_equal(cmq_container_surely("(width<9px)", 11, 0), 0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_range_syntax),
@@ -95,6 +120,7 @@ int main(void) {
         cmocka_unit_test(test_not_or),
         cmocka_unit_test(test_desktop_identity),
         cmocka_unit_test(test_fail_closed),
+        cmocka_unit_test(test_container_surely),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

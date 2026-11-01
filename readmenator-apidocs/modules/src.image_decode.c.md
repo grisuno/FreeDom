@@ -145,7 +145,7 @@ int img_dimensions_ok(uint32_t w, uint32_t h)
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`img_dimensions_ok`](#img_dimensions_ok) (include/image_decode.h:78).
+> **Inherited:** Documentation from [`img_dimensions_ok`](#img_dimensions_ok) (include/image_decode.h:84).
 
 *Called by:* [`img_decode_gif`](#img_decode_gif), [`img_decode_jpeg`](#img_decode_jpeg), [`img_decode_png`](#img_decode_png), [`img_decode_webp`](#img_decode_webp)
 
@@ -322,7 +322,7 @@ Idempotent; safe on NULL and on a zeroed struct.
 |---|---|---|---|
 | `p` | `img_pixels *` |  |  |
 
-> **Inherited:** Documentation from [`img_pixels_free`](#img_pixels_free) (include/image_decode.h:121).
+> **Inherited:** Documentation from [`img_pixels_free`](#img_pixels_free) (include/image_decode.h:127).
 
 ---
 
@@ -348,7 +348,7 @@ Never NULL.
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`img_format_name`](#img_format_name) (include/image_decode.h:124).
+> **Inherited:** Documentation from [`img_format_name`](#img_format_name) (include/image_decode.h:130).
 
 ---
 

@@ -1,12 +1,28 @@
 # `src/css_color.c`
 
-> Source: [src/css_color.c:1](../../src/css_color.c#L1) | language `c` | coverage 38.5% | [API index](../index.md)
+> Source: [src/css_color.c:1](../../src/css_color.c#L1) | language `c` | coverage 41.2% | [API index](../index.md)
 
 ## Contents
 
-- **Structs:** [`cc_named`](#cc_named)
+- **Structs:** [`cc_named`](#cc_named), [`cc_cv`](#cc_cv), [`cc_cp`](#cc_cp)
+- **Type Aliases:** [`v`](#v)
 - **Functions:** [`span`](#span), [`cc_parse`](#cc_parse), [`strncmp`](#strncmp), [`cc_pack`](#cc_pack), [`cc_unpack`](#cc_unpack)
-- **Macros:** [`CC_TOKEN_MAX`](#cc_token_max), [`CC_CHANNEL_MAX`](#cc_channel_max), [`CC_PERCENT_MAX`](#cc_percent_max), [`CC_NUMBER_MAX_DIGITS`](#cc_number_max_digits), [`CC_HSL_SCALE`](#cc_hsl_scale), [`CC_PI`](#cc_pi)
+- **Macros:** [`CC_TOKEN_MAX`](#cc_token_max), [`CC_CHANNEL_MAX`](#cc_channel_max), [`CC_PERCENT_MAX`](#cc_percent_max), [`CC_NUMBER_MAX_DIGITS`](#cc_number_max_digits), [`CC_HSL_SCALE`](#cc_hsl_scale), [`CC_CALC_DEPTH`](#cc_calc_depth), [`CC_PI`](#cc_pi)
+
+## Type Diagram
+
+```mermaid
+classDiagram
+    direction LR
+    class cc_named
+    <<struct>> cc_named
+    class v
+    <<type_alias>> v
+    class cc_cv
+    <<struct>> cc_cv
+    class cc_cp
+    <<struct>> cc_cp
+```
 
 ## Call Graph
 
@@ -28,11 +44,53 @@ flowchart LR
 
 ### `cc_named`
 
-`struct` | [src/css_color.c:33](../../src/css_color.c#L33)
+`struct` | [src/css_color.c:34](../../src/css_color.c#L34)
 
 ```c
 typedef struct cc_named
 ```
+
+---
+
+<a id="cc_cv"></a>
+
+### `cc_cv`
+
+`struct` | [src/css_color.c:223](../../src/css_color.c#L223)
+
+```c
+typedef struct cc_cv { double v; int pct; } cc_cv;
+```
+
+---
+
+<a id="cc_cp"></a>
+
+### `cc_cp`
+
+`struct` `const` | [src/css_color.c:224](../../src/css_color.c#L224)
+
+```c
+typedef struct cc_cp { const char *p, *e; } cc_cp;
+```
+
+---
+
+## Type Aliases
+
+<a id="v"></a>
+
+### `v`
+
+`type_alias` | [src/css_color.c:222](../../src/css_color.c#L222)
+
+```c
+typedef struct cc_cv { double v;
+```
+
+-- calc() inside a colour component (CSS Values 4 section 10) ---------------- A channel may be a calc() over <number>s and <percentage>s (GitHub writes `hsl(0deg, 0%, calc(var(--switch) * 100%))`, Discord `hsl(235, calc(1*86.1%), 71.8%)`).
+
+The expression is folded to one literal before the component parser sees it, so the range checks stay in exactly one place. Depth-bounded recursive descent over a * bounded span; a percentage times a percentage, or a sum mixing the two, fails. define CC_CALC_DEPTH 8
 
 ---
 
@@ -42,7 +100,7 @@ typedef struct cc_named
 
 ### `span`
 
-`function` | [src/css_color.c:325](../../src/css_color.c#L325)
+`function` | [src/css_color.c:431](../../src/css_color.c#L431)
 
 ```c
 * span (when a slash is present) into ab/ae, and returns the component count, * or -1. Bounded: ...
@@ -62,7 +120,7 @@ typedef struct cc_named
 
 ### `cc_parse`
 
-`function` | [src/css_color.c:583](../../src/css_color.c#L583)
+`function` | [src/css_color.c:697](../../src/css_color.c#L697)
 
 ```c
 cc_status cc_parse(const char *token, cc_rgb *out)
@@ -87,7 +145,7 @@ cc_status cc_parse(const char *token, cc_rgb *out)
 
 ### `strncmp`
 
-`function` | [src/css_color.c:598](../../src/css_color.c#L598)
+`function` | [src/css_color.c:712](../../src/css_color.c#L712)
 
 ```c
 strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)
@@ -102,7 +160,7 @@ strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
-*Called by:* [`arrives`](gui.browser_ui.c.md#arrives), [`only`](gui.browser_ui.c.md#only), [`blur`](src.css.c.md#blur), [`cb_clip_inset`](src.css_box.c.md#cb_clip_inset), [`cc_parse`](#cc_parse), [`cnt_is_marker`](src.css_counter.c.md#cnt_is_marker), [`cnt_parse_decls`](src.css_counter.c.md#cnt_parse_decls), [`dl_should_download`](src.download.c.md#dl_should_download), [`gets`](src.freedom.c.md#gets), [`main`](src.freedom.c.md#main), [`parent`](src.freedom.c.md#parent), [`hls_resolve_url`](src.hls.c.md#hls_resolve_url) and 5 more
+*Called by:* [`arrives`](gui.browser_ui.c.md#arrives), [`only`](gui.browser_ui.c.md#only), [`blur`](src.css.c.md#blur), [`cb_clip_inset`](src.css_box.c.md#cb_clip_inset), [`cc_parse`](#cc_parse), [`cnt_is_marker`](src.css_counter.c.md#cnt_is_marker), [`cnt_parse_decls`](src.css_counter.c.md#cnt_parse_decls), [`cmq_container_surely`](src.css_mq.c.md#cmq_container_surely), [`dl_should_download`](src.download.c.md#dl_should_download), [`gets`](src.freedom.c.md#gets), [`main`](src.freedom.c.md#main), [`parent`](src.freedom.c.md#parent) and 6 more
 
 ---
 
@@ -110,7 +168,7 @@ strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)
 
 ### `cc_pack`
 
-`function` | [src/css_color.c:623](../../src/css_color.c#L623)
+`function` | [src/css_color.c:737](../../src/css_color.c#L737)
 
 ```c
 int cc_pack(cc_rgb c)
@@ -134,7 +192,7 @@ Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport and
 
 ### `cc_unpack`
 
-`function` | [src/css_color.c:627](../../src/css_color.c#L627)
+`function` | [src/css_color.c:741](../../src/css_color.c#L741)
 
 ```c
 cc_rgb cc_unpack(int packed)
@@ -158,7 +216,7 @@ cc_rgb cc_unpack(int packed)
 
 ### `CC_TOKEN_MAX`
 
-`macro` | [src/css_color.c:19](../../src/css_color.c#L19)
+`macro` | [src/css_color.c:20](../../src/css_color.c#L20)
 
 ```c
 #define CC_TOKEN_MAX
@@ -174,7 +232,7 @@ The longest named color ("lightgoldenrodyellow") is 20 bytes; functional rgba() 
 
 ### `CC_CHANNEL_MAX`
 
-`macro` | [src/css_color.c:22](../../src/css_color.c#L22)
+`macro` | [src/css_color.c:23](../../src/css_color.c#L23)
 
 ```c
 #define CC_CHANNEL_MAX
@@ -188,7 +246,7 @@ Channel maxima for the rgb() functional form.
 
 ### `CC_PERCENT_MAX`
 
-`macro` | [src/css_color.c:23](../../src/css_color.c#L23)
+`macro` | [src/css_color.c:24](../../src/css_color.c#L24)
 
 ```c
 #define CC_PERCENT_MAX
@@ -200,7 +258,7 @@ Channel maxima for the rgb() functional form.
 
 ### `CC_NUMBER_MAX_DIGITS`
 
-`macro` | [src/css_color.c:28](../../src/css_color.c#L28)
+`macro` | [src/css_color.c:29](../../src/css_color.c#L29)
 
 ```c
 #define CC_NUMBER_MAX_DIGITS
@@ -216,7 +274,7 @@ A real value has a handful; the cap is what stops a hostile stylesheet from hand
 
 ### `CC_HSL_SCALE`
 
-`macro` | [src/css_color.c:31](../../src/css_color.c#L31)
+`macro` | [src/css_color.c:32](../../src/css_color.c#L32)
 
 ```c
 #define CC_HSL_SCALE
@@ -228,11 +286,30 @@ See parse_hsl_comp.
 
 ---
 
+<a id="cc_calc_depth"></a>
+
+### `CC_CALC_DEPTH`
+
+`macro` | [src/css_color.c:221](../../src/css_color.c#L221)
+
+```c
+#define CC_CALC_DEPTH
+```
+
+--- calc() inside a colour component (CSS Values 4 section 10) ----------------
+A channel may be a calc() over <number>s and <percentage>s (GitHub writes
+`hsl(0deg, 0%, calc(var(--switch) * 100%))`, Discord `hsl(235, calc(1*86.1%), 71.8%)`).
+The expression is folded to one literal before the component parser sees it, so
+the range checks stay in exactly one place. Depth-bounded recursive descent over a
+bounded span; a percentage times a percentage, or a sum mixing the two, fails.
+
+---
+
 <a id="cc_pi"></a>
 
 ### `CC_PI`
 
-`macro` | [src/css_color.c:463](../../src/css_color.c#L463)
+`macro` | [src/css_color.c:577](../../src/css_color.c#L577)
 
 ```c
 #define CC_PI

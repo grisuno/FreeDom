@@ -116,7 +116,7 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
              $(BUILD_DIR)/test_tls_impersonate \
               $(BUILD_DIR)/test_hls $(BUILD_DIR)/test_data_url \
               $(BUILD_DIR)/test_interp $(BUILD_DIR)/test_frame_clock \
-              $(BUILD_DIR)/test_media_decoder $(BUILD_DIR)/test_svg_render \
+              $(BUILD_DIR)/test_media_decoder $(BUILD_DIR)/test_svg_render $(BUILD_DIR)/test_svg_raster \
              $(BUILD_DIR)/test_perf_trace $(BUILD_DIR)/test_css_length \
                $(BUILD_DIR)/test_block_flow $(BUILD_DIR)/test_css_values $(BUILD_DIR)/test_css_gradient $(BUILD_DIR)/test_css_mask $(BUILD_DIR)/test_css_box $(BUILD_DIR)/test_css_text \
                $(BUILD_DIR)/test_css_vars $(BUILD_DIR)/test_css_atrule $(BUILD_DIR)/test_css_mq \
@@ -157,6 +157,17 @@ $(BUILD_DIR)/image_decode.o: $(SRC_DIR)/image_decode.c include/image_decode.h | 
 # their include dirs are added explicitly. Trusted-side painter helper only.
 $(BUILD_DIR)/text_shape.o: $(SRC_DIR)/text_shape.c include/text_shape.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(TSH_CFLAGS) -c $< -o $@
+
+# svg_paint / svg_raster draw validated SVG geometry with Cairo (spec/svg_raster.md):
+# svg_paint on the trusted side for inline <svg>, svg_raster inside the confined
+# worker for SVG served as an image (in-memory surface, no text, no files).
+CAIRO_CFLAGS := $(shell pkg-config --cflags cairo 2>/dev/null)
+CAIRO_LIBS   := $(shell pkg-config --libs cairo 2>/dev/null || echo -lcairo)
+SVG_IMG_OBJ  := $(BUILD_DIR)/svg_raster.o $(BUILD_DIR)/svg_paint.o $(BUILD_DIR)/svg_render.o
+$(BUILD_DIR)/svg_paint.o: $(SRC_DIR)/svg_paint.c include/svg_paint.h include/svg_render.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CAIRO_CFLAGS) -c $< -o $@
+$(BUILD_DIR)/svg_raster.o: $(SRC_DIR)/svg_raster.c include/svg_raster.h include/svg_paint.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CAIRO_CFLAGS) $(IMG_CFLAGS) -c $< -o $@
 
 # media_decoder pulls in FFmpeg headers (libavformat, libavcodec, libavutil, libswscale).
 $(BUILD_DIR)/media_decoder.o: $(SRC_DIR)/media_decoder.c include/media_decoder.h | $(BUILD_DIR)
@@ -289,6 +300,9 @@ $(BUILD_DIR)/test_compositor: $(TEST_DIR)/test_compositor.c $(BUILD_DIR)/composi
 
 # Pure inline-SVG parser (spec/svg_render.md): hostile markup in, bounded geometry
 # out. No I/O, no Cairo -- the Cairo half lives in svg_paint.c on the trusted side.
+$(BUILD_DIR)/test_svg_raster: $(TEST_DIR)/test_svg_raster.c $(SVG_IMG_OBJ) $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $(CAIRO_CFLAGS) $^ -o $@ $(LDFLAGS) $(IMG_LIBS) $(CAIRO_LIBS) -lm $(CMOCKA_LIBS)
+
 $(BUILD_DIR)/test_svg_render: $(TEST_DIR)/test_svg_render.c $(BUILD_DIR)/svg_render.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
@@ -571,12 +585,12 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/su
                        $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o \
                        $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o \
                        $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o \
-                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o \
+                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(SVG_IMG_OBJ) \
                        $(BUILD_DIR)/request_policy.o $(PSL_OBJ) \
                        $(BUILD_DIR)/url.o $(BUILD_DIR)/link_nav.o \
                        $(BUILD_DIR)/freebug.o \
                        $(QJS_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(CMOCKA_LIBS)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(CAIRO_LIBS) $(CMOCKA_LIBS)
 
 # Trusted-parent iframe host over real confined workers.
 $(BUILD_DIR)/test_frame_host: $(TEST_DIR)/test_frame_host.c $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/tab.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
@@ -586,19 +600,19 @@ $(BUILD_DIR)/test_frame_host: $(TEST_DIR)/test_frame_host.c $(BUILD_DIR)/frame_h
                        $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/css_chain.o \
                        $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o \
                        $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o \
-                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o \
+                       $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(SVG_IMG_OBJ) \
                        $(BUILD_DIR)/request_policy.o $(PSL_OBJ) \
                        $(BUILD_DIR)/url.o $(BUILD_DIR)/link_nav.o \
                        $(BUILD_DIR)/freebug.o \
                        $(QJS_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(CMOCKA_LIBS)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(CAIRO_LIBS) $(CMOCKA_LIBS)
 
 # Freedom browser (Hito 5+): GUI by default, --headless for terminal output.
 # Links the full secure tab pipeline plus the Wayland/Cairo/xkbcommon UI.
 FREEDOM_UI_OBJ = $(BUILD_DIR)/browser.o $(BUILD_DIR)/ui_layout.o
 FREEDOM_GUI_OBJ = $(GUI_DIR)/browser_ui.c \
                   $(GUI_DIR)/bui_theme.c \
-                  $(GUI_DIR)/svg_paint.c \
+                  $(GUI_DIR)/bui_mask_img.c \
                   $(BUILD_DIR)/xdg-shell-protocol.c \
                   $(BUILD_DIR)/xdg-decoration-protocol.c
 
@@ -633,7 +647,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/subre
                        $(BUILD_DIR)/tls_impersonate.o \
                        $(BUILD_DIR)/hls.o \
                        $(BUILD_DIR)/media_decoder.o \
-                       $(BUILD_DIR)/svg_render.o \
+                       $(BUILD_DIR)/svg_raster.o $(BUILD_DIR)/svg_paint.o $(BUILD_DIR)/svg_render.o \
                        $(PSL_OBJ) $(FREEDOM_UI_OBJ) $(FREEDOM_GUI_OBJ) \
                        | $(BUILD_DIR) \
                        $(BUILD_DIR)/xdg-shell-client-protocol.h \
@@ -745,10 +759,11 @@ fuzz-jsdom: | $(BUILD_DIR)
 # Coverage-guided fuzzing of the PNG decoder (clang + libFuzzer). Hostile image
 # bytes through sniff + dimensions + decode + free must never crash/leak/UB.
 fuzz-img: | $(BUILD_DIR)
-	clang $(STD) -g -O1 -Iinclude $(IMG_CFLAGS) \
+	clang $(STD) -g -O1 -Iinclude $(IMG_CFLAGS) $(CAIRO_CFLAGS) \
 	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_image_decode.c $(SRC_DIR)/image_decode.c \
-	  -o $(BUILD_DIR)/fuzz_image_decode $(IMG_LIBS)
+	  $(SRC_DIR)/svg_raster.c $(SRC_DIR)/svg_paint.c $(SRC_DIR)/svg_render.c $(SRC_DIR)/css_color.c \
+	  -o $(BUILD_DIR)/fuzz_image_decode $(IMG_LIBS) $(CAIRO_LIBS) -lm
 	./$(BUILD_DIR)/fuzz_image_decode -max_total_time=30 -rss_limit_mb=2048
 
 # Coverage-guided fuzzing of the display-list builder (clang + libFuzzer). Arbitrary
@@ -1434,7 +1449,7 @@ drift:
 	@grep -q "TAB_WIRE_HEAD_N 6" src/tab.c || (echo "drift: HEAD const missing"; exit 1)
 	@grep -q "TAB_WIRE_A_N 40" src/tab.c || (echo "drift: A const missing"; exit 1)
 	@grep -q "TAB_WIRE_B_N 70" src/tab.c || (echo "drift: B const missing"; exit 1)
-	@grep -q "TAB_WIRE_BOX_F_N 268" src/tab.c || (echo "drift: BOX const missing"; exit 1)
+	@grep -q "TAB_WIRE_BOX_F_N 278" src/tab.c || (echo "drift: BOX const missing"; exit 1)
 	@grep -q "int32_t head\[TAB_WIRE_HEAD_N\]\|int32_t head\[6\]" src/tab.c || (echo "drift: head array drift"; exit 1)
 	@grep -q "int32_t a\[TAB_WIRE_A_N\]\|int32_t a\[40\]" src/tab.c || (echo "drift: A array drift"; exit 1)
 	@grep -q "int32_t b\[TAB_WIRE_B_N\]\|int32_t b\[70\]" src/tab.c || (echo "drift: B array drift"; exit 1)

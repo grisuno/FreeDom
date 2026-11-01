@@ -190,12 +190,14 @@ static void test_image_data_url_disabled_by_default(void **state) {
 
 static void test_image_data_url_malformed_is_invalid(void **state) {
     (void)state;
-    /* Percent-encoded (no ;base64 flag) or otherwise malformed data: URIs fail
-     * closed rather than falling through to the https scheme check. */
+    /* A percent-encoded data: image (`data:image/svg+xml,<svg/>`, tanda 83) is a
+     * valid shape: no socket, and the worker decodes it (spec/svg_raster.md). A URI
+     * with no comma at all is malformed and fails closed rather than falling
+     * through to the https scheme check. */
     assert_int_equal(
         rdp_image_decision(caps_images_on(), "https://example.com/",
                            "data:image/svg+xml,<svg/>", 64, 64),
-        RDP_IMG_BLOCK_INVALID);
+        RDP_IMG_ALLOW);
     assert_int_equal(
         rdp_image_decision(caps_images_on(), "https://example.com/",
                            "data:image/png;base64", 64, 64),

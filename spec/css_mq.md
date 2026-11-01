@@ -66,3 +66,27 @@ Dado-Cuando-Entonces (ancho 1000, alto 1080):
 - `(prefers-reduced-motion:reduce)` → falso; `(hover)` → verdadero.
 - `((max-width:500px) or (min-width:900px))` → verdadero.
 - `(frobnicate:1)` → falso; `(width >> 3px)` → falso.
+
+## Container queries sin layout (tanda 83): `cmq_container_surely`
+
+`@container [nombre] <condición>` (CSS Conditional 5 §2) pregunta por el tamaño del
+**contenedor**, que la cascada (pura, previa al layout) no conoce. Antes se descartaba
+la regla entera, así que ni la rama `<` ni la `>=` de un componente aplicaban nunca.
+
+Hecho que la hace evaluable sin layout: un contenedor en flujo **nunca es más ancho que
+el ancho de render**. Una condición que es un intervalo de anchos (comparaciones de
+`width`/`inline-size` unidas por `and`) es verdadera para TODO ancho en `[0, W]` si y solo
+si lo es en los dos extremos. Entonces:
+
+- Se aplica la regla solo si es **seguramente** verdadera: cierta en `w=0` y en `w=W`.
+- Cualquier cosa que no sea un intervalo de anchos falla cerrado (regla omitida, como
+  antes): `or`, `not`, `height`/`block-size`/`aspect-ratio`/`orientation` (la altura del
+  contenedor no está acotada por la del viewport), `style()`, `scroll-state()`.
+- El nombre de contenedor se ignora: la cota vale para cualquier contenedor.
+
+Dado-Cuando-Entonces (W = 1000):
+- `(width<63.25rem)` → aplica (cierta en 0 y en 1000).
+- `(width>=1280px)` → no aplica; `(width<480px)` → no aplica (falsa en 1000: puede no
+  cumplirse); `blankslate (width<=34rem)` → no aplica.
+- `(max-width: 1200px)` → aplica; `(min-width:32px)` → no aplica (falsa en 0).
+- `(width<80rem) or (width>9px)` → no aplica (`or`); `(height<10px)` → no aplica.

@@ -114,7 +114,7 @@ int wf_supported_format(const char *fmt)
 
 **Returns:** `&&`
 
-*Called by:* [`wf_scan`](#wf_scan)
+*Called by:* [`cmq_container_surely`](src.css_mq.c.md#cmq_container_surely), [`wf_scan`](#wf_scan)
 
 ---
 

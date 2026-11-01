@@ -1,12 +1,12 @@
 # `include/css_mq.h`
 
-> Source: [include/css_mq.h:1](../../include/css_mq.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
+> Source: [include/css_mq.h:1](../../include/css_mq.h#L1) | language `h` | coverage 57.1% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cmq_env`](#cmq_env)
 - **Type Aliases:** [`width_px`](#width_px)
-- **Functions:** [`cmq_matches`](#cmq_matches)
+- **Functions:** [`cmq_matches`](#cmq_matches), [`cmq_container_surely`](#cmq_container_surely)
 - **Macros:** [`CMQ_MAX_DEPTH`](#cmq_max_depth), [`CMQ_TOK_MAX`](#cmq_tok_max)
 
 ## Type Diagram
@@ -73,6 +73,32 @@ An empty list matches (all). NULL s or env -> 0.
 | `s` | `char *` |  |  |
 | `len` | `size_t` |  |  |
 | `env` | `cmq_env *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="cmq_container_surely"></a>
+
+### `cmq_container_surely`
+
+`function` | [include/css_mq.h:34](../../include/css_mq.h#L34)
+
+```c
+int cmq_container_surely(const char *s, size_t len, int max_width);
+```
+
+@container condition s[0,len) (optionally led by a container name) is SURELY true for every container no wider than max_width: it must be a pure width interval (width/inline-size comparisons joined by `and`) true at width 0 and at max_width.
+
+Anything else -- or, not, height, style(), unknown -- is 0. spec/css_mq.md.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `s` | `char *` |  |  |
+| `len` | `size_t` |  |  |
+| `max_width` | `int` |  |  |
 
 **Returns:** `int`
 

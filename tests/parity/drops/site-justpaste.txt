@@ -1,10 +1,7 @@
 JustPaste.it - paste text and share with your friends
-CSS drops: 13 declaration(s) dropped, 7 distinct
+CSS drops: 7 declaration(s) dropped, 4 distinct
   count  cause         property                     first value
       4  unknown-prop  animation-play-state         paused
-      2  bad-value     background-position          right .75rem center,center right 2.25rem
-      2  bad-value     background-size              16px 12px,calc(.75em + .375rem) calc(.75em + .375rem)
-      2  bad-value     animation-timing-function    cubic-bezier(.18,.89,.32,1.28)
+      1  bad-value     text-align                   -webkit-match-parent
       1  bad-value     filter                       url(#gaussian-blur)
       1  unknown-prop  text-decoration-skip-ink     none
-      1  bad-value     text-align                   -webkit-match-parent

@@ -47,6 +47,8 @@ _Static_assert(PV_BG_URL_MAX == CSS_URL_MAX,
 #include <lexbor/html/html.h>
 #include <lexbor/tag/const.h>
 
+_Static_assert(PV_MASK_GEO_N == CSS_MASK_GEO_N, "mask geometry: page_view and css disagree");
+
 /* Upper bound for a parsed <img> declared dimension. A declared size only feeds
  * the tracking-pixel heuristic and the layout hint, so absurd values are clamped
  * rather than trusted; this also keeps parse_dim free of integer overflow. */
@@ -2110,6 +2112,9 @@ static void boxdef_from_style(pv_box_def *d, const css_style *cs) {
     d->bg_rad_rx = cs->bg_rad_rx; d->bg_rad_ry = cs->bg_rad_ry;
     d->mask_n = cs->mask_n; d->mask_comp = cs->mask_comp; d->mask_clip = cs->mask_clip;
     for (int mk = 0; mk < 6; ++mk) d->mask_w[mk] = cs->mask_w[mk];
+    memcpy(d->mask_url, cs->mask_url, PV_BG_URL_MAX);
+    d->mask_url[PV_BG_URL_MAX - 1] = '\0';
+    for (int mk = 0; mk < PV_MASK_GEO_N; ++mk) d->mask_geo[mk] = cs->mask_geo[mk];
     d->bg_size = cs->bg_size;
     d->bg_repeat = cs->bg_repeat;
     /* background-clip:text (2026-07-19): the background lives INSIDE the
@@ -6625,6 +6630,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                                     &elh, &edeco,
                                     &eli, &edepth, &eordered, &reg, &econt, &ebox, &eext,
                                     &box_reg, &float_reg, &ebdeco, &cache, &flowreg);
+                    /* The placeholder run IS this element's own line content: its own
+                     * vertical-align (not inherited, CSS 2.1 10.8.1) places the atom. */
+                    if (ecs->valign != CSS_VA_UNSET) eext.valign = ecs->valign;
                     /* Inside a walked cell of a FLOW table the ROW is the line: a
                      * decorated leaf (e.g. Hacker News' votearrow icon <div>) must
                      * join the row's line like its sibling cell text, not split the
@@ -7159,6 +7167,8 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                 box_reg.def[bi].mask_comp = ad->mask_comp;
                 box_reg.def[bi].mask_clip = ad->mask_clip;
                 for (int mk = 0; mk < 6; ++mk) box_reg.def[bi].mask_w[mk] = ad->mask_w[mk];
+                memcpy(box_reg.def[bi].mask_url, ad->mask_url, PV_BG_URL_MAX);
+                for (int mk = 0; mk < PV_MASK_GEO_N; ++mk) box_reg.def[bi].mask_geo[mk] = ad->mask_geo[mk];
                 box_reg.def[bi].mask_ref1 = up + 1;
                 break;
             }

@@ -3459,6 +3459,37 @@ static void test_decode_image_data_url_rejects_malformed(void **state) {
     tab_close(t);
 }
 
+/* SVG served as an image is rasterized INSIDE the confined worker (seccomp +
+ * Landlock + namespaces): Cairo on an in-memory surface must not trip the filter
+ * (spec/svg_raster.md). Both the raw-bytes path and a percent-encoded data: URI. */
+static void test_decode_svg_image_in_sandbox(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    static const char SVG[] = "<?xml version=\"1.0\"?><svg xmlns=\"http://www.w3.org/2000/svg\" "
+                              "width=\"8\" height=\"4\"><rect width=\"8\" height=\"4\" fill=\"#00ff00\"/>"
+                              "<text x=\"1\" y=\"3\">x</text></svg>";
+    tab_image img;
+    assert_int_equal(tab_decode_image(t, (const uint8_t *)SVG, sizeof SVG - 1, &img), TAB_OK);
+    assert_non_null(img.data);
+    /* A small SVG comes back oversampled: 8x4 CSS px at density 4 (spec/svg_raster.md). */
+    assert_int_equal(img.scale, 4);
+    assert_int_equal(img.width, 32);
+    assert_int_equal(img.height, 16);
+    assert_int_equal(img.data[1], 0xff);     /* B,G,R,A: green */
+    assert_int_equal(img.data[3], 0xff);
+    tab_image_free(&img);
+    assert_int_equal(tab_alive(t), 1);
+
+    assert_int_equal(tab_decode_image_data_url(t,
+        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E"
+        "%3Ccircle cx='3' cy='3' r='3' fill='red'/%3E%3C/svg%3E", &img), TAB_OK);
+    assert_non_null(img.data);
+    assert_int_equal(img.width / img.scale, 6);
+    tab_image_free(&img);
+    tab_close(t);
+}
+
 static void test_decode_image_data_url_null_args(void **state) {
     (void)state;
     tab *t = NULL;
@@ -3802,6 +3833,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_decode_image_rejects_junk),
         cmocka_unit_test(test_decode_image_null_args),
         cmocka_unit_test(test_decode_image_data_url_in_sandbox),
+        cmocka_unit_test(test_decode_svg_image_in_sandbox),
         cmocka_unit_test(test_decode_image_data_url_rejects_malformed),
         cmocka_unit_test(test_decode_image_data_url_null_args),
         cmocka_unit_test(test_free_null_and_double),

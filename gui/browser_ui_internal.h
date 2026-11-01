@@ -104,4 +104,12 @@ ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to a palette *
 ui_rgb   rgb_from_packed(int packed);     /* 0xRRGGBB author colour -> theme RGB */
 void     set_rgb(cairo_t *cr, ui_rgb c);  /* cairo_set_source_rgb from a ui_rgb */
 
+/* --- bui_mask_img.c: a mask-image url() layer into a mask surface --- */
+
+/* Paints the decoded image `img` (nat_w x nat_h) as an alpha source into `c`, placed and
+ * tiled over the mask area (ax, ay, aw, ah) by the layer geometry `geo` (css.h CSS_MG_*,
+ * resolved by bx_background_layer). 1 = painted, 0 = nothing usable. */
+int bui_paint_mask_image(cairo_t *c, cairo_surface_t *img, int nat_w, int nat_h,
+                         const int geo[10], double ax, double ay, double aw, double ah);
+
 #endif /* FREEDOM_BROWSER_UI_INTERNAL_H */

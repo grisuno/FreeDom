@@ -1462,6 +1462,10 @@ static void set_cache(browser_window *w, char *html, size_t len, const char *top
 /* Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row
  * by row because Cairo may use a wider stride than the tightly packed worker buffer.
  * Returns NULL on failure. */
+/* A decoded image's size in CSS px: its pixel size over its density. */
+static uint32_t img_css_w(const tab_image *img) { return img->scale > 1u ? img->width / img->scale : img->width; }
+static uint32_t img_css_h(const tab_image *img) { return img->scale > 1u ? img->height / img->scale : img->height; }
+
 static cairo_surface_t *surface_from_pixels(const tab_image *img) {
     if (img->data == NULL || img->width == 0 || img->height == 0) return NULL;
     cairo_surface_t *s = cairo_image_surface_create(
@@ -1480,6 +1484,10 @@ static cairo_surface_t *surface_from_pixels(const tab_image *img) {
                img->data + (size_t)y * (size_t)img->stride, rowbytes);
     }
     cairo_surface_mark_dirty(s);
+    /* An oversampled vector image (svg_raster): Cairo then measures and draws it at its
+     * CSS size, so every consumer keeps working in CSS px. */
+    if (img->scale > 1u)
+        cairo_surface_set_device_scale(s, (double)img->scale, (double)img->scale);
     return s;
 }
 
@@ -2179,7 +2187,7 @@ static img_fail_reason fetch_decode_image(browser_window *w, tab *t, tab_fetch_f
         if (ds != TAB_OK || img.data == NULL) { tab_image_free(&img); return IMG_FAIL_DECODE; }
         *out_surface = surface_from_pixels(&img);
         img_fail_reason r = IMG_FAIL_OK;
-        if (*out_surface != NULL) { *out_w = (int)img.width; *out_h = (int)img.height; }
+        if (*out_surface != NULL) { *out_w = (int)img_css_w(&img); *out_h = (int)img_css_h(&img); }
         else r = IMG_FAIL_SURFACE;
         tab_image_free(&img);
         return r;
@@ -2209,7 +2217,7 @@ static img_fail_reason fetch_decode_image(browser_window *w, tab *t, tab_fetch_f
     if (ds != TAB_OK || img.data == NULL) { tab_image_free(&img); return IMG_FAIL_DECODE; }
     *out_surface = surface_from_pixels(&img);
     img_fail_reason r = IMG_FAIL_OK;
-    if (*out_surface != NULL) { *out_w = (int)img.width; *out_h = (int)img.height; }
+    if (*out_surface != NULL) { *out_w = (int)img_css_w(&img); *out_h = (int)img_css_h(&img); }
     else r = IMG_FAIL_SURFACE;
     tab_image_free(&img);
     return r;
@@ -2330,6 +2338,7 @@ static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, vo
         const pv_box_def *bx = rd_box_at(w->doc, i);
         if (bx->bg_image_url[0] != '\0') nwith++;
         if (bx->bg_image_url2[0] != '\0') nwith++;
+        if (bx->mask_url[0] != '\0') nwith++;
     }
     if (nwith == 0) return;
 
@@ -2339,14 +2348,34 @@ static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, vo
     size_t k = 0;
     for (size_t i = 0; i < nb; ++i) {
         const pv_box_def *bx = rd_box_at(w->doc, i);
-        for (int layer = 0; layer < 2; ++layer) {
-            const char *u = layer == 0 ? bx->bg_image_url : bx->bg_image_url2;   /* R5b: second layer */
+        /* layer 0/1: the two background-image layers (R5b); 2: the mask-image url (tanda 83),
+         * which find_bg_image serves to the mask builder by URL like any background. */
+        for (int layer = 0; layer < 3; ++layer) {
+            const char *u = layer == 0 ? bx->bg_image_url
+                          : layer == 1 ? bx->bg_image_url2 : bx->mask_url;
             if (u[0] == '\0' || k >= nwith) continue;
             if (w->cur_top == NULL && !du_is_data_url(u)) continue;
             ui_bg_image *slot = &w->bg_images[k++];
             slot->url = strdup(u);
             slot->box = (int)i;
-            if (lazy && !du_is_data_url(u)) { slot->deferred = 1; continue; }   /* data: costs no network */
+            /* data: costs no network, but a data: MASK still costs a worker round trip and
+             * a raster per URL (GitHub: 30 icon masks): in the window it waits for its box
+             * to near the viewport like any lazy image. */
+            if (lazy && (!du_is_data_url(u) || layer == 2)) { slot->deferred = 1; continue; }
+            /* Many boxes share one image (GitHub: 30 masked icons over a handful of
+             * data: SVGs): decode each URL once and share the surface by reference,
+             * so free_bg_images' per-slot destroy stays balanced. */
+            const ui_bg_image *same = NULL;
+            for (size_t q = 0; q + 1 < k && same == NULL; ++q)
+                if (w->bg_images[q].surface != NULL && w->bg_images[q].url != NULL &&
+                    strcmp(w->bg_images[q].url, u) == 0)
+                    same = &w->bg_images[q];
+            if (same != NULL) {
+                slot->surface = cairo_surface_reference(same->surface);
+                slot->nat_w = same->nat_w;
+                slot->nat_h = same->nat_h;
+                continue;
+            }
             fetch_decode_image(w, t, img_fetch, fetch_ctx, u, NULL, 0,
                                &slot->surface, &slot->nat_w, &slot->nat_h);
         }
@@ -3687,6 +3716,11 @@ typedef struct rc_ibox {
      * and sits on the baseline, bottom edge first. min_w/min_h are its content size;
      * both 0 for a box that wraps real fragments. */
     double min_w, min_h;
+    /* Its extent above/below the line's baseline, decided by atoms_extend_line when the
+     * line closes (0/0 = not an atom that shapes the line), so the painted rect and the
+     * row height come from ONE computation. */
+    double up, down;
+    int valign;         /* css_valign of the atom itself (its run carries it) */
 } rc_ibox;
 #define RC_IBOX_MAX 16
 
@@ -3752,6 +3786,8 @@ typedef struct rc_state {
      * did not open a line, so `<strong>bold</strong>,` painted as `bold ,`.
      * spec/page_view.md "Colapso de espacio en el borde entre runs". */
     int    prev_ended_ws;
+    double prev_space_w;   /* the space advance of that run, for an atom that follows it */
+    int    line_atoms;     /* inline-block atoms the flow has LEFT on the open line */
     /* INLINE-LEVEL boxes of the open line: a display:inline-block sitting in a line
      * of text (a badge, a pill, a chip) or a display:inline element with box-model
      * decoration (a link with padding, a tag with a border). They are deliberately
@@ -4210,11 +4246,12 @@ static void close_inline_boxes(rc_layout *L, rc_state *s, double row_top, double
             double desc = (ib->max_desc > 0.0) ? ib->max_desc : 0.0;
             bx->top = row_top + baseline - asc - pt;
             bx->h = asc + desc + pt + pb;
-        } else if (ib->min_h > 0.0) {
-            double pt = box_pad_px(d->pad_t, d->pad_t_pct, 0.0) + box_edge_px(d->bord_tw);
-            double pb = box_pad_px(d->pad_b, d->pad_b_pct, 0.0) + box_edge_px(d->bord_bw);
-            bx->h = ib->min_h + pt + pb;
-            bx->top = row_top + baseline - bx->h;
+        } else if (ib->up + ib->down > 0.0) {
+            /* An empty atom sits on the baseline, bottom edge first; one with text has
+             * its first line's baseline on the line's baseline (CSS 2.1 10.8.1). The
+             * extents were fixed by atoms_extend_line, which also sized the row. */
+            bx->top = row_top + baseline - ib->up;
+            bx->h = ib->up + ib->down;
         }
         rc_box_copy_decoration(bx, d);
         bx->hidden = (s->hidden_from != 0) ||
@@ -4239,8 +4276,58 @@ static void leave_inline_box(rc_layout *L, rc_state *s, int block_id) {
     if (block_id == ib->id) return;
     if (ib->frag1 != (size_t)-1) return;
     ib->frag1 = L->nfrag;
+    /* A sized atom whose content was narrower still occupies its declared width. */
+    if (ib->min_w > 0.0 && s->pen_x < ib->pen0 + ib->pad_l + ib->min_w)
+        s->pen_x = ib->pen0 + ib->pad_l + ib->min_w;
     s->pen_x += ib->pad_r + ib->mar_r;
+    if (ib->def != NULL && ib->def->display == CSS_DISP_INLINE_BLOCK) ++s->line_atoms;
     s->ibx_open = 0;
+}
+
+/* A sized inline-block is part of the line box (CSS 2.1 10.8): the line grows to hold
+ * it, above the baseline for an empty atom (it sits on the baseline, bottom edge
+ * first) and on both sides for one with text (its first baseline is the line's). The
+ * same placement close_inline_boxes paints, so the row and the box cannot disagree. */
+static void atoms_extend_line(const rc_layout *L, rc_state *s, double *h,
+                              double *baseline_off) {
+    double above0 = *baseline_off, below0 = *h - *baseline_off;
+    double above = above0, below = below0;
+    for (int bi = 0; bi < s->n_ibx; ++bi) {
+        rc_ibox *ib = &s->ibx[bi];
+        const pv_box_def *d = ib->def;
+        ib->up = ib->down = 0.0;
+        if (d == NULL || d->display != CSS_DISP_INLINE_BLOCK) continue;
+        double pt = box_pad_px(d->pad_t, d->pad_t_pct, 0.0) + box_edge_px(d->bord_tw);
+        double pb = box_pad_px(d->pad_b, d->pad_b_pct, 0.0) + box_edge_px(d->bord_bw);
+        size_t fend = (ib->frag1 != (size_t)-1) ? ib->frag1 : L->nfrag;
+        int has_text = (fend > ib->frag0);
+        if (ib->min_h > 0.0) {
+            double bh = ib->min_h + pt + pb;
+            double asc = (ib->max_asc > 0.0) ? ib->max_asc : 0.0;
+            ib->up = (has_text && asc > 0.0) ? asc + pt : bh;
+            /* vertical-align of an empty atom (CSS 2.1 10.8.1): top/text-top hang it from
+             * the parent's ascent, bottom/text-bottom stand it on the descent, middle
+             * centres it a quarter em (half the x-height) above the baseline. */
+            if (!has_text) {
+                double lasc = s->line_asc, ldesc = s->line_desc;
+                if (ib->valign == CSS_VA_TOP && lasc > 0.0) ib->up = lasc;
+                else if (ib->valign == CSS_VA_BOTTOM) ib->up = bh - ldesc;
+                else if (ib->valign == CSS_VA_MIDDLE) ib->up = bh / 2.0 + lasc * 0.27;
+            }
+            ib->down = bh - ib->up;
+        } else if (has_text) {
+            /* Auto height: its content is one line with the parent's metrics, so the
+             * box is that line plus its vertical padding and border on each side. */
+            ib->up = above0 + pt;
+            ib->down = below0 + pb;
+        } else {
+            continue;
+        }
+        if (ib->up > above) above = ib->up;
+        if (ib->down > below) below = ib->down;
+    }
+    *baseline_off = above;
+    *h = above + below;
 }
 
 static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
@@ -4269,6 +4356,7 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
      * line-height is tighter than the font: the glyphs overflow both sides. */
     double half_leading = (h - (s->line_asc + s->line_desc)) / 2.0;
     double baseline_off = s->line_asc + half_leading;
+    atoms_extend_line(L, s, &h, &baseline_off);
     /* An inline-level box ends at the line end at the latest: its rect needs the
      * row's top, height and baseline, which are only known now. */
     close_inline_boxes(L, s, s->cur_top, h, baseline_off);
@@ -4303,6 +4391,7 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
     s->line_open = 0; s->pen_x = 0; s->line_asc = 0; s->line_desc = 0;
     s->line_lead_px = 0.0; s->line_any_theme = 0;
     s->line_first = L->nfrag;
+    s->line_atoms = 0;
 }
 
 /* Height the currently open line WILL have when it flushes (same formula
@@ -4598,7 +4687,8 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
         if (wl == 0) break;
 
         open_line(L, s);
-        int line_has_frag = (L->nfrag > s->line_first);
+        /* An atom the flow already left is content of this line like a word is. */
+        int line_has_frag = (L->nfrag > s->line_first) || s->line_atoms > 0;
         /* Words WITHIN one run were split on a real space, so they always separate.
          * The FIRST word only separates from the previous run when one of the two
          * sides actually carried whitespace -- that is the collapse rule, and it is
@@ -4734,6 +4824,7 @@ static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th
      * that emitted nothing (all whitespace) still passes its whitespace along, which
      * is what makes `<b>a</b> <i>b</i>` separate through the blank text node. */
     s->prev_ended_ws = ends_ws;
+    s->prev_space_w = space_w;
 }
 
 /* Intrinsic display size (px) of an inline <svg> block, resolving the CSS/attr width
@@ -8140,6 +8231,14 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                         empty_atom_continues_line(doc, run_i, path[k]));
         if ((ib_inline || ib_atom || ib_empty) && s->ibx_open == 0 && s->n_ibx < RC_IBOX_MAX) {
             if (ib_inline || ib_empty) open_line(L, s);
+            /* The collapsible space the previous run ended with separates the atom from
+             * it (`dot <i class=ico></i>`): an atom is not a word, so no later word
+             * would spend it -- the box itself has to. */
+            if ((ib_atom || ib_empty) && s->prev_ended_ws &&
+                (L->nfrag > s->line_first || s->line_atoms > 0)) {
+                s->pen_x += s->prev_space_w;
+                s->prev_ended_ws = 0;
+            }
             double ictx_l, ictx_w;
             rc_box_context(s, content_w, &ictx_l, &ictx_w);
             double ipl = box_pad_px(d->pad_l, d->pad_l_pct, ictx_w);
@@ -8161,7 +8260,11 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
             ib->pad_l = ipl + box_edge_px(d->bord_lw);
             ib->pad_r = ipr + box_edge_px(d->bord_rw);
             ib->mar_r = imr;
-            if (ib_empty) {
+            if (run_i < rd_count(doc) && rd_at(doc, run_i)->block_id == path[k])
+                ib->valign = rd_at(doc, run_i)->valign;
+            /* A declared width/height is the atom's content size whether it is empty
+             * (an icon) or wraps text (a fixed-size badge/button): CSS 2.1 10.3.9/10.6.6. */
+            if (ib_empty || ib_atom) {
                 int bb2 = (d->box_sizing == CSS_BOXS_BORDER);
                 double edge_w = ib->pad_l + ib->pad_r;
                 double edge_h = box_pad_px(d->pad_t, d->pad_t_pct, ictx_w) + box_edge_px(d->bord_tw) +
@@ -8172,7 +8275,10 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                 if (ib->min_h < 0.0) ib->min_h = 0.0;
             }
             s->ibx_open = s->n_ibx;
-            s->pen_x += ib->pad_l + ib->min_w;
+            /* Its content flows from the left padding edge; only an EMPTY atom has no
+             * content to do the advancing, so it spends its declared width now. A
+             * sized atom with text reaches it when the flow leaves it (leave_inline_box). */
+            s->pen_x += ib->pad_l + (ib_empty ? ib->min_w : 0.0);
             break;
         }
         double ctx_left, ctx_w;
@@ -9863,7 +9969,19 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * content within the remaining width via the pure bx_place. */
         double base_l = (double)b->indent * UI_LIST_INDENT;
         double inner_w;
-        if (s.box_depth > 0) {
+        /* A run inside an open inline-level atom (a sized inline-block on this line) flows
+         * on the PARENT's line: the atom's width is its box's (close_inline_boxes), not a
+         * line width -- taking it as one wrapped `label` out of a 90px badge that started
+         * 51px into the line. */
+        int in_atom = (s.ibx_open > 0 && s.ibx[s.ibx_open - 1].id == b->block_id &&
+                       s.ibx[s.ibx_open - 1].frag1 == (size_t)-1);
+        if (in_atom) {
+            double ctx_left, ctx_w;
+            rc_box_context(&s, content_w, &ctx_left, &ctx_w);
+            s.indent_px = ctx_left + base_l;
+            inner_w = ctx_w - base_l;
+            s.bg_w = inner_w;
+        } else if (s.box_depth > 0) {
             /* Inside a box: the box already placed its content rect (consuming its own
              * hbox/padding/border), so the run just flows there plus its list indent.
              * Re-applying the run's bx_place would double-count the box's insets. */
@@ -13179,6 +13297,7 @@ static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
 typedef struct bui_mask_ctx {
     const rc_layout *L;
     const rd_doc *doc;
+    const browser_window *w;   /* the decoded mask-image urls (find_bg_image) */
 } bui_mask_ctx;
 
 /* The layout rect (x, y, w, h) and rc_box of box `ref`, found among the in-flow boxes or the
@@ -13272,12 +13391,22 @@ static cairo_surface_t *bui_build_mask(const pv_box_def *def, const rc_box *bx_i
             int t = ((255 - ly.alpha[k]) * 127 + 127) / 255;   /* back to 0 opaque .. 127 clear */
             cols[k] = (t & 0x7f) << 24;
         }
-        cairo_pattern_t *pat = bui_linear_grad(cx0 - ix, cy0 - iy, cw, ch, ly.angle, cols, ly.pos, ly.nst, 1.0);
         /* The first layer painted is the lowest; every later one composes onto what is there. */
         static const cairo_operator_t OPS[4] = {
             CAIRO_OPERATOR_OVER, CAIRO_OPERATOR_OUT, CAIRO_OPERATOR_IN, CAIRO_OPERATOR_XOR };
         cairo_set_operator(c, (i == n - 1) ? CAIRO_OPERATOR_OVER
                                            : OPS[(comp >= 0 && comp <= 3) ? comp : 0]);
+        /* A url() image layer (always layer 0, css_mask.c): its decoded pixels ARE the
+         * alpha, placed over the clip box like a background-image (bui_mask_img.c).
+         * Not loaded / blocked / undecodable leaves the transparent layer: hidden. */
+        if (i == 0 && gdef->mask_url[0] != '\0' && mc != NULL && mc->w != NULL) {
+            const ui_bg_image *mi = find_bg_image(mc->w, gdef->mask_url);
+            if (mi != NULL && mi->surface != NULL)
+                (void)bui_paint_mask_image(c, mi->surface, mi->nat_w, mi->nat_h, gdef->mask_geo,
+                                           cx0 - ix, cy0 - iy, cw, ch);
+            continue;
+        }
+        cairo_pattern_t *pat = bui_linear_grad(cx0 - ix, cy0 - iy, cw, ch, ly.angle, cols, ly.pos, ly.nst, 1.0);
         cairo_set_source(c, pat);
         box_path4(c, cx0 - ix, cy0 - iy, cw, ch, crc);
         cairo_fill(c);
@@ -13744,7 +13873,7 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
     if (own_clip) cairo_restore(cr);
     bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
-                             &(bui_mask_ctx){ L, w->doc });
+                             &(bui_mask_ctx){ L, w->doc, w });
 }
 
 /* Paints one Stage-2 out-of-flow positioned box: its decoration, then (if it holds
@@ -14055,7 +14184,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
 
     if (own_clip) cairo_restore(cr);
     if (needs_group) bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, &bx, left, origin,
-                                                &(bui_mask_ctx){ L, w->doc });
+                                                &(bui_mask_ctx){ L, w->doc, w });
     if (clip_saved) cairo_restore(cr);
 }
 
@@ -14101,7 +14230,7 @@ static void paint_nested_children(cairo_t *cr, browser_window *w,
             paint_nested_children(cr, w, L, cbid, left, origin, content_w,
                                   content_top, content_h, box_done, row_done);
             bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms, &L->boxes[j], left, origin,
-                                    &(bui_mask_ctx){ L, w->doc });
+                                    &(bui_mask_ctx){ L, w->doc, w });
         } else {
             paint_box_and_direct_rows(cr, w, L, &L->boxes[j], left, origin,
                                        content_w, (double)w->width, content_top,
@@ -14353,7 +14482,7 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
             paint_nested_children(cr, w, Lp, bid, left, origin, content_w,
                                   content_top, content_h, box_done, row_done);
             bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
-                                    &(bui_mask_ctx){ Lp, w->doc });
+                                    &(bui_mask_ctx){ Lp, w->doc, w });
         } else {
             paint_box_and_direct_rows(cr, w, Lp, bx, left, origin, content_w,
                                        (double)w->width, content_top, content_h,

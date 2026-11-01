@@ -6,8 +6,8 @@ Previous: [KB_include.md](KB_include.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_decl` (struct, line 232)
-  - `prop` (type_alias, line 231) `typedef struct css_decl { int prop;`
+  - `css_decl` (struct, line 238)
+  - `prop` (type_alias, line 237) `typedef struct css_decl { int prop;`
   - `order` (function, line 50) `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
   - `contiguous` (function, line 65) `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
   - `part` (function, line 216) `* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM...`
@@ -25,23 +25,24 @@ Previous: [KB_include.md](KB_include.md)
 - Imported by: `include/css_box.h`, `include/css_gradient.h`, `include/css_mask.h`, `include/css_text.h`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_box.c`, `tests/test_css_text.c`
 
 ## include/css_gradient.h
-- Doc: cg_radial_shape: Radial-gradient geometry (spec/css_gradient.md 3b).
+- Doc: The first url(...) token of val, unquoted and trimmed, into out.
 - Layer: utility
 - Language: h
 - Symbols:
-  - `cg_radial` (struct, line 24)
-  - `cg_radial_shape` (enum, line 19)
-  - `cg_radial_size` (enum, line 20)
-  - `shape` (type_alias, line 24) `typedef struct cg_radial { int shape;`
-  - `cg_expand_bg_image` (function, line 11) `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
-  - `cg_expand_background` (function, line 13) `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
-  - `width` (function, line 17) `* width (x, rx) or height (y, ry);`
-  - `out` (function, line 32) `* Returns 1 and fills *out (defaults first) when seg is a valid prelude, 0 when seg is not * one (it is a colour...`
-  - `cg_radial_len_px` (function, line 37) `double cg_radial_len_px(int enc, double dim);`
-  - `zero` (function, line 41) `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....`
-  - `cg_parse_linear` (function, line 51) `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions);`
+  - `cg_radial` (struct, line 28)
+  - `cg_radial_shape` (enum, line 23)
+  - `cg_radial_size` (enum, line 24)
+  - `shape` (type_alias, line 28) `typedef struct cg_radial { int shape;`
+  - `cg_first_url` (function, line 13) `int cg_first_url(const char *val, char *out, size_t outcap);`
+  - `cg_expand_bg_image` (function, line 15) `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
+  - `cg_expand_background` (function, line 17) `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
+  - `width` (function, line 21) `* width (x, rx) or height (y, ry);`
+  - `out` (function, line 36) `* Returns 1 and fills *out (defaults first) when seg is a valid prelude, 0 when seg is not * one (it is a colour...`
+  - `cg_radial_len_px` (function, line 41) `double cg_radial_len_px(int enc, double dim);`
+  - `zero` (function, line 45) `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....`
+  - `cg_parse_linear` (function, line 55) `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions);`
   - `FREEDOM_CSS_GRADIENT_H` (macro, line 2) `#define FREEDOM_CSS_GRADIENT_H`
-  - `CG_LEN_UNSET` (macro, line 18) `#define CG_LEN_UNSET`
+  - `CG_LEN_UNSET` (macro, line 22) `#define CG_LEN_UNSET`
 - Depends on: `include/css_decl.h`
 - Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_gradient.c`, `src/css_mask.c`, `src/tab.c`, `tests/test_css_gradient.c`
 
@@ -114,6 +115,7 @@ Previous: [KB_include.md](KB_include.md)
   - `cmq_env` (struct, line 19)
   - `width_px` (type_alias, line 18) `typedef struct cmq_env { int width_px;`
   - `cmq_matches` (function, line 28) `int cmq_matches(const char *s, size_t len, const cmq_env *env);`
+  - `cmq_container_surely` (function, line 34) `int cmq_container_surely(const char *s, size_t len, int max_width);`
   - `FREEDOM_CSS_MQ_H` (macro, line 2) `#define FREEDOM_CSS_MQ_H`
   - `CMQ_MAX_DEPTH` (macro, line 16) `#define CMQ_MAX_DEPTH`
   - `CMQ_TOK_MAX` (macro, line 17) `#define CMQ_TOK_MAX`
@@ -137,9 +139,10 @@ Previous: [KB_include.md](KB_include.md)
   - `csel_anc_reject` (function, line 194) `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
   - `csel_lower_ch` (function, line 239) `static inline char csel_lower_ch(char c)`
   - `csel_ci_eq` (function, line 243) `static inline int csel_ci_eq(const char *a, const char *b)`
-  - `csel_span_eq` (function, line 252) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
-  - `csel_substr` (function, line 263) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
-  - `csel_ident_ch` (function, line 271) `static inline int csel_ident_ch(char c)`
+  - `csel_ci_starts` (function, line 252) `static inline int csel_ci_starts(const char *a, const char *p)`
+  - `csel_span_eq` (function, line 261) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
+  - `csel_substr` (function, line 272) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
+  - `csel_ident_ch` (function, line 280) `static inline int csel_ident_ch(char c)`
   - `csel_compact_size` (function, line 167) `size_t csel_compact_size(int nparts);`
   - `csel_compact_dup` (function, line 172) `css_sel *csel_compact_dup(const css_sel *sel);`
   - `csel_parse` (function, line 176) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);`
@@ -240,7 +243,8 @@ Previous: [KB_include.md](KB_include.md)
   - `du_status` (enum, line 27)
   - `allocation` (function, line 21) `* * du_base64_payload does no allocation (it only slices the caller's url string);`
   - `du_is_data_url` (function, line 46) `int du_is_data_url(const char *url);`
-  - `closed` (function, line 59) `* 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/out/out_len == NULL (with b64_len !=...`
+  - `worker` (function, line 59) `* the confined worker (du_decode). */ du_status du_shape_ok(const char *url);`
+  - `closed` (function, line 65) `* 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/out/out_len == NULL (with b64_len !=...`
   - `FREEDOM_DATA_URL_H` (macro, line 2) `#define FREEDOM_DATA_URL_H`
   - `DU_MAX_ENCODED_LEN` (macro, line 43) `#define DU_MAX_ENCODED_LEN`
 - Imported by: `gui/browser_ui.c`, `src/data_url.c`, `src/render_doc.c`, `src/render_policy.c`, `src/tab.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_data_url.c`
@@ -475,25 +479,6 @@ Previous: [KB_include.md](KB_include.md)
   - `fc_interval_ms` (function, line 23) `int fc_interval_ms(const fc_clock *c);`
   - `FREEDOM_FRAME_CLOCK_H` (macro, line 2) `#define FREEDOM_FRAME_CLOCK_H`
 - Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
-
-## include/frame_host.h
-- Doc: fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `fh_host` (type_alias, line 19) `typedef struct fh_host fh_host;`
-  - `fh_new` (function, line 28) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);`
-  - `fh_free` (function, line 32) `void fh_free(fh_host *h);`
-  - `fh_apply_top` (function, line 36) `void fh_apply_top(fh_host *h, const tab_page *page);`
-  - `fh_tick` (function, line 40) `int fh_tick(fh_host *h, int elapsed_ms);`
-  - `fh_count` (function, line 43) `int fh_count(const fh_host *h);`
-  - `it` (function, line 46) `* confined worker last built it (NULL when no live frame has that URL);`
-  - `fh_frame_view` (function, line 49) `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);`
-  - `fh_generation` (function, line 52) `unsigned fh_generation(const fh_host *h);`
-  - `FREEDOM_FRAME_HOST_H` (macro, line 2) `#define FREEDOM_FRAME_HOST_H`
-  - `FH_MAX_DEPTH` (macro, line 18) `#define FH_MAX_DEPTH`
-- Depends on: `include/page_view.h`, `include/tab.h`
-- Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `src/freedom.c`, `tests/test_frame_host.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

@@ -3,13 +3,13 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `order` | function | `include/css.h:1102` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
-| `palette` | function | `include/css.h:1049` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
-| `prefers_dark` | type_alias | `include/css.h:1003` | `typedef struct css_media { int prefers_dark;` |
-| `prop` | type_alias | `include/css.h:1072` | `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];` |
-| `scaleY` | function | `include/css.h:871` | `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);` |
-| `slots` | function | `include/css.h:887` | `* parse time into ALL seven slots (singular matrices fail closed);` |
-| `translate` | function | `include/css.h:870` | `* translate()/translateX()/translateY();` |
+| `order` | function | `include/css.h:1113` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
+| `palette` | function | `include/css.h:1060` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
+| `prefers_dark` | type_alias | `include/css.h:1014` | `typedef struct css_media { int prefers_dark;` |
+| `prop` | type_alias | `include/css.h:1083` | `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];` |
+| `scaleY` | function | `include/css.h:882` | `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);` |
+| `slots` | function | `include/css.h:898` | `* parse time into ALL seven slots (singular matrices fail closed);` |
+| `translate` | function | `include/css.h:881` | `* translate()/translateX()/translateY();` |
 | `verbatim` | function | `include/css.h:85` | `* the quoted row strings verbatim (flex_layout parses them);` |
 | `CAR_INLINE_SPEC` | macro | `include/css_atrule.h:18` | `#define CAR_INLINE_SPEC` |
 | `CAR_LAYER_NAME_MAX` | macro | `include/css_atrule.h:17` | `#define CAR_LAYER_NAME_MAX` |
@@ -103,23 +103,24 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CSS_WIDE_PROBE_DECLS` | macro | `include/css_decl.h:35` | `#define CSS_WIDE_PROBE_DECLS` |
 | `FREEDOM_CSS_DECL_H` | macro | `include/css_decl.h:2` | `#define FREEDOM_CSS_DECL_H` |
 | `contiguous` | function | `include/css_decl.h:65` | `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...` |
-| `css_decl` | struct | `include/css_decl.h:232` | `` |
+| `css_decl` | struct | `include/css_decl.h:238` | `` |
 | `order` | function | `include/css_decl.h:50` | `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);` |
 | `part` | function | `include/css_decl.h:216` | `* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM...` |
-| `prop` | type_alias | `include/css_decl.h:231` | `typedef struct css_decl { int prop;` |
-| `CG_LEN_UNSET` | macro | `include/css_gradient.h:18` | `#define CG_LEN_UNSET` |
+| `prop` | type_alias | `include/css_decl.h:237` | `typedef struct css_decl { int prop;` |
+| `CG_LEN_UNSET` | macro | `include/css_gradient.h:22` | `#define CG_LEN_UNSET` |
 | `FREEDOM_CSS_GRADIENT_H` | macro | `include/css_gradient.h:2` | `#define FREEDOM_CSS_GRADIENT_H` |
-| `cg_expand_background` | function | `include/css_gradient.h:13` | `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
-| `cg_expand_bg_image` | function | `include/css_gradient.h:11` | `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
-| `cg_parse_linear` | function | `include/css_gradient.h:51` | `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions);` |
-| `cg_radial` | struct | `include/css_gradient.h:24` | `` |
-| `cg_radial_len_px` | function | `include/css_gradient.h:37` | `double cg_radial_len_px(int enc, double dim);` |
-| `cg_radial_shape` | enum | `include/css_gradient.h:19` | `` |
-| `cg_radial_size` | enum | `include/css_gradient.h:20` | `` |
-| `out` | function | `include/css_gradient.h:32` | `* Returns 1 and fills *out (defaults first) when seg is a valid prelude, 0 when seg is not * one (it is a colour...` |
-| `shape` | type_alias | `include/css_gradient.h:24` | `typedef struct cg_radial { int shape;` |
-| `width` | function | `include/css_gradient.h:17` | `* width (x, rx) or height (y, ry);` |
-| `zero` | function | `include/css_gradient.h:41` | `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....` |
+| `cg_expand_background` | function | `include/css_gradient.h:17` | `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
+| `cg_expand_bg_image` | function | `include/css_gradient.h:15` | `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
+| `cg_first_url` | function | `include/css_gradient.h:13` | `int cg_first_url(const char *val, char *out, size_t outcap);` |
+| `cg_parse_linear` | function | `include/css_gradient.h:55` | `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions);` |
+| `cg_radial` | struct | `include/css_gradient.h:28` | `` |
+| `cg_radial_len_px` | function | `include/css_gradient.h:41` | `double cg_radial_len_px(int enc, double dim);` |
+| `cg_radial_shape` | enum | `include/css_gradient.h:23` | `` |
+| `cg_radial_size` | enum | `include/css_gradient.h:24` | `` |
+| `out` | function | `include/css_gradient.h:36` | `* Returns 1 and fills *out (defaults first) when seg is a valid prelude, 0 when seg is not * one (it is a colour...` |
+| `shape` | type_alias | `include/css_gradient.h:28` | `typedef struct cg_radial { int shape;` |
+| `width` | function | `include/css_gradient.h:21` | `* width (x, rx) or height (y, ry);` |
+| `zero` | function | `include/css_gradient.h:45` | `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....` |
 | `FREEDOM_CSS_INDEX_H` | macro | `include/css_index.h:11` | `#define FREEDOM_CSS_INDEX_H` |
 | `cix_build` | function | `include/css_index.h:34` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` |
 | `cix_build_ptrs` | function | `include/css_index.h:37` | `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);` |
@@ -161,6 +162,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CMQ_MAX_DEPTH` | macro | `include/css_mq.h:16` | `#define CMQ_MAX_DEPTH` |
 | `CMQ_TOK_MAX` | macro | `include/css_mq.h:17` | `#define CMQ_TOK_MAX` |
 | `FREEDOM_CSS_MQ_H` | macro | `include/css_mq.h:2` | `#define FREEDOM_CSS_MQ_H` |
+| `cmq_container_surely` | function | `include/css_mq.h:34` | `int cmq_container_surely(const char *s, size_t len, int max_width);` |
 | `cmq_env` | struct | `include/css_mq.h:19` | `` |
 | `cmq_matches` | function | `include/css_mq.h:28` | `int cmq_matches(const char *s, size_t len, const cmq_env *env);` |
 | `width_px` | type_alias | `include/css_mq.h:18` | `typedef struct cmq_env { int width_px;` |
@@ -177,21 +179,22 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `conservative` | function | `include/css_select.h:201` | `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...` |
 | `csel_anc_reject` | function | `include/css_select.h:194` | `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)` |
 | `csel_ci_eq` | function | `include/css_select.h:243` | `static inline int csel_ci_eq(const char *a, const char *b)` |
+| `csel_ci_starts` | function | `include/css_select.h:252` | `static inline int csel_ci_starts(const char *a, const char *p)` |
 | `csel_compact_dup` | function | `include/css_select.h:172` | `css_sel *csel_compact_dup(const css_sel *sel);` |
 | `csel_compact_size` | function | `include/css_select.h:167` | `size_t csel_compact_size(int nparts);` |
 | `csel_decl_end` | function | `include/css_select.h:235` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` |
 | `csel_element_feature_bits` | function | `include/css_select.h:193` | `unsigned long long csel_element_feature_bits(const css_element *e);` |
 | `csel_emit_utf8` | function | `include/css_select.h:219` | `size_t csel_emit_utf8(unsigned int cp, char *out);` |
 | `csel_escape_len` | function | `include/css_select.h:223` | `size_t csel_escape_len(const char *s, size_t i, size_t b);` |
-| `csel_ident_ch` | function | `include/css_select.h:271` | `static inline int csel_ident_ch(char c)` |
+| `csel_ident_ch` | function | `include/css_select.h:280` | `static inline int csel_ident_ch(char c)` |
 | `csel_ident_eq` | function | `include/css_select.h:227` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` |
 | `csel_ident_fold` | function | `include/css_select.h:225` | `void csel_ident_fold(const char *src, size_t len, char *dst);` |
 | `csel_lower_ch` | function | `include/css_select.h:239` | `static inline char csel_lower_ch(char c)` |
 | `csel_matches` | function | `include/css_select.h:185` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` |
 | `csel_parse` | function | `include/css_select.h:176` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` |
 | `csel_read_ident` | function | `include/css_select.h:230` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` |
-| `csel_span_eq` | function | `include/css_select.h:252` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
-| `csel_substr` | function | `include/css_select.h:263` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
+| `csel_span_eq` | function | `include/css_select.h:261` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
+| `csel_substr` | function | `include/css_select.h:272` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
 | `csel_unescape` | function | `include/css_select.h:221` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
 | `css_attr_match` | struct | `include/css_select.h:88` | `` |
 | `css_compound` | struct | `include/css_select.h:122` | `` |
@@ -251,9 +254,10 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `DU_MAX_ENCODED_LEN` | macro | `include/data_url.h:43` | `#define DU_MAX_ENCODED_LEN` |
 | `FREEDOM_DATA_URL_H` | macro | `include/data_url.h:2` | `#define FREEDOM_DATA_URL_H` |
 | `allocation` | function | `include/data_url.h:21` | `* * du_base64_payload does no allocation (it only slices the caller's url string);` |
-| `closed` | function | `include/data_url.h:59` | `* 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/out/out_len == NULL (with b64_len !=...` |
+| `closed` | function | `include/data_url.h:65` | `* 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/out/out_len == NULL (with b64_len !=...` |
 | `du_is_data_url` | function | `include/data_url.h:46` | `int du_is_data_url(const char *url);` |
 | `du_status` | enum | `include/data_url.h:27` | `` |
+| `worker` | function | `include/data_url.h:59` | `* the confined worker (du_decode). */ du_status du_shape_ok(const char *url);` |
 | `FREEDOM_DISK_STORE_H` | macro | `include/disk_store.h:2` | `#define FREEDOM_DISK_STORE_H` |
 | `ds_free` | function | `include/disk_store.h:47` | `void ds_free(uint8_t *buf, size_t len);` |
 | `ds_status` | enum | `include/disk_store.h:25` | `` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FREEDOM_HTML_PARSE_H` | macro | `include/html_parse.h:2` | `#define FREEDOM_HTML_PARSE_H` |
 | `HP_DEFAULT_MAX_BYTES` | macro | `include/html_parse.h:41` | `#define HP_DEFAULT_MAX_BYTES` |
 | `HP_MAX_SCRIPTS` | macro | `include/html_parse.h:48` | `#define HP_MAX_SCRIPTS` |
-| `HP_MAX_STYLESHEETS` | macro | `include/html_parse.h:115` | `#define HP_MAX_STYLESHEETS` |
-| `cfg` | function | `include/html_parse.h:57` | `* policy in cfg (cfg == NULL => secure defaults). No script is ever executed. * html == NULL or out == NULL =>...` |
-| `dropped` | function | `include/html_parse.h:47` | `* dropped (not executed). */ #define HP_MAX_SCRIPTS ((size_t)4096) /* Returns a configuration with the secure...` |
-| `hp_config` | struct | `include/html_parse.h:32` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

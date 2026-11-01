@@ -325,7 +325,19 @@ static int find_url_token(const char *val, size_t *us, size_t *ue,
               (p[2] == 'l' || p[2] == 'L') && p[3] == '('))
             continue;
         const char *inner = p + 4;
-        const char *close = strchr(inner, ')');
+        /* A quoted URL ends at its closing quote, not at the first ')': an inline
+         * `url("data:image/svg+xml,<svg ... transform='rotate(45)'>")` has parens. */
+        const char *close = NULL;
+        const char *q = inner;
+        while (*q == ' ' || *q == '\t') ++q;
+        if (*q == '"' || *q == '\'') {
+            const char *e = q + 1;
+            while (*e != '\0' && *e != *q) e += (e[0] == '\\' && e[1] != '\0') ? 2 : 1;
+            if (*e == '\0') return -1;
+            close = strchr(e + 1, ')');
+        } else {
+            close = strchr(inner, ')');
+        }
         if (close == NULL) return -1;
         size_t ilen = (size_t)(close - inner);
         while (ilen > 0 && (*inner == ' ' || *inner == '\t')) { ++inner; --ilen; }
@@ -381,6 +393,12 @@ static int emit_bg_image_url(css_decl *dst, int cap, const char *url,
     dst[0].ival = (int)*nurl;
     ++*nurl;
     return 1;
+}
+
+int cg_first_url(const char *val, char *out, size_t outcap) {
+    size_t us, ue;
+    if (val == NULL || out == NULL || outcap == 0) return -1;
+    return find_url_token(val, &us, &ue, out, outcap);
 }
 
 /* The five radial-geometry decls that ride a kind-1 gradient emission. */

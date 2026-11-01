@@ -1,10 +1,10 @@
 # `src/data_url.c`
 
-> Source: [src/data_url.c:1](../../src/data_url.c#L1) | language `c` | coverage 20.0% | [API index](../index.md)
+> Source: [src/data_url.c:1](../../src/data_url.c#L1) | language `c` | coverage 16.7% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`du_is_data_url`](#du_is_data_url), [`du_base64_payload`](#du_base64_payload), [`du_base64_decode`](#du_base64_decode), [`du_decode`](#du_decode)
+- **Functions:** [`du_is_data_url`](#du_is_data_url), [`du_base64_payload`](#du_base64_payload), [`du_shape_ok`](#du_shape_ok), [`du_base64_decode`](#du_base64_decode), [`du_decode`](#du_decode)
 
 ## Call Graph
 
@@ -14,9 +14,11 @@ Solid arrows stay in this module, dashed arrows leave it.
 flowchart LR
     n_src_data_url_c__du_base64_payload(["du_base64_payload"])
     n_src_data_url_c__du_is_data_url(["du_is_data_url"])
+    n_src_data_url_c__du_shape_ok(["du_shape_ok"])
     n_src_data_url_c__du_decode(["du_decode"])
     n_src_data_url_c__du_base64_decode(["du_base64_decode"])
     n_src_data_url_c__du_base64_payload --> n_src_data_url_c__du_is_data_url
+    n_src_data_url_c__du_shape_ok --> n_src_data_url_c__du_is_data_url
     n_src_data_url_c__du_decode --> n_src_data_url_c__du_base64_decode
     n_src_data_url_c__du_decode --> n_src_data_url_c__du_is_data_url
 ```
@@ -47,7 +49,7 @@ NULL => 0.
 
 > **Inherited:** Documentation from [`du_is_data_url`](#du_is_data_url) (include/data_url.h:46).
 
-*Called by:* [`du_base64_payload`](#du_base64_payload), [`du_decode`](#du_decode)
+*Called by:* [`du_base64_payload`](#du_base64_payload), [`du_decode`](#du_decode), [`du_shape_ok`](#du_shape_ok)
 
 ---
 
@@ -73,6 +75,28 @@ du_status du_base64_payload(const char *url, const char **payload, size_t *paylo
 
 *Calls:* [`du_is_data_url`](#du_is_data_url)
 
+---
+
+<a id="du_shape_ok"></a>
+
+### `du_shape_ok`
+
+`function` | [src/data_url.c:59](../../src/data_url.c#L59)
+
+```c
+du_status du_shape_ok(const char *url)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `url` | `char *` |  |  |
+
+**Returns:** `du_status`
+
+*Calls:* [`du_is_data_url`](#du_is_data_url)
+
 *Called by:* [`rdp_image_decision`](src.render_policy.c.md#rdp_image_decision)
 
 ---
@@ -81,7 +105,7 @@ du_status du_base64_payload(const char *url, const char **payload, size_t *paylo
 
 ### `du_base64_decode`
 
-`function` | [src/data_url.c:70](../../src/data_url.c#L70)
+`function` | [src/data_url.c:79](../../src/data_url.c#L79)
 
 ```c
 du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)
@@ -106,7 +130,7 @@ du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_
 
 ### `du_decode`
 
-`function` | [src/data_url.c:131](../../src/data_url.c#L131)
+`function` | [src/data_url.c:140](../../src/data_url.c#L140)
 
 ```c
 du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)

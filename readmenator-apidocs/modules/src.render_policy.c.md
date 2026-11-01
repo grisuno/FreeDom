@@ -15,11 +15,11 @@ flowchart LR
     n_src_render_policy_c__rdp_image_decision(["rdp_image_decision"])
     n_src_render_policy_c__rdp_is_tracking_pixel(["rdp_is_tracking_pixel"])
     n_include_data_url_h__du_is_data_url["data_url.du_is_data_url"]
-    n_src_data_url_c__du_base64_payload["data_url.du_base64_payload"]
+    n_src_data_url_c__du_shape_ok["data_url.du_shape_ok"]
     n_src_request_policy_c__rp_evaluate["request_policy.rp_evaluate"]
     n_src_render_policy_c__rdp_image_decision --> n_src_render_policy_c__rdp_is_tracking_pixel
     n_src_render_policy_c__rdp_image_decision -.-> n_include_data_url_h__du_is_data_url
-    n_src_render_policy_c__rdp_image_decision -.-> n_src_data_url_c__du_base64_payload
+    n_src_render_policy_c__rdp_image_decision -.-> n_src_data_url_c__du_shape_ok
     n_src_render_policy_c__rdp_image_decision -.-> n_src_request_policy_c__rp_evaluate
 ```
 
@@ -90,7 +90,7 @@ rdp_img_decision rdp_image_decision(rdp_caps caps, const char *top_level_url, co
 
 **Returns:** `rdp_img_decision`
 
-*Calls:* [`du_is_data_url`](include.data_url.h.md#du_is_data_url), [`du_base64_payload`](src.data_url.c.md#du_base64_payload), [`rdp_is_tracking_pixel`](#rdp_is_tracking_pixel), [`rp_evaluate`](src.request_policy.c.md#rp_evaluate)
+*Calls:* [`du_is_data_url`](include.data_url.h.md#du_is_data_url), [`du_shape_ok`](src.data_url.c.md#du_shape_ok), [`rdp_is_tracking_pixel`](#rdp_is_tracking_pixel), [`rp_evaluate`](src.request_policy.c.md#rp_evaluate)
 
 ---
 
@@ -98,7 +98,7 @@ rdp_img_decision rdp_image_decision(rdp_caps caps, const char *top_level_url, co
 
 ### `rdp_img_reason`
 
-`function` `const` | [src/render_policy.c:63](../../src/render_policy.c#L63)
+`function` `const` | [src/render_policy.c:60](../../src/render_policy.c#L60)
 
 ```c
 const char *rdp_img_reason(rdp_img_decision d)
@@ -124,7 +124,7 @@ Never NULL; an unknown enum value yields "unknown".
 
 ### `rdp_images_warning`
 
-`function` `const` | [src/render_policy.c:74](../../src/render_policy.c#L74)
+`function` `const` | [src/render_policy.c:71](../../src/render_policy.c#L71)
 
 ```c
 const char *rdp_images_warning(void)

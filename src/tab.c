@@ -27,6 +27,7 @@
 #include "freedom_config.h"
 #include "html_parse.h"
 #include "image_decode.h"
+#include "svg_raster.h"
 #include "js_dom.h"
 #include "js_trusted.h"
 #include "identity.h"
@@ -137,7 +138,7 @@ static void ignore_sigpipe(void);
 #define TAB_WIRE_HEAD_N 6
 #define TAB_WIRE_A_N 40
 #define TAB_WIRE_B_N 70
-#define TAB_WIRE_BOX_F_N 268
+#define TAB_WIRE_BOX_F_N 278
 #define TAB_WIRE_GRID_N (PV_GRID_TRACKS + 1)
 
 /* A clip-edge percentage off the wire: per-mille, bounded like CSS_PCT_MAX (a hostile
@@ -169,7 +170,7 @@ static int rad_len_ok(int32_t v, int dflt) {
 /* Request opcodes (parent -> child). */
 enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5,
        OP_TICK = 6, OP_SUBMIT = 7, OP_EVENT = 8, OP_MOUSE = 9,
-       OP_DECODE_IMAGE_B64 = 10, OP_GEOM = 11, OP_POPSTATE = 12, OP_WS_EVENT = 13 };
+       OP_DECODE_IMAGE_DATA = 10, OP_GEOM = 11, OP_POPSTATE = 12, OP_WS_EVENT = 13 };
 
 /* A WebSocket message pushed to the page (OP_WS_EVENT) is bounded like the
  * connection's own per-message cap. */
@@ -1047,6 +1048,11 @@ static int write_view_raw(int wfd, const pv_view *v) {
             (int32_t)bd->clip_bottom_pm, (int32_t)bd->clip_left_pm,
             /* background-clip padding-box/content-box, 2026-10-24 (appended; read_view mirrors) */
             (int32_t)bd->bg_clip,
+            /* mask-image url() layer geometry, tanda 83 (CSS_MG_* order) */
+            (int32_t)bd->mask_geo[0], (int32_t)bd->mask_geo[1], (int32_t)bd->mask_geo[2],
+            (int32_t)bd->mask_geo[3], (int32_t)bd->mask_geo[4], (int32_t)bd->mask_geo[5],
+            (int32_t)bd->mask_geo[6], (int32_t)bd->mask_geo[7], (int32_t)bd->mask_geo[8],
+            (int32_t)bd->mask_geo[9],
         };
         if (write_full(wfd, f, sizeof f) != 0) return -1;
         /* background-image url() text, 2026-07-16: length-prefixed like the run
@@ -1055,6 +1061,7 @@ static int write_view_raw(int wfd, const pv_view *v) {
          * the same way read_field already bounds every other string here). */
         if (write_field(wfd, bd->bg_image_url) != 0) return -1;
         if (write_field(wfd, bd->bg_image_url2) != 0) return -1;
+        if (write_field(wfd, bd->mask_url) != 0) return -1;
         /* R8: ::before/::after generated content text. */
         if (write_field(wfd, bd->content_str) != 0) return -1;
         if (write_field(wfd, bd->content_before_str) != 0) return -1;
@@ -2204,32 +2211,45 @@ static void child_handle_decode_image(int wfd, const char *bytes, size_t len) {
     img_pixels px;
     memset(&px, 0, sizeof px);
     int ok = (img_decode((const uint8_t *)bytes, len, &px) == IMG_OK);
+    /* An SVG document served as an image (spec/svg_raster.md): rasterized here,
+     * inside the same confinement, with no text and no URL form to follow. */
+    if (!ok && sr_sniff((const uint8_t *)bytes, len))
+        ok = (sr_rasterize((const uint8_t *)bytes, len, &px) == IMG_OK);
     int32_t k = ok ? 1 : 0;
     if (write_full(wfd, &k, sizeof k) == 0 && ok) {
         uint32_t w = px.width, h = px.height, stride = px.stride;
+        uint32_t scale = (px.scale >= 1u) ? px.scale : 1u;
         size_t dlen = (size_t)stride * (size_t)h;
         (void)(write_full(wfd, &w, sizeof w) == 0
             && write_full(wfd, &h, sizeof h) == 0
             && write_full(wfd, &stride, sizeof stride) == 0
+            && write_full(wfd, &scale, sizeof scale) == 0
             && write_full(wfd, &dlen, sizeof dlen) == 0
             && (dlen == 0 || write_full(wfd, px.data, dlen) == 0));
     }
     img_pixels_free(&px);
 }
 
-/* data: URI images: the parent only sliced the base64 payload (pure pointer
- * arithmetic, no interpretation); the base64 DECODE of hostile bytes happens here,
- * confined, same as the image-format decode it feeds into. A malformed payload
- * (defense in depth -- render_policy already validated it at the decision layer)
- * answers exactly like an undecodable image: ok=0, no placeholder-worthy crash. */
-static void child_handle_decode_image_b64(int wfd, const char *b64, size_t len) {
+/* data: URI images: the parent only checked the URI's shape (du_shape_ok, no
+ * interpretation); decoding the hostile payload -- base64 or percent-encoded --
+ * happens here, confined, same as the image-format decode it feeds into. A
+ * malformed payload answers exactly like an undecodable image: ok=0. */
+static void child_handle_decode_image_data(int wfd, const char *url, size_t len) {
+    char *z = (len == (size_t)-1) ? NULL : (char *)malloc(len + 1);
     uint8_t *raw = NULL;
     size_t raw_len = 0;
-    if (du_base64_decode(b64, len, &raw, &raw_len) != DU_OK) {
+    char mime[64];
+    if (z != NULL) {
+        memcpy(z, url, len);
+        z[len] = '\0';
+    }
+    if (z == NULL || du_decode(z, mime, sizeof mime, &raw, &raw_len) != DU_OK) {
+        free(z);
         int32_t k = 0;
-        write_full(wfd, &k, sizeof k);
+        (void)write_full(wfd, &k, sizeof k);
         return;
     }
+    free(z);
     child_handle_decode_image(wfd, (const char *)raw, raw_len);
     free(raw);
 }
@@ -2308,7 +2328,7 @@ static void tab_worker_run(int rfd, int wfd) {
         if (read_full(rfd, &op, 1) != 0) break; /* EOF / error => quit */
         if (op == OP_QUIT) break;
         if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE &&
-            op != OP_DECODE_IMAGE_B64 &&
+            op != OP_DECODE_IMAGE_DATA &&
             op != OP_CLICK && op != OP_TICK && op != OP_SUBMIT &&
             op != OP_EVENT && op != OP_MOUSE && op != OP_GEOM && op != OP_POPSTATE &&
             op != OP_WS_EVENT)
@@ -2470,7 +2490,7 @@ static void tab_worker_run(int rfd, int wfd) {
         if (op == OP_LOAD)                   child_handle_load(wfd, &cs, buf, len, run_js, net, reader, dark, css, (int)vpw, url, cookies, storage, storage_len);
         else if (op == OP_EVAL)              child_handle_eval(wfd, &cs, buf, len);
         else if (op == OP_DECODE_IMAGE)      child_handle_decode_image(wfd, buf, len);
-        else /* OP_DECODE_IMAGE_B64 */       child_handle_decode_image_b64(wfd, buf, len);
+        else /* OP_DECODE_IMAGE_DATA */      child_handle_decode_image_data(wfd, buf, len);
         free(buf);
         free(url);
         free(cookies);
@@ -3011,6 +3031,13 @@ static int read_view_raw(int fd, pv_view **out) {
             .clip_bottom_pm = clip_pm_ok(f[265]), .clip_left_pm = clip_pm_ok(f[266]),
             .bg_clip = (f[267] == CSS_BGC_PADDING_BOX || f[267] == CSS_BGC_CONTENT_BOX) ? f[267] : 0,
         };
+        /* mask image geometry from the confined worker: the enums are clamped here, the
+         * lengths are bounded by bx_background_layer exactly like the background's. */
+        for (int k = 0; k < PV_MASK_GEO_N; ++k) bd.mask_geo[k] = f[268 + k];
+        if (bd.mask_geo[CSS_MG_REPEAT] < CSS_BGR_UNSET || bd.mask_geo[CSS_MG_REPEAT] > CSS_BGR_ROUND)
+            bd.mask_geo[CSS_MG_REPEAT] = CSS_BGR_UNSET;
+        if (bd.mask_geo[CSS_MG_SIZE] < 0 || bd.mask_geo[CSS_MG_SIZE] > CSS_BGS_CONTAIN)
+            bd.mask_geo[CSS_MG_SIZE] = 0;
         for (int k = 0; k < (PV_BSHADOW_LAYERS - 1) * 6; ++k)
             bd.bsh_x[k / 6][k % 6] = f[228 + k];
         for (int k = 0; k < CSS_GRAD_STOPS_MAX; ++k)
@@ -3032,6 +3059,12 @@ static int read_view_raw(int fd, pv_view **out) {
         if (bgurl2_len >= PV_BG_URL_MAX) { free(bgurl2); pv_free(v); return -1; }
         memcpy(bd.bg_image_url2, bgurl2, bgurl2_len + 1);
         free(bgurl2);
+        char *mkurl = NULL;
+        size_t mkurl_len = 0;
+        if (read_field(fd, &mkurl, &mkurl_len) != 0) { pv_free(v); return -1; }
+        if (mkurl_len >= PV_BG_URL_MAX) { free(mkurl); pv_free(v); return -1; }
+        memcpy(bd.mask_url, mkurl, mkurl_len + 1);
+        free(mkurl);
         /* R8: ::before/::after generated content text. */
         char *cstr = NULL;
         size_t cstr_len = 0;
@@ -4323,14 +4356,18 @@ static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, siz
     if (read_full(t->resp_fd, &ok, sizeof ok) != 0) return io_failure(t);
     if (!ok) return TAB_OK; /* not decodable: out stays zeroed, caller shows placeholder */
 
-    uint32_t w = 0, h = 0, stride = 0;
+    uint32_t w = 0, h = 0, stride = 0, scale = 0;
     size_t dlen = 0;
     if (read_full(t->resp_fd, &w, sizeof w) != 0
      || read_full(t->resp_fd, &h, sizeof h) != 0
      || read_full(t->resp_fd, &stride, sizeof stride) != 0
+     || read_full(t->resp_fd, &scale, sizeof scale) != 0
      || read_full(t->resp_fd, &dlen, sizeof dlen) != 0) {
         return io_failure(t);
     }
+    /* The density is the worker's claim too: bounded, and it must divide the size. */
+    if (scale < 1u || scale > IMG_MAX_SCALE || w % scale != 0u || h % scale != 0u)
+        return io_failure(t);
     /* Validate the worker's claims against the same anti-DoS bounds the decoder
      * enforces, so a hostile child cannot desync the stream or over-claim memory
      * (dimensions_ok bounds w,h <= IMG_MAX_DIM, so w*4 and stride*h cannot overflow). */
@@ -4348,6 +4385,7 @@ static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, siz
     out->stride = stride;
     out->data = data;
     out->data_len = dlen;
+    out->scale = scale;
     return TAB_OK;
 }
 
@@ -4363,18 +4401,13 @@ tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *ou
     if (t == NULL || data_url == NULL || out == NULL) return TAB_ERR_NULL_ARG;
     memset(out, 0, sizeof *out);
 
-    /* Slicing the payload substring is pure pointer arithmetic over the hostile
-     * URL string (same trust level as url_resolve_https parsing a hostile href in
-     * this same parent process) -- it never interprets the bytes it points to. The
-     * actual base64 decode, like the image format decode, happens inside the
-     * confined worker. An unsupported/malformed data: URI is not a transport
-     * error: it behaves like "not decodable" (placeholder), matching
-     * tab_decode_image's convention. */
-    const char *payload = NULL;
-    size_t plen = 0;
-    if (du_base64_payload(data_url, &payload, &plen) != DU_OK) return TAB_OK;
-
-    return tab_decode_image_op(t, OP_DECODE_IMAGE_B64, payload, plen, out);
+    /* The parent only checks the URI's SHAPE (a comma, a bounded body); it never
+     * interprets the payload. Decoding it -- base64 or percent-encoded -- and the
+     * image format decode both happen inside the confined worker. A malformed
+     * data: URI is not a transport error: it behaves like "not decodable"
+     * (placeholder), matching tab_decode_image's convention. */
+    if (du_shape_ok(data_url) != DU_OK) return TAB_OK;
+    return tab_decode_image_op(t, OP_DECODE_IMAGE_DATA, data_url, strlen(data_url), out);
 }
 
 int tab_alive(const tab *t) {

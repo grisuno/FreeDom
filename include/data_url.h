@@ -53,6 +53,12 @@ int du_is_data_url(const char *url);
  * DU_ERR_NULL_ARG. */
 du_status du_base64_payload(const char *url, const char **payload, size_t *payload_len);
 
+/* Shape check only, no decoding and no allocation: DU_OK when url is a data: URI
+ * with a comma and an encoded body within DU_MAX_ENCODED_LEN -- base64 OR
+ * percent-encoded (`data:image/svg+xml,%3Csvg...`). The decode itself happens in
+ * the confined worker (du_decode). */
+du_status du_shape_ok(const char *url);
+
 /* Decodes base64 text (RFC 4648 standard alphabet, mandatory '=' padding, length a
  * multiple of 4) into freshly malloc'd bytes; *out is the caller's to free(). Any
  * character outside the alphabet, misplaced padding, or a length not a multiple of

@@ -1,6 +1,41 @@
 # API (page 12 of 12)
 Previous: [API_p11.md](API_p11.md)
 
+## src/url.c
+Depends on: `include/url.h`
+- `ci_prefix` (function) `src/url.c:20` `static int ci_prefix(const char *haystack, const char *prefix)` -- produced; every assembly is bounded and reports overflow rather than truncate.  #define _POSIX_C_SOURCE 200809L...
+- `copy_checked` (function) `src/url.c:32` `static int copy_checked(char *out, size_t outsz, const char *src)` -- /* Case-insensitive: does haystack start with prefix? static int ci_prefix(const char *haystack, const char *prefix)...
+- `cat_checked` (function) `src/url.c:40` `static int cat_checked(char *out, size_t outsz, const char *src)` -- +haystack; ++prefix; } return 1; } /* Bounded copy: out gets src (NUL-terminated).
+- `ncat_checked` (function) `src/url.c:49` `static int ncat_checked(char *out, size_t outsz, const char *src, size_t n)` -- memcpy(out, src, n + 1); return 0; } /* Bounded append: out += src.
+- `url_has_scheme` (function) `src/url.c:59` `int url_has_scheme(const char *s)`
+- `url_is_https` (function) `src/url.c:73` `int url_is_https(const char *s)`
+- `url_validate_https` (function) `src/url.c:80` `url_status url_validate_https(const char *url)`
+- `url_authority_len` (function) `src/url.c:91` `size_t url_authority_len(const char *url)`
+- `out_pop_segment` (function) `src/url.c:102` `static void out_pop_segment(char *out, size_t *olen)` -- RFC 3986 3.2: the authority ends at the first '/', '?' or '#'.
+- `url_remove_dot_segments` (function) `src/url.c:109` `url_status url_remove_dot_segments(const char *path, char *out, size_t outsz)`
+- `dir_len` (function) `src/url.c:159` `static size_t dir_len(const char *base)` -- Length of base up to and including the last path '/', ignoring query/fragment. * If the path carries no slash...
+- `url_resolve_https` (function) `src/url.c:170` `url_status url_resolve_https(const char *base, const char *ref,
+                             char...`
+- `is_space` (function) `src/url.c:218` `static int is_space(int c)`
+- `is_unreserved` (function) `src/url.c:222` `static int is_unreserved(int c)`
+- `append_query_encoded` (function) `src/url.c:229` `static int append_query_encoded(char *out, size_t outsz, const char *src)` -- Percent-encodes src into a query value appended to out (space -> '+', every * non-unreserved byte -> %XX).
+- `assumed` (function) `src/url.c:254` `* assumed (the caller already routed whitespace to search). */
+static int looks_like_host(const c...`
+- `build_search` (function) `src/url.c:303` `static url_status build_search(const char *query, char *out, size_t outsz)`
+- `url_omnibox` (function) `src/url.c:309` `url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz)`
+- `host_equals` (function) `src/url.c:378` `static int host_equals(const url_parts *p, const char *want)` -- Any remaining explicit scheme is never executed nor downgraded: search for it * (so "javascript:...", "file:..."...
+- `query_find_q` (function) `src/url.c:393` `static const char *query_find_q(const char *search, size_t len, size_t *vlen)` -- Returns a pointer to the value of the "q" parameter within a "?a=b&q=v&..." search span, with its length in *vlen...
+- `url_search_rewrite` (function) `src/url.c:411` `url_status url_search_rewrite(const char *url, char *out, size_t outsz)`
+- `url_extract_userinfo` (function) `src/url.c:431` `url_status url_extract_userinfo(const char *url, char *out, size_t outsz,
+                       ...`
+- `url_is_file` (function) `src/url.c:525` `int url_is_file(const char *s)`
+- `url_file_path` (function) `src/url.c:531` `const char *url_file_path(const char *s)`
+- `url_resolve_file` (function) `src/url.c:535` `url_status url_resolve_file(const char *base, const char *ref, char *out, size_t outsz)`
+- `url_split` (function) `src/url.c:584` `url_status url_split(const char *url, url_parts *out)`
+- `copy_bounded` (function) `src/url.c:645` `static url_status copy_bounded(char *out, size_t outsz, const char *a, size_t alen,
+             ...`
+- `url_history_target` (function) `src/url.c:654` `url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz)`
+
 ## src/web_storage.c
 Depends on: `include/web_storage.h`
 - `get_u32` (function) `src/web_storage.c:25` `static uint32_t get_u32(const unsigned char *p)`

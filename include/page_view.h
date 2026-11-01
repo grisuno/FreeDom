@@ -67,6 +67,7 @@ typedef enum pv_status {
  * Sized to hold the RESOLVED absolute URL too (render_doc.c resolves in
  * place), not just the raw author-CSS token. */
 #define PV_BG_URL_MAX 1024
+#define PV_MASK_GEO_N 10   /* == css.h CSS_MASK_GEO_N (asserted in page_view.c) */
 
 typedef enum pv_kind {
     PV_TEXT = 0,   /* inline text */
@@ -672,6 +673,10 @@ typedef struct pv_box_def {
     /* mask (css.h mask_*): layer count, composite op, clip pair, 2 layers x 3 compact words */
     int mask_n, mask_comp, mask_clip;
     int mask_w[6];
+    /* mask-image: url() (tanda 83): the first mask layer's image URL ("" = none; render_doc
+     * resolves and gates it like bg_image_url) and its geometry (css.h CSS_MG_*). */
+    char mask_url[PV_BG_URL_MAX];
+    int mask_geo[PV_MASK_GEO_N];
     /* 1 + the id of the box that DECLARED the mask when this one only inherits it through the
      * box tree (a mask covers its whole subtree); 0 = declared here (or none). The painter
      * measures the mask against that box's rect, not this one's. */

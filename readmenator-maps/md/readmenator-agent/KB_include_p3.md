@@ -1,6 +1,25 @@
 # Subsystem: include (page 3 of 5)
 Previous: [KB_include_p2.md](KB_include_p2.md)
 
+## include/frame_host.h
+- Doc: fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fh_host` (type_alias, line 19) `typedef struct fh_host fh_host;`
+  - `fh_new` (function, line 28) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);`
+  - `fh_free` (function, line 32) `void fh_free(fh_host *h);`
+  - `fh_apply_top` (function, line 36) `void fh_apply_top(fh_host *h, const tab_page *page);`
+  - `fh_tick` (function, line 40) `int fh_tick(fh_host *h, int elapsed_ms);`
+  - `fh_count` (function, line 43) `int fh_count(const fh_host *h);`
+  - `it` (function, line 46) `* confined worker last built it (NULL when no live frame has that URL);`
+  - `fh_frame_view` (function, line 49) `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);`
+  - `fh_generation` (function, line 52) `unsigned fh_generation(const fh_host *h);`
+  - `FREEDOM_FRAME_HOST_H` (macro, line 2) `#define FREEDOM_FRAME_HOST_H`
+  - `FH_MAX_DEPTH` (macro, line 18) `#define FH_MAX_DEPTH`
+- Depends on: `include/page_view.h`, `include/tab.h`
+- Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `src/freedom.c`, `tests/test_frame_host.c`
+
 ## include/freebug.h
 - Doc: fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated)....
 - Layer: utility
@@ -45,7 +64,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 78) `#define FC_MAX_AUTHOR_CSS_BYTES`
   - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 81) `#define FC_LAZY_IMAGE_MARGIN_PX`
   - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 87) `#define FC_TAB_OP_NET_BUDGET_MS`
-- Imported by: `gui/browser_ui_internal.h`, `gui/svg_paint.c`, `gui/ui_render.c`, `src/page_view.c`, `src/tab.c`
+- Imported by: `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/svg_paint.c`, `src/tab.c`
 
 ## include/hls.h
 - Doc: hls_segment: or variant info.
@@ -209,15 +228,16 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `img_status` (enum, line 41)
   - `width` (type_alias, line 56) `typedef struct img_pixels { uint32_t width;`
   - `guards` (function, line 25) `* guards (in-memory source only, longjmp error manager so a bad stream never * calls exit(), dimension caps before...`
-  - `img_dimensions_ok` (function, line 78) `int img_dimensions_ok(uint32_t w, uint32_t h);`
-  - `inputs` (function, line 81) `* Degenerate inputs (<= 0) yield (0,0). Pure. */ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h...`
-  - `decode` (function, line 92) `* the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and * expands to BGRA. Rejects non-JPEG...`
-  - `img_pixels_free` (function, line 121) `void img_pixels_free(img_pixels *p);`
-  - `img_format_name` (function, line 124) `const char *img_format_name(img_format f);`
+  - `img_dimensions_ok` (function, line 84) `int img_dimensions_ok(uint32_t w, uint32_t h);`
+  - `inputs` (function, line 87) `* Degenerate inputs (<= 0) yield (0,0). Pure. */ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h...`
+  - `decode` (function, line 98) `* the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and * expands to BGRA. Rejects non-JPEG...`
+  - `img_pixels_free` (function, line 127) `void img_pixels_free(img_pixels *p);`
+  - `img_format_name` (function, line 130) `const char *img_format_name(img_format f);`
   - `FREEDOM_IMAGE_DECODE_H` (macro, line 2) `#define FREEDOM_IMAGE_DECODE_H`
-  - `IMG_MAX_DIM` (macro, line 65) `#define IMG_MAX_DIM`
-  - `IMG_MAX_PIXELS` (macro, line 66) `#define IMG_MAX_PIXELS`
-- Imported by: `gui/browser_ui.c`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
+  - `IMG_MAX_SCALE` (macro, line 67) `#define IMG_MAX_SCALE`
+  - `IMG_MAX_DIM` (macro, line 71) `#define IMG_MAX_DIM`
+  - `IMG_MAX_PIXELS` (macro, line 72) `#define IMG_MAX_PIXELS`
+- Imported by: `gui/browser_ui.c`, `include/svg_raster.h`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
 
 ## include/import_map.h
 - Doc: im_resolve: Resolves specifier as imported from base (the importing module's URL).
@@ -263,7 +283,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FREEDOM_INTERP_H` (macro, line 2) `#define FREEDOM_INTERP_H`
   - `IP_MAX_KEYFRAMES` (macro, line 68) `#define IP_MAX_KEYFRAMES`
   - `IP_ITERATION_INFINITE` (macro, line 85) `#define IP_ITERATION_INFINITE`
-- Imported by: `gui/browser_ui.c`, `src/interp.c`, `tests/test_interp.c`
+- Imported by: `gui/browser_ui.c`, `src/css.c`, `src/interp.c`, `tests/test_interp.c`
 
 ## include/js_dom.h
 - Doc: jd_iframe_track: Tracks iframes already processed by jd_process_iframes, to avoid re-fetching...
@@ -472,26 +492,6 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `LS_OVERHEAD` (macro, line 31) `#define LS_OVERHEAD`
   - `LS_MAX_PLAINTEXT` (macro, line 32) `#define LS_MAX_PLAINTEXT`
 - Imported by: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`, `include/profile.h`, `src/disk_store.c`, `src/local_store.c`, `tests/test_disk_store.c`, `tests/test_local_store.c`
-
-## include/media_decoder.h
-- Doc: md_cmd: Communicates with the parent over two pipes: out_fd: decoder → parent (frames, stream...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `md_pacer` (struct, line 67)
-  - `md_cmd` (enum, line 29)
-  - `md_resp` (enum, line 38)
-  - `epoch_ms` (type_alias, line 66) `typedef struct md_pacer { uint64_t epoch_ms;`
-  - `md_pace_due_ms` (function, line 79) `static inline uint64_t md_pace_due_ms(md_pacer *p, uint64_t now_ms,
-                             ...`
-  - `media_decoder_run` (function, line 99) `void media_decoder_run(int out_fd, int cmd_fd);`
-  - `media_decoder_spawn` (function, line 104) `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd);`
-  - `FREEDOM_MEDIA_DECODER_H` (macro, line 2) `#define FREEDOM_MEDIA_DECODER_H`
-  - `MD_MAX_SEGMENT_BYTES` (macro, line 46) `#define MD_MAX_SEGMENT_BYTES`
-  - `MD_PACE_MAX_LAG_MS` (macro, line 58) `#define MD_PACE_MAX_LAG_MS`
-  - `MD_PACE_MAX_STEP_MS` (macro, line 62) `#define MD_PACE_MAX_STEP_MS`
-  - `MD_MAX_CATCHUP_READS` (macro, line 65) `#define MD_MAX_CATCHUP_READS`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/media_decoder.c`, `tests/test_media_decoder.c`
 
 
 Next: [KB_include_p4.md](KB_include_p4.md)

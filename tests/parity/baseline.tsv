@@ -3,7 +3,7 @@ css-counters	0.30
 css-table	1.89
 ddg-results	3.26
 em-units	1.30
-empty-inline-block-atom	0.27
+empty-inline-block-atom	0.28
 flex-pct-visual	0.45
 float-beside	0.74
 float-icon-row	0.24
@@ -18,6 +18,7 @@ hackernews	3.04
 heading-in-link	0.68
 huggingface	5.64
 images-data	1.02
+inline-block-sized	0.35
 inline-links	0.51
 inline-replaced	1.56
 jkanime-clamp	0.04
@@ -26,10 +27,11 @@ jkanime-main-col	0.19
 jkanime-tile	0.14
 jkanime-tile2	0.11
 jkanime-tile3	0.08
-jkanime	7.16
-lobsters	1.79
+jkanime	6.83
+lobsters	1.78
 margin-collapse	0.46
 marquee-flex	0.78
+mask-icons	0.32
 multicol	2.64
 nav-inline-blocks	0.38
 navbox-table	0.41
@@ -44,13 +46,13 @@ site-bgp	0.75
 site-discord	2.93
 site-github	2.85
 site-gitlab	2.48
-site-ipinfo	5.34
+site-ipinfo	4.95
 site-justpaste	0.12
 site-ntp	2.12
 site-oldreddit	0.05
 site-olduse	1.64
 site-osm	4.10
-site-telegram	1.10
+site-telegram	1.51
 site-youtube	0.16
 slashdot-cols	0.39
 slashdot	3.24

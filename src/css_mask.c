@@ -5,7 +5,9 @@
 
 #include "css_gradient.h"
 
-#define CM_TOK_MAX 256
+/* A layer token can be a whole url(...) (a data: SVG icon is routinely 400-900 bytes):
+ * the token cap follows the URL cap plus the `url("")` around it. */
+#define CM_TOK_MAX 1088
 #define CM_MAX_TOKS 16
 
 static int ieq(const char *a, const char *b) {
@@ -141,10 +143,12 @@ static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val) {
         int got_image = 0;
         memset(&L[i], 0, sizeof L[i]);
         for (int t = 0; t < nt; ++t) {
-            /* A url() mask image is never fetched (decoration must not open a socket). Like
-             * Firefox with an unavailable image, the element is then not painted at all. */
-            if (strstr(toks[t], "url(") != NULL && strstr(toks[t], "data:") == NULL) {
-                unavailable = 1; got_image = 1; continue;      /* a data: image stays unsupported */
+            /* A url() mask image: the layer is an IMAGE, whose pixels the painter takes from
+             * the decoded url (css.c emit_mask_image, gated like a background-image). Until
+             * it is available the layer is the fully transparent one below -- like Firefox
+             * with an image that has not loaded, the element is then not painted. */
+            if (strstr(toks[t], "url(") != NULL) {
+                unavailable = 1; got_image = 1; continue;
             }
             cm_layer img;
             int r = image_layer(toks[t], &img);

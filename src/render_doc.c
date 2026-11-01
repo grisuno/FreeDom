@@ -273,6 +273,23 @@ static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_le
     return rdp_image_decision(caps, top_level_url, *out_url, w, h);
 }
 
+/* Resolves a box's raw author-CSS image URL (background-image layer or mask-image) in
+ * place against the page origin and gates it under the EXACT policy of an <img>
+ * (resolve_image_decision: caps.images, tracker heuristics, file:// confinement,
+ * scheme checks). Anything short of RDP_IMG_ALLOW clears the field, so the GUI never
+ * sees a URL for a blocked image and structurally cannot fetch it; a resolved URL
+ * that would not fit is cleared too (never truncated-and-fetched). */
+static void gate_box_image_url(rdp_caps caps, const char *top_level_url, char *url, size_t cap) {
+    if (url[0] == '\0') return;
+    char resolved[URL_MAX_LEN + 1] = "";
+    const char *img_url = NULL;
+    rdp_img_decision dec = resolve_image_decision(caps, top_level_url, url, -1, -1,
+                                                  resolved, sizeof resolved, &img_url);
+    size_t ulen = (dec == RDP_IMG_ALLOW && img_url != NULL) ? strlen(img_url) : cap;
+    if (ulen >= cap) { url[0] = '\0'; return; }
+    memmove(url, img_url, ulen + 1);
+}
+
 rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_url, rd_doc **out) {
     if (out == NULL) return RD_ERR_NULL_ARG;
@@ -299,7 +316,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
         size_t nb0 = pv_box_count(view);
         for (size_t i = 0; i < nb0; ++i) {
             const pv_box_def *bx = pv_box_at(view, i);
-            if (bx != NULL && (bx->bg_image_url[0] != '\0' || bx->bg_image_url2[0] != '\0'))
+            if (bx != NULL && (bx->bg_image_url[0] != '\0' || bx->bg_image_url2[0] != '\0' ||
+                               bx->mask_url[0] != '\0'))
             { d->has_images = 1; break; }
         }
     }
@@ -688,41 +706,14 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
                  * background paints as if unset (no border/box-shadow-style
                  * "broken image" placeholder) -- it is decoration, not content
                  * with alt text, matching real-browser behaviour. */
-                if (d->boxes[i].bg_image_url[0] != '\0') {
-                    char resolved[URL_MAX_LEN + 1] = "";
-                    const char *img_url;
-                    rdp_img_decision dec = resolve_image_decision(
-                        caps, top_level_url, d->boxes[i].bg_image_url, -1, -1,
-                        resolved, sizeof resolved, &img_url);
-                    if (dec == RDP_IMG_ALLOW) {
-                        size_t ulen = strlen(img_url);
-                        if (ulen >= sizeof d->boxes[i].bg_image_url) {
-                            d->boxes[i].bg_image_url[0] = '\0';
-                        } else {
-                            memcpy(d->boxes[i].bg_image_url, img_url, ulen + 1);
-                        }
-                    } else {
-                        d->boxes[i].bg_image_url[0] = '\0';
-                    }
-                }
-                /* R5b: resolve second background-image layer. */
-                if (d->boxes[i].bg_image_url2[0] != '\0') {
-                    char resolved2[URL_MAX_LEN + 1] = "";
-                    const char *img_url2;
-                    rdp_img_decision dec2 = resolve_image_decision(
-                        caps, top_level_url, d->boxes[i].bg_image_url2, -1, -1,
-                        resolved2, sizeof resolved2, &img_url2);
-                    if (dec2 == RDP_IMG_ALLOW) {
-                        size_t ulen2 = strlen(img_url2);
-                        if (ulen2 >= sizeof d->boxes[i].bg_image_url2) {
-                            d->boxes[i].bg_image_url2[0] = '\0';
-                        } else {
-                            memcpy(d->boxes[i].bg_image_url2, img_url2, ulen2 + 1);
-                        }
-                    } else {
-                        d->boxes[i].bg_image_url2[0] = '\0';
-                    }
-                }
+                gate_box_image_url(caps, top_level_url, d->boxes[i].bg_image_url,
+                                   sizeof d->boxes[i].bg_image_url);
+                /* R5b: the second background-image layer. */
+                gate_box_image_url(caps, top_level_url, d->boxes[i].bg_image_url2,
+                                   sizeof d->boxes[i].bg_image_url2);
+                /* mask-image: url() (tanda 83): an image like any other, same gate. */
+                gate_box_image_url(caps, top_level_url, d->boxes[i].mask_url,
+                                   sizeof d->boxes[i].mask_url);
             }
             d->nbox = nb;
             d->boxcap = nb;
