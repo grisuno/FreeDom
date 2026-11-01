@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 38 file(s) rooted at `src` with dominant language c (cohesion 0.68). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `src/css.c` (266 symbols). Documented purpose: The sheet's two string pools -- background url()s, and the ::before/::after.
+This community groups 38 file(s) rooted at `src` with dominant language c (cohesion 0.68). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `src/css.c` (268 symbols). Documented purpose: The sheet's two string pools -- background url()s, and the ::before/::after.
 
 ## Files
 
@@ -12,7 +12,7 @@ This community groups 38 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `src/css.c` | c | utility | 266 | no |
+| `src/css.c` | c | utility | 268 | no |
 | `src/css_atrule.c` | c | utility | 11 | no |
 | `src/css_box.c` | c | utility | 52 | no |
 | `src/css_chain.c` | c | utility | 26 | no |
@@ -38,7 +38,7 @@ This community groups 38 file(s) rooted at `src` with dominant language c (cohes
 |------|----------|-------|---------|-----|
 | `tests/test_css_atrule.c` | c | testing | 10 | yes |
 | `tests/test_css_box.c` | c | testing | 13 | no |
-| `tests/test_css_color.c` | c | testing | 36 | no |
+| `tests/test_css_color.c` | c | testing | 37 | no |
 | `tests/test_css_gradient.c` | c | testing | 13 | no |
 | `tests/test_css_index.c` | c | testing | 14 | yes |
 | `tests/test_css_length.c` | c | testing | 25 | no |
@@ -93,7 +93,7 @@ This community groups 38 file(s) rooted at `src` with dominant language c (cohes
 
 ## Risks
 
-- [dataflow DEAD_STORE] `src/css.c:6081` `page_view` `had_winner`: `had_winner` assigned at line 6081 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css.c:6109` `page_view` `had_winner`: `had_winner` assigned at line 6109 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:156` `parse_hex` `r`: `r` assigned at line 156 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:157` `parse_hex` `g`: `g` assigned at line 157 but never read afterwards.
 

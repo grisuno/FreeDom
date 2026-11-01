@@ -5,7 +5,7 @@
 | `app.py` | Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL... | root | 3 | 0 |
 | `docker-entrypoint.sh` | - | root | 0 | 0 |
 | `docker_run.sh` | Thin wrapper. | root | 0 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 657 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 662 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 11 | 3 |
 | `gui/bui_mask_img.c` | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | gui | 1 | 0 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
@@ -118,7 +118,7 @@
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 41 | 0 |
 | `src/cached_fetch.c` | trace: fetcher, and so the same policy, as an uncached request.  #define _POSIX_C_SOURCE 200809L... | src | 14 | 0 |
 | `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 5 | 0 |
-| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 266 | 0 |
+| `src/css.c` | len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 \|\| (size_t)r >= space)... | src | 268 | 0 |
 | `src/css_atrule.c` | keyword_at: Scratch size for one declaration or selector handed to the caller. | src | 11 | 0 |
 | `src/css_box.c` | calc_val: bare0: the token was a unitless 0. | src | 52 | 0 |
 | `src/css_chain.c` | cch_node: One element's selector inputs (tag/id/classes) plus its css_element view, with *... | src | 26 | 0 |
@@ -220,10 +220,10 @@
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
 | `tests/test_cached_fetch.c` | - | tests | 14 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
-| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 366 | 0 |
+| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 369 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
 | `tests/test_css_box.c` | test_lineheight_abs_vs_scale: line-height (CSS 2.1 10.8.1): a number, a percentage and an em... | tests | 13 | 0 |
-| `tests/test_css_color.c` | test_hsl_fractional_hue: A fractional hue is a <number> too (and hsl() takes an <angle>, whose... | tests | 36 | 0 |
+| `tests/test_css_color.c` | test_hsl_fractional_hue: A fractional hue is a <number> too (and hsl() takes an <angle>, whose... | tests | 37 | 0 |
 | `tests/test_css_computed.c` | - | tests | 9 | 0 |
 | `tests/test_css_counter.c` | Suite for css_counter (spec/css_counter.md). | tests | 12 | 0 |
 | `tests/test_css_drops.c` | Suite for the parser drop log (spec/css_drops.md). | tests | 30 | 0 |
@@ -248,7 +248,7 @@
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
 | `tests/test_frame_host.c` | test_frame_view_is_exposed_for_painting: The painter asks the host for the document of the frame... | tests | 9 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
-| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 111 | 0 |
+| `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 115 | 0 |
 | `tests/test_hls.c` | - | tests | 16 | 0 |
 | `tests/test_host_conf.c` | - | tests | 8 | 0 |
 | `tests/test_hostblock.c` | test_tld_entry_blocks_every_host_under_it: A bare top-level label blocks the whole TLD (.cyou is... | tests | 24 | 0 |

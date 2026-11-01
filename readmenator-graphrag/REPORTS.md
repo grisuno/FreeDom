@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 8193 | Relationships: 14500 | Communities: 13 | Themes: 4 | Text units: 7723
+Entities: 8208 | Relationships: 14517 | Communities: 13 | Themes: 4 | Text units: 7738
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -86,7 +86,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 1.2).
 - Hotspot `src/tab.c`: 189 symbols, 72 connections (score 0.42).
 - Hotspot `tests/test_js_dom.c`: 271 symbols, 28 connections (score 0.28).
 - Dependency cycle: js_dom.h -> js_location.h -> js_dom.h.
-- Dataflow: 2 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
+- Dataflow: 1 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
 - Surprising bridge: frame_broker.c <-> sha2.c (9 hops across communities).
 - Key entities: file:tests/test_js_dom.c, file:src/tab.c, file:tests/test_tab.c, file:src/dom.c, file:src/js_dom.c, file:src/js_sandbox.c, file:tests/test_js_sandbox.c, file:tests/test_url.c
 - Rating 7.0/10 = 7 x PageRank share 1.00 + 3 x risk 0.00. Internal imports: 110.
@@ -99,7 +99,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 1.2).
 - `include/css_counter.h` ranks 2 by PageRank, 3 importers, 19 symbols: cnt_hash: FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are * case-sensitive).
 - `include/page_view.h` ranks 3 by PageRank, 12 importers, 93 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - Hotspot `src/page_view.c`: 267 symbols, 40 connections (score 0.33).
-- Hotspot `tests/test_css.c`: 366 symbols, 19 connections (score 0.30).
+- Hotspot `tests/test_css.c`: 369 symbols, 19 connections (score 0.30).
 - 15 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
 - Dataflow: 8 INFERRED issues (first: DEAD_STORE in layout_grid).
 - Key entities: file:tests/test_css.c, file:src/page_view.c, file:tests/test_page_view.c, file:include/css.h, file:include/page_view.h, file:tests/test_flex_layout.c, file:tests/test_box_tree.c, file:include/flex_layout.h
@@ -112,10 +112,10 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 1.2).
 - `include/css_color.h` ranks 1 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
 - `include/css_select.h` ranks 2 by PageRank, 14 importers, 40 symbols: css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only tag/.class/#id/[attr] (no combinators, no pseudo-classes inside * sub-selectors).
 - `include/css_decl.h` ranks 3 by PageRank, 12 importers, 15 symbols: The sheet's two string pools -- background url()s, and the ::before/::after
-- Hotspot `src/css.c`: 266 symbols, 40 connections (score 0.33).
+- Hotspot `src/css.c`: 268 symbols, 40 connections (score 0.33).
 - Hotspot `src/css_box.c`: 52 symbols, 17 connections (score 0.10).
 - Dataflow: 3 INFERRED issues (first: DEAD_STORE in page_view).
-- Key entities: file:src/css.c, file:src/css_box.c, file:include/css_select.h, file:src/css_select.c, file:src/css_gradient.c, file:src/css_color.c, file:src/css_mq.c, file:tests/test_css_color.c
+- Key entities: file:src/css.c, file:src/css_box.c, file:include/css_select.h, file:src/css_select.c, file:src/css_gradient.c, file:tests/test_css_color.c, file:src/css_color.c, file:src/css_mq.c
 - Rating 5.5/10 = 7 x PageRank share 0.79 + 3 x risk 0.00. Internal imports: 69.
 
 ## include: browser_ui (`c1`, community, rating 4.9)
@@ -125,10 +125,10 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 1.2).
 - `include/prefs.h` ranks 1 by PageRank, 6 importers, 18 symbols: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
 - `include/zoom.h` ranks 2 by PageRank, 5 importers, 10 symbols: zm_clamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
 - `include/ui.h` ranks 3 by PageRank, 6 importers, 20 symbols: ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no copy): render with text + offset over len bytes.
-- Hotspot `gui/browser_ui.c`: 657 symbols, 143 connections (score 1.00).
+- Hotspot `gui/browser_ui.c`: 662 symbols, 143 connections (score 1.00).
 - Hotspot `tests/test_profile.c`: 17 symbols, 16 connections (score 0.08).
 - 3 layer violations, e.g. browser_ui.c (presentation) -> data_url.h (data_access).
-- Dataflow: 34 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
+- Dataflow: 35 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
 - Key entities: file:gui/browser_ui.c, file:tests/test_interp.c, file:tests/test_pdf_export.c, file:src/prefs.c, file:include/ui.h, file:include/interp.h, file:include/prefs.h, file:tests/test_download.c
 - Rating 4.9/10 = 7 x PageRank share 0.71 + 3 x risk 0.00. Internal imports: 52.
 
@@ -193,7 +193,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 1.2).
 - `include/image_decode.h` ranks 1 by PageRank, 6 importers, 14 symbols: img_pixels: A decoded bitmap that owns its pixel buffer.
 - `include/svg_render.h` ranks 2 by PageRank, 6 importers, 19 symbols: sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g> chain, and `m` the flattened affine transform of that chain (a,b,c,d,e,f in Cairo order).
 - `include/freedom_config.h` ranks 3 by PageRank, 5 importers, 15 symbols.
-- Hotspot `tests/test_freedom.c`: 111 symbols, 12 connections (score 0.12).
+- Hotspot `tests/test_freedom.c`: 115 symbols, 12 connections (score 0.12).
 - Hotspot `gui/ui_render.c`: 29 symbols, 13 connections (score 0.07).
 - 1 layer violations, e.g. test_svg_render.c (testing) -> svg_render.h (presentation).
 - Dataflow: 1 INFERRED issues (first: DEAD_STORE in img_decode_jpeg).

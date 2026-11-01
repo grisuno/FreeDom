@@ -3779,6 +3779,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 int cgrow = 0;
                 if (gen && has_deco) {
                     want_box = 1;
+                } else if (gen && (cs->float_side == CSS_FLOAT_LEFT ||
+                                   cs->float_side == CSS_FLOAT_RIGHT)) {
+                    /* A float IS a box (CSS 2.1 9.5): the root of its own BFC, and the
+                     * only edge its shrink-to-fit width can be measured up to. Without
+                     * one a bare `li{float:left}` left the padding of its inner
+                     * `a{display:block}` uncounted and every nav label was squeezed by
+                     * exactly that padding (Bootstrap 3 navbars, telegram). */
+                    want_box = 1;
                 } else if (!gen && (cs->display == CSS_DISP_UNSET ||
                                     cs->display == CSS_DISP_INLINE) &&
                            css_inline_boxdeco(cs) &&
@@ -6979,7 +6987,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
          * may sit deep inside an undecorated abspos wrapper, where no box
          * marks the out-of-flow region. */
         int own_oof = subtree_is_oof(n->parent, sheet, &cache);
-        int brk = (pending_break || (block != prev_block)) && !own_oof;
+        /* Whether the run STARTS a block, oof or not: the out-of-flow subtree is laid
+         * out on its own, and there blank text that opens a block is no box either. */
+        int starts_block = pending_break || (block != prev_block);
+        int brk = starts_block && !own_oof;
         int br_cont = brk && pending_break && br_pending
                       && block == br_block && block == prev_block;
         pending_break = 0;
@@ -7098,7 +7109,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
         if (!has_content) {
             int direct_in_cont = cont.id >= 0 && (size_t)cont.id < reg.count &&
                                   n->parent == reg.node[cont.id];
-            if (brk || direct_in_cont) {
+            if (brk || direct_in_cont || (own_oof && starts_block)) {
                 if (brk) pending_break = 1;
                 free(collapsed);
                 continue;

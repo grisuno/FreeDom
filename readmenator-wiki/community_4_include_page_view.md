@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 37 file(s) rooted at `include` with dominant language c (cohesion 0.54). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `tests/test_css.c` (366 symbols). Documented purpose: bui_mask_img -- paints a mask-image: url() layer into a mask surface..
+This community groups 37 file(s) rooted at `include` with dominant language c (cohesion 0.54). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `tests/test_css.c` (369 symbols). Documented purpose: bui_mask_img -- paints a mask-image: url() layer into a mask surface..
 
 ## Files
 
@@ -27,7 +27,7 @@ This community groups 37 file(s) rooted at `include` with dominant language c (c
 | `tests/test_box_style.c` | c | testing | 49 | no |
 | `tests/test_box_tree.c` | c | testing | 69 | no |
 | `tests/test_compositor.c` | c | testing | 21 | no |
-| `tests/test_css.c` | c | testing | 366 | no |
+| `tests/test_css.c` | c | testing | 369 | no |
 | `tests/test_css_computed.c` | c | testing | 9 | no |
 | `tests/test_css_counter.c` | c | testing | 12 | yes |
 

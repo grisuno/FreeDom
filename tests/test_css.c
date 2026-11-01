@@ -4371,7 +4371,7 @@ static void test_inline_outline_longhands(void **state) {
     assert_int_equal(css_parse_inline("outline-style:ridge", 0).outline_style, CSS_BST_RIDGE);
     assert_int_equal(css_parse_inline("outline-style:inset", 0).outline_style, CSS_BST_INSET);
     assert_int_equal(css_parse_inline("outline-style:outset", 0).outline_style, CSS_BST_OUTSET);
-    assert_int_equal(css_parse_inline("outline-style:auto", 0).outline_style, CSS_BST_UNSET); /* unknown */
+    assert_int_equal(css_parse_inline("outline-style:auto", 0).outline_style, CSS_BST_SOLID); /* CSS UI 4 3.3: the focus ring */
     /* outline-color */
     assert_int_equal(css_parse_inline("outline-color:red", 0).outline_color, 0xFF0000);
     assert_int_equal(css_parse_inline("outline-color:#00FF00", 0).outline_color, 0x00FF00);
@@ -5874,6 +5874,45 @@ static void test_grid_template_rows_tracks(void **state) {
     assert_int_equal(u.grid_row_h[1], 0);
 }
 
+/* Tanda 84: line-height takes the math functions (Values 4 section 10) like every
+ * other <length-percentage>; Tailwind 4 writes all its leading as calc(). Mixed
+ * absolute + font-relative stays unrepresentable and fails closed. */
+static void test_inline_line_height_calc(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("line-height:calc(.25rem * 7)", 0).line_scale,
+                     CSS_LINE_ABS_BASE + 280);
+    assert_int_equal(css_parse_inline("line-height:calc(1.25rem - .0625rem*2)", 0).line_scale,
+                     CSS_LINE_ABS_BASE + 180);
+    assert_int_equal(css_parse_inline("line-height:calc(1.5em)", 0).line_scale, 150);
+    assert_int_equal(css_parse_inline("line-height:max(20px, 1rem)", 0).line_scale,
+                     CSS_LINE_ABS_BASE + 200);
+    assert_int_equal(css_parse_inline("line-height:calc(1em + 4px)", 0).line_scale, 0);
+    assert_int_equal(css_parse_inline("line-height:calc(-2px)", 0).line_scale, 0);
+}
+
+/* Tanda 84: `outline-style: auto` is the focus-ring style; drawn solid. Borders do not
+ * take it. */
+static void test_inline_outline_auto(void **state) {
+    (void)state;
+    css_style o = css_parse_inline("outline:2px auto red", 0);
+    assert_int_equal(o.outline_width, 2);
+    assert_int_equal(o.outline_style, CSS_BST_SOLID);
+    assert_int_equal(o.outline_color, 0xff0000);
+    assert_int_equal(css_parse_inline("outline-style:auto", 0).outline_style, CSS_BST_SOLID);
+    assert_int_equal(css_parse_inline("outline:1px solid ButtonText", 0).outline_color, 0x000000);
+    assert_int_not_equal(css_parse_inline("border-top-style:auto", 0).border_top_style, CSS_BST_SOLID);
+}
+
+/* Tanda 84 (fuzz-css): an iteration count beyond int range was converted to int (UB);
+ * a count that large outlasts any session, so it is `infinite`. Both the longhand and
+ * the shorthand share the conversion. */
+static void test_anim_iterations_huge_is_infinite(void **state) {
+    (void)state;
+    assert_int_equal(css_parse_inline("animation-iteration-count:3e36", 0).anim_iterations, -1);
+    assert_int_equal(css_parse_inline("animation:spin 2s 3e36", 0).anim_iterations, -1);
+    assert_int_equal(css_parse_inline("animation-iteration-count:2.4", 0).anim_iterations, 2);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -5975,6 +6014,9 @@ int main(void) {
         cmocka_unit_test(test_inline_font_size),
         cmocka_unit_test(test_inline_font_size_absolute_flag),
         cmocka_unit_test(test_inline_line_height),
+        cmocka_unit_test(test_inline_line_height_calc),
+        cmocka_unit_test(test_inline_outline_auto),
+        cmocka_unit_test(test_anim_iterations_huge_is_infinite),
         cmocka_unit_test(test_inline_font_weight_style),
         cmocka_unit_test(test_inline_text_decoration),
         cmocka_unit_test(test_text_decoration_cascade),

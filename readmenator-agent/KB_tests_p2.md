@@ -381,7 +381,10 @@ static void test_vendor_prefixes(v...`
   - `test_fontface_local_then_url_keeps_url` (function, line 5818) `static void test_fontface_local_then_url_keeps_url(void **state)`
   - `test_box_shadow_layers_and_alpha` (function, line 5836) `static void test_box_shadow_layers_and_alpha(void **state)`
   - `test_grid_template_rows_tracks` (function, line 5861) `static void test_grid_template_rows_tracks(void **state)`
-  - `main` (function, line 5877) `int main(void)`
+  - `test_inline_line_height_calc` (function, line 5880) `static void test_inline_line_height_calc(void **state)`
+  - `test_inline_outline_auto` (function, line 5895) `static void test_inline_outline_auto(void **state)`
+  - `test_anim_iterations_huge_is_infinite` (function, line 5909) `static void test_anim_iterations_huge_is_infinite(void **state)`
+  - `main` (function, line 5916) `int main(void)`
   - `box` (function, line 234) `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the...`
   - `downstream` (function, line 663) `* and deciding whether to fetch happens downstream (render_doc.c) */ assert_string_equal(css_parse_inline(...`
   - `invalid` (function, line 765) `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color...`
@@ -466,7 +469,8 @@ static void test_vendor_prefixes(v...`
   - `test_space_separated_still_fails_closed` (function, line 323) `static void test_space_separated_still_fails_closed(void **state)`
   - `result` (function, line 342) `* result (`border:1px solid rgba(0,0,0,0)`). A non-zero alpha stays a colour. */
 static void test...`
-  - `main` (function, line 358) `int main(void)`
+  - `test_system_colors` (function, line 361) `static void test_system_colors(void **state)`
+  - `main` (function, line 381) `int main(void)`
   - `oklch` (function, line 176) `* Tailwind v4 writes its whole palette in oklch();`
   - `rgba` (function, line 340) `* rgba(0,0,0,0)). Minifiers and frameworks write it as #0000, rgba(0,0,0,0) or * hsla(...,0);`
 - Depends on: `include/css_color.h`

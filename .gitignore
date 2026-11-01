@@ -177,3 +177,10 @@ fuzz/out/
 
 debian/
 tmp/
+
+# State the GUI writes when launched against the parity host lists (make fbench):
+# never part of the corpus.
+tests/parity/hosts/cache/
+tests/parity/hosts/prefs.bin
+tests/parity/hosts/profile.key
+dist-deb/

@@ -684,9 +684,40 @@ static int named_cmp(const void *key, const void *element) {
     return strcmp(k, n->name);
 }
 
+/* CSS Color 4 section 6.2 system colors, sorted for binary search. The values are
+ * FIXED -- Firefox's light-scheme defaults -- and never read from the OS theme: a
+ * real system palette is a fingerprinting surface (Zero Knowledge). The deprecated
+ * keywords of section 6.3 map to the replacement the spec names for each. */
+static const cc_named CC_SYSTEM[] = {
+    { "accentcolor", 0x00, 0x60, 0xdf }, { "accentcolortext", 0xff, 0xff, 0xff },
+    { "activeborder", 0x8f, 0x8f, 0x9d }, { "activecaption", 0xff, 0xff, 0xff },
+    { "activetext", 0xee, 0x00, 0x00 }, { "appworkspace", 0xff, 0xff, 0xff },
+    { "background", 0xff, 0xff, 0xff }, { "buttonborder", 0x8f, 0x8f, 0x9d },
+    { "buttonface", 0xe9, 0xe9, 0xed }, { "buttonhighlight", 0x8f, 0x8f, 0x9d },
+    { "buttonshadow", 0x8f, 0x8f, 0x9d }, { "buttontext", 0x00, 0x00, 0x00 },
+    { "canvas", 0xff, 0xff, 0xff }, { "canvastext", 0x00, 0x00, 0x00 },
+    { "captiontext", 0x00, 0x00, 0x00 }, { "field", 0xff, 0xff, 0xff },
+    { "fieldtext", 0x00, 0x00, 0x00 }, { "graytext", 0x6d, 0x6d, 0x6d },
+    { "highlight", 0x33, 0x99, 0xff }, { "highlighttext", 0xff, 0xff, 0xff },
+    { "inactiveborder", 0x8f, 0x8f, 0x9d }, { "inactivecaption", 0xff, 0xff, 0xff },
+    { "inactivecaptiontext", 0x6d, 0x6d, 0x6d }, { "infobackground", 0xff, 0xff, 0xff },
+    { "infotext", 0x00, 0x00, 0x00 }, { "linktext", 0x00, 0x00, 0xee },
+    { "mark", 0xff, 0xff, 0x00 }, { "marktext", 0x00, 0x00, 0x00 },
+    { "menu", 0xff, 0xff, 0xff }, { "menutext", 0x00, 0x00, 0x00 },
+    { "scrollbar", 0xff, 0xff, 0xff }, { "selecteditem", 0x33, 0x99, 0xff },
+    { "selecteditemtext", 0xff, 0xff, 0xff }, { "threeddarkshadow", 0x8f, 0x8f, 0x9d },
+    { "threedface", 0xe9, 0xe9, 0xed }, { "threedhighlight", 0x8f, 0x8f, 0x9d },
+    { "threedlightshadow", 0x8f, 0x8f, 0x9d }, { "threedshadow", 0x8f, 0x8f, 0x9d },
+    { "visitedtext", 0x55, 0x1a, 0x8b }, { "window", 0xff, 0xff, 0xff },
+    { "windowframe", 0x8f, 0x8f, 0x9d }, { "windowtext", 0x00, 0x00, 0x00 },
+};
+
 static int parse_named(const char *s, cc_rgb *out) {
     const cc_named *hit = (const cc_named *)bsearch(
         s, CC_NAMES, sizeof CC_NAMES / sizeof CC_NAMES[0], sizeof CC_NAMES[0], named_cmp);
+    if (hit == NULL)
+        hit = (const cc_named *)bsearch(s, CC_SYSTEM, sizeof CC_SYSTEM / sizeof CC_SYSTEM[0],
+                                        sizeof CC_SYSTEM[0], named_cmp);
     if (hit == NULL) return -1;
     out->r = hit->r;
     out->g = hit->g;

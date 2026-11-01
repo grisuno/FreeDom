@@ -120,7 +120,7 @@ The expression is folded to one literal before the component parser sees it, so 
 
 ### `cc_parse`
 
-`function` | [src/css_color.c:697](../../src/css_color.c#L697)
+`function` | [src/css_color.c:728](../../src/css_color.c#L728)
 
 ```c
 cc_status cc_parse(const char *token, cc_rgb *out)
@@ -145,7 +145,7 @@ cc_status cc_parse(const char *token, cc_rgb *out)
 
 ### `strncmp`
 
-`function` | [src/css_color.c:712](../../src/css_color.c#L712)
+`function` | [src/css_color.c:743](../../src/css_color.c#L743)
 
 ```c
 strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)
@@ -168,7 +168,7 @@ strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)
 
 ### `cc_pack`
 
-`function` | [src/css_color.c:737](../../src/css_color.c#L737)
+`function` | [src/css_color.c:768](../../src/css_color.c#L768)
 
 ```c
 int cc_pack(cc_rgb c)
@@ -192,7 +192,7 @@ Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport and
 
 ### `cc_unpack`
 
-`function` | [src/css_color.c:741](../../src/css_color.c#L741)
+`function` | [src/css_color.c:772](../../src/css_color.c#L772)
 
 ```c
 cc_rgb cc_unpack(int packed)

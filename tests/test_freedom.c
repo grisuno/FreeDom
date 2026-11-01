@@ -2589,6 +2589,118 @@ static void test_dump_layout_rail_with_nested_float_sits_beside(void **state) {
     unlink(path);
 }
 
+/* Runs --dump-layout over an inline HTML page written to `path` (tanda 84 helper). */
+static void nav_layout_of(const char *html, const char *path, char *out, size_t cap) {
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    int rc;
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --dump-layout %s", path) < sizeof args);
+    assert_int_equal(run_freedom(args, out, cap, &rc), 0);
+    unlink(path);
+}
+
+#define NAV_CSS "body{margin:0;font:14px sans-serif}.nav{margin:0;padding:0;list-style:none}" \
+                ".nav>li{float:left}.nav>li>a{display:block;padding:15px 12px}"
+
+/* Tanda 84: a `li{float:left}` with no decoration of its own is still a box, and its
+ * shrink-to-fit width holds the padded `a{display:block}` inside it. Red: each label was
+ * squeezed by exactly that padding (Home 16px, FAQ 2.8px of text room). */
+static void test_dump_layout_float_items_hold_inner_padding(void **state) {
+    (void)state;
+    char out[8192];
+    nav_layout_of("<html><head><style>" NAV_CSS "</style></head><body><ul class=\"nav\">"
+              "<li><a href=\"/\">Home</a></li><li><a href=\"/f\">FAQ</a></li>"
+              "<li><a href=\"/a\">Apps</a></li></ul><p style=\"clear:both\">x</p></body></html>",
+              "__freedom_fnav.html", out, sizeof out);
+    int n = 0;
+    for (char *q = strstr(out, "row["); q != NULL; q = strstr(q + 1, "row[")) {
+        double top, h, xo, w;
+        if (sscanf(q, "row[%*d] top=%lf h=%lf x_off=%lf w=%lf", &top, &h, &xo, &w) == 4
+            && top == 15.0) {
+            assert_true(w > 20.0);   /* the label's own text width, never minus the padding */
+            ++n;
+        }
+    }
+    assert_int_equal(n, 3);
+}
+
+/* Tanda 84: an outer `ul{float:right}` holding only floats shrinks to them (CSS 2.1
+ * 10.3.5) and sits on the right, beside a `ul{float:left}`, BELOW the paragraph before
+ * them (9.5.1 rule 5). Red: both outer floats spanned the band and stacked, pulled up
+ * beside the paragraph. */
+static void test_dump_layout_nested_float_navs_share_a_line(void **state) {
+    (void)state;
+    char out[8192];
+    nav_layout_of("<html><head><style>" NAV_CSS ".r{float:right}.l{float:left}</style></head><body>"
+              "<div>x</div><ul class=\"nav r\"><li><a>Home</a></li><li><a>FAQ Long</a></li></ul>"
+              "<ul class=\"nav l\"><li><a>One</a></li><li><a>Two</a></li></ul>"
+              "<p style=\"clear:both\">y</p></body></html>",
+              "__freedom_fnav2.html", out, sizeof out);
+    int right = 0, left = 0;
+    for (char *q = strstr(out, "row["); q != NULL; q = strstr(q + 1, "row[")) {
+        double top, h, xo, w;
+        if (sscanf(q, "row[%*d] top=%lf h=%lf x_off=%lf w=%lf", &top, &h, &xo, &w) != 4) continue;
+        if (top < 25.0 || top > 45.0) continue;   /* the nav line, below the 21px paragraph */
+        if (xo > 800.0) ++right;
+        if (xo < 100.0) ++left;
+    }
+    assert_int_equal(right, 2);
+    assert_int_equal(left, 2);
+}
+
+/* Tanda 84: the same navbar inside a `position:fixed` header. Red: blank source text
+ * between the two lists became runs inside the out-of-flow subtree and split the band,
+ * so the header stacked the lists 145px tall instead of one 52px bar. */
+static void test_dump_layout_fixed_header_float_navs(void **state) {
+    (void)state;
+    char out[8192];
+    nav_layout_of("<html><head><style>" NAV_CSS ".h{position:fixed;top:0;left:0;right:0;"
+              "border-bottom:1px solid #ccc}.c{width:900px;margin:0 auto}.r{float:right}"
+              ".l{float:left}</style></head><body><div class=\"h\"><div class=\"c\">\n"
+              "<ul class=\"nav r\"><li><a>Lang</a></li><li><a>Follow on X</a></li></ul>\n"
+              "<ul class=\"nav l\"><li><a>Home</a></li><li><a>FAQ</a></li></ul>\n"
+              "</div></div><p style=\"margin-top:80px\">z</p></body></html>",
+              "__freedom_fnav3.html", out, sizeof out);
+    char *hdr = strstr(out, "sub box bid=");
+    assert_non_null(hdr);
+    double hx, ht, hw, hh;
+    assert_int_equal(sscanf(hdr, "sub box bid=%*d x=%lf top=%lf w=%lf h=%lf", &hx, &ht, &hw, &hh), 4);
+    assert_true(hh < 60.0);
+    int far_right = 0;
+    for (char *q = hdr; q != NULL; q = strstr(q + 1, "sub box bid=")) {
+        double x, t, w, h;
+        if (sscanf(q, "sub box bid=%*d x=%lf top=%lf w=%lf h=%lf", &x, &t, &w, &h) == 4
+            && x > 700.0 && t == 0.0)
+            far_right = 1;
+    }
+    assert_true(far_right);
+}
+
+/* Tanda 84: an empty sized inline-block (an icon) is an atom of the float's line, so it
+ * counts in the float's shrink-to-fit width. Red: "Follow on X" wrapped, its float sized
+ * without the 21px icon. */
+static void test_dump_layout_float_counts_icon_atom(void **state) {
+    (void)state;
+    char out[8192];
+    nav_layout_of("<html><head><style>" NAV_CSS ".nav{float:right}.i{display:inline-block;"
+              "width:21px;height:17px;background:#c33}</style></head><body><ul class=\"nav\">"
+              "<li><a><i class=\"i\"></i> Follow on X</a></li></ul>"
+              "<p style=\"clear:both\">z</p></body></html>",
+              "__freedom_fnav4.html", out, sizeof out);
+    int nav_rows = 0;
+    for (char *q = strstr(out, "row["); q != NULL; q = strstr(q + 1, "row[")) {
+        double top, h, xo, w;
+        if (sscanf(q, "row[%*d] top=%lf h=%lf x_off=%lf w=%lf", &top, &h, &xo, &w) == 4
+            && top < 50.0)
+            ++nav_rows;
+    }
+    assert_int_equal(nav_rows, 1);
+}
+
 /* A flex item with no box of its own whose children are SIBLING boxes keeps both:
  * the first child is not "the item's box" (tanda 40). */
 static void test_dump_layout_flex_item_sibling_boxes(void **state) {
@@ -4318,6 +4430,10 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_dump_layout_grid_justify_self),
         cmocka_unit_test(test_dump_layout_rail_with_nested_float_sits_beside),
+        cmocka_unit_test(test_dump_layout_float_items_hold_inner_padding),
+        cmocka_unit_test(test_dump_layout_nested_float_navs_share_a_line),
+        cmocka_unit_test(test_dump_layout_fixed_header_float_navs),
+        cmocka_unit_test(test_dump_layout_float_counts_icon_atom),
         cmocka_unit_test(test_download_png_negz_paints_above_owner_background),
         cmocka_unit_test(test_dump_layout_ua_margin_scales_with_font_size),
         cmocka_unit_test(test_download_png_text_color_alpha_blends),

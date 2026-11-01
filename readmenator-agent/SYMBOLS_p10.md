@@ -3,6 +3,13 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `rp_sanitize_request_headers` | function | `src/request_policy.c:197` | `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap)` |
+| `rp_site_of` | function | `src/request_policy.c:102` | `int rp_site_of(const char *host, char *out, size_t out_size)` |
+| `SF_RCACHE_SLOTS` | macro | `src/secure_fetch.c:1164` | `#define SF_RCACHE_SLOTS` |
+| `SF_RCACHE_TTL_S` | macro | `src/secure_fetch.c:1165` | `#define SF_RCACHE_TTL_S` |
+| `_POSIX_C_SOURCE` | macro | `src/secure_fetch.c:12` | `#define _POSIX_C_SOURCE` |
+| `add_header` | function | `src/secure_fetch.c:803` | `static int add_header(struct curl_slist **h, const char *line)` |
+| `body_sink` | struct | `src/secure_fetch.c:490` | `` |
 | `ci_index` | function | `src/secure_fetch.c:58` | `static long ci_index(const char *haystack, const char *needle)` |
 | `ci_starts_with` | function | `src/secure_fetch.c:46` | `static int ci_starts_with(const char *haystack, const char *prefix)` |
 | `copy_bounded` | function | `src/secure_fetch.c:530` | `static void copy_bounded(char *dst, size_t dstsz, const char *src)` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `put_u32` | function | `src/web_storage.c:201` | `static void put_u32(char *b, uint32_t v)` |
 | `utf8_ok` | function | `src/web_storage.c:32` | `static int utf8_ok(const unsigned char *s, size_t n)` |
 | `wst_db` | struct | `src/web_storage.c:20` | `` |
-| `wst_decode_check` | function | `src/web_storage.c:101` | `int wst_decode_check(const char *blob, size_t len)` |
-| `wst_encode` | function | `src/web_storage.c:125` | `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len)` |
-| `wst_foreach` | function | `src/web_storage.c:181` | `int wst_foreach(const char *blob, size_t len,                 void (*fn)(void *ctx, const char *k...` |
-| `wst_free` | function | `src/web_storage.c:109` | `void wst_free(wst_db *db)` |
-| `wst_new` | function | `src/web_storage.c:105` | `wst_db *wst_new(void)` |
-| `wst_origin` | struct | `src/web_storage.c:12` | `` |
-| `wst_origin_bytes` | function | `src/web_storage.c:175` | `size_t wst_origin_bytes(const wst_db *db, const char *origin)` |
 
 Next: [SYMBOLS_p11.md](SYMBOLS_p11.md)

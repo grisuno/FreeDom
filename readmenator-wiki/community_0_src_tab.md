@@ -95,7 +95,6 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 - [cycle] `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
 - [dataflow UNCHECKED_ALLOC] `src/js_events.c:30` `jd_click_state_new` `s`: Result of allocator stored in `s` is never checked against NULL.
-- [dataflow DEAD_STORE] `src/js_geom.c:71` `unite` `w`: `w` assigned at line 71 but never read afterwards.
 
 ## Open Questions
 

@@ -626,3 +626,39 @@ banda (150 de 1000 px), no 50 % de la página: un `%` es parte de su bloque cont
 - A declared height ends the box: overflowing content no longer pushes the cursor (CSS 2.1 10.6.3), unless pulled columns were placed inside it (`defer_mark`).
 - Out-of-flow runs do not contribute to a float's preferred width.
 - An empty in-flow spacer with a declared height anchors the pull-up (`anchor_top`).
+
+## 7f. Tanda 84 — barras de navegación de flotantes (Bootstrap 3, telegram)
+
+El patrón `ul.navbar-right{float:right}` + `li{float:left}` + `a{display:block;padding}`
+(toda barra pre-flex) salía con las etiquetas comprimidas, apiladas y a la izquierda.
+Cinco causas, todas medidas con sondas contra Firefox:
+
+1. **Un flotante ES una caja** (CSS 2.1 §9.5, raíz de su BFC). `page_view` registra caja
+   para todo elemento con `float:left|right`, decorado o no: sin ella el shrink-to-fit no
+   sabía dónde terminaba el flotante.
+2. **El shrink-to-fit cuenta las cajas interiores**: `float_group_pref_w` suma
+   `item_inner_inset` (padding+borde entre el texto y el fundador), la misma regla que ya
+   usaban los ítems flex. Antes cada etiqueta perdía exactamente su padding.
+3. **Un átomo inline vacío con tamaño cuenta en la medición** (`empty_atom_outer_w` en
+   `measure_item_w_at`): el icono de 21 px antes de "Follow on X" partía la etiqueta.
+4. **Fundador exterior hecho solo de flotantes** (`defer_col_shrink_w`): su columna mide la
+   SUMA de los anchos externos de sus flotantes (+ sus bordes), con su contenido directo
+   (el `::before` de un clearfix) como mínimo; un `%` en los hijos cae al ancho completo
+   (sería cíclico). Si todos los fundadores están completos en la banda y sin margen
+   negativo, la banda se coloca en la pluma (`rc_defer.flush_now`), **nunca** por encima de
+   un bloque anterior (§9.5.1 regla 5). "Completo" = el fundador no tiene runs fuera de la
+   banda (antes: "tiene contenido directo Y anidado", que excluía justo este caso).
+5. **Dentro de un `position:fixed`**: los runs OOF no llevan `block_break` (no deben cortar el
+   flujo principal), y la supresión de texto en blanco usaba ese mismo flag: el `\n` entre
+   las dos `ul` partía la banda. Ahora usa `starts_block` crudo. Y `float_group_pref_w`
+   pregunta `block_leaves_flow` (relativo al flujo medido), no el flag `oof` crudo, que en
+   la sub-maquetación de un `fixed` es verdadero para todo su propio contenido.
+
+Además: un contenedor flex cuyo único contenido son átomos (icono+caret de un toggle) dentro
+de un flotante pertenece a la banda (`runs_share_float`), y la caja común de una columna
+diferida nunca queda DENTRO del flotante interno (aplicaba el padding del `a` dos veces).
+
+Tests (rojo verificado con el binario de HEAD): `test_dump_layout_float_items_hold_inner_padding`,
+`..._nested_float_navs_share_a_line`, `..._fixed_header_float_navs`, `..._float_counts_icon_atom`.
+Paridad 88.90 → 86.88 (telegram −0.97, slashdot −0.57, ntp −0.49; ninguna peor salvo ddg
++0.04, cuyo formulario queda MÁS cerca de Firefox). GUI telegram 161 → 110 ms.

@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 16 file(s) rooted at `include` with dominant language c (cohesion 0.52). Central symbols: `ERR_FILE`, `FC_FLEX_MEASURE_W`, `FC_FLEX_MIN_MEASURE_W`, `FC_FONT_CHAIN_MAX`, `FC_FONT_FALLBACK_PX`, `FC_HEADLESS_VIEW_H`, `FC_LAZY_IMAGE_MARGIN_PX`, `FC_MAX_AUTHOR_CSS_BYTES`. Core file: `tests/test_freedom.c` (111 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
+This community groups 16 file(s) rooted at `include` with dominant language c (cohesion 0.52). Central symbols: `ERR_FILE`, `FC_FLEX_MEASURE_W`, `FC_FLEX_MIN_MEASURE_W`, `FC_FONT_CHAIN_MAX`, `FC_FONT_FALLBACK_PX`, `FC_HEADLESS_VIEW_H`, `FC_LAZY_IMAGE_MARGIN_PX`, `FC_MAX_AUTHOR_CSS_BYTES`. Core file: `tests/test_freedom.c` (115 symbols). Documented purpose: svg_paint — Cairo back end for the shapes svg_render extracted..
 
 ## Files
 
@@ -22,7 +22,7 @@ This community groups 16 file(s) rooted at `include` with dominant language c (c
 | `src/svg_paint.c` | c | utility | 6 | yes |
 | `src/svg_raster.c` | c | utility | 4 | yes |
 | `src/svg_render.c` | c | presentation | 34 | yes |
-| `tests/test_freedom.c` | c | testing | 111 | no |
+| `tests/test_freedom.c` | c | testing | 115 | no |
 | `tests/test_image_decode.c` | c | testing | 37 | no |
 | `tests/test_svg_raster.c` | c | testing | 10 | yes |
 | `tests/test_svg_render.c` | c | testing | 17 | yes |

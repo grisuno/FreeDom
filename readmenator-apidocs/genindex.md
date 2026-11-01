@@ -66,6 +66,7 @@
 - [`BB_MAX_PIXELS`](modules/include.box_blur.h.md#bb_max_pixels) macro in `include/box_blur.h`
 - [`BB_MAX_PIXELS`](modules/include.box_blur.h.md#bb_max_pixels) function in `include/box_blur.h`
 - [`behind`](modules/gui.browser_ui.c.md#behind) function in `gui/browser_ui.c`
+- [`beside`](modules/gui.browser_ui.c.md#beside) function in `gui/browser_ui.c`
 - [`between`](modules/src.css_select.c.md#between) function in `src/css_select.c`
 - [`bf_collapse`](modules/src.block_flow.c.md#bf_collapse) function in `src/block_flow.c`
 - [`bf_collapse_n`](modules/include.block_flow.h.md#bf_collapse_n) function in `include/block_flow.h`
@@ -568,6 +569,7 @@
 - [`csel_unescape`](modules/src.css_select.c.md#csel_unescape) function in `src/css_select.c`
 - [`css_align`](modules/include.css.h.md#css_align) enum in `include/css.h`
 - [`css_align_kw`](modules/include.css.h.md#css_align_kw) enum in `include/css.h`
+- [`CSS_ANIM_ITERS_FINITE_MAX`](modules/src.css.c.md#css_anim_iters_finite_max) macro in `src/css.c`
 - [`css_appearance`](modules/include.css.h.md#css_appearance) enum in `include/css.h`
 - [`css_attr`](modules/include.css.h.md#css_attr) struct in `include/css.h`
 - [`CSS_ATTR_MARK`](modules/src.css.c.md#css_attr_mark) macro in `src/css.c`
@@ -1600,6 +1602,7 @@
 - [`index`](modules/include.dom.h.md#index) function in `include/dom.h`
 - [`inherited_px`](modules/include.css.h.md#inherited_px) function in `include/css.h`
 - [`INLINE`](modules/src.box_style.c.md#inline) macro in `src/box_style.c`
+- [`inline`](modules/gui.browser_ui.c.md#inline) function in `gui/browser_ui.c`
 - [`inline_css`](modules/tools.snapshot.py.md#inline_css) function in `tools.snapshot`
 - [`inlines`](modules/gui.browser_ui.c.md#inlines) function in `gui/browser_ui.c`
 - [`inner`](modules/include.prefetch.h.md#inner) type_alias in `include/prefetch.h`

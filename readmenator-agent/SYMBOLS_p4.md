@@ -3,6 +3,11 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `he_suggest` | function | `include/hostedit.h:55` | `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);` |
+| `he_text_has_host` | function | `include/hostedit.h:46` | `int he_text_has_host(const char *text, const char *host);` |
+| `FREEDOM_HTML_PARSE_H` | macro | `include/html_parse.h:2` | `#define FREEDOM_HTML_PARSE_H` |
+| `HP_DEFAULT_MAX_BYTES` | macro | `include/html_parse.h:41` | `#define HP_DEFAULT_MAX_BYTES` |
+| `HP_MAX_SCRIPTS` | macro | `include/html_parse.h:48` | `#define HP_MAX_SCRIPTS` |
 | `HP_MAX_STYLESHEETS` | macro | `include/html_parse.h:115` | `#define HP_MAX_STYLESHEETS` |
 | `cfg` | function | `include/html_parse.h:57` | `* policy in cfg (cfg == NULL => secure defaults). No script is ever executed. * html == NULL or out == NULL =>...` |
 | `dropped` | function | `include/html_parse.h:47` | `* dropped (not executed). */ #define HP_MAX_SCRIPTS ((size_t)4096) /* Returns a configuration with the secure...` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `rd_cont_count` | function | `include/render_doc.h:331` | `size_t rd_cont_count(const rd_doc *d);` |
 | `rd_count` | function | `include/render_doc.h:321` | `size_t rd_count(const rd_doc *d);` |
 | `rd_doc` | struct | `include/render_doc.h:267` | `` |
-| `rd_free` | function | `include/render_doc.h:318` | `void rd_free(rd_doc *d);` |
-| `rd_input_invisible` | function | `include/render_doc.h:370` | `int rd_input_invisible(int input_type);` |
-| `rd_input_label` | function | `include/render_doc.h:365` | `const char *rd_input_label(int input_type);` |
-| `rd_kind` | enum | `include/render_doc.h:42` | `` |
-| `rd_kind_name` | function | `include/render_doc.h:336` | `const char *rd_kind_name(rd_kind k);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

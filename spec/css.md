@@ -2170,3 +2170,17 @@ mismo `fold_font_relative` que cualquier longitud), cuando el texto lleva `under
 fuente. Cruza `css_style` → `pv_run` → códec IPC (`TAB_WIRE_A_N` 40) → `rd_block` → fragmento (`deco_ul_on`/`deco_ul_px`:
 un fragmento cero-inicializado significa "sin declarar"). Sonda `underline-offset` 0.33 contra Firefox. Abierto:
 `text-decoration-skip-ink` (Firefox salta los descendentes; Freedom dibuja la línea continua).
+
+## Tanda 84 — valores que se perdían
+
+- `line-height: calc()/min()/max()/clamp()`: absoluto ⇒ px (`CSS_LINE_ABS_BASE`), solo
+  em/% ⇒ múltiplo del font-size; mezcla ⇒ falla cerrado (mismo criterio que `font-size`).
+- `outline-style: auto` (CSS UI 4 §3.3) se pinta `solid`; solo en outline, nunca en border.
+- Colores de sistema (CSS Color 4 §6.2/§6.3): `Canvas`, `ButtonText`, `LinkText`,
+  `Highlight`… con valores **fijos** (Firefox claro). Leer la paleta del SO sería una
+  superficie de fingerprinting.
+- `animation-iteration-count` enorme (fuzz-css: `3e36`) ⇒ `infinite`; antes era UB.
+- **Abierto:** un `url(data:…)` de más de `CSS_URL_MAX` (1 KiB) se descarta en silencio y no
+  aparece en `--dump-css-drops` (el globo de idioma de telegram, 1 icono por sitio en
+  github/discord/huggingface/justpaste). Requiere sacar las URL de los arrays fijos de
+  `css_style`/`pv_box_def`/IPC a un pool por documento.

@@ -3,6 +3,11 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `declared` | function | `include/css.h:886` | `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...` |
+| `element` | function | `include/css.h:891` | `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...` |
+| `family` | function | `include/css.h:710` | `* LOCAL family (spec/text_shape.md section 7);` |
+| `inherited_px` | function | `include/css.h:1226` | `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...` |
+| `name` | function | `include/css.h:1243` | `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...` |
 | `order` | function | `include/css.h:1113` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
 | `palette` | function | `include/css.h:1060` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
 | `prefers_dark` | type_alias | `include/css.h:1014` | `typedef struct css_media { int prefers_dark;` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `he_cdn_kind` | function | `include/hostedit.h:62` | `he_cdn_kind_t he_cdn_kind(const char *url);` |
 | `he_cdn_kind_t` | enum | `include/hostedit.h:61` | `` |
 | `he_status` | enum | `include/hostedit.h:24` | `` |
-| `he_suggest` | function | `include/hostedit.h:55` | `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);` |
-| `he_text_has_host` | function | `include/hostedit.h:46` | `int he_text_has_host(const char *text, const char *host);` |
-| `FREEDOM_HTML_PARSE_H` | macro | `include/html_parse.h:2` | `#define FREEDOM_HTML_PARSE_H` |
-| `HP_DEFAULT_MAX_BYTES` | macro | `include/html_parse.h:41` | `#define HP_DEFAULT_MAX_BYTES` |
-| `HP_MAX_SCRIPTS` | macro | `include/html_parse.h:48` | `#define HP_MAX_SCRIPTS` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

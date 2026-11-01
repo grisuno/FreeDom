@@ -3,6 +3,11 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `rd_free` | function | `include/render_doc.h:318` | `void rd_free(rd_doc *d);` |
+| `rd_input_invisible` | function | `include/render_doc.h:370` | `int rd_input_invisible(int input_type);` |
+| `rd_input_label` | function | `include/render_doc.h:365` | `const char *rd_input_label(int input_type);` |
+| `rd_kind` | enum | `include/render_doc.h:42` | `` |
+| `rd_kind_name` | function | `include/render_doc.h:336` | `const char *rd_kind_name(rd_kind k);` |
 | `rd_status` | enum | `include/render_doc.h:299` | `` |
 | `rdp_images_warning` | function | `include/render_doc.h:308` | `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...` |
 | `to` | function | `include/render_doc.h:253` | `* belongs to (-1 = none);` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `browser_entry_doc` | function | `src/browser.c:255` | `int browser_entry_doc(const browser_state *bs, size_t pos)` |
 | `browser_forward` | function | `src/browser.c:280` | `browser_status browser_forward(browser_state *bs)` |
 | `browser_free` | function | `src/browser.c:167` | `void browser_free(browser_state *bs)` |
-| `browser_init` | function | `src/browser.c:156` | `browser_status browser_init(browser_state *bs)` |
-| `browser_is_exception` | function | `src/browser.c:464` | `int browser_is_exception(const browser_state *bs, const char *host)` |
-| `browser_navigate` | function | `src/browser.c:224` | `browser_status browser_navigate(browser_state *bs, const char *url)` |
-| `browser_push_state` | function | `src/browser.c:236` | `browser_status browser_push_state(browser_state *bs, const char *url)` |
-| `browser_replace_state` | function | `src/browser.c:243` | `browser_status browser_replace_state(browser_state *bs, const char *url)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

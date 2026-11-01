@@ -3,6 +3,13 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `clampv` | function | `src/css_counter.c:375` | `static int clampv(long v)` |
+| `cnt_format` | function | `src/css_counter.c:120` | `size_t cnt_format(int style, long value, char *out, size_t cap)` |
+| `cnt_hash` | function | `src/css_counter.c:18` | `unsigned cnt_hash(const char *name, size_t len)` |
+| `cnt_increment` | function | `src/css_counter.c:392` | `void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n)` |
+| `cnt_inst` | struct | `src/css_counter.c:359` | `` |
+| `cnt_is_marker` | function | `src/css_counter.c:272` | `int cnt_is_marker(const char *s)` |
+| `cnt_leave` | function | `src/css_counter.c:407` | `void cnt_leave(cnt_state *s, int depth)` |
 | `cnt_parse_content` | function | `src/css_counter.c:286` | `int cnt_parse_content(const char *val, char *out, size_t cap)` |
 | `cnt_parse_decls` | function | `src/css_counter.c:59` | `int cnt_parse_decls(const char *val, int dflt, cnt_decl out[CNT_MAX_DECL])` |
 | `cnt_reset` | function | `src/css_counter.c:379` | `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n)` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `print_console` | function | `src/freedom.c:430` | `static void print_console(const fb_buffer *log)` |
 | `print_css_drops` | function | `src/freedom.c:597` | `static void print_css_drops(const char *html, size_t len)` |
 | `print_doc` | function | `src/freedom.c:337` | `static void print_doc(const rd_doc *doc)` |
-| `print_dom` | function | `src/freedom.c:447` | `static void print_dom(const rd_doc *doc)` |
-| `print_dom_css` | function | `src/freedom.c:462` | `static void print_dom_css(const rd_doc *doc)` |
-| `print_usage` | function | `src/freedom.c:55` | `static void print_usage(FILE *fp, const char *prog)` |
-| `read_file` | function | `src/freedom.c:243` | `static char *read_file(const char *path, size_t *out_len)` |
-| `render_page` | function | `src/freedom.c:720` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
-| `run_dump_video` | function | `src/freedom.c:1287` | `static int run_dump_video(const char *url)` |
-| `run_headless` | function | `src/freedom.c:1139` | `static int run_headless(const char *target)` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

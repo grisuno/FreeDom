@@ -5807,6 +5807,26 @@ static double replaced_item_width(const browser_window *w, const rd_block *b) {
  * intrinsic box either way (it does not wrap below its own size). */
 static int block_leaves_flow(const rd_doc *doc, const rd_block *bk);
 
+static int empty_atom_continues_line(const rd_doc *doc, size_t run_i, int box_id);
+
+/* Outer width of run k when it is an EMPTY inline-block with a declared width (an icon
+ * atom), 0 otherwise -- the same edges reconcile_boxes_below spends placing it. */
+static double empty_atom_outer_w(const rd_doc *doc, size_t k, const rd_block *bk) {
+    if (bk->kind != RD_PARAGRAPH || bk->block_id < 0 ||
+        (bk->text != NULL && bk->text[0] != '\0'))
+        return 0.0;
+    const pv_box_def *d = rd_box_at(doc, (size_t)bk->block_id);
+    if (d == NULL || d->display != CSS_DISP_INLINE_BLOCK || d->box_w <= 0) return 0.0;
+    if (!empty_atom_continues_line(doc, k, bk->block_id) && bk->block_break) return 0.0;
+    double pl = box_pad_px(d->pad_l, d->pad_l_pct, 0.0) + box_edge_px(d->bord_lw);
+    double pr = box_pad_px(d->pad_r, d->pad_r_pct, 0.0) + box_edge_px(d->bord_rw);
+    double ml = bx_lp_px(d->box_l, 0, 0.0) - box_pad_px(d->pad_l, d->pad_l_pct, 0.0);
+    double mr = bx_lp_px(d->box_r, 0, 0.0) - box_pad_px(d->pad_r, d->pad_r_pct, 0.0);
+    double bw = (double)d->box_w;
+    if (d->box_sizing != CSS_BOXS_BORDER) bw += pl + pr;
+    return bw + (ml > 0.0 ? ml : 0.0) + (mr > 0.0 ? mr : 0.0);
+}
+
 static double measure_item_w_at(cairo_t *cr, const browser_window *w,
                                 const ui_theme *th, const rd_doc *doc,
                                 size_t b0, size_t b1, double measure_w) {
@@ -5815,6 +5835,7 @@ static double measure_item_w_at(cairo_t *cr, const browser_window *w,
     memset(&M, 0, sizeof M);
     memset(&si, 0, sizeof si);
     double repl_max = 0.0;
+    double atom_line_max = 0.0;
     /* The flow being measured is the one of the first block's out-of-flow anchor
      * (-1 = the normal flow; a positioned box's measurement measures ITS subtree). */
     size_t nbx = rd_box_count(doc);
@@ -5833,7 +5854,20 @@ static double measure_item_w_at(cairo_t *cr, const browser_window *w,
          * it adds to that line's width exactly as the layout places it
          * (flow_nested_block); one on its own row counts as max, not sum. */
         double rw = replaced_item_width(w, bk);
-        if (rw >= 0.0) {
+        double aw = empty_atom_outer_w(doc, k, bk);
+        if (aw > 0.0) {
+            /* A sized empty inline-block (an icon `<i>` before a label) is an atom of
+             * the line: the layout spends its width (reconcile_boxes_below), so the
+             * measure must too, or the label wraps inside a float sized without it. */
+            open_line(&M, &si);
+            if (si.prev_ended_ws && (M.nfrag > si.line_first || si.line_atoms > 0)) {
+                si.pen_x += si.prev_space_w;
+                si.prev_ended_ws = 0;
+            }
+            si.pen_x += aw;
+            ++si.line_atoms;
+            if (si.pen_x > atom_line_max) atom_line_max = si.pen_x;
+        } else if (rw >= 0.0) {
             if ((replaced_is_inline_level(&si, bk) || replaced_opens_inline_line(doc, k, b1) > 0)
                 && place_inline_replaced(cr, &M, &si, th, w, bk, measure_w))
                 continue;
@@ -5843,7 +5877,7 @@ static double measure_item_w_at(cairo_t *cr, const browser_window *w,
         }
     }
     flush_line(&M, &si, th);
-    double maxw = repl_max;
+    double maxw = (repl_max > atom_line_max) ? repl_max : atom_line_max;
     for (size_t r = 0; r < M.nrow; ++r) {
         const rc_row *rr = &M.rows[r];
         if (rr->count == 0 || rr->first + rr->count > M.nfrag) continue;
@@ -8520,6 +8554,8 @@ typedef struct rc_defer {
                                              * ones instead of overlapping */
     double pbot[RC_DEFER_COLS];
     int np;
+    int flush_now;                          /* the band just split pulls nothing up:
+                                             * place it at the pen, below earlier flow */
 } rc_defer;
 
 /* Forward: defer_split (below) appends through defer_append (after it). */
@@ -8578,6 +8614,7 @@ static int defer_split(rc_defer *d, const rd_doc *doc, size_t start, size_t end,
                        const int *outer, int nouter) {
     struct { int key; size_t rs, re; } runs[RC_DEFER_BAND_RUNS];
     int nruns = 0;
+    d->flush_now = 0;
     int cur = -2;
     size_t rstart = 0;
     int nested = 0;
@@ -8640,8 +8677,19 @@ static int defer_split(rc_defer *d, const rd_doc *doc, size_t start, size_t end,
             if (is_nested) fnested[q] = 1; else fdirect[q] = 1;
         }
         int all_complete = (nf > 0 && !overflow);
-        for (int q = 0; q < nf && all_complete; ++q)
-            if (!fdirect[q] || !fnested[q]) all_complete = 0;
+        int nested_only = 0;
+        /* Complete = the founder owns no run outside this band. A founder holding ONLY
+         * floats (a `ul{float:right}` of `li{float:left}`) has no direct run at all, yet is
+         * whole here: pulling it up placed a navbar beside the paragraph above it. */
+        for (int q = 0; q < nf && all_complete; ++q) {
+            if (fdirect[q] && fnested[q]) continue;
+            nested_only = 1;
+            for (size_t k = 0; k < rd_count(doc) && all_complete; ++k) {
+                if (k == start) { k = end - 1; continue; }
+                const rd_block *bk = rd_at(doc, k);
+                if (bk->float_id == fkeys[q] || bk->float_oid == fkeys[q]) all_complete = 0;
+            }
+        }
         /* Pull-up needs earlier in-flow content to sit beside. A band that opens the page
          * (a header whose nav floats hold their own nested floats) has none. */
         int earlier = 0;
@@ -8653,15 +8701,29 @@ static int defer_split(rc_defer *d, const rd_doc *doc, size_t start, size_t end,
          * rail, `margin-left:-320px` on a float that follows the main column in the same
          * band) is built to sit beside content that came before it, even when that content
          * is a float of the same band rather than earlier in-flow text. */
+        int neg_lead = 0;   /* any founder (direct or outer) with a negative margin */
         if (all_complete) {
-            for (size_t k = start; k < end && !earlier; ++k) {
+            for (size_t k = start; k < end; ++k) {
                 const rd_block *bk = rd_at(doc, k);
-                if (block_leaves_flow(doc, bk) || bk->float_oid >= 0) continue;
+                if (block_leaves_flow(doc, bk)) continue;
+                if (bk->float_oid >= 0) {
+                    if ((bk->float_oml < 0 && bk->float_oml > -100000) ||
+                        (bk->float_omr < 0 && bk->float_omr > -100000)) neg_lead = 1;
+                    continue;
+                }
                 if ((bk->float_ml < 0 && bk->float_ml > -100000) ||
-                    (bk->float_mr < 0 && bk->float_mr > -100000)) earlier = 1;
+                    (bk->float_mr < 0 && bk->float_mr > -100000)) {
+                    neg_lead = 1;
+                    earlier = 1;
+                }
             }
         }
-        if (all_complete && !earlier) return -1;
+        if (all_complete && !earlier && !nested_only) return -1;
+        /* Founders made only of floats, all whole in this band, with no negative leading
+         * margin: nothing to pull up beside (CSS 2.1 9.5.1 rule 5 -- a float's top is never
+         * above an earlier block). They still lay out as columns -- the inline band path
+         * does not nest -- but at the pen. */
+        d->flush_now = (all_complete && nested_only && !neg_lead && d->n == 0);
     }
     /* Bounds before touching the map (atomic: all or inline). */
     int keys[RC_DEFER_COLS];
@@ -8739,7 +8801,7 @@ static double float_group_pref_w(cairo_t *cr, const browser_window *w, const ui_
         /* An out-of-flow run (a visually-hidden `sr-only` label) is no part of the float's
          * content width, anchor or not: counted as text it also cut the container's run into
          * pieces, so a row of icons measured as its widest label (88px, not 204). */
-        if (block_is_oof(doc, bk0)) { ++k; continue; }
+        if (block_leaves_flow(doc, bk0)) { ++k; continue; }
         int is_cont = (bk0->cont_id >= 0 && (bk0->cont_display == BX_DISPLAY_FLEX ||
                                              bk0->cont_display == BX_DISPLAY_GRID));
         int fbx0 = rd_at(doc, g0)->float_box;
@@ -8748,14 +8810,18 @@ static double float_group_pref_w(cairo_t *cr, const browser_window *w, const ui_
         while (e < g1) {
             const rd_block *be = rd_at(doc, e);
             if (block_in_table_caption(doc, be)) break;
-            if (block_is_oof(doc, be)) { ++e; continue; }
+            if (block_leaves_flow(doc, be)) { ++e; continue; }
             int ec = (be->cont_id >= 0) ? root_cont_in(doc, be->cont_id, fbx0) : -1;
             if (ec != rootc) break;
             ++e;
         }
+        /* The boxes BETWEEN the text and the founder (a padded `a{display:block}` in
+         * a `li{float:left}`) wrap the measured text too: shrink-to-fit is the
+         * founder's content box, and that holds those boxes whole. */
         double seg = (rootc >= 0)
                    ? nested_cont_basis(cr, w, th, doc, k, e, rootc, ctx_w, 0, 0)
-                   : measure_item_content_w(cr, w, th, doc, k, e);
+                   : measure_item_content_w(cr, w, th, doc, k, e)
+                     + ((fbx0 >= 0) ? item_inner_inset(doc, k, e, fbx0) : 0.0);
         if (seg > pref) pref = seg;
         k = e;
     }
@@ -8772,6 +8838,55 @@ static double float_founder_edges(const rd_doc *doc, int float_box, double ctx_w
     return box_pad_px(fd->pad_l, fd->pad_l_pct, ctx_w)
          + box_pad_px(fd->pad_r, fd->pad_r_pct, ctx_w)
          + box_edge_px(fd->bord_lw) + box_edge_px(fd->bord_rw);
+}
+
+/* Shrink-to-fit width of an outer float whose content is ONLY floats (a `ul{float:right}`
+ * holding `li{float:left}` items -- every Bootstrap 3 navbar): CSS 2.1 10.3.5 gives the
+ * founder's border box = its edges + the max-content of the floats it holds, which sit side
+ * by side, so their outer widths add up. 0 = not that shape (direct in-flow content, a `%`
+ * width that would resolve against the answer itself, a founder that is not known): the
+ * caller keeps the full-width column. */
+static double defer_col_shrink_w(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                                 const rd_doc *doc, const rc_defer_col *dc, double ctx_w) {
+    double sum = 0.0, direct = 0.0;
+    int obox = -1, nfloats = 0;
+    for (int r = 0; r < dc->nr; ++r) {
+        size_t k = dc->rs[r];
+        while (k < dc->re[r]) {
+            const rd_block *bk = rd_at(doc, k);
+            if (block_leaves_flow(doc, bk)) { ++k; continue; }
+            int is_direct = (bk->float_id == dc->key);
+            if (!is_direct && bk->float_oid != dc->key) return 0.0;
+            if (bk->float_w_pct != 0 || bk->float_ml_pct != 0 || bk->float_mr_pct != 0) return 0.0;
+            if (obox < 0) obox = is_direct ? bk->float_box : bk->float_obox;
+            size_t e = k + 1;
+            while (e < dc->re[r] && (block_leaves_flow(doc, rd_at(doc, e)) ||
+                                     rd_at(doc, e)->float_id == bk->float_id))
+                ++e;
+            if (is_direct) {
+                /* The founder's own in-flow content (often only a clearfix `::before`
+                 * of `content:" "`) shares its lines with the floats: as wide as the
+                 * widest of it, never added to them. */
+                double dw = float_group_pref_w(cr, w, th, doc, k, e, ctx_w);
+                if (dw > direct) direct = dw;
+            } else {
+                double gw = (bk->float_w > 0)
+                          ? (double)bk->float_w
+                          : float_group_pref_w(cr, w, th, doc, k, e, ctx_w)
+                            + float_founder_edges(doc, bk->float_box, ctx_w);
+                if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
+                    fprintf(stderr, "[stf] key=%d group k=[%zu,%zu) w=%.1f\n", dc->key, k, e, gw);
+                sum += gw + (double)bk->float_ml + (double)bk->float_mr;
+                ++nfloats;
+            }
+            k = e;
+        }
+    }
+    if (nfloats == 0 || sum <= 0.0) return 0.0;
+    if (direct > sum) sum = direct;
+    /* Rounded up: a float exactly as wide as its content must not wrap its last item to a
+     * new band row over a sub-pixel of text measurement. */
+    return ceil(sum + float_founder_edges(doc, obox, ctx_w));
 }
 
 /* Places every deferred column: each lays its inner bands (reused, not forked)
@@ -8856,7 +8971,10 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
             double wj = pref + float_founder_edges(doc, fbox, ctx_w);
             border[c] = (wj > 0.0) ? wj : ((pxw > 0.0) ? pxw : ctx_w);
         } else {
-            border[c] = ctx_w;
+            double stf = defer_col_shrink_w(cr, w, th, doc, dc, ctx_w);
+            if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
+                fprintf(stderr, "[defer] col key=%d shrink-to-fit=%.1f\n", dc->key, stf);
+            border[c] = (stf > 0.0 && stf < ctx_w) ? stf : ctx_w;
         }
         if (border[c] > ctx_w) border[c] = ctx_w;
         if (border[c] < 1.0) border[c] = 1.0;
@@ -8979,6 +9097,17 @@ static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                         si.col_founder_box = fbx;
                         col_fbx = fbx;
                     }
+                }
+                /* The shared context of a column is never INSIDE its founder: for a range of
+                 * one run the common box is that run's own (a padded `a` in a `li`), and
+                 * opening it here made the inner band apply its padding a second time. */
+                {
+                    const rd_block *f0 = rd_at(doc, dc->rs[r]);
+                    int inner = f0->float_box;
+                    if (col_fbx >= 0 && bbox >= 0 && inner >= 0 && inner != col_fbx &&
+                        (bbox == inner ||
+                         bt_in_subtree(doc->boxes, rd_box_count(doc), (size_t)inner, (size_t)bbox)))
+                        bbox = col_fbx;
                 }
                 if (bbox >= 0)
                     /* Boxes ALREADY OPEN on the parent state are what ctx_left/ctx_w (the
@@ -9553,7 +9682,10 @@ static int runs_share_float(const rd_doc *doc, size_t i, size_t j, int fid) {
         const rd_block *bk = rd_at(doc, k);
         if (block_leaves_flow(doc, bk)) continue;
         if (bk->float_id != fid) return 0;
-        if (bk->text != NULL && bk->text[0] != '\0') text = 1;
+        /* Content is text or a sized atom: an icon-and-caret toggle (two empty
+         * inline-blocks in a flex `a`) is still the float's whole content. */
+        if ((bk->text != NULL && bk->text[0] != '\0') || empty_atom_outer_w(doc, k, bk) > 0.0)
+            text = 1;
     }
     return text;
 }
@@ -9799,6 +9931,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
              * founders splits by key (stories, rail, footer nav each take
              * their column); a band with inline content, or any overflow,
              * lays out whole inline (fail-open: today's path). */
+            if (getenv("FREEDOM_DEFER_DEBUG") != NULL)
+                fprintf(stderr, "[band] [%zu,%zu) cur=%.1f\n", i, j, s.cur_top);
             {
                 int nkeys = defer_split(&df, doc, i, j, douter, dnouter);
                 if (nkeys > 0) {
@@ -9815,6 +9949,13 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                         }
                         if (!founder)
                             reconcile_boxes(cr, w, L, &s, th, doc, content_w, shared, i);
+                    }
+                    if (df.flush_now) {
+                        flush_line(L, &s, th);
+                        df.anchor_top = s.cur_top;
+                        df.anchor_set = 1;
+                        defer_flush(cr, w, L, &s, th, content_w, doc, &df);
+                        df.flush_now = 0;
                     }
                     i = j - 1;  /* the loop's ++i moves past the band */
                     continue;

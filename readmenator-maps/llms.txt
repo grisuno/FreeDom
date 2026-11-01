@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 12 communities, 312 files, 1801 imports, 4 languages, 7732 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 12 communities, 312 files, 1801 imports, 4 languages, 7747 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -13,7 +13,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): Depends on: include/antifp.h, include/requestpolicy.h, include/securefetch.h, include/url.h
 - [readmenator-agent/API_p12.md](md/readmenator-agent/API_p12.md): Depends on: include/url.h
 - [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/cachedfetch.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): fillframeslot (function) gui/browserui.c:15182 static void fillframeslot(browserwindow w, const rdblock b, uiimage slot,
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): uirenderviewportw (function) gui/browserui.c:15092 int uirenderviewportw(void)
 - [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Depends on: include/css.h
 - [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Imported by: src/freedom.c, src/perftrace.c, tests/testperftrace.c
 - [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/browser.h, include/util.h
@@ -24,7 +24,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testhostconf.c -> include/hostconf.h
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): setpageurl (function, line 15793) static void setpageurl(browserwindow w, const char url)
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): fragatpoint (function, line 15861) static domnodeid fragatpoint(browserwindow w, double px, double py,
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
 - [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: The sheet's two string pools -- background url()s, and the ::before/::after
 - [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: fhnew: topurl: the trusted top document; fetch/fetchctx: the page's policy-gated subresource...
@@ -50,7 +50,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: testrenderbinarydoesnotcrashparent: (void)state; rdresult r...
 - [readmenator-agent/KB_tests_p8.md](md/readmenator-agent/KB_tests_p8.md): Doc: testvalidatelongbundleurl: Modern bundle URLs exceed 2048 bytes (google.com's xjs script URL...
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 312 files at commit a8188815ee23. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 312 files at commit 3d332b159822. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)

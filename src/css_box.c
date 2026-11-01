@@ -144,6 +144,26 @@ int cb_interp_fontsize_ex(const char *v, int *abs_out) {
  * Clamped to [CSS_LINE_MIN, CSS_LINE_MAX] (anti-DoS). */
 int cb_interp_lineheight(const char *v) {
     if (csel_ci_eq(v, "normal")) return 0;
+    /* calc()/min()/max()/clamp() (Values 4 section 10; Tailwind 4 writes every
+     * leading as `calc(.25rem * 7)`): an absolute result is that many px, a purely
+     * font-relative one (em, %) a multiple of the font-size, exactly like the plain
+     * forms below. A mix of both is not representable in this slot: fail closed. */
+    {
+        double mpx, mem, mpct;
+        int m = math_eval_whole(v, &mpx, &mem, &mpct);
+        if (m == 0) return -1;
+        if (m == 1) {
+            if (mpx < 0.0 || mpct < 0.0) return -1;
+            if (mem == 0.0 && mpct == 0.0) {
+                double tenths = mpx * 10.0;
+                if (tenths > (double)CSS_LINE_ABS_MAX_PX * 10.0) tenths = (double)CSS_LINE_ABS_MAX_PX * 10.0;
+                return CSS_LINE_ABS_BASE + (int)lround(tenths);
+            }
+            double abs_px = mpx - mem * CL_INITIAL_FONT_SIZE;
+            if (abs_px > 1e-9 || abs_px < -1e-9) return -1;
+            return css_round_clamp(mem * 100.0 + mpct, CSS_LINE_MIN, CSS_LINE_MAX);
+        }
+    }
     double num;
     const char *end;
     if (!cb_parse_num(v, &num, &end)) return -1;

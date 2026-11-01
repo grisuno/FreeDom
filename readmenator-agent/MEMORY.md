@@ -2,7 +2,7 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 312 files at commit `a8188815ee23`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 312 files at commit `3d332b159822`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
@@ -68,7 +68,7 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 194 files, 6026 symbols; docstrings on 28% of symbols; functions snake_case (99%); types PascalCase (0%); median file 237 lines, max 20071.
+- c: 194 files, 6041 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (0%); median file 237 lines, max 20212.
 - h: 102 files, 1656 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 73 lines, max 1267.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
 - sh: 4 files, 0 symbols; median file 39 lines, max 90.
@@ -90,7 +90,7 @@ Measured baseline:
 ## 6. Risks to respect
 
 - God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/freedom.c`, `src/css.c`
-- Hotspots (complex and central): `gui/browser_ui.c`, `src/tab.c`, `src/page_view.c`, `src/css.c`, `tests/test_css.c`
+- Hotspots (complex and central): `gui/browser_ui.c`, `src/tab.c`, `src/css.c`, `src/page_view.c`, `tests/test_css.c`
 - Cycle: `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - Full blast radius: `readmenator-agent/GOTCHAS.md`; findings: `readmenator-agent/SECURITY.md`.
 

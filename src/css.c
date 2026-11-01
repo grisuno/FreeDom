@@ -320,6 +320,16 @@ static int interp_fontsize_ex(const char *v, int *abs_out) {
     return cb_interp_fontsize_ex(v, abs_out);
 }
 
+/* An <animation-iteration-count> number as the slot stores it. A count past
+ * CSS_ANIM_ITERS_FINITE_MAX outlasts any page session, so it IS `infinite` (-1):
+ * converting it to int was undefined behaviour (fuzz-css, 3.3e36). */
+#define CSS_ANIM_ITERS_FINITE_MAX 1000000.0
+static int anim_iters(double d) {
+    if (!(d >= 0.0)) return 0;
+    if (d > CSS_ANIM_ITERS_FINITE_MAX) return -1;
+    return (int)(d + 0.5);
+}
+
 static int interp_lineheight(const char *v) {
     return cb_interp_lineheight(v);
 }
@@ -1213,9 +1223,27 @@ static int expand_border_shorthand(const char *val, int mask, css_decl *dst, int
     return n;
 }
 
+/* `outline-style: auto` (CSS UI 4 section 3.3) is the UA focus ring. This engine
+ * draws it as the solid ring it looks like; the keyword exists only on outlines,
+ * never on borders, so it is mapped here and not in interp_border_style. */
+static int interp_outline_style(const char *v) {
+    if (csel_ci_eq(v, "auto")) return interp_border_style("solid");
+    return interp_border_style(v);
+}
+
 static int expand_outline(const char *val, css_decl *dst, int cap) {
-    int w = 0, s = 0, c = 0, hw, hs, hc;
-    if (!classify_box_edge(val, &w, &hw, &s, &hs, &c, &hc)) return 0;
+    int w = 0, s = 0, c = 0, hw = 0, hs = 0, hc = 0;
+    if (csel_substr(val, "url(", 1)) return 0;
+    const char *p = val;
+    char tok[CSS_TOK_MAX];
+    while (next_ws_token(&p, tok, sizeof tok)) {
+        int tmp;
+        if (!hw && interp_border_width(tok, &tmp)) { w = tmp; hw = 1; }
+        else if (!hs && (tmp = interp_outline_style(tok)) >= 0) { s = tmp; hs = 1; }
+        else if (!hc && color_ok(tmp = interp_color(tok))) { c = tmp; hc = 1; }
+        else return 0;   /* unrecognised token: drop the whole shorthand */
+    }
+    if (!hw && !hs && !hc) return 0;
     int n = 0;
     if (hw && n < cap) { dst[n].prop = P_OUTLINE_W; dst[n].ival = w; ++n; }
     if (hs && n < cap) { dst[n].prop = P_OUTLINE_S; dst[n].ival = s; ++n; }
@@ -1576,7 +1604,7 @@ static int expand_animation(const char *val, css_decl *dst, int cap) {
             double d;
             const char *e;
             if (parse_num(t, &d, &e) && *e == '\0' && d >= 0.0) {
-                if (nout < cap) { dst[nout].prop = P_ANIM_ITERS; dst[nout].ival = (int)(d + 0.5); ++nout; }
+                if (nout < cap) { dst[nout].prop = P_ANIM_ITERS; dst[nout].ival = anim_iters(d); ++nout; }
                 have_iters = 1;
                 continue;
             }
@@ -4172,7 +4200,7 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         dst[0].prop = P_OUTLINE_W; dst[0].ival = o; return 1;
     }
     if (strcmp(prop, "outline-style") == 0) {
-        int o = interp_border_style(val);
+        int o = interp_outline_style(val);
         if (o < 0) return 0;
         dst[0].prop = P_OUTLINE_S; dst[0].ival = o; return 1;
     }
@@ -4503,7 +4531,7 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         if (csel_ci_eq(first, "infinite")) { dst[0].prop = P_ANIM_ITERS; dst[0].ival = -1; return 1; }
         double d; const char *e;
         if (!parse_num(first, &d, &e) || *e != '\0' || d < 0.0) return 0;
-        dst[0].prop = P_ANIM_ITERS; dst[0].ival = (int)(d + 0.5); return 1;
+        dst[0].prop = P_ANIM_ITERS; dst[0].ival = anim_iters(d); return 1;
     }
     else if (strcmp(prop, "animation-direction") == 0) {
         char first[CSS_TOK_MAX];

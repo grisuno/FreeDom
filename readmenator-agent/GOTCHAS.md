@@ -4,11 +4,11 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 181.70)
+- `gui/browser_ui.c` (score: 182.20)
 - `include/css.h` (score: 92.40, imported by 37 files)
 - `src/tab.c` (score: 76.90)
 - `src/freedom.c` (score: 63.00)
-- `src/css.c` (score: 60.60)
+- `src/css.c` (score: 60.80)
 - `src/page_view.c` (score: 56.70)
 - `include/page_view.h` (score: 39.30, imported by 12 files)
 - `include/html_parse.h` (score: 38.40, imported by 18 files)
@@ -17,9 +17,9 @@ These files have the most connections. Changes here have high blast radius.
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css_counter.h` -- 3 direct, 54 total dependents
-- `include/css.h` -- 37 direct, 51 total dependents
-- `include/css_color.h` -- 13 direct, 51 total dependents
+- `include/css.h` -- 37 direct, 53 total dependents
+- `include/css_counter.h` -- 3 direct, 52 total dependents
+- `include/css_color.h` -- 13 direct, 50 total dependents
 - `include/html_parse.h` -- 18 direct, 43 total dependents
 - `include/dom.h` -- 16 direct, 39 total dependents
 - `include/css_select.h` -- 14 direct, 29 total dependents
@@ -32,8 +32,8 @@ Editing these files can break the listed number of dependents. Run their tests a
 
 - `gui/browser_ui.c` -- complexity: 1.0, centrality: 1.0, combined: 1.0
 - `src/tab.c` -- complexity: 0.3, centrality: 0.5, combined: 0.4
-- `src/page_view.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
 - `src/css.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
+- `src/page_view.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
 - `src/freedom.c` -- complexity: 0.1, centrality: 0.4, combined: 0.3
 - `include/css.h` -- complexity: 0.2, centrality: 0.3, combined: 0.3
 - `include/page_view.h` -- complexity: 0.1, centrality: 0.1, combined: 0.1
@@ -69,6 +69,6 @@ Circular dependencies. Refactor to break the cycle.
 - `gui/browser_ui.c:5699` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5699 but never read afterwards.
 - `gui/browser_ui.c:5700` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5700 but never read afterwards.
 - `gui/browser_ui.c:5702` `table` [DEAD_STORE] `j`: `j` assigned at line 5702 but never read afterwards.
-- `gui/browser_ui.c:6002` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 6002 but never read afterwards.
-- `gui/browser_ui.c:6003` `nested_cont_basis` [DEAD_STORE] `n_items`: `n_items` assigned at line 6003 but never read afterwards.
-- `gui/browser_ui.c:7087` `builds` [DEAD_STORE] `sl`: `sl` assigned at line 7087 but never read afterwards.
+- `gui/browser_ui.c:5837` `measure_item_w_at` [DEAD_STORE] `repl_max`: `repl_max` assigned at line 5837 but never read afterwards.
+- `gui/browser_ui.c:5838` `measure_item_w_at` [DEAD_STORE] `atom_line_max`: `atom_line_max` assigned at line 5838 but never read afterwards.
+- `gui/browser_ui.c:5856` `measure_item_w_at` [DEAD_STORE] `rw`: `rw` assigned at line 5856 but never read afterwards.

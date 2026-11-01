@@ -3,6 +3,21 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_build_control_without_form` | function | `tests/test_page_view.c:4192` | `static void test_build_control_without_form(void **state)` |
+| `test_build_css_bold_and_inline_wins` | function | `tests/test_page_view.c:4549` | `static void test_build_css_bold_and_inline_wins(void **state)` |
+| `test_build_cursor_alone_triggers_box` | function | `tests/test_page_view.c:2904` | `static void test_build_cursor_alone_triggers_box(void **state)` |
+| `test_build_display_none_hidden` | function | `tests/test_page_view.c:4644` | `static void test_build_display_none_hidden(void **state)` |
+| `test_build_empty_box_gets_run_and_box` | function | `tests/test_page_view.c:2780` | `static void test_build_empty_box_gets_run_and_box(void **state)` |
+| `test_build_empty_document` | function | `tests/test_page_view.c:1132` | `static void test_build_empty_document(void **state)` |
+| `test_build_empty_flex_grow_spacer` | function | `tests/test_page_view.c:950` | `static void test_build_empty_flex_grow_spacer(void **state)` |
+| `test_build_flex_anchor_is_its_own_block` | function | `tests/test_page_view.c:1768` | `static void test_build_flex_anchor_is_its_own_block(void **state)` |
+| `test_build_flex_container` | function | `tests/test_page_view.c:1338` | `static void test_build_flex_container(void **state)` |
+| `test_build_flex_container_from_sheet` | function | `tests/test_page_view.c:2450` | `static void test_build_flex_container_from_sheet(void **state)` |
+| `test_build_flex_item_values` | function | `tests/test_page_view.c:1451` | `static void test_build_flex_item_values(void **state)` |
+| `test_build_flex_whitespace_not_item` | function | `tests/test_page_view.c:1784` | `static void test_build_flex_whitespace_not_item(void **state)` |
+| `test_build_flex_wrap_align_row_gap` | function | `tests/test_page_view.c:1410` | `static void test_build_flex_wrap_align_row_gap(void **state)` |
+| `test_build_float_outermost_founder` | function | `tests/test_page_view.c:1561` | `static void test_build_float_outermost_founder(void **state)` |
+| `test_build_float_threading` | function | `tests/test_page_view.c:1515` | `static void test_build_float_threading(void **state)` |
 | `test_build_float_widthless_stays_unset` | function | `tests/test_page_view.c:894` | `static void test_build_float_widthless_stays_unset(void **state)` |
 | `test_build_flow_table_row_is_one_block` | function | `tests/test_page_view.c:2822` | `static void test_build_flow_table_row_is_one_block(void **state)` |
 | `test_build_font_list_inherits` | function | `tests/test_page_view.c:2279` | `static void test_build_font_list_inherits(void **state)` |
@@ -481,20 +496,5 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_eval_sees_dom` | function | `tests/test_tab.c:1675` | `static void test_eval_sees_dom(void **state)` |
 | `test_eval_sees_env` | function | `tests/test_tab.c:1696` | `static void test_eval_sees_env(void **state)` |
 | `test_eval_without_load` | function | `tests/test_tab.c:3277` | `static void test_eval_without_load(void **state)` |
-| `test_event_ipc_via_tab_eval` | function | `tests/test_tab.c:674` | `static void test_event_ipc_via_tab_eval(void **state)` |
-| `test_event_navigation_is_policy_gated` | function | `tests/test_tab.c:2442` | `static void test_event_navigation_is_policy_gated(void **state)` |
-| `test_external_css_applied_when_allowed` | function | `tests/test_tab.c:2036` | `static void test_external_css_applied_when_allowed(void **state)` |
-| `test_external_css_bad_ctype_not_parsed` | function | `tests/test_tab.c:2139` | `static void test_external_css_bad_ctype_not_parsed(void **state)` |
-| `test_external_css_blocked_host_refused` | function | `tests/test_tab.c:2157` | `static void test_external_css_blocked_host_refused(void **state)` |
-| `test_external_css_skipped_without_grant` | function | `tests/test_tab.c:2120` | `static void test_external_css_skipped_without_grant(void **state)` |
-| `test_external_css_survives_click_rederive` | function | `tests/test_tab.c:3162` | `static void test_external_css_survives_click_rederive(void **state)` |
-| `test_external_script_bad_ctype_not_executed` | function | `tests/test_tab.c:1963` | `static void test_external_script_bad_ctype_not_executed(void **state)` |
-| `test_external_script_blocked_host_refused` | function | `tests/test_tab.c:1980` | `static void test_external_script_blocked_host_refused(void **state)` |
-| `test_external_script_document_order` | function | `tests/test_tab.c:1916` | `static void test_external_script_document_order(void **state)` |
-| `test_external_script_executes_when_net_allowed` | function | `tests/test_tab.c:1899` | `static void test_external_script_executes_when_net_allowed(void **state)` |
-| `test_external_script_skipped_without_net` | function | `tests/test_tab.c:1939` | `static void test_external_script_skipped_without_net(void **state)` |
-| `test_first_visit_trusted_host_can_set_cookie` | function | `tests/test_tab.c:1203` | `static void test_first_visit_trusted_host_can_set_cookie(void **state)` |
-| `test_focus_ipc_round_trip` | function | `tests/test_tab.c:774` | `static void test_focus_ipc_round_trip(void **state)` |
-| `test_frames_absent_for_untrusted_host` | function | `tests/test_tab.c:2743` | `static void test_frames_absent_for_untrusted_host(void **state)` |
 
 Next: [SYMBOLS_p16.md](SYMBOLS_p16.md)

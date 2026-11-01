@@ -1,14 +1,14 @@
 IP Data Intelligence for Developers & Enterprises | IPinfo
-CSS drops: 51 declaration(s) dropped, 19 distinct
+CSS drops: 49 declaration(s) dropped, 19 distinct
   count  cause         property                     first value
       6  bad-value     transform                    var(--explainer-from)
       6  unknown-prop  font-feature-settings        normal
       6  unknown-prop  font-variation-settings      normal
-      4  bad-value     outline                      1px solid ButtonText
       4  unknown-prop  perspective                  1400px
       3  unknown-prop  all                          unset
-      2  unknown-prop  stroke-dashoffset            600
       2  bad-value     mask-image                   radial-gradient(120% 80% at 50% 100%,black,transparent 70%)
+      2  unknown-prop  stroke-dashoffset            600
+      2  bad-value     outline                      1px auto -webkit-focus-ring-color
       2  bad-value     margin                       bs
       2  bad-value     width                        max(100%,2.75rem)
       2  bad-value     height                       max(100%,2.75rem)

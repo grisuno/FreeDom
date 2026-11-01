@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 46 file(s) rooted at `include` with dominant language c (cohesion 0.51). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (657 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
+This community groups 46 file(s) rooted at `include` with dominant language c (cohesion 0.51). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (662 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
 
 ## Files
 
@@ -45,7 +45,7 @@ This community groups 46 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 657 | no |
+| `gui/browser_ui.c` | c | presentation | 662 | no |
 | `gui/freedom_view.c` | c | presentation | 2 | no |
 
 *... and 26 more files in this community.*
@@ -114,11 +114,11 @@ This community groups 46 file(s) rooted at `include` with dominant language c (c
 - [dataflow DEAD_STORE] `gui/browser_ui.c:5699` `table` `parent`: `parent` assigned at line 5699 but never read afterwards.
 - [dataflow DEAD_STORE] `gui/browser_ui.c:5700` `table` `seen`: `seen` assigned at line 5700 but never read afterwards.
 - [dataflow DEAD_STORE] `gui/browser_ui.c:5702` `table` `j`: `j` assigned at line 5702 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6002` `nested_cont_basis` `total`: `total` assigned at line 6002 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6003` `nested_cont_basis` `n_items`: `n_items` assigned at line 6003 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:7087` `builds` `sl`: `sl` assigned at line 7087 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:8810` `defer_flush` `fw`: `fw` assigned at line 8810 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:8811` `defer_flush` `ngroups`: `ngroups` assigned at line 8811 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5837` `measure_item_w_at` `repl_max`: `repl_max` assigned at line 5837 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5838` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5838 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5856` `measure_item_w_at` `rw`: `rw` assigned at line 5856 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6036` `nested_cont_basis` `total`: `total` assigned at line 6036 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6037` `nested_cont_basis` `n_items`: `n_items` assigned at line 6037 but never read afterwards.
 
 ## Open Questions
 

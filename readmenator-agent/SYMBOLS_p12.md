@@ -3,6 +3,14 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_inline_container_props` | function | `tests/test_css.c:333` | `static void test_inline_container_props(void **state)` |
+| `test_inline_content_visibility` | function | `tests/test_css.c:4606` | `static void test_inline_content_visibility(void **state)` |
+| `test_inline_direction` | function | `tests/test_css.c:3235` | `static void test_inline_direction(void **state)` |
+| `test_inline_display` | function | `tests/test_css.c:295` | `static void test_inline_display(void **state)` |
+| `test_inline_display_table_family` | function | `tests/test_css.c:308` | `static void test_inline_display_table_family(void **state)` |
+| `test_inline_empty_cells` | function | `tests/test_css.c:4404` | `static void test_inline_empty_cells(void **state)` |
+| `test_inline_font_kerning` | function | `tests/test_css.c:4994` | `static void test_inline_font_kerning(void **state)` |
+| `test_inline_font_size` | function | `tests/test_css.c:45` | `static void test_inline_font_size(void **state)` |
 | `test_inline_font_size_absolute_flag` | function | `tests/test_css.c:60` | `static void test_inline_font_size_absolute_flag(void **state)` |
 | `test_inline_font_stretch` | function | `tests/test_css.c:5013` | `static void test_inline_font_stretch(void **state)` |
 | `test_inline_font_variant` | function | `tests/test_css.c:4431` | `static void test_inline_font_variant(void **state)` |
@@ -11,12 +19,14 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_inline_image_rendering` | function | `tests/test_css.c:4615` | `static void test_inline_image_rendering(void **state)` |
 | `test_inline_isolation` | function | `tests/test_css.c:4583` | `static void test_inline_isolation(void **state)` |
 | `test_inline_line_height` | function | `tests/test_css.c:87` | `static void test_inline_line_height(void **state)` |
+| `test_inline_line_height_calc` | function | `tests/test_css.c:5880` | `static void test_inline_line_height_calc(void **state)` |
 | `test_inline_list_style_pos` | function | `tests/test_css.c:4986` | `static void test_inline_list_style_pos(void **state)` |
 | `test_inline_min_max_height` | function | `tests/test_css.c:3125` | `static void test_inline_min_max_height(void **state)` |
 | `test_inline_min_width_height` | function | `tests/test_css.c:3098` | `static void test_inline_min_width_height(void **state)` |
 | `test_inline_mix_blend_mode` | function | `tests/test_css.c:4657` | `static void test_inline_mix_blend_mode(void **state)` |
 | `test_inline_object_fit` | function | `tests/test_css.c:4975` | `static void test_inline_object_fit(void **state)` |
 | `test_inline_object_position` | function | `tests/test_css.c:4954` | `static void test_inline_object_position(void **state)` |
+| `test_inline_outline_auto` | function | `tests/test_css.c:5895` | `static void test_inline_outline_auto(void **state)` |
 | `test_inline_outline_longhands` | function | `tests/test_css.c:4353` | `static void test_inline_outline_longhands(void **state)` |
 | `test_inline_outline_offset` | function | `tests/test_css.c:3244` | `static void test_inline_outline_offset(void **state)` |
 | `test_inline_overscroll_behavior` | function | `tests/test_css.c:5058` | `static void test_inline_overscroll_behavior(void **state)` |
@@ -185,7 +195,7 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_interp_len_bare_number_rejected` | function | `tests/test_css_box.c:26` | `static void test_interp_len_bare_number_rejected(void **state)` |
 | `test_interp_len_px` | function | `tests/test_css_box.c:9` | `static void test_interp_len_px(void **state)` |
 | `test_lineheight_abs_vs_scale` | function | `tests/test_css_box.c:86` | `static void test_lineheight_abs_vs_scale(void **state)` |
-| `main` | function | `tests/test_css_color.c:358` | `int main(void)` |
+| `main` | function | `tests/test_css_color.c:381` | `int main(void)` |
 | `oklch` | function | `tests/test_css_color.c:176` | `* Tailwind v4 writes its whole palette in oklch();` |
 | `palette` | function | `tests/test_css_color.c:178` | `* Tailwind v4 palette (sRGB fallbacks it publishes). One unit of rounding slack  * per channel. *...` |
 | `preprocessor` | function | `tests/test_css_color.c:241` | `* is how a page written by a preprocessor (`hsl(0,0%,15.8333333333%)`, the shape a  * SASS/LESS c...` |
@@ -219,6 +229,7 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_rgb_space_separated` | function | `tests/test_css_color.c:292` | `static void test_rgb_space_separated(void **state)` |
 | `test_rgba_integer` | function | `tests/test_css_color.c:77` | `static void test_rgba_integer(void **state)` |
 | `test_space_separated_still_fails_closed` | function | `tests/test_css_color.c:323` | `static void test_space_separated_still_fails_closed(void **state)` |
+| `test_system_colors` | function | `tests/test_css_color.c:361` | `static void test_system_colors(void **state)` |
 | `test_transparent_currentcolor` | function | `tests/test_css_color.c:126` | `static void test_transparent_currentcolor(void **state)` |
 | `test_unsupported_syntax` | function | `tests/test_css_color.c:168` | `static void test_unsupported_syntax(void **state)` |
 | `blank` | function | `tests/test_css_computed.c:18` | `static css_style blank(void)` |
@@ -485,16 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_pick_fallback_when_empty` | function | `tests/test_download.c:129` | `static void test_pick_fallback_when_empty(void **state)` |
 | `test_pick_from_disposition_ext_form` | function | `tests/test_download.c:81` | `static void test_pick_from_disposition_ext_form(void **state)` |
 | `test_pick_from_disposition_quoted` | function | `tests/test_download.c:72` | `static void test_pick_from_disposition_quoted(void **state)` |
-| `test_pick_from_url_segment` | function | `tests/test_download.c:91` | `static void test_pick_from_url_segment(void **state)` |
-| `test_pick_keeps_existing_extension` | function | `tests/test_download.c:108` | `static void test_pick_keeps_existing_extension(void **state)` |
-| `test_pick_null_out` | function | `tests/test_download.c:141` | `static void test_pick_null_out(void **state)` |
-| `test_pick_overflow_fails_closed` | function | `tests/test_download.c:148` | `static void test_pick_overflow_fails_closed(void **state)` |
-| `test_pick_traversal_contained` | function | `tests/test_download.c:117` | `static void test_pick_traversal_contained(void **state)` |
-| `test_should_binary_types` | function | `tests/test_download.c:41` | `static void test_should_binary_types(void **state)` |
-| `test_should_renderable_types` | function | `tests/test_download.c:30` | `static void test_should_renderable_types(void **state)` |
-| `main` | function | `tests/test_fb_cmdline.c:117` | `int main(void)` |
-| `test_complete_split` | function | `tests/test_fb_cmdline.c:50` | `static void test_complete_split(void **state)` |
-| `test_filter` | function | `tests/test_fb_cmdline.c:98` | `static void test_filter(void **state)` |
-| `test_history_is_bounded_and_push_returns_to_live` | function | `tests/test_fb_cmdline.c:31` | `static void test_history_is_bounded_and_push_returns_to_live(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

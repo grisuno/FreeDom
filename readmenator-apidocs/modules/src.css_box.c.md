@@ -82,7 +82,7 @@ flowchart LR
 
 ### `calc_val`
 
-`struct` | [src/css_box.c:711](../../src/css_box.c#L711)
+`struct` | [src/css_box.c:731](../../src/css_box.c#L731)
 
 ```c
 typedef struct calc_val { double px; double em; double pct; int is_length; int bare0; } calc_val;
@@ -102,7 +102,7 @@ Under +/- it may stand for a length (lenient, like every engine's legacy path); 
 
 #### `calc_val.px`
 
-`type_alias` | [src/css_box.c:711](../../src/css_box.c#L711)
+`type_alias` | [src/css_box.c:731](../../src/css_box.c#L731)
 
 ```c
 typedef struct calc_val { double px;
@@ -118,7 +118,7 @@ Under +/- it may stand for a length (lenient, like every engine's legacy path); 
 
 ### `calc_parser`
 
-`struct` `const` | [src/css_box.c:712](../../src/css_box.c#L712)
+`struct` `const` | [src/css_box.c:732](../../src/css_box.c#L732)
 
 ```c
 typedef struct calc_parser { const char *s; size_t n, i; } calc_parser;
@@ -252,7 +252,7 @@ A unitless multiplier ("1.5" -> 150) or a percent ("160%" -> 160); "normal" is u
 
 ### `cb_interp_weight`
 
-`function` | [src/css_box.c:174](../../src/css_box.c#L174)
+`function` | [src/css_box.c:194](../../src/css_box.c#L194)
 
 ```c
 int cb_interp_weight(const char *v)
@@ -274,7 +274,7 @@ int cb_interp_weight(const char *v)
 
 ### `cb_interp_style`
 
-`function` | [src/css_box.c:183](../../src/css_box.c#L183)
+`function` | [src/css_box.c:203](../../src/css_box.c#L203)
 
 ```c
 int cb_interp_style(const char *v)
@@ -296,7 +296,7 @@ int cb_interp_style(const char *v)
 
 ### `cb_interp_textdeco`
 
-`function` | [src/css_box.c:193](../../src/css_box.c#L193)
+`function` | [src/css_box.c:213](../../src/css_box.c#L213)
 
 ```c
 int cb_interp_textdeco(const char *v)
@@ -322,7 +322,7 @@ text-decoration / text-decoration-line: OR of the line keywords underline / over
 
 ### `cb_interp_display`
 
-`function` | [src/css_box.c:213](../../src/css_box.c#L213)
+`function` | [src/css_box.c:233](../../src/css_box.c#L233)
 
 ```c
 int cb_interp_display(const char *v)
@@ -344,7 +344,7 @@ int cb_interp_display(const char *v)
 
 ### `cb_interp_gap`
 
-`function` | [src/css_box.c:288](../../src/css_box.c#L288)
+`function` | [src/css_box.c:308](../../src/css_box.c#L308)
 
 ```c
 int cb_interp_gap(const char *v)
@@ -370,7 +370,7 @@ Reuses interp_len (px / em / rem / bare 0 / calc() / math functions), so a `gap:
 
 ### `cb_interp_justify`
 
-`function` | [src/css_box.c:295](../../src/css_box.c#L295)
+`function` | [src/css_box.c:315](../../src/css_box.c#L315)
 
 ```c
 int cb_interp_justify(const char *v)
@@ -392,7 +392,7 @@ int cb_interp_justify(const char *v)
 
 ### `repeat`
 
-`function` | [src/css_box.c:316](../../src/css_box.c#L316)
+`function` | [src/css_box.c:336](../../src/css_box.c#L336)
 
 ```c
 * repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) / repeat(auto-fit|...) need an available width this pure * parser does not have, so they fail the W
@@ -413,7 +413,7 @@ int cb_interp_justify(const char *v)
 
 ### `cb_expand_grid_template_cols`
 
-`function` | [src/css_box.c:598](../../src/css_box.c#L598)
+`function` | [src/css_box.c:618](../../src/css_box.c#L618)
 
 ```c
 int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)
@@ -439,7 +439,7 @@ grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track size
 
 ### `cb_expand_grid_template_rows`
 
-`function` | [src/css_box.c:621](../../src/css_box.c#L621)
+`function` | [src/css_box.c:641](../../src/css_box.c#L641)
 
 ```c
 int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)
@@ -463,7 +463,7 @@ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)
 
 ### `accepts`
 
-`function` | [src/css_box.c:681](../../src/css_box.c#L681)
+`function` | [src/css_box.c:701](../../src/css_box.c#L701)
 
 ```c
 * itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further than interp_len already can). Bounded: * the whole expression already lives inside o
@@ -484,7 +484,7 @@ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)
 
 ### `min`
 
-`function` | [src/css_box.c:782](../../src/css_box.c#L782)
+`function` | [src/css_box.c:802](../../src/css_box.c#L802)
 
 ```c
 * without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the element to zero width. Dropping the declaration * leaves the element at its content size,
@@ -505,7 +505,7 @@ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)
 
 ### `cb_interp_len`
 
-`function` | [src/css_box.c:1008](../../src/css_box.c#L1008)
+`function` | [src/css_box.c:1028](../../src/css_box.c#L1028)
 
 ```c
 int cb_interp_len(const char *v, int allow_auto, int *out)
@@ -531,7 +531,7 @@ int cb_interp_len(const char *v, int allow_auto, int *out)
 
 ### `cb_value_em_milli`
 
-`function` | [src/css_box.c:1087](../../src/css_box.c#L1087)
+`function` | [src/css_box.c:1107](../../src/css_box.c#L1107)
 
 ```c
 int cb_value_em_milli(const char *v)
@@ -564,7 +564,7 @@ its own sum via calc_eval; a bare token answers through cl_resolve_lp.
 
 ### `cb_clip_inset`
 
-`function` | [src/css_box.c:1107](../../src/css_box.c#L1107)
+`function` | [src/css_box.c:1127](../../src/css_box.c#L1127)
 
 ```c
 int cb_clip_inset(const char *val, int px[4], int pm[4])
@@ -588,7 +588,7 @@ int cb_clip_inset(const char *val, int px[4], int pm[4])
 
 ### `cb_interp_lp`
 
-`function` | [src/css_box.c:1141](../../src/css_box.c#L1141)
+`function` | [src/css_box.c:1161](../../src/css_box.c#L1161)
 
 ```c
 int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm)
@@ -616,7 +616,7 @@ int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int 
 
 ### `term`
 
-`function` | [src/css_box.c:1148](../../src/css_box.c#L1148)
+`function` | [src/css_box.c:1168](../../src/css_box.c#L1168)
 
 ```c
 * the same expression and failed closed on the percentage term (its property * may not accept one);
@@ -636,7 +636,7 @@ int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int 
 
 ### `interp_len`
 
-`function` | [src/css_box.c:1317](../../src/css_box.c#L1317)
+`function` | [src/css_box.c:1337](../../src/css_box.c#L1337)
 
 ```c
 * this file that might hand a token to interp_len (transitively: margin/padding/ * inset, flex-basis, border/outline width, text-shadow/box-shadow offsets) uses * this helper, so calc() works uniformly instead of only in single-value * properties. Returns 0 (tok untouched) when there is nothing left to read. */ int cb_next_ws_token(const char **p, char *tok, size_t cap)
@@ -663,7 +663,7 @@ int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int 
 
 ### `cb_expand_box2`
 
-`function` | [src/css_box.c:1388](../../src/css_box.c#L1388)
+`function` | [src/css_box.c:1408](../../src/css_box.c#L1408)
 
 ```c
 int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int cap)
@@ -697,7 +697,7 @@ Fail closed on zero, more than two, or any uninterpretable token.
 
 ### `CSS_CALC_MAX_DEPTH`
 
-`macro` | [src/css_box.c:689](../../src/css_box.c#L689)
+`macro` | [src/css_box.c:709](../../src/css_box.c#L709)
 
 ```c
 #define CSS_CALC_MAX_DEPTH
@@ -722,7 +722,7 @@ bare-number side; / requires a bare-number, non-zero divisor. A bare-number
 
 ### `CSS_MATHFN_MAX_ARGS`
 
-`macro` | [src/css_box.c:693](../../src/css_box.c#L693)
+`macro` | [src/css_box.c:713](../../src/css_box.c#L713)
 
 ```c
 #define CSS_MATHFN_MAX_ARGS
@@ -738,7 +738,7 @@ More fail the declaration (anti-DoS; the whole value already fits one CSS_TOK_MA
 
 ### `AUTO_REJECT`
 
-`macro` | [src/css_box.c:1214](../../src/css_box.c#L1214)
+`macro` | [src/css_box.c:1234](../../src/css_box.c#L1234)
 
 ```c
 #define AUTO_REJECT
@@ -761,7 +761,7 @@ before) left the 200px in place. 90 declarations in the measured corpus.
 
 ### `AUTO_VALUE`
 
-`macro` | [src/css_box.c:1215](../../src/css_box.c#L1215)
+`macro` | [src/css_box.c:1235](../../src/css_box.c#L1235)
 
 ```c
 #define AUTO_VALUE
@@ -775,7 +775,7 @@ before) left the 200px in place. 90 declarations in the measured corpus.
 
 ### `AUTO_RESET`
 
-`macro` | [src/css_box.c:1216](../../src/css_box.c#L1216)
+`macro` | [src/css_box.c:1236](../../src/css_box.c#L1236)
 
 ```c
 #define AUTO_RESET
@@ -789,7 +789,7 @@ before) left the 200px in place. 90 declarations in the measured corpus.
 
 ### `AUTO_RESET_NONE`
 
-`macro` | [src/css_box.c:1220](../../src/css_box.c#L1220)
+`macro` | [src/css_box.c:1240](../../src/css_box.c#L1240)
 
 ```c
 #define AUTO_RESET_NONE

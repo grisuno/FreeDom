@@ -3,23 +3,28 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `prepare_fetch` | function | `gui/browser_ui.c:1906` | `static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,                     ...` |
+| `presentation` | function | `gui/browser_ui.c:16595` | `* affect presentation (a repaint, which re-runs layout, suffices);` |
+| `proceed` | function | `gui/browser_ui.c:1903` | `* may proceed (cfg and pr->allowlisted are then set);` |
+| `produced` | function | `gui/browser_ui.c:4567` | `* href tags every fragment produced (NULL for non-link runs) so a later hit-test * can recover the click target...` |
+| `profile_sync` | function | `gui/browser_ui.c:1037` | `static void profile_sync(browser_window *w)` |
 | `proxy` | function | `gui/browser_ui.c:1097` | `* and enable each proxy ("1" => the default port);` |
 | `proxy_addr_from_env` | function | `gui/browser_ui.c:1086` | `static int proxy_addr_from_env(const char *envname, const char *deflt,                           ...` |
-| `ptr_axis` | function | `gui/browser_ui.c:18475` | `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,                      uint32...` |
-| `ptr_button` | function | `gui/browser_ui.c:18222` | `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,               ...` |
-| `ptr_enter` | function | `gui/browser_ui.c:18104` | `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,                       struct wl_...` |
-| `ptr_frame` | function | `gui/browser_ui.c:18499` | `static void ptr_frame(void *d, struct wl_pointer *p)` |
-| `ptr_leave` | function | `gui/browser_ui.c:18122` | `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)` |
-| `ptr_motion` | function | `gui/browser_ui.c:18139` | `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)` |
-| `publish_geometry` | function | `gui/browser_ui.c:14278` | `static void publish_geometry(browser_window *w, const rc_layout *L, double left,                 ...` |
+| `ptr_axis` | function | `gui/browser_ui.c:18616` | `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,                      uint32...` |
+| `ptr_button` | function | `gui/browser_ui.c:18363` | `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,               ...` |
+| `ptr_enter` | function | `gui/browser_ui.c:18245` | `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,                       struct wl_...` |
+| `ptr_frame` | function | `gui/browser_ui.c:18640` | `static void ptr_frame(void *d, struct wl_pointer *p)` |
+| `ptr_leave` | function | `gui/browser_ui.c:18263` | `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)` |
+| `ptr_motion` | function | `gui/browser_ui.c:18280` | `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)` |
+| `publish_geometry` | function | `gui/browser_ui.c:14419` | `static void publish_geometry(browser_window *w, const rc_layout *L, double left,                 ...` |
 | `rc_add_box` | function | `gui/browser_ui.c:3953` | `static rc_box *rc_add_box(rc_layout *L)` |
 | `rc_add_frag` | function | `gui/browser_ui.c:3965` | `static rc_frag *rc_add_frag(rc_layout *L)` |
 | `rc_add_row` | function | `gui/browser_ui.c:3980` | `static rc_row *rc_add_row(rc_layout *L)` |
 | `rc_box` | struct | `gui/browser_ui.c:3527` | `` |
-| `rc_box_context` | function | `gui/browser_ui.c:7647` | `static void rc_box_context(const rc_state *s, double content_w,                            double...` |
+| `rc_box_context` | function | `gui/browser_ui.c:7681` | `static void rc_box_context(const rc_state *s, double content_w,                            double...` |
 | `rc_box_copy_decoration` | function | `gui/browser_ui.c:5493` | `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)` |
-| `rc_defer` | struct | `gui/browser_ui.c:8512` | `` |
-| `rc_defer_col` | struct | `gui/browser_ui.c:8505` | `` |
+| `rc_defer` | struct | `gui/browser_ui.c:8546` | `` |
+| `rc_defer_col` | struct | `gui/browser_ui.c:8539` | `` |
 | `rc_ext` | struct | `gui/browser_ui.c:4438` | `` |
 | `rc_float_bottom` | function | `gui/browser_ui.c:3838` | `static double rc_float_bottom(const rc_state *s)` |
 | `rc_float_clear` | function | `gui/browser_ui.c:3847` | `static void rc_float_clear(rc_state *s)` |
@@ -35,77 +40,77 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `rc_row` | struct | `gui/browser_ui.c:3504` | `` |
 | `rc_rowkind` | enum | `gui/browser_ui.c:3502` | `` |
 | `rc_state` | struct | `gui/browser_ui.c:3740` | `` |
-| `rd_build` | function | `gui/browser_ui.c:10960` | `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr...` |
+| `rd_build` | function | `gui/browser_ui.c:11101` | `* rd_build (-1 = auto/off -> theme caret). */ if (b->caret_color >= 0 && !w->force_theme) set_rgb(cr...` |
 | `read_file` | function | `gui/browser_ui.c:746` | `static char *read_file(const char *path, size_t *out_len)` |
 | `rebuild_inputs` | function | `gui/browser_ui.c:1409` | `static void rebuild_inputs(browser_window *w)` |
-| `reconcile_boxes` | function | `gui/browser_ui.c:8299` | `static void reconcile_boxes(cairo_t *cr, const browser_window *w,                             rc_...` |
-| `reconcile_boxes_below` | function | `gui/browser_ui.c:8168` | `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,                          ...` |
-| `rect` | function | `gui/browser_ui.c:11946` | `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops...` |
-| `redraw` | function | `gui/browser_ui.c:17127` | `static void redraw(browser_window *w)` |
-| `redraws` | function | `gui/browser_ui.c:19616` | `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...` |
-| `reference` | function | `gui/browser_ui.c:15774` | `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:  * hostile content...` |
-| `refresh_frame_images` | function | `gui/browser_ui.c:15240` | `static void refresh_frame_images(browser_window *w)` |
-| `registry_global` | function | `gui/browser_ui.c:19430` | `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,                  ...` |
-| `registry_remove` | function | `gui/browser_ui.c:19450` | `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)` |
+| `reconcile_boxes` | function | `gui/browser_ui.c:8333` | `static void reconcile_boxes(cairo_t *cr, const browser_window *w,                             rc_...` |
+| `reconcile_boxes_below` | function | `gui/browser_ui.c:8202` | `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,                          ...` |
+| `rect` | function | `gui/browser_ui.c:12087` | `* across rect (x,y,w,h): the gradient line runs through the rect center, long * enough that the first/last stops...` |
+| `redraw` | function | `gui/browser_ui.c:17268` | `static void redraw(browser_window *w)` |
+| `redraws` | function | `gui/browser_ui.c:19757` | `* so a large page with frequent redraws (spinner, JS ticks, video frames) * never hits "Data too big for buffer". A...` |
+| `reference` | function | `gui/browser_ui.c:15915` | `* reference (downgrade, foreign scheme, no resolvable base) navigates nowhere:  * hostile content...` |
+| `refresh_frame_images` | function | `gui/browser_ui.c:15381` | `static void refresh_frame_images(browser_window *w)` |
+| `registry_global` | function | `gui/browser_ui.c:19571` | `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,                  ...` |
+| `registry_remove` | function | `gui/browser_ui.c:19591` | `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)` |
 | `reload_host_list` | function | `gui/browser_ui.c:887` | `static void reload_host_list(browser_window *w, int sel)` |
 | `remember_visit` | function | `gui/browser_ui.c:1054` | `static void remember_visit(browser_window *w, const char *url)` |
 | `render_current` | function | `gui/browser_ui.c:2718` | `static void render_current(browser_window *w)` |
 | `render_current_ex` | function | `gui/browser_ui.c:2537` | `static void render_current_ex(browser_window *w, int allow_js_nav)` |
-| `render_doc_images` | function | `gui/browser_ui.c:15375` | `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,               ...` |
-| `render_frame_surface` | function | `gui/browser_ui.c:15141` | `static cairo_surface_t *render_frame_surface(const pv_view *view, tab *ft, const char *url,      ...` |
+| `render_doc_images` | function | `gui/browser_ui.c:15516` | `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,               ...` |
+| `render_frame_surface` | function | `gui/browser_ui.c:15282` | `static cairo_surface_t *render_frame_surface(const pv_view *view, tab *ft, const char *url,      ...` |
 | `repl_edges` | struct | `gui/browser_ui.c:1251` | `` |
 | `repl_edges_x` | function | `gui/browser_ui.c:1282` | `static double repl_edges_x(const repl_edges *e)` |
 | `repl_edges_y` | function | `gui/browser_ui.c:1286` | `static double repl_edges_y(const repl_edges *e)` |
-| `replaced_current_color` | function | `gui/browser_ui.c:12586` | `static int replaced_current_color(const browser_window *w, const rd_block *blk)` |
+| `replaced_current_color` | function | `gui/browser_ui.c:12727` | `static int replaced_current_color(const browser_window *w, const rd_block *blk)` |
 | `replaced_edges` | function | `gui/browser_ui.c:1258` | `static repl_edges replaced_edges(const rd_doc *doc, const rd_block *b, double cb_w)` |
 | `replaced_inline_size` | function | `gui/browser_ui.c:4913` | `static int replaced_inline_size(cairo_t *cr, const browser_window *w, const ui_theme *th,        ...` |
 | `replaced_is_inline_level` | function | `gui/browser_ui.c:4945` | `static int replaced_is_inline_level(const rc_state *s, const rd_block *b)` |
-| `resizes` | function | `gui/browser_ui.c:17180` | `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);` |
+| `resizes` | function | `gui/browser_ui.c:17321` | `* when the window resizes (a no-op for the other modes). */ if (w->reader) apply_theme(w);` |
 | `resolve` | function | `gui/browser_ui.c:2948` | `* origin so its relative references and local images resolve (confined to the * document's directory) -- a local...` |
-| `resolve_box_cursor` | function | `gui/browser_ui.c:15598` | `static int resolve_box_cursor(const rd_doc *doc, int block_id)` |
-| `root_cont_in` | function | `gui/browser_ui.c:6251` | `static int root_cont_in(const rd_doc *doc, int cid, int float_box)` |
-| `root_cont_of` | function | `gui/browser_ui.c:6223` | `static int root_cont_of(const rd_doc *doc, int cid)` |
+| `resolve_box_cursor` | function | `gui/browser_ui.c:15739` | `static int resolve_box_cursor(const rd_doc *doc, int block_id)` |
+| `root_cont_in` | function | `gui/browser_ui.c:6285` | `static int root_cont_in(const rd_doc *doc, int cid, int float_box)` |
+| `root_cont_of` | function | `gui/browser_ui.c:6257` | `static int root_cont_of(const rd_doc *doc, int cid)` |
 | `row` | function | `gui/browser_ui.c:5762` | `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */ static d...` |
-| `row_align_offset` | function | `gui/browser_ui.c:11792` | `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` |
-| `row_line_slack` | function | `gui/browser_ui.c:11780` | `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)` |
-| `row_owner_block_id` | function | `gui/browser_ui.c:12561` | `static int row_owner_block_id(const rc_layout *L, const rc_row *r);` |
-| `rows` | function | `gui/browser_ui.c:12931` | `* RC_IMAGE rows (see its declaration);` |
-| `rule` | function | `gui/browser_ui.c:8443` | `* wrapper keeps the old rule (opened with the float's own column). */ const pv_box_def *wd = rd_box_at(doc...` |
+| `row_align_offset` | function | `gui/browser_ui.c:11933` | `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)` |
+| `row_line_slack` | function | `gui/browser_ui.c:11921` | `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)` |
+| `row_owner_block_id` | function | `gui/browser_ui.c:12702` | `static int row_owner_block_id(const rc_layout *L, const rc_row *r);` |
+| `rows` | function | `gui/browser_ui.c:13072` | `* RC_IMAGE rows (see its declaration);` |
+| `rule` | function | `gui/browser_ui.c:8477` | `* wrapper keeps the old rule (opened with the float's own column). */ const pv_box_def *wd = rd_box_at(doc...` |
 | `run` | function | `gui/browser_ui.c:4269` | `* continuation run (block_id < 0 with no block break) deliberately skips reconcile  * to stay on ...` |
 | `run_is_content` | function | `gui/browser_ui.c:5370` | `static int run_is_content(const rd_block *bk)` |
-| `run_width_cap` | function | `gui/browser_ui.c:5959` | `static double run_width_cap(const rd_block *b, double avail_w)` |
-| `save_current_page` | function | `gui/browser_ui.c:16228` | `static void save_current_page(browser_window *w)` |
-| `save_download` | function | `gui/browser_ui.c:16195` | `static void save_download(browser_window *w, const char *url, const char *bytes,                 ...` |
-| `saving` | function | `gui/browser_ui.c:19522` | `* disables saving (never clobber);` |
+| `run_width_cap` | function | `gui/browser_ui.c:5993` | `static double run_width_cap(const rd_block *b, double avail_w)` |
+| `save_current_page` | function | `gui/browser_ui.c:16369` | `static void save_current_page(browser_window *w)` |
+| `save_download` | function | `gui/browser_ui.c:16336` | `static void save_download(browser_window *w, const char *url, const char *bytes,                 ...` |
+| `saving` | function | `gui/browser_ui.c:19663` | `* disables saving (never clobber);` |
 | `schedule_js_tick` | function | `gui/browser_ui.c:2527` | `static void schedule_js_tick(browser_window *w, int next_ms)` |
-| `screen_flow_ctx` | struct | `gui/browser_ui.c:14406` | `` |
-| `scroll_line_px` | function | `gui/browser_ui.c:18471` | `static double scroll_line_px(const browser_window *w)` |
+| `screen_flow_ctx` | struct | `gui/browser_ui.c:14547` | `` |
+| `scroll_line_px` | function | `gui/browser_ui.c:18612` | `static double scroll_line_px(const browser_window *w)` |
 | `scrollbar_drag_to` | function | `gui/browser_ui.c:3285` | `static void scrollbar_drag_to(browser_window *w)` |
 | `scrollbar_metrics` | function | `gui/browser_ui.c:3257` | `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,          ...` |
-| `seat_caps` | function | `gui/browser_ui.c:19412` | `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` |
-| `seat_name` | function | `gui/browser_ui.c:19423` | `static void seat_name(void *d, struct wl_seat *s, const char *name)` |
+| `seat_caps` | function | `gui/browser_ui.c:19553` | `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` |
+| `seat_name` | function | `gui/browser_ui.c:19564` | `static void seat_name(void *d, struct wl_seat *s, const char *name)` |
 | `secure_fetch` | function | `gui/browser_ui.c:2157` | `* through secure_fetch (Zero Trust);` |
 | `seed_local_storage` | function | `gui/browser_ui.c:2456` | `static void seed_local_storage(browser_window *w, tab *t, int trusted)` |
 | `seed_session_cookies` | function | `gui/browser_ui.c:2432` | `static void seed_session_cookies(tab *t, int trusted, const char *url)` |
-| `select_box_width` | function | `gui/browser_ui.c:10521` | `static double select_box_width(double content_w)` |
+| `select_box_width` | function | `gui/browser_ui.c:10662` | `static double select_box_width(double content_w)` |
 | `set_cache` | function | `gui/browser_ui.c:1453` | `static void set_cache(browser_window *w, char *html, size_t len, const char *top)` |
-| `set_cursor` | function | `gui/browser_ui.c:17215` | `static void set_cursor(browser_window *w, int cur_kind)` |
-| `set_page_url` | function | `gui/browser_ui.c:15793` | `static void set_page_url(browser_window *w, const char *url)` |
-| `set_rgb` | function | `gui/browser_ui.c:12425` | `set_rgb(cr, (ui_rgb)` |
+| `set_cursor` | function | `gui/browser_ui.c:17356` | `static void set_cursor(browser_window *w, int cur_kind)` |
+| `set_page_url` | function | `gui/browser_ui.c:15934` | `static void set_page_url(browser_window *w, const char *url)` |
+| `set_rgb` | function | `gui/browser_ui.c:12566` | `set_rgb(cr, (ui_rgb)` |
 | `set_rgb_alpha` | function | `gui/browser_ui.c:4043` | `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)` |
-| `sf_ws_url_check` | function | `gui/browser_ui.c:15876` | `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 &&...` |
+| `sf_ws_url_check` | function | `gui/browser_ui.c:16017` | `&& sf_ws_url_check(op->data) == SF_OK && rp_host_of(op->data, host, sizeof host) == 0 &&...` |
 | `show_busy` | function | `gui/browser_ui.c:2725` | `static void show_busy(browser_window *w)` |
 | `show_fetch_error` | function | `gui/browser_ui.c:2734` | `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,                   ...` |
 | `sites` | function | `gui/browser_ui.c:4027` | `* sites (wfh 0, local 0) get the bucket face, which is the toy face's twin. */     if (wfh != 0u ...` |
-| `slot` | function | `gui/browser_ui.c:6592` | `* layout slot (item 0 → rightmost, last item → leftmost). */     if (use_flex && cdv.direction ==...` |
+| `slot` | function | `gui/browser_ui.c:6626` | `* layout slot (item 0 → rightmost, last item → leftmost). */     if (use_flex && cdv.direction ==...` |
 | `smaller` | function | `gui/browser_ui.c:3553` | `* size when the content is smaller (height) or wider (min-width);` |
-| `spaced` | function | `gui/browser_ui.c:12025` | `* or evenly spaced (bui_grad_color_at). */ static void bui_paint_conic(cairo_t *cr, double x, dou...` |
-| `standalone` | function | `gui/browser_ui.c:9848` | `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */...` |
-| `startup_abort_release` | function | `gui/browser_ui.c:19491` | `static void startup_abort_release(browser_window *w)` |
+| `spaced` | function | `gui/browser_ui.c:12166` | `* or evenly spaced (bui_grad_color_at). */ static void bui_paint_conic(cairo_t *cr, double x, dou...` |
+| `standalone` | function | `gui/browser_ui.c:9989` | `* must not be treated as standalone (which would flush that line and give * the element a row of its own -- R7). */...` |
+| `startup_abort_release` | function | `gui/browser_ui.c:19632` | `static void startup_abort_release(browser_window *w)` |
 | `strcmp` | function | `gui/browser_ui.c:2914` | `&& strcmp(auth_host_buf, w->auth_host) != 0)` |
 | `stream_progress_cb` | function | `gui/browser_ui.c:2031` | `static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata)` |
 | `string` | function | `gui/browser_ui.c:2325` | `* or an empty string (unset, blocked, or off by caps.images), so there is no * decision to re-check, unlike...` |
-| `struct` | function | `gui/browser_ui.c:6738` | `* struct (0 = auto);` |
+| `struct` | function | `gui/browser_ui.c:6772` | `* struct (0 = auto);` |
 | `styled_advance` | function | `gui/browser_ui.c:4105` | `static double styled_advance(cairo_t *cr, const rc_frag *f)` |
 | `styled_draw` | function | `gui/browser_ui.c:4127` | `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)` |
 | `stylesheets` | function | `gui/browser_ui.c:2557` | `* External stylesheets (Hito 27) follow the author-styles opt-in -- or the * trusted-host doctrine (Hito 28)...` |
@@ -119,57 +124,57 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `tab_title` | function | `gui/browser_ui.c:3158` | `static const char *tab_title(const browser_window *w, int i)` |
 | `tabbar_top` | function | `gui/browser_ui.c:3174` | `static double tabbar_top(const browser_window *w)` |
 | `table` | function | `gui/browser_ui.c:5697` | `* synthesised table (no descriptors to disagree) keeps the stamp. */         if (cd != NULL && !c...` |
-| `text` | function | `gui/browser_ui.c:11950` | `* fill and gradient text (2026-07-19). */ static cairo_pattern_t *bui_linear_grad(double x, doubl...` |
-| `the` | function | `gui/browser_ui.c:13604` | `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...` |
+| `text` | function | `gui/browser_ui.c:12091` | `* fill and gradient text (2026-07-19). */ static cairo_pattern_t *bui_linear_grad(double x, doubl...` |
+| `the` | function | `gui/browser_ui.c:13745` | `* the (already filtered) group with the shadow color, blur it, and * paint it under the group at the declared offset...` |
 | `them` | function | `gui/browser_ui.c:5433` | `* to them (jkanime's badge-only tiles keep their box). */ static int item_root_box_in(const rd_do...` |
 | `toggle` | function | `gui/browser_ui.c:2401` | `* No network: a capability toggle (images/CSS) re-renders from cache. Does nothing * when there is no cached source...` |
 | `toggle_fullscreen` | function | `gui/browser_ui.c:1158` | `static void toggle_fullscreen(browser_window *w)` |
-| `toggle_reader` | function | `gui/browser_ui.c:16423` | `static void toggle_reader(browser_window *w)` |
+| `toggle_reader` | function | `gui/browser_ui.c:16564` | `static void toggle_reader(browser_window *w)` |
 | `toolbar_button_at` | function | `gui/browser_ui.c:3364` | `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)` |
 | `toolbar_rects` | function | `gui/browser_ui.c:3349` | `static void toolbar_rects(const browser_window *w,                           double *back_x, doub...` |
 | `toolbar_top` | function | `gui/browser_ui.c:3180` | `static double toolbar_top(const browser_window *w)` |
-| `toplevel_close` | function | `gui/browser_ui.c:17194` | `static void toplevel_close(void *data, struct xdg_toplevel *t)` |
-| `toplevel_configure` | function | `gui/browser_ui.c:17172` | `static void toplevel_configure(void *data, struct xdg_toplevel *t,                               ...` |
-| `treatment` | function | `gui/browser_ui.c:8219` | `* block treatment (shrink-wrapped and placed by text-align), which is what a * standalone centred call-to-action...` |
+| `toplevel_close` | function | `gui/browser_ui.c:17335` | `static void toplevel_close(void *data, struct xdg_toplevel *t)` |
+| `toplevel_configure` | function | `gui/browser_ui.c:17313` | `static void toplevel_configure(void *data, struct xdg_toplevel *t,                               ...` |
+| `treatment` | function | `gui/browser_ui.c:8253` | `* block treatment (shrink-wrapped and placed by text-align), which is what a * standalone centred call-to-action...` |
 | `ua_box_rect` | function | `gui/browser_ui.c:3407` | `static void ua_box_rect(const browser_window *w, double *x, double *y,                         do...` |
 | `ui_bg_image` | struct | `gui/browser_ui.c:278` | `` |
-| `ui_dump_layout` | function | `gui/browser_ui.c:15435` | `ui_status ui_dump_layout(const rd_doc *doc)` |
+| `ui_dump_layout` | function | `gui/browser_ui.c:15576` | `ui_status ui_dump_layout(const rd_doc *doc)` |
 | `ui_hot` | enum | `gui/browser_ui.c:232` | `` |
 | `ui_image` | struct | `gui/browser_ui.c:264` | `` |
 | `ui_input_state` | struct | `gui/browser_ui.c:239` | `` |
 | `ui_menu_action` | enum | `gui/browser_ui.c:182` | `` |
 | `ui_menu_item` | struct | `gui/browser_ui.c:200` | `` |
-| `ui_render_pdf_images` | function | `gui/browser_ui.c:15420` | `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
-| `ui_render_png` | function | `gui/browser_ui.c:15315` | `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` |
-| `ui_render_png_frames` | function | `gui/browser_ui.c:15414` | `ui_status ui_render_png_frames(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
-| `ui_render_png_images` | function | `gui/browser_ui.c:15408` | `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
-| `ui_render_viewport_w` | function | `gui/browser_ui.c:14951` | `int ui_render_viewport_w(void)` |
-| `ui_run_browser` | function | `gui/browser_ui.c:19500` | `ui_status ui_run_browser(const char *start_url)` |
+| `ui_render_pdf_images` | function | `gui/browser_ui.c:15561` | `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
+| `ui_render_png` | function | `gui/browser_ui.c:15456` | `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)` |
+| `ui_render_png_frames` | function | `gui/browser_ui.c:15555` | `ui_status ui_render_png_frames(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
+| `ui_render_png_images` | function | `gui/browser_ui.c:15549` | `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,                   ...` |
+| `ui_render_viewport_w` | function | `gui/browser_ui.c:15092` | `int ui_render_viewport_w(void)` |
+| `ui_run_browser` | function | `gui/browser_ui.c:19641` | `ui_status ui_run_browser(const char *start_url)` |
 | `ui_set_operator_insecure` | function | `gui/browser_ui.c:1582` | `void ui_set_operator_insecure(int on)` |
 | `uitab_close` | function | `gui/browser_ui.c:3109` | `static void uitab_close(browser_window *w, int idx)` |
-| `upstream` | function | `gui/browser_ui.c:11820` | `* upstream (see spec/css.md). */ static void box_path4(cairo_t *cr, double x, double y, double w,...` |
+| `upstream` | function | `gui/browser_ui.c:11961` | `* upstream (see spec/css.md). */ static void box_path4(cairo_t *cr, double x, double y, double w,...` |
 | `utf8_clen` | function | `gui/browser_ui.c:4052` | `static size_t utf8_clen(const char *s, size_t n)` |
-| `v_read` | function | `gui/browser_ui.c:11173` | `static int v_read(int fd, void *buf, size_t n)` |
+| `v_read` | function | `gui/browser_ui.c:11314` | `static int v_read(int fd, void *buf, size_t n)` |
 | `video_feeder_thread` | function | `gui/browser_ui.c:1153` | `static void *video_feeder_thread(void *arg);` |
-| `video_fetch` | function | `gui/browser_ui.c:11495` | `static sf_status video_fetch(const char *url, browser_window *w,                               sf...` |
-| `video_play` | function | `gui/browser_ui.c:11512` | `static int video_play(browser_window *w, const char *m3u8_url)` |
-| `video_stop` | function | `gui/browser_ui.c:11316` | `static void video_stop(browser_window *w)` |
-| `video_stop` | function | `gui/browser_ui.c:11614` | `* each segment loop so a video_stop() in the main thread (which sets it to 0  * then calls pthrea...` |
+| `video_fetch` | function | `gui/browser_ui.c:11636` | `static sf_status video_fetch(const char *url, browser_window *w,                               sf...` |
+| `video_play` | function | `gui/browser_ui.c:11653` | `static int video_play(browser_window *w, const char *m3u8_url)` |
+| `video_stop` | function | `gui/browser_ui.c:11457` | `static void video_stop(browser_window *w)` |
+| `video_stop` | function | `gui/browser_ui.c:11755` | `* each segment loop so a video_stop() in the main thread (which sets it to 0  * then calls pthrea...` |
 | `way` | function | `gui/browser_ui.c:5807` | `* intrinsic box either way (it does not wrap below its own size). */ static int block_leaves_flow(const rd_doc *doc...` |
-| `wc_render_caps` | function | `gui/browser_ui.c:15943` | `return wc_render_caps(wc_derive((wc_input)` |
-| `width` | function | `gui/browser_ui.c:8819` | `* box width (an inline-block icon `width:12px` inside the float) is * not the float's. */ double t =...` |
-| `widths` | function | `gui/browser_ui.c:12303` | `* the outer minus the adjacent border widths (CSS Backgrounds 3 5.2). The straight      * per-sid...` |
+| `wc_render_caps` | function | `gui/browser_ui.c:16084` | `return wc_render_caps(wc_derive((wc_input)` |
+| `width` | function | `gui/browser_ui.c:5860` | `* the line: the layout spends its width (reconcile_boxes_below), so the * measure must too, or the label wraps...` |
+| `widths` | function | `gui/browser_ui.c:12444` | `* the outer minus the adjacent border widths (CSS Backgrounds 3 5.2). The straight      * per-sid...` |
 | `window_button_rects` | function | `gui/browser_ui.c:3339` | `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...` |
-| `wins` | function | `gui/browser_ui.c:7540` | `* content taller than the ratio still wins (min-height:auto). */         if (bx->aspect_num > 0 &...` |
-| `wl_array_for_each` | function | `gui/browser_ui.c:17188` | `wl_array_for_each(st, states)` |
-| `wm_base_ping` | function | `gui/browser_ui.c:17158` | `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` |
-| `write_doc_pdf` | function | `gui/browser_ui.c:14787` | `static long write_doc_pdf(browser_window *w, const char *path)` |
-| `write_doc_png` | function | `gui/browser_ui.c:15129` | `static long write_doc_png(browser_window *w, const char *path)` |
-| `write_file_atomic` | function | `gui/browser_ui.c:16173` | `static int write_file_atomic(const char *path, const void *bytes, size_t len)` |
-| `ws_apply_ops` | function | `gui/browser_ui.c:15866` | `static void ws_apply_ops(browser_window *w, const tab_page *page)` |
-| `x` | function | `gui/browser_ui.c:8868` | `* reported x is already the BORDER x (the §7c.2 rule);` |
-| `xdg_surface_configure` | function | `gui/browser_ui.c:17164` | `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)` |
-| `yet` | function | `gui/browser_ui.c:9549` | `* does not carry yet (WPT flex-abspos-staticpos-*). */ static int runs_share_float(const rd_doc *...` |
+| `wins` | function | `gui/browser_ui.c:7574` | `* content taller than the ratio still wins (min-height:auto). */         if (bx->aspect_num > 0 &...` |
+| `wl_array_for_each` | function | `gui/browser_ui.c:17329` | `wl_array_for_each(st, states)` |
+| `wm_base_ping` | function | `gui/browser_ui.c:17299` | `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` |
+| `write_doc_pdf` | function | `gui/browser_ui.c:14928` | `static long write_doc_pdf(browser_window *w, const char *path)` |
+| `write_doc_png` | function | `gui/browser_ui.c:15270` | `static long write_doc_png(browser_window *w, const char *path)` |
+| `write_file_atomic` | function | `gui/browser_ui.c:16314` | `static int write_file_atomic(const char *path, const void *bytes, size_t len)` |
+| `ws_apply_ops` | function | `gui/browser_ui.c:16007` | `static void ws_apply_ops(browser_window *w, const tab_page *page)` |
+| `x` | function | `gui/browser_ui.c:8986` | `* reported x is already the BORDER x (the §7c.2 rule);` |
+| `xdg_surface_configure` | function | `gui/browser_ui.c:17305` | `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)` |
+| `yet` | function | `gui/browser_ui.c:9678` | `* does not carry yet (WPT flex-abspos-staticpos-*). */ static int runs_share_float(const rd_doc *...` |
 | `FREEDOM_BROWSER_UI_INTERNAL_H` | macro | `gui/browser_ui_internal.h:2` | `#define FREEDOM_BROWSER_UI_INTERNAL_H` |
 | `UI_FONT_SIZE` | macro | `gui/browser_ui_internal.h:30` | `#define UI_FONT_SIZE` |
 | `UI_HEADING_LEVELS` | macro | `gui/browser_ui_internal.h:32` | `#define UI_HEADING_LEVELS` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS.md](SYMBOLS.md)
 | `css_white_space` | enum | `include/css.h:136` | `` |
 | `css_word_break` | enum | `include/css.h:260` | `` |
 | `cvr_table` | struct | `include/css.h:1202` | `` |
-| `declared` | function | `include/css.h:886` | `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...` |
-| `element` | function | `include/css.h:891` | `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...` |
-| `family` | function | `include/css.h:710` | `* LOCAL family (spec/text_shape.md section 7);` |
-| `inherited_px` | function | `include/css.h:1226` | `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...` |
-| `name` | function | `include/css.h:1243` | `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...` |
 
 Next: [SYMBOLS_p3.md](SYMBOLS_p3.md)

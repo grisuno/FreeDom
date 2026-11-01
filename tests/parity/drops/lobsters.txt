@@ -1,7 +1,6 @@
 Lobsters
-CSS drops: 6 declaration(s) dropped, 4 distinct
+CSS drops: 5 declaration(s) dropped, 3 distinct
   count  cause         property                     first value
       3  bad-value     list-style                   '🕮'
       1  unknown-prop  -webkit-text-stroke          1px rgb(172 19 13)
-      1  bad-value     outline                      auto
       1  bad-value     margin-left                  calc(....10px +    ....18px +    ....0.25rem +  ....0.25rem    ...)

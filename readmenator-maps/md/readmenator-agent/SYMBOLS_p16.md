@@ -3,6 +3,21 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_event_ipc_via_tab_eval` | function | `tests/test_tab.c:674` | `static void test_event_ipc_via_tab_eval(void **state)` |
+| `test_event_navigation_is_policy_gated` | function | `tests/test_tab.c:2442` | `static void test_event_navigation_is_policy_gated(void **state)` |
+| `test_external_css_applied_when_allowed` | function | `tests/test_tab.c:2036` | `static void test_external_css_applied_when_allowed(void **state)` |
+| `test_external_css_bad_ctype_not_parsed` | function | `tests/test_tab.c:2139` | `static void test_external_css_bad_ctype_not_parsed(void **state)` |
+| `test_external_css_blocked_host_refused` | function | `tests/test_tab.c:2157` | `static void test_external_css_blocked_host_refused(void **state)` |
+| `test_external_css_skipped_without_grant` | function | `tests/test_tab.c:2120` | `static void test_external_css_skipped_without_grant(void **state)` |
+| `test_external_css_survives_click_rederive` | function | `tests/test_tab.c:3162` | `static void test_external_css_survives_click_rederive(void **state)` |
+| `test_external_script_bad_ctype_not_executed` | function | `tests/test_tab.c:1963` | `static void test_external_script_bad_ctype_not_executed(void **state)` |
+| `test_external_script_blocked_host_refused` | function | `tests/test_tab.c:1980` | `static void test_external_script_blocked_host_refused(void **state)` |
+| `test_external_script_document_order` | function | `tests/test_tab.c:1916` | `static void test_external_script_document_order(void **state)` |
+| `test_external_script_executes_when_net_allowed` | function | `tests/test_tab.c:1899` | `static void test_external_script_executes_when_net_allowed(void **state)` |
+| `test_external_script_skipped_without_net` | function | `tests/test_tab.c:1939` | `static void test_external_script_skipped_without_net(void **state)` |
+| `test_first_visit_trusted_host_can_set_cookie` | function | `tests/test_tab.c:1203` | `static void test_first_visit_trusted_host_can_set_cookie(void **state)` |
+| `test_focus_ipc_round_trip` | function | `tests/test_tab.c:774` | `static void test_focus_ipc_round_trip(void **state)` |
+| `test_frames_absent_for_untrusted_host` | function | `tests/test_tab.c:2743` | `static void test_frames_absent_for_untrusted_host(void **state)` |
 | `test_frames_cross_the_worker` | function | `tests/test_tab.c:2706` | `static void test_frames_cross_the_worker(void **state)` |
 | `test_free_null_and_double` | function | `tests/test_tab.c:3330` | `static void test_free_null_and_double(void **state)` |
 | `test_geometry_never_reaches_untrusted_page` | function | `tests/test_tab.c:2269` | `static void test_geometry_never_reaches_untrusted_page(void **state)` |

@@ -3,6 +3,21 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `console_teardown` | function | `tests/test_js_dom.c:1178` | `static void console_teardown(hp_document *doc, dom_index *idx, js_context *ctx,                  ...` |
+| `fake_fetch` | function | `tests/test_js_dom.c:3224` | `static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,          ...` |
+| `fake_net` | struct | `tests/test_js_dom.c:3223` | `` |
+| `fixture` | struct | `tests/test_js_dom.c:44` | `` |
+| `geom_parent` | function | `tests/test_js_dom.c:1997` | `static dom_node_id geom_parent(void *ctx, dom_node_id n)` |
+| `handle_after` | function | `tests/test_js_dom.c:1801` | `static dom_node_id handle_after(fixture *f, const char *src)` |
+| `identity` | function | `tests/test_js_dom.c:706` | `* identity (the same one innerWidth and the CSS viewport units use);` |
+| `it` | function | `tests/test_js_dom.c:878` | `* itself no longer finds it (getElementById only answers with attached elements). */ assert_string_equal(r.value...` |
+| `jQuery` | function | `tests/test_js_dom.c:271` | `* page that ships jQuery (Slashdot). The fragment must be complete enough that the  * detection c...` |
+| `js_handle` | function | `tests/test_js_dom.c:2001` | `static dom_node_id js_handle(fixture *f, const char *expr)` |
+| `main` | function | `tests/test_js_dom.c:3718` | `int main(void)` |
+| `methods` | function | `tests/test_js_dom.c:755` | `* backed by the sealed dom methods (this element's own attributes only). */ static void test_elem...` |
+| `persisted` | function | `tests/test_js_dom.c:1029` | `* never persisted (process-lifetime only). */ static void test_cookie_jar_enabled_for_trusted_hos...` |
+| `pump_ticks` | function | `tests/test_js_dom.c:3488` | `static void pump_ticks(fixture *f, int n)` |
+| `run` | function | `tests/test_js_dom.c:75` | `static js_status run(fixture *f, const char *src, js_result *r)` |
 | `run_pane` | function | `tests/test_js_dom.c:2348` | `static void run_pane(fixture *f, int tab, const char *arg, js_result *r)` |
 | `set_https_location` | function | `tests/test_js_dom.c:1065` | `static void set_https_location(fixture *f, const char *url)` |
 | `set_loc` | function | `tests/test_js_dom.c:2573` | `static void set_loc(fixture *f, const char *href)` |
@@ -481,20 +496,5 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_build_component_custom_props` | function | `tests/test_page_view.c:4605` | `static void test_build_component_custom_props(void **state)` |
 | `test_build_cont_item_identity` | function | `tests/test_page_view.c:1862` | `static void test_build_cont_item_identity(void **state)` |
 | `test_build_content_visibility_hidden_folds` | function | `tests/test_page_view.c:5180` | `static void test_build_content_visibility_hidden_folds(void **state)` |
-| `test_build_control_without_form` | function | `tests/test_page_view.c:4192` | `static void test_build_control_without_form(void **state)` |
-| `test_build_css_bold_and_inline_wins` | function | `tests/test_page_view.c:4549` | `static void test_build_css_bold_and_inline_wins(void **state)` |
-| `test_build_cursor_alone_triggers_box` | function | `tests/test_page_view.c:2904` | `static void test_build_cursor_alone_triggers_box(void **state)` |
-| `test_build_display_none_hidden` | function | `tests/test_page_view.c:4644` | `static void test_build_display_none_hidden(void **state)` |
-| `test_build_empty_box_gets_run_and_box` | function | `tests/test_page_view.c:2780` | `static void test_build_empty_box_gets_run_and_box(void **state)` |
-| `test_build_empty_document` | function | `tests/test_page_view.c:1132` | `static void test_build_empty_document(void **state)` |
-| `test_build_empty_flex_grow_spacer` | function | `tests/test_page_view.c:950` | `static void test_build_empty_flex_grow_spacer(void **state)` |
-| `test_build_flex_anchor_is_its_own_block` | function | `tests/test_page_view.c:1768` | `static void test_build_flex_anchor_is_its_own_block(void **state)` |
-| `test_build_flex_container` | function | `tests/test_page_view.c:1338` | `static void test_build_flex_container(void **state)` |
-| `test_build_flex_container_from_sheet` | function | `tests/test_page_view.c:2450` | `static void test_build_flex_container_from_sheet(void **state)` |
-| `test_build_flex_item_values` | function | `tests/test_page_view.c:1451` | `static void test_build_flex_item_values(void **state)` |
-| `test_build_flex_whitespace_not_item` | function | `tests/test_page_view.c:1784` | `static void test_build_flex_whitespace_not_item(void **state)` |
-| `test_build_flex_wrap_align_row_gap` | function | `tests/test_page_view.c:1410` | `static void test_build_flex_wrap_align_row_gap(void **state)` |
-| `test_build_float_outermost_founder` | function | `tests/test_page_view.c:1561` | `static void test_build_float_outermost_founder(void **state)` |
-| `test_build_float_threading` | function | `tests/test_page_view.c:1515` | `static void test_build_float_threading(void **state)` |
 
 Next: [SYMBOLS_p15.md](SYMBOLS_p15.md)

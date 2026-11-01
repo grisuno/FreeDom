@@ -355,6 +355,29 @@ static void test_zero_alpha_is_transparent(void **state) {
     assert_int_equal(cc_parse("#00000001", &c), CC_OK);
 }
 
+/* CSS Color 4 section 6.2 system colors resolve to FIXED values (never the OS
+ * palette: that would be a fingerprinting surface), case-insensitively; the
+ * deprecated ones map to their documented replacement. */
+static void test_system_colors(void **state) {
+    (void)state;
+    cc_rgb c;
+    assert_int_equal(cc_parse("Canvas", &c), CC_OK);
+    assert_int_equal(cc_pack(c), 0xffffff);
+    assert_int_equal(cc_parse("canvastext", &c), CC_OK);
+    assert_int_equal(cc_pack(c), 0x000000);
+    assert_int_equal(cc_parse("LinkText", &c), CC_OK);
+    assert_int_equal(cc_pack(c), 0x0000ee);
+    assert_int_equal(cc_parse("ButtonText", &c), CC_OK);
+    assert_int_equal(cc_pack(c), 0x000000);
+    assert_int_equal(cc_parse("ButtonFace", &c), CC_OK);
+    assert_int_equal(cc_pack(c), 0xe9e9ed);
+    assert_int_equal(cc_parse("Highlight", &c), CC_OK);
+    assert_int_equal(cc_parse("GrayText", &c), CC_OK);
+    assert_int_equal(cc_parse("ThreeDShadow", &c), CC_OK);   /* deprecated -> ButtonBorder */
+    assert_int_equal(cc_pack(c), 0x8f8f9d);
+    assert_int_equal(cc_parse("-webkit-focus-ring-color", &c), CC_ERR_SYNTAX);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_zero_alpha_is_transparent),
@@ -370,6 +393,7 @@ int main(void) {
         cmocka_unit_test(test_rgb_out_of_range),
         cmocka_unit_test(test_named),
         cmocka_unit_test(test_named_bad),
+        cmocka_unit_test(test_system_colors),
         cmocka_unit_test(test_transparent_currentcolor),
         cmocka_unit_test(test_hsl),
         cmocka_unit_test(test_hsl_120),

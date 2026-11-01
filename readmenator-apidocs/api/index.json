@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 222,
-  "entities": 3561,
+  "entities": 3564,
   "languages": {
    "c": 104,
    "h": 102,
@@ -13,8 +13,8 @@
   "kinds": {
    "constant": 23,
    "enum": 162,
-   "function": 1999,
-   "macro": 715,
+   "function": 2001,
+   "macro": 716,
    "method": 24,
    "module": 222,
    "struct": 267,
@@ -27,8 +27,8 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1547,
-   "total": 3531,
+   "documented": 1548,
+   "total": 3534,
    "percent": 43.8
   },
   "by_kind": {
@@ -39,13 +39,13 @@
    },
    "function": {
     "documented": 886,
-    "total": 1999,
+    "total": 2001,
     "percent": 44.3
    },
    "macro": {
-    "documented": 327,
-    "total": 715,
-    "percent": 45.7
+    "documented": 328,
+    "total": 716,
+    "percent": 45.8
    },
    "method": {
     "documented": 0,
@@ -86,8 +86,8 @@
    },
    "gui/browser_ui.c": {
     "documented": 83,
-    "total": 253,
-    "percent": 32.8
+    "total": 255,
+    "percent": 32.5
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -650,9 +650,9 @@
     "percent": 60.0
    },
    "src/css.c": {
-    "documented": 20,
-    "total": 83,
-    "percent": 24.1
+    "documented": 21,
+    "total": 84,
+    "percent": 25.0
    },
    "src/css_atrule.c": {
     "documented": 4,
@@ -1200,7 +1200,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 253
+   "entities": 255
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1765,7 +1765,7 @@
   {
    "uid": "src/css.c",
    "path": "modules/src.css.c.jsonl",
-   "entities": 83
+   "entities": 84
   },
   {
    "uid": "src/css_atrule.c",
@@ -2295,7 +2295,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 1985
+  "total": 1987
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

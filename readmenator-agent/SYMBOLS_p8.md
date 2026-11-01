@@ -3,6 +3,13 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `print_dom` | function | `src/freedom.c:447` | `static void print_dom(const rd_doc *doc)` |
+| `print_dom_css` | function | `src/freedom.c:462` | `static void print_dom_css(const rd_doc *doc)` |
+| `print_usage` | function | `src/freedom.c:55` | `static void print_usage(FILE *fp, const char *prog)` |
+| `read_file` | function | `src/freedom.c:243` | `static char *read_file(const char *path, size_t *out_len)` |
+| `render_page` | function | `src/freedom.c:720` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
+| `run_dump_video` | function | `src/freedom.c:1287` | `static int run_dump_video(const char *url)` |
+| `run_headless` | function | `src/freedom.c:1139` | `static int run_headless(const char *target)` |
 | `sf_reason` | function | `src/freedom.c:994` | `static const char *sf_reason(sf_status ss)` |
 | `timings_dump` | function | `src/freedom.c:163` | `static void timings_dump(void)` |
 | `timings_enabled` | function | `src/freedom.c:159` | `static int timings_enabled(void)` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `pop_seg` | function | `src/link_nav.c:98` | `static void pop_seg(char *body, size_t *blen)` |
 | `resolve_file` | function | `src/link_nav.c:149` | `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)` |
 | `LS_ARGON2_M_KIB` | macro | `src/local_store.c:54` | `#define LS_ARGON2_M_KIB` |
-| `LS_ARGON2_P` | macro | `src/local_store.c:55` | `#define LS_ARGON2_P` |
-| `LS_ARGON2_T` | macro | `src/local_store.c:53` | `#define LS_ARGON2_T` |
-| `LS_KDF_ARGON2ID` | macro | `src/local_store.c:50` | `#define LS_KDF_ARGON2ID` |
-| `LS_KDF_NONE` | macro | `src/local_store.c:49` | `#define LS_KDF_NONE` |
-| `LS_VERSION` | macro | `src/local_store.c:48` | `#define LS_VERSION` |
-| `OFF_AEAD` | macro | `src/local_store.c:60` | `#define OFF_AEAD` |
-| `OFF_KDF` | macro | `src/local_store.c:61` | `#define OFF_KDF` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

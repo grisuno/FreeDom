@@ -3,6 +3,13 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `wst_decode_check` | function | `src/web_storage.c:101` | `int wst_decode_check(const char *blob, size_t len)` |
+| `wst_encode` | function | `src/web_storage.c:125` | `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len)` |
+| `wst_foreach` | function | `src/web_storage.c:181` | `int wst_foreach(const char *blob, size_t len,                 void (*fn)(void *ctx, const char *k...` |
+| `wst_free` | function | `src/web_storage.c:109` | `void wst_free(wst_db *db)` |
+| `wst_new` | function | `src/web_storage.c:105` | `wst_db *wst_new(void)` |
+| `wst_origin` | struct | `src/web_storage.c:12` | `` |
+| `wst_origin_bytes` | function | `src/web_storage.c:175` | `size_t wst_origin_bytes(const wst_db *db, const char *origin)` |
 | `wst_pack` | function | `src/web_storage.c:206` | `int wst_pack(const char *const *keys, const size_t *klens,              const char *const *vals, ...` |
 | `wst_replace` | function | `src/web_storage.c:140` | `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len)` |
 | `wc_derive` | function | `src/webcaps.c:15` | `wc_caps wc_derive(wc_input in)` |
@@ -318,12 +325,13 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `geometry` | function | `tests/test_css.c:2999` | `* hostile sheet never sees real window geometry (anti-fingerprinting) yet 100vh  * heroes and cal...` |
 | `grammar` | function | `tests/test_css.c:5760` | `* grammar (spec/css.md), so they parse instead of dropping. */ static void test_vendor_prefixes(v...` |
 | `invalid` | function | `tests/test_css.c:765` | `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color...` |
-| `main` | function | `tests/test_css.c:5877` | `int main(void)` |
+| `main` | function | `tests/test_css.c:5916` | `int main(void)` |
 | `root_is_dark_html` | function | `tests/test_css.c:969` | `static int root_is_dark_html(void *ctx, const css_sel *sel)` |
 | `silent` | function | `tests/test_css.c:2613` | `* silent (anti-DoS truncation, not a parse failure). 500 filler rules is well past  * the OLD cap...` |
 | `terminator` | function | `tests/test_css.c:2014` | `* terminator (consumed, not painted);` |
 | `test_adjacent_sibling_combinator` | function | `tests/test_css.c:1581` | `static void test_adjacent_sibling_combinator(void **state)` |
 | `test_alignment_keywords` | function | `tests/test_css.c:3780` | `static void test_alignment_keywords(void **state)` |
+| `test_anim_iterations_huge_is_infinite` | function | `tests/test_css.c:5909` | `static void test_anim_iterations_huge_is_infinite(void **state)` |
 | `test_anim_keyframes_resolved_from_sheet` | function | `tests/test_css.c:5424` | `static void test_anim_keyframes_resolved_from_sheet(void **state)` |
 | `test_anim_transform_keyframes_from_sheet` | function | `tests/test_css.c:5457` | `static void test_anim_transform_keyframes_from_sheet(void **state)` |
 | `test_animation_none_resets` | function | `tests/test_css.c:3434` | `static void test_animation_none_resets(void **state)` |
@@ -488,13 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_inline_clip_path_inset_sets_clip_edges` | function | `tests/test_css.c:4555` | `static void test_inline_clip_path_inset_sets_clip_edges(void **state)` |
 | `test_inline_color_scheme` | function | `tests/test_css.c:4624` | `static void test_inline_color_scheme(void **state)` |
 | `test_inline_contain` | function | `tests/test_css.c:4591` | `static void test_inline_contain(void **state)` |
-| `test_inline_container_props` | function | `tests/test_css.c:333` | `static void test_inline_container_props(void **state)` |
-| `test_inline_content_visibility` | function | `tests/test_css.c:4606` | `static void test_inline_content_visibility(void **state)` |
-| `test_inline_direction` | function | `tests/test_css.c:3235` | `static void test_inline_direction(void **state)` |
-| `test_inline_display` | function | `tests/test_css.c:295` | `static void test_inline_display(void **state)` |
-| `test_inline_display_table_family` | function | `tests/test_css.c:308` | `static void test_inline_display_table_family(void **state)` |
-| `test_inline_empty_cells` | function | `tests/test_css.c:4404` | `static void test_inline_empty_cells(void **state)` |
-| `test_inline_font_kerning` | function | `tests/test_css.c:4994` | `static void test_inline_font_kerning(void **state)` |
-| `test_inline_font_size` | function | `tests/test_css.c:45` | `static void test_inline_font_size(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

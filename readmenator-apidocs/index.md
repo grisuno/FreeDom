@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 222 modules, 3561 documented entities, documentation coverage 43.8% (1547/3531 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 222 modules, 3564 documented entities, documentation coverage 43.8% (1548/3534 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -22,7 +22,7 @@ Languages: c (104), h (102), py (12), sh (4)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 210 | 32.8% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 212 | 32.5% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 5 | 45.5% |
 | [`gui/bui_mask_img.c`](modules/gui.bui_mask_img.c.md) | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | 0 | 1 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
@@ -143,7 +143,7 @@ Languages: c (104), h (102), py (12), sh (4)
 | [`src/browser.c`](modules/src.browser.c.md) |  | 0 | 30 | 25.8% |
 | [`src/cached_fetch.c`](modules/src.cached_fetch.c.md) |  | 0 | 6 | 28.6% |
 | [`src/compositor.c`](modules/src.compositor.c.md) |  | 0 | 4 | 60.0% |
-| [`src/css.c`](modules/src.css.c.md) |  | 8 | 74 | 24.1% |
+| [`src/css.c`](modules/src.css.c.md) |  | 8 | 75 | 25.0% |
 | [`src/css_atrule.c`](modules/src.css_atrule.c.md) |  | 0 | 4 | 80.0% |
 | [`src/css_box.c`](modules/src.css_box.c.md) |  | 3 | 29 | 45.5% |
 | [`src/css_chain.c`](modules/src.css_chain.c.md) |  | 3 | 16 | 40.0% |

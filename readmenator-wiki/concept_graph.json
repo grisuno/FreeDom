@@ -170,7 +170,7 @@
         "tests/test_wl_guard.c",
         "tools/gen_psl.c"
       ],
-      "mentions": 1160,
+      "mentions": 1162,
       "confidence": "EXTRACTED"
     },
     {
@@ -316,7 +316,7 @@
         "tools/mutate.py",
         "tools/snapshot_age.py"
       ],
-      "mentions": 705,
+      "mentions": 707,
       "confidence": "EXTRACTED"
     },
     {
@@ -456,7 +456,7 @@
         "tools/pngprof.py",
         "tools/prune.py"
       ],
-      "mentions": 658,
+      "mentions": 662,
       "confidence": "EXTRACTED"
     },
     {
@@ -729,7 +729,7 @@
         "tools/prune.py",
         "tools/snapshot.py"
       ],
-      "mentions": 613,
+      "mentions": 614,
       "confidence": "EXTRACTED"
     },
     {
@@ -997,7 +997,7 @@
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 694,
+      "mentions": 697,
       "confidence": "EXTRACTED"
     },
     {
@@ -1129,7 +1129,7 @@
         "tools/snapshot.py",
         "tools/snapshot_age.py"
       ],
-      "mentions": 470,
+      "mentions": 471,
       "confidence": "EXTRACTED"
     },
     {
@@ -1257,7 +1257,7 @@
         "tools/gen_psl.c",
         "tools/pngdiff.c"
       ],
-      "mentions": 1149,
+      "mentions": 1152,
       "confidence": "EXTRACTED"
     },
     {
@@ -1509,7 +1509,7 @@
         "tests/test_ws_hub.c",
         "tools/gen_psl.c"
       ],
-      "mentions": 622,
+      "mentions": 623,
       "confidence": "EXTRACTED"
     },
     {
@@ -1876,6 +1876,120 @@
       "confidence": "EXTRACTED"
     },
     {
+      "name": "never",
+      "files": [
+        "gui/browser_ui.c",
+        "include/anti_fp.h",
+        "include/box_style.h",
+        "include/box_tree.h",
+        "include/compositor.h",
+        "include/css.h",
+        "include/css_counter.h",
+        "include/css_gradient.h",
+        "include/css_length.h",
+        "include/css_mask.h",
+        "include/css_select.h",
+        "include/dom_debug.h",
+        "include/fb_panes.h",
+        "include/flex_layout.h",
+        "include/freebug.h",
+        "include/hostedit.h",
+        "include/html_parse.h",
+        "include/identity.h",
+        "include/image_decode.h",
+        "include/js_dom.h",
+        "include/js_policy.h",
+        "include/js_sandbox.h",
+        "include/js_trusted.h",
+        "include/link_nav.h",
+        "include/media_decoder.h",
+        "include/net_realm.h",
+        "include/os_sandbox.h",
+        "include/page_view.h",
+        "include/perf_trace.h",
+        "include/prefetch.h",
+        "include/render_doc.h",
+        "include/render_policy.h",
+        "include/request_policy.h",
+        "include/secure_fetch.h",
+        "include/svg_paint.h",
+        "include/svg_render.h",
+        "include/tab.h",
+        "include/text_shape.h",
+        "include/textfield.h",
+        "include/tls_impersonate.h",
+        "include/ui.h",
+        "include/zoom.h",
+        "src/box_tree.c",
+        "src/css.c",
+        "src/css_box.c",
+        "src/css_length.c",
+        "src/css_select.c",
+        "src/css_text.c",
+        "src/css_vars.c",
+        "src/dom.c",
+        "src/form.c",
+        "src/frame_host.c",
+        "src/freedom.c",
+        "src/hostblock.c",
+        "src/http_cache.c",
+        "src/js_dom.c",
+        "src/js_env.c",
+        "src/js_fetch.c",
+        "src/js_geom.c",
+        "src/js_policy.c",
+        "src/link_nav.c",
+        "src/page_view.c",
+        "src/prefetch.c",
+        "src/render_doc.c",
+        "src/secure_fetch.c",
+        "src/svg_raster.c",
+        "src/svg_render.c",
+        "src/tab.c",
+        "src/text_shape.c",
+        "src/url.c",
+        "src/webfont.c",
+        "tests/test_block_flow.c",
+        "tests/test_box_style.c",
+        "tests/test_box_tree.c",
+        "tests/test_cached_fetch.c",
+        "tests/test_css.c",
+        "tests/test_css_box.c",
+        "tests/test_css_color.c",
+        "tests/test_css_drops.c",
+        "tests/test_css_index.c",
+        "tests/test_css_length.c",
+        "tests/test_css_mask.c",
+        "tests/test_dom.c",
+        "tests/test_flex_layout.c",
+        "tests/test_frame_broker.c",
+        "tests/test_freedom.c",
+        "tests/test_hostedit.c",
+        "tests/test_html_parse.c",
+        "tests/test_js_dom.c",
+        "tests/test_js_sandbox.c",
+        "tests/test_media_decoder.c",
+        "tests/test_os_sandbox.c",
+        "tests/test_page_view.c",
+        "tests/test_perf_trace.c",
+        "tests/test_prefetch.c",
+        "tests/test_render_doc.c",
+        "tests/test_renderer.c",
+        "tests/test_shm_slots.c",
+        "tests/test_svg_render.c",
+        "tests/test_tab.c",
+        "tests/test_text_shape.c",
+        "tests/test_webcaps.c",
+        "tests/test_webfont_load.c",
+        "tools/fftime.py",
+        "tools/guitime.py",
+        "tools/mutate.py",
+        "tools/pngprof.py"
+      ],
+      "mentions": 344,
+      "confidence": "EXTRACTED"
+    },
+    {
       "name": "only",
       "files": [
         "gui/browser_ui.c",
@@ -1985,120 +2099,7 @@
         "tools/pngprof.py",
         "tools/prune.py"
       ],
-      "mentions": 411,
-      "confidence": "EXTRACTED"
-    },
-    {
-      "name": "never",
-      "files": [
-        "gui/browser_ui.c",
-        "include/anti_fp.h",
-        "include/box_style.h",
-        "include/box_tree.h",
-        "include/compositor.h",
-        "include/css.h",
-        "include/css_counter.h",
-        "include/css_gradient.h",
-        "include/css_length.h",
-        "include/css_mask.h",
-        "include/css_select.h",
-        "include/dom_debug.h",
-        "include/fb_panes.h",
-        "include/flex_layout.h",
-        "include/freebug.h",
-        "include/hostedit.h",
-        "include/html_parse.h",
-        "include/identity.h",
-        "include/image_decode.h",
-        "include/js_dom.h",
-        "include/js_policy.h",
-        "include/js_sandbox.h",
-        "include/js_trusted.h",
-        "include/link_nav.h",
-        "include/media_decoder.h",
-        "include/net_realm.h",
-        "include/os_sandbox.h",
-        "include/page_view.h",
-        "include/perf_trace.h",
-        "include/prefetch.h",
-        "include/render_doc.h",
-        "include/render_policy.h",
-        "include/request_policy.h",
-        "include/secure_fetch.h",
-        "include/svg_paint.h",
-        "include/svg_render.h",
-        "include/tab.h",
-        "include/text_shape.h",
-        "include/textfield.h",
-        "include/tls_impersonate.h",
-        "include/ui.h",
-        "include/zoom.h",
-        "src/box_tree.c",
-        "src/css.c",
-        "src/css_box.c",
-        "src/css_length.c",
-        "src/css_select.c",
-        "src/css_text.c",
-        "src/css_vars.c",
-        "src/dom.c",
-        "src/form.c",
-        "src/frame_host.c",
-        "src/freedom.c",
-        "src/hostblock.c",
-        "src/http_cache.c",
-        "src/js_dom.c",
-        "src/js_env.c",
-        "src/js_fetch.c",
-        "src/js_geom.c",
-        "src/js_policy.c",
-        "src/link_nav.c",
-        "src/page_view.c",
-        "src/prefetch.c",
-        "src/render_doc.c",
-        "src/secure_fetch.c",
-        "src/svg_raster.c",
-        "src/svg_render.c",
-        "src/tab.c",
-        "src/text_shape.c",
-        "src/url.c",
-        "src/webfont.c",
-        "tests/test_block_flow.c",
-        "tests/test_box_style.c",
-        "tests/test_box_tree.c",
-        "tests/test_cached_fetch.c",
-        "tests/test_css.c",
-        "tests/test_css_box.c",
-        "tests/test_css_drops.c",
-        "tests/test_css_index.c",
-        "tests/test_css_length.c",
-        "tests/test_css_mask.c",
-        "tests/test_dom.c",
-        "tests/test_flex_layout.c",
-        "tests/test_frame_broker.c",
-        "tests/test_freedom.c",
-        "tests/test_hostedit.c",
-        "tests/test_html_parse.c",
-        "tests/test_js_dom.c",
-        "tests/test_js_sandbox.c",
-        "tests/test_media_decoder.c",
-        "tests/test_os_sandbox.c",
-        "tests/test_page_view.c",
-        "tests/test_perf_trace.c",
-        "tests/test_prefetch.c",
-        "tests/test_render_doc.c",
-        "tests/test_renderer.c",
-        "tests/test_shm_slots.c",
-        "tests/test_svg_render.c",
-        "tests/test_tab.c",
-        "tests/test_text_shape.c",
-        "tests/test_webcaps.c",
-        "tests/test_webfont_load.c",
-        "tools/fftime.py",
-        "tools/guitime.py",
-        "tools/mutate.py",
-        "tools/pngprof.py"
-      ],
-      "mentions": 342,
+      "mentions": 413,
       "confidence": "EXTRACTED"
     },
     {
@@ -2208,7 +2209,7 @@
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 606,
+      "mentions": 609,
       "confidence": "EXTRACTED"
     },
     {
@@ -2316,7 +2317,7 @@
         "tools/ffq.py",
         "tools/snapshot.py"
       ],
-      "mentions": 2035,
+      "mentions": 2042,
       "confidence": "EXTRACTED"
     },
     {
@@ -2835,7 +2836,7 @@
         "tests/test_url.c",
         "tests/test_web_storage.c"
       ],
-      "mentions": 264,
+      "mentions": 268,
       "confidence": "EXTRACTED"
     },
     {
@@ -2935,7 +2936,7 @@
         "tools/ffq.py",
         "tools/snapshot.py"
       ],
-      "mentions": 708,
+      "mentions": 709,
       "confidence": "EXTRACTED"
     },
     {
@@ -3133,7 +3134,7 @@
         "tools/prune.py",
         "tools/snapshot.py"
       ],
-      "mentions": 310,
+      "mentions": 312,
       "confidence": "EXTRACTED"
     },
     {
@@ -3405,7 +3406,7 @@
         "tools/snapshot.py",
         "tools/snapshot_age.py"
       ],
-      "mentions": 497,
+      "mentions": 500,
       "confidence": "EXTRACTED"
     },
     {
@@ -3585,7 +3586,7 @@
         "tests/test_webcaps.c",
         "tests/test_wl_display.c"
       ],
-      "mentions": 186,
+      "mentions": 187,
       "confidence": "EXTRACTED"
     },
     {
@@ -4020,7 +4021,7 @@
         "tools/gen_psl.c",
         "tools/mutate.py"
       ],
-      "mentions": 155,
+      "mentions": 156,
       "confidence": "EXTRACTED"
     },
     {
@@ -4103,7 +4104,7 @@
         "tests/test_web_storage.c",
         "tools/ffgeom.py"
       ],
-      "mentions": 248,
+      "mentions": 250,
       "confidence": "EXTRACTED"
     },
     {
@@ -4265,7 +4266,7 @@
         "tests/test_url.c",
         "tests/test_wl_guard.c"
       ],
-      "mentions": 211,
+      "mentions": 212,
       "confidence": "EXTRACTED"
     },
     {
@@ -4496,7 +4497,7 @@
         "tools/guitime.py",
         "tools/mutate.py"
       ],
-      "mentions": 354,
+      "mentions": 358,
       "confidence": "EXTRACTED"
     },
     {
@@ -4572,7 +4573,7 @@
         "tools/guitime.py",
         "tools/snapshot.py"
       ],
-      "mentions": 256,
+      "mentions": 258,
       "confidence": "EXTRACTED"
     },
     {
@@ -4723,7 +4724,81 @@
         "tools/mutate.py",
         "tools/pngdiff.c"
       ],
-      "mentions": 134,
+      "mentions": 135,
+      "confidence": "EXTRACTED"
+    },
+    {
+      "name": "case",
+      "files": [
+        "gui/browser_ui.c",
+        "gui/bui_theme.c",
+        "include/box_style.h",
+        "include/css_computed.h",
+        "include/css_counter.h",
+        "include/css_length.h",
+        "include/css_select.h",
+        "include/css_vars.h",
+        "include/data_url.h",
+        "include/fb_panes.h",
+        "include/flex_layout.h",
+        "include/hostedit.h",
+        "include/html_parse.h",
+        "include/page_view.h",
+        "include/prefs.h",
+        "include/request_policy.h",
+        "include/secure_fetch.h",
+        "include/sha2.h",
+        "include/text_case.h",
+        "include/text_shape.h",
+        "include/url.h",
+        "include/util.h",
+        "src/box_tree.c",
+        "src/css.c",
+        "src/css_atrule.c",
+        "src/css_box.c",
+        "src/css_gradient.c",
+        "src/css_length.c",
+        "src/css_mq.c",
+        "src/css_select.c",
+        "src/css_text.c",
+        "src/data_url.c",
+        "src/dom.c",
+        "src/dom_debug.c",
+        "src/download.c",
+        "src/flex_layout.c",
+        "src/html_parse.c",
+        "src/http_cache.c",
+        "src/js_dom.c",
+        "src/js_policy.c",
+        "src/link_nav.c",
+        "src/page_view.c",
+        "src/prefetch.c",
+        "src/render_doc.c",
+        "src/secure_fetch.c",
+        "src/svg_render.c",
+        "src/text_case.c",
+        "src/text_shape.c",
+        "src/url.c",
+        "src/webfont.c",
+        "src/webfont_load.c",
+        "tests/test_box_style.c",
+        "tests/test_css.c",
+        "tests/test_css_color.c",
+        "tests/test_css_drops.c",
+        "tests/test_css_length.c",
+        "tests/test_css_vars.c",
+        "tests/test_data_url.c",
+        "tests/test_flex_layout.c",
+        "tests/test_hostedit.c",
+        "tests/test_html_parse.c",
+        "tests/test_js_dom.c",
+        "tests/test_js_geom.c",
+        "tests/test_page_view.c",
+        "tests/test_secure_fetch.c",
+        "tests/test_text_case.c",
+        "tests/test_webfont.c"
+      ],
+      "mentions": 161,
       "confidence": "EXTRACTED"
     },
     {
@@ -4796,80 +4871,7 @@
         "tests/test_ws_hub.c",
         "tools/pngprof.py"
       ],
-      "mentions": 190,
-      "confidence": "EXTRACTED"
-    },
-    {
-      "name": "case",
-      "files": [
-        "gui/browser_ui.c",
-        "gui/bui_theme.c",
-        "include/box_style.h",
-        "include/css_computed.h",
-        "include/css_counter.h",
-        "include/css_length.h",
-        "include/css_select.h",
-        "include/css_vars.h",
-        "include/data_url.h",
-        "include/fb_panes.h",
-        "include/flex_layout.h",
-        "include/hostedit.h",
-        "include/html_parse.h",
-        "include/page_view.h",
-        "include/prefs.h",
-        "include/request_policy.h",
-        "include/secure_fetch.h",
-        "include/sha2.h",
-        "include/text_case.h",
-        "include/text_shape.h",
-        "include/url.h",
-        "include/util.h",
-        "src/box_tree.c",
-        "src/css.c",
-        "src/css_atrule.c",
-        "src/css_box.c",
-        "src/css_gradient.c",
-        "src/css_length.c",
-        "src/css_mq.c",
-        "src/css_select.c",
-        "src/css_text.c",
-        "src/data_url.c",
-        "src/dom.c",
-        "src/dom_debug.c",
-        "src/download.c",
-        "src/flex_layout.c",
-        "src/html_parse.c",
-        "src/http_cache.c",
-        "src/js_dom.c",
-        "src/js_policy.c",
-        "src/link_nav.c",
-        "src/page_view.c",
-        "src/prefetch.c",
-        "src/render_doc.c",
-        "src/secure_fetch.c",
-        "src/svg_render.c",
-        "src/text_case.c",
-        "src/text_shape.c",
-        "src/url.c",
-        "src/webfont.c",
-        "src/webfont_load.c",
-        "tests/test_box_style.c",
-        "tests/test_css.c",
-        "tests/test_css_drops.c",
-        "tests/test_css_length.c",
-        "tests/test_css_vars.c",
-        "tests/test_data_url.c",
-        "tests/test_flex_layout.c",
-        "tests/test_hostedit.c",
-        "tests/test_html_parse.c",
-        "tests/test_js_dom.c",
-        "tests/test_js_geom.c",
-        "tests/test_page_view.c",
-        "tests/test_secure_fetch.c",
-        "tests/test_text_case.c",
-        "tests/test_webfont.c"
-      ],
-      "mentions": 160,
+      "mentions": 191,
       "confidence": "EXTRACTED"
     },
     {
@@ -5015,7 +5017,7 @@
         "tests/test_webfont_load.c",
         "tools/snapshot_age.py"
       ],
-      "mentions": 136,
+      "mentions": 137,
       "confidence": "EXTRACTED"
     },
     {
@@ -5087,7 +5089,7 @@
         "tests/test_media_decoder.c",
         "tests/test_page_view.c"
       ],
-      "mentions": 162,
+      "mentions": 163,
       "confidence": "EXTRACTED"
     }
   ],
@@ -5550,6 +5552,25 @@
     },
     {
       "source": "never",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.84,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h"
+      ]
+    },
+    {
+      "source": "never",
       "target": "include",
       "verb": "depends_on",
       "strength": 0.84,
@@ -5679,25 +5700,6 @@
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h",
         "gui/browser_ui.c->include/css_gradient.h"
-      ]
-    },
-    {
-      "source": "never",
-      "target": "freedom",
-      "verb": "depends_on",
-      "strength": 0.83,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h"
       ]
     },
     {
