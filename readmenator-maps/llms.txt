@@ -50,7 +50,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: testrenderbinarydoesnotcrashparent: (void)state; rdresult r...
 - [readmenator-agent/KB_tests_p8.md](md/readmenator-agent/KB_tests_p8.md): Doc: testvalidatelongbundleurl: Modern bundle URLs exceed 2048 bytes (google.com's xjs script URL...
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 312 files at commit c014c9ea6634. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 312 files at commit a8188815ee23. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)

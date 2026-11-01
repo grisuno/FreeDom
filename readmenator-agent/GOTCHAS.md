@@ -17,9 +17,9 @@ These files have the most connections. Changes here have high blast radius.
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css.h` -- 37 direct, 54 total dependents
-- `include/css_counter.h` -- 3 direct, 51 total dependents
-- `include/css_color.h` -- 13 direct, 50 total dependents
+- `include/css_counter.h` -- 3 direct, 54 total dependents
+- `include/css.h` -- 37 direct, 51 total dependents
+- `include/css_color.h` -- 13 direct, 51 total dependents
 - `include/html_parse.h` -- 18 direct, 43 total dependents
 - `include/dom.h` -- 16 direct, 39 total dependents
 - `include/css_select.h` -- 14 direct, 29 total dependents

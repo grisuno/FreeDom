@@ -12,7 +12,7 @@
 **Total Files Parsed:** 312 | **Total Symbols Extracted:** 7732 | **Total Imports:** 1801
  | **Resolved Imports:** 584
 
-<!-- ranking_model: v1.0 | weights: {ppr:0.45,auth:0.2,test:0.15,doc:0.1,fresh:0.1} | alpha:0.85 | commit:c014c9e | date:2026-07-18 -->
+<!-- ranking_model: v1.0 | weights: {ppr:0.45,auth:0.2,test:0.15,doc:0.1,fresh:0.1} | alpha:0.85 | commit:a818881 | date:2026-07-18 -->
 
 
 ## Table of Contents
@@ -1029,9 +1029,9 @@ Files sorted by how many other files would be affected if they changed. High-imp
 
 | File | Direct Dependents | Transitive Dependents | Total Impact |
 |------|------------------|----------------------|--------------|
-| `css.h` | 37 | 17 | 54 |
-| `css_counter.h` | 3 | 48 | 51 |
-| `css_color.h` | 13 | 37 | 50 |
+| `css_counter.h` | 3 | 50 | 54 |
+| `css.h` | 37 | 14 | 51 |
+| `css_color.h` | 13 | 38 | 51 |
 | `html_parse.h` | 18 | 25 | 43 |
 | `dom.h` | 16 | 23 | 39 |
 | `css_select.h` | 14 | 15 | 29 |

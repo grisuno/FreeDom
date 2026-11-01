@@ -42,9 +42,7 @@ if [ ! -d "/usr/local/include/lexbor" ]; then
     rm -rf "$BUILD_DIR"
 fi
 
-# 4. Aplicar parches de compatibilidad de código (OpenSSL < 3.3)
-echo -e "${BLUE}[*] Patching source code files for target environment...${NC}"
-if [ -f src/local_store.c ]; then
-fi
+# 4. Compatibilidad OpenSSL < 3.3: el shim vive una sola vez en src/local_store.c
+#    (tanda 80); configure ya no reescribe fuentes.
 
 echo -e "${GREEN}[+] Configuration complete. You can now run 'make && sudo make install'.${NC}"
