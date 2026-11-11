@@ -236,8 +236,6 @@ JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)
 
 **Returns:** `* due is the remaining`
 
-*Called by:* [`pv_build_styled`](src.page_view.c.md#pv_build_styled)
-
 ---
 
 <a id="empty"></a>

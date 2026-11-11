@@ -1,6 +1,27 @@
 # Subsystem: tests (page 8 of 8)
 Previous: [KB_tests_p7.md](KB_tests_p7.md)
 
+## tests/test_ui.c
+- Doc: assert_line: Build: make test   ;   ASan: make asan  #include <stdarg.h> #include <stddef.h>...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `assert_line` (function, line 21) `static void assert_line(const char *text, const ui_layout *lay, size_t n,
+                       ...`
+  - `test_wrap_null_args` (function, line 29) `static void test_wrap_null_args(void **state)`
+  - `test_wrap_empty` (function, line 36) `static void test_wrap_empty(void **state)`
+  - `test_wrap_short_single_line` (function, line 44) `static void test_wrap_short_single_line(void **state)`
+  - `test_wrap_breaks_at_space` (function, line 54) `static void test_wrap_breaks_at_space(void **state)`
+  - `test_wrap_hard_breaks_long_word` (function, line 65) `static void test_wrap_hard_breaks_long_word(void **state)`
+  - `test_wrap_does_not_split_utf8` (function, line 77) `static void test_wrap_does_not_split_utf8(void **state)`
+  - `test_wrap_respects_newline` (function, line 91) `static void test_wrap_respects_newline(void **state)`
+  - `test_wrap_zero_cols_is_sanitised` (function, line 102) `static void test_wrap_zero_cols_is_sanitised(void **state)`
+  - `test_clamp_scroll` (function, line 114) `static void test_clamp_scroll(void **state)`
+  - `test_layout_free_null_and_double` (function, line 122) `static void test_layout_free_null_and_double(void **state)`
+  - `test_lazy_near_viewport` (function, line 133) `static void test_lazy_near_viewport(void **state)`
+  - `main` (function, line 146) `int main(void)`
+- Depends on: `include/lazy_load.h`, `include/ui.h`
+
 ## tests/test_url.c
 - Doc: test_validate_long_bundle_url: Modern bundle URLs exceed 2048 bytes (google.com's xjs script URL...
 - Layer: testing

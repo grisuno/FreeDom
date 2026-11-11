@@ -1,6 +1,6 @@
 # include: page_view
 
-include: page_view groups 37 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bui_mask_img -- paints a mask-image: url() layer into a mask surface.
+include: page_view groups 43 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
 
 ```mermaid
 graph LR
@@ -17,25 +17,27 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## gui (5.1)
+## gui (3.1)
 
-gui groups 1 files (c) around bui_paint_mask_image. bui_mask_img -- paints a mask-image: url() layer into a mask surface.
+gui groups 3 files (c, h) around FREEDOM_BROWSER_UI_INTERNAL_H, UI_FONT_SIZE, UI_TEXT_MARGIN, UI_HEADING_LEVELS, b. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
 
-## include (5.2)
+## include (3.2)
 
-include groups 13 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+include groups 15 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. bx_edges: anything longer fails closed instead of truncating into a wrong match....
 
-## src (5.3)
+## src (3.3)
 
-src groups 10 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet.
+src groups 11 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet.
 
-## tests (5.4)
+## tests (3.4)
 
-tests groups 13 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, test_paragraph, test_heading_ladder. dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include...
+tests groups 14 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, test_paragraph, test_heading_ladder. dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include...
 
 **Files**:
 
+- gui/browser_ui_internal.h
 - gui/bui_mask_img.c
+- gui/bui_theme.c
 - include/box_style.h
 - include/box_tree.h
 - include/compositor.h
@@ -45,9 +47,11 @@ tests groups 13 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, 
 - include/css_counter.h
 - include/dom_debug.h
 - include/flex_layout.h
+- include/freedom_config.h
 - include/page_view.h
 - include/render_doc.h
 - include/render_policy.h
+- include/sheet_cache.h
 - include/text_case.h
 - src/box_style.c
 - src/box_tree.c
@@ -58,6 +62,7 @@ tests groups 13 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, 
 - src/flex_layout.c
 - src/page_view.c
 - src/render_doc.c
+- src/sheet_cache.c
 - src/text_case.c
 - tests/test_box_style.c
 - tests/test_box_tree.c
@@ -71,4 +76,5 @@ tests groups 13 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, 
 - tests/test_page_view.c
 - tests/test_render_doc.c
 - tests/test_render_policy.c
+- tests/test_sheet_cache.c
 - tests/test_text_case.c

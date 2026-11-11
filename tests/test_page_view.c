@@ -23,6 +23,7 @@
 #include "flex_layout.h"
 #include "html_parse.h"
 #include "page_view.h"
+#include "sheet_cache.h"
 #include "css_chain.h"
 #include "webfont.h"
 
@@ -5455,6 +5456,52 @@ static void test_build_iframe_display_none_hidden(void **state) {
     hp_document_free(doc);
 }
 
+/* spec/sheet_cache.md: a derivation with unchanged CSS reuses the parsed sheet and
+ * yields the same view; the SAME stylesheet text over a document whose root no longer
+ * matches an attribute-scoped palette must not inherit the retained sheet's var()
+ * table (the cache replays the root matcher), and must equal the uncached build. */
+static void test_build_cached_reuses_sheet_and_tracks_root_attributes(void **state) {
+    (void)state;
+    static const char CSS[] =
+        "html[data-t=dark]{--fg:#abcdef} html:has(.flag){--bg:#123456}"
+        "p{color:var(--fg,#111111)} b{color:var(--bg,#222222)}";
+    hp_document *dark = parse("<html data-t='dark'><body><i class='flag'></i>"
+                              "<p>para</p><b>bold</b></body></html>");
+    hp_document *lite = parse("<html data-t='lite'><body>"
+                              "<p>para</p><b>bold</b></body></html>");
+    shc_cache *sheets = shc_new(0);
+    assert_non_null(sheets);
+    shc_stats st;
+    pv_view *v1 = NULL, *v2 = NULL, *v3 = NULL, *v4 = NULL, *ref = NULL;
+    assert_int_equal(pv_build_cached(dark, 0, 0, 0, CSS, sizeof CSS - 1, 0, sheets, &v1), PV_OK);
+    assert_int_equal(pv_build_cached(dark, 0, 0, 0, CSS, sizeof CSS - 1, 0, sheets, &v2), PV_OK);
+    shc_stats_get(sheets, &st);
+    assert_int_equal((int)st.hits, 1);
+    assert_int_equal((int)pv_count(v1), (int)pv_count(v2));
+    assert_int_equal(find_text(v1, "para")->fg_rgb, 0xabcdef);
+    assert_int_equal(find_text(v2, "para")->fg_rgb, 0xabcdef);
+    assert_int_equal(find_text(v2, "bold")->fg_rgb, 0x123456);
+
+    assert_int_equal(pv_build_cached(lite, 0, 0, 0, CSS, sizeof CSS - 1, 0, sheets, &v3), PV_OK);
+    assert_int_equal(pv_build_styled(lite, 0, 0, 0, CSS, sizeof CSS - 1, 0, &ref), PV_OK);
+    shc_stats_get(sheets, &st);
+    assert_int_equal((int)st.hits, 1);
+    assert_int_equal(find_text(v3, "para")->fg_rgb, find_text(ref, "para")->fg_rgb);
+    assert_int_equal(find_text(v3, "bold")->fg_rgb, find_text(ref, "bold")->fg_rgb);
+    assert_int_equal(find_text(v3, "para")->fg_rgb, 0x111111);
+    assert_int_equal(find_text(v3, "bold")->fg_rgb, 0x222222);
+
+    /* A different viewport width is a different @media gate: no reuse. */
+    assert_int_equal(pv_build_cached(lite, 0, 0, 0, CSS, sizeof CSS - 1, 640, sheets, &v4), PV_OK);
+    shc_stats_get(sheets, &st);
+    assert_int_equal((int)st.hits, 1);
+
+    pv_free(v1); pv_free(v2); pv_free(v3); pv_free(v4); pv_free(ref);
+    shc_free(sheets);
+    hp_document_free(dark);
+    hp_document_free(lite);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_new_is_empty),
@@ -5688,6 +5735,7 @@ int main(void) {
         cmocka_unit_test(test_float_inner_blocks_keep_breaks),
         cmocka_unit_test(test_hidden_attribute_is_display_none),
         cmocka_unit_test(test_build_pct_height_under_aspect_parent_reaches_layout),
+        cmocka_unit_test(test_build_cached_reuses_sheet_and_tracks_root_attributes),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

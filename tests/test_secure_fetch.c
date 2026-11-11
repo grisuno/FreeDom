@@ -675,6 +675,64 @@ static void test_ws_open_rejects_before_any_io(void **state) {
     sf_ws_close(NULL);
 }
 
+/* spec/net_guard.md, wired in sf_setup_handle. Nothing here leaves the machine: the
+ * refusals happen before a socket exists, and the permitted cases hit a closed
+ * loopback port (connection refused => SF_ERR_NETWORK), which proves the guard let
+ * them through to the transport. */
+static void test_private_network_guard_judges_by_initiator(void **state) {
+    (void)state;
+    static const char LOOP[] = "https://127.0.0.1:9/x";
+    sf_global_init();
+    sf_config cfg = sf_config_default();
+    cfg.timeout_ms = 3000;
+    sf_response out;
+
+    /* The user's own navigation may go anywhere. */
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_NETWORK);
+    sf_response_free(&out);
+
+    /* A public page may not reach a private address on the user's behalf. */
+    cfg.referrer_url = "https://news.example/article";
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_PRIVATE_NET);
+    assert_int_equal(out.status, SF_ERR_PRIVATE_NET);
+    sf_response_free(&out);
+    assert_int_equal(sf_post(LOOP, &cfg, "a=b", 3, NULL, &out), SF_ERR_PRIVATE_NET);
+    sf_response_free(&out);
+
+    /* ...nor through a name that merely resolves to one, nor IPv6 loopback. */
+    assert_int_equal(sf_get("https://localhost:9/x", &cfg, &out), SF_ERR_PRIVATE_NET);
+    sf_response_free(&out);
+    assert_int_equal(sf_get("https://[::1]:9/x", &cfg, &out), SF_ERR_PRIVATE_NET);
+    sf_response_free(&out);
+
+    /* An initiator that cannot be read is not trusted to be local. */
+    cfg.referrer_url = "not a url";
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_PRIVATE_NET);
+    sf_response_free(&out);
+
+    /* Local and same-host initiators are the same zone. */
+    cfg.referrer_url = "https://localhost/app";
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_NETWORK);
+    sf_response_free(&out);
+    cfg.referrer_url = "https://127.0.0.1:9/index";
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_NETWORK);
+    sf_response_free(&out);
+    /* Two different literals are not one site, whatever their trailing labels. */
+    cfg.referrer_url = "https://8.8.0.1/";
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_PRIVATE_NET);
+    sf_response_free(&out);
+
+    /* A redirect hop is remote content even when the user started the navigation. */
+    cfg.referrer_url = NULL;
+    cfg.redirect_from = "https://evil.example/go";
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_PRIVATE_NET);
+    sf_response_free(&out);
+
+    /* No policy level retries a private-network refusal. */
+    sf_policy next = SF_POLICY_PQ_HYBRID_KE;
+    assert_int_equal(sf_fallback_policy(SF_ERR_PRIVATE_NET, SF_POLICY_PQ_HYBRID_KE, 1, &next), 0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_config_default_is_secure),
@@ -735,6 +793,7 @@ int main(void) {
         cmocka_unit_test(test_rcache_remembers_permanent_redirects),
         cmocka_unit_test(test_rcache_backing_persists_and_serves_after_ram_loss),
         cmocka_unit_test(test_ws_open_rejects_before_any_io),
+        cmocka_unit_test(test_private_network_guard_judges_by_initiator),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

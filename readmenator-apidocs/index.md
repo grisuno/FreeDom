@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 222 modules, 3564 documented entities, documentation coverage 43.8% (1548/3534 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 226 modules, 3615 documented entities, documentation coverage 44.1% (1581/3585 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (104), h (102), py (12), sh (4)
+Languages: c (106), h (104), py (12), sh (4)
 
 ## Modules
 
@@ -71,7 +71,7 @@ Languages: c (104), h (102), py (12), sh (4)
 | [`include/frame_clock.h`](modules/include.frame_clock.h.md) |  | 2 | 4 | 14.3% |
 | [`include/frame_host.h`](modules/include.frame_host.h.md) |  | 1 | 9 | 72.7% |
 | [`include/freebug.h`](modules/include.freebug.h.md) |  | 4 | 13 | 72.2% |
-| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 12 | 92.3% |
+| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 14 | 93.3% |
 | [`include/hls.h`](modules/include.hls.h.md) |  | 4 | 3 | 62.5% |
 | [`include/host_conf.h`](modules/include.host_conf.h.md) |  | 1 | 7 | 55.6% |
 | [`include/hostblock.h`](modules/include.hostblock.h.md) |  | 4 | 5 | 50.0% |
@@ -93,9 +93,10 @@ Languages: c (104), h (102), py (12), sh (4)
 | [`include/link_nav.h`](modules/include.link_nav.h.md) |  | 6 | 4 | 36.4% |
 | [`include/local_store.h`](modules/include.local_store.h.md) |  | 2 | 8 | 18.2% |
 | [`include/media_decoder.h`](modules/include.media_decoder.h.md) |  | 4 | 7 | 75.0% |
+| [`include/net_guard.h`](modules/include.net_guard.h.md) |  | 2 | 6 | 55.6% |
 | [`include/net_realm.h`](modules/include.net_realm.h.md) |  | 4 | 5 | 20.0% |
 | [`include/os_sandbox.h`](modules/include.os_sandbox.h.md) |  | 4 | 7 | 50.0% |
-| [`include/page_view.h`](modules/include.page_view.h.md) |  | 14 | 78 | 59.1% |
+| [`include/page_view.h`](modules/include.page_view.h.md) |  | 15 | 79 | 60.0% |
 | [`include/pdf_export.h`](modules/include.pdf_export.h.md) |  | 1 | 8 | 30.0% |
 | [`include/perf_trace.h`](modules/include.perf_trace.h.md) |  | 5 | 11 | 52.9% |
 | [`include/pq_seal.h`](modules/include.pq_seal.h.md) |  | 2 | 5 | 12.5% |
@@ -109,6 +110,7 @@ Languages: c (104), h (102), py (12), sh (4)
 | [`include/request_policy.h`](modules/include.request_policy.h.md) |  | 1 | 9 | 54.5% |
 | [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 38 | 52.1% |
 | [`include/sha2.h`](modules/include.sha2.h.md) |  | 1 | 4 | 50.0% |
+| [`include/sheet_cache.h`](modules/include.sheet_cache.h.md) |  | 5 | 6 | 66.7% |
 | [`include/shm_slots.h`](modules/include.shm_slots.h.md) |  | 2 | 4 | 42.9% |
 | [`include/subreq_batch.h`](modules/include.subreq_batch.h.md) |  | 4 | 8 | 46.2% |
 | [`include/svg_paint.h`](modules/include.svg_paint.h.md) |  | 0 | 2 | 33.3% |
@@ -202,9 +204,10 @@ Languages: c (104), h (102), py (12), sh (4)
 | [`src/link_nav.c`](modules/src.link_nav.c.md) |  | 0 | 2 | 33.3% |
 | [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 25 | 19.2% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
+| [`src/net_guard.c`](modules/src.net_guard.c.md) | net_guard -- see include/net_guard.h and spec/net_guard.md. | 0 | 9 | 50.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
-| [`src/page_view.c`](modules/src.page_view.c.md) |  | 22 | 118 | 44.7% |
+| [`src/page_view.c`](modules/src.page_view.c.md) |  | 22 | 121 | 44.4% |
 | [`src/pdf_export.c`](modules/src.pdf_export.c.md) |  | 0 | 4 | 20.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) |  | 0 | 11 | 75.0% |
 | [`src/pq_seal.c`](modules/src.pq_seal.c.md) |  | 1 | 8 | 10.0% |
@@ -215,13 +218,14 @@ Languages: c (104), h (102), py (12), sh (4)
 | [`src/render_policy.c`](modules/src.render_policy.c.md) |  | 0 | 5 | 50.0% |
 | [`src/renderer.c`](modules/src.renderer.c.md) |  | 0 | 4 | 20.0% |
 | [`src/request_policy.c`](modules/src.request_policy.c.md) |  | 0 | 7 | 62.5% |
-| [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 44 | 27.5% |
+| [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 45 | 28.8% |
 | [`src/sha2.c`](modules/src.sha2.c.md) |  | 0 | 6 | 42.9% |
+| [`src/sheet_cache.c`](modules/src.sheet_cache.c.md) | sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md. | 4 | 6 | 81.8% |
 | [`src/subreq_batch.c`](modules/src.subreq_batch.c.md) |  | 2 | 8 | 45.5% |
 | [`src/svg_paint.c`](modules/src.svg_paint.c.md) | svg_paint — Cairo back end for the shapes svg_render extracted. | 0 | 2 | 66.7% |
 | [`src/svg_raster.c`](modules/src.svg_raster.c.md) | svg_raster -- SVG served as an image, rasterized inside the confined worker. spec/svg_raster.md. | 0 | 2 | 66.7% |
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
-| [`src/tab.c`](modules/src.tab.c.md) |  | 7 | 94 | 44.1% |
+| [`src/tab.c`](modules/src.tab.c.md) |  | 7 | 95 | 43.7% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |
 | [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 12 | 27 | 50.0% |
 | [`src/textfield.c`](modules/src.textfield.c.md) |  | 0 | 12 | 46.2% |

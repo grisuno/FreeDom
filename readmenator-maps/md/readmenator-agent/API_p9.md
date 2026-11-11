@@ -397,6 +397,20 @@ Depends on: `include/media_decoder.h`, `include/util.h`
 - `media_decoder_spawn` (function) `src/media_decoder.c:449` `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)`
 - `fd` (function) `src/media_decoder.c:469` `* prevent the Wayland display fd (inherited from the parent) from * surviving the exec. An inherited Wayland fd...`
 
+## src/net_guard.c
+Depends on: `include/net_guard.h`
+- `ng_v4_is_private` (function) `src/net_guard.c:12` `static int ng_v4_is_private(const unsigned char o[NG_V4_LEN])`
+- `ng_seg` (function) `src/net_guard.c:29` `static unsigned ng_seg(const unsigned char a[NG_V6_LEN], int i)`
+- `ng_v6_is_private` (function) `src/net_guard.c:33` `static int ng_v6_is_private(const unsigned char a[NG_V6_LEN])`
+- `decides` (function) `src/net_guard.c:40` `* IPv4 decides (:: and ::1 embed 0.0.0.0 and 0.0.0.1, both in 0/8). */ if (head_zero && (s[5] == 0 || s[5] ==...`
+- `ng_addr_is_private` (function) `src/net_guard.c:63` `int ng_addr_is_private(int family, const unsigned char *addr, size_t len)`
+- `ng_parse` (function) `src/net_guard.c:71` `static int ng_parse(const char *text, int *family, unsigned char out[NG_V6_LEN])` -- if (s[0] == 0x2001 && s[1] == 0x0db8) return 1;              /* documentation if (s[0] == 0x3fff && (s[1] & 0xf000)...
+- `ng_text_is_private` (function) `src/net_guard.c:84` `int ng_text_is_private(const char *ip_text)`
+- `ng_host_is_ip` (function) `src/net_guard.c:91` `int ng_host_is_ip(const char *host)`
+- `ng_ci_eq` (function) `src/net_guard.c:97` `static int ng_ci_eq(const char *a, const char *b, size_t n)`
+- `ng_host_is_local` (function) `src/net_guard.c:107` `int ng_host_is_local(const char *host)`
+- `ng_decide` (function) `src/net_guard.c:121` `ng_verdict ng_decide(const ng_request *r, int peer_private)`
+
 ## src/net_realm.c
 Depends on: `include/net_realm.h`
 - `lower` (function) `src/net_realm.c:17` `static char lower(char c)`

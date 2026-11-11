@@ -8,19 +8,19 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: What does css.h depend on, and what depends on it? (39 connections)
+### Q: What does css.h depend on, and what depends on it? (40 connections)
 
 - Status: unanswered
 
-### Q: What does tab.c depend on, and what depends on it? (29 connections)
+### Q: What does tab.c depend on, and what depends on it? (30 connections)
 
 - Status: unanswered
 
-### Q: How are the 51 files in 'src: tab' related to each other?
+### Q: How are the 48 files in 'src: tab' related to each other?
 
 - Status: unanswered
 
-### Q: Why are frame_broker.c and sha2.c connected through 9 hops across 4 communities?
+### Q: Why are frame_broker.c and sha2.c connected through 9 hops across 5 communities?
 
 - Status: unanswered
 

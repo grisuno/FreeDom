@@ -77,6 +77,18 @@
  * that follow them were dropped whole and the page rendered unstyled. */
 #define FC_MAX_AUTHOR_CSS_BYTES ((size_t)16u << 20)
 
+/* Largest stylesheet text (author CSS plus the prepended UA sheet) whose parsed form
+ * the worker retains between view derivations (spec/sheet_cache.md). The retained
+ * copy of the text is the cache key, so this bounds that copy; a longer text is
+ * parsed on every derivation exactly as before the cache existed. */
+#define FC_SHC_MAX_TEXT_BYTES (FC_MAX_AUTHOR_CSS_BYTES * 2u)
+
+/* Most root-matcher questions one parse may record for replay (spec/sheet_cache.md).
+ * Each is a compact selector copy re-asked on every later derivation, so the bound
+ * caps both memory and the cost of a hit; a sheet that asks more is simply not
+ * retained. Sized against what real pages ask (measured on the allowlist corpus). */
+#define FC_SHC_MAX_QUERIES 4096u
+
 /* Distance (px) beyond the viewport at which a loading="lazy" image starts loading. */
 #define FC_LAZY_IMAGE_MARGIN_PX 1000.0
 

@@ -197,6 +197,7 @@ sobre una struct inicializada a cero o liberada dos veces.
 | `SF_ERR_OOM` | Fallo de asignación de memoria. |
 | `SF_ERR_TOO_MANY_REDIRECTS` | `sf_get_follow` superó `max_redirects` saltos. |
 | `SF_ERR_INTERNAL` | El transporte devolvió un estado inesperado. |
+| `SF_ERR_PRIVATE_NET` | Contenido remoto (página o salto de redirección) pidió una dirección privada/loopback (`spec/net_guard.md`). Añadido al final del enum: los códigos anteriores conservan su valor. |
 
 ## 6. Semántica de los validadores puros
 
@@ -309,6 +310,32 @@ handshake TLS 1.3 + ML-KEM nuevo y ~10 `connect()` (DNS + happy-eyeballs) por fe
   identificador entre peticiones.
 - `--as-gui` llama a `sf_global_init` como la GUI (antes el arnés buscaba sin jar ni caché de
   conexiones). Medido: github.com 48 s → 28 s de pared en carga completa.
+
+## 6quinquies. Guarda de red privada (`net_guard`, 2026-11-11)
+
+`sf_setup_handle` instala en **todo** handle (GET, POST, WebSocket) dos callbacks que llaman a
+la misma decisión pura `ng_decide` (`spec/net_guard.md`):
+
+- `CURLOPT_OPENSOCKETFUNCTION` — sobre la dirección ya resuelta, antes de crear el socket
+  (no sale ni un SYN; el socket permitido se crea con `SOCK_CLOEXEC`, nunca se hereda a un
+  worker).
+- `CURLOPT_PREREQFUNCTION` — sobre la IP del par de la conexión realmente usada, que cubre
+  la **reutilización** del pool compartido (§6quater).
+
+Iniciador = `redirect_from` (lo fija `sf_get_follow` a partir del segundo salto) o, si no,
+`referrer_url`; ninguno = navegación del usuario. Mismo sitio = mismo host, o mismo eTLD+1
+(`rp_same_site`) cuando ninguno de los dos es un literal IP. `sf_fallback_policy` no reintenta
+un `SF_ERR_PRIVATE_NET`: ningún nivel de política cambia a dónde va la petición.
+
+`sf_global_init` es idempotente: una segunda llamada reemplazaba el share (fuga + pérdida del
+jar de cookies y del pool de conexiones de la sesión).
+
+La redirección de un POST de formulario la sigue la GUI (`deliver_fetch_result` → `do_load`):
+el salto que la envió viaja como `redirect_from` del nuevo fetch (`nav_redirect_from`).
+
+**Abierto:** no hay override por host para permitir público → privado a un destino concreto;
+la rama GUI de la redirección de POST está cableada pero **no ejercitada** de punta a punta
+(necesita un primer salto público).
 
 ## 7. Garantías de memoria
 

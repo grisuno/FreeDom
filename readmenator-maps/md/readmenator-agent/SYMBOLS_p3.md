@@ -454,13 +454,15 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FC_FONT_CHAIN_MAX` | macro | `include/freedom_config.h:56` | `#define FC_FONT_CHAIN_MAX` |
 | `FC_FONT_FALLBACK_PX` | macro | `include/freedom_config.h:66` | `#define FC_FONT_FALLBACK_PX` |
 | `FC_HEADLESS_VIEW_H` | macro | `include/freedom_config.h:24` | `#define FC_HEADLESS_VIEW_H` |
-| `FC_LAZY_IMAGE_MARGIN_PX` | macro | `include/freedom_config.h:81` | `#define FC_LAZY_IMAGE_MARGIN_PX` |
+| `FC_LAZY_IMAGE_MARGIN_PX` | macro | `include/freedom_config.h:93` | `#define FC_LAZY_IMAGE_MARGIN_PX` |
 | `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:78` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
 | `FC_MAX_BOXES` | macro | `include/freedom_config.h:61` | `#define FC_MAX_BOXES` |
 | `FC_PNG_MARGIN` | macro | `include/freedom_config.h:34` | `#define FC_PNG_MARGIN` |
 | `FC_PNG_MAX_H` | macro | `include/freedom_config.h:39` | `#define FC_PNG_MAX_H` |
 | `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
-| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:87` | `#define FC_TAB_OP_NET_BUDGET_MS` |
+| `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:90` | `#define FC_SHC_MAX_QUERIES` |
+| `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:84` | `#define FC_SHC_MAX_TEXT_BYTES` |
+| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:99` | `#define FC_TAB_OP_NET_BUDGET_MS` |
 | `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:30` | `#define FC_TRUSTED_JS_BUDGET_MS` |
 | `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:70` | `#define FC_UI_FONT_SIZE` |
 | `FREEDOM_CONFIG_H` | macro | `include/freedom_config.h:14` | `#define FREEDOM_CONFIG_H` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FREEDOM_HOSTEDIT_H` | macro | `include/hostedit.h:2` | `#define FREEDOM_HOSTEDIT_H` |
 | `HE_MAX_HOST` | macro | `include/hostedit.h:32` | `#define HE_MAX_HOST` |
 | `he_cdn_kind` | function | `include/hostedit.h:62` | `he_cdn_kind_t he_cdn_kind(const char *url);` |
-| `he_cdn_kind_t` | enum | `include/hostedit.h:61` | `` |
-| `he_status` | enum | `include/hostedit.h:24` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

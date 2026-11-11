@@ -3,19 +3,44 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `elsewhere` | function | `src/freedom.c:1077` | `* page whose script immediately forwards elsewhere (e.g. a search engine's  * JS-capability inter...` |
+| `fetch_and_render_one` | function | `src/freedom.c:1014` | `static int fetch_and_render_one(const char *url, char **out_nav)` |
+| `first` | function | `src/freedom.c:798` | `* always cleared first (fetch_and_render may paint several pages per      * process). A NULL top_...` |
+| `foldback_cookies` | function | `src/freedom.c:573` | `static void foldback_cookies(const char *url, const char *jar)` |
+| `gets` | function | `src/freedom.c:482` | `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...` |
+| `headless_fetch` | function | `src/freedom.c:486` | `static int headless_fetch(void *ctx, const char *method, const char *url,                        ...` |
+| `headless_load_hosts` | function | `src/freedom.c:261` | `static void headless_load_hosts(void)` |
+| `hl_css_sink` | function | `src/freedom.c:655` | `static void hl_css_sink(void *vctx, const char *url,                         const char *body, si...` |
+| `hl_font_fetch` | function | `src/freedom.c:692` | `static int hl_font_fetch(void *vctx, const char *url,                          int *out_status, c...` |
+| `hl_font_stash` | struct | `src/freedom.c:634` | `` |
+| `hl_font_stash_free` | function | `src/freedom.c:642` | `static void hl_font_stash_free(hl_font_stash *s)` |
+| `hl_frame_top_msg` | function | `src/freedom.c:215` | `static void hl_frame_top_msg(void *ctx, const char *data, size_t len)` |
+| `hl_frames` | struct | `src/freedom.c:210` | `` |
+| `is_blank_text` | function | `src/freedom.c:324` | `static int is_blank_text(const char *s)` |
+| `is_http_url` | function | `src/freedom.c:88` | `static int is_http_url(const char *s)` |
+| `is_https_url` | function | `src/freedom.c:84` | `static int is_https_url(const char *s)` |
+| `is_overlay_http` | function | `src/freedom.c:93` | `static int is_overlay_http(const char *s)` |
+| `main` | function | `src/freedom.c:1307` | `int main(int argc, char **argv)` |
+| `now_us` | function | `src/freedom.c:149` | `static uint64_t now_us(void)` |
+| `only` | function | `src/freedom.c:868` | `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...` |
+| `parent` | function | `src/freedom.c:1103` | `* gated by the parent (ln_resolve: a local target stays under the document's  * directory, a remo...` |
+| `pool` | function | `src/freedom.c:784` | `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...` |
+| `print_console` | function | `src/freedom.c:430` | `static void print_console(const fb_buffer *log)` |
+| `print_css_drops` | function | `src/freedom.c:597` | `static void print_css_drops(const char *html, size_t len)` |
+| `print_doc` | function | `src/freedom.c:337` | `static void print_doc(const rd_doc *doc)` |
 | `print_dom` | function | `src/freedom.c:447` | `static void print_dom(const rd_doc *doc)` |
 | `print_dom_css` | function | `src/freedom.c:462` | `static void print_dom_css(const rd_doc *doc)` |
 | `print_usage` | function | `src/freedom.c:55` | `static void print_usage(FILE *fp, const char *prog)` |
 | `read_file` | function | `src/freedom.c:243` | `static char *read_file(const char *path, size_t *out_len)` |
 | `render_page` | function | `src/freedom.c:720` | `static int render_page(const char *html, size_t len, const char *top_url,                        ...` |
-| `run_dump_video` | function | `src/freedom.c:1287` | `static int run_dump_video(const char *url)` |
-| `run_headless` | function | `src/freedom.c:1139` | `static int run_headless(const char *target)` |
+| `run_dump_video` | function | `src/freedom.c:1288` | `static int run_dump_video(const char *url)` |
+| `run_headless` | function | `src/freedom.c:1140` | `static int run_headless(const char *target)` |
 | `sf_reason` | function | `src/freedom.c:994` | `static const char *sf_reason(sf_status ss)` |
 | `timings_dump` | function | `src/freedom.c:163` | `static void timings_dump(void)` |
 | `timings_enabled` | function | `src/freedom.c:159` | `static int timings_enabled(void)` |
 | `timings_ensure_init` | function | `src/freedom.c:155` | `static void timings_ensure_init(void)` |
 | `user_impersonate_enabled` | function | `src/freedom.c:236` | `static int user_impersonate_enabled(void)` |
-| `video_fetch_with_fallback` | function | `src/freedom.c:1176` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
+| `video_fetch_with_fallback` | function | `src/freedom.c:1177` | `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,                      ...` |
 | `_GNU_SOURCE` | macro | `src/hls.c:21` | `#define _GNU_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `src/hls.c:22` | `#define _POSIX_C_SOURCE` |
 | `hls_parse` | function | `src/hls.c:80` | `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)` |
@@ -471,30 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `explicitly` | function | `src/js_trusted.c:557` | `* explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...` |
 | `hex_nibble` | function | `src/js_trusted.c:254` | `static int hex_nibble(char c)` |
 | `jt_enable_frames` | function | `src/js_trusted.c:432` | `jd_status jt_enable_frames(js_context *ctx, int frame_id)` |
-| `jt_enable_observers` | function | `src/js_trusted.c:129` | `jd_status jt_enable_observers(js_context *ctx)` |
-| `jt_enable_open` | function | `src/js_trusted.c:48` | `jd_status jt_enable_open(js_context *ctx)` |
-| `jt_enable_storage` | function | `src/js_trusted.c:488` | `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)` |
-| `jt_enable_worker` | function | `src/js_trusted.c:638` | `jd_status jt_enable_worker(js_context *ctx)` |
-| `jt_enable_ws` | function | `src/js_trusted.c:237` | `jd_status jt_enable_ws(js_context *ctx)` |
-| `jt_geometry_changed` | function | `src/js_trusted.c:143` | `jd_status jt_geometry_changed(js_context *ctx)` |
-| `jt_seed_ctx` | struct | `src/js_trusted.c:476` | `` |
-| `jt_seed_pair` | function | `src/js_trusted.c:478` | `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)` |
-| `jt_take_opens` | function | `src/js_trusted.c:159` | `char *jt_take_opens(js_context *ctx)` |
-| `jt_take_storage` | function | `src/js_trusted.c:509` | `int jt_take_storage(js_context *ctx, char **out, size_t *len)` |
-| `jt_take_ws` | function | `src/js_trusted.c:285` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)` |
-| `jt_ws_event` | function | `src/js_trusted.c:336` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)` |
-| `jt_ws_ops_free` | function | `src/js_trusted.c:249` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n)` |
-| `ws_payload` | function | `src/js_trusted.c:261` | `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)` |
-| `append_seg` | function | `src/link_nav.c:86` | `static int append_seg(char *body, size_t bodysz, size_t *blen,                       const char *...` |
-| `ci_prefix` | function | `src/link_nav.c:38` | `static int ci_prefix(const char *s, const char *prefix)` |
-| `classify_block` | function | `src/link_nav.c:62` | `static ln_block_reason classify_block(const char *ref)` |
-| `clean_href` | function | `src/link_nav.c:19` | `static int clean_href(const char *href, char *out, size_t outsz)` |
-| `file_dir_len` | function | `src/link_nav.c:69` | `static size_t file_dir_len(const char *base)` |
-| `last_seg_is_dotdot` | function | `src/link_nav.c:79` | `static int last_seg_is_dotdot(const char *body, size_t blen)` |
-| `ln_block_reason_text` | function | `src/link_nav.c:241` | `const char *ln_block_reason_text(ln_block_reason reason)` |
-| `ln_resolve` | function | `src/link_nav.c:172` | `ln_status ln_resolve(const char *base, const char *href, ln_result *out)` |
-| `pop_seg` | function | `src/link_nav.c:98` | `static void pop_seg(char *body, size_t *blen)` |
-| `resolve_file` | function | `src/link_nav.c:149` | `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)` |
-| `LS_ARGON2_M_KIB` | macro | `src/local_store.c:54` | `#define LS_ARGON2_M_KIB` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

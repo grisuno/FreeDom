@@ -514,6 +514,10 @@ typedef struct browser_window {
      * is discarded -- the active tab is then guaranteed unchanged since the launch. */
     int      fetch_pipe[2];  /* [0] read end (polled), [1] write end (threads) */
     uint64_t net_gen;        /* current navigation generation */
+    const char *nav_redirect_from; /* borrowed, non-NULL only while do_load runs for a
+                                    * navigation a server redirect caused: the hop that
+                                    * sent it is the initiator the private-network guard
+                                    * judges (spec/net_guard.md), not the user */
     int js_nav_depth;        /* consecutive JS-driven navigations (location.href=); capped */
 
     /* Streaming progressive render: the fetch thread copies accumulated body here
@@ -1996,6 +2000,7 @@ typedef struct fetch_job {
     void         *body;          /* POST body (owned), or NULL */
     size_t        body_len;
     char         *content_type;  /* POST content type (owned), or NULL */
+    char         *redirect_from; /* hop whose redirect caused this fetch (owned), or NULL */
 
     /* Output (filled by the thread). */
     sf_status status;
@@ -2017,6 +2022,7 @@ static void fetch_job_free(fetch_job *j) {
     free(j->password);
     free(j->body);
     free(j->content_type);
+    free(j->redirect_from);
     free(j->html);
     free(j->location);
     free(j->resp_ctype);
@@ -2066,6 +2072,7 @@ static void *fetch_thread(void *arg) {
     cfg.impersonate = j->impersonate;
     cfg.username = j->username;
     cfg.password = j->password;
+    cfg.redirect_from = j->redirect_from;
     /* Enable streaming progress so the page renders before the full download
      * finishes. Only for GET (not POST); the callback copies data under the
      * window's stream_lock and signals the main loop via eventfd. */
@@ -2126,6 +2133,7 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
     j->proxy_address = (cfg->proxy_address != NULL) ? strdup(cfg->proxy_address) : NULL;
     j->username = (cfg->username != NULL) ? strdup(cfg->username) : NULL;
     j->password = (cfg->password != NULL) ? strdup(cfg->password) : NULL;
+    j->redirect_from = (cfg->redirect_from != NULL) ? strdup(cfg->redirect_from) : NULL;
     if (is_post) {
         j->content_type = (content_type != NULL) ? strdup(content_type) : NULL;
         if (body_len > 0) {
@@ -2137,6 +2145,7 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
     if (j->url == NULL ||
         (cfg->user_agent != NULL && j->user_agent == NULL) ||
         (cfg->proxy_address != NULL && j->proxy_address == NULL) ||
+        (cfg->redirect_from != NULL && j->redirect_from == NULL) ||
         (is_post && content_type != NULL && j->content_type == NULL) ||
         (is_post && body_len > 0 && j->body == NULL)) {
         fetch_job_free(j);
@@ -2743,6 +2752,7 @@ static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
         case SF_ERR_CERT_NOT_PQ:  reason = "strict PQ signature missing"; break;
         case SF_ERR_NETWORK:      reason = "network error"; break;
         case SF_ERR_TOO_MANY_REDIRECTS: reason = "too many redirects"; break;
+        case SF_ERR_PRIVATE_NET:  reason = "a page tried to reach a private network address"; break;
         default:                  reason = "fetch error"; break;
     }
     char bypass[768];
@@ -2931,6 +2941,7 @@ static void do_load(browser_window *w, const char *url) {
             browser_set_page(&w->bs, NULL, pr.err, 1);
             return;
         }
+        cfg.redirect_from = w->nav_redirect_from;
         if (!fetch_launch(w, fetch_url, &cfg, pr.allowlisted, 0, NULL, 0, NULL)) {
             clear_doc(w);
             w->scroll = 0.0; w->loading = 0;
@@ -16390,7 +16401,13 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j) {
     if (j->is_post && sf_is_redirect_code(j->http_code) && j->location != NULL) {
         char next[SF_MAX_URL];
         if (sf_resolve_redirect(j->url, j->location, next, sizeof next) == SF_OK) {
-            if (browser_navigate(&w->bs, next) == BROWSER_OK) do_load(w, next);
+            if (browser_navigate(&w->bs, next) == BROWSER_OK) {
+                /* The server sent us there, not the user: a POST answered with a
+                 * redirect to a private address is refused like any other hop. */
+                w->nav_redirect_from = j->url;
+                do_load(w, next);
+                w->nav_redirect_from = NULL;
+            }
             redraw(w);
             return;
         }

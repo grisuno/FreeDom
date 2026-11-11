@@ -16,6 +16,7 @@
 #include "anti_fp.h"
 #include "url.h"
 #include "request_policy.h"
+#include "net_guard.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +24,8 @@
 #include <pthread.h>
 #include <time.h>
 #include <inttypes.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #include <curl/curl.h>
 #include <openssl/ssl.h>
@@ -90,7 +93,10 @@ void sf_global_init(void) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     /* In-memory cookie jar shared across ALL requests so Set-Cookie from a POST
-     * login survives the redirect GET. Zero Knowledge: never persisted to disk. */
+     * login survives the redirect GET. Zero Knowledge: never persisted to disk.
+     * Created once: a second call used to replace the share, leaking the first and
+     * silently dropping the session's cookies and pooled connections with it. */
+    if (sf_share != NULL) return;
     sf_share = curl_share_init();
     if (sf_share != NULL) {
         curl_share_setopt(sf_share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -245,6 +251,7 @@ sf_config sf_config_default(void) {
     c.insecure = 0;
     c.impersonate = 0; /* default hardened PQ-hybrid ClientHello; opt-in per trusted host */
     c.referrer_url = NULL;
+    c.redirect_from = NULL;
     c.sec_fetch_dest = NULL;
     c.sec_fetch_mode = NULL;
     c.progress_ctx = NULL;
@@ -510,6 +517,8 @@ typedef struct tls_capture {
     char          sigbuf[128];
 } tls_capture;
 
+#define SF_GUARD_HOST_MAX 256
+
 typedef struct fetch_ctx {
     body_sink   sink;
     tls_capture cap;
@@ -523,6 +532,11 @@ typedef struct fetch_ctx {
     void      (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);
     char        hdr_all[SF_RESPONSE_HEADERS_MAX]; /* final hop's header lines, status line excluded */
     size_t      hdr_len;
+    /* Private-network guard (spec/net_guard.md): who asked, and whether a connection
+     * was refused for it (turns the transport's generic failure into SF_ERR_PRIVATE_NET). */
+    ng_request  guard;
+    char        guard_host[SF_GUARD_HOST_MAX];
+    int         guard_denied;
 } fetch_ctx;
 
 static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len);
@@ -759,6 +773,76 @@ static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sig
     return 0;
 }
 
+/* --- private-network guard (spec/net_guard.md) --- */
+
+/* Fills ctx->guard for a request to `url` under *local. The initiator is the redirect
+ * hop that led here, else the page that asked; neither means the user navigated. An
+ * initiator whose host cannot be read stays "" and so can never be local or same-site:
+ * a private peer is then refused (fail closed). */
+static void sf_guard_init(fetch_ctx *ctx, const char *url, const sf_config *local) {
+    const char *initiator = (local->redirect_from != NULL) ? local->redirect_from
+                                                           : local->referrer_url;
+    ctx->guard.via_proxy = (local->proxy_type != SF_PROXY_NONE
+                            && local->proxy_address != NULL);
+    ctx->guard.initiator_host = NULL;
+    ctx->guard.same_site = 0;
+    ctx->guard_host[0] = '\0';
+    ctx->guard_denied = 0;
+    if (initiator == NULL) return;
+    ctx->guard.initiator_host = ctx->guard_host;
+    char target[SF_GUARD_HOST_MAX], scratch[2];
+    if (sf_url_host_path(initiator, ctx->guard_host, sizeof ctx->guard_host,
+                         scratch, sizeof scratch) != 0) { ctx->guard_host[0] = '\0'; return; }
+    if (sf_url_host_path(url, target, sizeof target, scratch, sizeof scratch) != 0) return;
+    if (strcasecmp(target, ctx->guard_host) == 0) { ctx->guard.same_site = 1; return; }
+    /* A registrable domain is a property of names; two literals are one site only
+     * when they are the same literal. */
+    if (ng_host_is_ip(target) || ng_host_is_ip(ctx->guard_host)) return;
+    ctx->guard.same_site = rp_same_site(initiator, url);
+}
+
+/* CURLOPT_OPENSOCKETFUNCTION: judged on the RESOLVED address before a socket exists,
+ * so a refused request sends nothing -- and a name that resolves to a private address
+ * (rebinding, hosts file, legacy numeric forms) is caught like a literal. The socket is
+ * created the way libcurl would, close-on-exec so it never leaks into a tab worker. */
+static curl_socket_t sf_guard_opensocket(void *clientp, curlsocktype purpose,
+                                         struct curl_sockaddr *address) {
+    fetch_ctx *ctx = (fetch_ctx *)clientp;
+    (void)purpose;
+    int peer_private = 1;
+    if (address->family == AF_INET && address->addrlen >= sizeof(struct sockaddr_in)) {
+        struct sockaddr_in sa;
+        memcpy(&sa, &address->addr, sizeof sa);
+        peer_private = ng_addr_is_private(NG_FAMILY_V4, (const unsigned char *)&sa.sin_addr,
+                                          sizeof sa.sin_addr);
+    } else if (address->family == AF_INET6
+               && address->addrlen >= sizeof(struct sockaddr_in6)) {
+        struct sockaddr_in6 sa6;
+        memcpy(&sa6, &address->addr, sizeof sa6);
+        peer_private = ng_addr_is_private(NG_FAMILY_V6, sa6.sin6_addr.s6_addr,
+                                          sizeof sa6.sin6_addr.s6_addr);
+    }
+    if (ng_decide(&ctx->guard, peer_private) == NG_DENY) {
+        ctx->guard_denied = 1;
+        return CURL_SOCKET_BAD;
+    }
+    return socket(address->family, address->socktype | SOCK_CLOEXEC, address->protocol);
+}
+
+/* CURLOPT_PREREQFUNCTION: the same decision on the peer of the connection actually
+ * used, which covers one REUSED from the shared pool -- opened, legitimately, by the
+ * user's own navigation to a private host. */
+static int sf_guard_prereq(void *clientp, char *conn_primary_ip, char *conn_local_ip,
+                           int conn_primary_port, int conn_local_port) {
+    fetch_ctx *ctx = (fetch_ctx *)clientp;
+    (void)conn_local_ip; (void)conn_primary_port; (void)conn_local_port;
+    if (ng_decide(&ctx->guard, ng_text_is_private(conn_primary_ip)) == NG_DENY) {
+        ctx->guard_denied = 1;
+        return CURL_PREREQFUNC_ABORT;
+    }
+    return CURL_PREREQFUNC_OK;
+}
+
 static sf_status map_curl_error(CURLcode rc, const body_sink *sink) {
     if (sink->overflow == 1) return SF_ERR_TOO_LARGE;
     if (sink->overflow == 2) return SF_ERR_OOM;
@@ -818,6 +902,13 @@ static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *l
                                  fetch_ctx *ctx, const char *ws_protos,
                                  struct curl_slist **hdrs) {
     curl_easy_setopt(curl, CURLOPT_URL, url);
+    /* Remote content never reaches the private network (spec/net_guard.md). Installed
+     * here, on every handle, so GET, POST and WebSocket cannot differ. */
+    sf_guard_init(ctx, url, local);
+    curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, sf_guard_opensocket);
+    curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, ctx);
+    curl_easy_setopt(curl, CURLOPT_PREREQFUNCTION, sf_guard_prereq);
+    curl_easy_setopt(curl, CURLOPT_PREREQDATA, ctx);
     /* Socket-level anonymity proxy (Tor SOCKS5h / I2P HTTP). SOCKS5_HOSTNAME keeps DNS
      * resolution at the proxy (no local lookup => no DNS leak; resolves .onion). When
      * a proxy is set, libcurl never bypasses it, so there is no de-anonymizing direct
@@ -1060,7 +1151,7 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
 
     CURLcode rc = curl_easy_perform(curl);
     if (rc != CURLE_OK) {
-        result = map_curl_error(rc, &ctx.sink);
+        result = ctx.guard_denied ? SF_ERR_PRIVATE_NET : map_curl_error(rc, &ctx.sink);
         goto done;
     }
 
@@ -1264,6 +1355,11 @@ sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
         return SF_ERR_INVALID_URL;
     }
 
+    /* From the second hop on, the request was caused by a redirect -- remote content,
+     * not the user -- and the private-network guard judges it as such. */
+    sf_config hop_cfg = (cfg != NULL) ? *cfg : sf_config_default();
+    char previous[SF_MAX_URL];
+
     for (int hops = 0; ; ++hops) {
         /* A permanent redirect already seen this session is not asked again: the next
          * hop is requested directly, under the full policy like any other hop. */
@@ -1271,12 +1367,14 @@ sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
         if (hops < max_redirects && sf_rcache_get(current, time(NULL), known, sizeof known)) {
             if (getenv("FREEDOM_TRACE_FETCH") != NULL)
                 fprintf(stderr, "redirect-memory %s -> %s\n", current, known);
+            memcpy(previous, current, strlen(current) + 1);
+            hop_cfg.redirect_from = previous;
             memcpy(current, known, strlen(known) + 1);
             continue;
         }
         /* Each hop is a fresh request: the full TLS/PQ/chain policy is enforced
          * again. Nothing from the previous hop is trusted but the resolved URL. */
-        sf_status s = sf_get(current, cfg, out);
+        sf_status s = sf_get(current, (cfg != NULL || hops > 0) ? &hop_cfg : NULL, out);
         if (s != SF_OK) return s; /* out carries the failure reason */
 
         if (!sf_is_redirect_code(out->http_code) || out->location == NULL) {
@@ -1304,6 +1402,8 @@ sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
         if ((out->http_code == 301 || out->http_code == 308) && !overlay)
             (void)sf_rcache_put(current, next, time(NULL));
         sf_response_free(out);
+        memcpy(previous, current, strlen(current) + 1);
+        hop_cfg.redirect_from = previous;
         memcpy(current, next, strlen(next) + 1);
     }
 }
@@ -1391,7 +1491,7 @@ sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out) {
 
     CURLcode rc = curl_easy_perform(ws->curl);
     if (rc != CURLE_OK) {
-        st = map_curl_error(rc, &ws->ctx->sink);
+        st = ws->ctx->guard_denied ? SF_ERR_PRIVATE_NET : map_curl_error(rc, &ws->ctx->sink);
         ws_free(ws);
         return st;
     }
@@ -1481,6 +1581,9 @@ int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_po
         *next = SF_POLICY_ALLOW_CLASSICAL_KE;
         return 1;
     }
+    /* The private-network refusal is about WHERE the request goes, not how strong its
+     * crypto is: no policy level changes it, so there is nothing to retry. */
+    if (failed == SF_ERR_PRIVATE_NET) return 0;
     if (allowlisted && tried != SF_POLICY_ALLOWLISTED_INSECURE
         && failed != SF_OK) {
         *next = SF_POLICY_ALLOWLISTED_INSECURE;

@@ -849,6 +849,7 @@
 - [`dd_format`](modules/src.dom_debug.c.md#dd_format) function in `src/dom_debug.c`
 - [`dd_format_css`](modules/include.dom_debug.h.md#dd_format_css) function in `include/dom_debug.h`
 - [`dd_format_css`](modules/src.dom_debug.c.md#dd_format_css) function in `src/dom_debug.c`
+- [`decides`](modules/src.net_guard.c.md#decides) function in `src/net_guard.c`
 - [`decision`](modules/include.render_doc.h.md#decision) function in `include/render_doc.h`
 - [`declaration`](modules/include.css_vars.h.md#declaration) function in `include/css_vars.h`
 - [`declaration`](modules/src.css.c.md#declaration) function in `src/css.c`
@@ -1132,6 +1133,8 @@
 - [`FC_PNG_PAGE_W`](modules/include.freedom_config.h.md#fc_png_page_w) macro in `include/freedom_config.h`
 - [`fc_set_active`](modules/include.frame_clock.h.md#fc_set_active) function in `include/frame_clock.h`
 - [`fc_set_active`](modules/src.frame_clock.c.md#fc_set_active) function in `src/frame_clock.c`
+- [`FC_SHC_MAX_QUERIES`](modules/include.freedom_config.h.md#fc_shc_max_queries) macro in `include/freedom_config.h`
+- [`FC_SHC_MAX_TEXT_BYTES`](modules/include.freedom_config.h.md#fc_shc_max_text_bytes) macro in `include/freedom_config.h`
 - [`FC_TAB_OP_NET_BUDGET_MS`](modules/include.freedom_config.h.md#fc_tab_op_net_budget_ms) macro in `include/freedom_config.h`
 - [`FC_TRUSTED_JS_BUDGET_MS`](modules/include.freedom_config.h.md#fc_trusted_js_budget_ms) macro in `include/freedom_config.h`
 - [`FC_UI_FONT_SIZE`](modules/include.freedom_config.h.md#fc_ui_font_size) macro in `include/freedom_config.h`
@@ -1458,6 +1461,7 @@
 - [`here`](modules/src.webfont_load.c.md#here) function in `src/webfont_load.c`
 - [`here`](modules/include.webfont.h.md#wf_ref-here) method of `wf_ref` in `include/webfont.h`
 - [`HIST_STEP_DEPTH_MAX`](modules/gui.browser_ui.c.md#hist_step_depth_max) macro in `gui/browser_ui.c`
+- [`hits`](modules/include.sheet_cache.h.md#hits) type_alias in `include/sheet_cache.h`
 - [`HL_FONT_MAX_BYTES`](modules/src.freedom.c.md#hl_font_max_bytes) macro in `src/freedom.c`
 - [`HL_FONT_MAX_SHEETS`](modules/src.freedom.c.md#hl_font_max_sheets) macro in `src/freedom.c`
 - [`hl_font_stash`](modules/src.freedom.c.md#hl_font_stash) struct in `src/freedom.c`
@@ -2027,6 +2031,22 @@
 - [`namespace`](modules/include.os_sandbox.h.md#namespace) function in `include/os_sandbox.h`
 - [`nat_h`](modules/include.box_style.h.md#bx_bg_layer-nat_h) type_alias of `bx_bg_layer` in `include/box_style.h`
 - [`net_reply`](modules/src.tab.c.md#net_reply) struct in `src/tab.c`
+- [`ng_addr_is_private`](modules/include.net_guard.h.md#ng_addr_is_private) function in `include/net_guard.h`
+- [`ng_addr_is_private`](modules/src.net_guard.c.md#ng_addr_is_private) function in `src/net_guard.c`
+- [`ng_decide`](modules/src.net_guard.c.md#ng_decide) function in `src/net_guard.c`
+- [`NG_FAMILY_V4`](modules/include.net_guard.h.md#ng_family_v4) macro in `include/net_guard.h`
+- [`NG_FAMILY_V6`](modules/include.net_guard.h.md#ng_family_v6) macro in `include/net_guard.h`
+- [`ng_host_is_ip`](modules/include.net_guard.h.md#ng_host_is_ip) function in `include/net_guard.h`
+- [`ng_host_is_ip`](modules/src.net_guard.c.md#ng_host_is_ip) function in `src/net_guard.c`
+- [`ng_host_is_local`](modules/include.net_guard.h.md#ng_host_is_local) function in `include/net_guard.h`
+- [`ng_host_is_local`](modules/src.net_guard.c.md#ng_host_is_local) function in `src/net_guard.c`
+- [`ng_request`](modules/include.net_guard.h.md#ng_request) struct in `include/net_guard.h`
+- [`ng_text_is_private`](modules/include.net_guard.h.md#ng_text_is_private) function in `include/net_guard.h`
+- [`ng_text_is_private`](modules/src.net_guard.c.md#ng_text_is_private) function in `src/net_guard.c`
+- [`NG_TEXT_MAX`](modules/src.net_guard.c.md#ng_text_max) macro in `src/net_guard.c`
+- [`NG_V4_LEN`](modules/src.net_guard.c.md#ng_v4_len) macro in `src/net_guard.c`
+- [`NG_V6_LEN`](modules/src.net_guard.c.md#ng_v6_len) macro in `src/net_guard.c`
+- [`ng_verdict`](modules/include.net_guard.h.md#ng_verdict) enum in `include/net_guard.h`
 - [`node`](modules/include.box_tree.h.md#node) function in `include/box_tree.h`
 - [`node`](modules/include.js_geom.h.md#node) type_alias in `include/js_geom.h`
 - [`NONE`](modules/src.box_style.c.md#none) macro in `src/box_style.c`
@@ -2378,6 +2398,7 @@
 - [`PV_BR_EMPTY`](modules/include.page_view.h.md#pv_br_empty) macro in `include/page_view.h`
 - [`PV_BSHADOW_LAYERS`](modules/include.page_view.h.md#pv_bshadow_layers) macro in `include/page_view.h`
 - [`pv_build`](modules/src.page_view.c.md#pv_build) function in `src/page_view.c`
+- [`pv_build_cached`](modules/src.page_view.c.md#pv_build_cached) function in `src/page_view.c`
 - [`pv_build_ex`](modules/src.page_view.c.md#pv_build_ex) function in `src/page_view.c`
 - [`pv_build_full`](modules/src.page_view.c.md#pv_build_full) function in `src/page_view.c`
 - [`pv_build_styled`](modules/src.page_view.c.md#pv_build_styled) function in `src/page_view.c`
@@ -2391,6 +2412,8 @@
 - [`pv_computed_get`](modules/src.page_view.c.md#pv_computed_get) function in `src/page_view.c`
 - [`pv_computed_new`](modules/include.page_view.h.md#pv_computed_new) function in `include/page_view.h`
 - [`pv_computed_new`](modules/src.page_view.c.md#pv_computed_new) function in `src/page_view.c`
+- [`pv_computed_new_cached`](modules/include.page_view.h.md#pv_computed_new_cached) function in `include/page_view.h`
+- [`pv_computed_new_cached`](modules/src.page_view.c.md#pv_computed_new_cached) function in `src/page_view.c`
 - [`pv_cont_at`](modules/include.page_view.h.md#pv_cont_at) function in `include/page_view.h`
 - [`pv_cont_at`](modules/src.page_view.c.md#pv_cont_at) function in `src/page_view.c`
 - [`pv_cont_count`](modules/include.page_view.h.md#pv_cont_count) function in `include/page_view.h`
@@ -2723,6 +2746,7 @@
 - [`sf_get_follow_navigable`](modules/src.secure_fetch.c.md#sf_get_follow_navigable) function in `src/secure_fetch.c`
 - [`sf_global_init`](modules/include.secure_fetch.h.md#sf_global_init) function in `include/secure_fetch.h`
 - [`sf_global_init`](modules/src.secure_fetch.c.md#sf_global_init) function in `src/secure_fetch.c`
+- [`SF_GUARD_HOST_MAX`](modules/src.secure_fetch.c.md#sf_guard_host_max) macro in `src/secure_fetch.c`
 - [`sf_header_value`](modules/include.secure_fetch.h.md#sf_header_value) function in `include/secure_fetch.h`
 - [`sf_header_value`](modules/src.secure_fetch.c.md#sf_header_value) function in `src/secure_fetch.c`
 - [`SF_IMPERSONATE_KEX_GROUPS`](modules/include.secure_fetch.h.md#sf_impersonate_kex_groups) macro in `include/secure_fetch.h`
@@ -2783,6 +2807,27 @@
 - [`sha_digest_len`](modules/src.sha2.c.md#sha_digest_len) function in `src/sha2.c`
 - [`SHA_MAX_DIGEST`](modules/include.sha2.h.md#sha_max_digest) macro in `include/sha2.h`
 - [`shape`](modules/include.css_gradient.h.md#cg_radial-shape) type_alias of `cg_radial` in `include/css_gradient.h`
+- [`shc_acquire`](modules/include.sheet_cache.h.md#shc_acquire) function in `include/sheet_cache.h`
+- [`shc_acquire`](modules/src.sheet_cache.c.md#shc_acquire) function in `src/sheet_cache.c`
+- [`shc_cache`](modules/include.page_view.h.md#shc_cache) struct in `include/page_view.h`
+- [`shc_cache`](modules/include.sheet_cache.h.md#shc_cache) type_alias in `include/sheet_cache.h`
+- [`shc_cache`](modules/src.sheet_cache.c.md#shc_cache) struct in `src/sheet_cache.c`
+- [`shc_css`](modules/include.sheet_cache.h.md#shc_css) function in `include/sheet_cache.h`
+- [`shc_css`](modules/src.sheet_cache.c.md#shc_css) function in `src/sheet_cache.c`
+- [`shc_free`](modules/include.sheet_cache.h.md#shc_free) function in `include/sheet_cache.h`
+- [`shc_free`](modules/src.sheet_cache.c.md#shc_free) function in `src/sheet_cache.c`
+- [`shc_key`](modules/include.sheet_cache.h.md#shc_key) struct in `include/sheet_cache.h`
+- [`shc_new`](modules/include.sheet_cache.h.md#shc_new) function in `include/sheet_cache.h`
+- [`shc_new`](modules/src.sheet_cache.c.md#shc_new) function in `src/sheet_cache.c`
+- [`shc_probe`](modules/src.sheet_cache.c.md#shc_probe) struct in `src/sheet_cache.c`
+- [`shc_query`](modules/src.sheet_cache.c.md#shc_query) struct in `src/sheet_cache.c`
+- [`shc_release`](modules/include.sheet_cache.h.md#shc_release) function in `include/sheet_cache.h`
+- [`shc_release`](modules/src.sheet_cache.c.md#shc_release) function in `src/sheet_cache.c`
+- [`shc_sheet`](modules/include.sheet_cache.h.md#shc_sheet) type_alias in `include/sheet_cache.h`
+- [`shc_sheet`](modules/src.sheet_cache.c.md#shc_sheet) struct in `src/sheet_cache.c`
+- [`shc_stats`](modules/include.sheet_cache.h.md#shc_stats) struct in `include/sheet_cache.h`
+- [`shc_stats_get`](modules/include.sheet_cache.h.md#shc_stats_get) function in `include/sheet_cache.h`
+- [`shc_stats_get`](modules/src.sheet_cache.c.md#shc_stats_get) function in `src/sheet_cache.c`
 - [`shortcut`](modules/include.ui.h.md#shortcut) function in `include/ui.h`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
@@ -3250,11 +3295,13 @@
 - [`UI_WIN_BTN_W`](modules/gui.browser_ui.c.md#ui_win_btn_w) macro in `gui/browser_ui.c`
 - [`ui_window`](modules/gui.ui_render.c.md#ui_window) struct in `gui/ui_render.c`
 - [`ui_wrap_text`](modules/src.ui_layout.c.md#ui_wrap_text) function in `src/ui_layout.c`
+- [`unchanged`](modules/src.tab.c.md#child_state-unchanged) method of `child_state` in `src/tab.c`
 - [`undefined`](modules/src.js_sandbox.c.md#undefined) function in `src/js_sandbox.c`
 - [`unset`](modules/src.render_doc.c.md#unset) function in `src/render_doc.c`
 - [`upstream`](modules/gui.browser_ui.c.md#upstream) function in `gui/browser_ui.c`
 - [`URL`](modules/src.page_view.c.md#url) function in `src/page_view.c`
 - [`url`](modules/include.url.h.md#url) function in `include/url.h`
+- [`url`](modules/src.page_view.c.md#url) function in `src/page_view.c`
 - [`url_authority_len`](modules/include.url.h.md#url_authority_len) function in `include/url.h`
 - [`url_authority_len`](modules/src.url.c.md#url_authority_len) function in `src/url.c`
 - [`URL_ERR_NOT_HTTPS`](modules/include.url.h.md#url_err_not_https) function in `include/url.h`

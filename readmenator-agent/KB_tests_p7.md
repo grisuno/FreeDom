@@ -1,6 +1,34 @@
 # Subsystem: tests (page 7 of 8)
 Previous: [KB_tests_p6.md](KB_tests_p6.md)
 
+## tests/test_render_policy.c
+- Doc: test_image_allow_data_url: A data: URI embeds its bytes inline: no socket opens, so it skips the...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_caps_safe_is_all_off` (function, line 18) `static void test_caps_safe_is_all_off(void **state)`
+  - `test_caps_zero_value_is_safe` (function, line 26) `static void test_caps_zero_value_is_safe(void **state)`
+  - `test_tracking_pixel_tiny` (function, line 37) `static void test_tracking_pixel_tiny(void **state)`
+  - `test_tracking_pixel_zero_area` (function, line 45) `static void test_tracking_pixel_zero_area(void **state)`
+  - `test_tracking_pixel_normal` (function, line 52) `static void test_tracking_pixel_normal(void **state)`
+  - `test_tracking_pixel_unknown` (function, line 62) `static void test_tracking_pixel_unknown(void **state)`
+  - `test_image_disabled_by_default` (function, line 72) `static void test_image_disabled_by_default(void **state)`
+  - `caps_images_on` (function, line 90) `static rdp_caps caps_images_on(void)`
+  - `test_image_allow_same_site` (function, line 96) `static void test_image_allow_same_site(void **state)`
+  - `test_image_allow_cross_site_when_enabled` (function, line 108) `static void test_image_allow_cross_site_when_enabled(void **state)`
+  - `test_image_block_tracker` (function, line 119) `static void test_image_block_tracker(void **state)`
+  - `test_image_block_scheme` (function, line 134) `static void test_image_block_scheme(void **state)`
+  - `test_image_block_invalid` (function, line 142) `static void test_image_block_invalid(void **state)`
+  - `test_image_allow_data_url` (function, line 164) `static void test_image_allow_data_url(void **state)`
+  - `test_image_data_url_disabled_by_default` (function, line 183) `static void test_image_data_url_disabled_by_default(void **state)`
+  - `test_image_data_url_malformed_is_invalid` (function, line 191) `static void test_image_data_url_malformed_is_invalid(void **state)`
+  - `test_image_disabled_precedence` (function, line 209) `static void test_image_disabled_precedence(void **state)`
+  - `test_img_reason_total_and_stable` (function, line 219) `static void test_img_reason_total_and_stable(void **state)`
+  - `test_images_warning_present` (function, line 234) `static void test_images_warning_present(void **state)`
+  - `main` (function, line 243) `int main(void)`
+  - `consulted` (function, line 76) `* is not even consulted (a bogus URL still yields BLOCK_DISABLED). */ assert_int_equal( rdp_image_decision(off...`
+- Depends on: `include/render_policy.h`
+
 ## tests/test_renderer.c
 - Doc: test_render_binary_does_not_crash_parent: (void)state; rd_result r...
 - Layer: testing
@@ -102,7 +130,7 @@ Previous: [KB_tests_p6.md](KB_tests_p6.md)
   - `test_cookie_jar_put_and_header` (function, line 632) `static void test_cookie_jar_put_and_header(void **state)`
   - `test_ws_url_check` (function, line 650) `static void test_ws_url_check(void **state)`
   - `test_ws_open_rejects_before_any_io` (function, line 662) `static void test_ws_open_rejects_before_any_io(void **state)`
-  - `main` (function, line 678) `int main(void)`
+  - `main` (function, line 736) `int main(void)`
 - Depends on: `include/secure_fetch.h`
 
 ## tests/test_sha2.c
@@ -118,6 +146,33 @@ Previous: [KB_tests_p6.md](KB_tests_p6.md)
   - `test_names_and_errors` (function, line 60) `static void test_names_and_errors(void **state)`
   - `main` (function, line 74) `int main(void)`
 - Depends on: `include/sha2.h`
+
+## tests/test_sheet_cache.c
+- Doc: Suite for sheet_cache (spec/sheet_cache.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `matcher_log` (struct, line 36)
+  - `calls` (type_alias, line 35) `typedef struct matcher_log { int calls;`
+  - `p_color` (function, line 21) `static int p_color(const shc_sheet *s)`
+  - `key_of` (function, line 25) `static shc_key key_of(const char *text, const css_media *m)`
+  - `stats_of` (function, line 30) `static shc_stats stats_of(const shc_cache *c)`
+  - `log_match` (function, line 38) `static int log_match(void *ctx, const struct css_sel *sel)`
+  - `test_same_key_is_a_hit_and_returns_the_same_sheet` (function, line 45) `static void test_same_key_is_a_hit_and_returns_the_same_sheet(void **state)`
+  - `test_one_byte_of_text_changes_the_result` (function, line 66) `static void test_one_byte_of_text_changes_the_result(void **state)`
+  - `test_media_inputs_are_part_of_the_key` (function, line 81) `static void test_media_inputs_are_part_of_the_key(void **state)`
+  - `test_root_scope_is_part_of_the_key` (function, line 107) `static void test_root_scope_is_part_of_the_key(void **state)`
+  - `test_a_hit_replays_the_matcher_and_needs_the_same_answers` (function, line 125) `static void test_a_hit_replays_the_matcher_and_needs_the_same_answers(void **state)`
+  - `test_structural_root_selector_is_replayed_too` (function, line 156) `static void test_structural_root_selector_is_replayed_too(void **state)`
+  - `test_matcher_presence_is_part_of_the_key` (function, line 176) `static void test_matcher_presence_is_part_of_the_key(void **state)`
+  - `test_too_many_matcher_questions_are_never_reused` (function, line 192) `static void test_too_many_matcher_questions_are_never_reused(void **state)`
+  - `test_a_bypassed_parse_does_not_evict_the_retained_entry` (function, line 223) `static void test_a_bypassed_parse_does_not_evict_the_retained_entry(void **state)`
+  - `test_oversized_text_is_parsed_but_not_retained` (function, line 238) `static void test_oversized_text_is_parsed_but_not_retained(void **state)`
+  - `test_a_reference_outlives_replacement_and_the_cache` (function, line 253) `static void test_a_reference_outlives_replacement_and_the_cache(void **state)`
+  - `test_no_cache_parses_without_retaining` (function, line 267) `static void test_no_cache_parses_without_retaining(void **state)`
+  - `test_fails_closed_on_bad_arguments` (function, line 279) `static void test_fails_closed_on_bad_arguments(void **state)`
+  - `main` (function, line 303) `int main(void)`
+- Depends on: `include/freedom_config.h`, `include/sheet_cache.h`
 
 ## tests/test_shm_slots.c
 - Layer: testing
@@ -431,27 +486,6 @@ static void tes...`
   - `test_encode_rejects_oversize_url` (function, line 203) `static void test_encode_rejects_oversize_url(void **state)`
   - `main` (function, line 218) `int main(void)`
 - Depends on: `include/tls_impersonate.h`
-
-## tests/test_ui.c
-- Doc: assert_line: Build: make test   ;   ASan: make asan  #include <stdarg.h> #include <stddef.h>...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `assert_line` (function, line 21) `static void assert_line(const char *text, const ui_layout *lay, size_t n,
-                       ...`
-  - `test_wrap_null_args` (function, line 29) `static void test_wrap_null_args(void **state)`
-  - `test_wrap_empty` (function, line 36) `static void test_wrap_empty(void **state)`
-  - `test_wrap_short_single_line` (function, line 44) `static void test_wrap_short_single_line(void **state)`
-  - `test_wrap_breaks_at_space` (function, line 54) `static void test_wrap_breaks_at_space(void **state)`
-  - `test_wrap_hard_breaks_long_word` (function, line 65) `static void test_wrap_hard_breaks_long_word(void **state)`
-  - `test_wrap_does_not_split_utf8` (function, line 77) `static void test_wrap_does_not_split_utf8(void **state)`
-  - `test_wrap_respects_newline` (function, line 91) `static void test_wrap_respects_newline(void **state)`
-  - `test_wrap_zero_cols_is_sanitised` (function, line 102) `static void test_wrap_zero_cols_is_sanitised(void **state)`
-  - `test_clamp_scroll` (function, line 114) `static void test_clamp_scroll(void **state)`
-  - `test_layout_free_null_and_double` (function, line 122) `static void test_layout_free_null_and_double(void **state)`
-  - `test_lazy_near_viewport` (function, line 133) `static void test_lazy_near_viewport(void **state)`
-  - `main` (function, line 146) `int main(void)`
-- Depends on: `include/lazy_load.h`, `include/ui.h`
 
 
 Next: [KB_tests_p8.md](KB_tests_p8.md)

@@ -1,27 +1,24 @@
 # src: http_cache
 
-*Community 7 | 16 files | cohesion 0.79*
+*Community 7 | 13 files | cohesion 0.80*
 
 ## Definition
 
-This community groups 16 file(s) rooted at `src` with dominant language c (cohesion 0.79). Central symbols: `FREEDOM_CACHED_FETCH_H`, `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `HC_EVICT_EVERY`, `HC_HEURISTIC_CAP`, `HC_KEY_FILE`. Core file: `src/http_cache.c` (38 symbols).
+This community groups 13 file(s) rooted at `src` with dominant language c (cohesion 0.80). Central symbols: `FREEDOM_DISK_STORE_H`, `FREEDOM_HTTP_CACHE_H`, `FREEDOM_LOCAL_STORE_H`, `FREEDOM_PQ_SEAL_H`, `HC_EVICT_EVERY`, `HC_HEURISTIC_CAP`, `HC_KEY_FILE`, `HC_MAGIC`. Core file: `src/http_cache.c` (38 symbols).
 
 ## Files
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `include/cached_fetch.h` | h | infrastructure | 4 | no |
 | `include/disk_store.h` | h | data_access | 3 | no |
 | `include/http_cache.h` | h | presentation | 19 | no |
 | `include/local_store.h` | h | data_access | 11 | no |
 | `include/pq_seal.h` | h | utility | 8 | no |
-| `src/cached_fetch.c` | c | infrastructure | 14 | no |
 | `src/disk_store.c` | c | data_access | 6 | no |
 | `src/http_cache.c` | c | presentation | 38 | no |
 | `src/local_store.c` | c | data_access | 31 | no |
 | `src/pq_seal.c` | c | utility | 11 | no |
 | `src/profile.c` | c | utility | 9 | no |
-| `tests/test_cached_fetch.c` | c | testing | 14 | no |
 | `tests/test_disk_store.c` | c | testing | 16 | no |
 | `tests/test_http_cache.c` | c | testing | 17 | no |
 | `tests/test_local_store.c` | c | testing | 18 | no |
@@ -29,10 +26,6 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 
 ## Key Symbols
 
-- `FREEDOM_CACHED_FETCH_H` (macro, `include/cached_fetch.h:2`) `#define FREEDOM_CACHED_FETCH_H`
-- `cf_set_store` (function, `include/cached_fetch.h:30`) `void cf_set_store(hc_store *store);` - Cache-aware GET. `partition` is the top-level site (double keying). On a fresh hit the response is r
-- `cf_store` (function, `include/cached_fetch.h:31`) `hc_store *cf_store(void);`
-- `cf_attach_redirect_memory` (function, `include/cached_fetch.h:38`) `void cf_attach_redirect_memory(hc_store *store);` - conditional GET is sent to the stored FINAL url and a 304 serves the stored body. sf_status cf_get_w
 - `FREEDOM_DISK_STORE_H` (macro, `include/disk_store.h:2`) `#define FREEDOM_DISK_STORE_H`
 - `ds_status` (enum, `include/disk_store.h:25`)
 - `ds_free` (function, `include/disk_store.h:47`) `void ds_free(uint8_t *buf, size_t len);` - Reads and decrypts path. Wrong key / tampering => DS_ERR_AUTH (no plaintext). * *out is owned; relea
@@ -59,17 +52,21 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 - `LS_KEY_LEN` (macro, `include/local_store.h:26`) `#define LS_KEY_LEN`
 - `LS_SALT_LEN` (macro, `include/local_store.h:27`) `#define LS_SALT_LEN`
 - `LS_NONCE_LEN` (macro, `include/local_store.h:28`) `#define LS_NONCE_LEN`
+- `LS_TAG_LEN` (macro, `include/local_store.h:29`) `#define LS_TAG_LEN`
+- `LS_HEADER_LEN` (macro, `include/local_store.h:30`) `#define LS_HEADER_LEN`
+- `LS_OVERHEAD` (macro, `include/local_store.h:31`) `#define LS_OVERHEAD`
+- `LS_MAX_PLAINTEXT` (macro, `include/local_store.h:32`) `#define LS_MAX_PLAINTEXT`
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 19
-- Cross-boundary resolved imports (EXTRACTED): 5
+- Internal resolved imports (EXTRACTED): 16
+- Cross-boundary resolved imports (EXTRACTED): 4
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/cached_fetch.h.
-- [EXTRACTED] depends_on community 7 <-> 8 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
-- [EXTRACTED] depends_on community 7 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
+- [EXTRACTED] depends_on community 5 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/http_cache.h.
+- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/profile.h imports include/local_store.h.
+- [EXTRACTED] depends_on community 7 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 
 ## Risks
 
@@ -79,24 +76,21 @@ This community groups 16 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 16 file(s) lack file-level docs (e.g. `include/cached_fetch.h`)? What purpose do they serve?
+- Why do 13 file(s) lack file-level docs (e.g. `include/disk_store.h`)? What purpose do they serve?
 - What would break if the most connected file in src: http_cache changed?
-- Should src: http_cache be split, given cohesion 0.79?
+- Should src: http_cache be split, given cohesion 0.80?
 
 ## Sources
 
-- `include/cached_fetch.h`
 - `include/disk_store.h`
 - `include/http_cache.h`
 - `include/local_store.h`
 - `include/pq_seal.h`
-- `src/cached_fetch.c`
 - `src/disk_store.c`
 - `src/http_cache.c`
 - `src/local_store.c`
 - `src/pq_seal.c`
 - `src/profile.c`
-- `tests/test_cached_fetch.c`
 - `tests/test_disk_store.c`
 - `tests/test_http_cache.c`
 - `tests/test_local_store.c`

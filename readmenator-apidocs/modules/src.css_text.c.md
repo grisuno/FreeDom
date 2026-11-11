@@ -18,7 +18,6 @@ flowchart LR
     n_src_css_text_c__ct_interp_valign(["ct_interp_valign"])
     n_src_css_text_c__ct_interp_fontfamily(["ct_interp_fontfamily"])
     n_include_css_select_h__csel_substr["css_select.csel_substr"]
-    n_include_url_h__url["url.url"]
     n_src_css_text_c__ct_interp_texttransform(["ct_interp_texttransform"])
     n_include_css_select_h__csel_ci_eq["css_select.csel_ci_eq"]
     n_include_css_box_h__cb_interp_lp["css_box.cb_interp_lp"]
@@ -39,7 +38,6 @@ flowchart LR
     n_include_css_values_h__cv_parse_color["css_values.cv_parse_color"]
     n_src_css_text_c__ct_expand_valign --> n_src_css_text_c__ct_interp_valign
     n_src_css_text_c__ct_interp_fontfamily -.-> n_include_css_select_h__csel_substr
-    n_src_css_text_c__ct_interp_fontfamily -.-> n_include_url_h__url
     n_src_css_text_c__ct_interp_texttransform -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_text_c__ct_interp_valign -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_text_c__ct_expand_valign -.-> n_include_css_box_h__cb_interp_lp
@@ -53,14 +51,12 @@ flowchart LR
     n_src_css_text_c__ct_interp_aspect_ratio -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_text_c__ct_interp_direction -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_text_c__ct_interp_liststyle -.-> n_include_css_select_h__csel_substr
-    n_src_css_text_c__ct_interp_liststyle -.-> n_include_url_h__url
     n_src_css_text_c__ct_emit_spacing -.-> n_include_css_text_h__ct_interp_spacing
     n_src_css_text_c__ct_expand_shadow -.-> n_include_css_box_h__cb_interp_len
     n_src_css_text_c__ct_expand_shadow -.-> n_include_css_box_h__cb_next_ws_token
     n_src_css_text_c__ct_expand_shadow -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_text_c__ct_expand_shadow -.-> n_include_css_select_h__csel_substr
     n_src_css_text_c__ct_expand_shadow -.-> n_include_css_values_h__cv_parse_color
-    n_src_css_text_c__ct_expand_shadow -.-> n_include_url_h__url
 ```
 
 ## Functions
@@ -87,7 +83,7 @@ Quotes are stripped. url() defensively dropped. -1 if none known.
 
 **Returns:** `int`
 
-*Calls:* [`csel_substr`](include.css_select.h.md#csel_substr), [`url`](include.url.h.md#url)
+*Calls:* [`csel_substr`](include.css_select.h.md#csel_substr)
 
 ---
 
@@ -336,7 +332,7 @@ list-style-type, or the type token of the list-style shorthand: the first recogn
 
 **Returns:** `int`
 
-*Calls:* [`csel_substr`](include.css_select.h.md#csel_substr), [`url`](include.url.h.md#url)
+*Calls:* [`csel_substr`](include.css_select.h.md#csel_substr)
 
 ---
 
@@ -389,6 +385,6 @@ text-shadow (single layer): collects up to three lengths (dx, dy, blur — blur 
 
 **Returns:** `int`
 
-*Calls:* [`cb_interp_len`](include.css_box.h.md#cb_interp_len), [`cb_next_ws_token`](include.css_box.h.md#cb_next_ws_token), [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`csel_substr`](include.css_select.h.md#csel_substr), [`cv_parse_color`](include.css_values.h.md#cv_parse_color), [`url`](include.url.h.md#url)
+*Calls:* [`cb_interp_len`](include.css_box.h.md#cb_interp_len), [`cb_next_ws_token`](include.css_box.h.md#cb_next_ws_token), [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`csel_substr`](include.css_select.h.md#csel_substr), [`cv_parse_color`](include.css_values.h.md#cv_parse_color)
 
 ---

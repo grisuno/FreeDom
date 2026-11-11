@@ -3,6 +3,31 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `bt_oof_avail` | function | `src/box_tree.c:800` | `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)` |
+| `bt_oof_root` | function | `src/box_tree.c:772` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
+| `bt_resolve_positioning` | function | `src/box_tree.c:585` | `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,                           ...` |
+| `bt_resolve_positioning_ex` | function | `src/box_tree.c:596` | `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,                        ...` |
+| `find_positioned_ancestor` | function | `src/box_tree.c:522` | `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,                        ...` |
+| `height` | function | `src/box_tree.c:78` | `* exactly that height (Flexbox 9.4 step 15).  *  * wrap_reverse (node->wrap_reverse): when node->...` |
+| `inset_unset` | function | `src/box_tree.c:551` | `static int inset_unset(int v, int pct_pm)` |
+| `layout_block` | function | `src/box_tree.c:37` | `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,                    ...` |
+| `layout_flex` | function | `src/box_tree.c:98` | `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,                     ...` |
+| `layout_grid` | function | `src/box_tree.c:280` | `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,                     ...` |
+| `layout_node` | function | `src/box_tree.c:420` | `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)` |
+| `oof_walk` | function | `src/box_tree.c:751` | `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` |
+| `resolve_inset` | function | `src/box_tree.c:542` | `static double resolve_inset(int v, int pct_pm, double basis)` |
+| `sized` | function | `src/box_tree.c:350` | `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);` |
+| `_POSIX_C_SOURCE` | macro | `src/browser.c:7` | `#define _POSIX_C_SOURCE` |
+| `browser_add_exception` | function | `src/browser.c:472` | `browser_status browser_add_exception(browser_state *bs, const char *host)` |
+| `browser_back` | function | `src/browser.c:268` | `browser_status browser_back(browser_state *bs)` |
+| `browser_can_back` | function | `src/browser.c:292` | `int browser_can_back(const browser_state *bs)` |
+| `browser_can_forward` | function | `src/browser.c:296` | `int browser_can_forward(const browser_state *bs)` |
+| `browser_commit_url_bar` | function | `src/browser.c:190` | `browser_status browser_commit_url_bar(browser_state *bs)` |
+| `browser_current_url` | function | `src/browser.c:300` | `const char *browser_current_url(const browser_state *bs)` |
+| `browser_doc_index` | function | `src/browser.c:260` | `int browser_doc_index(const browser_state *bs)` |
+| `browser_entry_doc` | function | `src/browser.c:255` | `int browser_entry_doc(const browser_state *bs, size_t pos)` |
+| `browser_forward` | function | `src/browser.c:280` | `browser_status browser_forward(browser_state *bs)` |
+| `browser_free` | function | `src/browser.c:167` | `void browser_free(browser_state *bs)` |
 | `browser_init` | function | `src/browser.c:156` | `browser_status browser_init(browser_state *bs)` |
 | `browser_is_exception` | function | `src/browser.c:464` | `int browser_is_exception(const browser_state *bs, const char *host)` |
 | `browser_navigate` | function | `src/browser.c:224` | `browser_status browser_navigate(browser_state *bs, const char *url)` |
@@ -471,30 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `f_float` | function | `src/css_computed.c:105` | `static size_t f_float(const ccm_input *in, char *out, size_t cap)` |
 | `f_font_size` | function | `src/css_computed.c:181` | `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)` |
 | `f_font_style` | function | `src/css_computed.c:173` | `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)` |
-| `f_font_weight` | function | `src/css_computed.c:177` | `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)` |
-| `f_gap` | function | `src/css_computed.c:244` | `static size_t f_gap(const ccm_input *in, char *out, size_t cap)` |
-| `f_justify` | function | `src/css_computed.c:145` | `static size_t f_justify(const ccm_input *in, char *out, size_t cap)` |
-| `f_line_height` | function | `src/css_computed.c:187` | `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)` |
-| `f_opacity` | function | `src/css_computed.c:204` | `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)` |
-| `f_overflow_x` | function | `src/css_computed.c:115` | `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)` |
-| `f_overflow_y` | function | `src/css_computed.c:120` | `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)` |
-| `f_position` | function | `src/css_computed.c:95` | `static size_t f_position(const ccm_input *in, char *out, size_t cap)` |
-| `f_text_align` | function | `src/css_computed.c:125` | `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)` |
-| `f_text_transform` | function | `src/css_computed.c:168` | `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)` |
-| `f_visibility` | function | `src/css_computed.c:100` | `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)` |
-| `f_white_space` | function | `src/css_computed.c:163` | `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)` |
-| `f_z_index` | function | `src/css_computed.c:212` | `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)` |
-| `put` | function | `src/css_computed.c:9` | `static size_t put(char *out, size_t cap, const char *s)` |
-| `put_enum` | function | `src/css_computed.c:42` | `static size_t put_enum(char *out, size_t cap, int v, const char *const *names, size_t n,         ...` |
-| `put_len` | function | `src/css_computed.c:37` | `static size_t put_len(char *out, size_t cap, int v, const char *unset_text)` |
-| `put_rgb` | function | `src/css_computed.c:26` | `static size_t put_rgb(char *out, size_t cap, int rgb, int alpha_pct)` |
-| `putf` | function | `src/css_computed.c:17` | `static size_t putf(char *out, size_t cap, const char *fmt, ...)` |
-| `ua_display` | function | `src/css_computed.c:49` | `static const char *ua_display(const char *tag)` |
-| `CNT_FIELD_SEP` | macro | `src/css_counter.c:14` | `#define CNT_FIELD_SEP` |
-| `CNT_ITEM_END` | macro | `src/css_counter.c:13` | `#define CNT_ITEM_END` |
-| `CNT_SEQ_MARK` | macro | `src/css_counter.c:12` | `#define CNT_SEQ_MARK` |
-| `CNT_STR_MAX` | macro | `src/css_counter.c:16` | `#define CNT_STR_MAX` |
-| `CNT_VALUE_LIMIT` | macro | `src/css_counter.c:15` | `#define CNT_VALUE_LIMIT` |
-| `ci_eq` | function | `src/css_counter.c:34` | `static int ci_eq(const char *a, const char *b)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

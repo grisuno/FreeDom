@@ -20,6 +20,9 @@ telemetry, mandatory API keys or hidden solver workers.
 - **Privacy by default.** Third parties are blocked in the network engine. The browser
   has an anti-fingerprinting identity, and JS, images and author CSS are opt-in per host
   (`allow.conf` / `js.conf`). Tor and I2P route at the socket level.
+- **The web cannot reach your LAN.** A page (or a redirect it controls) is refused any
+  private, loopback or link-local address, judged on the resolved IP before a socket is
+  opened, so DNS rebinding does not get around it. You can still browse to your own router.
 - **Own rendering engine.** It has a CSS cascade with a rule index, plus flex, grid,
   floats, margin collapsing, multicol, `@layer`/`@supports`/media queries, custom
   properties, inline SVG, HarfBuzz shaping with local fonts, and image decoding inside the

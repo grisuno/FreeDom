@@ -11,6 +11,7 @@
 
 #include "html_parse.h"
 #include "page_view.h"
+#include "sheet_cache.h"
 #include "freedom_config.h"
 
 #include <stddef.h>
@@ -31,8 +32,19 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
          * (2026-08-10 doctrine): the headless page width, fixed so a run is
          * reproducible. The harness had not been updated when the parameter was
          * added, which silently broke this fuzz target at build time. */
-        if (pv_build_styled(doc, 0, 0, 0, ext, ext_len, (int)FC_PNG_PAGE_W, &v) == PV_OK) {
+        /* The same document is derived twice through one sheet cache
+         * (spec/sheet_cache.md): the second derivation takes the retained sheet after
+         * replaying every recorded root-matcher question, so hostile selectors reach
+         * the compact copies and the replay. Differential oracle: a cached derivation
+         * must produce as many runs as the first. */
+        shc_cache *sheets = shc_new(0);
+        size_t first_n = 0;
+        for (int pass = 0; pass < 2; ++pass) {
+            if (pv_build_cached(doc, 0, 0, 0, ext, ext_len, (int)FC_PNG_PAGE_W, sheets, &v)
+                != PV_OK) break;
             size_t n = pv_count(v);
+            if (pass == 0) first_n = n;
+            else if (n != first_n) __builtin_trap();
             for (size_t i = 0; i < n; ++i) {
                 const pv_run *r = pv_at(v, i);
                 /* Touch every owned/derived field so the sanitizers see the reads. */
@@ -44,7 +56,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
                 (void)sink;
             }
             pv_free(v);
+            v = NULL;
         }
+        shc_free(sheets);
     }
     hp_document_free(doc);
     return 0;

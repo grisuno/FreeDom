@@ -1,6 +1,6 @@
 # include: subreq_batch
 
-*Community 11 | 3 files | cohesion 0.67*
+*Community 12 | 3 files | cohesion 0.67*
 
 ## Definition
 

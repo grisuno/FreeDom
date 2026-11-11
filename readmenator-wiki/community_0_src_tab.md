@@ -1,14 +1,14 @@
 # src: tab
 
-*Community 0 | 51 files | cohesion 0.68*
+*Community 0 | 48 files | cohesion 0.66*
 
 ## Definition
 
-This community groups 51 file(s) rooted at `src` with dominant language c (cohesion 0.68). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (271 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
+This community groups 48 file(s) rooted at `src` with dominant language c (cohesion 0.66). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (271 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
 
 ## Files
 
-### `src` (24 files)
+### `src` (23 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -20,7 +20,7 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 | `src/js_custom_elements.c` | c | utility | 1 | no |
 | `src/js_custom_elements.h` | h | utility | 2 | yes |
 
-### `include` (14 files)
+### `include` (13 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -32,7 +32,7 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 | `include/js_dom.h` | h | utility | 23 | no |
 | `include/js_env.h` | h | infrastructure | 4 | no |
 
-### `tests` (13 files)
+### `tests` (12 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -43,7 +43,7 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_html_parse.c` | c | testing | 24 | no |
 | `tests/test_js_dom.c` | c | testing | 271 | no |
 
-*... and 31 more files in this community.*
+*... and 28 more files in this community.*
 
 
 ## Key Symbols
@@ -81,14 +81,16 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 110
-- Cross-boundary resolved imports (EXTRACTED): 52
+- Internal resolved imports (EXTRACTED): 107
+- Cross-boundary resolved imports (EXTRACTED): 54
 
 ## Connections
 
 - [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 4 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 2 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
 - [EXTRACTED] depends_on community 9 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
+- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_select.h.
+- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
 
 ## Risks
 
@@ -98,10 +100,10 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 46 file(s) lack file-level docs (e.g. `include/dom.h`)? What purpose do they serve?
+- Why do 44 file(s) lack file-level docs (e.g. `include/dom.h`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
 - What would break if the most connected file in src: tab changed?
-- Should src: tab be split, given cohesion 0.68?
+- Should src: tab be split, given cohesion 0.66?
 
 ## Sources
 
@@ -116,7 +118,6 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 - `include/js_location.h`
 - `include/js_sandbox.h`
 - `include/js_trusted.h`
-- `include/sha2.h`
 - `include/url.h`
 - `include/web_storage.h`
 - `src/dom.c`
@@ -125,4 +126,5 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 - `src/freebug.c`
 - `src/html_parse.c`
 - `src/js_custom_elements.c`
-- *... and 31 more*
+- `src/js_custom_elements.h`
+- *... and 28 more*

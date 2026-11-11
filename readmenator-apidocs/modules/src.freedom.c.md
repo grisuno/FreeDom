@@ -201,7 +201,7 @@ typedef struct
 
 ### `BLOCKED`
 
-`function` | [src/freedom.c:1041](../../src/freedom.c#L1041)
+`function` | [src/freedom.c:1042](../../src/freedom.c#L1042)
 
 ```c
 * is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);
@@ -221,7 +221,7 @@ typedef struct
 
 ### `elsewhere`
 
-`function` | [src/freedom.c:1076](../../src/freedom.c#L1076)
+`function` | [src/freedom.c:1077](../../src/freedom.c#L1077)
 
 ```c
 * page whose script immediately forwards elsewhere (e.g. a search engine's * JS-capability interstitial) renders as an empty husk instead of its destination. */ static int fetch_and_render(const char *url)
@@ -243,7 +243,7 @@ typedef struct
 
 ### `parent`
 
-`function` | [src/freedom.c:1102](../../src/freedom.c#L1102)
+`function` | [src/freedom.c:1103](../../src/freedom.c#L1103)
 
 ```c
 * gated by the parent (ln_resolve: a local target stays under the document's * directory, a remote one must be https), bounded by HL_JS_NAV_MAX hops. */ static int render_local(const char *target, int hop)
@@ -265,7 +265,7 @@ typedef struct
 
 ### `main`
 
-`function` | [src/freedom.c:1306](../../src/freedom.c#L1306)
+`function` | [src/freedom.c:1307](../../src/freedom.c#L1307)
 
 ```c
 int main(int argc, char **argv)
@@ -396,7 +396,7 @@ Same 16-sheet / 2 MiB bounds as the GUI stash (anti-DoS).
 
 ### `HL_JS_NAV_MAX`
 
-`macro` | [src/freedom.c:1009](../../src/freedom.c#L1009)
+`macro` | [src/freedom.c:1010](../../src/freedom.c#L1010)
 
 ```c
 #define HL_JS_NAV_MAX

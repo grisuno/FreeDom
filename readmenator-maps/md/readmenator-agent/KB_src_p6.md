@@ -258,6 +258,27 @@ static const char JT_W...`
   - `_POSIX_C_SOURCE` (macro, line 23) `#define _POSIX_C_SOURCE`
 - Depends on: `include/media_decoder.h`, `include/util.h`
 
+## src/net_guard.c
+- Doc: net_guard -- see include/net_guard.h and spec/net_guard.md.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `ng_v4_is_private` (function, line 12) `static int ng_v4_is_private(const unsigned char o[NG_V4_LEN])`
+  - `ng_seg` (function, line 29) `static unsigned ng_seg(const unsigned char a[NG_V6_LEN], int i)`
+  - `ng_v6_is_private` (function, line 33) `static int ng_v6_is_private(const unsigned char a[NG_V6_LEN])`
+  - `ng_addr_is_private` (function, line 63) `int ng_addr_is_private(int family, const unsigned char *addr, size_t len)`
+  - `ng_parse` (function, line 71) `static int ng_parse(const char *text, int *family, unsigned char out[NG_V6_LEN])`
+  - `ng_text_is_private` (function, line 84) `int ng_text_is_private(const char *ip_text)`
+  - `ng_host_is_ip` (function, line 91) `int ng_host_is_ip(const char *host)`
+  - `ng_ci_eq` (function, line 97) `static int ng_ci_eq(const char *a, const char *b, size_t n)`
+  - `ng_host_is_local` (function, line 107) `int ng_host_is_local(const char *host)`
+  - `ng_decide` (function, line 121) `ng_verdict ng_decide(const ng_request *r, int peer_private)`
+  - `decides` (function, line 40) `* IPv4 decides (:: and ::1 embed 0.0.0.0 and 0.0.0.1, both in 0/8). */ if (head_zero && (s[5] == 0 || s[5] ==...`
+  - `NG_V4_LEN` (macro, line 8) `#define NG_V4_LEN`
+  - `NG_V6_LEN` (macro, line 9) `#define NG_V6_LEN`
+  - `NG_TEXT_MAX` (macro, line 10) `#define NG_TEXT_MAX`
+- Depends on: `include/net_guard.h`
+
 ## src/net_realm.c
 - Doc: ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one...
 - Layer: utility

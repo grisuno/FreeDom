@@ -62,9 +62,11 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FC_FONT_FALLBACK_PX` (macro, line 66) `#define FC_FONT_FALLBACK_PX`
   - `FC_UI_FONT_SIZE` (macro, line 70) `#define FC_UI_FONT_SIZE`
   - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 78) `#define FC_MAX_AUTHOR_CSS_BYTES`
-  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 81) `#define FC_LAZY_IMAGE_MARGIN_PX`
-  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 87) `#define FC_TAB_OP_NET_BUDGET_MS`
-- Imported by: `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/svg_paint.c`, `src/tab.c`
+  - `FC_SHC_MAX_TEXT_BYTES` (macro, line 84) `#define FC_SHC_MAX_TEXT_BYTES`
+  - `FC_SHC_MAX_QUERIES` (macro, line 90) `#define FC_SHC_MAX_QUERIES`
+  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 93) `#define FC_LAZY_IMAGE_MARGIN_PX`
+  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 99) `#define FC_TAB_OP_NET_BUDGET_MS`
+- Imported by: `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/svg_paint.c`, `src/tab.c`, `tests/test_sheet_cache.c`
 
 ## include/hls.h
 - Doc: hls_segment: or variant info.

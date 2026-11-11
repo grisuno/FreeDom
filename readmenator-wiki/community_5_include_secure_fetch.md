@@ -1,28 +1,50 @@
 # include: secure_fetch
 
-*Community 8 | 13 files | cohesion 0.54*
+*Community 5 | 24 files | cohesion 0.60*
 
 ## Definition
 
-This community groups 13 file(s) rooted at `tests` with dominant language c (cohesion 0.54). Central symbols: `CHECK`, `EXCLUDED`, `FP_ACCEPT_HEADER_NAV`, `FP_ACCEPT_LANGUAGE`, `FP_ACCEPT_LANGUAGE_HEADER`, `FP_SEC_FETCH_DEST_NAV`, `FP_SEC_FETCH_MODE_NAV`, `FP_SEC_FETCH_SITE_NONE`. Core file: `src/secure_fetch.c` (79 symbols).
+This community groups 24 file(s) rooted at `include` with dominant language c (cohesion 0.60). Central symbols: `CHECK`, `EXCLUDED`, `FP_ACCEPT_HEADER_NAV`, `FP_ACCEPT_LANGUAGE`, `FP_ACCEPT_LANGUAGE_HEADER`, `FP_SEC_FETCH_DEST_NAV`, `FP_SEC_FETCH_MODE_NAV`, `FP_SEC_FETCH_SITE_NONE`. Core file: `src/secure_fetch.c` (83 symbols). Documented purpose: net_guard -- see include/net_guard.h and spec/net_guard.md..
 
 ## Files
+
+### `include` (8 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/anti_fp.h` | h | utility | 35 | no |
+| `include/cached_fetch.h` | h | infrastructure | 4 | no |
 | `include/identity.h` | h | utility | 24 | no |
+| `include/net_guard.h` | h | utility | 9 | no |
+| `include/psl_data.h` | h | data_access | 7 | no |
+| `include/request_policy.h` | h | business_logic | 11 | no |
 | `include/secure_fetch.h` | h | utility | 48 | no |
-| `include/ws_hub.h` | h | utility | 15 | no |
+
+### `src` (8 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
 | `src/anti_fp.c` | c | utility | 23 | no |
+| `src/cached_fetch.c` | c | infrastructure | 14 | no |
 | `src/identity.c` | c | utility | 25 | no |
-| `src/secure_fetch.c` | c | utility | 79 | no |
-| `src/ws_hub.c` | c | utility | 27 | no |
+| `src/net_guard.c` | c | utility | 14 | yes |
+| `src/render_policy.c` | c | presentation | 5 | no |
+| `src/request_policy.c` | c | business_logic | 17 | no |
+| `src/secure_fetch.c` | c | utility | 83 | no |
+
+### `tests` (8 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
 | `tests/itest_secure_fetch.c` | c | testing | 2 | no |
 | `tests/test_anti_fp.c` | c | testing | 15 | no |
+| `tests/test_cached_fetch.c` | c | testing | 14 | no |
 | `tests/test_identity.c` | c | testing | 12 | no |
-| `tests/test_secure_fetch.c` | c | testing | 58 | no |
-| `tests/test_ws_hub.c` | c | testing | 13 | no |
+| `tests/test_net_guard.c` | c | testing | 10 | yes |
+| `tests/test_request_policy.c` | c | testing | 17 | no |
+
+*... and 4 more files in this community.*
+
 
 ## Key Symbols
 
@@ -59,36 +81,44 @@ This community groups 13 file(s) rooted at `tests` with dominant language c (coh
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 14
-- Cross-boundary resolved imports (EXTRACTED): 12
+- Internal resolved imports (EXTRACTED): 25
+- Cross-boundary resolved imports (EXTRACTED): 17
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
-- [EXTRACTED] depends_on community 7 <-> 8 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/secure_fetch.h.
+- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
+- [EXTRACTED] depends_on community 5 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/http_cache.h.
 
 ## Risks
 
-- No scoped security, taint, cycle, or layer risks.
+- [layer strict] `src/render_policy.c` (presentation) -> `include/data_url.h` (data_access)
 
 ## Open Questions
 
-- Why do 13 file(s) lack file-level docs (e.g. `include/anti_fp.h`)? What purpose do they serve?
+- Why do 22 file(s) lack file-level docs (e.g. `include/anti_fp.h`)? What purpose do they serve?
 - What would break if the most connected file in include: secure_fetch changed?
-- Should include: secure_fetch be split, given cohesion 0.54?
+- Should include: secure_fetch be split, given cohesion 0.60?
 
 ## Sources
 
 - `include/anti_fp.h`
+- `include/cached_fetch.h`
 - `include/identity.h`
+- `include/net_guard.h`
+- `include/psl_data.h`
+- `include/request_policy.h`
 - `include/secure_fetch.h`
 - `include/ws_hub.h`
 - `src/anti_fp.c`
+- `src/cached_fetch.c`
 - `src/identity.c`
+- `src/net_guard.c`
+- `src/render_policy.c`
+- `src/request_policy.c`
 - `src/secure_fetch.c`
 - `src/ws_hub.c`
 - `tests/itest_secure_fetch.c`
 - `tests/test_anti_fp.c`
+- `tests/test_cached_fetch.c`
 - `tests/test_identity.c`
-- `tests/test_secure_fetch.c`
-- `tests/test_ws_hub.c`
+- *... and 4 more*

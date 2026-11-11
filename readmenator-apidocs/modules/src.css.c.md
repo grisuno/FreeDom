@@ -53,7 +53,6 @@ flowchart LR
     n_src_css_c__number(["number"])
     n_src_css_box_c__interp_len["css_box.interp_len"]
     n_src_css_c__layer(["layer"])
-    n_include_url_h__url["url.url"]
     n_src_css_color_c__strncmp["css_color.strncmp"]
     n_src_css_c__axis(["axis"])
     n_src_css_c__CSS_ATTR_SEP(["CSS_ATTR_SEP"])
@@ -74,13 +73,11 @@ flowchart LR
     n_src_css_c__number -.-> n_src_css_box_c__interp_len
     n_src_css_c__layer -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_c__blur -.-> n_include_css_select_h__csel_ci_eq
-    n_src_css_c__blur -.-> n_include_url_h__url
     n_src_css_c__blur -.-> n_src_css_box_c__interp_len
     n_src_css_c__blur -.-> n_src_css_color_c__strncmp
     n_src_css_c__axis -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_c__CSS_ATTR_SEP -.-> n_include_css_select_h__csel_unescape
     n_src_css_c__declaration -.-> n_include_css_select_h__csel_ci_eq
-    n_src_css_c__declaration -.-> n_include_url_h__url
     n_src_css_c__function -.-> n_include_css_h__css_style_translate
     n_src_css_c__function -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_c__function -.-> n_include_css_select_h__csel_span_eq
@@ -406,7 +403,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 **Returns:** `* consumes ONLY`
 
-*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`url`](include.url.h.md#url), [`csel_substr`](#csel_substr), [`interp_len`](src.css_box.c.md#interp_len), [`strncmp`](src.css_color.c.md#strncmp)
+*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`csel_substr`](#csel_substr), [`interp_len`](src.css_box.c.md#interp_len), [`strncmp`](src.css_color.c.md#strncmp)
 
 ---
 
@@ -487,7 +484,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 **Returns:** `* invalid layer drops the whole`
 
-*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`url`](include.url.h.md#url), [`csel_substr`](#csel_substr)
+*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`csel_substr`](#csel_substr)
 
 ---
 
@@ -1008,7 +1005,7 @@ css_status css_parse_scoped(const char *text, size_t len, const css_media *media
 
 **Returns:** `css_status`
 
-*Called by:* [`pv_build_styled`](src.page_view.c.md#pv_build_styled)
+*Called by:* [`shc_acquire`](src.sheet_cache.c.md#shc_acquire)
 
 ---
 

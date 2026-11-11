@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `img_fail_reason` | enum | `include/render_doc.h:34` | `` |
+| `kind` | type_alias | `include/render_doc.h:64` | `typedef struct rd_block { rd_kind kind;` |
+| `list` | function | `include/render_doc.h:18` | `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...` |
+| `rd_at` | function | `include/render_doc.h:322` | `const rd_block *rd_at(const rd_doc *d, size_t i);` |
+| `rd_block` | struct | `include/render_doc.h:64` | `` |
+| `rd_block_heading_level` | function | `include/render_doc.h:351` | `int rd_block_heading_level(const rd_block *b);` |
+| `rd_block_tag` | function | `include/render_doc.h:344` | `const char *rd_block_tag(const rd_block *b);` |
+| `rd_box_at` | function | `include/render_doc.h:327` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);` |
+| `rd_box_count` | function | `include/render_doc.h:326` | `size_t rd_box_count(const rd_doc *d);` |
+| `rd_cont_at` | function | `include/render_doc.h:332` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);` |
+| `rd_cont_count` | function | `include/render_doc.h:331` | `size_t rd_cont_count(const rd_doc *d);` |
+| `rd_count` | function | `include/render_doc.h:321` | `size_t rd_count(const rd_doc *d);` |
+| `rd_doc` | struct | `include/render_doc.h:267` | `` |
 | `rd_free` | function | `include/render_doc.h:318` | `void rd_free(rd_doc *d);` |
 | `rd_input_invisible` | function | `include/render_doc.h:370` | `int rd_input_invisible(int input_type);` |
 | `rd_input_label` | function | `include/render_doc.h:365` | `const char *rd_input_label(int input_type);` |
@@ -38,53 +51,53 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `rp_same_site` | function | `include/request_policy.h:37` | `int rp_same_site(const char *top_level_url, const char *request_url);` |
 | `rp_sanitize_request_headers` | function | `include/request_policy.h:57` | `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);` |
 | `rp_site_of` | function | `include/request_policy.h:34` | `int rp_site_of(const char *host, char *out, size_t out_size);` |
-| `EXCLUDED` | function | `include/secure_fetch.h:233` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
+| `EXCLUDED` | function | `include/secure_fetch.h:239` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
 | `FREEDOM_SECURE_FETCH_H` | macro | `include/secure_fetch.h:2` | `#define FREEDOM_SECURE_FETCH_H` |
-| `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:216` | `#define SF_CONNECT_TIMEOUT_MS` |
-| `SF_DEFAULT_KEX_GROUPS` | macro | `include/secure_fetch.h:166` | `#define SF_DEFAULT_KEX_GROUPS` |
-| `SF_DEFAULT_MAX_BODY` | macro | `include/secure_fetch.h:192` | `#define SF_DEFAULT_MAX_BODY` |
-| `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:218` | `#define SF_DEFAULT_MAX_REDIRECTS` |
-| `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:193` | `#define SF_DEFAULT_TIMEOUT_MS` |
-| `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:191` | `#define SF_DEFAULT_USER_AGENT` |
-| `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:175` | `#define SF_IMPERSONATE_KEX_GROUPS` |
-| `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:180` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
-| `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:176` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
-| `SF_MAX_URL` | macro | `include/secure_fetch.h:219` | `#define SF_MAX_URL` |
-| `SF_META_MAX` | macro | `include/secure_fetch.h:77` | `#define SF_META_MAX` |
-| `SF_RESPONSE_HEADERS_MAX` | macro | `include/secure_fetch.h:78` | `#define SF_RESPONSE_HEADERS_MAX` |
-| `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:217` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
-| `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:324` | `#define SF_WS_MAX_MESSAGE` |
-| `bits` | function | `include/secure_fetch.h:342` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
-| `connection` | function | `include/secure_fetch.h:356` | `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...` |
-| `exhausted` | function | `include/secure_fetch.h:387` | `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...` |
-| `policy` | type_alias | `include/secure_fetch.h:79` | `typedef struct sf_config { sf_policy policy;` |
-| `rp_sanitize_request_headers` | function | `include/secure_fetch.h:109` | `* rp_sanitize_request_headers ("Name: value\n" lines);` |
-| `sf_accept_language_or_default` | function | `include/secure_fetch.h:258` | `const char *sf_accept_language_or_default(const char *lang);` |
-| `sf_chain_info` | struct | `include/secure_fetch.h:61` | `` |
-| `sf_config` | struct | `include/secure_fetch.h:80` | `` |
-| `sf_cookie_line_matches` | function | `include/secure_fetch.h:245` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
-| `sf_cookie_put` | function | `include/secure_fetch.h:240` | `void sf_cookie_put(const char *url, const char *namevalue);` |
-| `sf_get` | function | `include/secure_fetch.h:365` | `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...` |
-| `sf_global_init` | function | `include/secure_fetch.h:227` | `void sf_global_init(void);` |
-| `sf_header_value` | function | `include/secure_fetch.h:305` | `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` |
-| `sf_impersonate_kex_groups` | function | `include/secure_fetch.h:262` | `const char *sf_impersonate_kex_groups(void);` |
-| `sf_impersonate_tls13_ciphers` | function | `include/secure_fetch.h:263` | `const char *sf_impersonate_tls13_ciphers(void);` |
-| `sf_is_redirect_code` | function | `include/secure_fetch.h:294` | `int sf_is_redirect_code(long http_code);` |
-| `sf_policy` | enum | `include/secure_fetch.h:41` | `` |
-| `sf_proxy_type` | enum | `include/secure_fetch.h:70` | `` |
-| `sf_rcache_clear` | function | `include/secure_fetch.h:402` | `void sf_rcache_clear(void);` |
-| `sf_rcache_get` | function | `include/secure_fetch.h:401` | `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);` |
-| `sf_rcache_put` | function | `include/secure_fetch.h:400` | `int sf_rcache_put(const char *from, const char *to, time_t now);` |
-| `sf_rcache_set_backing` | function | `include/secure_fetch.h:411` | `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);` |
-| `sf_response` | struct | `include/secure_fetch.h:130` | `` |
-| `sf_response_free` | function | `include/secure_fetch.h:376` | `void sf_response_free(sf_response *resp);` |
+| `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:222` | `#define SF_CONNECT_TIMEOUT_MS` |
+| `SF_DEFAULT_KEX_GROUPS` | macro | `include/secure_fetch.h:172` | `#define SF_DEFAULT_KEX_GROUPS` |
+| `SF_DEFAULT_MAX_BODY` | macro | `include/secure_fetch.h:198` | `#define SF_DEFAULT_MAX_BODY` |
+| `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:224` | `#define SF_DEFAULT_MAX_REDIRECTS` |
+| `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:199` | `#define SF_DEFAULT_TIMEOUT_MS` |
+| `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:197` | `#define SF_DEFAULT_USER_AGENT` |
+| `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:181` | `#define SF_IMPERSONATE_KEX_GROUPS` |
+| `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:186` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
+| `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:182` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
+| `SF_MAX_URL` | macro | `include/secure_fetch.h:225` | `#define SF_MAX_URL` |
+| `SF_META_MAX` | macro | `include/secure_fetch.h:79` | `#define SF_META_MAX` |
+| `SF_RESPONSE_HEADERS_MAX` | macro | `include/secure_fetch.h:80` | `#define SF_RESPONSE_HEADERS_MAX` |
+| `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:223` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
+| `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:330` | `#define SF_WS_MAX_MESSAGE` |
+| `bits` | function | `include/secure_fetch.h:348` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
+| `connection` | function | `include/secure_fetch.h:362` | `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...` |
+| `exhausted` | function | `include/secure_fetch.h:393` | `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...` |
+| `policy` | type_alias | `include/secure_fetch.h:81` | `typedef struct sf_config { sf_policy policy;` |
+| `rp_sanitize_request_headers` | function | `include/secure_fetch.h:111` | `* rp_sanitize_request_headers ("Name: value\n" lines);` |
+| `sf_accept_language_or_default` | function | `include/secure_fetch.h:264` | `const char *sf_accept_language_or_default(const char *lang);` |
+| `sf_chain_info` | struct | `include/secure_fetch.h:63` | `` |
+| `sf_config` | struct | `include/secure_fetch.h:82` | `` |
+| `sf_cookie_line_matches` | function | `include/secure_fetch.h:251` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
+| `sf_cookie_put` | function | `include/secure_fetch.h:246` | `void sf_cookie_put(const char *url, const char *namevalue);` |
+| `sf_get` | function | `include/secure_fetch.h:371` | `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...` |
+| `sf_global_init` | function | `include/secure_fetch.h:233` | `void sf_global_init(void);` |
+| `sf_header_value` | function | `include/secure_fetch.h:311` | `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` |
+| `sf_impersonate_kex_groups` | function | `include/secure_fetch.h:268` | `const char *sf_impersonate_kex_groups(void);` |
+| `sf_impersonate_tls13_ciphers` | function | `include/secure_fetch.h:269` | `const char *sf_impersonate_tls13_ciphers(void);` |
+| `sf_is_redirect_code` | function | `include/secure_fetch.h:300` | `int sf_is_redirect_code(long http_code);` |
+| `sf_policy` | enum | `include/secure_fetch.h:43` | `` |
+| `sf_proxy_type` | enum | `include/secure_fetch.h:72` | `` |
+| `sf_rcache_clear` | function | `include/secure_fetch.h:408` | `void sf_rcache_clear(void);` |
+| `sf_rcache_get` | function | `include/secure_fetch.h:407` | `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);` |
+| `sf_rcache_put` | function | `include/secure_fetch.h:406` | `int sf_rcache_put(const char *from, const char *to, time_t now);` |
+| `sf_rcache_set_backing` | function | `include/secure_fetch.h:417` | `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);` |
+| `sf_response` | struct | `include/secure_fetch.h:136` | `` |
+| `sf_response_free` | function | `include/secure_fetch.h:382` | `void sf_response_free(sf_response *resp);` |
 | `sf_status` | enum | `include/secure_fetch.h:24` | `` |
-| `sf_user_agent_or_default` | function | `include/secure_fetch.h:254` | `const char *sf_user_agent_or_default(const char *ua);` |
-| `sf_ws` | type_alias | `include/secure_fetch.h:325` | `typedef struct sf_ws sf_ws;` |
-| `sf_ws_close` | function | `include/secure_fetch.h:352` | `void sf_ws_close(sf_ws *ws);` |
-| `sf_ws_fd` | function | `include/secure_fetch.h:349` | `int sf_ws_fd(const sf_ws *ws);` |
-| `skipped` | function | `include/secure_fetch.h:283` | `* skipped (a classical key exchange is accepted);` |
-| `status` | type_alias | `include/secure_fetch.h:129` | `typedef struct sf_response { sf_status status;` |
+| `sf_user_agent_or_default` | function | `include/secure_fetch.h:260` | `const char *sf_user_agent_or_default(const char *ua);` |
+| `sf_ws` | type_alias | `include/secure_fetch.h:331` | `typedef struct sf_ws sf_ws;` |
+| `sf_ws_close` | function | `include/secure_fetch.h:358` | `void sf_ws_close(sf_ws *ws);` |
+| `sf_ws_fd` | function | `include/secure_fetch.h:355` | `int sf_ws_fd(const sf_ws *ws);` |
+| `skipped` | function | `include/secure_fetch.h:289` | `* skipped (a classical key exchange is accepted);` |
+| `status` | type_alias | `include/secure_fetch.h:135` | `typedef struct sf_response { sf_status status;` |
 | `validators` | function | `include/secure_fetch.h:18` | `* The security logic lives in pure validators (no I/O);` |
 | `FREEDOM_SHA2_H` | macro | `include/sha2.h:2` | `#define FREEDOM_SHA2_H` |
 | `SHA_MAX_DIGEST` | macro | `include/sha2.h:18` | `#define SHA_MAX_DIGEST` |
@@ -92,6 +105,18 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `sha_alg_from_name` | function | `include/sha2.h:24` | `int sha_alg_from_name(const char *name, sha_alg *out);` |
 | `sha_digest` | function | `include/sha2.h:28` | `int sha_digest(sha_alg alg, const void *data, size_t len, uint8_t *out);` |
 | `sha_digest_len` | function | `include/sha2.h:21` | `size_t sha_digest_len(sha_alg alg);` |
+| `FREEDOM_SHEET_CACHE_H` | macro | `include/sheet_cache.h:14` | `#define FREEDOM_SHEET_CACHE_H` |
+| `hits` | type_alias | `include/sheet_cache.h:42` | `typedef struct shc_stats { unsigned long hits;` |
+| `shc_acquire` | function | `include/sheet_cache.h:60` | `shc_sheet *shc_acquire(shc_cache *cache, const shc_key *key);` |
+| `shc_cache` | type_alias | `include/sheet_cache.h:26` | `typedef struct shc_cache shc_cache;` |
+| `shc_css` | function | `include/sheet_cache.h:64` | `const css_sheet *shc_css(const shc_sheet *s);` |
+| `shc_free` | function | `include/sheet_cache.h:55` | `void shc_free(shc_cache *c);` |
+| `shc_key` | struct | `include/sheet_cache.h:36` | `` |
+| `shc_new` | function | `include/sheet_cache.h:52` | `shc_cache *shc_new(size_t max_text_bytes);` |
+| `shc_release` | function | `include/sheet_cache.h:67` | `void shc_release(shc_sheet *s);` |
+| `shc_sheet` | type_alias | `include/sheet_cache.h:28` | `typedef struct shc_sheet shc_sheet;` |
+| `shc_stats` | struct | `include/sheet_cache.h:43` | `` |
+| `shc_stats_get` | function | `include/sheet_cache.h:70` | `void shc_stats_get(const shc_cache *c, shc_stats *out);` |
 | `FREEDOM_SHM_SLOTS_H` | macro | `include/shm_slots.h:2` | `#define FREEDOM_SHM_SLOTS_H` |
 | `SS_COUNT` | macro | `include/shm_slots.h:17` | `#define SS_COUNT` |
 | `busy` | type_alias | `include/shm_slots.h:18` | `typedef struct ss_state { int busy[SS_COUNT];` |
@@ -471,30 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `bt_layout` | function | `src/box_tree.c:465` | `bt_status bt_layout(bt_node *root, double avail_w)` |
 | `bt_nn` | function | `src/box_tree.c:58` | `static double bt_nn(double v)` |
 | `bt_oof_anchor` | function | `src/box_tree.c:768` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_oof_avail` | function | `src/box_tree.c:800` | `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)` |
-| `bt_oof_root` | function | `src/box_tree.c:772` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_resolve_positioning` | function | `src/box_tree.c:585` | `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,                           ...` |
-| `bt_resolve_positioning_ex` | function | `src/box_tree.c:596` | `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,                        ...` |
-| `find_positioned_ancestor` | function | `src/box_tree.c:522` | `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,                        ...` |
-| `height` | function | `src/box_tree.c:78` | `* exactly that height (Flexbox 9.4 step 15).  *  * wrap_reverse (node->wrap_reverse): when node->...` |
-| `inset_unset` | function | `src/box_tree.c:551` | `static int inset_unset(int v, int pct_pm)` |
-| `layout_block` | function | `src/box_tree.c:37` | `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,                    ...` |
-| `layout_flex` | function | `src/box_tree.c:98` | `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,                     ...` |
-| `layout_grid` | function | `src/box_tree.c:280` | `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,                     ...` |
-| `layout_node` | function | `src/box_tree.c:420` | `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)` |
-| `oof_walk` | function | `src/box_tree.c:751` | `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` |
-| `resolve_inset` | function | `src/box_tree.c:542` | `static double resolve_inset(int v, int pct_pm, double basis)` |
-| `sized` | function | `src/box_tree.c:350` | `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);` |
-| `_POSIX_C_SOURCE` | macro | `src/browser.c:7` | `#define _POSIX_C_SOURCE` |
-| `browser_add_exception` | function | `src/browser.c:472` | `browser_status browser_add_exception(browser_state *bs, const char *host)` |
-| `browser_back` | function | `src/browser.c:268` | `browser_status browser_back(browser_state *bs)` |
-| `browser_can_back` | function | `src/browser.c:292` | `int browser_can_back(const browser_state *bs)` |
-| `browser_can_forward` | function | `src/browser.c:296` | `int browser_can_forward(const browser_state *bs)` |
-| `browser_commit_url_bar` | function | `src/browser.c:190` | `browser_status browser_commit_url_bar(browser_state *bs)` |
-| `browser_current_url` | function | `src/browser.c:300` | `const char *browser_current_url(const browser_state *bs)` |
-| `browser_doc_index` | function | `src/browser.c:260` | `int browser_doc_index(const browser_state *bs)` |
-| `browser_entry_doc` | function | `src/browser.c:255` | `int browser_entry_doc(const browser_state *bs, size_t pos)` |
-| `browser_forward` | function | `src/browser.c:280` | `browser_status browser_forward(browser_state *bs)` |
-| `browser_free` | function | `src/browser.c:167` | `void browser_free(browser_state *bs)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

@@ -21,6 +21,22 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `MD_MAX_CATCHUP_READS` (macro, line 65) `#define MD_MAX_CATCHUP_READS`
 - Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/media_decoder.c`, `tests/test_media_decoder.c`
 
+## include/net_guard.h
+- Doc: ng_request: #ifndef __STDC_VERSION__ #error "net_guard requires C11" #endif #ifdef __cplusplus...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ng_request` (struct, line 26)
+  - `ng_verdict` (enum, line 20)
+  - `ng_addr_is_private` (function, line 38) `int ng_addr_is_private(int family, const unsigned char *addr, size_t len);`
+  - `ng_text_is_private` (function, line 42) `int ng_text_is_private(const char *ip_text);`
+  - `ng_host_is_ip` (function, line 46) `int ng_host_is_ip(const char *host);`
+  - `ng_host_is_local` (function, line 50) `int ng_host_is_local(const char *host);`
+  - `FREEDOM_NET_GUARD_H` (macro, line 9) `#define FREEDOM_NET_GUARD_H`
+  - `NG_FAMILY_V4` (macro, line 22) `#define NG_FAMILY_V4`
+  - `NG_FAMILY_V6` (macro, line 23) `#define NG_FAMILY_V6`
+- Imported by: `src/net_guard.c`, `src/secure_fetch.c`, `tests/test_net_guard.c`
+
 ## include/net_realm.h
 - Doc: nr_realm_allows_http: 1 iff plain http:// is acceptable for this realm.
 - Layer: utility
@@ -66,7 +82,8 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `pv_box_def` (struct, line 463)
   - `pv_cont_def` (struct, line 796)
   - `pv_view` (struct, line 846)
-  - `pv_text_ext` (struct, line 1036)
+  - `shc_cache` (struct, line 918)
+  - `pv_text_ext` (struct, line 1050)
   - `pv_status` (enum, line 34)
   - `pv_kind` (enum, line 72)
   - `pv_input_type` (enum, line 88)
@@ -74,8 +91,8 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `kind` (type_alias, line 122) `typedef struct pv_run { pv_kind kind;`
   - `parent_id` (type_alias, line 463) `typedef struct pv_box_def { int parent_id;`
   - `parent_id` (type_alias, line 796) `typedef struct pv_cont_def { int parent_id;`
-  - `pv_computed` (type_alias, line 918) `typedef struct pv_computed pv_computed;`
-  - `word_spacing` (type_alias, line 1036) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
+  - `pv_computed` (type_alias, line 928) `typedef struct pv_computed pv_computed;`
+  - `word_spacing` (type_alias, line 1050) `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;`
   - `container` (function, line 233) `* cont_id groups runs of one container (-1 = none);`
   - `bx_display` (function, line 234) `* bx_display (flex/grid);`
   - `order` (function, line 298) `* groups the runs of ONE floated element in document order (-1 = not in a float);`
@@ -87,55 +104,56 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `nonzero` (function, line 882) `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
   - `resolved` (function, line 889) `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
   - `policy` (function, line 897) `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
-  - `pv_computed_new` (function, line 919) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
-  - `pv_computed_get` (function, line 926) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);`
-  - `pv_computed_free` (function, line 929) `void pv_computed_free(pv_computed *pc);`
-  - `cause` (function, line 933) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
-  - `pv_new` (function, line 945) `pv_view *pv_new(void);`
-  - `form` (function, line 964) `* form (-1 if none);`
-  - `pv_set_emphasis` (function, line 996) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
-  - `default` (function, line 1001) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
-  - `pv_set_color` (function, line 1004) `void pv_set_color(pv_view *v, int fg_rgb);`
-  - `pv_set_bgcolor` (function, line 1011) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
-  - `pv_set_text_style` (function, line 1020) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
-  - `pv_text_ext_reset` (function, line 1077) `void pv_text_ext_reset(pv_text_ext *e);`
-  - `ancestors` (function, line 1082) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
-  - `pv_set_text_ext` (function, line 1092) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
-  - `pv_set_grad_text` (function, line 1098) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
-  - `run` (function, line 1101) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
-  - `pv_set_row_span` (function, line 1114) `void pv_set_row_span(pv_view *v, int row_span);`
-  - `pv_set_grid_area` (function, line 1118) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
-  - `pv_set_grid_rows` (function, line 1119) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
-  - `pv_set_ua_tag` (function, line 1124) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
-  - `pv_set_cont_box` (function, line 1128) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
-  - `pv_set_grid` (function, line 1129) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
-  - `pv_set_flex` (function, line 1137) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...`
-  - `pv_set_flex_mauto` (function, line 1140) `void pv_set_flex_mauto(pv_view *v, int mauto);`
-  - `pv_set_cont_item` (function, line 1144) `void pv_set_cont_item(pv_view *v, int cont_item);`
-  - `pv_set_float_w` (function, line 1155) `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...`
-  - `pv_set_float` (function, line 1158) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
-  - `pv_set_box` (function, line 1168) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
-  - `pv_set_box_pct` (function, line 1174) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
-  - `pv_set_box_maxw` (function, line 1179) `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);`
-  - `pv_set_node_id` (function, line 1184) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
-  - `pv_set_block_id` (function, line 1189) `void pv_set_block_id(pv_view *v, int block_id);`
-  - `pv_set_own_box` (function, line 1193) `void pv_set_own_box(pv_view *v, int box_id);`
-  - `pv_set_oof` (function, line 1197) `void pv_set_oof(pv_view *v, int oof);`
-  - `pv_set_justify_self` (function, line 1200) `void pv_set_justify_self(pv_view *v, int justify_self);`
-  - `pv_set_block_node` (function, line 1203) `void pv_set_block_node(pv_view *v, dom_node_id id);`
-  - `pv_set_br_line` (function, line 1211) `void pv_set_br_line(pv_view *v, int br_line);`
-  - `pv_cont_count` (function, line 1226) `size_t pv_cont_count(const pv_view *v);`
-  - `pv_cont_at` (function, line 1227) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
-  - `pv_set_input_checked` (function, line 1231) `void pv_set_input_checked(pv_view *v, int checked);`
-  - `pv_set_input_placeholder` (function, line 1235) `void pv_set_input_placeholder(pv_view *v, int ph_color);`
-  - `pv_svg_append_root_attrs` (function, line 1241) `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);`
-  - `pv_placeholder_color` (function, line 1244) `int pv_placeholder_color(const css_style *ph);`
-  - `pv_set_input_select_opts` (function, line 1248) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
-  - `pv_free` (function, line 1251) `void pv_free(pv_view *v);`
-  - `pv_count` (function, line 1254) `size_t pv_count(const pv_view *v);`
-  - `pv_at` (function, line 1255) `const pv_run *pv_at(const pv_view *v, size_t i);`
-  - `pv_box_count` (function, line 1259) `size_t pv_box_count(const pv_view *v);`
-  - `pv_box_at` (function, line 1260) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+  - `pv_computed_new` (function, line 929) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
+  - `pv_computed_new_cached` (function, line 932) `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark, const char *extern_css, size_t...`
+  - `pv_computed_get` (function, line 940) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);`
+  - `pv_computed_free` (function, line 943) `void pv_computed_free(pv_computed *pc);`
+  - `cause` (function, line 947) `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
+  - `pv_new` (function, line 959) `pv_view *pv_new(void);`
+  - `form` (function, line 978) `* form (-1 if none);`
+  - `pv_set_emphasis` (function, line 1010) `void pv_set_emphasis(pv_view *v, int bold, int italic);`
+  - `default` (function, line 1015) `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+  - `pv_set_color` (function, line 1018) `void pv_set_color(pv_view *v, int fg_rgb);`
+  - `pv_set_bgcolor` (function, line 1025) `void pv_set_bgcolor(pv_view *v, int bg_rgb);`
+  - `pv_set_text_style` (function, line 1034) `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);`
+  - `pv_text_ext_reset` (function, line 1091) `void pv_text_ext_reset(pv_text_ext *e);`
+  - `ancestors` (function, line 1096) `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
+  - `pv_set_text_ext` (function, line 1106) `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+  - `pv_set_grad_text` (function, line 1112) `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);`
+  - `run` (function, line 1115) `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
+  - `pv_set_row_span` (function, line 1128) `void pv_set_row_span(pv_view *v, int row_span);`
+  - `pv_set_grid_area` (function, line 1132) `void pv_set_grid_area(pv_view *v, int row_start, int col_start);`
+  - `pv_set_grid_rows` (function, line 1133) `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+  - `pv_set_ua_tag` (function, line 1138) `void pv_set_ua_tag(pv_view *v, int ua_tag);`
+  - `pv_set_cont_box` (function, line 1142) `void pv_set_cont_box(pv_view *v, int cont_box_id);`
+  - `pv_set_grid` (function, line 1143) `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+  - `pv_set_flex` (function, line 1151) `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...`
+  - `pv_set_flex_mauto` (function, line 1154) `void pv_set_flex_mauto(pv_view *v, int mauto);`
+  - `pv_set_cont_item` (function, line 1158) `void pv_set_cont_item(pv_view *v, int cont_item);`
+  - `pv_set_float_w` (function, line 1169) `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...`
+  - `pv_set_float` (function, line 1172) `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
+  - `pv_set_box` (function, line 1182) `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);`
+  - `pv_set_box_pct` (function, line 1188) `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);`
+  - `pv_set_box_maxw` (function, line 1193) `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);`
+  - `pv_set_node_id` (function, line 1198) `void pv_set_node_id(pv_view *v, dom_node_id node_id);`
+  - `pv_set_block_id` (function, line 1203) `void pv_set_block_id(pv_view *v, int block_id);`
+  - `pv_set_own_box` (function, line 1207) `void pv_set_own_box(pv_view *v, int box_id);`
+  - `pv_set_oof` (function, line 1211) `void pv_set_oof(pv_view *v, int oof);`
+  - `pv_set_justify_self` (function, line 1214) `void pv_set_justify_self(pv_view *v, int justify_self);`
+  - `pv_set_block_node` (function, line 1217) `void pv_set_block_node(pv_view *v, dom_node_id id);`
+  - `pv_set_br_line` (function, line 1225) `void pv_set_br_line(pv_view *v, int br_line);`
+  - `pv_cont_count` (function, line 1240) `size_t pv_cont_count(const pv_view *v);`
+  - `pv_cont_at` (function, line 1241) `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+  - `pv_set_input_checked` (function, line 1245) `void pv_set_input_checked(pv_view *v, int checked);`
+  - `pv_set_input_placeholder` (function, line 1249) `void pv_set_input_placeholder(pv_view *v, int ph_color);`
+  - `pv_svg_append_root_attrs` (function, line 1255) `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);`
+  - `pv_placeholder_color` (function, line 1258) `int pv_placeholder_color(const css_style *ph);`
+  - `pv_set_input_select_opts` (function, line 1262) `void pv_set_input_select_opts(pv_view *v, const char *select_opts);`
+  - `pv_free` (function, line 1265) `void pv_free(pv_view *v);`
+  - `pv_count` (function, line 1268) `size_t pv_count(const pv_view *v);`
+  - `pv_at` (function, line 1269) `const pv_run *pv_at(const pv_view *v, size_t i);`
+  - `pv_box_count` (function, line 1273) `size_t pv_box_count(const pv_view *v);`
+  - `pv_box_at` (function, line 1274) `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
   - `FREEDOM_PAGE_VIEW_H` (macro, line 2) `#define FREEDOM_PAGE_VIEW_H`
   - `PV_BSHADOW_LAYERS` (macro, line 44) `#define PV_BSHADOW_LAYERS`
   - `PV_MAUTO_LEFT` (macro, line 46) `#define PV_MAUTO_LEFT`
@@ -150,11 +168,11 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `PV_BG_URL_MAX` (macro, line 69) `#define PV_BG_URL_MAX`
   - `PV_MASK_GEO_N` (macro, line 70) `#define PV_MASK_GEO_N`
   - `PV_UA_BODY_MARGIN` (macro, line 867) `#define PV_UA_BODY_MARGIN`
-  - `PV_BR_EMPTY` (macro, line 1206) `#define PV_BR_EMPTY`
-  - `PV_BR_CONT` (macro, line 1207) `#define PV_BR_CONT`
-  - `PV_PH_THEME` (macro, line 1232) `#define PV_PH_THEME`
-  - `PV_PH_HIDDEN` (macro, line 1233) `#define PV_PH_HIDDEN`
-  - `PV_FRAME_SCHEME` (macro, line 1265) `#define PV_FRAME_SCHEME`
+  - `PV_BR_EMPTY` (macro, line 1220) `#define PV_BR_EMPTY`
+  - `PV_BR_CONT` (macro, line 1221) `#define PV_BR_CONT`
+  - `PV_PH_THEME` (macro, line 1246) `#define PV_PH_THEME`
+  - `PV_PH_HIDDEN` (macro, line 1247) `#define PV_PH_HIDDEN`
+  - `PV_FRAME_SCHEME` (macro, line 1279) `#define PV_FRAME_SCHEME`
 - Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 - Imported by: `include/box_tree.h`, `include/frame_host.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
@@ -393,54 +411,54 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `sf_chain_info` (struct, line 61)
-  - `sf_config` (struct, line 80)
-  - `sf_response` (struct, line 130)
+  - `sf_chain_info` (struct, line 63)
+  - `sf_config` (struct, line 82)
+  - `sf_response` (struct, line 136)
   - `sf_status` (enum, line 24)
-  - `sf_policy` (enum, line 41)
-  - `sf_proxy_type` (enum, line 70)
-  - `policy` (type_alias, line 79) `typedef struct sf_config { sf_policy policy;`
-  - `status` (type_alias, line 129) `typedef struct sf_response { sf_status status;`
-  - `sf_ws` (type_alias, line 325) `typedef struct sf_ws sf_ws;`
+  - `sf_policy` (enum, line 43)
+  - `sf_proxy_type` (enum, line 72)
+  - `policy` (type_alias, line 81) `typedef struct sf_config { sf_policy policy;`
+  - `status` (type_alias, line 135) `typedef struct sf_response { sf_status status;`
+  - `sf_ws` (type_alias, line 331) `typedef struct sf_ws sf_ws;`
   - `validators` (function, line 18) `* The security logic lives in pure validators (no I/O);`
-  - `rp_sanitize_request_headers` (function, line 109) `* rp_sanitize_request_headers ("Name: value\n" lines);`
-  - `sf_global_init` (function, line 227) `void sf_global_init(void);`
-  - `EXCLUDED` (function, line 233) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-  - `sf_cookie_put` (function, line 240) `void sf_cookie_put(const char *url, const char *namevalue);`
-  - `sf_cookie_line_matches` (function, line 245) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
-  - `sf_user_agent_or_default` (function, line 254) `const char *sf_user_agent_or_default(const char *ua);`
-  - `sf_accept_language_or_default` (function, line 258) `const char *sf_accept_language_or_default(const char *lang);`
-  - `sf_impersonate_kex_groups` (function, line 262) `const char *sf_impersonate_kex_groups(void);`
-  - `sf_impersonate_tls13_ciphers` (function, line 263) `const char *sf_impersonate_tls13_ciphers(void);`
-  - `skipped` (function, line 283) `* skipped (a classical key exchange is accepted);`
-  - `sf_is_redirect_code` (function, line 294) `int sf_is_redirect_code(long http_code);`
-  - `sf_header_value` (function, line 305) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);`
-  - `bits` (function, line 342) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-  - `sf_ws_fd` (function, line 349) `int sf_ws_fd(const sf_ws *ws);`
-  - `sf_ws_close` (function, line 352) `void sf_ws_close(sf_ws *ws);`
-  - `connection` (function, line 356) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-  - `sf_get` (function, line 365) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-  - `sf_response_free` (function, line 376) `void sf_response_free(sf_response *resp);`
-  - `exhausted` (function, line 387) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
-  - `sf_rcache_put` (function, line 400) `int sf_rcache_put(const char *from, const char *to, time_t now);`
-  - `sf_rcache_get` (function, line 401) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
-  - `sf_rcache_clear` (function, line 402) `void sf_rcache_clear(void);`
-  - `sf_rcache_set_backing` (function, line 411) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
+  - `rp_sanitize_request_headers` (function, line 111) `* rp_sanitize_request_headers ("Name: value\n" lines);`
+  - `sf_global_init` (function, line 233) `void sf_global_init(void);`
+  - `EXCLUDED` (function, line 239) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+  - `sf_cookie_put` (function, line 246) `void sf_cookie_put(const char *url, const char *namevalue);`
+  - `sf_cookie_line_matches` (function, line 251) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
+  - `sf_user_agent_or_default` (function, line 260) `const char *sf_user_agent_or_default(const char *ua);`
+  - `sf_accept_language_or_default` (function, line 264) `const char *sf_accept_language_or_default(const char *lang);`
+  - `sf_impersonate_kex_groups` (function, line 268) `const char *sf_impersonate_kex_groups(void);`
+  - `sf_impersonate_tls13_ciphers` (function, line 269) `const char *sf_impersonate_tls13_ciphers(void);`
+  - `skipped` (function, line 289) `* skipped (a classical key exchange is accepted);`
+  - `sf_is_redirect_code` (function, line 300) `int sf_is_redirect_code(long http_code);`
+  - `sf_header_value` (function, line 311) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);`
+  - `bits` (function, line 348) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+  - `sf_ws_fd` (function, line 355) `int sf_ws_fd(const sf_ws *ws);`
+  - `sf_ws_close` (function, line 358) `void sf_ws_close(sf_ws *ws);`
+  - `connection` (function, line 362) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+  - `sf_get` (function, line 371) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+  - `sf_response_free` (function, line 382) `void sf_response_free(sf_response *resp);`
+  - `exhausted` (function, line 393) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+  - `sf_rcache_put` (function, line 406) `int sf_rcache_put(const char *from, const char *to, time_t now);`
+  - `sf_rcache_get` (function, line 407) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+  - `sf_rcache_clear` (function, line 408) `void sf_rcache_clear(void);`
+  - `sf_rcache_set_backing` (function, line 417) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
   - `FREEDOM_SECURE_FETCH_H` (macro, line 2) `#define FREEDOM_SECURE_FETCH_H`
-  - `SF_META_MAX` (macro, line 77) `#define SF_META_MAX`
-  - `SF_RESPONSE_HEADERS_MAX` (macro, line 78) `#define SF_RESPONSE_HEADERS_MAX`
-  - `SF_DEFAULT_KEX_GROUPS` (macro, line 166) `#define SF_DEFAULT_KEX_GROUPS`
-  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 175) `#define SF_IMPERSONATE_KEX_GROUPS`
-  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 176) `#define SF_IMPERSONATE_TLS13_CIPHERS`
-  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 180) `#define SF_IMPERSONATE_TLS12_CIPHERS`
-  - `SF_DEFAULT_USER_AGENT` (macro, line 191) `#define SF_DEFAULT_USER_AGENT`
-  - `SF_DEFAULT_MAX_BODY` (macro, line 192) `#define SF_DEFAULT_MAX_BODY`
-  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 193) `#define SF_DEFAULT_TIMEOUT_MS`
-  - `SF_CONNECT_TIMEOUT_MS` (macro, line 216) `#define SF_CONNECT_TIMEOUT_MS`
-  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 217) `#define SF_SUBRESOURCE_TIMEOUT_MS`
-  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 218) `#define SF_DEFAULT_MAX_REDIRECTS`
-  - `SF_MAX_URL` (macro, line 219) `#define SF_MAX_URL`
-  - `SF_WS_MAX_MESSAGE` (macro, line 324) `#define SF_WS_MAX_MESSAGE`
+  - `SF_META_MAX` (macro, line 79) `#define SF_META_MAX`
+  - `SF_RESPONSE_HEADERS_MAX` (macro, line 80) `#define SF_RESPONSE_HEADERS_MAX`
+  - `SF_DEFAULT_KEX_GROUPS` (macro, line 172) `#define SF_DEFAULT_KEX_GROUPS`
+  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 181) `#define SF_IMPERSONATE_KEX_GROUPS`
+  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 182) `#define SF_IMPERSONATE_TLS13_CIPHERS`
+  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 186) `#define SF_IMPERSONATE_TLS12_CIPHERS`
+  - `SF_DEFAULT_USER_AGENT` (macro, line 197) `#define SF_DEFAULT_USER_AGENT`
+  - `SF_DEFAULT_MAX_BODY` (macro, line 198) `#define SF_DEFAULT_MAX_BODY`
+  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 199) `#define SF_DEFAULT_TIMEOUT_MS`
+  - `SF_CONNECT_TIMEOUT_MS` (macro, line 222) `#define SF_CONNECT_TIMEOUT_MS`
+  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 223) `#define SF_SUBRESOURCE_TIMEOUT_MS`
+  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 224) `#define SF_DEFAULT_MAX_REDIRECTS`
+  - `SF_MAX_URL` (macro, line 225) `#define SF_MAX_URL`
+  - `SF_WS_MAX_MESSAGE` (macro, line 330) `#define SF_WS_MAX_MESSAGE`
 - Depends on: `include/anti_fp.h`
 - Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 
@@ -457,39 +475,25 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `SHA_MAX_DIGEST` (macro, line 18) `#define SHA_MAX_DIGEST`
 - Imported by: `src/js_env.c`, `src/sha2.c`, `tests/test_sha2.c`
 
-## include/shm_slots.h
-- Doc: ss_committed: Chooses the slot to paint into: the current one if free, else the other free one.
-- Layer: utility
+## include/sheet_cache.h
+- Doc: shc_key: Every input of the parse.
+- Layer: infrastructure
 - Language: h
 - Symbols:
-  - `ss_state` (struct, line 19)
-  - `busy` (type_alias, line 18) `typedef struct ss_state { int busy[SS_COUNT];`
-  - `ss_init` (function, line 24) `static inline void ss_init(ss_state *s)`
-  - `ss_committed` (function, line 41) `static inline void ss_committed(ss_state *s, int i)`
-  - `ss_released` (function, line 49) `static inline int ss_released(ss_state *s, int i)`
-  - `FREEDOM_SHM_SLOTS_H` (macro, line 2) `#define FREEDOM_SHM_SLOTS_H`
-  - `SS_COUNT` (macro, line 17) `#define SS_COUNT`
-- Imported by: `gui/browser_ui.c`, `tests/test_shm_slots.c`
-
-## include/subreq_batch.h
-- Doc: sqb_res: #ifndef SUBREQ_BATCH_H #define SUBREQ_BATCH_H #include <stddef.h> #define SQB_MAX_JOBS...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `sqb_req` (struct, line 16)
-  - `sqb_res` (struct, line 23)
-  - `ok` (type_alias, line 23) `typedef struct sqb_res { int ok;`
-  - `sqb` (type_alias, line 34) `typedef struct sqb sqb;`
-  - `sqb_new` (function, line 37) `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx);`
-  - `sqb_submit` (function, line 41) `int sqb_submit(sqb *b, int refused, const sqb_req *req);`
-  - `sqb_count` (function, line 42) `size_t sqb_count(const sqb *b);`
-  - `sqb_wait_all` (function, line 44) `void sqb_wait_all(sqb *b);`
-  - `sqb_result` (function, line 46) `const sqb_res *sqb_result(const sqb *b, size_t i);`
-  - `sqb_reset` (function, line 48) `void sqb_reset(sqb *b);`
-  - `sqb_free` (function, line 49) `void sqb_free(sqb *b);`
-  - `SUBREQ_BATCH_H` (macro, line 10) `#define SUBREQ_BATCH_H`
-  - `SQB_MAX_JOBS` (macro, line 14) `#define SQB_MAX_JOBS`
-- Imported by: `src/subreq_batch.c`, `src/tab.c`, `tests/test_subreq_batch.c`
+  - `shc_key` (struct, line 36)
+  - `shc_stats` (struct, line 43)
+  - `shc_cache` (type_alias, line 26) `typedef struct shc_cache shc_cache;`
+  - `shc_sheet` (type_alias, line 28) `typedef struct shc_sheet shc_sheet;`
+  - `hits` (type_alias, line 42) `typedef struct shc_stats { unsigned long hits;`
+  - `shc_new` (function, line 52) `shc_cache *shc_new(size_t max_text_bytes);`
+  - `shc_free` (function, line 55) `void shc_free(shc_cache *c);`
+  - `shc_acquire` (function, line 60) `shc_sheet *shc_acquire(shc_cache *cache, const shc_key *key);`
+  - `shc_css` (function, line 64) `const css_sheet *shc_css(const shc_sheet *s);`
+  - `shc_release` (function, line 67) `void shc_release(shc_sheet *s);`
+  - `shc_stats_get` (function, line 70) `void shc_stats_get(const shc_cache *c, shc_stats *out);`
+  - `FREEDOM_SHEET_CACHE_H` (macro, line 14) `#define FREEDOM_SHEET_CACHE_H`
+- Depends on: `include/css.h`
+- Imported by: `src/page_view.c`, `src/sheet_cache.c`, `src/tab.c`, `tests/test_page_view.c`, `tests/test_sheet_cache.c`
 
 
 Next: [KB_include_p5.md](KB_include_p5.md)

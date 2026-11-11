@@ -233,7 +233,7 @@ const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)
 
 Painting (spec/frame_broker.md section 5).
 
-The document of the frame loaded from [`url`](include.url.h.md#url), as its confined worker last built it (NULL when no live frame has that URL); *t_out (optional) is that worker, which decodes the frame's own images. Both stay owned by the host and are valid until the next fh_apply_top/fh_tick/fh_free.
+The document of the frame loaded from `url`, as its confined worker last built it (NULL when no live frame has that URL); *t_out (optional) is that worker, which decodes the frame's own images. Both stay owned by the host and are valid until the next fh_apply_top/fh_tick/fh_free.
 
 **Parameters**
 

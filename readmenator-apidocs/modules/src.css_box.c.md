@@ -48,7 +48,6 @@ flowchart LR
     n_include_css_select_h__csel_ci_starts["css_select.csel_ci_starts"]
     n_src_css_box_c__cb_expand_grid_template_cols(["cb_expand_grid_template_cols"])
     n_include_css_select_h__csel_substr["css_select.csel_substr"]
-    n_include_url_h__url["url.url"]
     n_src_css_box_c__cb_expand_grid_template_rows(["cb_expand_grid_template_rows"])
     n_src_css_box_c__cb_interp_fontsize_ex --> n_src_css_box_c__cb_length_px
     n_src_css_box_c__cb_interp_lineheight --> n_src_css_box_c__cb_length_px
@@ -72,8 +71,8 @@ flowchart LR
     n_src_css_box_c__cb_interp_justify -.-> n_include_css_select_h__csel_ci_starts
     n_src_css_box_c__cb_expand_grid_template_cols -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_box_c__cb_expand_grid_template_cols -.-> n_include_css_select_h__csel_substr
-    n_src_css_box_c__cb_expand_grid_template_cols -.-> n_include_url_h__url
     n_src_css_box_c__cb_expand_grid_template_rows -.-> n_include_css_select_h__csel_ci_eq
+    n_src_css_box_c__cb_expand_grid_template_rows -.-> n_include_css_select_h__csel_substr
 ```
 
 ## Structs
@@ -431,7 +430,7 @@ grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track size
 
 **Returns:** `int`
 
-*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`csel_substr`](include.css_select.h.md#csel_substr), [`url`](include.url.h.md#url)
+*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`csel_substr`](include.css_select.h.md#csel_substr)
 
 ---
 
@@ -455,7 +454,7 @@ int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)
 
 **Returns:** `int`
 
-*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`csel_substr`](include.css_select.h.md#csel_substr), [`url`](include.url.h.md#url)
+*Calls:* [`csel_ci_eq`](include.css_select.h.md#csel_ci_eq), [`csel_substr`](include.css_select.h.md#csel_substr)
 
 ---
 

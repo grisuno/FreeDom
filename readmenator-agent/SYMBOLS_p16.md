@@ -3,6 +3,102 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_refused_and_failed_keep_their_slot` | function | `tests/test_subreq_batch.c:60` | `static void test_refused_and_failed_keep_their_slot(void **st)` |
+| `test_results_in_issue_order_and_overlap` | function | `tests/test_subreq_batch.c:32` | `static void test_results_in_issue_order_and_overlap(void **st)` |
+| `test_thread_limit_is_respected` | function | `tests/test_subreq_batch.c:50` | `static void test_thread_limit_is_respected(void **st)` |
+| `main` | function | `tests/test_svg_raster.c:111` | `int main(void)` |
+| `pixel` | function | `tests/test_svg_raster.c:18` | `static uint32_t pixel(const img_pixels *px, uint32_t x, uint32_t y)` |
+| `raster` | function | `tests/test_svg_raster.c:14` | `static img_status raster(const char *s, img_pixels *px)` |
+| `test_garbage_fails_closed` | function | `tests/test_svg_raster.c:89` | `static void test_garbage_fails_closed(void **state)` |
+| `test_huge_scales_down` | function | `tests/test_svg_raster.c:79` | `static void test_huge_scales_down(void **state)` |
+| `test_large_svg_is_not_oversampled` | function | `tests/test_svg_raster.c:69` | `static void test_large_svg_is_not_oversampled(void **state)` |
+| `test_rect_fills_red` | function | `tests/test_svg_raster.c:42` | `static void test_rect_fills_red(void **state)` |
+| `test_sniff` | function | `tests/test_svg_raster.c:24` | `static void test_sniff(void **state)` |
+| `test_text_is_skipped_not_fatal` | function | `tests/test_svg_raster.c:101` | `static void test_text_is_skipped_not_fatal(void **state)` |
+| `test_viewbox_sets_size_and_transparent_bg` | function | `tests/test_svg_raster.c:56` | `static void test_viewbox_sets_size_and_transparent_bg(void **state)` |
+| `main` | function | `tests/test_svg_render.c:344` | `int main(void)` |
+| `parse` | function | `tests/test_svg_render.c:26` | `static sv_status parse(sv_image *im, const char *s)` |
+| `test_basic_shapes` | function | `tests/test_svg_render.c:71` | `static void test_basic_shapes(void **state)` |
+| `test_bounds_are_enforced` | function | `tests/test_svg_render.c:248` | `static void test_bounds_are_enforced(void **state)` |
+| `test_dimensions_and_viewbox` | function | `tests/test_svg_render.c:50` | `static void test_dimensions_and_viewbox(void **state)` |
+| `test_empty_and_garbage_do_not_parse` | function | `tests/test_svg_render.c:38` | `static void test_empty_and_garbage_do_not_parse(void **state)` |
+| `test_fit_uniform_and_centered` | function | `tests/test_svg_render.c:320` | `static void test_fit_uniform_and_centered(void **state)` |
+| `test_group_inheritance_and_transform` | function | `tests/test_svg_render.c:118` | `static void test_group_inheritance_and_transform(void **state)` |
+| `test_malformed_values_degrade` | function | `tests/test_svg_render.c:285` | `static void test_malformed_values_degrade(void **state)` |
+| `test_null_args` | function | `tests/test_svg_render.c:30` | `static void test_null_args(void **state)` |
+| `test_paint_attributes` | function | `tests/test_svg_render.c:96` | `static void test_paint_attributes(void **state)` |
+| `test_path_arc_compact_flags` | function | `tests/test_svg_render.c:208` | `static void test_path_arc_compact_flags(void **state)` |
+| `test_path_arc_reaches_endpoint` | function | `tests/test_svg_render.c:192` | `static void test_path_arc_reaches_endpoint(void **state)` |
+| `test_path_commands` | function | `tests/test_svg_render.c:159` | `static void test_path_commands(void **state)` |
+| `test_polygon_points` | function | `tests/test_svg_render.c:140` | `static void test_polygon_points(void **state)` |
+| `test_text_element` | function | `tests/test_svg_render.c:304` | `static void test_text_element(void **state)` |
+| `test_url_bearing_elements_are_dropped` | function | `tests/test_svg_render.c:224` | `static void test_url_bearing_elements_are_dropped(void **state)` |
+| `CSS_PAGE` | macro | `tests/test_tab.c:2020` | `#define CSS_PAGE(HREF)` |
+| `EXT_PAGE` | macro | `tests/test_tab.c:1893` | `#define EXT_PAGE(SRC)` |
+| `XHR_PAGE` | macro | `tests/test_tab.c:1798` | `#define XHR_PAGE(URL)` |
+| `_DEFAULT_SOURCE` | macro | `tests/test_tab.c:1` | `#define _DEFAULT_SOURCE` |
+| `_POSIX_C_SOURCE` | macro | `tests/test_tab.c:15` | `#define _POSIX_C_SOURCE` |
+| `console_find` | function | `tests/test_tab.c:1372` | `static const fb_entry *console_find(const fb_buffer *log, int level, const char *needle)` |
+| `cs_eval` | function | `tests/test_tab.c:2283` | `static void cs_eval(tab *t, const char *js, char *out, size_t outsz)` |
+| `cs_open` | function | `tests/test_tab.c:2291` | `static void cs_open(tab **t, int net)` |
+| `document` | function | `tests/test_tab.c:2176` | `* listener is on document (the React/jQuery-delegation shape);` |
+| `expect_eval` | function | `tests/test_tab.c:70` | `static void expect_eval(tab *t, const char *js, const char *expected)` |
+| `expect_eval` | function | `tests/test_tab.c:1688` | `expect_eval(f->t, "var fr=function(n)` |
+| `expect_eval` | function | `tests/test_tab.c:1689` | `expect_eval(f->t, "var gr=function()` |
+| `expect_eval` | function | `tests/test_tab.c:1792` | `expect_eval(t, "var n=net(), a=n.filter(function(e)` |
+| `fixture` | struct | `tests/test_tab.c:47` | `` |
+| `geom_load_and_measure` | function | `tests/test_tab.c:2236` | `static int geom_load_and_measure(int net, char *out, size_t outsz)` |
+| `load` | function | `tests/test_tab.c:2226` | `* table only for a trusted load (net granted: allow.conf AND js.conf);` |
+| `load_js_page` | function | `tests/test_tab.c:2393` | `static void load_js_page(tab **out_t, const char *html, tab_page *p)` |
+| `ls_load` | function | `tests/test_tab.c:2769` | `static void ls_load(int net, tab **t, tab_page *p)` |
+| `main` | function | `tests/test_tab.c:3703` | `int main(int argc, char **argv)` |
+| `module_page` | function | `tests/test_tab.c:2855` | `static const pv_run *module_page(int net, tab **t, tab_page *p, const char *needle)` |
+| `ms_since` | function | `tests/test_tab.c:3002` | `static long ms_since(const struct timespec *a)` |
+| `n` | type_alias | `tests/test_tab.c:2057` | `typedef struct sink_cap { int n;` |
+| `open_page` | function | `tests/test_tab.c:2521` | `static void open_page(int net, tab **t, tab_page *p)` |
+| `paragraph` | function | `tests/test_tab.c:219` | `* reserved 200x280 box and the alt flowed as a paragraph (jkanime tiles). */ static void test_loa...` |
+| `read` | function | `tests/test_tab.c:3211` | `* vector no page may read (Zero Knowledge). Google's real JS hit exactly this. */ static void tes...` |
+| `setup_loaded` | function | `tests/test_tab.c:49` | `static int setup_loaded(void **state)` |
+| `sink_cap` | struct | `tests/test_tab.c:2057` | `` |
+| `sink_capture` | function | `tests/test_tab.c:2059` | `static void sink_capture(void *ctx, const char *url,                          const char *body, s...` |
+| `slow_fetch` | function | `tests/test_tab.c:1748` | `static int slow_fetch(void *ctx, const char *method, const char *url,                       const...` |
+| `slow_tab` | function | `tests/test_tab.c:2991` | `static tab *slow_tab(void)` |
+| `stub_css_fetch` | function | `tests/test_tab.c:2003` | `static int stub_css_fetch(void *ctx, const char *method, const char *url,                        ...` |
+| `stub_fetch` | function | `tests/test_tab.c:1732` | `static int stub_fetch(void *ctx, const char *method, const char *url,                       const...` |
+| `stub_module_fetch` | function | `tests/test_tab.c:2817` | `static int stub_module_fetch(void *ctx, const char *method, const char *url,                     ...` |
+| `stub_script_fetch` | function | `tests/test_tab.c:1869` | `static int stub_script_fetch(void *ctx, const char *method, const char *url,                     ...` |
+| `stub_slow_fetch` | function | `tests/test_tab.c:2949` | `static int stub_slow_fetch(void *ctx, const char *method, const char *url, const char *body,     ...` |
+| `teardown` | function | `tests/test_tab.c:60` | `static int teardown(void **state)` |
+| `test_ajax_after_load_reaches_the_gated_fetcher` | function | `tests/test_tab.c:2918` | `static void test_ajax_after_load_reaches_the_gated_fetcher(void **state)` |
+| `test_async_subrequests_run_in_parallel` | function | `tests/test_tab.c:1767` | `static void test_async_subrequests_run_in_parallel(void **state)` |
+| `test_async_tick_returns_at_once_and_delivers_through_eventfd` | function | `tests/test_tab.c:3008` | `static void test_async_tick_returns_at_once_and_delivers_through_eventfd(void **state)` |
+| `test_binary_does_not_crash_parent` | function | `tests/test_tab.c:3289` | `static void test_binary_does_not_crash_parent(void **state)` |
+| `test_boxdef_node_id_crosses_codec` | function | `tests/test_tab.c:2207` | `static void test_boxdef_node_id_crosses_codec(void **state)` |
+| `test_child_death_survived` | function | `tests/test_tab.c:3304` | `static void test_child_death_survived(void **state)` |
+| `test_click_bubbles_to_delegated_document_listener` | function | `tests/test_tab.c:2179` | `static void test_click_bubbles_to_delegated_document_listener(void **state)` |
+| `test_click_handler_navigation_reaches_parent` | function | `tests/test_tab.c:2399` | `static void test_click_handler_navigation_reaches_parent(void **state)` |
+| `test_click_runs_handler_and_returns_view` | function | `tests/test_tab.c:635` | `static void test_click_runs_handler_and_returns_view(void **state)` |
+| `test_computed_style_follows_dom_mutation` | function | `tests/test_tab.c:2318` | `static void test_computed_style_follows_dom_mutation(void **state)` |
+| `test_computed_style_is_inline_only_for_untrusted_host` | function | `tests/test_tab.c:2337` | `static void test_computed_style_is_inline_only_for_untrusted_host(void **state)` |
+| `test_computed_style_reads_the_cascade_for_trusted_host` | function | `tests/test_tab.c:2299` | `static void test_computed_style_reads_the_cascade_for_trusted_host(void **state)` |
+| `test_css_sink_ignores_non_css_body` | function | `tests/test_tab.c:2100` | `static void test_css_sink_ignores_non_css_body(void **state)` |
+| `test_css_sink_observes_served_stylesheet` | function | `tests/test_tab.c:2074` | `static void test_css_sink_observes_served_stylesheet(void **state)` |
+| `test_data_module_imports_absolute_https` | function | `tests/test_tab.c:3141` | `static void test_data_module_imports_absolute_https(void **state)` |
+| `test_data_url_classic_script_runs_without_network` | function | `tests/test_tab.c:3071` | `static void test_data_url_classic_script_runs_without_network(void **state)` |
+| `test_decode_image_data_url_in_sandbox` | function | `tests/test_tab.c:3420` | `static void test_decode_image_data_url_in_sandbox(void **state)` |
+| `test_decode_image_data_url_null_args` | function | `tests/test_tab.c:3493` | `static void test_decode_image_data_url_null_args(void **state)` |
+| `test_decode_image_in_sandbox` | function | `tests/test_tab.c:3364` | `static void test_decode_image_in_sandbox(void **state)` |
+| `test_decode_image_null_args` | function | `tests/test_tab.c:3401` | `static void test_decode_image_null_args(void **state)` |
+| `test_decode_image_rejects_junk` | function | `tests/test_tab.c:3386` | `static void test_decode_image_rejects_junk(void **state)` |
+| `test_decode_svg_image_in_sandbox` | function | `tests/test_tab.c:3465` | `static void test_decode_svg_image_in_sandbox(void **state)` |
+| `test_dynamic_import_from_classic_script_uses_document_base` | function | `tests/test_tab.c:2886` | `static void test_dynamic_import_from_classic_script_uses_document_base(void **state)` |
+| `test_eval_captures_console_output` | function | `tests/test_tab.c:1529` | `static void test_eval_captures_console_output(void **state)` |
+| `test_eval_exception` | function | `tests/test_tab.c:3232` | `static void test_eval_exception(void **state)` |
+| `test_eval_no_network_or_cross_origin_api` | function | `tests/test_tab.c:1713` | `static void test_eval_no_network_or_cross_origin_api(void **state)` |
+| `test_eval_persistent_state` | function | `tests/test_tab.c:3244` | `static void test_eval_persistent_state(void **state)` |
+| `test_eval_sees_dom` | function | `tests/test_tab.c:1675` | `static void test_eval_sees_dom(void **state)` |
+| `test_eval_sees_env` | function | `tests/test_tab.c:1696` | `static void test_eval_sees_env(void **state)` |
+| `test_eval_without_load` | function | `tests/test_tab.c:3277` | `static void test_eval_without_load(void **state)` |
 | `test_event_ipc_via_tab_eval` | function | `tests/test_tab.c:674` | `static void test_event_ipc_via_tab_eval(void **state)` |
 | `test_event_navigation_is_policy_gated` | function | `tests/test_tab.c:2442` | `static void test_event_navigation_is_policy_gated(void **state)` |
 | `test_external_css_applied_when_allowed` | function | `tests/test_tab.c:2036` | `static void test_external_css_applied_when_allowed(void **state)` |

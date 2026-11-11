@@ -1,10 +1,10 @@
 # `include/freedom_config.h`
 
-> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 92.3% | [API index](../index.md)
+> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 93.3% | [API index](../index.md)
 
 ## Contents
 
-- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes), [`FC_LAZY_IMAGE_MARGIN_PX`](#fc_lazy_image_margin_px), [`FC_TAB_OP_NET_BUDGET_MS`](#fc_tab_op_net_budget_ms)
+- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes), [`FC_SHC_MAX_TEXT_BYTES`](#fc_shc_max_text_bytes), [`FC_SHC_MAX_QUERIES`](#fc_shc_max_queries), [`FC_LAZY_IMAGE_MARGIN_PX`](#fc_lazy_image_margin_px), [`FC_TAB_OP_NET_BUDGET_MS`](#fc_tab_op_net_budget_ms)
 
 ## Macros
 
@@ -168,11 +168,43 @@ It is an anti-DoS bound on parser memory and time, and it must sit ABOVE what re
 
 ---
 
+<a id="fc_shc_max_text_bytes"></a>
+
+### `FC_SHC_MAX_TEXT_BYTES`
+
+`macro` | [include/freedom_config.h:84](../../include/freedom_config.h#L84)
+
+```c
+#define FC_SHC_MAX_TEXT_BYTES
+```
+
+Largest stylesheet text (author CSS plus the prepended UA sheet) whose parsed form the worker retains between view derivations (spec/sheet_cache.md).
+
+The retained copy of the text is the cache key, so this bounds that copy; a longer text is parsed on every derivation exactly as before the cache existed.
+
+---
+
+<a id="fc_shc_max_queries"></a>
+
+### `FC_SHC_MAX_QUERIES`
+
+`macro` | [include/freedom_config.h:90](../../include/freedom_config.h#L90)
+
+```c
+#define FC_SHC_MAX_QUERIES
+```
+
+Most root-matcher questions one parse may record for replay (spec/sheet_cache.md).
+
+Each is a compact selector copy re-asked on every later derivation, so the bound caps both memory and the cost of a hit; a sheet that asks more is simply not retained. Sized against what real pages ask (measured on the allowlist corpus).
+
+---
+
 <a id="fc_lazy_image_margin_px"></a>
 
 ### `FC_LAZY_IMAGE_MARGIN_PX`
 
-`macro` | [include/freedom_config.h:81](../../include/freedom_config.h#L81)
+`macro` | [include/freedom_config.h:93](../../include/freedom_config.h#L93)
 
 ```c
 #define FC_LAZY_IMAGE_MARGIN_PX
@@ -186,7 +218,7 @@ Distance (px) beyond the viewport at which a loading="lazy" image starts loading
 
 ### `FC_TAB_OP_NET_BUDGET_MS`
 
-`macro` | [include/freedom_config.h:87](../../include/freedom_config.h#L87)
+`macro` | [include/freedom_config.h:99](../../include/freedom_config.h#L99)
 
 ```c
 #define FC_TAB_OP_NET_BUDGET_MS

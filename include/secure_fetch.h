@@ -34,7 +34,9 @@ typedef enum sf_status {
     SF_ERR_NETWORK,      /* connect / read / timeout at the transport layer */
     SF_ERR_OOM,          /* allocation failed */
     SF_ERR_TOO_MANY_REDIRECTS, /* sf_get_follow exceeded max_redirects hops */
-    SF_ERR_INTERNAL      /* transport library returned an unexpected state */
+    SF_ERR_INTERNAL,     /* transport library returned an unexpected state */
+    SF_ERR_PRIVATE_NET   /* remote content asked for a private/loopback address
+                          * (spec/net_guard.md); appended so earlier codes keep their values */
 } sf_status;
 
 /* Post-quantum enforcement policy. */
@@ -109,6 +111,10 @@ typedef struct sf_config {
                                   * rp_sanitize_request_headers ("Name: value\n" lines); they replace the
                                   * default Accept / Content-Type of the same name. NULL => none. */
     const char *referrer_url;    /* document URL of the initiator; NULL => top-level nav */
+    const char *redirect_from;   /* URL of the hop whose redirect led here; set by the
+                                  * redirect followers, NULL on a first request. It is
+                                  * the initiator for the private-network guard: a
+                                  * redirect is remote content, not the user. */
     const char *sec_fetch_dest;  /* NULL => "document"; set to "script"/"image"/"style" etc. */
     const char *sec_fetch_mode;  /* NULL => "navigate"; set to "no-cors"/"cors" etc. */
     /* Streaming progress: called ~1/sec during download with the accumulated body so

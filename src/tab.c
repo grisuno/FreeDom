@@ -21,6 +21,7 @@
 #include "box_tree.h"
 #include "css.h"
 #include "css_computed.h"
+#include "sheet_cache.h"
 #include "data_url.h"
 #include "dom.h"
 #include "freebug.h"
@@ -249,6 +250,8 @@ typedef struct child_state {
     char           *page_url;          /* the loaded page's URL: base of module specifiers */
     im_map         *imap;              /* the page's first <script type=importmap>, or NULL */
     jg_table        geom;              /* laid-out geometry installed into js (OP_GEOM) */
+    shc_cache      *sheets;            /* the page's parsed sheet, reused while its CSS text
+                                        * is unchanged (spec/sheet_cache.md); lazily created */
     pv_computed    *computed;          /* retained cascade behind getComputedStyle (trusted) */
     uint64_t        computed_sig;      /* css_signature the cascade snapshot was taken at */
     /* A JS context with the page-independent shims already installed over a blank document,
@@ -267,6 +270,13 @@ static int write_ws(int wfd, child_state *cs);
 static int write_storage(int wfd, child_state *cs);
 static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture);
 static void tab_async_sync(tab *t);
+
+/* The worker's sheet cache, created on first use. NULL on OOM: every consumer then
+ * parses afresh, exactly as without a cache. */
+static shc_cache *child_sheets(child_state *cs) {
+    if (cs->sheets == NULL) cs->sheets = shc_new(0);
+    return cs->sheets;
+}
 
 static void child_reset_page(child_state *cs) {
     pv_computed_free(cs->computed);
@@ -362,8 +372,9 @@ static int child_computed(void *ctx, dom_node_id h, const char *prop, char *out,
     uint64_t sig = computed_signature(cs->idx);
     if (cs->computed == NULL || sig != cs->computed_sig) {
         pv_computed_free(cs->computed);
-        cs->computed = pv_computed_new(cs->doc, cs->last_prefers_dark, cs->extern_css,
-                                       cs->extern_css_len, cs->last_viewport_w);
+        cs->computed = pv_computed_new_cached(cs->doc, cs->last_prefers_dark, cs->extern_css,
+                                              cs->extern_css_len, cs->last_viewport_w,
+                                              child_sheets(cs));
         cs->computed_sig = sig;
     }
     const void *native = dom_native_node(cs->idx, h);
@@ -1420,8 +1431,8 @@ static pv_view *child_prescript_view(child_state *cs, const char *html, size_t l
     }
     hp_free_scripts(scripts, nscripts);
     pv_view *view = NULL;
-    if (pv_build_styled(doc, run_js, reader, prefers_dark, cs->extern_css, cs->extern_css_len,
-                        cs->last_viewport_w, &view) != PV_OK) view = NULL;
+    if (pv_build_cached(doc, run_js, reader, prefers_dark, cs->extern_css, cs->extern_css_len,
+                        cs->last_viewport_w, child_sheets(cs), &view) != PV_OK) view = NULL;
     dom_free(idx);
     hp_document_free(doc);
     return view;
@@ -1790,9 +1801,9 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         prof_lap("extract-text", &ph);
         double pt2 = prof_now_ms();
         int pv_ok = !(title == NULL || text == NULL
-            || pv_build_styled(cs->doc, run_js, reader, prefers_dark,
+            || pv_build_cached(cs->doc, run_js, reader, prefers_dark,
                                cs->extern_css, cs->extern_css_len,
-                               cs->last_viewport_w, &view) != PV_OK);
+                               cs->last_viewport_w, child_sheets(cs), &view) != PV_OK);
         prof_lap("pv-build-styled", &pt2);
         if (!pv_ok) {
             ok = 0;
@@ -1954,9 +1965,9 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
         title = hp_get_title(cs->doc, &tl);
         text  = hp_extract_text(cs->doc, &xl);
         if (title != NULL && text != NULL
-            && pv_build_styled(cs->doc, cs->last_run_js, cs->last_reader,
+            && pv_build_cached(cs->doc, cs->last_run_js, cs->last_reader,
                                cs->last_prefers_dark, cs->extern_css,
-                               cs->extern_css_len, cs->last_viewport_w, &view) == PV_OK) {
+                               cs->extern_css_len, cs->last_viewport_w, child_sheets(cs), &view) == PV_OK) {
             ok = 1;
         }
     }
@@ -2498,6 +2509,8 @@ static void tab_worker_run(int rfd, int wfd) {
     }
 
     child_reset_page(&cs);
+    shc_free(cs.sheets);
+    cs.sheets = NULL;
     fb_buffer_free(&cs.log);
     _exit(0);
 }

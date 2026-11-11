@@ -3,6 +3,71 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `rule` | function | `tests/test_dom.c:462` | `* silently drops the whole rule (fail closed), so the title read black-on-teal  * instead of the ...` |
+| `setup_doc` | function | `tests/test_dom.c:35` | `static int setup_doc(void **state)` |
+| `teardown_doc` | function | `tests/test_dom.c:48` | `static int teardown_doc(void **state)` |
+| `test_append_rejects_cycle` | function | `tests/test_dom.c:262` | `static void test_append_rejects_cycle(void **state)` |
+| `test_attributes` | function | `tests/test_dom.c:174` | `static void test_attributes(void **state)` |
+| `test_build_null_args` | function | `tests/test_dom.c:63` | `static void test_build_null_args(void **state)` |
+| `test_by_class` | function | `tests/test_dom.c:112` | `static void test_by_class(void **state)` |
+| `test_by_tag` | function | `tests/test_dom.c:121` | `static void test_by_tag(void **state)` |
+| `test_by_tag_results_in_document_order` | function | `tests/test_dom.c:130` | `static void test_by_tag_results_in_document_order(void **state)` |
+| `test_char_nodes` | function | `tests/test_dom.c:646` | `static void test_char_nodes(void **state)` |
+| `test_clone_node` | function | `tests/test_dom.c:582` | `static void test_clone_node(void **state)` |
+| `test_construction_invalid_args` | function | `tests/test_dom.c:330` | `static void test_construction_invalid_args(void **state)` |
+| `test_create_and_append` | function | `tests/test_dom.c:244` | `static void test_create_and_append(void **state)` |
+| `test_document_order` | function | `tests/test_dom.c:140` | `static void test_document_order(void **state)` |
+| `test_free_null_and_double` | function | `tests/test_dom.c:73` | `static void test_free_null_and_double(void **state)` |
+| `test_get_by_id` | function | `tests/test_dom.c:91` | `static void test_get_by_id(void **state)` |
+| `test_get_by_id_absent` | function | `tests/test_dom.c:105` | `static void test_get_by_id_absent(void **state)` |
+| `test_get_element_by_id_ignores_detached_nodes` | function | `tests/test_dom.c:721` | `static void test_get_element_by_id_ignores_detached_nodes(void **state)` |
+| `test_get_inner_html` | function | `tests/test_dom.c:338` | `static void test_get_inner_html(void **state)` |
+| `test_insert_before` | function | `tests/test_dom.c:550` | `static void test_insert_before(void **state)` |
+| `test_matches_and_closest` | function | `tests/test_dom.c:517` | `static void test_matches_and_closest(void **state)` |
+| `test_move_children` | function | `tests/test_dom.c:605` | `static void test_move_children(void **state)` |
+| `test_navigation` | function | `tests/test_dom.c:154` | `static void test_navigation(void **state)` |
+| `test_node_count` | function | `tests/test_dom.c:84` | `static void test_node_count(void **state)` |
+| `test_qs_subject_prefilter_is_exact` | function | `tests/test_dom.c:695` | `static void test_qs_subject_prefilter_is_exact(void **state)` |
+| `test_query_selector_all_counts` | function | `tests/test_dom.c:434` | `static void test_query_selector_all_counts(void **state)` |
+| `test_query_selector_combinators` | function | `tests/test_dom.c:445` | `static void test_query_selector_combinators(void **state)` |
+| `test_query_selector_fail_closed` | function | `tests/test_dom.c:530` | `static void test_query_selector_fail_closed(void **state)` |
+| `test_query_selector_nth_and_structural` | function | `tests/test_dom.c:492` | `static void test_query_selector_nth_and_structural(void **state)` |
+| `test_query_selector_scope_is_descendants_only` | function | `tests/test_dom.c:505` | `static void test_query_selector_scope_is_descendants_only(void **state)` |
+| `test_query_selector_type_class_id` | function | `tests/test_dom.c:420` | `static void test_query_selector_type_class_id(void **state)` |
+| `test_remove_attribute` | function | `tests/test_dom.c:297` | `static void test_remove_attribute(void **state)` |
+| `test_remove_child` | function | `tests/test_dom.c:272` | `static void test_remove_child(void **state)` |
+| `test_set_and_get_document_title` | function | `tests/test_dom.c:232` | `static void test_set_and_get_document_title(void **state)` |
+| `test_set_attribute_reindexes_id` | function | `tests/test_dom.c:284` | `static void test_set_attribute_reindexes_id(void **state)` |
+| `test_set_inner_html` | function | `tests/test_dom.c:314` | `static void test_set_inner_html(void **state)` |
+| `test_set_text_content_changes_tree` | function | `tests/test_dom.c:199` | `static void test_set_text_content_changes_tree(void **state)` |
+| `test_set_text_content_empty_clears` | function | `tests/test_dom.c:217` | `static void test_set_text_content_empty_clears(void **state)` |
+| `test_set_text_content_invalid_node` | function | `tests/test_dom.c:227` | `static void test_set_text_content_invalid_node(void **state)` |
+| `test_text_content_read` | function | `tests/test_dom.c:188` | `static void test_text_content_read(void **state)` |
+| `build` | function | `tests/test_dom_debug.c:36` | `static rd_doc *build(pv_view *v, rdp_caps caps)` |
+| `caps_css_on` | function | `tests/test_dom_debug.c:29` | `static rdp_caps caps_css_on(void)` |
+| `main` | function | `tests/test_dom_debug.c:269` | `int main(void)` |
+| `test_box_tree_width_cap` | function | `tests/test_dom_debug.c:116` | `static void test_box_tree_width_cap(void **state)` |
+| `test_control_bytes_kept_on_one_line` | function | `tests/test_dom_debug.c:245` | `static void test_control_bytes_kept_on_one_line(void **state)` |
+| `test_grid_container_annotation` | function | `tests/test_dom_debug.c:92` | `static void test_grid_container_annotation(void **state)` |
+| `test_heading_paragraph_link` | function | `tests/test_dom_debug.c:59` | `static void test_heading_paragraph_link(void **state)` |
+| `test_no_box_tree_without_css` | function | `tests/test_dom_debug.c:197` | `static void test_no_box_tree_without_css(void **state)` |
+| `test_null_doc_is_empty_header` | function | `tests/test_dom_debug.c:45` | `static void test_null_doc_is_empty_header(void **state)` |
+| `test_truncation_no_overflow` | function | `tests/test_dom_debug.c:217` | `static void test_truncation_no_overflow(void **state)` |
+| `test_visibility_overflow_cursor_and_text_wrap` | function | `tests/test_dom_debug.c:154` | `static void test_visibility_overflow_cursor_and_text_wrap(void **state)` |
+| `builder` | function | `tests/test_download.c:8` | `* builder (join, separator rejection, overflow, NULL), and the size cap.  */  #include <setjmp.h>...` |
+| `main` | function | `tests/test_download.c:204` | `int main(void)` |
+| `test_build_path_basic` | function | `tests/test_download.c:158` | `static void test_build_path_basic(void **state)` |
+| `test_build_path_null_args` | function | `tests/test_download.c:186` | `static void test_build_path_null_args(void **state)` |
+| `test_build_path_overflow` | function | `tests/test_download.c:179` | `static void test_build_path_overflow(void **state)` |
+| `test_build_path_rejects_separator_in_name` | function | `tests/test_download.c:172` | `static void test_build_path_rejects_separator_in_name(void **state)` |
+| `test_build_path_trailing_slash` | function | `tests/test_download.c:165` | `static void test_build_path_trailing_slash(void **state)` |
+| `test_check_size` | function | `tests/test_download.c:197` | `static void test_check_size(void **state)` |
+| `test_ext_known_types` | function | `tests/test_download.c:52` | `static void test_ext_known_types(void **state)` |
+| `test_ext_unknown_type` | function | `tests/test_download.c:63` | `static void test_ext_unknown_type(void **state)` |
+| `test_pick_appends_extension_when_missing` | function | `tests/test_download.c:99` | `static void test_pick_appends_extension_when_missing(void **state)` |
+| `test_pick_fallback_when_empty` | function | `tests/test_download.c:129` | `static void test_pick_fallback_when_empty(void **state)` |
+| `test_pick_from_disposition_ext_form` | function | `tests/test_download.c:81` | `static void test_pick_from_disposition_ext_form(void **state)` |
+| `test_pick_from_disposition_quoted` | function | `tests/test_download.c:72` | `static void test_pick_from_disposition_quoted(void **state)` |
 | `test_pick_from_url_segment` | function | `tests/test_download.c:91` | `static void test_pick_from_url_segment(void **state)` |
 | `test_pick_keeps_existing_extension` | function | `tests/test_download.c:108` | `static void test_pick_keeps_existing_extension(void **state)` |
 | `test_pick_null_out` | function | `tests/test_download.c:141` | `static void test_pick_null_out(void **state)` |
@@ -431,70 +496,5 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `tres` | function | `tests/test_import_map.c:17` | `static int tres(void *ctx, const char *base, const char *ref, char *out, size_t outsz)` |
 | `assert_float_equal` | function | `tests/test_interp.c:64` | `assert_float_equal(ip_ease(0.0, &(ip_ease_fn)` |
 | `assert_float_equal` | function | `tests/test_interp.c:66` | `assert_float_equal(ip_ease(0.0, &(ip_ease_fn)` |
-| `linear_ease` | function | `tests/test_interp.c:258` | `static ip_ease_fn linear_ease(void)` |
-| `main` | function | `tests/test_interp.c:474` | `int main(void)` |
-| `test_anim_active_linear` | function | `tests/test_interp.c:292` | `static void test_anim_active_linear(void **state)` |
-| `test_anim_alternate` | function | `tests/test_interp.c:393` | `static void test_anim_alternate(void **state)` |
-| `test_anim_alternate_reverse` | function | `tests/test_interp.c:410` | `static void test_anim_alternate_reverse(void **state)` |
-| `test_anim_delay_backwards_fill` | function | `tests/test_interp.c:278` | `static void test_anim_delay_backwards_fill(void **state)` |
-| `test_anim_delay_no_fill` | function | `tests/test_interp.c:263` | `static void test_anim_delay_no_fill(void **state)` |
-| `test_anim_forwards_fill` | function | `tests/test_interp.c:325` | `static void test_anim_forwards_fill(void **state)` |
-| `test_anim_infinite` | function | `tests/test_interp.c:367` | `static void test_anim_infinite(void **state)` |
-| `test_anim_negative_dt` | function | `tests/test_interp.c:448` | `static void test_anim_negative_dt(void **state)` |
-| `test_anim_no_keyframes` | function | `tests/test_interp.c:436` | `static void test_anim_no_keyframes(void **state)` |
-| `test_anim_null_init` | function | `tests/test_interp.c:463` | `static void test_anim_null_init(void **state)` |
-| `test_anim_reverse_direction` | function | `tests/test_interp.c:380` | `static void test_anim_reverse_direction(void **state)` |
-| `test_anim_single_iteration_done` | function | `tests/test_interp.c:310` | `static void test_anim_single_iteration_done(void **state)` |
-| `test_anim_two_iterations` | function | `tests/test_interp.c:338` | `static void test_anim_two_iterations(void **state)` |
-| `test_anim_zero_duration` | function | `tests/test_interp.c:423` | `static void test_anim_zero_duration(void **state)` |
-| `test_ease_clamp` | function | `tests/test_interp.c:78` | `static void test_ease_clamp(void **state)` |
-| `test_ease_ease_in_concave` | function | `tests/test_interp.c:92` | `static void test_ease_ease_in_concave(void **state)` |
-| `test_ease_ease_out_convex` | function | `tests/test_interp.c:99` | `static void test_ease_ease_out_convex(void **state)` |
-| `test_ease_endpoints` | function | `tests/test_interp.c:31` | `static void test_ease_endpoints(void **state)` |
-| `test_ease_monotonic` | function | `tests/test_interp.c:106` | `static void test_ease_monotonic(void **state)` |
-| `test_ease_null_fn` | function | `tests/test_interp.c:85` | `static void test_ease_null_fn(void **state)` |
-| `test_ease_step_start_end_aliases` | function | `tests/test_interp.c:147` | `static void test_ease_step_start_end_aliases(void **state)` |
-| `test_ease_steps_end` | function | `tests/test_interp.c:127` | `static void test_ease_steps_end(void **state)` |
-| `test_ease_steps_start` | function | `tests/test_interp.c:138` | `static void test_ease_steps_start(void **state)` |
-| `test_interp_dispatches` | function | `tests/test_interp.c:192` | `static void test_interp_dispatches(void **state)` |
-| `test_kf_after_last` | function | `tests/test_interp.c:231` | `static void test_kf_after_last(void **state)` |
-| `test_kf_before_first` | function | `tests/test_interp.c:225` | `static void test_kf_before_first(void **state)` |
-| `test_kf_color_interp` | function | `tests/test_interp.c:247` | `static void test_kf_color_interp(void **state)` |
-| `test_kf_exact_match` | function | `tests/test_interp.c:219` | `static void test_kf_exact_match(void **state)` |
-| `test_kf_null_or_empty` | function | `tests/test_interp.c:237` | `static void test_kf_null_or_empty(void **state)` |
-| `test_kf_three_keyframes` | function | `tests/test_interp.c:212` | `static void test_kf_three_keyframes(void **state)` |
-| `test_kf_two_keyframes` | function | `tests/test_interp.c:205` | `static void test_kf_two_keyframes(void **state)` |
-| `test_lerp_color_rgb` | function | `tests/test_interp.c:171` | `static void test_lerp_color_rgb(void **state)` |
-| `test_lerp_scalar` | function | `tests/test_interp.c:163` | `static void test_lerp_scalar(void **state)` |
-| `EXPECT` | macro | `tests/test_js_dom.c:79` | `#define EXPECT(f, src, expected)` |
-| `EXPECT` | function | `tests/test_js_dom.c:295` | `EXPECT(f, "typeof (new MutationObserver(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:620` | `EXPECT(f, "['setText','appendChild','insertBefore','moveChildren','removeChild','setAttribute'," ...` |
-| `EXPECT` | function | `tests/test_js_dom.c:982` | `EXPECT(f,         "setTimeout(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2063` | `EXPECT(f, "globalThis.$=function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2171` | `EXPECT(f, "var mk=function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:2338` | `EXPECT(f, "R[2].declarations.concat(R[3].declarations).map(function(x)` |
-| `EXPECT` | function | `tests/test_js_dom.c:2473` | `EXPECT(f, "function onc()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3032` | `EXPECT(f, "['DocumentType','CDATASection','ProcessingInstruction','Window','NamedNodeMap',"      ...` |
-| `EXPECT` | function | `tests/test_js_dom.c:3273` | `EXPECT(f, "function mk(h)` |
-| `EXPECT` | function | `tests/test_js_dom.c:3338` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3353` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3357` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3361` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3373` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3384` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3388` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3391` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3399` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3410` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3412` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3424` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3434` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3445` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3454` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3467` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_dom.c:3478` | `EXPECT(f, "(function()` |
-| `assert_int_equal` | function | `tests/test_js_dom.c:971` | `assert_int_equal(run(f,         "window.onload=function()` |
-| `bundle` | function | `tests/test_js_dom.c:739` | `* library bundle (DuckDuckGo's l.js "cannot read property createElement of  * undefined"). This l...` |
-| `console_fixture` | function | `tests/test_js_dom.c:1165` | `static void console_fixture(hp_document **doc, dom_index **idx, js_context **ctx,                ...` |
 
 Next: [SYMBOLS_p14.md](SYMBOLS_p14.md)

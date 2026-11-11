@@ -1000,6 +1000,7 @@ static const char *sf_reason(sf_status ss) {
         case SF_ERR_CERT_NOT_PQ:  return "strict PQ signature missing";
         case SF_ERR_NETWORK:      return "network error";
         case SF_ERR_TOO_MANY_REDIRECTS: return "too many redirects";
+        case SF_ERR_PRIVATE_NET:  return "private network address refused";
         default:                  return "fetch error";
     }
 }

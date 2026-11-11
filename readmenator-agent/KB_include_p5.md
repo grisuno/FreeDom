@@ -1,6 +1,40 @@
 # Subsystem: include (page 5 of 5)
 Previous: [KB_include_p4.md](KB_include_p4.md)
 
+## include/shm_slots.h
+- Doc: ss_committed: Chooses the slot to paint into: the current one if free, else the other free one.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ss_state` (struct, line 19)
+  - `busy` (type_alias, line 18) `typedef struct ss_state { int busy[SS_COUNT];`
+  - `ss_init` (function, line 24) `static inline void ss_init(ss_state *s)`
+  - `ss_committed` (function, line 41) `static inline void ss_committed(ss_state *s, int i)`
+  - `ss_released` (function, line 49) `static inline int ss_released(ss_state *s, int i)`
+  - `FREEDOM_SHM_SLOTS_H` (macro, line 2) `#define FREEDOM_SHM_SLOTS_H`
+  - `SS_COUNT` (macro, line 17) `#define SS_COUNT`
+- Imported by: `gui/browser_ui.c`, `tests/test_shm_slots.c`
+
+## include/subreq_batch.h
+- Doc: sqb_res: #ifndef SUBREQ_BATCH_H #define SUBREQ_BATCH_H #include <stddef.h> #define SQB_MAX_JOBS...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `sqb_req` (struct, line 16)
+  - `sqb_res` (struct, line 23)
+  - `ok` (type_alias, line 23) `typedef struct sqb_res { int ok;`
+  - `sqb` (type_alias, line 34) `typedef struct sqb sqb;`
+  - `sqb_new` (function, line 37) `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx);`
+  - `sqb_submit` (function, line 41) `int sqb_submit(sqb *b, int refused, const sqb_req *req);`
+  - `sqb_count` (function, line 42) `size_t sqb_count(const sqb *b);`
+  - `sqb_wait_all` (function, line 44) `void sqb_wait_all(sqb *b);`
+  - `sqb_result` (function, line 46) `const sqb_res *sqb_result(const sqb *b, size_t i);`
+  - `sqb_reset` (function, line 48) `void sqb_reset(sqb *b);`
+  - `sqb_free` (function, line 49) `void sqb_free(sqb *b);`
+  - `SUBREQ_BATCH_H` (macro, line 10) `#define SUBREQ_BATCH_H`
+  - `SQB_MAX_JOBS` (macro, line 14) `#define SQB_MAX_JOBS`
+- Imported by: `src/subreq_batch.c`, `src/tab.c`, `tests/test_subreq_batch.c`
+
 ## include/svg_paint.h
 - Doc: svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred...
 - Layer: utility

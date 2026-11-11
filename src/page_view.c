@@ -10,6 +10,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "page_view.h"
+#include "sheet_cache.h"
 #include "freedom_config.h"
 #include "box_tree.h"  /* BT_MAX_POSITIONED: the box-id bound the solver can address */
 #include "box_style.h"
@@ -4561,6 +4562,49 @@ static char *collect_root_scope(lxb_dom_node_t *root) {
     return scope;
 }
 
+static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
+                              size_t extern_len, size_t *outlen);
+
+/* The page's parsed sheet: collects the CSS text and every other parse input and asks
+ * the sheet cache for it (cache == NULL parses afresh). The cache replays root_els_match
+ * against the live roots to decide a hit, so a class or attribute a script flips on
+ * <html>/<body> (a theme switch) re-parses on its own. NULL on OOM of the handle; the caller treats that as "no author CSS". */
+static shc_sheet *acquire_page_sheet(lxb_dom_node_t *root, const char *extern_css,
+                                     size_t extern_len, int prefers_dark, int viewport_w,
+                                     shc_cache *cache) {
+    size_t style_len = 0;
+    char *style_text = collect_page_css(root, extern_css, extern_len, &style_len);
+    /* @media gated against the user's color scheme (auto dark mode) and the render
+     * viewport width, so a responsive page selects the same breakpoint Firefox does
+     * at the paint width (0 => the normalized CSS_MEDIA_DEFAULT_WIDTH desktop). Only
+     * the width query sees this; viewport UNITS still resolve against the normalized
+     * desktop (no real geometry leaks into lengths). The live <html>/<body> class
+     * list scopes custom-property collection, so a theme palette keyed by a class the
+     * page actually carries applies and an inactive one never clobbers it. */
+    int media_w = (viewport_w > 0) ? viewport_w : CSS_MEDIA_DEFAULT_WIDTH;
+    pv_root_els roots = find_root_els(root);
+    css_media media = { prefers_dark ? 1 : 0, 0, media_w, root_els_match, &roots };
+    char *root_scope = collect_root_scope(root);
+    shc_key key = { style_text, (style_text != NULL) ? style_len : 0, &media, root_scope };
+    shc_stats before, after;
+    shc_stats_get(cache, &before);
+    struct timespec pt0, pt1;
+    clock_gettime(CLOCK_MONOTONIC, &pt0);
+    shc_sheet *sh = shc_acquire(cache, &key);
+    clock_gettime(CLOCK_MONOTONIC, &pt1);
+    if (getenv("FREEDOM_JS_PROFILE") != NULL) {
+        shc_stats_get(cache, &after);
+        fprintf(stderr, "pv-profile css-parse %.1f ms (%zu bytes)%s\n",
+                (double)(pt1.tv_sec - pt0.tv_sec) * 1e3
+                    + (double)(pt1.tv_nsec - pt0.tv_nsec) / 1e6,
+                style_len, (after.hits != before.hits) ? " cached"
+                    : (after.bypasses != before.bypasses) ? " not-retained" : "");
+    }
+    free(root_scope);
+    free(style_text);
+    return sh;
+}
+
 /* --- form controls --- */
 
 /* One <form> seen in document order: its grouping id is its index. action is an
@@ -5518,6 +5562,13 @@ static void pv_counters_pass(lxb_dom_node_t *root, const css_sheet *sheet, pv_st
 pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
                           int viewport_w, pv_view **out) {
+    return pv_build_cached(doc, js_enabled, reader, prefers_dark, extern_css, extern_len,
+                           viewport_w, NULL, out);
+}
+
+pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
+                          int prefers_dark, const char *extern_css, size_t extern_len,
+                          int viewport_w, shc_cache *sheets, pv_view **out) {
     if (doc == NULL || out == NULL) return PV_ERR_NULL_ARG;
     *out = NULL;
 
@@ -5540,29 +5591,9 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
     /* Parse the document's <style> blocks once into a bounded sheet (pure: it never
      * fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css
      * module, so OOM here degrades to "no author CSS", not a failure. */
-    size_t style_len = 0;
-    char *style_text = collect_page_css(root, extern_css, extern_len, &style_len);
-    css_sheet *sheet = NULL;
-    /* @media gated against the user's color scheme (auto dark mode) and the render
-     * viewport width, so a responsive page selects the same breakpoint Firefox does
-     * at the paint width (0 => the normalized CSS_MEDIA_DEFAULT_WIDTH desktop). Only
-     * the width query sees this; viewport UNITS still resolve against the normalized
-     * desktop (no real geometry leaks into lengths). The live <html>/<body> class
-     * list scopes custom-property collection, so a theme palette keyed by a class the
-     * page actually carries applies and an inactive one never clobbers it. */
-    int media_w = (viewport_w > 0) ? viewport_w : CSS_MEDIA_DEFAULT_WIDTH;
-    pv_root_els roots = find_root_els(root);
-    css_media media = { prefers_dark ? 1 : 0, 0, media_w, root_els_match, &roots };
-    char *root_scope = collect_root_scope(root);
-    struct timespec pt0, pt1;
-    clock_gettime(CLOCK_MONOTONIC, &pt0);
-    (void)css_parse_scoped(style_text, style_len, &media, root_scope, &sheet);
-    clock_gettime(CLOCK_MONOTONIC, &pt1);
-    if (getenv("FREEDOM_JS_PROFILE") != NULL)
-        fprintf(stderr, "pv-profile css-parse %.1f ms (%zu bytes)\n",
-                (double)(pt1.tv_sec - pt0.tv_sec) * 1e3 + (double)(pt1.tv_nsec - pt0.tv_nsec) / 1e6, style_len);
-    free(root_scope);
-    free(style_text);
+    shc_sheet *sheet_ref = acquire_page_sheet(root, extern_css, extern_len, prefers_dark,
+                                              viewport_w, sheets);
+    const css_sheet *sheet = shc_css(sheet_ref);
 
     const lxb_dom_node_t *prev_block = NULL;
     const lxb_dom_node_t *prev_li = NULL;  /* last <li> seen, to mark each item once */
@@ -7211,7 +7242,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
 
     *out = v;
     forms_free(&forms);
-    css_free(sheet);
+    shc_release(sheet_ref);
     pv_node_map_free(&node_map);
     pv_style_cache_free(&cache);
     pv_ptrmap_free(&pseudo_memo);
@@ -7221,7 +7252,7 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
 cleanup:
     free(after_p.text);
     forms_free(&forms);
-    css_free(sheet);
+    shc_release(sheet_ref);
     pv_node_map_free(&node_map);
     pv_style_cache_free(&cache);
     pv_ptrmap_free(&pseudo_memo);
@@ -7265,26 +7296,26 @@ pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
 /* --- getComputedStyle bridge (spec/js_computed_style.md) --- */
 
 struct pv_computed {
-    css_sheet   *sheet;
-    pv_root_els  roots;   /* referenced by the media callback while parsing only */
+    shc_sheet       *sheet_ref;
+    const css_sheet *sheet;
 };
 
 pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
                              size_t extern_len, int viewport_w) {
+    return pv_computed_new_cached(doc, prefers_dark, extern_css, extern_len, viewport_w, NULL);
+}
+
+pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,
+                                    const char *extern_css, size_t extern_len,
+                                    int viewport_w, shc_cache *sheets) {
     if (doc == NULL) return NULL;
     lxb_dom_node_t *root = (lxb_dom_node_t *)hp_document_root(doc);
     if (root == NULL) return NULL;
     pv_computed *pc = (pv_computed *)calloc(1, sizeof *pc);
     if (pc == NULL) return NULL;
-    size_t style_len = 0;
-    char *style_text = collect_page_css(root, extern_css, extern_len, &style_len);
-    int media_w = (viewport_w > 0) ? viewport_w : CSS_MEDIA_DEFAULT_WIDTH;
-    pc->roots = find_root_els(root);
-    css_media media = { prefers_dark ? 1 : 0, 0, media_w, root_els_match, &pc->roots };
-    char *root_scope = collect_root_scope(root);
-    (void)css_parse_scoped(style_text, style_len, &media, root_scope, &pc->sheet);
-    free(root_scope);
-    free(style_text);
+    pc->sheet_ref = acquire_page_sheet(root, extern_css, extern_len, prefers_dark,
+                                       viewport_w, sheets);
+    pc->sheet = shc_css(pc->sheet_ref);
     return pc;
 }
 
@@ -7312,6 +7343,6 @@ int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
 
 void pv_computed_free(pv_computed *pc) {
     if (pc == NULL) return;
-    css_free(pc->sheet);
+    shc_release(pc->sheet_ref);
     free(pc);
 }

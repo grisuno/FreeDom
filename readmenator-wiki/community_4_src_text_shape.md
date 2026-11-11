@@ -1,14 +1,14 @@
 # src: text_shape
 
-*Community 2 | 42 files | cohesion 0.54*
+*Community 4 | 37 files | cohesion 0.52*
 
 ## Definition
 
-This community groups 42 file(s) rooted at `src` with dominant language c (cohesion 0.54). Central symbols: `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FREEDOM_DATA_URL_H`, `FREEDOM_HLS_H`. Core file: `src/text_shape.c` (68 symbols). Documented purpose: test_wl_display — CMocka suite for the pure Wayland socket picker..
+This community groups 37 file(s) rooted at `src` with dominant language c (cohesion 0.52). Central symbols: `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FREEDOM_DATA_URL_H`, `FREEDOM_HLS_H`. Core file: `src/text_shape.c` (68 symbols). Documented purpose: test_wl_display — CMocka suite for the pure Wayland socket picker..
 
 ## Files
 
-### `src` (15 files)
+### `src` (13 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -20,7 +20,7 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 | `src/net_realm.c` | c | utility | 10 | no |
 | `src/perf_trace.c` | c | utility | 12 | no |
 
-### `include` (14 files)
+### `include` (12 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -30,9 +30,9 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 | `include/link_nav.h` | h | utility | 11 | no |
 | `include/net_realm.h` | h | utility | 10 | no |
 | `include/perf_trace.h` | h | utility | 17 | no |
-| `include/psl_data.h` | h | data_access | 7 | no |
+| `include/text_shape.h` | h | utility | 24 | no |
 
-### `tests` (13 files)
+### `tests` (12 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -43,7 +43,7 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_net_realm.c` | c | testing | 13 | no |
 | `tests/test_perf_trace.c` | c | testing | 12 | no |
 
-*... and 22 more files in this community.*
+*... and 17 more files in this community.*
 
 
 ## Key Symbols
@@ -81,14 +81,14 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 50
-- Cross-boundary resolved imports (EXTRACTED): 43
+- Internal resolved imports (EXTRACTED): 44
+- Cross-boundary resolved imports (EXTRACTED): 41
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
-- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
-- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
+- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
+- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
 
 ## Risks
 
@@ -99,9 +99,9 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 41 file(s) lack file-level docs (e.g. `include/data_url.h`)? What purpose do they serve?
+- Why do 36 file(s) lack file-level docs (e.g. `include/data_url.h`)? What purpose do they serve?
 - What would break if the most connected file in src: text_shape changed?
-- Should src: text_shape be split, given cohesion 0.54?
+- Should src: text_shape be split, given cohesion 0.52?
 
 ## Sources
 
@@ -111,8 +111,6 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 - `include/link_nav.h`
 - `include/net_realm.h`
 - `include/perf_trace.h`
-- `include/psl_data.h`
-- `include/request_policy.h`
 - `include/text_shape.h`
 - `include/tls_impersonate.h`
 - `include/webcaps.h`
@@ -125,4 +123,6 @@ This community groups 42 file(s) rooted at `src` with dominant language c (cohes
 - `src/js_policy.c`
 - `src/link_nav.c`
 - `src/net_realm.c`
-- *... and 22 more*
+- `src/perf_trace.c`
+- `src/text_shape.c`
+- *... and 17 more*

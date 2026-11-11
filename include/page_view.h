@@ -910,6 +910,16 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
                           int viewport_w, pv_view **out);
 
+/* As pv_build_styled, but the parsed stylesheet comes from *sheets (spec/sheet_cache.md):
+ * a derivation whose CSS text, @media inputs and root attributes are byte-identical to
+ * the previous one skips the parse. sheets == NULL is pv_build_styled exactly. The
+ * produced view is the same either way; the cache is owned by the caller and must
+ * outlive the call only. */
+struct shc_cache;
+pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
+                          int prefers_dark, const char *extern_css, size_t extern_len,
+                          int viewport_w, struct shc_cache *sheets, pv_view **out);
+
 /* getComputedStyle bridge (spec/js_computed_style.md). A pv_computed retains the
  * parsed sheet of a document so single elements can be resolved with the full
  * cascade (author sheets, inheritance, capas, !important) long after
@@ -918,6 +928,10 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
 typedef struct pv_computed pv_computed;
 pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
                              size_t extern_len, int viewport_w);
+/* As pv_computed_new, sharing the parsed sheet with *sheets (NULL == pv_computed_new). */
+pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,
+                                    const char *extern_css, size_t extern_len,
+                                    int viewport_w, struct shc_cache *sheets);
 
 /* Resolves native_el (a dom_native_node pointer of the SAME document) into *st; when
  * non-NULL, *font_px receives its computed font-size and *inherited_color the

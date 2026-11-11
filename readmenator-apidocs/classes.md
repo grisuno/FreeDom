@@ -245,6 +245,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`he_status`](modules/include.hostedit.h.md#he_status) enum in `include/hostedit.h`
 - [`height`](modules/include.svg_render.h.md#height) type_alias in `include/svg_render.h`
 - [`height`](modules/tools.pngdiff.c.md#height) type_alias in `tools/pngdiff.c`
+- [`hits`](modules/include.sheet_cache.h.md#hits) type_alias in `include/sheet_cache.h`
 - [`hl_font_stash`](modules/src.freedom.c.md#hl_font_stash) struct in `src/freedom.c`
 - [`hl_frames`](modules/src.freedom.c.md#hl_frames) struct in `src/freedom.c`
 - [`hls_playlist`](modules/include.hls.h.md#hls_playlist) struct in `include/hls.h`
@@ -345,6 +346,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`name`](modules/src.text_shape.c.md#name) type_alias in `src/text_shape.c`
 - [`bx_bg_layer.nat_h`](modules/include.box_style.h.md#bx_bg_layer-nat_h) type_alias in `include/box_style.h`
 - [`net_reply`](modules/src.tab.c.md#net_reply) struct in `src/tab.c`
+- [`ng_request`](modules/include.net_guard.h.md#ng_request) struct in `include/net_guard.h`
+- [`ng_verdict`](modules/include.net_guard.h.md#ng_verdict) enum in `include/net_guard.h`
 - [`node`](modules/include.js_geom.h.md#node) type_alias in `include/js_geom.h`
 - [`nr_config`](modules/include.net_realm.h.md#nr_config) struct in `include/net_realm.h`
 - [`nr_realm`](modules/include.net_realm.h.md#nr_realm) enum in `include/net_realm.h`
@@ -461,6 +464,15 @@ Project types nested under the project types they derive from. External bases ar
 - [`sf_ws`](modules/src.secure_fetch.c.md#sf_ws) struct in `src/secure_fetch.c`
 - [`sha_alg`](modules/include.sha2.h.md#sha_alg) enum in `include/sha2.h`
 - [`cg_radial.shape`](modules/include.css_gradient.h.md#cg_radial-shape) type_alias in `include/css_gradient.h`
+- [`shc_cache`](modules/include.page_view.h.md#shc_cache) struct in `include/page_view.h`
+- [`shc_cache`](modules/include.sheet_cache.h.md#shc_cache) type_alias in `include/sheet_cache.h`
+- [`shc_cache`](modules/src.sheet_cache.c.md#shc_cache) struct in `src/sheet_cache.c`
+- [`shc_key`](modules/include.sheet_cache.h.md#shc_key) struct in `include/sheet_cache.h`
+- [`shc_probe`](modules/src.sheet_cache.c.md#shc_probe) struct in `src/sheet_cache.c`
+- [`shc_query`](modules/src.sheet_cache.c.md#shc_query) struct in `src/sheet_cache.c`
+- [`shc_sheet`](modules/include.sheet_cache.h.md#shc_sheet) type_alias in `include/sheet_cache.h`
+- [`shc_sheet`](modules/src.sheet_cache.c.md#shc_sheet) struct in `src/sheet_cache.c`
+- [`shc_stats`](modules/include.sheet_cache.h.md#shc_stats) struct in `include/sheet_cache.h`
 - [`sink`](modules/src.css_counter.c.md#sink) struct in `src/css_counter.c`
 - [`sink`](modules/src.secure_fetch.c.md#sink) type_alias in `src/secure_fetch.c`
 - [`sm_entry`](modules/src.dom.c.md#sm_entry) struct in `src/dom.c`

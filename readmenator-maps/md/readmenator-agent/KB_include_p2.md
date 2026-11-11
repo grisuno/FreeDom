@@ -167,7 +167,7 @@ Previous: [KB_include.md](KB_include.md)
   - `CSEL_FOLD_MARK` (macro, line 215) `#define CSEL_FOLD_MARK`
   - `CSEL_IDENT_SCRATCH` (macro, line 216) `#define CSEL_IDENT_SCRATCH`
 - Depends on: `include/css.h`
-- Imported by: `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `tests/test_css.c`
+- Imported by: `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `src/sheet_cache.c`, `tests/test_css.c`
 
 ## include/css_text.h
 - Layer: utility

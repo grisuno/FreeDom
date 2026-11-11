@@ -2,70 +2,70 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 222,
-  "entities": 3564,
+  "modules": 226,
+  "entities": 3615,
   "languages": {
-   "c": 104,
-   "h": 102,
+   "c": 106,
+   "h": 104,
    "py": 12,
    "sh": 4
   },
   "kinds": {
    "constant": 23,
-   "enum": 162,
-   "function": 2001,
-   "macro": 716,
-   "method": 24,
-   "module": 222,
-   "struct": 267,
-   "type_alias": 142,
+   "enum": 163,
+   "function": 2027,
+   "macro": 724,
+   "method": 25,
+   "module": 226,
+   "struct": 275,
+   "type_alias": 145,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 90,
+  "skipped_files": 92,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1548,
-   "total": 3534,
-   "percent": 43.8
+   "documented": 1581,
+   "total": 3585,
+   "percent": 44.1
   },
   "by_kind": {
    "enum": {
     "documented": 81,
-    "total": 162,
-    "percent": 50.0
+    "total": 163,
+    "percent": 49.7
    },
    "function": {
-    "documented": 886,
-    "total": 2001,
-    "percent": 44.3
+    "documented": 908,
+    "total": 2027,
+    "percent": 44.8
    },
    "macro": {
-    "documented": 328,
-    "total": 716,
-    "percent": 45.8
+    "documented": 330,
+    "total": 724,
+    "percent": 45.6
    },
    "method": {
     "documented": 0,
-    "total": 24,
+    "total": 25,
     "percent": 0.0
    },
    "module": {
-    "documented": 32,
-    "total": 222,
-    "percent": 14.4
+    "documented": 34,
+    "total": 226,
+    "percent": 15.0
    },
    "struct": {
-    "documented": 117,
-    "total": 267,
-    "percent": 43.8
+    "documented": 122,
+    "total": 275,
+    "percent": 44.4
    },
    "type_alias": {
-    "documented": 104,
-    "total": 142,
-    "percent": 73.2
+    "documented": 106,
+    "total": 145,
+    "percent": 73.1
    }
   },
   "by_module": {
@@ -305,9 +305,9 @@
     "percent": 72.2
    },
    "include/freedom_config.h": {
-    "documented": 12,
-    "total": 13,
-    "percent": 92.3
+    "documented": 14,
+    "total": 15,
+    "percent": 93.3
    },
    "include/hls.h": {
     "documented": 5,
@@ -414,6 +414,11 @@
     "total": 12,
     "percent": 75.0
    },
+   "include/net_guard.h": {
+    "documented": 5,
+    "total": 9,
+    "percent": 55.6
+   },
    "include/net_realm.h": {
     "documented": 2,
     "total": 10,
@@ -425,9 +430,9 @@
     "percent": 50.0
    },
    "include/page_view.h": {
-    "documented": 55,
-    "total": 93,
-    "percent": 59.1
+    "documented": 57,
+    "total": 95,
+    "percent": 60.0
    },
    "include/pdf_export.h": {
     "documented": 3,
@@ -493,6 +498,11 @@
     "documented": 3,
     "total": 6,
     "percent": 50.0
+   },
+   "include/sheet_cache.h": {
+    "documented": 8,
+    "total": 12,
+    "percent": 66.7
    },
    "include/shm_slots.h": {
     "documented": 3,
@@ -944,6 +954,11 @@
     "total": 10,
     "percent": 30.0
    },
+   "src/net_guard.c": {
+    "documented": 5,
+    "total": 10,
+    "percent": 50.0
+   },
    "src/net_realm.c": {
     "documented": 2,
     "total": 8,
@@ -955,9 +970,9 @@
     "percent": 33.3
    },
    "src/page_view.c": {
-    "documented": 63,
-    "total": 141,
-    "percent": 44.7
+    "documented": 64,
+    "total": 144,
+    "percent": 44.4
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -1010,14 +1025,19 @@
     "percent": 62.5
    },
    "src/secure_fetch.c": {
-    "documented": 14,
-    "total": 51,
-    "percent": 27.5
+    "documented": 15,
+    "total": 52,
+    "percent": 28.8
    },
    "src/sha2.c": {
     "documented": 3,
     "total": 7,
     "percent": 42.9
+   },
+   "src/sheet_cache.c": {
+    "documented": 9,
+    "total": 11,
+    "percent": 81.8
    },
    "src/subreq_batch.c": {
     "documented": 5,
@@ -1041,8 +1061,8 @@
    },
    "src/tab.c": {
     "documented": 45,
-    "total": 102,
-    "percent": 44.1
+    "total": 103,
+    "percent": 43.7
    },
    "src/text_case.c": {
     "documented": 3,
@@ -1420,7 +1440,7 @@
   {
    "uid": "include/freedom_config.h",
    "path": "modules/include.freedom_config.h.jsonl",
-   "entities": 13
+   "entities": 15
   },
   {
    "uid": "include/hls.h",
@@ -1528,6 +1548,11 @@
    "entities": 12
   },
   {
+   "uid": "include/net_guard.h",
+   "path": "modules/include.net_guard.h.jsonl",
+   "entities": 9
+  },
+  {
    "uid": "include/net_realm.h",
    "path": "modules/include.net_realm.h.jsonl",
    "entities": 10
@@ -1540,7 +1565,7 @@
   {
    "uid": "include/page_view.h",
    "path": "modules/include.page_view.h.jsonl",
-   "entities": 93
+   "entities": 95
   },
   {
    "uid": "include/pdf_export.h",
@@ -1606,6 +1631,11 @@
    "uid": "include/sha2.h",
    "path": "modules/include.sha2.h.jsonl",
    "entities": 6
+  },
+  {
+   "uid": "include/sheet_cache.h",
+   "path": "modules/include.sheet_cache.h.jsonl",
+   "entities": 12
   },
   {
    "uid": "include/shm_slots.h",
@@ -2058,6 +2088,11 @@
    "entities": 10
   },
   {
+   "uid": "src/net_guard.c",
+   "path": "modules/src.net_guard.c.jsonl",
+   "entities": 10
+  },
+  {
    "uid": "src/net_realm.c",
    "path": "modules/src.net_realm.c.jsonl",
    "entities": 8
@@ -2070,7 +2105,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 141
+   "entities": 144
   },
   {
    "uid": "src/pdf_export.c",
@@ -2125,12 +2160,17 @@
   {
    "uid": "src/secure_fetch.c",
    "path": "modules/src.secure_fetch.c.jsonl",
-   "entities": 51
+   "entities": 52
   },
   {
    "uid": "src/sha2.c",
    "path": "modules/src.sha2.c.jsonl",
    "entities": 7
+  },
+  {
+   "uid": "src/sheet_cache.c",
+   "path": "modules/src.sheet_cache.c.jsonl",
+   "entities": 11
   },
   {
    "uid": "src/subreq_batch.c",
@@ -2155,7 +2195,7 @@
   {
    "uid": "src/tab.c",
    "path": "modules/src.tab.c.jsonl",
-   "entities": 102
+   "entities": 103
   },
   {
    "uid": "src/text_case.c",
@@ -2295,7 +2335,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 1987
+  "total": 2005
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

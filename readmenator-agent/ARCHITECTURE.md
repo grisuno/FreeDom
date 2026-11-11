@@ -121,6 +121,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/render_doc.h` -> `include/page_view.h`
 - `include/render_doc.h` -> `include/render_policy.h`
 - `include/secure_fetch.h` -> `include/anti_fp.h`
+- `include/sheet_cache.h` -> `include/css.h`
 - `include/svg_paint.h` -> `include/svg_render.h`
 - `include/svg_raster.h` -> `include/image_decode.h`
 - `include/tab.h` -> `include/freebug.h`
@@ -327,6 +328,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/local_store.c` -> `include/local_store.h`
 - `src/media_decoder.c` -> `include/media_decoder.h`
 - `src/media_decoder.c` -> `include/util.h`
+- `src/net_guard.c` -> `include/net_guard.h`
 - `src/net_realm.c` -> `include/net_realm.h`
 - `src/os_sandbox.c` -> `include/os_sandbox.h`
 - `src/page_view.c` -> `include/box_style.h`
@@ -342,6 +344,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/page_view.c` -> `include/freedom_config.h`
 - `src/page_view.c` -> `include/html_parse.h`
 - `src/page_view.c` -> `include/page_view.h`
+- `src/page_view.c` -> `include/sheet_cache.h`
 - `src/page_view.c` -> `include/svg_render.h`
 - `src/page_view.c` -> `include/util.h`
 - `src/pdf_export.c` -> `include/pdf_export.h`
@@ -370,10 +373,14 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/request_policy.c` -> `include/psl_data.h`
 - `src/request_policy.c` -> `include/request_policy.h`
 - `src/secure_fetch.c` -> `include/anti_fp.h`
+- `src/secure_fetch.c` -> `include/net_guard.h`
 - `src/secure_fetch.c` -> `include/request_policy.h`
 - `src/secure_fetch.c` -> `include/secure_fetch.h`
 - `src/secure_fetch.c` -> `include/url.h`
 - `src/sha2.c` -> `include/sha2.h`
+- `src/sheet_cache.c` -> `include/css_select.h`
+- `src/sheet_cache.c` -> `include/freedom_config.h`
+- `src/sheet_cache.c` -> `include/sheet_cache.h`
 - `src/subreq_batch.c` -> `include/subreq_batch.h`
 - `src/svg_paint.c` -> `include/css_color.h`
 - `src/svg_paint.c` -> `include/freedom_config.h`
@@ -406,6 +413,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/page_view.h`
 - `src/tab.c` -> `include/request_policy.h`
 - `src/tab.c` -> `include/secure_fetch.h`
+- `src/tab.c` -> `include/sheet_cache.h`
 - `src/tab.c` -> `include/subreq_batch.h`
 - `src/tab.c` -> `include/svg_raster.h`
 - `src/tab.c` -> `include/tab.h`
@@ -488,13 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_fb_cmdline.c` -> `include/freebug.h`
 - `tests/test_fb_panes.c` -> `include/fb_panes.h`
 - `tests/test_flex_layout.c` -> `include/flex_layout.h`
-- `tests/test_form.c` -> `include/form.h`
-- `tests/test_frame_broker.c` -> `include/frame_broker.h`
-- `tests/test_frame_clock.c` -> `include/frame_clock.h`
-- `tests/test_frame_host.c` -> `include/frame_host.h`
-- `tests/test_frame_host.c` -> `include/tab.h`
-- `tests/test_freebug.c` -> `include/freebug.h`
-- `tests/test_freedom.c` -> `include/image_decode.h`
-- `tests/test_hls.c` -> `include/hls.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

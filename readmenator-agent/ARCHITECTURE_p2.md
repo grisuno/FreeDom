@@ -2,6 +2,14 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_form.c` -> `include/form.h`
+- `tests/test_frame_broker.c` -> `include/frame_broker.h`
+- `tests/test_frame_clock.c` -> `include/frame_clock.h`
+- `tests/test_frame_host.c` -> `include/frame_host.h`
+- `tests/test_frame_host.c` -> `include/tab.h`
+- `tests/test_freebug.c` -> `include/freebug.h`
+- `tests/test_freedom.c` -> `include/image_decode.h`
+- `tests/test_hls.c` -> `include/hls.h`
 - `tests/test_host_conf.c` -> `include/host_conf.h`
 - `tests/test_hostblock.c` -> `include/hostblock.h`
 - `tests/test_hostedit.c` -> `include/hostedit.h`
@@ -33,6 +41,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_link_nav.c` -> `include/link_nav.h`
 - `tests/test_local_store.c` -> `include/local_store.h`
 - `tests/test_media_decoder.c` -> `include/media_decoder.h`
+- `tests/test_net_guard.c` -> `include/net_guard.h`
 - `tests/test_net_realm.c` -> `include/net_realm.h`
 - `tests/test_os_sandbox.c` -> `include/os_sandbox.h`
 - `tests/test_page_view.c` -> `include/box_style.h`
@@ -42,6 +51,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_page_view.c` -> `include/flex_layout.h`
 - `tests/test_page_view.c` -> `include/html_parse.h`
 - `tests/test_page_view.c` -> `include/page_view.h`
+- `tests/test_page_view.c` -> `include/sheet_cache.h`
 - `tests/test_page_view.c` -> `include/webfont.h`
 - `tests/test_pdf_export.c` -> `include/pdf_export.h`
 - `tests/test_perf_trace.c` -> `include/perf_trace.h`
@@ -62,6 +72,8 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_request_policy.c` -> `include/request_policy.h`
 - `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
 - `tests/test_sha2.c` -> `include/sha2.h`
+- `tests/test_sheet_cache.c` -> `include/freedom_config.h`
+- `tests/test_sheet_cache.c` -> `include/sheet_cache.h`
 - `tests/test_shm_slots.c` -> `include/shm_slots.h`
 - `tests/test_subreq_batch.c` -> `include/subreq_batch.h`
 - `tests/test_svg_raster.c` -> `include/svg_raster.h`
@@ -148,6 +160,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/link_nav.h` -> stddef.h
 - `include/local_store.h` -> stddef.h, stdint.h
 - `include/media_decoder.h` -> stddef.h, stdint.h, sys/types.h
+- `include/net_guard.h` -> stddef.h
 - `include/os_sandbox.h` -> stddef.h
 - `include/page_view.h` -> stddef.h, stdint.h
 - `include/pdf_export.h` -> stddef.h
@@ -163,6 +176,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/request_policy.h` -> stddef.h
 - `include/secure_fetch.h` -> stddef.h, stdint.h, time.h
 - `include/sha2.h` -> stddef.h, stdint.h
+- `include/sheet_cache.h` -> stddef.h
 - `include/subreq_batch.h` -> stddef.h
 - `include/svg_paint.h` -> cairo.h
 - `include/svg_raster.h` -> stddef.h, stdint.h
@@ -244,6 +258,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/link_nav.c` -> string.h
 - `src/local_store.c` -> openssl/core_names.h, openssl/crypto.h, openssl/evp.h, openssl/kdf.h, openssl/params.h, openssl/rand.h, stdlib.h, string.h
 - `src/media_decoder.c` -> errno.h, libavcodec/avcodec.h, libavformat/avformat.h, libavutil/avutil.h, libavutil/imgutils.h, libswscale/swscale.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, unistd.h
+- `src/net_guard.c` -> arpa/inet.h, string.h, sys/socket.h
 - `src/net_realm.c` -> stddef.h, string.h
 - `src/os_sandbox.c` -> errno.h, fcntl.h, linux/audit.h, linux/filter.h, linux/landlock.h, linux/seccomp.h, sched.h, stddef.h, stdint.h, string.h, sys/mman.h, sys/prctl.h, sys/resource.h, sys/syscall.h, unistd.h
 - `src/page_view.c` -> ctype.h, lexbor/html/html.h, lexbor/tag/const.h, limits.h, stdint.h, stdio.h, stdlib.h, string.h, strings.h, time.h
@@ -256,8 +271,9 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/render_doc.c` -> stdlib.h, string.h
 - `src/renderer.c` -> errno.h, stdint.h, stdlib.h, string.h, sys/wait.h, unistd.h
 - `src/request_policy.c` -> stdlib.h, string.h
-- `src/secure_fetch.c` -> curl/curl.h, inttypes.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdio.h, stdlib.h, string.h, strings.h, time.h
+- `src/secure_fetch.c` -> curl/curl.h, inttypes.h, netinet/in.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdio.h, stdlib.h, string.h, strings.h, sys/socket.h, time.h
 - `src/sha2.c` -> string.h
+- `src/sheet_cache.c` -> stdint.h, stdlib.h, string.h
 - `src/subreq_batch.c` -> pthread.h, semaphore.h, stdlib.h, string.h, time.h
 - `src/svg_paint.c` -> math.h, string.h
 - `src/svg_raster.c` -> cairo.h, math.h, stdlib.h, string.h
@@ -330,6 +346,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_link_nav.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_local_store.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_media_decoder.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
+- `tests/test_net_guard.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_net_realm.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_os_sandbox.c` -> cmocka.h, errno.h, fcntl.h, linux/audit.h, sched.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/mman.h, sys/prctl.h, sys/resource.h, sys/socket.h, sys/stat.h, sys/syscall.h, sys/wait.h, unistd.h
 - `tests/test_page_view.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
@@ -345,6 +362,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_request_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
 - `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_sha2.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_sheet_cache.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_shm_slots.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_subreq_batch.c` -> cmocka.h, pthread.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h, unistd.h
 - `tests/test_svg_raster.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h

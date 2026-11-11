@@ -1,10 +1,10 @@
 # include: browser_ui
 
-*Community 1 | 46 files | cohesion 0.51*
+*Community 1 | 47 files | cohesion 0.52*
 
 ## Definition
 
-This community groups 46 file(s) rooted at `include` with dominant language c (cohesion 0.51). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (662 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
+This community groups 47 file(s) rooted at `include` with dominant language c (cohesion 0.52). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (662 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
 
 ## Files
 
@@ -39,16 +39,16 @@ This community groups 46 file(s) rooted at `include` with dominant language c (c
 | `src/download.c` | c | utility | 12 | no |
 | `src/form.c` | c | utility | 8 | no |
 | `src/frame_clock.c` | c | utility | 4 | no |
-| `src/hostedit.c` | c | utility | 14 | no |
 
-### `gui` (2 files)
+### `gui` (3 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `gui/browser_ui.c` | c | presentation | 662 | no |
 | `gui/freedom_view.c` | c | presentation | 2 | no |
+| `gui/ui_render.c` | c | presentation | 29 | no |
 
-*... and 26 more files in this community.*
+*... and 27 more files in this community.*
 
 
 ## Key Symbols
@@ -86,50 +86,51 @@ This community groups 46 file(s) rooted at `include` with dominant language c (c
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 52
+- Internal resolved imports (EXTRACTED): 53
 - Cross-boundary resolved imports (EXTRACTED): 49
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
-- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
+- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
+- [EXTRACTED] depends_on community 1 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 1 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
 - [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/css_color.h.
-- [EXTRACTED] depends_on community 1 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
 - [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 1 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
+- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
 - [EXTRACTED] depends_on community 1 <-> 10 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
-- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/cached_fetch.h.
 - [EXTRACTED] depends_on community 1 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/tab.h.
+- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/profile.h imports include/local_store.h.
 
 ## Risks
 
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
 - [layer strict] `tests/test_ui.c` (testing) -> `include/ui.h` (presentation)
-- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1687` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:1853` `first` `dg`: `dg` assigned at line 1853 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4660` `flow_text` `space_w`: `space_w` assigned at line 4660 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4662` `flow_text` `i`: `i` assigned at line 4662 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5699` `table` `parent`: `parent` assigned at line 5699 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5700` `table` `seen`: `seen` assigned at line 5700 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5702` `table` `j`: `j` assigned at line 5702 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5837` `measure_item_w_at` `repl_max`: `repl_max` assigned at line 5837 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5838` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5838 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5856` `measure_item_w_at` `rw`: `rw` assigned at line 5856 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6036` `nested_cont_basis` `total`: `total` assigned at line 6036 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6037` `nested_cont_basis` `n_items`: `n_items` assigned at line 6037 but never read afterwards.
+- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1691` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:1857` `first` `dg`: `dg` assigned at line 1857 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4671` `flow_text` `space_w`: `space_w` assigned at line 4671 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4673` `flow_text` `i`: `i` assigned at line 4673 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5710` `table` `parent`: `parent` assigned at line 5710 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5711` `table` `seen`: `seen` assigned at line 5711 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5713` `table` `j`: `j` assigned at line 5713 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5848` `measure_item_w_at` `repl_max`: `repl_max` assigned at line 5848 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5849` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5849 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5867` `measure_item_w_at` `rw`: `rw` assigned at line 5867 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6047` `nested_cont_basis` `total`: `total` assigned at line 6047 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6048` `nested_cont_basis` `n_items`: `n_items` assigned at line 6048 but never read afterwards.
 
 ## Open Questions
 
-- Why do 43 file(s) lack file-level docs (e.g. `gui/browser_ui.c`)? What purpose do they serve?
+- Why do 44 file(s) lack file-level docs (e.g. `gui/browser_ui.c`)? What purpose do they serve?
 - What would break if the most connected file in include: browser_ui changed?
-- Should include: browser_ui be split, given cohesion 0.51?
+- Should include: browser_ui be split, given cohesion 0.52?
 
 ## Sources
 
 - `gui/browser_ui.c`
 - `gui/freedom_view.c`
+- `gui/ui_render.c`
 - `include/block_flow.h`
 - `include/box_blur.h`
 - `include/download.h`
@@ -147,5 +148,4 @@ This community groups 46 file(s) rooted at `include` with dominant language c (c
 - `include/wl_guard.h`
 - `include/zoom.h`
 - `src/block_flow.c`
-- `src/box_blur.c`
-- *... and 26 more*
+- *... and 27 more*

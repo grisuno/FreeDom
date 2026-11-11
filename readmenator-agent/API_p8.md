@@ -158,17 +158,17 @@ Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`,
      * process). A NULL top_...`
 - `only` (function) `src/freedom.c:868` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
 - `sf_reason` (function) `src/freedom.c:994` `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (function) `src/freedom.c:1013` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
-- `BLOCKED` (function) `src/freedom.c:1041` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
-- `elsewhere` (function) `src/freedom.c:1076` `* page whose script immediately forwards elsewhere (e.g. a search engine's
+- `fetch_and_render_one` (function) `src/freedom.c:1014` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
+- `BLOCKED` (function) `src/freedom.c:1042` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+- `elsewhere` (function) `src/freedom.c:1077` `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-- `parent` (function) `src/freedom.c:1102` `* gated by the parent (ln_resolve: a local target stays under the document's
+- `parent` (function) `src/freedom.c:1103` `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-- `run_headless` (function) `src/freedom.c:1139` `static int run_headless(const char *target)`
-- `video_fetch_with_fallback` (function) `src/freedom.c:1176` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+- `run_headless` (function) `src/freedom.c:1140` `static int run_headless(const char *target)`
+- `video_fetch_with_fallback` (function) `src/freedom.c:1177` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
-- `run_dump_video` (function) `src/freedom.c:1287` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
-- `main` (function) `src/freedom.c:1306` `int main(int argc, char **argv)`
+- `run_dump_video` (function) `src/freedom.c:1288` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
+- `main` (function) `src/freedom.c:1307` `int main(int argc, char **argv)`
 
 ## src/hls.c
 Depends on: `include/hls.h`

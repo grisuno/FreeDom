@@ -1,6 +1,6 @@
 # src: text_shape
 
-src: text_shape groups 42 files (c, h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
+src: text_shape groups 37 files (c, h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
 
 ```mermaid
 graph LR
@@ -13,17 +13,17 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (3.1)
+## include (5.1)
 
-include groups 14 files (h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
+include groups 12 files (h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
 
-## src (3.2)
+## src (5.2)
 
-src groups 15 files (c) around lower, ci_starts_with, du_is_data_url, du_base64_payload, du_shape_ok. b64_val: 0-63 for a base64 alphabet character, -1 otherwise.
+src groups 13 files (c) around lower, ci_starts_with, du_is_data_url, du_base64_payload, du_shape_ok. b64_val: 0-63 for a base64 alphabet character, -1 otherwise.
 
-## tests (3.3)
+## tests (5.3)
 
-tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty. test_trusted_requires_both_signals: Hito 28: a host is TRUSTED (full author CSS +...
+tests groups 12 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty. test_trusted_requires_both_signals: Hito 28: a host is TRUSTED (full author CSS +...
 
 **Files**:
 
@@ -33,8 +33,6 @@ tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, 
 - include/link_nav.h
 - include/net_realm.h
 - include/perf_trace.h
-- include/psl_data.h
-- include/request_policy.h
 - include/text_shape.h
 - include/tls_impersonate.h
 - include/webcaps.h
@@ -48,8 +46,6 @@ tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, 
 - src/link_nav.c
 - src/net_realm.c
 - src/perf_trace.c
-- src/render_policy.c
-- src/request_policy.c
 - src/text_shape.c
 - src/tls_impersonate.c
 - src/webcaps.c
@@ -62,7 +58,6 @@ tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, 
 - tests/test_link_nav.c
 - tests/test_net_realm.c
 - tests/test_perf_trace.c
-- tests/test_request_policy.c
 - tests/test_text_shape.c
 - tests/test_tls_impersonate.c
 - tests/test_webcaps.c

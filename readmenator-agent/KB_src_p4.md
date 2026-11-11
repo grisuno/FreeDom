@@ -371,20 +371,20 @@ static dom_node_id qs_walk(const dom_inde...`
   - `first` (function, line 798) `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
   - `sf_reason` (function, line 994) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 1013) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 1076) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `fetch_and_render_one` (function, line 1014) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 1077) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 1102) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 1103) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 1139) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 1176) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1140) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1177) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1287) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1306) `int main(int argc, char **argv)`
+  - `run_dump_video` (function, line 1288) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1307) `int main(int argc, char **argv)`
   - `gets` (function, line 482) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
   - `pool` (function, line 784) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
   - `only` (function, line 868) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 1041) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `BLOCKED` (function, line 1042) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
   - `EXIT_OK` (macro, line 51) `#define EXIT_OK`
@@ -393,7 +393,7 @@ static dom_node_id qs_walk(const dom_inde...`
   - `CSS_DROPS_REPORT_MAX` (macro, line 174) `#define CSS_DROPS_REPORT_MAX`
   - `HL_FONT_MAX_SHEETS` (macro, line 631) `#define HL_FONT_MAX_SHEETS`
   - `HL_FONT_MAX_BYTES` (macro, line 632) `#define HL_FONT_MAX_BYTES`
-  - `HL_JS_NAV_MAX` (macro, line 1009) `#define HL_JS_NAV_MAX`
+  - `HL_JS_NAV_MAX` (macro, line 1010) `#define HL_JS_NAV_MAX`
 - Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 
 ## src/hls.c
