@@ -51,3 +51,10 @@ hardened build. quickjs-ng requires `_GNU_SOURCE` for `alloca`, `localtime_r`, `
   memory. Patch: release the internals, keep the header until the last value is freed; the
   `JS_TAG_MODULE` case of `js_free_value_rt` (previously `abort()`) frees it. Reproducer
   kept as a `fuzz-js` seed and as `test_module_self_await_teardown` in `test_js_sandbox`.
+- **2026-11-11 — `JS_SetHideSource` (host code keeps no source).** The web platform is
+  largely JavaScript evaluated before the page; `Function.prototype.toString` returned that
+  shim source where a browser returns `[native code]`. The parser keeps a function's source
+  in three places (arrow/expression bodies, block bodies, class constructors); each is now
+  skipped while `rt->hide_source` is set, and `js_function_toString` already renders a
+  source-less function in the native form. No behaviour changes when the flag is never set.
+  Contract in `spec/js_native.md`; covered by `tests/test_js_native.c`.

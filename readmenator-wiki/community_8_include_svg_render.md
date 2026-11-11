@@ -63,7 +63,7 @@ This community groups 12 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
+- [EXTRACTED] depends_on community 2 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
 
 ## Risks
 

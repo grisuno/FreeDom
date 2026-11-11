@@ -7,6 +7,7 @@
  */
 
 #include "js_custom_elements.h"
+#include "js_native_internal.h"
 
 static const char JDCE_SHIM[] =
     "(function(){\n"
@@ -197,7 +198,7 @@ static const char JDCE_SHIM[] =
     "})();\n";
 
 int jdce_install(JSContext *ctx) {
-    JSValue r = JS_Eval(ctx, JDCE_SHIM, sizeof JDCE_SHIM - 1, "<custom-elements>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(ctx, JDCE_SHIM, sizeof JDCE_SHIM - 1, "<custom-elements>");
     int ok = !JS_IsException(r);
     JS_FreeValue(ctx, r);
     return ok ? 0 : -1;

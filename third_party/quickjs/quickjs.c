@@ -318,6 +318,9 @@ struct JSRuntime {
     JSThrowHook *throw_hook;
     void *throw_opaque;
     int in_throw_hook;
+    /* Freedom patch: while set, a compiled function does not keep its source text, so
+       Function.prototype.toString reports it as native (host platform code). */
+    bool hide_source;
 
     JSPromiseHook *promise_hook;
     void *promise_hook_opaque;
@@ -7603,6 +7606,14 @@ void JS_SetThrowHook(JSRuntime *rt, JSThrowHook *cb, void *opaque)
 {
     rt->throw_hook = cb;
     rt->throw_opaque = opaque;
+}
+
+/* Freedom patch (2026-11-11, see VERSION.md). Returns the previous setting. */
+bool JS_SetHideSource(JSRuntime *rt, bool hide)
+{
+    bool prev = rt->hide_source;
+    rt->hide_source = hide;
+    return prev;
 }
 
 JSValue JS_Throw(JSContext *ctx, JSValue obj)
@@ -25349,10 +25360,14 @@ static __exception int js_parse_class(JSParseState *s, bool is_class_expr,
 
     /* store the class source code in the constructor. */
     js_free(ctx, ctor_fd->source);
+    ctor_fd->source = NULL;
+    ctor_fd->source_len = 0;
+    if (!ctx->rt->hide_source) { /* Freedom patch: host code keeps no source */
     ctor_fd->source_len = s->buf_ptr - class_start_ptr;
     ctor_fd->source = js_strndup(ctx, (const char *)class_start_ptr, ctor_fd->source_len);
     if (!ctor_fd->source)
         goto fail;
+    }
 
     /* consume the '}' */
     if (next_token(s))
@@ -36963,10 +36978,12 @@ static __exception int js_parse_function_decl2(JSParseState *s,
             /* save the function source code */
             /* the end of the function source code is after the last
                 token of the function source stored into s->last_ptr */
+            if (!ctx->rt->hide_source) { /* Freedom patch: host code keeps no source */
             fd->source_len = s->last_ptr - ptr;
             fd->source = js_strndup(ctx, (const char *)ptr, fd->source_len);
             if (!fd->source)
                 goto fail;
+            }
 
             goto done;
         }
@@ -37001,10 +37018,12 @@ static __exception int js_parse_function_decl2(JSParseState *s,
         }
 
         /* save the function source code */
+        if (!ctx->rt->hide_source) { /* Freedom patch: host code keeps no source */
         fd->source_len = s->buf_ptr - ptr;
         fd->source = js_strndup(ctx, (const char *)ptr, fd->source_len);
         if (!fd->source)
             goto fail;
+        }
 
         if (next_token(s)) {
             /* consume the '}' */

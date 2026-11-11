@@ -1,6 +1,77 @@
 # Subsystem: tests (page 8 of 8)
 Previous: [KB_tests_p7.md](KB_tests_p7.md)
 
+## tests/test_text_case.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_upper_lower_ascii_latin` (function, line 10) `static void test_upper_lower_ascii_latin(void **state)`
+  - `test_transform_keeps_length` (function, line 33) `static void test_transform_keeps_length(void **state)`
+  - `test_smallcaps_runs` (function, line 55) `static void test_smallcaps_runs(void **state)`
+  - `main` (function, line 73) `int main(void)`
+- Depends on: `include/css.h`, `include/text_case.h`
+
+## tests/test_text_shape.c
+- Doc: inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_null_and_bad_inputs` (function, line 30) `static void test_null_and_bad_inputs(void **state)`
+  - `test_empty_slice_is_ok` (function, line 60) `static void test_empty_slice_is_ok(void **state)`
+  - `test_shape_ascii` (function, line 73) `static void test_shape_ascii(void **state)`
+  - `test_determinism` (function, line 95) `static void test_determinism(void **state)`
+  - `test_measure_matches_shape` (function, line 111) `static void test_measure_matches_shape(void **state)`
+  - `test_overflow_cap` (function, line 123) `static void test_overflow_cap(void **state)`
+  - `test_draw_paints` (function, line 133) `static void test_draw_paints(void **state)`
+  - `inked_pixels` (function, line 149) `static int inked_pixels(cairo_surface_t *s)`
+  - `test_uncovered_pua_draws_nothing` (function, line 161) `static void test_uncovered_pua_draws_nothing(void **state)`
+  - `test_webfont_rejects_bad_input` (function, line 179) `static void test_webfont_rejects_bad_input(void **state)`
+  - `read_host_font` (function, line 201) `static unsigned char *read_host_font(const char *path, size_t *out_n)`
+  - `test_webfont_register_find_clear` (function, line 216) `static void test_webfont_register_find_clear(void **state)`
+  - `test_generic_keywords` (function, line 264) `static void test_generic_keywords(void **state)`
+  - `table_resolve` (function, line 276) `static int table_resolve(const char *name, char *out, size_t cap, void *ctx)`
+  - `test_pick_from_list_order_and_generic_stop` (function, line 286) `static void test_pick_from_list_order_and_generic_stop(void **state)`
+  - `set_installed` (function, line 306) `static int set_installed(const char *name, void *ctx)`
+  - `test_pick_family_strong_vs_weak` (function, line 313) `static void test_pick_family_strong_vs_weak(void **state)`
+  - `test_local_handle_real_fontconfig` (function, line 337) `static void test_local_handle_real_fontconfig(void **state)`
+  - `teardown` (function, line 358) `static int teardown(void **state)`
+  - `fake_cover` (function, line 383) `static int fake_cover(unsigned cp, void *ctx)`
+  - `test_segment_runs` (function, line 390) `static void test_segment_runs(void **state)`
+  - `test_measure_uses_fallback_face` (function, line 415) `static void test_measure_uses_fallback_face(void **state)`
+  - `main` (function, line 426) `int main(void)`
+- Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
+
+## tests/test_textfield.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_init_and_accessors` (function, line 20) `static void test_init_and_accessors(void **state)`
+  - `test_null_safe` (function, line 29) `static void test_null_safe(void **state)`
+  - `test_set` (function, line 46) `static void test_set(void **state)`
+  - `test_insert_sequence` (function, line 59) `static void test_insert_sequence(void **state)`
+  - `test_backspace_delete` (function, line 76) `static void test_backspace_delete(void **state)`
+  - `test_move_saturates` (function, line 100) `static void test_move_saturates(void **state)`
+  - `test_full_fails_closed` (function, line 113) `static void test_full_fails_closed(void **state)`
+  - `main` (function, line 140) `int main(void)`
+- Depends on: `include/textfield.h`
+
+## tests/test_tls_impersonate.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_gate_requires_all_three_signals` (function, line 22) `static void test_gate_requires_all_three_signals(void **state)`
+  - `test_encode_decode_req_roundtrip` (function, line 39) `static void test_encode_decode_req_roundtrip(void **state)`
+  - `test_encode_decode_req_empty_body` (function, line 65) `static void test_encode_decode_req_empty_body(void **state)`
+  - `test_encode_decode_resp_roundtrip` (function, line 89) `static void test_encode_decode_resp_roundtrip(void **state)`
+  - `test_resp_no_chain_ok` (function, line 121) `static void test_resp_no_chain_ok(void **state)`
+  - `test_decode_rejects_truncated` (function, line 144) `static void test_decode_rejects_truncated(void **state)`
+  - `test_decode_rejects_bad_magic` (function, line 163) `static void test_decode_rejects_bad_magic(void **state)`
+  - `test_decode_rejects_overlong_field` (function, line 177) `static void test_decode_rejects_overlong_field(void **state)`
+  - `test_encode_fails_when_no_room` (function, line 192) `static void test_encode_fails_when_no_room(void **state)`
+  - `test_encode_rejects_oversize_url` (function, line 203) `static void test_encode_rejects_oversize_url(void **state)`
+  - `main` (function, line 218) `int main(void)`
+- Depends on: `include/tls_impersonate.h`
+
 ## tests/test_ui.c
 - Doc: assert_line: Build: make test   ;   ASan: make asan  #include <stdarg.h> #include <stddef.h>...
 - Layer: testing

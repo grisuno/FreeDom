@@ -1,6 +1,85 @@
 # API (page 6 of 12)
 Previous: [API_p5.md](API_p5.md)
 
+## src/box_style.c
+Depends on: `include/box_style.h`
+- `is_ws` (function) `src/box_style.c:31` `static int is_ws(char c)`
+- `copy_lower_trim` (function) `src/box_style.c:37` `static int copy_lower_trim(const char *in, char *out, size_t out_size)` -- Copies in into out, trimming ASCII whitespace and lowercasing.
+- `name_cmp` (function) `src/box_style.c:50` `static int name_cmp(const void *key, const void *elem)` -- Both row structs start with `const char *name`, so a pointer to a row is also a * pointer to its name field: one...
+- `bx_default_for_tag` (function) `src/box_style.c:163` `bx_box bx_default_for_tag(const char *tag)`
+- `bx_table_role_of` (function) `src/box_style.c:171` `bx_table_role bx_table_role_of(const char *tag, css_display display)`
+- `bx_ua_of_tag` (function) `src/box_style.c:210` `bx_ua_tag bx_ua_of_tag(const char *tag)`
+- `bx_default_for_ua` (function) `src/box_style.c:219` `bx_box bx_default_for_ua(bx_ua_tag id)`
+- `bx_block_ua_box` (function) `src/box_style.c:225` `bx_box bx_block_ua_box(int heading_level, int in_list, bx_ua_tag ua)`
+- `bx_parse_display` (function) `src/box_style.c:261` `bx_status bx_parse_display(const char *token, bx_display *out)`
+- `bx_place` (function) `src/box_style.c:271` `bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
+                ...`
+- `bx_width_cap` (function) `src/box_style.c:288` `double bx_width_cap(int w_px, int w_pct, double avail_w)`
+- `take` (function) `src/box_style.c:295` `* caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read...`
+- `bx_width_cap2` (function) `src/box_style.c:313` `double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w)`
+- `bx_replaced_box` (function) `src/box_style.c:321` `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den,
+                    doub...`
+- `bx_border_box_h` (function) `src/box_style.c:335` `double bx_border_box_h(double declared_h, int border_box,
+                       double pad_t, do...`
+- `bx_pct_block_size` (function) `src/box_style.c:346` `double bx_pct_block_size(int px_val, int pct_pm, double cb_h)`
+- `bx_definite_content_h` (function) `src/box_style.c:352` `double bx_definite_content_h(double h, double min_h, double max_h,
+                             i...`
+- `bx_content_clipped` (function) `src/box_style.c:361` `int bx_content_clipped(int overflow_x, int overflow_y)`
+- `bx_lp_px` (function) `src/box_style.c:367` `double bx_lp_px(int px_val, int pct_pm, double basis)`
+- `bx_content_cap` (function) `src/box_style.c:378` `double bx_content_cap(double width_cap, int border_box,
+                      double pad_l, doubl...`
+- `bx_flex_min_clamp` (function) `src/box_style.c:389` `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box,
+                      ...`
+- `bx_border_span` (function) `src/box_style.c:396` `double bx_border_span(double width_cap, int border_box,
+                      double pad_l, doubl...`
+- `bg_size_component` (function) `src/box_style.c:408` `static double bg_size_component(int px_val, int pct_pm, double area)` -- One background-size component in px, or -1 when it is `auto` (Backgrounds 3 section 3.9).
+- `bx_background_layer` (function) `src/box_style.c:415` `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,
+                    ...`
+- `bx_display_name` (function) `src/box_style.c:454` `const char *bx_display_name(bx_display d)`
+- `bx_flex_max_clamp` (function) `src/box_style.c:467` `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box,
+                     ...`
+- `bx_place_ex` (function) `src/box_style.c:474` `bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int center,
+             ...`
+- `bx_line_height_px` (function) `src/box_style.c:484` `double bx_line_height_px(int line_scale, double font_px)`
+
+## src/box_tree.c
+Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
+- `layout_block` (function) `src/box_tree.c:37` `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,
+                   ...` -- Block container: stack non-none children vertically, collapsing each child's top * margin with the previous child's...
+- `bt_nn` (function) `src/box_tree.c:58` `static double bt_nn(double v)` -- if (cavail < 0.0) cavail = 0.0; bt_status r = layout_node(c, cavail, depth + 1); if (r != BT_OK) return r; double...
+- `height` (function) `src/box_tree.c:78` `* exactly that height (Flexbox 9.4 step 15).
+ *
+ * wrap_reverse (node->wrap_reverse): when node->...`
+- `layout_flex` (function) `src/box_tree.c:98` `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
+                    ...`
+- `layout_grid` (function) `src/box_tree.c:280` `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
+                    ...`
+- `sized` (function) `src/box_tree.c:350` `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
+- `layout_node` (function) `src/box_tree.c:420` `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
+- `bt_layout` (function) `src/box_tree.c:465` `bt_status bt_layout(bt_node *root, double avail_w)`
+- `assign_doc_order` (function) `src/box_tree.c:505` `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
+                  ...` -- Recursive doc_order assignment.
+- `find_positioned_ancestor` (function) `src/box_tree.c:522` `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
+                       ...` -- Walk the parent_id chain from `start` to find the nearest ancestor with position != STATIC.
+- `resolve_inset` (function) `src/box_tree.c:542` `static double resolve_inset(int v, int pct_pm, double basis)` -- Resolves an inset <length-percentage>: PV_LEN_UNSET or BT_LEN_AUTO with no percentage half → 0 (anchor at the...
+- `inset_unset` (function) `src/box_tree.c:551` `static int inset_unset(int v, int pct_pm)` -- Stage 2b: an inset axis the author left undeclared (UNSET) or `auto`.
+- `bt_containing_block` (function) `src/box_tree.c:555` `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
+                        ...`
+- `block` (function) `src/box_tree.c:566` `* true block (same flow neighbourhood), strictly better than zeros. NULL
+     * placed keeps lega...`
+- `bt_resolve_positioning` (function) `src/box_tree.c:585` `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
+                          ...`
+- `bt_resolve_positioning_ex` (function) `src/box_tree.c:596` `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
+                       ...`
+- `oof_walk` (function) `src/box_tree.c:751` `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` -- Shared walk for the Stage 2d classifiers: nearest==1 stops at the first * ABSOLUTE/FIXED box, nearest==0 remembers...
+- `bt_oof_anchor` (function) `src/box_tree.c:768` `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
+- `bt_oof_root` (function) `src/box_tree.c:772` `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
+- `bt_box_hidden` (function) `src/box_tree.c:776` `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
+- `bt_in_subtree` (function) `src/box_tree.c:789` `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)`
+- `bt_oof_avail` (function) `src/box_tree.c:800` `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
+- `bt_defer_roots` (function) `src/box_tree.c:808` `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
+                      const bt_positi...`
+
 ## src/browser.c
 Depends on: `include/browser.h`, `include/util.h`
 - `free_page` (function) `src/browser.c:15` `static void free_page(browser_state *bs)`
@@ -383,109 +462,6 @@ Depends on: `include/css_atrule.h`, `include/css_select.h`
 - `car_supports` (function) `src/css_atrule.c:141` `int car_supports(const char *s, size_t a, size_t b, const car_ops *ops)`
 - `car_layer_rank` (function) `src/css_atrule.c:148` `int car_layer_rank(car_layers *L, const char *name, size_t len)`
 - `car_effective_spec` (function) `src/css_atrule.c:171` `int car_effective_spec(int spec, int layer, int important)`
-
-## src/css_box.c
-Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
-- `cb_parse_num` (function) `src/css_box.c:13` `static int cb_parse_num(const char *s, double *out, const char **endp)`
-- `cb_wide_keyword` (function) `src/css_box.c:18` `static int cb_wide_keyword(const char *v)`
-- `cb_copy_trim` (function) `src/css_box.c:25` `static size_t cb_copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
-- `cb_length_px` (function) `src/css_box.c:49` `int cb_length_px(const char *v, double *px)` -- Resolves a NUL-terminated <length> token to px through the canonical resolver.
-- `cb_interp_align` (function) `src/css_box.c:54` `int cb_interp_align(const char *v)`
-- `RELATIVE` (function) `src/css_box.c:63` `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...`
-- `cb_interp_fontsize_ex` (function) `src/css_box.c:72` `int cb_interp_fontsize_ex(const char *v, int *abs_out)`
-- `cb_interp_lineheight` (function) `src/css_box.c:145` `int cb_interp_lineheight(const char *v)` -- line-height as a percent of the natural line box.
-- `cb_interp_weight` (function) `src/css_box.c:194` `int cb_interp_weight(const char *v)`
-- `cb_interp_style` (function) `src/css_box.c:203` `int cb_interp_style(const char *v)`
-- `cb_interp_textdeco` (function) `src/css_box.c:213` `int cb_interp_textdeco(const char *v)` -- text-decoration / text-decoration-line: OR of the line keywords underline / overline / line-through found in the...
-- `cb_interp_display` (function) `src/css_box.c:233` `int cb_interp_display(const char *v)`
-- `cb_interp_gap` (function) `src/css_box.c:308` `int cb_interp_gap(const char *v)` -- One gap length.
-- `cb_interp_justify` (function) `src/css_box.c:315` `int cb_interp_justify(const char *v)`
-- `repeat` (function) `src/css_box.c:336` `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) /...`
-- `cb_starts_with_ci` (function) `src/css_box.c:347` `static int cb_starts_with_ci(const char *s, const char *pre)`
-- `count_tracks` (function) `src/css_box.c:353` `static int count_tracks(const char *s, size_t n)`
-- `track_size_of` (function) `src/css_box.c:361` `static int track_size_of(const char *tok)` -- Size of ONE track token: `<N>fr` -> -(N*100); a px/em/rem length -> px (> 0); minmax(a,b) -> the size of its max...
-- `count_one_repeat` (function) `src/css_box.c:391` `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
-                      ...`
-- `walk_tracks` (function) `src/css_box.c:434` `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)`
-- `track_min_of` (function) `src/css_box.c:502` `static int track_min_of(const char *tok)` -- Minimum width of ONE track token for repeat(auto-fill): minmax(a,b) takes a's length; a plain track takes itself....
-- `expand_auto_fill` (function) `src/css_box.c:540` `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` -- repeat(auto-fill|auto-fit, <single-track pattern>) tried as a whole value: returns 1 and emits grid_cols = -min_px...
-- `cb_expand_grid_template_cols` (function) `src/css_box.c:618` `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` -- grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track sizes, emitted in lock-step (P_GRIDCOLS...
-- `cb_expand_grid_template_rows` (function) `src/css_box.c:641` `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)`
-- `accepts` (function) `src/css_box.c:701` `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...`
-- `calc_skip_ws` (function) `src/css_box.c:734` `static void calc_skip_ws(calc_parser *p)`
-- `calc_match_fn` (function) `src/css_box.c:741` `static int calc_match_fn(calc_parser *p, const char *name)` -- bare0: the token was a unitless 0.
-- `calc_piecewise` (function) `src/css_box.c:768` `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` -- Shared by BOTH symbolic components: the percentage is piecewise for exactly the same reason the em derivative is...
-- `calc_mathfn` (function) `src/css_box.c:783` `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` -- min()/max()/clamp() (2026-07-10): comma-separated full expressions, every argument the same shape (all lengths or...
-- `min` (function) `src/css_box.c:802` `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...`
-- `calc_term` (function) `src/css_box.c:906` `static int calc_term(calc_parser *p, calc_val *out, int depth)` -- out->pct = num; out->is_length = 1;   /* a <percentage> is dimensional, like a length ++p->i; return 1; } out->px =...
-- `calc_expr` (function) `src/css_box.c:933` `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
-- `calc_eval_full` (function) `src/css_box.c:955` `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
-           ...` -- Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching ")" already stripped by the caller).
-- `calc_eval_em` (function) `src/css_box.c:969` `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` -- static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em, double *out_pct) { calc_parser...
-- `calc_unwrap` (function) `src/css_box.c:977` `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` -- True if s (already trimmed) is a "calc(...)" call spanning the whole string (case-insensitive keyword, balanced...
-- `cb_interp_len` (function) `src/css_box.c:1028` `int cb_interp_len(const char *v, int allow_auto, int *out)`
-- `pct_slot_of` (function) `src/css_box.c:1057` `static int pct_slot_of(int slot)` -- The css_pct_slot mirroring a px length slot, or -1 when the property does not accept the <length-percentage> type.
-- `cb_value_em_milli` (function) `src/css_box.c:1107` `int cb_value_em_milli(const char *v)` -- The font-relative derivative of `v`, in thousandths of an em, saturating at CSS_EM_MILLI_MAX.
-- `cb_clip_inset` (function) `src/css_box.c:1127` `int cb_clip_inset(const char *val, int px[4], int pm[4])`
-- `cb_interp_lp` (function) `src/css_box.c:1161` `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
-                     int *out_px, ...`
-- `term` (function) `src/css_box.c:1168` `* the same expression and failed closed on the percentage term (its property * may not accept one);`
-- `interp_len` (function) `src/css_box.c:1337` `* this file that might hand a token to interp_len (transitively: margin/padding/
- * inset, flex-b...`
-- `cb_expand_box2` (function) `src/css_box.c:1408` `int cb_expand_box2(const char *val, int slot_start, int slot_end,
-                       int allo...` -- Expands a two-slot logical shorthand (margin-inline / padding-block / inset-inline: one value sets both sides, two...
-
-## src/css_chain.c
-Depends on: `include/css_chain.h`, `include/css_select.h`
-- `cls_space` (function) `src/css_chain.c:42` `static int cls_space(char c)`
-- `release_nodes` (function) `src/css_chain.c:90` `static void release_nodes(cch_node *nodes, int n)` -- memcpy(buf, v, n); buf[n] = '\0'; size_t nc = 0; for (size_t i = 0; i < n && nc < cap_tok; ) { while (i < n &&...
-- `fill_css_node` (function) `src/css_chain.c:99` `static void fill_css_node(lxb_dom_element_t *e, cch_node *node)` -- Fills *node with element e's tag/id/class tokens (no style=, no parent link yet). * Over-long tokens are simply...
-- `sibling_position` (function) `src/css_chain.c:181` `static void sibling_position(lxb_dom_node_t *n, int *nth, int *nsib)` -- Computes the 1-based index of n among its ELEMENT siblings and the total element-sibling count (both walks bounded...
-- `sibling_type_position` (function) `src/css_chain.c:199` `static void sibling_type_position(lxb_dom_node_t *n, int *nth, int *nsib)` -- Like sibling_position but only counts siblings with the SAME local name as n. * R2: for :nth-of-type() /...
-- `count_children` (function) `src/css_chain.c:227` `static int count_children(lxb_dom_node_t *n)` -- Counts ALL child nodes (elements, text, comments) of the DOM element n. * R2: for :empty matching.
-- `inputs` (function) `src/css_chain.c:241` `* identical inputs (single source of truth). */
-static const css_element *build_chain(lxb_dom_ele...`
-- `cch_element_style_vars` (function) `src/css_chain.c:310` `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
-                 ...`
-- `cch_path_new` (function) `src/css_chain.c:353` `cch_path *cch_path_new(void)`
-- `path_truncate` (function) `src/css_chain.c:357` `static void path_truncate(cch_path *pa, int keep)`
-- `cch_path_free` (function) `src/css_chain.c:365` `void cch_path_free(cch_path *pa)`
-- `cch_element_style_path` (function) `src/css_chain.c:372` `css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,
-   ...`
-- `cch_pseudo_style` (function) `src/css_chain.c:439` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
-            ...`
-- `cch_element_style` (function) `src/css_chain.c:458` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
-- `cch_element_matches` (function) `src/css_chain.c:462` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
-- `cch_element_matches_any` (function) `src/css_chain.c:476` `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
-
-## src/css_color.c
-Depends on: `include/css_color.h`
-- `ascii_lower` (function) `src/css_color.c:119` `static int ascii_lower(int c)`
-- `hex_val` (function) `src/css_color.c:123` `static int hex_val(int c)`
-- `normalize` (function) `src/css_color.c:132` `static int normalize(const char *token, char *out)` -- Trims surrounding ASCII spaces and lowercases into out (CC_TOKEN_MAX bytes). * Returns 0, or -1 if the trimmed token...
-- `parse_hex` (function) `src/css_color.c:146` `static int parse_hex(const char *s, cc_rgb *out)` -- static int normalize(const char *token, char *out) { size_t start = 0; while (token[start] == ' ' || token[start] ==...
-- `cc_cws` (function) `src/css_color.c:226` `static void cc_cws(cc_cp *c)`
-- `cc_cfactor` (function) `src/css_color.c:229` `static int cc_cfactor(cc_cp *c, cc_cv *out, int depth)`
-- `cc_cterm` (function) `src/css_color.c:250` `static int cc_cterm(cc_cp *c, cc_cv *out, int depth)`
-- `cc_cexpr` (function) `src/css_color.c:269` `static int cc_cexpr(cc_cp *c, cc_cv *out, int depth)`
-- `cc_fold_calc` (function) `src/css_color.c:285` `static int cc_fold_calc(const char **b, const char **e, char *buf, size_t cap)` -- When [*b, *e) is exactly one calc(...), folds it into buf (cap bytes) and repoints the span there.
-- `cc_round` (function) `src/css_color.c:305` `static long cc_round(double v)` -- cc_cv r; if (cc_cfactor(&c, &r, 0) != 0) return -1; cc_cws(&c); if (c.p != y || r.v != r.v) return -1; if (r.v >...
-- `parse_component` (function) `src/css_color.c:310` `static int parse_component(const char *b, const char *e, int is_alpha, int *out)` -- Parses one rgb() component in [b, e).
-- `parse_hsl_comp` (function) `src/css_color.c:343` `static int parse_hsl_comp(const char *b, const char *e, int is_hue, int *out)` -- Parses one hsl() component: H is integer 0..360, S/L are 0%..100%. * Returns 0 / -1.
-- `span` (function) `src/css_color.c:431` `* span (when a slash is present) into ab/ae, and returns the component count,
- * or -1. Bounded: ...`
-- `parse_func` (function) `src/css_color.c:508` `static int parse_func(const char *s, cc_rgb *out)` -- Parses the functional rgb()/rgba()/hsl()/hsla() form (lowercased token).
-- `lab_comp` (function) `src/css_color.c:581` `static int lab_comp(const char *b, const char *e, double pct_ref, int is_hue, double *out)` -- One component: a <number>, a <percentage> (scaled so 100% == pct_ref), `none` * (0), or -- when is_hue -- an <angle>...
-- `srgb_encode` (function) `src/css_color.c:609` `static unsigned char srgb_encode(double lin)`
-- `oklab_to_rgb` (function) `src/css_color.c:616` `static void oklab_to_rgb(double L, double a, double b, cc_rgb *out)`
-- `lab_to_rgb` (function) `src/css_color.c:627` `static void lab_to_rgb(double L, double a, double b, cc_rgb *out)` -- return (unsigned char)cc_round(v * 255.0); } static void oklab_to_rgb(double L, double a, double b, cc_rgb *out) {...
-- `parse_lab_family` (function) `src/css_color.c:643` `static int parse_lab_family(const char *s, cc_rgb *out)` -- double fy = (L + 16.0) / 116.0, fx = a / 500.0 + fy, fz = fy - b / 200.0; double xr = (fx * fx * fx > e) ? fx * fx *...
-- `named_cmp` (function) `src/css_color.c:681` `static int named_cmp(const void *key, const void *element)`
-- `parse_named` (function) `src/css_color.c:715` `static int parse_named(const char *s, cc_rgb *out)`
-- `cc_parse` (function) `src/css_color.c:728` `cc_status cc_parse(const char *token, cc_rgb *out)`
-- `strncmp` (function) `src/css_color.c:743` `strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)`
-- `cc_pack` (function) `src/css_color.c:768` `int cc_pack(cc_rgb c)`
-- `cc_unpack` (function) `src/css_color.c:772` `cc_rgb cc_unpack(int packed)`
 
 
 Next: [API_p7.md](API_p7.md)

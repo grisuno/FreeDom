@@ -242,8 +242,12 @@ static void test_unforgeable(void **state) {
     fixture *f = (fixture *)*state;
     EXPECT(f, "try{navigator.userAgent='x'}catch(e){};"
               "navigator.userAgent.indexOf('Firefox') >= 0", "true");
-    EXPECT(f, "try{navigator.injected=1}catch(e){}; typeof navigator.injected",
-           "undefined");
+    /* navigator is an ordinary extensible object with NO own identity field, as in a
+     * browser (spec/js_native.md): an expando is the page talking to itself, while every
+     * identity field is a prototype getter without a setter. */
+    EXPECT(f, "navigator.injected=1; Object.getOwnPropertyNames(navigator).join()", "injected");
+    EXPECT(f, "'use strict';var t=0;try{navigator.platform='Win32'}catch(e){t=1}; t+navigator.platform",
+           "1Linux x86_64");
     EXPECT(f, "try{screen.width=10}catch(e){}; screen.width", "1600");
     /* Date.now cannot be restored to a high-resolution real clock. */
     EXPECT(f, "try{Date.now=function(){return 12345}}catch(e){}; Date.now()%100",

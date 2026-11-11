@@ -4,8 +4,8 @@
 
 ## Contents
 
-- **Functions:** [`primitives`](#primitives), [`methods`](#methods), [`je_install`](#je_install), [`je_install_identity`](#je_install_identity), [`je_install_identity_trusted`](#je_install_identity_trusted), [`je_install_canvas`](#je_install_canvas)
-- **Macros:** [`_POSIX_C_SOURCE`](#_posix_c_source), [`FP_MIME_COUNT`](#fp_mime_count), [`PERF_ORIGIN_EPOCH`](#perf_origin_epoch)
+- **Functions:** [`primitives`](#primitives), [`je_install`](#je_install), [`je_install_identity`](#je_install_identity), [`je_install_identity_trusted`](#je_install_identity_trusted), [`je_install_canvas`](#je_install_canvas)
+- **Macros:** [`_POSIX_C_SOURCE`](#_posix_c_source), [`PERF_ORIGIN_EPOCH`](#perf_origin_epoch)
 
 ## Call Graph
 
@@ -46,31 +46,11 @@ flowchart LR
 
 ---
 
-<a id="methods"></a>
-
-### `methods`
-
-`function` | [src/js_env.c:290](../../src/js_env.c#L290)
-
-```c
-* capability methods (sendBeacon, spec/js_dom.md 7h) without touching any * fingerprintable field. An untrusted page's prototype stays empty. */ JSValue proto = JS_NewObject(ctx);
-```
-
-**Parameters**
-
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `h` | `spec/js_dom.md 7` |  |  |
-
-**Returns:** `* capability`
-
----
-
 <a id="je_install"></a>
 
 ### `je_install`
 
-`function` | [src/js_env.c:592](../../src/js_env.c#L592)
+`function` | [src/js_env.c:619](../../src/js_env.c#L619)
 
 ```c
 je_status je_install(js_context *ctx, int screen_w, int screen_h)
@@ -94,7 +74,7 @@ je_status je_install(js_context *ctx, int screen_w, int screen_h)
 
 ### `je_install_identity`
 
-`function` | [src/js_env.c:596](../../src/js_env.c#L596)
+`function` | [src/js_env.c:623](../../src/js_env.c#L623)
 
 ```c
 je_status je_install_identity(js_context *ctx, int screen_w, int screen_h, const char *user_agent, const char *languages)
@@ -122,7 +102,7 @@ je_status je_install_identity(js_context *ctx, int screen_w, int screen_h, const
 
 ### `je_install_identity_trusted`
 
-`function` | [src/js_env.c:601](../../src/js_env.c#L601)
+`function` | [src/js_env.c:628](../../src/js_env.c#L628)
 
 ```c
 je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_h, const char *user_agent, const char *languages, int trusted)
@@ -151,7 +131,7 @@ je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_
 
 ### `je_install_canvas`
 
-`function` | [src/js_env.c:622](../../src/js_env.c#L622)
+`function` | [src/js_env.c:649](../../src/js_env.c#L649)
 
 ```c
 je_status je_install_canvas(js_context *ctx, uint64_t readback_key)
@@ -184,23 +164,11 @@ je_status je_install_canvas(js_context *ctx, uint64_t readback_key)
 
 ---
 
-<a id="fp_mime_count"></a>
-
-### `FP_MIME_COUNT`
-
-`macro` | [src/js_env.c:356](../../src/js_env.c#L356)
-
-```c
-#define FP_MIME_COUNT
-```
-
----
-
 <a id="perf_origin_epoch"></a>
 
 ### `PERF_ORIGIN_EPOCH`
 
-`macro` | [src/js_env.c:439](../../src/js_env.c#L439)
+`macro` | [src/js_env.c:466](../../src/js_env.c#L466)
 
 ```c
 #define PERF_ORIGIN_EPOCH

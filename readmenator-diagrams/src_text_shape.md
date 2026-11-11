@@ -1,6 +1,6 @@
 # src: text_shape
 
-src: text_shape groups 37 files (c, h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
+src: text_shape groups 40 files (c, h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
 
 ```mermaid
 graph LR
@@ -13,21 +13,22 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (5.1)
+## include (4.1)
 
-include groups 12 files (h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
+include groups 13 files (h) around FREEDOM_JS_POLICY_H, membership, jsp_mode, allowlist, jsp_trusted. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
 
-## src (5.2)
+## src (4.2)
 
-src groups 13 files (c) around lower, ci_starts_with, du_is_data_url, du_base64_payload, du_shape_ok. b64_val: 0-63 for a base64 alphabet character, -1 otherwise.
+src groups 14 files (c) around lower, ci_starts_with, du_is_data_url, du_base64_payload, du_shape_ok. b64_val: 0-63 for a base64 alphabet character, -1 otherwise.
 
-## tests (5.3)
+## tests (4.3)
 
-tests groups 12 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty. test_trusted_requires_both_signals: Hito 28: a host is TRUSTED (full author CSS +...
+tests groups 13 files (c) around test_is_data_url_true, test_is_data_url_false, test_payload_basic, test_payload_no_mediatype, test_payload_empty. test_net_pane_shows_timing_and_headers: assert_int_equal(fbp_expr(FBP_CONSOLE, "", 0...
 
 **Files**:
 
 - include/data_url.h
+- include/fb_panes.h
 - include/hls.h
 - include/js_policy.h
 - include/link_nav.h
@@ -40,6 +41,7 @@ tests groups 12 files (c) around test_is_data_url_true, test_is_data_url_false, 
 - include/webfont_load.h
 - include/wl_display.h
 - src/data_url.c
+- src/fb_panes.c
 - src/freedom.c
 - src/hls.c
 - src/js_policy.c
@@ -53,6 +55,7 @@ tests groups 12 files (c) around test_is_data_url_true, test_is_data_url_false, 
 - src/webfont_load.c
 - src/wl_display.c
 - tests/test_data_url.c
+- tests/test_fb_panes.c
 - tests/test_hls.c
 - tests/test_js_policy.c
 - tests/test_link_nav.c

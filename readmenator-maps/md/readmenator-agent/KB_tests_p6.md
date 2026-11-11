@@ -1,6 +1,72 @@
 # Subsystem: tests (page 6 of 8)
 Previous: [KB_tests_p5.md](KB_tests_p5.md)
 
+## tests/test_link_nav.c
+- Doc: test_resolve_long_bundle_target: Modern bundle URLs exceed the old 4096 target cap (google's xjs...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_null_out` (function, line 24) `static void test_null_out(void **state)`
+  - `test_null_href_blocked` (function, line 29) `static void test_null_href_blocked(void **state)`
+  - `test_fragment_is_same_document` (function, line 37) `static void test_fragment_is_same_document(void **state)`
+  - `test_https_absolute` (function, line 49) `static void test_https_absolute(void **state)`
+  - `test_https_relative` (function, line 57) `static void test_https_relative(void **state)`
+  - `test_https_absolute_path_and_parent` (function, line 65) `static void test_https_absolute_path_and_parent(void **state)`
+  - `test_https_blocks_downgrade_and_schemes` (function, line 76) `static void test_https_blocks_downgrade_and_schemes(void **state)`
+  - `test_https_scheme_relative` (function, line 91) `static void test_https_scheme_relative(void **state)`
+  - `test_resolve_long_bundle_target` (function, line 101) `static void test_resolve_long_bundle_target(void **state)`
+  - `test_href_cleaning` (function, line 114) `static void test_href_cleaning(void **state)`
+  - `test_file_relative` (function, line 125) `static void test_file_relative(void **state)`
+  - `test_file_parent` (function, line 133) `static void test_file_parent(void **state)`
+  - `test_file_absolute_path` (function, line 141) `static void test_file_absolute_path(void **state)`
+  - `test_file_drops_fragment` (function, line 149) `static void test_file_drops_fragment(void **state)`
+  - `test_file_base_to_https` (function, line 157) `static void test_file_base_to_https(void **state)`
+  - `test_file_base_blocks_schemes_and_scheme_relative` (function, line 165) `static void test_file_base_blocks_schemes_and_scheme_relative(void **state)`
+  - `test_no_base` (function, line 179) `static void test_no_base(void **state)`
+  - `test_overflow_blocked` (function, line 195) `static void test_overflow_blocked(void **state)`
+  - `test_block_reasons` (function, line 207) `static void test_block_reasons(void **state)`
+  - `test_block_reason_text` (function, line 234) `static void test_block_reason_text(void **state)`
+  - `test_fragment_capture` (function, line 244) `static void test_fragment_capture(void **state)`
+  - `main` (function, line 273) `int main(void)`
+- Depends on: `include/link_nav.h`
+
+## tests/test_local_store.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `roundtrip_raw` (function, line 30) `static void roundtrip_raw(ls_aead aead)`
+  - `test_roundtrip_aes` (function, line 48) `static void test_roundtrip_aes(void **s)`
+  - `test_roundtrip_chacha` (function, line 49) `static void test_roundtrip_chacha(void **s)`
+  - `test_empty_plaintext` (function, line 53) `static void test_empty_plaintext(void **s)`
+  - `test_wrong_key` (function, line 67) `static void test_wrong_key(void **s)`
+  - `tamper_at` (function, line 85) `static void tamper_at(size_t off)`
+  - `test_tamper_ciphertext` (function, line 99) `static void test_tamper_ciphertext(void **s)`
+  - `test_tamper_tag` (function, line 100) `static void test_tamper_tag(void **s)`
+  - `test_tamper_nonce` (function, line 101) `static void test_tamper_nonce(void **s)`
+  - `test_tamper_salt` (function, line 102) `static void test_tamper_salt(void **s)`
+  - `test_tamper_aead_id` (function, line 103) `static void test_tamper_aead_id(void **s)`
+  - `test_nondeterministic` (function, line 107) `static void test_nondeterministic(void **s)`
+  - `test_passphrase_roundtrip` (function, line 121) `static void test_passphrase_roundtrip(void **s)`
+  - `test_derive_key` (function, line 149) `static void test_derive_key(void **s)`
+  - `test_format_errors` (function, line 166) `static void test_format_errors(void **s)`
+  - `test_null_and_limits` (function, line 181) `static void test_null_and_limits(void **s)`
+  - `main` (function, line 193) `int main(void)`
+  - `local_store` (function, line 2) `* TDD suite for local_store (Hito 5 - Zero Knowledge: encrypted local state). * * RED state until src/local_store.c...`
+- Depends on: `include/local_store.h`
+
+## tests/test_media_decoder.c
+- Doc: test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_pacer_paces_by_pts_delta` (function, line 28) `static void test_pacer_paces_by_pts_delta(void **state)`
+  - `test_pacer_backwards_pts_reanchors` (function, line 40) `static void test_pacer_backwards_pts_reanchors(void **state)`
+  - `test_pacer_lag_reanchors` (function, line 52) `static void test_pacer_lag_reanchors(void **state)`
+  - `test_pacer_hostile_pts_bounded` (function, line 69) `static void test_pacer_hostile_pts_bounded(void **state)`
+  - `test_pacer_null_safe` (function, line 84) `static void test_pacer_null_safe(void **state)`
+  - `main` (function, line 89) `int main(void)`
+- Depends on: `include/media_decoder.h`
+
 ## tests/test_net_guard.c
 - Doc: Suite for net_guard (spec/net_guard.md).
 - Layer: testing
@@ -416,74 +482,6 @@ static void t...`
   - `main` (function, line 424) `int main(void)`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
 - Depends on: `include/prefs.h`, `include/zoom.h`
-
-## tests/test_profile.c
-- Doc: dir: include "prefs.h" include "profile.h"
-- Layer: testing
-- Language: c
-- Symbols:
-  - `fixture` (struct, line 28)
-  - `dir` (type_alias, line 27) `typedef struct fixture { char dir[64];`
-  - `setup` (function, line 30) `static int setup(void **state)`
-  - `teardown` (function, line 39) `static int teardown(void **state)`
-  - `path_of` (function, line 60) `static void path_of(const fixture *f, const char *name, char *out, size_t cap)`
-  - `file_size` (function, line 64) `static size_t file_size(const char *path)`
-  - `test_open_creates_keyfile` (function, line 72) `static void test_open_creates_keyfile(void **state)`
-  - `test_open_rejects_corrupt_keyfile` (function, line 89) `static void test_open_rejects_corrupt_keyfile(void **state)`
-  - `test_open_bad_dir` (function, line 103) `static void test_open_bad_dir(void **state)`
-  - `test_first_launch_defaults` (function, line 115) `static void test_first_launch_defaults(void **state)`
-  - `test_save_load_roundtrip_two_ctx` (function, line 128) `static void test_save_load_roundtrip_two_ctx(void **state)`
-  - `test_nothing_readable_on_disk` (function, line 174) `static void test_nothing_readable_on_disk(void **state)`
-  - `test_tampered_blob_auth_fails` (function, line 204) `static void test_tampered_blob_auth_fails(void **state)`
-  - `test_foreign_key_auth_fails` (function, line 236) `static void test_foreign_key_auth_fails(void **state)`
-  - `test_null_and_not_ready` (function, line 261) `static void test_null_and_not_ready(void **state)`
-  - `main` (function, line 278) `int main(void)`
-  - `_GNU_SOURCE` (macro, line 9) `#define _GNU_SOURCE`
-- Depends on: `include/prefs.h`, `include/profile.h`
-
-## tests/test_render_doc.c
-- Doc: first_kind: #include "flex_layout.h" #include "page_view.h" #include "render_doc.h" #include...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `caps_images_on` (function, line 28) `static rdp_caps caps_images_on(void)`
-  - `first_kind` (function, line 35) `static const rd_block *first_kind(const rd_doc *d, rd_kind k)`
-  - `test_build_null_out` (function, line 44) `static void test_build_null_out(void **state)`
-  - `test_build_null_view_is_empty` (function, line 51) `static void test_build_null_view_is_empty(void **state)`
-  - `test_heading_paragraph_link` (function, line 64) `static void test_heading_paragraph_link(void **state)`
-  - `test_emphasis_propagates` (function, line 94) `static void test_emphasis_propagates(void **state)`
-  - `test_image_off_emits_notice_and_blocked` (function, line 125) `static void test_image_off_emits_notice_and_blocked(void **state)`
-  - `test_no_images_no_notice` (function, line 174) `static void test_no_images_no_notice(void **state)`
-  - `test_image_on_allows_normal` (function, line 188) `static void test_image_on_allows_normal(void **state)`
-  - `test_image_on_resolves_relative_src` (function, line 206) `static void test_image_on_resolves_relative_src(void **state)`
-  - `test_image_on_resolves_doc_relative_src` (function, line 222) `static void test_image_on_resolves_doc_relative_src(void **state)`
-  - `test_image_on_blocks_tracker` (function, line 236) `static void test_image_on_blocks_tracker(void **state)`
-  - `test_image_on_blocks_non_https` (function, line 249) `static void test_image_on_blocks_non_https(void **state)`
-  - `test_image_data_url_allowed_remote_top` (function, line 284) `static void test_image_data_url_allowed_remote_top(void **state)`
-  - `test_image_data_url_allowed_no_top` (function, line 302) `static void test_image_data_url_allowed_no_top(void **state)`
-  - `test_image_data_url_disabled_by_default` (function, line 315) `static void test_image_data_url_disabled_by_default(void **state)`
-  - `test_image_data_url_percent_encoded_allowed` (function, line 331) `static void test_image_data_url_percent_encoded_allowed(void **state)`
-  - `test_href_sanitised` (function, line 353) `static void test_href_sanitised(void **state)`
-  - `test_kind_name_total` (function, line 370) `static void test_kind_name_total(void **state)`
-  - `test_image_label_total` (function, line 380) `static void test_image_label_total(void **state)`
-  - `test_free_null_and_double` (function, line 393) `static void test_free_null_and_double(void **state)`
-  - `test_author_color_gated_by_css` (function, line 403) `static void test_author_color_gated_by_css(void **state)`
-  - `test_text_overflow_word_break_gated_by_css` (function, line 433) `static void test_text_overflow_word_break_gated_by_css(void **state)`
-  - `test_text_ext_2026_07_10_batch_gated_by_css` (function, line 468) `static void test_text_ext_2026_07_10_batch_gated_by_css(void **state)`
-  - `test_image_rendering_gated_on_image` (function, line 508) `static void test_image_rendering_gated_on_image(void **state)`
-  - `test_caret_color_gated_on_input` (function, line 537) `static void test_caret_color_gated_on_input(void **state)`
-  - `test_input_passthrough` (function, line 567) `static void test_input_passthrough(void **state)`
-  - `test_input_label_total` (function, line 602) `static void test_input_label_total(void **state)`
-  - `test_container_carried_by_default` (function, line 627) `static void test_container_carried_by_default(void **state)`
-  - `test_cont_item_carried_by_default` (function, line 659) `static void test_cont_item_carried_by_default(void **state)`
-  - `test_float_carried_by_default` (function, line 692) `static void test_float_carried_by_default(void **state)`
-  - `test_flex_item_carried_by_default` (function, line 728) `static void test_flex_item_carried_by_default(void **state)`
-  - `test_flex_wrap_align_row_gap_carried_by_default` (function, line 776) `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)`
-  - `test_heading_level_of_link` (function, line 808) `static void test_heading_level_of_link(void **state)`
-  - `test_block_tag_total` (function, line 824) `static void test_block_tag_total(void **state)`
-  - `test_node_id_carried_by_default` (function, line 860) `static void test_node_id_carried_by_default(void **state)`
-  - `main` (function, line 873) `int main(void)`
-- Depends on: `include/box_style.h`, `include/css.h`, `include/flex_layout.h`, `include/page_view.h`, `include/render_doc.h`, `include/render_policy.h`
 
 
 Next: [KB_tests_p7.md](KB_tests_p7.md)

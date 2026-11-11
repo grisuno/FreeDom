@@ -19,6 +19,7 @@
 
 #include "quickjs.h"
 #include "js_dom_internal.h"
+#include "js_native_internal.h"
 
 /* --- XMLHttpRequest / fetch (parent-gated network; sovereignty boundary) --- */
 
@@ -318,13 +319,13 @@ static const char JD_XHR_SHIM[] =
     "    if(beacons.length===1) __G.setTimeout(function(){ var q=beacons.splice(0);"
     "      q.forEach(function(b){ try{ if(HAS_ASYNC) HFA('POST',b[0],b[1],'',function(){}); else HF('POST',b[0],b[1]); }catch(e){} }); },0);"
     "    return true; };"
-    /* the real navigator is non-extensible (anti-fp): the method goes on its own
-     * extensible prototype, never on Object.prototype */
-    "  var nav=__G.navigator, tgt=Object.isExtensible(nav)?nav:Object.getPrototypeOf(nav);"
+    /* navigator has no own properties (spec/js_native.md): the method goes on its own
+     * prototype -- the future Navigator.prototype -- never on Object.prototype */
+    "  var nav=__G.navigator, tgt=Object.getPrototypeOf(nav); if(tgt===Object.prototype) tgt=nav;"
     /* An ACCESSOR with a setter, not a data property: analytics code patches the method with
      * `navigator.sendBeacon = fn`, and a write to an inherited data property would create an
-     * own property on the non-extensible navigator (a strict-mode TypeError). The setter keeps
-     * the override in a closure -- the navigator stays non-extensible, no own key appears. */
+     * own property on navigator. The setter keeps the override in a closure -- no own key
+     * appears. */
     "  if(tgt&&tgt!==Object.prototype&&Object.isExtensible(tgt)){"
     "    var cur=sendB;"
     "    Object.defineProperty(tgt,'sendBeacon',{configurable:true,enumerable:true,"
@@ -384,8 +385,8 @@ jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
     }
     JS_FreeValue(jsctx, global);
 
-    JSValue r = JS_Eval(jsctx, JD_XHR_SHIM, sizeof JD_XHR_SHIM - 1,
-                        "<xhr-shim>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JD_XHR_SHIM, sizeof JD_XHR_SHIM - 1,
+                        "<xhr-shim>");
     int ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     return ok ? JD_OK : JD_ERR_INTERNAL;

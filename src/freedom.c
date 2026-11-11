@@ -725,6 +725,9 @@ static int render_page(const char *html, size_t len, const char *top_url,
         fprintf(stderr, "freedom: failed to open tab worker (status %d)\n", (int)ts);
         return EXIT_ERROR;
     }
+    /* The timer pump below ticks up to HL_TICK_MAX times: a tick that left the document
+     * untouched sends no view, and the page keeps the one it has (tab_page_keep_view). */
+    tab_set_lazy_ticks(t, 1);
 
     /* Unified capability model (webcaps): headless does not gate by host -- the
      * operator's --js=on / --author-css / --images ARE the trust signal. --js=on
@@ -833,6 +836,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
         if (geom_sent && page.nav_url == NULL) {
             tab_page refreshed;
             if (tab_tick(t, 0, &refreshed) == TAB_OK) {
+                tab_page_keep_view(&page, &refreshed);
                 tab_page_free(&page);
                 page = refreshed;
             }
@@ -847,6 +851,7 @@ static int render_page(const char *html, size_t len, const char *top_url,
         /* Re-lay out before the timer fires (bounded: each pass builds the whole document). */
         if (wc.net && tick < HL_GEOM_REPUBLISH_MAX) (void)hl_publish_geometry(t, &page, wc, top_url);
         if (tab_tick(t, page.next_timer_ms, &ticked) != TAB_OK) break;
+        tab_page_keep_view(&page, &ticked);
         tab_page_free(&page);
         page = ticked;
         if (hframes.host != NULL) fh_apply_top(hframes.host, &page);

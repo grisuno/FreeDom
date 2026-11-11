@@ -1,12 +1,12 @@
 # `src/tab.c`
 
-> Source: [src/tab.c:1](../../src/tab.c#L1) | language `c` | coverage 43.7% | [API index](../index.md)
+> Source: [src/tab.c:1](../../src/tab.c#L1) | language `c` | coverage 43.4% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`tab_iobuf`](#tab_iobuf), [`child_state`](#child_state), [`net_reply`](#net_reply), [`tab`](#tab), [`tab_spawned`](#tab_spawned)
 - **Type Aliases:** [`fd`](#fd)
-- **Functions:** [`replies`](#replies), [`run_js`](#run_js), [`buffer`](#buffer), [`blocks`](#blocks), [`FB_MAX_FILE_BYTES`](#fb_max_file_bytes), [`run`](#run), [`window`](#window), [`libraries`](#libraries), [`WHERE`](#where), [`content`](#content), [`once`](#once), [`swap`](#swap), [`write_full`](#write_full), [`EPIPE`](#epipe), [`tzset`](#tzset), [`depth`](#depth), [`tab_parse_worker_args`](#tab_parse_worker_args), [`tab_worker_dispatch`](#tab_worker_dispatch), [`tests`](#tests), [`layout`](#layout), [`column`](#column), [`tab_prewarm`](#tab_prewarm), [`tab_prewarmed`](#tab_prewarmed), [`tab_prewarmed_pid`](#tab_prewarmed_pid), [`tab_shutdown_spare`](#tab_shutdown_spare), [`tab_open`](#tab_open), [`tab_set_fetcher`](#tab_set_fetcher), [`tab_set_css_sink`](#tab_set_css_sink), [`tab_set_op_net_budget_ms`](#tab_set_op_net_budget_ms), [`tab_set_net_allowed`](#tab_set_net_allowed), [`tab_set_css_allowed`](#tab_set_css_allowed), [`tab_last_subreq_stats`](#tab_last_subreq_stats), [`tab_set_identity`](#tab_set_identity), [`tab_set_frame_id`](#tab_set_frame_id), [`tab_set_viewport_w`](#tab_set_viewport_w), [`tab_set_cookies`](#tab_set_cookies), [`tab_subreq_permitted`](#tab_subreq_permitted), [`tab_report_response_headers`](#tab_report_response_headers), [`tab_inflight_request_headers`](#tab_inflight_request_headers), [`tab_load`](#tab_load), [`tab_load_ex`](#tab_load_ex), [`tab_load_full`](#tab_load_full), [`tab_click`](#tab_click), [`tab_tick`](#tab_tick), [`tab_submit`](#tab_submit), [`tab_read_view`](#tab_read_view), [`frames`](#frames), [`tab_eval`](#tab_eval), [`tab_decode_image`](#tab_decode_image), [`tab_decode_image_data_url`](#tab_decode_image_data_url), [`tab_alive`](#tab_alive), [`tab_child_pid`](#tab_child_pid), [`tab_close`](#tab_close), [`tab_page_free`](#tab_page_free), [`tab_eval_result_free`](#tab_eval_result_free), [`tab_image_free`](#tab_image_free), [`tab_set_geometry`](#tab_set_geometry), [`tab_async_fd`](#tab_async_fd), [`tab_async_busy`](#tab_async_busy), [`tab_tick_async`](#tab_tick_async), [`tab_geometry_async`](#tab_geometry_async), [`tab_async_finish`](#tab_async_finish), [`tab_popstate`](#tab_popstate), [`tab_ws_event`](#tab_ws_event), [`tab_set_storage`](#tab_set_storage)
+- **Functions:** [`replies`](#replies), [`run_js`](#run_js), [`buffer`](#buffer), [`blocks`](#blocks), [`FB_MAX_FILE_BYTES`](#fb_max_file_bytes), [`run`](#run), [`window`](#window), [`does`](#does), [`libraries`](#libraries), [`WHERE`](#where), [`content`](#content), [`once`](#once), [`swap`](#swap), [`write_full`](#write_full), [`EPIPE`](#epipe), [`tzset`](#tzset), [`depth`](#depth), [`tab_parse_worker_args`](#tab_parse_worker_args), [`tab_worker_dispatch`](#tab_worker_dispatch), [`tests`](#tests), [`layout`](#layout), [`column`](#column), [`tab_prewarm`](#tab_prewarm), [`tab_prewarmed`](#tab_prewarmed), [`tab_prewarmed_pid`](#tab_prewarmed_pid), [`tab_shutdown_spare`](#tab_shutdown_spare), [`tab_open`](#tab_open), [`tab_set_fetcher`](#tab_set_fetcher), [`tab_set_css_sink`](#tab_set_css_sink), [`tab_set_op_net_budget_ms`](#tab_set_op_net_budget_ms), [`tab_set_net_allowed`](#tab_set_net_allowed), [`tab_set_lazy_ticks`](#tab_set_lazy_ticks), [`tab_page_keep_view`](#tab_page_keep_view), [`tab_set_css_allowed`](#tab_set_css_allowed), [`tab_last_subreq_stats`](#tab_last_subreq_stats), [`tab_set_identity`](#tab_set_identity), [`tab_set_frame_id`](#tab_set_frame_id), [`tab_set_viewport_w`](#tab_set_viewport_w), [`tab_set_cookies`](#tab_set_cookies), [`tab_subreq_permitted`](#tab_subreq_permitted), [`tab_report_response_headers`](#tab_report_response_headers), [`tab_inflight_request_headers`](#tab_inflight_request_headers), [`tab_load`](#tab_load), [`tab_load_ex`](#tab_load_ex), [`tab_load_full`](#tab_load_full), [`tab_click`](#tab_click), [`tab_tick`](#tab_tick), [`tab_submit`](#tab_submit), [`tab_read_view`](#tab_read_view), [`frames`](#frames), [`tab_eval`](#tab_eval), [`tab_decode_image`](#tab_decode_image), [`tab_decode_image_data_url`](#tab_decode_image_data_url), [`tab_alive`](#tab_alive), [`tab_child_pid`](#tab_child_pid), [`tab_close`](#tab_close), [`tab_page_free`](#tab_page_free), [`tab_eval_result_free`](#tab_eval_result_free), [`tab_image_free`](#tab_image_free), [`tab_set_geometry`](#tab_set_geometry), [`tab_async_fd`](#tab_async_fd), [`tab_async_busy`](#tab_async_busy), [`tab_tick_async`](#tab_tick_async), [`tab_geometry_async`](#tab_geometry_async), [`tab_async_finish`](#tab_async_finish), [`tab_popstate`](#tab_popstate), [`tab_ws_event`](#tab_ws_event), [`tab_set_storage`](#tab_set_storage)
 - **Macros:** [`_GNU_SOURCE`](#_gnu_source), [`TAB_IOBUF_BYTES`](#tab_iobuf_bytes), [`write_full`](#write_full), [`read_full`](#read_full), [`TAB_SCREEN_W`](#tab_screen_w), [`TAB_WIRE_HEAD_N`](#tab_wire_head_n), [`TAB_WIRE_A_N`](#tab_wire_a_n), [`TAB_WIRE_B_N`](#tab_wire_b_n), [`TAB_WIRE_BOX_F_N`](#tab_wire_box_f_n), [`TAB_WIRE_GRID_N`](#tab_wire_grid_n), [`TAB_MAX_RUNS`](#tab_max_runs), [`PV_MAX_CONTAINERS_WIRE`](#pv_max_containers_wire), [`TAB_MAX_URL`](#tab_max_url), [`TAB_MAX_WS_MSG`](#tab_max_ws_msg), [`TAB_MAX_STORAGE`](#tab_max_storage), [`TAB_MAX_HIST_OPS`](#tab_max_hist_ops), [`TAB_MAX_HIST_BYTES`](#tab_max_hist_bytes), [`TAB_MAX_OPENS`](#tab_max_opens), [`TAB_MAX_OPEN_BYTES`](#tab_max_open_bytes), [`TAB_MAX_GEOM_WORDS`](#tab_max_geom_words), [`TAB_MAX_ASYNC_PENDING`](#tab_max_async_pending), [`TAB_MAX_NET_ROUNDS`](#tab_max_net_rounds), [`TAB_ASYNC_THREADS`](#tab_async_threads), [`TAB_MAX_BATCH_BYTES`](#tab_max_batch_bytes), [`TAB_MAX_SUBREQ`](#tab_max_subreq), [`TAB_MAX_SUBRESOURCE`](#tab_max_subresource), [`TAB_MAX_JS_JOBS`](#tab_max_js_jobs), [`TAB_MAX_EXTERN_CSS`](#tab_max_extern_css)
 
 ## Type Diagram
@@ -41,7 +41,7 @@ flowchart LR
     n_src_tab_c__replies(["replies"])
     n_src_tab_c__write_full(["write_full"])
     n_src_tab_c__FB_MAX_FILE_BYTES(["FB_MAX_FILE_BYTES"])
-    n_src_tab_c__write_full_1857(["write_full"])
+    n_src_tab_c__write_full_1882(["write_full"])
     n_src_tab_c__tab_worker_dispatch(["tab_worker_dispatch"])
     n_src_tab_c__tab_parse_worker_args(["tab_parse_worker_args"])
     n_src_tab_c__tab_load(["tab_load"])
@@ -58,6 +58,7 @@ flowchart LR
     n_src_html_parse_c__hp_config_default["html_parse.hp_config_default"]
     n_src_html_parse_c__hp_parse["html_parse.hp_parse"]
     n_src_js_dom_c__jd_install["js_dom.jd_install"]
+    n_src_js_native_c__jn_seal["js_native.jn_seal"]
     n_src_js_sandbox_c__js_context_new["js_sandbox.js_context_new"]
     n_include_freebug_h__fb_buffer_at["freebug.fb_buffer_at"]
     n_include_freebug_h__fb_buffer_count["freebug.fb_buffer_count"]
@@ -65,10 +66,9 @@ flowchart LR
     n_include_dom_h__dom_get_attribute["dom.dom_get_attribute"]
     n_include_page_view_h__pv_at["page_view.pv_at"]
     n_include_page_view_h__pv_count["page_view.pv_count"]
-    n_src_dom_c__dom_get_by_tag["dom.dom_get_by_tag"]
     n_src_tab_c__replies --> n_src_tab_c__write_full
     n_src_tab_c__FB_MAX_FILE_BYTES --> n_src_tab_c__write_full
-    n_src_tab_c__write_full_1857 --> n_src_tab_c__write_full
+    n_src_tab_c__write_full_1882 --> n_src_tab_c__write_full
     n_src_tab_c__tab_worker_dispatch --> n_src_tab_c__tab_parse_worker_args
     n_src_tab_c__tab_load --> n_src_tab_c__tab_load_ex
     n_src_tab_c__tab_load_ex --> n_src_tab_c__tab_load_full
@@ -83,13 +83,13 @@ flowchart LR
     n_src_tab_c__run_js -.-> n_src_html_parse_c__hp_config_default
     n_src_tab_c__run_js -.-> n_src_html_parse_c__hp_parse
     n_src_tab_c__run_js -.-> n_src_js_dom_c__jd_install
+    n_src_tab_c__run_js -.-> n_src_js_native_c__jn_seal
     n_src_tab_c__run_js -.-> n_src_js_sandbox_c__js_context_new
     n_src_tab_c__FB_MAX_FILE_BYTES -.-> n_include_freebug_h__fb_buffer_at
     n_src_tab_c__FB_MAX_FILE_BYTES -.-> n_include_freebug_h__fb_buffer_count
     n_src_tab_c__run -.-> n_include_dom_h__dom_get_attribute
     n_src_tab_c__run -.-> n_include_page_view_h__pv_at
     n_src_tab_c__run -.-> n_include_page_view_h__pv_count
-    n_src_tab_c__run -.-> n_src_dom_c__dom_get_by_tag
 ```
 
 ## Structs
@@ -98,7 +98,7 @@ flowchart LR
 
 ### `tab_iobuf`
 
-`struct` | [src/tab.c:59](../../src/tab.c#L59)
+`struct` | [src/tab.c:60](../../src/tab.c#L60)
 
 ```c
 typedef struct tab_iobuf
@@ -114,7 +114,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 ### `child_state`
 
-`struct` | [src/tab.c:225](../../src/tab.c#L225)
+`struct` | [src/tab.c:231](../../src/tab.c#L231)
 
 ```c
 typedef struct child_state
@@ -130,7 +130,7 @@ typedef struct child_state
 
 #### `child_state.unchanged`
 
-`method` | [src/tab.c:254](../../src/tab.c#L254)
+`method` | [src/tab.c:264](../../src/tab.c#L264)
 
 ```c
 * is unchanged (spec/sheet_cache.md);
@@ -150,7 +150,7 @@ typedef struct child_state
 
 ### `net_reply`
 
-`struct` | [src/tab.c:403](../../src/tab.c#L403)
+`struct` | [src/tab.c:414](../../src/tab.c#L414)
 
 ```c
 typedef struct net_reply
@@ -170,7 +170,7 @@ An XHR/fetch from page script is proxied to the TRUSTED parent over the existing
 
 #### `net_reply.status`
 
-`type_alias` | [src/tab.c:403](../../src/tab.c#L403)
+`type_alias` | [src/tab.c:414](../../src/tab.c#L414)
 
 ```c
 typedef struct net_reply { int32_t status;
@@ -186,7 +186,7 @@ An XHR/fetch from page script is proxied to the TRUSTED parent over the existing
 
 ### `tab`
 
-`struct` | [src/tab.c:2553](../../src/tab.c#L2553)
+`struct` | [src/tab.c:2602](../../src/tab.c#L2602)
 
 ```c
 struct tab
@@ -202,7 +202,7 @@ struct tab
 
 #### `tab.load`
 
-`method` | [src/tab.c:2560](../../src/tab.c#L2560)
+`method` | [src/tab.c:2609](../../src/tab.c#L2609)
 
 ```c
 * subresource requests this load (set per page: host in allow.conf AND js.conf);
@@ -222,7 +222,7 @@ struct tab
 
 ### `tab_spawned`
 
-`struct` | [src/tab.c:3273](../../src/tab.c#L3273)
+`struct` | [src/tab.c:3326](../../src/tab.c#L3326)
 
 ```c
 typedef struct
@@ -238,7 +238,7 @@ An idle worker waiting for the next tab_open (spec/tab.md "Worker de repuesto").
 
 ### `fd`
 
-`type_alias` | [src/tab.c:59](../../src/tab.c#L59)
+`type_alias` | [src/tab.c:60](../../src/tab.c#L60)
 
 ```c
 typedef struct tab_iobuf { int fd;
@@ -256,7 +256,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 ### `replies`
 
-`function` | [src/tab.c:496](../../src/tab.c#L496)
+`function` | [src/tab.c:507](../../src/tab.c#L507)
 
 ```c
 * writing replies (no pipe deadlock). */ static void child_net_drain(child_state *cs)
@@ -278,7 +278,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 ### `run_js`
 
-`function` | [src/tab.c:541](../../src/tab.c#L541)
+`function` | [src/tab.c:552](../../src/tab.c#L552)
 
 ```c
 * regardless of run_js (a no-JS load simply never records a request). */ /* Installs the page-ind...
@@ -292,7 +292,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 **Returns:** `* regardless of`
 
-*Calls:* [`dom_free`](include.dom.h.md#dom_free), [`hp_document_free`](include.html_parse.h.md#hp_document_free), [`js_context_free`](include.js_sandbox.h.md#js_context_free), [`dom_build`](src.dom.c.md#dom_build), [`hp_config_default`](src.html_parse.c.md#hp_config_default), [`hp_parse`](src.html_parse.c.md#hp_parse), [`jd_install`](src.js_dom.c.md#jd_install), [`js_context_new`](src.js_sandbox.c.md#js_context_new)
+*Calls:* [`dom_free`](include.dom.h.md#dom_free), [`hp_document_free`](include.html_parse.h.md#hp_document_free), [`js_context_free`](include.js_sandbox.h.md#js_context_free), [`dom_build`](src.dom.c.md#dom_build), [`hp_config_default`](src.html_parse.c.md#hp_config_default), [`hp_parse`](src.html_parse.c.md#hp_parse), [`jd_install`](src.js_dom.c.md#jd_install), [`jn_seal`](src.js_native.c.md#jn_seal), [`js_context_new`](src.js_sandbox.c.md#js_context_new)
 
 ---
 
@@ -300,7 +300,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 ### `buffer`
 
-`function` | [src/tab.c:633](../../src/tab.c#L633)
+`function` | [src/tab.c:647](../../src/tab.c#L647)
 
 ```c
 * the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of run_js so the REPL works on any page. */ fb_buffer_reset(&cs->log);
@@ -320,7 +320,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 ### `blocks`
 
-`function` | [src/tab.c:698](../../src/tab.c#L698)
+`function` | [src/tab.c:717](../../src/tab.c#L717)
 
 ```c
 * * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the * grid array, block B[26]) exactly like the box-def f[] array, NOT one write_full per * field: the block literal li
@@ -343,7 +343,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 ### `FB_MAX_FILE_BYTES`
 
-`function` | [src/tab.c:1150](../../src/tab.c#L1150)
+`function` | [src/tab.c:1169](../../src/tab.c#L1169)
 
 ```c
 * FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify * the stream. ...
@@ -371,7 +371,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `run`
 
-`function` | [src/tab.c:1229](../../src/tab.c#L1229)
+`function` | [src/tab.c:1248](../../src/tab.c#L1248)
 
 ```c
 * already contains a PV_VIDEO run (avoids duplicates on repeated injection). * Call after every ...
@@ -393,7 +393,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `window`
 
-`function` | [src/tab.c:1358](../../src/tab.c#L1358)
+`function` | [src/tab.c:1377](../../src/tab.c#L1377)
 
 ```c
 * net window (cs->net_active). */ static void child_fetch_stylesheets(child_state *cs)
@@ -411,11 +411,31 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ---
 
+<a id="does"></a>
+
+### `does`
+
+`function` | [src/tab.c:1552](../../src/tab.c#L1552)
+
+```c
+* native browser does (spec/js_native.md). Best effort -- an unsealed page still runs. */ (void)jn_seal(cs->js);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `md` | `spec/js_native.` |  |  |
+
+**Returns:** `* browser`
+
+---
+
 <a id="libraries"></a>
 
 ### `libraries`
 
-`function` | [src/tab.c:1546](../../src/tab.c#L1546)
+`function` | [src/tab.c:1569](../../src/tab.c#L1569)
 
 ```c
 * load heavier libraries (jQuery, Bootstrap, etc.) that need more time. * Untrusted hosts get the default budget (1s) to limit abuse. */ prof_lap("js-enable", &ph);
@@ -435,7 +455,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `WHERE`
 
-`function` | [src/tab.c:1711](../../src/tab.c#L1711)
+`function` | [src/tab.c:1734](../../src/tab.c#L1734)
 
 ```c
 * the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value != NULL) fb_buffer_push_loc(&cs->log, FB_ERROR, r.value, r.value_len, r.file != NUL
@@ -455,7 +475,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `content`
 
-`function` | [src/tab.c:1776](../../src/tab.c#L1776)
+`function` | [src/tab.c:1799](../../src/tab.c#L1799)
 
 ```c
 * content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video> elements in the DOM for any * found. */ if (cs->idx != NULL) jd_process_iframes(cs->js, cs
@@ -475,7 +495,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `once`
 
-`function` | [src/tab.c:1827](../../src/tab.c#L1827)
+`function` | [src/tab.c:1852](../../src/tab.c#L1852)
 
 ```c
 * ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);
@@ -495,7 +515,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `swap`
 
-`function` | [src/tab.c:1836](../../src/tab.c#L1836)
+`function` | [src/tab.c:1861](../../src/tab.c#L1861)
 
 ```c
 * display:none hiding an element via class swap (CSS, not * DOM removal). */ if (ok && v...
@@ -517,7 +537,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `write_full`
 
-`function` | [src/tab.c:1857](../../src/tab.c#L1857)
+`function` | [src/tab.c:1882](../../src/tab.c#L1882)
 
 ```c
 && write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 || write_full(wfd, text, xl) == 0) && write_view(wfd, write_which) == 0 && write_full(wfd, &nlen, sizeof nlen) == 0 && (nlen == 0 || write_full(wfd,
@@ -540,7 +560,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `EPIPE`
 
-`function` | [src/tab.c:2290](../../src/tab.c#L2290)
+`function` | [src/tab.c:2338](../../src/tab.c#L2338)
 
 ```c
 * surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();
@@ -560,7 +580,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `tzset`
 
-`function` | [src/tab.c:2306](../../src/tab.c#L2306)
+`function` | [src/tab.c:2354](../../src/tab.c#L2354)
 
 ```c
 * tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);
@@ -574,7 +594,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `depth`
 
-`function` | [src/tab.c:2320](../../src/tab.c#L2320)
+`function` | [src/tab.c:2368](../../src/tab.c#L2368)
 
 ```c
 * defense in depth (seccomp already excludes open/socket/exec);
@@ -596,7 +616,7 @@ It is not counted against FB_MAX_TOTAL_BYTES: entries are capped, so total file 
 
 ### `tab_parse_worker_args`
 
-`function` | [src/tab.c:2533](../../src/tab.c#L2533)
+`function` | [src/tab.c:2582](../../src/tab.c#L2582)
 
 ```c
 int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)
@@ -617,7 +637,7 @@ No side effects; fail-closed (any malformation => 0).
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`tab_parse_worker_args`](#tab_parse_worker_args) (include/tab.h:168).
+> **Inherited:** Documentation from [`tab_parse_worker_args`](#tab_parse_worker_args) (include/tab.h:172).
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
@@ -629,7 +649,7 @@ No side effects; fail-closed (any malformation => 0).
 
 ### `tab_worker_dispatch`
 
-`function` | [src/tab.c:2543](../../src/tab.c#L2543)
+`function` | [src/tab.c:2592](../../src/tab.c#L2592)
 
 ```c
 void tab_worker_dispatch(int argc, char **argv)
@@ -650,7 +670,7 @@ void tab_worker_dispatch(int argc, char **argv)
 
 ### `tests`
 
-`function` | [src/tab.c:2726](../../src/tab.c#L2726)
+`function` | [src/tab.c:2779](../../src/tab.c#L2779)
 
 ```c
 * here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed green. */ st = pv_append_image(v, heading, brk, text, (src != NULL) ? src : "", img_w,
@@ -670,7 +690,7 @@ void tab_worker_dispatch(int argc, char **argv)
 
 ### `layout`
 
-`function` | [src/tab.c:2839](../../src/tab.c#L2839)
+`function` | [src/tab.c:2892](../../src/tab.c#L2892)
 
 ```c
 * only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property. */ pv_set_box_pct(v, (int)bwpct, (int)b[36], (int)b[37], (int)b[38], (int)b[39]);
@@ -684,7 +704,7 @@ void tab_worker_dispatch(int argc, char **argv)
 
 ### `column`
 
-`function` | [src/tab.c:2850](../../src/tab.c#L2850)
+`function` | [src/tab.c:2903](../../src/tab.c#L2903)
 
 ```c
 * a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation as text runs. */ pv_set_container(v, (int)cid, (int)cdisp, (int)cgap, (int)cjust, (in
@@ -704,7 +724,7 @@ void tab_worker_dispatch(int argc, char **argv)
 
 ### `tab_prewarm`
 
-`function` | [src/tab.c:3346](../../src/tab.c#L3346)
+`function` | [src/tab.c:3399](../../src/tab.c#L3399)
 
 ```c
 void tab_prewarm(void)
@@ -714,7 +734,7 @@ Starts one idle, confined worker in advance so the next tab_open does not wait f
 
 Idempotent; best-effort (a failed spawn just means tab_open spawns on demand). The spare has received no content.
 
-> **Inherited:** Documentation from [`tab_prewarm`](#tab_prewarm) (include/tab.h:177).
+> **Inherited:** Documentation from [`tab_prewarm`](#tab_prewarm) (include/tab.h:181).
 
 ---
 
@@ -722,7 +742,7 @@ Idempotent; best-effort (a failed spawn just means tab_open spawns on demand). T
 
 ### `tab_prewarmed`
 
-`function` | [src/tab.c:3352](../../src/tab.c#L3352)
+`function` | [src/tab.c:3405](../../src/tab.c#L3405)
 
 ```c
 int tab_prewarmed(void)
@@ -732,7 +752,7 @@ int tab_prewarmed(void)
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`tab_prewarmed`](#tab_prewarmed) (include/tab.h:180).
+> **Inherited:** Documentation from [`tab_prewarmed`](#tab_prewarmed) (include/tab.h:184).
 
 ---
 
@@ -740,7 +760,7 @@ int tab_prewarmed(void)
 
 ### `tab_prewarmed_pid`
 
-`function` | [src/tab.c:3359](../../src/tab.c#L3359)
+`function` | [src/tab.c:3412](../../src/tab.c#L3412)
 
 ```c
 int tab_prewarmed_pid(void)
@@ -750,7 +770,7 @@ Process id of that spare, 0 when there is none (diagnostics and tests).
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`tab_prewarmed_pid`](#tab_prewarmed_pid) (include/tab.h:183).
+> **Inherited:** Documentation from [`tab_prewarmed_pid`](#tab_prewarmed_pid) (include/tab.h:187).
 
 ---
 
@@ -758,7 +778,7 @@ Process id of that spare, 0 when there is none (diagnostics and tests).
 
 ### `tab_shutdown_spare`
 
-`function` | [src/tab.c:3366](../../src/tab.c#L3366)
+`function` | [src/tab.c:3419](../../src/tab.c#L3419)
 
 ```c
 void tab_shutdown_spare(void)
@@ -768,7 +788,7 @@ Kills and reaps the spare, if any.
 
 Safe to call when there is none.
 
-> **Inherited:** Documentation from [`tab_shutdown_spare`](#tab_shutdown_spare) (include/tab.h:186).
+> **Inherited:** Documentation from [`tab_shutdown_spare`](#tab_shutdown_spare) (include/tab.h:190).
 
 ---
 
@@ -776,7 +796,7 @@ Safe to call when there is none.
 
 ### `tab_open`
 
-`function` | [src/tab.c:3375](../../src/tab.c#L3375)
+`function` | [src/tab.c:3428](../../src/tab.c#L3428)
 
 ```c
 tab_status tab_open(tab **out)
@@ -796,7 +816,7 @@ tab_status tab_open(tab **out)
 
 ### `tab_set_fetcher`
 
-`function` | [src/tab.c:3398](../../src/tab.c#L3398)
+`function` | [src/tab.c:3451](../../src/tab.c#L3451)
 
 ```c
 void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)
@@ -812,7 +832,7 @@ Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests ar
 | `fn` | `tab_fetch_fn` |  |  |
 | `ctx` | `void *` |  |  |
 
-> **Inherited:** Documentation from [`tab_set_fetcher`](#tab_set_fetcher) (include/tab.h:205).
+> **Inherited:** Documentation from [`tab_set_fetcher`](#tab_set_fetcher) (include/tab.h:209).
 
 ---
 
@@ -820,7 +840,7 @@ Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests ar
 
 ### `tab_set_css_sink`
 
-`function` | [src/tab.c:3404](../../src/tab.c#L3404)
+`function` | [src/tab.c:3457](../../src/tab.c#L3457)
 
 ```c
 void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)
@@ -840,7 +860,7 @@ void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)
 
 ### `tab_set_op_net_budget_ms`
 
-`function` | [src/tab.c:3410](../../src/tab.c#L3410)
+`function` | [src/tab.c:3463](../../src/tab.c#L3463)
 
 ```c
 void tab_set_op_net_budget_ms(tab *t, int ms)
@@ -857,7 +877,7 @@ Tests lower it.
 | `t` | `tab *` |  |  |
 | `ms` | `int` |  |  |
 
-> **Inherited:** Documentation from [`tab_set_op_net_budget_ms`](#tab_set_op_net_budget_ms) (include/tab.h:237).
+> **Inherited:** Documentation from [`tab_set_op_net_budget_ms`](#tab_set_op_net_budget_ms) (include/tab.h:252).
 
 ---
 
@@ -865,7 +885,7 @@ Tests lower it.
 
 ### `tab_set_net_allowed`
 
-`function` | [src/tab.c:3414](../../src/tab.c#L3414)
+`function` | [src/tab.c:3467](../../src/tab.c#L3467)
 
 ```c
 void tab_set_net_allowed(tab *t, int allowed)
@@ -882,7 +902,53 @@ Set it true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sov
 | `t` | `tab *` |  |  |
 | `allowed` | `int` |  |  |
 
-> **Inherited:** Documentation from [`tab_set_net_allowed`](#tab_set_net_allowed) (include/tab.h:233).
+> **Inherited:** Documentation from [`tab_set_net_allowed`](#tab_set_net_allowed) (include/tab.h:237).
+
+---
+
+<a id="tab_set_lazy_ticks"></a>
+
+### `tab_set_lazy_ticks`
+
+`function` | [src/tab.c:3472](../../src/tab.c#L3472)
+
+```c
+void tab_set_lazy_ticks(tab *t, int on)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `t` | `tab *` |  |  |
+| `on` | `int` |  |  |
+
+---
+
+<a id="tab_page_keep_view"></a>
+
+### `tab_page_keep_view`
+
+`function` | [src/tab.c:3477](../../src/tab.c#L3477)
+
+```c
+void tab_page_keep_view(tab_page *prev, tab_page *next)
+```
+
+For a caller that replaces its page with each tick's: when `next` is unchanged, moves the title, text and view of `prev` into it (prev keeps none).
+
+No-op otherwise or on NULL.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `prev` | `tab_page *` |  |  |
+| `next` | `tab_page *` |  |  |
+
+> **Inherited:** Documentation from [`tab_page_keep_view`](#tab_page_keep_view) (include/tab.h:248).
+
+*Calls:* [`pv_free`](include.page_view.h.md#pv_free)
 
 ---
 
@@ -890,7 +956,7 @@ Set it true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sov
 
 ### `tab_set_css_allowed`
 
-`function` | [src/tab.c:3419](../../src/tab.c#L3419)
+`function` | [src/tab.c:3488](../../src/tab.c#L3488)
 
 ```c
 void tab_set_css_allowed(tab *t, int allowed)
@@ -909,7 +975,7 @@ void tab_set_css_allowed(tab *t, int allowed)
 
 ### `tab_last_subreq_stats`
 
-`function` | [src/tab.c:3424](../../src/tab.c#L3424)
+`function` | [src/tab.c:3493](../../src/tab.c#L3493)
 
 ```c
 void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)
@@ -927,7 +993,7 @@ A diagnostic (FREEDOM_PERF): it separates "the page's JS is slow" from "the page
 | `count` | `size_t *` |  |  |
 | `total_us` | `uint64_t *` |  |  |
 
-> **Inherited:** Documentation from [`tab_last_subreq_stats`](#tab_last_subreq_stats) (include/tab.h:294).
+> **Inherited:** Documentation from [`tab_last_subreq_stats`](#tab_last_subreq_stats) (include/tab.h:309).
 
 ---
 
@@ -935,7 +1001,7 @@ A diagnostic (FREEDOM_PERF): it separates "the page's JS is slow" from "the page
 
 ### `tab_set_identity`
 
-`function` | [src/tab.c:3429](../../src/tab.c#L3429)
+`function` | [src/tab.c:3498](../../src/tab.c#L3498)
 
 ```c
 void tab_set_identity(tab *t, const char *serialized)
@@ -952,7 +1018,7 @@ The user's identity override (idn_serialize text, spec/identity.md) for the NEXT
 | `t` | `tab *` |  |  |
 | `serialized` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`tab_set_identity`](#tab_set_identity) (include/tab.h:288).
+> **Inherited:** Documentation from [`tab_set_identity`](#tab_set_identity) (include/tab.h:303).
 
 ---
 
@@ -960,7 +1026,7 @@ The user's identity override (idn_serialize text, spec/identity.md) for the NEXT
 
 ### `tab_set_frame_id`
 
-`function` | [src/tab.c:3437](../../src/tab.c#L3437)
+`function` | [src/tab.c:3506](../../src/tab.c#L3506)
 
 ```c
 void tab_set_frame_id(tab *t, int id)
@@ -979,7 +1045,7 @@ void tab_set_frame_id(tab *t, int id)
 
 ### `tab_set_viewport_w`
 
-`function` | [src/tab.c:3442](../../src/tab.c#L3442)
+`function` | [src/tab.c:3511](../../src/tab.c#L3511)
 
 ```c
 void tab_set_viewport_w(tab *t, int px)
@@ -996,7 +1062,7 @@ Only the @media width query sees it; viewport UNITS (vw/vh) still resolve agains
 | `t` | `tab *` |  |  |
 | `px` | `int` |  |  |
 
-> **Inherited:** Documentation from [`tab_set_viewport_w`](#tab_set_viewport_w) (include/tab.h:278).
+> **Inherited:** Documentation from [`tab_set_viewport_w`](#tab_set_viewport_w) (include/tab.h:293).
 
 ---
 
@@ -1004,7 +1070,7 @@ Only the @media width query sees it; viewport UNITS (vw/vh) still resolve agains
 
 ### `tab_set_cookies`
 
-`function` | [src/tab.c:3447](../../src/tab.c#L3447)
+`function` | [src/tab.c:3516](../../src/tab.c#L3516)
 
 ```c
 void tab_set_cookies(tab *t, const char *cookies)
@@ -1021,7 +1087,7 @@ Only meaningful for a trusted host (allow.conf AND js.conf); pass NULL/"" otherw
 | `t` | `tab *` |  |  |
 | `cookies` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`tab_set_cookies`](#tab_set_cookies) (include/tab.h:259).
+> **Inherited:** Documentation from [`tab_set_cookies`](#tab_set_cookies) (include/tab.h:274).
 
 ---
 
@@ -1029,7 +1095,7 @@ Only meaningful for a trusted host (allow.conf AND js.conf); pass NULL/"" otherw
 
 ### `tab_subreq_permitted`
 
-`function` | [src/tab.c:3453](../../src/tab.c#L3453)
+`function` | [src/tab.c:3522](../../src/tab.c#L3522)
 
 ```c
 int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)
@@ -1047,7 +1113,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`tab_subreq_permitted`](#tab_subreq_permitted) (include/tab.h:299).
+> **Inherited:** Documentation from [`tab_subreq_permitted`](#tab_subreq_permitted) (include/tab.h:314).
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
@@ -1057,7 +1123,7 @@ Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants 
 
 ### `tab_report_response_headers`
 
-`function` | [src/tab.c:3467](../../src/tab.c#L3467)
+`function` | [src/tab.c:3536](../../src/tab.c#L3536)
 
 ```c
 void tab_report_response_headers(const char *lines)
@@ -1073,7 +1139,7 @@ Copied (bounded); the fetcher keeps ownership of `lines`. Outside a fetcher call
 |---|---|---|---|
 | `lines` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`tab_report_response_headers`](#tab_report_response_headers) (include/tab.h:215).
+> **Inherited:** Documentation from [`tab_report_response_headers`](#tab_report_response_headers) (include/tab.h:219).
 
 ---
 
@@ -1081,7 +1147,7 @@ Copied (bounded); the fetcher keeps ownership of `lines`. Outside a fetcher call
 
 ### `tab_inflight_request_headers`
 
-`function` `const` | [src/tab.c:3479](../../src/tab.c#L3479)
+`function` `const` | [src/tab.c:3548](../../src/tab.c#L3548)
 
 ```c
 const char *tab_inflight_request_headers(void)
@@ -1093,7 +1159,7 @@ Valid only for the duration of that call, on the calling thread; NULL anywhere e
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`tab_inflight_request_headers`](#tab_inflight_request_headers) (include/tab.h:210).
+> **Inherited:** Documentation from [`tab_inflight_request_headers`](#tab_inflight_request_headers) (include/tab.h:214).
 
 ---
 
@@ -1101,7 +1167,7 @@ Valid only for the duration of that call, on the calling thread; NULL anywhere e
 
 ### `tab_load`
 
-`function` | [src/tab.c:3861](../../src/tab.c#L3861)
+`function` | [src/tab.c:3930](../../src/tab.c#L3930)
 
 ```c
 tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)
@@ -1126,7 +1192,7 @@ tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)
 
 ### `tab_load_ex`
 
-`function` | [src/tab.c:3865](../../src/tab.c#L3865)
+`function` | [src/tab.c:3934](../../src/tab.c#L3934)
 
 ```c
 tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)
@@ -1154,7 +1220,7 @@ tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_pag
 
 ### `tab_load_full`
 
-`function` | [src/tab.c:3869](../../src/tab.c#L3869)
+`function` | [src/tab.c:3938](../../src/tab.c#L3938)
 
 ```c
 tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url, int run_js, int reader, int prefers_dark, tab_page *out)
@@ -1185,7 +1251,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
 
 ### `tab_click`
 
-`function` | [src/tab.c:4070](../../src/tab.c#L4070)
+`function` | [src/tab.c:4143](../../src/tab.c#L4143)
 
 ```c
 tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)
@@ -1207,7 +1273,7 @@ tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)
 
 ### `tab_tick`
 
-`function` | [src/tab.c:4078](../../src/tab.c#L4078)
+`function` | [src/tab.c:4151](../../src/tab.c#L4151)
 
 ```c
 tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)
@@ -1231,7 +1297,7 @@ tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)
 
 ### `tab_submit`
 
-`function` | [src/tab.c:4088](../../src/tab.c#L4088)
+`function` | [src/tab.c:4161](../../src/tab.c#L4161)
 
 ```c
 tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)
@@ -1257,7 +1323,7 @@ Simple response: [TAG_RESULT][ok:int32][prevented:int32]. No view re-derivation.
 
 ### `tab_read_view`
 
-`function` | [src/tab.c:4196](../../src/tab.c#L4196)
+`function` | [src/tab.c:4269](../../src/tab.c#L4269)
 
 ```c
 tab_status tab_read_view(tab *t, tab_page *out)
@@ -1282,7 +1348,7 @@ Used by tab_mutation_request, tab_subreq, tab_dispatch_event.
 
 ### `frames`
 
-`function` | [src/tab.c:4202](../../src/tab.c#L4202)
+`function` | [src/tab.c:4275](../../src/tab.c#L4275)
 
 ```c
 * TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of the page, never the stylesheet grant. Anything else is a desync. */ static tab_status
@@ -1302,7 +1368,7 @@ Used by tab_mutation_request, tab_subreq, tab_dispatch_event.
 
 ### `tab_eval`
 
-`function` | [src/tab.c:4317](../../src/tab.c#L4317)
+`function` | [src/tab.c:4400](../../src/tab.c#L4400)
 
 ```c
 tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)
@@ -1325,7 +1391,7 @@ tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)
 
 ### `tab_decode_image`
 
-`function` | [src/tab.c:4405](../../src/tab.c#L4405)
+`function` | [src/tab.c:4488](../../src/tab.c#L4488)
 
 ```c
 tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)
@@ -1348,7 +1414,7 @@ tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image 
 
 ### `tab_decode_image_data_url`
 
-`function` | [src/tab.c:4412](../../src/tab.c#L4412)
+`function` | [src/tab.c:4495](../../src/tab.c#L4495)
 
 ```c
 tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)
@@ -1370,7 +1436,7 @@ tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *ou
 
 ### `tab_alive`
 
-`function` | [src/tab.c:4426](../../src/tab.c#L4426)
+`function` | [src/tab.c:4509](../../src/tab.c#L4509)
 
 ```c
 int tab_alive(const tab *t)
@@ -1386,7 +1452,7 @@ Nonzero while the worker process is believed alive.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`tab_alive`](#tab_alive) (include/tab.h:415).
+> **Inherited:** Documentation from [`tab_alive`](#tab_alive) (include/tab.h:430).
 
 ---
 
@@ -1394,7 +1460,7 @@ Nonzero while the worker process is believed alive.
 
 ### `tab_child_pid`
 
-`function` | [src/tab.c:4432](../../src/tab.c#L4432)
+`function` | [src/tab.c:4515](../../src/tab.c#L4515)
 
 ```c
 pid_t tab_child_pid(const tab *t)
@@ -1410,7 +1476,7 @@ The worker's process id (for monitoring), or -1.
 
 **Returns:** `pid_t`
 
-> **Inherited:** Documentation from [`tab_child_pid`](#tab_child_pid) (include/tab.h:418).
+> **Inherited:** Documentation from [`tab_child_pid`](#tab_child_pid) (include/tab.h:433).
 
 ---
 
@@ -1418,7 +1484,7 @@ The worker's process id (for monitoring), or -1.
 
 ### `tab_close`
 
-`function` | [src/tab.c:4436](../../src/tab.c#L4436)
+`function` | [src/tab.c:4519](../../src/tab.c#L4519)
 
 ```c
 void tab_close(tab *t)
@@ -1434,7 +1500,7 @@ Safe on NULL.
 |---|---|---|---|
 | `t` | `tab *` |  |  |
 
-> **Inherited:** Documentation from [`tab_close`](#tab_close) (include/tab.h:421).
+> **Inherited:** Documentation from [`tab_close`](#tab_close) (include/tab.h:436).
 
 ---
 
@@ -1442,7 +1508,7 @@ Safe on NULL.
 
 ### `tab_page_free`
 
-`function` | [src/tab.c:4454](../../src/tab.c#L4454)
+`function` | [src/tab.c:4537](../../src/tab.c#L4537)
 
 ```c
 void tab_page_free(tab_page *p)
@@ -1458,7 +1524,7 @@ Safe on NULL / zeroed structs.
 |---|---|---|---|
 | `p` | `tab_page *` |  |  |
 
-> **Inherited:** Documentation from [`tab_page_free`](#tab_page_free) (include/tab.h:424).
+> **Inherited:** Documentation from [`tab_page_free`](#tab_page_free) (include/tab.h:439).
 
 ---
 
@@ -1466,7 +1532,7 @@ Safe on NULL / zeroed structs.
 
 ### `tab_eval_result_free`
 
-`function` | [src/tab.c:4484](../../src/tab.c#L4484)
+`function` | [src/tab.c:4567](../../src/tab.c#L4567)
 
 ```c
 void tab_eval_result_free(tab_eval_result *r)
@@ -1484,7 +1550,7 @@ void tab_eval_result_free(tab_eval_result *r)
 
 ### `tab_image_free`
 
-`function` | [src/tab.c:4493](../../src/tab.c#L4493)
+`function` | [src/tab.c:4576](../../src/tab.c#L4576)
 
 ```c
 void tab_image_free(tab_image *img)
@@ -1502,7 +1568,7 @@ void tab_image_free(tab_image *img)
 
 ### `tab_set_geometry`
 
-`function` | [src/tab.c:4533](../../src/tab.c#L4533)
+`function` | [src/tab.c:4616](../../src/tab.c#L4616)
 
 ```c
 tab_status tab_set_geometry(tab *t, const jg_table *g)
@@ -1523,7 +1589,7 @@ tab_status tab_set_geometry(tab *t, const jg_table *g)
 
 ### `tab_async_fd`
 
-`function` | [src/tab.c:4585](../../src/tab.c#L4585)
+`function` | [src/tab.c:4669](../../src/tab.c#L4669)
 
 ```c
 int tab_async_fd(tab *t)
@@ -1543,7 +1609,7 @@ int tab_async_fd(tab *t)
 
 ### `tab_async_busy`
 
-`function` | [src/tab.c:4594](../../src/tab.c#L4594)
+`function` | [src/tab.c:4678](../../src/tab.c#L4678)
 
 ```c
 int tab_async_busy(const tab *t)
@@ -1563,7 +1629,7 @@ int tab_async_busy(const tab *t)
 
 ### `tab_tick_async`
 
-`function` | [src/tab.c:4611](../../src/tab.c#L4611)
+`function` | [src/tab.c:4695](../../src/tab.c#L4695)
 
 ```c
 tab_status tab_tick_async(tab *t, int elapsed_ms)
@@ -1584,7 +1650,7 @@ tab_status tab_tick_async(tab *t, int elapsed_ms)
 
 ### `tab_geometry_async`
 
-`function` | [src/tab.c:4621](../../src/tab.c#L4621)
+`function` | [src/tab.c:4705](../../src/tab.c#L4705)
 
 ```c
 tab_status tab_geometry_async(tab *t, const jg_table *g)
@@ -1605,7 +1671,7 @@ tab_status tab_geometry_async(tab *t, const jg_table *g)
 
 ### `tab_async_finish`
 
-`function` | [src/tab.c:4636](../../src/tab.c#L4636)
+`function` | [src/tab.c:4720](../../src/tab.c#L4720)
 
 ```c
 tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)
@@ -1628,7 +1694,7 @@ tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *
 
 ### `tab_popstate`
 
-`function` | [src/tab.c:4658](../../src/tab.c#L4658)
+`function` | [src/tab.c:4742](../../src/tab.c#L4742)
 
 ```c
 tab_status tab_popstate(tab *t, int index, tab_page *out)
@@ -1650,7 +1716,7 @@ tab_status tab_popstate(tab *t, int index, tab_page *out)
 
 ### `tab_ws_event`
 
-`function` | [src/tab.c:4665](../../src/tab.c#L4665)
+`function` | [src/tab.c:4749](../../src/tab.c#L4749)
 
 ```c
 tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len, tab_page *out)
@@ -1676,7 +1742,7 @@ tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, si
 
 ### `tab_set_storage`
 
-`function` | [src/tab.c:4685](../../src/tab.c#L4685)
+`function` | [src/tab.c:4769](../../src/tab.c#L4769)
 
 ```c
 void tab_set_storage(tab *t, const char *blob, size_t len)
@@ -1694,7 +1760,7 @@ Used only when the load is trusted (net granted); NULL/0 clears it. See spec/web
 | `blob` | `char *` |  |  |
 | `len` | `size_t` |  |  |
 
-> **Inherited:** Documentation from [`tab_set_storage`](#tab_set_storage) (include/tab.h:264).
+> **Inherited:** Documentation from [`tab_set_storage`](#tab_set_storage) (include/tab.h:279).
 
 ---
 
@@ -1716,7 +1782,7 @@ Used only when the load is trusted (net granted); NULL/0 clears it. See spec/web
 
 ### `TAB_IOBUF_BYTES`
 
-`macro` | [src/tab.c:58](../../src/tab.c#L58)
+`macro` | [src/tab.c:59](../../src/tab.c#L59)
 
 ```c
 #define TAB_IOBUF_BYTES
@@ -1732,7 +1798,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 ### `write_full`
 
-`macro` | [src/tab.c:112](../../src/tab.c#L112)
+`macro` | [src/tab.c:113](../../src/tab.c#L113)
 
 ```c
 #define write_full(fd, buf, n)
@@ -1746,7 +1812,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 ### `read_full`
 
-`macro` | [src/tab.c:113](../../src/tab.c#L113)
+`macro` | [src/tab.c:114](../../src/tab.c#L114)
 
 ```c
 #define read_full(fd, buf, n)
@@ -1760,7 +1826,7 @@ Inside those two functions the traffic goes through a per-THREAD 64 KiB buffer i
 
 ### `TAB_SCREEN_W`
 
-`macro` | [src/tab.c:134](../../src/tab.c#L134)
+`macro` | [src/tab.c:135](../../src/tab.c#L135)
 
 ```c
 #define TAB_SCREEN_W
@@ -1774,7 +1840,7 @@ Fixed, normalized output size; fp_bucket_screen snaps it the same for all.
 
 ### `TAB_WIRE_HEAD_N`
 
-`macro` | [src/tab.c:139](../../src/tab.c#L139)
+`macro` | [src/tab.c:140](../../src/tab.c#L140)
 
 ```c
 #define TAB_WIRE_HEAD_N
@@ -1790,7 +1856,7 @@ Single source of truth for write_view/read_view. Change requires same-diff in bo
 
 ### `TAB_WIRE_A_N`
 
-`macro` | [src/tab.c:140](../../src/tab.c#L140)
+`macro` | [src/tab.c:141](../../src/tab.c#L141)
 
 ```c
 #define TAB_WIRE_A_N
@@ -1802,7 +1868,7 @@ Single source of truth for write_view/read_view. Change requires same-diff in bo
 
 ### `TAB_WIRE_B_N`
 
-`macro` | [src/tab.c:141](../../src/tab.c#L141)
+`macro` | [src/tab.c:142](../../src/tab.c#L142)
 
 ```c
 #define TAB_WIRE_B_N
@@ -1814,7 +1880,7 @@ Single source of truth for write_view/read_view. Change requires same-diff in bo
 
 ### `TAB_WIRE_BOX_F_N`
 
-`macro` | [src/tab.c:142](../../src/tab.c#L142)
+`macro` | [src/tab.c:143](../../src/tab.c#L143)
 
 ```c
 #define TAB_WIRE_BOX_F_N
@@ -1826,7 +1892,7 @@ Single source of truth for write_view/read_view. Change requires same-diff in bo
 
 ### `TAB_WIRE_GRID_N`
 
-`macro` | [src/tab.c:143](../../src/tab.c#L143)
+`macro` | [src/tab.c:144](../../src/tab.c#L144)
 
 ```c
 #define TAB_WIRE_GRID_N
@@ -1838,7 +1904,7 @@ Single source of truth for write_view/read_view. Change requires same-diff in bo
 
 ### `TAB_MAX_RUNS`
 
-`macro` | [src/tab.c:162](../../src/tab.c#L162)
+`macro` | [src/tab.c:163](../../src/tab.c#L163)
 
 ```c
 #define TAB_MAX_RUNS
@@ -1854,7 +1920,7 @@ Plenty for any real page.
 
 ### `PV_MAX_CONTAINERS_WIRE`
 
-`macro` | [src/tab.c:166](../../src/tab.c#L166)
+`macro` | [src/tab.c:167](../../src/tab.c#L167)
 
 ```c
 #define PV_MAX_CONTAINERS_WIRE
@@ -1870,7 +1936,7 @@ Mirrors page_view's own PV_MAX_CONTAINERS: the worker can never register more th
 
 ### `TAB_MAX_URL`
 
-`macro` | [src/tab.c:169](../../src/tab.c#L169)
+`macro` | [src/tab.c:170](../../src/tab.c#L170)
 
 ```c
 #define TAB_MAX_URL
@@ -1884,7 +1950,7 @@ Cap on the page URL carried by OP_LOAD (URLs are small; defensive vs a desync).
 
 ### `TAB_MAX_WS_MSG`
 
-`macro` | [src/tab.c:178](../../src/tab.c#L178)
+`macro` | [src/tab.c:184](../../src/tab.c#L184)
 
 ```c
 #define TAB_MAX_WS_MSG
@@ -1898,7 +1964,7 @@ A WebSocket message pushed to the page (OP_WS_EVENT) is bounded like the connect
 
 ### `TAB_MAX_STORAGE`
 
-`macro` | [src/tab.c:182](../../src/tab.c#L182)
+`macro` | [src/tab.c:188](../../src/tab.c#L188)
 
 ```c
 #define TAB_MAX_STORAGE
@@ -1912,7 +1978,7 @@ A localStorage snapshot on the wire: the quota plus the per-pair framing of a st
 
 ### `TAB_MAX_HIST_OPS`
 
-`macro` | [src/tab.c:186](../../src/tab.c#L186)
+`macro` | [src/tab.c:192](../../src/tab.c#L192)
 
 ```c
 #define TAB_MAX_HIST_OPS
@@ -1926,7 +1992,7 @@ History ops one response may carry (2 x JD_HIST_MAX: every push can be followed 
 
 ### `TAB_MAX_HIST_BYTES`
 
-`macro` | [src/tab.c:187](../../src/tab.c#L187)
+`macro` | [src/tab.c:193](../../src/tab.c#L193)
 
 ```c
 #define TAB_MAX_HIST_BYTES
@@ -1938,7 +2004,7 @@ History ops one response may carry (2 x JD_HIST_MAX: every push can be followed 
 
 ### `TAB_MAX_OPENS`
 
-`macro` | [src/tab.c:189](../../src/tab.c#L189)
+`macro` | [src/tab.c:195](../../src/tab.c#L195)
 
 ```c
 #define TAB_MAX_OPENS
@@ -1952,7 +2018,7 @@ window.open targets one response may carry (the shim records at most 4).
 
 ### `TAB_MAX_OPEN_BYTES`
 
-`macro` | [src/tab.c:190](../../src/tab.c#L190)
+`macro` | [src/tab.c:196](../../src/tab.c#L196)
 
 ```c
 #define TAB_MAX_OPEN_BYTES
@@ -1964,7 +2030,7 @@ window.open targets one response may carry (the shim records at most 4).
 
 ### `TAB_MAX_GEOM_WORDS`
 
-`macro` | [src/tab.c:193](../../src/tab.c#L193)
+`macro` | [src/tab.c:199](../../src/tab.c#L199)
 
 ```c
 #define TAB_MAX_GEOM_WORDS
@@ -1978,7 +2044,7 @@ OP_GEOM payload bound in int32 words: a full js_geom table.
 
 ### `TAB_MAX_ASYNC_PENDING`
 
-`macro` | [src/tab.c:205](../../src/tab.c#L205)
+`macro` | [src/tab.c:211](../../src/tab.c#L211)
 
 ```c
 #define TAB_MAX_ASYNC_PENDING
@@ -1990,7 +2056,7 @@ OP_GEOM payload bound in int32 words: a full js_geom table.
 
 ### `TAB_MAX_NET_ROUNDS`
 
-`macro` | [src/tab.c:206](../../src/tab.c#L206)
+`macro` | [src/tab.c:212](../../src/tab.c#L212)
 
 ```c
 #define TAB_MAX_NET_ROUNDS
@@ -2004,7 +2070,7 @@ deferred requests outstanding
 
 ### `TAB_ASYNC_THREADS`
 
-`macro` | [src/tab.c:207](../../src/tab.c#L207)
+`macro` | [src/tab.c:213](../../src/tab.c#L213)
 
 ```c
 #define TAB_ASYNC_THREADS
@@ -2018,7 +2084,7 @@ drain rounds per operation
 
 ### `TAB_MAX_BATCH_BYTES`
 
-`macro` | [src/tab.c:208](../../src/tab.c#L208)
+`macro` | [src/tab.c:214](../../src/tab.c#L214)
 
 ```c
 #define TAB_MAX_BATCH_BYTES
@@ -2032,7 +2098,7 @@ overlapping fetches (Firefox per-host limit)
 
 ### `TAB_MAX_SUBREQ`
 
-`macro` | [src/tab.c:212](../../src/tab.c#L212)
+`macro` | [src/tab.c:218](../../src/tab.c#L218)
 
 ```c
 #define TAB_MAX_SUBREQ
@@ -2046,7 +2112,7 @@ Per-page subresource caps (anti-DoS): a hostile script cannot drive unbounded fe
 
 ### `TAB_MAX_SUBRESOURCE`
 
-`macro` | [src/tab.c:213](../../src/tab.c#L213)
+`macro` | [src/tab.c:219](../../src/tab.c#L219)
 
 ```c
 #define TAB_MAX_SUBRESOURCE
@@ -2058,7 +2124,7 @@ Per-page subresource caps (anti-DoS): a hostile script cannot drive unbounded fe
 
 ### `TAB_MAX_JS_JOBS`
 
-`macro` | [src/tab.c:214](../../src/tab.c#L214)
+`macro` | [src/tab.c:220](../../src/tab.c#L220)
 
 ```c
 #define TAB_MAX_JS_JOBS
@@ -2072,7 +2138,7 @@ matches SF_DEFAULT_MAX_BODY; modern app bundles (e.g. youtube main) exceed 8 MiB
 
 ### `TAB_MAX_EXTERN_CSS`
 
-`macro` | [src/tab.c:1223](../../src/tab.c#L1223)
+`macro` | [src/tab.c:1242](../../src/tab.c#L1242)
 
 ```c
 #define TAB_MAX_EXTERN_CSS

@@ -378,6 +378,8 @@ static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,
 #include "js_location_internal.h"
 #include "js_dom_ext.h"
 #include "js_custom_elements.h"
+#include "js_native_internal.h"
+#include "js_intl.h"
 
 /* dom.u8len(s): UTF-8 byte length of String(s) -- the unit the localStorage quota is
  * measured in (spec/web_storage.md). Native: a per-character JS loop over a large
@@ -822,7 +824,9 @@ static const char JD_DOCUMENT_SHIM[] =
     "      matches: function(s){ var h=this._h; if(__G.__selProf) __G.__selTick('mt',s); return dom.matches(h, String(s)); },"
     "      webkitMatchesSelector: function(s){ var h=this._h; return dom.matches(h, String(s)); },"
     "      closest: function(s){ var h=this._h; if(__G.__selProf) __G.__selTick('cl',s); return wrap(dom.closest(h, String(s))); },"
-    "      focus: function(){}, blur: function(){}, click: function(){},"
+    "      focus: function(){}, blur: function(){},"
+    /* HTML 6.4.4: synthetic click + activation behaviour (js_dom_ext.c, __elClick). */
+    "      click: function(){ if(typeof __G.__elClick==='function') __G.__elClick(this); },"
      "      scrollIntoView: function(){},"
      "      getBoundingClientRect: function(){ var h=this._h; return gBox(h); },"
      "      getClientRects: function(){ var h=this._h; return dom.rect(h)?[gBox(h)]:[]; },"
@@ -1196,74 +1200,10 @@ static const char JD_DOCUMENT_SHIM[] =
     "  if (typeof __G.console==='undefined')"
     "    __G.console={log:function(){},warn:function(){},error:function(){},"
     "      info:function(){},debug:function(){}};"
-    /* Intl: a minimal, identity-neutral stub (QuickJS-ng builds without ICU, so
-     * Intl is otherwise undefined and any locale-aware script -- DuckDuckGo's
-     * result formatting, date/number rendering -- dies with "Intl is not defined").
-     * Everything resolves to a fixed en-US-ish behaviour via the engine's own
-     * toLocaleString/toString: no real locale/timezone enumeration leaks (anti-fp). */
+    /* Intl lives in its own module (js_intl.c, spec/js_intl.md), installed before this shim. */
     "  if (typeof __G.DOMStringMap==='undefined'){ (function(){"
     "    function DOMStringMap(){ throw new TypeError('Illegal constructor'); }"
     "    Object.defineProperty(__G,'DOMStringMap',{value:DOMStringMap,writable:true,configurable:true,enumerable:false}); })(); }"
-    "  if (typeof __G.Intl==='undefined'){ (function(){"
-    "    function res(){ return {locale:'en-US',numberingSystem:'latn',calendar:'gregory',timeZone:'UTC'}; }"
-    /* BCP 47 case canonicalisation: language lower, 4-letter script title, region upper. */
-    "    function canon(t){ return t.split(/[-_]/).map(function(p,i){ if(i===0) return p.toLowerCase();"
-    "      if(p.length===2) return p.toUpperCase(); if(p.length===4) return p.charAt(0).toUpperCase()+p.slice(1).toLowerCase();"
-    "      return p.toLowerCase(); }).join('-'); }"
-    "    function canonList(l){ if(l==null) return []; return (Array.isArray(l)?l:[l]).map(function(x){ return canon(String(x)); }); }"
-    "    function NumberFormat(l,o){ if(!(this instanceof NumberFormat)) return new NumberFormat(l,o); this._o=o||{}; }"
-    "    NumberFormat.prototype.format=function(n){ try{ return Number(n).toLocaleString('en-US'); }catch(e){ return String(n); } };"
-    "    NumberFormat.prototype.formatToParts=function(n){ return [{type:'integer',value:this.format(n)}]; };"
-    "    NumberFormat.prototype.resolvedOptions=res;"
-    "    function DateTimeFormat(l,o){ if(!(this instanceof DateTimeFormat)) return new DateTimeFormat(l,o); this._o=o||{}; }"
-    "    DateTimeFormat.prototype.format=function(d){ try{ return new Date(d).toString(); }catch(e){ return String(d); } };"
-    "    DateTimeFormat.prototype.formatToParts=function(d){ return [{type:'literal',value:this.format(d)}]; };"
-    "    DateTimeFormat.prototype.resolvedOptions=res;"
-    "    function Collator(l,o){ if(!(this instanceof Collator)) return new Collator(l,o); }"
-    "    Collator.prototype.compare=function(a,b){ a=String(a); b=String(b); return a<b?-1:(a>b?1:0); };"
-    "    Collator.prototype.resolvedOptions=res;"
-    "    function PluralRules(l,o){ if(!(this instanceof PluralRules)) return new PluralRules(l,o); }"
-    "    PluralRules.prototype.select=function(n){ return Number(n)===1?'one':'other'; };"
-    "    PluralRules.prototype.resolvedOptions=res;"
-    "    function RelativeTimeFormat(l,o){ if(!(this instanceof RelativeTimeFormat)) return new RelativeTimeFormat(l,o); }"
-    "    RelativeTimeFormat.prototype.format=function(v,u){ return String(v)+' '+String(u); };"
-    "    RelativeTimeFormat.prototype.formatToParts=function(v,u){ return [{type:'literal',value:this.format(v,u)}]; };"
-    "    RelativeTimeFormat.prototype.resolvedOptions=res;"
-    "    function ListFormat(l,o){ if(!(this instanceof ListFormat)) return new ListFormat(l,o); }"
-    "    ListFormat.prototype.format=function(a){ return (a||[]).join(', '); };"
-    "    ListFormat.prototype.resolvedOptions=res;"
-    "    __G.Intl={NumberFormat:NumberFormat,DateTimeFormat:DateTimeFormat,Collator:Collator,"
-    "      PluralRules:PluralRules,RelativeTimeFormat:RelativeTimeFormat,ListFormat:ListFormat,"
-    "      getCanonicalLocales:function(l){ return canonList(l); }};"
-    /* supportedLocalesOf on every constructor (formatjs calls it at startup): the
-     * requested tags, canonicalised -- formatting itself stays the fixed en-US. */
-    "    [NumberFormat,DateTimeFormat,Collator,PluralRules,RelativeTimeFormat,ListFormat].forEach(function(C){"
-    "      C.supportedLocalesOf=function(l){ return canonList(l); }; });"
-    "    function Locale(tag){ if(!(this instanceof Locale)) return new Locale(tag);"
-    "      var t=canon(String(tag)), p=t.split('-'); this.baseName=t; this.language=p[0]||'en';"
-    "      this.region=undefined; this.script=undefined;"
-    "      for(var i=1;i<p.length;i++){ if(/^[A-Z]{2}$|^[0-9]{3}$/.test(p[i])) this.region=p[i];"
-    "        else if(/^[A-Z][a-z]{3}$/.test(p[i])) this.script=p[i]; } }"
-    "    Locale.prototype.toString=function(){ return this.baseName; };"
-    "    Locale.prototype.maximize=function(){ return this; }; Locale.prototype.minimize=function(){ return this; };"
-    "    function DisplayNames(l,o){ if(!(this instanceof DisplayNames)) return new DisplayNames(l,o); this._o=o||{}; }"
-    "    DisplayNames.prototype.of=function(code){ return String(code); };"
-    "    DisplayNames.prototype.resolvedOptions=res; DisplayNames.supportedLocalesOf=function(l){ return canonList(l); };"
-    "    function Segmenter(l,o){ if(!(this instanceof Segmenter)) return new Segmenter(l,o);"
-    "      this._g=(o&&o.granularity)||'grapheme'; }"
-    "    Segmenter.prototype.segment=function(str){ str=String(str); var g=this._g, out=[];"
-    "      if(g==='grapheme'){ var a=Array.from(str), idx=0;"
-    "        a.forEach(function(ch){ out.push({segment:ch,index:idx,input:str}); idx+=ch.length; }); }"
-    "      else { var re=g==='word'?/\\w+|[^\\w]+/g:/[^.!?]+[.!?]*\\s*/g, m;"
-    "        while((m=re.exec(str))!==null){ if(m[0]==='') break; out.push({segment:m[0],index:m.index,input:str,"
-    "          isWordLike:g==='word'?/\\w/.test(m[0]):undefined}); } }"
-    "      out.containing=function(i){ for(var k=0;k<out.length;k++){ var s=out[k];"
-    "        if(i>=s.index&&i<s.index+s.segment.length) return s; } return undefined; };"
-    "      return out; };"
-    "    Segmenter.prototype.resolvedOptions=res; Segmenter.supportedLocalesOf=function(l){ return canonList(l); };"
-    "    __G.Intl.Locale=Locale; __G.Intl.DisplayNames=DisplayNames; __G.Intl.Segmenter=Segmenter;"
-    "    __G.Intl.supportedValuesOf=function(){ return []; };"
-    "  })(); }"
     "  __G.addEventListener=function(type,fn,o){ if(!addL(String(type),fn,'w')) __G.__evAdd('w',type,fn,o); };"
     "  __G.removeEventListener=function(type,fn,o){ delL(String(type),fn,'w'); __G.__evRemove('w',type,fn,o); };"
     "  __G.dispatchEvent=function(ev){ return __G.__evDispatch('w',ev); };"
@@ -1275,13 +1215,18 @@ static const char JD_DOCUMENT_SHIM[] =
      * on the load pump, the historical behaviour). clearTimeout/clearInterval
      * cancel by id. rAF/rIC keep due 0 (the v1 "frame" is the pump). */
     "  var tmSeq=0;"
-    "  function tmAdd(fn,ms,iv){ if(typeof fn!=='function') return 0;"
+    /* A timer taken out of `timers` to fire is still cancellable: `firing` holds the round
+     * being run, and a cancelled timer is marked dead so it neither runs nor re-arms. */
+    "  var firing=[];"
+    "  function tmAdd(fn,ms,iv,args){ if(typeof fn!=='function') return 0;"
     "    var d=(typeof ms==='number'&&ms>0)?ms:0;"
-    "    timers.push({f:fn,due:d,iv:iv?Math.max(d,16):0,id:++tmSeq}); return tmSeq; }"
-    "  function tmDel(id){ for(var i=0;i<timers.length;i++)"
-    "    if(timers[i].id===id){ timers.splice(i,1); return; } }"
-    "  __G.setTimeout=function(fn,ms){ return tmAdd(fn,ms,0); };"
-    "  __G.setInterval=function(fn,ms){ return tmAdd(fn,ms,1); };"
+    "    timers.push({f:fn,a:args,due:d,iv:iv?Math.max(d,16):0,id:++tmSeq,dead:0}); return tmSeq; }"
+    "  function tmDel(id){ var i;"
+    "    for(i=0;i<firing.length;i++) if(firing[i].id===id) firing[i].dead=1;"
+    "    for(i=0;i<timers.length;i++) if(timers[i].id===id){ timers[i].dead=1; timers.splice(i,1); return; } }"
+    "  function tmArgs(a){ return a.length>2?Array.prototype.slice.call(a,2):null; }"
+    "  __G.setTimeout=function(fn,ms){ return tmAdd(fn,ms,0,tmArgs(arguments)); };"
+    "  __G.setInterval=function(fn,ms){ return tmAdd(fn,ms,1,tmArgs(arguments)); };"
     "  __G.clearTimeout=tmDel; __G.clearInterval=tmDel;"
     /* rAF/rIC feed the same synthetic timer queue; the callback gets a fixed
      * timestamp (identity-safe: no real high-res clock leaks through animation). */
@@ -1301,11 +1246,16 @@ static const char JD_DOCUMENT_SHIM[] =
     "      var due=[], rest=[];"
     "      for (var i=0;i<timers.length;i++) (timers[i].due<=0?due:rest).push(timers[i]);"
     "      if (due.length===0) break;"
-    "      timers=rest; rounds++;"
-    "      for (var j=0;j<due.length && fired<256;j++){ fired++;"
-    "        try{ due[j].f.call(__G); }catch(ex){ __G.__reportError(ex); }"
-    "        if (due[j].iv>0){ due[j].due=due[j].iv; timers.push(due[j]); }"
+    "      timers=rest; rounds++; firing=due;"
+    "      for (var j=0;j<due.length;j++){ var t=due[j];"
+    "        if (t.dead) continue;"
+    /* Over the per-tick cap: not fired, not lost -- back in the queue for the next tick. */
+    "        if (fired>=256){ timers.push(t); continue; }"
+    "        fired++;"
+    "        try{ if(t.a) t.f.apply(__G,t.a); else t.f.call(__G); }catch(ex){ __G.__reportError(ex); }"
+    "        if (t.iv>0 && !t.dead){ t.due=t.iv; timers.push(t); }"
     "      }"
+    "      firing=[];"
     "    }"
     "    return fired;"
     "  };"
@@ -2057,22 +2007,24 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque) {
     if (rc < 0) return JD_ERR_INTERNAL;
 
     /* Install the `document` facade (depends on the `dom` global just defined). */
-    JSValue r = JS_Eval(jsctx, JD_DOCUMENT_SHIM, sizeof JD_DOCUMENT_SHIM - 1,
-                        "<document-shim>", JS_EVAL_TYPE_GLOBAL);
+    /* ECMA-402 first: the shims below (and the page) format through it. */
+    if (ji_install(ctx) != 0) return JD_ERR_INTERNAL;
+    JSValue r = jn_host_eval(jsctx, JD_DOCUMENT_SHIM, sizeof JD_DOCUMENT_SHIM - 1,
+                        "<document-shim>");
     int shim_ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     if (!shim_ok) return JD_ERR_INTERNAL;
 
     /* Install the modern ambient surface (depends on the document shim's helpers). */
-    JSValue r2 = JS_Eval(jsctx, JD_MODERN_SHIM, sizeof JD_MODERN_SHIM - 1,
-                         "<modern-shim>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r2 = jn_host_eval(jsctx, JD_MODERN_SHIM, sizeof JD_MODERN_SHIM - 1,
+                         "<modern-shim>");
     int mod_ok = !JS_IsException(r2);
     JS_FreeValue(jsctx, r2);
     if (!mod_ok) return JD_ERR_INTERNAL;
 
     /* Install WHATWG URL / URLSearchParams (pure string parsers; no I/O, no net). */
-    JSValue r3 = JS_Eval(jsctx, JD_URL_SHIM, sizeof JD_URL_SHIM - 1,
-                         "<url-shim>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r3 = jn_host_eval(jsctx, JD_URL_SHIM, sizeof JD_URL_SHIM - 1,
+                         "<url-shim>");
     int url_ok = !JS_IsException(r3);
     JS_FreeValue(jsctx, r3);
     if (!url_ok) return JD_ERR_INTERNAL;
@@ -2254,8 +2206,8 @@ jd_status jd_install_console(js_context *ctx, fb_buffer *log) {
     JS_FreeValue(jsctx, global);
     if (rc < 0) return JD_ERR_INTERNAL;
 
-    JSValue r = JS_Eval(jsctx, JD_CONSOLE_EXTRA, sizeof JD_CONSOLE_EXTRA - 1,
-                        "<console-extra>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JD_CONSOLE_EXTRA, sizeof JD_CONSOLE_EXTRA - 1,
+                        "<console-extra>");
     int ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     return ok ? JD_OK : JD_ERR_INTERNAL;
@@ -2276,7 +2228,7 @@ jd_status jd_set_cookies(js_context *ctx, const char *cookies) {
     static const char en[] =
         "if(typeof __ckEnable==='function'){__ckEnable(__G.__ckSeed);"
         "__G.__ckSeed=undefined;}";
-    JSValue r = JS_Eval(jsctx, en, sizeof en - 1, "<cookie-seed>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, en, sizeof en - 1, "<cookie-seed>");
     int ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     return ok ? JD_OK : JD_ERR_INTERNAL;
@@ -2288,7 +2240,7 @@ int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz) {
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return 0;
     static const char q[] = "(typeof __ckDump==='function')?__ckDump():''";
-    JSValue r = JS_Eval(jsctx, q, sizeof q - 1, "<cookie-dump>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, q, sizeof q - 1, "<cookie-dump>");
     if (JS_IsException(r)) { JS_FreeValue(jsctx, JS_GetException(jsctx)); return 0; }
     size_t slen = 0;
     const char *s = JS_ToCStringLen(jsctx, &slen, r);

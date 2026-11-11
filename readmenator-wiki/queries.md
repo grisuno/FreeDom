@@ -8,15 +8,15 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: What does css.h depend on, and what depends on it? (40 connections)
+### Q: What does css.h depend on, and what depends on it? (41 connections)
 
 - Status: unanswered
 
-### Q: What does tab.c depend on, and what depends on it? (30 connections)
+### Q: What does tab.c depend on, and what depends on it? (31 connections)
 
 - Status: unanswered
 
-### Q: How are the 48 files in 'src: tab' related to each other?
+### Q: How are the 57 files in 'src: css' related to each other?
 
 - Status: unanswered
 

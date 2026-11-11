@@ -266,7 +266,7 @@ Previous: [KB_include.md](KB_include.md)
 - Language: h
 - Symbols:
   - `dom_status` (enum, line 26)
-  - `dom_place` (enum, line 187)
+  - `dom_place` (enum, line 194)
   - `dom_node_id` (type_alias, line 34) `typedef uint32_t dom_node_id;`
   - `dom_index` (type_alias, line 40) `typedef struct dom_index dom_index;`
   - `dom_free` (function, line 48) `void dom_free(dom_index *idx);`
@@ -282,21 +282,22 @@ Previous: [KB_include.md](KB_include.md)
   - `dom_attribute_names` (function, line 133) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);`
   - `dom_text_content` (function, line 138) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);`
   - `dom_document_title` (function, line 141) `const char *dom_document_title(const dom_index *idx, size_t *len);`
-  - `cycle` (function, line 169) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...`
-  - `parent` (function, line 196) `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...`
-  - `dom_node_kind` (function, line 212) `int dom_node_kind(const dom_index *idx, dom_node_id node);`
-  - `index` (function, line 228) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
-  - `length` (function, line 253) `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
-  - `process` (function, line 260) `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
+  - `valid` (function, line 146) `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...`
+  - `cycle` (function, line 176) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...`
+  - `parent` (function, line 203) `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...`
+  - `dom_node_kind` (function, line 219) `int dom_node_kind(const dom_index *idx, dom_node_id node);`
+  - `index` (function, line 235) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
+  - `length` (function, line 260) `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
+  - `process` (function, line 267) `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
   - `FREEDOM_DOM_H` (macro, line 2) `#define FREEDOM_DOM_H`
   - `DOM_NODE_NONE` (macro, line 37) `#define DOM_NODE_NONE`
-  - `DOM_KIND_NONE` (macro, line 203) `#define DOM_KIND_NONE`
-  - `DOM_KIND_ELEMENT` (macro, line 204) `#define DOM_KIND_ELEMENT`
-  - `DOM_KIND_TEXT` (macro, line 205) `#define DOM_KIND_TEXT`
-  - `DOM_KIND_COMMENT` (macro, line 206) `#define DOM_KIND_COMMENT`
-  - `DOM_MAX_HANDLES` (macro, line 209) `#define DOM_MAX_HANDLES`
+  - `DOM_KIND_NONE` (macro, line 210) `#define DOM_KIND_NONE`
+  - `DOM_KIND_ELEMENT` (macro, line 211) `#define DOM_KIND_ELEMENT`
+  - `DOM_KIND_TEXT` (macro, line 212) `#define DOM_KIND_TEXT`
+  - `DOM_KIND_COMMENT` (macro, line 213) `#define DOM_KIND_COMMENT`
+  - `DOM_MAX_HANDLES` (macro, line 216) `#define DOM_MAX_HANDLES`
 - Depends on: `include/html_parse.h`
-- Imported by: `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
+- Imported by: `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`, `tests/test_page_view.c`
 
 ## include/dom_debug.h
 - Doc: dd_format: Formats doc into out[0..cap) as a NUL-terminated, line-oriented dump (see the spec...

@@ -146,6 +146,13 @@ const char *dom_document_title(const dom_index *idx, size_t *len);
  * detached node stays valid (it just becomes unreachable from the root and is no
  * longer rendered). These never call lxb_dom_node_destroy. */
 
+/* A counter that moves on every call that can change the rendered tree (set text/title,
+ * append/insert/move/remove, set/remove attribute, inner HTML) and never on a read or on the
+ * creation of a detached node. It over-counts by design (a failed or no-op mutation still
+ * moves it): equal values PROVE the tree is unchanged, unequal values prove nothing.
+ * NULL => 0. */
+uint64_t dom_mutation_count(const dom_index *idx);
+
 /* Replaces node's children with a single text node carrying text[0..len) (an empty
  * text clears the children). node invalid => DOM_ERR_NULL_ARG; OOM => DOM_ERR_OOM. */
 dom_status dom_set_text_content(dom_index *idx, dom_node_id node,

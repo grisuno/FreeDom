@@ -1,8 +1,74 @@
-# Symbols (page 15 of 16)
+# Symbols (page 15 of 17)
 Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `tamper_at` | function | `tests/test_local_store.c:85` | `static void tamper_at(size_t off)` |
+| `test_derive_key` | function | `tests/test_local_store.c:149` | `static void test_derive_key(void **s)` |
+| `test_empty_plaintext` | function | `tests/test_local_store.c:53` | `static void test_empty_plaintext(void **s)` |
+| `test_format_errors` | function | `tests/test_local_store.c:166` | `static void test_format_errors(void **s)` |
+| `test_nondeterministic` | function | `tests/test_local_store.c:107` | `static void test_nondeterministic(void **s)` |
+| `test_null_and_limits` | function | `tests/test_local_store.c:181` | `static void test_null_and_limits(void **s)` |
+| `test_passphrase_roundtrip` | function | `tests/test_local_store.c:121` | `static void test_passphrase_roundtrip(void **s)` |
+| `test_roundtrip_aes` | function | `tests/test_local_store.c:48` | `static void test_roundtrip_aes(void **s)` |
+| `test_roundtrip_chacha` | function | `tests/test_local_store.c:49` | `static void test_roundtrip_chacha(void **s)` |
+| `test_tamper_aead_id` | function | `tests/test_local_store.c:103` | `static void test_tamper_aead_id(void **s)` |
+| `test_tamper_ciphertext` | function | `tests/test_local_store.c:99` | `static void test_tamper_ciphertext(void **s)` |
+| `test_tamper_nonce` | function | `tests/test_local_store.c:101` | `static void test_tamper_nonce(void **s)` |
+| `test_tamper_salt` | function | `tests/test_local_store.c:102` | `static void test_tamper_salt(void **s)` |
+| `test_tamper_tag` | function | `tests/test_local_store.c:100` | `static void test_tamper_tag(void **s)` |
+| `test_wrong_key` | function | `tests/test_local_store.c:67` | `static void test_wrong_key(void **s)` |
+| `main` | function | `tests/test_media_decoder.c:89` | `int main(void)` |
+| `test_pacer_backwards_pts_reanchors` | function | `tests/test_media_decoder.c:40` | `static void test_pacer_backwards_pts_reanchors(void **state)` |
+| `test_pacer_hostile_pts_bounded` | function | `tests/test_media_decoder.c:69` | `static void test_pacer_hostile_pts_bounded(void **state)` |
+| `test_pacer_lag_reanchors` | function | `tests/test_media_decoder.c:52` | `static void test_pacer_lag_reanchors(void **state)` |
+| `test_pacer_null_safe` | function | `tests/test_media_decoder.c:84` | `static void test_pacer_null_safe(void **state)` |
+| `test_pacer_paces_by_pts_delta` | function | `tests/test_media_decoder.c:28` | `static void test_pacer_paces_by_pts_delta(void **state)` |
+| `expect_private` | function | `tests/test_net_guard.c:10` | `static void expect_private(const char *const *ips, size_t n, int want)` |
+| `main` | function | `tests/test_net_guard.c:150` | `int main(void)` |
+| `test_decide` | function | `tests/test_net_guard.c:124` | `static void test_decide(void **state)` |
+| `test_host_is_ip` | function | `tests/test_net_guard.c:112` | `static void test_host_is_ip(void **state)` |
+| `test_host_is_local` | function | `tests/test_net_guard.c:93` | `static void test_host_is_local(void **state)` |
+| `test_ipv4_embedded_in_ipv6_is_unwrapped` | function | `tests/test_net_guard.c:56` | `static void test_ipv4_embedded_in_ipv6_is_unwrapped(void **state)` |
+| `test_ipv4_private_and_special_ranges` | function | `tests/test_net_guard.c:16` | `static void test_ipv4_private_and_special_ranges(void **state)` |
+| `test_ipv4_public_edges` | function | `tests/test_net_guard.c:29` | `static void test_ipv4_public_edges(void **state)` |
+| `test_ipv6_private_and_special_ranges` | function | `tests/test_net_guard.c:41` | `static void test_ipv6_private_and_special_ranges(void **state)` |
+| `test_unclassifiable_fails_closed` | function | `tests/test_net_guard.c:71` | `static void test_unclassifiable_fails_closed(void **state)` |
+| `main` | function | `tests/test_net_realm.c:140` | `int main(void)` |
+| `test_classify_host_clearnet` | function | `tests/test_net_realm.c:37` | `static void test_classify_host_clearnet(void **state)` |
+| `test_classify_host_edges` | function | `tests/test_net_realm.c:54` | `static void test_classify_host_edges(void **state)` |
+| `test_classify_host_i2p` | function | `tests/test_net_realm.c:30` | `static void test_classify_host_i2p(void **state)` |
+| `test_classify_host_lookalikes` | function | `tests/test_net_realm.c:44` | `static void test_classify_host_lookalikes(void **state)` |
+| `test_classify_host_onion` | function | `tests/test_net_realm.c:22` | `static void test_classify_host_onion(void **state)` |
+| `test_classify_url` | function | `tests/test_net_realm.c:67` | `static void test_classify_url(void **state)` |
+| `test_names` | function | `tests/test_net_realm.c:126` | `static void test_names(void **state)` |
+| `test_realm_allows_http` | function | `tests/test_net_realm.c:118` | `static void test_realm_allows_http(void **state)` |
+| `test_route_clearnet` | function | `tests/test_net_realm.c:96` | `static void test_route_clearnet(void **state)` |
+| `test_route_i2p` | function | `tests/test_net_realm.c:88` | `static void test_route_i2p(void **state)` |
+| `test_route_null_blocked` | function | `tests/test_net_realm.c:110` | `static void test_route_null_blocked(void **state)` |
+| `test_route_onion` | function | `tests/test_net_realm.c:79` | `static void test_route_onion(void **state)` |
+| `_GNU_SOURCE` | macro | `tests/test_os_sandbox.c:14` | `#define _GNU_SOURCE` |
+| `main` | function | `tests/test_os_sandbox.c:335` | `int main(void)` |
+| `net_ns_inode` | function | `tests/test_os_sandbox.c:304` | `static unsigned long net_ns_inode(void)` |
+| `suite` | function | `tests/test_os_sandbox.c:313` | `* suite (it is best-effort defense in depth), and on a host that allows them the  * isolation mus...` |
+| `test_harden_allows_permitted_syscall` | function | `tests/test_os_sandbox.c:96` | `static void test_harden_allows_permitted_syscall(void **state)` |
+| `test_harden_blocks_exec_mmap` | function | `tests/test_os_sandbox.c:162` | `static void test_harden_blocks_exec_mmap(void **state)` |
+| `test_harden_blocks_exec_mprotect` | function | `tests/test_os_sandbox.c:182` | `static void test_harden_blocks_exec_mprotect(void **state)` |
+| `test_harden_errno_denies_with_eperm` | function | `tests/test_os_sandbox.c:112` | `static void test_harden_errno_denies_with_eperm(void **state)` |
+| `test_harden_kills_denied_syscall` | function | `tests/test_os_sandbox.c:79` | `static void test_harden_kills_denied_syscall(void **state)` |
+| `test_harden_kills_io_uring_setup` | function | `tests/test_os_sandbox.c:130` | `static void test_harden_kills_io_uring_setup(void **state)` |
+| `test_landlock_abi_present` | function | `tests/test_os_sandbox.c:233` | `static void test_landlock_abi_present(void **state)` |
+| `test_landlock_allow_read` | function | `tests/test_os_sandbox.c:257` | `static void test_landlock_allow_read(void **state)` |
+| `test_landlock_deny_all` | function | `tests/test_os_sandbox.c:239` | `static void test_landlock_deny_all(void **state)` |
+| `test_no_dump_undumpable` | function | `tests/test_os_sandbox.c:214` | `static void test_no_dump_undumpable(void **state)` |
+| `test_policy_allows_safe` | function | `tests/test_os_sandbox.c:43` | `static void test_policy_allows_safe(void **state)` |
+| `test_policy_denies_dangerous` | function | `tests/test_os_sandbox.c:51` | `static void test_policy_denies_dangerous(void **state)` |
+| `test_policy_denies_io_uring` | function | `tests/test_os_sandbox.c:64` | `static void test_policy_denies_io_uring(void **state)` |
+| `test_policy_size` | function | `tests/test_os_sandbox.c:71` | `static void test_policy_size(void **state)` |
+| `test_prot_allowed_wx` | function | `tests/test_os_sandbox.c:151` | `static void test_prot_allowed_wx(void **state)` |
+| `applies` | function | `tests/test_page_view.c:4697` | `* <style>: an extern rule applies (presentation and display:none alike);` |
+| `box_of_run_with_bg` | function | `tests/test_page_view.c:3761` | `static const pv_box_def *box_of_run_with_bg(const pv_view *v, int bg)` |
+| `break` | function | `tests/test_page_view.c:705` | `* block break (from entering <p>);` |
 | `collect_elements` | function | `tests/test_page_view.c:4412` | `static void collect_elements(lxb_dom_node_t *n, lxb_dom_element_t **out, size_t *cnt, size_t cap)` |
 | `count_empty_lines` | function | `tests/test_page_view.c:3464` | `static int count_empty_lines(const pv_view *v)` |
 | `count_inputs` | function | `tests/test_page_view.c:3361` | `static size_t count_inputs(const pv_view *v, int type)` |
@@ -430,71 +496,5 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_group_rejects_pure_pq` | function | `tests/test_secure_fetch.c:138` | `static void test_group_rejects_pure_pq(void **state)` |
 | `test_header_value_reads_named_header` | function | `tests/test_secure_fetch.c:397` | `static void test_header_value_reads_named_header(void **state)` |
 | `test_header_value_rejects_other_empty_and_oversize` | function | `tests/test_secure_fetch.c:408` | `static void test_header_value_rejects_other_empty_and_oversize(void **state)` |
-| `test_location_is_case_insensitive_and_trims` | function | `tests/test_secure_fetch.c:429` | `static void test_location_is_case_insensitive_and_trims(void **state)` |
-| `test_location_parses_value` | function | `tests/test_secure_fetch.c:421` | `static void test_location_parses_value(void **state)` |
-| `test_location_rejects_non_location_and_empty` | function | `tests/test_secure_fetch.c:439` | `static void test_location_rejects_non_location_and_empty(void **state)` |
-| `test_location_rejects_overflow` | function | `tests/test_secure_fetch.c:451` | `static void test_location_rejects_overflow(void **state)` |
-| `test_post_null_args` | function | `tests/test_secure_fetch.c:570` | `static void test_post_null_args(void **state)` |
-| `test_rcache_backing_persists_and_serves_after_ram_loss` | function | `tests/test_secure_fetch.c:340` | `static void test_rcache_backing_persists_and_serves_after_ram_loss(void **state)` |
-| `test_rcache_remembers_permanent_redirects` | function | `tests/test_secure_fetch.c:358` | `static void test_rcache_remembers_permanent_redirects(void **state)` |
-| `test_redirect_code_recognizes_3xx` | function | `tests/test_secure_fetch.c:377` | `static void test_redirect_code_recognizes_3xx(void **state)` |
-| `test_redirect_code_rejects_others` | function | `tests/test_secure_fetch.c:386` | `static void test_redirect_code_rejects_others(void **state)` |
-| `test_resolve_absolute_https` | function | `tests/test_secure_fetch.c:460` | `static void test_resolve_absolute_https(void **state)` |
-| `test_resolve_absolute_path` | function | `tests/test_secure_fetch.c:494` | `static void test_resolve_absolute_path(void **state)` |
-| `test_resolve_null_args` | function | `tests/test_secure_fetch.c:518` | `static void test_resolve_null_args(void **state)` |
-| `test_resolve_refuses_dangerous_schemes` | function | `tests/test_secure_fetch.c:475` | `static void test_resolve_refuses_dangerous_schemes(void **state)` |
-| `test_resolve_refuses_http_downgrade` | function | `tests/test_secure_fetch.c:468` | `static void test_resolve_refuses_http_downgrade(void **state)` |
-| `test_resolve_relative_path` | function | `tests/test_secure_fetch.c:506` | `static void test_resolve_relative_path(void **state)` |
-| `test_resolve_scheme_relative` | function | `tests/test_secure_fetch.c:486` | `static void test_resolve_scheme_relative(void **state)` |
-| `test_response_free_on_zeroed` | function | `tests/test_secure_fetch.c:529` | `static void test_response_free_on_zeroed(void **state)` |
-| `test_response_free_releases_location` | function | `tests/test_secure_fetch.c:538` | `static void test_response_free_releases_location(void **state)` |
-| `test_tls_accepts_13` | function | `tests/test_secure_fetch.c:124` | `static void test_tls_accepts_13(void **state)` |
-| `test_tls_rejects_12` | function | `tests/test_secure_fetch.c:110` | `static void test_tls_rejects_12(void **state)` |
-| `test_tls_rejects_older_and_garbage` | function | `tests/test_secure_fetch.c:115` | `static void test_tls_rejects_older_and_garbage(void **state)` |
-| `test_url_accepts_https` | function | `tests/test_secure_fetch.c:102` | `static void test_url_accepts_https(void **state)` |
-| `test_url_rejects_dangerous_schemes` | function | `tests/test_secure_fetch.c:92` | `static void test_url_rejects_dangerous_schemes(void **state)` |
-| `test_url_rejects_null` | function | `tests/test_secure_fetch.c:82` | `static void test_url_rejects_null(void **state)` |
-| `test_url_rejects_plain_http` | function | `tests/test_secure_fetch.c:87` | `static void test_url_rejects_plain_http(void **state)` |
-| `test_user_agent_default_when_unset` | function | `tests/test_secure_fetch.c:55` | `static void test_user_agent_default_when_unset(void **state)` |
-| `test_user_agent_uses_override` | function | `tests/test_secure_fetch.c:61` | `static void test_user_agent_uses_override(void **state)` |
-| `test_ws_open_rejects_before_any_io` | function | `tests/test_secure_fetch.c:662` | `static void test_ws_open_rejects_before_any_io(void **state)` |
-| `test_ws_url_check` | function | `tests/test_secure_fetch.c:650` | `static void test_ws_url_check(void **state)` |
-| `check` | function | `tests/test_sha2.c:18` | `static void check(sha_alg a, const char *msg, size_t rep, const char *want)` |
-| `hex` | function | `tests/test_sha2.c:14` | `static void hex(const uint8_t *d, size_t n, char *out)` |
-| `main` | function | `tests/test_sha2.c:74` | `int main(void)` |
-| `test_abc_vectors` | function | `tests/test_sha2.c:31` | `static void test_abc_vectors(void **state)` |
-| `test_empty_and_long` | function | `tests/test_sha2.c:39` | `static void test_empty_and_long(void **state)` |
-| `test_names_and_errors` | function | `tests/test_sha2.c:60` | `static void test_names_and_errors(void **state)` |
-| `test_padding_boundaries` | function | `tests/test_sha2.c:52` | `static void test_padding_boundaries(void **state)` |
-| `calls` | type_alias | `tests/test_sheet_cache.c:35` | `typedef struct matcher_log { int calls;` |
-| `key_of` | function | `tests/test_sheet_cache.c:25` | `static shc_key key_of(const char *text, const css_media *m)` |
-| `log_match` | function | `tests/test_sheet_cache.c:38` | `static int log_match(void *ctx, const struct css_sel *sel)` |
-| `main` | function | `tests/test_sheet_cache.c:303` | `int main(void)` |
-| `matcher_log` | struct | `tests/test_sheet_cache.c:36` | `` |
-| `p_color` | function | `tests/test_sheet_cache.c:21` | `static int p_color(const shc_sheet *s)` |
-| `stats_of` | function | `tests/test_sheet_cache.c:30` | `static shc_stats stats_of(const shc_cache *c)` |
-| `test_a_bypassed_parse_does_not_evict_the_retained_entry` | function | `tests/test_sheet_cache.c:223` | `static void test_a_bypassed_parse_does_not_evict_the_retained_entry(void **state)` |
-| `test_a_hit_replays_the_matcher_and_needs_the_same_answers` | function | `tests/test_sheet_cache.c:125` | `static void test_a_hit_replays_the_matcher_and_needs_the_same_answers(void **state)` |
-| `test_a_reference_outlives_replacement_and_the_cache` | function | `tests/test_sheet_cache.c:253` | `static void test_a_reference_outlives_replacement_and_the_cache(void **state)` |
-| `test_fails_closed_on_bad_arguments` | function | `tests/test_sheet_cache.c:279` | `static void test_fails_closed_on_bad_arguments(void **state)` |
-| `test_matcher_presence_is_part_of_the_key` | function | `tests/test_sheet_cache.c:176` | `static void test_matcher_presence_is_part_of_the_key(void **state)` |
-| `test_media_inputs_are_part_of_the_key` | function | `tests/test_sheet_cache.c:81` | `static void test_media_inputs_are_part_of_the_key(void **state)` |
-| `test_no_cache_parses_without_retaining` | function | `tests/test_sheet_cache.c:267` | `static void test_no_cache_parses_without_retaining(void **state)` |
-| `test_one_byte_of_text_changes_the_result` | function | `tests/test_sheet_cache.c:66` | `static void test_one_byte_of_text_changes_the_result(void **state)` |
-| `test_oversized_text_is_parsed_but_not_retained` | function | `tests/test_sheet_cache.c:238` | `static void test_oversized_text_is_parsed_but_not_retained(void **state)` |
-| `test_root_scope_is_part_of_the_key` | function | `tests/test_sheet_cache.c:107` | `static void test_root_scope_is_part_of_the_key(void **state)` |
-| `test_same_key_is_a_hit_and_returns_the_same_sheet` | function | `tests/test_sheet_cache.c:45` | `static void test_same_key_is_a_hit_and_returns_the_same_sheet(void **state)` |
-| `test_structural_root_selector_is_replayed_too` | function | `tests/test_sheet_cache.c:156` | `static void test_structural_root_selector_is_replayed_too(void **state)` |
-| `test_too_many_matcher_questions_are_never_reused` | function | `tests/test_sheet_cache.c:192` | `static void test_too_many_matcher_questions_are_never_reused(void **state)` |
-| `main` | function | `tests/test_shm_slots.c:42` | `int main(void)` |
-| `test_alternates_and_never_paints_a_held_slot` | function | `tests/test_shm_slots.c:8` | `static void test_alternates_and_never_paints_a_held_slot(void **state)` |
-| `test_release_of_unknown_or_idle_slot_is_ignored` | function | `tests/test_shm_slots.c:23` | `static void test_release_of_unknown_or_idle_slot_is_ignored(void **state)` |
-| `test_repaint_before_commit_reuses_the_same_free_slot` | function | `tests/test_shm_slots.c:34` | `static void test_repaint_before_commit_reuses_the_same_free_slot(void **state)` |
-| `_GNU_SOURCE` | macro | `tests/test_subreq_batch.c:2` | `#define _GNU_SOURCE` |
-| `main` | function | `tests/test_subreq_batch.c:99` | `int main(void)` |
-| `mk` | function | `tests/test_subreq_batch.c:30` | `static sqb_req mk(const char *u)` |
-| `slow_run` | function | `tests/test_subreq_batch.c:18` | `static int slow_run(void *ctx, const sqb_req *rq, sqb_res *out)` |
-| `test_full_batch_refuses_and_reset_reuses` | function | `tests/test_subreq_batch.c:75` | `static void test_full_batch_refuses_and_reset_reuses(void **st)` |
-| `test_null_args_fail_closed` | function | `tests/test_subreq_batch.c:89` | `static void test_null_args_fail_closed(void **st)` |
 
 Next: [SYMBOLS_p16.md](SYMBOLS_p16.md)

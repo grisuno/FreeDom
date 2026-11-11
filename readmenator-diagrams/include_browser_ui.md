@@ -19,19 +19,19 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## gui (2.1)
+## gui (3.1)
 
 gui groups 3 files (c) around _GNU_SOURCE, UI_TOOLBAR_H, UI_TITLEBAR_H, UI_TABBAR_H, UI_TAB_MIN_W. ui_input_state: Live editable state for one form text control, aliasing a block of the...
 
-## include (2.2)
+## include (3.2)
 
 include groups 16 files (h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. block_flow (bf_) -- vertical margin collapsing for block-level boxes.
 
-## src (2.3)
+## src (3.3)
 
 src groups 13 files (c) around finite_or_zero, bf_collapse_n, bf_collapse, bf_margins_adjoin, bb_box_sizes. block_flow (bf_) -- vertical margin collapsing.
 
-## tests (2.4)
+## tests (3.4)
 
 tests groups 15 files (c) around dbl_eq, test_two_positive_collapse_to_max, test_two_negative_take_the_most_negative, test_non_finite_is_absent, test_collapse_n_matches_binary. test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never...
 

@@ -1,12 +1,15 @@
 # src: css
 
-src: css groups 38 files (c, h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. car_ops: The questions @supports asks the caller's own engine. prop is lowercased and...
+src: css groups 57 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
 
 ```mermaid
 graph LR
+    gui["gui"]
     include["include"]
     src["src"]
     tests["tests"]
+    gui -- "depends on" --> include
+    gui -- "calls into" --> src
     include -- "calls into" --> src
     src -- "calls into" --> include
     src -- "calls into" --> tests
@@ -14,23 +17,34 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (4.1)
+## gui (1.1)
 
-include groups 13 files (h) around FREEDOM_CSS_COLOR_H, b, cc_rgb, cc_status, cc_pack. car_ops: The questions @supports asks the caller's own engine. prop is lowercased and...
+gui groups 3 files (c, h) around FREEDOM_BROWSER_UI_INTERNAL_H, UI_FONT_SIZE, UI_TEXT_MARGIN, UI_HEADING_LEVELS, b. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
 
-## src (4.2)
+## include (1.2)
 
-src groups 14 files (c) around CSS_INIT_SELS, CSS_INIT_DECLS, emit, CSS_DECL_SLOTS_MIN, CSS_INIT_RULES. len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r...
+include groups 18 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
-## tests (4.3)
+## src (1.3)
 
-tests groups 11 files (c) around toy_decl, toy_sel, sup, test_declaration_tests, test_boolean_combinators. test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md).
+src groups 19 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...
+
+## tests (1.4)
+
+tests groups 17 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
 
 **Files**:
 
+- gui/browser_ui_internal.h
+- gui/bui_mask_img.c
+- gui/bui_theme.c
+- include/compositor.h
+- include/css.h
 - include/css_atrule.h
 - include/css_box.h
 - include/css_color.h
+- include/css_computed.h
+- include/css_counter.h
 - include/css_decl.h
 - include/css_gradient.h
 - include/css_index.h
@@ -41,11 +55,15 @@ tests groups 11 files (c) around toy_decl, toy_sel, sup, test_declaration_tests,
 - include/css_text.h
 - include/css_values.h
 - include/css_vars.h
+- include/text_case.h
+- src/compositor.c
 - src/css.c
 - src/css_atrule.c
 - src/css_box.c
 - src/css_chain.c
 - src/css_color.c
+- src/css_computed.c
+- src/css_counter.c
 - src/css_gradient.c
 - src/css_index.c
 - src/css_length.c
@@ -55,9 +73,16 @@ tests groups 11 files (c) around toy_decl, toy_sel, sup, test_declaration_tests,
 - src/css_text.c
 - src/css_values.c
 - src/css_vars.c
+- src/js_native.c
+- src/text_case.c
+- tests/test_compositor.c
+- tests/test_css.c
 - tests/test_css_atrule.c
 - tests/test_css_box.c
 - tests/test_css_color.c
+- tests/test_css_computed.c
+- tests/test_css_counter.c
+- tests/test_css_drops.c
 - tests/test_css_gradient.c
 - tests/test_css_index.c
 - tests/test_css_length.c
@@ -66,3 +91,4 @@ tests groups 11 files (c) around toy_decl, toy_sel, sup, test_declaration_tests,
 - tests/test_css_text.c
 - tests/test_css_values.c
 - tests/test_css_vars.c
+- tests/test_text_case.c

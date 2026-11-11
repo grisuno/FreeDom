@@ -2560,6 +2560,9 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
         browser_set_page(&w->bs, NULL, "Failed to spawn sandboxed tab.", 1);
         return;
     }
+    /* A timer tick that left the document untouched sends no view (spec/tab.md): the window
+     * keeps its laid-out document instead of rebuilding and repainting it. */
+    tab_set_lazy_ticks(t, 1);
 
     /* Page-JS network (XHR/fetch) is granted only for a host in allow.conf AND js.conf
      * (the sovereignty boundary): the fetcher re-applies the full network policy.
@@ -16121,19 +16124,23 @@ static int apply_click_result(browser_window *w, tab_page *page) {
         }
         browser_set_status(&w->bs, "Stopped a JavaScript redirect loop.", now_ms());
     }
-    if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
-    w->hover_href = NULL; /* aliased the doc we just freed; recomputed on next hover */
-    w->hover_cursor = CSS_CUR_UNSET;
-    rdp_caps eff = page_render_caps(w);
-    rd_doc *doc = NULL;
-    if (rd_build(page->view, eff, w->cur_top, &doc) == RD_OK) {
-        w->doc = doc;
+    /* A lazy tick that found the document untouched carries no view: the laid-out document,
+     * the hover state and the page title/text all stay exactly as they are. */
+    if (!page->unchanged) {
+        if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
+        w->hover_href = NULL; /* aliased the doc we just freed; recomputed on next hover */
+        w->hover_cursor = CSS_CUR_UNSET;
+        rdp_caps eff = page_render_caps(w);
+        rd_doc *doc = NULL;
+        if (rd_build(page->view, eff, w->cur_top, &doc) == RD_OK) {
+            w->doc = doc;
+        }
+        rebuild_inputs(w);
+        browser_set_page(&w->bs, page->title, page->text, 0);
     }
-    rebuild_inputs(w);
     fb_buffer_free(&w->console);
     w->console = page->console;
     fb_buffer_init(&page->console);
-    browser_set_page(&w->bs, page->title, page->text, 0);
     /* Handlers may have (re)armed timers: schedule the next tick from the report. */
     schedule_js_tick(w, page->next_timer_ms);
     apply_history_ops(w, page);
@@ -16164,11 +16171,18 @@ static void on_tab_async(browser_window *w) {
     tab_status st = TAB_ERR_IO;
     int was_tick = 0;
     if (tab_async_finish(w->tab_worker, &tp, &st, &was_tick) != TAB_OK) return;
+    int repaint = 1;
     if (was_tick && st == TAB_OK) {
-        (void)apply_click_result(w, &tp);
+        /* Nothing on screen moved when the document is untouched and the console (shown by
+         * Freebug) did not grow; a navigation or a new tab repaints on its own path. */
+        size_t lines_before = fb_buffer_count(&w->console);
+        int same_doc = tp.unchanged;
+        size_t lines_after = fb_buffer_count(&tp.console);
+        int handled = apply_click_result(w, &tp);
         tab_page_free(&tp);
+        if (same_doc && !handled && lines_after == lines_before) repaint = 0;
     }
-    redraw(w);
+    if (repaint) redraw(w);
 }
 
 static void gui_quiesce(browser_window *w) {

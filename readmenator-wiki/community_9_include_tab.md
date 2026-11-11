@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 7 file(s) rooted at `include` with dominant language c (cohesion 0.41). Central symbols: `FBK_MAX_DEPTH`, `FBK_MAX_FRAMES`, `FBK_MAX_MSG`, `FBK_ORIGIN_MAX`, `FBK_URL_MAX`, `FH_MAX_DEPTH`, `FREEDOM_FRAME_BROKER_H`, `FREEDOM_FRAME_HOST_H`. Core file: `include/tab.h` (53 symbols). Documented purpose: test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router..
+This community groups 7 file(s) rooted at `include` with dominant language c (cohesion 0.41). Central symbols: `FBK_MAX_DEPTH`, `FBK_MAX_FRAMES`, `FBK_MAX_MSG`, `FBK_ORIGIN_MAX`, `FBK_URL_MAX`, `FH_MAX_DEPTH`, `FREEDOM_FRAME_BROKER_H`, `FREEDOM_FRAME_HOST_H`. Core file: `include/tab.h` (55 symbols). Documented purpose: test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router..
 
 ## Files
 
@@ -12,7 +12,7 @@ This community groups 7 file(s) rooted at `include` with dominant language c (co
 |------|----------|-------|---------|-----|
 | `include/frame_broker.h` | h | utility | 17 | no |
 | `include/frame_host.h` | h | utility | 11 | no |
-| `include/tab.h` | h | utility | 53 | no |
+| `include/tab.h` | h | utility | 55 | no |
 | `src/frame_broker.c` | c | utility | 10 | no |
 | `src/frame_host.c` | c | utility | 16 | no |
 | `tests/test_frame_broker.c` | c | testing | 10 | yes |
@@ -58,9 +58,9 @@ This community groups 7 file(s) rooted at `include` with dominant language c (co
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/tab.h.
-- [EXTRACTED] depends_on community 9 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
-- [EXTRACTED] depends_on community 9 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
+- [EXTRACTED] depends_on community 2 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/tab.h.
+- [EXTRACTED] depends_on community 9 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
+- [EXTRACTED] depends_on community 9 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
 
 ## Risks
 

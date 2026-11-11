@@ -1,12 +1,12 @@
 # `include/dom.h`
 
-> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 60.0% | [API index](../index.md)
+> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 58.1% | [API index](../index.md)
 
 ## Contents
 
 - **Enums:** [`dom_status`](#dom_status), [`dom_place`](#dom_place)
 - **Type Aliases:** [`dom_node_id`](#dom_node_id), [`dom_index`](#dom_index)
-- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`tree`](#tree), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length), [`process`](#process)
+- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`tree`](#tree), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`valid`](#valid), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length), [`process`](#process)
 - **Macros:** [`DOM_NODE_NONE`](#dom_node_none), [`DOM_KIND_NONE`](#dom_kind_none), [`DOM_KIND_ELEMENT`](#dom_kind_element), [`DOM_KIND_TEXT`](#dom_kind_text), [`DOM_KIND_COMMENT`](#dom_kind_comment), [`DOM_MAX_HANDLES`](#dom_max_handles)
 
 ## Type Diagram
@@ -42,7 +42,7 @@ typedef enum dom_status
 
 ### `dom_place`
 
-`enum` | [include/dom.h:187](../../include/dom.h#L187)
+`enum` | [include/dom.h:194](../../include/dom.h#L194)
 
 ```c
 typedef enum dom_place
@@ -398,11 +398,33 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ---
 
+<a id="valid"></a>
+
+### `valid`
+
+`function` | [include/dom.h:146](../../include/dom.h#L146)
+
+```c
+* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never call lxb_dom_node_destroy. */ /* A counter that moves on every call that can change the
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `rendered` | `it just becomes unreachable from the root and is no * longer` |  |  |
+
+**Returns:** `* detached node stays`
+
+*Called by:* [`dom_append_child`](src.dom.c.md#dom_append_child), [`dom_clone_node`](src.dom.c.md#dom_clone_node), [`dom_document_position`](src.dom.c.md#dom_document_position), [`dom_first_child`](src.dom.c.md#dom_first_child), [`dom_insert_before`](src.dom.c.md#dom_insert_before), [`dom_move_children`](src.dom.c.md#dom_move_children), [`dom_next_sibling`](src.dom.c.md#dom_next_sibling), [`dom_node_kind`](src.dom.c.md#dom_node_kind), [`dom_parent`](src.dom.c.md#dom_parent), [`dom_precedes`](src.dom.c.md#dom_precedes), [`dom_remove_child`](src.dom.c.md#dom_remove_child), [`dom_set_text_content`](src.dom.c.md#dom_set_text_content) and 2 more
+
+---
+
 <a id="cycle"></a>
 
 ### `cycle`
 
-`function` | [include/dom.h:169](../../include/dom.h#L169)
+`function` | [include/dom.h:176](../../include/dom.h#L176)
 
 ```c
 * Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */ dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child);
@@ -422,7 +444,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `parent`
 
-`function` | [include/dom.h:196](../../include/dom.h#L196)
+`function` | [include/dom.h:203](../../include/dom.h#L203)
 
 ```c
 * child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent, dom_place where, dom_node_id ref
@@ -442,7 +464,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `dom_node_kind`
 
-`function` | [include/dom.h:212](../../include/dom.h#L212)
+`function` | [include/dom.h:219](../../include/dom.h#L219)
 
 ```c
 int dom_node_kind(const dom_index *idx, dom_node_id node);
@@ -465,7 +487,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `index`
 
-`function` | [include/dom.h:228](../../include/dom.h#L228)
+`function` | [include/dom.h:235](../../include/dom.h#L235)
 
 ```c
 * stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child);
@@ -485,7 +507,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `length`
 
-`function` | [include/dom.h:253](../../include/dom.h#L253)
+`function` | [include/dom.h:260](../../include/dom.h#L260)
 
 ```c
 * length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard cap — OOM from malloc is the only limit. * Invalid handle / NULL out => DOM_ERR_NULL
@@ -505,7 +527,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `process`
 
-`function` | [include/dom.h:260](../../include/dom.h#L260)
+`function` | [include/dom.h:267](../../include/dom.h#L267)
 
 ```c
 * modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next mutation of that node. */ const void *dom_native_node(const dom_index *idx, dom_node_id n
@@ -541,7 +563,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `DOM_KIND_NONE`
 
-`macro` | [include/dom.h:203](../../include/dom.h#L203)
+`macro` | [include/dom.h:210](../../include/dom.h#L210)
 
 ```c
 #define DOM_KIND_NONE
@@ -557,7 +579,7 @@ node-level navigation or creation reaches them. Element-only functions reject th
 
 ### `DOM_KIND_ELEMENT`
 
-`macro` | [include/dom.h:204](../../include/dom.h#L204)
+`macro` | [include/dom.h:211](../../include/dom.h#L211)
 
 ```c
 #define DOM_KIND_ELEMENT
@@ -569,7 +591,7 @@ node-level navigation or creation reaches them. Element-only functions reject th
 
 ### `DOM_KIND_TEXT`
 
-`macro` | [include/dom.h:205](../../include/dom.h#L205)
+`macro` | [include/dom.h:212](../../include/dom.h#L212)
 
 ```c
 #define DOM_KIND_TEXT
@@ -583,7 +605,7 @@ the DOM nodeType numbers
 
 ### `DOM_KIND_COMMENT`
 
-`macro` | [include/dom.h:206](../../include/dom.h#L206)
+`macro` | [include/dom.h:213](../../include/dom.h#L213)
 
 ```c
 #define DOM_KIND_COMMENT
@@ -595,7 +617,7 @@ the DOM nodeType numbers
 
 ### `DOM_MAX_HANDLES`
 
-`macro` | [include/dom.h:209](../../include/dom.h#L209)
+`macro` | [include/dom.h:216](../../include/dom.h#L216)
 
 ```c
 #define DOM_MAX_HANDLES

@@ -1,4 +1,4 @@
-# Symbols (page 3 of 16)
+# Symbols (page 3 of 17)
 Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
@@ -266,15 +266,15 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FREEDOM_DISK_STORE_H` | macro | `include/disk_store.h:2` | `#define FREEDOM_DISK_STORE_H` |
 | `ds_free` | function | `include/disk_store.h:47` | `void ds_free(uint8_t *buf, size_t len);` |
 | `ds_status` | enum | `include/disk_store.h:25` | `` |
-| `DOM_KIND_COMMENT` | macro | `include/dom.h:206` | `#define DOM_KIND_COMMENT` |
-| `DOM_KIND_ELEMENT` | macro | `include/dom.h:204` | `#define DOM_KIND_ELEMENT` |
-| `DOM_KIND_NONE` | macro | `include/dom.h:203` | `#define DOM_KIND_NONE` |
-| `DOM_KIND_TEXT` | macro | `include/dom.h:205` | `#define DOM_KIND_TEXT` |
-| `DOM_MAX_HANDLES` | macro | `include/dom.h:209` | `#define DOM_MAX_HANDLES` |
+| `DOM_KIND_COMMENT` | macro | `include/dom.h:213` | `#define DOM_KIND_COMMENT` |
+| `DOM_KIND_ELEMENT` | macro | `include/dom.h:211` | `#define DOM_KIND_ELEMENT` |
+| `DOM_KIND_NONE` | macro | `include/dom.h:210` | `#define DOM_KIND_NONE` |
+| `DOM_KIND_TEXT` | macro | `include/dom.h:212` | `#define DOM_KIND_TEXT` |
+| `DOM_MAX_HANDLES` | macro | `include/dom.h:216` | `#define DOM_MAX_HANDLES` |
 | `DOM_NODE_NONE` | macro | `include/dom.h:37` | `#define DOM_NODE_NONE` |
 | `FREEDOM_DOM_H` | macro | `include/dom.h:2` | `#define FREEDOM_DOM_H` |
 | `count` | function | `include/dom.h:64` | `* match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index...` |
-| `cycle` | function | `include/dom.h:169` | `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...` |
+| `cycle` | function | `include/dom.h:176` | `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...` |
 | `dom_attribute_names` | function | `include/dom.h:133` | `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);` |
 | `dom_document_position` | function | `include/dom.h:106` | `size_t dom_document_position(const dom_index *idx, dom_node_id node);` |
 | `dom_document_title` | function | `include/dom.h:141` | `const char *dom_document_title(const dom_index *idx, size_t *len);` |
@@ -285,17 +285,18 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `dom_matches` | function | `include/dom.h:96` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);` |
 | `dom_node_count` | function | `include/dom.h:51` | `size_t dom_node_count(const dom_index *idx);` |
 | `dom_node_id` | type_alias | `include/dom.h:34` | `typedef uint32_t dom_node_id;` |
-| `dom_node_kind` | function | `include/dom.h:212` | `int dom_node_kind(const dom_index *idx, dom_node_id node);` |
-| `dom_place` | enum | `include/dom.h:187` | `` |
+| `dom_node_kind` | function | `include/dom.h:219` | `int dom_node_kind(const dom_index *idx, dom_node_id node);` |
+| `dom_place` | enum | `include/dom.h:194` | `` |
 | `dom_precedes` | function | `include/dom.h:109` | `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);` |
 | `dom_status` | enum | `include/dom.h:26` | `` |
 | `dom_tag_name` | function | `include/dom.h:123` | `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);` |
 | `dom_text_content` | function | `include/dom.h:138` | `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);` |
-| `index` | function | `include/dom.h:228` | `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...` |
-| `length` | function | `include/dom.h:253` | `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...` |
-| `parent` | function | `include/dom.h:196` | `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...` |
-| `process` | function | `include/dom.h:260` | `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...` |
+| `index` | function | `include/dom.h:235` | `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...` |
+| `length` | function | `include/dom.h:260` | `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...` |
+| `parent` | function | `include/dom.h:203` | `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...` |
+| `process` | function | `include/dom.h:267` | `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...` |
 | `tree` | function | `include/dom.h:59` | `* tree (the index only grows, so a node a script removed is still registered and must not be * found);` |
+| `valid` | function | `include/dom.h:146` | `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...` |
 | `DD_FIELD_MAX` | macro | `include/dom_debug.h:28` | `#define DD_FIELD_MAX` |
 | `FREEDOM_DOM_DEBUG_H` | macro | `include/dom_debug.h:2` | `#define FREEDOM_DOM_DEBUG_H` |
 | `dd_format` | function | `include/dom_debug.h:36` | `size_t dd_format(const rd_doc *doc, char *out, size_t cap);` |
@@ -495,6 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `walked` | function | `include/hostblock.h:65` | `* walked (the host, then without its first label, ...): any suffix on the allowlist * => HB_ALLOW (allow wins...` |
 | `FREEDOM_HOSTEDIT_H` | macro | `include/hostedit.h:2` | `#define FREEDOM_HOSTEDIT_H` |
 | `HE_MAX_HOST` | macro | `include/hostedit.h:32` | `#define HE_MAX_HOST` |
-| `he_cdn_kind` | function | `include/hostedit.h:62` | `he_cdn_kind_t he_cdn_kind(const char *url);` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

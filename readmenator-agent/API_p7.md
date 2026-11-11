@@ -1,6 +1,109 @@
 # API (page 7 of 12)
 Previous: [API_p6.md](API_p6.md)
 
+## src/css_box.c
+Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
+- `cb_parse_num` (function) `src/css_box.c:13` `static int cb_parse_num(const char *s, double *out, const char **endp)`
+- `cb_wide_keyword` (function) `src/css_box.c:18` `static int cb_wide_keyword(const char *v)`
+- `cb_copy_trim` (function) `src/css_box.c:25` `static size_t cb_copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
+- `cb_length_px` (function) `src/css_box.c:49` `int cb_length_px(const char *v, double *px)` -- Resolves a NUL-terminated <length> token to px through the canonical resolver.
+- `cb_interp_align` (function) `src/css_box.c:54` `int cb_interp_align(const char *v)`
+- `RELATIVE` (function) `src/css_box.c:63` `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...`
+- `cb_interp_fontsize_ex` (function) `src/css_box.c:72` `int cb_interp_fontsize_ex(const char *v, int *abs_out)`
+- `cb_interp_lineheight` (function) `src/css_box.c:145` `int cb_interp_lineheight(const char *v)` -- line-height as a percent of the natural line box.
+- `cb_interp_weight` (function) `src/css_box.c:194` `int cb_interp_weight(const char *v)`
+- `cb_interp_style` (function) `src/css_box.c:203` `int cb_interp_style(const char *v)`
+- `cb_interp_textdeco` (function) `src/css_box.c:213` `int cb_interp_textdeco(const char *v)` -- text-decoration / text-decoration-line: OR of the line keywords underline / overline / line-through found in the...
+- `cb_interp_display` (function) `src/css_box.c:233` `int cb_interp_display(const char *v)`
+- `cb_interp_gap` (function) `src/css_box.c:308` `int cb_interp_gap(const char *v)` -- One gap length.
+- `cb_interp_justify` (function) `src/css_box.c:315` `int cb_interp_justify(const char *v)`
+- `repeat` (function) `src/css_box.c:336` `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) /...`
+- `cb_starts_with_ci` (function) `src/css_box.c:347` `static int cb_starts_with_ci(const char *s, const char *pre)`
+- `count_tracks` (function) `src/css_box.c:353` `static int count_tracks(const char *s, size_t n)`
+- `track_size_of` (function) `src/css_box.c:361` `static int track_size_of(const char *tok)` -- Size of ONE track token: `<N>fr` -> -(N*100); a px/em/rem length -> px (> 0); minmax(a,b) -> the size of its max...
+- `count_one_repeat` (function) `src/css_box.c:391` `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
+                      ...`
+- `walk_tracks` (function) `src/css_box.c:434` `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)`
+- `track_min_of` (function) `src/css_box.c:502` `static int track_min_of(const char *tok)` -- Minimum width of ONE track token for repeat(auto-fill): minmax(a,b) takes a's length; a plain track takes itself....
+- `expand_auto_fill` (function) `src/css_box.c:540` `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` -- repeat(auto-fill|auto-fit, <single-track pattern>) tried as a whole value: returns 1 and emits grid_cols = -min_px...
+- `cb_expand_grid_template_cols` (function) `src/css_box.c:618` `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` -- grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track sizes, emitted in lock-step (P_GRIDCOLS...
+- `cb_expand_grid_template_rows` (function) `src/css_box.c:641` `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)`
+- `accepts` (function) `src/css_box.c:701` `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...`
+- `calc_skip_ws` (function) `src/css_box.c:734` `static void calc_skip_ws(calc_parser *p)`
+- `calc_match_fn` (function) `src/css_box.c:741` `static int calc_match_fn(calc_parser *p, const char *name)` -- bare0: the token was a unitless 0.
+- `calc_piecewise` (function) `src/css_box.c:768` `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` -- Shared by BOTH symbolic components: the percentage is piecewise for exactly the same reason the em derivative is...
+- `calc_mathfn` (function) `src/css_box.c:783` `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` -- min()/max()/clamp() (2026-07-10): comma-separated full expressions, every argument the same shape (all lengths or...
+- `min` (function) `src/css_box.c:802` `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...`
+- `calc_term` (function) `src/css_box.c:906` `static int calc_term(calc_parser *p, calc_val *out, int depth)` -- out->pct = num; out->is_length = 1;   /* a <percentage> is dimensional, like a length ++p->i; return 1; } out->px =...
+- `calc_expr` (function) `src/css_box.c:933` `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
+- `calc_eval_full` (function) `src/css_box.c:955` `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
+           ...` -- Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching ")" already stripped by the caller).
+- `calc_eval_em` (function) `src/css_box.c:969` `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` -- static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em, double *out_pct) { calc_parser...
+- `calc_unwrap` (function) `src/css_box.c:977` `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` -- True if s (already trimmed) is a "calc(...)" call spanning the whole string (case-insensitive keyword, balanced...
+- `cb_interp_len` (function) `src/css_box.c:1028` `int cb_interp_len(const char *v, int allow_auto, int *out)`
+- `pct_slot_of` (function) `src/css_box.c:1057` `static int pct_slot_of(int slot)` -- The css_pct_slot mirroring a px length slot, or -1 when the property does not accept the <length-percentage> type.
+- `cb_value_em_milli` (function) `src/css_box.c:1107` `int cb_value_em_milli(const char *v)` -- The font-relative derivative of `v`, in thousandths of an em, saturating at CSS_EM_MILLI_MAX.
+- `cb_clip_inset` (function) `src/css_box.c:1127` `int cb_clip_inset(const char *val, int px[4], int pm[4])`
+- `cb_interp_lp` (function) `src/css_box.c:1161` `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
+                     int *out_px, ...`
+- `term` (function) `src/css_box.c:1168` `* the same expression and failed closed on the percentage term (its property * may not accept one);`
+- `interp_len` (function) `src/css_box.c:1337` `* this file that might hand a token to interp_len (transitively: margin/padding/
+ * inset, flex-b...`
+- `cb_expand_box2` (function) `src/css_box.c:1408` `int cb_expand_box2(const char *val, int slot_start, int slot_end,
+                       int allo...` -- Expands a two-slot logical shorthand (margin-inline / padding-block / inset-inline: one value sets both sides, two...
+
+## src/css_chain.c
+Depends on: `include/css_chain.h`, `include/css_select.h`
+- `cls_space` (function) `src/css_chain.c:42` `static int cls_space(char c)`
+- `release_nodes` (function) `src/css_chain.c:90` `static void release_nodes(cch_node *nodes, int n)` -- memcpy(buf, v, n); buf[n] = '\0'; size_t nc = 0; for (size_t i = 0; i < n && nc < cap_tok; ) { while (i < n &&...
+- `fill_css_node` (function) `src/css_chain.c:99` `static void fill_css_node(lxb_dom_element_t *e, cch_node *node)` -- Fills *node with element e's tag/id/class tokens (no style=, no parent link yet). * Over-long tokens are simply...
+- `sibling_position` (function) `src/css_chain.c:181` `static void sibling_position(lxb_dom_node_t *n, int *nth, int *nsib)` -- Computes the 1-based index of n among its ELEMENT siblings and the total element-sibling count (both walks bounded...
+- `sibling_type_position` (function) `src/css_chain.c:199` `static void sibling_type_position(lxb_dom_node_t *n, int *nth, int *nsib)` -- Like sibling_position but only counts siblings with the SAME local name as n. * R2: for :nth-of-type() /...
+- `count_children` (function) `src/css_chain.c:227` `static int count_children(lxb_dom_node_t *n)` -- Counts ALL child nodes (elements, text, comments) of the DOM element n. * R2: for :empty matching.
+- `inputs` (function) `src/css_chain.c:241` `* identical inputs (single source of truth). */
+static const css_element *build_chain(lxb_dom_ele...`
+- `cch_element_style_vars` (function) `src/css_chain.c:310` `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,
+                 ...`
+- `cch_path_new` (function) `src/css_chain.c:353` `cch_path *cch_path_new(void)`
+- `path_truncate` (function) `src/css_chain.c:357` `static void path_truncate(cch_path *pa, int keep)`
+- `cch_path_free` (function) `src/css_chain.c:365` `void cch_path_free(cch_path *pa)`
+- `cch_element_style_path` (function) `src/css_chain.c:372` `css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,
+   ...`
+- `cch_pseudo_style` (function) `src/css_chain.c:439` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+            ...`
+- `cch_element_style` (function) `src/css_chain.c:458` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
+- `cch_element_matches` (function) `src/css_chain.c:462` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+- `cch_element_matches_any` (function) `src/css_chain.c:476` `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
+
+## src/css_color.c
+Depends on: `include/css_color.h`
+- `ascii_lower` (function) `src/css_color.c:119` `static int ascii_lower(int c)`
+- `hex_val` (function) `src/css_color.c:123` `static int hex_val(int c)`
+- `normalize` (function) `src/css_color.c:132` `static int normalize(const char *token, char *out)` -- Trims surrounding ASCII spaces and lowercases into out (CC_TOKEN_MAX bytes). * Returns 0, or -1 if the trimmed token...
+- `parse_hex` (function) `src/css_color.c:146` `static int parse_hex(const char *s, cc_rgb *out)` -- static int normalize(const char *token, char *out) { size_t start = 0; while (token[start] == ' ' || token[start] ==...
+- `cc_cws` (function) `src/css_color.c:226` `static void cc_cws(cc_cp *c)`
+- `cc_cfactor` (function) `src/css_color.c:229` `static int cc_cfactor(cc_cp *c, cc_cv *out, int depth)`
+- `cc_cterm` (function) `src/css_color.c:250` `static int cc_cterm(cc_cp *c, cc_cv *out, int depth)`
+- `cc_cexpr` (function) `src/css_color.c:269` `static int cc_cexpr(cc_cp *c, cc_cv *out, int depth)`
+- `cc_fold_calc` (function) `src/css_color.c:285` `static int cc_fold_calc(const char **b, const char **e, char *buf, size_t cap)` -- When [*b, *e) is exactly one calc(...), folds it into buf (cap bytes) and repoints the span there.
+- `cc_round` (function) `src/css_color.c:305` `static long cc_round(double v)` -- cc_cv r; if (cc_cfactor(&c, &r, 0) != 0) return -1; cc_cws(&c); if (c.p != y || r.v != r.v) return -1; if (r.v >...
+- `parse_component` (function) `src/css_color.c:310` `static int parse_component(const char *b, const char *e, int is_alpha, int *out)` -- Parses one rgb() component in [b, e).
+- `parse_hsl_comp` (function) `src/css_color.c:343` `static int parse_hsl_comp(const char *b, const char *e, int is_hue, int *out)` -- Parses one hsl() component: H is integer 0..360, S/L are 0%..100%. * Returns 0 / -1.
+- `span` (function) `src/css_color.c:431` `* span (when a slash is present) into ab/ae, and returns the component count,
+ * or -1. Bounded: ...`
+- `parse_func` (function) `src/css_color.c:508` `static int parse_func(const char *s, cc_rgb *out)` -- Parses the functional rgb()/rgba()/hsl()/hsla() form (lowercased token).
+- `lab_comp` (function) `src/css_color.c:581` `static int lab_comp(const char *b, const char *e, double pct_ref, int is_hue, double *out)` -- One component: a <number>, a <percentage> (scaled so 100% == pct_ref), `none` * (0), or -- when is_hue -- an <angle>...
+- `srgb_encode` (function) `src/css_color.c:609` `static unsigned char srgb_encode(double lin)`
+- `oklab_to_rgb` (function) `src/css_color.c:616` `static void oklab_to_rgb(double L, double a, double b, cc_rgb *out)`
+- `lab_to_rgb` (function) `src/css_color.c:627` `static void lab_to_rgb(double L, double a, double b, cc_rgb *out)` -- return (unsigned char)cc_round(v * 255.0); } static void oklab_to_rgb(double L, double a, double b, cc_rgb *out) {...
+- `parse_lab_family` (function) `src/css_color.c:643` `static int parse_lab_family(const char *s, cc_rgb *out)` -- double fy = (L + 16.0) / 116.0, fx = a / 500.0 + fy, fz = fy - b / 200.0; double xr = (fx * fx * fx > e) ? fx * fx *...
+- `named_cmp` (function) `src/css_color.c:681` `static int named_cmp(const void *key, const void *element)`
+- `parse_named` (function) `src/css_color.c:715` `static int parse_named(const char *s, cc_rgb *out)`
+- `cc_parse` (function) `src/css_color.c:728` `cc_status cc_parse(const char *token, cc_rgb *out)`
+- `strncmp` (function) `src/css_color.c:743` `strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)`
+- `cc_pack` (function) `src/css_color.c:768` `int cc_pack(cc_rgb c)`
+- `cc_unpack` (function) `src/css_color.c:772` `cc_rgb cc_unpack(int packed)`
+
 ## src/css_computed.c
 Depends on: `include/css_computed.h`
 - `put` (function) `src/css_computed.c:9` `static size_t put(char *out, size_t cap, const char *s)`
@@ -318,162 +421,6 @@ Depends on: `include/disk_store.h`, `include/local_store.h`, `include/util.h`
 - `ds_read` (function) `src/disk_store.c:103` `ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN],
                   uint8_t **ou...`
 - `ds_free` (function) `src/disk_store.c:136` `void ds_free(uint8_t *buf, size_t len)`
-
-## src/dom.c
-Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `include/html_parse.h`, `include/util.h`
-- `to_lower_buf` (function) `src/dom.c:33` `static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap)` -- #include <stdint.h> #include <stdlib.h> #include <string.h> #include <lexbor/dom/dom.h> #include...
-- `ptr_hash` (function) `src/dom.c:45` `static size_t ptr_hash(const void *p)`
-- `sm_entry_append` (function) `src/dom.c:70` `static int sm_entry_append(sm_entry *e, dom_node_id id)`
-- `sm_grow` (function) `src/dom.c:82` `static int sm_grow(strmap *m)`
-- `sm_put` (function) `src/dom.c:99` `static int sm_put(strmap *m, const char *key, size_t klen, dom_node_id id)`
-- `sm_find` (function) `src/dom.c:127` `static const sm_entry *sm_find(const strmap *m, const char *key, size_t klen)`
-- `sm_free` (function) `src/dom.c:139` `static void sm_free(strmap *m)`
-- `pm_grow` (function) `src/dom.c:166` `static int pm_grow(ptrmap *m)`
-- `pm_put` (function) `src/dom.c:183` `static int pm_put(ptrmap *m, const void *key, dom_node_id id)`
-- `pm_get` (function) `src/dom.c:200` `static int pm_get(const ptrmap *m, const void *key, dom_node_id *out)`
-- `pm_free` (function) `src/dom.c:211` `static void pm_free(ptrmap *m)`
-- `node_next` (function) `src/dom.c:232` `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` -- /* --- the index --- struct dom_index { lxb_dom_node_t      **nodes;    /* arena: id -> element node, in document...
-- `valid` (function) `src/dom.c:242` `static int valid(const dom_index *idx, dom_node_id n)`
-- `index_element` (function) `src/dom.c:254` `static int index_element(dom_index *idx, lxb_dom_element_t *el, dom_node_id id)` -- A handle that is an ELEMENT: every element-only operation (tag, attributes, selectors, innerHTML, being a parent)...
-- `dom_build` (function) `src/dom.c:291` `dom_status dom_build(const hp_document *doc, dom_index **out)`
-- `dom_free` (function) `src/dom.c:332` `void dom_free(dom_index *idx)`
-- `dom_node_count` (function) `src/dom.c:344` `size_t dom_node_count(const dom_index *idx)`
-- `node_in_document` (function) `src/dom.c:352` `static int node_in_document(const lxb_dom_node_t *node)` -- 1 when `node` is in the document tree (its topmost ancestor is the document node).
-- `dom_get_element_by_id` (function) `src/dom.c:358` `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)`
-- `dom_get_connected_by_id` (function) `src/dom.c:364` `dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id)`
-- `copy_ids` (function) `src/dom.c:387` `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
-- `dom_get_by_tag` (function) `src/dom.c:394` `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
-                      dom_node_id *o...`
-- `dom_get_by_class` (function) `src/dom.c:403` `size_t dom_get_by_class(const dom_index *idx, const char *cls,
-                        dom_node_i...`
-- `id_of` (function) `src/dom.c:416` `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)` -- Max complex selectors in one comma-separated list.
-- `parse_selector_list` (function) `src/dom.c:426` `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)` -- Parses a selector list "a, b, c" into up to cap css_sel.
-- `node_matches_any` (function) `src/dom.c:459` `static int node_matches_any(const lxb_dom_node_t *cn,
-                            const css_sel *...` -- s.order = (int)n; s.rule = 0; out[n++] = s; } } start = i + 1; } break; default: break; } } return n; } /* Nonzero...
-- `count` (function) `src/dom.c:467` `* count (may exceed cap), and returns DOM_NODE_NONE. */
-static dom_node_id qs_walk(const dom_inde...`
-- `dom_query_selector` (function) `src/dom.c:497` `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
-                          ...`
-- `dom_query_selector_all` (function) `src/dom.c:506` `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
-                           ...`
-- `dom_matches` (function) `src/dom.c:517` `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
-- `dom_closest` (function) `src/dom.c:526` `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
-                        const cha...`
-- `dom_document_position` (function) `src/dom.c:542` `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
-- `dom_precedes` (function) `src/dom.c:547` `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
-- `dom_node_at` (function) `src/dom.c:552` `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
-- `dom_parent` (function) `src/dom.c:557` `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
-- `dom_first_child` (function) `src/dom.c:567` `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
-- `dom_next_sibling` (function) `src/dom.c:575` `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
-- `dom_tag_name` (function) `src/dom.c:583` `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
-- `dom_get_attribute` (function) `src/dom.c:594` `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
-                           ...`
-- `dom_attribute_names` (function) `src/dom.c:616` `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
-                           con...`
-- `dom_text_content` (function) `src/dom.c:634` `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
-- `dom_document_title` (function) `src/dom.c:644` `const char *dom_document_title(const dom_index *idx, size_t *len)`
-- `dom_set_text_content` (function) `src/dom.c:657` `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
-                               ...`
-- `dom_set_document_title` (function) `src/dom.c:691` `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
-- `idx_push` (function) `src/dom.c:702` `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)` -- return DOM_OK; } dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len) { if (idx == NULL...
-- `dom_create_element` (function) `src/dom.c:720` `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
-- `dom_append_child` (function) `src/dom.c:740` `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-- `dom_remove_child` (function) `src/dom.c:754` `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-- `dom_set_attribute` (function) `src/dom.c:762` `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
-                             const...`
-- `dom_remove_attribute` (function) `src/dom.c:791` `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
-- `index_subtree` (function) `src/dom.c:800` `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)` -- } } return DOM_OK; } dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name) { if...
-- `dom_set_inner_html` (function) `src/dom.c:810` `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
-                              con...`
-- `ih_append` (function) `src/dom.c:863` `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
-- `ih_free` (function) `src/dom.c:890` `static void ih_free(ih_acc *a)`
-- `dom_get_inner_html` (function) `src/dom.c:917` `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
-                           ...`
-- `dom_insert_before` (function) `src/dom.c:947` `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
-             ...`
-- `dom_clone_node` (function) `src/dom.c:964` `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)`
-- `dom_move_children` (function) `src/dom.c:978` `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
-               ...`
-- `char_kind` (function) `src/dom.c:1011` `static int char_kind(const lxb_dom_node_t *n)`
-- `handle_of` (function) `src/dom.c:1022` `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)` -- /* --- text and comment nodes (spec/dom.md 9) --- static int char_kind(const lxb_dom_node_t *n) { switch (n->type) {...
-- `dom_node_kind` (function) `src/dom.c:1030` `int dom_node_kind(const dom_index *idx, dom_node_id node)`
-- `dom_child_node` (function) `src/dom.c:1034` `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)`
-- `dom_sibling_node` (function) `src/dom.c:1041` `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
-- `dom_create_char_node` (function) `src/dom.c:1048` `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
-         ...`
-- `dom_native_node` (function) `src/dom.c:1062` `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
-
-## src/dom_debug.c
-Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
-- `dd_putc` (function) `src/dom_debug.c:31` `static void dd_putc(dd_cursor *c, char ch)`
-- `dd_emit` (function) `src/dom_debug.c:36` `static void dd_emit(dd_cursor *c, const char *s, size_t len)`
-- `dd_puts` (function) `src/dom_debug.c:40` `static void dd_puts(dd_cursor *c, const char *s)`
-- `dd_printf` (function) `src/dom_debug.c:48` `static void dd_printf(dd_cursor *c, const char *fmt, ...)` -- Formats short fixed fields (ints, hex colours, fixed tokens) only; the variable hostile fields go through dd_field.
-- `dd_w` (function) `src/dom_debug.c:80` `static int dd_w(int v)` -- A border/outline width or radius that is unset (PV_LEN_UNSET) or negative reads as * 0 ("no border"); otherwise the...
-- `dd_color` (function) `src/dom_debug.c:83` `static void dd_color(dd_cursor *c, int rgb)` -- A border/outline width or radius that is unset (PV_LEN_UNSET) or negative reads as * 0 ("no border"); otherwise the...
-- `dd_display_name` (function) `src/dom_debug.c:88` `static const char *dd_display_name(int d)`
-- `dd_justify_name` (function) `src/dom_debug.c:96` `static const char *dd_justify_name(int j)`
-- `dd_align_name` (function) `src/dom_debug.c:108` `static const char *dd_align_name(int a)`
-- `dd_position_name` (function) `src/dom_debug.c:118` `static const char *dd_position_name(int p)`
-- `dd_visibility_name` (function) `src/dom_debug.c:129` `static const char *dd_visibility_name(int v)`
-- `dd_mix_blend_name` (function) `src/dom_debug.c:137` `static const char *dd_mix_blend_name(int m)`
-- `dd_overflow_name` (function) `src/dom_debug.c:157` `static const char *dd_overflow_name(int o)`
-- `dd_cursor_name` (function) `src/dom_debug.c:166` `static const char *dd_cursor_name(int c)`
-- `dd_text_overflow_name` (function) `src/dom_debug.c:199` `static const char *dd_text_overflow_name(int t)`
-- `dd_inset` (function) `src/dom_debug.c:204` `static int dd_inset(int v)` -- case CSS_CUR_PROGRESS:    return "progress"; case CSS_CUR_NO_DROP:     return "no-drop"; case CSS_CUR_VERTICAL_TEXT...
-- `dd_object_fit_name` (function) `src/dom_debug.c:208` `static const char *dd_object_fit_name(int o)`
-- `dd_image_rendering_name` (function) `src/dom_debug.c:219` `static const char *dd_image_rendering_name(int r)`
-- `dd_border_style_name` (function) `src/dom_debug.c:228` `static const char *dd_border_style_name(int s)`
-- `dd_box_line` (function) `src/dom_debug.c:261` `static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b)`
-- `dd_block_line` (function) `src/dom_debug.c:323` `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
-- `dd_format` (function) `src/dom_debug.c:400` `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
-- `dd_format_css` (function) `src/dom_debug.c:432` `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)` -- } dd_puts(&c, "[blocks]\n"); for (size_t i = 0; i < nblocks; ++i) { const rd_block *b = rd_at(doc, i); if (b !=...
-
-## src/download.c
-Depends on: `include/download.h`, `include/pdf_export.h`
-- `lc` (function) `src/download.c:13` `static int lc(int c)` -- download — pure helpers for "save this resource to disk".
-- `ci_find` (function) `src/download.c:19` `static const char *ci_find(const char *hay, const char *needle)` -- #include "download.h" #include "pdf_export.h"   /* pe_safe_basename: the single audited sanitizer #include <ctype.h>...
-- `media_type` (function) `src/download.c:33` `static void media_type(const char *content_type, char *buf, size_t bufsz)` -- Writes the lowercased media type of content_type (the part before ';', with * surrounding spaces trimmed) into buf.
-- `dl_should_download` (function) `src/download.c:47` `int dl_should_download(const char *content_type, const char *content_disposition)`
-- `dl_ext_for_type` (function) `src/download.c:58` `const char *dl_ext_for_type(const char *content_type)`
-- `copy_span` (function) `src/download.c:85` `static void copy_span(const char *src, const char *end, char *buf, size_t bufsz)` -- { "application/xhtml+xml",  ".html" }, { "text/plain",            ".txt"  }, { "image/png",             ".png"  }, {...
-- `extract_disposition_name` (function) `src/download.c:96` `static int extract_disposition_name(const char *cd, char *buf, size_t bufsz)` -- Extracts a filename candidate from a Content-Disposition value into buf.
-- `extract_url_name` (function) `src/download.c:134` `static int extract_url_name(const char *url, char *buf, size_t bufsz)` -- Extracts the last path segment of url (without ?query or #fragment) into buf. * Returns 1 if a non-empty candidate...
-- `has_extension` (function) `src/download.c:148` `static int has_extension(const char *name)` -- Does name already carry an extension (a '.' past the first byte with at least * one character after it)?
-- `dl_pick_name` (function) `src/download.c:153` `dl_status dl_pick_name(const char *url, const char *content_disposition,
-                       c...`
-- `dl_build_path` (function) `src/download.c:195` `dl_status dl_build_path(const char *dir, const char *name, char *out, size_t outsz)`
-- `dl_check_size` (function) `src/download.c:213` `dl_status dl_check_size(size_t len)`
-
-## src/fb_cmdline.c
-Depends on: `include/fb_cmdline.h`, `include/fb_panes.h`, `include/freebug.h`
-- `dup_n` (function) `src/fb_cmdline.c:10` `static char *dup_n(const char *s, size_t n)`
-- `fbc_history_init` (function) `src/fb_cmdline.c:19` `void fbc_history_init(fbc_history *h)`
-- `fbc_history_free` (function) `src/fb_cmdline.c:23` `void fbc_history_free(fbc_history *h)`
-- `fbc_history_push` (function) `src/fb_cmdline.c:32` `int fbc_history_push(fbc_history *h, const char *text, size_t len)`
-- `fbc_history_prev` (function) `src/fb_cmdline.c:53` `const char *fbc_history_prev(fbc_history *h, const char *cur, size_t curlen)`
-- `fbc_history_next` (function) `src/fb_cmdline.c:63` `const char *fbc_history_next(fbc_history *h)`
-- `path_char` (function) `src/fb_cmdline.c:70` `static int path_char(char c)`
-- `fbc_complete_split` (function) `src/fb_cmdline.c:74` `long fbc_complete_split(const char *text, size_t n, char *base, size_t cap, size_t *prefix_off)`
-- `fbc_names_expr` (function) `src/fb_cmdline.c:95` `size_t fbc_names_expr(const char *base, char *out, size_t cap)`
-- `fbc_complete_pick` (function) `src/fb_cmdline.c:118` `size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen,
-                    ...`
-- `fbc_filter_passes` (function) `src/fb_cmdline.c:159` `int fbc_filter_passes(int filter, int level)`
-- `fbc_filter_next` (function) `src/fb_cmdline.c:168` `int fbc_filter_next(int filter)`
-- `fbc_filter_label` (function) `src/fb_cmdline.c:173` `const char *fbc_filter_label(int filter)`
-
-## src/fb_panes.c
-Depends on: `include/fb_panes.h`
-- `tab_ok` (function) `src/fb_panes.c:110` `static int tab_ok(int tab)`
-- `fbp_tab_label` (function) `src/fb_panes.c:112` `const char *fbp_tab_label(int tab)`
-- `ieq` (function) `src/fb_panes.c:114` `static int ieq(const char *a, const char *b)`
-- `fbp_tab_from_name` (function) `src/fb_panes.c:123` `int fbp_tab_from_name(const char *name)`
-- `fbp_tab_wrap` (function) `src/fb_panes.c:130` `int fbp_tab_wrap(int tab, int dir)`
-- `fbp_tab_span` (function) `src/fb_panes.c:136` `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
-- `fbp_tab_at` (function) `src/fb_panes.c:145` `int fbp_tab_at(double px, double cell_w, double pad_cells)`
-- `fbp_is_pane` (function) `src/fb_panes.c:155` `int fbp_is_pane(int tab)`
-- `fbp_js_quote` (function) `src/fb_panes.c:157` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
-- `fbp_expr` (function) `src/fb_panes.c:186` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
 
 
 Next: [API_p8.md](API_p8.md)

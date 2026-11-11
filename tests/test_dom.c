@@ -643,6 +643,40 @@ static void test_move_children(void **state) {
 }
 
 /* Text/comment nodes as lazy handles (spec/dom.md 9). */
+/* dom_mutation_count: every tree-changing call moves it (so "did the page change since the
+ * view was derived" is one comparison); a read never does. */
+static void test_mutation_count(void **state) {
+    dom_index *idx = IDX(state);
+    assert_int_equal(dom_mutation_count(NULL), 0);
+    uint64_t g = dom_mutation_count(idx);
+    size_t n = 0;
+    dom_node_id go = dom_get_element_by_id(idx, "go");
+    assert_int_not_equal(go, DOM_NODE_NONE);
+    (void)dom_text_content(idx, go, &n);
+    (void)dom_get_attribute(idx, go, "class", &n);
+    (void)dom_node_count(idx);
+    dom_node_id made = DOM_NODE_NONE;
+    assert_int_equal(dom_create_element(idx, "span", &made), DOM_OK);   /* detached: not rendered */
+    assert_true(dom_mutation_count(idx) == g);
+
+    assert_int_equal(dom_set_attribute(idx, go, "class", "x"), DOM_OK);
+    assert_true(dom_mutation_count(idx) > g); g = dom_mutation_count(idx);
+    assert_int_equal(dom_remove_attribute(idx, go, "class"), DOM_OK);
+    assert_true(dom_mutation_count(idx) > g); g = dom_mutation_count(idx);
+    assert_int_equal(dom_set_text_content(idx, go, "Hi", 2), DOM_OK);
+    assert_true(dom_mutation_count(idx) > g); g = dom_mutation_count(idx);
+    assert_int_equal(dom_append_child(idx, go, made), DOM_OK);
+    assert_true(dom_mutation_count(idx) > g); g = dom_mutation_count(idx);
+    assert_int_equal(dom_remove_child(idx, go, made), DOM_OK);
+    assert_true(dom_mutation_count(idx) > g); g = dom_mutation_count(idx);
+    assert_int_equal(dom_insert_before(idx, go, made, DOM_NODE_NONE), DOM_OK);
+    assert_true(dom_mutation_count(idx) > g); g = dom_mutation_count(idx);
+    assert_int_equal(dom_set_inner_html(idx, go, "<i>z</i>", 8), DOM_OK);
+    assert_true(dom_mutation_count(idx) > g); g = dom_mutation_count(idx);
+    assert_int_equal(dom_set_document_title(idx, "T2", 2), DOM_OK);
+    assert_true(dom_mutation_count(idx) > g);
+}
+
 static void test_char_nodes(void **state) {
     dom_index *idx = IDX(state);
     dom_node_id box = DOM_NODE_NONE;
@@ -792,6 +826,7 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_clone_node, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_move_children, setup_doc, teardown_doc),
         cmocka_unit_test_setup_teardown(test_char_nodes, setup_doc, teardown_doc),
+        cmocka_unit_test_setup_teardown(test_mutation_count, setup_doc, teardown_doc),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

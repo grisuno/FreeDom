@@ -1599,7 +1599,7 @@ Idempotent; safe on NULL and safe to call twice.
 |---|---|---|---|
 | `v` | `pv_view *` |  |  |
 
-*Called by:* [`tab_load_full`](src.tab.c.md#tab_load_full)
+*Called by:* [`tab_load_full`](src.tab.c.md#tab_load_full), [`tab_page_keep_view`](src.tab.c.md#tab_page_keep_view)
 
 ---
 

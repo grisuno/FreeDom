@@ -17,8 +17,10 @@ flowchart LR
     n_src_js_fetch_c__jd_install_xhr_ex(["jd_install_xhr_ex"])
     n_src_js_fetch_c__jd_net_deliver(["jd_net_deliver"])
     n_src_js_sandbox_c__js_context_raw["js_sandbox.js_context_raw"]
+    n_src_js_native_c__jn_host_eval["js_native.jn_host_eval"]
     n_src_js_fetch_c__jd_install_xhr --> n_src_js_fetch_c__jd_install_xhr_ex
     n_src_js_fetch_c__jd_net_deliver -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_fetch_c__jd_install_xhr_ex -.-> n_src_js_native_c__jn_host_eval
     n_src_js_fetch_c__jd_install_xhr_ex -.-> n_src_js_sandbox_c__js_context_raw
 ```
 
@@ -28,7 +30,7 @@ flowchart LR
 
 ### `send`
 
-`function` | [src/js_fetch.c:127](../../src/js_fetch.c#L127)
+`function` | [src/js_fetch.c:128](../../src/js_fetch.c#L128)
 
 ```c
 * callbacks fire right after send();
@@ -42,7 +44,7 @@ flowchart LR
 
 ### `task`
 
-`function` | [src/js_fetch.c:311](../../src/js_fetch.c#L311)
+`function` | [src/js_fetch.c:312](../../src/js_fetch.c#L312)
 
 ```c
 * current task (the page never waits on it);
@@ -62,7 +64,7 @@ flowchart LR
 
 ### `jd_install_xhr`
 
-`function` | [src/js_fetch.c:335](../../src/js_fetch.c#L335)
+`function` | [src/js_fetch.c:336](../../src/js_fetch.c#L336)
 
 ```c
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)
@@ -86,7 +88,7 @@ jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)
 
 ### `jd_net_deliver`
 
-`function` | [src/js_fetch.c:339](../../src/js_fetch.c#L339)
+`function` | [src/js_fetch.c:340](../../src/js_fetch.c#L340)
 
 ```c
 jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len, const char *ctype, const char *hdrs, int ms)
@@ -117,7 +119,7 @@ jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, 
 
 ### `jd_install_xhr_ex`
 
-`function` | [src/js_fetch.c:360](../../src/js_fetch.c#L360)
+`function` | [src/js_fetch.c:361](../../src/js_fetch.c#L361)
 
 ```c
 jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx, jd_fetch_async_fn afn, void *afetch_ctx)
@@ -135,7 +137,7 @@ jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx, jd
 
 **Returns:** `jd_status`
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 *Called by:* [`jd_install_xhr`](#jd_install_xhr)
 

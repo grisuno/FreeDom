@@ -70,9 +70,9 @@ This community groups 19 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
+- [EXTRACTED] depends_on community 2 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
 - [EXTRACTED] depends_on community 7 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
-- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
+- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
 
 ## Risks
 

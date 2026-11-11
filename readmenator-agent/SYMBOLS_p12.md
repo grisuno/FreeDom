@@ -1,8 +1,29 @@
-# Symbols (page 12 of 16)
+# Symbols (page 12 of 17)
 Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_container_unset` | function | `tests/test_css.c:495` | `static void test_container_unset(void **state)` |
+| `test_cursor` | function | `tests/test_css.c:3376` | `static void test_cursor(void **state)` |
+| `test_custom_prop_attr_scoped_skipped_without_matcher` | function | `tests/test_css.c:993` | `static void test_custom_prop_attr_scoped_skipped_without_matcher(void **state)` |
+| `test_custom_prop_attr_scoped_via_root_matcher` | function | `tests/test_css.c:981` | `static void test_custom_prop_attr_scoped_via_root_matcher(void **state)` |
+| `test_custom_prop_chain_eight_deep` | function | `tests/test_css.c:946` | `static void test_custom_prop_chain_eight_deep(void **state)` |
+| `test_custom_prop_class_scoped_applies_with_root_scope` | function | `tests/test_css.c:851` | `static void test_custom_prop_class_scoped_applies_with_root_scope(void **state)` |
+| `test_custom_prop_class_scoped_skipped_without_scope` | function | `tests/test_css.c:839` | `static void test_custom_prop_class_scoped_skipped_without_scope(void **state)` |
+| `test_custom_prop_dark_media_collected_in_dark` | function | `tests/test_css.c:826` | `static void test_custom_prop_dark_media_collected_in_dark(void **state)` |
+| `test_custom_prop_dark_media_not_collected_in_light` | function | `tests/test_css.c:811` | `static void test_custom_prop_dark_media_not_collected_in_light(void **state)` |
+| `test_custom_prop_descendant_scoped_skipped` | function | `tests/test_css.c:864` | `static void test_custom_prop_descendant_scoped_skipped(void **state)` |
+| `test_custom_prop_fanout_bounded` | function | `tests/test_css.c:954` | `static void test_custom_prop_fanout_bounded(void **state)` |
+| `test_custom_prop_long_name_survives` | function | `tests/test_css.c:915` | `static void test_custom_prop_long_name_survives(void **state)` |
+| `test_custom_prop_long_value_survives` | function | `tests/test_css.c:900` | `static void test_custom_prop_long_value_survives(void **state)` |
+| `test_custom_prop_root_matcher_rejects_descendant` | function | `tests/test_css.c:1004` | `static void test_custom_prop_root_matcher_rejects_descendant(void **state)` |
+| `test_custom_prop_table_holds_hundreds` | function | `tests/test_css.c:876` | `static void test_custom_prop_table_holds_hundreds(void **state)` |
+| `test_custom_prop_table_holds_thousands` | function | `tests/test_css.c:927` | `static void test_custom_prop_table_holds_thousands(void **state)` |
+| `test_custom_prop_var_basic` | function | `tests/test_css.c:745` | `static void test_custom_prop_var_basic(void **state)` |
+| `test_custom_prop_var_chain` | function | `tests/test_css.c:771` | `static void test_custom_prop_var_chain(void **state)` |
+| `test_custom_prop_var_fallback_used_when_missing` | function | `tests/test_css.c:756` | `static void test_custom_prop_var_fallback_used_when_missing(void **state)` |
+| `test_custom_prop_var_in_shorthand` | function | `tests/test_css.c:788` | `static void test_custom_prop_var_in_shorthand(void **state)` |
+| `test_custom_prop_var_later_declaration_wins` | function | `tests/test_css.c:798` | `static void test_custom_prop_var_later_declaration_wins(void **state)` |
 | `test_custom_prop_var_never_phones_home` | function | `tests/test_css.c:1397` | `static void test_custom_prop_var_never_phones_home(void **state)` |
 | `test_custom_prop_var_no_fallback_drops_decl` | function | `tests/test_css.c:762` | `static void test_custom_prop_var_no_fallback_drops_decl(void **state)` |
 | `test_custom_prop_var_self_reference_fails_closed` | function | `tests/test_css.c:779` | `static void test_custom_prop_var_self_reference_fails_closed(void **state)` |
@@ -475,26 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_payload_not_data_url` | function | `tests/test_data_url.c:73` | `static void test_payload_not_data_url(void **state)` |
 | `test_payload_nulls` | function | `tests/test_data_url.c:122` | `static void test_payload_nulls(void **state)` |
 | `test_payload_percent_encoded_not_supported` | function | `tests/test_data_url.c:81` | `static void test_payload_percent_encoded_not_supported(void **state)` |
-| `test_payload_too_large` | function | `tests/test_data_url.c:106` | `static void test_payload_too_large(void **state)` |
-| `_POSIX_C_SOURCE` | macro | `tests/test_disk_store.c:8` | `#define _POSIX_C_SOURCE` |
-| `count_dir_entries` | function | `tests/test_disk_store.c:65` | `static size_t count_dir_entries(const char *dir)` |
-| `dir` | type_alias | `tests/test_disk_store.c:32` | `typedef struct fixture { char dir[64];` |
-| `fixture` | struct | `tests/test_disk_store.c:33` | `` |
-| `main` | function | `tests/test_disk_store.c:181` | `int main(void)` |
-| `setup` | function | `tests/test_disk_store.c:35` | `static int setup(void **state)` |
-| `teardown` | function | `tests/test_disk_store.c:45` | `static int teardown(void **state)` |
-| `test_empty` | function | `tests/test_disk_store.c:99` | `static void test_empty(void **state)` |
-| `test_missing_and_null` | function | `tests/test_disk_store.c:168` | `static void test_missing_and_null(void **state)` |
-| `test_no_temp_left` | function | `tests/test_disk_store.c:117` | `static void test_no_temp_left(void **state)` |
-| `test_overwrite` | function | `tests/test_disk_store.c:124` | `static void test_overwrite(void **state)` |
-| `test_permissions` | function | `tests/test_disk_store.c:108` | `static void test_permissions(void **state)` |
-| `test_roundtrip` | function | `tests/test_disk_store.c:78` | `static void test_roundtrip(void **state)` |
-| `test_roundtrip_chacha` | function | `tests/test_disk_store.c:89` | `static void test_roundtrip_chacha(void **state)` |
-| `test_tamper_on_disk` | function | `tests/test_disk_store.c:150` | `static void test_tamper_on_disk(void **state)` |
-| `test_wrong_key` | function | `tests/test_disk_store.c:138` | `static void test_wrong_key(void **state)` |
-| `DOC` | macro | `tests/test_dom.c:58` | `#define DOC(state)` |
-| `IDX` | macro | `tests/test_dom.c:59` | `#define IDX(state)` |
-| `_POSIX_C_SOURCE` | macro | `tests/test_dom.c:1` | `#define _POSIX_C_SOURCE` |
-| `main` | function | `tests/test_dom.c:754` | `int main(void)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

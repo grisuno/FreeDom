@@ -16,6 +16,7 @@
 
 #include "quickjs.h"
 #include "url.h"
+#include "js_native_internal.h"
 
 /* --- real location + JS-navigation capture (Hito 20e parte 1) --- */
 
@@ -163,8 +164,8 @@ jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *pa
     JS_SetPropertyStr(jsctx, global, "__navReplace", JS_NewBool(jsctx, 0));
     JS_FreeValue(jsctx, global);
 
-    JSValue r = JS_Eval(jsctx, JD_LOCATION_SHIM, sizeof JD_LOCATION_SHIM - 1,
-                        "<location-shim>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JD_LOCATION_SHIM, sizeof JD_LOCATION_SHIM - 1,
+                        "<location-shim>");
     int ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     return ok ? JD_OK : JD_ERR_INTERNAL;
@@ -221,8 +222,8 @@ char *jd_take_history(js_context *ctx, int *go) {
     if (ctx == NULL) return NULL;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return NULL;
-    JSValue r = JS_Eval(jsctx, JD_TAKE_HISTORY, sizeof JD_TAKE_HISTORY - 1,
-                        "<take-history>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JD_TAKE_HISTORY, sizeof JD_TAKE_HISTORY - 1,
+                        "<take-history>");
     if (JS_IsException(r)) {
         JS_FreeValue(jsctx, JS_GetException(jsctx));
         return NULL;
@@ -255,7 +256,7 @@ int jd_pop_state(js_context *ctx, int index) {
     int n = snprintf(src, sizeof src,
                      "typeof __histPop==='function'?__histPop(%d):0", index);
     if (n < 0 || (size_t)n >= sizeof src) return 0;
-    JSValue r = JS_Eval(jsctx, src, (size_t)n, "<popstate>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, src, (size_t)n, "<popstate>");
     int32_t v = 0;
     if (JS_IsException(r)) JS_FreeValue(jsctx, JS_GetException(jsctx));
     else if (JS_ToInt32(jsctx, &v, r) != 0) v = 0;

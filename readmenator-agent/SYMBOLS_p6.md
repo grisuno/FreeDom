@@ -1,8 +1,15 @@
-# Symbols (page 6 of 16)
+# Symbols (page 6 of 17)
 Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `bt_box_hidden` | function | `src/box_tree.c:776` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
+| `bt_containing_block` | function | `src/box_tree.c:555` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,                         ...` |
+| `bt_defer_roots` | function | `src/box_tree.c:808` | `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,                       const bt_positi...` |
+| `bt_in_subtree` | function | `src/box_tree.c:789` | `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)` |
+| `bt_layout` | function | `src/box_tree.c:465` | `bt_status bt_layout(bt_node *root, double avail_w)` |
+| `bt_nn` | function | `src/box_tree.c:58` | `static double bt_nn(double v)` |
+| `bt_oof_anchor` | function | `src/box_tree.c:768` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` |
 | `bt_oof_avail` | function | `src/box_tree.c:800` | `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)` |
 | `bt_oof_root` | function | `src/box_tree.c:772` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
 | `bt_resolve_positioning` | function | `src/box_tree.c:585` | `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,                           ...` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `f_color` | function | `src/css_computed.c:193` | `static size_t f_color(const ccm_input *in, char *out, size_t cap)` |
 | `f_cursor` | function | `src/css_computed.c:157` | `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)` |
 | `f_display` | function | `src/css_computed.c:77` | `static size_t f_display(const ccm_input *in, char *out, size_t cap)` |
-| `f_flex_direction` | function | `src/css_computed.c:135` | `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)` |
-| `f_flex_grow` | function | `src/css_computed.c:269` | `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)` |
-| `f_flex_shrink` | function | `src/css_computed.c:272` | `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)` |
-| `f_flex_wrap` | function | `src/css_computed.c:140` | `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)` |
-| `f_float` | function | `src/css_computed.c:105` | `static size_t f_float(const ccm_input *in, char *out, size_t cap)` |
-| `f_font_size` | function | `src/css_computed.c:181` | `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)` |
-| `f_font_style` | function | `src/css_computed.c:173` | `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

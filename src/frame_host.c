@@ -95,6 +95,7 @@ static void load_frame(fh_host *h, int id, const char *url) {
     }
     free(ctype);
     if (tab_open(&t) != TAB_OK) { free(body); fbk_remove(&h->tbl, id); return; }
+    tab_set_lazy_ticks(t, 1);      /* fh_tick keeps the frame's last view when a tick sends none */
     tab_set_net_allowed(t, 1);
     tab_set_css_allowed(t, 1);
     tab_set_fetcher(t, h->fetch, h->fetch_ctx);

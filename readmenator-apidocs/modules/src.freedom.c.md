@@ -138,7 +138,7 @@ typedef struct
 
 ### `pool`
 
-`function` | [src/freedom.c:784](../../src/freedom.c#L784)
+`function` | [src/freedom.c:787](../../src/freedom.c#L787)
 
 ```c
 * the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void *)(uintptr_t)top_url);
@@ -159,7 +159,7 @@ typedef struct
 
 ### `first`
 
-`function` | [src/freedom.c:798](../../src/freedom.c#L798)
+`function` | [src/freedom.c:801](../../src/freedom.c#L801)
 
 ```c
 * always cleared first (fetch_and_render may paint several pages per * process). A NULL top_...
@@ -181,7 +181,7 @@ typedef struct
 
 ### `only`
 
-`function` | [src/freedom.c:868](../../src/freedom.c#L868)
+`function` | [src/freedom.c:873](../../src/freedom.c#L873)
 
 ```c
 * styling for the local render only (no network). --images enables image loading * AND rendering, including remote fetches (so --download-png --images actually * shows images in the bitmap). */ rdp_ca
@@ -201,7 +201,7 @@ typedef struct
 
 ### `BLOCKED`
 
-`function` | [src/freedom.c:1042](../../src/freedom.c#L1042)
+`function` | [src/freedom.c:1047](../../src/freedom.c#L1047)
 
 ```c
 * is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);
@@ -221,7 +221,7 @@ typedef struct
 
 ### `elsewhere`
 
-`function` | [src/freedom.c:1077](../../src/freedom.c#L1077)
+`function` | [src/freedom.c:1082](../../src/freedom.c#L1082)
 
 ```c
 * page whose script immediately forwards elsewhere (e.g. a search engine's * JS-capability interstitial) renders as an empty husk instead of its destination. */ static int fetch_and_render(const char *url)
@@ -243,7 +243,7 @@ typedef struct
 
 ### `parent`
 
-`function` | [src/freedom.c:1103](../../src/freedom.c#L1103)
+`function` | [src/freedom.c:1108](../../src/freedom.c#L1108)
 
 ```c
 * gated by the parent (ln_resolve: a local target stays under the document's * directory, a remote one must be https), bounded by HL_JS_NAV_MAX hops. */ static int render_local(const char *target, int hop)
@@ -265,7 +265,7 @@ typedef struct
 
 ### `main`
 
-`function` | [src/freedom.c:1307](../../src/freedom.c#L1307)
+`function` | [src/freedom.c:1312](../../src/freedom.c#L1312)
 
 ```c
 int main(int argc, char **argv)
@@ -396,7 +396,7 @@ Same 16-sheet / 2 MiB bounds as the GUI stash (anti-DoS).
 
 ### `HL_JS_NAV_MAX`
 
-`macro` | [src/freedom.c:1010](../../src/freedom.c#L1010)
+`macro` | [src/freedom.c:1015](../../src/freedom.c#L1015)
 
 ```c
 #define HL_JS_NAV_MAX

@@ -65,7 +65,7 @@ This community groups 13 file(s) rooted at `src` with dominant language c (cohes
 ## Connections
 
 - [EXTRACTED] depends_on community 5 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/http_cache.h.
-- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/profile.h imports include/local_store.h.
+- [EXTRACTED] depends_on community 2 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/profile.h imports include/local_store.h.
 - [EXTRACTED] depends_on community 7 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 
 ## Risks

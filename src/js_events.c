@@ -19,6 +19,7 @@
 
 #include "quickjs.h"
 #include "js_dom_internal.h"
+#include "js_native_internal.h"
 
 /* --- click events (Stage 4 dispatcher keystone) --- */
 
@@ -51,7 +52,7 @@ jd_status jd_install_events(js_context *ctx, jd_click_state *state) {
  * Fail-open: an exception or a non-number result lets the action proceed. */
 static int jd_eval_default_action(JSContext *jsctx, const char *src, size_t n,
                                   const char *tag) {
-    JSValue r = JS_Eval(jsctx, src, n, tag, JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, src, n, tag);
     int default_action = 1;
     if (!JS_IsException(r)) {
         int32_t v = 1;

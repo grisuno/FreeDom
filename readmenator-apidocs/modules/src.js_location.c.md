@@ -16,15 +16,19 @@ flowchart LR
     n_src_url_c__url_history_target["url.url_history_target"]
     n_src_url_c__url_split["url.url_split"]
     n_src_js_location_c__jd_set_location(["jd_set_location"])
+    n_src_js_native_c__jn_host_eval["js_native.jn_host_eval"]
     n_src_js_sandbox_c__js_context_raw["js_sandbox.js_context_raw"]
     n_src_js_location_c__jd_take_nav_request(["jd_take_nav_request"])
     n_src_js_location_c__jd_take_history(["jd_take_history"])
     n_src_js_location_c__jd_pop_state(["jd_pop_state"])
     n_src_js_location_c__jl_m_hist_target -.-> n_src_url_c__url_history_target
     n_src_js_location_c__jl_m_hist_target -.-> n_src_url_c__url_split
+    n_src_js_location_c__jd_set_location -.-> n_src_js_native_c__jn_host_eval
     n_src_js_location_c__jd_set_location -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_location_c__jd_take_nav_request -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_location_c__jd_take_history -.-> n_src_js_native_c__jn_host_eval
     n_src_js_location_c__jd_take_history -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_location_c__jd_pop_state -.-> n_src_js_native_c__jn_host_eval
     n_src_js_location_c__jd_pop_state -.-> n_src_js_sandbox_c__js_context_raw
 ```
 
@@ -34,7 +38,7 @@ flowchart LR
 
 ### `jl_m_hist_target`
 
-`function` | [src/js_location.c:35](../../src/js_location.c#L35)
+`function` | [src/js_location.c:36](../../src/js_location.c#L36)
 
 ```c
 JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
@@ -63,7 +67,7 @@ A file:// target yields {href} only, like the location it replaces.
 
 ### `jd_set_location`
 
-`function` | [src/js_location.c:139](../../src/js_location.c#L139)
+`function` | [src/js_location.c:140](../../src/js_location.c#L140)
 
 ```c
 jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)
@@ -79,7 +83,7 @@ jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *pa
 
 **Returns:** `jd_status`
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -87,7 +91,7 @@ jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *pa
 
 ### `jd_take_nav_request`
 
-`function` | [src/js_location.c:173](../../src/js_location.c#L173)
+`function` | [src/js_location.c:174](../../src/js_location.c#L174)
 
 ```c
 int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)
@@ -112,7 +116,7 @@ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)
 
 ### `jd_take_history`
 
-`function` | [src/js_location.c:219](../../src/js_location.c#L219)
+`function` | [src/js_location.c:220](../../src/js_location.c#L220)
 
 ```c
 char *jd_take_history(js_context *ctx, int *go)
@@ -131,7 +135,7 @@ Drains the history operations page JS performed since the last call: an owned st
 
 > **Inherited:** Documentation from [`jd_take_history`](#jd_take_history) (include/js_location.h:38).
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -139,7 +143,7 @@ Drains the history operations page JS performed since the last call: an owned st
 
 ### `jd_pop_state`
 
-`function` | [src/js_location.c:250](../../src/js_location.c#L250)
+`function` | [src/js_location.c:251](../../src/js_location.c#L251)
 
 ```c
 int jd_pop_state(js_context *ctx, int index)
@@ -160,6 +164,6 @@ Returns 1 when applied, 0 when index is out of range or no location is installed
 
 > **Inherited:** Documentation from [`jd_pop_state`](#jd_pop_state) (include/js_location.h:44).
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---

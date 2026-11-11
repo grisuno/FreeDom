@@ -1,6 +1,163 @@
 # API (page 8 of 12)
 Previous: [API_p7.md](API_p7.md)
 
+## src/dom.c
+Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `include/html_parse.h`, `include/util.h`
+- `to_lower_buf` (function) `src/dom.c:33` `static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap)` -- #include <stdint.h> #include <stdlib.h> #include <string.h> #include <lexbor/dom/dom.h> #include...
+- `ptr_hash` (function) `src/dom.c:45` `static size_t ptr_hash(const void *p)`
+- `sm_entry_append` (function) `src/dom.c:70` `static int sm_entry_append(sm_entry *e, dom_node_id id)`
+- `sm_grow` (function) `src/dom.c:82` `static int sm_grow(strmap *m)`
+- `sm_put` (function) `src/dom.c:99` `static int sm_put(strmap *m, const char *key, size_t klen, dom_node_id id)`
+- `sm_find` (function) `src/dom.c:127` `static const sm_entry *sm_find(const strmap *m, const char *key, size_t klen)`
+- `sm_free` (function) `src/dom.c:139` `static void sm_free(strmap *m)`
+- `pm_grow` (function) `src/dom.c:166` `static int pm_grow(ptrmap *m)`
+- `pm_put` (function) `src/dom.c:183` `static int pm_put(ptrmap *m, const void *key, dom_node_id id)`
+- `pm_get` (function) `src/dom.c:200` `static int pm_get(const ptrmap *m, const void *key, dom_node_id *out)`
+- `pm_free` (function) `src/dom.c:211` `static void pm_free(ptrmap *m)`
+- `node_next` (function) `src/dom.c:233` `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` -- struct dom_index { lxb_dom_node_t      **nodes;    /* arena: id -> element node, in document order size_t...
+- `valid` (function) `src/dom.c:243` `static int valid(const dom_index *idx, dom_node_id n)`
+- `index_element` (function) `src/dom.c:255` `static int index_element(dom_index *idx, lxb_dom_element_t *el, dom_node_id id)` -- A handle that is an ELEMENT: every element-only operation (tag, attributes, selectors, innerHTML, being a parent)...
+- `dom_build` (function) `src/dom.c:292` `dom_status dom_build(const hp_document *doc, dom_index **out)`
+- `dom_free` (function) `src/dom.c:333` `void dom_free(dom_index *idx)`
+- `dom_mutation_count` (function) `src/dom.c:345` `uint64_t dom_mutation_count(const dom_index *idx)`
+- `dom_node_count` (function) `src/dom.c:349` `size_t dom_node_count(const dom_index *idx)`
+- `node_in_document` (function) `src/dom.c:357` `static int node_in_document(const lxb_dom_node_t *node)` -- 1 when `node` is in the document tree (its topmost ancestor is the document node).
+- `dom_get_element_by_id` (function) `src/dom.c:363` `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)`
+- `dom_get_connected_by_id` (function) `src/dom.c:369` `dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id)`
+- `copy_ids` (function) `src/dom.c:392` `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
+- `dom_get_by_tag` (function) `src/dom.c:399` `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
+                      dom_node_id *o...`
+- `dom_get_by_class` (function) `src/dom.c:408` `size_t dom_get_by_class(const dom_index *idx, const char *cls,
+                        dom_node_i...`
+- `id_of` (function) `src/dom.c:421` `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)` -- Max complex selectors in one comma-separated list.
+- `parse_selector_list` (function) `src/dom.c:431` `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)` -- Parses a selector list "a, b, c" into up to cap css_sel.
+- `node_matches_any` (function) `src/dom.c:464` `static int node_matches_any(const lxb_dom_node_t *cn,
+                            const css_sel *...` -- s.order = (int)n; s.rule = 0; out[n++] = s; } } start = i + 1; } break; default: break; } } return n; } /* Nonzero...
+- `count` (function) `src/dom.c:472` `* count (may exceed cap), and returns DOM_NODE_NONE. */
+static dom_node_id qs_walk(const dom_inde...`
+- `dom_query_selector` (function) `src/dom.c:502` `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
+                          ...`
+- `dom_query_selector_all` (function) `src/dom.c:511` `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
+                           ...`
+- `dom_matches` (function) `src/dom.c:522` `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
+- `dom_closest` (function) `src/dom.c:531` `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
+                        const cha...`
+- `dom_document_position` (function) `src/dom.c:547` `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
+- `dom_precedes` (function) `src/dom.c:552` `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
+- `dom_node_at` (function) `src/dom.c:557` `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
+- `dom_parent` (function) `src/dom.c:562` `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
+- `dom_first_child` (function) `src/dom.c:572` `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
+- `dom_next_sibling` (function) `src/dom.c:580` `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
+- `dom_tag_name` (function) `src/dom.c:588` `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
+- `dom_get_attribute` (function) `src/dom.c:599` `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
+                           ...`
+- `dom_attribute_names` (function) `src/dom.c:621` `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
+                           con...`
+- `dom_text_content` (function) `src/dom.c:639` `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
+- `dom_document_title` (function) `src/dom.c:649` `const char *dom_document_title(const dom_index *idx, size_t *len)`
+- `dom_set_text_content` (function) `src/dom.c:662` `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
+                               ...`
+- `dom_set_document_title` (function) `src/dom.c:697` `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
+- `idx_push` (function) `src/dom.c:709` `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)` -- } dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len) { if (idx != NULL)...
+- `dom_create_element` (function) `src/dom.c:727` `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
+- `dom_append_child` (function) `src/dom.c:747` `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
+- `dom_remove_child` (function) `src/dom.c:762` `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
+- `dom_set_attribute` (function) `src/dom.c:771` `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
+                             const...`
+- `dom_remove_attribute` (function) `src/dom.c:801` `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
+- `index_subtree` (function) `src/dom.c:811` `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)` -- } return DOM_OK; } dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name) { if (idx !=...
+- `dom_set_inner_html` (function) `src/dom.c:821` `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
+                              con...`
+- `ih_append` (function) `src/dom.c:875` `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
+- `ih_free` (function) `src/dom.c:902` `static void ih_free(ih_acc *a)`
+- `dom_get_inner_html` (function) `src/dom.c:929` `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
+                           ...`
+- `dom_insert_before` (function) `src/dom.c:959` `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
+             ...`
+- `dom_clone_node` (function) `src/dom.c:977` `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)`
+- `dom_move_children` (function) `src/dom.c:991` `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
+               ...`
+- `char_kind` (function) `src/dom.c:1025` `static int char_kind(const lxb_dom_node_t *n)`
+- `handle_of` (function) `src/dom.c:1036` `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)` -- /* --- text and comment nodes (spec/dom.md 9) --- static int char_kind(const lxb_dom_node_t *n) { switch (n->type) {...
+- `dom_node_kind` (function) `src/dom.c:1044` `int dom_node_kind(const dom_index *idx, dom_node_id node)`
+- `dom_child_node` (function) `src/dom.c:1048` `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)`
+- `dom_sibling_node` (function) `src/dom.c:1055` `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
+- `dom_create_char_node` (function) `src/dom.c:1062` `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
+         ...`
+- `dom_native_node` (function) `src/dom.c:1076` `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
+
+## src/dom_debug.c
+Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
+- `dd_putc` (function) `src/dom_debug.c:31` `static void dd_putc(dd_cursor *c, char ch)`
+- `dd_emit` (function) `src/dom_debug.c:36` `static void dd_emit(dd_cursor *c, const char *s, size_t len)`
+- `dd_puts` (function) `src/dom_debug.c:40` `static void dd_puts(dd_cursor *c, const char *s)`
+- `dd_printf` (function) `src/dom_debug.c:48` `static void dd_printf(dd_cursor *c, const char *fmt, ...)` -- Formats short fixed fields (ints, hex colours, fixed tokens) only; the variable hostile fields go through dd_field.
+- `dd_w` (function) `src/dom_debug.c:80` `static int dd_w(int v)` -- A border/outline width or radius that is unset (PV_LEN_UNSET) or negative reads as * 0 ("no border"); otherwise the...
+- `dd_color` (function) `src/dom_debug.c:83` `static void dd_color(dd_cursor *c, int rgb)` -- A border/outline width or radius that is unset (PV_LEN_UNSET) or negative reads as * 0 ("no border"); otherwise the...
+- `dd_display_name` (function) `src/dom_debug.c:88` `static const char *dd_display_name(int d)`
+- `dd_justify_name` (function) `src/dom_debug.c:96` `static const char *dd_justify_name(int j)`
+- `dd_align_name` (function) `src/dom_debug.c:108` `static const char *dd_align_name(int a)`
+- `dd_position_name` (function) `src/dom_debug.c:118` `static const char *dd_position_name(int p)`
+- `dd_visibility_name` (function) `src/dom_debug.c:129` `static const char *dd_visibility_name(int v)`
+- `dd_mix_blend_name` (function) `src/dom_debug.c:137` `static const char *dd_mix_blend_name(int m)`
+- `dd_overflow_name` (function) `src/dom_debug.c:157` `static const char *dd_overflow_name(int o)`
+- `dd_cursor_name` (function) `src/dom_debug.c:166` `static const char *dd_cursor_name(int c)`
+- `dd_text_overflow_name` (function) `src/dom_debug.c:199` `static const char *dd_text_overflow_name(int t)`
+- `dd_inset` (function) `src/dom_debug.c:204` `static int dd_inset(int v)` -- case CSS_CUR_PROGRESS:    return "progress"; case CSS_CUR_NO_DROP:     return "no-drop"; case CSS_CUR_VERTICAL_TEXT...
+- `dd_object_fit_name` (function) `src/dom_debug.c:208` `static const char *dd_object_fit_name(int o)`
+- `dd_image_rendering_name` (function) `src/dom_debug.c:219` `static const char *dd_image_rendering_name(int r)`
+- `dd_border_style_name` (function) `src/dom_debug.c:228` `static const char *dd_border_style_name(int s)`
+- `dd_box_line` (function) `src/dom_debug.c:261` `static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b)`
+- `dd_block_line` (function) `src/dom_debug.c:323` `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)`
+- `dd_format` (function) `src/dom_debug.c:400` `size_t dd_format(const rd_doc *doc, char *out, size_t cap)`
+- `dd_format_css` (function) `src/dom_debug.c:432` `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)` -- } dd_puts(&c, "[blocks]\n"); for (size_t i = 0; i < nblocks; ++i) { const rd_block *b = rd_at(doc, i); if (b !=...
+
+## src/download.c
+Depends on: `include/download.h`, `include/pdf_export.h`
+- `lc` (function) `src/download.c:13` `static int lc(int c)` -- download — pure helpers for "save this resource to disk".
+- `ci_find` (function) `src/download.c:19` `static const char *ci_find(const char *hay, const char *needle)` -- #include "download.h" #include "pdf_export.h"   /* pe_safe_basename: the single audited sanitizer #include <ctype.h>...
+- `media_type` (function) `src/download.c:33` `static void media_type(const char *content_type, char *buf, size_t bufsz)` -- Writes the lowercased media type of content_type (the part before ';', with * surrounding spaces trimmed) into buf.
+- `dl_should_download` (function) `src/download.c:47` `int dl_should_download(const char *content_type, const char *content_disposition)`
+- `dl_ext_for_type` (function) `src/download.c:58` `const char *dl_ext_for_type(const char *content_type)`
+- `copy_span` (function) `src/download.c:85` `static void copy_span(const char *src, const char *end, char *buf, size_t bufsz)` -- { "application/xhtml+xml",  ".html" }, { "text/plain",            ".txt"  }, { "image/png",             ".png"  }, {...
+- `extract_disposition_name` (function) `src/download.c:96` `static int extract_disposition_name(const char *cd, char *buf, size_t bufsz)` -- Extracts a filename candidate from a Content-Disposition value into buf.
+- `extract_url_name` (function) `src/download.c:134` `static int extract_url_name(const char *url, char *buf, size_t bufsz)` -- Extracts the last path segment of url (without ?query or #fragment) into buf. * Returns 1 if a non-empty candidate...
+- `has_extension` (function) `src/download.c:148` `static int has_extension(const char *name)` -- Does name already carry an extension (a '.' past the first byte with at least * one character after it)?
+- `dl_pick_name` (function) `src/download.c:153` `dl_status dl_pick_name(const char *url, const char *content_disposition,
+                       c...`
+- `dl_build_path` (function) `src/download.c:195` `dl_status dl_build_path(const char *dir, const char *name, char *out, size_t outsz)`
+- `dl_check_size` (function) `src/download.c:213` `dl_status dl_check_size(size_t len)`
+
+## src/fb_cmdline.c
+Depends on: `include/fb_cmdline.h`, `include/fb_panes.h`, `include/freebug.h`
+- `dup_n` (function) `src/fb_cmdline.c:10` `static char *dup_n(const char *s, size_t n)`
+- `fbc_history_init` (function) `src/fb_cmdline.c:19` `void fbc_history_init(fbc_history *h)`
+- `fbc_history_free` (function) `src/fb_cmdline.c:23` `void fbc_history_free(fbc_history *h)`
+- `fbc_history_push` (function) `src/fb_cmdline.c:32` `int fbc_history_push(fbc_history *h, const char *text, size_t len)`
+- `fbc_history_prev` (function) `src/fb_cmdline.c:53` `const char *fbc_history_prev(fbc_history *h, const char *cur, size_t curlen)`
+- `fbc_history_next` (function) `src/fb_cmdline.c:63` `const char *fbc_history_next(fbc_history *h)`
+- `path_char` (function) `src/fb_cmdline.c:70` `static int path_char(char c)`
+- `fbc_complete_split` (function) `src/fb_cmdline.c:74` `long fbc_complete_split(const char *text, size_t n, char *base, size_t cap, size_t *prefix_off)`
+- `fbc_names_expr` (function) `src/fb_cmdline.c:95` `size_t fbc_names_expr(const char *base, char *out, size_t cap)`
+- `fbc_complete_pick` (function) `src/fb_cmdline.c:118` `size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen,
+                    ...`
+- `fbc_filter_passes` (function) `src/fb_cmdline.c:159` `int fbc_filter_passes(int filter, int level)`
+- `fbc_filter_next` (function) `src/fb_cmdline.c:168` `int fbc_filter_next(int filter)`
+- `fbc_filter_label` (function) `src/fb_cmdline.c:173` `const char *fbc_filter_label(int filter)`
+
+## src/fb_panes.c
+Depends on: `include/fb_panes.h`
+- `tab_ok` (function) `src/fb_panes.c:110` `static int tab_ok(int tab)`
+- `fbp_tab_label` (function) `src/fb_panes.c:112` `const char *fbp_tab_label(int tab)`
+- `ieq` (function) `src/fb_panes.c:114` `static int ieq(const char *a, const char *b)`
+- `fbp_tab_from_name` (function) `src/fb_panes.c:123` `int fbp_tab_from_name(const char *name)`
+- `fbp_tab_wrap` (function) `src/fb_panes.c:130` `int fbp_tab_wrap(int tab, int dir)`
+- `fbp_tab_span` (function) `src/fb_panes.c:136` `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)`
+- `fbp_tab_at` (function) `src/fb_panes.c:145` `int fbp_tab_at(double px, double cell_w, double pad_cells)`
+- `fbp_is_pane` (function) `src/fb_panes.c:155` `int fbp_is_pane(int tab)`
+- `fbp_js_quote` (function) `src/fb_panes.c:157` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
+- `fbp_expr` (function) `src/fb_panes.c:186` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
+
 ## src/flex_layout.c
 Depends on: `include/flex_layout.h`
 - `nn` (function) `src/flex_layout.c:19` `static double nn(double v)` -- bounded by FX_MAX_ITEMS (no VLAs).
@@ -98,14 +255,14 @@ Depends on: `include/frame_broker.h`, `include/frame_host.h`
 - `fh_free` (function) `src/frame_host.c:67` `void fh_free(fh_host *h)`
 - `fh_count` (function) `src/frame_host.c:76` `int fh_count(const fh_host *h)`
 - `load_frame` (function) `src/frame_host.c:85` `static void load_frame(fh_host *h, int id, const char *url)` -- Loads the document of frame `id` (already registered in the table).
-- `find_child` (function) `src/frame_host.c:129` `static int find_child(const fh_host *h, int parent, int token)`
-- `token_seen_by` (function) `src/frame_host.c:137` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
-- `post_op` (function) `src/frame_host.c:143` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
-- `apply_ops` (function) `src/frame_host.c:198` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
-- `fh_apply_top` (function) `src/frame_host.c:221` `void fh_apply_top(fh_host *h, const tab_page *page)`
-- `fh_tick` (function) `src/frame_host.c:226` `int fh_tick(fh_host *h, int elapsed_ms)`
-- `fh_generation` (function) `src/frame_host.c:250` `unsigned fh_generation(const fh_host *h)`
-- `fh_frame_view` (function) `src/frame_host.c:252` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
+- `find_child` (function) `src/frame_host.c:130` `static int find_child(const fh_host *h, int parent, int token)`
+- `token_seen_by` (function) `src/frame_host.c:138` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
+- `post_op` (function) `src/frame_host.c:144` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
+- `apply_ops` (function) `src/frame_host.c:199` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
+- `fh_apply_top` (function) `src/frame_host.c:222` `void fh_apply_top(fh_host *h, const tab_page *page)`
+- `fh_tick` (function) `src/frame_host.c:227` `int fh_tick(fh_host *h, int elapsed_ms)`
+- `fh_generation` (function) `src/frame_host.c:251` `unsigned fh_generation(const fh_host *h)`
+- `fh_frame_view` (function) `src/frame_host.c:253` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
 
 ## src/freebug.c
 Depends on: `include/freebug.h`
@@ -153,22 +310,22 @@ Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`,
                          int *out_status, c...` -- wf_fetch_fn around the headless policy gate (font bytes download like any * other subresource of this page). data...
 - `render_page` (function) `src/freedom.c:720` `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-- `pool` (function) `src/freedom.c:784` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-- `first` (function) `src/freedom.c:798` `* always cleared first (fetch_and_render may paint several pages per
+- `pool` (function) `src/freedom.c:787` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+- `first` (function) `src/freedom.c:801` `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-- `only` (function) `src/freedom.c:868` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-- `sf_reason` (function) `src/freedom.c:994` `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (function) `src/freedom.c:1014` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
-- `BLOCKED` (function) `src/freedom.c:1042` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
-- `elsewhere` (function) `src/freedom.c:1077` `* page whose script immediately forwards elsewhere (e.g. a search engine's
+- `only` (function) `src/freedom.c:873` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+- `sf_reason` (function) `src/freedom.c:999` `static const char *sf_reason(sf_status ss)`
+- `fetch_and_render_one` (function) `src/freedom.c:1019` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
+- `BLOCKED` (function) `src/freedom.c:1047` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+- `elsewhere` (function) `src/freedom.c:1082` `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-- `parent` (function) `src/freedom.c:1103` `* gated by the parent (ln_resolve: a local target stays under the document's
+- `parent` (function) `src/freedom.c:1108` `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-- `run_headless` (function) `src/freedom.c:1140` `static int run_headless(const char *target)`
-- `video_fetch_with_fallback` (function) `src/freedom.c:1177` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+- `run_headless` (function) `src/freedom.c:1145` `static int run_headless(const char *target)`
+- `video_fetch_with_fallback` (function) `src/freedom.c:1182` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
-- `run_dump_video` (function) `src/freedom.c:1288` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
-- `main` (function) `src/freedom.c:1307` `int main(int argc, char **argv)`
+- `run_dump_video` (function) `src/freedom.c:1293` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
+- `main` (function) `src/freedom.c:1312` `int main(int argc, char **argv)`
 
 ## src/hls.c
 Depends on: `include/hls.h`
@@ -325,92 +482,6 @@ Depends on: `include/anti_fp.h`, `include/identity.h`
 - `idn_apply_query` (function) `src/identity.c:282` `unsigned idn_apply_query(idn_config *c, const char *query)`
 - `esc_append` (function) `src/identity.c:361` `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)`
 - `idn_render_page` (function) `src/identity.c:377` `size_t idn_render_page(const idn_config *c, char *out, size_t cap)`
-
-## src/image_decode.c
-Depends on: `include/image_decode.h`
-- `exit` (function) `src/image_decode.c:6` `* malformed stream fails closed instead of calling exit(). GIF uses an own pure-C * bounded LZW decoder (no giflib)....`
-- `read_be32` (function) `src/image_decode.c:52` `static uint32_t read_be32(const uint8_t *p)`
-- `img_png_dimensions` (function) `src/image_decode.c:57` `img_status img_png_dimensions(const uint8_t *bytes, size_t len,
-                              uin...`
-- `img_dimensions_ok` (function) `src/image_decode.c:68` `int img_dimensions_ok(uint32_t w, uint32_t h)`
-- `img_fit` (function) `src/image_decode.c:76` `void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h,
-             double *out_w, do...`
-- `premultiply` (function) `src/image_decode.c:90` `static void premultiply(uint8_t *data, size_t pixels)` -- void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h, double *out_w, double *out_h) { if (out_w == NULL...
-- `img_decode_png` (function) `src/image_decode.c:102` `img_status img_decode_png(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `jpeg_error_longjmp` (function) `src/image_decode.c:158` `static void jpeg_error_longjmp(j_common_ptr cinfo)`
-- `jpeg_silence` (function) `src/image_decode.c:164` `static void jpeg_silence(j_common_ptr cinfo)` -- libjpeg error manager that longjmps instead of calling exit(), so a hostile JPEG * fails closed (IMG_ERR_DECODE)...
-- `img_decode_jpeg` (function) `src/image_decode.c:166` `img_status img_decode_jpeg(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `gr_u8` (function) `src/image_decode.c:260` `static int gr_u8(gif_reader *r, uint8_t *out)`
-- `gr_u16le` (function) `src/image_decode.c:266` `static int gr_u16le(gif_reader *r, uint16_t *out)`
-- `gr_skip` (function) `src/image_decode.c:273` `static int gr_skip(gif_reader *r, size_t n)`
-- `gr_skip_subblocks` (function) `src/image_decode.c:280` `static int gr_skip_subblocks(gif_reader *r)` -- static int gr_u16le(gif_reader *r, uint16_t *out) { if (r->pos + 2u > r->len) return 0; out =...
-- `gb_next_code` (function) `src/image_decode.c:298` `static int gb_next_code(gif_bits *b, unsigned width, unsigned *out)`
-- `gif_deinterlace_row` (function) `src/image_decode.c:319` `static uint32_t gif_deinterlace_row(uint32_t r, uint32_t fh)` -- } uint8_t byte; if (!gr_u8(b->r, &byte)) return 0; b->block_left--; b->acc |= (uint32_t)byte << b->nbits; b->nbits...
-- `gif_put_pixel` (function) `src/image_decode.c:334` `static void gif_put_pixel(uint32_t *canvas, uint32_t cw, uint32_t ch,
-                          u...` -- Writes one palette pixel into the canvas at frame-relative index i (clipped to * the canvas; transparent index ->...
-- `img_decode_gif` (function) `src/image_decode.c:354` `img_status img_decode_gif(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `img_decode_webp` (function) `src/image_decode.c:520` `img_status img_decode_webp(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `img_decode` (function) `src/image_decode.c:553` `img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out)`
-- `img_pixels_free` (function) `src/image_decode.c:566` `void img_pixels_free(img_pixels *p)`
-- `img_format_name` (function) `src/image_decode.c:575` `const char *img_format_name(img_format f)`
-
-## src/import_map.c
-Depends on: `include/import_map.h`
-- `ws` (function) `src/import_map.c:39` `static void ws(jr *r)`
-- `eat` (function) `src/import_map.c:44` `static int eat(jr *r, char c)`
-- `hex4` (function) `src/import_map.c:50` `static int hex4(const char *s, uint32_t *out)`
-- `put_utf8` (function) `src/import_map.c:64` `static size_t put_utf8(char *o, uint32_t cp)`
-- `str` (function) `src/import_map.c:78` `static char *str(jr *r)` -- A JSON string into an owned UTF-8 buffer (escapes decoded; a lone surrogate or a * raw control character is malformed).
-- `skip` (function) `src/import_map.c:128` `static void skip(jr *r, int depth)` -- } n += put_utf8(o + n, cp);   /* <= the 6/12 escape bytes it replaces break; } default: goto fail; } } fail...
-- `url_like` (function) `src/import_map.c:156` `static int url_like(const char *s)`
-- `dup_s` (function) `src/import_map.c:168` `static char *dup_s(const char *s)`
-- `clear` (function) `src/import_map.c:175` `static void clear(im_map *m)`
-- `add` (function) `src/import_map.c:185` `static int add(im_map *m, int scope, const char *key, const char *addr, const char *doc_url,
-    ...` -- if (d != NULL) memcpy(d, s, n + 1); return d; } static void clear(im_map *m) { for (size_t i = 0; i < m->n; ++i) {...
-- `specifier_map` (function) `src/import_map.c:209` `static void specifier_map(jr *r, im_map *m, int scope, const char *doc_url,
-                     ...` -- if (m->n == m->cap) { size_t nc = m->cap ? m->cap * 2 : 16; im_entry *g = (im_entry *)realloc(m->e, nc * sizeof *g)...
-- `im_parse` (function) `src/import_map.c:225` `im_map *im_parse(const char *json, size_t len, const char *doc_url, im_url_fn resolve, void *ctx)`
-- `match` (function) `src/import_map.c:272` `static int match(const im_map *m, int scope, const char *key, char *out, size_t outsz)` -- WHATWG "resolve an imports match" within one specifier map (scope).
-- `im_resolve` (function) `src/import_map.c:301` `int im_resolve(const im_map *m, const char *base, const char *specifier,
-               im_url_fn...`
-- `im_count` (function) `src/import_map.c:339` `size_t im_count(const im_map *m)`
-- `im_free` (function) `src/import_map.c:343` `void im_free(im_map *m)`
-
-## src/interp.c
-Depends on: `include/interp.h`
-- `sample_bezier_x` (function) `src/interp.c:18` `static double sample_bezier_x(double t, double cx1, double cx2)`
-- `sample_bezier_dx` (function) `src/interp.c:23` `static double sample_bezier_dx(double t, double cx1, double cx2)`
-- `sample_bezier_y` (function) `src/interp.c:29` `static double sample_bezier_y(double t, double cy1, double cy2)`
-- `solve_bezier_t` (function) `src/interp.c:35` `static double solve_bezier_t(double x, double cx1, double cx2)` -- } static double sample_bezier_dx(double t, double cx1, double cx2) { return 3.0 * cx1 * (1.0 - 4.0 * t + 3.0 * t *...
-- `ip_ease` (function) `src/interp.c:55` `double ip_ease(double t, const ip_ease_fn *fn)`
-- `ip_ease` (function) `src/interp.c:64` `case IP_EASE_EASE:
-        return ip_ease(t, &(ip_ease_fn)`
-- `ip_ease` (function) `src/interp.c:70` `case IP_EASE_EASE_IN:
-        return ip_ease(t, &(ip_ease_fn)`
-- `ip_ease` (function) `src/interp.c:76` `case IP_EASE_EASE_OUT:
-        return ip_ease(t, &(ip_ease_fn)`
-- `ip_ease` (function) `src/interp.c:82` `case IP_EASE_EASE_IN_OUT:
-        return ip_ease(t, &(ip_ease_fn)`
-- `ip_lerp` (function) `src/interp.c:134` `double ip_lerp(double a, double b, double t)`
-- `ip_lerp_color` (function) `src/interp.c:139` `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t)`
-- `ip_interp` (function) `src/interp.c:162` `double ip_interp(ip_val_kind kind, double a, double b, double t)`
-- `ip_kf_interp` (function) `src/interp.c:175` `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf,
-                    int n_kf, do...`
-- `ip_anim_init` (function) `src/interp.c:196` `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease,
-                  const ip_...`
-- `anim_effective_dir_for` (function) `src/interp.c:222` `static int anim_effective_dir_for(const ip_anim *a, int iter)`
-- `anim_effective_dir` (function) `src/interp.c:232` `static int anim_effective_dir(const ip_anim *a)`
-- `ip_anim_tick` (function) `src/interp.c:236` `int ip_anim_tick(ip_anim *a, double dt_ms)`
-- `ip_anim_current` (function) `src/interp.c:282` `double ip_anim_current(const ip_anim *a)`
-- `ip_anim_done` (function) `src/interp.c:320` `int ip_anim_done(const ip_anim *a)`
-
-## src/js_custom_elements.c
-Depends on: `src/js_custom_elements.h`
-- `jdce_install` (function) `src/js_custom_elements.c:199` `int jdce_install(JSContext *ctx)`
-
-## src/js_custom_elements.h
-Imported by: `src/js_custom_elements.c`, `src/js_dom.c`
-- `jdce_install` (function) `src/js_custom_elements.h:9` `int jdce_install(JSContext *ctx);`
 
 
 Next: [API_p9.md](API_p9.md)

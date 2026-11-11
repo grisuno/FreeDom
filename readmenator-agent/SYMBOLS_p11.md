@@ -1,8 +1,29 @@
-# Symbols (page 11 of 16)
+# Symbols (page 11 of 17)
 Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `tsh_ready` | function | `src/text_shape.c:550` | `int tsh_ready(void)` |
+| `tsh_segment` | function | `src/text_shape.c:636` | `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,                 tsh_...` |
+| `tsh_shape` | function | `src/text_shape.c:555` | `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,                 ...` |
+| `tsh_shutdown` | function | `src/text_shape.c:977` | `void tsh_shutdown(void)` |
+| `tsh_web` | struct | `src/text_shape.c:192` | `` |
+| `tsh_webfont_clear` | function | `src/text_shape.c:306` | `void tsh_webfont_clear(void)` |
+| `tsh_webfont_register` | function | `src/text_shape.c:271` | `int tsh_webfont_register(const char *name,                          const unsigned char *bytes, s...` |
+| `used` | type_alias | `src/text_shape.c:191` | `typedef struct tsh_web { int used;` |
+| `utf8_next` | function | `src/text_shape.c:604` | `static unsigned utf8_next(const char *s, size_t n, size_t *len)` |
+| `web_entry_free` | function | `src/text_shape.c:202` | `static void web_entry_free(tsh_web *w)` |
+| `web_find` | function | `src/text_shape.c:312` | `static tsh_entry *web_find(unsigned h, int bold, int italic)` |
+| `web_magic_ok` | function | `src/text_shape.c:215` | `static int web_magic_ok(const unsigned char *b, size_t n)` |
+| `web_make_entry` | function | `src/text_shape.c:228` | `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` |
+| `tf_backspace` | function | `src/textfield.c:47` | `void tf_backspace(tf_field *f)` |
+| `tf_clear` | function | `src/textfield.c:20` | `void tf_clear(tf_field *f)` |
+| `tf_cursor` | function | `src/textfield.c:91` | `size_t tf_cursor(const tf_field *f)` |
+| `tf_delete` | function | `src/textfield.c:55` | `void tf_delete(tf_field *f)` |
+| `tf_end` | function | `src/textfield.c:78` | `void tf_end(tf_field *f)` |
+| `tf_home` | function | `src/textfield.c:73` | `void tf_home(tf_field *f)` |
+| `tf_insert` | function | `src/textfield.c:35` | `tf_status tf_insert(tf_field *f, char c)` |
+| `tf_len` | function | `src/textfield.c:87` | `size_t tf_len(const tf_field *f)` |
 | `tf_move` | function | `src/textfield.c:62` | `void tf_move(tf_field *f, long delta)` |
 | `tf_set` | function | `src/textfield.c:24` | `tf_status tf_set(tf_field *f, const char *s)` |
 | `tf_text` | function | `src/textfield.c:83` | `const char *tf_text(const tf_field *f)` |
@@ -475,26 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `test_container_cascade_inline_wins` | function | `tests/test_css.c:387` | `static void test_container_cascade_inline_wins(void **state)` |
 | `test_container_fail_closed_and_bounds` | function | `tests/test_css.c:402` | `static void test_container_fail_closed_and_bounds(void **state)` |
 | `test_container_query_surely_true_applies` | function | `tests/test_css.c:3899` | `static void test_container_query_surely_true_applies(void **state)` |
-| `test_container_unset` | function | `tests/test_css.c:495` | `static void test_container_unset(void **state)` |
-| `test_cursor` | function | `tests/test_css.c:3376` | `static void test_cursor(void **state)` |
-| `test_custom_prop_attr_scoped_skipped_without_matcher` | function | `tests/test_css.c:993` | `static void test_custom_prop_attr_scoped_skipped_without_matcher(void **state)` |
-| `test_custom_prop_attr_scoped_via_root_matcher` | function | `tests/test_css.c:981` | `static void test_custom_prop_attr_scoped_via_root_matcher(void **state)` |
-| `test_custom_prop_chain_eight_deep` | function | `tests/test_css.c:946` | `static void test_custom_prop_chain_eight_deep(void **state)` |
-| `test_custom_prop_class_scoped_applies_with_root_scope` | function | `tests/test_css.c:851` | `static void test_custom_prop_class_scoped_applies_with_root_scope(void **state)` |
-| `test_custom_prop_class_scoped_skipped_without_scope` | function | `tests/test_css.c:839` | `static void test_custom_prop_class_scoped_skipped_without_scope(void **state)` |
-| `test_custom_prop_dark_media_collected_in_dark` | function | `tests/test_css.c:826` | `static void test_custom_prop_dark_media_collected_in_dark(void **state)` |
-| `test_custom_prop_dark_media_not_collected_in_light` | function | `tests/test_css.c:811` | `static void test_custom_prop_dark_media_not_collected_in_light(void **state)` |
-| `test_custom_prop_descendant_scoped_skipped` | function | `tests/test_css.c:864` | `static void test_custom_prop_descendant_scoped_skipped(void **state)` |
-| `test_custom_prop_fanout_bounded` | function | `tests/test_css.c:954` | `static void test_custom_prop_fanout_bounded(void **state)` |
-| `test_custom_prop_long_name_survives` | function | `tests/test_css.c:915` | `static void test_custom_prop_long_name_survives(void **state)` |
-| `test_custom_prop_long_value_survives` | function | `tests/test_css.c:900` | `static void test_custom_prop_long_value_survives(void **state)` |
-| `test_custom_prop_root_matcher_rejects_descendant` | function | `tests/test_css.c:1004` | `static void test_custom_prop_root_matcher_rejects_descendant(void **state)` |
-| `test_custom_prop_table_holds_hundreds` | function | `tests/test_css.c:876` | `static void test_custom_prop_table_holds_hundreds(void **state)` |
-| `test_custom_prop_table_holds_thousands` | function | `tests/test_css.c:927` | `static void test_custom_prop_table_holds_thousands(void **state)` |
-| `test_custom_prop_var_basic` | function | `tests/test_css.c:745` | `static void test_custom_prop_var_basic(void **state)` |
-| `test_custom_prop_var_chain` | function | `tests/test_css.c:771` | `static void test_custom_prop_var_chain(void **state)` |
-| `test_custom_prop_var_fallback_used_when_missing` | function | `tests/test_css.c:756` | `static void test_custom_prop_var_fallback_used_when_missing(void **state)` |
-| `test_custom_prop_var_in_shorthand` | function | `tests/test_css.c:788` | `static void test_custom_prop_var_in_shorthand(void **state)` |
-| `test_custom_prop_var_later_declaration_wins` | function | `tests/test_css.c:798` | `static void test_custom_prop_var_later_declaration_wins(void **state)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

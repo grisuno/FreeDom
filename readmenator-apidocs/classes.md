@@ -294,6 +294,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`jr`](modules/src.import_map.c.md#jr) struct in `src/import_map.c`
 - [`js`](modules/include.webcaps.h.md#js) type_alias in `include/webcaps.h`
 - [`js_context`](modules/include.js_sandbox.h.md#js_context) type_alias in `include/js_sandbox.h`
+- [`js_context`](modules/src.js_native_internal.h.md#js_context) struct in `src/js_native_internal.h`
 - [`js_context`](modules/src.js_sandbox.c.md#js_context) struct in `src/js_sandbox.c`
 - [`js_limits`](modules/include.js_sandbox.h.md#js_limits) struct in `include/js_sandbox.h`
 - [`js_mem_state`](modules/src.js_sandbox.c.md#js_mem_state) struct in `src/js_sandbox.c`

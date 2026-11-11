@@ -33,7 +33,7 @@ flowchart LR
 
 ### `jd_click_state`
 
-`struct` | [src/js_events.c:25](../../src/js_events.c#L25)
+`struct` | [src/js_events.c:26](../../src/js_events.c#L26)
 
 ```c
 struct jd_click_state
@@ -47,7 +47,7 @@ struct jd_click_state
 
 ### `jd_click_state_new`
 
-`function` | [src/js_events.c:29](../../src/js_events.c#L29)
+`function` | [src/js_events.c:30](../../src/js_events.c#L30)
 
 ```c
 jd_click_state *jd_click_state_new(void)
@@ -61,7 +61,7 @@ jd_click_state *jd_click_state_new(void)
 
 ### `jd_click_state_free`
 
-`function` | [src/js_events.c:34](../../src/js_events.c#L34)
+`function` | [src/js_events.c:35](../../src/js_events.c#L35)
 
 ```c
 void jd_click_state_free(jd_click_state *s)
@@ -79,7 +79,7 @@ void jd_click_state_free(jd_click_state *s)
 
 ### `jd_install_events`
 
-`function` | [src/js_events.c:38](../../src/js_events.c#L38)
+`function` | [src/js_events.c:39](../../src/js_events.c#L39)
 
 ```c
 jd_status jd_install_events(js_context *ctx, jd_click_state *state)
@@ -102,7 +102,7 @@ jd_status jd_install_events(js_context *ctx, jd_click_state *state)
 
 ### `jd_fire_click`
 
-`function` | [src/js_events.c:66](../../src/js_events.c#L66)
+`function` | [src/js_events.c:67](../../src/js_events.c#L67)
 
 ```c
 int jd_fire_click(js_context *ctx, dom_node_id node_id)
@@ -125,7 +125,7 @@ int jd_fire_click(js_context *ctx, dom_node_id node_id)
 
 ### `jd_fire_submit`
 
-`function` | [src/js_events.c:78](../../src/js_events.c#L78)
+`function` | [src/js_events.c:79](../../src/js_events.c#L79)
 
 ```c
 int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)
@@ -152,7 +152,7 @@ Returns 0 if preventDefault() was called, 1 if the default action should proceed
 
 ### `jd_fire_mouse_event`
 
-`function` | [src/js_events.c:163](../../src/js_events.c#L163)
+`function` | [src/js_events.c:164](../../src/js_events.c#L164)
 
 ```c
 int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id, const char *event_type, int client_x, int client_y, int button)

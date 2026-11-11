@@ -312,10 +312,11 @@ static void test_leading_b...`
   - `test_insert_before` (function, line 550) `static void test_insert_before(void **state)`
   - `test_clone_node` (function, line 582) `static void test_clone_node(void **state)`
   - `test_move_children` (function, line 605) `static void test_move_children(void **state)`
-  - `test_char_nodes` (function, line 646) `static void test_char_nodes(void **state)`
-  - `test_qs_subject_prefilter_is_exact` (function, line 695) `static void test_qs_subject_prefilter_is_exact(void **state)`
-  - `test_get_element_by_id_ignores_detached_nodes` (function, line 721) `static void test_get_element_by_id_ignores_detached_nodes(void **state)`
-  - `main` (function, line 754) `int main(void)`
+  - `test_mutation_count` (function, line 648) `static void test_mutation_count(void **state)`
+  - `test_char_nodes` (function, line 680) `static void test_char_nodes(void **state)`
+  - `test_qs_subject_prefilter_is_exact` (function, line 729) `static void test_qs_subject_prefilter_is_exact(void **state)`
+  - `test_get_element_by_id_ignores_detached_nodes` (function, line 755) `static void test_get_element_by_id_ignores_detached_nodes(void **state)`
+  - `main` (function, line 788) `int main(void)`
   - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
   - `DOC` (macro, line 58) `#define DOC(state)`
   - `IDX` (macro, line 59) `#define IDX(state)`

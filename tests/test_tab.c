@@ -818,6 +818,163 @@ static void test_focus_ipc_round_trip(void **state) {
  * load pump; the load response reports the smallest pending delay; tab_tick
  * advances the virtual clock, fires it, and the refreshed view shows the
  * mutation. Intervals re-arm (next_timer_ms stays set). */
+/* --- lazy ticks (spec/tab.md "Tick sin cambios") --- */
+
+static int view_has_text(const pv_view *v, const char *want) {
+    for (size_t i = 0; v != NULL && i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && strcmp(r->text, want) == 0) return 1;
+    }
+    return 0;
+}
+
+#define LAZY_PAGE(body_script) \
+    "<html><head><title>T</title></head><body><p id=\"t\">waiting</p>" \
+    "<script>" body_script "</script></body></html>"
+
+/* Default (lazy off): a tick that changed nothing still carries the whole view. */
+static void test_tick_default_always_carries_view(void **state) {
+    (void)state;
+    static const char H[] = LAZY_PAGE("var n=0; setInterval(function(){ n++; }, 10);");
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    int step = p.next_timer_ms;        /* the interval as the worker schedules it (clamped) */
+    assert_true(step > 0);
+    tab_page_free(&p);
+    tab_page p2;
+    assert_int_equal(tab_tick(t, step, &p2), TAB_OK);
+    assert_int_equal(p2.unchanged, 0);
+    assert_true(view_has_text(p2.view, "waiting"));
+    tab_page_free(&p2);
+    tab_close(t);
+}
+
+/* Lazy on: a timer that touches no DOM yields no view -- but everything else of the reply
+ * (console, next timer) still arrives. */
+static void test_lazy_tick_without_mutation_sends_no_view(void **state) {
+    (void)state;
+    static const char H[] = LAZY_PAGE("var n=0; setInterval(function(){ n++; console.log('beat '+n); }, 10);");
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_lazy_ticks(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    assert_int_equal(p.unchanged, 0);
+    assert_non_null(p.view);
+    int step = p.next_timer_ms;
+    assert_true(step > 0);
+    for (int i = 1; i <= 3; ++i) {
+        tab_page q;
+        assert_int_equal(tab_tick(t, step, &q), TAB_OK);
+        assert_int_equal(q.unchanged, 1);
+        assert_null(q.view);
+        assert_true(q.next_timer_ms > 0);
+        step = q.next_timer_ms;        /* an interval re-arms at the clamped period */
+        assert_true(fb_buffer_count(&q.console) >= (size_t)i);   /* the console still crosses */
+        /* The caller keeps what it had: tab_page_keep_view carries it into the new page. */
+        tab_page_keep_view(&p, &q);
+        assert_true(view_has_text(q.view, "waiting"));
+        assert_non_null(q.title);
+        assert_null(p.view);
+        tab_page_free(&p);
+        p = q;
+    }
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Lazy on: a mutation -- text, attribute, title -- always brings the fresh view. */
+static void test_lazy_tick_with_mutation_sends_view(void **state) {
+    (void)state;
+    static const char H[] = LAZY_PAGE(
+        "var n=0; setInterval(function(){ n++;"
+        " if(n===2) document.getElementById('t').textContent='ticked';"
+        " if(n===4) document.title='T4'; }, 10);");
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_lazy_ticks(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    int step = p.next_timer_ms;        /* the interval as the worker schedules it (clamped) */
+    assert_true(step > 0);
+    tab_page_free(&p);
+    tab_page q;
+    assert_int_equal(tab_tick(t, step, &q), TAB_OK);
+    if (q.next_timer_ms > 0) step = q.next_timer_ms;
+    assert_int_equal(q.unchanged, 1);
+    tab_page_free(&q);
+    assert_int_equal(tab_tick(t, step, &q), TAB_OK);
+    if (q.next_timer_ms > 0) step = q.next_timer_ms;
+    assert_int_equal(q.unchanged, 0);
+    assert_true(view_has_text(q.view, "ticked"));
+    tab_page_free(&q);
+    assert_int_equal(tab_tick(t, step, &q), TAB_OK);
+    if (q.next_timer_ms > 0) step = q.next_timer_ms;
+    assert_int_equal(q.unchanged, 1);
+    tab_page_free(&q);
+    assert_int_equal(tab_tick(t, step, &q), TAB_OK);
+    if (q.next_timer_ms > 0) step = q.next_timer_ms;
+    assert_int_equal(q.unchanged, 0);
+    assert_string_equal(q.title, "T4");
+    tab_page_free(&q);
+    tab_close(t);
+}
+
+/* A mutation made by an operation that returns no view (the REPL) is not lost: the next tick
+ * sees the tree moved since the last view and sends it. */
+static void test_lazy_tick_after_viewless_mutation_sends_view(void **state) {
+    (void)state;
+    static const char H[] = LAZY_PAGE("var n=0; setInterval(function(){ n++; }, 10);");
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_lazy_ticks(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    int step = p.next_timer_ms;        /* the interval as the worker schedules it (clamped) */
+    assert_true(step > 0);
+    tab_page_free(&p);
+    expect_eval(t, "document.getElementById('t').textContent='from-repl'; 1", "1");
+    tab_page q;
+    assert_int_equal(tab_tick(t, step, &q), TAB_OK);
+    if (q.next_timer_ms > 0) step = q.next_timer_ms;
+    assert_int_equal(q.unchanged, 0);
+    assert_true(view_has_text(q.view, "from-repl"));
+    tab_page_free(&q);
+    tab_close(t);
+}
+
+/* A background tick whose result was DISCARDED took a fresh view to the grave: the parent
+ * must not accept "unchanged" from the next tick, or the caller keeps a stale page forever. */
+static void test_lazy_tick_after_discarded_result_sends_view(void **state) {
+    (void)state;
+    static const char H[] = LAZY_PAGE(
+        "var n=0; setInterval(function(){ n++;"
+        " if(n===1) document.getElementById('t').textContent='ticked'; }, 10);");
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_lazy_ticks(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    int step = p.next_timer_ms;        /* the interval as the worker schedules it (clamped) */
+    assert_true(step > 0);
+    tab_page_free(&p);
+    assert_int_equal(tab_tick_async(t, step), TAB_OK);   /* carries "ticked"; never collected */
+    tab_page q;
+    assert_int_equal(tab_tick(t, step, &q), TAB_OK);     /* discards it, then ticks again */
+    if (q.next_timer_ms > 0) step = q.next_timer_ms;
+    assert_int_equal(q.unchanged, 0);
+    assert_true(view_has_text(q.view, "ticked"));
+    tab_page_free(&q);
+    /* ...and from here on the parent is in sync again. */
+    assert_int_equal(tab_tick(t, step, &q), TAB_OK);
+    if (q.next_timer_ms > 0) step = q.next_timer_ms;
+    assert_int_equal(q.unchanged, 1);
+    tab_page_free(&q);
+    tab_close(t);
+}
+
 static void test_tick_fires_delayed_timer(void **state) {
     (void)state;
     static const char H[] =
@@ -1816,10 +1973,14 @@ static void test_xhr_works_when_net_allowed(void **state) {
     tab_page_free(&p);
     expect_eval(t, "typeof XMLHttpRequest", "function");
     expect_eval(t, "typeof fetch", "function");
-    /* the rest of the trusted runtime, on the REAL (frozen, anti-fp) navigator */
+    /* the rest of the trusted runtime, on the REAL navigator: nothing is an own property
+     * (spec/js_native.md) -- sendBeacon and every identity field sit on Navigator.prototype */
     expect_eval(t, "typeof navigator.sendBeacon", "function");
     expect_eval(t, "typeof Worker", "function");
-    expect_eval(t, "Object.isExtensible(navigator)+','+navigator.hasOwnProperty('sendBeacon')", "false,false");
+    expect_eval(t, "Object.getOwnPropertyNames(navigator).length+','+('sendBeacon' in Navigator.prototype)"
+                   "+','+(navigator instanceof Navigator)", "0,true,true");
+    /* ...and the worker sealed the surface before the page ran. */
+    expect_eval(t, "/\\[native code\\]/.test(''+fetch)+','+String(window)", "true,[object Window]");
     tab_close(t);
 }
 
@@ -3731,6 +3892,11 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_mouse_ipc_round_trip),
         cmocka_unit_test(test_focus_ipc_round_trip),
         cmocka_unit_test(test_tick_fires_delayed_timer),
+        cmocka_unit_test(test_tick_default_always_carries_view),
+        cmocka_unit_test(test_lazy_tick_without_mutation_sends_no_view),
+        cmocka_unit_test(test_lazy_tick_with_mutation_sends_view),
+        cmocka_unit_test(test_lazy_tick_after_viewless_mutation_sends_view),
+        cmocka_unit_test(test_lazy_tick_after_discarded_result_sends_view),
         cmocka_unit_test(test_tick_interval_rearms),
         cmocka_unit_test(test_load_carries_box_decoration),
         cmocka_unit_test(test_load_carries_box_tree),

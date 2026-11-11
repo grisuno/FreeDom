@@ -82,6 +82,10 @@ typedef struct tab_page {
     char    *text;      /* NUL-terminated; may be NULL */
     size_t   text_len;
     pv_view *view;      /* owned display list; may be NULL */
+    /* 1 when a lazy tick (tab_set_lazy_ticks) found the document untouched since the last
+     * view the worker sent: title/text/view are then NULL and the caller keeps what it has
+     * (tab_page_keep_view). Everything else in the page is filled as usual. */
+    int      unchanged;
     /* JS-requested navigation (Hito 20e): a resolved, policy-gated https/file target
      * the page's JS asked to navigate to (location.href= / assign / replace / reload),
      * or NULL when none. nav_replace mirrors location.replace (history semantics). The
@@ -231,6 +235,17 @@ void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);
  * true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sovereignty
  * boundary); false (default) keeps XHR/fetch undefined (Same-Origin-by-construction). */
 void tab_set_net_allowed(tab *t, int allowed);
+
+/* Lazy ticks (spec/tab.md, "Tick sin cambios"). Off by default: every tab_tick carries the
+ * whole re-derived view. On: a tick that left the document untouched since the last view the
+ * worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick.
+ * The caller must then keep its current view. Safe against lost results: the parent only
+ * asks for a lazy tick while the last view-carrying reply reached its caller. */
+void tab_set_lazy_ticks(tab *t, int on);
+
+/* For a caller that replaces its page with each tick's: when `next` is unchanged, moves the
+ * title, text and view of `prev` into it (prev keeps none). No-op otherwise or on NULL. */
+void tab_page_keep_view(tab_page *prev, tab_page *next);
 
 /* Per-operation network time budget in ms for requests the worker issues AFTER the load
  * (default FC_TAB_OP_NET_BUDGET_MS; <= 0 restores it). Tests lower it. */

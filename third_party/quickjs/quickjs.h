@@ -1144,6 +1144,11 @@ JS_EXTERN void JS_SetInterruptHandler(JSRuntime *rt, JSInterruptHandler *cb, voi
  * exception. The hook must not keep `obj` without duplicating it. */
 typedef void JSThrowHook(JSContext *ctx, JSValueConst obj, void *opaque);
 JS_EXTERN void JS_SetThrowHook(JSRuntime *rt, JSThrowHook *cb, void *opaque);
+/* Freedom patch: while `hide` is set, functions compiled on this runtime keep no source
+ * text, so Function.prototype.toString renders them as "[native code]". The host brackets
+ * the evaluation of its own platform code with it; page code is never compiled under it.
+ * Returns the previous setting so the caller can restore it. */
+JS_EXTERN bool JS_SetHideSource(JSRuntime *rt, bool hide);
 /* if can_block is true, Atomics.wait() can be used */
 JS_EXTERN void JS_SetCanBlock(JSRuntime *rt, bool can_block);
 /* set the [IsHTMLDDA] internal slot */

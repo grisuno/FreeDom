@@ -452,3 +452,32 @@ página mínima, en el camino crítico de cada render. El costo no depende de la
   que quiere el repuesto siguiente llama `tab_prewarm`. `tab_shutdown_spare` lo mata y lo cosecha.
 - Hilos: un mutex protege el repuesto; `tab_prewarm`/`tab_open`/`tab_shutdown_spare` pueden llamarse desde
   cualquier hilo.
+
+## Tick sin cambios: `tab_set_lazy_ticks` (2026-11-11)
+
+**Problema medido.** Cada `OP_TICK` re-derivaba la vista entera (cascada + display list),
+la mandaba por el pipe y el padre reconstruia y repintaba el documento — aunque los timers
+no hubieran tocado el DOM. En sitios vivos eso es casi todos los ticks: HuggingFace 240 de
+241, GitHub 28 de 34 (medido con `FREEDOM_JS_PROFILE`, linea `tab-profile tick mutated=`).
+
+- **Dado** un tab con `tab_set_lazy_ticks(t, 1)`, **cuando** un tick termina y
+  `dom_mutation_count` es el mismo que cuando se derivo la ULTIMA vista del worker,
+  **entonces** la respuesta lleva `ok = 2` y NO lleva titulo, texto ni vista
+  (`tab_page.unchanged = 1`); el resto (navegacion, history, opens, WebSocket, storage,
+  consola, proximo timer) viaja igual. El llamador conserva la vista que tiene
+  (`tab_page_keep_view`).
+- **Dado** que el arbol cambio —en este tick o en una operacion anterior que no devuelve
+  vista (REPL, evento de WebSocket)—, **entonces** el tick lleva la vista completa: el
+  contador se compara contra el de la ultima vista DERIVADA, no contra el del inicio del tick.
+- **Dado** que el padre descarto el resultado de un trabajo en segundo plano
+  (`tab_async_sync`), **entonces** el siguiente tick se pide completo (`OP_TICK`, no
+  `OP_TICK_LAZY`): la vista nueva pudo haberse perdido con el resultado descartado. El padre
+  solo pide un tick perezoso mientras la ultima respuesta con vista llego a su llamador.
+- **Apagado por defecto**: sin `tab_set_lazy_ticks` el protocolo y cada respuesta son
+  identicos a antes.
+
+**Por que es correcto.** La vista es funcion de: el arbol (todo cambio pasa por los
+mutadores de `dom.c`, que mueven el contador — sobrecuenta a proposito), y de entradas que
+solo cambian en `OP_LOAD` (CSS externo, viewport, tema, reader). Contadores iguales PRUEBAN
+arbol igual; ante la duda el contador se mueve y se manda la vista. Fail-safe: un worker
+hostil que mienta "sin cambios" solo consigue que SU pagina no se repinte.

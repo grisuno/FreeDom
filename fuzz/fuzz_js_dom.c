@@ -12,6 +12,7 @@
 #include "dom.h"
 #include "html_parse.h"
 #include "js_dom.h"
+#include "js_native.h"
 #include "js_trusted.h"
 #include "js_geom.h"
 #include "web_storage.h"
@@ -53,6 +54,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     if (dom_build(doc, &idx) != DOM_OK) goto out;
     if (js_context_new(&lim, &ctx) != JS_OK) goto out;
     if (jd_install(ctx, idx, &op) != JD_OK) goto out;
+    /* Sealed like the worker seals it (spec/js_native.md): the fuzzed script then also drives
+     * CSS.supports (the cascade parser) and the Intl formatters behind toLocale*. */
+    (void)jn_seal(ctx);
     {
         /* A real location, so history.pushState/replaceState/popstate run too. */
         static const char loc[] = "https://a.test/dir/page?q=1#h";

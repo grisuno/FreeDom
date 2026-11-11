@@ -149,7 +149,7 @@ Number of live frame workers (excludes the top).
 
 ### `fh_apply_top`
 
-`function` | [src/frame_host.c:221](../../src/frame_host.c#L221)
+`function` | [src/frame_host.c:222](../../src/frame_host.c#L222)
 
 ```c
 void fh_apply_top(fh_host *h, const tab_page *page)
@@ -172,7 +172,7 @@ Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP 
 
 ### `fh_tick`
 
-`function` | [src/frame_host.c:226](../../src/frame_host.c#L226)
+`function` | [src/frame_host.c:227](../../src/frame_host.c#L227)
 
 ```c
 int fh_tick(fh_host *h, int elapsed_ms)
@@ -201,7 +201,7 @@ Returns the smallest pending frame timer in ms, or -1 when none.
 
 ### `fh_generation`
 
-`function` | [src/frame_host.c:250](../../src/frame_host.c#L250)
+`function` | [src/frame_host.c:251](../../src/frame_host.c#L251)
 
 ```c
 unsigned fh_generation(const fh_host *h)
@@ -225,7 +225,7 @@ Changes whenever any frame view appears, is replaced or goes away: repaint the f
 
 ### `fh_frame_view`
 
-`function` `const` | [src/frame_host.c:252](../../src/frame_host.c#L252)
+`function` `const` | [src/frame_host.c:253](../../src/frame_host.c#L253)
 
 ```c
 const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)

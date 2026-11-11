@@ -175,7 +175,7 @@ freedom/
 
 ### 7.1 Núcleo cerrado — de la red a la pantalla
 
-Todos con suites CMocka + ASan/UBSan limpio (92 suites, 31 targets de fuzzing).
+Todos con suites CMocka + ASan/UBSan limpio (94 suites, 31 targets de fuzzing).
 
 | Capa | Módulo(s) | Garantía clave |
 | :-- | :-- | :-- |
@@ -186,6 +186,7 @@ Todos con suites CMocka + ASan/UBSan limpio (92 suites, 31 targets de fuzzing).
 | Enrutado | `net_realm` (`nr_`) | clearnet / `.onion` / `.i2p` → directo / Tor SOCKS5h / I2P HTTP / **bloqueado**. Puro, fail-closed. |
 | Parser | `html_parse` (`hp_`), `dom` (`dom_`) | DOM inerte con Lexbor, strip de `<script>`/`on*`; índice de solo lectura con handles enteros. |
 | JS/anti-FP | `js_sandbox`/`js_dom`/`js_env`, `anti_fp` | QuickJS-ng sin I/O; bindings sellados; relojes/pantalla normalizados; readback de canvas/audio envenenado **por origen**. |
+| Identidad JS | `js_native` (`jn_`), `js_intl` (`ji_`) | La plataforma del host se describe como nativa (`[native code]`, `Symbol.toStringTag`, `navigator` sin propiedades propias); `Intl` real con locale `en-US` y zona `UTC` fijos. Ninguna capacidad nueva. |
 | Aislamiento | `os_sandbox` (`os_`), `tab` (`tab_`) | fork+exec + seccomp-bpf fail-closed con **W^X** + anti-volcado + Landlock + `unshare` user/net/ipc/uts. El worker NO toca red. |
 | Estado cifrado | `local_store`, `disk_store`, `prefs`, `profile` | AEAD + Argon2id; escritura atómica 0600. AUTH-fail ⇒ defaults sin clobber. |
 | Render | `page_view` (`pv_`), `render_doc` (`rd_`), `box_tree` (`bt_`), `flex_layout` (`fx_`), `block_flow` (`bf_`), `compositor` (`cx_`) | DOM → display list → cajas (block/flex/grid) → stacking context (7 capas CSS 2.1 App E). Posicionamiento, z-index, opacity, blend, transform matricial, clipping, float, **colapso de márgenes verticales** (`block_flow`, CSS 2.1 §8.3.1) y **colocación de grilla por nombre** (`grid-template-areas`, `spec/grid_areas.md`). |
@@ -229,6 +230,8 @@ Cada línea es la decisión + su porqué; el detalle vive en `spec/`, en `git lo
 - Readback de canvas/audio por origen (eTLD+1), no por sesión: cierra el cross-origin linking. `[[freedom-anti-fp-origin-readback-key]]`
 - JS apagado salvo opt-in. Con JS activo los mutadores del DOM **DETACHAN** (`lxb_dom_node_remove`, nunca `destroy`): cero UAF. `location` real y de solo lectura; la navegación la gatea el padre con `ln_resolve`. Storage/cookies/referrer efímeros o vacíos. `[[freedom-live-js]]`
 - **Un solo registro de listeners** para elementos, `document` y `window`, con captura → destino → burbuja (DOM §2.9) y camino calculado antes de despachar y acotado; los `jd_fire_*` de C pasan por él. Sin eso la delegación (React escucha en la raíz) quedaba sorda. `timeStamp` siempre 0 (anti-fp). `spec/js_dom.md` §7d.
+- **La identidad anti-fp tiene que ser coherente también POR DENTRO.** El UA dice Firefox; si `setTimeout.toString()` devuelve el fuente de un shim, `String(window)` es `[object global]` o `navigator` tiene 20 propiedades propias, la página ve "motor desconocido con polyfills" sin ninguna API especial. El código del host se compila SIN fuente (`jn_host_eval`, parche `JS_SetHideSource`: no se envuelve `Function.prototype.toString`, así que no hay envoltorio que detectar) y `jn_seal` corre tras el último shim y antes del primer script. Un shim nuevo se evalúa con `jn_host_eval`, nunca con `JS_Eval` a secas. Esto NO resuelve desafíos que exigen WebAssembly/WebGL. `spec/js_native.md`.
+- **Un tick que no mutó el DOM no re-deriva, no viaja y no repinta.** `dom_mutation_count` igual al de la última vista derivada PRUEBA árbol igual (sobrecuenta a propósito); el worker responde "sin cambios" solo si el padre lo pidió (`OP_TICK_LAZY`), y el padre solo lo pide mientras la última respuesta con vista llegó a su llamador (un resultado en segundo plano descartado apaga el permiso). `spec/tab.md`.
 - Cada `<script>` es su propio programa; un **único** presupuesto de reloj por página se reparte entre todos. `[[freedom-per-script-isolation]]`
 - Doctrina trusted-host: allow∩js ⇒ CSS de autor e imágenes efectivos sin toggles. `JSP_ON` global **no** es confianza. `[[freedom-trusted-host-full-caps]]`
 - Cookies de sesión EN MEMORIA para allow∩js; nunca a disco. `[[freedom-session-cookies-trusted-spa]]`
@@ -314,6 +317,7 @@ Cada línea es la decisión + su porqué; el detalle vive en `spec/`, en `git lo
 
 - **Tanda 84 (oct 31) — barras de navegación de flotantes y valores CSS perdidos. Un flotante ES una caja (registra caja aunque no tenga decoración); el shrink-to-fit cuenta el padding interior y los átomos inline; un fundador hecho solo de flotantes mide la suma de sus hijos y se coloca en la pluma, nunca por encima de un bloque anterior (§9.5.1 r.5); dentro de `position:fixed` el texto en blanco ya no parte la banda. Telegram: navbar = Firefox en la ventana real (161→110 ms). `line-height: calc()`, `outline: auto`, colores de sistema fijos, UB de `animation-iteration-count` (fuzz-css). Parity 88.90→86.88, drops 6290→6229, ASan/UBSan y fuzz-css/pv verdes. Abierto: `url(data:)` > 1 KiB se descarta (arrays fijos).** `[[freedom-tanda84-float-navbars-2026-10-31]]`
 - **Tanda 85 (nov 11) — dos ideas portadas de Obscura. (1) `sheet_cache` (`shc_`): la hoja parseada se retiene con clave exacta y replay del matcher de raíz; cada tick/evento re-parseaba TODO el CSS. GitHub en la ventana real, 40 s: parseo CSS 3760→500 ms, CPU 14,1→11,0 s (25 de 29 derivaciones sin parsear), captura idéntica a HEAD. (2) `net_guard` (`ng_`): una página o redirección remota no alcanza direcciones privadas (IP resuelta, antes del socket y en conexiones reutilizadas; E2E con servidor TLS local: la petición nunca llega). `sf_global_init` idempotente. `parity` +0.00, ASan/UBSan 92 suites, `fuzz-pv` 65k (oráculo diferencial cacheado=sin caché), `fuzz-ng` 10M. Abierto: override por host público→privado; rama GUI de redirección de POST sin ejercitar; GitHub pinta casi en blanco en la ventana real (preexistente, igual en HEAD).** `[[freedom-tanda85-obscura-sheet-cache-net-guard-2026-11-11]]`
+- **Tanda 86 (nov 11) — identidad JS nativa, `Intl` real, `click()`, timers y tick perezoso.** `js_native`: host sin fuente + sellado (`[native code]`, `[object Window]`, `navigator instanceof Navigator` sin propiedades propias, plugins de Firefox en vez de "Chrome PDF Plugin", `CSS.supports` = veredicto del parser). `js_intl`: `NumberFormat`/`DateTimeFormat`/`RelativeTimeFormat`/`ListFormat`/`PluralRules`/`Collator` reales (antes el número crudo y `Date#toString()`). `el.click()` era una función vacía; `clearInterval` desde el propio callback no cancelaba. Tick perezoso: ventana real 30 s intercalado contra HEAD, HuggingFace 23,3→14,9 s de CPU, GitHub 11,2→8,1 s, capturas idénticas píxel a píxel. `parity` +0.00, ASan/UBSan 94 suites, `fuzz-jsdom`/`fuzz-js`/`fuzz-dom` limpios; +1,6 ms por carga (sellado). Abierto: WebAssembly (hCaptcha/reCAPTCHA Enterprise no se resuelven; ningún desafío real nuevo verificado); cada cuadro de animación CSS rehace el layout entero (604 layouts ≈ 5,9 s de 14,3 s de pintado en HuggingFace, igual en HEAD); `NodeList`/`style` aún no llevan su etiqueta de interfaz. `[[freedom-tanda86-js-native-intl-lazy-ticks-2026-11-11]]`
 ---
 
 ## 8. Reglas para el asistente (IA)
@@ -363,6 +367,7 @@ Cada línea es la decisión + su porqué; el detalle vive en `spec/`, en `git lo
 - IPC: todo campo nuevo `pv_run`/`pv_box_def` cruza `write_view`/`read_view`; correr `make drift`.
 - Tunables en `include/freedom_config.h` (`FC_*`); bounds de contrato en header de modulo.
 - `css_values` dueno de color/bg; `css.c` delega. Mutantes equivalentes `round_clamp` documentados (redondeo hace borde inobservable).
+- Shims del host: evaluar con `jn_host_eval` (sin fuente), nunca `JS_Eval`; mutadores del árbol solo en `dom.c` (mueven `dom_mutation_count`).
 - Cascade split: `css_decl` (P_* slots + `css_round_clamp` unico), `css_values` (cv_), `css_gradient` (cg_), `css_box` (cb_ + grid/calc), `css_text` (ct_). `css.c` solo dispatch/cascade + wrappers. Drift gate verifica duenos.
 
 <!-- readmenator-agent-kb-link -->

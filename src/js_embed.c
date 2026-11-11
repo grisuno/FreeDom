@@ -19,6 +19,7 @@
 
 #include "quickjs.h"
 #include "js_dom_internal.h"
+#include "js_native_internal.h"
 
 /* Scans a string `val` (len `vlen`) for `<iframe` and extracts its `src`
  * attribute value (URL). Writes the URL into `out` (bounded by `outsz`).
@@ -243,8 +244,8 @@ jd_status jd_inject_video_shim(js_context *ctx) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
-    JSValue r = JS_Eval(jsctx, JD_VIDEO_SHIM, sizeof JD_VIDEO_SHIM - 1,
-                        "<video-shim>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JD_VIDEO_SHIM, sizeof JD_VIDEO_SHIM - 1,
+                        "<video-shim>");
     int ok = !JS_IsException(r);
     JS_FreeValue(jsctx, r);
     return ok ? JD_OK : JD_ERR_INTERNAL;

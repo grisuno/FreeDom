@@ -1,49 +1,49 @@
 # src: tab
 
-*Community 0 | 48 files | cohesion 0.66*
+*Community 1 | 51 files | cohesion 0.69*
 
 ## Definition
 
-This community groups 48 file(s) rooted at `src` with dominant language c (cohesion 0.66). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (271 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
+This community groups 51 file(s) rooted at `src` with dominant language c (cohesion 0.69). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (274 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
 
 ## Files
 
-### `src` (23 files)
+### `src` (24 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `src/dom.c` | c | utility | 75 | no |
+| `src/dom.c` | c | utility | 76 | no |
 | `src/fb_cmdline.c` | c | utility | 13 | no |
-| `src/fb_panes.c` | c | utility | 10 | no |
 | `src/freebug.c` | c | utility | 9 | no |
 | `src/html_parse.c` | c | utility | 29 | no |
 | `src/js_custom_elements.c` | c | utility | 1 | no |
 | `src/js_custom_elements.h` | h | utility | 2 | yes |
+| `src/js_dom.c` | c | utility | 64 | no |
 
-### `include` (13 files)
+### `include` (14 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `include/dom.h` | h | utility | 30 | no |
+| `include/dom.h` | h | utility | 31 | no |
 | `include/fb_cmdline.h` | h | utility | 18 | no |
-| `include/fb_panes.h` | h | utility | 12 | no |
 | `include/freebug.h` | h | utility | 18 | no |
 | `include/html_parse.h` | h | utility | 24 | no |
 | `include/js_dom.h` | h | utility | 23 | no |
 | `include/js_env.h` | h | infrastructure | 4 | no |
+| `include/js_geom.h` | h | utility | 19 | no |
 
-### `tests` (12 files)
+### `tests` (13 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `tests/test_dom.c` | c | testing | 44 | no |
+| `tests/test_dom.c` | c | testing | 45 | no |
 | `tests/test_fb_cmdline.c` | c | testing | 7 | no |
-| `tests/test_fb_panes.c` | c | testing | 11 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
-| `tests/test_js_dom.c` | c | testing | 271 | no |
+| `tests/test_js_dom.c` | c | testing | 274 | no |
+| `tests/test_js_env.c` | c | testing | 32 | no |
 
-*... and 28 more files in this community.*
+*... and 31 more files in this community.*
 
 
 ## Key Symbols
@@ -66,65 +66,65 @@ This community groups 48 file(s) rooted at `src` with dominant language c (cohes
 - `dom_attribute_names` (function, `include/dom.h:133`) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **` - Qualified names of node's attributes, in document order, written to names[] (borrowed, valid while i
 - `dom_text_content` (function, `include/dom.h:138`) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len` - Concatenated text content of node's subtree (borrowed, valid while idx/doc are * alive), or NULL. *l
 - `dom_document_title` (function, `include/dom.h:141`) `const char *dom_document_title(const dom_index *idx, size_t *len);` - Concatenated text content of node's subtree (borrowed, valid while idx/doc are * alive), or NULL. *l
-- `cycle` (function, `include/dom.h:169`) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / c`
-- `dom_place` (enum, `include/dom.h:187`) - Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node"
-- `parent` (function, `include/dom.h:196`) `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_AR`
-- `DOM_KIND_NONE` (macro, `include/dom.h:203`) `#define DOM_KIND_NONE`
-- `DOM_KIND_ELEMENT` (macro, `include/dom.h:204`) `#define DOM_KIND_ELEMENT`
-- `DOM_KIND_TEXT` (macro, `include/dom.h:205`) `#define DOM_KIND_TEXT`
-- `DOM_KIND_COMMENT` (macro, `include/dom.h:206`) `#define DOM_KIND_COMMENT`
-- `DOM_MAX_HANDLES` (macro, `include/dom.h:209`) `#define DOM_MAX_HANDLES`
-- `dom_node_kind` (function, `include/dom.h:212`) `int dom_node_kind(const dom_index *idx, dom_node_id node);` - -- text and comment nodes (spec/dom.md 9) --- Character-data nodes get LAZY handles in the same aren
-- `index` (function, `include/dom.h:228`) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_`
-- `length` (function, `include/dom.h:253`) `* length (no children => an owned empty string). Uses a chain of fixed-size * bl`
-- `process` (function, `include/dom.h:260`) `* modules in the same process (style resolution). NULL for a bad or non-element`
+- `valid` (function, `include/dom.h:146`) `* detached node stays valid (it just becomes unreachable from the root and is no`
+- `cycle` (function, `include/dom.h:176`) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / c`
+- `dom_place` (enum, `include/dom.h:194`) - Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node"
+- `parent` (function, `include/dom.h:203`) `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_AR`
+- `DOM_KIND_NONE` (macro, `include/dom.h:210`) `#define DOM_KIND_NONE`
+- `DOM_KIND_ELEMENT` (macro, `include/dom.h:211`) `#define DOM_KIND_ELEMENT`
+- `DOM_KIND_TEXT` (macro, `include/dom.h:212`) `#define DOM_KIND_TEXT`
+- `DOM_KIND_COMMENT` (macro, `include/dom.h:213`) `#define DOM_KIND_COMMENT`
+- `DOM_MAX_HANDLES` (macro, `include/dom.h:216`) `#define DOM_MAX_HANDLES`
+- `dom_node_kind` (function, `include/dom.h:219`) `int dom_node_kind(const dom_index *idx, dom_node_id node);` - -- text and comment nodes (spec/dom.md 9) --- Character-data nodes get LAZY handles in the same aren
+- `index` (function, `include/dom.h:235`) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_`
+- `length` (function, `include/dom.h:260`) `* length (no children => an owned empty string). Uses a chain of fixed-size * bl`
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 107
-- Cross-boundary resolved imports (EXTRACTED): 54
+- Internal resolved imports (EXTRACTED): 125
+- Cross-boundary resolved imports (EXTRACTED): 56
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 2 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 9 <-> 0 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
-- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_select.h.
-- [EXTRACTED] depends_on community 0 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
+- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 4 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 9 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
+- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_select.h.
+- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
 
 ## Risks
 
 - [cycle] `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
-- [dataflow UNCHECKED_ALLOC] `src/js_events.c:30` `jd_click_state_new` `s`: Result of allocator stored in `s` is never checked against NULL.
+- [dataflow UNCHECKED_ALLOC] `src/js_events.c:31` `jd_click_state_new` `s`: Result of allocator stored in `s` is never checked against NULL.
 
 ## Open Questions
 
-- Why do 44 file(s) lack file-level docs (e.g. `include/dom.h`)? What purpose do they serve?
+- Why do 47 file(s) lack file-level docs (e.g. `include/dom.h`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
 - What would break if the most connected file in src: tab changed?
-- Should src: tab be split, given cohesion 0.66?
+- Should src: tab be split, given cohesion 0.69?
 
 ## Sources
 
 - `include/dom.h`
 - `include/fb_cmdline.h`
-- `include/fb_panes.h`
 - `include/freebug.h`
 - `include/html_parse.h`
 - `include/js_dom.h`
 - `include/js_env.h`
 - `include/js_geom.h`
+- `include/js_intl.h`
 - `include/js_location.h`
+- `include/js_native.h`
 - `include/js_sandbox.h`
 - `include/js_trusted.h`
 - `include/url.h`
 - `include/web_storage.h`
 - `src/dom.c`
 - `src/fb_cmdline.c`
-- `src/fb_panes.c`
 - `src/freebug.c`
 - `src/html_parse.c`
 - `src/js_custom_elements.c`
 - `src/js_custom_elements.h`
-- *... and 28 more*
+- *... and 31 more*

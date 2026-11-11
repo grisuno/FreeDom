@@ -15,6 +15,7 @@ Solid arrows stay in this module, dashed arrows leave it.
 ```mermaid
 flowchart LR
     n_src_js_trusted_c__jt_enable_open(["jt_enable_open"])
+    n_src_js_native_c__jn_host_eval["js_native.jn_host_eval"]
     n_src_js_sandbox_c__js_context_raw["js_sandbox.js_context_raw"]
     n_src_js_trusted_c__jt_enable_observers(["jt_enable_observers"])
     n_src_js_trusted_c__jt_geometry_changed(["jt_geometry_changed"])
@@ -30,23 +31,30 @@ flowchart LR
     n_src_js_trusted_c__jt_take_storage(["jt_take_storage"])
     n_src_web_storage_c__wst_pack["web_storage.wst_pack"]
     n_src_js_trusted_c__jt_enable_worker(["jt_enable_worker"])
-    n_src_js_sandbox_c__js_install_realms["js_sandbox.js_install_realms"]
+    n_src_js_trusted_c__jt_enable_open -.-> n_src_js_native_c__jn_host_eval
     n_src_js_trusted_c__jt_enable_open -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_trusted_c__jt_enable_observers -.-> n_src_js_native_c__jn_host_eval
     n_src_js_trusted_c__jt_enable_observers -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_trusted_c__jt_geometry_changed -.-> n_src_js_native_c__jn_host_eval
     n_src_js_trusted_c__jt_geometry_changed -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_trusted_c__jt_take_opens -.-> n_src_js_native_c__jn_host_eval
     n_src_js_trusted_c__jt_take_opens -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_trusted_c__jt_enable_ws -.-> n_src_js_native_c__jn_host_eval
     n_src_js_trusted_c__jt_enable_ws -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_take_ws -.-> n_src_box_style_c__take
     n_src_js_trusted_c__jt_take_ws -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_ws_event -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_enable_frames -.-> n_src_css_c__function
+    n_src_js_trusted_c__jt_enable_frames -.-> n_src_js_native_c__jn_host_eval
     n_src_js_trusted_c__jt_enable_frames -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_trusted_c__jt_enable_storage -.-> n_src_js_native_c__jn_host_eval
     n_src_js_trusted_c__jt_enable_storage -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_enable_storage -.-> n_src_web_storage_c__wst_foreach
+    n_src_js_trusted_c__jt_take_storage -.-> n_src_js_native_c__jn_host_eval
     n_src_js_trusted_c__jt_take_storage -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_trusted_c__jt_take_storage -.-> n_src_web_storage_c__wst_pack
+    n_src_js_trusted_c__jt_enable_worker -.-> n_src_js_native_c__jn_host_eval
     n_src_js_trusted_c__jt_enable_worker -.-> n_src_js_sandbox_c__js_context_raw
-    n_src_js_trusted_c__jt_enable_worker -.-> n_src_js_sandbox_c__js_install_realms
 ```
 
 ## Structs
@@ -55,7 +63,7 @@ flowchart LR
 
 ### `jt_seed_ctx`
 
-`struct` | [src/js_trusted.c:476](../../src/js_trusted.c#L476)
+`struct` | [src/js_trusted.c:472](../../src/js_trusted.c#L472)
 
 ```c
 typedef struct jt_seed_ctx { JSContext *js; JSValue fn; JSValue global; } jt_seed_ctx;
@@ -69,7 +77,7 @@ typedef struct jt_seed_ctx { JSContext *js; JSValue fn; JSValue global; } jt_see
 
 ### `jt_enable_open`
 
-`function` | [src/js_trusted.c:48](../../src/js_trusted.c#L48)
+`function` | [src/js_trusted.c:49](../../src/js_trusted.c#L49)
 
 ```c
 jd_status jt_enable_open(js_context *ctx)
@@ -83,7 +91,7 @@ jd_status jt_enable_open(js_context *ctx)
 
 **Returns:** `jd_status`
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -105,7 +113,7 @@ jd_status jt_enable_observers(js_context *ctx)
 
 **Returns:** `jd_status`
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -113,7 +121,7 @@ jd_status jt_enable_observers(js_context *ctx)
 
 ### `jt_geometry_changed`
 
-`function` | [src/js_trusted.c:143](../../src/js_trusted.c#L143)
+`function` | [src/js_trusted.c:142](../../src/js_trusted.c#L142)
 
 ```c
 jd_status jt_geometry_changed(js_context *ctx)
@@ -127,7 +135,7 @@ jd_status jt_geometry_changed(js_context *ctx)
 
 **Returns:** `jd_status`
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -135,7 +143,7 @@ jd_status jt_geometry_changed(js_context *ctx)
 
 ### `jt_take_opens`
 
-`function` | [src/js_trusted.c:159](../../src/js_trusted.c#L159)
+`function` | [src/js_trusted.c:157](../../src/js_trusted.c#L157)
 
 ```c
 char *jt_take_opens(js_context *ctx)
@@ -153,7 +161,7 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 > **Inherited:** Documentation from [`jt_take_opens`](#jt_take_opens) (include/js_trusted.h:42).
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -161,7 +169,7 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 ### `jt_enable_ws`
 
-`function` | [src/js_trusted.c:237](../../src/js_trusted.c#L237)
+`function` | [src/js_trusted.c:234](../../src/js_trusted.c#L234)
 
 ```c
 jd_status jt_enable_ws(js_context *ctx)
@@ -175,7 +183,7 @@ jd_status jt_enable_ws(js_context *ctx)
 
 **Returns:** `jd_status`
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -183,7 +191,7 @@ jd_status jt_enable_ws(js_context *ctx)
 
 ### `jt_ws_ops_free`
 
-`function` | [src/js_trusted.c:249](../../src/js_trusted.c#L249)
+`function` | [src/js_trusted.c:245](../../src/js_trusted.c#L245)
 
 ```c
 void jt_ws_ops_free(jt_ws_op *ops, size_t n)
@@ -202,7 +210,7 @@ void jt_ws_ops_free(jt_ws_op *ops, size_t n)
 
 ### `jt_take_ws`
 
-`function` | [src/js_trusted.c:285](../../src/js_trusted.c#L285)
+`function` | [src/js_trusted.c:281](../../src/js_trusted.c#L281)
 
 ```c
 size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)
@@ -232,7 +240,7 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 ### `jt_ws_event`
 
-`function` | [src/js_trusted.c:336](../../src/js_trusted.c#L336)
+`function` | [src/js_trusted.c:332](../../src/js_trusted.c#L332)
 
 ```c
 int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)
@@ -265,7 +273,7 @@ Returns 1 when a live socket with that id received it.
 
 ### `jt_enable_frames`
 
-`function` | [src/js_trusted.c:432](../../src/js_trusted.c#L432)
+`function` | [src/js_trusted.c:428](../../src/js_trusted.c#L428)
 
 ```c
 jd_status jt_enable_frames(js_context *ctx, int frame_id)
@@ -280,7 +288,7 @@ jd_status jt_enable_frames(js_context *ctx, int frame_id)
 
 **Returns:** `jd_status`
 
-*Calls:* [`function`](src.css.c.md#function), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`function`](src.css.c.md#function), [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -288,7 +296,7 @@ jd_status jt_enable_frames(js_context *ctx, int frame_id)
 
 ### `jt_enable_storage`
 
-`function` | [src/js_trusted.c:488](../../src/js_trusted.c#L488)
+`function` | [src/js_trusted.c:484](../../src/js_trusted.c#L484)
 
 ```c
 jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
@@ -304,7 +312,7 @@ jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
 
 **Returns:** `jd_status`
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`wst_foreach`](src.web_storage.c.md#wst_foreach)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`wst_foreach`](src.web_storage.c.md#wst_foreach)
 
 ---
 
@@ -312,7 +320,7 @@ jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
 
 ### `jt_take_storage`
 
-`function` | [src/js_trusted.c:509](../../src/js_trusted.c#L509)
+`function` | [src/js_trusted.c:504](../../src/js_trusted.c#L504)
 
 ```c
 int jt_take_storage(js_context *ctx, char **out, size_t *len)
@@ -332,7 +340,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 > **Inherited:** Documentation from [`jt_take_storage`](#jt_take_storage) (include/js_trusted.h:104).
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`wst_pack`](src.web_storage.c.md#wst_pack)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`wst_pack`](src.web_storage.c.md#wst_pack)
 
 ---
 
@@ -340,7 +348,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `explicitly`
 
-`function` | [src/js_trusted.c:557](../../src/js_trusted.c#L557)
+`function` | [src/js_trusted.c:552](../../src/js_trusted.c#L552)
 
 ```c
 * explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...
@@ -361,7 +369,7 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 
 ### `jt_enable_worker`
 
-`function` | [src/js_trusted.c:638](../../src/js_trusted.c#L638)
+`function` | [src/js_trusted.c:633](../../src/js_trusted.c#L633)
 
 ```c
 jd_status jt_enable_worker(js_context *ctx)
@@ -375,7 +383,7 @@ jd_status jt_enable_worker(js_context *ctx)
 
 **Returns:** `jd_status`
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`js_install_realms`](src.js_sandbox.c.md#js_install_realms)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`js_install_realms`](src.js_sandbox.c.md#js_install_realms)
 
 ---
 

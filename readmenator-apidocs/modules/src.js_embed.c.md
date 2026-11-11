@@ -14,6 +14,7 @@ Solid arrows stay in this module, dashed arrows leave it.
 ```mermaid
 flowchart LR
     n_src_js_embed_c__jd_inject_video_shim(["jd_inject_video_shim"])
+    n_src_js_native_c__jn_host_eval["js_native.jn_host_eval"]
     n_src_js_sandbox_c__js_context_raw["js_sandbox.js_context_raw"]
     n_src_js_embed_c__jd_process_iframes(["jd_process_iframes"])
     n_include_dom_h__dom_get_attribute["dom.dom_get_attribute"]
@@ -24,6 +25,7 @@ flowchart LR
     n_src_dom_c__dom_get_by_tag["dom.dom_get_by_tag"]
     n_src_dom_c__dom_next_sibling["dom.dom_next_sibling"]
     n_src_dom_c__dom_set_attribute["dom.dom_set_attribute"]
+    n_src_js_embed_c__jd_inject_video_shim -.-> n_src_js_native_c__jn_host_eval
     n_src_js_embed_c__jd_inject_video_shim -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_embed_c__jd_process_iframes -.-> n_include_dom_h__dom_get_attribute
     n_src_js_embed_c__jd_process_iframes -.-> n_include_dom_h__dom_tag_name
@@ -42,7 +44,7 @@ flowchart LR
 
 ### `jd_video_from_scripts`
 
-`function` | [src/js_embed.c:203](../../src/js_embed.c#L203)
+`function` | [src/js_embed.c:204](../../src/js_embed.c#L204)
 
 ```c
 size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t nscripts, const char *page_url)
@@ -72,7 +74,7 @@ Runs before the pre-script preserve_view snapshot so video elements survive jQue
 
 ### `jd_inject_video_shim`
 
-`function` | [src/js_embed.c:242](../../src/js_embed.c#L242)
+`function` | [src/js_embed.c:243](../../src/js_embed.c#L243)
 
 ```c
 jd_status jd_inject_video_shim(js_context *ctx)
@@ -86,7 +88,7 @@ jd_status jd_inject_video_shim(js_context *ctx)
 
 **Returns:** `jd_status`
 
-*Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
 ---
 
@@ -94,7 +96,7 @@ jd_status jd_inject_video_shim(js_context *ctx)
 
 ### `jd_process_iframes`
 
-`function` | [src/js_embed.c:294](../../src/js_embed.c#L294)
+`function` | [src/js_embed.c:295](../../src/js_embed.c#L295)
 
 ```c
 void jd_process_iframes(js_context *ctx, dom_index *idx, jd_fetch_fn fn, void *fetch_ctx)

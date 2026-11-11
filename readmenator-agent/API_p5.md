@@ -1,6 +1,71 @@
 # API (page 5 of 12)
 Previous: [API_p4.md](API_p4.md)
 
+## include/page_view.h
+Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
+Imported by: `include/box_tree.h`, `include/frame_host.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+- `container` (function) `include/page_view.h:233` `* cont_id groups runs of one container (-1 = none);`
+- `bx_display` (function) `include/page_view.h:234` `* bx_display (flex/grid);`
+- `order` (function) `include/page_view.h:298` `* groups the runs of ONE floated element in document order (-1 = not in a float);`
+- `itself` (function) `include/page_view.h:362` `* by itself (bx_width_cap2);`
+- `CSS_LEN_UNSET` (function) `include/page_view.h:561` `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
+- `scale` (function) `include/page_view.h:636` `* scale(1)) and rotate in whole degrees (transform_rotate);`
+- `tree` (function) `include/page_view.h:681` `* box tree (a mask covers its whole subtree);`
+- `declare` (function) `include/page_view.h:870` `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
+- `nonzero` (function) `include/page_view.h:882` `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
+- `resolved` (function) `include/page_view.h:889` `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
+- `policy` (function) `include/page_view.h:897` `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
+- `pv_computed_new` (function) `include/page_view.h:929` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
+- `pv_computed_new_cached` (function) `include/page_view.h:932` `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark, const char *extern_css, size_t...` -- getComputedStyle bridge (spec/js_computed_style.md).
+- `pv_computed_get` (function) `include/page_view.h:940` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);` -- Resolves native_el (a dom_native_node pointer of the SAME document) into *st; when non-NULL, *font_px receives its...
+- `pv_computed_free` (function) `include/page_view.h:943` `void pv_computed_free(pv_computed *pc);`
+- `cause` (function) `include/page_view.h:947` `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
+- `pv_new` (function) `include/page_view.h:959` `pv_view *pv_new(void);` -- Allocates an empty view (used by the IPC deserialiser to rebuild a view on the * receiving side).
+- `form` (function) `include/page_view.h:978` `* form (-1 if none);`
+- `pv_set_emphasis` (function) `include/page_view.h:1010` `void pv_set_emphasis(pv_view *v, int bold, int italic);` -- Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run.
+- `default` (function) `include/page_view.h:1015` `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
+- `pv_set_color` (function) `include/page_view.h:1018` `void pv_set_color(pv_view *v, int fg_rgb);`
+- `pv_set_bgcolor` (function) `include/page_view.h:1025` `void pv_set_bgcolor(pv_view *v, int bg_rgb);` -- Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run.
+- `pv_set_text_style` (function) `include/page_view.h:1034` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` -- Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1...
+- `pv_text_ext_reset` (function) `include/page_view.h:1091` `void pv_text_ext_reset(pv_text_ext *e);` -- Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the nearest ancestor that sets it (packed /...
+- `ancestors` (function) `include/page_view.h:1096` `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
+- `pv_set_text_ext` (function) `include/page_view.h:1106` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
+- `pv_set_grad_text` (function) `include/page_view.h:1112` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` -- Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient).
+- `run` (function) `include/page_view.h:1115` `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
+- `pv_set_row_span` (function) `include/page_view.h:1128` `void pv_set_row_span(pv_view *v, int row_span);` -- Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run...
+- `pv_set_grid_area` (function) `include/page_view.h:1132` `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` -- Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed).
+- `pv_set_grid_rows` (function) `include/page_view.h:1133` `void pv_set_grid_rows(pv_view *v, int grid_rows);`
+- `pv_set_ua_tag` (function) `include/page_view.h:1138` `void pv_set_ua_tag(pv_view *v, int ua_tag);` -- Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor).
+- `pv_set_cont_box` (function) `include/page_view.h:1142` `void pv_set_cont_box(pv_view *v, int cont_box_id);` -- Sets the last run's cont_box_id (the box enclosing its container's items; -1 = * none).
+- `pv_set_grid` (function) `include/page_view.h:1143` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
+- `pv_set_flex` (function) `include/page_view.h:1151` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
+- `pv_set_flex_mauto` (function) `include/page_view.h:1154` `void pv_set_flex_mauto(pv_view *v, int mauto);` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
+- `pv_set_cont_item` (function) `include/page_view.h:1158` `void pv_set_cont_item(pv_view *v, int cont_item);` -- Sets the container-item ordinal on the most recently appended run (-1 = none). * No-op on an empty or NULL view; the...
+- `pv_set_float_w` (function) `include/page_view.h:1169` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...` -- Stamps the float founder's own declared width halves (pv_run.float_w) on the * most recently appended run.
+- `pv_set_float` (function) `include/page_view.h:1172` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
+- `pv_set_box` (function) `include/page_view.h:1182` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` -- Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and...
+- `pv_set_box_pct` (function) `include/page_view.h:1188` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` -- Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run.
+- `pv_set_box_maxw` (function) `include/page_view.h:1193` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` -- Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most * recently appended run.
+- `pv_set_node_id` (function) `include/page_view.h:1198` `void pv_set_node_id(pv_view *v, dom_node_id node_id);` -- Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element.
+- `pv_set_block_id` (function) `include/page_view.h:1203` `void pv_set_block_id(pv_view *v, int block_id);` -- Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs...
+- `pv_set_own_box` (function) `include/page_view.h:1207` `void pv_set_own_box(pv_view *v, int box_id);` -- Records the replaced element's own box def index on the last appended run.
+- `pv_set_oof` (function) `include/page_view.h:1211` `void pv_set_oof(pv_view *v, int oof);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_justify_self` (function) `include/page_view.h:1214` `void pv_set_justify_self(pv_view *v, int justify_self);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_block_node` (function) `include/page_view.h:1217` `void pv_set_block_node(pv_view *v, dom_node_id id);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
+- `pv_set_br_line` (function) `include/page_view.h:1225` `void pv_set_br_line(pv_view *v, int br_line);` -- Sets the last appended run's PV_BR_* flags (see pv_run.br_line); other bits * are dropped.
+- `pv_cont_count` (function) `include/page_view.h:1240` `size_t pv_cont_count(const pv_view *v);` -- pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] * (i == a cont_id) or NULL when out of...
+- `pv_cont_at` (function) `include/page_view.h:1241` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
+- `pv_set_input_checked` (function) `include/page_view.h:1245` `void pv_set_input_checked(pv_view *v, int checked);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
+- `pv_set_input_placeholder` (function) `include/page_view.h:1249` `void pv_set_input_placeholder(pv_view *v, int ph_color);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
+- `pv_svg_append_root_attrs` (function) `include/page_view.h:1255` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` -- Appends attrs (e.g.
+- `pv_placeholder_color` (function) `include/page_view.h:1258` `int pv_placeholder_color(const css_style *ph);` -- Appends attrs (e.g.
+- `pv_set_input_select_opts` (function) `include/page_view.h:1262` `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_free` (function) `include/page_view.h:1265` `void pv_free(pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_count` (function) `include/page_view.h:1268` `size_t pv_count(const pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
+- `pv_at` (function) `include/page_view.h:1269` `const pv_run *pv_at(const pv_view *v, size_t i);`
+- `pv_box_count` (function) `include/page_view.h:1273` `size_t pv_box_count(const pv_view *v);` -- Box tree accessors (Step D). pv_box_count is the number of box definitions; * pv_box_at returns boxes[i] (i == a...
+- `pv_box_at` (function) `include/page_view.h:1274` `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
+
 ## include/pdf_export.h
 Imported by: `gui/browser_ui.c`, `src/download.c`, `src/pdf_export.c`, `tests/test_pdf_export.c`
 - `fallback` (function) `include/pdf_export.h:46` `* fallback (PE_ERR_OVERFLOW, out left empty). title == NULL is treated as empty. * Does NOT append the extension...`
@@ -178,45 +243,47 @@ Imported by: `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/
 ## include/tab.h
 Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
 Imported by: `gui/browser_ui.c`, `include/frame_host.h`, `src/freedom.c`, `src/tab.c`, `tests/test_frame_host.c`, `tests/test_tab.c`
-- `tab_worker_dispatch` (function) `include/tab.h:157` `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
-- `tab_open` (function) `include/tab.h:161` `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
-- `tab_parse_worker_args` (function) `include/tab.h:168` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` -- Pure validator of the worker handoff arguments (the security-relevant surface of the exec): returns nonzero and...
-- `tab_prewarm` (function) `include/tab.h:177` `void tab_prewarm(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
-- `tab_prewarmed` (function) `include/tab.h:180` `int tab_prewarmed(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
-- `tab_prewarmed_pid` (function) `include/tab.h:183` `int tab_prewarmed_pid(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
-- `tab_shutdown_spare` (function) `include/tab.h:186` `void tab_shutdown_spare(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
-- `out_status` (function) `include/tab.h:194` `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
-- `tab_set_fetcher` (function) `include/tab.h:205` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` -- Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests are then * refused). fn/ctx must...
-- `tab_inflight_request_headers` (function) `include/tab.h:210` `const char *tab_inflight_request_headers(void);` -- Inside a tab_fetch_fn call: the request headers the page attached to this XHR/fetch, already filtered by...
-- `tab_report_response_headers` (function) `include/tab.h:215` `void tab_report_response_headers(const char *lines);` -- Inside a tab_fetch_fn call: reports the response header lines ("name: value\n", no Set-Cookie) the page's XHR/fetch...
-- `bytes` (function) `include/tab.h:219` `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
-- `tab_set_css_sink` (function) `include/tab.h:228` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
-- `tab_set_net_allowed` (function) `include/tab.h:233` `void tab_set_net_allowed(tab *t, int allowed);` -- Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load.
-- `tab_set_op_net_budget_ms` (function) `include/tab.h:237` `void tab_set_op_net_budget_ms(tab *t, int ms);` -- Per-operation network time budget in ms for requests the worker issues AFTER the load * (default...
-- `tab_async_fd` (function) `include/tab.h:242` `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
-- `tab_async_busy` (function) `include/tab.h:248` `int tab_async_busy(const tab *t);`
-- `jar` (function) `include/tab.h:255` `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
-- `tab_set_cookies` (function) `include/tab.h:259` `void tab_set_cookies(tab *t, const char *cookies);` -- Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...") the trusted parent read from...
-- `origin` (function) `include/tab.h:262` `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
-- `tab_set_storage` (function) `include/tab.h:264` `void tab_set_storage(tab *t, const char *blob, size_t len);` -- Seeds localStorage for the next load from the parent's in-memory store for the page origin (web_storage snapshot...
-- `exclusively` (function) `include/tab.h:270` `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
-- `tab_set_viewport_w` (function) `include/tab.h:278` `void tab_set_viewport_w(tab *t, int px);` -- Sets the render viewport width (px) used to evaluate @media width queries on the NEXT load, so a responsive page...
-- `load` (function) `include/tab.h:282` `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);`
-- `tab_set_identity` (function) `include/tab.h:288` `void tab_set_identity(tab *t, const char *serialized);` -- The user's identity override (idn_serialize text, spec/identity.md) for the NEXT loads: the worker applies it to...
-- `tab_last_subreq_stats` (function) `include/tab.h:294` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` -- Subresources the parent served for the LAST load (the worker's TAG_SUBREQ: XHR, fetch, external scripts, ES...
-- `tab_subreq_permitted` (function) `include/tab.h:299` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` -- Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for this load, never the worker's...
-- `view` (function) `include/tab.h:307` `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-- `string` (function) `include/tab.h:327` `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-- `granted` (function) `include/tab.h:376` `* granted (allow.conf AND js.conf);`
-- `returned` (function) `include/tab.h:377` `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-- `popstate` (function) `include/tab.h:383` `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-- `decode` (function) `include/tab.h:402` `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-- `tab_alive` (function) `include/tab.h:415` `int tab_alive(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
-- `tab_child_pid` (function) `include/tab.h:418` `pid_t tab_child_pid(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
-- `tab_close` (function) `include/tab.h:421` `void tab_close(tab *t);` -- variant): data_url slices the base64 payload out of `data_url` (no allocation, no network -- the bytes are already...
-- `tab_page_free` (function) `include/tab.h:424` `void tab_page_free(tab_page *p);` -- malformed data: URI is not a transport error: *out stays zeroed, same as an * undecodable format, and the caller...
-- `tab_eval_result_free` (function) `include/tab.h:425` `void tab_eval_result_free(tab_eval_result *r);`
-- `tab_image_free` (function) `include/tab.h:426` `void tab_image_free(tab_image *img);`
+- `tab_worker_dispatch` (function) `include/tab.h:161` `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
+- `tab_open` (function) `include/tab.h:165` `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
+- `tab_parse_worker_args` (function) `include/tab.h:172` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` -- Pure validator of the worker handoff arguments (the security-relevant surface of the exec): returns nonzero and...
+- `tab_prewarm` (function) `include/tab.h:181` `void tab_prewarm(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
+- `tab_prewarmed` (function) `include/tab.h:184` `int tab_prewarmed(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
+- `tab_prewarmed_pid` (function) `include/tab.h:187` `int tab_prewarmed_pid(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
+- `tab_shutdown_spare` (function) `include/tab.h:190` `void tab_shutdown_spare(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
+- `out_status` (function) `include/tab.h:198` `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
+- `tab_set_fetcher` (function) `include/tab.h:209` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` -- Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests are then * refused). fn/ctx must...
+- `tab_inflight_request_headers` (function) `include/tab.h:214` `const char *tab_inflight_request_headers(void);` -- Inside a tab_fetch_fn call: the request headers the page attached to this XHR/fetch, already filtered by...
+- `tab_report_response_headers` (function) `include/tab.h:219` `void tab_report_response_headers(const char *lines);` -- Inside a tab_fetch_fn call: reports the response header lines ("name: value\n", no Set-Cookie) the page's XHR/fetch...
+- `bytes` (function) `include/tab.h:223` `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+- `tab_set_css_sink` (function) `include/tab.h:232` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+- `tab_set_net_allowed` (function) `include/tab.h:237` `void tab_set_net_allowed(tab *t, int allowed);` -- Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load.
+- `none` (function) `include/tab.h:241` `* worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick. * The caller must then...`
+- `tab_page_keep_view` (function) `include/tab.h:248` `void tab_page_keep_view(tab_page *prev, tab_page *next);` -- For a caller that replaces its page with each tick's: when `next` is unchanged, moves the * title, text and view of...
+- `tab_set_op_net_budget_ms` (function) `include/tab.h:252` `void tab_set_op_net_budget_ms(tab *t, int ms);` -- Per-operation network time budget in ms for requests the worker issues AFTER the load * (default...
+- `tab_async_fd` (function) `include/tab.h:257` `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
+- `tab_async_busy` (function) `include/tab.h:263` `int tab_async_busy(const tab *t);`
+- `jar` (function) `include/tab.h:270` `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+- `tab_set_cookies` (function) `include/tab.h:274` `void tab_set_cookies(tab *t, const char *cookies);` -- Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...") the trusted parent read from...
+- `origin` (function) `include/tab.h:277` `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+- `tab_set_storage` (function) `include/tab.h:279` `void tab_set_storage(tab *t, const char *blob, size_t len);` -- Seeds localStorage for the next load from the parent's in-memory store for the page origin (web_storage snapshot...
+- `exclusively` (function) `include/tab.h:285` `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+- `tab_set_viewport_w` (function) `include/tab.h:293` `void tab_set_viewport_w(tab *t, int px);` -- Sets the render viewport width (px) used to evaluate @media width queries on the NEXT load, so a responsive page...
+- `load` (function) `include/tab.h:297` `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);`
+- `tab_set_identity` (function) `include/tab.h:303` `void tab_set_identity(tab *t, const char *serialized);` -- The user's identity override (idn_serialize text, spec/identity.md) for the NEXT loads: the worker applies it to...
+- `tab_last_subreq_stats` (function) `include/tab.h:309` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` -- Subresources the parent served for the LAST load (the worker's TAG_SUBREQ: XHR, fetch, external scripts, ES...
+- `tab_subreq_permitted` (function) `include/tab.h:314` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` -- Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for this load, never the worker's...
+- `view` (function) `include/tab.h:322` `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+- `string` (function) `include/tab.h:342` `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+- `granted` (function) `include/tab.h:391` `* granted (allow.conf AND js.conf);`
+- `returned` (function) `include/tab.h:392` `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+- `popstate` (function) `include/tab.h:398` `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+- `decode` (function) `include/tab.h:417` `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+- `tab_alive` (function) `include/tab.h:430` `int tab_alive(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
+- `tab_child_pid` (function) `include/tab.h:433` `pid_t tab_child_pid(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
+- `tab_close` (function) `include/tab.h:436` `void tab_close(tab *t);` -- variant): data_url slices the base64 payload out of `data_url` (no allocation, no network -- the bytes are already...
+- `tab_page_free` (function) `include/tab.h:439` `void tab_page_free(tab_page *p);` -- malformed data: URI is not a transport error: *out stays zeroed, same as an * undecodable format, and the caller...
+- `tab_eval_result_free` (function) `include/tab.h:440` `void tab_eval_result_free(tab_eval_result *r);`
+- `tab_image_free` (function) `include/tab.h:441` `void tab_image_free(tab_image *img);`
 
 ## include/text_case.h
 Imported by: `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
@@ -400,85 +467,6 @@ Depends on: `include/box_blur.h`
 - `box_line` (function) `src/box_blur.c:28` `static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)` -- One box pass of odd width bw over n samples spaced `step` apart, through tmp * (n bytes).
 - `bb_blur_a8` (function) `src/box_blur.c:41` `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)`
 - `bb_ink_rect` (function) `src/box_blur.c:57` `int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])`
-
-## src/box_style.c
-Depends on: `include/box_style.h`
-- `is_ws` (function) `src/box_style.c:31` `static int is_ws(char c)`
-- `copy_lower_trim` (function) `src/box_style.c:37` `static int copy_lower_trim(const char *in, char *out, size_t out_size)` -- Copies in into out, trimming ASCII whitespace and lowercasing.
-- `name_cmp` (function) `src/box_style.c:50` `static int name_cmp(const void *key, const void *elem)` -- Both row structs start with `const char *name`, so a pointer to a row is also a * pointer to its name field: one...
-- `bx_default_for_tag` (function) `src/box_style.c:163` `bx_box bx_default_for_tag(const char *tag)`
-- `bx_table_role_of` (function) `src/box_style.c:171` `bx_table_role bx_table_role_of(const char *tag, css_display display)`
-- `bx_ua_of_tag` (function) `src/box_style.c:210` `bx_ua_tag bx_ua_of_tag(const char *tag)`
-- `bx_default_for_ua` (function) `src/box_style.c:219` `bx_box bx_default_for_ua(bx_ua_tag id)`
-- `bx_block_ua_box` (function) `src/box_style.c:225` `bx_box bx_block_ua_box(int heading_level, int in_list, bx_ua_tag ua)`
-- `bx_parse_display` (function) `src/box_style.c:261` `bx_status bx_parse_display(const char *token, bx_display *out)`
-- `bx_place` (function) `src/box_style.c:271` `bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,
-                ...`
-- `bx_width_cap` (function) `src/box_style.c:288` `double bx_width_cap(int w_px, int w_pct, double avail_w)`
-- `take` (function) `src/box_style.c:295` `* caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read...`
-- `bx_width_cap2` (function) `src/box_style.c:313` `double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w)`
-- `bx_replaced_box` (function) `src/box_style.c:321` `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den,
-                    doub...`
-- `bx_border_box_h` (function) `src/box_style.c:335` `double bx_border_box_h(double declared_h, int border_box,
-                       double pad_t, do...`
-- `bx_pct_block_size` (function) `src/box_style.c:346` `double bx_pct_block_size(int px_val, int pct_pm, double cb_h)`
-- `bx_definite_content_h` (function) `src/box_style.c:352` `double bx_definite_content_h(double h, double min_h, double max_h,
-                             i...`
-- `bx_content_clipped` (function) `src/box_style.c:361` `int bx_content_clipped(int overflow_x, int overflow_y)`
-- `bx_lp_px` (function) `src/box_style.c:367` `double bx_lp_px(int px_val, int pct_pm, double basis)`
-- `bx_content_cap` (function) `src/box_style.c:378` `double bx_content_cap(double width_cap, int border_box,
-                      double pad_l, doubl...`
-- `bx_flex_min_clamp` (function) `src/box_style.c:389` `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box,
-                      ...`
-- `bx_border_span` (function) `src/box_style.c:396` `double bx_border_span(double width_cap, int border_box,
-                      double pad_l, doubl...`
-- `bg_size_component` (function) `src/box_style.c:408` `static double bg_size_component(int px_val, int pct_pm, double area)` -- One background-size component in px, or -1 when it is `auto` (Backgrounds 3 section 3.9).
-- `bx_background_layer` (function) `src/box_style.c:415` `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,
-                    ...`
-- `bx_display_name` (function) `src/box_style.c:454` `const char *bx_display_name(bx_display d)`
-- `bx_flex_max_clamp` (function) `src/box_style.c:467` `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box,
-                     ...`
-- `bx_place_ex` (function) `src/box_style.c:474` `bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int center,
-             ...`
-- `bx_line_height_px` (function) `src/box_style.c:484` `double bx_line_height_px(int line_scale, double font_px)`
-
-## src/box_tree.c
-Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
-- `layout_block` (function) `src/box_tree.c:37` `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,
-                   ...` -- Block container: stack non-none children vertically, collapsing each child's top * margin with the previous child's...
-- `bt_nn` (function) `src/box_tree.c:58` `static double bt_nn(double v)` -- if (cavail < 0.0) cavail = 0.0; bt_status r = layout_node(c, cavail, depth + 1); if (r != BT_OK) return r; double...
-- `height` (function) `src/box_tree.c:78` `* exactly that height (Flexbox 9.4 step 15).
- *
- * wrap_reverse (node->wrap_reverse): when node->...`
-- `layout_flex` (function) `src/box_tree.c:98` `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
-                    ...`
-- `layout_grid` (function) `src/box_tree.c:280` `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
-                    ...`
-- `sized` (function) `src/box_tree.c:350` `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
-- `layout_node` (function) `src/box_tree.c:420` `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
-- `bt_layout` (function) `src/box_tree.c:465` `bt_status bt_layout(bt_node *root, double avail_w)`
-- `assign_doc_order` (function) `src/box_tree.c:505` `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
-                  ...` -- Recursive doc_order assignment.
-- `find_positioned_ancestor` (function) `src/box_tree.c:522` `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
-                       ...` -- Walk the parent_id chain from `start` to find the nearest ancestor with position != STATIC.
-- `resolve_inset` (function) `src/box_tree.c:542` `static double resolve_inset(int v, int pct_pm, double basis)` -- Resolves an inset <length-percentage>: PV_LEN_UNSET or BT_LEN_AUTO with no percentage half → 0 (anchor at the...
-- `inset_unset` (function) `src/box_tree.c:551` `static int inset_unset(int v, int pct_pm)` -- Stage 2b: an inset axis the author left undeclared (UNSET) or `auto`.
-- `bt_containing_block` (function) `src/box_tree.c:555` `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
-                        ...`
-- `block` (function) `src/box_tree.c:566` `* true block (same flow neighbourhood), strictly better than zeros. NULL
-     * placed keeps lega...`
-- `bt_resolve_positioning` (function) `src/box_tree.c:585` `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
-                          ...`
-- `bt_resolve_positioning_ex` (function) `src/box_tree.c:596` `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
-                       ...`
-- `oof_walk` (function) `src/box_tree.c:751` `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` -- Shared walk for the Stage 2d classifiers: nearest==1 stops at the first * ABSOLUTE/FIXED box, nearest==0 remembers...
-- `bt_oof_anchor` (function) `src/box_tree.c:768` `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
-- `bt_oof_root` (function) `src/box_tree.c:772` `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
-- `bt_box_hidden` (function) `src/box_tree.c:776` `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
-- `bt_in_subtree` (function) `src/box_tree.c:789` `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)`
-- `bt_oof_avail` (function) `src/box_tree.c:800` `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
-- `bt_defer_roots` (function) `src/box_tree.c:808` `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
-                      const bt_positi...`
 
 
 Next: [API_p6.md](API_p6.md)

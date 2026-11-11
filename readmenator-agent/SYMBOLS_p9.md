@@ -1,22 +1,40 @@
-# Symbols (page 9 of 16)
+# Symbols (page 9 of 17)
 Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `mod_loader` | function | `src/js_sandbox.c:896` | `static JSModuleDef *mod_loader(JSContext *jc, const char *name, void *opaque)` |
+| `mod_normalize` | function | `src/js_sandbox.c:932` | `static char *mod_normalize(JSContext *jc, const char *base, const char *name, void *opaque);` |
+| `mod_set_meta` | function | `src/js_sandbox.c:887` | `static void mod_set_meta(JSContext *jc, JSValueConst compiled, const char *url)` |
+| `process_soft_stack` | function | `src/js_sandbox.c:557` | `static size_t process_soft_stack(void)` |
+| `profile_sample` | function | `src/js_sandbox.c:197` | `static void profile_sample(js_context *c, unsigned weight_ms)` |
+| `realm_of` | function | `src/js_sandbox.c:1032` | `static JSContext *realm_of(js_context *c, JSValueConst g)` |
+| `rej_remove` | function | `src/js_sandbox.c:82` | `static void rej_remove(js_context *c, size_t i)` |
+| `rej_report` | function | `src/js_sandbox.c:109` | `static void rej_report(js_context *c)` |
+| `throw_hook_cb` | function | `src/js_sandbox.c:315` | `static void throw_hook_cb(JSContext *ctx, JSValueConst obj, void *opaque)` |
+| `throw_key` | function | `src/js_sandbox.c:258` | `static void throw_key(JSContext *ctx, JSValueConst obj, char *key, size_t cap)` |
+| `throw_named` | function | `src/js_sandbox.c:1045` | `static JSValue throw_named(JSContext *ctx, const char *name, const char *msg)` |
+| `timespec_diff_ms` | function | `src/js_sandbox.c:192` | `static long timespec_diff_ms(const struct timespec *a, const struct timespec *b)` |
+| `timespec_reached` | function | `src/js_sandbox.c:187` | `static int timespec_reached(const struct timespec *now, const struct timespec *deadline)` |
+| `undefined` | function | `src/js_sandbox.c:519` | `* yields undefined (or a getter throws), in which case we leave it unknown. */ JSValue st = JS_GetPropertyStr(ctx...` |
+| `JT_IO_MAX_STR` | macro | `src/js_trusted.c:62` | `#define JT_IO_MAX_STR` |
+| `explicitly` | function | `src/js_trusted.c:552` | `* explicitly (no window, no document). Delivery is always a timer task. */ static const char JT_W...` |
+| `hex_nibble` | function | `src/js_trusted.c:250` | `static int hex_nibble(char c)` |
+| `jt_enable_frames` | function | `src/js_trusted.c:428` | `jd_status jt_enable_frames(js_context *ctx, int frame_id)` |
 | `jt_enable_observers` | function | `src/js_trusted.c:129` | `jd_status jt_enable_observers(js_context *ctx)` |
-| `jt_enable_open` | function | `src/js_trusted.c:48` | `jd_status jt_enable_open(js_context *ctx)` |
-| `jt_enable_storage` | function | `src/js_trusted.c:488` | `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)` |
-| `jt_enable_worker` | function | `src/js_trusted.c:638` | `jd_status jt_enable_worker(js_context *ctx)` |
-| `jt_enable_ws` | function | `src/js_trusted.c:237` | `jd_status jt_enable_ws(js_context *ctx)` |
-| `jt_geometry_changed` | function | `src/js_trusted.c:143` | `jd_status jt_geometry_changed(js_context *ctx)` |
-| `jt_seed_ctx` | struct | `src/js_trusted.c:476` | `` |
-| `jt_seed_pair` | function | `src/js_trusted.c:478` | `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)` |
-| `jt_take_opens` | function | `src/js_trusted.c:159` | `char *jt_take_opens(js_context *ctx)` |
-| `jt_take_storage` | function | `src/js_trusted.c:509` | `int jt_take_storage(js_context *ctx, char **out, size_t *len)` |
-| `jt_take_ws` | function | `src/js_trusted.c:285` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)` |
-| `jt_ws_event` | function | `src/js_trusted.c:336` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)` |
-| `jt_ws_ops_free` | function | `src/js_trusted.c:249` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n)` |
-| `ws_payload` | function | `src/js_trusted.c:261` | `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)` |
+| `jt_enable_open` | function | `src/js_trusted.c:49` | `jd_status jt_enable_open(js_context *ctx)` |
+| `jt_enable_storage` | function | `src/js_trusted.c:484` | `jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)` |
+| `jt_enable_worker` | function | `src/js_trusted.c:633` | `jd_status jt_enable_worker(js_context *ctx)` |
+| `jt_enable_ws` | function | `src/js_trusted.c:234` | `jd_status jt_enable_ws(js_context *ctx)` |
+| `jt_geometry_changed` | function | `src/js_trusted.c:142` | `jd_status jt_geometry_changed(js_context *ctx)` |
+| `jt_seed_ctx` | struct | `src/js_trusted.c:472` | `` |
+| `jt_seed_pair` | function | `src/js_trusted.c:474` | `static void jt_seed_pair(void *vctx, const char *k, size_t kl, const char *v, size_t vl)` |
+| `jt_take_opens` | function | `src/js_trusted.c:157` | `char *jt_take_opens(js_context *ctx)` |
+| `jt_take_storage` | function | `src/js_trusted.c:504` | `int jt_take_storage(js_context *ctx, char **out, size_t *len)` |
+| `jt_take_ws` | function | `src/js_trusted.c:281` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap)` |
+| `jt_ws_event` | function | `src/js_trusted.c:332` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len)` |
+| `jt_ws_ops_free` | function | `src/js_trusted.c:245` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n)` |
+| `ws_payload` | function | `src/js_trusted.c:257` | `static char *ws_payload(int kind, const char *s, size_t n, size_t *out_len)` |
 | `append_seg` | function | `src/link_nav.c:86` | `static int append_seg(char *body, size_t bodysz, size_t *blen,                       const char *...` |
 | `ci_prefix` | function | `src/link_nav.c:38` | `static int ci_prefix(const char *s, const char *prefix)` |
 | `classify_block` | function | `src/link_nav.c:62` | `static ln_block_reason classify_block(const char *ref)` |
@@ -478,23 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `sb_put` | function | `src/prefs.c:382` | `static void sb_put(sbuf *b, const char *s, size_t n)` |
 | `sb_str` | function | `src/prefs.c:397` | `static void sb_str(sbuf *b, const char *s)` |
 | `sbuf` | struct | `src/prefs.c:380` | `` |
-| `sugg_push` | function | `src/prefs.c:348` | `static void sugg_push(char *out, size_t row_len, int max_rows, int *n,                       cons...` |
-| `title_clean` | function | `src/prefs.c:39` | `static char *title_clean(const char *src)` |
-| `url_prefix_match` | function | `src/prefs.c:336` | `static int url_prefix_match(const char *url, const char *q)` |
-| `url_valid` | function | `src/prefs.c:26` | `static int url_valid(const char *url)` |
-| `PROFILE_KEYFILE_LEN` | macro | `src/profile.c:27` | `#define PROFILE_KEYFILE_LEN` |
-| `_POSIX_C_SOURCE` | macro | `src/profile.c:11` | `#define _POSIX_C_SOURCE` |
-| `join_path` | function | `src/profile.c:29` | `static int join_path(const profile_ctx *ctx, const char *name,                      char *out, si...` |
-| `keyfile_create` | function | `src/profile.c:36` | `static profile_status keyfile_create(const char *dir, const char *path,                          ...` |
-| `map_ds` | function | `src/profile.c:98` | `static profile_status map_ds(ds_status ds)` |
-| `profile_close` | function | `src/profile.c:149` | `void profile_close(profile_ctx *ctx)` |
-| `profile_load` | function | `src/profile.c:112` | `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)` |
-| `profile_open` | function | `src/profile.c:59` | `profile_status profile_open(profile_ctx *ctx, const char *dir)` |
-| `profile_save` | function | `src/profile.c:133` | `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)` |
-| `place` | function | `src/render_doc.c:240` | `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...` |
-| `rd_at` | function | `src/render_doc.c:765` | `const rd_block *rd_at(const rd_doc *d, size_t i)` |
-| `rd_block_heading_level` | function | `src/render_doc.c:802` | `int rd_block_heading_level(const rd_block *b)` |
-| `rd_block_tag` | function | `src/render_doc.c:813` | `const char *rd_block_tag(const rd_block *b)` |
-| `rd_box_at` | function | `src/render_doc.c:774` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

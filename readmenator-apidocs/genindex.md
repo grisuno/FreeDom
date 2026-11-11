@@ -258,6 +258,7 @@
 - [`calc_val`](modules/src.css_box.c.md#calc_val) struct in `src/css_box.c`
 - [`caller`](modules/gui.browser_ui.c.md#caller) function in `gui/browser_ui.c`
 - [`caller`](modules/src.css.c.md#caller) function in `src/css.c`
+- [`cancels`](modules/src.js_dom_ext.c.md#cancels) function in `src/js_dom_ext.c`
 - [`candidates`](modules/src.webfont.c.md#candidates) function in `src/webfont.c`
 - [`cap`](modules/src.css.c.md#cap) function in `src/css.c`
 - [`car_effective_spec`](modules/include.css_atrule.h.md#car_effective_spec) function in `include/css_atrule.h`
@@ -888,6 +889,7 @@
 - [`dl_should_download`](modules/include.download.h.md#dl_should_download) function in `include/download.h`
 - [`dl_should_download`](modules/src.download.c.md#dl_should_download) function in `src/download.c`
 - [`dl_status`](modules/include.download.h.md#dl_status) enum in `include/download.h`
+- [`does`](modules/src.tab.c.md#does) function in `src/tab.c`
 - [`dom_append_child`](modules/src.dom.c.md#dom_append_child) function in `src/dom.c`
 - [`dom_attribute_names`](modules/include.dom.h.md#dom_attribute_names) function in `include/dom.h`
 - [`dom_attribute_names`](modules/src.dom.c.md#dom_attribute_names) function in `src/dom.c`
@@ -923,6 +925,7 @@
 - [`dom_matches`](modules/src.dom.c.md#dom_matches) function in `src/dom.c`
 - [`DOM_MAX_HANDLES`](modules/include.dom.h.md#dom_max_handles) macro in `include/dom.h`
 - [`dom_move_children`](modules/src.dom.c.md#dom_move_children) function in `src/dom.c`
+- [`dom_mutation_count`](modules/src.dom.c.md#dom_mutation_count) function in `src/dom.c`
 - [`dom_native_node`](modules/src.dom.c.md#dom_native_node) function in `src/dom.c`
 - [`dom_next_sibling`](modules/src.dom.c.md#dom_next_sibling) function in `src/dom.c`
 - [`dom_node_at`](modules/src.dom.c.md#dom_node_at) function in `src/dom.c`
@@ -1009,6 +1012,7 @@
 
 - [`f`](modules/include.frame_broker.h.md#f) type_alias in `include/frame_broker.h`
 - [`fails`](modules/src.js_dom.c.md#fails) function in `src/js_dom.c`
+- [`failure`](modules/include.js_native.h.md#failure) function in `include/js_native.h`
 - [`fallback`](modules/include.pdf_export.h.md#fallback) function in `include/pdf_export.h`
 - [`family`](modules/include.css.h.md#css_style-family) method of `css_style` in `include/css.h`
 - [`family`](modules/gui.browser_ui.c.md#family) type_alias in `gui/browser_ui.c`
@@ -1228,7 +1232,6 @@
 - [`fp_hardware_concurrency`](modules/src.anti_fp.c.md#fp_hardware_concurrency) function in `src/anti_fp.c`
 - [`fp_max_touch_points`](modules/include.anti_fp.h.md#fp_max_touch_points) function in `include/anti_fp.h`
 - [`fp_max_touch_points`](modules/src.anti_fp.c.md#fp_max_touch_points) function in `src/anti_fp.c`
-- [`FP_MIME_COUNT`](modules/src.js_env.c.md#fp_mime_count) macro in `src/js_env.c`
 - [`fp_on_line`](modules/include.anti_fp.h.md#fp_on_line) function in `include/anti_fp.h`
 - [`fp_on_line`](modules/src.anti_fp.c.md#fp_on_line) function in `src/anti_fp.c`
 - [`fp_origin_key`](modules/include.anti_fp.h.md#fp_origin_key) function in `include/anti_fp.h`
@@ -1755,12 +1758,18 @@
 - [`jg_table`](modules/include.ui.h.md#jg_table) struct in `include/ui.h`
 - [`jg_wire_len`](modules/include.js_geom.h.md#jg_wire_len) function in `include/js_geom.h`
 - [`jg_wire_len`](modules/src.js_geom.c.md#jg_wire_len) function in `src/js_geom.c`
+- [`ji_install`](modules/include.js_intl.h.md#ji_install) function in `include/js_intl.h`
+- [`ji_install`](modules/src.js_intl.c.md#ji_install) function in `src/js_intl.c`
 - [`jl_m_hist_target`](modules/src.js_location.c.md#jl_m_hist_target) function in `src/js_location.c`
+- [`jn_host_eval`](modules/src.js_native.c.md#jn_host_eval) function in `src/js_native.c`
+- [`jn_seal`](modules/src.js_native.c.md#jn_seal) function in `src/js_native.c`
+- [`JN_SUPPORTS_MAX`](modules/src.js_native.c.md#jn_supports_max) macro in `src/js_native.c`
 - [`jobs`](modules/include.prefetch.h.md#jobs) type_alias in `include/prefetch.h`
 - [`jpeg_err_ctx`](modules/src.image_decode.c.md#jpeg_err_ctx) struct in `src/image_decode.c`
 - [`jr`](modules/src.import_map.c.md#jr) struct in `src/import_map.c`
 - [`js`](modules/include.webcaps.h.md#js) type_alias in `include/webcaps.h`
 - [`js_context`](modules/include.js_sandbox.h.md#js_context) type_alias in `include/js_sandbox.h`
+- [`js_context`](modules/src.js_native_internal.h.md#js_context) struct in `src/js_native_internal.h`
 - [`js_context`](modules/src.js_sandbox.c.md#js_context) struct in `src/js_sandbox.c`
 - [`js_context_free`](modules/include.js_sandbox.h.md#js_context_free) function in `include/js_sandbox.h`
 - [`js_context_free`](modules/src.js_sandbox.c.md#js_context_free) function in `src/js_sandbox.c`
@@ -1777,6 +1786,8 @@
 - [`js_eval_module`](modules/src.js_sandbox.c.md#js_eval_module) function in `src/js_sandbox.c`
 - [`js_eval_named`](modules/src.js_sandbox.c.md#js_eval_named) function in `src/js_sandbox.c`
 - [`js_eval_once`](modules/src.js_sandbox.c.md#js_eval_once) function in `src/js_sandbox.c`
+- [`js_host_slot`](modules/src.js_native_internal.h.md#js_host_slot) function in `src/js_native_internal.h`
+- [`js_host_slot`](modules/src.js_sandbox.c.md#js_host_slot) function in `src/js_sandbox.c`
 - [`js_install_realms`](modules/src.js_sandbox.c.md#js_install_realms) function in `src/js_sandbox.c`
 - [`js_limits`](modules/include.js_sandbox.h.md#js_limits) struct in `include/js_sandbox.h`
 - [`js_limits_default`](modules/src.js_sandbox.c.md#js_limits_default) function in `src/js_sandbox.c`
@@ -2004,7 +2015,6 @@
 - [`mem_contains_ci`](modules/include.util.h.md#mem_contains_ci) function in `include/util.h`
 - [`membership`](modules/include.js_policy.h.md#membership) function in `include/js_policy.h`
 - [`memory`](modules/gui.browser_ui.c.md#memory) function in `gui/browser_ui.c`
-- [`methods`](modules/src.js_env.c.md#methods) function in `src/js_env.c`
 - [`min`](modules/src.css_box.c.md#min) function in `src/css_box.c`
 - [`module`](modules/src.secure_fetch.c.md#module) function in `src/secure_fetch.c`
 - [`modules`](modules/include.html_parse.h.md#modules) function in `include/html_parse.h`
@@ -2050,6 +2060,7 @@
 - [`node`](modules/include.box_tree.h.md#node) function in `include/box_tree.h`
 - [`node`](modules/include.js_geom.h.md#node) type_alias in `include/js_geom.h`
 - [`NONE`](modules/src.box_style.c.md#none) macro in `src/box_style.c`
+- [`none`](modules/include.tab.h.md#none) function in `include/tab.h`
 - [`none`](modules/src.page_view.c.md#none) function in `src/page_view.c`
 - [`nonzero`](modules/include.page_view.h.md#nonzero) function in `include/page_view.h`
 - [`nr_classify_host`](modules/src.net_realm.c.md#nr_classify_host) function in `src/net_realm.c`
@@ -3006,6 +3017,8 @@
 - [`tab_page`](modules/include.tab.h.md#tab_page) struct in `include/tab.h`
 - [`tab_page_free`](modules/include.tab.h.md#tab_page_free) function in `include/tab.h`
 - [`tab_page_free`](modules/src.tab.c.md#tab_page_free) function in `src/tab.c`
+- [`tab_page_keep_view`](modules/include.tab.h.md#tab_page_keep_view) function in `include/tab.h`
+- [`tab_page_keep_view`](modules/src.tab.c.md#tab_page_keep_view) function in `src/tab.c`
 - [`tab_parse_worker_args`](modules/include.tab.h.md#tab_parse_worker_args) function in `include/tab.h`
 - [`tab_parse_worker_args`](modules/src.tab.c.md#tab_parse_worker_args) function in `src/tab.c`
 - [`tab_popstate`](modules/src.tab.c.md#tab_popstate) function in `src/tab.c`
@@ -3030,6 +3043,7 @@
 - [`tab_set_geometry`](modules/src.tab.c.md#tab_set_geometry) function in `src/tab.c`
 - [`tab_set_identity`](modules/include.tab.h.md#tab_set_identity) function in `include/tab.h`
 - [`tab_set_identity`](modules/src.tab.c.md#tab_set_identity) function in `src/tab.c`
+- [`tab_set_lazy_ticks`](modules/src.tab.c.md#tab_set_lazy_ticks) function in `src/tab.c`
 - [`tab_set_net_allowed`](modules/include.tab.h.md#tab_set_net_allowed) function in `include/tab.h`
 - [`tab_set_net_allowed`](modules/src.tab.c.md#tab_set_net_allowed) function in `src/tab.c`
 - [`tab_set_op_net_budget_ms`](modules/include.tab.h.md#tab_set_op_net_budget_ms) function in `include/tab.h`
@@ -3339,6 +3353,7 @@
 
 - [`v`](modules/src.css_color.c.md#v) type_alias in `src/css_color.c`
 - [`val_kind`](modules/include.interp.h.md#val_kind) type_alias in `include/interp.h`
+- [`valid`](modules/include.dom.h.md#valid) function in `include/dom.h`
 - [`validators`](modules/include.secure_fetch.h.md#validators) function in `include/secure_fetch.h`
 - [`var`](modules/src.css.c.md#var) function in `src/css.c`
 - [`var`](modules/src.css.c.md#var) function in `src/css.c`

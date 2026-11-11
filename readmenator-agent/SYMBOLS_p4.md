@@ -1,8 +1,9 @@
-# Symbols (page 4 of 16)
+# Symbols (page 4 of 17)
 Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `he_cdn_kind` | function | `include/hostedit.h:62` | `he_cdn_kind_t he_cdn_kind(const char *url);` |
 | `he_cdn_kind_t` | enum | `include/hostedit.h:61` | `` |
 | `he_status` | enum | `include/hostedit.h:24` | `` |
 | `he_suggest` | function | `include/hostedit.h:55` | `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);` |
@@ -166,12 +167,16 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `jg_table` | struct | `include/js_geom.h:35` | `` |
 | `jg_wire_len` | function | `include/js_geom.h:68` | `size_t jg_wire_len(const jg_table *t);` |
 | `node` | type_alias | `include/js_geom.h:29` | `typedef struct jg_rect { dom_node_id node;` |
+| `FREEDOM_JS_INTL_H` | macro | `include/js_intl.h:6` | `#define FREEDOM_JS_INTL_H` |
+| `ji_install` | function | `include/js_intl.h:16` | `int ji_install(js_context *ctx);` |
 | `FREEDOM_JS_LOCATION_H` | macro | `include/js_location.h:2` | `#define FREEDOM_JS_LOCATION_H` |
 | `JD_HIST_MAX` | macro | `include/js_location.h:31` | `#define JD_HIST_MAX` |
 | `acting` | function | `include/js_location.h:49` | `* The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int...` |
 | `jd_pop_state` | function | `include/js_location.h:44` | `int jd_pop_state(js_context *ctx, int index);` |
 | `jd_take_history` | function | `include/js_location.h:38` | `char *jd_take_history(js_context *ctx, int *go);` |
 | `reads` | function | `include/js_location.h:25` | `* reads (NULL => only href is known, the rest fall back to stub defaults). Call after * jd_install, on the page's...` |
+| `FREEDOM_JS_NATIVE_H` | macro | `include/js_native.h:12` | `#define FREEDOM_JS_NATIVE_H` |
+| `failure` | function | `include/js_native.h:22` | `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);` |
 | `FREEDOM_JS_POLICY_H` | macro | `include/js_policy.h:2` | `#define FREEDOM_JS_POLICY_H` |
 | `allowlist` | function | `include/js_policy.h:34` | `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode * yields false. */ bool...` |
 | `jsp_mode` | enum | `include/js_policy.h:27` | `` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `psl_wildcards` | variable | `include/psl_data.h:23` | `extern const char *const psl_wildcards[];` |
 | `psl_wildcards_n` | variable | `include/psl_data.h:24` | `extern const size_t psl_wildcards_n;` |
 | `FREEDOM_RENDER_DOC_H` | macro | `include/render_doc.h:2` | `#define FREEDOM_RENDER_DOC_H` |
-| `IMG_FAIL_OK` | function | `include/render_doc.h:360` | `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);` |
-| `RD_IMAGE` | function | `include/render_doc.h:59` | `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);` |
-| `decision` | function | `include/render_doc.h:354` | `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...` |
-| `default` | function | `include/render_doc.h:153` | `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...` |
-| `form` | function | `include/render_doc.h:63` | `* form (-1 = none);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

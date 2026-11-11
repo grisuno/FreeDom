@@ -226,6 +226,7 @@ struct dom_index {
     strmap                by_tag;
     strmap                by_class;
     ptrmap                rev;      /* node pointer -> id */
+    uint64_t              mutations; /* dom_mutation_count: moved by every tree-changing call */
 };
 
 /* Iterative pre-order successor within the subtree rooted at root. */
@@ -340,6 +341,10 @@ void dom_free(dom_index *idx) {
 }
 
 /* --- public: queries --- */
+
+uint64_t dom_mutation_count(const dom_index *idx) {
+    return (idx != NULL) ? idx->mutations : 0;
+}
 
 size_t dom_node_count(const dom_index *idx) {
     return (idx != NULL) ? idx->count : 0;
@@ -656,6 +661,7 @@ const char *dom_document_title(const dom_index *idx, size_t *len) {
 
 dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
                                 const char *text, size_t len) {
+    if (idx != NULL) idx->mutations++;
     if (!valid(idx, node)) return DOM_ERR_NULL_ARG;
     lxb_dom_node_t *el = idx->nodes[node];
     if (el->type == LXB_DOM_NODE_TYPE_TEXT || el->type == LXB_DOM_NODE_TYPE_COMMENT
@@ -689,6 +695,7 @@ dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
 }
 
 dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len) {
+    if (idx != NULL) idx->mutations++;
     if (idx == NULL || idx->document == NULL) return DOM_ERR_NULL_ARG;
     lxb_status_t s =
         lxb_html_document_title_set((lxb_html_document_t *)idx->document,
@@ -738,6 +745,7 @@ dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_
 }
 
 dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child) {
+    if (idx != NULL) idx->mutations++;
     if (!valid_el(idx, parent) || !valid(idx, child) || parent == child)
         return DOM_ERR_NULL_ARG;
     lxb_dom_node_t *p = idx->nodes[parent];
@@ -752,6 +760,7 @@ dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id chil
 }
 
 dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child) {
+    if (idx != NULL) idx->mutations++;
     if (!valid_el(idx, parent) || !valid(idx, child)) return DOM_ERR_NULL_ARG;
     lxb_dom_node_t *c = idx->nodes[child];
     if (c->parent != idx->nodes[parent]) return DOM_ERR_NULL_ARG;
@@ -761,6 +770,7 @@ dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id chil
 
 dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
                              const char *name, const char *value) {
+    if (idx != NULL) idx->mutations++;
     if (!valid_el(idx, node) || name == NULL) return DOM_ERR_NULL_ARG;
     const char *v = (value != NULL) ? value : "";
     size_t nl = strlen(name), vl = strlen(v);
@@ -789,6 +799,7 @@ dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
 }
 
 dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name) {
+    if (idx != NULL) idx->mutations++;
     if (!valid_el(idx, node) || name == NULL) return DOM_ERR_NULL_ARG;
     lxb_status_t st =
         lxb_dom_element_remove_attribute(lxb_dom_interface_element(idx->nodes[node]),
@@ -809,6 +820,7 @@ static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub) {
 
 dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
                               const char *html, size_t len) {
+    if (idx != NULL) idx->mutations++;
     if (!valid_el(idx, node)) return DOM_ERR_NULL_ARG;
     if (idx->document == NULL) return DOM_ERR_INTERNAL;
     lxb_dom_node_t *el = idx->nodes[node];
@@ -946,6 +958,7 @@ dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
 
 dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
                              dom_node_id ref) {
+    if (idx != NULL) idx->mutations++;
     if (ref == DOM_NODE_NONE) return dom_append_child(idx, parent, child);
     if (!valid_el(idx, parent) || !valid(idx, child) || !valid(idx, ref) || parent == child)
         return DOM_ERR_NULL_ARG;
@@ -977,6 +990,7 @@ dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_i
 
 dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
                              dom_place where, dom_node_id ref) {
+    if (idx != NULL) idx->mutations++;
     if (!valid_el(idx, src) || !valid_el(idx, parent)) return DOM_ERR_NULL_ARG;
     lxb_dom_node_t *s = idx->nodes[src];
     lxb_dom_node_t *p = idx->nodes[parent];

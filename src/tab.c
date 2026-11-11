@@ -33,6 +33,7 @@
 #include "js_trusted.h"
 #include "identity.h"
 #include "js_env.h"
+#include "js_native.h"
 #include "js_sandbox.h"
 #include "link_nav.h"
 #include "os_sandbox.h"
@@ -171,7 +172,12 @@ static int rad_len_ok(int32_t v, int dflt) {
 /* Request opcodes (parent -> child). */
 enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5,
        OP_TICK = 6, OP_SUBMIT = 7, OP_EVENT = 8, OP_MOUSE = 9,
-       OP_DECODE_IMAGE_DATA = 10, OP_GEOM = 11, OP_POPSTATE = 12, OP_WS_EVENT = 13 };
+       OP_DECODE_IMAGE_DATA = 10, OP_GEOM = 11, OP_POPSTATE = 12, OP_WS_EVENT = 13,
+       /* OP_TICK whose reply may omit the view when the document is untouched (spec/tab.md). */
+       OP_TICK_LAZY = 14 };
+
+/* The ok word of a view reply: 0 failed, 1 a full view follows, 2 unchanged (lazy tick). */
+enum { VIEW_REPLY_FAIL = 0, VIEW_REPLY_FULL = 1, VIEW_REPLY_UNCHANGED = 2 };
 
 /* A WebSocket message pushed to the page (OP_WS_EVENT) is bounded like the
  * connection's own per-message cap. */
@@ -250,6 +256,10 @@ typedef struct child_state {
     char           *page_url;          /* the loaded page's URL: base of module specifiers */
     im_map         *imap;              /* the page's first <script type=importmap>, or NULL */
     jg_table        geom;              /* laid-out geometry installed into js (OP_GEOM) */
+    /* dom_mutation_count when the last view was derived from this page, and whether there
+     * is one: a lazy tick whose tree still has that count sends no view (spec/tab.md). */
+    uint64_t        view_gen;
+    int             view_gen_ok;
     shc_cache      *sheets;            /* the page's parsed sheet, reused while its CSS text
                                         * is unchanged (spec/sheet_cache.md); lazily created */
     pv_computed    *computed;          /* retained cascade behind getComputedStyle (trusted) */
@@ -291,6 +301,7 @@ static void child_reset_page(child_state *cs) {
     cs->extern_css_len = 0;
     pv_free(cs->preserved_view);
     cs->preserved_view = NULL;
+    cs->view_gen_ok = 0;
     jg_free(&cs->geom);   /* after js: the context held the only pointer to it */
     free(cs->page_url);
     cs->page_url = NULL;
@@ -557,6 +568,9 @@ static void child_prepare_js(child_state *cs) {
         js_context_free(js); dom_free(ix); hp_document_free(d);
         return;
     }
+    /* The bulk of the seal is page-independent: pay for it here, off the load path. The
+     * load seals again, which then only covers what the per-page installs added. */
+    (void)jn_seal(js);
     cs->prep_js = js;
     cs->prep_doc = d;
     cs->prep_idx = ix;
@@ -654,6 +668,11 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
     /* navigator.geolocation: only a trusted host, only when the user fixed a place. */
     if (run_js && net_allowed && idn_cfg.geo_mode == IDN_GEO_FIXED)
         (void)jd_install_geolocation(js, idn_cfg.geo_lat, idn_cfg.geo_lon, idn_cfg.geo_accuracy_m);
+
+    prof_lap("js-net-install", &pt);
+    /* A page whose scripts will run is sealed later, after the trusted runtime is enabled
+     * (child_handle_load); one that runs none is sealed here, for the REPL. */
+    if (!run_js) (void)jn_seal(js);
 
     cs->doc = doc; cs->idx = idx; cs->js = js;
     return 0;
@@ -1529,6 +1548,10 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                      (void)jt_enable_worker(cs->js); prof_lap("en-worker", &ph);
                      (void)jt_enable_observers(cs->js); prof_lap("en-observers", &ph);
                      (void)jd_set_computed(cs->js, child_computed, cs); }
+        /* Last install step, before any page script: the host surface describes itself as a
+         * native browser does (spec/js_native.md). Best effort -- an unsealed page still runs. */
+        (void)jn_seal(cs->js);
+        prof_lap("js-seal", &ph);
         /* Open the network window: XHR/fetch (if installed) may now reach the parent.
          * Closed again before deriving the view so a later REPL eval cannot use it. */
         cs->net_active = 1;
@@ -1800,10 +1823,12 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         text  = hp_extract_text(cs->doc, &xl);
         prof_lap("extract-text", &ph);
         double pt2 = prof_now_ms();
+        uint64_t gen_at_build = dom_mutation_count(cs->idx);
         int pv_ok = !(title == NULL || text == NULL
             || pv_build_cached(cs->doc, run_js, reader, prefers_dark,
                                cs->extern_css, cs->extern_css_len,
                                cs->last_viewport_w, child_sheets(cs), &view) != PV_OK);
+        if (pv_ok) { cs->view_gen = gen_at_build; cs->view_gen_ok = 1; }
         prof_lap("pv-build-styled", &pt2);
         if (!pv_ok) {
             ok = 0;
@@ -1936,12 +1961,24 @@ static int32_t child_next_timer_ms(child_state *cs) {
  * by the handlers. Response format matches the tail of OP_LOAD: [ok:int32]
  * [title_len][title][text_len][text][view][nav_len][nav][nav_replace][console]
  * [next_timer_ms:int32]. A navigation the handlers/timers requested travels raw. */
+static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
+                                     dom_node_id node_id, int32_t elapsed_ms, int lazy);
 static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
                                   dom_node_id node_id, int32_t elapsed_ms) {
+    child_handle_mutation_ex(wfd, cs, is_tick, node_id, elapsed_ms, 0);
+}
+
+/* lazy != 0 (OP_TICK_LAZY only): when the tree still has the mutation count the last derived
+ * view was built at, the reply says VIEW_REPLY_UNCHANGED and omits title, text and view. */
+static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
+                                     dom_node_id node_id, int32_t elapsed_ms, int lazy) {
     char  *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
     pv_view *view = NULL;
     int ok = 0;
+    int unchanged = 0;
+    uint64_t gen0 = dom_mutation_count(cs->idx);
+    double tp0 = prof_now_ms();
     if (cs->js != NULL && cs->doc != NULL && cs->idx != NULL) {
         if (is_tick) {
             char tick[64];
@@ -1962,20 +1999,34 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
         }
         child_net_drain(cs);
         if (cs->js != NULL) jd_flush_custom_elements(cs->js);
-        title = hp_get_title(cs->doc, &tl);
-        text  = hp_extract_text(cs->doc, &xl);
-        if (title != NULL && text != NULL
-            && pv_build_cached(cs->doc, cs->last_run_js, cs->last_reader,
-                               cs->last_prefers_dark, cs->extern_css,
-                               cs->extern_css_len, cs->last_viewport_w, child_sheets(cs), &view) == PV_OK) {
+        uint64_t gen_now = dom_mutation_count(cs->idx);
+        if (lazy && cs->view_gen_ok && gen_now == cs->view_gen) {
+            unchanged = 1;                 /* the view the parent holds is still the page */
             ok = 1;
+        } else {
+            title = hp_get_title(cs->doc, &tl);
+            text  = hp_extract_text(cs->doc, &xl);
+            if (title != NULL && text != NULL
+                && pv_build_cached(cs->doc, cs->last_run_js, cs->last_reader,
+                                   cs->last_prefers_dark, cs->extern_css,
+                                   cs->extern_css_len, cs->last_viewport_w, child_sheets(cs), &view) == PV_OK) {
+                ok = 1;
+                cs->view_gen = gen_now;
+                cs->view_gen_ok = 1;
+            } else {
+                cs->view_gen_ok = 0;
+            }
         }
     }
 
-    inject_video_into_view(cs, &view);
+    if (prof_on())
+        fprintf(stderr, "tab-profile %s mutated=%d skipped=%d %7.1f ms\n", is_tick ? "tick" : "click",
+                dom_mutation_count(cs->idx) != gen0, unchanged, prof_now_ms() - tp0);
+
+    if (!unchanged) inject_video_into_view(cs, &view);
 
     uint8_t rtag = TAG_RESULT;
-    int32_t k = ok ? 1 : 0;
+    int32_t k = !ok ? VIEW_REPLY_FAIL : (unchanged ? VIEW_REPLY_UNCHANGED : VIEW_REPLY_FULL);
     /* Mutation may corrupt the DOM (jQuery's support tests break Lexbor
      * siblings). Fall back to the preserved pre-script view when the
      * rebuilt view lost >= 2 blocks (severe DOM corruption). A diff of
@@ -1997,11 +2048,12 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
     int32_t nav_replace = rep ? 1 : 0;
     int32_t next_ms = child_next_timer_ms(cs);
     if (write_full(wfd, &rtag, 1) == 0 && write_full(wfd, &k, sizeof k) == 0 && ok) {
-        (void)(write_full(wfd, &tl, sizeof tl) == 0
-            && (tl == 0 || write_full(wfd, title, tl) == 0)
-            && write_full(wfd, &xl, sizeof xl) == 0
-            && (xl == 0 || write_full(wfd, text, xl) == 0)
-            && write_view(wfd, write_which) == 0
+        (void)((unchanged
+                || (write_full(wfd, &tl, sizeof tl) == 0
+                    && (tl == 0 || write_full(wfd, title, tl) == 0)
+                    && write_full(wfd, &xl, sizeof xl) == 0
+                    && (xl == 0 || write_full(wfd, text, xl) == 0)
+                    && write_view(wfd, write_which) == 0))
             && write_full(wfd, &navlen, sizeof navlen) == 0
             && (navlen == 0 || write_full(wfd, navbuf, navlen) == 0)
             && write_full(wfd, &nav_replace, sizeof nav_replace) == 0
@@ -2019,10 +2071,6 @@ static void child_handle_mutation(int wfd, child_state *cs, int is_tick,
 
 static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id) {
     child_handle_mutation(wfd, cs, 0, node_id, 0);
-}
-
-static void child_handle_tick(int wfd, child_state *cs, int32_t elapsed_ms) {
-    child_handle_mutation(wfd, cs, 1, DOM_NODE_NONE, elapsed_ms);
 }
 
 /* Handles a generic DOM event (OP_EVENT). Reads: node_id:int32, event_type_len:size_t,
@@ -2340,7 +2388,7 @@ static void tab_worker_run(int rfd, int wfd) {
         if (op == OP_QUIT) break;
         if (op != OP_LOAD && op != OP_EVAL && op != OP_DECODE_IMAGE &&
             op != OP_DECODE_IMAGE_DATA &&
-            op != OP_CLICK && op != OP_TICK && op != OP_SUBMIT &&
+            op != OP_CLICK && op != OP_TICK && op != OP_TICK_LAZY && op != OP_SUBMIT &&
             op != OP_EVENT && op != OP_MOUSE && op != OP_GEOM && op != OP_POPSTATE &&
             op != OP_WS_EVENT)
             break; /* desync */
@@ -2350,7 +2398,8 @@ static void tab_worker_run(int rfd, int wfd) {
          * TAG_SUBREQ the parent serves (tab_await_result) under the full policy. Every other
          * op (eval, decode, submit) keeps it closed. Fresh budget per operation. */
         cs.net_active = (cs.last_net && cs.js != NULL
-                         && (op == OP_CLICK || op == OP_TICK || op == OP_EVENT || op == OP_MOUSE
+                         && (op == OP_CLICK || op == OP_TICK || op == OP_TICK_LAZY || op == OP_EVENT
+                             || op == OP_MOUSE
                              || op == OP_GEOM || op == OP_POPSTATE || op == OP_WS_EVENT)) ? 1 : 0;
         if (cs.net_active) cs.subreq_used = 0;
 
@@ -2406,10 +2455,10 @@ static void tab_worker_run(int rfd, int wfd) {
         }
 
         /* OP_TICK is a short command: the elapsed virtual ms to advance. */
-        if (op == OP_TICK) {
+        if (op == OP_TICK || op == OP_TICK_LAZY) {
             int32_t elapsed = 0;
             if (read_full(rfd, &elapsed, sizeof elapsed) != 0) break;
-            child_handle_tick(wfd, &cs, elapsed);
+            child_handle_mutation_ex(wfd, &cs, 1, DOM_NODE_NONE, elapsed, op == OP_TICK_LAZY);
             continue;
         }
 
@@ -2568,6 +2617,10 @@ struct tab {
     int            job_running;     /* the thread exists and is not yet joined */
     int            job_ready;       /* joined; result waits for tab_async_finish */
     int            job_is_tick;
+    /* Lazy ticks (spec/tab.md): the opt-in, and whether the last view-carrying reply reached
+     * the caller -- cleared by a load, a failed read and a discarded background result. */
+    int            lazy_ticks;
+    int            lazy_ok;
     int            job_elapsed;
     int32_t       *job_words;       /* geometry job: encoded table (owned until done) */
     size_t         job_nwords;
@@ -3416,6 +3469,22 @@ void tab_set_net_allowed(tab *t, int allowed) {
     t->net_allowed = allowed ? 1 : 0;
 }
 
+void tab_set_lazy_ticks(tab *t, int on) {
+    if (t == NULL) return;
+    t->lazy_ticks = on ? 1 : 0;
+}
+
+void tab_page_keep_view(tab_page *prev, tab_page *next) {
+    if (prev == NULL || next == NULL || !next->unchanged) return;
+    free(next->title); free(next->text); pv_free(next->view);
+    next->title = prev->title; next->title_len = prev->title_len;
+    next->text  = prev->text;  next->text_len  = prev->text_len;
+    next->view  = prev->view;
+    prev->title = NULL; prev->title_len = 0;
+    prev->text  = NULL; prev->text_len  = 0;
+    prev->view  = NULL;
+}
+
 void tab_set_css_allowed(tab *t, int allowed) {
     if (t == NULL) return;
     t->css_allowed = allowed ? 1 : 0;
@@ -3878,6 +3947,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
     tab_batch_discard(t);
+    t->lazy_ok = 0;
 
     /* OP_LOAD framing: [op][run_js:1][net:1][reader:1][dark:1][css:1][frame:1][vpw:4][url_len][url]
      * [ck_len][cookies][st_len][storage][id_len][identity][len][html] (the flags, viewport width, URL and cookie seed
@@ -4048,6 +4118,7 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     out->hist = hist; out->nhist = nhist; out->hist_go = hist_go;
     out->ws = wsops; out->nws = nws;
     out->storage = stor; out->storage_len = stor_len;
+    t->lazy_ok = 1;                    /* the caller holds the page's current view */
     return TAB_OK;
 }
 
@@ -4058,6 +4129,8 @@ static tab_status tab_mutation_request(tab *t, uint8_t op, int32_t arg, tab_page
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
+    /* Only while the last view-carrying reply reached the caller may the worker omit one. */
+    if (op == OP_TICK && t->lazy_ticks && t->lazy_ok) op = OP_TICK_LAZY;
     if (write_full(t->req_fd, &op, 1) != 0
      || write_full(t->req_fd, &arg, sizeof arg) != 0) {
         tab_refresh_alive(t);
@@ -4221,24 +4294,32 @@ static tab_status tab_await_result_inner(tab *t) {
 
 static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     if (t == NULL || out == NULL) return TAB_ERR_NULL_ARG;
+    /* Until this reply is read whole, the caller is not known to hold the current view. */
+    int could_be_lazy = t->lazy_ok;
+    t->lazy_ok = 0;
     tab_status aw = tab_await_result(t);
     if (aw != TAB_OK) return aw;
 
     int32_t ok = 0;
     if (read_full(t->resp_fd, &ok, sizeof ok) != 0) return io_failure(t);
-    if (!ok) return TAB_ERR_RENDER;
+    if (ok == VIEW_REPLY_FAIL) return TAB_ERR_RENDER;
+    /* "Unchanged" is only an answer to a lazy tick; from anything else it is a desync. */
+    int unchanged = (ok == VIEW_REPLY_UNCHANGED);
+    if (ok != VIEW_REPLY_FULL && !(unchanged && could_be_lazy && t->lazy_ticks)) return io_failure(t);
 
     char *title = NULL, *text = NULL;
     size_t tl = 0, xl = 0;
-    if (read_field(t->resp_fd, &title, &tl) != 0
-     || read_field(t->resp_fd, &text, &xl) != 0) {
-        free(title); free(text);
-        return io_failure(t);
-    }
     pv_view *view = NULL;
-    if (read_view(t->resp_fd, &view) != 0) {
-        free(title); free(text);
-        return io_failure(t);
+    if (!unchanged) {
+        if (read_field(t->resp_fd, &title, &tl) != 0
+         || read_field(t->resp_fd, &text, &xl) != 0) {
+            free(title); free(text);
+            return io_failure(t);
+        }
+        if (read_view(t->resp_fd, &view) != 0) {
+            free(title); free(text);
+            return io_failure(t);
+        }
     }
     char *navreq = NULL;
     size_t nlen = 0;
@@ -4307,10 +4388,12 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     out->title = title; out->title_len = tl;
     out->text  = text;  out->text_len  = xl;
     out->view  = view;
+    out->unchanged = unchanged;
     out->nav_url = nav_url;
     out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
     out->console = console;
     out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
+    t->lazy_ok = 1;                    /* the caller now holds (or kept) the current view */
     return TAB_OK;
 }
 
@@ -4545,6 +4628,7 @@ tab_status tab_set_geometry(tab *t, const jg_table *g) {
 /* ---- background jobs (tab_tick_async / tab_geometry_async) ---- */
 
 static void job_discard(tab *t) {
+    t->lazy_ok = 0;                    /* a fresh view may have died with this result */
     if (t->job_ready) tab_page_free(&t->job_page);
     memset(&t->job_page, 0, sizeof t->job_page);
     free(t->job_words);

@@ -438,7 +438,7 @@ typedef enum css_text_transform
 
 text-transform.
 
-0 is unset; CSS_TT_NONE is an explicit [`none`](src.page_view.c.md#none).
+0 is unset; CSS_TT_NONE is an explicit `none`.
 
 ---
 
@@ -1766,7 +1766,7 @@ bytes of a normalized font-family list (truncated at a name boundary)
 
 text-decoration line bits, OR-combined into css_style.text_decoration.
 
-The field is -1 when unset and 0 for an explicit [`none`](src.page_view.c.md#none) (so `a { text-decoration: none }` can drop the default link underline).
+The field is -1 when unset and 0 for an explicit `none` (so `a { text-decoration: none }` can drop the default link underline).
 
 ---
 

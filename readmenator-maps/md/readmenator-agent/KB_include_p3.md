@@ -160,7 +160,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `HP_DEFAULT_MAX_BYTES` (macro, line 41) `#define HP_DEFAULT_MAX_BYTES`
   - `HP_MAX_SCRIPTS` (macro, line 48) `#define HP_MAX_SCRIPTS`
   - `HP_MAX_STYLESHEETS` (macro, line 115) `#define HP_MAX_STYLESHEETS`
-- Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
+- Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`, `tests/test_page_view.c`
 
 ## include/http_cache.h
 - Doc: hc_parse_http_date: } hc_class; typedef struct hc_meta { char   final_url[HC_URL_MAX]; char...
@@ -316,7 +316,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `JD_IFRAME_TRACK_MAX` (macro, line 40) `#define JD_IFRAME_TRACK_MAX`
   - `JD_REPL_CSS_MAX` (macro, line 86) `#define JD_REPL_CSS_MAX`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/url.h`
-- Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`
+- Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`
 
 ## include/js_env.h
 - Layer: infrastructure
@@ -327,7 +327,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FREEDOM_JS_ENV_H` (macro, line 2) `#define FREEDOM_JS_ENV_H`
   - `JE_READBACK_EXACT` (macro, line 59) `#define JE_READBACK_EXACT`
 - Depends on: `include/js_sandbox.h`
-- Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`
+- Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`, `tests/test_js_native.c`
 
 ## include/js_geom.h
 - Doc: jg_init: typedef struct jg_rect { dom_node_id node; int32_t     x, y, w, h;       /* document...
@@ -356,6 +356,16 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
 - Depends on: `include/dom.h`
 - Imported by: `include/js_dom.h`, `include/tab.h`, `src/js_geom.c`, `tests/test_js_dom.c`, `tests/test_js_geom.c`, `tests/test_tab.c`
 
+## include/js_intl.h
+- Doc: ji_install: Installs `Intl` and the Number/BigInt/Date toLocale* methods that delegate to it. *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ji_install` (function, line 16) `int ji_install(js_context *ctx);`
+  - `FREEDOM_JS_INTL_H` (macro, line 6) `#define FREEDOM_JS_INTL_H`
+- Depends on: `include/js_sandbox.h`
+- Imported by: `src/js_dom.c`, `src/js_intl.c`, `tests/test_js_intl.c`
+
 ## include/js_location.h
 - Doc: jd_take_history: Drains the history operations page JS performed since the last call: an owned...
 - Layer: utility
@@ -369,6 +379,15 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `JD_HIST_MAX` (macro, line 31) `#define JD_HIST_MAX`
 - Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `include/url.h`
 - Imported by: `include/js_dom.h`
+
+## include/js_native.h
+- Layer: utility
+- Language: h
+- Symbols:
+  - `failure` (function, line 22) `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);`
+  - `FREEDOM_JS_NATIVE_H` (macro, line 12) `#define FREEDOM_JS_NATIVE_H`
+- Depends on: `include/js_sandbox.h`
+- Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_native.c`
 
 ## include/js_policy.h
 - Doc: jsp_trusted: Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its...
@@ -426,7 +445,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `JS_THROW_SLOTS` (macro, line 174) `#define JS_THROW_SLOTS`
   - `JS_REALM_MAX` (macro, line 215) `#define JS_REALM_MAX`
   - `JS_REJECT_MAX` (macro, line 218) `#define JS_REJECT_MAX`
-- Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_sandbox.c`
+- Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_intl.h`, `include/js_location.h`, `include/js_native.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_intl.c`, `tests/test_js_native.c`, `tests/test_js_sandbox.c`
 
 ## include/js_trusted.h
 - Doc: jt_take_opens: The parent installed a new geometry table (layout or scroll changed)...
@@ -476,24 +495,6 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `LN_MAX_TARGET` (macro, line 33) `#define LN_MAX_TARGET`
   - `LN_MAX_FRAGMENT` (macro, line 38) `#define LN_MAX_FRAGMENT`
 - Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/link_nav.c`, `src/tab.c`, `tests/test_link_nav.c`
-
-## include/local_store.h
-- Doc: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and...
-- Layer: data_access
-- Language: h
-- Symbols:
-  - `ls_aead` (enum, line 34)
-  - `ls_status` (enum, line 39)
-  - `ls_free` (function, line 80) `void ls_free(uint8_t *buf, size_t len);`
-  - `FREEDOM_LOCAL_STORE_H` (macro, line 2) `#define FREEDOM_LOCAL_STORE_H`
-  - `LS_KEY_LEN` (macro, line 26) `#define LS_KEY_LEN`
-  - `LS_SALT_LEN` (macro, line 27) `#define LS_SALT_LEN`
-  - `LS_NONCE_LEN` (macro, line 28) `#define LS_NONCE_LEN`
-  - `LS_TAG_LEN` (macro, line 29) `#define LS_TAG_LEN`
-  - `LS_HEADER_LEN` (macro, line 30) `#define LS_HEADER_LEN`
-  - `LS_OVERHEAD` (macro, line 31) `#define LS_OVERHEAD`
-  - `LS_MAX_PLAINTEXT` (macro, line 32) `#define LS_MAX_PLAINTEXT`
-- Imported by: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`, `include/profile.h`, `src/disk_store.c`, `src/local_store.c`, `tests/test_disk_store.c`, `tests/test_local_store.c`
 
 
 Next: [KB_include_p4.md](KB_include_p4.md)

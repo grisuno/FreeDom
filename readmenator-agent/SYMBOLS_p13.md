@@ -1,8 +1,29 @@
-# Symbols (page 13 of 16)
+# Symbols (page 13 of 17)
 Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_payload_too_large` | function | `tests/test_data_url.c:106` | `static void test_payload_too_large(void **state)` |
+| `_POSIX_C_SOURCE` | macro | `tests/test_disk_store.c:8` | `#define _POSIX_C_SOURCE` |
+| `count_dir_entries` | function | `tests/test_disk_store.c:65` | `static size_t count_dir_entries(const char *dir)` |
+| `dir` | type_alias | `tests/test_disk_store.c:32` | `typedef struct fixture { char dir[64];` |
+| `fixture` | struct | `tests/test_disk_store.c:33` | `` |
+| `main` | function | `tests/test_disk_store.c:181` | `int main(void)` |
+| `setup` | function | `tests/test_disk_store.c:35` | `static int setup(void **state)` |
+| `teardown` | function | `tests/test_disk_store.c:45` | `static int teardown(void **state)` |
+| `test_empty` | function | `tests/test_disk_store.c:99` | `static void test_empty(void **state)` |
+| `test_missing_and_null` | function | `tests/test_disk_store.c:168` | `static void test_missing_and_null(void **state)` |
+| `test_no_temp_left` | function | `tests/test_disk_store.c:117` | `static void test_no_temp_left(void **state)` |
+| `test_overwrite` | function | `tests/test_disk_store.c:124` | `static void test_overwrite(void **state)` |
+| `test_permissions` | function | `tests/test_disk_store.c:108` | `static void test_permissions(void **state)` |
+| `test_roundtrip` | function | `tests/test_disk_store.c:78` | `static void test_roundtrip(void **state)` |
+| `test_roundtrip_chacha` | function | `tests/test_disk_store.c:89` | `static void test_roundtrip_chacha(void **state)` |
+| `test_tamper_on_disk` | function | `tests/test_disk_store.c:150` | `static void test_tamper_on_disk(void **state)` |
+| `test_wrong_key` | function | `tests/test_disk_store.c:138` | `static void test_wrong_key(void **state)` |
+| `DOC` | macro | `tests/test_dom.c:58` | `#define DOC(state)` |
+| `IDX` | macro | `tests/test_dom.c:59` | `#define IDX(state)` |
+| `_POSIX_C_SOURCE` | macro | `tests/test_dom.c:1` | `#define _POSIX_C_SOURCE` |
+| `main` | function | `tests/test_dom.c:788` | `int main(void)` |
 | `rule` | function | `tests/test_dom.c:462` | `* silently drops the whole rule (fail closed), so the title read black-on-teal  * instead of the ...` |
 | `setup_doc` | function | `tests/test_dom.c:35` | `static int setup_doc(void **state)` |
 | `teardown_doc` | function | `tests/test_dom.c:48` | `static int teardown_doc(void **state)` |
@@ -12,7 +33,7 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_by_class` | function | `tests/test_dom.c:112` | `static void test_by_class(void **state)` |
 | `test_by_tag` | function | `tests/test_dom.c:121` | `static void test_by_tag(void **state)` |
 | `test_by_tag_results_in_document_order` | function | `tests/test_dom.c:130` | `static void test_by_tag_results_in_document_order(void **state)` |
-| `test_char_nodes` | function | `tests/test_dom.c:646` | `static void test_char_nodes(void **state)` |
+| `test_char_nodes` | function | `tests/test_dom.c:680` | `static void test_char_nodes(void **state)` |
 | `test_clone_node` | function | `tests/test_dom.c:582` | `static void test_clone_node(void **state)` |
 | `test_construction_invalid_args` | function | `tests/test_dom.c:330` | `static void test_construction_invalid_args(void **state)` |
 | `test_create_and_append` | function | `tests/test_dom.c:244` | `static void test_create_and_append(void **state)` |
@@ -20,14 +41,15 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_free_null_and_double` | function | `tests/test_dom.c:73` | `static void test_free_null_and_double(void **state)` |
 | `test_get_by_id` | function | `tests/test_dom.c:91` | `static void test_get_by_id(void **state)` |
 | `test_get_by_id_absent` | function | `tests/test_dom.c:105` | `static void test_get_by_id_absent(void **state)` |
-| `test_get_element_by_id_ignores_detached_nodes` | function | `tests/test_dom.c:721` | `static void test_get_element_by_id_ignores_detached_nodes(void **state)` |
+| `test_get_element_by_id_ignores_detached_nodes` | function | `tests/test_dom.c:755` | `static void test_get_element_by_id_ignores_detached_nodes(void **state)` |
 | `test_get_inner_html` | function | `tests/test_dom.c:338` | `static void test_get_inner_html(void **state)` |
 | `test_insert_before` | function | `tests/test_dom.c:550` | `static void test_insert_before(void **state)` |
 | `test_matches_and_closest` | function | `tests/test_dom.c:517` | `static void test_matches_and_closest(void **state)` |
 | `test_move_children` | function | `tests/test_dom.c:605` | `static void test_move_children(void **state)` |
+| `test_mutation_count` | function | `tests/test_dom.c:648` | `static void test_mutation_count(void **state)` |
 | `test_navigation` | function | `tests/test_dom.c:154` | `static void test_navigation(void **state)` |
 | `test_node_count` | function | `tests/test_dom.c:84` | `static void test_node_count(void **state)` |
-| `test_qs_subject_prefilter_is_exact` | function | `tests/test_dom.c:695` | `static void test_qs_subject_prefilter_is_exact(void **state)` |
+| `test_qs_subject_prefilter_is_exact` | function | `tests/test_dom.c:729` | `static void test_qs_subject_prefilter_is_exact(void **state)` |
 | `test_query_selector_all_counts` | function | `tests/test_dom.c:434` | `static void test_query_selector_all_counts(void **state)` |
 | `test_query_selector_combinators` | function | `tests/test_dom.c:445` | `static void test_query_selector_combinators(void **state)` |
 | `test_query_selector_fail_closed` | function | `tests/test_dom.c:530` | `static void test_query_selector_fail_closed(void **state)` |
@@ -474,27 +496,5 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_dimensions_from_ihdr` | function | `tests/test_image_decode.c:89` | `static void test_dimensions_from_ihdr(void **state)` |
 | `test_dimensions_non_png` | function | `tests/test_image_decode.c:104` | `static void test_dimensions_non_png(void **state)` |
 | `test_dimensions_null` | function | `tests/test_image_decode.c:111` | `static void test_dimensions_null(void **state)` |
-| `test_dimensions_ok_bounds` | function | `tests/test_image_decode.c:120` | `static void test_dimensions_ok_bounds(void **state)` |
-| `test_dimensions_truncated` | function | `tests/test_image_decode.c:97` | `static void test_dimensions_truncated(void **state)` |
-| `test_fit_degenerate` | function | `tests/test_image_decode.c:154` | `static void test_fit_degenerate(void **state)` |
-| `test_fit_landscape_into_square` | function | `tests/test_image_decode.c:136` | `static void test_fit_landscape_into_square(void **state)` |
-| `test_fit_portrait_into_box` | function | `tests/test_image_decode.c:145` | `static void test_fit_portrait_into_box(void **state)` |
-| `test_format_name` | function | `tests/test_image_decode.c:227` | `static void test_format_name(void **state)` |
-| `test_pixels_free_idempotent` | function | `tests/test_image_decode.c:218` | `static void test_pixels_free_idempotent(void **state)` |
-| `test_sniff_gif` | function | `tests/test_image_decode.c:356` | `static void test_sniff_gif(void **state)` |
-| `test_sniff_jpeg` | function | `tests/test_image_decode.c:236` | `static void test_sniff_jpeg(void **state)` |
-| `test_sniff_png` | function | `tests/test_image_decode.c:75` | `static void test_sniff_png(void **state)` |
-| `test_sniff_unsupported` | function | `tests/test_image_decode.c:80` | `static void test_sniff_unsupported(void **state)` |
-| `test_sniff_webp` | function | `tests/test_image_decode.c:448` | `static void test_sniff_webp(void **state)` |
-| `DOC` | macro | `tests/test_import_map.c:36` | `#define DOC` |
-| `expect_res` | function | `tests/test_import_map.c:38` | `static void expect_res(const im_map *m, const char *base, const char *spec, const char *want)` |
-| `main` | function | `tests/test_import_map.c:123` | `int main(void)` |
-| `test_exact_and_prefix_imports` | function | `tests/test_import_map.c:48` | `static void test_exact_and_prefix_imports(void **state)` |
-| `test_invalid_input_yields_empty_map` | function | `tests/test_import_map.c:102` | `static void test_invalid_input_yields_empty_map(void **state)` |
-| `test_json_escapes_and_ignored_members` | function | `tests/test_import_map.c:90` | `static void test_json_escapes_and_ignored_members(void **state)` |
-| `test_scopes_win_by_longest_prefix` | function | `tests/test_import_map.c:74` | `static void test_scopes_win_by_longest_prefix(void **state)` |
-| `tres` | function | `tests/test_import_map.c:17` | `static int tres(void *ctx, const char *base, const char *ref, char *out, size_t outsz)` |
-| `assert_float_equal` | function | `tests/test_interp.c:64` | `assert_float_equal(ip_ease(0.0, &(ip_ease_fn)` |
-| `assert_float_equal` | function | `tests/test_interp.c:66` | `assert_float_equal(ip_ease(0.0, &(ip_ease_fn)` |
 
 Next: [SYMBOLS_p14.md](SYMBOLS_p14.md)

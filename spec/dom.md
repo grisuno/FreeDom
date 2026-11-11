@@ -252,3 +252,20 @@ dom_status  dom_create_char_node(dom_index *idx, int kind, const char *text, siz
 Dado un `<p>t<b>u</b>v</p>`, cuando el JS pide `p.childNodes`, entonces recibe
 `[Text "t", <b>, Text "v"]` y `childNodes[0].data === "t"`. Dado `createTextNode("x")` y
 `p.appendChild(t)`, entonces `p.textContent` termina en `"x"` y el texto se pinta.
+
+## 10. Contador de mutaciones (2026-11-11)
+
+`uint64_t dom_mutation_count(const dom_index *idx)` — se mueve en CADA llamada que puede
+cambiar el arbol renderizado (`dom_set_text_content`, `dom_set_document_title`,
+`dom_append_child`, `dom_insert_before`, `dom_move_children`, `dom_remove_child`,
+`dom_set_attribute`, `dom_remove_attribute`, `dom_set_inner_html`) y nunca en una lectura ni al
+crear un nodo suelto (`dom_create_element`, `dom_clone_node`: no se pinta hasta insertarse).
+
+- **Dado** dos lecturas con el mismo valor, **entonces** el arbol es el mismo: es una PRUEBA.
+- **Dado** valores distintos, **entonces** no se afirma nada: sobrecuenta a proposito (una
+  mutacion fallida o sin efecto tambien lo mueve). El unico error posible es re-derivar de mas.
+- `NULL` => 0.
+
+Consumidor: el tick perezoso del worker (`spec/tab.md`, "Tick sin cambios"). Toda mutacion del
+arbol pasa por `dom.c` (ningun otro modulo llama a los mutadores de Lexbor tras el parseo): un
+mutador nuevo fuera de `dom.c` romperia esa garantia.

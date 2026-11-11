@@ -2,6 +2,23 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_data_url.c` -> `include/data_url.h`
+- `tests/test_disk_store.c` -> `include/disk_store.h`
+- `tests/test_disk_store.c` -> `include/local_store.h`
+- `tests/test_dom.c` -> `include/dom.h`
+- `tests/test_dom.c` -> `include/html_parse.h`
+- `tests/test_dom_debug.c` -> `include/box_style.h`
+- `tests/test_dom_debug.c` -> `include/css.h`
+- `tests/test_dom_debug.c` -> `include/dom_debug.h`
+- `tests/test_dom_debug.c` -> `include/flex_layout.h`
+- `tests/test_dom_debug.c` -> `include/page_view.h`
+- `tests/test_dom_debug.c` -> `include/render_doc.h`
+- `tests/test_dom_debug.c` -> `include/render_policy.h`
+- `tests/test_download.c` -> `include/download.h`
+- `tests/test_fb_cmdline.c` -> `include/fb_cmdline.h`
+- `tests/test_fb_cmdline.c` -> `include/freebug.h`
+- `tests/test_fb_panes.c` -> `include/fb_panes.h`
+- `tests/test_flex_layout.c` -> `include/flex_layout.h`
 - `tests/test_form.c` -> `include/form.h`
 - `tests/test_frame_broker.c` -> `include/frame_broker.h`
 - `tests/test_frame_clock.c` -> `include/frame_clock.h`
@@ -36,6 +53,14 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_js_env.c` -> `include/js_env.h`
 - `tests/test_js_env.c` -> `include/js_sandbox.h`
 - `tests/test_js_geom.c` -> `include/js_geom.h`
+- `tests/test_js_intl.c` -> `include/js_intl.h`
+- `tests/test_js_intl.c` -> `include/js_sandbox.h`
+- `tests/test_js_native.c` -> `include/dom.h`
+- `tests/test_js_native.c` -> `include/html_parse.h`
+- `tests/test_js_native.c` -> `include/js_dom.h`
+- `tests/test_js_native.c` -> `include/js_env.h`
+- `tests/test_js_native.c` -> `include/js_native.h`
+- `tests/test_js_native.c` -> `include/js_sandbox.h`
 - `tests/test_js_policy.c` -> `include/js_policy.h`
 - `tests/test_js_sandbox.c` -> `include/js_sandbox.h`
 - `tests/test_link_nav.c` -> `include/link_nav.h`
@@ -250,8 +275,11 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/js_events.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/js_fetch.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/js_geom.c` -> math.h, stdlib.h, string.h
+- `src/js_intl.c` -> quickjs.h, stdbool.h, stddef.h
 - `src/js_location.c` -> quickjs.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/js_location_internal.h` -> quickjs.h
+- `src/js_native.c` -> stdio.h, string.h
+- `src/js_native_internal.h` -> quickjs.h, stddef.h
 - `src/js_policy.c` -> string.h
 - `src/js_sandbox.c` -> malloc.h, quickjs.h, stdlib.h, string.h, sys/resource.h, time.h
 - `src/js_trusted.c` -> quickjs.h, stdint.h, stdlib.h, string.h
@@ -341,6 +369,8 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_js_dom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_js_env.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_js_geom.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_js_intl.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_js_native.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_js_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_js_sandbox.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_link_nav.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h

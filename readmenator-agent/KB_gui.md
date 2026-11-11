@@ -15,39 +15,39 @@ Pages: [KB_gui.md](KB_gui.md), [KB_gui_p2.md](KB_gui_p2.md)
   - `repl_edges` (struct, line 1255)
   - `fetch_prep` (struct, line 1901)
   - `fetch_job` (struct, line 1982)
-  - `rc_frag` (struct, line 3448)
-  - `rc_row` (struct, line 3515)
-  - `rc_box` (struct, line 3538)
-  - `rc_oof_sub` (struct, line 3599)
-  - `rc_layout` (struct, line 3601)
-  - `rc_oof_sub` (struct, line 3647)
-  - `rc_open_box` (struct, line 3657)
-  - `rc_ibox` (struct, line 3710)
-  - `rc_state` (struct, line 3751)
-  - `rc_ext` (struct, line 4449)
-  - `item_sides` (struct, line 5564)
-  - `rc_defer_col` (struct, line 8550)
-  - `rc_defer` (struct, line 8557)
-  - `bui_mask_ctx` (struct, line 13449)
-  - `screen_flow_ctx` (struct, line 14558)
-  - `png_flow_ctx` (struct, line 15119)
-  - `freebug_window` (struct, line 17453)
+  - `rc_frag` (struct, line 3451)
+  - `rc_row` (struct, line 3518)
+  - `rc_box` (struct, line 3541)
+  - `rc_oof_sub` (struct, line 3602)
+  - `rc_layout` (struct, line 3604)
+  - `rc_oof_sub` (struct, line 3650)
+  - `rc_open_box` (struct, line 3660)
+  - `rc_ibox` (struct, line 3713)
+  - `rc_state` (struct, line 3754)
+  - `rc_ext` (struct, line 4452)
+  - `item_sides` (struct, line 5567)
+  - `rc_defer_col` (struct, line 8553)
+  - `rc_defer` (struct, line 8560)
+  - `bui_mask_ctx` (struct, line 13452)
+  - `screen_flow_ctx` (struct, line 14561)
+  - `png_flow_ctx` (struct, line 15122)
+  - `freebug_window` (struct, line 17467)
   - `ui_menu_action` (enum, line 182)
   - `ui_hot` (enum, line 232)
-  - `rc_rowkind` (enum, line 3513)
+  - `rc_rowkind` (enum, line 3516)
   - `bs` (type_alias, line 297) `typedef struct tab_ctx { browser_state bs;`
   - `freebug_window` (type_alias, line 630) `typedef struct freebug_window freebug_window;`
   - `pl` (type_alias, line 1255) `typedef struct repl_edges { double mt, mr, mb, ml, bt, br, bb, bl, pt, pr, pb, pl;`
   - `allowlisted` (type_alias, line 1901) `typedef struct fetch_prep { int allowlisted;`
-  - `font_size` (type_alias, line 3447) `typedef struct rc_frag { double x, width, font_size;`
-  - `kind` (type_alias, line 3514) `typedef struct rc_row { rc_rowkind kind;`
-  - `h` (type_alias, line 3538) `typedef struct rc_box { double x, top, w, h;`
-  - `block_id` (type_alias, line 3657) `typedef struct rc_open_box { int block_id;`
-  - `col_founder_box` (type_alias, line 3750) `typedef struct rc_state { /* Inside a float band column whose width was SHRUNK TO FIT: the float * founder's own box...`
-  - `family` (type_alias, line 4449) `typedef struct rc_ext { int family;`
-  - `mr` (type_alias, line 5564) `typedef struct item_sides { double ml, mr;`
-  - `key` (type_alias, line 8550) `typedef struct rc_defer_col { int key;`
-  - `col` (type_alias, line 8557) `typedef struct rc_defer { rc_defer_col col[RC_DEFER_COLS];`
+  - `font_size` (type_alias, line 3450) `typedef struct rc_frag { double x, width, font_size;`
+  - `kind` (type_alias, line 3517) `typedef struct rc_row { rc_rowkind kind;`
+  - `h` (type_alias, line 3541) `typedef struct rc_box { double x, top, w, h;`
+  - `block_id` (type_alias, line 3660) `typedef struct rc_open_box { int block_id;`
+  - `col_founder_box` (type_alias, line 3753) `typedef struct rc_state { /* Inside a float band column whose width was SHRUNK TO FIT: the float * founder's own box...`
+  - `family` (type_alias, line 4452) `typedef struct rc_ext { int family;`
+  - `mr` (type_alias, line 5567) `typedef struct item_sides { double ml, mr;`
+  - `key` (type_alias, line 8553) `typedef struct rc_defer_col { int key;`
+  - `col` (type_alias, line 8560) `typedef struct rc_defer { rc_defer_col col[RC_DEFER_COLS];`
   - `now_ms` (function, line 169) `static uint64_t now_ms(void)`
   - `gutter` (function, line 651) `* gutter (content_margin) is intentionally left unzoomed, like a browser's text
  * zoom. The PDF ...`
@@ -132,369 +132,369 @@ Pages: [KB_gui.md](KB_gui.md), [KB_gui_p2.md](KB_gui_p2.md)
   - `drop_repl_worker` (function, line 2521) `static void drop_repl_worker(browser_window *w)`
   - `schedule_js_tick` (function, line 2536) `static void schedule_js_tick(browser_window *w, int next_ms)`
   - `render_current_ex` (function, line 2546) `static void render_current_ex(browser_window *w, int allow_js_nav)`
-  - `render_current` (function, line 2727) `static void render_current(browser_window *w)`
-  - `show_busy` (function, line 2734) `static void show_busy(browser_window *w)`
-  - `show_fetch_error` (function, line 2743) `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
+  - `render_current` (function, line 2730) `static void render_current(browser_window *w)`
+  - `show_busy` (function, line 2737) `static void show_busy(browser_window *w)`
+  - `show_fetch_error` (function, line 2746) `static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
                   ...`
-  - `identity_load` (function, line 2811) `static void identity_load(browser_window *w)`
-  - `arrives` (function, line 2821) `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
+  - `identity_load` (function, line 2814) `static void identity_load(browser_window *w)`
+  - `arrives` (function, line 2824) `* on screen until the result arrives (deliver_fetch_result renders it). about:blank
  * and local ...`
-  - `strcmp` (function, line 2924) `&& strcmp(auth_host_buf, w->auth_host) != 0)`
-  - `tab_save` (function, line 2986) `static void tab_save(browser_window *w)`
-  - `tab_restore` (function, line 3004) `static void tab_restore(browser_window *w)`
-  - `free_live_page` (function, line 3022) `static void free_live_page(browser_window *w)`
-  - `tab_ctx_release` (function, line 3034) `static void tab_ctx_release(tab_ctx *c)`
-  - `tab_switch` (function, line 3058) `static void tab_switch(browser_window *w, int idx)`
-  - `uitab_close` (function, line 3120) `static void uitab_close(browser_window *w, int idx)`
-  - `newtab_x` (function, line 3162) `static double newtab_x(const browser_window *w)`
-  - `tab_title` (function, line 3169) `static const char *tab_title(const browser_window *w, int i)`
-  - `tabbar_top` (function, line 3185) `static double tabbar_top(const browser_window *w)`
-  - `toolbar_top` (function, line 3191) `static double toolbar_top(const browser_window *w)`
-  - `content_geometry` (function, line 3198) `static void content_geometry(const browser_window *w, double *top, double *height)`
-  - `page_side` (function, line 3224) `static double page_side(const browser_window *w, int side)`
-  - `content_margin_x` (function, line 3228) `static double content_margin_x(const browser_window *w)`
-  - `content_margins_x` (function, line 3239) `static double content_margins_x(const browser_window *w)`
-  - `content_width` (function, line 3244) `static double content_width(const browser_window *w)`
-  - `html_center_offset` (function, line 3254) `static double html_center_offset(const browser_window *w)`
-  - `scrollbar_metrics` (function, line 3268) `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
+  - `strcmp` (function, line 2927) `&& strcmp(auth_host_buf, w->auth_host) != 0)`
+  - `tab_save` (function, line 2989) `static void tab_save(browser_window *w)`
+  - `tab_restore` (function, line 3007) `static void tab_restore(browser_window *w)`
+  - `free_live_page` (function, line 3025) `static void free_live_page(browser_window *w)`
+  - `tab_ctx_release` (function, line 3037) `static void tab_ctx_release(tab_ctx *c)`
+  - `tab_switch` (function, line 3061) `static void tab_switch(browser_window *w, int idx)`
+  - `uitab_close` (function, line 3123) `static void uitab_close(browser_window *w, int idx)`
+  - `newtab_x` (function, line 3165) `static double newtab_x(const browser_window *w)`
+  - `tab_title` (function, line 3172) `static const char *tab_title(const browser_window *w, int i)`
+  - `tabbar_top` (function, line 3188) `static double tabbar_top(const browser_window *w)`
+  - `toolbar_top` (function, line 3194) `static double toolbar_top(const browser_window *w)`
+  - `content_geometry` (function, line 3201) `static void content_geometry(const browser_window *w, double *top, double *height)`
+  - `page_side` (function, line 3227) `static double page_side(const browser_window *w, int side)`
+  - `content_margin_x` (function, line 3231) `static double content_margin_x(const browser_window *w)`
+  - `content_margins_x` (function, line 3242) `static double content_margins_x(const browser_window *w)`
+  - `content_width` (function, line 3247) `static double content_width(const browser_window *w)`
+  - `html_center_offset` (function, line 3257) `static double html_center_offset(const browser_window *w)`
+  - `scrollbar_metrics` (function, line 3271) `static int scrollbar_metrics(const browser_window *w, double *track_x, double *track_y,
          ...`
-  - `scrollbar_drag_to` (function, line 3296) `static void scrollbar_drag_to(browser_window *w)`
-  - `draw_scrollbar` (function, line 3313) `static void draw_scrollbar(cairo_t *cr, const browser_window *w)`
-  - `window_button_rects` (function, line 3350) `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...`
-  - `toolbar_rects` (function, line 3360) `static void toolbar_rects(const browser_window *w,
+  - `scrollbar_drag_to` (function, line 3299) `static void scrollbar_drag_to(browser_window *w)`
+  - `draw_scrollbar` (function, line 3316) `static void draw_scrollbar(cairo_t *cr, const browser_window *w)`
+  - `window_button_rects` (function, line 3353) `static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *cl...`
+  - `toolbar_rects` (function, line 3363) `static void toolbar_rects(const browser_window *w,
                           double *back_x, doub...`
-  - `toolbar_button_at` (function, line 3375) `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)`
-  - `hot_actionable` (function, line 3391) `static int hot_actionable(const browser_window *w, ui_hot hot)`
-  - `menu_panel_rect` (function, line 3402) `static void menu_panel_rect(const browser_window *w, double *x, double *y,
+  - `toolbar_button_at` (function, line 3378) `static ui_hot toolbar_button_at(const browser_window *w, double px, double py)`
+  - `hot_actionable` (function, line 3394) `static int hot_actionable(const browser_window *w, ui_hot hot)`
+  - `menu_panel_rect` (function, line 3405) `static void menu_panel_rect(const browser_window *w, double *x, double *y,
                       ...`
-  - `ua_box_rect` (function, line 3418) `static void ua_box_rect(const browser_window *w, double *x, double *y,
+  - `ua_box_rect` (function, line 3421) `static void ua_box_rect(const browser_window *w, double *x, double *y,
                         do...`
-  - `draw_text` (function, line 3428) `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)`
-  - `rc_float_bottom` (function, line 3849) `static double rc_float_bottom(const rc_state *s)`
-  - `rc_float_clear` (function, line 3858) `static void rc_float_clear(rc_state *s)`
-  - `rc_float_refresh` (function, line 3871) `static void rc_float_refresh(rc_state *s, double line_h)`
-  - `rc_float_fit_line` (function, line 3917) `static void rc_float_fit_line(rc_state *s, double line_h)`
-  - `line_limit` (function, line 3936) `static double line_limit(const rc_state *s, double content_w)`
-  - `rc_free` (function, line 3944) `static void rc_free(rc_layout *L)`
-  - `rc_add_box` (function, line 3964) `static rc_box *rc_add_box(rc_layout *L)`
-  - `rc_add_frag` (function, line 3976) `static rc_frag *rc_add_frag(rc_layout *L)`
-  - `rc_add_row` (function, line 3991) `static rc_row *rc_add_row(rc_layout *L)`
-  - `family_face` (function, line 4003) `static const char *family_face(int family)`
-  - `content_font_ex` (function, line 4025) `static void content_font_ex(cairo_t *cr, double size, int bold, int italic, int family,
+  - `draw_text` (function, line 3431) `static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered)`
+  - `rc_float_bottom` (function, line 3852) `static double rc_float_bottom(const rc_state *s)`
+  - `rc_float_clear` (function, line 3861) `static void rc_float_clear(rc_state *s)`
+  - `rc_float_refresh` (function, line 3874) `static void rc_float_refresh(rc_state *s, double line_h)`
+  - `rc_float_fit_line` (function, line 3920) `static void rc_float_fit_line(rc_state *s, double line_h)`
+  - `line_limit` (function, line 3939) `static double line_limit(const rc_state *s, double content_w)`
+  - `rc_free` (function, line 3947) `static void rc_free(rc_layout *L)`
+  - `rc_add_box` (function, line 3967) `static rc_box *rc_add_box(rc_layout *L)`
+  - `rc_add_frag` (function, line 3979) `static rc_frag *rc_add_frag(rc_layout *L)`
+  - `rc_add_row` (function, line 3994) `static rc_row *rc_add_row(rc_layout *L)`
+  - `family_face` (function, line 4006) `static const char *family_face(int family)`
+  - `content_font_ex` (function, line 4028) `static void content_font_ex(cairo_t *cr, double size, int bold, int italic, int family,
          ...`
-  - `sites` (function, line 4038) `* sites (wfh 0, local 0) get the bucket face, which is the toy face's twin. */
+  - `sites` (function, line 4041) `* sites (wfh 0, local 0) get the bucket face, which is the toy face's twin. */
     if (wfh != 0u ...`
-  - `content_font` (function, line 4047) `static void content_font(cairo_t *cr, double size, int bold, int italic, int family,
+  - `content_font` (function, line 4050) `static void content_font(cairo_t *cr, double size, int bold, int italic, int family,
             ...`
-  - `set_rgb_alpha` (function, line 4054) `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)`
-  - `utf8_clen` (function, line 4063) `static size_t utf8_clen(const char *s, size_t n)`
-  - `draw_slice` (function, line 4096) `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)`
-  - `frag_styled` (function, line 4109) `static int frag_styled(const rc_frag *f)`
-  - `styled_advance` (function, line 4116) `static double styled_advance(cairo_t *cr, const rc_frag *f)`
-  - `styled_draw` (function, line 4138) `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)`
-  - `block_style` (function, line 4161) `static void block_style(const ui_theme *th, const rd_block *b,
+  - `set_rgb_alpha` (function, line 4057) `static void set_rgb_alpha(cairo_t *cr, ui_rgb c, int opacity)`
+  - `utf8_clen` (function, line 4066) `static size_t utf8_clen(const char *s, size_t n)`
+  - `draw_slice` (function, line 4099) `static void draw_slice(cairo_t *cr, double x, double baseline, const char *s, size_t n)`
+  - `frag_styled` (function, line 4112) `static int frag_styled(const rc_frag *f)`
+  - `styled_advance` (function, line 4119) `static double styled_advance(cairo_t *cr, const rc_frag *f)`
+  - `styled_draw` (function, line 4141) `static void styled_draw(cairo_t *cr, double x, double baseline, const rc_frag *f)`
+  - `block_style` (function, line 4164) `static void block_style(const ui_theme *th, const rd_block *b,
                         double *si...`
-  - `block_margins` (function, line 4189) `static void block_margins(const ui_theme *th, const rd_block *b,
+  - `block_margins` (function, line 4192) `static void block_margins(const ui_theme *th, const rd_block *b,
                           double...`
-  - `area` (function, line 4226) `* box spans its CONTENT area (the font's ascent + descent plus its vertical padding
+  - `area` (function, line 4229) `* box spans its CONTENT area (the font's ascent + descent plus its vertical padding
  * and border...`
-  - `run` (function, line 4280) `* continuation run (block_id < 0 with no block break) deliberately skips reconcile
+  - `run` (function, line 4283) `* continuation run (block_id < 0 with no block break) deliberately skips reconcile
  * to stay on ...`
-  - `atoms_extend_line` (function, line 4302) `static void atoms_extend_line(const rc_layout *L, rc_state *s, double *h,
+  - `atoms_extend_line` (function, line 4305) `static void atoms_extend_line(const rc_layout *L, rc_state *s, double *h,
                        ...`
-  - `flush_line` (function, line 4344) `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)`
-  - `open_line_height` (function, line 4413) `static double open_line_height(const rc_state *s, const ui_theme *th)`
-  - `open_line` (function, line 4428) `static void open_line(rc_layout *L, rc_state *s)`
-  - `flow_emit_frag` (function, line 4482) `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
+  - `flush_line` (function, line 4347) `static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th)`
+  - `open_line_height` (function, line 4416) `static double open_line_height(const rc_state *s, const ui_theme *th)`
+  - `open_line` (function, line 4431) `static void open_line(rc_layout *L, rc_state *s)`
+  - `flow_emit_frag` (function, line 4485) `static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
                  ...`
-  - `flow_smallcaps_word` (function, line 4544) `static double flow_smallcaps_word(cairo_t *cr, rc_layout *L, rc_state *s,
+  - `flow_smallcaps_word` (function, line 4547) `static double flow_smallcaps_word(cairo_t *cr, rc_layout *L, rc_state *s,
                        ...`
-  - `ibx_advance` (function, line 4599) `static void ibx_advance(const rc_layout *L, rc_state *s, double adv)`
-  - `flow_text` (function, line 4607) `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
+  - `ibx_advance` (function, line 4602) `static void ibx_advance(const rc_layout *L, rc_state *s, double adv)`
+  - `flow_text` (function, line 4610) `static void flow_text(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
                ...`
-  - `input_inline_eligible` (function, line 4888) `static int input_inline_eligible(const rd_block *b)`
-  - `input_inline_size` (function, line 4902) `static int input_inline_size(cairo_t *cr, const ui_theme *th, const rd_block *b,
+  - `input_inline_eligible` (function, line 4891) `static int input_inline_eligible(const rd_block *b)`
+  - `input_inline_size` (function, line 4905) `static int input_inline_size(cairo_t *cr, const ui_theme *th, const rd_block *b,
                 ...`
-  - `replaced_inline_size` (function, line 4924) `static int replaced_inline_size(cairo_t *cr, const browser_window *w, const ui_theme *th,
+  - `replaced_inline_size` (function, line 4927) `static int replaced_inline_size(cairo_t *cr, const browser_window *w, const ui_theme *th,
        ...`
-  - `replaced_is_inline_level` (function, line 4956) `static int replaced_is_inline_level(const rc_state *s, const rd_block *b)`
-  - `inlines` (function, line 4969) `* next run may also be a replaced element without its own break: consecutive
+  - `replaced_is_inline_level` (function, line 4959) `static int replaced_is_inline_level(const rc_state *s, const rd_block *b)`
+  - `inlines` (function, line 4972) `* next run may also be a replaced element without its own break: consecutive
  * atomic inlines (`...`
-  - `place_inline_replaced` (function, line 5006) `static int place_inline_replaced(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
+  - `place_inline_replaced` (function, line 5009) `static int place_inline_replaced(cairo_t *cr, rc_layout *L, rc_state *s, const ui_theme *th,
     ...`
-  - `css_replaced_box` (function, line 5091) `static int css_replaced_box(const rd_doc *doc, const rd_block *b, double avail_w,
+  - `css_replaced_box` (function, line 5094) `static int css_replaced_box(const rd_doc *doc, const rd_block *b, double avail_w,
                ...`
-  - `emit_replaced_row` (function, line 5100) `static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
+  - `emit_replaced_row` (function, line 5103) `static int emit_replaced_row(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...`
-  - `block_text_style` (function, line 5213) `static void block_text_style(const browser_window *w, const ui_theme *th, const rd_block *b,
+  - `block_text_style` (function, line 5216) `static void block_text_style(const browser_window *w, const ui_theme *th, const rd_block *b,
     ...`
-  - `flow_text_block` (function, line 5224) `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
+  - `flow_text_block` (function, line 5227) `static void flow_text_block(cairo_t *cr, const browser_window *w, rc_layout *L,
                  ...`
-  - `run_is_content` (function, line 5381) `static int run_is_content(const rd_block *bk)`
-  - `item_root_box_pass` (function, line 5391) `static int item_root_box_pass(const rd_doc *doc, size_t b0, size_t b1, int cbox,
+  - `run_is_content` (function, line 5384) `static int run_is_content(const rd_block *bk)`
+  - `item_root_box_pass` (function, line 5394) `static int item_root_box_pass(const rd_doc *doc, size_t b0, size_t b1, int cbox,
                 ...`
-  - `them` (function, line 5444) `* to them (jkanime's badge-only tiles keep their box). */
+  - `them` (function, line 5447) `* to them (jkanime's badge-only tiles keep their box). */
 static int item_root_box_in(const rd_do...`
-  - `item_root_box` (function, line 5465) `static int item_root_box(const rd_doc *doc, size_t b0, size_t b1)`
-  - `itself` (function, line 5473) `* STRETCH itself (box_tree fills the line with it). */
+  - `item_root_box` (function, line 5468) `static int item_root_box(const rd_doc *doc, size_t b0, size_t b1)`
+  - `itself` (function, line 5476) `* STRETCH itself (box_tree fills the line with it). */
 static int css_align_to_bt(int align_kw)`
-  - `box_edge_px` (function, line 5484) `static double box_edge_px(int wpx)`
-  - `rc_box_copy_decoration` (function, line 5504) `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)`
-  - `box_is_strict_descendant` (function, line 5597) `static int box_is_strict_descendant(const rd_doc *doc, int id, int anc)`
-  - `item_sides_at_level` (function, line 5619) `static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
+  - `box_edge_px` (function, line 5487) `static double box_edge_px(int wpx)`
+  - `rc_box_copy_decoration` (function, line 5507) `static void rc_box_copy_decoration(rc_box *bx, const pv_box_def *def)`
+  - `box_is_strict_descendant` (function, line 5600) `static int box_is_strict_descendant(const rd_doc *doc, int id, int anc)`
+  - `item_sides_at_level` (function, line 5622) `static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
                   ...`
-  - `container_box_of` (function, line 5686) `static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid)`
-  - `table` (function, line 5708) `* synthesised table (no descriptors to disagree) keeps the stamp. */
+  - `container_box_of` (function, line 5689) `static int container_box_of(const rd_doc *doc, size_t start, size_t end, int cid)`
+  - `table` (function, line 5711) `* synthesised table (no descriptors to disagree) keeps the stamp. */
         if (cd != NULL && !c...`
-  - `row` (function, line 5773) `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
+  - `row` (function, line 5776) `* label beside them shrank to one word per row (spec/page_view.md, jkanime/slashdot). */
 static d...`
-  - `empty_atom_outer_w` (function, line 5825) `static double empty_atom_outer_w(const rd_doc *doc, size_t k, const rd_block *bk)`
-  - `measure_item_w_at` (function, line 5841) `static double measure_item_w_at(cairo_t *cr, const browser_window *w,
+  - `empty_atom_outer_w` (function, line 5828) `static double empty_atom_outer_w(const rd_doc *doc, size_t k, const rd_block *bk)`
+  - `measure_item_w_at` (function, line 5844) `static double measure_item_w_at(cairo_t *cr, const browser_window *w,
                            ...`
-  - `lines_at` (function, line 5905) `static size_t lines_at(cairo_t *cr, const browser_window *w, const ui_theme *th,
+  - `lines_at` (function, line 5908) `static size_t lines_at(cairo_t *cr, const browser_window *w, const ui_theme *th,
                 ...`
-  - `balanced_wrap_width` (function, line 5923) `static double balanced_wrap_width(cairo_t *cr, const browser_window *w, const ui_theme *th,
+  - `balanced_wrap_width` (function, line 5926) `static double balanced_wrap_width(cairo_t *cr, const browser_window *w, const ui_theme *th,
      ...`
-  - `item_inner_inset` (function, line 5944) `static double item_inner_inset(const rd_doc *doc, size_t b0, size_t b1, int root)`
-  - `measure_item_content_w` (function, line 5971) `static double measure_item_content_w(cairo_t *cr, const browser_window *w,
+  - `item_inner_inset` (function, line 5947) `static double item_inner_inset(const rd_doc *doc, size_t b0, size_t b1, int root)`
+  - `measure_item_content_w` (function, line 5974) `static double measure_item_content_w(cairo_t *cr, const browser_window *w,
                       ...`
-  - `run_width_cap` (function, line 6004) `static double run_width_cap(const rd_block *b, double avail_w)`
-  - `def_width_cap` (function, line 6008) `static double def_width_cap(const pv_box_def *d, double avail_w)`
-  - `def_declared_width` (function, line 6014) `static double def_declared_width(const pv_box_def *d, double avail_w)`
-  - `item_declared_basis` (function, line 6019) `static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
+  - `run_width_cap` (function, line 6007) `static double run_width_cap(const rd_block *b, double avail_w)`
+  - `def_width_cap` (function, line 6011) `static double def_width_cap(const pv_box_def *d, double avail_w)`
+  - `def_declared_width` (function, line 6017) `static double def_declared_width(const pv_box_def *d, double avail_w)`
+  - `item_declared_basis` (function, line 6022) `static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
                       ...`
-  - `nested_cont_basis` (function, line 6033) `static double nested_cont_basis(cairo_t *cr, const browser_window *w,
+  - `nested_cont_basis` (function, line 6036) `static double nested_cont_basis(cairo_t *cr, const browser_window *w,
                            ...`
-  - `flex_item_basis` (function, line 6107) `static double flex_item_basis(cairo_t *cr, const browser_window *w,
+  - `flex_item_basis` (function, line 6110) `static double flex_item_basis(cairo_t *cr, const browser_window *w,
                              ...`
-  - `flex_item_min_main` (function, line 6155) `static double flex_item_min_main(cairo_t *cr, const browser_window *w,
+  - `flex_item_min_main` (function, line 6158) `static double flex_item_min_main(cairo_t *cr, const browser_window *w,
                           ...`
-  - `item_at_level` (function, line 6220) `static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-  - `child_cont_at_level` (function, line 6235) `static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
-  - `cont_in_view` (function, line 6254) `static int cont_in_view(const rd_doc *doc, int cid)`
-  - `root_cont_of` (function, line 6268) `static int root_cont_of(const rd_doc *doc, int cid)`
-  - `box_under` (function, line 6279) `static int box_under(const rd_doc *doc, int child, int anc)`
-  - `root_cont_in` (function, line 6296) `static int root_cont_in(const rd_doc *doc, int cid, int float_box)`
-  - `block_is_oof` (function, line 6340) `static int block_is_oof(const rd_doc *doc, const rd_block *bk)`
-  - `item_vmargins` (function, line 6385) `static void item_vmargins(const ui_theme *th, const rd_doc *doc, const pv_box_def *ib,
+  - `item_at_level` (function, line 6223) `static int item_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
+  - `child_cont_at_level` (function, line 6238) `static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid)`
+  - `cont_in_view` (function, line 6257) `static int cont_in_view(const rd_doc *doc, int cid)`
+  - `root_cont_of` (function, line 6271) `static int root_cont_of(const rd_doc *doc, int cid)`
+  - `box_under` (function, line 6282) `static int box_under(const rd_doc *doc, int child, int anc)`
+  - `root_cont_in` (function, line 6299) `static int root_cont_in(const rd_doc *doc, int cid, int float_box)`
+  - `block_is_oof` (function, line 6343) `static int block_is_oof(const rd_doc *doc, const rd_block *bk)`
+  - `item_vmargins` (function, line 6388) `static void item_vmargins(const ui_theme *th, const rd_doc *doc, const pv_box_def *ib,
           ...`
-  - `container_inner_h` (function, line 6406) `static double container_inner_h(const rd_doc *doc, const pv_cont_def *cdv, double content_w)`
-  - `layout_container` (function, line 6446) `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
+  - `container_inner_h` (function, line 6409) `static double container_inner_h(const rd_doc *doc, const pv_cont_def *cdv, double content_w)`
+  - `layout_container` (function, line 6449) `static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 ...`
-  - `slot` (function, line 6637) `* layout slot (item 0 → rightmost, last item → leftmost). */
+  - `slot` (function, line 6640) `* layout slot (item 0 → rightmost, last item → leftmost). */
     if (use_flex && cdv.direction ==...`
-  - `path` (function, line 6836) `*
+  - `path` (function, line 6839) `*
          * Only a SYNTHESISED table grid takes this path (cdv.is_table), and only when
         ...`
-  - `box_line_visible` (function, line 7458) `static int box_line_visible(int style)`
-  - `col_spend_free_space` (function, line 7472) `static void col_spend_free_space(rc_layout *L, const rc_open_box *ob, double free_px)`
-  - `close_top_box` (function, line 7517) `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)`
-  - `wins` (function, line 7585) `* content taller than the ratio still wins (min-height:auto). */
+  - `box_line_visible` (function, line 7461) `static int box_line_visible(int style)`
+  - `col_spend_free_space` (function, line 7475) `static void col_spend_free_space(rc_layout *L, const rc_open_box *ob, double free_px)`
+  - `close_top_box` (function, line 7520) `static void close_top_box(rc_layout *L, rc_state *s, const ui_theme *th)`
+  - `wins` (function, line 7588) `* content taller than the ratio still wins (min-height:auto). */
         if (bx->aspect_num > 0 &...`
-  - `rc_box_context` (function, line 7692) `static void rc_box_context(const rc_state *s, double content_w,
+  - `rc_box_context` (function, line 7695) `static void rc_box_context(const rc_state *s, double content_w,
                            double...`
-  - `box_margin_top` (function, line 7719) `static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w)`
-  - `box_margin_bottom` (function, line 7726) `static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w)`
-  - `children` (function, line 7736) `* own content rect onto the stack so its children (text or nested boxes) place inside
+  - `box_margin_top` (function, line 7722) `static double box_margin_top(const ui_theme *th, const pv_box_def *def, double cb_w)`
+  - `box_margin_bottom` (function, line 7729) `static double box_margin_bottom(const ui_theme *th, const pv_box_def *def, double cb_w)`
+  - `children` (function, line 7739) `* own content rect onto the stack so its children (text or nested boxes) place inside
  * it. At t...`
-  - `column` (function, line 7981) `*
+  - `column` (function, line 7984) `*
  * Returns the height of the tallest column (0 when there is nothing to fragment). */
 static do...`
-  - `box_path_has` (function, line 8075) `static int box_path_has(const rd_doc *doc, int block_id, int want)`
-  - `columns` (function, line 8089) `* each card made 1080px columns (huggingface, github). */
+  - `box_path_has` (function, line 8078) `static int box_path_has(const rd_doc *doc, int block_id, int want)`
+  - `columns` (function, line 8092) `* each card made 1080px columns (huggingface, github). */
 static int deepest_open_on_path(const r...`
-  - `float_item_stop` (function, line 8106) `static int float_item_stop(const rd_doc *doc, const rd_block *bk, int founder_key, int base_stop)`
-  - `nested_stop` (function, line 8125) `static int nested_stop(const rc_state *outer, const rd_doc *doc, int block_id, int stop_at)`
-  - `box_shrink_width` (function, line 8137) `static double box_shrink_width(cairo_t *cr, const browser_window *w,
+  - `float_item_stop` (function, line 8109) `static int float_item_stop(const rd_doc *doc, const rd_block *bk, int founder_key, int base_stop)`
+  - `nested_stop` (function, line 8128) `static int nested_stop(const rc_state *outer, const rd_doc *doc, int block_id, int stop_at)`
+  - `box_shrink_width` (function, line 8140) `static double box_shrink_width(cairo_t *cr, const browser_window *w,
                             ...`
-  - `reconcile_boxes_below` (function, line 8213) `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
+  - `reconcile_boxes_below` (function, line 8216) `static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                          ...`
-  - `reconcile_boxes` (function, line 8344) `static void reconcile_boxes(cairo_t *cr, const browser_window *w,
+  - `reconcile_boxes` (function, line 8347) `static void reconcile_boxes(cairo_t *cr, const browser_window *w,
                             rc_...`
-  - `box_path_of` (function, line 8372) `static int box_path_of(const rd_doc *doc, int block_id, int *out)`
-  - `oof_static_xy` (function, line 8392) `static void oof_static_xy(const rc_state *s, const ui_theme *th, double content_w,
+  - `box_path_of` (function, line 8375) `static int box_path_of(const rd_doc *doc, int block_id, int *out)`
+  - `oof_static_xy` (function, line 8395) `static void oof_static_xy(const rc_state *s, const ui_theme *th, double content_w,
               ...`
-  - `band_parent_box` (function, line 8408) `static int band_parent_box(const rd_doc *doc, const rd_block *bk)`
-  - `band_common_box_ex` (function, line 8415) `static int band_common_box_ex(const rd_doc *doc, size_t start, size_t end, int skip_boxless)`
-  - `band_common_box` (function, line 8440) `static int band_common_box(const rd_doc *doc, size_t start, size_t end)`
-  - `block_in_table_caption` (function, line 8514) `static int block_in_table_caption(const rd_doc *doc, const rd_block *b)`
-  - `defer_key_block` (function, line 8580) `static int defer_key_block(const rd_block *bk)`
-  - `defer_append` (function, line 8780) `static int defer_append(rc_defer *d, int key, int side,
+  - `band_parent_box` (function, line 8411) `static int band_parent_box(const rd_doc *doc, const rd_block *bk)`
+  - `band_common_box_ex` (function, line 8418) `static int band_common_box_ex(const rd_doc *doc, size_t start, size_t end, int skip_boxless)`
+  - `band_common_box` (function, line 8443) `static int band_common_box(const rd_doc *doc, size_t start, size_t end)`
+  - `block_in_table_caption` (function, line 8517) `static int block_in_table_caption(const rd_doc *doc, const rd_block *b)`
+  - `defer_key_block` (function, line 8583) `static int defer_key_block(const rd_block *bk)`
+  - `defer_append` (function, line 8783) `static int defer_append(rc_defer *d, int key, int side,
                         int ml, int mlpct...`
-  - `float_founder_edges` (function, line 8845) `static double float_founder_edges(const rd_doc *doc, int float_box, double ctx_w)`
-  - `defer_col_shrink_w` (function, line 8860) `static double defer_col_shrink_w(cairo_t *cr, const browser_window *w, const ui_theme *th,
+  - `float_founder_edges` (function, line 8848) `static double float_founder_edges(const rd_doc *doc, int float_box, double ctx_w)`
+  - `defer_col_shrink_w` (function, line 8863) `static double defer_col_shrink_w(cairo_t *cr, const browser_window *w, const ui_theme *th,
       ...`
-  - `defer_flush` (function, line 8915) `static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
+  - `defer_flush` (function, line 8918) `static void defer_flush(cairo_t *cr, const browser_window *w, rc_layout *L,
                      ...`
-  - `layout_float_band` (function, line 9214) `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
+  - `layout_float_band` (function, line 9217) `static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L,
                ...`
-  - `yet` (function, line 9689) `* does not carry yet (WPT flex-abspos-staticpos-*). */
+  - `yet` (function, line 9692) `* does not carry yet (WPT flex-abspos-staticpos-*). */
 static int runs_share_float(const rd_doc *...`
-  - `layout_doc` (function, line 9704) `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
+  - `layout_doc` (function, line 9707) `static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                   ...`
-  - `count` (function, line 10232) `* the box count (a hostile parent cycle terminates). */
+  - `count` (function, line 10235) `* the box count (a hostile parent cycle terminates). */
 static int oof_depth(const rd_doc *doc, s...`
-  - `approximation` (function, line 10251) `* anchors on the Stage 2d approximation (fail-open: content never vanishes). */
+  - `approximation` (function, line 10254) `* anchors on the Stage 2d approximation (fail-open: content never vanishes). */
 static void oof_s...`
-  - `position_doc` (function, line 10477) `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
+  - `position_doc` (function, line 10480) `static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
                 ...`
-  - `defer_root_of` (function, line 10655) `static int defer_root_of(const rc_layout *L, int bid)`
-  - `defer_wants` (function, line 10663) `static int defer_wants(const rc_layout *L, int bid, int only_root)`
-  - `input_box_width` (function, line 10669) `static double input_box_width(double content_w)`
-  - `select_box_width` (function, line 10673) `static double select_box_width(double content_w)`
-  - `button_box_width` (function, line 10678) `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
+  - `defer_root_of` (function, line 10658) `static int defer_root_of(const rc_layout *L, int bid)`
+  - `defer_wants` (function, line 10666) `static int defer_wants(const rc_layout *L, int bid, int only_root)`
+  - `input_box_width` (function, line 10672) `static double input_box_width(double content_w)`
+  - `select_box_width` (function, line 10676) `static double select_box_width(double content_w)`
+  - `button_box_width` (function, line 10681) `static double button_box_width(cairo_t *cr, const ui_theme *th, const rd_block *b,
               ...`
-  - `blit_image_box` (function, line 11127) `static void blit_image_box(cairo_t *cr, browser_window *w, const rd_block *blk,
+  - `blit_image_box` (function, line 11130) `static void blit_image_box(cairo_t *cr, browser_window *w, const rd_block *blk,
                  ...`
-  - `v_read` (function, line 11325) `static int v_read(int fd, void *buf, size_t n)`
-  - `dies` (function, line 11353) `* child dies (exec failed, device busy, daemon absent) is detected on the
+  - `v_read` (function, line 11328) `static int v_read(int fd, void *buf, size_t n)`
+  - `dies` (function, line 11356) `* child dies (exec failed, device busy, daemon absent) is detected on the
  * next PCM write (EPIP...`
-  - `audio_spawn` (function, line 11362) `static void audio_spawn(browser_window *w, int rate, int channels)`
-  - `audio_mark_dead` (function, line 11416) `static void audio_mark_dead(browser_window *w)`
-  - `audio_write` (function, line 11433) `static void audio_write(browser_window *w, const uint8_t *data, size_t len)`
-  - `audio_stop` (function, line 11448) `static void audio_stop(browser_window *w)`
-  - `video_stop` (function, line 11468) `static void video_stop(browser_window *w)`
-  - `video_fetch` (function, line 11647) `static sf_status video_fetch(const char *url, browser_window *w,
+  - `audio_spawn` (function, line 11365) `static void audio_spawn(browser_window *w, int rate, int channels)`
+  - `audio_mark_dead` (function, line 11419) `static void audio_mark_dead(browser_window *w)`
+  - `audio_write` (function, line 11436) `static void audio_write(browser_window *w, const uint8_t *data, size_t len)`
+  - `audio_stop` (function, line 11451) `static void audio_stop(browser_window *w)`
+  - `video_stop` (function, line 11471) `static void video_stop(browser_window *w)`
+  - `video_fetch` (function, line 11650) `static sf_status video_fetch(const char *url, browser_window *w,
                               sf...`
-  - `video_play` (function, line 11664) `static int video_play(browser_window *w, const char *m3u8_url)`
-  - `video_stop` (function, line 11766) `* each segment loop so a video_stop() in the main thread (which sets it to 0
+  - `video_play` (function, line 11667) `static int video_play(browser_window *w, const char *m3u8_url)`
+  - `video_stop` (function, line 11769) `* each segment loop so a video_stop() in the main thread (which sets it to 0
  * then calls pthrea...`
-  - `paint_video_row` (function, line 11820) `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
+  - `paint_video_row` (function, line 11823) `static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                 ...`
-  - `row_line_slack` (function, line 11932) `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)`
-  - `row_align_offset` (function, line 11944) `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)`
-  - `upstream` (function, line 11972) `* upstream (see spec/css.md). */
+  - `row_line_slack` (function, line 11935) `static double row_line_slack(const rc_layout *L, const rc_row *r, double content_w)`
+  - `row_align_offset` (function, line 11947) `static double row_align_offset(const rc_layout *L, const rc_row *r, double content_w)`
+  - `upstream` (function, line 11975) `* upstream (see spec/css.md). */
 static void box_path4(cairo_t *cr, double x, double y, double w,...`
-  - `box_path` (function, line 12000) `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)`
-  - `paint_box_shadow_layer` (function, line 12011) `static void paint_box_shadow_layer(cairo_t *cr, double x, double y, double w, double h,
+  - `box_path` (function, line 12003) `static void box_path(cairo_t *cr, double x, double y, double w, double h, double r)`
+  - `paint_box_shadow_layer` (function, line 12014) `static void paint_box_shadow_layer(cairo_t *cr, double x, double y, double w, double h,
          ...`
-  - `text` (function, line 12102) `* fill and gradient text (2026-07-19). */
+  - `text` (function, line 12105) `* fill and gradient text (2026-07-19). */
 static cairo_pattern_t *bui_linear_grad(double x, doubl...`
-  - `grad_stop` (function, line 12129) `static ui_rgb grad_stop(const int *cols, int nst, int k, double *alpha)`
-  - `bui_grad_color_at` (function, line 12144) `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
+  - `grad_stop` (function, line 12132) `static ui_rgb grad_stop(const int *cols, int nst, int k, double *alpha)`
+  - `bui_grad_color_at` (function, line 12147) `static ui_rgb bui_grad_color_at(const int *cols, const int *pos1000, int nst,
                    ...`
-  - `spaced` (function, line 12177) `* or evenly spaced (bui_grad_color_at). */
+  - `spaced` (function, line 12180) `* or evenly spaced (bui_grad_color_at). */
 static void bui_paint_conic(cairo_t *cr, double x, dou...`
-  - `paint_bg_layer` (function, line 12210) `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
+  - `paint_bg_layer` (function, line 12213) `static void paint_bg_layer(cairo_t *cr, const rc_box *bx, const ui_bg_image *img,
                ...`
-  - `paint_gradient_fill` (function, line 12256) `static void paint_gradient_fill(cairo_t *cr, const rc_box *bx, double x, double y,
+  - `paint_gradient_fill` (function, line 12259) `static void paint_gradient_fill(cairo_t *cr, const rc_box *bx, double x, double y,
               ...`
-  - `paint_gradient_tiled` (function, line 12303) `static void paint_gradient_tiled(cairo_t *cr, const rc_box *bx, double x, double y,
+  - `paint_gradient_tiled` (function, line 12306) `static void paint_gradient_tiled(cairo_t *cr, const rc_box *bx, double x, double y,
              ...`
-  - `paint_box_decoration` (function, line 12330) `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
+  - `paint_box_decoration` (function, line 12333) `static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, double oy,
            ...`
-  - `widths` (function, line 12455) `* the outer minus the adjacent border widths (CSS Backgrounds 3 5.2). The straight
+  - `widths` (function, line 12458) `* the outer minus the adjacent border widths (CSS Backgrounds 3 5.2). The straight
      * per-sid...`
-  - `cairo_set_dash` (function, line 12491) `cairo_set_dash(cr, (double[])`
   - `cairo_set_dash` (function, line 12494) `cairo_set_dash(cr, (double[])`
-  - `cairo_set_dash` (function, line 12540) `cairo_set_dash(cr, (double[])`
+  - `cairo_set_dash` (function, line 12497) `cairo_set_dash(cr, (double[])`
   - `cairo_set_dash` (function, line 12543) `cairo_set_dash(cr, (double[])`
-  - `set_rgb` (function, line 12577) `set_rgb(cr, (ui_rgb)`
-  - `cairo_set_dash` (function, line 12601) `cairo_set_dash(cr, (double[])`
+  - `cairo_set_dash` (function, line 12546) `cairo_set_dash(cr, (double[])`
+  - `set_rgb` (function, line 12580) `set_rgb(cr, (ui_rgb)`
   - `cairo_set_dash` (function, line 12604) `cairo_set_dash(cr, (double[])`
-  - `paint_deco_line` (function, line 12662) `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
+  - `cairo_set_dash` (function, line 12607) `cairo_set_dash(cr, (double[])`
+  - `paint_deco_line` (function, line 12665) `static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
                        ...`
-  - `cairo_set_dash` (function, line 12696) `cairo_set_dash(cr, (double[])`
-  - `cairo_set_dash` (function, line 12698) `cairo_set_dash(cr, (double[])`
-  - `paint_svg_at` (function, line 12718) `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
+  - `cairo_set_dash` (function, line 12699) `cairo_set_dash(cr, (double[])`
+  - `cairo_set_dash` (function, line 12701) `cairo_set_dash(cr, (double[])`
+  - `paint_svg_at` (function, line 12721) `static void paint_svg_at(cairo_t *cr, const rd_block *blk, int cur,
                          doub...`
-  - `replaced_current_color` (function, line 12738) `static int replaced_current_color(const browser_window *w, const rd_block *blk)`
-  - `paint_inline_replaced` (function, line 12747) `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
+  - `replaced_current_color` (function, line 12741) `static int replaced_current_color(const browser_window *w, const rd_block *blk)`
+  - `paint_inline_replaced` (function, line 12750) `static void paint_inline_replaced(cairo_t *cr, browser_window *w,
                                ...`
-  - `paint_content_row` (function, line 12792) `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
+  - `paint_content_row` (function, line 12795) `static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                ...`
-  - `paint_content_row_ex` (function, line 12799) `static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout *L,
+  - `paint_content_row_ex` (function, line 12802) `static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout *L,
             ...`
-  - `ov_box_clips` (function, line 13014) `static int ov_box_clips(const pv_box_def *d)`
-  - `ov_collect_chain` (function, line 13021) `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)`
-  - `ov_box_bounds` (function, line 13042) `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)`
-  - `ov_content_rect` (function, line 13068) `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
+  - `ov_box_clips` (function, line 13017) `static int ov_box_clips(const pv_box_def *d)`
+  - `ov_collect_chain` (function, line 13024) `static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap)`
+  - `ov_box_bounds` (function, line 13045) `static int ov_box_bounds(const rc_layout *L, int bid, rc_box *out)`
+  - `ov_content_rect` (function, line 13071) `static void ov_content_rect(const rc_box *bx, const pv_box_def *d,
                             do...`
-  - `fragment` (function, line 13084) `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
+  - `fragment` (function, line 13087) `* first fragment (rc_frag.block_id, stamped at flow_emit_frag time) -- using
  * blk->block_id alo...`
-  - `box_forms_stacking_context` (function, line 13139) `static int box_forms_stacking_context(const pv_box_def *def)`
-  - `bui_skew_tan` (function, line 13183) `static double bui_skew_tan(int deg)`
-  - `box_transform_matrix` (function, line 13190) `static int box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
+  - `box_forms_stacking_context` (function, line 13142) `static int box_forms_stacking_context(const pv_box_def *def)`
+  - `bui_skew_tan` (function, line 13186) `static double bui_skew_tan(int deg)`
+  - `box_transform_matrix` (function, line 13193) `static int box_transform_matrix(const pv_box_def *def, double box_x, double box_y,
               ...`
-  - `bui_blend_operator` (function, line 13318) `static cairo_operator_t bui_blend_operator(int mix_blend)`
-  - `bui_gaussian_blur_surface` (function, line 13344) `static void bui_gaussian_blur_surface(cairo_surface_t *surf, double sigma)`
-  - `bui_paint_backdrop_blur` (function, line 13387) `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
+  - `bui_blend_operator` (function, line 13321) `static cairo_operator_t bui_blend_operator(int mix_blend)`
+  - `bui_gaussian_blur_surface` (function, line 13347) `static void bui_gaussian_blur_surface(cairo_surface_t *surf, double sigma)`
+  - `bui_paint_backdrop_blur` (function, line 13390) `static void bui_paint_backdrop_blur(cairo_t *cr, const pv_box_def *def,
                          ...`
-  - `bui_mask_ref_rect` (function, line 13457) `static int bui_mask_ref_rect(const rc_layout *L, int ref, rc_box *out)`
-  - `bui_build_mask` (function, line 13473) `static cairo_surface_t *bui_build_mask(const pv_box_def *def, const rc_box *bx_in,
+  - `bui_mask_ref_rect` (function, line 13460) `static int bui_mask_ref_rect(const rc_layout *L, int ref, rc_box *out)`
+  - `bui_build_mask` (function, line 13476) `static cairo_surface_t *bui_build_mask(const pv_box_def *def, const rc_box *bx_in,
               ...`
-  - `bui_pop_group_composite` (function, line 13589) `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms,
+  - `bui_pop_group_composite` (function, line 13592) `static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t elapsed_ms,
     ...`
-  - `limits` (function, line 13841) `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
+  - `limits` (function, line 13844) `* documents narrower v1 limits (no overflow:hidden, no negative z-index). A box
  * grouped this w...`
-  - `paint_box_decoration_grouped` (function, line 13910) `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
+  - `paint_box_decoration_grouped` (function, line 13913) `static void paint_box_decoration_grouped(cairo_t *cr, browser_window *w,
                         ...`
-  - `paint_box_and_direct_rows` (function, line 13951) `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
+  - `paint_box_and_direct_rows` (function, line 13954) `static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_layout *L,
        ...`
-  - `bui_pop_group_composite` (function, line 14027) `bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
+  - `bui_pop_group_composite` (function, line 14030) `bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
              ...`
-  - `paint_oof_sub` (function, line 14081) `static void paint_oof_sub(cairo_t *cr, browser_window *w, const rc_oof_sub *sub,
+  - `paint_oof_sub` (function, line 14084) `static void paint_oof_sub(cairo_t *cr, browser_window *w, const rc_oof_sub *sub,
                 ...`
-  - `paint_positioned_one` (function, line 14119) `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
+  - `paint_positioned_one` (function, line 14122) `static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme *th,
             ...`
-  - `box` (function, line 14240) `* content belongs to that box (painted by its own positioned entry). */
+  - `box` (function, line 14243) `* content belongs to that box (painted by its own positioned entry). */
     if (sub == NULL)`
-  - `paint_owned_negz` (function, line 14345) `static void paint_owned_negz(cairo_t *cr, browser_window *w, rc_layout *L, double left,
+  - `paint_owned_negz` (function, line 14348) `static void paint_owned_negz(cairo_t *cr, browser_window *w, rc_layout *L, double left,
          ...`
-  - `paint_nested_children` (function, line 14361) `static void paint_nested_children(cairo_t *cr, browser_window *w,
+  - `paint_nested_children` (function, line 14364) `static void paint_nested_children(cairo_t *cr, browser_window *w,
                                ...`
-  - `bui_pop_group_composite` (function, line 14384) `bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms, &L->boxes[j], left, origin,
+  - `bui_pop_group_composite` (function, line 14387) `bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms, &L->boxes[j], left, origin,
   ...`
-  - `geom_from_layout` (function, line 14399) `static void geom_from_layout(const rd_doc *doc, const rc_layout *L, double left,
+  - `geom_from_layout` (function, line 14402) `static void geom_from_layout(const rd_doc *doc, const rc_layout *L, double left,
                 ...`
-  - `publish_geometry` (function, line 14430) `static void publish_geometry(browser_window *w, const rc_layout *L, double left,
+  - `publish_geometry` (function, line 14433) `static void publish_geometry(browser_window *w, const rc_layout *L, double left,
                 ...`
-  - `defer_root_z` (function, line 14492) `static int defer_root_z(const rd_doc *doc, size_t root)`
-  - `defer_root_before` (function, line 14498) `static int defer_root_before(const rd_doc *doc, const rc_layout *L, size_t a, size_t b)`
-  - `paint_positioned_layer` (function, line 14504) `static void paint_positioned_layer(cairo_t *cr, browser_window *w, const ui_theme *th,
+  - `defer_root_z` (function, line 14495) `static int defer_root_z(const rd_doc *doc, size_t root)`
+  - `defer_root_before` (function, line 14501) `static int defer_root_before(const rd_doc *doc, const rc_layout *L, size_t a, size_t b)`
+  - `paint_positioned_layer` (function, line 14507) `static void paint_positioned_layer(cairo_t *cr, browser_window *w, const ui_theme *th,
           ...`
-  - `paint_screen_inflow` (function, line 14569) `static void paint_screen_inflow(const screen_flow_ctx *c, int only_root)`
-  - `bui_pop_group_composite` (function, line 14636) `bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
+  - `paint_screen_inflow` (function, line 14572) `static void paint_screen_inflow(const screen_flow_ctx *c, int only_root)`
+  - `bui_pop_group_composite` (function, line 14639) `bui_pop_group_composite(cr, def, now_ms() - w->page_load_mono_ms, bx, left, origin,
              ...`
-  - `lazy_slot` (function, line 14690) `static ui_image *lazy_slot(browser_window *w, const char *href, size_t *idx)`
-  - `lazy_load_one` (function, line 14701) `static void lazy_load_one(browser_window *w, ui_image *slot, const rd_block *b)`
-  - `load_lazy_bg_images` (function, line 14757) `static void load_lazy_bg_images(browser_window *w, const rc_layout *L, double origin,
+  - `lazy_slot` (function, line 14693) `static ui_image *lazy_slot(browser_window *w, const char *href, size_t *idx)`
+  - `lazy_load_one` (function, line 14704) `static void lazy_load_one(browser_window *w, ui_image *slot, const rd_block *b)`
+  - `load_lazy_bg_images` (function, line 14760) `static void load_lazy_bg_images(browser_window *w, const rc_layout *L, double origin,
            ...`
-  - `paint_screen_deferred` (function, line 14792) `static void paint_screen_deferred(void *ctx, int root)`
-  - `gui_prof_now_ms` (function, line 14797) `static double gui_prof_now_ms(void)`
-  - `gui_prof_log` (function, line 14802) `static void gui_prof_log(const char *what, double ms)`
-  - `paint_structured` (function, line 14808) `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
+  - `paint_screen_deferred` (function, line 14795) `static void paint_screen_deferred(void *ctx, int root)`
+  - `gui_prof_now_ms` (function, line 14800) `static double gui_prof_now_ms(void)`
+  - `gui_prof_log` (function, line 14805) `static void gui_prof_log(const char *what, double ms)`
+  - `paint_structured` (function, line 14811) `static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                 ...`
-  - `write_doc_pdf` (function, line 14939) `static long write_doc_pdf(browser_window *w, const char *path)`
-  - `export_pdf` (function, line 15048) `static void export_pdf(browser_window *w)`
-  - `ui_render_viewport_w` (function, line 15103) `int ui_render_viewport_w(void)`
-  - `paint_png_inflow` (function, line 15132) `static void paint_png_inflow(const png_flow_ctx *c, int only_root)`
-  - `paint_png_deferred` (function, line 15168) `static void paint_png_deferred(void *ctx, int root)`
-  - `write_doc_png` (function, line 15281) `static long write_doc_png(browser_window *w, const char *path)`
-  - `render_frame_surface` (function, line 15293) `static cairo_surface_t *render_frame_surface(const pv_view *view, tab *ft, const char *url,
+  - `write_doc_pdf` (function, line 14942) `static long write_doc_pdf(browser_window *w, const char *path)`
+  - `export_pdf` (function, line 15051) `static void export_pdf(browser_window *w)`
+  - `ui_render_viewport_w` (function, line 15106) `int ui_render_viewport_w(void)`
+  - `paint_png_inflow` (function, line 15135) `static void paint_png_inflow(const png_flow_ctx *c, int only_root)`
+  - `paint_png_deferred` (function, line 15171) `static void paint_png_deferred(void *ctx, int root)`
+  - `write_doc_png` (function, line 15284) `static long write_doc_png(browser_window *w, const char *path)`
+  - `render_frame_surface` (function, line 15296) `static cairo_surface_t *render_frame_surface(const pv_view *view, tab *ft, const char *url,
      ...`
-  - `fill_frame_slot` (function, line 15334) `static void fill_frame_slot(browser_window *w, const rd_block *b, ui_image *slot,
+  - `fill_frame_slot` (function, line 15337) `static void fill_frame_slot(browser_window *w, const rd_block *b, ui_image *slot,
                ...`
-  - `refresh_frame_images` (function, line 15392) `static void refresh_frame_images(browser_window *w)`
-  - `export_png` (function, line 15410) `static void export_png(browser_window *w)`
-  - `caller` (function, line 15444) `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
+  - `refresh_frame_images` (function, line 15395) `static void refresh_frame_images(browser_window *w)`
+  - `export_png` (function, line 15413) `static void export_png(browser_window *w)`
+  - `caller` (function, line 15447) `* caller (freedom.c --download-pdf) owns the fetch/parse pipeline and supplies the
  * out_path ve...`
-  - `ui_render_png` (function, line 15467) `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)`
-  - `render_doc_images` (function, line 15527) `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
+  - `ui_render_png` (function, line 15470) `ui_status ui_render_png(const rd_doc *doc, const char *out_path, long *out_h)`
+  - `render_doc_images` (function, line 15530) `static ui_status render_doc_images(const rd_doc *doc, tab *t, const char *top_url,
               ...`
-  - `ui_render_png_images` (function, line 15560) `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
+  - `ui_render_png_images` (function, line 15563) `ui_status ui_render_png_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-  - `ui_render_png_frames` (function, line 15566) `ui_status ui_render_png_frames(const rd_doc *doc, tab *t, const char *top_url,
+  - `ui_render_png_frames` (function, line 15569) `ui_status ui_render_png_frames(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-  - `ui_render_pdf_images` (function, line 15572) `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
+  - `ui_render_pdf_images` (function, line 15575) `ui_status ui_render_pdf_images(const rd_doc *doc, tab *t, const char *top_url,
                   ...`
-  - `ui_dump_layout` (function, line 15587) `ui_status ui_dump_layout(const rd_doc *doc)`
-  - `link_at_point` (function, line 15659) `static const char *link_at_point(browser_window *w, double px, double py)`
-  - `resolve_box_cursor` (function, line 15750) `static int resolve_box_cursor(const rd_doc *doc, int block_id)`
-  - `box_pointer_events_none` (function, line 15764) `static int box_pointer_events_none(const rd_doc *doc, int block_id)`
-  - `cursor_at_point` (function, line 15780) `static int cursor_at_point(browser_window *w, double px, double py)`
-  - `node_at_point` (function, line 15845) `static dom_node_id node_at_point(browser_window *w, double px, double py)`
-  - `Firefox` (function, line 15853) `* on its face does in Firefox (spec/page_view.md, tanda 40). */
+  - `ui_dump_layout` (function, line 15590) `ui_status ui_dump_layout(const rd_doc *doc)`
+  - `link_at_point` (function, line 15662) `static const char *link_at_point(browser_window *w, double px, double py)`
+  - `resolve_box_cursor` (function, line 15753) `static int resolve_box_cursor(const rd_doc *doc, int block_id)`
+  - `box_pointer_events_none` (function, line 15767) `static int box_pointer_events_none(const rd_doc *doc, int block_id)`
+  - `cursor_at_point` (function, line 15783) `static int cursor_at_point(browser_window *w, double px, double py)`
+  - `node_at_point` (function, line 15848) `static dom_node_id node_at_point(browser_window *w, double px, double py)`
+  - `Firefox` (function, line 15856) `* on its face does in Firefox (spec/page_view.md, tanda 40). */
 static const rd_block *submit_pro...`
 
 Next: [KB_gui_p2.md](KB_gui_p2.md)

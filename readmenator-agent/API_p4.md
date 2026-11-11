@@ -82,7 +82,7 @@ Imported by: `src/disk_store.c`, `src/http_cache.c`, `src/profile.c`, `tests/tes
 
 ## include/dom.h
 Depends on: `include/html_parse.h`
-Imported by: `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
+Imported by: `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`, `tests/test_page_view.c`
 - `dom_free` (function) `include/dom.h:48` `void dom_free(dom_index *idx);` -- Builds the index over an already-parsed document. doc must outlive *out. doc == NULL / out == NULL =>...
 - `dom_node_count` (function) `include/dom.h:51` `size_t dom_node_count(const dom_index *idx);` -- Builds the index over an already-parsed document. doc must outlive *out. doc == NULL / out == NULL =>...
 - `tree` (function) `include/dom.h:59` `* tree (the index only grows, so a node a script removed is still registered and must not be * found);`
@@ -96,12 +96,13 @@ Imported by: `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `sr
 - `dom_attribute_names` (function) `include/dom.h:133` `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);` -- Qualified names of node's attributes, in document order, written to names[] (borrowed, valid while idx/doc are...
 - `dom_text_content` (function) `include/dom.h:138` `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);` -- Concatenated text content of node's subtree (borrowed, valid while idx/doc are * alive), or NULL. *len (optional)...
 - `dom_document_title` (function) `include/dom.h:141` `const char *dom_document_title(const dom_index *idx, size_t *len);` -- Concatenated text content of node's subtree (borrowed, valid while idx/doc are * alive), or NULL. *len (optional)...
-- `cycle` (function) `include/dom.h:169` `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...`
-- `parent` (function) `include/dom.h:196` `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...`
-- `dom_node_kind` (function) `include/dom.h:212` `int dom_node_kind(const dom_index *idx, dom_node_id node);` -- -- text and comment nodes (spec/dom.md 9) --- Character-data nodes get LAZY handles in the same arena: registered...
-- `index` (function) `include/dom.h:228` `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
-- `length` (function) `include/dom.h:253` `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
-- `process` (function) `include/dom.h:260` `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
+- `valid` (function) `include/dom.h:146` `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...`
+- `cycle` (function) `include/dom.h:176` `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...`
+- `parent` (function) `include/dom.h:203` `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...`
+- `dom_node_kind` (function) `include/dom.h:219` `int dom_node_kind(const dom_index *idx, dom_node_id node);` -- -- text and comment nodes (spec/dom.md 9) --- Character-data nodes get LAZY handles in the same arena: registered...
+- `index` (function) `include/dom.h:235` `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
+- `length` (function) `include/dom.h:260` `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
+- `process` (function) `include/dom.h:267` `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
 
 ## include/dom_debug.h
 Depends on: `include/render_doc.h`
@@ -232,7 +233,7 @@ Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
 - `he_cdn_kind` (function) `include/hostedit.h:62` `he_cdn_kind_t he_cdn_kind(const char *url);`
 
 ## include/html_parse.h
-Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_page_view.c`
+Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`, `tests/test_page_view.c`
 - `dropped` (function) `include/html_parse.h:47` `* dropped (not executed). */ #define HP_MAX_SCRIPTS ((size_t)4096) /* Returns a configuration with the secure...`
 - `cfg` (function) `include/html_parse.h:57` `* policy in cfg (cfg == NULL => secure defaults). No script is ever executed. * html == NULL or out == NULL =>...`
 - `hp_element_count` (function) `include/html_parse.h:63` `size_t hp_element_count(const hp_document *doc);` -- Parses untrusted HTML into an inert document and applies the sanitisation policy in cfg (cfg == NULL => secure...
@@ -306,7 +307,7 @@ Imported by: `gui/browser_ui.c`, `src/css.c`, `src/interp.c`, `tests/test_interp
 
 ## include/js_dom.h
 Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/url.h`
-Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`
+Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`
 - `opaque` (function) `include/js_dom.h:73` `* the engine runtime opaque (unreachable from script);`
 - `global` (function) `include/js_dom.h:80` `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...`
 - `jd_install_repl_api` (function) `include/js_dom.h:89` `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...`
@@ -325,7 +326,7 @@ Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `s
 
 ## include/js_env.h
 Depends on: `include/js_sandbox.h`
-Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`
+Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`, `tests/test_js_native.c`
 - `poisoned` (function) `include/js_env.h:49` `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...`
 
 ## include/js_geom.h
@@ -342,6 +343,11 @@ Imported by: `include/js_dom.h`, `include/tab.h`, `src/js_geom.c`, `tests/test_j
 - `jg_decode` (function) `include/js_geom.h:77` `int jg_decode(const int32_t *in, size_t n, jg_table *out);` -- Parses a wire array into out (which must be jg_init'ed or empty; previous contents are freed).
 - `jg_hash` (function) `include/js_geom.h:80` `uint64_t jg_hash(const jg_table *t);` -- Parses a wire array into out (which must be jg_init'ed or empty; previous contents are freed).
 
+## include/js_intl.h
+Depends on: `include/js_sandbox.h`
+Imported by: `src/js_dom.c`, `src/js_intl.c`, `tests/test_js_intl.c`
+- `ji_install` (function) `include/js_intl.h:16` `int ji_install(js_context *ctx);` -- Installs `Intl` and the Number/BigInt/Date toLocale* methods that delegate to it. * Returns 0, or -1 on a NULL...
+
 ## include/js_location.h
 Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `include/url.h`
 Imported by: `include/js_dom.h`
@@ -349,6 +355,11 @@ Imported by: `include/js_dom.h`
 - `jd_take_history` (function) `include/js_location.h:38` `char *jd_take_history(js_context *ctx, int *go);` -- Drains the history operations page JS performed since the last call: an owned string of lines "P <url>\n"...
 - `jd_pop_state` (function) `include/js_location.h:44` `int jd_pop_state(js_context *ctx, int index);` -- Moves the page's history to entry index (the parent went Back/Forward within the same document): updates location...
 - `acting` (function) `include/js_location.h:49` `* The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int...`
+
+## include/js_native.h
+Depends on: `include/js_sandbox.h`
+Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_native.c`
+- `failure` (function) `include/js_native.h:22` `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);`
 
 ## include/js_policy.h
 Imported by: `gui/browser_ui.c`, `include/webcaps.h`, `src/freedom.c`, `src/js_policy.c`, `tests/test_js_policy.c`
@@ -359,7 +370,7 @@ Imported by: `gui/browser_ui.c`, `include/webcaps.h`, `src/freedom.c`, `src/js_p
 - `jsp_mode_str` (function) `include/js_policy.h:64` `const char *jsp_mode_str(jsp_mode mode);` -- Stable lowercase name of a mode ("off"/"allowlist"/"on"); an unknown value * yields "off" (fail closed).
 
 ## include/js_sandbox.h
-Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_sandbox.c`
+Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_intl.h`, `include/js_location.h`, `include/js_native.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_intl.c`, `tests/test_js_native.c`, `tests/test_js_sandbox.c`
 - `js_stack_limit_for` (function) `include/js_sandbox.h:75` `size_t js_stack_limit_for(size_t soft_stack);` -- Engine stack cap for a process whose soft stack limit is `soft_stack` bytes (0 = unknown): * 75 % of it (the rest is...
 - `js_prime_stack_limit` (function) `include/js_sandbox.h:79` `void js_prime_stack_limit(void);` -- Reads the process stack limit now.
 - `js_context_free` (function) `include/js_sandbox.h:96` `void js_context_free(js_context *ctx);` -- Creates an isolated, hardened sandbox (memory/stack/time limits armed; no I/O modules). lim == NULL =>...
@@ -430,71 +441,6 @@ Imported by: `src/os_sandbox.c`, `src/renderer.c`, `src/tab.c`, `tests/test_os_s
 - `namespace` (function) `include/os_sandbox.h:75` `* namespace (the unprivileged enabler), network (the worker never needs the * network -- the parent fetches and...`
 - `os_namespace_flags` (function) `include/os_sandbox.h:81` `int os_namespace_flags(void);` -- The set of CLONE_* namespace flags the worker isolates into: a new user namespace (the unprivileged enabler)...
 - `os_landlock_abi` (function) `include/os_sandbox.h:114` `int os_landlock_abi(void);` -- /* What a Landlock rule permits at/below a path. typedef enum os_fs_access { OS_FS_NONE       = 0, /* no access (not...
-
-## include/page_view.h
-Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
-Imported by: `include/box_tree.h`, `include/frame_host.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
-- `container` (function) `include/page_view.h:233` `* cont_id groups runs of one container (-1 = none);`
-- `bx_display` (function) `include/page_view.h:234` `* bx_display (flex/grid);`
-- `order` (function) `include/page_view.h:298` `* groups the runs of ONE floated element in document order (-1 = not in a float);`
-- `itself` (function) `include/page_view.h:362` `* by itself (bx_width_cap2);`
-- `CSS_LEN_UNSET` (function) `include/page_view.h:561` `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...`
-- `scale` (function) `include/page_view.h:636` `* scale(1)) and rotate in whole degrees (transform_rotate);`
-- `tree` (function) `include/page_view.h:681` `* box tree (a mask covers its whole subtree);`
-- `declare` (function) `include/page_view.h:870` `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...`
-- `nonzero` (function) `include/page_view.h:882` `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...`
-- `resolved` (function) `include/page_view.h:889` `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...`
-- `policy` (function) `include/page_view.h:897` `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...`
-- `pv_computed_new` (function) `include/page_view.h:929` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...`
-- `pv_computed_new_cached` (function) `include/page_view.h:932` `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark, const char *extern_css, size_t...` -- getComputedStyle bridge (spec/js_computed_style.md).
-- `pv_computed_get` (function) `include/page_view.h:940` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);` -- Resolves native_el (a dom_native_node pointer of the SAME document) into *st; when non-NULL, *font_px receives its...
-- `pv_computed_free` (function) `include/page_view.h:943` `void pv_computed_free(pv_computed *pc);`
-- `cause` (function) `include/page_view.h:947` `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...`
-- `pv_new` (function) `include/page_view.h:959` `pv_view *pv_new(void);` -- Allocates an empty view (used by the IPC deserialiser to rebuild a view on the * receiving side).
-- `form` (function) `include/page_view.h:978` `* form (-1 if none);`
-- `pv_set_emphasis` (function) `include/page_view.h:1010` `void pv_set_emphasis(pv_view *v, int bold, int italic);` -- Sets the inline emphasis flags (bold from <b>/<strong>/<th>, italic from <i>/<em>) on the most recently appended run.
-- `default` (function) `include/page_view.h:1015` `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);`
-- `pv_set_color` (function) `include/page_view.h:1018` `void pv_set_color(pv_view *v, int fg_rgb);`
-- `pv_set_bgcolor` (function) `include/page_view.h:1025` `void pv_set_bgcolor(pv_view *v, int bg_rgb);` -- Sets the author background-color (packed 0xRRGGBB, or -1 for none) on the most recently appended run.
-- `pv_set_text_style` (function) `include/page_view.h:1034` `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` -- Sets the author text presentation (text_align as a css_align, font_scale as a font-size percent or 0, font_abs as 1...
-- `pv_text_ext_reset` (function) `include/page_view.h:1091` `void pv_text_ext_reset(pv_text_ext *e);` -- Gradient text (2026-07-19). text_fill: -webkit-text-fill-color from the nearest ancestor that sets it (packed /...
-- `ancestors` (function) `include/page_view.h:1096` `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...`
-- `pv_set_text_ext` (function) `include/page_view.h:1106` `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);`
-- `pv_set_grad_text` (function) `include/page_view.h:1112` `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` -- Sets the gradient-text fill (grad_text_*) verbatim on the most recently appended run. n < 2 is a no-op (no gradient).
-- `run` (function) `include/page_view.h:1115` `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...`
-- `pv_set_row_span` (function) `include/page_view.h:1128` `void pv_set_row_span(pv_view *v, int row_span);` -- Sets the container's grid track sizes and this run's ITEM column span on the most recently appended run...
-- `pv_set_grid_area` (function) `include/page_view.h:1132` `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` -- Sets the last run's RESOLVED named-grid cell (-1, -1 = auto-placed).
-- `pv_set_grid_rows` (function) `include/page_view.h:1133` `void pv_set_grid_rows(pv_view *v, int grid_rows);`
-- `pv_set_ua_tag` (function) `include/page_view.h:1138` `void pv_set_ua_tag(pv_view *v, int ua_tag);` -- Sets the last run's ua_tag (a bx_ua_tag code: the user-agent box identity of its nearest block-level ancestor).
-- `pv_set_cont_box` (function) `include/page_view.h:1142` `void pv_set_cont_box(pv_view *v, int cont_box_id);` -- Sets the last run's cont_box_id (the box enclosing its container's items; -1 = * none).
-- `pv_set_grid` (function) `include/page_view.h:1143` `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);`
-- `pv_set_flex` (function) `include/page_view.h:1151` `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
-- `pv_set_flex_mauto` (function) `include/page_view.h:1154` `void pv_set_flex_mauto(pv_view *v, int mauto);` -- Stage 3: sets the flex per-item values on the most recently appended run — the ITEM's resolved grow/shrink (x100, -1...
-- `pv_set_cont_item` (function) `include/page_view.h:1158` `void pv_set_cont_item(pv_view *v, int cont_item);` -- Sets the container-item ordinal on the most recently appended run (-1 = none). * No-op on an empty or NULL view; the...
-- `pv_set_float_w` (function) `include/page_view.h:1169` `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...` -- Stamps the float founder's own declared width halves (pv_run.float_w) on the * most recently appended run.
-- `pv_set_float` (function) `include/page_view.h:1172` `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...`
-- `pv_set_box` (function) `include/page_view.h:1182` `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` -- Sets the author box model on the most recently appended run (left/right insets, width cap, centered flag, and...
-- `pv_set_box_pct` (function) `include/page_view.h:1188` `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` -- Sets the symbolic percentage width cap (per-mille, 0 = none; Hito 32) on the most recently appended run.
-- `pv_set_box_maxw` (function) `include/page_view.h:1193` `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` -- Sets the max-width cap (px half, 0 = none; per-mille half, 0 = none) on the most * recently appended run.
-- `pv_set_node_id` (function) `include/page_view.h:1198` `void pv_set_node_id(pv_view *v, dom_node_id node_id);` -- Keystone (Stage 0) setter for the most recently appended run: the dom_node_id of the source element.
-- `pv_set_block_id` (function) `include/page_view.h:1203` `void pv_set_block_id(pv_view *v, int block_id);` -- Box engine (Hito 23b-8) setter for the most recently appended run: the block_id of the box-carrying block it belongs...
-- `pv_set_own_box` (function) `include/page_view.h:1207` `void pv_set_own_box(pv_view *v, int box_id);` -- Records the replaced element's own box def index on the last appended run.
-- `pv_set_oof` (function) `include/page_view.h:1211` `void pv_set_oof(pv_view *v, int oof);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_set_justify_self` (function) `include/page_view.h:1214` `void pv_set_justify_self(pv_view *v, int justify_self);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_set_block_node` (function) `include/page_view.h:1217` `void pv_set_block_node(pv_view *v, dom_node_id id);` -- Records out-of-flow subtree membership on the last appended run (see * pv_run.oof_subtree).
-- `pv_set_br_line` (function) `include/page_view.h:1225` `void pv_set_br_line(pv_view *v, int br_line);` -- Sets the last appended run's PV_BR_* flags (see pv_run.br_line); other bits * are dropped.
-- `pv_cont_count` (function) `include/page_view.h:1240` `size_t pv_cont_count(const pv_view *v);` -- pv_cont_count is v->ncont (0 when v is NULL); pv_cont_at returns conts[i] * (i == a cont_id) or NULL when out of...
-- `pv_cont_at` (function) `include/page_view.h:1241` `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);`
-- `pv_set_input_checked` (function) `include/page_view.h:1245` `void pv_set_input_checked(pv_view *v, int checked);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
-- `pv_set_input_placeholder` (function) `include/page_view.h:1249` `void pv_set_input_placeholder(pv_view *v, int ph_color);` -- Sets the input's checked state (-1 n/a, 0 unchecked, 1 checked) on the most * recently appended run.
-- `pv_svg_append_root_attrs` (function) `include/page_view.h:1255` `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` -- Appends attrs (e.g.
-- `pv_placeholder_color` (function) `include/page_view.h:1258` `int pv_placeholder_color(const css_style *ph);` -- Appends attrs (e.g.
-- `pv_set_input_select_opts` (function) `include/page_view.h:1262` `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_free` (function) `include/page_view.h:1265` `void pv_free(pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_count` (function) `include/page_view.h:1268` `size_t pv_count(const pv_view *v);` -- Sets the <select> options string ("opt||label||opt||label") on the most recently * appended run, taking an owned copy.
-- `pv_at` (function) `include/page_view.h:1269` `const pv_run *pv_at(const pv_view *v, size_t i);`
-- `pv_box_count` (function) `include/page_view.h:1273` `size_t pv_box_count(const pv_view *v);` -- Box tree accessors (Step D). pv_box_count is the number of box definitions; * pv_box_at returns boxes[i] (i == a...
-- `pv_box_at` (function) `include/page_view.h:1274` `const pv_box_def *pv_box_at(const pv_view *v, size_t i);`
 
 
 Next: [API_p5.md](API_p5.md)

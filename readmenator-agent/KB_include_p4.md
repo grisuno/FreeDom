@@ -1,6 +1,24 @@
 # Subsystem: include (page 4 of 5)
 Previous: [KB_include_p3.md](KB_include_p3.md)
 
+## include/local_store.h
+- Doc: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and...
+- Layer: data_access
+- Language: h
+- Symbols:
+  - `ls_aead` (enum, line 34)
+  - `ls_status` (enum, line 39)
+  - `ls_free` (function, line 80) `void ls_free(uint8_t *buf, size_t len);`
+  - `FREEDOM_LOCAL_STORE_H` (macro, line 2) `#define FREEDOM_LOCAL_STORE_H`
+  - `LS_KEY_LEN` (macro, line 26) `#define LS_KEY_LEN`
+  - `LS_SALT_LEN` (macro, line 27) `#define LS_SALT_LEN`
+  - `LS_NONCE_LEN` (macro, line 28) `#define LS_NONCE_LEN`
+  - `LS_TAG_LEN` (macro, line 29) `#define LS_TAG_LEN`
+  - `LS_HEADER_LEN` (macro, line 30) `#define LS_HEADER_LEN`
+  - `LS_OVERHEAD` (macro, line 31) `#define LS_OVERHEAD`
+  - `LS_MAX_PLAINTEXT` (macro, line 32) `#define LS_MAX_PLAINTEXT`
+- Imported by: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`, `include/profile.h`, `src/disk_store.c`, `src/local_store.c`, `tests/test_disk_store.c`, `tests/test_local_store.c`
+
 ## include/media_decoder.h
 - Doc: md_cmd: Communicates with the parent over two pipes: out_fd: decoder → parent (frames, stream...
 - Layer: utility
@@ -474,26 +492,6 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `FREEDOM_SHA2_H` (macro, line 2) `#define FREEDOM_SHA2_H`
   - `SHA_MAX_DIGEST` (macro, line 18) `#define SHA_MAX_DIGEST`
 - Imported by: `src/js_env.c`, `src/sha2.c`, `tests/test_sha2.c`
-
-## include/sheet_cache.h
-- Doc: shc_key: Every input of the parse.
-- Layer: infrastructure
-- Language: h
-- Symbols:
-  - `shc_key` (struct, line 36)
-  - `shc_stats` (struct, line 43)
-  - `shc_cache` (type_alias, line 26) `typedef struct shc_cache shc_cache;`
-  - `shc_sheet` (type_alias, line 28) `typedef struct shc_sheet shc_sheet;`
-  - `hits` (type_alias, line 42) `typedef struct shc_stats { unsigned long hits;`
-  - `shc_new` (function, line 52) `shc_cache *shc_new(size_t max_text_bytes);`
-  - `shc_free` (function, line 55) `void shc_free(shc_cache *c);`
-  - `shc_acquire` (function, line 60) `shc_sheet *shc_acquire(shc_cache *cache, const shc_key *key);`
-  - `shc_css` (function, line 64) `const css_sheet *shc_css(const shc_sheet *s);`
-  - `shc_release` (function, line 67) `void shc_release(shc_sheet *s);`
-  - `shc_stats_get` (function, line 70) `void shc_stats_get(const shc_cache *c, shc_stats *out);`
-  - `FREEDOM_SHEET_CACHE_H` (macro, line 14) `#define FREEDOM_SHEET_CACHE_H`
-- Depends on: `include/css.h`
-- Imported by: `src/page_view.c`, `src/sheet_cache.c`, `src/tab.c`, `tests/test_page_view.c`, `tests/test_sheet_cache.c`
 
 
 Next: [KB_include_p5.md](KB_include_p5.md)

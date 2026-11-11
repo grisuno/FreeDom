@@ -86,7 +86,7 @@ This community groups 24 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
+- [EXTRACTED] depends_on community 2 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
 - [EXTRACTED] depends_on community 5 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/http_cache.h.
 
 ## Risks

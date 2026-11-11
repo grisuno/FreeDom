@@ -24,6 +24,21 @@
 - Anti-fingerprinting techniques
 - Comprehensive test suite, fuzzing, and integration tests
 
+### Native-looking JS platform, real Intl and lazy timer ticks (11 November 2026)
+
+- **Host code looks native.** Platform functions are compiled without source, so
+  `Function.prototype.toString` prints `[native code]`; interfaces carry their
+  `Symbol.toStringTag`; `navigator` fields are getters on `Navigator.prototype`.
+  `CSS.supports` answers with the CSS parser's own verdict (`spec/js_native.md`).
+- **Real `Intl`.** `NumberFormat` (grouping, currency, percent, compact, units),
+  `DateTimeFormat` (components, `dateStyle`/`timeStyle`), `RelativeTimeFormat`,
+  `ListFormat`, `PluralRules`, `Collator`; fixed `en-US` / `UTC` (`spec/js_intl.md`).
+- **`element.click()`** dispatches the click and runs the element's activation behaviour.
+- **Timers** can be cancelled from their own callback; extra `setTimeout` arguments are passed.
+- **Lazy ticks.** A timer tick that left the DOM untouched sends no view and causes no
+  repaint. Real window, 30 s, against the previous build: HuggingFace 23.3 s to 14.9 s of
+  CPU, GitHub 11.2 s to 8.1 s, identical screenshots (`spec/tab.md`).
+
 ### Vertical rhythm, heading scale and named grid areas (14 August 2026)
 
 Three engine-wide corrections, each isolated in a probe **measured against Firefox

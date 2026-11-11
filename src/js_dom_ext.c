@@ -13,6 +13,7 @@
 #include "js_dom.h"
 #include <math.h>
 #include "js_sandbox.h"
+#include "js_native_internal.h"
 
 static const char JDX_SHIM[] =
     "(function(){ var g=__G, d=g.document, EP=(g.Element&&g.Element.prototype)||null;"
@@ -948,6 +949,41 @@ static const char JDX_PLATFORM_SHIM[] =
     "      var e=new g.Event('submit',{bubbles:true,cancelable:true}); e.submitter=sub||null;\n"
     "      if(this.dispatchEvent(e)&&typeof this.submit==='function') this.submit(); });\n"
     "  }\n"
+    /* el.click() (HTML 6.4.4 + 4.10.5.4 activation behaviour). A disabled control does nothing;
+     * otherwise an untrusted, bubbling, cancelable click is dispatched. A checkbox/radio is
+     * toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);
+     * an uncancelled click then runs the element's own action: input+change, a label's control,
+     * a submit button's form, a link's navigation (through location, which the parent gates). */
+    "  var inClick=false;\n"
+    "  function attr(e,n){ return e.getAttribute?e.getAttribute(n):null; }\n"
+    "  function fireIC(e){ e.dispatchEvent(new g.Event('input',{bubbles:true})); e.dispatchEvent(new g.Event('change',{bubbles:true})); }\n"
+    "  function radioGroup(e){ var n=attr(e,'name'); if(!n) return []; var root=(e.form||d), out=[];\n"
+    "    var all=root.querySelectorAll('input'); for(var i=0;i<all.length;i++){ var o=all[i];\n"
+    "      if(o!==e&&String(attr(o,'type')||'').toLowerCase()==='radio'&&attr(o,'name')===n&&(o.form||null)===(e.form||null)) out.push(o); }\n"
+    "    return out; }\n"
+    "  g.__elClick=function(el){\n"
+    "    var tag=String(el.tagName||'').toLowerCase(), type=String(attr(el,'type')||'').toLowerCase();\n"
+    "    if(/^(button|input|select|textarea)$/.test(tag)&&el.hasAttribute('disabled')) return;\n"
+    "    var box=(tag==='input'&&type==='checkbox'), radio=(tag==='input'&&type==='radio'), was, peers=[];\n"
+    "    if(box){ was=el.checked; el.checked=!was; }\n"
+    "    else if(radio){ was=el.checked; if(!was){ peers=radioGroup(el).filter(function(o){ return o.checked; });\n"
+    "      peers.forEach(function(o){ o.checked=false; }); el.checked=true; } }\n"
+    "    var ev=new g.MouseEvent('click',{bubbles:true,cancelable:true,composed:true,view:g,detail:1});\n"
+    "    var go=el.dispatchEvent(ev);\n"
+    "    if(!go){ if(box) el.checked=was; else if(radio&&!was){ el.checked=false; peers.forEach(function(o){ o.checked=true; }); } return; }\n"
+    "    if(box||(radio&&!was)){ fireIC(el); return; }\n"
+    "    if(inClick) return; inClick=true;\n"
+    "    try{\n"
+    "      if(tag==='label'){ var c=null, fo=attr(el,'for'); if(fo) c=d.getElementById(fo);\n"
+    "        else c=el.querySelector('input,button,select,textarea'); if(c&&typeof c.click==='function'){ inClick=false; c.click(); } }\n"
+    "      else if((tag==='button'&&(type===''||type==='submit'))||(tag==='input'&&(type==='submit'||type==='image'))){\n"
+    "        var f=el.form||(el.closest?el.closest('form'):null); if(f&&typeof f.requestSubmit==='function') f.requestSubmit(el); }\n"
+    "      else if(tag==='button'&&type==='reset'){ var rf=el.form||(el.closest?el.closest('form'):null); if(rf&&typeof rf.reset==='function') rf.reset(); }\n"
+    "      else if(tag==='a'||tag==='area'){ var h=attr(el,'href'); if(h!==null&&!/^\\s*javascript:/i.test(h)&&g.location&&typeof g.location.assign==='function'){\n"
+    "        try{ g.location.assign(String(el.href||h)); }catch(e){} } }\n"
+    "      else if(tag==='summary'){ var dt=el.parentNode; if(dt&&String(dt.tagName).toLowerCase()==='details'){\n"
+    "        if(dt.hasAttribute('open')) dt.removeAttribute('open'); else dt.setAttribute('open',''); } }\n"
+    "    }finally{ inClick=false; } };\n"
     "  if(EP){\n"
     "    function scr(el,a,b){ var x,y; if(a&&typeof a==='object'){ x=a.left; y=a.top; } else { x=a; y=b; }\n"
     "      try{ if(x!==undefined&&!isNaN(+x)) el.scrollLeft=+x; if(y!==undefined&&!isNaN(+y)) el.scrollTop=+y; }catch(e){} }\n"
@@ -1263,7 +1299,7 @@ static const char JDX_IDB_SHIM[] =
     "})()\n";
 
 static int run(JSContext *ctx, const char *src, size_t len, const char *name) {
-    JSValue r = JS_Eval(ctx, src, len, name, JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(ctx, src, len, name);
     int ok = !JS_IsException(r);
     if (!ok) JS_FreeValue(ctx, JS_GetException(ctx));
     JS_FreeValue(ctx, r);

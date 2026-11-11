@@ -768,9 +768,9 @@ static void test_element_attributes_named_node_map(void **state) {
               "e.attributes[0].name", "id");
 }
 
-/* Intl stub: QuickJS-ng builds without ICU, so Intl is otherwise undefined and any
- * locale-aware script (DuckDuckGo's wplv.js: "Intl is not defined") dies. The stub
- * is identity-neutral (fixed en-US-ish behaviour, no real locale/timezone leak). */
+/* Intl: QuickJS-ng builds without ICU, so Intl is otherwise undefined and any
+ * locale-aware script (DuckDuckGo's wplv.js: "Intl is not defined") dies. jd_install brings
+ * js_intl in: identity-neutral (fixed en-US / UTC, no real locale or timezone leak). */
 static void test_intl_stub_does_not_throw(void **state) {
     fixture *f = (fixture *)*state;
     EXPECT(f, "typeof Intl", "object");
@@ -778,7 +778,8 @@ static void test_intl_stub_does_not_throw(void **state) {
     EXPECT(f, "typeof new Intl.DateTimeFormat('en-US').format(0)", "string");
     EXPECT(f, "new Intl.Collator().compare('a','b')", "-1");
     EXPECT(f, "new Intl.PluralRules().select(1)", "one");
-    EXPECT(f, "new Intl.ListFormat().format(['a','b'])", "a, b");
+    /* The real formatter (js_intl, spec/js_intl.md): "a and b", as Firefox prints it. */
+    EXPECT(f, "new Intl.ListFormat().format(['a','b'])", "a and b");
     EXPECT(f, "Intl.NumberFormat('en-US').resolvedOptions().locale", "en-US");
 }
 
@@ -2103,6 +2104,51 @@ static void test_platform_dommatrix_and_imagedata(void **state) {
               "p.x+','+p.y+','+m.is2D+','+new DOMMatrix().isIdentity", "2,2,true,true");
     EXPECT(f, "var im=new ImageData(2,3); im.width+','+im.height+','+im.data.length", "2,3,24");
     EXPECT(f, "var t=0; try{ new ImageData(0,5); }catch(e){ t=e.name; } t", "IndexSizeError");
+}
+
+/* el.click() (HTML 6.4.4): a synthetic, untrusted, bubbling, cancelable click plus the
+ * activation behaviour of the element -- it used to be an empty function. */
+static void test_platform_click_method(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var b=document.createElement('button'); document.body.appendChild(b); var log=[];"
+              "document.body.addEventListener('click',function(e){ log.push(e.type,e.target===b,e.isTrusted,e.bubbles,e.cancelable,e instanceof MouseEvent); });"
+              "b.click(); log.join()", "click,true,false,true,true,true");
+    EXPECT(f, "var n=0; b.onclick=function(){ n++; }; b.click(); b.click(); n", "2");
+    /* A disabled control does nothing. */
+    EXPECT(f, "b.setAttribute('disabled',''); b.click(); n", "2");
+    /* Checkbox: toggles, then input + change; preventDefault undoes the toggle. */
+    EXPECT(f, "var c=document.createElement('input'); c.setAttribute('type','checkbox'); document.body.appendChild(c);"
+              "var ev=[]; c.addEventListener('input',function(){ ev.push('input:'+c.checked); });"
+              "c.addEventListener('change',function(){ ev.push('change:'+c.checked); });"
+              "c.click(); ev.join()+'|'+c.checked", "input:true,change:true|true");
+    EXPECT(f, "c.addEventListener('click',function(e){ e.preventDefault(); }); c.click(); c.checked", "true");
+    /* Radio: checking one clears its group. */
+    EXPECT(f, "function radio(){ var r=document.createElement('input'); r.setAttribute('type','radio');"
+              " r.setAttribute('name','grp'); document.body.appendChild(r); return r; }"
+              "var r1=radio(), r2=radio(); r1.click(); r2.click(); r1.checked+','+r2.checked", "false,true");
+    /* A label forwards to its control. */
+    EXPECT(f, "var l=document.createElement('label'); var k=document.createElement('input'); k.setAttribute('type','checkbox');"
+              "l.appendChild(k); document.body.appendChild(l); l.click(); k.checked", "true");
+    /* A submit button submits its form (through the cancelable submit event). */
+    EXPECT(f, "var fm=document.createElement('form'); var sb=document.createElement('button'); fm.appendChild(sb);"
+              "document.body.appendChild(fm); var s=0; fm.addEventListener('submit',function(e){ s++; e.preventDefault(); });"
+              "sb.click(); s", "1");
+    EXPECT(f, "Function.prototype.toString.call(HTMLElement.prototype.click).indexOf('click')>=0", "true");
+}
+
+/* Cancelling a timer works from anywhere -- including from the timer's own callback and for a
+ * timer that is due in the same round (HTML 8.6: clearing removes it from the active list). */
+static void test_timers_cancel_while_firing(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var n=0; var iv=setInterval(function(){ n++; if(n===3) clearInterval(iv); },20);"
+              "for(var i=0;i<10;i++) __tickTimers(20); n", "3");
+    EXPECT(f, "var log=[]; var b; var a=setTimeout(function(){ log.push('a'); clearTimeout(b); },10);"
+              "b=setTimeout(function(){ log.push('b'); },10); __tickTimers(10); __tickTimers(10); log.join()", "a");
+    EXPECT(f, "var m=0; var t=setTimeout(function(){ m++; },10); clearTimeout(t); __tickTimers(50); m", "0");
+    /* Extra arguments reach the callback (setTimeout(fn, ms, ...args)). */
+    EXPECT(f, "var got=''; setTimeout(function(x,y){ got=x+y; },5,'p','q'); __tickTimers(5); got", "pq");
+    EXPECT(f, "var c=0; var i2=setInterval(function(k){ c+=k; if(c>=6) clearInterval(i2); },16,2);"
+              "for(var i=0;i<8;i++) __tickTimers(16); c", "6");
 }
 
 static void test_platform_form_controls(void **state) {
@@ -3863,6 +3909,8 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_repl_api_inspect_and_event_listeners, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_interfaces_and_events, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_dommatrix_and_imagedata, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_platform_click_method, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_timers_cancel_while_firing, setup, teardown),
         cmocka_unit_test_setup_teardown(test_platform_form_controls, setup, teardown),
         cmocka_unit_test_setup_teardown(test_form_elements_collection, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_styles_are_scoped, setup, teardown),

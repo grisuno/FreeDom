@@ -19,7 +19,7 @@
 | `include/browser.h` | browser_free: Zero-initialise or reset a state. | include | 19 | 3 |
 | `include/cached_fetch.h` | cf_set_store: Cache-aware GET. | include | 4 | 3 |
 | `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 9 | 4 |
-| `include/css.h` | css_style: A resolved presentation. | include | 144 | 38 |
+| `include/css.h` | css_style: A resolved presentation. | include | 144 | 39 |
 | `include/css_atrule.h` | car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both... | include | 10 | 3 |
 | `include/css_box.h` | - | include | 27 | 4 |
 | `include/css_chain.h` | cch_element_matches: Nonzero iff the parsed selector *sel matches element `el`, built against... | include | 12 | 4 |
@@ -38,7 +38,7 @@
 | `include/css_vars.h` | cvr_table: Zero-initialise ({0}) before first use. | include | 19 | 5 |
 | `include/data_url.h` | du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/... | include | 7 | 8 |
 | `include/disk_store.h` | ds_free: Reads and decrypts path. | include | 3 | 4 |
-| `include/dom.h` | dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: *... | include | 30 | 16 |
+| `include/dom.h` | dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: *... | include | 31 | 17 |
 | `include/dom_debug.h` | dd_format: Formats doc into out[0..cap) as a NUL-terminated, line-oriented dump (see the spec... | include | 4 | 3 |
 | `include/download.h` | dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media... | include | 9 | 3 |
 | `include/fb_cmdline.h` | fbc_history_push: #define FBC_BASE_MAX   256    /* bytes of a completion base path #define... | include | 18 | 4 |
@@ -54,18 +54,20 @@
 | `include/host_conf.h` | hcf_search_dirs: Pure. | include | 9 | 4 |
 | `include/hostblock.h` | hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted... | include | 10 | 5 |
 | `include/hostedit.h` | he_cdn_kind_t: Which auto-allow switch (config page) a subresource falls under, decided from the... | include | 7 | 3 |
-| `include/html_parse.h` | hp_script: One executable <script>. | include | 24 | 18 |
+| `include/html_parse.h` | hp_script: One executable <script>. | include | 24 | 19 |
 | `include/http_cache.h` | hc_parse_http_date: } hc_class; typedef struct hc_meta { char   final_url[HC_URL_MAX]; char... | include | 19 | 3 |
 | `include/identity.h` | idn_defaults: typedef struct idn_config { char   user_agent[IDN_UA_MAX];  /* "" = FP_USER_AGENT... | include | 24 | 5 |
 | `include/image_decode.h` | img_pixels: A decoded bitmap that owns its pixel buffer. | include | 14 | 6 |
 | `include/import_map.h` | im_resolve: Resolves specifier as imported from base (the importing module's URL). | include | 10 | 4 |
 | `include/interp.h` | ip_ease: Compute eased t for normalized t ∈ [0,1]. | include | 22 | 4 |
-| `include/js_dom.h` | jd_iframe_track: Tracks iframes already processed by jd_process_iframes, to avoid re-fetching... | include | 23 | 12 |
-| `include/js_env.h` | - | include | 4 | 3 |
+| `include/js_dom.h` | jd_iframe_track: Tracks iframes already processed by jd_process_iframes, to avoid re-fetching... | include | 23 | 13 |
+| `include/js_env.h` | - | include | 4 | 4 |
 | `include/js_geom.h` | jg_init: typedef struct jg_rect { dom_node_id node; int32_t     x, y, w, h;       /* document... | include | 19 | 6 |
+| `include/js_intl.h` | ji_install: Installs `Intl` and the Number/BigInt/Date toLocale* methods that delegate to it. *... | include | 2 | 3 |
 | `include/js_location.h` | jd_take_history: Drains the history operations page JS performed since the last call: an owned... | include | 6 | 1 |
+| `include/js_native.h` | - | include | 2 | 3 |
 | `include/js_policy.h` | jsp_trusted: Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its... | include | 7 | 5 |
-| `include/js_sandbox.h` | js_limits: Per-evaluation resource limits. | include | 37 | 15 |
+| `include/js_sandbox.h` | js_limits: Per-evaluation resource limits. | include | 37 | 19 |
 | `include/js_trusted.h` | jt_take_opens: The parent installed a new geometry table (layout or scroll changed)... | include | 16 | 3 |
 | `include/lazy_load.h` | - | include | 1 | 2 |
 | `include/link_nav.h` | ln_block_reason: Why a reference was blocked, for a precise user-facing notice and for *... | include | 11 | 5 |
@@ -94,7 +96,7 @@
 | `include/svg_paint.h` | svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred... | include | 3 | 3 |
 | `include/svg_raster.h` | sr_sniff: 1 when the first element of the document (after BOM, whitespace, the XML *... | include | 5 | 3 |
 | `include/svg_render.h` | sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>... | include | 19 | 6 |
-| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 53 | 6 |
+| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 55 | 6 |
 | `include/text_case.h` | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | include | 8 | 3 |
 | `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 24 | 6 |
 | `include/textfield.h` | tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at... | include | 15 | 3 |
@@ -138,7 +140,7 @@
 | `src/css_vars.c` | find_slot: Index into t->slot where name lives, or the empty slot where it would go. * Requires... | src | 17 | 0 |
 | `src/data_url.c` | b64_val: 0-63 for a base64 alphabet character, -1 otherwise. | src | 11 | 0 |
 | `src/disk_store.c` | fsync_dir: Best-effort fsync of the directory holding path, for crash durability of the * rename. | src | 6 | 0 |
-| `src/dom.c` | to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include... | src | 75 | 0 |
+| `src/dom.c` | to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include... | src | 76 | 0 |
 | `src/dom_debug.c` | dd_cursor: Bounded write cursor: `pos` bytes are committed to `out` (always leaving room for the... | src | 24 | 0 |
 | `src/download.c` | lc: download — pure helpers for "save this resource to disk". | src | 12 | 0 |
 | `src/fb_cmdline.c` | - | src | 13 | 0 |
@@ -163,7 +165,7 @@
 | `src/js_custom_elements.c` | - | src | 1 | 0 |
 | `src/js_custom_elements.h` | Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the... | src | 2 | 2 |
 | `src/js_dom.c` | jd_handle: Coerces a JS argument to a node handle. | src | 64 | 0 |
-| `src/js_dom_ext.c` | - | src | 8 | 0 |
+| `src/js_dom_ext.c` | - | src | 9 | 0 |
 | `src/js_dom_ext.h` | Private to js_dom.c / js_dom_ext.c: installs the DOM Standard extras (tree | src | 2 | 2 |
 | `src/js_dom_internal.h` | Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): the context... | src | 4 | 4 |
 | `src/js_embed.c` | try_create_iframe_from_script: Scans an inline script body for `video[N]` or `video_data`... | src | 6 | 0 |
@@ -171,10 +173,13 @@
 | `src/js_events.c` | jd_eval_default_action: Runs one engine event-dispatch expression and maps its result to the C... | src | 10 | 0 |
 | `src/js_fetch.c` | jd_pack_ptr: Carry the host fetch fn + its ctx as a function's closure data, each split into... | src | 11 | 0 |
 | `src/js_geom.c` | unite: Bounding box of a and b into a; returns 1 if a changed. | src | 21 | 0 |
+| `src/js_intl.c` | - | src | 1 | 0 |
 | `src/js_location.c` | jd_lp_set: Defines a string property on the __locParts data object from a (ptr,len) span. * The... | src | 6 | 0 |
 | `src/js_location_internal.h` | Private to js_dom.c / js_location.c: the dom.histTarget native lives with the | src | 2 | 2 |
+| `src/js_native.c` | jn_css_ok: __cssOk(decl): 1 when the cascade keeps `decl` ("prop: value") whole. | src | 4 | 0 |
+| `src/js_native_internal.h` | js_context: One engine value the host keeps for the lifetime of a context, out of the page's... | src | 3 | 10 |
 | `src/js_policy.c` | eq_ci: js_policy — implementation: pure per-host JavaScript policy decision. | src | 6 | 0 |
-| `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 61 | 0 |
+| `src/js_sandbox.c` | js_mem_state: We enforce the heap cap ourselves (not via JS_SetMemoryLimit, whose check runs... | src | 62 | 0 |
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 18 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
 | `src/local_store.c` | - | src | 31 | 0 |
@@ -200,7 +205,7 @@
 | `src/svg_paint.c` | svg_paint — Cairo back end for the shapes svg_render extracted. | src | 6 | 0 |
 | `src/svg_raster.c` | svg_raster -- SVG served as an image, rasterized inside the confined worker. spec/svg_raster.md. | src | 4 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 34 | 0 |
-| `src/tab.c` | tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and... | src | 191 | 0 |
+| `src/tab.c` | tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and... | src | 194 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
 | `src/text_shape.c` | tsh_fb_cp: Per-code-point verdicts of fb_entry. | src | 68 | 0 |
 | `src/textfield.c` | - | src | 12 | 0 |
@@ -241,7 +246,7 @@
 | `tests/test_css_vars.c` | test_css_vars -- the custom-property table and var() substitution (spec/css_vars.md). | tests | 14 | 0 |
 | `tests/test_data_url.c` | - | tests | 26 | 0 |
 | `tests/test_disk_store.c` | - | tests | 16 | 0 |
-| `tests/test_dom.c` | setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] = "<!DOCTYPE... | tests | 44 | 0 |
+| `tests/test_dom.c` | setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] = "<!DOCTYPE... | tests | 45 | 0 |
 | `tests/test_dom_debug.c` | build: #include "dom_debug.h" #include "page_view.h" #include "render_doc.h" #include... | tests | 11 | 0 |
 | `tests/test_download.c` | - | tests | 21 | 0 |
 | `tests/test_fb_cmdline.c` | - | tests | 7 | 0 |
@@ -263,9 +268,11 @@
 | `tests/test_image_decode.c` | - | tests | 37 | 0 |
 | `tests/test_import_map.c` | tres: Test URL resolver: absolute https passes, "/x" is origin-relative, "./x" and "../x" * are... | tests | 8 | 0 |
 | `tests/test_interp.c` | assert_float_equal: ip_ease_fn fns_0to0[] = { { .kind = IP_EASE_LINEAR }, { .kind = IP_EASE_EASE... | tests | 37 | 0 |
-| `tests/test_js_dom.c` | fake_net: HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and... | tests | 271 | 0 |
+| `tests/test_js_dom.c` | fake_net: HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and... | tests | 274 | 0 |
 | `tests/test_js_env.c` | test_install_identity_override: /* --- install --- static void test_install_null_args(void... | tests | 32 | 0 |
 | `tests/test_js_geom.c` | test_same_node_unions: assert_int_equal(jg_add(&t, 2, 0, 0, 5, 5), 0)... | tests | 11 | 0 |
+| `tests/test_js_intl.c` | - | tests | 15 | 0 |
+| `tests/test_js_native.c` | test_host_functions_look_native: assert_string_equal(_r.value, (expected))... | tests | 26 | 0 |
 | `tests/test_js_policy.c` | test_trusted_requires_both_signals: Hito 28: a host is TRUSTED (full author CSS + images, on top... | tests | 5 | 0 |
 | `tests/test_js_sandbox.c` | test_limits_default_heap_holds_real_bundles: A real site bundle (YouTube: ~1.2 MB of minified... | tests | 48 | 0 |
 | `tests/test_link_nav.c` | test_resolve_long_bundle_target: Modern bundle URLs exceed the old 4096 target cap (google's xjs... | tests | 22 | 0 |
@@ -292,7 +299,7 @@
 | `tests/test_subreq_batch.c` | subreq_batch (spec/subreq_async.md): parallelism, issue order, refusals, reuse. | tests | 9 | 0 |
 | `tests/test_svg_raster.c` | tests/test_svg_raster.c -- CMocka suite for SVG-as-image rasterization (sr_). spec/svg_raster.md... | tests | 10 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
-| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 158 | 0 |
+| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 165 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
 | `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 23 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |

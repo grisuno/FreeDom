@@ -11,6 +11,7 @@
 
 #include "quickjs.h"
 #include "web_storage.h"
+#include "js_native_internal.h"
 
 /* window.open for a trusted host (plan B4c): noopener semantics -- returns null, so
  * no cross-window reference (and no SOP channel) ever exists; the raw target is only
@@ -49,8 +50,7 @@ jd_status jt_enable_open(js_context *ctx) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
-    JSValue r = JS_Eval(jsctx, JT_OPEN_SHIM, sizeof JT_OPEN_SHIM - 1, "<open-shim>",
-                        JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JT_OPEN_SHIM, sizeof JT_OPEN_SHIM - 1, "<open-shim>");
     int ok = !JS_IsException(r);
     if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
     JS_FreeValue(jsctx, r);
@@ -130,8 +130,7 @@ jd_status jt_enable_observers(js_context *ctx) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
-    JSValue r = JS_Eval(jsctx, JT_IO_SHIM, sizeof JT_IO_SHIM - 1, "<io-shim>",
-                        JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JT_IO_SHIM, sizeof JT_IO_SHIM - 1, "<io-shim>");
     int ok = !JS_IsException(r);
     if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
     JS_FreeValue(jsctx, r);
@@ -144,8 +143,7 @@ jd_status jt_geometry_changed(js_context *ctx) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
-    JSValue r = JS_Eval(jsctx, JT_IO_TICK, sizeof JT_IO_TICK - 1, "<io-tick>",
-                        JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JT_IO_TICK, sizeof JT_IO_TICK - 1, "<io-tick>");
     int ok = !JS_IsException(r);
     if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
     JS_FreeValue(jsctx, r);
@@ -160,8 +158,7 @@ char *jt_take_opens(js_context *ctx) {
     if (ctx == NULL) return NULL;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return NULL;
-    JSValue r = JS_Eval(jsctx, JT_TAKE_OPENS, sizeof JT_TAKE_OPENS - 1, "<take-opens>",
-                        JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JT_TAKE_OPENS, sizeof JT_TAKE_OPENS - 1, "<take-opens>");
     if (JS_IsException(r)) { JS_FreeValue(jsctx, JS_GetException(jsctx)); return NULL; }
     char *out = NULL;
     size_t n = 0;
@@ -238,8 +235,7 @@ jd_status jt_enable_ws(js_context *ctx) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
-    JSValue r = JS_Eval(jsctx, JT_WS_SHIM, sizeof JT_WS_SHIM - 1, "<ws-shim>",
-                        JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JT_WS_SHIM, sizeof JT_WS_SHIM - 1, "<ws-shim>");
     int ok = !JS_IsException(r);
     if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
     JS_FreeValue(jsctx, r);
@@ -441,7 +437,7 @@ jd_status jt_enable_frames(js_context *ctx, int frame_id) {
     if (src == NULL) return JD_ERR_OOM;
     memcpy(src, head, (size_t)hn);
     memcpy(src + hn, JT_FRAMES_BODY, bl + 1);
-    JSValue r = JS_Eval(jsctx, src, (size_t)hn + bl, "<frames-shim>", JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, src, (size_t)hn + bl, "<frames-shim>");
     free(src);
     int ok = !JS_IsException(r);
     if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
@@ -489,8 +485,7 @@ jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
-    JSValue r = JS_Eval(jsctx, JT_STORAGE_SHIM, sizeof JT_STORAGE_SHIM - 1, "<storage-shim>",
-                        JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JT_STORAGE_SHIM, sizeof JT_STORAGE_SHIM - 1, "<storage-shim>");
     int ok = !JS_IsException(r);
     if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
     JS_FreeValue(jsctx, r);
@@ -513,7 +508,7 @@ int jt_take_storage(js_context *ctx, char **out, size_t *len) {
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return 0;
     static const char take[] = "typeof __lsTake==='function'?__lsTake():null";
-    JSValue arr = JS_Eval(jsctx, take, sizeof take - 1, "<storage-take>", JS_EVAL_TYPE_GLOBAL);
+    JSValue arr = jn_host_eval(jsctx, take, sizeof take - 1, "<storage-take>");
     if (JS_IsException(arr)) { JS_FreeValue(jsctx, JS_GetException(jsctx)); return 0; }
     int64_t n = 0;
     if (!JS_IsArray(arr) || JS_GetLength(jsctx, arr, &n) != 0 || n < 0 || (n % 2) != 0
@@ -640,8 +635,7 @@ jd_status jt_enable_worker(js_context *ctx) {
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
     if (js_install_realms(ctx) != JS_OK) return JD_ERR_OOM;
-    JSValue r = JS_Eval(jsctx, JT_WORKER_SHIM, sizeof JT_WORKER_SHIM - 1, "<worker-shim>",
-                        JS_EVAL_TYPE_GLOBAL);
+    JSValue r = jn_host_eval(jsctx, JT_WORKER_SHIM, sizeof JT_WORKER_SHIM - 1, "<worker-shim>");
     int ok = !JS_IsException(r);
     if (!ok) JS_FreeValue(jsctx, JS_GetException(jsctx));
     JS_FreeValue(jsctx, r);

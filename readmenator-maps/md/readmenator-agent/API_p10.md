@@ -1,6 +1,81 @@
 # API (page 10 of 12)
 Previous: [API_p9.md](API_p9.md)
 
+## src/media_decoder.c
+Depends on: `include/media_decoder.h`, `include/util.h`
+- `open` (function) `src/media_decoder.c:18` `*
+ * Sandbox: the decoder needs open() for shared libraries (.so loading) and
+ * brk/mmap for FFm...`
+- `decoder_close` (function) `src/media_decoder.c:78` `static void decoder_close(decoder_ctx *dc)` -- AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /* converted frame (ARGB) AVFrame...
+- `decoder_init` (function) `src/media_decoder.c:96` `static int decoder_init(decoder_ctx *dc, const uint8_t *data, size_t len)` -- Initialises the decoder from the first TS segment bytes.
+- `frame_pts_us` (function) `src/media_decoder.c:215` `static int64_t frame_pts_us(const AVFrame *f, AVRational tb, int64_t fallback)` -- Rescales a decoded frame's PTS to microseconds using the time base of the * stream it came from; frames without a...
+- `av_rescale_q` (function) `src/media_decoder.c:217` `return av_rescale_q(f->pts, tb, (AVRational)`
+- `send_video_frame` (function) `src/media_decoder.c:222` `static void send_video_frame(decoder_ctx *dc, int64_t pts_us)` -- Converts the current dc->frame (YUV) to BGRA and sends it as MD_FRAME with * the given PTS in microseconds.
+- `send_audio_frame` (function) `src/media_decoder.c:242` `static void send_audio_frame(decoder_ctx *dc, int64_t pts_us)` -- Converts the current dc->audio_frame to interleaved S16LE PCM and sends it as MD_AUDIO_FRAME with the given PTS in...
+- `decode_segment` (function) `src/media_decoder.c:276` `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)` -- Decodes one segment of TS data and sends frames.
+- `dropped` (function) `src/media_decoder.c:369` `* the codec in permanent EOF state: every segment after the first decoded * one was silently dropped ("plays a...`
+- `media_decoder_run` (function) `src/media_decoder.c:379` `void media_decoder_run(int out_fd, int cmd_fd)`
+- `media_decoder_spawn` (function) `src/media_decoder.c:449` `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)`
+- `fd` (function) `src/media_decoder.c:469` `* prevent the Wayland display fd (inherited from the parent) from * surviving the exec. An inherited Wayland fd...`
+
+## src/net_guard.c
+Depends on: `include/net_guard.h`
+- `ng_v4_is_private` (function) `src/net_guard.c:12` `static int ng_v4_is_private(const unsigned char o[NG_V4_LEN])`
+- `ng_seg` (function) `src/net_guard.c:29` `static unsigned ng_seg(const unsigned char a[NG_V6_LEN], int i)`
+- `ng_v6_is_private` (function) `src/net_guard.c:33` `static int ng_v6_is_private(const unsigned char a[NG_V6_LEN])`
+- `decides` (function) `src/net_guard.c:40` `* IPv4 decides (:: and ::1 embed 0.0.0.0 and 0.0.0.1, both in 0/8). */ if (head_zero && (s[5] == 0 || s[5] ==...`
+- `ng_addr_is_private` (function) `src/net_guard.c:63` `int ng_addr_is_private(int family, const unsigned char *addr, size_t len)`
+- `ng_parse` (function) `src/net_guard.c:71` `static int ng_parse(const char *text, int *family, unsigned char out[NG_V6_LEN])` -- if (s[0] == 0x2001 && s[1] == 0x0db8) return 1;              /* documentation if (s[0] == 0x3fff && (s[1] & 0xf000)...
+- `ng_text_is_private` (function) `src/net_guard.c:84` `int ng_text_is_private(const char *ip_text)`
+- `ng_host_is_ip` (function) `src/net_guard.c:91` `int ng_host_is_ip(const char *host)`
+- `ng_ci_eq` (function) `src/net_guard.c:97` `static int ng_ci_eq(const char *a, const char *b, size_t n)`
+- `ng_host_is_local` (function) `src/net_guard.c:107` `int ng_host_is_local(const char *host)`
+- `ng_decide` (function) `src/net_guard.c:121` `ng_verdict ng_decide(const ng_request *r, int peer_private)`
+
+## src/net_realm.c
+Depends on: `include/net_realm.h`
+- `lower` (function) `src/net_realm.c:17` `static char lower(char c)`
+- `ends_with_realm` (function) `src/net_realm.c:23` `static int ends_with_realm(const char *host, size_t n, const char *suffix)` -- True if the lowercased host (length n) ends with ".suffix" AND has at least one * non-empty label before the dot....
+- `nr_classify_host` (function) `src/net_realm.c:34` `nr_realm nr_classify_host(const char *host)`
+- `host_of` (function) `src/net_realm.c:52` `static int host_of(const char *url, char *out, size_t out_size)` -- Extracts the host of scheme://host[:port][/...] into out (lowercased not required * here; nr_classify_host lowercases).
+- `nr_classify_url` (function) `src/net_realm.c:68` `nr_realm nr_classify_url(const char *url)`
+- `nr_route_for` (function) `src/net_realm.c:74` `nr_route nr_route_for(const char *url, nr_config cfg)`
+- `nr_realm_allows_http` (function) `src/net_realm.c:88` `int nr_realm_allows_http(nr_realm r)`
+- `nr_realm_name` (function) `src/net_realm.c:94` `const char *nr_realm_name(nr_realm r)`
+- `nr_route_name` (function) `src/net_realm.c:103` `const char *nr_route_name(nr_route r)`
+
+## src/os_sandbox.c
+Depends on: `include/os_sandbox.h`
+- `os_policy_allows` (function) `src/os_sandbox.c:52` `int os_policy_allows(long syscall_nr)`
+- `os_policy_size` (function) `src/os_sandbox.c:59` `size_t os_policy_size(void)`
+- `os_prot_allowed` (function) `src/os_sandbox.c:65` `int os_prot_allowed(long syscall_nr, unsigned long prot)` -- W^X mirror: mmap/mprotect keep their membership but lose any request that asks * for executable memory.
+- `os_no_dump` (function) `src/os_sandbox.c:75` `os_status os_no_dump(void)` -- Anti-dump defense in depth: undumpable + no core file, so neither a crash nor a foreign ptrace can exfiltrate worker...
+- `excluded` (function) `src/os_sandbox.c:89` `* intentionally excluded (they need /proc remounting and a post-unshare fork). */
+int os_namespac...`
+- `os_isolate_namespaces` (function) `src/os_sandbox.c:94` `os_status os_isolate_namespaces(void)`
+- `os_policy_allows` (function) `src/os_sandbox.c:106` `int os_policy_allows(long syscall_nr)`
+- `os_policy_size` (function) `src/os_sandbox.c:107` `size_t os_policy_size(void)`
+- `os_prot_allowed` (function) `src/os_sandbox.c:108` `int os_prot_allowed(long syscall_nr, unsigned long prot)`
+- `os_no_dump` (function) `src/os_sandbox.c:111` `os_status os_no_dump(void)`
+- `os_harden` (function) `src/os_sandbox.c:113` `os_status os_harden(os_violation action)`
+- `os_namespace_flags` (function) `src/os_sandbox.c:115` `int os_namespace_flags(void)`
+- `os_isolate_namespaces` (function) `src/os_sandbox.c:116` `os_status os_isolate_namespaces(void)`
+- `os_harden` (function) `src/os_sandbox.c:145` `os_status os_harden(os_violation action)`
+- `number` (function) `src/os_sandbox.c:157` `* number (x32/i386 on x86_64, AArch32 on aarch64). */ prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W |...`
+- `headroom` (function) `src/os_sandbox.c:203` `* wide headroom (room for ~125 allowed syscalls). */ prog[at_mmap].jt = (unsigned char)(prot_check - (at_mmap + 1));`
+- `ll_create_ruleset` (function) `src/os_sandbox.c:239` `static long ll_create_ruleset(const struct landlock_ruleset_attr *attr,
+                         ...`
+- `ll_add_rule` (function) `src/os_sandbox.c:244` `static long ll_add_rule(int fd, enum landlock_rule_type type,
+                        const void ...`
+- `ll_restrict_self` (function) `src/os_sandbox.c:249` `static long ll_restrict_self(int fd, uint32_t flags)`
+- `ll_handled` (function) `src/os_sandbox.c:265` `static uint64_t ll_handled(int abi)` -- The set of FS rights the ruleset handles, masked to what this ABI supports so * landlock_create_ruleset does not...
+- `ll_read_access` (function) `src/os_sandbox.c:279` `static uint64_t ll_read_access(uint64_t handled)`
+- `os_landlock_abi` (function) `src/os_sandbox.c:285` `int os_landlock_abi(void)`
+- `os_landlock_restrict` (function) `src/os_sandbox.c:291` `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
+- `fields` (function) `src/os_sandbox.c:303` `* long as the unknown trailing fields (net/scoped) are zero, which they are. */ int rfd =...`
+- `os_landlock_abi` (function) `src/os_sandbox.c:331` `int os_landlock_abi(void)`
+- `os_landlock_restrict` (function) `src/os_sandbox.c:332` `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
+
 ## src/page_view.c
 Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_vars.h`, `include/dom.h`, `include/flex_layout.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/page_view.h`, `include/sheet_cache.h`, `include/svg_render.h`, `include/util.h`
 - `cp1252_to_ucs` (function) `src/page_view.c:94` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
@@ -416,82 +491,6 @@ Depends on: `include/prefs.h`, `include/zoom.h`
 - `sb_esc` (function) `src/prefs.c:400` `static void sb_esc(sbuf *b, const char *s)` -- while (nc < b->len + n + 1) nc *= 2; char *nd = (char *)realloc(b->data, nc); if (nd == NULL) { b->oom = 1; return...
 - `sb_link_item` (function) `src/prefs.c:413` `static void sb_link_item(sbuf *b, const char *url, const char *label)`
 - `prefs_bookmarks_page` (function) `src/prefs.c:421` `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)`
-
-## src/profile.c
-Depends on: `include/disk_store.h`, `include/profile.h`
-- `join_path` (function) `src/profile.c:29` `static int join_path(const profile_ctx *ctx, const char *name,
-                     char *out, si...`
-- `keyfile_create` (function) `src/profile.c:36` `static profile_status keyfile_create(const char *dir, const char *path,
-                         ...` -- #include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h> #define PROFILE_KEYFILE_LEN (LS_SALT_LEN +...
-- `profile_open` (function) `src/profile.c:59` `profile_status profile_open(profile_ctx *ctx, const char *dir)`
-- `map_ds` (function) `src/profile.c:98` `static profile_status map_ds(ds_status ds)`
-- `profile_load` (function) `src/profile.c:112` `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)`
-- `profile_save` (function) `src/profile.c:133` `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)`
-- `profile_close` (function) `src/profile.c:149` `void profile_close(profile_ctx *ctx)`
-
-## src/render_doc.c
-Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
-- `utf8_sanitized_dup` (function) `src/render_doc.c:28` `static char *utf8_sanitized_dup(const char *s)`
-- `rd_push` (function) `src/render_doc.c:60` `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,
-                 ...` -- Appends one block, taking owned copies of text (required) and href (optional). * Returns 0 on success, -1 on...
-- `rd_push_input` (function) `src/render_doc.c:214` `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` -- Appends an RD_INPUT block, copying text (placeholder/label), the form action * (href), and the control name/value.
-- `place` (function) `src/render_doc.c:240` `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...`
-- `resolve_image_decision` (function) `src/render_doc.c:250` `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,
-        ...` -- Resolves raw_src (possibly relative, or a data: URI) against top_level_url and judges it under the exact same policy...
-- `too` (function) `src/render_doc.c:281` `* that would not fit is cleared too (never truncated-and-fetched). */
-static void gate_box_image_...`
-- `rd_build` (function) `src/render_doc.c:293` `rd_status rd_build(const pv_view *view, rdp_caps caps,
-                   const char *top_level_u...`
-- `unset` (function) `src/render_doc.c:706` `* background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not...`
-- `rd_free` (function) `src/render_doc.c:744` `void rd_free(rd_doc *d)`
-- `rd_count` (function) `src/render_doc.c:761` `size_t rd_count(const rd_doc *d)`
-- `rd_at` (function) `src/render_doc.c:765` `const rd_block *rd_at(const rd_doc *d, size_t i)`
-- `rd_box_count` (function) `src/render_doc.c:770` `size_t rd_box_count(const rd_doc *d)`
-- `rd_box_at` (function) `src/render_doc.c:774` `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-- `rd_cont_count` (function) `src/render_doc.c:779` `size_t rd_cont_count(const rd_doc *d)`
-- `rd_cont_at` (function) `src/render_doc.c:783` `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
-- `rd_kind_name` (function) `src/render_doc.c:788` `const char *rd_kind_name(rd_kind k)`
-- `rd_block_heading_level` (function) `src/render_doc.c:802` `int rd_block_heading_level(const rd_block *b)`
-- `rd_block_tag` (function) `src/render_doc.c:813` `const char *rd_block_tag(const rd_block *b)`
-- `rd_input_label` (function) `src/render_doc.c:844` `const char *rd_input_label(int input_type)`
-- `rd_input_invisible` (function) `src/render_doc.c:864` `int rd_input_invisible(int input_type)`
-- `rd_image_label` (function) `src/render_doc.c:868` `const char *rd_image_label(rdp_img_decision d)`
-- `rd_image_fail_label` (function) `src/render_doc.c:879` `const char *rd_image_fail_label(img_fail_reason reason)`
-
-## src/render_policy.c
-Depends on: `include/data_url.h`, `include/render_policy.h`, `include/request_policy.h`
-- `rdp_caps_safe` (function) `src/render_policy.c:17` `rdp_caps rdp_caps_safe(void)`
-- `rdp_is_tracking_pixel` (function) `src/render_policy.c:22` `int rdp_is_tracking_pixel(int w, int h)`
-- `rdp_image_decision` (function) `src/render_policy.c:28` `rdp_img_decision rdp_image_decision(rdp_caps caps,
-                                    const char...`
-- `rdp_img_reason` (function) `src/render_policy.c:60` `const char *rdp_img_reason(rdp_img_decision d)`
-- `rdp_images_warning` (function) `src/render_policy.c:71` `const char *rdp_images_warning(void)`
-
-## src/renderer.c
-Depends on: `include/html_parse.h`, `include/os_sandbox.h`, `include/renderer.h`, `include/util.h`
-- `child_render` (function) `src/renderer.c:25` `static void child_render(int wfd, const char *html, size_t len)`
-- `write_full` (function) `src/renderer.c:40` `&& write_full(wfd, &tl, sizeof tl) == 0 && (tl == 0 || write_full(wfd, title, tl) == 0) && write_full(wfd, &xl...`
-- `read_field` (function) `src/renderer.c:53` `static int read_field(int fd, char **out, size_t *out_len)`
-- `rd_render_html` (function) `src/renderer.c:70` `rd_status rd_render_html(const char *html, size_t len, rd_result *out)`
-- `rd_result_free` (function) `src/renderer.c:120` `void rd_result_free(rd_result *out)`
-
-## src/request_policy.c
-Depends on: `include/psl_data.h`, `include/request_policy.h`
-- `lower` (function) `src/request_policy.c:22` `static char lower(char c)`
-- `ci_starts_with` (function) `src/request_policy.c:26` `static int ci_starts_with(const char *s, const char *prefix)`
-- `psl_cmp` (function) `src/request_policy.c:36` `static int psl_cmp(const void *key, const void *elem)`
-- `psl_in` (function) `src/request_policy.c:40` `static int psl_in(const char *const *arr, size_t n, const char *key)`
-- `public_suffix_labels` (function) `src/request_policy.c:48` `static size_t public_suffix_labels(const char *host, const size_t *off, size_t n)` -- Number of labels of the public suffix (eTLD) of a lowercased host, applying the full PSL algorithm: exception rules...
-- `rp_host_of` (function) `src/request_policy.c:76` `int rp_host_of(const char *url, char *out, size_t out_size)`
-- `rp_site_of` (function) `src/request_policy.c:102` `int rp_site_of(const char *host, char *out, size_t out_size)`
-- `rp_same_site` (function) `src/request_policy.c:134` `int rp_same_site(const char *top_level_url, const char *request_url)`
-- `rp_evaluate` (function) `src/request_policy.c:143` `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)`
-- `hdr_lower` (function) `src/request_policy.c:162` `static int hdr_lower(int c)`
-- `hdr_name_ieq` (function) `src/request_policy.c:164` `static int hdr_name_ieq(const char *a, size_t alen, const char *lit)`
-- `hdr_name_has_prefix` (function) `src/request_policy.c:171` `static int hdr_name_has_prefix(const char *a, size_t alen, const char *lit)`
-- `hdr_token_char` (function) `src/request_policy.c:178` `static int hdr_token_char(unsigned char c)`
-- `hdr_forbidden` (function) `src/request_policy.c:184` `static int hdr_forbidden(const char *n, size_t len)` -- static int hdr_name_has_prefix(const char *a, size_t alen, const char *lit) { size_t n = strlen(lit); if (alen < n)...
-- `rp_sanitize_request_headers` (function) `src/request_policy.c:197` `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap)`
 
 
 Next: [API_p11.md](API_p11.md)

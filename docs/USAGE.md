@@ -168,6 +168,13 @@ Every request carries a normalized, low-entropy `User-Agent` and `Accept-Languag
 shared by all Freedom users — a common Firefox-on-Linux identity that matches
 `navigator.userAgent`. You can override the User-Agent per session in the menu.
 
+The identity also holds from inside the page. Host functions print `[native code]`,
+`String(window)` is `[object Window]`, `navigator` is an instance of `Navigator` with no
+fields of its own, and the plugin list is the one Firefox reports. `Intl` and the
+`toLocale*` methods format with a single fixed locale (`en-US`) and time zone (`UTC`), so
+numbers, prices and dates render as a mainstream browser prints them without revealing
+your system locale. Challenges that require WebAssembly or WebGL are not supported.
+
 ### Keyboard shortcuts
 
 | Shortcut | Action |

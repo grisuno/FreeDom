@@ -1,6 +1,6 @@
 # include: browser_ui
 
-*Community 1 | 47 files | cohesion 0.52*
+*Community 2 | 47 files | cohesion 0.52*
 
 ## Definition
 
@@ -91,16 +91,16 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
-- [EXTRACTED] depends_on community 1 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 1 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
-- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/css_color.h.
-- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
-- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
-- [EXTRACTED] depends_on community 1 <-> 10 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
-- [EXTRACTED] depends_on community 1 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/tab.h.
-- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/profile.h imports include/local_store.h.
+- [EXTRACTED] depends_on community 2 <-> 6 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/browser.h.
+- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 2 <-> 0 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/compositor.h.
+- [EXTRACTED] depends_on community 2 <-> 8 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
+- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 2 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
+- [EXTRACTED] depends_on community 2 <-> 10 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
+- [EXTRACTED] depends_on community 2 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/tab.h.
+- [EXTRACTED] depends_on community 2 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/profile.h imports include/local_store.h.
 
 ## Risks
 
@@ -109,16 +109,16 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 - [layer strict] `tests/test_ui.c` (testing) -> `include/ui.h` (presentation)
 - [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1691` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
 - [dataflow DEAD_STORE] `gui/browser_ui.c:1857` `first` `dg`: `dg` assigned at line 1857 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4671` `flow_text` `space_w`: `space_w` assigned at line 4671 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4673` `flow_text` `i`: `i` assigned at line 4673 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5710` `table` `parent`: `parent` assigned at line 5710 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5711` `table` `seen`: `seen` assigned at line 5711 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5713` `table` `j`: `j` assigned at line 5713 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5848` `measure_item_w_at` `repl_max`: `repl_max` assigned at line 5848 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5849` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5849 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5867` `measure_item_w_at` `rw`: `rw` assigned at line 5867 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6047` `nested_cont_basis` `total`: `total` assigned at line 6047 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6048` `nested_cont_basis` `n_items`: `n_items` assigned at line 6048 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4674` `flow_text` `space_w`: `space_w` assigned at line 4674 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4676` `flow_text` `i`: `i` assigned at line 4676 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5713` `table` `parent`: `parent` assigned at line 5713 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5714` `table` `seen`: `seen` assigned at line 5714 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5716` `table` `j`: `j` assigned at line 5716 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5851` `measure_item_w_at` `repl_max`: `repl_max` assigned at line 5851 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5852` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5852 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5870` `measure_item_w_at` `rw`: `rw` assigned at line 5870 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6050` `nested_cont_basis` `total`: `total` assigned at line 6050 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6051` `nested_cont_basis` `n_items`: `n_items` assigned at line 6051 but never read afterwards.
 
 ## Open Questions
 

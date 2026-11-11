@@ -1,6 +1,26 @@
 # Subsystem: include (page 5 of 5)
 Previous: [KB_include_p4.md](KB_include_p4.md)
 
+## include/sheet_cache.h
+- Doc: shc_key: Every input of the parse.
+- Layer: infrastructure
+- Language: h
+- Symbols:
+  - `shc_key` (struct, line 36)
+  - `shc_stats` (struct, line 43)
+  - `shc_cache` (type_alias, line 26) `typedef struct shc_cache shc_cache;`
+  - `shc_sheet` (type_alias, line 28) `typedef struct shc_sheet shc_sheet;`
+  - `hits` (type_alias, line 42) `typedef struct shc_stats { unsigned long hits;`
+  - `shc_new` (function, line 52) `shc_cache *shc_new(size_t max_text_bytes);`
+  - `shc_free` (function, line 55) `void shc_free(shc_cache *c);`
+  - `shc_acquire` (function, line 60) `shc_sheet *shc_acquire(shc_cache *cache, const shc_key *key);`
+  - `shc_css` (function, line 64) `const css_sheet *shc_css(const shc_sheet *s);`
+  - `shc_release` (function, line 67) `void shc_release(shc_sheet *s);`
+  - `shc_stats_get` (function, line 70) `void shc_stats_get(const shc_cache *c, shc_stats *out);`
+  - `FREEDOM_SHEET_CACHE_H` (macro, line 14) `#define FREEDOM_SHEET_CACHE_H`
+- Depends on: `include/css.h`
+- Imported by: `src/page_view.c`, `src/sheet_cache.c`, `src/tab.c`, `tests/test_page_view.c`, `tests/test_sheet_cache.c`
+
 ## include/shm_slots.h
 - Doc: ss_committed: Chooses the slot to paint into: the current one if free, else the other free one.
 - Layer: utility
@@ -93,56 +113,58 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `tab_hist_op` (struct, line 54)
   - `tab_ws_op` (struct, line 72)
   - `tab_page` (struct, line 79)
-  - `tab_eval_result` (struct, line 131)
-  - `tab_image` (struct, line 144)
+  - `tab_eval_result` (struct, line 135)
+  - `tab_image` (struct, line 148)
   - `tab_status` (enum, line 31)
   - `tab_ws_kind` (enum, line 61)
   - `tab_ws_event_kind` (enum, line 67)
   - `tab` (type_alias, line 46) `typedef struct tab tab;`
   - `replace` (type_alias, line 54) `typedef struct tab_hist_op { int replace;`
   - `kind` (type_alias, line 71) `typedef struct tab_ws_op { int kind;`
-  - `width` (type_alias, line 144) `typedef struct tab_image { uint32_t width;`
-  - `tab_worker_dispatch` (function, line 157) `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
-  - `tab_open` (function, line 161) `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
-  - `tab_parse_worker_args` (function, line 168) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
-  - `tab_prewarm` (function, line 177) `void tab_prewarm(void);`
-  - `tab_prewarmed` (function, line 180) `int tab_prewarmed(void);`
-  - `tab_prewarmed_pid` (function, line 183) `int tab_prewarmed_pid(void);`
-  - `tab_shutdown_spare` (function, line 186) `void tab_shutdown_spare(void);`
-  - `out_status` (function, line 194) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
-  - `tab_set_fetcher` (function, line 205) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
-  - `tab_inflight_request_headers` (function, line 210) `const char *tab_inflight_request_headers(void);`
-  - `tab_report_response_headers` (function, line 215) `void tab_report_response_headers(const char *lines);`
-  - `bytes` (function, line 219) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
-  - `tab_set_css_sink` (function, line 228) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
-  - `tab_set_net_allowed` (function, line 233) `void tab_set_net_allowed(tab *t, int allowed);`
-  - `tab_set_op_net_budget_ms` (function, line 237) `void tab_set_op_net_budget_ms(tab *t, int ms);`
-  - `tab_async_fd` (function, line 242) `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
-  - `tab_async_busy` (function, line 248) `int tab_async_busy(const tab *t);`
-  - `jar` (function, line 255) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
-  - `tab_set_cookies` (function, line 259) `void tab_set_cookies(tab *t, const char *cookies);`
-  - `origin` (function, line 262) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
-  - `tab_set_storage` (function, line 264) `void tab_set_storage(tab *t, const char *blob, size_t len);`
-  - `exclusively` (function, line 270) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
-  - `tab_set_viewport_w` (function, line 278) `void tab_set_viewport_w(tab *t, int px);`
-  - `load` (function, line 282) `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);`
-  - `tab_set_identity` (function, line 288) `void tab_set_identity(tab *t, const char *serialized);`
-  - `tab_last_subreq_stats` (function, line 294) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
-  - `tab_subreq_permitted` (function, line 299) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
-  - `view` (function, line 307) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-  - `string` (function, line 327) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-  - `granted` (function, line 376) `* granted (allow.conf AND js.conf);`
-  - `returned` (function, line 377) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-  - `popstate` (function, line 383) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-  - `decode` (function, line 402) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-  - `tab_alive` (function, line 415) `int tab_alive(const tab *t);`
-  - `tab_child_pid` (function, line 418) `pid_t tab_child_pid(const tab *t);`
-  - `tab_close` (function, line 421) `void tab_close(tab *t);`
-  - `tab_page_free` (function, line 424) `void tab_page_free(tab_page *p);`
-  - `tab_eval_result_free` (function, line 425) `void tab_eval_result_free(tab_eval_result *r);`
-  - `tab_image_free` (function, line 426) `void tab_image_free(tab_image *img);`
+  - `width` (type_alias, line 148) `typedef struct tab_image { uint32_t width;`
+  - `tab_worker_dispatch` (function, line 161) `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
+  - `tab_open` (function, line 165) `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
+  - `tab_parse_worker_args` (function, line 172) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
+  - `tab_prewarm` (function, line 181) `void tab_prewarm(void);`
+  - `tab_prewarmed` (function, line 184) `int tab_prewarmed(void);`
+  - `tab_prewarmed_pid` (function, line 187) `int tab_prewarmed_pid(void);`
+  - `tab_shutdown_spare` (function, line 190) `void tab_shutdown_spare(void);`
+  - `out_status` (function, line 198) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
+  - `tab_set_fetcher` (function, line 209) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
+  - `tab_inflight_request_headers` (function, line 214) `const char *tab_inflight_request_headers(void);`
+  - `tab_report_response_headers` (function, line 219) `void tab_report_response_headers(const char *lines);`
+  - `bytes` (function, line 223) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+  - `tab_set_css_sink` (function, line 232) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+  - `tab_set_net_allowed` (function, line 237) `void tab_set_net_allowed(tab *t, int allowed);`
+  - `none` (function, line 241) `* worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick. * The caller must then...`
+  - `tab_page_keep_view` (function, line 248) `void tab_page_keep_view(tab_page *prev, tab_page *next);`
+  - `tab_set_op_net_budget_ms` (function, line 252) `void tab_set_op_net_budget_ms(tab *t, int ms);`
+  - `tab_async_fd` (function, line 257) `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
+  - `tab_async_busy` (function, line 263) `int tab_async_busy(const tab *t);`
+  - `jar` (function, line 270) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+  - `tab_set_cookies` (function, line 274) `void tab_set_cookies(tab *t, const char *cookies);`
+  - `origin` (function, line 277) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+  - `tab_set_storage` (function, line 279) `void tab_set_storage(tab *t, const char *blob, size_t len);`
+  - `exclusively` (function, line 285) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+  - `tab_set_viewport_w` (function, line 293) `void tab_set_viewport_w(tab *t, int px);`
+  - `load` (function, line 297) `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);`
+  - `tab_set_identity` (function, line 303) `void tab_set_identity(tab *t, const char *serialized);`
+  - `tab_last_subreq_stats` (function, line 309) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
+  - `tab_subreq_permitted` (function, line 314) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
+  - `view` (function, line 322) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+  - `string` (function, line 342) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+  - `granted` (function, line 391) `* granted (allow.conf AND js.conf);`
+  - `returned` (function, line 392) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+  - `popstate` (function, line 398) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+  - `decode` (function, line 417) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+  - `tab_alive` (function, line 430) `int tab_alive(const tab *t);`
+  - `tab_child_pid` (function, line 433) `pid_t tab_child_pid(const tab *t);`
+  - `tab_close` (function, line 436) `void tab_close(tab *t);`
+  - `tab_page_free` (function, line 439) `void tab_page_free(tab_page *p);`
+  - `tab_eval_result_free` (function, line 440) `void tab_eval_result_free(tab_eval_result *r);`
+  - `tab_image_free` (function, line 441) `void tab_image_free(tab_image *img);`
   - `FREEDOM_TAB_H` (macro, line 2) `#define FREEDOM_TAB_H`
-  - `TAB_MAX_INPUT` (macro, line 153) `#define TAB_MAX_INPUT`
+  - `TAB_MAX_INPUT` (macro, line 157) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `include/frame_host.h`, `src/freedom.c`, `src/tab.c`, `tests/test_frame_host.c`, `tests/test_tab.c`
 

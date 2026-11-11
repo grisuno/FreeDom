@@ -30,6 +30,7 @@
 #include <time.h>
 
 #include "quickjs.h"
+#include "js_native_internal.h"
 
 /* --- clocks (the only host I/O in this module) --- */
 
@@ -283,17 +284,66 @@ static JSValue build_languages(JSContext *ctx, const char *langs) {
     return arr;
 }
 
+/* An object with a prototype of its own. jn_seal turns that private prototype into the
+ * interface prototype (Screen.prototype, Performance.prototype...), which is how a frozen
+ * singleton still becomes an instance of its interface (spec/js_native.md). */
+static JSValue new_iface_obj(JSContext *ctx) {
+    JSValue proto = JS_NewObject(ctx);
+    if (JS_IsException(proto)) return proto;
+    JSValue obj = JS_NewObjectProto(ctx, proto);
+    JS_FreeValue(ctx, proto);
+    return obj;
+}
+
+/* A getter that returns the value captured at install time. */
+static JSValue m_captured(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv,
+                          int magic, JSValueConst *data) {
+    (void)this_val; (void)argc; (void)argv; (void)magic;
+    return JS_DupValue(ctx, data[0]);
+}
+
+/* Moves every own property of `vals` onto `proto` as an enumerable, configurable getter
+ * named "get <key>" with no setter -- the WebIDL attribute shape. */
+static int promote_to_getters(JSContext *ctx, JSValueConst vals, JSValueConst proto) {
+    JSPropertyEnum *tab = NULL;
+    uint32_t n = 0;
+    if (JS_GetOwnPropertyNames(ctx, &tab, &n, vals, JS_GPN_STRING_MASK) < 0) return -1;
+    int rc = 0;
+    for (uint32_t i = 0; i < n && rc == 0; ++i) {
+        JSValue v = JS_GetProperty(ctx, vals, tab[i].atom);
+        JSValue getter = JS_NewCFunctionData(ctx, m_captured, 0, 0, 1, &v);
+        JS_FreeValue(ctx, v);
+        const char *key = JS_AtomToCString(ctx, tab[i].atom);
+        if (JS_IsException(getter) || key == NULL) {
+            JS_FreeValue(ctx, getter); JS_FreeCString(ctx, key); rc = -1; break;
+        }
+        char name[96];
+        int w = snprintf(name, sizeof name, "get %s", key);
+        JS_FreeCString(ctx, key);
+        if (w < 0 || (size_t)w >= sizeof name) { JS_FreeValue(ctx, getter); rc = -1; break; }
+        JS_DefinePropertyValueStr(ctx, getter, "name", JS_NewString(ctx, name), JS_PROP_CONFIGURABLE);
+        if (JS_DefinePropertyGetSet(ctx, proto, tab[i].atom, getter, JS_UNDEFINED,
+                                    JS_PROP_CONFIGURABLE | JS_PROP_ENUMERABLE) < 0) rc = -1;
+    }
+    JS_FreePropertyEnum(ctx, tab, n);
+    return rc;
+}
+
 static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,
                            const char *lang_csv) {
-    /* The identity fields are OWN, read-only and the object is non-extensible; its
-     * prototype is a separate, extensible object so a trusted page's runtime can add
-     * capability methods (sendBeacon, spec/js_dom.md 7h) without touching any
-     * fingerprintable field. An untrusted page's prototype stays empty. */
+    /* navigator has NO own properties, like a browser's: every identity field is a getter
+     * (no setter, so assignment cannot change it) on its prototype, which jn_seal turns into
+     * Navigator.prototype (spec/js_native.md). The values are collected on `vals` first and
+     * promoted in one place. A trusted page's runtime adds capability methods (sendBeacon,
+     * spec/js_dom.md 7h) to the same prototype. */
     JSValue proto = JS_NewObject(ctx);
     if (JS_IsException(proto)) return -1;
     JSValue nav = JS_NewObjectProto(ctx, proto);
-    JS_FreeValue(ctx, proto);
-    if (JS_IsException(nav)) return -1;
+    JSValue vals = JS_NewObject(ctx);
+    if (JS_IsException(nav) || JS_IsException(vals)) {
+        JS_FreeValue(ctx, nav); JS_FreeValue(ctx, vals); JS_FreeValue(ctx, proto);
+        return -1;
+    }
 
     const char *ua = (ua_override != NULL && ua_override[0] != '\0') ? ua_override : fp_user_agent();
     const char *csv = (lang_csv != NULL && lang_csv[0] != '\0') ? lang_csv : fp_accept_language();
@@ -303,93 +353,70 @@ static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_o
     memcpy(primary, csv, pl);
     primary[pl] = '\0';
     JSValue languages = build_languages(ctx, csv);
-    if (JS_IsException(languages)) { JS_FreeValue(ctx, nav); return -1; }
+    if (JS_IsException(languages)) { JS_FreeValue(ctx, nav); JS_FreeValue(ctx, vals); JS_FreeValue(ctx, proto); return -1; }
 
-    JSValue plugins = JS_NewArray(ctx);
-    if (JS_IsException(plugins)) { JS_FreeValue(ctx, languages); JS_FreeValue(ctx, nav); return -1; }
-    {
-        JSValue p0 = JS_NewObject(ctx);
-        JS_DefinePropertyValueStr(ctx, p0, "name", JS_NewString(ctx, "Chrome PDF Plugin"),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueStr(ctx, p0, "filename", JS_NewString(ctx, "internal-pdf-viewer"),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueStr(ctx, p0, "description",
-                                  JS_NewString(ctx, "Portable Document Format"),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueStr(ctx, p0, "length", JS_NewInt32(ctx, 1),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueUint32(ctx, plugins, 0, p0, JS_PROP_ENUMERABLE);
-    }
-    {
-        JSValue p1 = JS_NewObject(ctx);
-        JS_DefinePropertyValueStr(ctx, p1, "name", JS_NewString(ctx, "Chrome PDF Viewer"),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueStr(ctx, p1, "filename",
-                                  JS_NewString(ctx, "mhjfbmdgcfjbbpaeojofohoefgiehjai"),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueStr(ctx, p1, "description", JS_NewString(ctx, ""),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueStr(ctx, p1, "length", JS_NewInt32(ctx, 1),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueUint32(ctx, plugins, 1, p1, JS_PROP_ENUMERABLE);
-    }
-    {
-        JSValue re = JS_NewCFunction(ctx, m_noop, "refresh", 0);
-        JS_DefinePropertyValueStr(ctx, plugins, "refresh", re, JS_PROP_ENUMERABLE);
-    }
-    JS_PreventExtensions(ctx, plugins);
+    /* The plugin and MIME lists the claimed browser reports (Firefox 99+: five PDF viewer
+     * names, two MIME types). Built by host script: array-likes with item/namedItem and an
+     * iterator, not Arrays, exactly the shape a page can probe. */
+    static const char JE_PLUGINS[] =
+        "(function(){"
+        " function tag(o,t){ Object.defineProperty(o,Symbol.toStringTag,{value:t,configurable:true}); }"
+        " function list(t,items,key){ var P={}; var n=items.length;"
+        "  Object.defineProperty(P,'length',{get:function(){ return n; },enumerable:true,configurable:true});"
+        "  P.item=function item(i){ return this[i>>>0]||null; };"
+        "  P.namedItem=function namedItem(k){ k=String(k); for(var i=0;i<n;i++) if(this[i][key]===k) return this[i]; return null; };"
+        "  P[Symbol.iterator]=Array.prototype[Symbol.iterator]; tag(P,t);"
+        "  var o=Object.create(P);"
+        "  for(var i=0;i<n;i++){ Object.defineProperty(o,i,{value:items[i],enumerable:true});"
+        "   Object.defineProperty(o,items[i][key],{value:items[i]}); }"
+        "  return o; }"
+        " function mime(type,plugin){ var m={type:type,suffixes:'pdf',description:'Portable Document Format',enabledPlugin:plugin};"
+        "  tag(m,'MimeType'); return m; }"
+        " var TYPES=['application/pdf','text/pdf'];"
+        " var plugins=['PDF Viewer','Chrome PDF Viewer','Chromium PDF Viewer','Microsoft Edge PDF Viewer',"
+        "  'WebKit built-in PDF'].map(function(name){"
+        "  var p={name:name,filename:'internal-pdf-viewer',description:'Portable Document Format',length:TYPES.length};"
+        "  p.item=function item(i){ return this[i>>>0]||null; };"
+        "  p.namedItem=function namedItem(k){ return this[String(k)]||null; };"
+        "  TYPES.forEach(function(t,i){ var m=Object.freeze(mime(t,p)); Object.defineProperty(p,i,{value:m});"
+        "   Object.defineProperty(p,t,{value:m}); });"
+        "  tag(p,'Plugin'); return Object.freeze(p); });"
+        " var pl=list('PluginArray',plugins,'name');"
+        " Object.getPrototypeOf(pl).refresh=function refresh(){};"
+        " var mt=list('MimeTypeArray',TYPES.map(function(t){ return Object.freeze(mime(t,plugins[0])); }),'type');"
+        " Object.freeze(Object.getPrototypeOf(pl)); Object.freeze(Object.getPrototypeOf(mt));"
+        " return [Object.freeze(pl),Object.freeze(mt)]; })()";
+    JSValue lists = jn_host_eval(ctx, JE_PLUGINS, sizeof JE_PLUGINS - 1, "<plugins>");
+    if (JS_IsException(lists)) { JS_FreeValue(ctx, languages); JS_FreeValue(ctx, nav); JS_FreeValue(ctx, vals); JS_FreeValue(ctx, proto); return -1; }
+    JSValue plugins = JS_GetPropertyUint32(ctx, lists, 0);
+    JSValue mime_types = JS_GetPropertyUint32(ctx, lists, 1);
+    JS_FreeValue(ctx, lists);
 
-    JSValue mime_types = JS_NewArray(ctx);
-    if (JS_IsException(mime_types)) {
-        JS_FreeValue(ctx, plugins); JS_FreeValue(ctx, languages);
-        JS_FreeValue(ctx, nav); return -1;
-    }
-    static const char *MTYPES[] = {
-        "application/pdf", "text/pdf",
-        "application/x-google-chrome-pdf", "application/x-pdf"
-    };
-    static const char *MSUFF[] = { "pdf", "pdf", "pdf", "pdf" };
-    static const char *MDESC[] = {
-        "Portable Document Format", "Portable Document Format",
-        "Portable Document Format", "Portable Document Format"
-    };
-    #define FP_MIME_COUNT (sizeof MTYPES / sizeof MTYPES[0])
-    for (size_t i = 0; i < FP_MIME_COUNT; ++i) {
-        JSValue mt = JS_NewObject(ctx);
-        JS_DefinePropertyValueStr(ctx, mt, "type", JS_NewString(ctx, MTYPES[i]),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueStr(ctx, mt, "suffixes", JS_NewString(ctx, MSUFF[i]),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueStr(ctx, mt, "description", JS_NewString(ctx, MDESC[i]),
-                                  JS_PROP_ENUMERABLE);
-        JS_DefinePropertyValueUint32(ctx, mime_types, (uint32_t)i, mt,
-                                     JS_PROP_ENUMERABLE);
-    }
-    #undef FP_MIME_COUNT
-    JS_PreventExtensions(ctx, mime_types);
-
-    int ok = def_str(ctx, nav, "appCodeName", fp_app_code_name()) == 0
-          && def_str(ctx, nav, "appName", fp_app_name()) == 0
-          && def_str(ctx, nav, "appVersion", (ua == fp_user_agent()) ? fp_app_version() : ua) == 0
-          && def_str(ctx, nav, "product", fp_product()) == 0
-          && def_str(ctx, nav, "productSub", fp_product_sub()) == 0
-          && def_str(ctx, nav, "oscpu", fp_oscpu()) == 0
-          && def_str(ctx, nav, "buildID", fp_build_id()) == 0
-          && def_val(ctx, nav, "languages", languages) == 0
-          && def_str(ctx, nav, "userAgent", ua) == 0
-          && def_str(ctx, nav, "language", primary) == 0
-          && def_str(ctx, nav, "platform", fp_platform()) == 0
-          && def_str(ctx, nav, "vendor", fp_vendor()) == 0
-          && def_int(ctx, nav, "hardwareConcurrency", fp_hardware_concurrency()) == 0
-          && def_int(ctx, nav, "maxTouchPoints", fp_max_touch_points()) == 0
-          && def_val(ctx, nav, "onLine", JS_NewBool(ctx, fp_on_line())) == 0
-          && def_val(ctx, nav, "cookieEnabled", JS_NewBool(ctx, fp_cookie_enabled())) == 0
-          && def_val(ctx, nav, "webdriver", JS_NewBool(ctx, 0)) == 0
-          && def_val(ctx, nav, "doNotTrack", JS_NULL) == 0
-          && def_val(ctx, nav, "plugins", plugins) == 0
-          && def_val(ctx, nav, "mimeTypes", mime_types) == 0;
+    int ok = def_str(ctx, vals, "appCodeName", fp_app_code_name()) == 0
+          && def_str(ctx, vals, "appName", fp_app_name()) == 0
+          && def_str(ctx, vals, "appVersion", (ua == fp_user_agent()) ? fp_app_version() : ua) == 0
+          && def_str(ctx, vals, "product", fp_product()) == 0
+          && def_str(ctx, vals, "productSub", fp_product_sub()) == 0
+          && def_str(ctx, vals, "oscpu", fp_oscpu()) == 0
+          && def_str(ctx, vals, "buildID", fp_build_id()) == 0
+          && def_val(ctx, vals, "languages", languages) == 0
+          && def_str(ctx, vals, "userAgent", ua) == 0
+          && def_str(ctx, vals, "language", primary) == 0
+          && def_str(ctx, vals, "platform", fp_platform()) == 0
+          && def_str(ctx, vals, "vendor", fp_vendor()) == 0
+          && def_int(ctx, vals, "hardwareConcurrency", fp_hardware_concurrency()) == 0
+          && def_int(ctx, vals, "maxTouchPoints", fp_max_touch_points()) == 0
+          && def_val(ctx, vals, "onLine", JS_NewBool(ctx, fp_on_line())) == 0
+          && def_val(ctx, vals, "cookieEnabled", JS_NewBool(ctx, fp_cookie_enabled())) == 0
+          && def_val(ctx, vals, "webdriver", JS_NewBool(ctx, 0)) == 0
+          && def_val(ctx, vals, "doNotTrack", JS_NULL) == 0
+          && def_val(ctx, vals, "plugins", plugins) == 0
+          && def_val(ctx, vals, "mimeTypes", mime_types) == 0
+          && def_val(ctx, vals, "pdfViewerEnabled", JS_TRUE) == 0;
+    ok = ok && promote_to_getters(ctx, vals, proto) == 0;
+    JS_FreeValue(ctx, vals);
+    JS_FreeValue(ctx, proto);
     if (!ok) { JS_FreeValue(ctx, nav); return -1; }
-    JS_PreventExtensions(ctx, nav);
     return (JS_DefinePropertyValueStr(ctx, global, "navigator", nav,
                                       JS_PROP_ENUMERABLE) < 0) ? -1 : 0;
 }
@@ -398,10 +425,10 @@ static int build_screen(JSContext *ctx, JSValueConst global, int w, int h) {
     int bw = 0, bh = 0;
     fp_bucket_screen(w, h, &bw, &bh);
 
-    JSValue scr = JS_NewObject(ctx);
+    JSValue scr = new_iface_obj(ctx);
     if (JS_IsException(scr)) return -1;
 
-    JSValue ori = JS_NewObject(ctx);
+    JSValue ori = new_iface_obj(ctx);
     if (JS_IsException(ori)) { JS_FreeValue(ctx, scr); return -1; }
 
     int ok_ori = def_str(ctx, ori, "type", "landscape-primary") == 0
@@ -439,9 +466,9 @@ static const char *const PERF_TIMING_FIELDS[] = {
 #define PERF_ORIGIN_EPOCH 1700000000000.0
 
 static int build_crypto(JSContext *ctx, JSValueConst global) {
-    JSValue crypto = JS_NewObject(ctx);
+    JSValue crypto = new_iface_obj(ctx);
     if (JS_IsException(crypto)) return -1;
-    JSValue subtle = JS_NewObject(ctx);
+    JSValue subtle = new_iface_obj(ctx);
     if (JS_IsException(subtle)) { JS_FreeValue(ctx, crypto); return -1; }
     int ok = def_fn(ctx, subtle, "digest", m_subtle_digest) == 0
           && def_fn(ctx, subtle, "encrypt", m_subtle_null) == 0
@@ -467,7 +494,7 @@ static int build_crypto(JSContext *ctx, JSValueConst global) {
 }
 
 static int build_perf_timing(JSContext *ctx, JSValueConst perf) {
-    JSValue timing = JS_NewObject(ctx);
+    JSValue timing = new_iface_obj(ctx);
     if (JS_IsException(timing)) return -1;
     for (size_t i = 0; i < sizeof PERF_TIMING_FIELDS / sizeof PERF_TIMING_FIELDS[0]; ++i) {
         if (def_val(ctx, timing, PERF_TIMING_FIELDS[i],
@@ -493,7 +520,7 @@ static int build_perf_navigation(JSContext *ctx, JSValueConst perf) {
 }
 
 static int build_performance(JSContext *ctx, JSValueConst global, int exact) {
-    JSValue perf = JS_NewObject(ctx);
+    JSValue perf = new_iface_obj(ctx);
     if (JS_IsException(perf)) return -1;
 
     JSValue origin = JS_NewFloat64(ctx, monotonic_ms());

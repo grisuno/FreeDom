@@ -28,6 +28,20 @@ nativo o un shim anterior siempre gana.
   `finished/ready/play/pause/finish/cancel/onfinish`; NO anima, pero al terminar (timer de
   `delay + duration*iterations`, tope 600 s, o `finish()`) aplica el ULTIMO fotograma al `style` si
   `fill` es `forwards`/`both`, de modo que el estado final de un fade coincide con el de Firefox.
+- **`el.click()`** (HTML 6.4.4, 2026-11-11; antes era una funcion vacia). Un control deshabilitado no
+  hace nada; si no, se despacha un `MouseEvent('click')` no confiable (`isTrusted` falso), que burbujea
+  y es cancelable, y luego la accion propia del elemento: checkbox/radio se alternan ANTES del
+  despacho y se restauran si un listener cancela (pre-activacion heredada), disparando `input` +
+  `change`; un `<label>` reenvia a su control; un boton submit llama `form.requestSubmit(el)`; un
+  enlace navega por `location.assign` (que el padre gatea como toda navegacion JS); `<summary>`
+  alterna `open`.
+- **Timers.** `clearTimeout`/`clearInterval` cancelan desde cualquier sitio: tambien desde el
+  propio callback del timer y sobre un timer vencido en la MISMA ronda (antes el intervalo se
+  re-armaba para siempre, porque el timer ya habia salido de la cola al dispararse). Los
+  argumentos extra de `setTimeout(fn, ms, ...args)` llegan al callback. Un timer que excede el
+  tope por tick (256) vuelve a la cola en vez de perderse.
+- **`Intl` y `toLocale*`**: modulo propio, `spec/js_intl.md`. **Identidad nativa** (`[native code]`,
+  `Symbol.toStringTag`, `navigator` sobre `Navigator.prototype`, `CSS.supports`): `spec/js_native.md`.
 - **Globales.** `AbortSignal.timeout/any`, `reportError`, `scheduler.postTask/yield`, `visualViewport`
   (lee `innerWidth/Height`, con la misma normalizacion que ellos), `window.name`,
   `document.execCommand` (siempre `false`), `document.timeline`, `DOMPoint`, `DOMMatrix` (4x4,

@@ -68,7 +68,14 @@ struct js_context {
     int                  thr_on;
     size_t               thr_n;
     struct { char key[JS_PROFILE_KEY_MAX]; unsigned hits; } thr[JS_THROW_SLOTS];
+    /* One value the host keeps alive and unreachable from script (js_host_slot). */
+    JSValue              host_slot;
 };
+
+JSValue *js_host_slot(struct js_context *ctx);   /* src/js_native_internal.h */
+JSValue *js_host_slot(struct js_context *ctx) {
+    return (ctx != NULL) ? &ctx->host_slot : NULL;
+}
 
 /* --- unhandled-rejection tracking --- */
 
@@ -596,6 +603,7 @@ js_status js_context_new(const js_limits *lim, js_context **out) {
 
     js_context *c = (js_context *)calloc(1, sizeof *c);
     if (c == NULL) return JS_ERR_OOM;
+    c->host_slot = JS_UNDEFINED;
 
     /* The heap cap must be live before the runtime allocates anything. */
     c->mem.limit = l.memory_limit_bytes;
@@ -631,6 +639,7 @@ js_status js_context_new(const js_limits *lim, js_context **out) {
 void js_context_free(js_context *ctx) {
     if (ctx == NULL) return;
     while (ctx->nrej > 0 && ctx->ctx != NULL) rej_remove(ctx, ctx->nrej - 1);
+    if (ctx->ctx != NULL) { JS_FreeValue(ctx->ctx, ctx->host_slot); ctx->host_slot = JS_UNDEFINED; }
     for (size_t i = 0; i < ctx->nrealms; ++i) JS_FreeContext(ctx->realms[i]);
     ctx->nrealms = 0;
     if (ctx->ctx != NULL) JS_FreeContext(ctx->ctx);
@@ -821,8 +830,11 @@ void js_set_current_script(js_context *ctx, const char *src, const char *type) {
     if (src == NULL) {
         JS_SetPropertyStr(jc, doc, "currentScript", JS_NULL);
     } else {
+        /* Host code: compiled without source, like every shim (spec/js_native.md). */
+        bool hid = JS_SetHideSource(JS_GetRuntime(jc), true);
         JSValue fn = JS_Eval(jc, JS_CURRENT_SCRIPT_FACTORY, sizeof JS_CURRENT_SCRIPT_FACTORY - 1,
                              "<currentScript>", JS_EVAL_TYPE_GLOBAL);
+        (void)JS_SetHideSource(JS_GetRuntime(jc), hid);
         if (JS_IsFunction(jc, fn)) {
             JSValue args[2] = { JS_NewString(jc, src),
                                 JS_NewString(jc, (type != NULL) ? type : "") };

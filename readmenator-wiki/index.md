@@ -1,15 +1,15 @@
 # Second Brain
 
-*Last synthesized: 2026-11-11 | 318 files | 14 concept pages | offline, zero tokens*
+*Last synthesized: 2026-11-11 | 325 files | 14 concept pages | offline, zero tokens*
 
 > Raw sources -> readmenator wiki -> links (Karpathy LLM Wiki Pattern, deterministic).
 > Start here, then open one community page. Prefer grep over full reads.
 
 ## Vault Overview
 
-The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (185 files) across 14 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
+The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (190 files) across 14 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
 
-Surprising tissue lives between src: tab, include: browser_ui, include: page_view: 20 extracted cross-community imports and 0 inferred bridges. Follow `connections.json` sorted by strength before refactoring.
+Surprising tissue lives between src: css, src: tab, include: browser_ui: 20 extracted cross-community imports and 0 inferred bridges. Follow `connections.json` sorted by strength before refactoring.
 
 Open work clusters around documentation (17% file coverage), 0 security findings, 6 taint paths, and 5 suggested exploration questions in `queries.md`.
 
@@ -17,14 +17,14 @@ Open work clusters around documentation (17% file coverage), 0 security findings
 
 | Metric | Value |
 |--------|-------|
-| Files | 318 |
-| Symbols | 7843 |
-| Resolved imports | 596 |
+| Files | 325 |
+| Symbols | 7916 |
+| Resolved imports | 621 |
 | Languages | c, h, py, sh |
 | Communities | 14 |
-| Doc coverage | 17% (54/318 files) |
+| Doc coverage | 17% (54/325 files) |
 | Security findings | 0 |
-| Estimated read cost | ~234524 tokens (chars/4, offline so $0) |
+| Estimated read cost | ~236934 tokens (chars/4, offline so $0) |
 | Large files (>256KB, maybe generated) | 4: `browser_ui.c`, `css.c`, `page_view.c`, `test_css.c` |
 
 ## Reading Order
@@ -40,11 +40,11 @@ readmenator query "<question>" --target freedom-0.0.3
 
 ## Concept Wiki
 
-- [src: tab (48 files, cohesion 0.66)](./community_0_src_tab.md)
-- [include: browser_ui (47 files, cohesion 0.52)](./community_1_include_browser_ui.md)
-- [include: page_view (43 files, cohesion 0.56)](./community_2_include_page_view.md)
-- [src: css (38 files, cohesion 0.68)](./community_3_src_css.md)
-- [src: text_shape (37 files, cohesion 0.52)](./community_4_src_text_shape.md)
+- [src: css (57 files, cohesion 0.69)](./community_0_src_css.md)
+- [src: tab (51 files, cohesion 0.69)](./community_1_src_tab.md)
+- [include: browser_ui (47 files, cohesion 0.52)](./community_2_include_browser_ui.md)
+- [src: text_shape (40 files, cohesion 0.52)](./community_3_src_text_shape.md)
+- [include: page_view (25 files, cohesion 0.46)](./community_4_include_page_view.md)
 - [include: secure_fetch (24 files, cohesion 0.60)](./community_5_include_secure_fetch.md)
 - [include: browser (19 files, cohesion 0.55)](./community_6_include_browser.md)
 - [src: http_cache (13 files, cohesion 0.80)](./community_7_src_http_cache.md)
@@ -60,23 +60,23 @@ readmenator query "<question>" --target freedom-0.0.3
 | File | Score |
 |------|-------|
 | `gui/browser_ui.c` | 182.2 (large, maybe generated) |
-| `include/css.h` | 94.4 |
-| `src/tab.c` | 79.1 |
+| `include/css.h` | 96.4 |
+| `src/tab.c` | 81.4 |
 | `src/freedom.c` | 63.0 |
 | `src/css.c` | 60.8 (large, maybe generated) |
 
 ## Strongest Connections
 
-- 1 -> 6: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 2: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 8: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 3: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 4: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 0: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 5: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 10: depends_on (strength 0.9, EXTRACTED)
-- 1 -> 9: depends_on (strength 0.9, EXTRACTED)
+- 2 -> 6: depends_on (strength 0.9, EXTRACTED)
+- 2 -> 4: depends_on (strength 0.9, EXTRACTED)
+- 2 -> 0: depends_on (strength 0.9, EXTRACTED)
+- 2 -> 8: depends_on (strength 0.9, EXTRACTED)
 - 2 -> 3: depends_on (strength 0.9, EXTRACTED)
+- 2 -> 1: depends_on (strength 0.9, EXTRACTED)
+- 2 -> 5: depends_on (strength 0.9, EXTRACTED)
+- 2 -> 10: depends_on (strength 0.9, EXTRACTED)
+- 2 -> 9: depends_on (strength 0.9, EXTRACTED)
+- 0 -> 4: depends_on (strength 0.9, EXTRACTED)
 
 ## Navigation Tips
 
