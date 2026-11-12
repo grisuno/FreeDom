@@ -1,6 +1,42 @@
 # Subsystem: src (page 8 of 10)
 Previous: [KB_src_p7.md](KB_src_p7.md)
 
+## src/prefs.c
+- Doc: url_valid: A representable URL: 1..PREFS_MAX_URL-1 bytes, no control bytes, no DEL. * Space is...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `sbuf` (struct, line 380)
+  - `url_valid` (function, line 26) `static int url_valid(const char *url)`
+  - `title_clean` (function, line 39) `static char *title_clean(const char *src)`
+  - `prefs_init` (function, line 66) `void prefs_init(prefs_state *p)`
+  - `prefs_free` (function, line 74) `void prefs_free(prefs_state *p)`
+  - `bookmark_push` (function, line 91) `static prefs_status bookmark_push(prefs_state *p, const char *url, const char *title)`
+  - `history_push_back` (function, line 109) `static prefs_status history_push_back(prefs_state *p, const char *url)`
+  - `prefs_bookmark_index` (function, line 125) `int prefs_bookmark_index(const prefs_state *p, const char *url)`
+  - `prefs_bookmark_toggle` (function, line 132) `prefs_status prefs_bookmark_toggle(prefs_state *p, const char *url,
+                             ...`
+  - `prefs_history_add` (function, line 152) `prefs_status prefs_history_add(prefs_state *p, const char *url)`
+  - `prefs_format` (function, line 183) `prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)`
+  - `apply_kv` (function, line 231) `static void apply_kv(prefs_state *out, const char *key, long val)`
+  - `prefs_parse` (function, line 247) `prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)`
+  - `ci_eq` (function, line 313) `static int ci_eq(char a, char b)`
+  - `ci_starts` (function, line 319) `static int ci_starts(const char *s, const char *q)`
+  - `ci_contains` (function, line 327) `static int ci_contains(const char *s, const char *q)`
+  - `url_prefix_match` (function, line 336) `static int url_prefix_match(const char *url, const char *q)`
+  - `sugg_push` (function, line 348) `static void sugg_push(char *out, size_t row_len, int max_rows, int *n,
+                      cons...`
+  - `prefs_suggest` (function, line 357) `int prefs_suggest(const prefs_state *p, const char *query,
+                  char *out, size_t ro...`
+  - `sb_put` (function, line 382) `static void sb_put(sbuf *b, const char *s, size_t n)`
+  - `sb_str` (function, line 397) `static void sb_str(sbuf *b, const char *s)`
+  - `sb_esc` (function, line 400) `static void sb_esc(sbuf *b, const char *s)`
+  - `sb_link_item` (function, line 413) `static void sb_link_item(sbuf *b, const char *url, const char *label)`
+  - `prefs_bookmarks_page` (function, line 421) `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)`
+  - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
+  - `PREFS_MAGIC` (macro, line 20) `#define PREFS_MAGIC`
+- Depends on: `include/prefs.h`, `include/zoom.h`
+
 ## src/profile.c
 - Doc: keyfile_create: #include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h>...
 - Layer: utility

@@ -126,6 +126,14 @@ SALIDA --dump-layout (stdout):
   BT_MAX_POSITIONED). Fail-closed: doc vacío → UI_ERR_NULL_ARG (no imprime nada).
 ```
 
+**`total_h` es la extensión desplazable, no el alto de la caja raíz (2026-11-12).** Tras
+`position_doc`, `total_h` cubre el borde inferior de toda caja y de toda caja posicionada
+(CSS Overflow 3 §2.2, *scrollable overflow*). **Dado** `html,body{height:100%}` y un hijo de
+4000 px **cuando** se vuelca el layout **entonces** `total_h >= 4000`. La ventana dimensiona su
+scroll, el PNG su lienzo y `scrollHeight` su valor desde ESE único número: antes solo el PNG
+medía las cajas y la ventana se detenía en 1080 px (la portada de Wikipedia «cortada»).
+Candado: `test_dump_layout_total_h_covers_overflowing_content`.
+
 ### `--download-pdf` / `--download-png`: razón de ser (revisión visual)
 
 El render del GUI necesita Wayland, que no siempre está disponible para una

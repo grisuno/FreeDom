@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `FREEDOM_HOSTEDIT_H` | macro | `include/hostedit.h:2` | `#define FREEDOM_HOSTEDIT_H` |
+| `HE_MAX_HOST` | macro | `include/hostedit.h:32` | `#define HE_MAX_HOST` |
 | `he_cdn_kind` | function | `include/hostedit.h:62` | `he_cdn_kind_t he_cdn_kind(const char *url);` |
 | `he_cdn_kind_t` | enum | `include/hostedit.h:61` | `` |
 | `he_status` | enum | `include/hostedit.h:24` | `` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `psl_rules` | variable | `include/psl_data.h:21` | `extern const char *const psl_rules[];` |
 | `psl_rules_n` | variable | `include/psl_data.h:22` | `extern const size_t psl_rules_n;` |
 | `psl_wildcards` | variable | `include/psl_data.h:23` | `extern const char *const psl_wildcards[];` |
-| `psl_wildcards_n` | variable | `include/psl_data.h:24` | `extern const size_t psl_wildcards_n;` |
-| `FREEDOM_RENDER_DOC_H` | macro | `include/render_doc.h:2` | `#define FREEDOM_RENDER_DOC_H` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

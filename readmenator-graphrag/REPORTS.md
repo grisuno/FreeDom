@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 8391 | Relationships: 14905 | Communities: 14 | Themes: 4 | Text units: 7909
+Entities: 8403 | Relationships: 14917 | Communities: 14 | Themes: 4 | Text units: 7921
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -100,7 +100,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.8).
 - Hotspot `src/tab.c`: 194 symbols, 76 connections (score 0.44).
 - Hotspot `tests/test_js_dom.c`: 274 symbols, 28 connections (score 0.28).
 - Dependency cycle: js_dom.h -> js_location.h -> js_dom.h.
-- Dataflow: 1 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
+- Dataflow: 2 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
 - Key entities: file:tests/test_js_dom.c, file:src/tab.c, file:tests/test_tab.c, file:src/dom.c, file:src/js_dom.c, file:src/js_sandbox.c, file:tests/test_js_sandbox.c, file:tests/test_url.c
 - Rating 4.9/10 = 7 x PageRank share 0.70 + 3 x risk 0.00. Internal imports: 125.
 
@@ -111,10 +111,10 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.8).
 - `include/prefs.h` ranks 1 by PageRank, 6 importers, 18 symbols: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
 - `include/zoom.h` ranks 2 by PageRank, 5 importers, 10 symbols: zm_clamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
 - `include/ui.h` ranks 3 by PageRank, 6 importers, 20 symbols: ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no copy): render with text + offset over len bytes.
-- Hotspot `gui/browser_ui.c`: 662 symbols, 143 connections (score 1.00).
+- Hotspot `gui/browser_ui.c`: 664 symbols, 143 connections (score 1.00).
 - Hotspot `tests/test_profile.c`: 17 symbols, 16 connections (score 0.08).
 - 3 layer violations, e.g. browser_ui.c (presentation) -> data_url.h (data_access).
-- Dataflow: 35 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
+- Dataflow: 34 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
 - Key entities: file:gui/browser_ui.c, file:tests/test_interp.c, file:gui/ui_render.c, file:tests/test_pdf_export.c, file:src/prefs.c, file:include/ui.h, file:include/interp.h, file:include/prefs.h
 - Rating 3.4/10 = 7 x PageRank share 0.49 + 3 x risk 0.00. Internal imports: 53.
 
@@ -138,8 +138,8 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.8).
 - `include/page_view.h` ranks 1 by PageRank, 12 importers, 95 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - `include/render_policy.h` ranks 2 by PageRank, 8 importers, 9 symbols: rdp_caps: Render capabilities for a page.
 - `include/box_style.h` ranks 3 by PageRank, 12 importers, 31 symbols: bx_edges: anything longer fails closed instead of truncating into a wrong match. #define BX_TAG_NAME_MAX 32u typedef enum bx_display { BX_DISPLAY_BLOCK = 0,     /* stacks vertically, takes the available width BX_DISPLAY_INLINE...
-- Hotspot `src/page_view.c`: 271 symbols, 42 connections (score 0.34).
-- Hotspot `tests/test_page_view.c`: 219 symbols, 26 connections (score 0.24).
+- Hotspot `src/page_view.c`: 277 symbols, 42 connections (score 0.34).
+- Hotspot `tests/test_page_view.c`: 220 symbols, 26 connections (score 0.24).
 - 14 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
 - Dataflow: 8 INFERRED issues (first: DEAD_STORE in layout_grid).
 - Key entities: file:src/page_view.c, file:tests/test_page_view.c, file:include/page_view.h, file:tests/test_flex_layout.c, file:tests/test_box_tree.c, file:include/flex_layout.h, file:tests/test_box_style.c, file:src/box_style.c
@@ -193,7 +193,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.8).
 - `include/image_decode.h` ranks 1 by PageRank, 6 importers, 14 symbols: img_pixels: A decoded bitmap that owns its pixel buffer.
 - `include/svg_render.h` ranks 2 by PageRank, 6 importers, 19 symbols: sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g> chain, and `m` the flattened affine transform of that chain (a,b,c,d,e,f in Cairo order).
 - `include/svg_raster.h` ranks 3 by PageRank, 3 importers, 5 symbols: sr_sniff: 1 when the first element of the document (after BOM, whitespace, the XML * declaration, comments and a doctype) is <svg; 0 otherwise.
-- Hotspot `tests/test_freedom.c`: 115 symbols, 12 connections (score 0.12).
+- Hotspot `tests/test_freedom.c`: 118 symbols, 12 connections (score 0.12).
 - Hotspot `tests/test_svg_render.c`: 17 symbols, 11 connections (score 0.06).
 - 1 layer violations, e.g. test_svg_render.c (testing) -> svg_render.h (presentation).
 - Dataflow: 1 INFERRED issues (first: DEAD_STORE in img_decode_jpeg).

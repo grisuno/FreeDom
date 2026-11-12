@@ -3,6 +3,18 @@ Previous: [SYMBOLS_p16.md](SYMBOLS_p16.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `emit` | function | `tools/gen_psl.c:61` | `static void emit(const char *name, vec *v)` |
+| `main` | function | `tools/gen_psl.c:67` | `int main(int argc, char **argv)` |
+| `sort_unique` | function | `tools/gen_psl.c:43` | `static void sort_unique(vec *v)` |
+| `vec` | struct | `tools/gen_psl.c:21` | `` |
+| `vec_push` | function | `tools/gen_psl.c:27` | `static void vec_push(vec *v, const char *s)` |
+| `main` | function | `tools/guitime.py:94` | `def main()` |
+| `one_run` | function | `tools/guitime.py:65` | `def one_run(binary, page, env, hosts_dir, tmp)` |
+| `start_display` | function | `tools/guitime.py:34` | `def start_display(workdir)` |
+| `find_modules` | function | `tools/mutate.py:107` | `def find_modules(root)` |
+| `line_sites` | function | `tools/mutate.py:41` | `def line_sites(text)` |
+| `main` | function | `tools/mutate.py:137` | `def main(argv)` |
+| `mutate_line` | function | `tools/mutate.py:75` | `def mutate_line(line, op)` |
 | `run_bin` | function | `tools/mutate.py:125` | `def run_bin(path)` |
 | `run_make` | function | `tools/mutate.py:116` | `def run_make(root, target)` |
 | `PD_COLS` | macro | `tools/pngdiff.c:57` | `#define PD_COLS` |

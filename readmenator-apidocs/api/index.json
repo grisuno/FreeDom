@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 231,
-  "entities": 3635,
+  "entities": 3638,
   "languages": {
    "c": 108,
    "h": 107,
@@ -13,8 +13,8 @@
   "kinds": {
    "constant": 23,
    "enum": 163,
-   "function": 2041,
-   "macro": 724,
+   "function": 2042,
+   "macro": 726,
    "method": 25,
    "module": 231,
    "struct": 276,
@@ -27,8 +27,8 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1588,
-   "total": 3605,
+   "documented": 1589,
+   "total": 3608,
    "percent": 44.0
   },
   "by_kind": {
@@ -39,12 +39,12 @@
    },
    "function": {
     "documented": 913,
-    "total": 2041,
+    "total": 2042,
     "percent": 44.7
    },
    "macro": {
-    "documented": 331,
-    "total": 724,
+    "documented": 332,
+    "total": 726,
     "percent": 45.7
    },
    "method": {
@@ -86,8 +86,8 @@
    },
    "gui/browser_ui.c": {
     "documented": 83,
-    "total": 255,
-    "percent": 32.5
+    "total": 256,
+    "percent": 32.4
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -995,9 +995,9 @@
     "percent": 33.3
    },
    "src/page_view.c": {
-    "documented": 64,
-    "total": 144,
-    "percent": 44.4
+    "documented": 65,
+    "total": 146,
+    "percent": 44.5
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -1245,7 +1245,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 255
+   "entities": 256
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -2155,7 +2155,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 144
+   "entities": 146
   },
   {
    "uid": "src/pdf_export.c",
@@ -2385,7 +2385,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2018
+  "total": 2020
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

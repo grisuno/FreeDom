@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 25 file(s) rooted at `include` with dominant language c (cohesion 0.46). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (271 symbols). Documented purpose: sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md..
+This community groups 25 file(s) rooted at `include` with dominant language c (cohesion 0.46). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (277 symbols). Documented purpose: sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md..
 
 ## Files
 
@@ -28,7 +28,7 @@ This community groups 25 file(s) rooted at `include` with dominant language c (c
 | `tests/test_box_tree.c` | c | testing | 69 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 72 | no |
-| `tests/test_page_view.c` | c | testing | 219 | no |
+| `tests/test_page_view.c` | c | testing | 220 | no |
 | `tests/test_render_doc.c` | c | testing | 37 | no |
 | `tests/test_render_policy.c` | c | testing | 21 | no |
 
@@ -40,7 +40,7 @@ This community groups 25 file(s) rooted at `include` with dominant language c (c
 | `src/box_tree.c` | c | utility | 25 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 36 | no |
-| `src/page_view.c` | c | presentation | 271 | no |
+| `src/page_view.c` | c | presentation | 277 | no |
 | `src/render_doc.c` | c | presentation | 22 | no |
 
 *... and 5 more files in this community.*

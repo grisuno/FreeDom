@@ -1,6 +1,19 @@
 # API (page 12 of 12)
 Previous: [API_p11.md](API_p11.md)
 
+## src/text_case.c
+Depends on: `include/css.h`, `include/text_case.h`
+- `pair_parity` (function) `src/text_case.c:8` `static int pair_parity(uint32_t cp)` -- Latin Extended-A and the Cyrillic historic block pair letters on adjacent code points, uppercase first.
+- `tc_upper` (function) `src/text_case.c:18` `uint32_t tc_upper(uint32_t cp)`
+- `tc_lower` (function) `src/text_case.c:37` `uint32_t tc_lower(uint32_t cp)`
+- `tc_is_lower` (function) `src/text_case.c:54` `int tc_is_lower(uint32_t cp)`
+- `utf8_decode` (function) `src/text_case.c:61` `static size_t utf8_decode(const unsigned char *s, size_t n, uint32_t *cp)` -- Decodes one UTF-8 code point of s[0,n) into *cp.
+- `utf8_put` (function) `src/text_case.c:79` `static void utf8_put(uint32_t cp, size_t len, unsigned char *out)` -- if ((c >> 5) == 0x6) { if (n < 2 || (s[1] & 0xC0) != 0x80) return 0; cp = ((c & 0x1Fu) << 6) | (s[1] & 0x3Fu)...
+- `utf8_len_of` (function) `src/text_case.c:91` `static size_t utf8_len_of(uint32_t cp)`
+- `tc_transform` (function) `src/text_case.c:95` `size_t tc_transform(const char *s, size_t n, int transform, int word_start,
+                    c...`
+- `tc_smallcaps_runs` (function) `src/text_case.c:117` `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap)`
+
 ## src/text_shape.c
 Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
 - `generic_name` (function) `src/text_shape.c:56` `static const char *generic_name(int family)`

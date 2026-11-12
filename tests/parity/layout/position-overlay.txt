@@ -1,6 +1,6 @@
 Stage 2 demo: position overlay
 === Freedom layout ===
-content_w=1000 total_h=508.0 nbox=8 nrow=12 npositioned=3
+content_w=1000 total_h=768.0 nbox=8 nrow=12 npositioned=3
   row[0] top=90.0 h=31.0 x_off=180.0 w=640.0
   row[1] top=133.0 h=23.0 x_off=180.0 w=640.0
   row[2] top=156.0 h=23.0 x_off=180.0 w=640.0

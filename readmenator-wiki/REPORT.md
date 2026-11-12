@@ -1,6 +1,6 @@
 # Audit Report
 
-*Project: freedom-0.0.3 | 2026-11-11 | offline, deterministic*
+*Project: freedom-0.0.3 | 2026-11-12 | offline, deterministic*
 
 ## Confidence Trail
 
@@ -31,7 +31,7 @@ Every edge is tagged. Extracted means parsed from source; inferred means derived
 
 ## Token Benchmark
 
-- Wiki index plus community pages estimate: ~236334 tokens (chars/4).
+- Wiki index plus community pages estimate: ~237090 tokens (chars/4).
 - Full re-read of every source file would cost strictly more on any non-trivial project; this wiki is the cheaper entry point.
 - Generation cost: $0, offline, no network calls.
 

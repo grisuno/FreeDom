@@ -1,0 +1,8 @@
+Wikipedia, la enciclopedia libre
+CSS drops: 7 declaration(s) dropped, 5 distinct
+  count  cause         property                     first value
+      3  unknown-prop  unicode-bidi                 isolate
+      1  unknown-prop  list-style-image             none
+      1  bad-value     list-style-type              myanmar_with_period
+      1  bad-value     box-shadow                   inset 0 0 0 1px #36c inset 0 0 0 2px #fff
+      1  bad-value     height                       1.6

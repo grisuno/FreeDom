@@ -7137,13 +7137,22 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * one already open) cannot collapse the previous block's bottom margin
                  * with anything: that margin is the gap before it (a heading's
                  * `margin-bottom` above a `display:grid` list). */
-                int seg_box_open = (scd == NULL || scd->box_id < 0 || scd->box_id == rb);
+                /* A synthesised table grid stamps no container box: the box every
+                 * cell shares IS the table's enclosing box, exactly as the top level
+                 * derives it. Without it the boxes between the item's root and the
+                 * table never opened for the table -- it started on the item's edge --
+                 * and each cell's item-box walk re-opened them instead, one bordered,
+                 * padded copy of the wrapper per cell (Wikipedia's sister projects). */
+                int seg_box = (scd != NULL) ? scd->box_id : -1;
+                if (seg_box < 0 && scd != NULL && scd->is_table)
+                    seg_box = band_common_box(doc, k, seg_end);
+                int seg_box_open = (seg_box < 0 || seg_box == rb);
                 for (int bk = 0; !seg_box_open && bk < si.box_depth; ++bk)
-                    if (si.box_stack[bk].block_id == scd->box_id) seg_box_open = 1;
-                if (scd != NULL && scd->box_id >= 0) {
+                    if (si.box_stack[bk].block_id == seg_box) seg_box_open = 1;
+                if (seg_box >= 0) {
                     flush_line(L, &si, th);
-                    int stop_at = (rb >= 0) ? rb : nested_stop(s, doc, scd->box_id, item_cbox);
-                    reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, scd->box_id, k, stop_at);
+                    int stop_at = (rb >= 0) ? rb : nested_stop(s, doc, seg_box, item_cbox);
+                    reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, seg_box, k, stop_at);
                     rc_box_context(&si, inner_w, &sl, &sw);
                 }
                 if (seg_box_open && si.prev_bottom > 0.0)
@@ -10477,8 +10486,37 @@ static void oof_sublayouts(cairo_t *cr, const browser_window *w, double content_
  * (the solver treats them as zero-size at the containing block's origin). */
 static double input_box_width(double content_w);
 
+/* The document is as tall as its tallest THING, not as its root box: the scrollable
+ * overflow of the page covers every box and positioned box (CSS Overflow 3 section 2.2).
+ * `html, body { height: 100% }` ends the body box at the viewport height while its
+ * content overflows it visibly; sizing the scrollbar from the flow height alone stopped
+ * such a page (Wikipedia's Vector skin) at 1080px, and a page made only of boxes has no
+ * in-flow rows at all. Folded into total_h so the window, the PNG export, --dump-layout
+ * and the geometry published to scripts all read ONE extent. */
+static void extend_total_to_overflow(rc_layout *L) {
+    double h = L->total_h;
+    for (size_t i = 0; i < L->nbox; ++i) {
+        double bot = L->boxes[i].top + L->boxes[i].h;
+        if (bot > h) h = bot;
+    }
+    for (size_t i = 0; i < L->npositioned; ++i) {
+        double bot = L->positioned[i].y + L->positioned[i].h;
+        if (bot > h) h = bot;
+    }
+    L->total_h = h;
+}
+
+static void position_boxes(cairo_t *cr, const browser_window *w, double content_w,
+                           double vp_h, rc_layout *L);
+
 static void position_doc(cairo_t *cr, const browser_window *w, double content_w,
-                        double vp_h, rc_layout *L) {
+                         double vp_h, rc_layout *L) {
+    position_boxes(cr, w, content_w, vp_h, L);
+    extend_total_to_overflow(L);
+}
+
+static void position_boxes(cairo_t *cr, const browser_window *w, double content_w,
+                           double vp_h, rc_layout *L) {
     const rd_doc *doc = w->doc;
     size_t nbox = rd_box_count(doc);
     if (nbox == 0) { L->npositioned = 0; return; }
@@ -15213,20 +15251,7 @@ static cairo_surface_t *paint_doc_surface(browser_window *w, double page_w, doub
     /* The headless viewport (a fixed box's containing block): the same height
      * window.innerHeight reports and the parity reference renders at. */
     position_doc(mcr, w, content_w, view_h, &L);
-    double content_h = L.total_h;
-    /* The document is as tall as its tallest THING, not as its text flow: a page
-     * whose content is entirely boxes (a hero, a card grid, an absolutely placed
-     * badge -- modern layouts are full of them) has no in-flow rows at all, and
-     * sizing the canvas from rows alone exported it as a 0 px image. Positioned
-     * boxes count too: one placed past the flow used to be cropped off. */
-    for (size_t i = 0; i < L.nbox; ++i) {
-        double bot = L.boxes[i].top + L.boxes[i].h;
-        if (bot > content_h) content_h = bot;
-    }
-    for (size_t i = 0; i < L.npositioned; ++i) {
-        double bot = L.positioned[i].y + L.positioned[i].h;
-        if (bot > content_h) content_h = bot;
-    }
+    double content_h = L.total_h;   /* position_doc folded the overflow extent in */
     cairo_destroy(mcr);
     cairo_surface_destroy(meas);
 

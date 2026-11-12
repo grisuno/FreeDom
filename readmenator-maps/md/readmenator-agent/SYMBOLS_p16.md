@@ -3,6 +3,18 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_enforce_checks_group_after_version` | function | `tests/test_secure_fetch.c:238` | `static void test_enforce_checks_group_after_version(void **state)` |
+| `test_enforce_checks_version_first` | function | `tests/test_secure_fetch.c:229` | `static void test_enforce_checks_version_first(void **state)` |
+| `test_enforce_fails_closed_on_null_chain` | function | `tests/test_secure_fetch.c:246` | `static void test_enforce_fails_closed_on_null_chain(void **state)` |
+| `test_enforce_strict_requires_pq_chain` | function | `tests/test_secure_fetch.c:253` | `static void test_enforce_strict_requires_pq_chain(void **state)` |
+| `test_fallback_ladder_is_shared_and_ordered` | function | `tests/test_secure_fetch.c:307` | `static void test_fallback_ladder_is_shared_and_ordered(void **state)` |
+| `test_get_follow_null_args` | function | `tests/test_secure_fetch.c:552` | `static void test_get_follow_null_args(void **state)` |
+| `test_get_null_args` | function | `tests/test_secure_fetch.c:561` | `static void test_get_null_args(void **state)` |
+| `test_group_accepts_hybrid` | function | `tests/test_secure_fetch.c:145` | `static void test_group_accepts_hybrid(void **state)` |
+| `test_group_rejects_classical` | function | `tests/test_secure_fetch.c:131` | `static void test_group_rejects_classical(void **state)` |
+| `test_group_rejects_pure_pq` | function | `tests/test_secure_fetch.c:138` | `static void test_group_rejects_pure_pq(void **state)` |
+| `test_header_value_reads_named_header` | function | `tests/test_secure_fetch.c:397` | `static void test_header_value_reads_named_header(void **state)` |
+| `test_header_value_rejects_other_empty_and_oversize` | function | `tests/test_secure_fetch.c:408` | `static void test_header_value_rejects_other_empty_and_oversize(void **state)` |
 | `test_location_is_case_insensitive_and_trims` | function | `tests/test_secure_fetch.c:429` | `static void test_location_is_case_insensitive_and_trims(void **state)` |
 | `test_location_parses_value` | function | `tests/test_secure_fetch.c:421` | `static void test_location_parses_value(void **state)` |
 | `test_location_rejects_non_location_and_empty` | function | `tests/test_secure_fetch.c:439` | `static void test_location_rejects_non_location_and_empty(void **state)` |
@@ -484,17 +496,5 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 | `_POSIX_C_SOURCE` | macro | `tools/gen_psl.c:15` | `#define _POSIX_C_SOURCE` |
 | `ascii_lower` | function | `tools/gen_psl.c:55` | `static void ascii_lower(char *s)` |
 | `cmp_str` | function | `tools/gen_psl.c:38` | `static int cmp_str(const void *a, const void *b)` |
-| `emit` | function | `tools/gen_psl.c:61` | `static void emit(const char *name, vec *v)` |
-| `main` | function | `tools/gen_psl.c:67` | `int main(int argc, char **argv)` |
-| `sort_unique` | function | `tools/gen_psl.c:43` | `static void sort_unique(vec *v)` |
-| `vec` | struct | `tools/gen_psl.c:21` | `` |
-| `vec_push` | function | `tools/gen_psl.c:27` | `static void vec_push(vec *v, const char *s)` |
-| `main` | function | `tools/guitime.py:94` | `def main()` |
-| `one_run` | function | `tools/guitime.py:65` | `def one_run(binary, page, env, hosts_dir, tmp)` |
-| `start_display` | function | `tools/guitime.py:34` | `def start_display(workdir)` |
-| `find_modules` | function | `tools/mutate.py:107` | `def find_modules(root)` |
-| `line_sites` | function | `tools/mutate.py:41` | `def line_sites(text)` |
-| `main` | function | `tools/mutate.py:137` | `def main(argv)` |
-| `mutate_line` | function | `tools/mutate.py:75` | `def mutate_line(line, op)` |
 
 Next: [SYMBOLS_p17.md](SYMBOLS_p17.md)

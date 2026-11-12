@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `f_cursor` | function | `src/css_computed.c:157` | `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)` |
+| `f_display` | function | `src/css_computed.c:77` | `static size_t f_display(const ccm_input *in, char *out, size_t cap)` |
 | `f_flex_direction` | function | `src/css_computed.c:135` | `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)` |
 | `f_flex_grow` | function | `src/css_computed.c:269` | `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)` |
 | `f_flex_shrink` | function | `src/css_computed.c:272` | `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `whole` | function | `src/freebug.c:5` | `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);` |
 | `BLOCKED` | function | `src/freedom.c:1047` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
 | `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:174` | `#define CSS_DROPS_REPORT_MAX` |
-| `EXIT_ERROR` | macro | `src/freedom.c:52` | `#define EXIT_ERROR` |
-| `EXIT_OK` | macro | `src/freedom.c:51` | `#define EXIT_OK` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

@@ -2170,6 +2170,7 @@
 
 - [`P_META_CUSTOM`](modules/src.css.c.md#p_meta_custom) macro in `src/css.c`
 - [`P_META_VARSRC`](modules/src.css.c.md#p_meta_varsrc) macro in `src/css.c`
+- [`page`](modules/gui.browser_ui.c.md#page) function in `gui/browser_ui.c`
 - [`page`](modules/include.box_style.h.md#page) function in `include/box_style.h`
 - [`page_view`](modules/src.css.c.md#page_view) function in `src/css.c`
 - [`PAINT_WAIT_S`](modules/tools.fftime.py.md#paint_wait_s) constant in `tools.fftime`
@@ -2413,6 +2414,8 @@
 - [`pv_build_ex`](modules/src.page_view.c.md#pv_build_ex) function in `src/page_view.c`
 - [`pv_build_full`](modules/src.page_view.c.md#pv_build_full) function in `src/page_view.c`
 - [`pv_build_styled`](modules/src.page_view.c.md#pv_build_styled) function in `src/page_view.c`
+- [`PV_CELL_NESTED`](modules/src.page_view.c.md#pv_cell_nested) macro in `src/page_view.c`
+- [`PV_CELL_RICH`](modules/src.page_view.c.md#pv_cell_rich) macro in `src/page_view.c`
 - [`pv_cnt_attr_ctx`](modules/src.page_view.c.md#pv_cnt_attr_ctx) struct in `src/page_view.c`
 - [`PV_COLOR_TOKEN_MAX`](modules/src.page_view.c.md#pv_color_token_max) macro in `src/page_view.c`
 - [`pv_computed`](modules/include.page_view.h.md#pv_computed) type_alias in `include/page_view.h`

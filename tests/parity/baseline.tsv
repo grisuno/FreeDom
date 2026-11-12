@@ -34,16 +34,17 @@ marquee-flex	0.78
 mask-icons	0.32
 multicol	2.64
 nav-inline-blocks	0.38
-navbox-table	0.41
+navbox-table	0.47
 pct-box	0.37
 pseudo-rule	0.01
 rail-negative-margin	0.11
 rem-62	0.54
 scroll-box	0.10
 site-andreagrandi	3.01
-site-animate	4.42
+site-animate	0.59
 site-bgp	0.75
 site-discord	2.93
+site-eswikipedia	6.02
 site-github	2.85
 site-gitlab	2.48
 site-ipinfo	4.95
@@ -61,4 +62,4 @@ table-fit	4.04
 table-in-bordered-section	1.19
 ua-metrics	0.40
 underline-offset	0.33
-wikipedia	3.57
+wikipedia	3.54

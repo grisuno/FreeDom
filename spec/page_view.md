@@ -401,6 +401,38 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
     silencio. Candado: `test_build_table_cell_author_styles`. En el painter, el **fondo de un
     item de contenedor pinta su propia columna** (`rc_row.bg_w`; antes se descartaba con
     "out of scope (basic)").
+  - **Celda rica = ítem real de la rejilla (2026-11-12).** Aplanar una celda a un único run
+    solo es fiel cuando la celda ES texto. Una celda **rica** — sin tabla anidada, de una tabla
+    que no fluye, y cuyo subárbol contiene un `<br>`, un elemento reemplazado o control
+    (`img`/`svg`/`picture`/`video`/`canvas`/`input`/`button`/`select`/`textarea`), un elemento de
+    bloque, o texto **fuera** de su única ancla — **no se recolecta: se recorre**, y
+    `resolve_context` anota cada run de su subárbol con el contenedor de la tabla
+    (`GRID`, `cols`, `is_table`) y la **celda como ítem** (`cont_item` = ordinal de la celda;
+    `colspan`/`rowspan` de la celda). El contenido conserva así su propia estructura (saltos de
+    `<br>`/bloque, enlaces, énfasis, imágenes) dentro de su columna.
+    **Dado** `<td><figure><img><figcaption>C</figcaption></figure></td><td><a><b>T</b></a><br>d</td>`
+    **cuando** se construye la vista **entonces** la imagen, `C`, `T` y `d` llevan el `cont_id`
+    de la tabla; imagen y `C` comparten `cont_item`; `T` (enlace) y `d` (texto, **no** enlace)
+    comparten otro; `d` abre línea (`block_break`).
+    Antes: la imagen salía **sin** pertenencia y partía el run contiguo del grid (cada celda a su
+    propia fila: el bloque «Otros proyectos» de la portada de Wikipedia medía +2000 px), el `<br>`
+    se perdía y todo el texto de la celda se volvía enlace. Las celdas no ricas (solo texto, o
+    exactamente un ancla que envuelve todo el texto) siguen recolectadas, y una celda vacía
+    sigue emitiendo su run `" "` para ocupar la columna. Candado:
+    `test_build_table_rich_cell_is_grid_item`.
+  - **Una caja de tabla sin celdas no es una tabla anidada (2026-11-12).** `display:table` sobre
+    un envoltorio sin descendientes de rol celda (el `<figure class="mw-halign-center">` de
+    MediaWiki) es un bloque encogido a su contenido: la celda que lo contiene sigue siendo hoja
+    de SU tabla. Candado: `test_build_table_cellless_display_table_is_not_nested`.
+  - **La caja de una tabla es la que comparten sus celdas, nunca la del contenedor de autor que
+    la rodea (2026-11-12).** La ruta de celda recolectada ya no copia `cu_cont.box_id` (la caja
+    del flex/grid de autor más cercano) al descriptor de la tabla: el layout deriva la caja
+    común (`band_common_box`) también para una tabla ANIDADA en un ítem
+    (`layout_container`, segmento anidado), igual que en el nivel raíz. Antes la tabla
+    arrancaba en el borde del ítem y cada celda reabría las cajas intermedias (una copia con
+    padding/borde del envoltorio por celda). Candados E2E:
+    `test_dump_layout_nested_table_inside_item_box`,
+    `test_dump_layout_table_cells_do_not_reopen_wrappers`.
   - **Tablas con celdas multi-link = FLUJO, no grid (los links sobreviven).** El aplanado a
     texto de una celda recolectada **destruye sus `<a href>`** (Hacker News quedaba sin un solo
     link). Regla: una tabla con **alguna celda hoja que contenga ≥2 anclas con `href`** es una

@@ -1926,6 +1926,94 @@ static void test_build_table_cells_distinct_items(void **state) {
     hp_document_free(doc);
 }
 
+/* A RICH cell (a <br>, an image, a block, or text beside its one link) is a real grid
+ * item: its subtree is walked and every run carries the table's container and the cell
+ * as its item. Flattening such a cell lost the <br>, turned the whole text into the
+ * link, and left the <img> with NO membership -- a stray run that split the grid's
+ * contiguous item run and dropped every cell onto its own line (Wikipedia's sister
+ * projects table rendered 2000px taller than in Firefox). */
+static void test_build_table_rich_cell_is_grid_item(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><table><tr>"
+        "<td><figure><a href='https://c.example/'><img src='https://c.example/i.png'"
+        " width='35' height='35' alt=''></a><figcaption>Capt</figcaption></figure></td>"
+        "<td><a href='https://t.example/'><b>Title</b></a><br>desc text</td>"
+        "<td>plain</td>"
+        "</tr></table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+
+    const pv_run *plain = find_text(v, "plain");
+    const pv_run *capt = find_text(v, "Capt");
+    const pv_run *title = find_text(v, "Title");
+    const pv_run *desc = find_text(v, "desc text");
+    assert_non_null(plain);
+    assert_non_null(capt);
+    assert_non_null(title);
+    assert_non_null(desc);
+    const pv_run *img = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i)
+        if (pv_at(v, i)->kind == PV_IMAGE) img = pv_at(v, i);
+    assert_non_null(img);
+
+    /* One table, one grid of three columns, every run a member. */
+    assert_true(plain->cont_id >= 0);
+    assert_int_equal(plain->cont_cols, 3);
+    assert_int_equal(img->cont_id, plain->cont_id);
+    assert_int_equal(capt->cont_id, plain->cont_id);
+    assert_int_equal(title->cont_id, plain->cont_id);
+    assert_int_equal(desc->cont_id, plain->cont_id);
+    assert_int_equal(desc->cont_cols, 3);
+
+    /* The cell is the item: runs of one cell share it, cells differ. */
+    assert_true(img->cont_item >= 0);
+    assert_int_equal(img->cont_item, capt->cont_item);
+    assert_int_equal(title->cont_item, desc->cont_item);
+    assert_int_not_equal(img->cont_item, title->cont_item);
+    assert_int_not_equal(title->cont_item, plain->cont_item);
+    assert_int_not_equal(img->cont_item, plain->cont_item);
+
+    /* The cell's own structure survives: the link is only the link, <br> breaks. */
+    assert_int_equal(title->kind, PV_LINK);
+    assert_int_equal(desc->kind, PV_TEXT);
+    assert_true(desc->block_break);
+
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* `display:table` on an element with no table-internal descendants (MediaWiki's
+ * `figure.mw-halign-center`) is a shrink-wrapped block, not a nested table: the cell
+ * that holds it is still a leaf of ITS table. Counting it as a nested table made the
+ * cell a "container cell", walked with no grid membership -- every such cell fell
+ * out of the grid onto its own line. */
+static void test_build_table_cellless_display_table_is_not_nested(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><body><table><tr>"
+        "<td><figure><img src='https://c.example/i.png' width='35' height='35' alt=''>"
+        "</figure></td>"
+        "<td>plain</td>"
+        "</tr></table></body></html>");
+    pv_view *v = NULL;
+    static const char CSS[] = "figure{display:table;margin:0 auto}";
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *plain = find_text(v, "plain");
+    assert_non_null(plain);
+    const pv_run *img = NULL;
+    for (size_t i = 0; i < pv_count(v); ++i)
+        if (pv_at(v, i)->kind == PV_IMAGE) img = pv_at(v, i);
+    assert_non_null(img);
+    assert_true(plain->cont_id >= 0);
+    assert_int_equal(plain->cont_cols, 2);
+    assert_int_equal(img->cont_id, plain->cont_id);
+    assert_true(img->cont_item >= 0);
+    assert_int_not_equal(img->cont_item, plain->cont_item);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_table_colspan_rowspan(void **state) {
     (void)state;
     /* 3 columns: Name(1) | Contact(2). John Doe spans 2 rows.
@@ -5597,6 +5685,8 @@ int main(void) {
         cmocka_unit_test(test_build_cont_item_identity),
         cmocka_unit_test(test_build_table_cells_distinct_items),
         cmocka_unit_test(test_build_table_colspan_rowspan),
+        cmocka_unit_test(test_build_table_rich_cell_is_grid_item),
+        cmocka_unit_test(test_build_table_cellless_display_table_is_not_nested),
         cmocka_unit_test(test_build_grid_container),
         cmocka_unit_test(test_build_grid_autofill_marker),
         cmocka_unit_test(test_build_fontface_hash),

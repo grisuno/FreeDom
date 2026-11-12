@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `css_word_break` | enum | `include/css.h:260` | `` |
+| `cvr_table` | struct | `include/css.h:1202` | `` |
 | `declared` | function | `include/css.h:886` | `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...` |
 | `element` | function | `include/css.h:891` | `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...` |
 | `family` | function | `include/css.h:710` | `* LOCAL family (spec/text_shape.md section 7);` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `hb_set` | type_alias | `include/hostblock.h:29` | `typedef struct hb_set hb_set;` |
 | `hb_status` | enum | `include/hostblock.h:42` | `` |
 | `walked` | function | `include/hostblock.h:65` | `* walked (the host, then without its first label, ...): any suffix on the allowlist * => HB_ALLOW (allow wins...` |
-| `FREEDOM_HOSTEDIT_H` | macro | `include/hostedit.h:2` | `#define FREEDOM_HOSTEDIT_H` |
-| `HE_MAX_HOST` | macro | `include/hostedit.h:32` | `#define HE_MAX_HOST` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

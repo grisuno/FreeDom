@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `assign_doc_order` | function | `src/box_tree.c:505` | `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,                   ...` |
+| `block` | function | `src/box_tree.c:566` | `* true block (same flow neighbourhood), strictly better than zeros. NULL      * placed keeps lega...` |
 | `bt_box_hidden` | function | `src/box_tree.c:776` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
 | `bt_containing_block` | function | `src/box_tree.c:555` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,                         ...` |
 | `bt_defer_roots` | function | `src/box_tree.c:808` | `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,                       const bt_positi...` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `f_box_sizing` | function | `src/css_computed.c:130` | `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)` |
 | `f_clear` | function | `src/css_computed.c:110` | `static size_t f_clear(const ccm_input *in, char *out, size_t cap)` |
 | `f_color` | function | `src/css_computed.c:193` | `static size_t f_color(const ccm_input *in, char *out, size_t cap)` |
-| `f_cursor` | function | `src/css_computed.c:157` | `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)` |
-| `f_display` | function | `src/css_computed.c:77` | `static size_t f_display(const ccm_input *in, char *out, size_t cap)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

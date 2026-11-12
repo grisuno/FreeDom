@@ -1,6 +1,6 @@
 Stage 2 demo: z-index stacking
 === Freedom layout ===
-content_w=1000 total_h=188.0 nbox=4 nrow=4 npositioned=4
+content_w=1000 total_h=428.0 nbox=4 nrow=4 npositioned=4
   row[0] top=60.0 h=42.0 x_off=16.0 w=984.0
   row[1] top=114.0 h=22.0 x_off=16.0 w=968.0
   row[2] top=136.0 h=22.0 x_off=16.0 w=968.0

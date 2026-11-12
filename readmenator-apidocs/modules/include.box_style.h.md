@@ -556,8 +556,6 @@ double bx_definite_content_h(double h, double min_h, double max_h, int border_bo
 
 **Returns:** `* instead of letting it extend the`
 
-*Called by:* [`offset`](gui.browser_ui.c.md#offset)
-
 ---
 
 <a id="bx_lp_px"></a>

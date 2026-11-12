@@ -2520,6 +2520,103 @@ static void test_dump_layout_oof_subtree_real_layout(void **state) {
 }
 
 
+/* The scroll extent is the page's scrollable overflow, not the height of its root box:
+ * `html, body { height: 100% }` (Vector on Wikipedia, most app shells) ends the body box at
+ * the viewport height while its content overflows it visibly. The window sized its
+ * scrollbar from the flow height alone, so such a page stopped scrolling at 1080px and
+ * read as truncated, while the PNG export (which already measured every box) was whole. */
+static void test_dump_layout_total_h_covers_overflowing_content(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>"
+        "html, body { height: 100%; margin: 0; }"
+        ".tall { height: 4000px; background: #ccc; }"
+        "</style></head><body><div class=\"tall\">tall</div><p>after</p></body></html>";
+    const char *path = "__freedom_scroll_extent.html";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    char out[8192];
+    int rc;
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --dump-layout %s", path) < sizeof args);
+    assert_int_equal(run_freedom(args, out, sizeof out, &rc), 0);
+    assert_int_equal(rc, 0);
+    char *th = strstr(out, "total_h=");
+    assert_non_null(th);
+    double total = 0.0;
+    assert_int_equal(sscanf(th, "total_h=%lf", &total), 1);
+    assert_true(total >= 4000.0);
+    unlink(path);
+}
+
+/* Runs --author-css --dump-layout over html and returns the output in out. */
+static void dump_layout_of(const char *html, const char *path, char *out, size_t cap) {
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    int rc;
+    char args[256];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --dump-layout %s", path) < sizeof args);
+    assert_int_equal(run_freedom(args, out, cap, &rc), 0);
+    assert_int_equal(rc, 0);
+    unlink(path);
+}
+
+/* A <table> nested in a flex item sits inside the boxes between the item's root and
+ * the table (a bordered, padded card): a synthesised table grid stamps no container
+ * box, so the nested path never opened them for it and the table started on the
+ * item's edge (x = 500 here) instead of inside the card (500 + 16 + 1 + 16). */
+static void test_dump_layout_nested_table_inside_item_box(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0}.row{display:flex}.col{width:50%}"
+        ".box{border:1px solid #888;padding:16px;margin:0 16px}</style></head><body>"
+        "<div class=\"row\"><div class=\"col\"><div class=\"box\"><p>Left</p></div></div>"
+        "<div class=\"col\"><div class=\"box\"><p>Intro</p>"
+        "<table><tr><td>a one</td><td>b two</td></tr>"
+        "<tr><td>d four</td><td>e five</td></tr></table></div></div></div></body></html>";
+    char out[8192];
+    dump_layout_of(html, "__freedom_nested_table.html", out, sizeof out);
+    int right_rows = 0;
+    for (char *p = strstr(out, "row["); p != NULL; p = strstr(p + 1, "row[")) {
+        double top = 0, h = 0, x = 0;
+        if (sscanf(strchr(p, ' '), " top=%lf h=%lf x_off=%lf", &top, &h, &x) != 3) continue;
+        if (x < 400.0) continue;
+        ++right_rows;
+        assert_true(x >= 533.0);
+    }
+    assert_true(right_rows >= 3);
+}
+
+/* A table's bound is the box its cells share, never the box of the author flex
+ * container around it: with `.wrap{display:flex;margin:..}` owning a box, the table
+ * took THAT box as its bound and every cell re-opened the column and the padded card
+ * in between -- one copy of the wrapper per cell (Wikipedia's sister projects). */
+static void test_dump_layout_table_cells_do_not_reopen_wrappers(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0}.wrap{display:flex;margin:0 -8px}"
+        ".col{margin:0 8px}.box{padding:16px}</style></head><body>"
+        "<div class=\"wrap\"><div class=\"col\"><div class=\"box\"><p>Left</p></div></div>"
+        "<div class=\"col\"><div class=\"box\"><p>Intro</p>"
+        "<table><tr><td>a one</td><td>b two</td><td>c three</td></tr>"
+        "<tr><td>d four</td><td>e five</td><td>f six</td></tr></table>"
+        "</div></div></div></body></html>";
+    char out[8192];
+    dump_layout_of(html, "__freedom_table_wrappers.html", out, sizeof out);
+    char *nb = strstr(out, "nbox=");
+    assert_non_null(nb);
+    size_t nbox = 999;
+    assert_int_equal(sscanf(nb, "nbox=%zu", &nbox), 1);
+    assert_true(nbox <= 6);
+}
+
+
 /* A heading's bottom margin before a flex container that has no box of its own, inside a
  * `max-width; margin:auto` wrapper, is the gap between them (CSS 2.1 8.3.1): it was dropped
  * (gitlab "Ship faster. Stay in control.": the cards touched the title). */
@@ -4535,6 +4632,9 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_margin_before_container_in_wrapper),
         cmocka_unit_test(test_dump_layout_inline_box_second_run_stays),
         cmocka_unit_test(test_dump_layout_nested_column_takes_max),
+        cmocka_unit_test(test_dump_layout_total_h_covers_overflowing_content),
+        cmocka_unit_test(test_dump_layout_nested_table_inside_item_box),
+        cmocka_unit_test(test_dump_layout_table_cells_do_not_reopen_wrappers),
         cmocka_unit_test(test_download_png_degenerate_transform_paints_rest),
         cmocka_unit_test(test_rejects_http_url),
     };
