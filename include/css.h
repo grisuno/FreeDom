@@ -67,6 +67,12 @@ typedef enum css_display {
     CSS_DISP_INLINE_BOX
 } css_display;
 
+/* OR-ed by cb_interp_display into the code of an INLINE-level flex/grid container
+ * (`inline-flex`, `inline-grid`, `inline flex`...). The cascade splits it off into
+ * css_style.display_inline, so css_style.display only ever holds a css_display. */
+#define CSS_DISP_INLINE_OUTER 0x100
+#define CSS_DISP_INNER_MASK   0xff
+
 typedef enum css_justify {  /* justify-content (flex/grid main axis) */
     CSS_JUSTIFY_UNSET = 0,
     CSS_JUSTIFY_START,
@@ -663,6 +669,8 @@ typedef struct css_style {
     int         bold;        /* 1, 0, or -1 (unset) */
     int         italic;      /* 1, 0, or -1 (unset) */
     css_display display;     /* CSS_DISP_UNSET if absent */
+    int         display_inline; /* 1: the declared display is an inline-level flex/grid
+                                 * container (Display 3 section 2); written with display */
     int         gap;         /* px between flex/grid items, or -1 (unset) */
     css_justify justify;     /* justify-content; CSS_JUSTIFY_UNSET if absent */
     int         grid_cols;   /* grid-template-columns track count, or 0 (unset) */

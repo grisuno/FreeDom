@@ -67,7 +67,7 @@ third-party network. Each pair shows the top of the page; the number is the
 | ![Hacker News](docs/img/compare-hackernews.png) | ![Wikipedia](docs/img/compare-wikipedia.png) |
 | **andreagrandi.it (3.01)** | **Hugging Face (5.67)** |
 | ![andreagrandi.it](docs/img/compare-site-andreagrandi.png) | ![Hugging Face](docs/img/compare-huggingface.png) |
-| **GitHub (2.85)** | **Slashdot (2.67): still the hardest page** |
+| **GitHub (3.49)** | **Slashdot (2.67): still the hardest page** |
 | ![GitHub](docs/img/compare-site-github.png) | ![Slashdot](docs/img/compare-slashdot.png) |
 | **Discord (2.96)** | **GitLab (2.48)** |
 | ![Discord](docs/img/compare-site-discord.png) | ![GitLab](docs/img/compare-site-gitlab.png) |

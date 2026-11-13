@@ -1544,3 +1544,41 @@ El fondo `currentColor` es el `color` computado del elemento, heredado si no dec
 - **Los hijos de una columna flex que fluye como bloque se blockifican** (CSS Display 3 §2.7):
   `is_flow_column_item` en `resolve_context`. `<p class=stat>` flex columna con dos `<span>` apila los dos.
   `test_flex_column_blockifies_inline_items`.
+
+### Contenedores flex/grid de nivel inline: `display:inline-flex` / `inline-grid` (tanda 88, 2026-11-13)
+
+**Causa.** `inline-flex` e `inline-grid` se plegaban a `flex`/`grid` en el parser
+(`cb_interp_display`), es decir, a una caja de nivel **bloque**: ancho completo y una por
+línea. Es el `display` de casi todo botón de design system (Codex de MediaWiki, Primer,
+Bootstrap `.btn` moderno): fuera de un contenedor flex salían a lo ancho y apilados. En la
+portada de es.wikipedia el botón-icono de búsqueda tomaba su `max-width:28em` (448 px) como
+ancho y partía la cabecera en dos filas.
+
+**Modelo.** El `display` exterior viaja aparte del interior (CSS Display 3 §2):
+`cb_interp_display` devuelve `CSS_DISP_FLEX|GRID` con el bit `CSS_DISP_INLINE_OUTER`;
+`apply()` lo separa en `css_style.display` (interior, sin cambios para todo consumidor) y
+`css_style.display_inline` (0/1). Ningún `display == CSS_DISP_FLEX` existente cambia.
+
+- **Dado** un elemento `inline-flex`/`inline-grid` en flujo, sin `width` declarado y que NO
+  es ítem de un contenedor flex/grid, **cuando** se registra su caja, **entonces**
+  `box_w_intrinsic = 1`: encoge al contenido (CSS 2.1 §10.3.9, igual que `inline-block`),
+  acotado por `min-width`/`max-width`.
+- **Dado** el mismo elemento **como ítem** de un contenedor flex/grid, **entonces** nada
+  cambia: el ítem está *blockificado* (Display 3 §2.7) y lo dimensiona su contenedor.
+- **Dado** un padre de nivel bloque cuyos hijos elemento son todos `inline-block` **o**
+  flex/grid de nivel inline (sin texto propio), **entonces** forman la misma fila anónima
+  con wrap que ya forman los `inline-block` (`children_all_inline_block`).
+- **Dado** un contenedor flex/grid **flotante** que es el **único** hijo en flujo de su
+  padre (sin texto propio), **entonces** es el único ítem de la fila anónima del padre,
+  con `justify` = lado del flotante (`right`→`END`), y **no** funda banda de flotantes
+  (`float_id < 0`): encoge al contenido (CSS 2.1 §10.3.5), queda en el borde de su lado y
+  el padre lo contiene (un ítem flex con un botón-icono flotante). Junto a texto u otros
+  hermanos sigue siendo un flotante (`float_id >= 0`) y su caja viaja con
+  `box_w_intrinsic = 1` y `line_align` = su lado.
+- **Registro de contenedores:** `PV_MAX_CONTAINERS` = 1024 (antes 256), en heap
+  (`cont_reg_init`/`cont_reg_free`) y compartido con el códec IPC. Una portada de design
+  system registra ~450; pasado el tope el contenedor perdía su layout en silencio (el
+  grid del pie de GitHub caía a flujo). `PV_MAX_FLOATS` sigue en 256.
+- **Fuera de alcance (abierto):** un `inline-flex` en una línea **mixta** con texto encoge
+  pero abre su propia línea (no es todavía un átomo de la línea del texto); `vertical-align`
+  de la caja flex.

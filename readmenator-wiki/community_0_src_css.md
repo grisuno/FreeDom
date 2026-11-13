@@ -24,7 +24,7 @@ This community groups 57 file(s) rooted at `src` with dominant language c (cohes
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/compositor.h` | h | utility | 9 | no |
-| `include/css.h` | h | utility | 144 | no |
+| `include/css.h` | h | utility | 147 | no |
 | `include/css_atrule.h` | h | utility | 10 | no |
 | `include/css_box.h` | h | utility | 27 | no |
 | `include/css_color.h` | h | utility | 7 | no |

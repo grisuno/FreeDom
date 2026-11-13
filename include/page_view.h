@@ -56,6 +56,15 @@ typedef enum pv_status {
 /* Sized grid tracks carried per run (2026-07-11). Mirrors CSS_GRID_TRACKS_MAX in
  * css.h (page_view.c static-asserts they agree); tracks past it lay out as auto. */
 #define PV_GRID_TRACKS 8
+
+/* Anti-DoS bound on the flex/grid container table (and the id space of a run's
+ * cont_id). Sized so no ordinary page is truncated: a design-system front page makes
+ * every link an inline-flex and every list a flex, and GitHub's registers ~450 -- at
+ * the old 256 the containers past the cap silently fell back to flow. The IPC codec
+ * (src/tab.c) rejects a table larger than this. */
+#define PV_MAX_CONTAINERS 1024u
+/* Bound on distinct floated elements (float ids), unchanged. */
+#define PV_MAX_FLOATS 256u
 /* Depth of the flex/grid container chain page_view tracks and the presentation layer
  * walks. Real pages nest a few levels (header > nav > ul, or grid > flex card > flex
  * row); past this the outer levels are dropped and those containers lay out as top

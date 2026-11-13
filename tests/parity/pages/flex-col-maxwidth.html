@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>column item max-width + cyclic percentage</title><style>
+body{margin:20px;font:16px sans-serif;color:#111}
+.st{display:flex;flex-direction:column;align-items:center;background:#f2f2f2;margin-bottom:16px}
+.st h2{margin:0;max-width:700px;background:#cde}
+.st p{margin:12px 0 0;max-width:300px;background:#fdc}
+.sx{display:flex;flex-direction:column;background:#f2f2f2;margin-bottom:16px}
+.sx p{margin:0;max-width:300px;background:#cfc}
+.bar{display:flex;justify-content:space-between;border-bottom:1px solid #999;margin-bottom:16px}
+.grp{display:flex;align-items:center}
+.grp nav{display:flex}
+.full{width:100%}
+.list{display:flex;justify-content:end;list-style:none;margin:0;padding:0}
+.list li{margin:0 8px;background:#eee;padding:4px}
+</style></head><body>
+<div class="st"><h2>Titulo corto</h2><p>Tools and trends evolve, but collaboration endures. With GitHub, developers, agents, and code come together on one platform.</p></div>
+<div class="sx"><p>Un item estirado con max-width queda acotado a trescientos pixeles de ancho.</p></div>
+<div class="bar"><div class="grp"><nav><div class="full"><ul class="list"><li>Portada</li><li>Discusion</li></ul></div></nav></div>
+<div class="grp"><nav><div class="full"><ul class="list"><li>Leer</li><li>Ver fuente</li><li>Historial</li></ul></div></nav></div></div>
+<p>despues</p>
+</body></html>

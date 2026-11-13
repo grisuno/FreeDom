@@ -178,7 +178,7 @@ Unit scales for len_rebase; a scale <= 0 leaves that unit family untouched.
 
 ### `css_match`
 
-`struct` | [src/css.c:6585](../../src/css.c#L6585)
+`struct` | [src/css.c:6588](../../src/css.c#L6588)
 
 ```c
 typedef struct css_match
@@ -192,7 +192,7 @@ One matched selector, remembered between the passes of the element cascade.
 
 ### `css_cand`
 
-`struct` | [src/css.c:6591](../../src/css.c#L6591)
+`struct` | [src/css.c:6594](../../src/css.c#L6594)
 
 ```c
 typedef struct css_cand
@@ -210,7 +210,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 #### `css_cand.idx`
 
-`type_alias` | [src/css.c:6591](../../src/css.c#L6591)
+`type_alias` | [src/css.c:6594](../../src/css.c#L6594)
 
 ```c
 typedef struct css_cand { int imp, espec, ord, idx;
@@ -1073,7 +1073,7 @@ Idempotent; NULL-safe.
 |---|---|---|---|
 | `s` | `css_sheet *` |  |  |
 
-> **Inherited:** Documentation from [`css_free`](#css_free) (include/css.h:1110).
+> **Inherited:** Documentation from [`css_free`](#css_free) (include/css.h:1118).
 
 ---
 
@@ -1121,7 +1121,7 @@ Idempotent; NULL-safe.
 
 ### `css_ua_heading_em`
 
-`function` | [src/css.c:6566](../../src/css.c#L6566)
+`function` | [src/css.c:6569](../../src/css.c#L6569)
 
 ```c
 double css_ua_heading_em(int level)
@@ -1139,7 +1139,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`css_ua_heading_em`](#css_ua_heading_em) (include/css.h:1238).
+> **Inherited:** Documentation from [`css_ua_heading_em`](#css_ua_heading_em) (include/css.h:1246).
 
 ---
 
@@ -1147,7 +1147,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `css_computed_font_size_for_tag`
 
-`function` | [src/css.c:6571](../../src/css.c#L6571)
+`function` | [src/css.c:6574](../../src/css.c#L6574)
 
 ```c
 double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)
@@ -1169,7 +1169,7 @@ double css_computed_font_size_for_tag(const css_style *o, double inherited_px, c
 
 ### `css_resolve_el`
 
-`function` | [src/css.c:6757](../../src/css.c#L6757)
+`function` | [src/css.c:6760](../../src/css.c#L6760)
 
 ```c
 css_style css_resolve_el(const css_sheet *sheet, const css_element *el, const char *inline_style, size_t inline_len)
@@ -1192,7 +1192,7 @@ css_style css_resolve_el(const css_sheet *sheet, const css_element *el, const ch
 
 ### `css_resolve_el_ex`
 
-`function` | [src/css.c:6766](../../src/css.c#L6766)
+`function` | [src/css.c:6769](../../src/css.c#L6769)
 
 ```c
 css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el, const char *inline_style, size_t inline_len, cvr_table *own_out)
@@ -1218,7 +1218,7 @@ css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el, const
 
 ### `css_resolve_pseudo`
 
-`function` | [src/css.c:6782](../../src/css.c#L6782)
+`function` | [src/css.c:6785](../../src/css.c#L6785)
 
 ```c
 css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)
@@ -1242,7 +1242,7 @@ css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int 
 
 ### `css_resolve`
 
-`function` | [src/css.c:7054](../../src/css.c#L7054)
+`function` | [src/css.c:7057](../../src/css.c#L7057)
 
 ```c
 css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, const char *const *classes, size_t nclasses, const char *inline_style, size_t inline_len)
@@ -1268,7 +1268,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, c
 
 ### `NULL`
 
-`function` | [src/css.c:7078](../../src/css.c#L7078)
+`function` | [src/css.c:7081](../../src/css.c#L7081)
 
 ```c
 * Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...
@@ -1291,7 +1291,7 @@ css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id, c
 
 ### `css_font_face_count`
 
-`function` | [src/css.c:7110](../../src/css.c#L7110)
+`function` | [src/css.c:7113](../../src/css.c#L7113)
 
 ```c
 size_t css_font_face_count(const css_sheet *sheet)
@@ -1309,7 +1309,7 @@ Returns 0 on success, -1 if i is out of range.
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`css_font_face_count`](#css_font_face_count) (include/css.h:1253).
+> **Inherited:** Documentation from [`css_font_face_count`](#css_font_face_count) (include/css.h:1261).
 
 ---
 
@@ -1317,7 +1317,7 @@ Returns 0 on success, -1 if i is out of range.
 
 ### `css_font_face_at`
 
-`function` | [src/css.c:7114](../../src/css.c#L7114)
+`function` | [src/css.c:7117](../../src/css.c#L7117)
 
 ```c
 int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap)
@@ -1342,7 +1342,7 @@ int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_
 
 ### `css_parse_inline`
 
-`function` | [src/css.c:7124](../../src/css.c#L7124)
+`function` | [src/css.c:7127](../../src/css.c#L7127)
 
 ```c
 css_style css_parse_inline(const char *style, size_t len)
@@ -1363,7 +1363,7 @@ css_style css_parse_inline(const char *style, size_t len)
 
 ### `css_sheet_uses_counters`
 
-`function` | [src/css.c:7128](../../src/css.c#L7128)
+`function` | [src/css.c:7131](../../src/css.c#L7131)
 
 ```c
 int css_sheet_uses_counters(const css_sheet *sheet)
@@ -1379,7 +1379,7 @@ int css_sheet_uses_counters(const css_sheet *sheet)
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`css_sheet_uses_counters`](#css_sheet_uses_counters) (include/css.h:1043).
+> **Inherited:** Documentation from [`css_sheet_uses_counters`](#css_sheet_uses_counters) (include/css.h:1051).
 
 ---
 
@@ -1652,7 +1652,7 @@ Nesting bound for conditional group rules (@media, @supports, @layer) -- they ne
 
 ### `CSS_VAR_POOL`
 
-`macro` | [src/css.c:6657](../../src/css.c#L6657)
+`macro` | [src/css.c:6660](../../src/css.c#L6660)
 
 ```c
 #define CSS_VAR_POOL

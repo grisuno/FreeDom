@@ -6070,8 +6070,7 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
          * inside a shrink-to-fit pill measure the whole page. Only a px width
          * (resolved against a zero basis) counts. */
         const pv_box_def *ibd = (isd.box >= 0) ? rd_box_at(doc, (size_t)isd.box) : NULL;
-        /* Only a SHRINK-TO-FIT measurement (cyclic != 0) makes the percentage
-         * cyclic; a flex basis inside a definite row resolves it normally. */
+        /* Only a max-content measurement (cyclic != 0) makes the percentage cyclic. */
         int pct_only = cyclic && ibd != NULL && ibd->box_w_pct != 0 && ibd->box_w <= 0;
         if (child >= 0) {
             double decl = item_declared_basis(doc, &isd, cyclic ? 0.0 : content_w);
@@ -6714,10 +6713,15 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                      * outranks measuring what the nested container holds. */
                     b = decl_w + sd.ml + sd.mr;
                 } else {
-                    /* In a column this base is only the item's shrink-to-fit
-                     * CROSS width, where an inner percentage is cyclic. */
+                    /* The base is the item's MAX-CONTENT width, and a percentage
+                     * inside a max-content measurement is cyclic: it behaves as auto
+                     * (CSS Sizing 3 5.2.1) whatever the container's direction. Resolved
+                     * against the row instead, a `width:100%` wrapper inside an
+                     * auto-width item made that item claim the whole line -- the
+                     * left tab group of MediaWiki's toolbar took all the free space
+                     * and its `justify-content:end` list landed mid-row. */
                     b = nested_cont_basis(cr, w, th, doc, gstart[j], gstart[j + 1],
-                                          nb_child, content_w, 0, is_col)
+                                          nb_child, content_w, 0, 1)
                       + sd.pl + sd.pr + sd.bl + sd.br + sd.ml + sd.mr;
                 }
                 if (b > content_w) b = content_w;
@@ -6970,6 +6974,17 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 iw = content_w;
             else
                 iw = kid->basis;
+            /* The item's max-width caps its cross size whichever way it was reached
+             * (CSS 2.1 10.4): a stretched or shrink-to-fit `p{max-width:600px}` in a
+             * centred column is 600px wide and centred, not the whole line. */
+            if (decl <= 0.0 && sd.box >= 0) {
+                const pv_box_def *ibd = rd_box_at(doc, (size_t)sd.box);
+                if (ibd != NULL && (ibd->box_mw > 0 || ibd->box_mw_pct > 0))
+                    iw = bx_flex_max_clamp(
+                        iw, bx_width_cap(ibd->box_mw, ibd->box_mw_pct, content_w),
+                        ibd->box_sizing == CSS_BOXS_BORDER,
+                        sd.pl + sd.pr + sd.bl + sd.br, sd.ml + sd.mr);
+            }
             if (iw > content_w) iw = content_w;
             if (iw < 1.0) iw = 1.0;
             kid->w = iw;
@@ -7834,11 +7849,18 @@ static void open_box(rc_layout *L, rc_state *s, const ui_theme *th,
      * filling the line (CSS 2.2 §10.3.9): shrink_w is that measured content width,
      * passed in by the caller. Without it a centred `display:inline-block` button
      * painted as a full-page-width bar. */
-    if (shrink_w > 0.0 && wcap <= 0.0) {
+    /* A max-width alone does not size the box: it is the CEILING of the shrink-to-fit
+     * width (CSS 2.1 10.4). Taking it as the width made an icon button with
+     * `max-width:28em` 448px wide. */
+    int only_max_w = !founder && wcap > 0.0 &&
+                     bx_width_cap(def->box_w, def->box_w_pct, avail_w) <= 0.0;
+    if (shrink_w > 0.0 && (wcap <= 0.0 || only_max_w)) {
+        double ceiling = only_max_w ? wcap : 0.0;
         /* shrink_w is the CONTENT width; the span carries the borders too. */
         wcap = shrink_w + bl + br;
         double room = avail_w - pl - pr;
         if (wcap > room) wcap = room;
+        if (ceiling > 0.0 && wcap > ceiling) wcap = ceiling;
         if (wcap < 1.0) wcap = 1.0;
     }
     /* A declared width overflows its containing block rather than being squeezed
@@ -8169,6 +8191,19 @@ static double box_shrink_width(cairo_t *cr, const browser_window *w,
         }
         if (fixed) return sum + (double)(cd->gap > 0 ? cd->gap : 0) * (double)(cd->cols - 1);
     }
+    /* A flex container is as wide as its items side by side plus its gaps (CSS Sizing 3
+     * 5.1), which is what nested_cont_basis measures: the text measure below strings
+     * the runs into one line and drops every gap (an icon+label button came out one
+     * gap too narrow). */
+    for (size_t c = 0; c < rd_cont_count(doc); ++c) {
+        const pv_cont_def *cd = rd_cont_at(doc, c);
+        if (cd == NULL || cd->box_id != box_id || !cd->box_own || cd->anon_row ||
+            cd->display != BX_DISPLAY_FLEX)
+            continue;
+        double nb = nested_cont_basis(cr, w, th, doc, start, j, (int)c, 0.0, 0, 1);
+        if (nb > 0.0) return nb;
+        break;
+    }
     double tw = measure_item_content_w(cr, w, th, doc, start, j);
     /* Boxes contribute too (CSS Sizing 3 5.1): a descendant with a declared px
      * width adds that width plus the horizontal padding/border/margin of every box
@@ -8486,22 +8521,18 @@ static int band_shared_box(const rd_doc *doc, const rc_state *s,
         ncommon = m;
     }
     /* A float that owns a box of its own sits INSIDE its wrapper: the boxes above the
-     * founder's are the band's shared context and are opened at the band level, before
-     * the column -- a `.wrap{height:30px;background:...}` holding one `float:right` list
-     * had its box opened INSIDE the float's column, so its bar painted the column's width
-     * and its height did not reserve the flow. Only when the founder has no box to mark
-     * where the float begins does the old rule (the deepest box already open) apply. */
+     * founder's are the float's containing block chain (CSS 2.1 10.1), so they are the
+     * band's shared context and are opened at the band level, before the column. Opened
+     * inside the column instead, a `div{width:600px}` holding one `float:right` box was
+     * measured against the page: the float landed at the page's right edge, outside its
+     * parent, and the parent's box took the column's width (lobste.rs' 30px vote column
+     * came out 20px with its story wrappers opened twice). Only when the founder has no
+     * box to mark where the float begins does the old rule (the deepest box already
+     * open) apply. */
     int fb = rd_at(doc, start)->float_box;
     if (fb >= 0) {
-        for (int i = 1; i < ncommon; ++i) {
-            if (common[i] != fb) continue;
-            /* Only a wrapper that BOUNDS its float (a declared height) is worth the change: it
-             * is what reserves the flow and what the bar's background must span. An auto-height
-             * wrapper keeps the old rule (opened with the float's own column). */
-            const pv_box_def *wd = rd_box_at(doc, (size_t)common[i - 1]);
-            if (wd != NULL && (wd->box_h > 0 || wd->box_h_set)) return common[i - 1];
-            break;
-        }
+        for (int i = 1; i < ncommon; ++i)
+            if (common[i] == fb) return common[i - 1];
     }
     int keep = -1;
     for (int i = 0; i < ncommon && i < s->box_depth; ++i) {
@@ -9308,7 +9339,11 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                 double ow = bx_width_cap(bb->float_ow, bb->float_ow_pct, ctx_w);
                 if (ow > 0.0) wbasis = ow;
             }
-            double c = run_width_cap(bb, wbasis);
+            /* Only a DECLARED width sizes a float; a max-width alone is a ceiling on
+             * its shrink-to-fit width (CSS 2.1 10.4), never a floor: an icon button
+             * `float:right; max-width:28em` is as wide as its icon, not 448px. */
+            double c = (bx_width_cap(bb->box_w, bb->box_w_pct, wbasis) > 0.0)
+                       ? run_width_cap(bb, wbasis) : 0.0;
             /* The founder's own declared width travels on its runs even when the
              * founder has no text of its own (a `nav{float:left;width:70%}` whose
              * content is a list): without it the float looked width-less and

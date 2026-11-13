@@ -6207,7 +6207,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_TEXTDECO:       o->text_decoration = d->ival; break;
             case P_TEXTDECO_COLOR: o->text_decoration_color = d->ival; break;
             case P_TEXTDECO_STYLE: o->text_decoration_style = d->ival; break;
-            case P_DISPLAY:  o->display = (css_display)d->ival; break;
+            case P_DISPLAY:
+                o->display = (css_display)(d->ival & CSS_DISP_INNER_MASK);
+                o->display_inline = (d->ival & CSS_DISP_INLINE_OUTER) != 0;
+                break;
             case P_GAP:      o->gap = d->ival; break;
             case P_JUSTIFY:  o->justify = (css_justify)d->ival; break;
             case P_GRIDCOLS: o->grid_cols = d->ival; break;

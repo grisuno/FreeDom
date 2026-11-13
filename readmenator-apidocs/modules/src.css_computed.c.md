@@ -25,7 +25,7 @@ flowchart LR
 
 ### `ccm_prop`
 
-`struct` `const` | [src/css_computed.c:276](../../src/css_computed.c#L276)
+`struct` `const` | [src/css_computed.c:278](../../src/css_computed.c#L278)
 
 ```c
 typedef struct ccm_prop { const char *name; ccm_fn fn; } ccm_prop;
@@ -39,7 +39,7 @@ typedef struct ccm_prop { const char *name; ccm_fn fn; } ccm_prop;
 
 ### `ccm_get`
 
-`function` | [src/css_computed.c:310](../../src/css_computed.c#L310)
+`function` | [src/css_computed.c:312](../../src/css_computed.c#L312)
 
 ```c
 size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)
@@ -70,7 +70,7 @@ Returns its length, or 0 when the property is unknown, in which case out is "". 
 
 ### `ccm_property_count`
 
-`function` | [src/css_computed.c:323](../../src/css_computed.c#L323)
+`function` | [src/css_computed.c:325](../../src/css_computed.c#L325)
 
 ```c
 size_t ccm_property_count(void)
@@ -88,7 +88,7 @@ The properties ccm_get knows, for enumeration (length/item/cssText).
 
 ### `ccm_property_name`
 
-`function` `const` | [src/css_computed.c:325](../../src/css_computed.c#L325)
+`function` `const` | [src/css_computed.c:327](../../src/css_computed.c#L327)
 
 ```c
 const char *ccm_property_name(size_t i)
@@ -110,7 +110,7 @@ const char *ccm_property_name(size_t i)
 
 ### `LEN_FIELD`
 
-`macro` | [src/css_computed.c:223](../../src/css_computed.c#L223)
+`macro` | [src/css_computed.c:225](../../src/css_computed.c#L225)
 
 ```c
 #define LEN_FIELD(NAME, FIELD, UNSET)
@@ -122,7 +122,7 @@ const char *ccm_property_name(size_t i)
 
 ### `CCM_NPROPS`
 
-`macro` | [src/css_computed.c:308](../../src/css_computed.c#L308)
+`macro` | [src/css_computed.c:310](../../src/css_computed.c#L310)
 
 ```c
 #define CCM_NPROPS

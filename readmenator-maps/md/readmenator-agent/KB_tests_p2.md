@@ -419,13 +419,13 @@ static void test_vendor_prefixes(v...`
   - `test_emit_len_claims_both_halves` (function, line 34) `static void test_emit_len_claims_both_halves(void **state)`
   - `test_box4_partial_fails_closed` (function, line 44) `static void test_box4_partial_fails_closed(void **state)`
   - `test_align_display_gap` (function, line 52) `static void test_align_display_gap(void **state)`
-  - `test_grid_repeat_autofill_dropped` (function, line 63) `static void test_grid_repeat_autofill_dropped(void **state)`
-  - `test_fit_content_trim` (function, line 70) `static void test_fit_content_trim(void **state)`
-  - `test_lineheight_abs_vs_scale` (function, line 86) `static void test_lineheight_abs_vs_scale(void **state)`
-  - `test_clip_inset_edges` (function, line 102) `static void test_clip_inset_edges(void **state)`
-  - `test_clip_inset_rejects` (function, line 127) `static void test_clip_inset_rejects(void **state)`
-  - `test_grid_rows_many_strings_fail_closed` (function, line 141) `static void test_grid_rows_many_strings_fail_closed(void **state)`
-  - `main` (function, line 152) `int main(void)`
+  - `test_grid_repeat_autofill_dropped` (function, line 71) `static void test_grid_repeat_autofill_dropped(void **state)`
+  - `test_fit_content_trim` (function, line 78) `static void test_fit_content_trim(void **state)`
+  - `test_lineheight_abs_vs_scale` (function, line 94) `static void test_lineheight_abs_vs_scale(void **state)`
+  - `test_clip_inset_edges` (function, line 110) `static void test_clip_inset_edges(void **state)`
+  - `test_clip_inset_rejects` (function, line 135) `static void test_clip_inset_rejects(void **state)`
+  - `test_grid_rows_many_strings_fail_closed` (function, line 149) `static void test_grid_rows_many_strings_fail_closed(void **state)`
+  - `main` (function, line 160) `int main(void)`
 - Depends on: `include/css_box.h`, `include/css_decl.h`
 
 ## tests/test_css_color.c
@@ -483,11 +483,11 @@ static void test...`
   - `blank` (function, line 18) `static css_style blank(void)`
   - `test_initial_values` (function, line 29) `static void test_initial_values(void **state)`
   - `test_declared_values` (function, line 48) `static void test_declared_values(void **state)`
-  - `test_ua_display_by_tag` (function, line 68) `static void test_ua_display_by_tag(void **state)`
-  - `test_color_inherits` (function, line 86) `static void test_color_inherits(void **state)`
-  - `test_unknown_property_is_empty` (function, line 94) `static void test_unknown_property_is_empty(void **state)`
-  - `test_enumeration` (function, line 106) `static void test_enumeration(void **state)`
-  - `main` (function, line 120) `int main(void)`
+  - `test_ua_display_by_tag` (function, line 73) `static void test_ua_display_by_tag(void **state)`
+  - `test_color_inherits` (function, line 91) `static void test_color_inherits(void **state)`
+  - `test_unknown_property_is_empty` (function, line 99) `static void test_unknown_property_is_empty(void **state)`
+  - `test_enumeration` (function, line 111) `static void test_enumeration(void **state)`
+  - `main` (function, line 125) `int main(void)`
 - Depends on: `include/css_computed.h`
 
 

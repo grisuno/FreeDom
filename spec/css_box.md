@@ -80,3 +80,13 @@ int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);
 
 - Cascade/dispatch/sheet storage (stays in `css.c`).
 - Used-value clamping against containing blocks (consumer-side).
+
+
+## Tanda 88 (2026-11-13): `display` exterior
+
+`cb_interp_display` devuelve `CSS_DISP_FLEX|CSS_DISP_GRID` con el bit
+`CSS_DISP_INLINE_OUTER` para `inline-flex`, `inline flex`, `-webkit-inline-flex`,
+`-moz-inline-flex`, `-ms-inline-flexbox`, `-webkit-inline-box`, `-moz-inline-box`,
+`inline-grid`, `inline grid` y `-ms-inline-grid`. La cascada lo separa en
+`css_style.display` (interior) y `css_style.display_inline`; `getComputedStyle` devuelve
+`inline-flex`/`inline-grid`. Detalle de layout en `spec/page_view.md`.

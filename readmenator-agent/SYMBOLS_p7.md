@@ -3,28 +3,32 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `f_cursor` | function | `src/css_computed.c:157` | `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_top_style` | function | `src/css_computed.c:258` | `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_box_sizing` | function | `src/css_computed.c:132` | `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)` |
+| `f_clear` | function | `src/css_computed.c:112` | `static size_t f_clear(const ccm_input *in, char *out, size_t cap)` |
+| `f_color` | function | `src/css_computed.c:195` | `static size_t f_color(const ccm_input *in, char *out, size_t cap)` |
+| `f_cursor` | function | `src/css_computed.c:159` | `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)` |
 | `f_display` | function | `src/css_computed.c:77` | `static size_t f_display(const ccm_input *in, char *out, size_t cap)` |
-| `f_flex_direction` | function | `src/css_computed.c:135` | `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)` |
-| `f_flex_grow` | function | `src/css_computed.c:269` | `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)` |
-| `f_flex_shrink` | function | `src/css_computed.c:272` | `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)` |
-| `f_flex_wrap` | function | `src/css_computed.c:140` | `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)` |
-| `f_float` | function | `src/css_computed.c:105` | `static size_t f_float(const ccm_input *in, char *out, size_t cap)` |
-| `f_font_size` | function | `src/css_computed.c:181` | `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)` |
-| `f_font_style` | function | `src/css_computed.c:173` | `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)` |
-| `f_font_weight` | function | `src/css_computed.c:177` | `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)` |
-| `f_gap` | function | `src/css_computed.c:244` | `static size_t f_gap(const ccm_input *in, char *out, size_t cap)` |
-| `f_justify` | function | `src/css_computed.c:145` | `static size_t f_justify(const ccm_input *in, char *out, size_t cap)` |
-| `f_line_height` | function | `src/css_computed.c:187` | `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)` |
-| `f_opacity` | function | `src/css_computed.c:204` | `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)` |
-| `f_overflow_x` | function | `src/css_computed.c:115` | `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)` |
-| `f_overflow_y` | function | `src/css_computed.c:120` | `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)` |
-| `f_position` | function | `src/css_computed.c:95` | `static size_t f_position(const ccm_input *in, char *out, size_t cap)` |
-| `f_text_align` | function | `src/css_computed.c:125` | `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)` |
-| `f_text_transform` | function | `src/css_computed.c:168` | `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)` |
-| `f_visibility` | function | `src/css_computed.c:100` | `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)` |
-| `f_white_space` | function | `src/css_computed.c:163` | `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)` |
-| `f_z_index` | function | `src/css_computed.c:212` | `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)` |
+| `f_flex_direction` | function | `src/css_computed.c:137` | `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)` |
+| `f_flex_grow` | function | `src/css_computed.c:271` | `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)` |
+| `f_flex_shrink` | function | `src/css_computed.c:274` | `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)` |
+| `f_flex_wrap` | function | `src/css_computed.c:142` | `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)` |
+| `f_float` | function | `src/css_computed.c:107` | `static size_t f_float(const ccm_input *in, char *out, size_t cap)` |
+| `f_font_size` | function | `src/css_computed.c:183` | `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)` |
+| `f_font_style` | function | `src/css_computed.c:175` | `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_font_weight` | function | `src/css_computed.c:179` | `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)` |
+| `f_gap` | function | `src/css_computed.c:246` | `static size_t f_gap(const ccm_input *in, char *out, size_t cap)` |
+| `f_justify` | function | `src/css_computed.c:147` | `static size_t f_justify(const ccm_input *in, char *out, size_t cap)` |
+| `f_line_height` | function | `src/css_computed.c:189` | `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)` |
+| `f_opacity` | function | `src/css_computed.c:206` | `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)` |
+| `f_overflow_x` | function | `src/css_computed.c:117` | `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)` |
+| `f_overflow_y` | function | `src/css_computed.c:122` | `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)` |
+| `f_position` | function | `src/css_computed.c:97` | `static size_t f_position(const ccm_input *in, char *out, size_t cap)` |
+| `f_text_align` | function | `src/css_computed.c:127` | `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)` |
+| `f_text_transform` | function | `src/css_computed.c:170` | `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)` |
+| `f_visibility` | function | `src/css_computed.c:102` | `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)` |
+| `f_white_space` | function | `src/css_computed.c:165` | `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)` |
+| `f_z_index` | function | `src/css_computed.c:214` | `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)` |
 | `put` | function | `src/css_computed.c:9` | `static size_t put(char *out, size_t cap, const char *s)` |
 | `put_enum` | function | `src/css_computed.c:42` | `static size_t put_enum(char *out, size_t cap, int v, const char *const *names, size_t n,         ...` |
 | `put_len` | function | `src/css_computed.c:37` | `static size_t put_len(char *out, size_t cap, int v, const char *unset_text)` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `fb_buffer_push` | function | `src/freebug.c:19` | `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)` |
 | `fb_buffer_push_loc` | function | `src/freebug.c:23` | `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,                    ...` |
 | `fb_buffer_reset` | function | `src/freebug.c:78` | `void fb_buffer_reset(fb_buffer *b)` |
-| `fb_level_name` | function | `src/freebug.c:110` | `const char *fb_level_name(int level)` |
-| `whole` | function | `src/freebug.c:5` | `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);` |
-| `BLOCKED` | function | `src/freedom.c:1047` | `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);` |
-| `CSS_DROPS_REPORT_MAX` | macro | `src/freedom.c:174` | `#define CSS_DROPS_REPORT_MAX` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

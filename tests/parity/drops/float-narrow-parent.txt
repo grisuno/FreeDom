@@ -1,0 +1,2 @@
+float in a narrow parent
+CSS drops: 0 declaration(s) dropped, 0 distinct

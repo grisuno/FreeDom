@@ -322,3 +322,21 @@ todo lo que sigue a cada hijo por esas cantidades al cerrar la caja de la column
 
 Una columna con `align-items` inicial estira sus ítems al ancho (Flexbox §9.4,
 `stretch` es el valor inicial): el pie toma el ancho completo.
+
+
+## Tanda 88 (2026-11-13): tamaños intrínsecos en el layout de contenedores
+
+- **Porcentaje cíclico:** la base de un ítem que es a su vez contenedor y no declara
+  ancho es su max-content, y dentro de esa medida un `width:%` de un descendiente se
+  comporta como `auto` (CSS Sizing 3 §5.2.1) sea cual sea la dirección del contenedor
+  (antes solo en columnas). Caso: el grupo izquierdo de pestañas de MediaWiki ocupaba
+  todo el espacio libre.
+- **`max-width` en el eje transversal de una columna:** el ancho de un ítem sin `width`
+  (estirado o encogido) se acota por su `max-width` (`bx_flex_max_clamp`) antes de
+  alinearlo. Caso: `p{max-width:600px}` en una pila centrada (hero de GitHub y de
+  Hugging Face).
+- **Ancho shrink-to-fit de un contenedor flex con caja propia:** suma de las bases de sus
+  ítems más los `gap` (`nested_cont_basis`), no el texto en una sola línea.
+- Sondas: `flex-col-maxwidth.html`, `inline-flex-buttons.html`.
+- **Abierto:** un ítem con `flex-grow` no se acota por `max-width` al repartir el
+  espacio libre (falta el paso de congelar y redistribuir de Flexbox §9.7).

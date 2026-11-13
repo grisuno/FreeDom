@@ -1,6 +1,6 @@
 # `include/css.h`
 
-> Source: [include/css.h:1](../../include/css.h#L1) | language `h` | coverage 72.2% | [API index](../index.md)
+> Source: [include/css.h:1](../../include/css.h#L1) | language `h` | coverage 71.4% | [API index](../index.md)
 
 ## Contents
 
@@ -8,7 +8,7 @@
 - **Enums:** [`css_status`](#css_status), [`css_align`](#css_align), [`css_display`](#css_display), [`css_justify`](#css_justify), [`css_font_family`](#css_font_family), [`css_text_transform`](#css_text_transform), [`css_valign`](#css_valign), [`css_white_space`](#css_white_space), [`css_list_style`](#css_list_style), [`css_position`](#css_position), [`css_box_sizing`](#css_box_sizing), [`css_border_style`](#css_border_style), [`css_flex_direction`](#css_flex_direction), [`css_flex_wrap`](#css_flex_wrap), [`css_align_kw`](#css_align_kw), [`css_grid_flow`](#css_grid_flow), [`css_float`](#css_float), [`css_clear`](#css_clear), [`css_visibility`](#css_visibility), [`css_overflow`](#css_overflow), [`css_cursor`](#css_cursor), [`css_text_overflow`](#css_text_overflow), [`css_word_break`](#css_word_break), [`css_text_decoration_style`](#css_text_decoration_style), [`css_direction`](#css_direction), [`css_border_collapse`](#css_border_collapse), [`css_empty_cells`](#css_empty_cells), [`css_caption_side`](#css_caption_side), [`css_table_layout`](#css_table_layout), [`css_font_variant`](#css_font_variant), [`css_hyphens`](#css_hyphens), [`css_user_select`](#css_user_select), [`css_appearance`](#css_appearance), [`css_pointer_events`](#css_pointer_events), [`css_bg_repeat`](#css_bg_repeat), [`css_bg_size`](#css_bg_size), [`css_bg_clip`](#css_bg_clip), [`css_bg_origin`](#css_bg_origin), [`css_bg_attachment`](#css_bg_attachment), [`css_isolation`](#css_isolation), [`css_content_visibility`](#css_content_visibility), [`css_image_rendering`](#css_image_rendering), [`css_color_scheme`](#css_color_scheme), [`css_print_color_adjust`](#css_print_color_adjust), [`css_forced_color_adjust`](#css_forced_color_adjust), [`css_mix_blend`](#css_mix_blend), [`css_object_fit`](#css_object_fit), [`css_list_pos`](#css_list_pos), [`css_font_kerning`](#css_font_kerning), [`css_text_rendering`](#css_text_rendering), [`css_font_stretch`](#css_font_stretch), [`css_resize`](#css_resize), [`css_scroll_behavior`](#css_scroll_behavior), [`css_touch_action`](#css_touch_action), [`css_overscroll`](#css_overscroll), [`css_column_fill`](#css_column_fill), [`css_column_span`](#css_column_span), [`css_backface`](#css_backface), [`css_pct_slot`](#css_pct_slot), [`css_drop_cause`](#css_drop_cause)
 - **Type Aliases:** [`color`](#color), [`css_sheet`](#css_sheet)
 - **Functions:** [`verbatim`](#verbatim), [`POINTER`](#pointer), [`css_sheet_uses_counters`](#css_sheet_uses_counters), [`palette`](#palette), [`css_free`](#css_free), [`order`](#order), [`inherited_px`](#inherited_px), [`css_ua_heading_em`](#css_ua_heading_em), [`name`](#name), [`css_font_face_count`](#css_font_face_count), [`css_font_face_at`](#css_font_face_at), [`css_resolve_anim_keyframes`](#css_resolve_anim_keyframes)
-- **Macros:** [`CSS_GAP_MAX`](#css_gap_max), [`CSS_GRID_COLS_MAX`](#css_grid_cols_max), [`CSS_GRID_TRACKS_MAX`](#css_grid_tracks_max), [`CSS_GRID_AREAS_MAX`](#css_grid_areas_max), [`CSS_GRAD_STOPS_MAX`](#css_grad_stops_max), [`CSS_LINE_MIN`](#css_line_min), [`CSS_LINE_MAX`](#css_line_max), [`CSS_LINE_ABS_BASE`](#css_line_abs_base), [`CSS_LINE_ABS_MAX_PX`](#css_line_abs_max_px), [`CSS_SVG_PAINT_NONE`](#css_svg_paint_none), [`CSS_FONT_LIST_MAX`](#css_font_list_max), [`CSS_URL_MAX`](#css_url_max), [`CSS_DECO_UNDERLINE`](#css_deco_underline), [`CSS_DECO_LINE_THROUGH`](#css_deco_line_through), [`CSS_DECO_OVERLINE`](#css_deco_overline), [`CSS_CONTAIN_SIZE`](#css_contain_size), [`CSS_CONTAIN_LAYOUT`](#css_contain_layout), [`CSS_CONTAIN_STYLE`](#css_contain_style), [`CSS_CONTAIN_PAINT`](#css_contain_paint), [`CSS_OBJPOS_PACK`](#css_objpos_pack), [`CSS_OBJPOS_X`](#css_objpos_x), [`CSS_OBJPOS_Y`](#css_objpos_y), [`CSS_BORDER_W_MAX`](#css_border_w_max), [`CSS_BORDER_SPACING_MAX`](#css_border_spacing_max), [`CSS_FLEX_FACTOR_MAX`](#css_flex_factor_max), [`CSS_GRID_SPAN_MAX`](#css_grid_span_max), [`CSS_SPACING_MAX`](#css_spacing_max), [`CSS_SHADOW_MAX`](#css_shadow_max), [`CSS_BSHADOW_LAYERS`](#css_bshadow_layers), [`CSS_LEN_MAX`](#css_len_max), [`CSS_LEN_UNSET`](#css_len_unset), [`CSS_LEN_AUTO`](#css_len_auto), [`CSS_LEN_END`](#css_len_end), [`CSS_LEN_MIN_CONTENT`](#css_len_min_content), [`CSS_LEN_MAX_CONTENT`](#css_len_max_content), [`CSS_LEN_FIT_CONTENT`](#css_len_fit_content), [`CSS_LEN_IS_INTRINSIC`](#css_len_is_intrinsic), [`CSS_PCT_MAX`](#css_pct_max), [`CSS_EM_MILLI_MAX`](#css_em_milli_max), [`CSS_FONT_SIZE_MAX`](#css_font_size_max), [`CSS_COLUMN_COUNT_MAX`](#css_column_count_max), [`CSS_MAX_COMPOUNDS`](#css_max_compounds), [`CSS_MAX_ATTR_SEL`](#css_max_attr_sel), [`CSS_MAX_PSEUDO_SEL`](#css_max_pseudo_sel), [`CSS_NTH_MAX`](#css_nth_max), [`CSS_MEDIA_DEFAULT_WIDTH`](#css_media_default_width), [`CSS_MEDIA_DEFAULT_HEIGHT`](#css_media_default_height), [`CSS_DROP_PROP_MAX`](#css_drop_prop_max), [`CSS_DROP_VAL_MAX`](#css_drop_val_max), [`CSS_PSEUDO_BEFORE`](#css_pseudo_before), [`CSS_PSEUDO_AFTER`](#css_pseudo_after), [`CSS_PSEUDO_PLACEHOLDER`](#css_pseudo_placeholder)
+- **Macros:** [`CSS_DISP_INLINE_OUTER`](#css_disp_inline_outer), [`CSS_DISP_INNER_MASK`](#css_disp_inner_mask), [`CSS_GAP_MAX`](#css_gap_max), [`CSS_GRID_COLS_MAX`](#css_grid_cols_max), [`CSS_GRID_TRACKS_MAX`](#css_grid_tracks_max), [`CSS_GRID_AREAS_MAX`](#css_grid_areas_max), [`CSS_GRAD_STOPS_MAX`](#css_grad_stops_max), [`CSS_LINE_MIN`](#css_line_min), [`CSS_LINE_MAX`](#css_line_max), [`CSS_LINE_ABS_BASE`](#css_line_abs_base), [`CSS_LINE_ABS_MAX_PX`](#css_line_abs_max_px), [`CSS_SVG_PAINT_NONE`](#css_svg_paint_none), [`CSS_FONT_LIST_MAX`](#css_font_list_max), [`CSS_URL_MAX`](#css_url_max), [`CSS_DECO_UNDERLINE`](#css_deco_underline), [`CSS_DECO_LINE_THROUGH`](#css_deco_line_through), [`CSS_DECO_OVERLINE`](#css_deco_overline), [`CSS_CONTAIN_SIZE`](#css_contain_size), [`CSS_CONTAIN_LAYOUT`](#css_contain_layout), [`CSS_CONTAIN_STYLE`](#css_contain_style), [`CSS_CONTAIN_PAINT`](#css_contain_paint), [`CSS_OBJPOS_PACK`](#css_objpos_pack), [`CSS_OBJPOS_X`](#css_objpos_x), [`CSS_OBJPOS_Y`](#css_objpos_y), [`CSS_BORDER_W_MAX`](#css_border_w_max), [`CSS_BORDER_SPACING_MAX`](#css_border_spacing_max), [`CSS_FLEX_FACTOR_MAX`](#css_flex_factor_max), [`CSS_GRID_SPAN_MAX`](#css_grid_span_max), [`CSS_SPACING_MAX`](#css_spacing_max), [`CSS_SHADOW_MAX`](#css_shadow_max), [`CSS_BSHADOW_LAYERS`](#css_bshadow_layers), [`CSS_LEN_MAX`](#css_len_max), [`CSS_LEN_UNSET`](#css_len_unset), [`CSS_LEN_AUTO`](#css_len_auto), [`CSS_LEN_END`](#css_len_end), [`CSS_LEN_MIN_CONTENT`](#css_len_min_content), [`CSS_LEN_MAX_CONTENT`](#css_len_max_content), [`CSS_LEN_FIT_CONTENT`](#css_len_fit_content), [`CSS_LEN_IS_INTRINSIC`](#css_len_is_intrinsic), [`CSS_PCT_MAX`](#css_pct_max), [`CSS_EM_MILLI_MAX`](#css_em_milli_max), [`CSS_FONT_SIZE_MAX`](#css_font_size_max), [`CSS_COLUMN_COUNT_MAX`](#css_column_count_max), [`CSS_MAX_COMPOUNDS`](#css_max_compounds), [`CSS_MAX_ATTR_SEL`](#css_max_attr_sel), [`CSS_MAX_PSEUDO_SEL`](#css_max_pseudo_sel), [`CSS_NTH_MAX`](#css_nth_max), [`CSS_MEDIA_DEFAULT_WIDTH`](#css_media_default_width), [`CSS_MEDIA_DEFAULT_HEIGHT`](#css_media_default_height), [`CSS_DROP_PROP_MAX`](#css_drop_prop_max), [`CSS_DROP_VAL_MAX`](#css_drop_val_max), [`CSS_PSEUDO_BEFORE`](#css_pseudo_before), [`CSS_PSEUDO_AFTER`](#css_pseudo_after), [`CSS_PSEUDO_PLACEHOLDER`](#css_pseudo_placeholder)
 
 ## Type Diagram
 
@@ -84,7 +84,7 @@ flowchart LR
 
 ### `css_style`
 
-`struct` | [include/css.h:599](../../include/css.h#L599)
+`struct` | [include/css.h:605](../../include/css.h#L605)
 
 ```c
 typedef struct css_style
@@ -98,6 +98,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 | Member | Kind | Summary |
 |---|---|---|
+| [`container`](#css_style-container) | method |  |
 | [`family`](#css_style-family) | method |  |
 | [`translate`](#css_style-translate) | method |  |
 | [`scaleY`](#css_style-scaley) | method |  |
@@ -106,11 +107,29 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 | [`slots`](#css_style-slots) | method |  |
 | [`CSS_MAX_KF_STOPS`](#css_style-css_max_kf_stops) | macro | Resolved @keyframes data (Phase R1c): the keyframe stops from the matching @keyframes rule, resolved after cascade. anim_nkf=0 means no keyframes (use default... |
 
+<a id="css_style-container"></a>
+
+#### `css_style.container`
+
+`method` | [include/css.h:673](../../include/css.h#L673)
+
+```c
+* container (Display 3 section 2);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `section` | `Display 3 2` |  |  |
+
+**Returns:** `*`
+
 <a id="css_style-family"></a>
 
 #### `css_style.family`
 
-`method` | [include/css.h:710](../../include/css.h#L710)
+`method` | [include/css.h:718](../../include/css.h#L718)
 
 ```c
 * LOCAL family (spec/text_shape.md section 7);
@@ -128,7 +147,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.translate`
 
-`method` | [include/css.h:881](../../include/css.h#L881)
+`method` | [include/css.h:889](../../include/css.h#L889)
 
 ```c
 * translate()/translateX()/translateY();
@@ -142,7 +161,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.scaleY`
 
-`method` | [include/css.h:882](../../include/css.h#L882)
+`method` | [include/css.h:890](../../include/css.h#L890)
 
 ```c
 * scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
@@ -154,7 +173,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.declared`
 
-`method` | [include/css.h:886](../../include/css.h#L886)
+`method` | [include/css.h:894](../../include/css.h#L894)
 
 ```c
 * function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
@@ -172,7 +191,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.element`
 
-`method` | [include/css.h:891](../../include/css.h#L891)
+`method` | [include/css.h:899](../../include/css.h#L899)
 
 ```c
 * so two different rules matching the same element (e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
@@ -193,7 +212,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.slots`
 
-`method` | [include/css.h:898](../../include/css.h#L898)
+`method` | [include/css.h:906](../../include/css.h#L906)
 
 ```c
 * parse time into ALL seven slots (singular matrices fail closed);
@@ -211,7 +230,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.CSS_MAX_KF_STOPS`
 
-`macro` | [include/css.h:921](../../include/css.h#L921)
+`macro` | [include/css.h:929](../../include/css.h#L929)
 
 ```c
 #define CSS_MAX_KF_STOPS
@@ -225,7 +244,7 @@ Resolved @keyframes data (Phase R1c): the keyframe stops from the matching @keyf
 
 ### `css_sel`
 
-`struct` | [include/css.h:1013](../../include/css.h#L1013)
+`struct` | [include/css.h:1021](../../include/css.h#L1021)
 
 ```c
 struct css_sel; /* css_select.h */
@@ -244,7 +263,7 @@ Render-time media context for evaluating @media at parse time. width_px is a fix
 
 #### `css_sel.prefers_dark`
 
-`type_alias` | [include/css.h:1014](../../include/css.h#L1014)
+`type_alias` | [include/css.h:1022](../../include/css.h#L1022)
 
 ```c
 typedef struct css_media { int prefers_dark;
@@ -256,7 +275,7 @@ css_select.h
 
 #### `css_sel.css_media`
 
-`struct` | [include/css.h:1015](../../include/css.h#L1015)
+`struct` | [include/css.h:1023](../../include/css.h#L1023)
 
 ```c
 typedef struct css_media
@@ -268,7 +287,7 @@ typedef struct css_media
 
 ### `css_drop`
 
-`struct` | [include/css.h:1083](../../include/css.h#L1083)
+`struct` | [include/css.h:1091](../../include/css.h#L1091)
 
 ```c
 typedef struct css_drop
@@ -288,7 +307,7 @@ One coalesced drop: every occurrence of the same (property, cause) pair folds in
 
 #### `css_drop.prop`
 
-`type_alias` | [include/css.h:1083](../../include/css.h#L1083)
+`type_alias` | [include/css.h:1091](../../include/css.h#L1091)
 
 ```c
 typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];
@@ -304,7 +323,7 @@ One coalesced drop: every occurrence of the same (property, cause) pair folds in
 
 ### `css_drop_log`
 
-`struct` | [include/css.h:1095](../../include/css.h#L1095)
+`struct` | [include/css.h:1103](../../include/css.h#L1103)
 
 ```c
 typedef struct css_drop_log
@@ -320,7 +339,7 @@ Optional write-only sink the parser fills while parsing.
 
 ### `css_attr`
 
-`struct` | [include/css.h:1124](../../include/css.h#L1124)
+`struct` | [include/css.h:1132](../../include/css.h#L1132)
 
 ```c
 typedef struct css_attr
@@ -336,7 +355,7 @@ Both alias caller storage (nothing is copied/owned).
 
 ### `css_element`
 
-`struct` | [include/css.h:1134](../../include/css.h#L1134)
+`struct` | [include/css.h:1142](../../include/css.h#L1142)
 
 ```c
 typedef struct css_element
@@ -352,7 +371,7 @@ Each field aliases caller storage (nothing is copied/owned). parent walks toward
 
 ### `cvr_table`
 
-`struct` | [include/css.h:1202](../../include/css.h#L1202)
+`struct` | [include/css.h:1210](../../include/css.h#L1210)
 
 ```c
 struct cvr_table;
@@ -402,7 +421,7 @@ typedef enum css_display
 
 ### `css_justify`
 
-`enum` | [include/css.h:70](../../include/css.h#L70)
+`enum` | [include/css.h:76](../../include/css.h#L76)
 
 ```c
 typedef enum css_justify { /* justify-content (flex/grid main axis) */
@@ -414,7 +433,7 @@ typedef enum css_justify { /* justify-content (flex/grid main axis) */
 
 ### `css_font_family`
 
-`enum` | [include/css.h:119](../../include/css.h#L119)
+`enum` | [include/css.h:125](../../include/css.h#L125)
 
 ```c
 typedef enum css_font_family
@@ -430,7 +449,7 @@ A specific family name is mapped to its generic group; an unrecognised name leav
 
 ### `css_text_transform`
 
-`enum` | [include/css.h:125](../../include/css.h#L125)
+`enum` | [include/css.h:131](../../include/css.h#L131)
 
 ```c
 typedef enum css_text_transform
@@ -446,7 +465,7 @@ text-transform.
 
 ### `css_valign`
 
-`enum` | [include/css.h:130](../../include/css.h#L130)
+`enum` | [include/css.h:136](../../include/css.h#L136)
 
 ```c
 typedef enum css_valign
@@ -462,7 +481,7 @@ vertical-align (subset: only the inline shifts).
 
 ### `css_white_space`
 
-`enum` | [include/css.h:136](../../include/css.h#L136)
+`enum` | [include/css.h:142](../../include/css.h#L142)
 
 ```c
 typedef enum css_white_space
@@ -478,7 +497,7 @@ white-space (subset: only the wrap/keep distinction is consumed).
 
 ### `css_list_style`
 
-`enum` | [include/css.h:142](../../include/css.h#L142)
+`enum` | [include/css.h:148](../../include/css.h#L148)
 
 ```c
 typedef enum css_list_style
@@ -494,7 +513,7 @@ list-style-type (and the type token of the list-style shorthand).
 
 ### `css_position`
 
-`enum` | [include/css.h:154](../../include/css.h#L154)
+`enum` | [include/css.h:160](../../include/css.h#L160)
 
 ```c
 typedef enum css_position
@@ -510,7 +529,7 @@ position.
 
 ### `css_box_sizing`
 
-`enum` | [include/css.h:161](../../include/css.h#L161)
+`enum` | [include/css.h:167](../../include/css.h#L167)
 
 ```c
 typedef enum css_box_sizing
@@ -526,7 +545,7 @@ box-sizing.
 
 ### `css_border_style`
 
-`enum` | [include/css.h:168](../../include/css.h#L168)
+`enum` | [include/css.h:174](../../include/css.h#L174)
 
 ```c
 typedef enum css_border_style
@@ -542,7 +561,7 @@ border-style / outline-style (subset).
 
 ### `css_flex_direction`
 
-`enum` | [include/css.h:175](../../include/css.h#L175)
+`enum` | [include/css.h:181](../../include/css.h#L181)
 
 ```c
 typedef enum css_flex_direction
@@ -558,7 +577,7 @@ flex-direction.
 
 ### `css_flex_wrap`
 
-`enum` | [include/css.h:181](../../include/css.h#L181)
+`enum` | [include/css.h:187](../../include/css.h#L187)
 
 ```c
 typedef enum css_flex_wrap
@@ -574,7 +593,7 @@ flex-wrap.
 
 ### `css_align_kw`
 
-`enum` | [include/css.h:187](../../include/css.h#L187)
+`enum` | [include/css.h:193](../../include/css.h#L193)
 
 ```c
 typedef enum css_align_kw
@@ -590,7 +609,7 @@ align-items / align-self / align-content / justify-items (cross-axis alignment).
 
 ### `css_grid_flow`
 
-`enum` | [include/css.h:194](../../include/css.h#L194)
+`enum` | [include/css.h:200](../../include/css.h#L200)
 
 ```c
 typedef enum css_grid_flow
@@ -606,7 +625,7 @@ grid-auto-flow (subset: the row/column axis only; `dense` is ignored).
 
 ### `css_float`
 
-`enum` | [include/css.h:200](../../include/css.h#L200)
+`enum` | [include/css.h:206](../../include/css.h#L206)
 
 ```c
 typedef enum css_float
@@ -622,7 +641,7 @@ float.
 
 ### `css_clear`
 
-`enum` | [include/css.h:206](../../include/css.h#L206)
+`enum` | [include/css.h:212](../../include/css.h#L212)
 
 ```c
 typedef enum css_clear
@@ -638,7 +657,7 @@ clear.
 
 ### `css_visibility`
 
-`enum` | [include/css.h:214](../../include/css.h#L214)
+`enum` | [include/css.h:220](../../include/css.h#L220)
 
 ```c
 typedef enum css_visibility
@@ -654,7 +673,7 @@ visibility.
 
 ### `css_overflow`
 
-`enum` | [include/css.h:223](../../include/css.h#L223)
+`enum` | [include/css.h:229](../../include/css.h#L229)
 
 ```c
 typedef enum css_overflow
@@ -670,7 +689,7 @@ overflow / overflow-x / overflow-y.
 
 ### `css_cursor`
 
-`enum` | [include/css.h:233](../../include/css.h#L233)
+`enum` | [include/css.h:239](../../include/css.h#L239)
 
 ```c
 typedef enum css_cursor
@@ -686,7 +705,7 @@ cursor (subset of the CSS keyword list).
 
 ### `css_text_overflow`
 
-`enum` | [include/css.h:246](../../include/css.h#L246)
+`enum` | [include/css.h:252](../../include/css.h#L252)
 
 ```c
 typedef enum css_text_overflow
@@ -702,7 +721,7 @@ text-overflow.
 
 ### `css_word_break`
 
-`enum` | [include/css.h:260](../../include/css.h#L260)
+`enum` | [include/css.h:266](../../include/css.h#L266)
 
 ```c
 typedef enum css_word_break
@@ -718,7 +737,7 @@ word-break / overflow-wrap / word-wrap.
 
 ### `css_text_decoration_style`
 
-`enum` | [include/css.h:267](../../include/css.h#L267)
+`enum` | [include/css.h:273](../../include/css.h#L273)
 
 ```c
 typedef enum css_text_decoration_style
@@ -734,7 +753,7 @@ text-decoration-style (Hito 23b-6 extension).
 
 ### `css_direction`
 
-`enum` | [include/css.h:274](../../include/css.h#L274)
+`enum` | [include/css.h:280](../../include/css.h#L280)
 
 ```c
 typedef enum css_direction
@@ -750,7 +769,7 @@ direction (Hito 23b-6 extension).
 
 ### `css_border_collapse`
 
-`enum` | [include/css.h:280](../../include/css.h#L280)
+`enum` | [include/css.h:286](../../include/css.h#L286)
 
 ```c
 typedef enum css_border_collapse
@@ -766,7 +785,7 @@ border-collapse.
 
 ### `css_empty_cells`
 
-`enum` | [include/css.h:286](../../include/css.h#L286)
+`enum` | [include/css.h:292](../../include/css.h#L292)
 
 ```c
 typedef enum css_empty_cells
@@ -782,7 +801,7 @@ empty-cells.
 
 ### `css_caption_side`
 
-`enum` | [include/css.h:292](../../include/css.h#L292)
+`enum` | [include/css.h:298](../../include/css.h#L298)
 
 ```c
 typedef enum css_caption_side
@@ -798,7 +817,7 @@ caption-side.
 
 ### `css_table_layout`
 
-`enum` | [include/css.h:298](../../include/css.h#L298)
+`enum` | [include/css.h:304](../../include/css.h#L304)
 
 ```c
 typedef enum css_table_layout
@@ -814,7 +833,7 @@ table-layout.
 
 ### `css_font_variant`
 
-`enum` | [include/css.h:304](../../include/css.h#L304)
+`enum` | [include/css.h:310](../../include/css.h#L310)
 
 ```c
 typedef enum css_font_variant
@@ -830,7 +849,7 @@ font-variant (subset: only small-caps).
 
 ### `css_hyphens`
 
-`enum` | [include/css.h:310](../../include/css.h#L310)
+`enum` | [include/css.h:316](../../include/css.h#L316)
 
 ```c
 typedef enum css_hyphens
@@ -846,7 +865,7 @@ hyphens.
 
 ### `css_user_select`
 
-`enum` | [include/css.h:316](../../include/css.h#L316)
+`enum` | [include/css.h:322](../../include/css.h#L322)
 
 ```c
 typedef enum css_user_select
@@ -862,7 +881,7 @@ user-select.
 
 ### `css_appearance`
 
-`enum` | [include/css.h:322](../../include/css.h#L322)
+`enum` | [include/css.h:328](../../include/css.h#L328)
 
 ```c
 typedef enum css_appearance
@@ -878,7 +897,7 @@ appearance.
 
 ### `css_pointer_events`
 
-`enum` | [include/css.h:328](../../include/css.h#L328)
+`enum` | [include/css.h:334](../../include/css.h#L334)
 
 ```c
 typedef enum css_pointer_events
@@ -894,7 +913,7 @@ pointer-events.
 
 ### `css_bg_repeat`
 
-`enum` | [include/css.h:333](../../include/css.h#L333)
+`enum` | [include/css.h:339](../../include/css.h#L339)
 
 ```c
 typedef enum css_bg_repeat
@@ -910,7 +929,7 @@ background-repeat.
 
 ### `css_bg_size`
 
-`enum` | [include/css.h:338](../../include/css.h#L338)
+`enum` | [include/css.h:344](../../include/css.h#L344)
 
 ```c
 typedef enum css_bg_size
@@ -926,7 +945,7 @@ background-size.
 
 ### `css_bg_clip`
 
-`enum` | [include/css.h:342](../../include/css.h#L342)
+`enum` | [include/css.h:348](../../include/css.h#L348)
 
 ```c
 typedef enum css_bg_clip
@@ -942,7 +961,7 @@ background-clip.
 
 ### `css_bg_origin`
 
-`enum` | [include/css.h:347](../../include/css.h#L347)
+`enum` | [include/css.h:353](../../include/css.h#L353)
 
 ```c
 typedef enum css_bg_origin
@@ -958,7 +977,7 @@ background-origin.
 
 ### `css_bg_attachment`
 
-`enum` | [include/css.h:351](../../include/css.h#L351)
+`enum` | [include/css.h:357](../../include/css.h#L357)
 
 ```c
 typedef enum css_bg_attachment
@@ -974,7 +993,7 @@ background-attachment.
 
 ### `css_isolation`
 
-`enum` | [include/css.h:355](../../include/css.h#L355)
+`enum` | [include/css.h:361](../../include/css.h#L361)
 
 ```c
 typedef enum css_isolation
@@ -990,7 +1009,7 @@ isolation.
 
 ### `css_content_visibility`
 
-`enum` | [include/css.h:364](../../include/css.h#L364)
+`enum` | [include/css.h:370](../../include/css.h#L370)
 
 ```c
 typedef enum css_content_visibility
@@ -1006,7 +1025,7 @@ content-visibility.
 
 ### `css_image_rendering`
 
-`enum` | [include/css.h:368](../../include/css.h#L368)
+`enum` | [include/css.h:374](../../include/css.h#L374)
 
 ```c
 typedef enum css_image_rendering
@@ -1022,7 +1041,7 @@ image-rendering.
 
 ### `css_color_scheme`
 
-`enum` | [include/css.h:372](../../include/css.h#L372)
+`enum` | [include/css.h:378](../../include/css.h#L378)
 
 ```c
 typedef enum css_color_scheme
@@ -1038,7 +1057,7 @@ color-scheme.
 
 ### `css_print_color_adjust`
 
-`enum` | [include/css.h:376](../../include/css.h#L376)
+`enum` | [include/css.h:382](../../include/css.h#L382)
 
 ```c
 typedef enum css_print_color_adjust
@@ -1054,7 +1073,7 @@ print-color-adjust.
 
 ### `css_forced_color_adjust`
 
-`enum` | [include/css.h:380](../../include/css.h#L380)
+`enum` | [include/css.h:386](../../include/css.h#L386)
 
 ```c
 typedef enum css_forced_color_adjust
@@ -1070,7 +1089,7 @@ forced-color-adjust.
 
 ### `css_mix_blend`
 
-`enum` | [include/css.h:385](../../include/css.h#L385)
+`enum` | [include/css.h:391](../../include/css.h#L391)
 
 ```c
 typedef enum css_mix_blend
@@ -1086,7 +1105,7 @@ mix-blend-mode.
 
 ### `css_object_fit`
 
-`enum` | [include/css.h:393](../../include/css.h#L393)
+`enum` | [include/css.h:399](../../include/css.h#L399)
 
 ```c
 typedef enum css_object_fit
@@ -1102,7 +1121,7 @@ object-fit.
 
 ### `css_list_pos`
 
-`enum` | [include/css.h:405](../../include/css.h#L405)
+`enum` | [include/css.h:411](../../include/css.h#L411)
 
 ```c
 typedef enum css_list_pos
@@ -1118,7 +1137,7 @@ list-style-position.
 
 ### `css_font_kerning`
 
-`enum` | [include/css.h:409](../../include/css.h#L409)
+`enum` | [include/css.h:415](../../include/css.h#L415)
 
 ```c
 typedef enum css_font_kerning
@@ -1134,7 +1153,7 @@ font-kerning.
 
 ### `css_text_rendering`
 
-`enum` | [include/css.h:413](../../include/css.h#L413)
+`enum` | [include/css.h:419](../../include/css.h#L419)
 
 ```c
 typedef enum css_text_rendering
@@ -1150,7 +1169,7 @@ text-rendering.
 
 ### `css_font_stretch`
 
-`enum` | [include/css.h:418](../../include/css.h#L418)
+`enum` | [include/css.h:424](../../include/css.h#L424)
 
 ```c
 typedef enum css_font_stretch
@@ -1166,7 +1185,7 @@ font-stretch.
 
 ### `css_resize`
 
-`enum` | [include/css.h:424](../../include/css.h#L424)
+`enum` | [include/css.h:430](../../include/css.h#L430)
 
 ```c
 typedef enum css_resize
@@ -1182,7 +1201,7 @@ resize.
 
 ### `css_scroll_behavior`
 
-`enum` | [include/css.h:428](../../include/css.h#L428)
+`enum` | [include/css.h:434](../../include/css.h#L434)
 
 ```c
 typedef enum css_scroll_behavior
@@ -1198,7 +1217,7 @@ scroll-behavior.
 
 ### `css_touch_action`
 
-`enum` | [include/css.h:432](../../include/css.h#L432)
+`enum` | [include/css.h:438](../../include/css.h#L438)
 
 ```c
 typedef enum css_touch_action
@@ -1214,7 +1233,7 @@ touch-action.
 
 ### `css_overscroll`
 
-`enum` | [include/css.h:436](../../include/css.h#L436)
+`enum` | [include/css.h:442](../../include/css.h#L442)
 
 ```c
 typedef enum css_overscroll
@@ -1230,7 +1249,7 @@ overscroll-behavior.
 
 ### `css_column_fill`
 
-`enum` | [include/css.h:441](../../include/css.h#L441)
+`enum` | [include/css.h:447](../../include/css.h#L447)
 
 ```c
 typedef enum css_column_fill
@@ -1246,7 +1265,7 @@ column-fill.
 
 ### `css_column_span`
 
-`enum` | [include/css.h:446](../../include/css.h#L446)
+`enum` | [include/css.h:452](../../include/css.h#L452)
 
 ```c
 typedef enum css_column_span
@@ -1262,7 +1281,7 @@ column-span.
 
 ### `css_backface`
 
-`enum` | [include/css.h:450](../../include/css.h#L450)
+`enum` | [include/css.h:456](../../include/css.h#L456)
 
 ```c
 typedef enum css_backface
@@ -1278,7 +1297,7 @@ backface-visibility.
 
 ### `css_pct_slot`
 
-`enum` | [include/css.h:527](../../include/css.h#L527)
+`enum` | [include/css.h:533](../../include/css.h#L533)
 
 ```c
 typedef enum css_pct_slot
@@ -1290,7 +1309,7 @@ typedef enum css_pct_slot
 
 ### `css_drop_cause`
 
-`enum` | [include/css.h:1070](../../include/css.h#L1070)
+`enum` | [include/css.h:1078](../../include/css.h#L1078)
 
 ```c
 typedef enum css_drop_cause
@@ -1308,7 +1327,7 @@ The distinction is the point of the log: the two causes need different fixes, an
 
 ### `color`
 
-`type_alias` | [include/css.h:599](../../include/css.h#L599)
+`type_alias` | [include/css.h:605](../../include/css.h#L605)
 
 ```c
 typedef struct css_style { int color;
@@ -1324,7 +1343,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 ### `css_sheet`
 
-`type_alias` | [include/css.h:1007](../../include/css.h#L1007)
+`type_alias` | [include/css.h:1015](../../include/css.h#L1015)
 
 ```c
 typedef struct css_sheet css_sheet;
@@ -1338,7 +1357,7 @@ typedef struct css_sheet css_sheet;
 
 ### `verbatim`
 
-`function` | [include/css.h:85](../../include/css.h#L85)
+`function` | [include/css.h:91](../../include/css.h#L91)
 
 ```c
 * the quoted row strings verbatim (flex_layout parses them);
@@ -1358,7 +1377,7 @@ typedef struct css_sheet css_sheet;
 
 ### `POINTER`
 
-`function` | [include/css.h:228](../../include/css.h#L228)
+`function` | [include/css.h:234](../../include/css.h#L234)
 
 ```c
 * POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);
@@ -1378,7 +1397,7 @@ typedef struct css_sheet css_sheet;
 
 ### `css_sheet_uses_counters`
 
-`function` | [include/css.h:1043](../../include/css.h#L1043)
+`function` | [include/css.h:1051](../../include/css.h#L1051)
 
 ```c
 int css_sheet_uses_counters(const css_sheet *sheet);
@@ -1400,7 +1419,7 @@ int css_sheet_uses_counters(const css_sheet *sheet);
 
 ### `palette`
 
-`function` | [include/css.h:1060](../../include/css.h#L1060)
+`function` | [include/css.h:1068](../../include/css.h#L1068)
 
 ```c
 * so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
@@ -1420,7 +1439,7 @@ int css_sheet_uses_counters(const css_sheet *sheet);
 
 ### `css_free`
 
-`function` | [include/css.h:1110](../../include/css.h#L1110)
+`function` | [include/css.h:1118](../../include/css.h#L1118)
 
 ```c
 void css_free(css_sheet *s);
@@ -1440,7 +1459,7 @@ Idempotent; NULL-safe.
 
 ### `order`
 
-`function` | [include/css.h:1113](../../include/css.h#L1113)
+`function` | [include/css.h:1121](../../include/css.h#L1121)
 
 ```c
 * cascade order (specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
@@ -1460,7 +1479,7 @@ Idempotent; NULL-safe.
 
 ### `inherited_px`
 
-`function` | [include/css.h:1226](../../include/css.h#L1226)
+`function` | [include/css.h:1234](../../include/css.h#L1234)
 
 ```c
 * whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that walks the DOM is the one that can supply the * inherited value, and it needs the same
@@ -1480,7 +1499,7 @@ Idempotent; NULL-safe.
 
 ### `css_ua_heading_em`
 
-`function` | [include/css.h:1238](../../include/css.h#L1238)
+`function` | [include/css.h:1246](../../include/css.h#L1246)
 
 ```c
 double css_ua_heading_em(int level);
@@ -1506,7 +1525,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `name`
 
-`function` | [include/css.h:1243](../../include/css.h#L1243)
+`function` | [include/css.h:1251](../../include/css.h#L1251)
 
 ```c
 * name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag);
@@ -1520,7 +1539,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `css_font_face_count`
 
-`function` | [include/css.h:1253](../../include/css.h#L1253)
+`function` | [include/css.h:1261](../../include/css.h#L1261)
 
 ```c
 size_t css_font_face_count(const css_sheet *sheet);
@@ -1544,7 +1563,7 @@ Returns 0 on success, -1 if i is out of range.
 
 ### `css_font_face_at`
 
-`function` | [include/css.h:1254](../../include/css.h#L1254)
+`function` | [include/css.h:1262](../../include/css.h#L1262)
 
 ```c
 int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);
@@ -1569,7 +1588,7 @@ int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_
 
 ### `css_resolve_anim_keyframes`
 
-`function` | [include/css.h:1262](../../include/css.h#L1262)
+`function` | [include/css.h:1270](../../include/css.h#L1270)
 
 ```c
 void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);
@@ -1590,11 +1609,39 @@ If found, copies the stops into s->anim_kf_* fields and updates s->anim_name wit
 
 ## Macros
 
+<a id="css_disp_inline_outer"></a>
+
+### `CSS_DISP_INLINE_OUTER`
+
+`macro` | [include/css.h:73](../../include/css.h#L73)
+
+```c
+#define CSS_DISP_INLINE_OUTER
+```
+
+OR-ed by cb_interp_display into the code of an INLINE-level flex/grid container (`inline-flex`, `inline-grid`, `inline flex`...).
+
+The cascade splits it off into css_style.display_inline, so css_style.display only ever holds a css_display.
+
+---
+
+<a id="css_disp_inner_mask"></a>
+
+### `CSS_DISP_INNER_MASK`
+
+`macro` | [include/css.h:74](../../include/css.h#L74)
+
+```c
+#define CSS_DISP_INNER_MASK
+```
+
+---
+
 <a id="css_gap_max"></a>
 
 ### `CSS_GAP_MAX`
 
-`macro` | [include/css.h:81](../../include/css.h#L81)
+`macro` | [include/css.h:87](../../include/css.h#L87)
 
 ```c
 #define CSS_GAP_MAX
@@ -1608,7 +1655,7 @@ Anti-DoS bounds for the flex/grid container params.
 
 ### `CSS_GRID_COLS_MAX`
 
-`macro` | [include/css.h:82](../../include/css.h#L82)
+`macro` | [include/css.h:88](../../include/css.h#L88)
 
 ```c
 #define CSS_GRID_COLS_MAX
@@ -1622,7 +1669,7 @@ px cap on gap
 
 ### `CSS_GRID_TRACKS_MAX`
 
-`macro` | [include/css.h:83](../../include/css.h#L83)
+`macro` | [include/css.h:89](../../include/css.h#L89)
 
 ```c
 #define CSS_GRID_TRACKS_MAX
@@ -1636,7 +1683,7 @@ cap on grid-template-columns track count
 
 ### `CSS_GRID_AREAS_MAX`
 
-`macro` | [include/css.h:89](../../include/css.h#L89)
+`macro` | [include/css.h:95](../../include/css.h#L95)
 
 ```c
 #define CSS_GRID_AREAS_MAX
@@ -1652,7 +1699,7 @@ It holds the quoted row strings verbatim (flex_layout parses them); a template l
 
 ### `CSS_GRAD_STOPS_MAX`
 
-`macro` | [include/css.h:90](../../include/css.h#L90)
+`macro` | [include/css.h:96](../../include/css.h#L96)
 
 ```c
 #define CSS_GRAD_STOPS_MAX
@@ -1664,7 +1711,7 @@ It holds the quoted row strings verbatim (flex_layout parses them); a template l
 
 ### `CSS_LINE_MIN`
 
-`macro` | [include/css.h:91](../../include/css.h#L91)
+`macro` | [include/css.h:97](../../include/css.h#L97)
 
 ```c
 #define CSS_LINE_MIN
@@ -1678,7 +1725,7 @@ cap on linear-gradient color stops (extra kept out)
 
 ### `CSS_LINE_MAX`
 
-`macro` | [include/css.h:92](../../include/css.h#L92)
+`macro` | [include/css.h:98](../../include/css.h#L98)
 
 ```c
 #define CSS_LINE_MAX
@@ -1692,7 +1739,7 @@ line-height clamp floor (percent)
 
 ### `CSS_LINE_ABS_BASE`
 
-`macro` | [include/css.h:97](../../include/css.h#L97)
+`macro` | [include/css.h:103](../../include/css.h#L103)
 
 ```c
 #define CSS_LINE_ABS_BASE
@@ -1706,7 +1753,7 @@ A line-height that is an absolute <length> (px, pt, rem, ...) is NOT a multiple 
 
 ### `CSS_LINE_ABS_MAX_PX`
 
-`macro` | [include/css.h:98](../../include/css.h#L98)
+`macro` | [include/css.h:104](../../include/css.h#L104)
 
 ```c
 #define CSS_LINE_ABS_MAX_PX
@@ -1718,7 +1765,7 @@ A line-height that is an absolute <length> (px, pt, rem, ...) is NOT a multiple 
 
 ### `CSS_SVG_PAINT_NONE`
 
-`macro` | [include/css.h:99](../../include/css.h#L99)
+`macro` | [include/css.h:105](../../include/css.h#L105)
 
 ```c
 #define CSS_SVG_PAINT_NONE
@@ -1730,7 +1777,7 @@ A line-height that is an absolute <length> (px, pt, rem, ...) is NOT a multiple 
 
 ### `CSS_FONT_LIST_MAX`
 
-`macro` | [include/css.h:100](../../include/css.h#L100)
+`macro` | [include/css.h:106](../../include/css.h#L106)
 
 ```c
 #define CSS_FONT_LIST_MAX
@@ -1744,7 +1791,7 @@ fill/stroke: none (distinct from every CC_COLOR_* sentinel)
 
 ### `CSS_URL_MAX`
 
-`macro` | [include/css.h:101](../../include/css.h#L101)
+`macro` | [include/css.h:107](../../include/css.h#L107)
 
 ```c
 #define CSS_URL_MAX
@@ -1758,7 +1805,7 @@ bytes of a normalized font-family list (truncated at a name boundary)
 
 ### `CSS_DECO_UNDERLINE`
 
-`macro` | [include/css.h:113](../../include/css.h#L113)
+`macro` | [include/css.h:119](../../include/css.h#L119)
 
 ```c
 #define CSS_DECO_UNDERLINE
@@ -1774,7 +1821,7 @@ The field is -1 when unset and 0 for an explicit `none` (so `a { text-decoration
 
 ### `CSS_DECO_LINE_THROUGH`
 
-`macro` | [include/css.h:114](../../include/css.h#L114)
+`macro` | [include/css.h:120](../../include/css.h#L120)
 
 ```c
 #define CSS_DECO_LINE_THROUGH
@@ -1786,7 +1833,7 @@ The field is -1 when unset and 0 for an explicit `none` (so `a { text-decoration
 
 ### `CSS_DECO_OVERLINE`
 
-`macro` | [include/css.h:115](../../include/css.h#L115)
+`macro` | [include/css.h:121](../../include/css.h#L121)
 
 ```c
 #define CSS_DECO_OVERLINE
@@ -1798,7 +1845,7 @@ The field is -1 when unset and 0 for an explicit `none` (so `a { text-decoration
 
 ### `CSS_CONTAIN_SIZE`
 
-`macro` | [include/css.h:359](../../include/css.h#L359)
+`macro` | [include/css.h:365](../../include/css.h#L365)
 
 ```c
 #define CSS_CONTAIN_SIZE
@@ -1814,7 +1861,7 @@ contain bitmask values.
 
 ### `CSS_CONTAIN_LAYOUT`
 
-`macro` | [include/css.h:360](../../include/css.h#L360)
+`macro` | [include/css.h:366](../../include/css.h#L366)
 
 ```c
 #define CSS_CONTAIN_LAYOUT
@@ -1826,7 +1873,7 @@ contain bitmask values.
 
 ### `CSS_CONTAIN_STYLE`
 
-`macro` | [include/css.h:361](../../include/css.h#L361)
+`macro` | [include/css.h:367](../../include/css.h#L367)
 
 ```c
 #define CSS_CONTAIN_STYLE
@@ -1838,7 +1885,7 @@ contain bitmask values.
 
 ### `CSS_CONTAIN_PAINT`
 
-`macro` | [include/css.h:362](../../include/css.h#L362)
+`macro` | [include/css.h:368](../../include/css.h#L368)
 
 ```c
 #define CSS_CONTAIN_PAINT
@@ -1850,7 +1897,7 @@ contain bitmask values.
 
 ### `CSS_OBJPOS_PACK`
 
-`macro` | [include/css.h:401](../../include/css.h#L401)
+`macro` | [include/css.h:407](../../include/css.h#L407)
 
 ```c
 #define CSS_OBJPOS_PACK(x_pm, y_pm)
@@ -1866,7 +1913,7 @@ object-position packed in one int so it crosses the IPC codec as ONE field: ((x_
 
 ### `CSS_OBJPOS_X`
 
-`macro` | [include/css.h:402](../../include/css.h#L402)
+`macro` | [include/css.h:408](../../include/css.h#L408)
 
 ```c
 #define CSS_OBJPOS_X(p)
@@ -1878,7 +1925,7 @@ object-position packed in one int so it crosses the IPC codec as ONE field: ((x_
 
 ### `CSS_OBJPOS_Y`
 
-`macro` | [include/css.h:403](../../include/css.h#L403)
+`macro` | [include/css.h:409](../../include/css.h#L409)
 
 ```c
 #define CSS_OBJPOS_Y(p)
@@ -1890,7 +1937,7 @@ object-position packed in one int so it crosses the IPC codec as ONE field: ((x_
 
 ### `CSS_BORDER_W_MAX`
 
-`macro` | [include/css.h:457](../../include/css.h#L457)
+`macro` | [include/css.h:463](../../include/css.h#L463)
 
 ```c
 #define CSS_BORDER_W_MAX
@@ -1906,7 +1953,7 @@ Insets/z-index/order reuse CSS_LEN_*. Border/outline widths and radius are non-n
 
 ### `CSS_BORDER_SPACING_MAX`
 
-`macro` | [include/css.h:458](../../include/css.h#L458)
+`macro` | [include/css.h:464](../../include/css.h#L464)
 
 ```c
 #define CSS_BORDER_SPACING_MAX
@@ -1918,7 +1965,7 @@ Insets/z-index/order reuse CSS_LEN_*. Border/outline widths and radius are non-n
 
 ### `CSS_FLEX_FACTOR_MAX`
 
-`macro` | [include/css.h:459](../../include/css.h#L459)
+`macro` | [include/css.h:465](../../include/css.h#L465)
 
 ```c
 #define CSS_FLEX_FACTOR_MAX
@@ -1930,7 +1977,7 @@ Insets/z-index/order reuse CSS_LEN_*. Border/outline widths and radius are non-n
 
 ### `CSS_GRID_SPAN_MAX`
 
-`macro` | [include/css.h:460](../../include/css.h#L460)
+`macro` | [include/css.h:466](../../include/css.h#L466)
 
 ```c
 #define CSS_GRID_SPAN_MAX
@@ -1944,7 +1991,7 @@ flex-grow/-shrink stored x100; ~1000.0 cap
 
 ### `CSS_SPACING_MAX`
 
-`macro` | [include/css.h:464](../../include/css.h#L464)
+`macro` | [include/css.h:470](../../include/css.h#L470)
 
 ```c
 #define CSS_SPACING_MAX
@@ -1958,7 +2005,7 @@ Anti-DoS clamps for the new metric properties (px, absolute value). text-indent 
 
 ### `CSS_SHADOW_MAX`
 
-`macro` | [include/css.h:465](../../include/css.h#L465)
+`macro` | [include/css.h:471](../../include/css.h#L471)
 
 ```c
 #define CSS_SHADOW_MAX
@@ -1972,7 +2019,7 @@ letter-spacing / word-spacing
 
 ### `CSS_BSHADOW_LAYERS`
 
-`macro` | [include/css.h:466](../../include/css.h#L466)
+`macro` | [include/css.h:472](../../include/css.h#L472)
 
 ```c
 #define CSS_BSHADOW_LAYERS
@@ -1986,7 +2033,7 @@ text-shadow offsets
 
 ### `CSS_LEN_MAX`
 
-`macro` | [include/css.h:471](../../include/css.h#L471)
+`macro` | [include/css.h:477](../../include/css.h#L477)
 
 ```c
 #define CSS_LEN_MAX
@@ -2002,7 +2049,7 @@ Two out-of-band sentinels distinguish "not declared" and the 'auto' keyword from
 
 ### `CSS_LEN_UNSET`
 
-`macro` | [include/css.h:472](../../include/css.h#L472)
+`macro` | [include/css.h:478](../../include/css.h#L478)
 
 ```c
 #define CSS_LEN_UNSET
@@ -2016,7 +2063,7 @@ Two out-of-band sentinels distinguish "not declared" and the 'auto' keyword from
 
 ### `CSS_LEN_AUTO`
 
-`macro` | [include/css.h:473](../../include/css.h#L473)
+`macro` | [include/css.h:479](../../include/css.h#L479)
 
 ```c
 #define CSS_LEN_AUTO
@@ -2030,7 +2077,7 @@ INT_MIN: property not set
 
 ### `CSS_LEN_END`
 
-`macro` | [include/css.h:474](../../include/css.h#L474)
+`macro` | [include/css.h:480](../../include/css.h#L480)
 
 ```c
 #define CSS_LEN_END
@@ -2044,7 +2091,7 @@ INT_MIN+1: the 'auto' keyword
 
 ### `CSS_LEN_MIN_CONTENT`
 
-`macro` | [include/css.h:481](../../include/css.h#L481)
+`macro` | [include/css.h:487](../../include/css.h#L487)
 
 ```c
 #define CSS_LEN_MIN_CONTENT
@@ -2060,7 +2107,7 @@ Like `auto` these are not lengths -- they name a measurement only layout can tak
 
 ### `CSS_LEN_MAX_CONTENT`
 
-`macro` | [include/css.h:482](../../include/css.h#L482)
+`macro` | [include/css.h:488](../../include/css.h#L488)
 
 ```c
 #define CSS_LEN_MAX_CONTENT
@@ -2074,7 +2121,7 @@ INT_MIN+3
 
 ### `CSS_LEN_FIT_CONTENT`
 
-`macro` | [include/css.h:483](../../include/css.h#L483)
+`macro` | [include/css.h:489](../../include/css.h#L489)
 
 ```c
 #define CSS_LEN_FIT_CONTENT
@@ -2088,7 +2135,7 @@ INT_MIN+4
 
 ### `CSS_LEN_IS_INTRINSIC`
 
-`macro` | [include/css.h:486](../../include/css.h#L486)
+`macro` | [include/css.h:492](../../include/css.h#L492)
 
 ```c
 #define CSS_LEN_IS_INTRINSIC(v)
@@ -2104,7 +2151,7 @@ True when [`v`](src.css_color.c.md#v) is one of the intrinsic keywords above.
 
 ### `CSS_PCT_MAX`
 
-`macro` | [include/css.h:509](../../include/css.h#L509)
+`macro` | [include/css.h:515](../../include/css.h#L515)
 
 ```c
 #define CSS_PCT_MAX
@@ -2136,7 +2183,7 @@ property of the VALUE TYPE, not of `width`.
 
 ### `CSS_EM_MILLI_MAX`
 
-`macro` | [include/css.h:515](../../include/css.h#L515)
+`macro` | [include/css.h:521](../../include/css.h#L521)
 
 ```c
 #define CSS_EM_MILLI_MAX
@@ -2152,7 +2199,7 @@ Saturating like CSS_PCT_MAX and for the same reason: the value is an author-supp
 
 ### `CSS_FONT_SIZE_MAX`
 
-`macro` | [include/css.h:521](../../include/css.h#L521)
+`macro` | [include/css.h:527](../../include/css.h#L527)
 
 ```c
 #define CSS_FONT_SIZE_MAX
@@ -2168,7 +2215,7 @@ Bounds the value every font-relative length is multiplied by, so a page nesting 
 
 ### `CSS_COLUMN_COUNT_MAX`
 
-`macro` | [include/css.h:525](../../include/css.h#L525)
+`macro` | [include/css.h:531](../../include/css.h#L531)
 
 ```c
 #define CSS_COLUMN_COUNT_MAX
@@ -2184,7 +2231,7 @@ Real stylesheets ask for two to four; a page demanding thousands of columns is l
 
 ### `CSS_MAX_COMPOUNDS`
 
-`macro` | [include/css.h:580](../../include/css.h#L580)
+`macro` | [include/css.h:586](../../include/css.h#L586)
 
 ```c
 #define CSS_MAX_COMPOUNDS
@@ -2200,7 +2247,7 @@ A deeper chain is dropped (fail closed). Real sites nest well past four: a bound
 
 ### `CSS_MAX_ATTR_SEL`
 
-`macro` | [include/css.h:584](../../include/css.h#L584)
+`macro` | [include/css.h:590](../../include/css.h#L590)
 
 ```c
 #define CSS_MAX_ATTR_SEL
@@ -2216,7 +2263,7 @@ More are dropped (the whole selector fails closed).
 
 ### `CSS_MAX_PSEUDO_SEL`
 
-`macro` | [include/css.h:588](../../include/css.h#L588)
+`macro` | [include/css.h:594](../../include/css.h#L594)
 
 ```c
 #define CSS_MAX_PSEUDO_SEL
@@ -2232,7 +2279,7 @@ More are dropped (the whole selector fails closed).
 
 ### `CSS_NTH_MAX`
 
-`macro` | [include/css.h:592](../../include/css.h#L592)
+`macro` | [include/css.h:598](../../include/css.h#L598)
 
 ```c
 #define CSS_NTH_MAX
@@ -2248,7 +2295,7 @@ Bound on the A/B coefficients of :nth-child(An+B) (anti-DoS; larger drops the se
 
 ### `CSS_MEDIA_DEFAULT_WIDTH`
 
-`macro` | [include/css.h:1027](../../include/css.h#L1027)
+`macro` | [include/css.h:1035](../../include/css.h#L1035)
 
 ```c
 #define CSS_MEDIA_DEFAULT_WIDTH
@@ -2260,7 +2307,7 @@ Bound on the A/B coefficients of :nth-child(An+B) (anti-DoS; larger drops the se
 
 ### `CSS_MEDIA_DEFAULT_HEIGHT`
 
-`macro` | [include/css.h:1032](../../include/css.h#L1032)
+`macro` | [include/css.h:1040](../../include/css.h#L1040)
 
 ```c
 #define CSS_MEDIA_DEFAULT_HEIGHT
@@ -2274,7 +2321,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_DROP_PROP_MAX`
 
-`macro` | [include/css.h:1075](../../include/css.h#L1075)
+`macro` | [include/css.h:1083](../../include/css.h#L1083)
 
 ```c
 #define CSS_DROP_PROP_MAX
@@ -2286,7 +2333,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_DROP_VAL_MAX`
 
-`macro` | [include/css.h:1076](../../include/css.h#L1076)
+`macro` | [include/css.h:1084](../../include/css.h#L1084)
 
 ```c
 #define CSS_DROP_VAL_MAX
@@ -2298,7 +2345,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_PSEUDO_BEFORE`
 
-`macro` | [include/css.h:1212](../../include/css.h#L1212)
+`macro` | [include/css.h:1220](../../include/css.h#L1220)
 
 ```c
 #define CSS_PSEUDO_BEFORE
@@ -2312,7 +2359,7 @@ Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1).
 
 ### `CSS_PSEUDO_AFTER`
 
-`macro` | [include/css.h:1213](../../include/css.h#L1213)
+`macro` | [include/css.h:1221](../../include/css.h#L1221)
 
 ```c
 #define CSS_PSEUDO_AFTER
@@ -2324,7 +2371,7 @@ Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1).
 
 ### `CSS_PSEUDO_PLACEHOLDER`
 
-`macro` | [include/css.h:1214](../../include/css.h#L1214)
+`macro` | [include/css.h:1222](../../include/css.h#L1222)
 
 ```c
 #define CSS_PSEUDO_PLACEHOLDER

@@ -80,8 +80,10 @@ static size_t f_display(const ccm_input *in, char *out, size_t cap) {
     case CSS_DISP_BLOCK:           return put(out, cap, "block");
     case CSS_DISP_INLINE_BLOCK:    return put(out, cap, "inline-block");
     case CSS_DISP_LIST_ITEM:       return put(out, cap, "list-item");
-    case CSS_DISP_FLEX:            return put(out, cap, "flex");
-    case CSS_DISP_GRID:            return put(out, cap, "grid");
+    case CSS_DISP_FLEX:
+        return put(out, cap, in->st->display_inline ? "inline-flex" : "flex");
+    case CSS_DISP_GRID:
+        return put(out, cap, in->st->display_inline ? "inline-grid" : "grid");
     case CSS_DISP_TABLE:           return put(out, cap, "table");
     case CSS_DISP_TABLE_ROW_GROUP: return put(out, cap, "table-row-group");
     case CSS_DISP_TABLE_ROW:       return put(out, cap, "table-row");

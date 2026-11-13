@@ -2,7 +2,7 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 325 files at commit `010cb95077d5`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 325 files at commit `6709d9c71f6d`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
@@ -68,8 +68,8 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 202 files, 6187 symbols; docstrings on 28% of symbols; functions snake_case (99%); types PascalCase (1%); median file 234 lines, max 20268.
-- h: 107 files, 1691 symbols; docstrings on 39% of symbols; functions snake_case (98%); types PascalCase (0%); median file 71 lines, max 1281.
+- c: 202 files, 6196 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (1%); median file 234 lines, max 20303.
+- h: 107 files, 1696 symbols; docstrings on 39% of symbols; functions snake_case (98%); types PascalCase (0%); median file 71 lines, max 1290.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
 - sh: 4 files, 0 symbols; median file 39 lines, max 90.
 - Tests: 94 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).

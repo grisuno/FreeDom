@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 231,
-  "entities": 3638,
+  "entities": 3642,
   "languages": {
    "c": 108,
    "h": 107,
@@ -13,9 +13,9 @@
   "kinds": {
    "constant": 23,
    "enum": 163,
-   "function": 2042,
-   "macro": 726,
-   "method": 25,
+   "function": 2041,
+   "macro": 730,
+   "method": 26,
    "module": 231,
    "struct": 276,
    "type_alias": 145,
@@ -27,9 +27,9 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1589,
-   "total": 3608,
-   "percent": 44.0
+   "documented": 1593,
+   "total": 3612,
+   "percent": 44.1
   },
   "by_kind": {
    "enum": {
@@ -39,17 +39,17 @@
    },
    "function": {
     "documented": 913,
-    "total": 2042,
+    "total": 2041,
     "percent": 44.7
    },
    "macro": {
-    "documented": 332,
-    "total": 726,
-    "percent": 45.7
+    "documented": 336,
+    "total": 730,
+    "percent": 46.0
    },
    "method": {
     "documented": 0,
-    "total": 25,
+    "total": 26,
     "percent": 0.0
    },
    "module": {
@@ -86,8 +86,8 @@
    },
    "gui/browser_ui.c": {
     "documented": 83,
-    "total": 256,
-    "percent": 32.4
+    "total": 255,
+    "percent": 32.5
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -155,9 +155,9 @@
     "percent": 88.9
    },
    "include/css.h": {
-    "documented": 104,
-    "total": 144,
-    "percent": 72.2
+    "documented": 105,
+    "total": 147,
+    "percent": 71.4
    },
    "include/css_atrule.h": {
     "documented": 7,
@@ -440,9 +440,9 @@
     "percent": 50.0
    },
    "include/page_view.h": {
-    "documented": 57,
-    "total": 95,
-    "percent": 60.0
+    "documented": 59,
+    "total": 97,
+    "percent": 60.8
    },
    "include/pdf_export.h": {
     "documented": 3,
@@ -995,9 +995,9 @@
     "percent": 33.3
    },
    "src/page_view.c": {
-    "documented": 65,
+    "documented": 66,
     "total": 146,
-    "percent": 44.5
+    "percent": 45.2
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -1245,7 +1245,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 256
+   "entities": 255
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1315,7 +1315,7 @@
   {
    "uid": "include/css.h",
    "path": "modules/include.css.h.jsonl",
-   "entities": 144
+   "entities": 147
   },
   {
    "uid": "include/css_atrule.h",
@@ -1600,7 +1600,7 @@
   {
    "uid": "include/page_view.h",
    "path": "modules/include.page_view.h.jsonl",
-   "entities": 95
+   "entities": 97
   },
   {
    "uid": "include/pdf_export.h",

@@ -164,7 +164,7 @@ static int rad_len_ok(int32_t v, int dflt) {
 /* Upper bound on the container table coming off the wire. Mirrors page_view's own
  * PV_MAX_CONTAINERS: the worker can never register more than that, so a larger
  * count is a corrupt or hostile stream and the whole view is rejected. */
-#define PV_MAX_CONTAINERS_WIRE ((size_t)256u)
+#define PV_MAX_CONTAINERS_WIRE ((size_t)PV_MAX_CONTAINERS)
 
 /* Cap on the page URL carried by OP_LOAD (URLs are small; defensive vs a desync). */
 #define TAB_MAX_URL ((size_t)(64u * 1024u))

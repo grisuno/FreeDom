@@ -516,6 +516,7 @@
 - [`consumer`](modules/src.css.c.md#consumer) function in `src/css.c`
 - [`container`](modules/gui.browser_ui.c.md#container) function in `gui/browser_ui.c`
 - [`container`](modules/src.page_view.c.md#container) function in `src/page_view.c`
+- [`container`](modules/include.css.h.md#css_style-container) method of `css_style` in `include/css.h`
 - [`container`](modules/include.page_view.h.md#pv_run-container) method of `pv_run` in `include/page_view.h`
 - [`content`](modules/include.text_shape.h.md#content) function in `include/text_shape.h`
 - [`content`](modules/src.page_view.c.md#content) function in `src/page_view.c`
@@ -611,6 +612,8 @@
 - [`CSS_DECO_OVERLINE`](modules/include.css.h.md#css_deco_overline) macro in `include/css.h`
 - [`CSS_DECO_UNDERLINE`](modules/include.css.h.md#css_deco_underline) macro in `include/css.h`
 - [`css_direction`](modules/include.css.h.md#css_direction) enum in `include/css.h`
+- [`CSS_DISP_INLINE_OUTER`](modules/include.css.h.md#css_disp_inline_outer) macro in `include/css.h`
+- [`CSS_DISP_INNER_MASK`](modules/include.css.h.md#css_disp_inner_mask) macro in `include/css.h`
 - [`css_display`](modules/include.css.h.md#css_display) enum in `include/css.h`
 - [`css_drop`](modules/include.css.h.md#css_drop) struct in `include/css.h`
 - [`css_drop_cause`](modules/include.css.h.md#css_drop_cause) enum in `include/css.h`
@@ -2467,9 +2470,11 @@
 - [`PV_MAUTO_RIGHT`](modules/include.page_view.h.md#pv_mauto_right) macro in `include/page_view.h`
 - [`PV_MAUTO_TOP`](modules/include.page_view.h.md#pv_mauto_top) macro in `include/page_view.h`
 - [`PV_MAX_BOXES`](modules/src.page_view.c.md#pv_max_boxes) macro in `src/page_view.c`
-- [`PV_MAX_CONTAINERS`](modules/src.page_view.c.md#pv_max_containers) macro in `src/page_view.c`
+- [`PV_MAX_CONTAINERS`](modules/include.page_view.h.md#pv_max_containers) macro in `include/page_view.h`
 - [`PV_MAX_CONTAINERS_WIRE`](modules/src.tab.c.md#pv_max_containers_wire) macro in `src/tab.c`
 - [`PV_MAX_DIM`](modules/src.page_view.c.md#pv_max_dim) macro in `src/page_view.c`
+- [`PV_MAX_FLOATS`](modules/include.page_view.h.md#pv_max_floats) macro in `include/page_view.h`
+- [`PV_MAX_FLOW_MEMO`](modules/src.page_view.c.md#pv_max_flow_memo) macro in `src/page_view.c`
 - [`PV_MAX_GRID_COLS`](modules/src.page_view.c.md#pv_max_grid_cols) macro in `src/page_view.c`
 - [`PV_MAX_INLINE_ROW_ITEMS`](modules/src.page_view.c.md#pv_max_inline_row_items) macro in `src/page_view.c`
 - [`PV_MAX_STYLE_BYTES`](modules/src.page_view.c.md#pv_max_style_bytes) macro in `src/page_view.c`
@@ -2701,7 +2706,6 @@
 - [`rp_sanitize_request_headers`](modules/include.secure_fetch.h.md#sf_config-rp_sanitize_request_headers) method of `sf_config` in `include/secure_fetch.h`
 - [`rp_site_of`](modules/include.request_policy.h.md#rp_site_of) function in `include/request_policy.h`
 - [`rp_site_of`](modules/src.request_policy.c.md#rp_site_of) function in `src/request_policy.c`
-- [`rule`](modules/gui.browser_ui.c.md#rule) function in `gui/browser_ui.c`
 - [`run`](modules/gui.browser_ui.c.md#run) function in `gui/browser_ui.c`
 - [`run`](modules/include.js_dom.h.md#run) function in `include/js_dom.h`
 - [`run`](modules/include.page_view.h.md#run) function in `include/page_view.h`

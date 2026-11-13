@@ -6,7 +6,7 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
 - Layer: utility
 - Language: c
 - Symbols:
-  - `ccm_prop` (struct, line 276)
+  - `ccm_prop` (struct, line 278)
   - `put` (function, line 9) `static size_t put(char *out, size_t cap, const char *s)`
   - `putf` (function, line 17) `static size_t putf(char *out, size_t cap, const char *fmt, ...)`
   - `put_rgb` (function, line 26) `static size_t put_rgb(char *out, size_t cap, int rgb, int alpha_pct)`
@@ -15,43 +15,43 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
         ...`
   - `ua_display` (function, line 49) `static const char *ua_display(const char *tag)`
   - `f_display` (function, line 77) `static size_t f_display(const ccm_input *in, char *out, size_t cap)`
-  - `f_position` (function, line 95) `static size_t f_position(const ccm_input *in, char *out, size_t cap)`
-  - `f_visibility` (function, line 100) `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)`
-  - `f_float` (function, line 105) `static size_t f_float(const ccm_input *in, char *out, size_t cap)`
-  - `f_clear` (function, line 110) `static size_t f_clear(const ccm_input *in, char *out, size_t cap)`
-  - `f_overflow_x` (function, line 115) `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)`
-  - `f_overflow_y` (function, line 120) `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)`
-  - `f_text_align` (function, line 125) `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)`
-  - `f_box_sizing` (function, line 130) `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)`
-  - `f_flex_direction` (function, line 135) `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)`
-  - `f_flex_wrap` (function, line 140) `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)`
-  - `f_justify` (function, line 145) `static size_t f_justify(const ccm_input *in, char *out, size_t cap)`
-  - `f_align_items` (function, line 151) `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)`
-  - `f_cursor` (function, line 157) `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)`
-  - `f_white_space` (function, line 163) `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)`
-  - `f_text_transform` (function, line 168) `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)`
-  - `f_font_style` (function, line 173) `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)`
-  - `f_font_weight` (function, line 177) `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)`
-  - `f_font_size` (function, line 181) `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)`
-  - `f_line_height` (function, line 187) `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)`
-  - `f_color` (function, line 193) `static size_t f_color(const ccm_input *in, char *out, size_t cap)`
-  - `f_background_color` (function, line 198) `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)`
-  - `f_opacity` (function, line 204) `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)`
-  - `f_z_index` (function, line 212) `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)`
-  - `f_border_style` (function, line 217) `static size_t f_border_style(int v, char *out, size_t cap)`
-  - `NAME` (function, line 224) `static size_t NAME(const ccm_input *in, char *out, size_t cap)`
-  - `f_gap` (function, line 244) `static size_t f_gap(const ccm_input *in, char *out, size_t cap)`
-  - `f_border_top_style` (function, line 256) `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)`
-  - `f_border_right_style` (function, line 259) `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)`
-  - `f_border_bottom_style` (function, line 262) `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)`
-  - `f_border_left_style` (function, line 265) `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)`
-  - `f_flex_grow` (function, line 269) `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)`
-  - `f_flex_shrink` (function, line 272) `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)`
-  - `ccm_get` (function, line 310) `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)`
-  - `ccm_property_count` (function, line 323) `size_t ccm_property_count(void)`
-  - `ccm_property_name` (function, line 325) `const char *ccm_property_name(size_t i)`
-  - `LEN_FIELD` (macro, line 223) `#define LEN_FIELD(NAME, FIELD, UNSET)`
-  - `CCM_NPROPS` (macro, line 308) `#define CCM_NPROPS`
+  - `f_position` (function, line 97) `static size_t f_position(const ccm_input *in, char *out, size_t cap)`
+  - `f_visibility` (function, line 102) `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)`
+  - `f_float` (function, line 107) `static size_t f_float(const ccm_input *in, char *out, size_t cap)`
+  - `f_clear` (function, line 112) `static size_t f_clear(const ccm_input *in, char *out, size_t cap)`
+  - `f_overflow_x` (function, line 117) `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)`
+  - `f_overflow_y` (function, line 122) `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)`
+  - `f_text_align` (function, line 127) `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)`
+  - `f_box_sizing` (function, line 132) `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)`
+  - `f_flex_direction` (function, line 137) `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)`
+  - `f_flex_wrap` (function, line 142) `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)`
+  - `f_justify` (function, line 147) `static size_t f_justify(const ccm_input *in, char *out, size_t cap)`
+  - `f_align_items` (function, line 153) `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)`
+  - `f_cursor` (function, line 159) `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)`
+  - `f_white_space` (function, line 165) `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)`
+  - `f_text_transform` (function, line 170) `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)`
+  - `f_font_style` (function, line 175) `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_font_weight` (function, line 179) `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)`
+  - `f_font_size` (function, line 183) `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)`
+  - `f_line_height` (function, line 189) `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)`
+  - `f_color` (function, line 195) `static size_t f_color(const ccm_input *in, char *out, size_t cap)`
+  - `f_background_color` (function, line 200) `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)`
+  - `f_opacity` (function, line 206) `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)`
+  - `f_z_index` (function, line 214) `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_style` (function, line 219) `static size_t f_border_style(int v, char *out, size_t cap)`
+  - `NAME` (function, line 226) `static size_t NAME(const ccm_input *in, char *out, size_t cap)`
+  - `f_gap` (function, line 246) `static size_t f_gap(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_top_style` (function, line 258) `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_right_style` (function, line 261) `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_bottom_style` (function, line 264) `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_border_left_style` (function, line 267) `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)`
+  - `f_flex_grow` (function, line 271) `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)`
+  - `f_flex_shrink` (function, line 274) `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)`
+  - `ccm_get` (function, line 312) `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)`
+  - `ccm_property_count` (function, line 325) `size_t ccm_property_count(void)`
+  - `ccm_property_name` (function, line 327) `const char *ccm_property_name(size_t i)`
+  - `LEN_FIELD` (macro, line 225) `#define LEN_FIELD(NAME, FIELD, UNSET)`
+  - `CCM_NPROPS` (macro, line 310) `#define CCM_NPROPS`
 - Depends on: `include/css_computed.h`
 
 ## src/css_counter.c

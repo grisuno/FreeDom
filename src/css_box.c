@@ -236,8 +236,19 @@ int cb_interp_display(const char *v) {
     if (csel_ci_eq(v, "inline")) return CSS_DISP_INLINE;
     if (csel_ci_eq(v, "inline-block")) return CSS_DISP_INLINE_BLOCK;
     if (csel_ci_eq(v, "list-item")) return CSS_DISP_LIST_ITEM;
-    if (csel_ci_eq(v, "flex") || csel_ci_eq(v, "inline-flex")) return CSS_DISP_FLEX;
-    if (csel_ci_eq(v, "grid") || csel_ci_eq(v, "inline-grid")) return CSS_DISP_GRID;
+    if (csel_ci_eq(v, "flex")) return CSS_DISP_FLEX;
+    if (csel_ci_eq(v, "grid")) return CSS_DISP_GRID;
+    /* The inline-level spellings keep their inner formatting context and carry the
+     * outer display as a bit (Display 3 section 2): folding them into the block-level
+     * code made every design-system button a full-width block. */
+    if (csel_ci_eq(v, "inline-flex") || csel_ci_eq(v, "inline flex") ||
+        csel_ci_eq(v, "-webkit-inline-flex") || csel_ci_eq(v, "-moz-inline-flex") ||
+        csel_ci_eq(v, "-ms-inline-flexbox") ||
+        csel_ci_eq(v, "-webkit-inline-box") || csel_ci_eq(v, "-moz-inline-box"))
+        return CSS_DISP_FLEX | CSS_DISP_INLINE_OUTER;
+    if (csel_ci_eq(v, "inline-grid") || csel_ci_eq(v, "inline grid") ||
+        csel_ci_eq(v, "-ms-inline-grid"))
+        return CSS_DISP_GRID | CSS_DISP_INLINE_OUTER;
     /* The table roles (CSS 2.1 17.2). Dropping these collapsed every CSS-built table
      * to one cell per row; see spec/css.md "display de la familia tabla". */
     if (csel_ci_eq(v, "table") || csel_ci_eq(v, "inline-table")) return CSS_DISP_TABLE;
@@ -257,19 +268,14 @@ int cb_interp_display(const char *v) {
     if (csel_ci_eq(v, "flow-root") || csel_ci_eq(v, "block flow") ||
         csel_ci_eq(v, "block flow-root")) return CSS_DISP_BLOCK;
     if (csel_ci_eq(v, "inline flow-root")) return CSS_DISP_INLINE_BLOCK;
-    if (csel_ci_eq(v, "block flex") || csel_ci_eq(v, "inline flex"))
-        return CSS_DISP_FLEX;
-    if (csel_ci_eq(v, "block grid") || csel_ci_eq(v, "inline grid"))
-        return CSS_DISP_GRID;
+    if (csel_ci_eq(v, "block flex")) return CSS_DISP_FLEX;
+    if (csel_ci_eq(v, "block grid")) return CSS_DISP_GRID;
     /* The vendor spellings of `flex` ARE `flex`: -webkit-flex and -ms-flexbox name
      * the same formatting context with the same box model, so an autoprefixed sheet
      * that writes both gets one answer either way. */
     if (csel_ci_eq(v, "-webkit-flex") || csel_ci_eq(v, "-moz-flex") ||
-        csel_ci_eq(v, "-ms-flexbox") ||
-        csel_ci_eq(v, "-webkit-inline-flex") || csel_ci_eq(v, "-moz-inline-flex") ||
-        csel_ci_eq(v, "-ms-inline-flexbox")) return CSS_DISP_FLEX;
-    if (csel_ci_eq(v, "-ms-grid") || csel_ci_eq(v, "-ms-inline-grid"))
-        return CSS_DISP_GRID;
+        csel_ci_eq(v, "-ms-flexbox")) return CSS_DISP_FLEX;
+    if (csel_ci_eq(v, "-ms-grid")) return CSS_DISP_GRID;
     /* `-webkit-box` / `-webkit-flexbox` is the 2009 flexbox draft. It is a
      * DIFFERENT spec, but the difference is in the item properties (box-flex,
      * box-pack, box-orient), not in the container's box: it is a block-level box
@@ -280,8 +286,7 @@ int cb_interp_display(const char *v) {
      * is horizontal, same as flex-direction's, so the mapping needs no extra rule;
      * `-webkit-box-orient: vertical` supplies the column case and is handled as an
      * alias of flex-direction. */
-    if (csel_ci_eq(v, "-webkit-box") || csel_ci_eq(v, "-moz-box") ||
-        csel_ci_eq(v, "-webkit-inline-box") || csel_ci_eq(v, "-moz-inline-box"))
+    if (csel_ci_eq(v, "-webkit-box") || csel_ci_eq(v, "-moz-box"))
         return CSS_DISP_FLEX;
     /* `contents` makes the element generate no box of its own while its children
      * still generate theirs (Display 3 3). This engine has no box-less pass-through,

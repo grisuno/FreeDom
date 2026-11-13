@@ -3,6 +3,17 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_clip_auto` | function | `tests/test_css.c:5743` | `static void test_clip_auto(void **state)` |
+| `test_clip_rect` | function | `tests/test_css.c:5733` | `static void test_clip_rect(void **state)` |
+| `test_color_calc_and_angle_hue` | function | `tests/test_css.c:3838` | `static void test_color_calc_and_angle_hue(void **state)` |
+| `test_color_keeps_alpha` | function | `tests/test_css.c:1985` | `static void test_color_keeps_alpha(void **state)` |
+| `test_combinator_class_chain` | function | `tests/test_css.c:1562` | `static void test_combinator_class_chain(void **state)` |
+| `test_combinator_specificity_sum` | function | `tests/test_css.c:1547` | `static void test_combinator_specificity_sum(void **state)` |
+| `test_component_var_cascade_order` | function | `tests/test_css.c:1343` | `static void test_component_var_cascade_order(void **state)` |
+| `test_component_var_inherited_by_child` | function | `tests/test_css.c:1323` | `static void test_component_var_inherited_by_child(void **state)` |
+| `test_component_var_inline_overrides` | function | `tests/test_css.c:1360` | `static void test_component_var_inline_overrides(void **state)` |
+| `test_component_var_same_element` | function | `tests/test_css.c:1310` | `static void test_component_var_same_element(void **state)` |
+| `test_conic_gradient_basic` | function | `tests/test_css.c:5279` | `static void test_conic_gradient_basic(void **state)` |
 | `test_conic_gradient_deg_positions` | function | `tests/test_css.c:5320` | `static void test_conic_gradient_deg_positions(void **state)` |
 | `test_conic_gradient_fails_closed` | function | `tests/test_css.c:5330` | `static void test_conic_gradient_fails_closed(void **state)` |
 | `test_conic_gradient_from_angle` | function | `tests/test_css.c:5291` | `static void test_conic_gradient_from_angle(void **state)` |
@@ -276,19 +287,19 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_selector_function` | function | `tests/test_css_atrule.c:51` | `static void test_selector_function(void **state)` |
 | `toy_decl` | function | `tests/test_css_atrule.c:16` | `static int toy_decl(void *ctx, const char *prop, const char *value)` |
 | `toy_sel` | function | `tests/test_css_atrule.c:23` | `static int toy_sel(void *ctx, const char *sel)` |
-| `main` | function | `tests/test_css_box.c:152` | `int main(void)` |
+| `main` | function | `tests/test_css_box.c:160` | `int main(void)` |
 | `test_align_display_gap` | function | `tests/test_css_box.c:52` | `static void test_align_display_gap(void **state)` |
 | `test_box4_partial_fails_closed` | function | `tests/test_css_box.c:44` | `static void test_box4_partial_fails_closed(void **state)` |
-| `test_clip_inset_edges` | function | `tests/test_css_box.c:102` | `static void test_clip_inset_edges(void **state)` |
-| `test_clip_inset_rejects` | function | `tests/test_css_box.c:127` | `static void test_clip_inset_rejects(void **state)` |
+| `test_clip_inset_edges` | function | `tests/test_css_box.c:110` | `static void test_clip_inset_edges(void **state)` |
+| `test_clip_inset_rejects` | function | `tests/test_css_box.c:135` | `static void test_clip_inset_rejects(void **state)` |
 | `test_emit_len_claims_both_halves` | function | `tests/test_css_box.c:34` | `static void test_emit_len_claims_both_halves(void **state)` |
-| `test_fit_content_trim` | function | `tests/test_css_box.c:70` | `static void test_fit_content_trim(void **state)` |
-| `test_grid_repeat_autofill_dropped` | function | `tests/test_css_box.c:63` | `static void test_grid_repeat_autofill_dropped(void **state)` |
-| `test_grid_rows_many_strings_fail_closed` | function | `tests/test_css_box.c:141` | `static void test_grid_rows_many_strings_fail_closed(void **state)` |
+| `test_fit_content_trim` | function | `tests/test_css_box.c:78` | `static void test_fit_content_trim(void **state)` |
+| `test_grid_repeat_autofill_dropped` | function | `tests/test_css_box.c:71` | `static void test_grid_repeat_autofill_dropped(void **state)` |
+| `test_grid_rows_many_strings_fail_closed` | function | `tests/test_css_box.c:149` | `static void test_grid_rows_many_strings_fail_closed(void **state)` |
 | `test_interp_len_auto_reject` | function | `tests/test_css_box.c:17` | `static void test_interp_len_auto_reject(void **state)` |
 | `test_interp_len_bare_number_rejected` | function | `tests/test_css_box.c:26` | `static void test_interp_len_bare_number_rejected(void **state)` |
 | `test_interp_len_px` | function | `tests/test_css_box.c:9` | `static void test_interp_len_px(void **state)` |
-| `test_lineheight_abs_vs_scale` | function | `tests/test_css_box.c:86` | `static void test_lineheight_abs_vs_scale(void **state)` |
+| `test_lineheight_abs_vs_scale` | function | `tests/test_css_box.c:94` | `static void test_lineheight_abs_vs_scale(void **state)` |
 | `main` | function | `tests/test_css_color.c:381` | `int main(void)` |
 | `oklch` | function | `tests/test_css_color.c:176` | `* Tailwind v4 writes its whole palette in oklch();` |
 | `palette` | function | `tests/test_css_color.c:178` | `* Tailwind v4 palette (sRGB fallbacks it publishes). One unit of rounding slack  * per channel. *...` |
@@ -328,13 +339,13 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_unsupported_syntax` | function | `tests/test_css_color.c:168` | `static void test_unsupported_syntax(void **state)` |
 | `blank` | function | `tests/test_css_computed.c:18` | `static css_style blank(void)` |
 | `get` | function | `tests/test_css_computed.c:11` | `static const char *get(const css_style *st, double fpx, int icol, const char *p)` |
-| `main` | function | `tests/test_css_computed.c:120` | `int main(void)` |
-| `test_color_inherits` | function | `tests/test_css_computed.c:86` | `static void test_color_inherits(void **state)` |
+| `main` | function | `tests/test_css_computed.c:125` | `int main(void)` |
+| `test_color_inherits` | function | `tests/test_css_computed.c:91` | `static void test_color_inherits(void **state)` |
 | `test_declared_values` | function | `tests/test_css_computed.c:48` | `static void test_declared_values(void **state)` |
-| `test_enumeration` | function | `tests/test_css_computed.c:106` | `static void test_enumeration(void **state)` |
+| `test_enumeration` | function | `tests/test_css_computed.c:111` | `static void test_enumeration(void **state)` |
 | `test_initial_values` | function | `tests/test_css_computed.c:29` | `static void test_initial_values(void **state)` |
-| `test_ua_display_by_tag` | function | `tests/test_css_computed.c:68` | `static void test_ua_display_by_tag(void **state)` |
-| `test_unknown_property_is_empty` | function | `tests/test_css_computed.c:94` | `static void test_unknown_property_is_empty(void **state)` |
+| `test_ua_display_by_tag` | function | `tests/test_css_computed.c:73` | `static void test_ua_display_by_tag(void **state)` |
+| `test_unknown_property_is_empty` | function | `tests/test_css_computed.c:99` | `static void test_unknown_property_is_empty(void **state)` |
 | `attr_of` | function | `tests/test_css_counter.c:54` | `static const char *attr_of(void *ctx, const char *name)` |
 | `h` | function | `tests/test_css_counter.c:10` | `static unsigned h(const char *s)` |
 | `main` | function | `tests/test_css_counter.c:160` | `int main(void)` |
@@ -485,16 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_decode_empty` | function | `tests/test_data_url.c:183` | `static void test_decode_empty(void **state)` |
 | `test_decode_invalid_character` | function | `tests/test_data_url.c:210` | `static void test_decode_invalid_character(void **state)` |
 | `test_decode_multi_group` | function | `tests/test_data_url.c:171` | `static void test_decode_multi_group(void **state)` |
-| `test_decode_no_padding_needed` | function | `tests/test_data_url.c:159` | `static void test_decode_no_padding_needed(void **state)` |
-| `test_decode_nulls` | function | `tests/test_data_url.c:236` | `static void test_decode_nulls(void **state)` |
-| `test_decode_one_byte_double_pad` | function | `tests/test_data_url.c:135` | `static void test_decode_one_byte_double_pad(void **state)` |
-| `test_decode_padding_in_wrong_position` | function | `tests/test_data_url.c:201` | `static void test_decode_padding_in_wrong_position(void **state)` |
-| `test_decode_percent_encoded_script` | function | `tests/test_data_url.c:270` | `static void test_decode_percent_encoded_script(void **state)` |
-| `test_decode_rejects` | function | `tests/test_data_url.c:302` | `static void test_decode_rejects(void **state)` |
-| `test_decode_too_large` | function | `tests/test_data_url.c:221` | `static void test_decode_too_large(void **state)` |
-| `test_decode_two_bytes_single_pad` | function | `tests/test_data_url.c:146` | `static void test_decode_two_bytes_single_pad(void **state)` |
-| `test_end_to_end_png_data_uri` | function | `tests/test_data_url.c:247` | `static void test_end_to_end_png_data_uri(void **state)` |
-| `test_is_data_url_false` | function | `tests/test_data_url.c:31` | `static void test_is_data_url_false(void **state)` |
-| `test_is_data_url_true` | function | `tests/test_data_url.c:23` | `static void test_is_data_url_true(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

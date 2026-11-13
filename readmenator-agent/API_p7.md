@@ -15,41 +15,41 @@ Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `includ
 - `cb_interp_style` (function) `src/css_box.c:203` `int cb_interp_style(const char *v)`
 - `cb_interp_textdeco` (function) `src/css_box.c:213` `int cb_interp_textdeco(const char *v)` -- text-decoration / text-decoration-line: OR of the line keywords underline / overline / line-through found in the...
 - `cb_interp_display` (function) `src/css_box.c:233` `int cb_interp_display(const char *v)`
-- `cb_interp_gap` (function) `src/css_box.c:308` `int cb_interp_gap(const char *v)` -- One gap length.
-- `cb_interp_justify` (function) `src/css_box.c:315` `int cb_interp_justify(const char *v)`
-- `repeat` (function) `src/css_box.c:336` `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) /...`
-- `cb_starts_with_ci` (function) `src/css_box.c:347` `static int cb_starts_with_ci(const char *s, const char *pre)`
-- `count_tracks` (function) `src/css_box.c:353` `static int count_tracks(const char *s, size_t n)`
-- `track_size_of` (function) `src/css_box.c:361` `static int track_size_of(const char *tok)` -- Size of ONE track token: `<N>fr` -> -(N*100); a px/em/rem length -> px (> 0); minmax(a,b) -> the size of its max...
-- `count_one_repeat` (function) `src/css_box.c:391` `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
+- `cb_interp_gap` (function) `src/css_box.c:313` `int cb_interp_gap(const char *v)` -- One gap length.
+- `cb_interp_justify` (function) `src/css_box.c:320` `int cb_interp_justify(const char *v)`
+- `repeat` (function) `src/css_box.c:341` `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) /...`
+- `cb_starts_with_ci` (function) `src/css_box.c:352` `static int cb_starts_with_ci(const char *s, const char *pre)`
+- `count_tracks` (function) `src/css_box.c:358` `static int count_tracks(const char *s, size_t n)`
+- `track_size_of` (function) `src/css_box.c:366` `static int track_size_of(const char *tok)` -- Size of ONE track token: `<N>fr` -> -(N*100); a px/em/rem length -> px (> 0); minmax(a,b) -> the size of its max...
+- `count_one_repeat` (function) `src/css_box.c:396` `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,
                       ...`
-- `walk_tracks` (function) `src/css_box.c:434` `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)`
-- `track_min_of` (function) `src/css_box.c:502` `static int track_min_of(const char *tok)` -- Minimum width of ONE track token for repeat(auto-fill): minmax(a,b) takes a's length; a plain track takes itself....
-- `expand_auto_fill` (function) `src/css_box.c:540` `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` -- repeat(auto-fill|auto-fit, <single-track pattern>) tried as a whole value: returns 1 and emits grid_cols = -min_px...
-- `cb_expand_grid_template_cols` (function) `src/css_box.c:618` `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` -- grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track sizes, emitted in lock-step (P_GRIDCOLS...
-- `cb_expand_grid_template_rows` (function) `src/css_box.c:641` `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)`
-- `accepts` (function) `src/css_box.c:701` `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...`
-- `calc_skip_ws` (function) `src/css_box.c:734` `static void calc_skip_ws(calc_parser *p)`
-- `calc_match_fn` (function) `src/css_box.c:741` `static int calc_match_fn(calc_parser *p, const char *name)` -- bare0: the token was a unitless 0.
-- `calc_piecewise` (function) `src/css_box.c:768` `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` -- Shared by BOTH symbolic components: the percentage is piecewise for exactly the same reason the em derivative is...
-- `calc_mathfn` (function) `src/css_box.c:783` `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` -- min()/max()/clamp() (2026-07-10): comma-separated full expressions, every argument the same shape (all lengths or...
-- `min` (function) `src/css_box.c:802` `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...`
-- `calc_term` (function) `src/css_box.c:906` `static int calc_term(calc_parser *p, calc_val *out, int depth)` -- out->pct = num; out->is_length = 1;   /* a <percentage> is dimensional, like a length ++p->i; return 1; } out->px =...
-- `calc_expr` (function) `src/css_box.c:933` `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
-- `calc_eval_full` (function) `src/css_box.c:955` `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
+- `walk_tracks` (function) `src/css_box.c:439` `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)`
+- `track_min_of` (function) `src/css_box.c:507` `static int track_min_of(const char *tok)` -- Minimum width of ONE track token for repeat(auto-fill): minmax(a,b) takes a's length; a plain track takes itself....
+- `expand_auto_fill` (function) `src/css_box.c:545` `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` -- repeat(auto-fill|auto-fit, <single-track pattern>) tried as a whole value: returns 1 and emits grid_cols = -min_px...
+- `cb_expand_grid_template_cols` (function) `src/css_box.c:623` `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` -- grid-template-columns: track count PLUS the first CSS_GRID_TRACKS_MAX track sizes, emitted in lock-step (P_GRIDCOLS...
+- `cb_expand_grid_template_rows` (function) `src/css_box.c:646` `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)`
+- `accepts` (function) `src/css_box.c:706` `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...`
+- `calc_skip_ws` (function) `src/css_box.c:739` `static void calc_skip_ws(calc_parser *p)`
+- `calc_match_fn` (function) `src/css_box.c:746` `static int calc_match_fn(calc_parser *p, const char *name)` -- bare0: the token was a unitless 0.
+- `calc_piecewise` (function) `src/css_box.c:773` `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` -- Shared by BOTH symbolic components: the percentage is piecewise for exactly the same reason the em derivative is...
+- `calc_mathfn` (function) `src/css_box.c:788` `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` -- min()/max()/clamp() (2026-07-10): comma-separated full expressions, every argument the same shape (all lengths or...
+- `min` (function) `src/css_box.c:807` `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...`
+- `calc_term` (function) `src/css_box.c:911` `static int calc_term(calc_parser *p, calc_val *out, int depth)` -- out->pct = num; out->is_length = 1;   /* a <percentage> is dimensional, like a length ++p->i; return 1; } out->px =...
+- `calc_expr` (function) `src/css_box.c:938` `static int calc_expr(calc_parser *p, calc_val *out, int depth)`
+- `calc_eval_full` (function) `src/css_box.c:960` `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,
            ...` -- Evaluates the inside of a calc(...) (v[0,vlen), the "calc(" prefix and matching ")" already stripped by the caller).
-- `calc_eval_em` (function) `src/css_box.c:969` `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` -- static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em, double *out_pct) { calc_parser...
-- `calc_unwrap` (function) `src/css_box.c:977` `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` -- True if s (already trimmed) is a "calc(...)" call spanning the whole string (case-insensitive keyword, balanced...
-- `cb_interp_len` (function) `src/css_box.c:1028` `int cb_interp_len(const char *v, int allow_auto, int *out)`
-- `pct_slot_of` (function) `src/css_box.c:1057` `static int pct_slot_of(int slot)` -- The css_pct_slot mirroring a px length slot, or -1 when the property does not accept the <length-percentage> type.
-- `cb_value_em_milli` (function) `src/css_box.c:1107` `int cb_value_em_milli(const char *v)` -- The font-relative derivative of `v`, in thousandths of an em, saturating at CSS_EM_MILLI_MAX.
-- `cb_clip_inset` (function) `src/css_box.c:1127` `int cb_clip_inset(const char *val, int px[4], int pm[4])`
-- `cb_interp_lp` (function) `src/css_box.c:1161` `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
+- `calc_eval_em` (function) `src/css_box.c:974` `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` -- static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em, double *out_pct) { calc_parser...
+- `calc_unwrap` (function) `src/css_box.c:982` `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` -- True if s (already trimmed) is a "calc(...)" call spanning the whole string (case-insensitive keyword, balanced...
+- `cb_interp_len` (function) `src/css_box.c:1033` `int cb_interp_len(const char *v, int allow_auto, int *out)`
+- `pct_slot_of` (function) `src/css_box.c:1062` `static int pct_slot_of(int slot)` -- The css_pct_slot mirroring a px length slot, or -1 when the property does not accept the <length-percentage> type.
+- `cb_value_em_milli` (function) `src/css_box.c:1112` `int cb_value_em_milli(const char *v)` -- The font-relative derivative of `v`, in thousandths of an em, saturating at CSS_EM_MILLI_MAX.
+- `cb_clip_inset` (function) `src/css_box.c:1132` `int cb_clip_inset(const char *val, int px[4], int pm[4])`
+- `cb_interp_lp` (function) `src/css_box.c:1166` `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
                      int *out_px, ...`
-- `term` (function) `src/css_box.c:1168` `* the same expression and failed closed on the percentage term (its property * may not accept one);`
-- `interp_len` (function) `src/css_box.c:1337` `* this file that might hand a token to interp_len (transitively: margin/padding/
+- `term` (function) `src/css_box.c:1173` `* the same expression and failed closed on the percentage term (its property * may not accept one);`
+- `interp_len` (function) `src/css_box.c:1342` `* this file that might hand a token to interp_len (transitively: margin/padding/
  * inset, flex-b...`
-- `cb_expand_box2` (function) `src/css_box.c:1408` `int cb_expand_box2(const char *val, int slot_start, int slot_end,
+- `cb_expand_box2` (function) `src/css_box.c:1413` `int cb_expand_box2(const char *val, int slot_start, int slot_end,
                        int allo...` -- Expands a two-slot logical shorthand (margin-inline / padding-block / inset-inline: one value sets both sides, two...
 
 ## src/css_chain.c
@@ -114,41 +114,41 @@ Depends on: `include/css_computed.h`
         ...`
 - `ua_display` (function) `src/css_computed.c:49` `static const char *ua_display(const char *tag)` -- The HTML Rendering UA sheet's `display` for a tag when the cascade declared none * (the engine keeps block-ness of...
 - `f_display` (function) `src/css_computed.c:77` `static size_t f_display(const ccm_input *in, char *out, size_t cap)`
-- `f_position` (function) `src/css_computed.c:95` `static size_t f_position(const ccm_input *in, char *out, size_t cap)`
-- `f_visibility` (function) `src/css_computed.c:100` `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)`
-- `f_float` (function) `src/css_computed.c:105` `static size_t f_float(const ccm_input *in, char *out, size_t cap)`
-- `f_clear` (function) `src/css_computed.c:110` `static size_t f_clear(const ccm_input *in, char *out, size_t cap)`
-- `f_overflow_x` (function) `src/css_computed.c:115` `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)`
-- `f_overflow_y` (function) `src/css_computed.c:120` `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)`
-- `f_text_align` (function) `src/css_computed.c:125` `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)`
-- `f_box_sizing` (function) `src/css_computed.c:130` `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)`
-- `f_flex_direction` (function) `src/css_computed.c:135` `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)`
-- `f_flex_wrap` (function) `src/css_computed.c:140` `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)`
-- `f_justify` (function) `src/css_computed.c:145` `static size_t f_justify(const ccm_input *in, char *out, size_t cap)`
-- `f_align_items` (function) `src/css_computed.c:151` `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)`
-- `f_cursor` (function) `src/css_computed.c:157` `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)`
-- `f_white_space` (function) `src/css_computed.c:163` `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)`
-- `f_text_transform` (function) `src/css_computed.c:168` `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)`
-- `f_font_style` (function) `src/css_computed.c:173` `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)`
-- `f_font_weight` (function) `src/css_computed.c:177` `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)`
-- `f_font_size` (function) `src/css_computed.c:181` `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)`
-- `f_line_height` (function) `src/css_computed.c:187` `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)`
-- `f_color` (function) `src/css_computed.c:193` `static size_t f_color(const ccm_input *in, char *out, size_t cap)`
-- `f_background_color` (function) `src/css_computed.c:198` `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)`
-- `f_opacity` (function) `src/css_computed.c:204` `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)`
-- `f_z_index` (function) `src/css_computed.c:212` `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)`
-- `f_border_style` (function) `src/css_computed.c:217` `static size_t f_border_style(int v, char *out, size_t cap)`
-- `NAME` (function) `src/css_computed.c:224` `static size_t NAME(const ccm_input *in, char *out, size_t cap)` -- define LEN_FIELD(NAME, FIELD, UNSET) \
-- `f_gap` (function) `src/css_computed.c:244` `static size_t f_gap(const ccm_input *in, char *out, size_t cap)`
-- `f_border_top_style` (function) `src/css_computed.c:256` `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)`
-- `f_border_right_style` (function) `src/css_computed.c:259` `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)`
-- `f_border_bottom_style` (function) `src/css_computed.c:262` `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)`
-- `f_border_left_style` (function) `src/css_computed.c:265` `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)`
-- `f_flex_grow` (function) `src/css_computed.c:269` `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)`
-- `f_flex_shrink` (function) `src/css_computed.c:272` `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)`
-- `ccm_get` (function) `src/css_computed.c:310` `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)`
-- `ccm_property_count` (function) `src/css_computed.c:323` `size_t ccm_property_count(void)`
-- `ccm_property_name` (function) `src/css_computed.c:325` `const char *ccm_property_name(size_t i)`
+- `f_position` (function) `src/css_computed.c:97` `static size_t f_position(const ccm_input *in, char *out, size_t cap)`
+- `f_visibility` (function) `src/css_computed.c:102` `static size_t f_visibility(const ccm_input *in, char *out, size_t cap)`
+- `f_float` (function) `src/css_computed.c:107` `static size_t f_float(const ccm_input *in, char *out, size_t cap)`
+- `f_clear` (function) `src/css_computed.c:112` `static size_t f_clear(const ccm_input *in, char *out, size_t cap)`
+- `f_overflow_x` (function) `src/css_computed.c:117` `static size_t f_overflow_x(const ccm_input *in, char *out, size_t cap)`
+- `f_overflow_y` (function) `src/css_computed.c:122` `static size_t f_overflow_y(const ccm_input *in, char *out, size_t cap)`
+- `f_text_align` (function) `src/css_computed.c:127` `static size_t f_text_align(const ccm_input *in, char *out, size_t cap)`
+- `f_box_sizing` (function) `src/css_computed.c:132` `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)`
+- `f_flex_direction` (function) `src/css_computed.c:137` `static size_t f_flex_direction(const ccm_input *in, char *out, size_t cap)`
+- `f_flex_wrap` (function) `src/css_computed.c:142` `static size_t f_flex_wrap(const ccm_input *in, char *out, size_t cap)`
+- `f_justify` (function) `src/css_computed.c:147` `static size_t f_justify(const ccm_input *in, char *out, size_t cap)`
+- `f_align_items` (function) `src/css_computed.c:153` `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)`
+- `f_cursor` (function) `src/css_computed.c:159` `static size_t f_cursor(const ccm_input *in, char *out, size_t cap)`
+- `f_white_space` (function) `src/css_computed.c:165` `static size_t f_white_space(const ccm_input *in, char *out, size_t cap)`
+- `f_text_transform` (function) `src/css_computed.c:170` `static size_t f_text_transform(const ccm_input *in, char *out, size_t cap)`
+- `f_font_style` (function) `src/css_computed.c:175` `static size_t f_font_style(const ccm_input *in, char *out, size_t cap)`
+- `f_font_weight` (function) `src/css_computed.c:179` `static size_t f_font_weight(const ccm_input *in, char *out, size_t cap)`
+- `f_font_size` (function) `src/css_computed.c:183` `static size_t f_font_size(const ccm_input *in, char *out, size_t cap)`
+- `f_line_height` (function) `src/css_computed.c:189` `static size_t f_line_height(const ccm_input *in, char *out, size_t cap)`
+- `f_color` (function) `src/css_computed.c:195` `static size_t f_color(const ccm_input *in, char *out, size_t cap)`
+- `f_background_color` (function) `src/css_computed.c:200` `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)`
+- `f_opacity` (function) `src/css_computed.c:206` `static size_t f_opacity(const ccm_input *in, char *out, size_t cap)`
+- `f_z_index` (function) `src/css_computed.c:214` `static size_t f_z_index(const ccm_input *in, char *out, size_t cap)`
+- `f_border_style` (function) `src/css_computed.c:219` `static size_t f_border_style(int v, char *out, size_t cap)`
+- `NAME` (function) `src/css_computed.c:226` `static size_t NAME(const ccm_input *in, char *out, size_t cap)` -- define LEN_FIELD(NAME, FIELD, UNSET) \
+- `f_gap` (function) `src/css_computed.c:246` `static size_t f_gap(const ccm_input *in, char *out, size_t cap)`
+- `f_border_top_style` (function) `src/css_computed.c:258` `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)`
+- `f_border_right_style` (function) `src/css_computed.c:261` `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)`
+- `f_border_bottom_style` (function) `src/css_computed.c:264` `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)`
+- `f_border_left_style` (function) `src/css_computed.c:267` `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)`
+- `f_flex_grow` (function) `src/css_computed.c:271` `static size_t f_flex_grow(const ccm_input *in, char *out, size_t cap)`
+- `f_flex_shrink` (function) `src/css_computed.c:274` `static size_t f_flex_shrink(const ccm_input *in, char *out, size_t cap)`
+- `ccm_get` (function) `src/css_computed.c:312` `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)`
+- `ccm_property_count` (function) `src/css_computed.c:325` `size_t ccm_property_count(void)`
+- `ccm_property_name` (function) `src/css_computed.c:327` `const char *ccm_property_name(size_t i)`
 
 ## src/css_counter.c
 Depends on: `include/css_counter.h`

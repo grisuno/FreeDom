@@ -53,6 +53,11 @@ static void test_declared_values(void **state) {
     s.margin_left = 12; s.pad_top = 7; s.width = 240; s.bold = 1; s.opacity = 25;
     s.z_index = -3;
     assert_string_equal(get(&s, 20, -1, "display"), "flex");
+    s.display_inline = 1;
+    assert_string_equal(get(&s, 20, -1, "display"), "inline-flex");
+    s.display = CSS_DISP_GRID;
+    assert_string_equal(get(&s, 20, -1, "display"), "inline-grid");
+    s.display = CSS_DISP_FLEX; s.display_inline = 0;
     assert_string_equal(get(&s, 20, -1, "position"), "absolute");
     assert_string_equal(get(&s, 20, -1, "color"), "rgb(51, 102, 153)");
     assert_string_equal(get(&s, 20, -1, "background-color"), "rgba(255, 0, 0, 0.5)");

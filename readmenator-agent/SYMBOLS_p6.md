@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `tag_row` | struct | `src/box_style.c:61` | `` |
+| `take` | function | `src/box_style.c:295` | `* caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read...` |
+| `BT_LEN_AUTO` | macro | `src/box_tree.c:31` | `#define BT_LEN_AUTO` |
+| `BT_WRAP_EPS` | macro | `src/box_tree.c:62` | `#define BT_WRAP_EPS` |
 | `assign_doc_order` | function | `src/box_tree.c:505` | `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,                   ...` |
 | `block` | function | `src/box_tree.c:566` | `* true block (same flow neighbourhood), strictly better than zeros. NULL      * placed keeps lega...` |
 | `bt_box_hidden` | function | `src/box_tree.c:776` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
@@ -102,17 +106,17 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `CSS_MAX_RAW` | macro | `src/css.c:87` | `#define CSS_MAX_RAW` |
 | `CSS_MEDIA_MAX_DEPTH` | macro | `src/css.c:5304` | `#define CSS_MEDIA_MAX_DEPTH` |
 | `CSS_SELS_PER_GROUP` | macro | `src/css.c:69` | `#define CSS_SELS_PER_GROUP` |
-| `CSS_VAR_POOL` | macro | `src/css.c:6657` | `#define CSS_VAR_POOL` |
+| `CSS_VAR_POOL` | macro | `src/css.c:6660` | `#define CSS_VAR_POOL` |
 | `CSS_WIDE_RESET` | macro | `src/css.c:222` | `#define CSS_WIDE_RESET` |
 | `LIST` | function | `src/css.c:2922` | `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...` |
-| `NULL` | function | `src/css.c:7078` | `* Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...` |
+| `NULL` | function | `src/css.c:7081` | `* Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...` |
 | `P_META_CUSTOM` | macro | `src/css.c:83` | `#define P_META_CUSTOM` |
 | `P_META_VARSRC` | macro | `src/css.c:84` | `#define P_META_VARSRC` |
 | `add_rule` | function | `src/css.c:5020` | `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,                      siz...` |
 | `anim_easing_iv` | function | `src/css.c:1486` | `static int anim_easing_iv(const char *tok)` |
 | `apply_decl` | function | `src/css.c:6077` | `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
-| `apply_rule` | function | `src/css.c:6688` | `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
-| `apply_var_source` | function | `src/css.c:6661` | `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,         ...` |
+| `apply_rule` | function | `src/css.c:6691` | `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
+| `apply_var_source` | function | `src/css.c:6664` | `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,         ...` |
 | `at_is_media` | function | `src/css.c:5171` | `static int at_is_media(const char *s, size_t i, size_t n)` |
 | `at_keyword` | function | `src/css.c:5182` | `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` |
 | `axis` | function | `src/css.c:1817` | `* bare center displaces it to the free axis (`center right` = x:right, y:center).  * Any other co...` |
@@ -122,36 +126,36 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `blur` | function | `src/css.c:1780` | `* consumes ONLY blur(Npx);` |
 | `box_shadow_layer` | function | `src/css.c:2302` | `static int box_shadow_layer(const char *val, size_t len, int out[6])` |
 | `caller` | function | `src/css.c:3860` | `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...` |
-| `cand_cmp` | function | `src/css.c:6596` | `static int cand_cmp(const void *pa, const void *pb)` |
+| `cand_cmp` | function | `src/css.c:6599` | `static int cand_cmp(const void *pa, const void *pb)` |
 | `cap` | function | `src/css.c:2049` | `* string past the cap (emit_content): a conforming declaration must not * count as a discard just because an icon...` |
 | `collect_custom_props_scoped` | function | `src/css.c:5313` | `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,                 ...` |
 | `column` | function | `src/css.c:2403` | `* column (`flex: 1 1 0%`);` |
-| `computed_font_size` | function | `src/css.c:6579` | `static double computed_font_size(const css_style *o, const css_element *el)` |
+| `computed_font_size` | function | `src/css.c:6582` | `static double computed_font_size(const css_style *o, const css_element *el)` |
 | `consumer` | function | `src/css.c:5987` | `* consumer (shorthands, calc(), var() values) gets it with no context          * threaded through...` |
 | `content_attr_of` | function | `src/css.c:6068` | `static const char *content_attr_of(const css_element *el, const char *name)` |
 | `copy_trim` | function | `src/css.c:2574` | `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
 | `csel_substr` | function | `src/css.c:5204` | `return known && csel_substr(val, "var(", 1);` |
-| `css_cand` | struct | `src/css.c:6591` | `` |
-| `css_computed_font_size_for_tag` | function | `src/css.c:6571` | `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)` |
+| `css_cand` | struct | `src/css.c:6594` | `` |
+| `css_computed_font_size_for_tag` | function | `src/css.c:6574` | `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)` |
 | `css_decl` | function | `src/css.c:91` | `* text and stores the INDEX in the css_decl (int-only, see P_BG_IMAGE_URL);` |
-| `css_font_face_at` | function | `src/css.c:7114` | `int css_font_face_at(const css_sheet *sheet, size_t i,                      char *family, size_t ...` |
-| `css_font_face_count` | function | `src/css.c:7110` | `size_t css_font_face_count(const css_sheet *sheet)` |
+| `css_font_face_at` | function | `src/css.c:7117` | `int css_font_face_at(const css_sheet *sheet, size_t i,                      char *family, size_t ...` |
+| `css_font_face_count` | function | `src/css.c:7113` | `size_t css_font_face_count(const css_sheet *sheet)` |
 | `css_free` | function | `src/css.c:6045` | `void css_free(css_sheet *s)` |
 | `css_keyframe_stop` | struct | `src/css.c:144` | `` |
-| `css_match` | struct | `src/css.c:6585` | `` |
+| `css_match` | struct | `src/css.c:6588` | `` |
 | `css_parse` | function | `src/css.c:5939` | `css_status css_parse(const char *text, size_t len, css_sheet **out)` |
-| `css_parse_inline` | function | `src/css.c:7124` | `css_style css_parse_inline(const char *style, size_t len)` |
+| `css_parse_inline` | function | `src/css.c:7127` | `css_style css_parse_inline(const char *style, size_t len)` |
 | `css_parse_logged` | function | `src/css.c:5953` | `css_status css_parse_logged(const char *text, size_t len, const css_media *media,                ...` |
 | `css_parse_media` | function | `src/css.c:5943` | `css_status css_parse_media(const char *text, size_t len, const css_media *media,                 ...` |
 | `css_parse_scoped` | function | `src/css.c:5948` | `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,                ...` |
-| `css_resolve` | function | `src/css.c:7054` | `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,                   ...` |
-| `css_resolve_el` | function | `src/css.c:6757` | `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,                          ...` |
-| `css_resolve_el_ex` | function | `src/css.c:6766` | `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,                       ...` |
-| `css_resolve_pseudo` | function | `src/css.c:6782` | `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)` |
+| `css_resolve` | function | `src/css.c:7057` | `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,                   ...` |
+| `css_resolve_el` | function | `src/css.c:6760` | `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,                          ...` |
+| `css_resolve_el_ex` | function | `src/css.c:6769` | `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,                       ...` |
+| `css_resolve_pseudo` | function | `src/css.c:6785` | `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)` |
 | `css_rule` | struct | `src/css.c:102` | `` |
 | `css_sheet` | struct | `src/css.c:104` | `` |
-| `css_sheet_uses_counters` | function | `src/css.c:7128` | `int css_sheet_uses_counters(const css_sheet *sheet)` |
-| `css_ua_heading_em` | function | `src/css.c:6566` | `double css_ua_heading_em(int level)` |
+| `css_sheet_uses_counters` | function | `src/css.c:7131` | `int css_sheet_uses_counters(const css_sheet *sheet)` |
+| `css_ua_heading_em` | function | `src/css.c:6569` | `double css_ua_heading_em(int level)` |
 | `declaration` | function | `src/css.c:2338` | `* invalid layer drops the whole declaration (fail closed). `none` is an explicit  * no-shadow. ur...` |
 | `download` | function | `src/css.c:5562` | `* the download (spec/webfont.md b3b). An empty src_url                      * simply never resolv...` |
 | `drop_copy_text` | function | `src/css.c:4792` | `static void drop_copy_text(char *dst, size_t cap, const char *src)` |
@@ -195,13 +199,13 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `expand_valign` | function | `src/css.c:370` | `static int expand_valign(const char *val, css_decl *dst, int cap)` |
 | `filter_paren_body` | function | `src/css.c:1380` | `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)` |
 | `first_comma_item` | function | `src/css.c:746` | `static void first_comma_item(const char *val, char *buf, size_t cap);` |
-| `fold_font_relative` | function | `src/css.c:6726` | `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,                          ...` |
+| `fold_font_relative` | function | `src/css.c:6729` | `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,                          ...` |
 | `font_list_alias` | function | `src/css.c:3660` | `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)` |
 | `font_list_norm` | function | `src/css.c:3694` | `static int font_list_norm(const char *val, char *out, size_t cap)` |
 | `function` | function | `src/css.c:3251` | `* transform function (perspective/rotate3d/...), or unparseable syntax,  * rejects the WHOLE decl...` |
 | `has_double_dash` | function | `src/css.c:2634` | `static int has_double_dash(const char *p, size_t n)` |
 | `here` | function | `src/css.c:4463` | `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);` |
-| `idx` | type_alias | `src/css.c:6591` | `typedef struct css_cand { int imp, espec, ord, idx;` |
+| `idx` | type_alias | `src/css.c:6594` | `typedef struct css_cand { int imp, espec, ord, idx;` |
 | `interp_accent_color` | function | `src/css.c:897` | `static int interp_accent_color(const char *v)` |
 | `interp_align` | function | `src/css.c:315` | `static int interp_align(const char *v)` |
 | `interp_align_kw` | function | `src/css.c:2469` | `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)` |
@@ -317,7 +321,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `parse_num` | function | `src/css.c:181` | `static int parse_num(const char *s, double *out, const char **endp)` |
 | `parse_numlist` | function | `src/css.c:2863` | `static int parse_numlist(const char *p, size_t argn, double *m6, int count)` |
 | `property` | function | `src/css.c:3569` | `* error drops the whole property (fail closed). */ static int expand_clip(const char *val, css_de...` |
-| `pseudo_of` | function | `src/css.c:6773` | `static int pseudo_of(int which)` |
+| `pseudo_of` | function | `src/css.c:6776` | `static int pseudo_of(int which)` |
 | `raw_add` | function | `src/css.c:4837` | `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)` |
 | `rem_emit_px` | function | `src/css.c:5712` | `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` |
 | `rem_ident_ch` | function | `src/css.c:5694` | `static int rem_ident_ch(char c)` |
@@ -325,7 +329,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `rem_px` | type_alias | `src/css.c:5730` | `typedef struct len_rebase_ctx { double rem_px;` |
 | `rem_rebase` | function | `src/css.c:5838` | `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)` |
 | `remap_to_mask` | function | `src/css.c:762` | `static int remap_to_mask(css_decl *dst, int n)` |
-| `resolve_core` | function | `src/css.c:6793` | `static css_style resolve_core(const css_sheet *sheet, const css_element *el,                     ...` |
+| `resolve_core` | function | `src/css.c:6796` | `static css_style resolve_core(const css_sheet *sheet, const css_element *el,                     ...` |
 | `sel_list_comma` | function | `src/css.c:2295` | `static size_t sel_list_comma(const char *s, size_t i, size_t end);` |
 | `selector_matches_root` | function | `src/css.c:2691` | `static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m,          ...` |
 | `sentinel` | function | `src/css.c:4250` | `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);` |
@@ -365,58 +369,58 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `eval_in_parens` | function | `src/css_atrule.c:85` | `static int eval_in_parens(const char *s, size_t *i, size_t b, const car_ops *ops,                ...` |
 | `keyword_at` | function | `src/css_atrule.c:23` | `static int keyword_at(const char *s, size_t i, size_t b, const char *kw)` |
 | `skip_ws` | function | `src/css_atrule.c:17` | `static size_t skip_ws(const char *s, size_t i, size_t b)` |
-| `AUTO_REJECT` | macro | `src/css_box.c:1234` | `#define AUTO_REJECT` |
-| `AUTO_RESET` | macro | `src/css_box.c:1236` | `#define AUTO_RESET` |
-| `AUTO_RESET_NONE` | macro | `src/css_box.c:1240` | `#define AUTO_RESET_NONE` |
-| `AUTO_VALUE` | macro | `src/css_box.c:1235` | `#define AUTO_VALUE` |
-| `CSS_CALC_MAX_DEPTH` | macro | `src/css_box.c:709` | `#define CSS_CALC_MAX_DEPTH` |
-| `CSS_MATHFN_MAX_ARGS` | macro | `src/css_box.c:713` | `#define CSS_MATHFN_MAX_ARGS` |
+| `AUTO_REJECT` | macro | `src/css_box.c:1239` | `#define AUTO_REJECT` |
+| `AUTO_RESET` | macro | `src/css_box.c:1241` | `#define AUTO_RESET` |
+| `AUTO_RESET_NONE` | macro | `src/css_box.c:1245` | `#define AUTO_RESET_NONE` |
+| `AUTO_VALUE` | macro | `src/css_box.c:1240` | `#define AUTO_VALUE` |
+| `CSS_CALC_MAX_DEPTH` | macro | `src/css_box.c:714` | `#define CSS_CALC_MAX_DEPTH` |
+| `CSS_MATHFN_MAX_ARGS` | macro | `src/css_box.c:718` | `#define CSS_MATHFN_MAX_ARGS` |
 | `RELATIVE` | function | `src/css_box.c:63` | `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...` |
-| `accepts` | function | `src/css_box.c:701` | `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...` |
-| `calc_eval_em` | function | `src/css_box.c:969` | `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` |
-| `calc_eval_full` | function | `src/css_box.c:955` | `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,            ...` |
-| `calc_expr` | function | `src/css_box.c:933` | `static int calc_expr(calc_parser *p, calc_val *out, int depth)` |
-| `calc_match_fn` | function | `src/css_box.c:741` | `static int calc_match_fn(calc_parser *p, const char *name)` |
-| `calc_mathfn` | function | `src/css_box.c:783` | `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` |
-| `calc_parser` | struct | `src/css_box.c:732` | `` |
-| `calc_piecewise` | function | `src/css_box.c:768` | `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` |
-| `calc_skip_ws` | function | `src/css_box.c:734` | `static void calc_skip_ws(calc_parser *p)` |
-| `calc_term` | function | `src/css_box.c:906` | `static int calc_term(calc_parser *p, calc_val *out, int depth)` |
-| `calc_unwrap` | function | `src/css_box.c:977` | `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` |
-| `calc_val` | struct | `src/css_box.c:731` | `` |
-| `cb_clip_inset` | function | `src/css_box.c:1127` | `int cb_clip_inset(const char *val, int px[4], int pm[4])` |
+| `accepts` | function | `src/css_box.c:706` | `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...` |
+| `calc_eval_em` | function | `src/css_box.c:974` | `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` |
+| `calc_eval_full` | function | `src/css_box.c:960` | `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,            ...` |
+| `calc_expr` | function | `src/css_box.c:938` | `static int calc_expr(calc_parser *p, calc_val *out, int depth)` |
+| `calc_match_fn` | function | `src/css_box.c:746` | `static int calc_match_fn(calc_parser *p, const char *name)` |
+| `calc_mathfn` | function | `src/css_box.c:788` | `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` |
+| `calc_parser` | struct | `src/css_box.c:737` | `` |
+| `calc_piecewise` | function | `src/css_box.c:773` | `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` |
+| `calc_skip_ws` | function | `src/css_box.c:739` | `static void calc_skip_ws(calc_parser *p)` |
+| `calc_term` | function | `src/css_box.c:911` | `static int calc_term(calc_parser *p, calc_val *out, int depth)` |
+| `calc_unwrap` | function | `src/css_box.c:982` | `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` |
+| `calc_val` | struct | `src/css_box.c:736` | `` |
+| `cb_clip_inset` | function | `src/css_box.c:1132` | `int cb_clip_inset(const char *val, int px[4], int pm[4])` |
 | `cb_copy_trim` | function | `src/css_box.c:25` | `static size_t cb_copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
-| `cb_expand_box2` | function | `src/css_box.c:1408` | `int cb_expand_box2(const char *val, int slot_start, int slot_end,                        int allo...` |
-| `cb_expand_grid_template_cols` | function | `src/css_box.c:618` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` |
-| `cb_expand_grid_template_rows` | function | `src/css_box.c:641` | `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)` |
+| `cb_expand_box2` | function | `src/css_box.c:1413` | `int cb_expand_box2(const char *val, int slot_start, int slot_end,                        int allo...` |
+| `cb_expand_grid_template_cols` | function | `src/css_box.c:623` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` |
+| `cb_expand_grid_template_rows` | function | `src/css_box.c:646` | `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)` |
 | `cb_interp_align` | function | `src/css_box.c:54` | `int cb_interp_align(const char *v)` |
 | `cb_interp_display` | function | `src/css_box.c:233` | `int cb_interp_display(const char *v)` |
 | `cb_interp_fontsize_ex` | function | `src/css_box.c:72` | `int cb_interp_fontsize_ex(const char *v, int *abs_out)` |
-| `cb_interp_gap` | function | `src/css_box.c:308` | `int cb_interp_gap(const char *v)` |
-| `cb_interp_justify` | function | `src/css_box.c:315` | `int cb_interp_justify(const char *v)` |
-| `cb_interp_len` | function | `src/css_box.c:1028` | `int cb_interp_len(const char *v, int allow_auto, int *out)` |
+| `cb_interp_gap` | function | `src/css_box.c:313` | `int cb_interp_gap(const char *v)` |
+| `cb_interp_justify` | function | `src/css_box.c:320` | `int cb_interp_justify(const char *v)` |
+| `cb_interp_len` | function | `src/css_box.c:1033` | `int cb_interp_len(const char *v, int allow_auto, int *out)` |
 | `cb_interp_lineheight` | function | `src/css_box.c:145` | `int cb_interp_lineheight(const char *v)` |
-| `cb_interp_lp` | function | `src/css_box.c:1161` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,                      int *out_px, ...` |
+| `cb_interp_lp` | function | `src/css_box.c:1166` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,                      int *out_px, ...` |
 | `cb_interp_style` | function | `src/css_box.c:203` | `int cb_interp_style(const char *v)` |
 | `cb_interp_textdeco` | function | `src/css_box.c:213` | `int cb_interp_textdeco(const char *v)` |
 | `cb_interp_weight` | function | `src/css_box.c:194` | `int cb_interp_weight(const char *v)` |
 | `cb_length_px` | function | `src/css_box.c:49` | `int cb_length_px(const char *v, double *px)` |
 | `cb_parse_num` | function | `src/css_box.c:13` | `static int cb_parse_num(const char *s, double *out, const char **endp)` |
-| `cb_starts_with_ci` | function | `src/css_box.c:347` | `static int cb_starts_with_ci(const char *s, const char *pre)` |
-| `cb_value_em_milli` | function | `src/css_box.c:1107` | `int cb_value_em_milli(const char *v)` |
+| `cb_starts_with_ci` | function | `src/css_box.c:352` | `static int cb_starts_with_ci(const char *s, const char *pre)` |
+| `cb_value_em_milli` | function | `src/css_box.c:1112` | `int cb_value_em_milli(const char *v)` |
 | `cb_wide_keyword` | function | `src/css_box.c:18` | `static int cb_wide_keyword(const char *v)` |
-| `count_one_repeat` | function | `src/css_box.c:391` | `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,                       ...` |
-| `count_tracks` | function | `src/css_box.c:353` | `static int count_tracks(const char *s, size_t n)` |
-| `expand_auto_fill` | function | `src/css_box.c:540` | `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` |
-| `interp_len` | function | `src/css_box.c:1337` | `* this file that might hand a token to interp_len (transitively: margin/padding/  * inset, flex-b...` |
-| `min` | function | `src/css_box.c:802` | `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...` |
-| `pct_slot_of` | function | `src/css_box.c:1057` | `static int pct_slot_of(int slot)` |
-| `px` | type_alias | `src/css_box.c:731` | `typedef struct calc_val { double px;` |
-| `repeat` | function | `src/css_box.c:336` | `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill\|...) /...` |
-| `term` | function | `src/css_box.c:1168` | `* the same expression and failed closed on the percentage term (its property * may not accept one);` |
-| `track_min_of` | function | `src/css_box.c:502` | `static int track_min_of(const char *tok)` |
-| `track_size_of` | function | `src/css_box.c:361` | `static int track_size_of(const char *tok)` |
-| `walk_tracks` | function | `src/css_box.c:434` | `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)` |
+| `count_one_repeat` | function | `src/css_box.c:396` | `static int count_one_repeat(const char *s, size_t tokstart, size_t toklen,                       ...` |
+| `count_tracks` | function | `src/css_box.c:358` | `static int count_tracks(const char *s, size_t n)` |
+| `expand_auto_fill` | function | `src/css_box.c:545` | `static int expand_auto_fill(const char *val, css_decl *dst, int cap)` |
+| `interp_len` | function | `src/css_box.c:1342` | `* this file that might hand a token to interp_len (transitively: margin/padding/  * inset, flex-b...` |
+| `min` | function | `src/css_box.c:807` | `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...` |
+| `pct_slot_of` | function | `src/css_box.c:1062` | `static int pct_slot_of(int slot)` |
+| `px` | type_alias | `src/css_box.c:736` | `typedef struct calc_val { double px;` |
+| `repeat` | function | `src/css_box.c:341` | `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill\|...) /...` |
+| `term` | function | `src/css_box.c:1173` | `* the same expression and failed closed on the percentage term (its property * may not accept one);` |
+| `track_min_of` | function | `src/css_box.c:507` | `static int track_min_of(const char *tok)` |
+| `track_size_of` | function | `src/css_box.c:366` | `static int track_size_of(const char *tok)` |
+| `walk_tracks` | function | `src/css_box.c:439` | `static int walk_tracks(const char *s, size_t n, int *sizes, int szcap, int *pos)` |
 | `CCH_ATTR_BUF` | macro | `src/css_chain.c:23` | `#define CCH_ATTR_BUF` |
 | `CCH_CLASS_BUF` | macro | `src/css_chain.c:17` | `#define CCH_CLASS_BUF` |
 | `CCH_CLASS_SPILL_MAX` | macro | `src/css_chain.c:21` | `#define CCH_CLASS_SPILL_MAX` |
@@ -479,22 +483,18 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `srgb_encode` | function | `src/css_color.c:609` | `static unsigned char srgb_encode(double lin)` |
 | `strncmp` | function | `src/css_color.c:743` | `strncmp(buf, "oklab(", 6) == 0 \|\| strncmp(buf, "oklch(", 6) == 0)` |
 | `v` | type_alias | `src/css_color.c:222` | `typedef struct cc_cv { double v;` |
-| `CCM_NPROPS` | macro | `src/css_computed.c:308` | `#define CCM_NPROPS` |
-| `LEN_FIELD` | macro | `src/css_computed.c:223` | `#define LEN_FIELD(NAME, FIELD, UNSET)` |
-| `NAME` | function | `src/css_computed.c:224` | `static size_t NAME(const ccm_input *in, char *out, size_t cap)` |
-| `ccm_get` | function | `src/css_computed.c:310` | `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)` |
-| `ccm_prop` | struct | `src/css_computed.c:276` | `` |
-| `ccm_property_count` | function | `src/css_computed.c:323` | `size_t ccm_property_count(void)` |
-| `ccm_property_name` | function | `src/css_computed.c:325` | `const char *ccm_property_name(size_t i)` |
-| `f_align_items` | function | `src/css_computed.c:151` | `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)` |
-| `f_background_color` | function | `src/css_computed.c:198` | `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)` |
-| `f_border_bottom_style` | function | `src/css_computed.c:262` | `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)` |
-| `f_border_left_style` | function | `src/css_computed.c:265` | `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)` |
-| `f_border_right_style` | function | `src/css_computed.c:259` | `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)` |
-| `f_border_style` | function | `src/css_computed.c:217` | `static size_t f_border_style(int v, char *out, size_t cap)` |
-| `f_border_top_style` | function | `src/css_computed.c:256` | `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)` |
-| `f_box_sizing` | function | `src/css_computed.c:130` | `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)` |
-| `f_clear` | function | `src/css_computed.c:110` | `static size_t f_clear(const ccm_input *in, char *out, size_t cap)` |
-| `f_color` | function | `src/css_computed.c:193` | `static size_t f_color(const ccm_input *in, char *out, size_t cap)` |
+| `CCM_NPROPS` | macro | `src/css_computed.c:310` | `#define CCM_NPROPS` |
+| `LEN_FIELD` | macro | `src/css_computed.c:225` | `#define LEN_FIELD(NAME, FIELD, UNSET)` |
+| `NAME` | function | `src/css_computed.c:226` | `static size_t NAME(const ccm_input *in, char *out, size_t cap)` |
+| `ccm_get` | function | `src/css_computed.c:312` | `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)` |
+| `ccm_prop` | struct | `src/css_computed.c:278` | `` |
+| `ccm_property_count` | function | `src/css_computed.c:325` | `size_t ccm_property_count(void)` |
+| `ccm_property_name` | function | `src/css_computed.c:327` | `const char *ccm_property_name(size_t i)` |
+| `f_align_items` | function | `src/css_computed.c:153` | `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)` |
+| `f_background_color` | function | `src/css_computed.c:200` | `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_bottom_style` | function | `src/css_computed.c:264` | `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_left_style` | function | `src/css_computed.c:267` | `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_right_style` | function | `src/css_computed.c:261` | `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_style` | function | `src/css_computed.c:219` | `static size_t f_border_style(int v, char *out, size_t cap)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

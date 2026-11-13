@@ -3,6 +3,20 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_chain_hybrid_allows_classical` | function | `tests/test_secure_fetch.c:171` | `static void test_chain_hybrid_allows_classical(void **state)` |
+| `test_chain_permissive_allows_weak_certs` | function | `tests/test_secure_fetch.c:188` | `static void test_chain_permissive_allows_weak_certs(void **state)` |
+| `test_chain_rejects_null` | function | `tests/test_secure_fetch.c:209` | `static void test_chain_rejects_null(void **state)` |
+| `test_chain_rejects_sha1_in_any_policy` | function | `tests/test_secure_fetch.c:179` | `static void test_chain_rejects_sha1_in_any_policy(void **state)` |
+| `test_chain_rejects_weak_rsa` | function | `tests/test_secure_fetch.c:201` | `static void test_chain_rejects_weak_rsa(void **state)` |
+| `test_chain_strict_accepts_pq` | function | `tests/test_secure_fetch.c:163` | `static void test_chain_strict_accepts_pq(void **state)` |
+| `test_chain_strict_rejects_classical` | function | `tests/test_secure_fetch.c:154` | `static void test_chain_strict_rejects_classical(void **state)` |
+| `test_config_blend_fields_default_null` | function | `tests/test_secure_fetch.c:43` | `static void test_config_blend_fields_default_null(void **state)` |
+| `test_cookie_jar_put_and_header` | function | `tests/test_secure_fetch.c:632` | `static void test_cookie_jar_put_and_header(void **state)` |
+| `test_cookie_line_matches_pure` | function | `tests/test_secure_fetch.c:596` | `static void test_cookie_line_matches_pure(void **state)` |
+| `test_default_groups_offer_p384` | function | `tests/test_secure_fetch.c:37` | `static void test_default_groups_offer_p384(void **state)` |
+| `test_enforce_all_good_hybrid` | function | `tests/test_secure_fetch.c:223` | `static void test_enforce_all_good_hybrid(void **state)` |
+| `test_enforce_allow_classical_ke` | function | `tests/test_secure_fetch.c:266` | `static void test_enforce_allow_classical_ke(void **state)` |
+| `test_enforce_allowlisted_insecure` | function | `tests/test_secure_fetch.c:285` | `static void test_enforce_allowlisted_insecure(void **state)` |
 | `test_enforce_checks_group_after_version` | function | `tests/test_secure_fetch.c:238` | `static void test_enforce_checks_group_after_version(void **state)` |
 | `test_enforce_checks_version_first` | function | `tests/test_secure_fetch.c:229` | `static void test_enforce_checks_version_first(void **state)` |
 | `test_enforce_fails_closed_on_null_chain` | function | `tests/test_secure_fetch.c:246` | `static void test_enforce_fails_closed_on_null_chain(void **state)` |
@@ -482,19 +496,5 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 | `_word_reader` | function | `tools/ffgeom.py:173` | `def _word_reader(path)` |
 | `bit` | function | `tools/ffgeom.py:206` | `def bit(grid_row, cell, origin)` |
 | `decode` | function | `tools/ffgeom.py:239` | `def decode(path)` |
-| `height` | function | `tools/ffgeom.py:292` | `def height(path)` |
-| `height_probe` | function | `tools/ffgeom.py:279` | `def height_probe(page, out_html)` |
-| `load_rows` | function | `tools/ffgeom.py:116` | `def load_rows(path)` |
-| `lum` | function | `tools/ffgeom.py:169` | `def lum(p)` |
-| `lum_at` | function | `tools/ffgeom.py:181` | `def lum_at(x, y)` |
-| `main` | function | `tools/ffgeom.py:301` | `def main(argv)` |
-| `probe` | function | `tools/ffgeom.py:265` | `def probe(page, selector, out_html)` |
-| `word` | function | `tools/ffgeom.py:209` | `def word(grid_row, origin)` |
-| `main` | function | `tools/ffq.py:22` | `def main()` |
-| `main` | function | `tools/ffshot.py:24` | `def main()` |
-| `main` | function | `tools/fftime.py:38` | `def main()` |
-| `_POSIX_C_SOURCE` | macro | `tools/gen_psl.c:15` | `#define _POSIX_C_SOURCE` |
-| `ascii_lower` | function | `tools/gen_psl.c:55` | `static void ascii_lower(char *s)` |
-| `cmp_str` | function | `tools/gen_psl.c:38` | `static int cmp_str(const void *a, const void *b)` |
 
 Next: [SYMBOLS_p17.md](SYMBOLS_p17.md)

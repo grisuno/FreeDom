@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>inline-flex buttons</title><style>
+body{margin:20px;font:16px sans-serif;color:#111}
+.btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;box-sizing:border-box;min-height:32px;min-width:32px;max-width:28em;border:1px solid #555;border-radius:2px;padding:0 12px;background:#e8eefc;color:#123;text-decoration:none}
+.ico{padding:0}
+.ic{display:inline-block;width:20px;height:20px;background:#404244}
+.grid{display:inline-grid;grid-template-columns:40px 40px;gap:4px;background:#fde;border:1px solid #a58}
+.grid i{display:block;height:20px;background:#a58}
+.hid{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(1px,1px,1px,1px)}
+.w{width:600px;border:1px solid #bbb;margin-bottom:16px;padding:8px}
+.r{text-align:right}.c{text-align:center}
+ul{list-style:none;margin:0;padding:0}
+</style></head><body>
+<div class="w"><a class="btn" href="#"><span class="ic"></span><span>Uno</span></a></div>
+<div class="w"><a class="btn" href="#"><span class="ic"></span><span>Uno</span></a> <a class="btn" href="#"><span>Dos</span></a> <a class="btn ico" href="#"><span class="ic"></span><span class="hid">Buscar</span></a></div>
+<div class="w c"><a class="btn" href="#"><span>Centro</span></a> <span class="grid"><i></i><i></i></span></div>
+<div class="w r"><a class="btn" href="#"><span>Derecha</span></a></div>
+<div class="w"><ul><li><a class="btn" href="#"><span>item uno</span></a></li><li><a class="btn" href="#"><span>item dos largo</span></a></li></ul></div>
+<div class="w" style="display:flex"><a class="btn" href="#" style="flex:1"><span>flex item estirado</span></a></div>
+<p>despues</p>
+</body></html>

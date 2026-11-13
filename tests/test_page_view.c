@@ -2290,6 +2290,98 @@ static void test_build_inline_block_row_ignores_oof_child(void **state) {
 }
 
 
+/* display:inline-flex|inline-grid is an INLINE-level flex/grid container (CSS Display 3
+ * section 2): it shrinks to fit like an inline-block and shares a row with its inline-level
+ * siblings. As a flex ITEM it is blockified and its container sizes it. */
+static void test_build_inline_flex_is_inline_level(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><body>"
+        "<div><a style='display:inline-flex;border:1px solid #000'>one</a> "
+        "<a style='display:inline-grid;border:1px solid #000'>two</a></div>"
+        "<div><span style='display:flex;border:1px solid #000'>blk</span></div>"
+        "<div><a style='display:inline-flex;width:200px;border:1px solid #000'>wide</a></div>"
+        "<div style='display:flex'><a style='display:inline-flex;border:1px solid #000'>item</a></div>"
+        "</body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *one = find_text(v, "one"), *two = find_text(v, "two");
+    const pv_run *blk = find_text(v, "blk"), *wide = find_text(v, "wide");
+    const pv_run *item = find_text(v, "item");
+    assert_non_null(one); assert_non_null(two); assert_non_null(blk);
+    assert_non_null(wide); assert_non_null(item);
+    assert_int_equal(pv_box_at(v, (size_t)one->block_id)->box_w_intrinsic, 1);
+    assert_int_equal(pv_box_at(v, (size_t)two->block_id)->box_w_intrinsic, 1);
+    assert_int_equal(pv_box_at(v, (size_t)blk->block_id)->box_w_intrinsic, 0);
+    assert_int_equal(pv_box_at(v, (size_t)wide->block_id)->box_w_intrinsic, 0);
+    assert_int_equal(pv_box_at(v, (size_t)item->block_id)->box_w_intrinsic, 0);
+    /* The two inline-level containers share ONE anonymous wrapping row. */
+    const pv_cont_def *c1 = pv_cont_at(v, (size_t)one->cont_id);
+    assert_non_null(c1);
+    int row = c1->parent_id;
+    assert_true(row >= 0);
+    assert_int_equal(pv_cont_at(v, (size_t)two->cont_id)->parent_id, row);
+    assert_int_equal(pv_cont_at(v, (size_t)row)->anon_row, 1);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A real page registers more than 256 flex/grid containers (GitHub's front page: every
+ * link is an inline-flex, every list a flex). Past the old cap a container silently
+ * lost its layout -- the footer grid fell back to flow. */
+static void test_build_container_registry_holds_a_real_page(void **state) {
+    (void)state;
+    enum { N = 600 };
+    size_t cap = 64 + (size_t)N * 64;
+    char *html = malloc(cap);
+    assert_non_null(html);
+    size_t n = (size_t)snprintf(html, cap, "<html><body>");
+    for (int i = 0; i < N; ++i)
+        n += (size_t)snprintf(html + n, cap - n, "<div style='display:flex'><b>k%d</b></div>", i);
+    snprintf(html + n, cap - n, "</body></html>");
+    hp_document *doc = parse(html);
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *last = find_text(v, "k599");
+    assert_non_null(last);
+    assert_true(last->cont_id >= 0);
+    assert_int_equal(pv_cont_at(v, (size_t)last->cont_id)->display, BX_DISPLAY_FLEX);
+    pv_free(v);
+    hp_document_free(doc);
+    free(html);
+}
+
+/* A FLOATED flex container that is the lone child of its parent is the single item of
+ * the parent's anonymous row, packed to its float side (shrink-to-fit at the edge,
+ * contained by the parent). It does not found a float band. Beside text it stays a
+ * float. */
+static void test_build_lone_float_container_is_row_item(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><body>"
+        "<div><a style='display:flex;float:right;border:1px solid #000'>solo</a></div>"
+        "<div><a style='display:flex;float:left;border:1px solid #000'>izq</a></div>"
+        "<div>texto <a style='display:flex;float:right;border:1px solid #000'>mixto</a></div>"
+        "</body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *solo = find_text(v, "solo"), *izq = find_text(v, "izq");
+    const pv_run *mixto = find_text(v, "mixto");
+    assert_non_null(solo); assert_non_null(izq); assert_non_null(mixto);
+    assert_true(solo->float_id < 0);
+    assert_true(solo->cont_id >= 0);
+    int row = pv_cont_at(v, (size_t)solo->cont_id)->parent_id;
+    assert_true(row >= 0);
+    assert_int_equal(pv_cont_at(v, (size_t)row)->anon_row, 1);
+    assert_int_equal(pv_cont_at(v, (size_t)row)->justify, FX_JUSTIFY_END);
+    int lrow = pv_cont_at(v, (size_t)izq->cont_id)->parent_id;
+    assert_true(lrow >= 0);
+    assert_int_equal(pv_cont_at(v, (size_t)lrow)->justify, FX_JUSTIFY_START);
+    assert_true(mixto->float_id >= 0);     /* beside text: still a float */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* width:max-content|fit-content reaches the box as a shrink-to-fit request. */
 static void test_build_intrinsic_width_flag(void **state) {
     (void)state;
@@ -5669,6 +5761,9 @@ int main(void) {
         cmocka_unit_test(test_build_flex_container),
         cmocka_unit_test(test_build_flex_item_values),
         cmocka_unit_test(test_build_anon_inline_block_row_wraps),
+        cmocka_unit_test(test_build_inline_flex_is_inline_level),
+        cmocka_unit_test(test_build_container_registry_holds_a_real_page),
+        cmocka_unit_test(test_build_lone_float_container_is_row_item),
         cmocka_unit_test(test_build_flex_wrap_align_row_gap),
         cmocka_unit_test(test_build_float_threading),
         cmocka_unit_test(test_build_float_outermost_founder),

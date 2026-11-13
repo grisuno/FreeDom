@@ -56,6 +56,14 @@ static void test_align_display_gap(void **state)
     assert_int_equal(cb_interp_align("bogus"), -1);
     assert_true(cb_interp_display("flex") > 0);
     assert_int_equal(cb_interp_display("bogus"), -1);
+    assert_int_equal(cb_interp_display("flex"), CSS_DISP_FLEX);
+    assert_int_equal(cb_interp_display("inline-flex"), CSS_DISP_FLEX | CSS_DISP_INLINE_OUTER);
+    assert_int_equal(cb_interp_display("inline flex"), CSS_DISP_FLEX | CSS_DISP_INLINE_OUTER);
+    assert_int_equal(cb_interp_display("-webkit-inline-flex"), CSS_DISP_FLEX | CSS_DISP_INLINE_OUTER);
+    assert_int_equal(cb_interp_display("inline-grid"), CSS_DISP_GRID | CSS_DISP_INLINE_OUTER);
+    assert_int_equal(cb_interp_display("inline grid"), CSS_DISP_GRID | CSS_DISP_INLINE_OUTER);
+    assert_int_equal(cb_interp_display("block flex"), CSS_DISP_FLEX);
+    assert_int_equal(cb_interp_display("inline-block"), CSS_DISP_INLINE_BLOCK);
     assert_int_equal(cb_interp_gap("normal"), 0);
     assert_true(cb_interp_justify("space-between") > 0);
 }

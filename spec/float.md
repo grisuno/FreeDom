@@ -662,3 +662,19 @@ Tests (rojo verificado con el binario de HEAD): `test_dump_layout_float_items_ho
 `..._nested_float_navs_share_a_line`, `..._fixed_header_float_navs`, `..._float_counts_icon_atom`.
 Paridad 88.90 → 86.88 (telegram −0.97, slashdot −0.57, ntp −0.49; ninguna peor salvo ddg
 +0.04, cuyo formulario queda MÁS cerca de Firefox). GUI telegram 161 → 110 ms.
+
+
+## 8. Tanda 88 (2026-11-13): bloque contenedor del flotante y `max-width`
+
+- **Dado** un flotante con caja propia dentro de un envoltorio, **cuando** se abre su
+  banda, **entonces** las cajas por encima de la del fundador son el contexto compartido
+  de la banda (`band_shared_box`) y se abren ANTES de la columna, tenga o no altura
+  declarada el envoltorio: son la cadena de bloques contenedores del flotante (CSS 2.1
+  §10.1). Antes solo valía para un envoltorio con `height`; con `div{width:600px}` el
+  flotante se medía contra la página (x=942 en vez de 542) y la caja del padre tomaba el
+  ancho de la columna.
+- **Dado** un flotante sin `width` y con `max-width`, **entonces** el `max-width` es el
+  TECHO de su ancho shrink-to-fit (CSS 2.1 §10.4), nunca su ancho ni un piso: solo un
+  `width` declarado dimensiona la columna. Lo mismo en `open_box` para toda caja que
+  encoge al contenido.
+- Sonda: `tests/parity/pages/float-narrow-parent.html`.

@@ -235,8 +235,6 @@ css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int wh
 
 *Calls:* [`css_resolve_pseudo`](src.css.c.md#css_resolve_pseudo)
 
-*Called by:* [`pv_build_cached`](src.page_view.c.md#pv_build_cached)
-
 ---
 
 <a id="cch_element_style"></a>

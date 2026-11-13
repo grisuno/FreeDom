@@ -107,18 +107,18 @@ Static architecture map of 325 files (c, h, py, sh) in 13 components: src: css, 
 
 ### src: css (1)
 
-src: css groups 57 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, css_justify. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
+src: css groups 57 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
 
 **Related Classes/Methods**:
 
 - <a href="../include/css.h#L2-L28">include/css.h::FREEDOM_CSS_H</a>
 - <a href="../include/css.h#L29-L34">include/css.h::css_status</a>
 - <a href="../include/css.h#L35-L42">include/css.h::css_align</a>
-- <a href="../include/css.h#L43-L69">include/css.h::css_display</a>
-- <a href="../include/css.h#L70-L80">include/css.h::css_justify</a>
+- <a href="../include/css.h#L43-L72">include/css.h::css_display</a>
+- <a href="../include/css.h">include/css.h::CSS_DISP_INLINE_OUTER</a>
+- <a href="../include/css.h#L74-L75">include/css.h::CSS_DISP_INNER_MASK</a>
+- <a href="../include/css.h#L76-L86">include/css.h::css_justify</a>
 - <a href="../include/css.h">include/css.h::CSS_GAP_MAX</a>
-- <a href="../include/css.h">include/css.h::CSS_GRID_COLS_MAX</a>
-- <a href="../include/css.h#L83-L84">include/css.h::CSS_GRID_TRACKS_MAX</a>
 
 ### src: tab (2)
 

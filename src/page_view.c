@@ -1251,7 +1251,6 @@ static int bgcolor_attr(lxb_dom_element_t *el) {
  * (gap/justify/columns) come from the css cascade (<style> + inline), resolved by
  * cch_element_style like the colors. --- */
 
-#define PV_MAX_CONTAINERS   256u
 #define PV_MAX_GRID_COLS    64
 
 /* Anti-DoS bound on the BOX registry (spec/page_view.md). Distinct from
@@ -1357,14 +1356,14 @@ int anc_n;
  * consecutive runs of one child share it and nested-container interruptions do not
  * break the outer container's item continuity. */
 typedef struct pv_item_track {
-    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
-    int ord[PV_MAX_CONTAINERS];
+    const lxb_dom_node_t **node;   /* PV_MAX_CONTAINERS entries, heap (pv_build owns) */
+    int *ord;
 } pv_item_track;
 
 /* Ordinal for a run of container `cid` whose direct-child item is `item` (NULL =
  * anonymous: every such run is its own item). -1 when the run has no container. */
 static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item) {
-    if (cid < 0 || (size_t)cid >= PV_MAX_CONTAINERS) return -1;
+    if (cid < 0 || (size_t)cid >= PV_MAX_CONTAINERS || tr->node == NULL) return -1;
     if (item == NULL || item != tr->node[cid]) {
         tr->ord[cid]++;
         tr->node[cid] = item;
@@ -1724,11 +1723,14 @@ static int css_has_boxdeco(const css_style *cs) {
 /* Document-order registry of flex/grid container nodes, so the runs of one
  * container share a stable id. */
 typedef struct pv_container_reg {
-    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
+    /* `cap` entries each, on the heap: at PV_MAX_CONTAINERS the two arrays are far
+     * too large for the worker's stack (cont_reg_init / cont_reg_free). */
+    const lxb_dom_node_t **node;
     /* Per-container parameters + parent linkage (2026-07-31). Mirrors pv_box_reg's
      * def[] array: the registry is the one place that knows a container by identity,
      * so it is also the one place that describes it. See pv_cont_def. */
-    pv_cont_def           def[PV_MAX_CONTAINERS];
+    pv_cont_def           *def;
+    size_t cap;
     size_t count;
     const struct pv_node_map *nodes;  /* element ids (block_node), or NULL */
 } pv_container_reg;
@@ -1752,11 +1754,31 @@ static void cont_def_reset(pv_cont_def *d) {
     d->node_id = DOM_NODE_NONE;
 }
 
+/* Allocates a registry of `cap` slots. 0 on success; on OOM the registry stays
+ * empty with cap 0, so every container_id() fails closed to -1. */
+static int cont_reg_init(pv_container_reg *reg, size_t cap) {
+    memset(reg, 0, sizeof *reg);
+    reg->node = calloc(cap, sizeof *reg->node);
+    reg->def = calloc(cap, sizeof *reg->def);
+    if (reg->node == NULL || reg->def == NULL) {
+        free(reg->node); free(reg->def);
+        reg->node = NULL; reg->def = NULL;
+        return -1;
+    }
+    reg->cap = cap;
+    return 0;
+}
+
+static void cont_reg_free(pv_container_reg *reg) {
+    free(reg->node); free(reg->def);
+    memset(reg, 0, sizeof *reg);
+}
+
 /* Id of node in reg, registering it on first sight. -1 when reg is full. */
 static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node) {
     for (size_t i = 0; i < reg->count; ++i)
         if (reg->node[i] == node) return (int)i;
-    if (reg->count >= PV_MAX_CONTAINERS) return -1;
+    if (reg->count >= reg->cap) return -1;
     reg->node[reg->count] = node;
     cont_def_reset(&reg->def[reg->count]);
     reg->def[reg->count].node_id = pv_node_map_id(reg->nodes, node);
@@ -2785,6 +2807,32 @@ static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *she
     return -1;
 }
 
+/* An inline-level flex/grid container (`inline-flex`, `inline-grid`; CSS Display 3
+ * section 2): an atom of its line outside, a flex/grid formatting context inside. */
+static int is_inline_container_style(const css_style *cs) {
+    /* A float is blockified (CSS 2.1 9.7): it leaves the line it would sit in. */
+    if (cs->float_side == CSS_FLOAT_LEFT || cs->float_side == CSS_FLOAT_RIGHT) return 0;
+    return cs->display_inline
+        && (cs->display == CSS_DISP_FLEX || cs->display == CSS_DISP_GRID);
+}
+
+/* A width the author declared: a length, a percentage or an intrinsic keyword. */
+static int css_width_declared(const css_style *cs) {
+    return (cs->width != CSS_LEN_UNSET && cs->width != CSS_LEN_AUTO)
+        || cs->pct[CSS_PCT_WIDTH] > 0;
+}
+
+/* The parent element's own display is flex or grid (an AUTHOR container, as opposed
+ * to the anonymous row synthesised around inline-level siblings). */
+static int parent_is_author_container(const lxb_dom_node_t *node, const css_sheet *sheet,
+                                      pv_style_cache *cache) {
+    const lxb_dom_node_t *par = node->parent;
+    if (par == NULL || par->type != LXB_DOM_NODE_TYPE_ELEMENT) return 0;
+    const css_style *pcs = cached_element_style_ref(
+        lxb_dom_interface_element((lxb_dom_node_t *)par), sheet, cache);
+    return pcs->display == CSS_DISP_FLEX || pcs->display == CSS_DISP_GRID;
+}
+
 static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
                          double font_px, const css_sheet *sheet, pv_style_cache *cache) {
     size_t before = r->count;
@@ -2796,6 +2844,28 @@ static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_st
         r->def[id].bg_rgb = inherited_text_color(node, sheet, cache);
     if (id >= 0 && r->count > before && cs->display == CSS_DISP_INLINE_BLOCK)
         r->def[id].line_align = inherited_line_align(node, sheet, cache);
+    /* An inline-level flex/grid container with `width:auto` shrinks to fit like an
+     * inline-block (CSS 2.1 10.3.9) -- unless it is a flex/grid ITEM, which is
+     * blockified (Display 3 2.7) and sized by its container. */
+    if (id >= 0 && r->count > before && is_inline_container_style(cs)
+        && !is_out_of_flow(cs) && !css_width_declared(cs)
+        && !parent_is_author_container(node, sheet, cache)) {
+        r->def[id].box_w_intrinsic = 1;
+        r->def[id].line_align = inherited_line_align(node, sheet, cache);
+    }
+    /* A FLOATED flex/grid container with `width:auto` shrinks to fit as well (CSS 2.1
+     * 10.3.5) and sits at the edge of its side. The container path lays it out as a
+     * block, so the float's side travels as the box's line alignment. */
+    if (id >= 0 && r->count > before
+        && (cs->display == CSS_DISP_FLEX || cs->display == CSS_DISP_GRID)
+        && (cs->float_side == CSS_FLOAT_LEFT || cs->float_side == CSS_FLOAT_RIGHT)
+        && cs->position != CSS_POS_ABSOLUTE && cs->position != CSS_POS_FIXED
+        && !css_width_declared(cs)
+        && !parent_is_author_container(node, sheet, cache)) {
+        r->def[id].box_w_intrinsic = 1;
+        r->def[id].line_align = (cs->float_side == CSS_FLOAT_RIGHT) ? CSS_ALIGN_RIGHT
+                                                                    : CSS_ALIGN_LEFT;
+    }
     /* The <body> background is the canvas background unless <html> declares one (Backgrounds
      * 3 2.11.2): mark the box so the painter lays it behind everything. */
     if (id >= 0 && r->count > before && node != NULL &&
@@ -3002,6 +3072,38 @@ static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
     return 0;
 }
 
+/* A FLOATED flex/grid container (in flow otherwise). Alone in its parent it is laid
+ * out as the single item of the parent's anonymous row, packed to its float side:
+ * shrink-to-fit (CSS 2.1 10.3.5) at the edge of the containing block, and -- unlike a
+ * float band -- contained by a parent that establishes a formatting context (a flex
+ * item holding one floated icon button). */
+static int is_float_container_style(const css_style *cs) {
+    return (cs->display == CSS_DISP_FLEX || cs->display == CSS_DISP_GRID)
+        && (cs->float_side == CSS_FLOAT_LEFT || cs->float_side == CSS_FLOAT_RIGHT)
+        && cs->position != CSS_POS_ABSOLUTE && cs->position != CSS_POS_FIXED;
+}
+
+/* The float side of `p`'s LONE in-flow child when that child is a floated flex/grid
+ * container and `p` has no text of its own; 0 otherwise. */
+static int row_lone_float_side(const lxb_dom_node_t *p, const css_sheet *sheet,
+                               pv_style_cache *cache) {
+    int side = 0, nel = 0;
+    for (const lxb_dom_node_t *c = p->first_child; c != NULL; c = c->next) {
+        if (c->type == LXB_DOM_NODE_TYPE_TEXT) {
+            if (!text_node_is_blank(c)) return 0;
+        } else if (c->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            const css_style *ccs = cached_element_style_ref(
+                lxb_dom_interface_element((lxb_dom_node_t *)c), sheet, cache);
+            if (ccs->display == CSS_DISP_NONE || ccs->position == CSS_POS_ABSOLUTE
+                || ccs->position == CSS_POS_FIXED)
+                continue;
+            if (++nel > 1 || !is_float_container_style(ccs)) return 0;
+            side = ccs->float_side;
+        }
+    }
+    return side;
+}
+
 static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
                                      pv_style_cache *cache) {
     int nel = 0;
@@ -3017,7 +3119,10 @@ static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *s
             if (ccs->display == CSS_DISP_NONE || ccs->position == CSS_POS_ABSOLUTE
                 || ccs->position == CSS_POS_FIXED)
                 continue;
-            if (ccs->display != CSS_DISP_INLINE_BLOCK) return 0;
+            if (is_float_container_style(ccs))
+                return row_lone_float_side(p, sheet, cache) != 0;
+            if (ccs->display != CSS_DISP_INLINE_BLOCK && !is_inline_container_style(ccs))
+                return 0;
             if (++nel > PV_MAX_INLINE_ROW_ITEMS) return 0;
         }
     }
@@ -3699,7 +3804,12 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * inside an out-of-flow (absolute/fixed) subtree is excluded: it is placed
              * by the positioner, not the float column. */
             if (!oof_seen && float_reg != NULL && is_block_like_style(t, cs) &&
-                (cs->float_side == CSS_FLOAT_LEFT || cs->float_side == CSS_FLOAT_RIGHT)) {
+                (cs->float_side == CSS_FLOAT_LEFT || cs->float_side == CSS_FLOAT_RIGHT) &&
+                /* ...unless it is the lone item of its parent's anonymous row, which
+                 * places it (see is_float_container_style). */
+                !(is_float_container_style(cs) && p->parent != NULL &&
+                  row_lone_float_side(p->parent, sheet, style_cache) != 0 &&
+                  is_inline_block_row(p->parent, sheet, style_cache))) {
                 /* The OUTERMOST founder (spec/float.md §7d.1): EVERY floated
                  * ancestor refreshes it, so when the walk ends it names the
                  * highest one. Same halves as the nearest founder's margins;
@@ -4049,6 +4159,10 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             cd->justify = (cs->text_align == CSS_ALIGN_CENTER) ? FX_JUSTIFY_CENTER
                                         : (cs->text_align == CSS_ALIGN_RIGHT)  ? FX_JUSTIFY_END
                                                                               : FX_JUSTIFY_START;
+                            /* A lone floated container packs to its float side. */
+                            int fside = row_lone_float_side(p, sheet, style_cache);
+                            if (fside == CSS_FLOAT_RIGHT) cd->justify = FX_JUSTIFY_END;
+                            else if (fside == CSS_FLOAT_LEFT) cd->justify = FX_JUSTIFY_START;
                         }
                         if (this_box >= 0 && cd->box_id < 0) {
                             cd->box_id = this_box;
@@ -5009,9 +5123,10 @@ static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
  * sheet/cache ride here rather than as two more parameters on nine helpers: the
  * table role of an element is its computed `display` (CSS 2.1 17.2), so resolving it
  * needs the cascade, and the memo cache is what keeps that from being quadratic. */
+#define PV_MAX_FLOW_MEMO 256u   /* memoised table/cell verdicts; past it: recomputed */
 typedef struct pv_flow_reg {
-    const lxb_dom_node_t *node[PV_MAX_CONTAINERS];
-    unsigned char         flow[PV_MAX_CONTAINERS];
+    const lxb_dom_node_t *node[PV_MAX_FLOW_MEMO];
+    unsigned char         flow[PV_MAX_FLOW_MEMO];
     size_t                count;
     const css_sheet      *sheet;
     pv_style_cache       *cache;
@@ -5194,8 +5309,8 @@ static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table) {
     if (table == NULL) return 0;
     for (size_t i = 0; i < fr->count; ++i)
         if (fr->node[i] == table) return fr->flow[i];
-    if (fr->count >= PV_MAX_CONTAINERS) return 0;
     int f = table_prefers_flow(table, fr) ? 1 : 0;
+    if (fr->count >= PV_MAX_FLOW_MEMO) return f;   /* memo full: answer, do not remember */
     fr->node[fr->count] = table;
     fr->flow[fr->count] = (unsigned char)f;
     fr->count++;
@@ -5726,11 +5841,15 @@ pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
     const lxb_dom_node_t *br_block = NULL;
     form_table forms = { NULL, 0, 0 };
     pv_status rc = PV_OK;
-    pv_container_reg reg = { { NULL }, { { 0 } }, 0, NULL };  /* flex/grid containers + defs */
-    pv_container_reg float_reg = { { NULL }, { { 0 } }, 0, NULL };  /* floated elements */
+    pv_container_reg reg;        /* flex/grid containers + defs */
+    pv_container_reg float_reg;  /* floated elements */
+    pv_item_track items;         /* per-container item ordinals */
+    int reg_oom = cont_reg_init(&reg, PV_MAX_CONTAINERS);
+    reg_oom |= cont_reg_init(&float_reg, PV_MAX_FLOATS);
+    items.node = calloc(PV_MAX_CONTAINERS, sizeof *items.node);
+    items.ord = calloc(PV_MAX_CONTAINERS, sizeof *items.ord);
     reg.nodes = &node_map;
     pv_box_reg box_reg = { NULL, NULL, 0, 0 };  /* box-carrying blocks + their defs (heap, grows) */
-    pv_item_track items = { { NULL }, { 0 } };  /* per-container item ordinals */
     int last_was_gap = 0;  /* dedupe for inter-cell separator runs of flowed tables */
     pv_after_pending after_p;        /* the ::after armed for the element being walked */
     pv_style_cache cache;  /* memoized cch_element_style() per element (see above) */
@@ -5744,6 +5863,7 @@ pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
      * after `cache` because it borrows it. */
     pv_flow_reg flowreg = { { NULL }, { 0 }, 0, sheet, &cache, NULL, 0 };
     pv_counters_pass(root, sheet, &cache);
+    if (reg_oom || items.node == NULL || items.ord == NULL) { rc = PV_ERR_OOM; goto cleanup; }
 
     /* CSS 2.1 §14.2: the root <html> element's background-color propagates to the
      * canvas (the full viewport). If <html> itself has no background set, <body>'s
@@ -7377,6 +7497,9 @@ pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
     pv_style_cache_free(&cache);
     pv_ptrmap_free(&pseudo_memo);
     box_reg_free(&box_reg);
+    cont_reg_free(&reg);
+    cont_reg_free(&float_reg);
+    free(items.node); free(items.ord);
     return PV_OK;
 
 cleanup:
@@ -7387,6 +7510,9 @@ cleanup:
     pv_style_cache_free(&cache);
     pv_ptrmap_free(&pseudo_memo);
     box_reg_free(&box_reg);
+    cont_reg_free(&reg);
+    cont_reg_free(&float_reg);
+    free(items.node); free(items.ord);
     pv_free(v);
     return rc;
 }
