@@ -3,6 +3,15 @@ Previous: [SYMBOLS_p16.md](SYMBOLS_p16.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `publish_readme` | function | `tools/fbench.py:114` | `def publish_readme(name, score)` |
+| `publish_timing` | function | `tools/fbench.py:171` | `def publish_timing(rows)` |
+| `run_timer` | function | `tools/fbench.py:140` | `def run_timer(tool, pages, runs)` |
+| `sbs` | function | `tools/fbench.py:95` | `def sbs(name, start, nrows)` |
+| `timing` | function | `tools/fbench.py:193` | `def timing(names, runs, readme)` |
+| `_append_probe` | function | `tools/ffgeom.py:254` | `def _append_probe(src, script)` |
+| `_word_reader` | function | `tools/ffgeom.py:173` | `def _word_reader(path)` |
+| `bit` | function | `tools/ffgeom.py:206` | `def bit(grid_row, cell, origin)` |
+| `decode` | function | `tools/ffgeom.py:239` | `def decode(path)` |
 | `height` | function | `tools/ffgeom.py:292` | `def height(path)` |
 | `height_probe` | function | `tools/ffgeom.py:279` | `def height_probe(page, out_html)` |
 | `load_rows` | function | `tools/ffgeom.py:116` | `def load_rows(path)` |

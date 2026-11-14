@@ -1,7 +1,7 @@
 broken-img-card	0.68
 css-counters	0.30
 css-table	1.89
-ddg-results	3.30
+ddg-results	2.88
 em-units	1.30
 empty-inline-block-atom	0.27
 flex-col-maxwidth	9.82
@@ -18,10 +18,11 @@ grid-auto-flow-col	0.00
 grid-calc-aside	1.25
 hackernews	3.04
 heading-in-link	0.68
-huggingface	5.88
+huggingface	5.76
 images-data	1.02
 inline-block-sized	0.35
-inline-flex-buttons	8.66
+inline-block-words	0.71
+inline-flex-buttons	8.65
 inline-links	0.51
 inline-replaced	1.56
 jkanime-clamp	0.04
@@ -30,7 +31,7 @@ jkanime-main-col	0.19
 jkanime-tile	0.14
 jkanime-tile2	0.11
 jkanime-tile3	0.08
-jkanime	6.84
+jkanime	6.83
 lobsters	2.51
 margin-collapse	0.46
 marquee-flex	0.78
@@ -48,8 +49,8 @@ site-animate	0.59
 site-bgp	0.70
 site-discord	2.93
 site-eswikipedia	5.88
-site-github	3.27
-site-gitlab	2.06
+site-github	3.44
+site-gitlab	1.85
 site-ipinfo	4.25
 site-justpaste	0.09
 site-ntp	1.32
@@ -59,10 +60,10 @@ site-osm	4.10
 site-telegram	0.54
 site-youtube	0.16
 slashdot-cols	0.39
-slashdot	2.67
+slashdot	2.66
 story-chain	3.05
 table-fit	4.04
 table-in-bordered-section	1.19
 ua-metrics	0.40
 underline-offset	0.33
-wikipedia	3.49
+wikipedia	3.53

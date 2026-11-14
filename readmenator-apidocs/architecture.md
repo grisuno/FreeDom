@@ -6,7 +6,7 @@
 
 15 components stacked in 7 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 20 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
 
-Upward dependencies to fix first: `include: page_view` -> `src: tab` (5 imports); `src: css` -> `include: page_view` (4 imports); `src: tab` -> `src: text_shape` (3 imports); `src: css` -> `src: tab` (2 imports); `include: tab` -> `src: tab` (2 imports); `src: css` -> `include: browser_ui` (1 imports); `src: css` -> `src: text_shape` (1 imports); `include: prefetch` -> `src: tab` (1 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `include: browser` -> `src: tab` (1 imports); `src: http_cache` -> `include: browser_ui` (1 imports); `include: svg_render` -> `include: page_view` (1 imports)
+Upward dependencies to fix first: `include: page_view` -> `src: tab` (5 imports); `include: css` -> `include: page_view` (3 imports); `src: tab` -> `src: text_shape` (3 imports); `include: css` -> `src: tab` (2 imports); `include: tab` -> `src: tab` (2 imports); `include: css` -> `include: browser_ui` (1 imports); `include: css` -> `src: text_shape` (1 imports); `include: prefetch` -> `src: tab` (1 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `include: browser` -> `src: tab` (1 imports); `src: http_cache` -> `include: browser_ui` (1 imports); `include: svg_render` -> `include: page_view` (1 imports)
 
 ```mermaid
 flowchart TB
@@ -15,7 +15,7 @@ flowchart TB
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     subgraph lane_0["Tier 1 - entry / orchestration"]
         direction LR
-        n_c2["include: browser_ui<br/>32 files, 980 symbols<br/>Core / utility"]:::cycle
+        n_c2["include: browser_ui<br/>32 files, 981 symbols<br/>Core / utility"]:::cycle
         n_d_tools["tools<br/>13 files, 69 symbols<br/>Core / utility"]:::default
         n_d__root_["(root)<br/>5 files, 3 symbols<br/>Core / utility"]:::entry
     end
@@ -37,7 +37,7 @@ flowchart TB
     end
     subgraph lane_4["Tier 5"]
         direction LR
-        n_c4["include: page_view<br/>17 files, 743 symbols<br/>Presentation / entry"]:::cycle
+        n_c4["include: page_view<br/>18 files, 770 symbols<br/>Core / utility"]:::cycle
         n_c7["src: http_cache<br/>9 files, 136 symbols<br/>Data access"]:::cycle
     end
     subgraph lane_5["Tier 6"]
@@ -47,7 +47,7 @@ flowchart TB
     end
     subgraph lane_6["Tier 7 - foundation"]
         direction LR
-        n_c0["src: css<br/>40 files, 1094 symbols<br/>Core / utility"]:::cycle
+        n_c0["include: css<br/>39 files, 1070 symbols<br/>Core / utility"]:::cycle
     end
     n_c1 -->|"1"| n_c10
     n_c1 -->|"1"| n_c11
@@ -66,7 +66,7 @@ flowchart TB
     n_c1 <-.-|"2 upward"| n_c0
     n_c2 <-.-|"1 upward"| n_c0
     n_c3 <-.-|"1 upward"| n_c0
-    n_c4 <-.-|"4 upward"| n_c0
+    n_c4 <-.-|"3 upward"| n_c0
     n_c3 <-.-|"3 upward"| n_c1
     n_c1 <-.-|"1 upward"| n_c10
     n_c2 <-.-|"1 upward"| n_c3

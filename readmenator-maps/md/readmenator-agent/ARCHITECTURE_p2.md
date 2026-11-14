@@ -2,6 +2,7 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_css_vars.c` -> `include/css_vars.h`
 - `tests/test_data_url.c` -> `include/data_url.h`
 - `tests/test_disk_store.c` -> `include/disk_store.h`
 - `tests/test_disk_store.c` -> `include/local_store.h`
@@ -43,6 +44,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_js_dom.c` -> `include/html_parse.h`
 - `tests/test_js_dom.c` -> `include/js_dom.h`
 - `tests/test_js_dom.c` -> `include/js_geom.h`
+- `tests/test_js_dom.c` -> `include/js_native.h`
 - `tests/test_js_dom.c` -> `include/js_sandbox.h`
 - `tests/test_js_dom.c` -> `include/js_trusted.h`
 - `tests/test_js_dom.c` -> `include/url.h`

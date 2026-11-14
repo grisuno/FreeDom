@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 47 file(s) rooted at `include` with dominant language c (cohesion 0.52). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (663 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
+This community groups 47 file(s) rooted at `include` with dominant language c (cohesion 0.52). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (664 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
 
 ## Files
 
@@ -44,7 +44,7 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 663 | no |
+| `gui/browser_ui.c` | c | presentation | 664 | no |
 | `gui/freedom_view.c` | c | presentation | 2 | no |
 | `gui/ui_render.c` | c | presentation | 29 | no |
 
@@ -117,8 +117,8 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 - [dataflow DEAD_STORE] `gui/browser_ui.c:5851` `measure_item_w_at` `repl_max`: `repl_max` assigned at line 5851 but never read afterwards.
 - [dataflow DEAD_STORE] `gui/browser_ui.c:5852` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5852 but never read afterwards.
 - [dataflow DEAD_STORE] `gui/browser_ui.c:5870` `measure_item_w_at` `rw`: `rw` assigned at line 5870 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6050` `nested_cont_basis` `total`: `total` assigned at line 6050 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6051` `nested_cont_basis` `n_items`: `n_items` assigned at line 6051 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6069` `nested_cont_basis` `total`: `total` assigned at line 6069 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6070` `nested_cont_basis` `n_items`: `n_items` assigned at line 6070 but never read afterwards.
 
 ## Open Questions
 

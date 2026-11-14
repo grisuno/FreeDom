@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `f_border_bottom_style` | function | `src/css_computed.c:264` | `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_left_style` | function | `src/css_computed.c:267` | `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_right_style` | function | `src/css_computed.c:261` | `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)` |
+| `f_border_style` | function | `src/css_computed.c:219` | `static size_t f_border_style(int v, char *out, size_t cap)` |
 | `f_border_top_style` | function | `src/css_computed.c:258` | `static size_t f_border_top_style(const ccm_input *in, char *out, size_t cap)` |
 | `f_box_sizing` | function | `src/css_computed.c:132` | `static size_t f_box_sizing(const ccm_input *in, char *out, size_t cap)` |
 | `f_clear` | function | `src/css_computed.c:112` | `static size_t f_clear(const ccm_input *in, char *out, size_t cap)` |
@@ -144,42 +148,42 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `ieq` | function | `src/css_mask.c:13` | `static int ieq(const char *a, const char *b)` |
 | `image_layer` | function | `src/css_mask.c:114` | `static int image_layer(const char *tok, cm_layer *l)` |
 | `split` | function | `src/css_mask.c:65` | `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)` |
-| `CMQ_CM_PER_IN` | macro | `src/css_mq.c:23` | `#define CMQ_CM_PER_IN` |
-| `CMQ_COLOR_BITS` | macro | `src/css_mq.c:21` | `#define CMQ_COLOR_BITS` |
-| `CMQ_DEVICE_H` | macro | `src/css_mq.c:19` | `#define CMQ_DEVICE_H` |
-| `CMQ_DEVICE_W` | macro | `src/css_mq.c:18` | `#define CMQ_DEVICE_W` |
-| `CMQ_DPI_PER_DPPX` | macro | `src/css_mq.c:22` | `#define CMQ_DPI_PER_DPPX` |
-| `CMQ_DPPX` | macro | `src/css_mq.c:20` | `#define CMQ_DPPX` |
-| `MQ_EPS` | macro | `src/css_mq.c:203` | `#define MQ_EPS` |
-| `and3` | function | `src/css_mq.c:66` | `static int and3(int a, int b)` |
-| `bool_ctx` | function | `src/css_mq.c:229` | `static int bool_ctx(const fval *v)` |
-| `cmp_op` | function | `src/css_mq.c:206` | `static int cmp_op(double lhs, int op, double rhs)` |
-| `cmq_container_surely` | function | `src/css_mq.c:489` | `int cmq_container_surely(const char *s, size_t len, int max_width)` |
-| `cmq_matches` | function | `src/css_mq.c:458` | `int cmq_matches(const char *s, size_t len, const cmq_env *env)` |
-| `copy_trim_lower` | function | `src/css_mq.c:83` | `static int copy_trim_lower(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
-| `eval_cond` | function | `src/css_mq.c:380` | `static int eval_cond(mq_cur *c, int depth)` |
-| `eval_feature` | function | `src/css_mq.c:328` | `static int eval_feature(const char *s, size_t a, size_t b, const cmq_env *env)` |
-| `eval_in_parens` | function | `src/css_mq.c:353` | `static int eval_in_parens(mq_cur *c, int depth)` |
-| `eval_plain` | function | `src/css_mq.c:237` | `static int eval_plain(const char *name, const char *value, const cmq_env *env)` |
-| `eval_query` | function | `src/css_mq.c:404` | `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)` |
-| `eval_range` | function | `src/css_mq.c:280` | `static int eval_range(const char *t, const cmq_env *env)` |
-| `feature_of` | function | `src/css_mq.c:106` | `static fval feature_of(const char *name, const cmq_env *env)` |
-| `flip_op` | function | `src/css_mq.c:218` | `static int flip_op(int op)` |
-| `fval` | struct | `src/css_mq.c:96` | `` |
-| `has_word` | function | `src/css_mq.c:479` | `static int has_word(const char *t, const char *w)` |
-| `is_ident_ch` | function | `src/css_mq.c:39` | `static int is_ident_ch(char c)` |
-| `is_space` | function | `src/css_mq.c:35` | `static int is_space(char c)` |
-| `kind` | type_alias | `src/css_mq.c:95` | `typedef struct fval { fv_kind kind;` |
-| `lower_ch` | function | `src/css_mq.c:31` | `static char lower_ch(char c)` |
-| `mq_cur` | struct | `src/css_mq.c:25` | `` |
-| `not3` | function | `src/css_mq.c:78` | `static int not3(int a)` |
-| `or3` | function | `src/css_mq.c:72` | `static int or3(int a, int b)` |
-| `parse_value` | function | `src/css_mq.c:167` | `static int parse_value(const char *t, int unit, double *out)` |
-| `peek_word` | function | `src/css_mq.c:61` | `static int peek_word(const mq_cur *c, char *w, size_t cap)` |
-| `read_num` | function | `src/css_mq.c:162` | `static int read_num(const char *t, double *out, const char **end)` |
-| `read_op` | function | `src/css_mq.c:266` | `static int read_op(const char **p)` |
-| `read_word` | function | `src/css_mq.c:49` | `static int read_word(mq_cur *c, char *w, size_t cap)` |
-| `skip_ws` | function | `src/css_mq.c:44` | `static void skip_ws(mq_cur *c)` |
+| `CMQ_CM_PER_IN` | macro | `src/css_mq.c:24` | `#define CMQ_CM_PER_IN` |
+| `CMQ_COLOR_BITS` | macro | `src/css_mq.c:22` | `#define CMQ_COLOR_BITS` |
+| `CMQ_DEVICE_H` | macro | `src/css_mq.c:20` | `#define CMQ_DEVICE_H` |
+| `CMQ_DEVICE_W` | macro | `src/css_mq.c:19` | `#define CMQ_DEVICE_W` |
+| `CMQ_DPI_PER_DPPX` | macro | `src/css_mq.c:23` | `#define CMQ_DPI_PER_DPPX` |
+| `CMQ_DPPX` | macro | `src/css_mq.c:21` | `#define CMQ_DPPX` |
+| `MQ_EPS` | macro | `src/css_mq.c:205` | `#define MQ_EPS` |
+| `and3` | function | `src/css_mq.c:67` | `static int and3(int a, int b)` |
+| `bool_ctx` | function | `src/css_mq.c:231` | `static int bool_ctx(const fval *v)` |
+| `cmp_op` | function | `src/css_mq.c:208` | `static int cmp_op(double lhs, int op, double rhs)` |
+| `cmq_container_surely` | function | `src/css_mq.c:491` | `int cmq_container_surely(const char *s, size_t len, int max_width)` |
+| `cmq_matches` | function | `src/css_mq.c:460` | `int cmq_matches(const char *s, size_t len, const cmq_env *env)` |
+| `copy_trim_lower` | function | `src/css_mq.c:84` | `static int copy_trim_lower(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
+| `eval_cond` | function | `src/css_mq.c:382` | `static int eval_cond(mq_cur *c, int depth)` |
+| `eval_feature` | function | `src/css_mq.c:330` | `static int eval_feature(const char *s, size_t a, size_t b, const cmq_env *env)` |
+| `eval_in_parens` | function | `src/css_mq.c:355` | `static int eval_in_parens(mq_cur *c, int depth)` |
+| `eval_plain` | function | `src/css_mq.c:239` | `static int eval_plain(const char *name, const char *value, const cmq_env *env)` |
+| `eval_query` | function | `src/css_mq.c:406` | `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)` |
+| `eval_range` | function | `src/css_mq.c:282` | `static int eval_range(const char *t, const cmq_env *env)` |
+| `feature_of` | function | `src/css_mq.c:107` | `static fval feature_of(const char *name, const cmq_env *env)` |
+| `flip_op` | function | `src/css_mq.c:220` | `static int flip_op(int op)` |
+| `fval` | struct | `src/css_mq.c:97` | `` |
+| `has_word` | function | `src/css_mq.c:481` | `static int has_word(const char *t, const char *w)` |
+| `is_ident_ch` | function | `src/css_mq.c:40` | `static int is_ident_ch(char c)` |
+| `is_space` | function | `src/css_mq.c:36` | `static int is_space(char c)` |
+| `kind` | type_alias | `src/css_mq.c:96` | `typedef struct fval { fv_kind kind;` |
+| `lower_ch` | function | `src/css_mq.c:32` | `static char lower_ch(char c)` |
+| `mq_cur` | struct | `src/css_mq.c:26` | `` |
+| `not3` | function | `src/css_mq.c:79` | `static int not3(int a)` |
+| `or3` | function | `src/css_mq.c:73` | `static int or3(int a, int b)` |
+| `parse_value` | function | `src/css_mq.c:168` | `static int parse_value(const char *t, int unit, double *out)` |
+| `peek_word` | function | `src/css_mq.c:62` | `static int peek_word(const mq_cur *c, char *w, size_t cap)` |
+| `read_num` | function | `src/css_mq.c:163` | `static int read_num(const char *t, double *out, const char **end)` |
+| `read_op` | function | `src/css_mq.c:268` | `static int read_op(const char **p)` |
+| `read_word` | function | `src/css_mq.c:50` | `static int read_word(mq_cur *c, char *w, size_t cap)` |
+| `skip_ws` | function | `src/css_mq.c:45` | `static void skip_ws(mq_cur *c)` |
 | `HAS_MAX_DEPTH` | macro | `src/css_select.c:939` | `#define HAS_MAX_DEPTH` |
 | `attr_matches` | function | `src/css_select.c:788` | `static int attr_matches(const css_attr_match *am, const css_element *el)` |
 | `between` | function | `src/css_select.c:384` | `* between ( and ) is split on commas (not inside [] or ());` |
@@ -492,9 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `fb_buffer_at` | function | `src/freebug.c:105` | `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)` |
 | `fb_buffer_count` | function | `src/freebug.c:101` | `size_t fb_buffer_count(const fb_buffer *b)` |
 | `fb_buffer_free` | function | `src/freebug.c:91` | `void fb_buffer_free(fb_buffer *b)` |
-| `fb_buffer_init` | function | `src/freebug.c:15` | `void fb_buffer_init(fb_buffer *b)` |
-| `fb_buffer_push` | function | `src/freebug.c:19` | `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)` |
-| `fb_buffer_push_loc` | function | `src/freebug.c:23` | `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,                    ...` |
-| `fb_buffer_reset` | function | `src/freebug.c:78` | `void fb_buffer_reset(fb_buffer *b)` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

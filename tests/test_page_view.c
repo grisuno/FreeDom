@@ -1377,6 +1377,36 @@ static void test_build_flex_container(void **state) {
  * the current one. Registered without wrap it was a nowrap flex row, which puts every
  * item on ONE line by definition -- a nav bar or tag cloud overflowed the page
  * sideways instead of wrapping (spec/page_view.md, 2026-08-11 correction). */
+/* spec/page_view.md "El espacio entre atomos": white space between inline-block siblings is
+ * one collapsed word space of their line; it travels as a marker the trusted side resolves. */
+static void test_build_anon_row_word_space_gap(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body>"
+        "<div><span style='display:inline-block'>a</span> \n"
+        "<span style='display:inline-block'>b</span> <span style='display:inline-block'>c</span></div>"
+        "<div><span style='display:inline-block'>x</span>"
+        "<span style='display:inline-block'>y</span></div>"
+        "<div><span style='display:inline-block'>m</span> "
+        "<span style='display:inline-block'>n</span><span style='display:inline-block'>o</span></div>"
+        "</body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_text(v, "a");
+    assert_non_null(a);
+    assert_true(a->cont_id >= 0);
+    assert_int_equal(pv_cont_at(v, (size_t)a->cont_id)->gap, PV_GAP_WORD_SPACE);
+    assert_int_equal(a->cont_gap, PV_GAP_WORD_SPACE);
+    const pv_run *x = find_text(v, "x");
+    assert_non_null(x);
+    assert_int_equal(pv_cont_at(v, (size_t)x->cont_id)->gap, 0);
+    const pv_run *m = find_text(v, "m");
+    assert_non_null(m);
+    assert_int_equal(pv_cont_at(v, (size_t)m->cont_id)->gap, 0);   /* mixed: known limit */
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 static void test_build_anon_inline_block_row_wraps(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -5760,6 +5790,7 @@ int main(void) {
         cmocka_unit_test(test_bgclip_text_solid_color_runs),
         cmocka_unit_test(test_build_flex_container),
         cmocka_unit_test(test_build_flex_item_values),
+        cmocka_unit_test(test_build_anon_row_word_space_gap),
         cmocka_unit_test(test_build_anon_inline_block_row_wraps),
         cmocka_unit_test(test_build_inline_flex_is_inline_level),
         cmocka_unit_test(test_build_container_registry_holds_a_real_page),

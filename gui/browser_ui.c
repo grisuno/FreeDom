@@ -6019,6 +6019,25 @@ static double def_declared_width(const pv_box_def *d, double avail_w) {
     return def_width_cap(d, avail_w);
 }
 
+/* The column gap of a container in px. An anonymous inline-block row whose atoms are
+ * separated by white space carries PV_GAP_WORD_SPACE instead of a length: the gap is the
+ * collapsed word space of its line, measured here in the font of the row's first run
+ * (the worker has no fonts). spec/page_view.md "El espacio entre atomos". */
+static double cont_gap_px(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                          const rd_doc *doc, const pv_cont_def *cd, size_t first_run) {
+    if (cd->gap >= 0) return (double)cd->gap;
+    if (!cd->anon_row || cd->gap != PV_GAP_WORD_SPACE || cr == NULL) return 0.0;
+    const rd_block *b = rd_at(doc, first_run);
+    if (b == NULL) return 0.0;
+    double size; int bold, italic, underline; ui_rgb color;
+    block_text_style(w, th, b, &size, &bold, &italic, &underline, &color);
+    int family = b->font_family;
+    if (family == CSS_FF_UNSET && doc->author_css && !w->force_theme) family = CSS_FF_SERIF;
+    content_font_ex(cr, size, bold, italic, family, b->fontface, tsh_local_handle(b->font_list));
+    double sp = measure_slice(cr, " ", 1);
+    return (sp > 0.0) ? sp : 0.0;
+}
+
 static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
                                   double content_w) {
     if (sd->box < 0) return 0.0;
@@ -6101,8 +6120,8 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
         ++n_items;
         k = e;
     }
-    if (!is_column && n_items > 1 && cd->gap > 0)
-        total += (double)cd->gap * (double)(n_items - 1);
+    if (!is_column && n_items > 1)
+        total += cont_gap_px(cr, w, th, doc, cd, b0) * (double)(n_items - 1);
     return total;
 }
 
@@ -6650,7 +6669,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     memset(table_track, 0, sizeof table_track);
     memset(&root, 0, sizeof root);
     memset(kids, 0, sizeof kids[0] * g);
-    root.gap = (double)cdv.gap;
+    root.gap = cont_gap_px(cr, w, th, doc, &cdv, start);
     root.justify = (fx_justify)cdv.justify;
     root.children = kids;
     root.child_count = g;
@@ -7199,6 +7218,22 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                     ((bk->ua_tag != BX_UA_NONE && bk->ua_tag == rbd->ua_tag) ||
                      (bk->kind == RD_HEADING && rbd->ua_tag >= BX_UA_H1 &&
                       rbd->ua_tag <= BX_UA_H6)))
+                    own_block = 1;
+                /* A run whose nearest block element is the one that owns the CONTAINER's
+                 * box sits at or above the container: that block's margins are the
+                 * container's, placed once outside it, never the item's. Without this
+                 * every atom of an inline-block row inside a `<p>` or a heading grew by
+                 * the paragraph's bottom margin, and the margin was then added again
+                 * below the row. */
+                if (!own_block && cdv.box_id >= 0 && bk->block_node != DOM_NODE_NONE) {
+                    const pv_box_def *cbd = rd_box_at(doc, (size_t)cdv.box_id);
+                    if (cbd != NULL && cbd->node_id == bk->block_node) own_block = 1;
+                }
+                /* Same fact seen from the box side: an item with no root box whose run
+                 * still sits in the container's box has no margin-bearing block of its
+                 * own (a margin is enough to generate a box), so whatever margins the
+                 * run carries were stamped by the container's element or an ancestor. */
+                if (!own_block && rb < 0 && cdv.box_id >= 0 && bk->block_id == cdv.box_id)
                     own_block = 1;
                 if ((bk->block_break || m == gstart[j]) && !(bk->br_line & PV_BR_CONT)
                     && !own_block) {
@@ -17043,7 +17078,10 @@ static void draw_tabstrip(cairo_t *cr, browser_window *w) {
         int hot = (w->ptr_y >= top && w->ptr_y < top + h
                    && w->ptr_x >= x && w->ptr_x < x + tw);
 
-        set_rgb(cr, active ? th->content_bg : (hot ? th->btn_hover_bg : th->toolbar_bg));
+        /* The active tab continues into the toolbar below it (one surface, one ink), so its
+         * title is legible in every palette; it used to take the page background, which under
+         * the light theme put light chrome text on white. */
+        set_rgb(cr, active ? th->toolbar_bg : (hot ? th->btn_hover_bg : th->titlebar_bg));
         cairo_rectangle(cr, x, top, tw - 1.0, h);
         cairo_fill(cr);
 
@@ -19956,9 +19994,12 @@ ui_status ui_run_browser(const char *start_url) {
         do_load(&w, "docs/index.html");
     }
 
-    /* Make the URL bar ready for typing. */
-    w.url_bar_focused = 1;
-    browser_url_bar_clear(&w.bs);
+    /* The home page starts with an empty, focused address bar, ready for typing. A page the
+     * user asked for keeps its address visible and the focus on the page, like any browser. */
+    if (start_url == NULL) {
+        w.url_bar_focused = 1;
+        browser_url_bar_clear(&w.bs);
+    }
 
     /* Optionally open the Freebug console on launch (like a browser's
      * auto-open-devtools): set FREEDOM_FREEBUG to any value. F12 / the hamburger

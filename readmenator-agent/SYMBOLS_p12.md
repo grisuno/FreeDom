@@ -3,6 +3,10 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_cascade_document_order` | function | `tests/test_css.c:2643` | `static void test_cascade_document_order(void **state)` |
+| `test_cascade_inline_wins` | function | `tests/test_css.c:2652` | `static void test_cascade_inline_wins(void **state)` |
+| `test_cascade_specificity` | function | `tests/test_css.c:2597` | `static void test_cascade_specificity(void **state)` |
+| `test_child_combinator` | function | `tests/test_css.c:1534` | `static void test_child_combinator(void **state)` |
 | `test_clip_auto` | function | `tests/test_css.c:5743` | `static void test_clip_auto(void **state)` |
 | `test_clip_rect` | function | `tests/test_css.c:5733` | `static void test_clip_rect(void **state)` |
 | `test_color_calc_and_angle_hue` | function | `tests/test_css.c:3838` | `static void test_color_calc_and_angle_hue(void **state)` |
@@ -453,13 +457,14 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_unsupported_fails_closed` | function | `tests/test_css_mask.c:134` | `static void test_unsupported_fails_closed(void **state)` |
 | `val_of` | function | `tests/test_css_mask.c:10` | `static int val_of(const css_decl *d, int n, int prop, int def)` |
 | `m` | function | `tests/test_css_mq.c:13` | `static int m(const char *q)` |
-| `main` | function | `tests/test_css_mq.c:116` | `int main(void)` |
-| `surely` | function | `tests/test_css_mq.c:92` | `static int surely(const char *q)` |
-| `test_container_surely` | function | `tests/test_css_mq.c:95` | `static void test_container_surely(void **state)` |
-| `test_desktop_identity` | function | `tests/test_css_mq.c:56` | `static void test_desktop_identity(void **state)` |
-| `test_fail_closed` | function | `tests/test_css_mq.c:78` | `static void test_fail_closed(void **state)` |
-| `test_not_or` | function | `tests/test_css_mq.c:44` | `static void test_not_or(void **state)` |
-| `test_plain_and_types` | function | `tests/test_css_mq.c:30` | `static void test_plain_and_types(void **state)` |
+| `main` | function | `tests/test_css_mq.c:135` | `int main(void)` |
+| `surely` | function | `tests/test_css_mq.c:111` | `static int surely(const char *q)` |
+| `test_container_surely` | function | `tests/test_css_mq.c:114` | `static void test_container_surely(void **state)` |
+| `test_desktop_identity` | function | `tests/test_css_mq.c:75` | `static void test_desktop_identity(void **state)` |
+| `test_fail_closed` | function | `tests/test_css_mq.c:97` | `static void test_fail_closed(void **state)` |
+| `test_math_function_values` | function | `tests/test_css_mq.c:31` | `static void test_math_function_values(void **state)` |
+| `test_not_or` | function | `tests/test_css_mq.c:63` | `static void test_not_or(void **state)` |
+| `test_plain_and_types` | function | `tests/test_css_mq.c:49` | `static void test_plain_and_types(void **state)` |
 | `test_range_syntax` | function | `tests/test_css_mq.c:15` | `static void test_range_syntax(void **state)` |
 | `main` | function | `tests/test_css_text.c:73` | `int main(void)` |
 | `test_aspect_ratio` | function | `tests/test_css_text.c:44` | `static void test_aspect_ratio(void **state)` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_resolve_scope_order_and_fallback` | function | `tests/test_css_vars.c:110` | `static void test_resolve_scope_order_and_fallback(void **state)` |
 | `test_set_get_overwrite` | function | `tests/test_css_vars.c:23` | `static void test_set_get_overwrite(void **state)` |
 | `main` | function | `tests/test_data_url.c:317` | `int main(void)` |
-| `test_decode_bad_length_not_multiple_of_4` | function | `tests/test_data_url.c:193` | `static void test_decode_bad_length_not_multiple_of_4(void **state)` |
-| `test_decode_base64_forgiving_and_mime` | function | `tests/test_data_url.c:284` | `static void test_decode_base64_forgiving_and_mime(void **state)` |
-| `test_decode_empty` | function | `tests/test_data_url.c:183` | `static void test_decode_empty(void **state)` |
-| `test_decode_invalid_character` | function | `tests/test_data_url.c:210` | `static void test_decode_invalid_character(void **state)` |
-| `test_decode_multi_group` | function | `tests/test_data_url.c:171` | `static void test_decode_multi_group(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

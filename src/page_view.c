@@ -3129,6 +3129,31 @@ static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *s
     return nel > 0;
 }
 
+/* True iff EVERY pair of adjacent in-flow element children of an anonymous inline-block
+ * row is separated by white-space text: that space collapses to one word space of the line
+ * (CSS Text 3 4.1.1) and is what PV_GAP_WORD_SPACE stands for. A single pair written
+ * without it (minified markup) keeps the row gapless -- the mixed case is a known limit. */
+static int row_atoms_space_separated(const lxb_dom_node_t *p, const css_sheet *sheet,
+                                     pv_style_cache *cache) {
+    int nel = 0, blank_since = 0;
+    for (const lxb_dom_node_t *c = p->first_child; c != NULL; c = c->next) {
+        if (c->type == LXB_DOM_NODE_TYPE_TEXT) {
+            if (text_node_is_blank(c)) blank_since = 1;
+            continue;
+        }
+        if (c->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
+        const css_style *ccs = cached_element_style_ref(
+            lxb_dom_interface_element((lxb_dom_node_t *)c), sheet, cache);
+        if (ccs->display == CSS_DISP_NONE || ccs->position == CSS_POS_ABSOLUTE
+            || ccs->position == CSS_POS_FIXED)
+            continue;
+        if (nel > 0 && !blank_since) return 0;
+        ++nel;
+        blank_since = 0;
+    }
+    return nel > 1;
+}
+
 /* True iff a column can have FREE space on its main axis: a px height or a px
  * min-height floor. Without one, auto margins distribute nothing, and block flow is
  * the same layout. Percentage heights are not resolved by this engine yet. */
@@ -4145,7 +4170,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                                                 ? cs->justify_items : 0;
                         } else {
                             cd->display = BX_DISPLAY_FLEX;
-                            cd->gap = 0;
+                            cd->gap = row_atoms_space_separated(p, sheet, style_cache)
+                                      ? PV_GAP_WORD_SPACE : 0;
                             cd->anon_row = 1;
                             cd->cols = 0;
                             /* This row models an INLINE FORMATTING CONTEXT, and an

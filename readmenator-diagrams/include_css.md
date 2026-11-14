@@ -1,6 +1,6 @@
-# src: css
+# include: css
 
-src: css groups 57 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
+include: css groups 56 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
 
 ```mermaid
 graph LR
@@ -27,7 +27,7 @@ include groups 18 files (h) around FREEDOM_CSS_H, css_status, css_align, css_dis
 
 ## src (1.3)
 
-src groups 19 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...
+src groups 18 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...
 
 ## tests (1.4)
 
@@ -60,7 +60,6 @@ tests groups 17 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - src/css.c
 - src/css_atrule.c
 - src/css_box.c
-- src/css_chain.c
 - src/css_color.c
 - src/css_computed.c
 - src/css_counter.c

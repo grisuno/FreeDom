@@ -1,6 +1,6 @@
 ```mermaid
 graph LR
-    src_css["src: css"]
+    include_css["include: css"]
     src_tab["src: tab"]
     include_browser_ui["include: browser_ui"]
     src_text_shape["src: text_shape"]
@@ -13,26 +13,26 @@ graph LR
     include_prefetch["include: prefetch"]
     include_sha2["include: sha2"]
     include_subreq_batch["include: subreq_batch"]
-    src_css -- "calls into" --> include_tab
-    src_css -- "calls into" --> include_prefetch
-    src_css -- "calls into" --> src_tab
-    src_css -- "calls into" --> include_browser_ui
-    src_css -- "calls into" --> src_text_shape
-    src_css -- "calls into" --> include_page_view
-    src_css -- "calls into" --> include_secure_fetch
-    src_css -- "calls into" --> src_http_cache
-    include_tab -- "calls into" --> src_css
+    include_css -- "calls into" --> include_tab
+    include_css -- "calls into" --> include_prefetch
+    include_css -- "calls into" --> src_tab
+    include_css -- "calls into" --> include_browser_ui
+    include_css -- "calls into" --> src_text_shape
+    include_css -- "calls into" --> include_page_view
+    include_css -- "calls into" --> include_secure_fetch
+    include_css -- "calls into" --> src_http_cache
+    include_tab -- "calls into" --> include_css
     include_tab -- "calls into" --> src_tab
     include_tab -- "calls into" --> include_browser_ui
     include_tab -- "calls into" --> src_text_shape
     include_tab -- "depends on" --> include_page_view
     include_tab -- "calls into" --> include_svg_render
-    include_prefetch -- "calls into" --> src_css
+    include_prefetch -- "calls into" --> include_css
     include_prefetch -- "calls into" --> src_tab
     include_prefetch -- "calls into" --> include_browser_ui
     include_prefetch -- "calls into" --> src_text_shape
     include_subreq_batch -- "calls into" --> src_text_shape
-    src_tab -- "calls into" --> src_css
+    src_tab -- "calls into" --> include_css
     src_tab -- "calls into" --> include_tab
     src_tab -- "calls into" --> include_prefetch
     src_tab -- "calls into" --> include_sha2
@@ -43,7 +43,7 @@ graph LR
     src_tab -- "calls into" --> include_secure_fetch
     src_tab -- "calls into" --> include_browser
     src_tab -- "calls into" --> include_svg_render
-    include_browser_ui -- "calls into" --> src_css
+    include_browser_ui -- "calls into" --> include_css
     include_browser_ui -- "calls into" --> include_tab
     include_browser_ui -- "calls into" --> include_prefetch
     include_browser_ui -- "calls into" --> src_tab
@@ -53,7 +53,7 @@ graph LR
     include_browser_ui -- "calls into" --> include_browser
     include_browser_ui -- "calls into" --> src_http_cache
     include_browser_ui -- "depends on" --> include_svg_render
-    src_text_shape -- "calls into" --> src_css
+    src_text_shape -- "calls into" --> include_css
     src_text_shape -- "calls into" --> include_tab
     src_text_shape -- "calls into" --> include_prefetch
     src_text_shape -- "calls into" --> src_tab
@@ -61,7 +61,7 @@ graph LR
     src_text_shape -- "calls into" --> include_page_view
     src_text_shape -- "calls into" --> include_secure_fetch
     src_text_shape -- "calls into" --> include_browser
-    include_page_view -- "calls into" --> src_css
+    include_page_view -- "calls into" --> include_css
     include_page_view -- "calls into" --> include_prefetch
     include_page_view -- "calls into" --> src_tab
     include_page_view -- "calls into" --> include_browser_ui
@@ -69,26 +69,26 @@ graph LR
     include_page_view -- "calls into" --> include_secure_fetch
     include_page_view -- "calls into" --> include_browser
     include_page_view -- "calls into" --> include_svg_render
-    include_secure_fetch -- "calls into" --> src_css
+    include_secure_fetch -- "calls into" --> include_css
     include_secure_fetch -- "calls into" --> src_tab
     include_secure_fetch -- "calls into" --> include_browser_ui
     include_secure_fetch -- "calls into" --> src_text_shape
     include_secure_fetch -- "depends on" --> include_page_view
     include_secure_fetch -- "calls into" --> src_http_cache
-    include_browser -- "calls into" --> src_css
+    include_browser -- "calls into" --> include_css
     include_browser -- "calls into" --> src_tab
     include_browser -- "calls into" --> include_browser_ui
     include_browser -- "calls into" --> src_text_shape
     include_browser -- "calls into" --> include_page_view
-    src_http_cache -- "calls into" --> src_css
+    src_http_cache -- "calls into" --> include_css
     src_http_cache -- "calls into" --> src_tab
     src_http_cache -- "calls into" --> include_browser_ui
     src_http_cache -- "calls into" --> src_text_shape
     src_http_cache -- "calls into" --> include_browser
-    include_svg_render -- "calls into" --> src_css
+    include_svg_render -- "calls into" --> include_css
     include_svg_render -- "calls into" --> src_text_shape
     include_svg_render -- "calls into" --> include_page_view
-    click src_css href "./src_css.md" "Details"
+    click include_css href "./include_css.md" "Details"
     click src_tab href "./src_tab.md" "Details"
     click include_browser_ui href "./include_browser_ui.md" "Details"
     click src_text_shape href "./src_text_shape.md" "Details"
@@ -103,11 +103,11 @@ graph LR
 
 ## Details
 
-Static architecture map of 325 files (c, h, py, sh) in 13 components: src: css, src: tab, include: browser_ui, src: text_shape, include: page_view, include: secure_fetch, include: browser, src: http_cache. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 325 files (c, h, py, sh) in 13 components: include: css, src: tab, include: browser_ui, src: text_shape, include: page_view, include: secure_fetch, include: browser, src: http_cache. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
-### src: css (1)
+### include: css (1)
 
-src: css groups 57 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
+include: css groups 56 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
 
 **Related Classes/Methods**:
 
@@ -167,7 +167,7 @@ src: text_shape groups 40 files (c, h) around FREEDOM_JS_POLICY_H, membership, j
 
 ### include: page_view (5)
 
-include: page_view groups 25 files (c, h) around FREEDOM_PAGE_VIEW_H, pv_status, PV_BSHADOW_LAYERS, PV_MAUTO_LEFT, PV_MAUTO_RIGHT. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+include: page_view groups 26 files (c, h) around FREEDOM_PAGE_VIEW_H, pv_status, PV_BSHADOW_LAYERS, PV_MAUTO_LEFT, PV_MAUTO_RIGHT. bx_edges: anything longer fails closed instead of truncating into a wrong match....
 
 **Related Classes/Methods**:
 

@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `css_valign` | enum | `include/css.h:136` | `` |
 | `css_visibility` | enum | `include/css.h:220` | `` |
 | `css_white_space` | enum | `include/css.h:142` | `` |
 | `css_word_break` | enum | `include/css.h:266` | `` |
@@ -35,28 +36,29 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CB_AUTO_RESET_NONE` | macro | `include/css_box.h:13` | `#define CB_AUTO_RESET_NONE` |
 | `CB_AUTO_VALUE` | macro | `include/css_box.h:11` | `#define CB_AUTO_VALUE` |
 | `FREEDOM_CSS_BOX_H` | macro | `include/css_box.h:2` | `#define FREEDOM_CSS_BOX_H` |
-| `cb_emit_len` | function | `include/css_box.h:17` | `int cb_emit_len(css_decl *dst, int cap, int slot, const char *val, int allow_auto, int allow_neg);` |
-| `cb_expand_box2` | function | `include/css_box.h:21` | `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...` |
-| `cb_expand_box4` | function | `include/css_box.h:19` | `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);` |
-| `cb_expand_grid_template_cols` | function | `include/css_box.h:43` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);` |
-| `cb_interp_align` | function | `include/css_box.h:33` | `int cb_interp_align(const char *v);` |
-| `cb_interp_display` | function | `include/css_box.h:39` | `int cb_interp_display(const char *v);` |
-| `cb_interp_fontsize_ex` | function | `include/css_box.h:34` | `int cb_interp_fontsize_ex(const char *v, int *abs_out);` |
-| `cb_interp_gap` | function | `include/css_box.h:40` | `int cb_interp_gap(const char *v);` |
-| `cb_interp_gridcols` | function | `include/css_box.h:42` | `int cb_interp_gridcols(const char *v);` |
-| `cb_interp_justify` | function | `include/css_box.h:41` | `int cb_interp_justify(const char *v);` |
-| `cb_interp_len` | function | `include/css_box.h:16` | `int cb_interp_len(const char *v, int allow_auto, int *out);` |
-| `cb_interp_lineheight` | function | `include/css_box.h:35` | `int cb_interp_lineheight(const char *v);` |
-| `cb_interp_lp` | function | `include/css_box.h:23` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);` |
-| `cb_interp_style` | function | `include/css_box.h:37` | `int cb_interp_style(const char *v);` |
-| `cb_interp_textdeco` | function | `include/css_box.h:38` | `int cb_interp_textdeco(const char *v);` |
-| `cb_interp_weight` | function | `include/css_box.h:36` | `int cb_interp_weight(const char *v);` |
+| `block` | function | `include/css_box.h:19` | `* For contexts with no element and no containing block (media query values). */ int cb_math_length_px(const char *v...` |
+| `cb_emit_len` | function | `include/css_box.h:22` | `int cb_emit_len(css_decl *dst, int cap, int slot, const char *val, int allow_auto, int allow_neg);` |
+| `cb_expand_box2` | function | `include/css_box.h:26` | `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...` |
+| `cb_expand_box4` | function | `include/css_box.h:24` | `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);` |
+| `cb_expand_grid_template_cols` | function | `include/css_box.h:48` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);` |
+| `cb_interp_align` | function | `include/css_box.h:38` | `int cb_interp_align(const char *v);` |
+| `cb_interp_display` | function | `include/css_box.h:44` | `int cb_interp_display(const char *v);` |
+| `cb_interp_fontsize_ex` | function | `include/css_box.h:39` | `int cb_interp_fontsize_ex(const char *v, int *abs_out);` |
+| `cb_interp_gap` | function | `include/css_box.h:45` | `int cb_interp_gap(const char *v);` |
+| `cb_interp_gridcols` | function | `include/css_box.h:47` | `int cb_interp_gridcols(const char *v);` |
+| `cb_interp_justify` | function | `include/css_box.h:46` | `int cb_interp_justify(const char *v);` |
+| `cb_interp_len` | function | `include/css_box.h:21` | `int cb_interp_len(const char *v, int allow_auto, int *out);` |
+| `cb_interp_lineheight` | function | `include/css_box.h:40` | `int cb_interp_lineheight(const char *v);` |
+| `cb_interp_lp` | function | `include/css_box.h:28` | `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);` |
+| `cb_interp_style` | function | `include/css_box.h:42` | `int cb_interp_style(const char *v);` |
+| `cb_interp_textdeco` | function | `include/css_box.h:43` | `int cb_interp_textdeco(const char *v);` |
+| `cb_interp_weight` | function | `include/css_box.h:41` | `int cb_interp_weight(const char *v);` |
 | `cb_length_px` | function | `include/css_box.h:15` | `int cb_length_px(const char *v, double *px);` |
-| `cb_lp_can_be_nonneg` | function | `include/css_box.h:31` | `int cb_lp_can_be_nonneg(int px_val, int pct_pm);` |
-| `cb_next_ws_token` | function | `include/css_box.h:32` | `int cb_next_ws_token(const char **p, char *tok, size_t cap);` |
-| `cb_value_em_milli` | function | `include/css_box.h:25` | `int cb_value_em_milli(const char *v);` |
-| `rectangle` | function | `include/css_box.h:27` | `* rectangle (top, right, bottom, left): px[i] + pm[i]/1000 of the border box (height for * top/bottom, width for...` |
-| `strings` | function | `include/css_box.h:45` | `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...` |
+| `cb_lp_can_be_nonneg` | function | `include/css_box.h:36` | `int cb_lp_can_be_nonneg(int px_val, int pct_pm);` |
+| `cb_next_ws_token` | function | `include/css_box.h:37` | `int cb_next_ws_token(const char **p, char *tok, size_t cap);` |
+| `cb_value_em_milli` | function | `include/css_box.h:30` | `int cb_value_em_milli(const char *v);` |
+| `rectangle` | function | `include/css_box.h:32` | `* rectangle (top, right, bottom, left): px[i] + pm[i]/1000 of the border box (height for * top/bottom, width for...` |
+| `strings` | function | `include/css_box.h:50` | `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...` |
 | `CCH_CHAIN_MAX` | macro | `include/css_chain.h:26` | `#define CCH_CHAIN_MAX` |
 | `CCH_NTH_MAX` | macro | `include/css_chain.h:28` | `#define CCH_NTH_MAX` |
 | `CCH_SIB_MAX` | macro | `include/css_chain.h:27` | `#define CCH_SIB_MAX` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `hb_free` | function | `include/hostblock.h:52` | `void hb_free(hb_set *s);` |
 | `hb_is_allowlisted` | function | `include/hostblock.h:75` | `int hb_is_allowlisted(const hb_set *s, const char *host);` |
 | `hb_list` | enum | `include/hostblock.h:32` | `` |
-| `hb_new` | function | `include/hostblock.h:49` | `hb_set *hb_new(void);` |
-| `hb_set` | type_alias | `include/hostblock.h:29` | `typedef struct hb_set hb_set;` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

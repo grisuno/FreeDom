@@ -802,6 +802,11 @@ typedef struct pv_box_def {
  * parent_id is the id of the enclosing container (-1 = top level) and parent_item is
  * THIS container's item ordinal within that parent, so a nested container is one item
  * of its parent. Structure (like cont_id itself), carried regardless of caps.css. */
+/* pv_cont_def.gap marker of an anonymous inline-block row whose atoms are separated by
+ * collapsible white space: the gap is ONE word space of the row's font, which only the
+ * trusted side can measure (the worker has no fonts). Never set on an author container. */
+#define PV_GAP_WORD_SPACE (-2)
+
 typedef struct pv_cont_def {
     int parent_id;      /* enclosing container id, or -1 */
     int parent_item;    /* this container's item ordinal in its parent, or -1 */

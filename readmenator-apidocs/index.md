@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 231 modules, 3642 documented entities, documentation coverage 44.1% (1593/3612 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 231 modules, 3645 documented entities, documentation coverage 44.1% (1593/3615 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -43,7 +43,7 @@ Languages: c (108), h (107), py (12), sh (4)
 | [`include/compositor.h`](modules/include.compositor.h.md) |  | 5 | 3 | 88.9% |
 | [`include/css.h`](modules/include.css.h.md) |  | 72 | 74 | 71.4% |
 | [`include/css_atrule.h`](modules/include.css_atrule.h.md) |  | 2 | 7 | 70.0% |
-| [`include/css_box.h`](modules/include.css_box.h.md) |  | 0 | 26 | 0.0% |
+| [`include/css_box.h`](modules/include.css_box.h.md) |  | 0 | 27 | 0.0% |
 | [`include/css_chain.h`](modules/include.css_chain.h.md) |  | 3 | 8 | 25.0% |
 | [`include/css_color.h`](modules/include.css_color.h.md) |  | 3 | 3 | 42.9% |
 | [`include/css_computed.h`](modules/include.css_computed.h.md) |  | 1 | 4 | 33.3% |
@@ -98,7 +98,7 @@ Languages: c (108), h (107), py (12), sh (4)
 | [`include/net_guard.h`](modules/include.net_guard.h.md) |  | 2 | 6 | 55.6% |
 | [`include/net_realm.h`](modules/include.net_realm.h.md) |  | 4 | 5 | 20.0% |
 | [`include/os_sandbox.h`](modules/include.os_sandbox.h.md) |  | 4 | 7 | 50.0% |
-| [`include/page_view.h`](modules/include.page_view.h.md) |  | 15 | 81 | 60.8% |
+| [`include/page_view.h`](modules/include.page_view.h.md) |  | 15 | 82 | 60.2% |
 | [`include/pdf_export.h`](modules/include.pdf_export.h.md) |  | 1 | 8 | 30.0% |
 | [`include/perf_trace.h`](modules/include.perf_trace.h.md) |  | 5 | 11 | 52.9% |
 | [`include/pq_seal.h`](modules/include.pq_seal.h.md) |  | 2 | 5 | 12.5% |
@@ -149,7 +149,7 @@ Languages: c (108), h (107), py (12), sh (4)
 | [`src/compositor.c`](modules/src.compositor.c.md) |  | 0 | 4 | 60.0% |
 | [`src/css.c`](modules/src.css.c.md) |  | 8 | 75 | 25.0% |
 | [`src/css_atrule.c`](modules/src.css_atrule.c.md) |  | 0 | 4 | 80.0% |
-| [`src/css_box.c`](modules/src.css_box.c.md) |  | 3 | 29 | 45.5% |
+| [`src/css_box.c`](modules/src.css_box.c.md) |  | 3 | 30 | 44.1% |
 | [`src/css_chain.c`](modules/src.css_chain.c.md) |  | 3 | 16 | 40.0% |
 | [`src/css_color.c`](modules/src.css_color.c.md) |  | 4 | 12 | 41.2% |
 | [`src/css_computed.c`](modules/src.css_computed.c.md) |  | 1 | 5 | 28.6% |

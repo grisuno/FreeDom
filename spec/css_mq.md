@@ -27,6 +27,18 @@ nunca y la página se pintaba a todo el ancho.
   `not <cond>`; paréntesis anidados `((a) or (b))`.
 - Rango: `(name op v)`, `(v op name)`, `(v1 op name op v2)` con `<`, `<=`, `>`, `>=`, `=`.
 - Plano: `(name: v)`, `(min-name: v)`, `(max-name: v)`, booleano `(name)`.
+- El valor de una característica de longitud puede ser una función matemática
+  (`calc()`, `min()`, `max()`, `clamp()`; MQ4 §4.1 remite a CSS Values): se evalúa con
+  el MISMO evaluador que una declaración (`cb_math_length_px`) contra la fuente inicial
+  de 16 px. MediaWiki escribe todos sus cortes como
+  `@media (max-width: calc(1120px - 1px))`; sin esto ninguno aplicaba y Wikipedia
+  mostraba a la vez el diseño ancho y el angosto. Un porcentaje o un resultado sin
+  dimensión no es una longitud de media query: la característica es desconocida
+  (fail-closed, como cualquier valor que no se puede leer).
+  - Dado `width_px = 1000`, cuando la query es `(max-width: calc(1120px - 1px))`,
+    entonces coincide; con `(min-width: calc(1120px - 1px))` no coincide.
+  - Dado lo mismo, cuando la query es `(width <= calc(70em - 1px))`, entonces coincide.
+  - Dado `(max-width: calc(50% + 10px))` o `(max-width: calc(2 * 3))`, entonces no coincide.
 
 ## Características y su respuesta
 

@@ -378,34 +378,35 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Language: h
 - Symbols:
   - `cb_length_px` (function, line 15) `int cb_length_px(const char *v, double *px);`
-  - `cb_interp_len` (function, line 16) `int cb_interp_len(const char *v, int allow_auto, int *out);`
-  - `cb_emit_len` (function, line 17) `int cb_emit_len(css_decl *dst, int cap, int slot, const char *val, int allow_auto, int allow_neg);`
-  - `cb_expand_box4` (function, line 19) `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);`
-  - `cb_expand_box2` (function, line 21) `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...`
-  - `cb_interp_lp` (function, line 23) `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);`
-  - `cb_value_em_milli` (function, line 25) `int cb_value_em_milli(const char *v);`
-  - `rectangle` (function, line 27) `* rectangle (top, right, bottom, left): px[i] + pm[i]/1000 of the border box (height for * top/bottom, width for...`
-  - `cb_lp_can_be_nonneg` (function, line 31) `int cb_lp_can_be_nonneg(int px_val, int pct_pm);`
-  - `cb_next_ws_token` (function, line 32) `int cb_next_ws_token(const char **p, char *tok, size_t cap);`
-  - `cb_interp_align` (function, line 33) `int cb_interp_align(const char *v);`
-  - `cb_interp_fontsize_ex` (function, line 34) `int cb_interp_fontsize_ex(const char *v, int *abs_out);`
-  - `cb_interp_lineheight` (function, line 35) `int cb_interp_lineheight(const char *v);`
-  - `cb_interp_weight` (function, line 36) `int cb_interp_weight(const char *v);`
-  - `cb_interp_style` (function, line 37) `int cb_interp_style(const char *v);`
-  - `cb_interp_textdeco` (function, line 38) `int cb_interp_textdeco(const char *v);`
-  - `cb_interp_display` (function, line 39) `int cb_interp_display(const char *v);`
-  - `cb_interp_gap` (function, line 40) `int cb_interp_gap(const char *v);`
-  - `cb_interp_justify` (function, line 41) `int cb_interp_justify(const char *v);`
-  - `cb_interp_gridcols` (function, line 42) `int cb_interp_gridcols(const char *v);`
-  - `cb_expand_grid_template_cols` (function, line 43) `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);`
-  - `strings` (function, line 45) `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...`
+  - `block` (function, line 19) `* For contexts with no element and no containing block (media query values). */ int cb_math_length_px(const char *v...`
+  - `cb_interp_len` (function, line 21) `int cb_interp_len(const char *v, int allow_auto, int *out);`
+  - `cb_emit_len` (function, line 22) `int cb_emit_len(css_decl *dst, int cap, int slot, const char *val, int allow_auto, int allow_neg);`
+  - `cb_expand_box4` (function, line 24) `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);`
+  - `cb_expand_box2` (function, line 26) `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...`
+  - `cb_interp_lp` (function, line 28) `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);`
+  - `cb_value_em_milli` (function, line 30) `int cb_value_em_milli(const char *v);`
+  - `rectangle` (function, line 32) `* rectangle (top, right, bottom, left): px[i] + pm[i]/1000 of the border box (height for * top/bottom, width for...`
+  - `cb_lp_can_be_nonneg` (function, line 36) `int cb_lp_can_be_nonneg(int px_val, int pct_pm);`
+  - `cb_next_ws_token` (function, line 37) `int cb_next_ws_token(const char **p, char *tok, size_t cap);`
+  - `cb_interp_align` (function, line 38) `int cb_interp_align(const char *v);`
+  - `cb_interp_fontsize_ex` (function, line 39) `int cb_interp_fontsize_ex(const char *v, int *abs_out);`
+  - `cb_interp_lineheight` (function, line 40) `int cb_interp_lineheight(const char *v);`
+  - `cb_interp_weight` (function, line 41) `int cb_interp_weight(const char *v);`
+  - `cb_interp_style` (function, line 42) `int cb_interp_style(const char *v);`
+  - `cb_interp_textdeco` (function, line 43) `int cb_interp_textdeco(const char *v);`
+  - `cb_interp_display` (function, line 44) `int cb_interp_display(const char *v);`
+  - `cb_interp_gap` (function, line 45) `int cb_interp_gap(const char *v);`
+  - `cb_interp_justify` (function, line 46) `int cb_interp_justify(const char *v);`
+  - `cb_interp_gridcols` (function, line 47) `int cb_interp_gridcols(const char *v);`
+  - `cb_expand_grid_template_cols` (function, line 48) `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);`
+  - `strings` (function, line 50) `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...`
   - `FREEDOM_CSS_BOX_H` (macro, line 2) `#define FREEDOM_CSS_BOX_H`
   - `CB_AUTO_REJECT` (macro, line 10) `#define CB_AUTO_REJECT`
   - `CB_AUTO_VALUE` (macro, line 11) `#define CB_AUTO_VALUE`
   - `CB_AUTO_RESET` (macro, line 12) `#define CB_AUTO_RESET`
   - `CB_AUTO_RESET_NONE` (macro, line 13) `#define CB_AUTO_RESET_NONE`
 - Depends on: `include/css_decl.h`
-- Imported by: `src/css.c`, `src/css_box.c`, `src/css_text.c`, `tests/test_css_box.c`
+- Imported by: `src/css.c`, `src/css_box.c`, `src/css_mq.c`, `src/css_text.c`, `tests/test_css_box.c`
 
 ## include/css_chain.h
 - Doc: cch_element_matches: Nonzero iff the parsed selector *sel matches element `el`, built against...

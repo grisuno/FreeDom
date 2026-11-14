@@ -13,6 +13,11 @@
 #define CB_AUTO_RESET_NONE 3
 
 int cb_length_px(const char *v, double *px);
+/* A whole value that is ONE math function (calc/min/max/clamp) evaluating to a pure
+ * <length> at the initial font size: 1 and *px. A percentage term, a dimensionless
+ * result, a syntax error or a value that is not a math function: 0, *px untouched.
+ * For contexts with no element and no containing block (media query values). */
+int cb_math_length_px(const char *v, double *px);
 int cb_interp_len(const char *v, int allow_auto, int *out);
 int cb_emit_len(css_decl *dst, int cap, int slot, const char *val,
                 int allow_auto, int allow_neg);

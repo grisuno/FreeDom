@@ -16,7 +16,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: How are the 57 files in 'src: css' related to each other?
+### Q: How are the 56 files in 'include: css' related to each other?
 
 - Status: unanswered
 

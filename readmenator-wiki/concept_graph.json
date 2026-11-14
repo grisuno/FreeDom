@@ -178,7 +178,7 @@
         "tests/test_wl_guard.c",
         "tools/gen_psl.c"
       ],
-      "mentions": 1207,
+      "mentions": 1208,
       "confidence": "EXTRACTED"
     },
     {
@@ -1034,7 +1034,7 @@
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 706,
+      "mentions": 704,
       "confidence": "EXTRACTED"
     },
     {
@@ -2051,7 +2051,7 @@
         "tools/pngprof.py",
         "tools/prune.py"
       ],
-      "mentions": 425,
+      "mentions": 424,
       "confidence": "EXTRACTED"
     },
     {
@@ -2168,7 +2168,7 @@
         "tools/mutate.py",
         "tools/pngprof.py"
       ],
-      "mentions": 352,
+      "mentions": 354,
       "confidence": "EXTRACTED"
     },
     {
@@ -2282,7 +2282,7 @@
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 636,
+      "mentions": 633,
       "confidence": "EXTRACTED"
     },
     {
@@ -2395,7 +2395,7 @@
         "tools/ffq.py",
         "tools/snapshot.py"
       ],
-      "mentions": 2074,
+      "mentions": 2073,
       "confidence": "EXTRACTED"
     },
     {
@@ -2505,7 +2505,7 @@
         "tests/test_ws_hub.c",
         "tools/gen_psl.c"
       ],
-      "mentions": 628,
+      "mentions": 630,
       "confidence": "EXTRACTED"
     },
     {
@@ -2719,7 +2719,7 @@
         "tests/test_ws_hub.c",
         "tools/gen_psl.c"
       ],
-      "mentions": 416,
+      "mentions": 419,
       "confidence": "EXTRACTED"
     },
     {
@@ -2928,7 +2928,7 @@
         "tools/prune.py",
         "tools/snapshot.py"
       ],
-      "mentions": 331,
+      "mentions": 327,
       "confidence": "EXTRACTED"
     },
     {
@@ -3032,7 +3032,7 @@
         "tools/guitime.py",
         "tools/snapshot.py"
       ],
-      "mentions": 234,
+      "mentions": 239,
       "confidence": "EXTRACTED"
     },
     {
@@ -3135,7 +3135,7 @@
         "tests/test_webfont_load.c",
         "tools/snapshot.py"
       ],
-      "mentions": 563,
+      "mentions": 579,
       "confidence": "EXTRACTED"
     },
     {
@@ -3237,7 +3237,102 @@
         "tests/test_url.c",
         "tests/test_web_storage.c"
       ],
-      "mentions": 273,
+      "mentions": 274,
+      "confidence": "EXTRACTED"
+    },
+    {
+      "name": "value",
+      "files": [
+        "gui/browser_ui.c",
+        "gui/browser_ui_internal.h",
+        "include/anti_fp.h",
+        "include/box_style.h",
+        "include/compositor.h",
+        "include/css.h",
+        "include/css_atrule.h",
+        "include/css_box.h",
+        "include/css_computed.h",
+        "include/css_counter.h",
+        "include/css_length.h",
+        "include/css_mask.h",
+        "include/css_mq.h",
+        "include/css_select.h",
+        "include/css_values.h",
+        "include/css_vars.h",
+        "include/dom.h",
+        "include/dom_debug.h",
+        "include/flex_layout.h",
+        "include/form.h",
+        "include/html_parse.h",
+        "include/identity.h",
+        "include/interp.h",
+        "include/js_dom.h",
+        "include/js_geom.h",
+        "include/js_policy.h",
+        "include/js_sandbox.h",
+        "include/js_trusted.h",
+        "include/link_nav.h",
+        "include/page_view.h",
+        "include/prefetch.h",
+        "include/render_doc.h",
+        "include/render_policy.h",
+        "include/request_policy.h",
+        "include/secure_fetch.h",
+        "include/tab.h",
+        "include/text_case.h",
+        "include/web_storage.h",
+        "include/webcaps.h",
+        "include/zoom.h",
+        "src/box_tree.c",
+        "src/css.c",
+        "src/css_atrule.c",
+        "src/css_box.c",
+        "src/css_color.c",
+        "src/css_counter.c",
+        "src/css_length.c",
+        "src/css_mq.c",
+        "src/css_select.c",
+        "src/css_text.c",
+        "src/css_vars.c",
+        "src/dom_debug.c",
+        "src/download.c",
+        "src/form.c",
+        "src/hls.c",
+        "src/html_parse.c",
+        "src/import_map.c",
+        "src/js_dom.c",
+        "src/js_env.c",
+        "src/js_native.c",
+        "src/js_native_internal.h",
+        "src/js_sandbox.c",
+        "src/page_view.c",
+        "src/prefs.c",
+        "src/render_doc.c",
+        "src/secure_fetch.c",
+        "src/svg_render.c",
+        "src/tab.c",
+        "src/url.c",
+        "src/web_storage.c",
+        "tests/test_box_style.c",
+        "tests/test_css.c",
+        "tests/test_css_drops.c",
+        "tests/test_css_length.c",
+        "tests/test_css_mask.c",
+        "tests/test_css_mq.c",
+        "tests/test_flex_layout.c",
+        "tests/test_freedom.c",
+        "tests/test_js_dom.c",
+        "tests/test_js_env.c",
+        "tests/test_js_native.c",
+        "tests/test_js_sandbox.c",
+        "tests/test_page_view.c",
+        "tests/test_render_policy.c",
+        "tests/test_secure_fetch.c",
+        "tests/test_tab.c",
+        "tools/ffgeom.py",
+        "tools/ffq.py"
+      ],
+      "mentions": 348,
       "confidence": "EXTRACTED"
     },
     {
@@ -3332,100 +3427,6 @@
         "tools/pngdiff.c"
       ],
       "mentions": 855,
-      "confidence": "EXTRACTED"
-    },
-    {
-      "name": "value",
-      "files": [
-        "gui/browser_ui.c",
-        "gui/browser_ui_internal.h",
-        "include/anti_fp.h",
-        "include/box_style.h",
-        "include/compositor.h",
-        "include/css.h",
-        "include/css_atrule.h",
-        "include/css_box.h",
-        "include/css_computed.h",
-        "include/css_counter.h",
-        "include/css_length.h",
-        "include/css_mask.h",
-        "include/css_mq.h",
-        "include/css_select.h",
-        "include/css_values.h",
-        "include/css_vars.h",
-        "include/dom.h",
-        "include/dom_debug.h",
-        "include/flex_layout.h",
-        "include/form.h",
-        "include/html_parse.h",
-        "include/identity.h",
-        "include/interp.h",
-        "include/js_dom.h",
-        "include/js_geom.h",
-        "include/js_policy.h",
-        "include/js_sandbox.h",
-        "include/js_trusted.h",
-        "include/link_nav.h",
-        "include/page_view.h",
-        "include/prefetch.h",
-        "include/render_doc.h",
-        "include/render_policy.h",
-        "include/request_policy.h",
-        "include/secure_fetch.h",
-        "include/tab.h",
-        "include/text_case.h",
-        "include/web_storage.h",
-        "include/webcaps.h",
-        "include/zoom.h",
-        "src/box_tree.c",
-        "src/css.c",
-        "src/css_atrule.c",
-        "src/css_box.c",
-        "src/css_color.c",
-        "src/css_counter.c",
-        "src/css_length.c",
-        "src/css_mq.c",
-        "src/css_select.c",
-        "src/css_text.c",
-        "src/css_vars.c",
-        "src/dom_debug.c",
-        "src/download.c",
-        "src/form.c",
-        "src/hls.c",
-        "src/html_parse.c",
-        "src/import_map.c",
-        "src/js_dom.c",
-        "src/js_env.c",
-        "src/js_native.c",
-        "src/js_native_internal.h",
-        "src/js_sandbox.c",
-        "src/page_view.c",
-        "src/prefs.c",
-        "src/render_doc.c",
-        "src/secure_fetch.c",
-        "src/svg_render.c",
-        "src/tab.c",
-        "src/url.c",
-        "src/web_storage.c",
-        "tests/test_box_style.c",
-        "tests/test_css.c",
-        "tests/test_css_drops.c",
-        "tests/test_css_length.c",
-        "tests/test_css_mask.c",
-        "tests/test_flex_layout.c",
-        "tests/test_freedom.c",
-        "tests/test_js_dom.c",
-        "tests/test_js_env.c",
-        "tests/test_js_native.c",
-        "tests/test_js_sandbox.c",
-        "tests/test_page_view.c",
-        "tests/test_render_policy.c",
-        "tests/test_secure_fetch.c",
-        "tests/test_tab.c",
-        "tools/ffgeom.py",
-        "tools/ffq.py"
-      ],
-      "mentions": 346,
       "confidence": "EXTRACTED"
     },
     {
@@ -3703,7 +3704,7 @@
         "tools/snapshot.py",
         "tools/snapshot_age.py"
       ],
-      "mentions": 529,
+      "mentions": 531,
       "confidence": "EXTRACTED"
     },
     {
@@ -3792,7 +3793,7 @@
         "tools/pngdiff.c",
         "tools/pngprof.py"
       ],
-      "mentions": 235,
+      "mentions": 231,
       "confidence": "EXTRACTED"
     },
     {
@@ -3968,7 +3969,7 @@
         "tools/fftime.py",
         "tools/mutate.py"
       ],
-      "mentions": 243,
+      "mentions": 244,
       "confidence": "EXTRACTED"
     },
     {
@@ -4225,7 +4226,7 @@
         "tools/mutate.py",
         "tools/pngdiff.c"
       ],
-      "mentions": 337,
+      "mentions": 343,
       "confidence": "EXTRACTED"
     },
     {
@@ -4466,7 +4467,7 @@
         "tools/pngdiff.c",
         "tools/prune.py"
       ],
-      "mentions": 372,
+      "mentions": 374,
       "confidence": "EXTRACTED"
     },
     {
@@ -4623,7 +4624,7 @@
         "tests/test_url.c",
         "tests/test_webcaps.c"
       ],
-      "mentions": 409,
+      "mentions": 411,
       "confidence": "EXTRACTED"
     },
     {
@@ -4930,7 +4931,7 @@
         "tools/guitime.py",
         "tools/mutate.py"
       ],
-      "mentions": 363,
+      "mentions": 365,
       "confidence": "EXTRACTED"
     },
     {
@@ -5004,7 +5005,7 @@
         "tests/test_ws_hub.c",
         "tools/pngprof.py"
       ],
-      "mentions": 192,
+      "mentions": 188,
       "confidence": "EXTRACTED"
     },
     {
@@ -5078,7 +5079,7 @@
         "tests/test_webcaps.c",
         "tests/test_ws_hub.c"
       ],
-      "mentions": 176,
+      "mentions": 184,
       "confidence": "EXTRACTED"
     },
     {
@@ -5156,77 +5157,76 @@
       "confidence": "EXTRACTED"
     },
     {
-      "name": "case",
+      "name": "must",
       "files": [
         "gui/browser_ui.c",
-        "gui/bui_theme.c",
-        "include/box_style.h",
-        "include/css_computed.h",
-        "include/css_counter.h",
+        "include/box_tree.h",
+        "include/css_chain.h",
+        "include/css_index.h",
         "include/css_length.h",
-        "include/css_select.h",
-        "include/css_vars.h",
-        "include/data_url.h",
-        "include/fb_panes.h",
-        "include/flex_layout.h",
-        "include/hostedit.h",
+        "include/css_mq.h",
+        "include/dom.h",
         "include/html_parse.h",
+        "include/interp.h",
+        "include/js_dom.h",
+        "include/js_geom.h",
+        "include/js_sandbox.h",
+        "include/local_store.h",
+        "include/media_decoder.h",
+        "include/net_realm.h",
+        "include/os_sandbox.h",
         "include/page_view.h",
-        "include/prefs.h",
-        "include/request_policy.h",
+        "include/prefetch.h",
+        "include/render_doc.h",
+        "include/renderer.h",
         "include/secure_fetch.h",
-        "include/sha2.h",
-        "include/text_case.h",
+        "include/sheet_cache.h",
+        "include/subreq_batch.h",
+        "include/svg_render.h",
+        "include/tab.h",
         "include/text_shape.h",
-        "include/url.h",
-        "include/util.h",
-        "src/box_tree.c",
+        "include/webfont.h",
         "src/css.c",
-        "src/css_atrule.c",
         "src/css_box.c",
-        "src/css_gradient.c",
-        "src/css_length.c",
         "src/css_mq.c",
         "src/css_select.c",
         "src/css_text.c",
-        "src/data_url.c",
         "src/dom.c",
-        "src/dom_debug.c",
-        "src/download.c",
-        "src/flex_layout.c",
+        "src/hostblock.c",
         "src/html_parse.c",
-        "src/http_cache.c",
-        "src/js_dom.c",
-        "src/js_policy.c",
-        "src/link_nav.c",
+        "src/js_env.c",
         "src/page_view.c",
-        "src/prefetch.c",
         "src/render_doc.c",
-        "src/secure_fetch.c",
-        "src/svg_render.c",
-        "src/text_case.c",
-        "src/text_shape.c",
-        "src/url.c",
-        "src/webfont.c",
-        "src/webfont_load.c",
+        "src/tab.c",
+        "tests/test_block_flow.c",
         "tests/test_box_style.c",
+        "tests/test_browser.c",
         "tests/test_css.c",
+        "tests/test_css_box.c",
         "tests/test_css_color.c",
         "tests/test_css_drops.c",
-        "tests/test_css_length.c",
-        "tests/test_css_vars.c",
-        "tests/test_data_url.c",
+        "tests/test_css_text.c",
+        "tests/test_dom.c",
         "tests/test_flex_layout.c",
-        "tests/test_hostedit.c",
-        "tests/test_html_parse.c",
+        "tests/test_freedom.c",
         "tests/test_js_dom.c",
-        "tests/test_js_geom.c",
+        "tests/test_js_policy.c",
+        "tests/test_js_sandbox.c",
+        "tests/test_link_nav.c",
+        "tests/test_net_realm.c",
+        "tests/test_os_sandbox.c",
         "tests/test_page_view.c",
-        "tests/test_secure_fetch.c",
-        "tests/test_text_case.c",
-        "tests/test_webfont.c"
+        "tests/test_prefetch.c",
+        "tests/test_render_doc.c",
+        "tests/test_renderer.c",
+        "tests/test_svg_render.c",
+        "tests/test_tab.c",
+        "tests/test_url.c",
+        "tests/test_ws_hub.c",
+        "tools/pngdiff.c",
+        "tools/snapshot.py"
       ],
-      "mentions": 161,
+      "mentions": 204,
       "confidence": "EXTRACTED"
     }
   ],
@@ -5727,25 +5727,6 @@
     },
     {
       "source": "const",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.83,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
-      ]
-    },
-    {
-      "source": "returns",
       "target": "freedom",
       "verb": "depends_on",
       "strength": 0.83,
@@ -5761,32 +5742,32 @@
         "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h"
-      ]
-    },
-    {
-      "source": "returns",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.83,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
       "source": "const",
+      "target": "include",
+      "verb": "depends_on",
+      "strength": 0.83,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
+      ]
+    },
+    {
+      "source": "returns",
       "target": "freedom",
       "verb": "depends_on",
-      "strength": 0.82,
+      "strength": 0.83,
       "confidence": "INFERRED",
       "evidence": [
         "gui/browser_ui.c->gui/browser_ui_internal.h",
@@ -5799,6 +5780,25 @@
         "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h"
+      ]
+    },
+    {
+      "source": "returns",
+      "target": "include",
+      "verb": "depends_on",
+      "strength": 0.83,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -5825,6 +5825,44 @@
       "target": "include",
       "verb": "depends_on",
       "strength": 0.82,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
+      ]
+    },
+    {
+      "source": "its",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.81,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h"
+      ]
+    },
+    {
+      "source": "its",
+      "target": "include",
+      "verb": "depends_on",
+      "strength": 0.81,
       "confidence": "INFERRED",
       "evidence": [
         "gui/browser_ui.c->include/block_flow.h",
@@ -5843,25 +5881,6 @@
       "source": "url",
       "target": "freedom",
       "verb": "depends_on",
-      "strength": 0.82,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h"
-      ]
-    },
-    {
-      "source": "its",
-      "target": "freedom",
-      "verb": "depends_on",
       "strength": 0.81,
       "confidence": "INFERRED",
       "evidence": [
@@ -5875,25 +5894,6 @@
         "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h"
-      ]
-    },
-    {
-      "source": "its",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.81,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -5973,25 +5973,6 @@
       ]
     },
     {
-      "source": "source",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.8,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
-      ]
-    },
-    {
       "source": "text",
       "target": "freedom",
       "verb": "depends_on",
@@ -6049,10 +6030,29 @@
       ]
     },
     {
+      "source": "source",
+      "target": "include",
+      "verb": "depends_on",
+      "strength": 0.79,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
+      ]
+    },
+    {
       "source": "void",
       "target": "freedom",
       "verb": "depends_on",
-      "strength": 0.75,
+      "strength": 0.76,
       "confidence": "INFERRED",
       "evidence": [
         "gui/browser_ui.c->gui/browser_ui_internal.h",
@@ -6236,44 +6236,6 @@
         "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h"
-      ]
-    },
-    {
-      "source": "page",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.73,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
-      ]
-    },
-    {
-      "source": "closed",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.72,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -6315,13 +6277,12 @@
       ]
     },
     {
-      "source": "closed",
-      "target": "freedom",
+      "source": "page",
+      "target": "include",
       "verb": "depends_on",
-      "strength": 0.71,
+      "strength": 0.72,
       "confidence": "INFERRED",
       "evidence": [
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
         "gui/browser_ui.c->include/block_flow.h",
         "gui/browser_ui.c->include/box_blur.h",
         "gui/browser_ui.c->include/box_style.h",
@@ -6330,7 +6291,27 @@
         "gui/browser_ui.c->include/cached_fetch.h",
         "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h"
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
+      ]
+    },
+    {
+      "source": "closed",
+      "target": "include",
+      "verb": "depends_on",
+      "strength": 0.71,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -6353,22 +6334,22 @@
       ]
     },
     {
-      "source": "one",
-      "target": "max",
+      "source": "closed",
+      "target": "freedom",
       "verb": "depends_on",
-      "strength": 0.71,
+      "strength": 0.7,
       "confidence": "INFERRED",
       "evidence": [
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
         "gui/browser_ui.c->include/box_blur.h",
         "gui/browser_ui.c->include/box_style.h",
         "gui/browser_ui.c->include/box_tree.h",
         "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/data_url.h",
-        "gui/browser_ui.c->include/download.h",
-        "gui/browser_ui.c->include/fb_cmdline.h",
-        "gui/browser_ui.c->include/fb_panes.h"
+        "gui/browser_ui.c->include/css_color.h"
       ]
     },
     {
@@ -6392,6 +6373,25 @@
     },
     {
       "source": "free",
+      "target": "max",
+      "verb": "depends_on",
+      "strength": 0.7,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/data_url.h",
+        "gui/browser_ui.c->include/download.h",
+        "gui/browser_ui.c->include/fb_cmdline.h",
+        "gui/browser_ui.c->include/fb_panes.h"
+      ]
+    },
+    {
+      "source": "one",
       "target": "max",
       "verb": "depends_on",
       "strength": 0.7,
@@ -6524,25 +6524,6 @@
       ]
     },
     {
-      "source": "static",
-      "target": "max",
-      "verb": "depends_on",
-      "strength": 0.69,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/data_url.h",
-        "gui/browser_ui.c->include/download.h",
-        "gui/browser_ui.c->include/fb_cmdline.h",
-        "gui/browser_ui.c->include/fb_panes.h"
-      ]
-    },
-    {
       "source": "fail",
       "target": "freedom",
       "verb": "depends_on",
@@ -6638,6 +6619,25 @@
       ]
     },
     {
+      "source": "static",
+      "target": "max",
+      "verb": "depends_on",
+      "strength": 0.68,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/data_url.h",
+        "gui/browser_ui.c->include/download.h",
+        "gui/browser_ui.c->include/fb_cmdline.h",
+        "gui/browser_ui.c->include/fb_panes.h"
+      ]
+    },
+    {
       "source": "value",
       "target": "freedom",
       "verb": "depends_on",
@@ -6654,6 +6654,25 @@
         "gui/browser_ui.c->include/compositor.h",
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_color.h"
+      ]
+    },
+    {
+      "source": "value",
+      "target": "include",
+      "verb": "depends_on",
+      "strength": 0.68,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h",
+        "gui/browser_ui.c->include/css_gradient.h"
       ]
     },
     {
@@ -6714,44 +6733,6 @@
       ]
     },
     {
-      "source": "static",
-      "target": "null",
-      "verb": "depends_on",
-      "strength": 0.67,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/data_url.h",
-        "gui/browser_ui.c->include/download.h",
-        "gui/browser_ui.c->include/fb_cmdline.h",
-        "gui/browser_ui.c->include/fb_panes.h"
-      ]
-    },
-    {
-      "source": "value",
-      "target": "include",
-      "verb": "depends_on",
-      "strength": 0.67,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h",
-        "gui/browser_ui.c->include/css_gradient.h"
-      ]
-    },
-    {
       "source": "when",
       "target": "max",
       "verb": "depends_on",
@@ -6768,6 +6749,25 @@
         "gui/browser_ui.c->include/download.h",
         "gui/browser_ui.c->include/fb_cmdline.h",
         "gui/browser_ui.c->include/fb_panes.h"
+      ]
+    },
+    {
+      "source": "any",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.66,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h"
       ]
     },
     {
@@ -6809,25 +6809,6 @@
       ]
     },
     {
-      "source": "never",
-      "target": "max",
-      "verb": "depends_on",
-      "strength": 0.66,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/data_url.h",
-        "gui/browser_ui.c->include/download.h",
-        "gui/browser_ui.c->include/fb_cmdline.h",
-        "gui/browser_ui.c->include/fb_panes.h"
-      ]
-    },
-    {
       "source": "null",
       "target": "when",
       "verb": "depends_on",
@@ -6844,44 +6825,6 @@
         "gui/browser_ui.c->include/css_gradient.h",
         "gui/browser_ui.c->include/css_mask.h",
         "gui/browser_ui.c->include/fb_cmdline.h"
-      ]
-    },
-    {
-      "source": "only",
-      "target": "max",
-      "verb": "depends_on",
-      "strength": 0.66,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_gradient.h",
-        "gui/browser_ui.c->include/data_url.h",
-        "gui/browser_ui.c->include/download.h",
-        "gui/browser_ui.c->include/fb_cmdline.h",
-        "gui/browser_ui.c->include/fb_panes.h"
-      ]
-    },
-    {
-      "source": "out",
-      "target": "null",
-      "verb": "depends_on",
-      "strength": 0.66,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/data_url.h",
-        "gui/browser_ui.c->include/download.h",
-        "gui/browser_ui.c->include/fb_cmdline.h",
-        "gui/browser_ui.c->include/fb_panes.h"
       ]
     },
     {
@@ -6923,6 +6866,25 @@
       ]
     },
     {
+      "source": "static",
+      "target": "null",
+      "verb": "depends_on",
+      "strength": 0.66,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/data_url.h",
+        "gui/browser_ui.c->include/download.h",
+        "gui/browser_ui.c->include/fb_cmdline.h",
+        "gui/browser_ui.c->include/fb_panes.h"
+      ]
+    },
+    {
       "source": "url",
       "target": "max",
       "verb": "depends_on",
@@ -6939,25 +6901,6 @@
         "gui/browser_ui.c->include/download.h",
         "gui/browser_ui.c->include/fb_cmdline.h",
         "gui/browser_ui.c->include/fb_panes.h"
-      ]
-    },
-    {
-      "source": "any",
-      "target": "freedom",
-      "verb": "depends_on",
-      "strength": 0.65,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->gui/browser_ui_internal.h",
-        "gui/browser_ui.c->include/block_flow.h",
-        "gui/browser_ui.c->include/box_blur.h",
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/css_color.h"
       ]
     },
     {
@@ -7037,7 +6980,7 @@
       ]
     },
     {
-      "source": "its",
+      "source": "never",
       "target": "max",
       "verb": "depends_on",
       "strength": 0.65,
@@ -7049,6 +6992,44 @@
         "gui/browser_ui.c->include/browser.h",
         "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/data_url.h",
+        "gui/browser_ui.c->include/download.h",
+        "gui/browser_ui.c->include/fb_cmdline.h",
+        "gui/browser_ui.c->include/fb_panes.h"
+      ]
+    },
+    {
+      "source": "only",
+      "target": "max",
+      "verb": "depends_on",
+      "strength": 0.65,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/data_url.h",
+        "gui/browser_ui.c->include/download.h",
+        "gui/browser_ui.c->include/fb_cmdline.h",
+        "gui/browser_ui.c->include/fb_panes.h"
+      ]
+    },
+    {
+      "source": "out",
+      "target": "null",
+      "verb": "depends_on",
+      "strength": 0.65,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
         "gui/browser_ui.c->include/data_url.h",
         "gui/browser_ui.c->include/download.h",
         "gui/browser_ui.c->include/fb_cmdline.h",
@@ -7094,26 +7075,7 @@
       ]
     },
     {
-      "source": "when",
-      "target": "null",
-      "verb": "depends_on",
-      "strength": 0.65,
-      "confidence": "INFERRED",
-      "evidence": [
-        "gui/browser_ui.c->include/box_style.h",
-        "gui/browser_ui.c->include/box_tree.h",
-        "gui/browser_ui.c->include/browser.h",
-        "gui/browser_ui.c->include/cached_fetch.h",
-        "gui/browser_ui.c->include/compositor.h",
-        "gui/browser_ui.c->include/css.h",
-        "gui/browser_ui.c->include/data_url.h",
-        "gui/browser_ui.c->include/download.h",
-        "gui/browser_ui.c->include/fb_cmdline.h",
-        "gui/browser_ui.c->include/fb_panes.h"
-      ]
-    },
-    {
-      "source": "bytes",
+      "source": "caller",
       "target": "include",
       "verb": "depends_on",
       "strength": 0.64,
@@ -7130,18 +7092,56 @@
         "gui/browser_ui.c->include/css_color.h",
         "gui/browser_ui.c->include/css_gradient.h"
       ]
+    },
+    {
+      "source": "its",
+      "target": "max",
+      "verb": "depends_on",
+      "strength": 0.64,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_gradient.h",
+        "gui/browser_ui.c->include/data_url.h",
+        "gui/browser_ui.c->include/download.h",
+        "gui/browser_ui.c->include/fb_cmdline.h",
+        "gui/browser_ui.c->include/fb_panes.h"
+      ]
+    },
+    {
+      "source": "line",
+      "target": "freedom",
+      "verb": "depends_on",
+      "strength": 0.64,
+      "confidence": "INFERRED",
+      "evidence": [
+        "gui/browser_ui.c->gui/browser_ui_internal.h",
+        "gui/browser_ui.c->include/block_flow.h",
+        "gui/browser_ui.c->include/box_blur.h",
+        "gui/browser_ui.c->include/box_style.h",
+        "gui/browser_ui.c->include/box_tree.h",
+        "gui/browser_ui.c->include/browser.h",
+        "gui/browser_ui.c->include/cached_fetch.h",
+        "gui/browser_ui.c->include/compositor.h",
+        "gui/browser_ui.c->include/css.h",
+        "gui/browser_ui.c->include/css_color.h"
+      ]
     }
   ],
   "dialectic": [
     "Thesis: `all` centralizes 67 files; Antithesis: `caller` pulls 67 files with 32 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 67 files; Antithesis: `count` pulls 75 files with 33 shared (Jaccard 0.30); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
+    "Thesis: `all` centralizes 67 files; Antithesis: `must` pulls 66 files with 32 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 67 files; Antithesis: `none` pulls 72 files with 34 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 67 files; Antithesis: `only` pulls 111 files with 44 shared (Jaccard 0.33); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 67 files; Antithesis: `returns` pulls 118 files with 43 shared (Jaccard 0.30); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 67 files; Antithesis: `size` pulls 134 files with 47 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `all` centralizes 67 files; Antithesis: `when` pulls 128 files with 47 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
     "Thesis: `any` centralizes 70 files; Antithesis: `caller` pulls 67 files with 33 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
-    "Thesis: `any` centralizes 70 files; Antithesis: `every` pulls 97 files with 42 shared (Jaccard 0.34); Synthesis: should they merge, split by layer, or keep `bridges` explicit?",
-    "Thesis: `any` centralizes 70 files; Antithesis: `first` pulls 80 files with 37 shared (Jaccard 0.33); Synthesis: should they merge, split by layer, or keep `bridges` explicit?"
+    "Thesis: `any` centralizes 70 files; Antithesis: `every` pulls 97 files with 42 shared (Jaccard 0.34); Synthesis: should they merge, split by layer, or keep `bridges` explicit?"
   ]
 }

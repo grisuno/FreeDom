@@ -2,17 +2,17 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 325 files at commit `6709d9c71f6d`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 325 files at commit `f25b706c2474`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
 - Domain vocabulary (term, files): `null` (174), `max` (143), `not` (138), `one` (136), `size` (134), `include` (134), `out` (129), `freedom` (127), `free` (120), `char` (119), `const` (114), `its` (107), `css` (106), `void` (103), `name` (101)
-- Subsystem `src: css`: 57 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
+- Subsystem `include: css`: 56 files, core `src/css.c`: len_rebase_ctx: int r = snprintf(out + *o, space, "%.4f", px); if (r < 0 || (size_t)r >= space)...
 - Subsystem `src: tab`: 51 files, core `src/tab.c`: tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and...
 - Subsystem `include: browser_ui`: 47 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
 - Subsystem `src: text_shape`: 40 files, core `src/text_shape.c`: tsh_fb_cp: Per-code-point verdicts of fb_entry.
-- Subsystem `include: page_view`: 25 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
+- Subsystem `include: page_view`: 26 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - Subsystem `include: secure_fetch`: 24 files, core `src/secure_fetch.c`: tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a...
 - Subsystem `include: browser`: 19 files, core `src/browser.c`: clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {...
 - Subsystem `src: http_cache`: 13 files, core `src/http_cache.c`: days_from_civil: #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY...
@@ -68,8 +68,8 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 202 files, 6196 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (1%); median file 234 lines, max 20303.
-- h: 107 files, 1696 symbols; docstrings on 39% of symbols; functions snake_case (98%); types PascalCase (0%); median file 71 lines, max 1290.
+- c: 202 files, 6203 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (1%); median file 234 lines, max 20344.
+- h: 107 files, 1698 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 71 lines, max 1295.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
 - sh: 4 files, 0 symbols; median file 39 lines, max 90.
 - Tests: 94 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).

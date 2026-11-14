@@ -3,6 +3,15 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_host_of_invalid` | function | `tests/test_request_policy.c:30` | `static void test_host_of_invalid(void **state)` |
+| `test_host_of_overflow` | function | `tests/test_request_policy.c:38` | `static void test_host_of_overflow(void **state)` |
+| `test_same_site` | function | `tests/test_request_policy.c:92` | `static void test_same_site(void **state)` |
+| `test_site_of` | function | `tests/test_request_policy.c:46` | `static void test_site_of(void **state)` |
+| `test_site_of_multi_suffix` | function | `tests/test_request_policy.c:59` | `static void test_site_of_multi_suffix(void **state)` |
+| `test_site_of_psl` | function | `tests/test_request_policy.c:71` | `static void test_site_of_psl(void **state)` |
+| `bk_load` | function | `tests/test_secure_fetch.c:333` | `static int bk_load(void *c, const char *from, time_t now, char *out, size_t cap)` |
+| `bk_save` | function | `tests/test_secure_fetch.c:327` | `static void bk_save(void *c, const char *from, const char *to, time_t now)` |
+| `main` | function | `tests/test_secure_fetch.c:736` | `int main(void)` |
 | `test_chain_hybrid_allows_classical` | function | `tests/test_secure_fetch.c:171` | `static void test_chain_hybrid_allows_classical(void **state)` |
 | `test_chain_permissive_allows_weak_certs` | function | `tests/test_secure_fetch.c:188` | `static void test_chain_permissive_allows_weak_certs(void **state)` |
 | `test_chain_rejects_null` | function | `tests/test_secure_fetch.c:209` | `static void test_chain_rejects_null(void **state)` |
@@ -487,14 +496,5 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 | `load_timing_baseline` | function | `tools/fbench.py:158` | `def load_timing_baseline()` |
 | `luma` | function | `tools/fbench.py:79` | `def luma(img)` |
 | `main` | function | `tools/fbench.py:227` | `def main()` |
-| `publish_readme` | function | `tools/fbench.py:114` | `def publish_readme(name, score)` |
-| `publish_timing` | function | `tools/fbench.py:171` | `def publish_timing(rows)` |
-| `run_timer` | function | `tools/fbench.py:140` | `def run_timer(tool, pages, runs)` |
-| `sbs` | function | `tools/fbench.py:95` | `def sbs(name, start, nrows)` |
-| `timing` | function | `tools/fbench.py:193` | `def timing(names, runs, readme)` |
-| `_append_probe` | function | `tools/ffgeom.py:254` | `def _append_probe(src, script)` |
-| `_word_reader` | function | `tools/ffgeom.py:173` | `def _word_reader(path)` |
-| `bit` | function | `tools/ffgeom.py:206` | `def bit(grid_row, cell, origin)` |
-| `decode` | function | `tools/ffgeom.py:239` | `def decode(path)` |
 
 Next: [SYMBOLS_p17.md](SYMBOLS_p17.md)

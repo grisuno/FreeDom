@@ -20,6 +20,7 @@
 #include "html_parse.h"
 #include "js_dom.h"
 #include "js_trusted.h"
+#include "js_native.h"
 #include "js_geom.h"
 #include "web_storage.h"
 #include "js_sandbox.h"
@@ -332,6 +333,37 @@ static void test_style_write_through(void **state) {
               "el.style.getPropertyValue('background-color')", "green");
     EXPECT(f, "var el=document.createElement('div');"
               "el.setAttribute('style','display: none'); el.style.display", "none");
+    /* CSSOM: assigning the empty string removes the declaration (GSAP's clearProps). */
+    EXPECT(f, "var el=document.createElement('div'); el.setAttribute('style','opacity:0; color: red');"
+              "el.style.opacity=''; el.getAttribute('style')", "color: red;");
+    EXPECT(f, "var el=document.createElement('div'); el.setAttribute('style','opacity:0');"
+              "el.style.setProperty('opacity',''); el.getAttribute('style')", "");
+}
+
+/* spec/js_dom.md 7j: `prop in el.style` is the parser's verdict; Node.normalize(). */
+static void test_style_has_property(void **state) {
+    fixture *f = (fixture *)*state;
+    assert_int_equal(jn_seal(f->ctx), 0);   /* the real CSS.supports is the seal's */
+    EXPECT(f, "var el=document.createElement('div'); String('opacity' in el.style)", "true");
+    EXPECT(f, "var el=document.createElement('div'); String('backgroundColor' in el.style)", "true");
+    EXPECT(f, "var el=document.createElement('div'); String('background-color' in el.style)", "true");
+    EXPECT(f, "var el=document.createElement('div'); String('webkitTransform' in el.style)", "true");
+    EXPECT(f, "var el=document.createElement('div'); String('noSuchThing' in el.style)", "false");
+    EXPECT(f, "var el=document.createElement('div'); String('cssText' in el.style)", "true");
+    EXPECT(f, "var el=document.createElement('div'); String('setProperty' in el.style)", "true");
+}
+
+static void test_node_normalize(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var p=document.createElement('p'); p.appendChild(document.createTextNode('a'));"
+              "p.appendChild(document.createTextNode('')); p.appendChild(document.createTextNode('b'));"
+              "var b=document.createElement('b'); b.appendChild(document.createTextNode('c'));"
+              "b.appendChild(document.createTextNode('d')); p.appendChild(b);"
+              "p.normalize(); p.childNodes.length+'|'+p.firstChild.nodeValue+'|'+b.childNodes.length+'|'+b.textContent",
+              "2|ab|1|cd");
+    EXPECT(f, "var e=document.createElement('p'); e.appendChild(document.createTextNode(''));"
+              "e.normalize(); String(e.childNodes.length)", "0");
+    EXPECT(f, "typeof document.createDocumentFragment().normalize", "function");
 }
 
 static void test_get_computed_style_inline(void **state) {
@@ -805,6 +837,20 @@ static void test_url_constructor_parses_components(void **state) {
     /* Relative with no base throws TypeError (WHATWG). */
     EXPECT(f, "var t='ok'; try{ new URL('not a url'); t='no-throw'; }"
               "catch(e){ t=e.constructor.name; } t", "TypeError");
+}
+
+/* URL.canParse / URL.parse (spec/js_dom.md): the constructor's parser, never throwing. */
+static void test_url_static_can_parse(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "typeof URL.canParse", "function");
+    EXPECT(f, "String(URL.canParse('https://a.b/c'))", "true");
+    EXPECT(f, "String(URL.canParse('/features/copilot'))", "false");
+    EXPECT(f, "String(URL.canParse('/features/copilot','https://github.com'))", "true");
+    EXPECT(f, "String(URL.canParse('not a url'))", "false");
+    EXPECT(f, "String(URL.canParse())", "false");
+    EXPECT(f, "URL.parse('/x?y=1','https://h.com/a').href", "https://h.com/x?y=1");
+    EXPECT(f, "String(URL.parse('not a url'))", "null");
+    EXPECT(f, "String(URL.parse('https://h.com/') instanceof URL)", "true");
 }
 
 /* WHATWG URLSearchParams: identity-safe query parsing/encoding. */
@@ -3815,6 +3861,9 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_element_attributes_named_node_map, setup, teardown),
         cmocka_unit_test_setup_teardown(test_intl_stub_does_not_throw, setup, teardown),
         cmocka_unit_test_setup_teardown(test_url_constructor_parses_components, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_url_static_can_parse, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_style_has_property, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_node_normalize, setup, teardown),
         cmocka_unit_test_setup_teardown(test_url_search_params, setup, teardown),
         cmocka_unit_test_setup_teardown(test_settimeout_chains_across_rounds, setup, teardown),
         cmocka_unit_test_setup_teardown(test_document_title_set_reflects_in_tree, setup, teardown),

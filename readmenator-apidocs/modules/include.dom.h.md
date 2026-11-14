@@ -174,6 +174,8 @@ NULL idx => 0.
 
 **Returns:** `* match`
 
+*Called by:* [`PV_GAP_WORD_SPACE`](include.page_view.h.md#pv_gap_word_space)
+
 ---
 
 <a id="dom_get_by_class"></a>

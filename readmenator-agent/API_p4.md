@@ -1,6 +1,11 @@
 # API (page 4 of 12)
 Previous: [API_p3.md](API_p3.md)
 
+## include/css_mq.h
+Imported by: `src/css.c`, `src/css_mq.c`, `tests/test_css_mq.c`
+- `cmq_matches` (function) `include/css_mq.h:28` `int cmq_matches(const char *s, size_t len, const cmq_env *env);` -- 1 iff the media query list s[0,len) matches env; malformed/unknown parts fail * closed.
+- `cmq_container_surely` (function) `include/css_mq.h:34` `int cmq_container_surely(const char *s, size_t len, int max_width);` -- @container condition s[0,len) (optionally led by a container name) is SURELY true for every container no wider than...
+
 ## include/css_select.h
 Depends on: `include/css.h`
 Imported by: `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `src/sheet_cache.c`, `tests/test_css.c`
@@ -358,7 +363,7 @@ Imported by: `include/js_dom.h`
 
 ## include/js_native.h
 Depends on: `include/js_sandbox.h`
-Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_native.c`
+Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_native.c`
 - `failure` (function) `include/js_native.h:22` `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);`
 
 ## include/js_policy.h

@@ -9,6 +9,7 @@
  */
 #include "css_mq.h"
 #include "css_length.h"
+#include "css_box.h"
 
 #include <string.h>
 
@@ -167,7 +168,8 @@ static int read_num(const char *t, double *out, const char **end) {
 static int parse_value(const char *t, int unit, double *out) {
     if (unit == VU_LENGTH) {
         cl_ctx ctx = cl_ctx_initial();
-        return cl_resolve(t, &ctx, out) == CL_OK;
+        if (cl_resolve(t, &ctx, out) == CL_OK) return 1;
+        return cb_math_length_px(t, out);
     }
     const char *e = NULL;
     double n;

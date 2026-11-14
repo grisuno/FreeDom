@@ -1030,6 +1030,15 @@ static int math_eval_whole(const char *v, double *px, double *em, double *pct) {
     return -1;
 }
 
+int cb_math_length_px(const char *v, double *px) {
+    if (v == NULL || px == NULL) return 0;
+    double mpx, mem, mpct;
+    if (math_eval_whole(v, &mpx, &mem, &mpct) != 1) return 0;
+    if (mpct != 0.0 || mpx != mpx) return 0;
+    *px = mpx;
+    return 1;
+}
+
 int cb_interp_len(const char *v, int allow_auto, int *out) {
     if (allow_auto && csel_ci_eq(v, "auto")) { *out = CSS_LEN_AUTO; return 1; }
 

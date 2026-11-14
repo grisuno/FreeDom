@@ -43,7 +43,7 @@ flowchart LR
 
 ### `mq_cur`
 
-`struct` | [src/css_mq.c:25](../../src/css_mq.c#L25)
+`struct` | [src/css_mq.c:26](../../src/css_mq.c#L26)
 
 ```c
 typedef struct mq_cur
@@ -55,7 +55,7 @@ typedef struct mq_cur
 
 ### `fval`
 
-`struct` | [src/css_mq.c:96](../../src/css_mq.c#L96)
+`struct` | [src/css_mq.c:97](../../src/css_mq.c#L97)
 
 ```c
 typedef struct fval
@@ -69,7 +69,7 @@ typedef struct fval
 
 ### `kind`
 
-`type_alias` | [src/css_mq.c:95](../../src/css_mq.c#L95)
+`type_alias` | [src/css_mq.c:96](../../src/css_mq.c#L96)
 
 ```c
 typedef struct fval { fv_kind kind;
@@ -83,7 +83,7 @@ typedef struct fval { fv_kind kind;
 
 ### `cmq_matches`
 
-`function` | [src/css_mq.c:458](../../src/css_mq.c#L458)
+`function` | [src/css_mq.c:460](../../src/css_mq.c#L460)
 
 ```c
 int cmq_matches(const char *s, size_t len, const cmq_env *env)
@@ -113,7 +113,7 @@ An empty list matches (all). NULL s or env -> 0.
 
 ### `cmq_container_surely`
 
-`function` | [src/css_mq.c:489](../../src/css_mq.c#L489)
+`function` | [src/css_mq.c:491](../../src/css_mq.c#L491)
 
 ```c
 int cmq_container_surely(const char *s, size_t len, int max_width)
@@ -145,7 +145,7 @@ Anything else -- or, not, height, style(), unknown -- is 0. spec/css_mq.md.
 
 ### `CMQ_DEVICE_W`
 
-`macro` | [src/css_mq.c:18](../../src/css_mq.c#L18)
+`macro` | [src/css_mq.c:19](../../src/css_mq.c#L19)
 
 ```c
 #define CMQ_DEVICE_W
@@ -159,7 +159,7 @@ The device the engine claims to be (anti-fingerprinting): never measured.
 
 ### `CMQ_DPPX`
 
-`macro` | [src/css_mq.c:20](../../src/css_mq.c#L20)
+`macro` | [src/css_mq.c:21](../../src/css_mq.c#L21)
 
 ```c
 #define CMQ_DPPX
@@ -171,7 +171,7 @@ The device the engine claims to be (anti-fingerprinting): never measured.
 
 ### `CMQ_COLOR_BITS`
 
-`macro` | [src/css_mq.c:21](../../src/css_mq.c#L21)
+`macro` | [src/css_mq.c:22](../../src/css_mq.c#L22)
 
 ```c
 #define CMQ_COLOR_BITS
@@ -183,7 +183,7 @@ The device the engine claims to be (anti-fingerprinting): never measured.
 
 ### `CMQ_DPI_PER_DPPX`
 
-`macro` | [src/css_mq.c:22](../../src/css_mq.c#L22)
+`macro` | [src/css_mq.c:23](../../src/css_mq.c#L23)
 
 ```c
 #define CMQ_DPI_PER_DPPX
@@ -195,7 +195,7 @@ The device the engine claims to be (anti-fingerprinting): never measured.
 
 ### `CMQ_CM_PER_IN`
 
-`macro` | [src/css_mq.c:23](../../src/css_mq.c#L23)
+`macro` | [src/css_mq.c:24](../../src/css_mq.c#L24)
 
 ```c
 #define CMQ_CM_PER_IN
@@ -207,7 +207,7 @@ The device the engine claims to be (anti-fingerprinting): never measured.
 
 ### `MQ_EPS`
 
-`macro` | [src/css_mq.c:203](../../src/css_mq.c#L203)
+`macro` | [src/css_mq.c:205](../../src/css_mq.c#L205)
 
 ```c
 #define MQ_EPS

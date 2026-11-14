@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 51 file(s) rooted at `src` with dominant language c (cohesion 0.69). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (274 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
+This community groups 51 file(s) rooted at `src` with dominant language c (cohesion 0.69). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (277 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
 
 ## Files
 
@@ -40,7 +40,7 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_fb_cmdline.c` | c | testing | 7 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
-| `tests/test_js_dom.c` | c | testing | 274 | no |
+| `tests/test_js_dom.c` | c | testing | 277 | no |
 | `tests/test_js_env.c` | c | testing | 32 | no |
 
 *... and 31 more files in this community.*
@@ -81,7 +81,7 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 125
+- Internal resolved imports (EXTRACTED): 126
 - Cross-boundary resolved imports (EXTRACTED): 56
 
 ## Connections

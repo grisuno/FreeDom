@@ -78,6 +78,7 @@
 - [`black`](modules/include.css_values.h.md#black) function in `include/css_values.h`
 - [`BLOCK`](modules/src.box_style.c.md#block) macro in `src/box_style.c`
 - [`block`](modules/include.box_style.h.md#block) function in `include/box_style.h`
+- [`block`](modules/include.css_box.h.md#block) function in `include/css_box.h`
 - [`block`](modules/src.box_tree.c.md#block) function in `src/box_tree.c`
 - [`block`](modules/src.page_view.c.md#block) function in `src/page_view.c`
 - [`block_id`](modules/gui.browser_ui.c.md#block_id) type_alias in `gui/browser_ui.c`
@@ -313,6 +314,7 @@
 - [`cb_length_px`](modules/include.css_box.h.md#cb_length_px) function in `include/css_box.h`
 - [`cb_length_px`](modules/src.css_box.c.md#cb_length_px) function in `src/css_box.c`
 - [`cb_lp_can_be_nonneg`](modules/include.css_box.h.md#cb_lp_can_be_nonneg) function in `include/css_box.h`
+- [`cb_math_length_px`](modules/src.css_box.c.md#cb_math_length_px) function in `src/css_box.c`
 - [`cb_next_ws_token`](modules/include.css_box.h.md#cb_next_ws_token) function in `include/css_box.h`
 - [`cb_value_em_milli`](modules/include.css_box.h.md#cb_value_em_milli) function in `include/css_box.h`
 - [`cb_value_em_milli`](modules/src.css_box.c.md#cb_value_em_milli) function in `src/css_box.c`
@@ -2457,6 +2459,7 @@
 - [`PV_FRAME_URL_MAX`](modules/src.page_view.c.md#pv_frame_url_max) macro in `src/page_view.c`
 - [`pv_free`](modules/include.page_view.h.md#pv_free) function in `include/page_view.h`
 - [`pv_free`](modules/src.page_view.c.md#pv_free) function in `src/page_view.c`
+- [`PV_GAP_WORD_SPACE`](modules/include.page_view.h.md#pv_gap_word_space) macro in `include/page_view.h`
 - [`PV_GRID_TRACKS`](modules/include.page_view.h.md#pv_grid_tracks) macro in `include/page_view.h`
 - [`pv_input_type`](modules/include.page_view.h.md#pv_input_type) enum in `include/page_view.h`
 - [`pv_item_track`](modules/src.page_view.c.md#pv_item_track) struct in `src/page_view.c`

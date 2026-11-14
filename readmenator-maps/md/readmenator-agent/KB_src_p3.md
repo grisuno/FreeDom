@@ -1,6 +1,50 @@
 # Subsystem: src (page 3 of 10)
 Previous: [KB_src_p2.md](KB_src_p2.md)
 
+## src/css_color.c
+- Doc: normalize: Trims surrounding ASCII spaces and lowercases into out (CC_TOKEN_MAX bytes). *...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `cc_named` (struct, line 34)
+  - `cc_cv` (struct, line 223)
+  - `cc_cp` (struct, line 224)
+  - `v` (type_alias, line 222) `typedef struct cc_cv { double v;`
+  - `ascii_lower` (function, line 119) `static int ascii_lower(int c)`
+  - `hex_val` (function, line 123) `static int hex_val(int c)`
+  - `normalize` (function, line 132) `static int normalize(const char *token, char *out)`
+  - `parse_hex` (function, line 146) `static int parse_hex(const char *s, cc_rgb *out)`
+  - `cc_cws` (function, line 226) `static void cc_cws(cc_cp *c)`
+  - `cc_cfactor` (function, line 229) `static int cc_cfactor(cc_cp *c, cc_cv *out, int depth)`
+  - `cc_cterm` (function, line 250) `static int cc_cterm(cc_cp *c, cc_cv *out, int depth)`
+  - `cc_cexpr` (function, line 269) `static int cc_cexpr(cc_cp *c, cc_cv *out, int depth)`
+  - `cc_fold_calc` (function, line 285) `static int cc_fold_calc(const char **b, const char **e, char *buf, size_t cap)`
+  - `cc_round` (function, line 305) `static long cc_round(double v)`
+  - `parse_component` (function, line 310) `static int parse_component(const char *b, const char *e, int is_alpha, int *out)`
+  - `parse_hsl_comp` (function, line 343) `static int parse_hsl_comp(const char *b, const char *e, int is_hue, int *out)`
+  - `span` (function, line 431) `* span (when a slash is present) into ab/ae, and returns the component count,
+ * or -1. Bounded: ...`
+  - `parse_func` (function, line 508) `static int parse_func(const char *s, cc_rgb *out)`
+  - `lab_comp` (function, line 581) `static int lab_comp(const char *b, const char *e, double pct_ref, int is_hue, double *out)`
+  - `srgb_encode` (function, line 609) `static unsigned char srgb_encode(double lin)`
+  - `oklab_to_rgb` (function, line 616) `static void oklab_to_rgb(double L, double a, double b, cc_rgb *out)`
+  - `lab_to_rgb` (function, line 627) `static void lab_to_rgb(double L, double a, double b, cc_rgb *out)`
+  - `parse_lab_family` (function, line 643) `static int parse_lab_family(const char *s, cc_rgb *out)`
+  - `named_cmp` (function, line 681) `static int named_cmp(const void *key, const void *element)`
+  - `parse_named` (function, line 715) `static int parse_named(const char *s, cc_rgb *out)`
+  - `cc_parse` (function, line 728) `cc_status cc_parse(const char *token, cc_rgb *out)`
+  - `strncmp` (function, line 743) `strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)`
+  - `cc_pack` (function, line 768) `int cc_pack(cc_rgb c)`
+  - `cc_unpack` (function, line 772) `cc_rgb cc_unpack(int packed)`
+  - `CC_TOKEN_MAX` (macro, line 20) `#define CC_TOKEN_MAX`
+  - `CC_CHANNEL_MAX` (macro, line 23) `#define CC_CHANNEL_MAX`
+  - `CC_PERCENT_MAX` (macro, line 24) `#define CC_PERCENT_MAX`
+  - `CC_NUMBER_MAX_DIGITS` (macro, line 29) `#define CC_NUMBER_MAX_DIGITS`
+  - `CC_HSL_SCALE` (macro, line 32) `#define CC_HSL_SCALE`
+  - `CC_CALC_DEPTH` (macro, line 221) `#define CC_CALC_DEPTH`
+  - `CC_PI` (macro, line 577) `#define CC_PI`
+- Depends on: `include/css_color.h`
+
 ## src/css_computed.c
 - Doc: ua_display: The HTML Rendering UA sheet's `display` for a tag when the cascade declared none *...
 - Layer: utility
@@ -215,43 +259,43 @@ int cg_expand_bg_imag...`
 - Layer: utility
 - Language: c
 - Symbols:
-  - `mq_cur` (struct, line 25)
-  - `fval` (struct, line 96)
-  - `kind` (type_alias, line 95) `typedef struct fval { fv_kind kind;`
-  - `lower_ch` (function, line 31) `static char lower_ch(char c)`
-  - `is_space` (function, line 35) `static int is_space(char c)`
-  - `is_ident_ch` (function, line 39) `static int is_ident_ch(char c)`
-  - `skip_ws` (function, line 44) `static void skip_ws(mq_cur *c)`
-  - `read_word` (function, line 49) `static int read_word(mq_cur *c, char *w, size_t cap)`
-  - `peek_word` (function, line 61) `static int peek_word(const mq_cur *c, char *w, size_t cap)`
-  - `and3` (function, line 66) `static int and3(int a, int b)`
-  - `or3` (function, line 72) `static int or3(int a, int b)`
-  - `not3` (function, line 78) `static int not3(int a)`
-  - `copy_trim_lower` (function, line 83) `static int copy_trim_lower(const char *s, size_t a, size_t b, char *dst, size_t cap)`
-  - `feature_of` (function, line 106) `static fval feature_of(const char *name, const cmq_env *env)`
-  - `read_num` (function, line 162) `static int read_num(const char *t, double *out, const char **end)`
-  - `parse_value` (function, line 167) `static int parse_value(const char *t, int unit, double *out)`
-  - `cmp_op` (function, line 206) `static int cmp_op(double lhs, int op, double rhs)`
-  - `flip_op` (function, line 218) `static int flip_op(int op)`
-  - `bool_ctx` (function, line 229) `static int bool_ctx(const fval *v)`
-  - `eval_plain` (function, line 237) `static int eval_plain(const char *name, const char *value, const cmq_env *env)`
-  - `read_op` (function, line 266) `static int read_op(const char **p)`
-  - `eval_range` (function, line 280) `static int eval_range(const char *t, const cmq_env *env)`
-  - `eval_feature` (function, line 328) `static int eval_feature(const char *s, size_t a, size_t b, const cmq_env *env)`
-  - `eval_in_parens` (function, line 353) `static int eval_in_parens(mq_cur *c, int depth)`
-  - `eval_cond` (function, line 380) `static int eval_cond(mq_cur *c, int depth)`
-  - `eval_query` (function, line 404) `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)`
-  - `cmq_matches` (function, line 458) `int cmq_matches(const char *s, size_t len, const cmq_env *env)`
-  - `has_word` (function, line 479) `static int has_word(const char *t, const char *w)`
-  - `cmq_container_surely` (function, line 489) `int cmq_container_surely(const char *s, size_t len, int max_width)`
-  - `CMQ_DEVICE_W` (macro, line 18) `#define CMQ_DEVICE_W`
-  - `CMQ_DEVICE_H` (macro, line 19) `#define CMQ_DEVICE_H`
-  - `CMQ_DPPX` (macro, line 20) `#define CMQ_DPPX`
-  - `CMQ_COLOR_BITS` (macro, line 21) `#define CMQ_COLOR_BITS`
-  - `CMQ_DPI_PER_DPPX` (macro, line 22) `#define CMQ_DPI_PER_DPPX`
-  - `CMQ_CM_PER_IN` (macro, line 23) `#define CMQ_CM_PER_IN`
-  - `MQ_EPS` (macro, line 203) `#define MQ_EPS`
-- Depends on: `include/css_length.h`, `include/css_mq.h`
+  - `mq_cur` (struct, line 26)
+  - `fval` (struct, line 97)
+  - `kind` (type_alias, line 96) `typedef struct fval { fv_kind kind;`
+  - `lower_ch` (function, line 32) `static char lower_ch(char c)`
+  - `is_space` (function, line 36) `static int is_space(char c)`
+  - `is_ident_ch` (function, line 40) `static int is_ident_ch(char c)`
+  - `skip_ws` (function, line 45) `static void skip_ws(mq_cur *c)`
+  - `read_word` (function, line 50) `static int read_word(mq_cur *c, char *w, size_t cap)`
+  - `peek_word` (function, line 62) `static int peek_word(const mq_cur *c, char *w, size_t cap)`
+  - `and3` (function, line 67) `static int and3(int a, int b)`
+  - `or3` (function, line 73) `static int or3(int a, int b)`
+  - `not3` (function, line 79) `static int not3(int a)`
+  - `copy_trim_lower` (function, line 84) `static int copy_trim_lower(const char *s, size_t a, size_t b, char *dst, size_t cap)`
+  - `feature_of` (function, line 107) `static fval feature_of(const char *name, const cmq_env *env)`
+  - `read_num` (function, line 163) `static int read_num(const char *t, double *out, const char **end)`
+  - `parse_value` (function, line 168) `static int parse_value(const char *t, int unit, double *out)`
+  - `cmp_op` (function, line 208) `static int cmp_op(double lhs, int op, double rhs)`
+  - `flip_op` (function, line 220) `static int flip_op(int op)`
+  - `bool_ctx` (function, line 231) `static int bool_ctx(const fval *v)`
+  - `eval_plain` (function, line 239) `static int eval_plain(const char *name, const char *value, const cmq_env *env)`
+  - `read_op` (function, line 268) `static int read_op(const char **p)`
+  - `eval_range` (function, line 282) `static int eval_range(const char *t, const cmq_env *env)`
+  - `eval_feature` (function, line 330) `static int eval_feature(const char *s, size_t a, size_t b, const cmq_env *env)`
+  - `eval_in_parens` (function, line 355) `static int eval_in_parens(mq_cur *c, int depth)`
+  - `eval_cond` (function, line 382) `static int eval_cond(mq_cur *c, int depth)`
+  - `eval_query` (function, line 406) `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)`
+  - `cmq_matches` (function, line 460) `int cmq_matches(const char *s, size_t len, const cmq_env *env)`
+  - `has_word` (function, line 481) `static int has_word(const char *t, const char *w)`
+  - `cmq_container_surely` (function, line 491) `int cmq_container_surely(const char *s, size_t len, int max_width)`
+  - `CMQ_DEVICE_W` (macro, line 19) `#define CMQ_DEVICE_W`
+  - `CMQ_DEVICE_H` (macro, line 20) `#define CMQ_DEVICE_H`
+  - `CMQ_DPPX` (macro, line 21) `#define CMQ_DPPX`
+  - `CMQ_COLOR_BITS` (macro, line 22) `#define CMQ_COLOR_BITS`
+  - `CMQ_DPI_PER_DPPX` (macro, line 23) `#define CMQ_DPI_PER_DPPX`
+  - `CMQ_CM_PER_IN` (macro, line 24) `#define CMQ_CM_PER_IN`
+  - `MQ_EPS` (macro, line 205) `#define MQ_EPS`
+- Depends on: `include/css_box.h`, `include/css_length.h`, `include/css_mq.h`
 
 ## src/css_select.c
 - Doc: csel_hex_val: CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content...

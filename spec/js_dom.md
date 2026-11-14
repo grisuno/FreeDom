@@ -114,6 +114,12 @@ filtran identidad. Motivo: son de los globals más usados de la web moderna; su 
   vivo sobre la query. `toString()`/`toJSON()` re-serializan. `Given` una URL absoluta,
   `When` se construye un `URL`, `Then` sus componentes coinciden con `url_split` (misma
   descomposición WHATWG que usa `location`).
+- Estáticos `URL.canParse(input, base?)` (booleano, nunca lanza) y `URL.parse(input, base?)`
+  (un `URL` o `null`, nunca lanza): el MISMO parser que el constructor, envuelto. `Given` un
+  `input` relativo sin base, `When` se llama `URL.canParse`, `Then` devuelve `false`; con una
+  URL absoluta devuelve `true`. Su ausencia tiraba la portada entera de GitHub: su bundle llama
+  `URL.canParse(t)` al normalizar cada enlace, el `TypeError: not a function` caía en el
+  *error boundary* de React y el hero se quedaba con su `opacity:0` inicial (página en blanco).
 - `new URLSearchParams(init)` acepta una query string (con o sin `?` inicial), un objeto, o un
   arreglo de pares `[k,v]`. Métodos: `get`/`getAll`/`has`/`set`/`append`/`delete`/`sort`/`keys`/
   `values`/`entries`/`forEach`/`toString`, con decodificación/codificación **percent** y `+`↔espacio.
@@ -457,6 +463,20 @@ repaint por `OP_TICK`/`OP_EVENT` nunca reflejaba mutaciones de estilo desde JS.
 acaba de escribir. `ResizeObserver`/`MutationObserver` nunca disparaban, así que
 reveal-on-scroll dependiente de resize quedaba oculto.
 
+- **Asignar la cadena vacía QUITA la declaración** (CSSOM §6.6.1): `el.style.opacity=''` y
+  `setProperty('opacity','')` eliminan la propiedad del atributo; antes escribían `opacity: ;`.
+- **`prop in el.style` responde lo que el motor implementa:** el proxy de `style` atiende `in`
+  con el veredicto del parser (`CSS.supports(prop, 'inherit')`: una palabra clave CSS-wide vale
+  en toda propiedad conocida y en ninguna desconocida), en camelCase, con guiones o con prefijo
+  de vendor (`webkitTransform`), memoizado por contexto. GSAP decide así si una propiedad es
+  CSS (`property in style`); con `in` siempre falso descartaba `opacity`/`top` («Missing
+  plugin?») y ninguna animación de entrada llegaba a su estado final. Dado un elemento, cuando
+  se evalúa `'opacity' in el.style` entonces es `true`; `'noSuchThing' in el.style` es `false`.
+- **`Node.normalize()`** (DOM §4.4): funde los nodos de texto adyacentes del subárbol y elimina
+  los vacíos. Dado `<p>` con los textos `"a"`, `""`, `"b"` y un `<b>` con `"c"`,`"d"`, cuando se
+  llama `p.normalize()` entonces `p.childNodes.length` es 2 y los textos son `"ab"` y `"cd"`.
+  SplitText (GSAP) lo llama al partir un titular en líneas; su ausencia era un
+  `TypeError: not a function` que abortaba el revelado del hero de GitHub.
 - **`style` write-through:** `el.style` lee/escribe el atributo `style` real vía
   `dom.getAttribute`/`dom.setAttribute`. `setProperty(k,v)` / asignación directa
   (`el.style.color='red'`) / `cssText=` actualizan el atributo serializado;

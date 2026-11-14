@@ -3,6 +3,9 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `profile_status` | enum | `include/profile.h:35` | `` |
+| `FREEDOM_PSL_DATA_H` | macro | `include/psl_data.h:2` | `#define FREEDOM_PSL_DATA_H` |
+| `psl_exceptions` | variable | `include/psl_data.h:25` | `extern const char *const psl_exceptions[];` |
 | `psl_exceptions_n` | variable | `include/psl_data.h:26` | `extern const size_t psl_exceptions_n;` |
 | `psl_rules` | variable | `include/psl_data.h:21` | `extern const char *const psl_rules[];` |
 | `psl_rules_n` | variable | `include/psl_data.h:22` | `extern const size_t psl_rules_n;` |
@@ -493,8 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `bx_width_cap` | function | `src/box_style.c:288` | `double bx_width_cap(int w_px, int w_pct, double avail_w)` |
 | `bx_width_cap2` | function | `src/box_style.c:313` | `double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w)` |
 | `copy_lower_trim` | function | `src/box_style.c:37` | `static int copy_lower_trim(const char *in, char *out, size_t out_size)` |
-| `disp_row` | struct | `src/box_style.c:241` | `` |
-| `is_ws` | function | `src/box_style.c:31` | `static int is_ws(char c)` |
-| `name_cmp` | function | `src/box_style.c:50` | `static int name_cmp(const void *key, const void *elem)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

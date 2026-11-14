@@ -1,23 +1,12 @@
-# src: css
+# include: css
 
-*Community 0 | 57 files | cohesion 0.69*
+*Community 0 | 56 files | cohesion 0.69*
 
 ## Definition
 
-This community groups 57 file(s) rooted at `src` with dominant language c (cohesion 0.69). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (369 symbols). Documented purpose: bui_mask_img -- paints a mask-image: url() layer into a mask surface..
+This community groups 56 file(s) rooted at `include` with dominant language c (cohesion 0.69). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (369 symbols). Documented purpose: bui_mask_img -- paints a mask-image: url() layer into a mask surface..
 
 ## Files
-
-### `src` (19 files)
-
-| File | Language | Layer | Symbols | Doc |
-|------|----------|-------|---------|-----|
-| `src/compositor.c` | c | utility | 5 | no |
-| `src/css.c` | c | utility | 268 | no |
-| `src/css_atrule.c` | c | utility | 11 | no |
-| `src/css_box.c` | c | utility | 52 | no |
-| `src/css_chain.c` | c | utility | 26 | no |
-| `src/css_color.c` | c | utility | 36 | no |
 
 ### `include` (18 files)
 
@@ -26,9 +15,20 @@ This community groups 57 file(s) rooted at `src` with dominant language c (cohes
 | `include/compositor.h` | h | utility | 9 | no |
 | `include/css.h` | h | utility | 147 | no |
 | `include/css_atrule.h` | h | utility | 10 | no |
-| `include/css_box.h` | h | utility | 27 | no |
+| `include/css_box.h` | h | utility | 28 | no |
 | `include/css_color.h` | h | utility | 7 | no |
 | `include/css_computed.h` | h | utility | 6 | no |
+
+### `src` (18 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `src/compositor.c` | c | utility | 5 | no |
+| `src/css.c` | c | utility | 268 | no |
+| `src/css_atrule.c` | c | utility | 11 | no |
+| `src/css_box.c` | c | utility | 53 | no |
+| `src/css_color.c` | c | utility | 36 | no |
+| `src/css_computed.c` | c | utility | 45 | no |
 
 ### `tests` (17 files)
 
@@ -48,7 +48,7 @@ This community groups 57 file(s) rooted at `src` with dominant language c (cohes
 | `gui/bui_mask_img.c` | c | utility | 1 | yes |
 | `gui/bui_theme.c` | c | utility | 6 | no |
 
-*... and 37 more files in this community.*
+*... and 36 more files in this community.*
 
 
 ## Key Symbols
@@ -105,9 +105,9 @@ This community groups 57 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 41 file(s) lack file-level docs (e.g. `gui/browser_ui_internal.h`)? What purpose do they serve?
-- What would break if the most connected file in src: css changed?
-- Should src: css be split, given cohesion 0.69?
+- Why do 40 file(s) lack file-level docs (e.g. `gui/browser_ui_internal.h`)? What purpose do they serve?
+- What would break if the most connected file in include: css changed?
+- Should include: css be split, given cohesion 0.69?
 
 ## Sources
 
@@ -131,4 +131,4 @@ This community groups 57 file(s) rooted at `src` with dominant language c (cohes
 - `include/css_text.h`
 - `include/css_values.h`
 - `include/css_vars.h`
-- *... and 37 more*
+- *... and 36 more*

@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 231,
-  "entities": 3642,
+  "entities": 3645,
   "languages": {
    "c": 108,
    "h": 107,
@@ -13,8 +13,8 @@
   "kinds": {
    "constant": 23,
    "enum": 163,
-   "function": 2041,
-   "macro": 730,
+   "function": 2043,
+   "macro": 731,
    "method": 26,
    "module": 231,
    "struct": 276,
@@ -28,7 +28,7 @@
  "coverage": {
   "overall": {
    "documented": 1593,
-   "total": 3612,
+   "total": 3615,
    "percent": 44.1
   },
   "by_kind": {
@@ -39,13 +39,13 @@
    },
    "function": {
     "documented": 913,
-    "total": 2041,
+    "total": 2043,
     "percent": 44.7
    },
    "macro": {
-    "documented": 336,
-    "total": 730,
-    "percent": 46.0
+    "documented": 337,
+    "total": 731,
+    "percent": 46.1
    },
    "method": {
     "documented": 0,
@@ -58,9 +58,9 @@
     "percent": 14.7
    },
    "struct": {
-    "documented": 123,
+    "documented": 122,
     "total": 276,
-    "percent": 44.6
+    "percent": 44.2
    },
    "type_alias": {
     "documented": 106,
@@ -166,7 +166,7 @@
    },
    "include/css_box.h": {
     "documented": 0,
-    "total": 27,
+    "total": 28,
     "percent": 0.0
    },
    "include/css_chain.h": {
@@ -441,8 +441,8 @@
    },
    "include/page_view.h": {
     "documented": 59,
-    "total": 97,
-    "percent": 60.8
+    "total": 98,
+    "percent": 60.2
    },
    "include/pdf_export.h": {
     "documented": 3,
@@ -681,8 +681,8 @@
    },
    "src/css_box.c": {
     "documented": 15,
-    "total": 33,
-    "percent": 45.5
+    "total": 34,
+    "percent": 44.1
    },
    "src/css_chain.c": {
     "documented": 8,
@@ -1325,7 +1325,7 @@
   {
    "uid": "include/css_box.h",
    "path": "modules/include.css_box.h.jsonl",
-   "entities": 27
+   "entities": 28
   },
   {
    "uid": "include/css_chain.h",
@@ -1600,7 +1600,7 @@
   {
    "uid": "include/page_view.h",
    "path": "modules/include.page_view.h.jsonl",
-   "entities": 97
+   "entities": 98
   },
   {
    "uid": "include/pdf_export.h",
@@ -1840,7 +1840,7 @@
   {
    "uid": "src/css_box.c",
    "path": "modules/src.css_box.c.jsonl",
-   "entities": 33
+   "entities": 34
   },
   {
    "uid": "src/css_chain.c",
@@ -2385,7 +2385,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2020
+  "total": 2023
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

@@ -387,7 +387,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `failure` (function, line 22) `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);`
   - `FREEDOM_JS_NATIVE_H` (macro, line 12) `#define FREEDOM_JS_NATIVE_H`
 - Depends on: `include/js_sandbox.h`
-- Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_native.c`
+- Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_native.c`
 
 ## include/js_policy.h
 - Doc: jsp_trusted: Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its...

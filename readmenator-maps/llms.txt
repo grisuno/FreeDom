@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 13 communities, 325 files, 1884 imports, 4 languages, 7942 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 13 communities, 325 files, 1886 imports, 4 languages, 7951 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -13,18 +13,18 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): Depends on: include/prefs.h, include/zoom.h
 - [readmenator-agent/API_p12.md](md/readmenator-agent/API_p12.md): Depends on: include/css.h, include/textcase.h
 - [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/cachedfetch.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): writedocpdf (function) gui/browserui.c:15015 static long writedocpdf(browserwindow w, const char path) -- Writes the window's current laid-out document to a...
-- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Depends on: include/css.h
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): guiproflog (function) gui/browserui.c:14913 static void guiproflog(const char what, double ms)
+- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: src/css.c, src/cssmq.c, tests/testcssmq.c
 - [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Depends on: include/css.h, include/dom.h, include/htmlparse.h
 - [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/boxstyle.h
 - [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/css.h, include/cssbox.h, include/csscolor.h, include/cssdecl.h, include/csslength.h, include/cssselect.h, include/cssvalues.h
 - [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/csschain.h, include/cssselect.h, include/dom.h, include/htmlparse.h, include/util.h
 - [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/imagedecode.h
 - [readmenator-agent/ARCHITECTURE.md](md/readmenator-agent/ARCHITECTURE.md): gui/browserui.c -> gui/browseruiinternal.h
-- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testdataurl.c -> include/dataurl.h
+- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testcssvars.c -> include/cssvars.h
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): cursoratpoint (function, line 15843) static int cursoratpoint(browserwindow w, double px, double py)
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): resolveboxcursor (function, line 15848) static int resolveboxcursor(const rddoc doc, int blockid)
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
 - [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: The sheet's two string pools -- background url()s, and the ::before/::after
 - [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: fhnew: topurl: the trusted top document; fetch/fetchctx: the page's policy-gated subresource...
@@ -34,7 +34,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_src.md](md/readmenator-agent/KB_src.md): fpcoarsentimems (function, line 17) uint64t fpcoarsentimems(uint64t rawms)
 - [readmenator-agent/KB_src_p10.md](md/readmenator-agent/KB_src_p10.md): Doc: wfkey: sizet k = 0; while (PREF[i][k] != '\0') ++k; sizet j = 0; for (; j < k; ++j) { char a...
 - [readmenator-agent/KB_src_p2.md](md/readmenator-agent/KB_src_p2.md): Doc: lenrebasectx: int r = snprintf(out + o, space, "%.4f", px); if (r < 0 || (sizet)r >= space)...
-- [readmenator-agent/KB_src_p3.md](md/readmenator-agent/KB_src_p3.md): Doc: uadisplay: The HTML Rendering UA sheet's display for a tag when the cascade declared none ...
+- [readmenator-agent/KB_src_p3.md](md/readmenator-agent/KB_src_p3.md): Doc: normalize: Trims surrounding ASCII spaces and lowercases into out (CCTOKENMAX bytes). ...
 - [readmenator-agent/KB_src_p4.md](md/readmenator-agent/KB_src_p4.md): Doc: tolowerbuf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
 - [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): Doc: nodenext: }; / --- helpers --- static char dupbytes(const lxbchart src, sizet len) { if...
 - [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): Doc: unite: Bounding box of a and b into a; returns 1 if a changed.
@@ -50,7 +50,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p7.md](md/readmenator-agent/KB_tests_p7.md): Doc: dir: include "prefs.h" include "profile.h"
 - [readmenator-agent/KB_tests_p8.md](md/readmenator-agent/KB_tests_p8.md): testupperlowerasciilatin (function, line 10) static void testupperlowerasciilatin(void state)
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 325 files at commit 6709d9c71f6d. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 325 files at commit f25b706c2474. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)

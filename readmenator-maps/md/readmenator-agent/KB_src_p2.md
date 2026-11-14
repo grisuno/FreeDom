@@ -392,27 +392,28 @@ void css_resolve_anim_keyframes(css_style *...`
            ...`
   - `calc_eval_em` (function, line 974) `static int calc_eval_em(const char *v, size_t vlen, double *out_em)`
   - `calc_unwrap` (function, line 982) `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)`
-  - `cb_interp_len` (function, line 1033) `int cb_interp_len(const char *v, int allow_auto, int *out)`
-  - `pct_slot_of` (function, line 1062) `static int pct_slot_of(int slot)`
-  - `cb_value_em_milli` (function, line 1112) `int cb_value_em_milli(const char *v)`
-  - `cb_clip_inset` (function, line 1132) `int cb_clip_inset(const char *val, int px[4], int pm[4])`
-  - `cb_interp_lp` (function, line 1166) `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
+  - `cb_math_length_px` (function, line 1033) `int cb_math_length_px(const char *v, double *px)`
+  - `cb_interp_len` (function, line 1042) `int cb_interp_len(const char *v, int allow_auto, int *out)`
+  - `pct_slot_of` (function, line 1071) `static int pct_slot_of(int slot)`
+  - `cb_value_em_milli` (function, line 1121) `int cb_value_em_milli(const char *v)`
+  - `cb_clip_inset` (function, line 1141) `int cb_clip_inset(const char *val, int px[4], int pm[4])`
+  - `cb_interp_lp` (function, line 1175) `int cb_interp_lp(const char *v, int allow_auto, int allow_pct,
                      int *out_px, ...`
-  - `interp_len` (function, line 1342) `* this file that might hand a token to interp_len (transitively: margin/padding/
+  - `interp_len` (function, line 1351) `* this file that might hand a token to interp_len (transitively: margin/padding/
  * inset, flex-b...`
-  - `cb_expand_box2` (function, line 1413) `int cb_expand_box2(const char *val, int slot_start, int slot_end,
+  - `cb_expand_box2` (function, line 1422) `int cb_expand_box2(const char *val, int slot_start, int slot_end,
                        int allo...`
   - `RELATIVE` (function, line 63) `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...`
   - `repeat` (function, line 341) `* repeat(<positive-integer>, <track-list>) into (count * tracks-in-pattern). * repeat(auto-fill|...) /...`
   - `accepts` (function, line 706) `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...`
   - `min` (function, line 807) `* without the basis: min(50%, 600px) would compare a px half of 0 against 600 * and pick 0, i.e. collapse the...`
-  - `term` (function, line 1173) `* the same expression and failed closed on the percentage term (its property * may not accept one);`
+  - `term` (function, line 1182) `* the same expression and failed closed on the percentage term (its property * may not accept one);`
   - `CSS_CALC_MAX_DEPTH` (macro, line 714) `#define CSS_CALC_MAX_DEPTH`
   - `CSS_MATHFN_MAX_ARGS` (macro, line 718) `#define CSS_MATHFN_MAX_ARGS`
-  - `AUTO_REJECT` (macro, line 1239) `#define AUTO_REJECT`
-  - `AUTO_VALUE` (macro, line 1240) `#define AUTO_VALUE`
-  - `AUTO_RESET` (macro, line 1241) `#define AUTO_RESET`
-  - `AUTO_RESET_NONE` (macro, line 1245) `#define AUTO_RESET_NONE`
+  - `AUTO_REJECT` (macro, line 1248) `#define AUTO_REJECT`
+  - `AUTO_VALUE` (macro, line 1249) `#define AUTO_VALUE`
+  - `AUTO_RESET` (macro, line 1250) `#define AUTO_RESET`
+  - `AUTO_RESET_NONE` (macro, line 1254) `#define AUTO_RESET_NONE`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_chain.c
@@ -451,50 +452,6 @@ static const css_element *build_chain(lxb_dom_ele...`
   - `CCH_MAX_ATTRS` (macro, line 22) `#define CCH_MAX_ATTRS`
   - `CCH_ATTR_BUF` (macro, line 23) `#define CCH_ATTR_BUF`
 - Depends on: `include/css_chain.h`, `include/css_select.h`
-
-## src/css_color.c
-- Doc: normalize: Trims surrounding ASCII spaces and lowercases into out (CC_TOKEN_MAX bytes). *...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `cc_named` (struct, line 34)
-  - `cc_cv` (struct, line 223)
-  - `cc_cp` (struct, line 224)
-  - `v` (type_alias, line 222) `typedef struct cc_cv { double v;`
-  - `ascii_lower` (function, line 119) `static int ascii_lower(int c)`
-  - `hex_val` (function, line 123) `static int hex_val(int c)`
-  - `normalize` (function, line 132) `static int normalize(const char *token, char *out)`
-  - `parse_hex` (function, line 146) `static int parse_hex(const char *s, cc_rgb *out)`
-  - `cc_cws` (function, line 226) `static void cc_cws(cc_cp *c)`
-  - `cc_cfactor` (function, line 229) `static int cc_cfactor(cc_cp *c, cc_cv *out, int depth)`
-  - `cc_cterm` (function, line 250) `static int cc_cterm(cc_cp *c, cc_cv *out, int depth)`
-  - `cc_cexpr` (function, line 269) `static int cc_cexpr(cc_cp *c, cc_cv *out, int depth)`
-  - `cc_fold_calc` (function, line 285) `static int cc_fold_calc(const char **b, const char **e, char *buf, size_t cap)`
-  - `cc_round` (function, line 305) `static long cc_round(double v)`
-  - `parse_component` (function, line 310) `static int parse_component(const char *b, const char *e, int is_alpha, int *out)`
-  - `parse_hsl_comp` (function, line 343) `static int parse_hsl_comp(const char *b, const char *e, int is_hue, int *out)`
-  - `span` (function, line 431) `* span (when a slash is present) into ab/ae, and returns the component count,
- * or -1. Bounded: ...`
-  - `parse_func` (function, line 508) `static int parse_func(const char *s, cc_rgb *out)`
-  - `lab_comp` (function, line 581) `static int lab_comp(const char *b, const char *e, double pct_ref, int is_hue, double *out)`
-  - `srgb_encode` (function, line 609) `static unsigned char srgb_encode(double lin)`
-  - `oklab_to_rgb` (function, line 616) `static void oklab_to_rgb(double L, double a, double b, cc_rgb *out)`
-  - `lab_to_rgb` (function, line 627) `static void lab_to_rgb(double L, double a, double b, cc_rgb *out)`
-  - `parse_lab_family` (function, line 643) `static int parse_lab_family(const char *s, cc_rgb *out)`
-  - `named_cmp` (function, line 681) `static int named_cmp(const void *key, const void *element)`
-  - `parse_named` (function, line 715) `static int parse_named(const char *s, cc_rgb *out)`
-  - `cc_parse` (function, line 728) `cc_status cc_parse(const char *token, cc_rgb *out)`
-  - `strncmp` (function, line 743) `strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)`
-  - `cc_pack` (function, line 768) `int cc_pack(cc_rgb c)`
-  - `cc_unpack` (function, line 772) `cc_rgb cc_unpack(int packed)`
-  - `CC_TOKEN_MAX` (macro, line 20) `#define CC_TOKEN_MAX`
-  - `CC_CHANNEL_MAX` (macro, line 23) `#define CC_CHANNEL_MAX`
-  - `CC_PERCENT_MAX` (macro, line 24) `#define CC_PERCENT_MAX`
-  - `CC_NUMBER_MAX_DIGITS` (macro, line 29) `#define CC_NUMBER_MAX_DIGITS`
-  - `CC_HSL_SCALE` (macro, line 32) `#define CC_HSL_SCALE`
-  - `CC_CALC_DEPTH` (macro, line 221) `#define CC_CALC_DEPTH`
-  - `CC_PI` (macro, line 577) `#define CC_PI`
-- Depends on: `include/css_color.h`
 
 
 Next: [KB_src_p3.md](KB_src_p3.md)

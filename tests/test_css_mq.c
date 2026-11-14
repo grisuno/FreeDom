@@ -27,6 +27,25 @@ static void test_range_syntax(void **state) {
     assert_false(m("(height<=639px) and (width>=768px)"));
 }
 
+/* spec/css_mq.md: a length feature value may be a math function. */
+static void test_math_function_values(void **state) {
+    (void)state;
+    assert_true(m("screen and (max-width:calc(1120px - 1px))"));
+    assert_false(m("screen and (min-width:calc(1120px - 1px))"));
+    assert_true(m("(min-width: calc(1000px - 1px))"));
+    assert_false(m("(min-width: calc(1000px + 1px))"));
+    assert_true(m("(width <= calc(70em - 1px))"));
+    assert_false(m("(calc(70em - 1px) <= width)"));
+    assert_true(m("(calc(10px * 2) < width <= calc(1000px))"));
+    assert_true(m("(max-width: max(900px, 1200px))"));
+    assert_false(m("(max-width: min(900px, 1200px))"));
+    assert_true(m("(min-width: clamp(100px, 50em, 900px))"));
+    assert_false(m("(max-width: calc(50% + 10px))"));
+    assert_false(m("(max-width: calc(2 * 3))"));
+    assert_false(m("(max-width: calc(1120px - ))"));
+    assert_false(m("(max-width: calc(1120px - 1px)"));
+}
+
 static void test_plain_and_types(void **state) {
     (void)state;
     assert_true(m("screen and (min-width:600px)"));
@@ -115,6 +134,7 @@ static void test_container_surely(void **state) {
 
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_math_function_values),
         cmocka_unit_test(test_range_syntax),
         cmocka_unit_test(test_plain_and_types),
         cmocka_unit_test(test_not_or),

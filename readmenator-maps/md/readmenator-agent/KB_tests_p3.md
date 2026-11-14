@@ -151,19 +151,20 @@ static void test_leading_b...`
 - Depends on: `include/css_mask.h`
 
 ## tests/test_css_mq.c
-- Doc: test_container_surely: assert_false(m("(width >> 3px)")); assert_false(m("(width >= )"))...
+- Doc: test_math_function_values: assert_true(m("(width>=48rem)")); assert_false(m("(width>=64rem)"))...
 - Layer: testing
 - Language: c
 - Symbols:
   - `m` (function, line 13) `static int m(const char *q)`
   - `test_range_syntax` (function, line 15) `static void test_range_syntax(void **state)`
-  - `test_plain_and_types` (function, line 30) `static void test_plain_and_types(void **state)`
-  - `test_not_or` (function, line 44) `static void test_not_or(void **state)`
-  - `test_desktop_identity` (function, line 56) `static void test_desktop_identity(void **state)`
-  - `test_fail_closed` (function, line 78) `static void test_fail_closed(void **state)`
-  - `surely` (function, line 92) `static int surely(const char *q)`
-  - `test_container_surely` (function, line 95) `static void test_container_surely(void **state)`
-  - `main` (function, line 116) `int main(void)`
+  - `test_math_function_values` (function, line 31) `static void test_math_function_values(void **state)`
+  - `test_plain_and_types` (function, line 49) `static void test_plain_and_types(void **state)`
+  - `test_not_or` (function, line 63) `static void test_not_or(void **state)`
+  - `test_desktop_identity` (function, line 75) `static void test_desktop_identity(void **state)`
+  - `test_fail_closed` (function, line 97) `static void test_fail_closed(void **state)`
+  - `surely` (function, line 111) `static int surely(const char *q)`
+  - `test_container_surely` (function, line 114) `static void test_container_surely(void **state)`
+  - `main` (function, line 135) `int main(void)`
 - Depends on: `include/css_mq.h`
 
 ## tests/test_css_text.c

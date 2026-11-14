@@ -838,6 +838,19 @@ páginas modernas. Verificadas comparando el mismo HTML en **Firefox 140 ESR hea
   del corpus (138 usos en slashdot, 115 en jkanime). La fila anónima se registra ahora
   con `CSS_FW_WRAP`. Un `display:flex` **de autor** no cambia: ahí el autor declaró
   `flex-wrap` y su ausencia sí significa `nowrap`.
+  **El espacio entre átomos es el espacio colapsado de su línea (2026-11-14).** El blanco
+  entre dos `inline-block` hermanos es contenido de la línea: colapsa a UN espacio de
+  palabra (CSS Text 3 §4.1.1) y los separa. La fila anónima lo perdía (`gap` 0), así que
+  un titular partido en palabras `inline-block` (SplitText de GSAP en la portada de GitHub,
+  cualquier nube de etiquetas) salía pegado: «Softwarestillstarts». El worker no mide
+  fuentes, así que el conteo viaja como **marcador**: `pv_cont_def.gap = PV_GAP_WORD_SPACE`
+  cuando TODOS los pares de ítems en flujo adyacentes están separados por texto en blanco,
+  y el lado confiable lo resuelve al avance del espacio en la fuente del primer ítem
+  (`anon_row_gap_px`). Sin blanco entre ellos (HTML minificado) el `gap` sigue en 0.
+  - Dado `<div><span class=ib>a</span> <span class=ib>b</span></div>`, cuando se construye
+    la vista, entonces el contenedor anónimo lleva `gap == PV_GAP_WORD_SPACE`.
+  - Dado `<div><span class=ib>a</span><span class=ib>b</span></div>`, entonces `gap == 0`.
+  - Límite conocido: un caso mixto (unos pares con blanco y otros no) queda en 0.
 - **Hoja de contenido ignora hijos fuera de flujo** (`element_is_content_leaf`). Un hijo
   `display:none` o **fuera de flujo** (`position:absolute`/`fixed`) **no es contenido**: lo pinta
   la pasada de posicionamiento, no el flujo del padre. Contarlo como contenido hacía que un

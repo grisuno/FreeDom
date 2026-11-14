@@ -441,11 +441,11 @@ $(BUILD_DIR)/test_css_computed: $(TEST_DIR)/test_css_computed.c $(BUILD_DIR)/css
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
 # Media Queries 4 evaluation (spec/css_mq.md). Pure, no I/O.
-$(BUILD_DIR)/test_css_mq: $(TEST_DIR)/test_css_mq.c $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_css_mq: $(TEST_DIR)/test_css_mq.c $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
 # @supports evaluation + @layer ranks (spec/css_atrule.md). Pure, no I/O.
-$(BUILD_DIR)/test_css_atrule: $(TEST_DIR)/test_css_atrule.c $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
+$(BUILD_DIR)/test_css_atrule: $(TEST_DIR)/test_css_atrule.c $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
 
 # Cascade rule index (spec/css_index.md). Pure, no I/O.

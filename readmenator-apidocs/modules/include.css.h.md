@@ -206,7 +206,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 **Returns:** `* so two different rules matching the same`
 
-*Called by:* [`pv_build_cached`](src.page_view.c.md#pv_build_cached)
+*Called by:* [`PV_GAP_WORD_SPACE`](include.page_view.h.md#pv_gap_word_space), [`pv_build_cached`](src.page_view.c.md#pv_build_cached)
 
 <a id="css_style-slots"></a>
 

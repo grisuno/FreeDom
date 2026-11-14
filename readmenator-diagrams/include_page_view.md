@@ -1,6 +1,6 @@
 # include: page_view
 
-include: page_view groups 25 files (c, h) around FREEDOM_PAGE_VIEW_H, pv_status, PV_BSHADOW_LAYERS, PV_MAUTO_LEFT, PV_MAUTO_RIGHT. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+include: page_view groups 26 files (c, h) around FREEDOM_PAGE_VIEW_H, pv_status, PV_BSHADOW_LAYERS, PV_MAUTO_LEFT, PV_MAUTO_RIGHT. bx_edges: anything longer fails closed instead of truncating into a wrong match....
 
 ```mermaid
 graph LR
@@ -20,7 +20,7 @@ include groups 10 files (h) around FREEDOM_PAGE_VIEW_H, pv_status, PV_BSHADOW_LA
 
 ## src (5.2)
 
-src groups 7 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet.
+src groups 8 files (c) around BX_TAG_MAX, BX_DISPLAY_MAX, is_ws, copy_lower_trim, name_cmp. tag_row: One row of the user-agent sheet.
 
 ## tests (5.3)
 
@@ -40,6 +40,7 @@ tests groups 8 files (c) around dbl_eq, assert_edges, test_body_has_no_margin, t
 - include/sheet_cache.h
 - src/box_style.c
 - src/box_tree.c
+- src/css_chain.c
 - src/dom_debug.c
 - src/flex_layout.c
 - src/page_view.c

@@ -1,10 +1,10 @@
 # include: page_view
 
-*Community 4 | 25 files | cohesion 0.46*
+*Community 4 | 26 files | cohesion 0.47*
 
 ## Definition
 
-This community groups 25 file(s) rooted at `include` with dominant language c (cohesion 0.46). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (284 symbols). Documented purpose: sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md..
+This community groups 26 file(s) rooted at `include` with dominant language c (cohesion 0.47). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (284 symbols). Documented purpose: sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md..
 
 ## Files
 
@@ -18,7 +18,19 @@ This community groups 25 file(s) rooted at `include` with dominant language c (c
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 45 | no |
 | `include/freedom_config.h` | h | infrastructure | 17 | no |
-| `include/page_view.h` | h | presentation | 97 | no |
+| `include/page_view.h` | h | presentation | 98 | no |
+
+### `src` (8 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `src/box_style.c` | c | utility | 48 | no |
+| `src/box_tree.c` | c | utility | 25 | no |
+| `src/css_chain.c` | c | utility | 26 | no |
+| `src/dom_debug.c` | c | utility | 24 | no |
+| `src/flex_layout.c` | c | presentation | 36 | no |
+| `src/page_view.c` | c | presentation | 284 | no |
+| `src/render_doc.c` | c | presentation | 22 | no |
 
 ### `tests` (8 files)
 
@@ -28,22 +40,10 @@ This community groups 25 file(s) rooted at `include` with dominant language c (c
 | `tests/test_box_tree.c` | c | testing | 69 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 72 | no |
-| `tests/test_page_view.c` | c | testing | 223 | no |
+| `tests/test_page_view.c` | c | testing | 224 | no |
 | `tests/test_render_doc.c` | c | testing | 37 | no |
-| `tests/test_render_policy.c` | c | testing | 21 | no |
 
-### `src` (7 files)
-
-| File | Language | Layer | Symbols | Doc |
-|------|----------|-------|---------|-----|
-| `src/box_style.c` | c | utility | 48 | no |
-| `src/box_tree.c` | c | utility | 25 | no |
-| `src/dom_debug.c` | c | utility | 24 | no |
-| `src/flex_layout.c` | c | presentation | 36 | no |
-| `src/page_view.c` | c | presentation | 284 | no |
-| `src/render_doc.c` | c | presentation | 22 | no |
-
-*... and 5 more files in this community.*
+*... and 6 more files in this community.*
 
 
 ## Key Symbols
@@ -81,7 +81,7 @@ This community groups 25 file(s) rooted at `include` with dominant language c (c
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 48
+- Internal resolved imports (EXTRACTED): 49
 - Cross-boundary resolved imports (EXTRACTED): 56
 
 ## Connections
@@ -112,9 +112,9 @@ This community groups 25 file(s) rooted at `include` with dominant language c (c
 
 ## Open Questions
 
-- Why do 23 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
+- Why do 24 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.46?
+- Should include: page_view be split, given cohesion 0.47?
 
 ## Sources
 
@@ -130,6 +130,7 @@ This community groups 25 file(s) rooted at `include` with dominant language c (c
 - `include/sheet_cache.h`
 - `src/box_style.c`
 - `src/box_tree.c`
+- `src/css_chain.c`
 - `src/dom_debug.c`
 - `src/flex_layout.c`
 - `src/page_view.c`
@@ -137,5 +138,4 @@ This community groups 25 file(s) rooted at `include` with dominant language c (c
 - `src/sheet_cache.c`
 - `tests/test_box_style.c`
 - `tests/test_box_tree.c`
-- `tests/test_dom_debug.c`
-- *... and 5 more*
+- *... and 6 more*

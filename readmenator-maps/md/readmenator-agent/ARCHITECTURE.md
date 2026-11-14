@@ -188,6 +188,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/css_length.c` -> `include/css_length.h`
 - `src/css_mask.c` -> `include/css_gradient.h`
 - `src/css_mask.c` -> `include/css_mask.h`
+- `src/css_mq.c` -> `include/css_box.h`
 - `src/css_mq.c` -> `include/css_length.h`
 - `src/css_mq.c` -> `include/css_mq.h`
 - `src/css_select.c` -> `include/css_select.h`
@@ -495,6 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_css_text.c` -> `include/css_text.h`
 - `tests/test_css_values.c` -> `include/css.h`
 - `tests/test_css_values.c` -> `include/css_values.h`
-- `tests/test_css_vars.c` -> `include/css_vars.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
