@@ -159,7 +159,13 @@ static void test_supported_format(void **state) {
     assert_int_equal(wf_supported_format("truetype"), 1);
     assert_int_equal(wf_supported_format("opentype"), 1);
     assert_int_equal(wf_supported_format(""), 1);
-    assert_int_equal(wf_supported_format("woff2"), 0);
+    assert_int_equal(wf_supported_format("woff2"), 1);
+    assert_int_equal(wf_supported_format("woff2-variations"), 1);
+    assert_int_equal(wf_supported_format("woff2 supports "), 1);   /* truncated hint */
+    assert_int_equal(wf_supported_format("woff-variations"), 1);
+    assert_int_equal(wf_supported_format("truetype-variat"), 1);
+    assert_int_equal(wf_supported_format("woff3"), 0);
+    assert_int_equal(wf_supported_format("woff2x"), 0);
     assert_int_equal(wf_supported_format("embedded-opentype"), 0);
     assert_int_equal(wf_supported_format("svg"), 0);
     assert_int_equal(wf_supported_format(NULL), 0);
@@ -226,6 +232,22 @@ static void test_name_hash(void **state) {
     assert_true(wf_name_hash("Oswald", 6) != wf_name_hash("Mulish", 6));
 }
 
+/* A stray brace inside the block must not stall the scan: the junk skip stopped ON a
+ * '}' and never consumed it, an endless loop on the TRUSTED side from a few bytes of
+ * hostile CSS (found by fuzz-wf, tanda 90). The descriptors after it are still read. */
+static void test_stray_brace_in_block_terminates(void **state) {
+    (void)state;
+    static const char css[] =
+        "@font-face{{}font-family:Stray;src:url(a.woff) format('woff')}"
+        "@font-face{}}@font-face{x}y{font-family:Z}";
+    wf_list l = { NULL, 0, 0 };
+    assert_int_equal(wf_scan(css, sizeof css - 1, &l), 0);
+    assert_true(l.count >= 1);
+    assert_string_equal(l.refs[0].family, "Stray");
+    assert_string_equal(l.refs[0].url, "a.woff");
+    wf_list_free(&l);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_scan_null_args),
@@ -241,6 +263,7 @@ int main(void) {
         cmocka_unit_test(test_data_url_decodes_at_scan),
         cmocka_unit_test(test_ref_move_transfers_bytes),
         cmocka_unit_test(test_name_hash),
+        cmocka_unit_test(test_stray_brace_in_block_terminates),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

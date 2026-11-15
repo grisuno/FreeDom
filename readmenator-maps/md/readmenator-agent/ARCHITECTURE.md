@@ -80,6 +80,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/cached_fetch.h` -> `include/secure_fetch.h`
 - `include/css.h` -> `include/css_color.h`
 - `include/css.h` -> `include/css_counter.h`
+- `include/css.h` -> `include/css_mq.h`
 - `include/css_box.h` -> `include/css_decl.h`
 - `include/css_chain.h` -> `include/css.h`
 - `include/css_chain.h` -> `include/css_select.h`
@@ -495,6 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_css_text.c` -> `include/css_decl.h`
 - `tests/test_css_text.c` -> `include/css_text.h`
 - `tests/test_css_values.c` -> `include/css.h`
-- `tests/test_css_values.c` -> `include/css_values.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

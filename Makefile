@@ -950,6 +950,22 @@ fuzz-tsh: | $(BUILD_DIR)
 	LSAN_OPTIONS=suppressions=tests/asan.supp \
 	  ./$(BUILD_DIR)/fuzz_text_shape -max_total_time=30 -rss_limit_mb=2048
 
+# The webfont registry (spec/webfont.md, woff2 slice): a font file is hostile remote
+# content parsed on the TRUSTED side. WOFF/WOFF2 containers and variable faces go
+# through tsh_webfont_register, the weight/optical-size instancing and a shape. The
+# seeds are the test fixtures behind the one selector byte the harness consumes.
+fuzz-wfr: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude $(TSH_CFLAGS) \
+	  -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_webfont_register.c $(SRC_DIR)/text_shape.c \
+	  -o $(BUILD_DIR)/fuzz_webfont_register $(TSH_LIBS)
+	mkdir -p $(BUILD_DIR)/corpus-wfr
+	for f in $(TEST_DIR)/fonts/*.woff*; do \
+	  { printf '\000'; cat $$f; } > $(BUILD_DIR)/corpus-wfr/$$(basename $$f); done
+	LSAN_OPTIONS=suppressions=tests/asan.supp \
+	  ./$(BUILD_DIR)/fuzz_webfont_register -max_total_time=60 -max_len=8192 \
+	  -rss_limit_mb=2048 $(BUILD_DIR)/corpus-wfr
+
 # Identity config + CDN kind classifier (spec/identity.md): hostile queries / lines / URLs.
 fuzz-idn: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \

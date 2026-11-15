@@ -71,6 +71,7 @@ cch_path *cch_path_new(void);
 void cch_path_free(cch_path *pa);
 css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,
                                  double parent_font_size, const struct cvr_chain *inherited,
+                                 const struct cmq_container *containers,
                                  struct cvr_table *own_out);
 
 /* Nonzero iff the parsed selector *sel matches element `el`, built against the

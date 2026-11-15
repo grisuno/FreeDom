@@ -87,7 +87,7 @@ tocar una sola línea de este módulo. Mientras valgan `<= 0` se usan los
 | `em` | `ctx->font_size` | — |
 | `rem` | `ctx->root_font_size` | — |
 | `ex` | `ctx->x_height` | `0.5em` (§6.1.1) |
-| `ch` | `ctx->zero_advance` | `0.5em` (§6.1.2) |
+| `ch` | `ctx->zero_advance` | `0.556em` (tanda 90: el «0» de Arial/Helvetica, la métrica sans canónica; el worker no mide fuentes y §6.1.2 propone 0.5em, que es Times y deja `16ch` un 11 % corto frente a Firefox) |
 | `cap` | `ctx->cap_height` | `0.7em` (§6.1.3, aproximación de la ascendente) |
 | `ic` | `ctx->ideographic_advance` | `1em` (§6.1.4) |
 | `lh` | `ctx->line_height` | — |
@@ -356,7 +356,7 @@ propiedad que compra: una página cuyos elementos están todos a 16 px sale
 
 `b` **no** se escribe a mano por unidad: sale de la MISMA tabla de
 `cl_unit_scale`, preguntándole el factor con un `cl_ctx` cuyo `font_size` es
-`1.0` y cuyas métricas de fuente están en cero. Así `em`→1, `ex`→0.5, `ch`→0.5,
+`1.0` y cuyas métricas de fuente están en cero. Así `em`→1, `ex`→0.5, `ch`→0.556,
 `cap`→0.7, `ic`→1.0, `lh`→`CL_NORMAL_LINE_RATIO`, y una unidad nueva que se
 agregue a §6.1 obtiene su coeficiente sola, sin tocar este código.
 

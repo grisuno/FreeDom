@@ -149,7 +149,10 @@ static void test_https_stub_registers(void **state) {
     free(bytes);
 }
 
-static void test_woff2_never_fetched(void **state) {
+/* The woff2 slice (spec/webfont.md): a woff2 source is fetched like any other, and
+ * the bytes are still validated at registration -- junk behind the hint registers
+ * nothing, a real WOFF2 container registers and shapes. */
+static void test_woff2_fetched_and_validated(void **state) {
     (void)state;
     stub s;
     memset(&s, 0, sizeof s);
@@ -158,12 +161,34 @@ static void test_woff2_never_fetched(void **state) {
     s.nbytes = sizeof dummy;
     const char *html =
         "<html><head><style>"
-        "@font-face{font-family:'W2';src:url(https://cdn.example/f.woff2) format('woff2');}"
+        "@font-face{font-family:W2 Face;src:url(https://cdn.example/f.woff2)format(\"woff2 supports variations\"),"
+        "url(https://cdn.example/f.woff2)format(\"woff2-variations\");font-weight:200 900}"
         "</style></head><body></body></html>";
     assert_int_equal(wf_load_document(stub_fetch, &s, "https://site.example/",
                                       NULL, 0, html, strlen(html)),
                      0);
-    assert_int_equal(s.calls, 0);
+    assert_true(s.calls >= 1);
+    assert_string_equal(s.last_url, "https://cdn.example/f.woff2");
+    tsh_webfont_clear();
+
+    FILE *f = fopen("tests/fonts/dejavu-subset.woff2", "rb");
+    assert_non_null(f);
+    static unsigned char real[8192];
+    size_t n = fread(real, 1, sizeof real, f);
+    fclose(f);
+    assert_true(n > 0 && n < sizeof real);
+    memset(&s, 0, sizeof s);
+    s.bytes = real;
+    s.nbytes = n;
+    int rc = wf_load_document(stub_fetch, &s, "https://site.example/",
+                              NULL, 0, html, strlen(html));
+    if (tsh_ready()) {
+        assert_int_equal(rc, 1);
+        assert_int_equal(s.calls, 1);
+        tsh_font wf = { .family = CSS_FF_SERIF, .bold = 0, .italic = 0,
+                        .wfh = wf_name_hash("W2 Face", 7) };
+        assert_true(tsh_measure(&wf, 16.0, "ABCD", 4) > 0.0);
+    }
     tsh_webfont_clear();
 }
 
@@ -326,7 +351,7 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_args),
         cmocka_unit_test(test_https_stub_registers),
-        cmocka_unit_test(test_woff2_never_fetched),
+        cmocka_unit_test(test_woff2_fetched_and_validated),
         cmocka_unit_test(test_fallback_second_url),
         cmocka_unit_test(test_first_wins),
         cmocka_unit_test(test_extern_sheet_relative_url),

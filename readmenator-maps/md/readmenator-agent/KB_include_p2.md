@@ -6,8 +6,8 @@ Previous: [KB_include.md](KB_include.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_decl` (struct, line 238)
-  - `prop` (type_alias, line 237) `typedef struct css_decl { int prop;`
+  - `css_decl` (struct, line 241)
+  - `prop` (type_alias, line 240) `typedef struct css_decl { int prop;`
   - `order` (function, line 50) `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
   - `contiguous` (function, line 65) `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
   - `part` (function, line 216) `* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM...`
@@ -67,26 +67,26 @@ Previous: [KB_include.md](KB_include.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `cl_ctx` (struct, line 84)
-  - `cl_lp` (struct, line 132)
-  - `cl_status` (enum, line 61)
-  - `font_size` (type_alias, line 84) `typedef struct cl_ctx { double font_size;`
-  - `px` (type_alias, line 132) `typedef struct cl_lp { double px;`
-  - `prelude` (function, line 99) `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...`
-  - `cl_unit_is_font_relative` (function, line 157) `* cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em *...`
-  - `cl_unit_font_ratio` (function, line 182) `double cl_unit_font_ratio(const char *unit, size_t unit_len);`
-  - `here` (function, line 186) `* Every input cl_resolve accepts resolves identically here (with has_pct 0);`
-  - `length` (function, line 206) `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...`
-  - `cl_number` (function, line 230) `int cl_number(const char *s, double *out, const char **endp);`
-  - `cl_is_length_unit` (function, line 246) `int cl_is_length_unit(const char *unit, size_t unit_len);`
+  - `cl_ctx` (struct, line 91)
+  - `cl_lp` (struct, line 139)
+  - `cl_status` (enum, line 68)
+  - `font_size` (type_alias, line 91) `typedef struct cl_ctx { double font_size;`
+  - `px` (type_alias, line 139) `typedef struct cl_lp { double px;`
+  - `prelude` (function, line 106) `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...`
+  - `cl_unit_is_font_relative` (function, line 164) `* cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em *...`
+  - `cl_unit_font_ratio` (function, line 189) `double cl_unit_font_ratio(const char *unit, size_t unit_len);`
+  - `here` (function, line 193) `* Every input cl_resolve accepts resolves identically here (with has_pct 0);`
+  - `length` (function, line 213) `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...`
+  - `cl_number` (function, line 237) `int cl_number(const char *s, double *out, const char **endp);`
+  - `cl_is_length_unit` (function, line 253) `int cl_is_length_unit(const char *unit, size_t unit_len);`
   - `FREEDOM_CSS_LENGTH_H` (macro, line 2) `#define FREEDOM_CSS_LENGTH_H`
   - `CL_MAX_TOKEN` (macro, line 33) `#define CL_MAX_TOKEN`
   - `CL_INITIAL_FONT_SIZE` (macro, line 39) `#define CL_INITIAL_FONT_SIZE`
   - `CL_NORMAL_LINE_RATIO` (macro, line 45) `#define CL_NORMAL_LINE_RATIO`
-  - `CL_FALLBACK_EX_RATIO` (macro, line 56) `#define CL_FALLBACK_EX_RATIO`
-  - `CL_FALLBACK_CH_RATIO` (macro, line 57) `#define CL_FALLBACK_CH_RATIO`
-  - `CL_FALLBACK_CAP_RATIO` (macro, line 58) `#define CL_FALLBACK_CAP_RATIO`
-  - `CL_FALLBACK_IC_RATIO` (macro, line 59) `#define CL_FALLBACK_IC_RATIO`
+  - `CL_FALLBACK_EX_RATIO` (macro, line 57) `#define CL_FALLBACK_EX_RATIO`
+  - `CL_FALLBACK_CH_RATIO` (macro, line 64) `#define CL_FALLBACK_CH_RATIO`
+  - `CL_FALLBACK_CAP_RATIO` (macro, line 65) `#define CL_FALLBACK_CAP_RATIO`
+  - `CL_FALLBACK_IC_RATIO` (macro, line 66) `#define CL_FALLBACK_IC_RATIO`
 - Imported by: `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_length.c`, `src/css_mq.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_length.c`
 
 ## include/css_mask.h
@@ -108,18 +108,23 @@ Previous: [KB_include.md](KB_include.md)
 - Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_mask.c`, `tests/test_css_mask.c`
 
 ## include/css_mq.h
-- Doc: cmq_matches: 1 iff the media query list s[0,len) matches env; malformed/unknown parts fail * closed.
+- Doc: cmq_container: @container condition s[0,len) (optionally led by a container name) is SURELY true...
 - Layer: utility
 - Language: h
 - Symbols:
   - `cmq_env` (struct, line 19)
+  - `cmq_container` (struct, line 41)
   - `width_px` (type_alias, line 18) `typedef struct cmq_env { int width_px;`
+  - `names` (type_alias, line 41) `typedef struct cmq_container { unsigned names[CMQ_CONTAINER_NAMES];`
   - `cmq_matches` (function, line 28) `int cmq_matches(const char *s, size_t len, const cmq_env *env);`
   - `cmq_container_surely` (function, line 34) `int cmq_container_surely(const char *s, size_t len, int max_width);`
+  - `cmq_name_hash` (function, line 50) `unsigned cmq_name_hash(const char *s, size_t n);`
+  - `cmq_container_decl` (function, line 63) `int cmq_container_decl(const char *prop, const char *val, int *type, unsigned names[CMQ_CONTAINER_NAMES], int...`
   - `FREEDOM_CSS_MQ_H` (macro, line 2) `#define FREEDOM_CSS_MQ_H`
   - `CMQ_MAX_DEPTH` (macro, line 16) `#define CMQ_MAX_DEPTH`
   - `CMQ_TOK_MAX` (macro, line 17) `#define CMQ_TOK_MAX`
-- Imported by: `src/css.c`, `src/css_mq.c`, `tests/test_css_mq.c`
+  - `CMQ_CONTAINER_NAMES` (macro, line 37) `#define CMQ_CONTAINER_NAMES`
+- Imported by: `include/css.h`, `src/css.c`, `src/css_mq.c`, `tests/test_css_mq.c`
 
 ## include/css_select.h
 - Doc: css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only...
@@ -136,36 +141,36 @@ Previous: [KB_include.md](KB_include.md)
   - `kind` (type_alias, line 112) `typedef struct css_pseudo_match { int kind;`
   - `tag` (type_alias, line 122) `typedef struct css_compound { char tag[CSS_TOK_MAX];`
   - `comb` (type_alias, line 139) `typedef struct css_sel { int comb[CSS_MAX_COMPOUNDS];`
-  - `csel_anc_reject` (function, line 194) `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
-  - `csel_lower_ch` (function, line 239) `static inline char csel_lower_ch(char c)`
-  - `csel_ci_eq` (function, line 243) `static inline int csel_ci_eq(const char *a, const char *b)`
-  - `csel_ci_starts` (function, line 252) `static inline int csel_ci_starts(const char *a, const char *p)`
-  - `csel_span_eq` (function, line 261) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
-  - `csel_substr` (function, line 272) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
-  - `csel_ident_ch` (function, line 280) `static inline int csel_ident_ch(char c)`
-  - `csel_compact_size` (function, line 167) `size_t csel_compact_size(int nparts);`
-  - `csel_compact_dup` (function, line 172) `css_sel *csel_compact_dup(const css_sel *sel);`
-  - `csel_parse` (function, line 176) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);`
-  - `csel_matches` (function, line 185) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...`
-  - `csel_element_feature_bits` (function, line 193) `unsigned long long csel_element_feature_bits(const css_element *e);`
-  - `conservative` (function, line 201) `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
-  - `identifier` (function, line 207) `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
-  - `csel_emit_utf8` (function, line 219) `size_t csel_emit_utf8(unsigned int cp, char *out);`
-  - `csel_unescape` (function, line 221) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);`
-  - `csel_escape_len` (function, line 223) `size_t csel_escape_len(const char *s, size_t i, size_t b);`
-  - `csel_ident_fold` (function, line 225) `void csel_ident_fold(const char *src, size_t len, char *dst);`
-  - `csel_ident_eq` (function, line 227) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);`
-  - `csel_read_ident` (function, line 230) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);`
-  - `csel_decl_end` (function, line 235) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);`
+  - `csel_anc_reject` (function, line 195) `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
+  - `csel_lower_ch` (function, line 240) `static inline char csel_lower_ch(char c)`
+  - `csel_ci_eq` (function, line 244) `static inline int csel_ci_eq(const char *a, const char *b)`
+  - `csel_ci_starts` (function, line 253) `static inline int csel_ci_starts(const char *a, const char *p)`
+  - `csel_span_eq` (function, line 262) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
+  - `csel_substr` (function, line 273) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
+  - `csel_ident_ch` (function, line 281) `static inline int csel_ident_ch(char c)`
+  - `csel_compact_size` (function, line 168) `size_t csel_compact_size(int nparts);`
+  - `csel_compact_dup` (function, line 173) `css_sel *csel_compact_dup(const css_sel *sel);`
+  - `csel_parse` (function, line 177) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);`
+  - `csel_matches` (function, line 186) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...`
+  - `csel_element_feature_bits` (function, line 194) `unsigned long long csel_element_feature_bits(const css_element *e);`
+  - `conservative` (function, line 202) `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
+  - `identifier` (function, line 208) `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
+  - `csel_emit_utf8` (function, line 220) `size_t csel_emit_utf8(unsigned int cp, char *out);`
+  - `csel_unescape` (function, line 222) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);`
+  - `csel_escape_len` (function, line 224) `size_t csel_escape_len(const char *s, size_t i, size_t b);`
+  - `csel_ident_fold` (function, line 226) `void csel_ident_fold(const char *src, size_t len, char *dst);`
+  - `csel_ident_eq` (function, line 228) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);`
+  - `csel_read_ident` (function, line 231) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);`
+  - `csel_decl_end` (function, line 236) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);`
   - `FREEDOM_CSS_SELECT_H` (macro, line 2) `#define FREEDOM_CSS_SELECT_H`
   - `CSS_TOK_MAX` (macro, line 27) `#define CSS_TOK_MAX`
   - `CSS_MAX_CLASSES_PER_SEL` (macro, line 28) `#define CSS_MAX_CLASSES_PER_SEL`
   - `CSS_MAX_SUB_SELS` (macro, line 83) `#define CSS_MAX_SUB_SELS`
   - `CSS_SUB_MAX_ATTRS` (macro, line 84) `#define CSS_SUB_MAX_ATTRS`
   - `CSS_SUB_MAX_PSEUDOS` (macro, line 85) `#define CSS_SUB_MAX_PSEUDOS`
-  - `CSEL_FOLD_PREFIX` (macro, line 214) `#define CSEL_FOLD_PREFIX`
-  - `CSEL_FOLD_MARK` (macro, line 215) `#define CSEL_FOLD_MARK`
-  - `CSEL_IDENT_SCRATCH` (macro, line 216) `#define CSEL_IDENT_SCRATCH`
+  - `CSEL_FOLD_PREFIX` (macro, line 215) `#define CSEL_FOLD_PREFIX`
+  - `CSEL_FOLD_MARK` (macro, line 216) `#define CSEL_FOLD_MARK`
+  - `CSEL_IDENT_SCRATCH` (macro, line 217) `#define CSEL_IDENT_SCRATCH`
 - Depends on: `include/css.h`
 - Imported by: `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `src/sheet_cache.c`, `tests/test_css.c`
 
@@ -289,6 +294,7 @@ Previous: [KB_include.md](KB_include.md)
   - `index` (function, line 235) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
   - `length` (function, line 260) `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
   - `process` (function, line 267) `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
+  - `sight` (function, line 272) `* first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change...`
   - `FREEDOM_DOM_H` (macro, line 2) `#define FREEDOM_DOM_H`
   - `DOM_NODE_NONE` (macro, line 37) `#define DOM_NODE_NONE`
   - `DOM_KIND_NONE` (macro, line 210) `#define DOM_KIND_NONE`

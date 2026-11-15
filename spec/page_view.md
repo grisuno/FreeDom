@@ -850,7 +850,15 @@ páginas modernas. Verificadas comparando el mismo HTML en **Firefox 140 ESR hea
   - Dado `<div><span class=ib>a</span> <span class=ib>b</span></div>`, cuando se construye
     la vista, entonces el contenedor anónimo lleva `gap == PV_GAP_WORD_SPACE`.
   - Dado `<div><span class=ib>a</span><span class=ib>b</span></div>`, entonces `gap == 0`.
-  - Límite conocido: un caso mixto (unos pares con blanco y otros no) queda en 0.
+  - **Caso mixto (tanda 90):** cuando solo ALGUNOS pares llevan blanco (SplitText deja
+    `Software</span>  <span>still</span><span>starts`), el `gap` del contenedor sigue en 0 y
+    cada átomo precedido de blanco lleva el bit `PV_BR_ATOM_SPACE` en `br_line` de su primer
+    run (campo que ya cruza el IPC). El lado confiable suma el avance de un espacio, en la
+    fuente de ese run, al margen izquierdo del ítem (`item_sides_at_level`). Firefox, sonda
+    `h1` de 56 px: «still» 14 px a la derecha de «Software», «starts» pegado a «still».
+  - Dado `<div><span class=ib>m</span> <span class=ib>n</span><span class=ib>o</span></div>`,
+    entonces `gap == 0`, `n` lleva `PV_BR_ATOM_SPACE`, y `m` y `o` no.
+  - Límite conocido: un átomo que es a su vez un contenedor anidado no recibe la marca.
 - **Hoja de contenido ignora hijos fuera de flujo** (`element_is_content_leaf`). Un hijo
   `display:none` o **fuera de flujo** (`position:absolute`/`fixed`) **no es contenido**: lo pinta
   la pasada de posicionamiento, no el flujo del padre. Contarlo como contenido hacía que un
@@ -1595,3 +1603,26 @@ ancho y partía la cabecera en dos filas.
 - **Fuera de alcance (abierto):** un `inline-flex` en una línea **mixta** con texto encoge
   pero abre su propia línea (no es todavía un átomo de la línea del texto); `vertical-align`
   de la caja flex.
+
+### Los ids de la vista son handles del DOM vivo (tanda 90)
+
+`pv_run.node_id`, `pv_box_def.node_id`, `pv_cont_def.node_id` y `block_node` identifican el
+elemento ante el worker: con ellos el padre despacha clics/eventos y entrega la geometría
+(`spec/js_geom.md`). `pv_build` los numeraba por **orden de documento**, que coincide con
+los handles de `dom_build` solo mientras nadie muta el árbol: `dom_create_element` **añade**
+handles al final. Tras un `insertBefore` todo elemento posterior quedaba con el id de su
+vecino — `getBoundingClientRect` devolvía el rect del elemento anterior, el nodo nuevo
+ceros, y un clic se despachaba al vecino. Medido: sonda con un `<div>` insertado por script
+antes de dos hermanos (Firefox `b` top=60 200x60; Freedom top=40 150x23), y en github.com
+las palabras del titular (creadas por SplitText) con rect 0x0.
+
+- `pv_build_live(..., const pv_node_ids *ids, ...)`: cuando el llamador entrega un
+  resolvedor (`id_of(ctx, nodo nativo)`), el id de cada elemento es **el que el resolvedor
+  devuelve** — en el worker, `dom_handle_of_native`, que registra el nodo en el índice la
+  primera vez que lo ve (un subárbol de `innerHTML` aún sin handle) sin mover
+  `dom_mutation_count`. `DOM_NODE_NONE` del resolvedor se respeta (el elemento queda sin
+  id, nunca con uno ajeno).
+- Sin resolvedor (`ids == NULL`: headless sin JS, tests, fuzz) el id sigue siendo el
+  ordinal de documento, byte-idéntico.
+- Dado un resolvedor que devuelve `ordinal + 100`, cuando se construye la vista, entonces
+  el `node_id` de cada run es el de su elemento más 100.

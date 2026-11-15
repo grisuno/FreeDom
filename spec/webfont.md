@@ -234,3 +234,44 @@ el path raro (heap, sin VLA) + test determinista que llena el array a
 - La superficie голода: `wf_scan` + `wf_supported_format` + `wf_list_free`.
 - El fetch/parse de bytes vive en la fase b2 con su propio threat model
   (policy gate, magic, topes, fuzz de `FT_New_Memory_Face`).
+
+## woff2 slice + variable weight (tanda 90)
+
+Measured: github.com ships Mona Sans **only** as woff2 (`format("woff2 supports
+variations")`), and so do most current sites; the v1 "never picked" rule left them in the
+fallback face.
+
+- `wf_supported_format` accepts the base token of the hint: `woff2`, `woff`, `truetype`,
+  `opentype`, each alone or followed by `-variations` / ` supports variations` (the
+  scanner may have truncated the hint to `WF_FORMAT_MAX`). `embedded-opentype`/`svg` stay
+  unsupported.
+- `wOF2` is an accepted magic. No new dependency: the container is decoded by the
+  FreeType already linked (built with brotli on this platform); a FreeType without it
+  fails `FT_New_Memory_Face` and the face is skipped (fail closed). The compressed
+  size is bounded by `WF_MAX_FACE_BYTES`; the decompressed size by FreeType's own
+  woff2 limit.
+- **Bug this exposed (WOFF1 too):** HarfBuzz cannot read tables out of a WOFF/WOFF2
+  blob, so a registered container shaped every character to `.notdef` while
+  reporting success. A container's HarfBuzz face is now built over the tables
+  FreeType decoded (`hb_ft_face_create_referenced`); a bare sfnt keeps the blob.
+- **Variable weight:** a face with a `wght` axis is instanced at 400 (regular key) or
+  700 (bold key), clamped to the axis range, every other axis at its default --
+  FreeType coordinates set before the cairo face is created, the same value given
+  to HarfBuzz. Without this the face painted at the axis DEFAULT (Mona Sans: 200).
+  Registering one key of a variable face also fills the other weight's key when it
+  is still empty (a later explicit registration replaces it), so bold text of a
+  single-file variable family stays in the family. `TSH_WEB_SLOTS` 16 -> 32.
+- Given-When-Then: given the Roboto Slab `[wght]` subset registered once as regular,
+  when "ABCD" is shaped regular and bold, then both use that face's glyphs and the
+  bold advance is larger.
+- **Automatic optical sizing** (CSS Fonts 4 `font-optical-sizing: auto`, the initial
+  value): a face with an `opsz` axis is shaped AND painted at `opsz = font-size in px`,
+  clamped to the axis range. Measured on github.com: Mona Sans' axis defaults to 0 (its
+  text cut), where the 48 px hero heading set ~5 % wider than Firefox and wrapped a line
+  early. HarfBuzz gets the coordinate before every shape (only when the size changed);
+  cairo gets it as font-options variations for that run, restored after.
+- Given-When-Then: given the synthetic `opsz` fixture (advances grow with the axis),
+  when "ABCD" is measured at 16 px and at 64 px, then advance/px at 64 is larger; and
+  the 16 px advance equals 16/64 of nothing else (the default instance is untouched).
+- Still out of scope: numeric weights other than 400/700, `wdth`/`slnt` axes,
+  `font-variation-settings`, `font-optical-sizing: none`, `unicode-range`, `size-adjust`.

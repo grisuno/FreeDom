@@ -12,7 +12,7 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `src/dom.c` | c | utility | 76 | no |
+| `src/dom.c` | c | utility | 77 | no |
 | `src/fb_cmdline.c` | c | utility | 13 | no |
 | `src/freebug.c` | c | utility | 9 | no |
 | `src/html_parse.c` | c | utility | 29 | no |
@@ -24,7 +24,7 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `include/dom.h` | h | utility | 31 | no |
+| `include/dom.h` | h | utility | 32 | no |
 | `include/fb_cmdline.h` | h | utility | 18 | no |
 | `include/freebug.h` | h | utility | 18 | no |
 | `include/html_parse.h` | h | utility | 24 | no |

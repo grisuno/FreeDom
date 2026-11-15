@@ -94,7 +94,8 @@ static dom_node_id qs_walk(const dom_inde...`
   - `dom_sibling_node` (function, line 1055) `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
   - `dom_create_char_node` (function, line 1062) `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
          ...`
-  - `dom_native_node` (function, line 1076) `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
+  - `dom_handle_of_native` (function, line 1076) `dom_node_id dom_handle_of_native(dom_index *idx, const void *native)`
+  - `dom_native_node` (function, line 1082) `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
   - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
   - `DOM_QS_MAX_SELECTORS` (macro, line 418) `#define DOM_QS_MAX_SELECTORS`
   - `IH_BLOCK_SIZE` (macro, line 860) `#define IH_BLOCK_SIZE`

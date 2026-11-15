@@ -3,6 +3,31 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `live` | function | `src/frame_broker.c:62` | `static int live(const fbk_table *t, int id)` |
+| `target_admits` | function | `src/frame_broker.c:101` | `static int target_admits(const char *target, const char *snd, const char *recv)` |
+| `FC_DEFAULT_INTERVAL_MS` | macro | `src/frame_clock.c:8` | `#define FC_DEFAULT_INTERVAL_MS` |
+| `fc_interval_ms` | function | `src/frame_clock.c:26` | `int fc_interval_ms(const fc_clock *c)` |
+| `fc_needs_tick` | function | `src/frame_clock.c:21` | `int fc_needs_tick(const fc_clock *c)` |
+| `fc_set_active` | function | `src/frame_clock.c:16` | `void fc_set_active(fc_clock *c, int active)` |
+| `apply_ops` | function | `src/frame_host.c:199` | `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)` |
+| `fh_apply_top` | function | `src/frame_host.c:222` | `void fh_apply_top(fh_host *h, const tab_page *page)` |
+| `fh_count` | function | `src/frame_host.c:76` | `int fh_count(const fh_host *h)` |
+| `fh_frame_view` | function | `src/frame_host.c:253` | `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)` |
+| `fh_free` | function | `src/frame_host.c:67` | `void fh_free(fh_host *h)` |
+| `fh_generation` | function | `src/frame_host.c:251` | `unsigned fh_generation(const fh_host *h)` |
+| `fh_host` | struct | `src/frame_host.c:22` | `` |
+| `fh_new` | function | `src/frame_host.c:35` | `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,                 fh_top_...` |
+| `fh_slot` | struct | `src/frame_host.c:14` | `` |
+| `fh_tick` | function | `src/frame_host.c:227` | `int fh_tick(fh_host *h, int elapsed_ms)` |
+| `find_child` | function | `src/frame_host.c:130` | `static int find_child(const fh_host *h, int parent, int token)` |
+| `load_frame` | function | `src/frame_host.c:85` | `static void load_frame(fh_host *h, int id, const char *url)` |
+| `post_op` | function | `src/frame_host.c:144` | `static void post_op(fh_host *h, int from, const tab_ws_op *op)` |
+| `reap` | function | `src/frame_host.c:55` | `static void reap(fh_host *h)` |
+| `slot_release_view` | function | `src/frame_host.c:47` | `static void slot_release_view(fh_slot *sl)` |
+| `token_seen_by` | function | `src/frame_host.c:138` | `static int token_seen_by(const fh_host *h, int dest, int from)` |
+| `fb_buffer_at` | function | `src/freebug.c:105` | `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)` |
+| `fb_buffer_count` | function | `src/freebug.c:101` | `size_t fb_buffer_count(const fb_buffer *b)` |
+| `fb_buffer_free` | function | `src/freebug.c:91` | `void fb_buffer_free(fb_buffer *b)` |
 | `fb_buffer_init` | function | `src/freebug.c:15` | `void fb_buffer_init(fb_buffer *b)` |
 | `fb_buffer_push` | function | `src/freebug.c:19` | `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)` |
 | `fb_buffer_push_loc` | function | `src/freebug.c:23` | `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,                    ...` |
@@ -471,30 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `jm_realloc` | function | `src/js_sandbox.c:158` | `static void *jm_realloc(void *opaque, void *ptr, size_t size)` |
 | `jm_usable_size` | function | `src/js_sandbox.c:168` | `static size_t jm_usable_size(const void *ptr)` |
 | `js_context` | struct | `src/js_sandbox.c:38` | `` |
-| `js_context_free` | function | `src/js_sandbox.c:639` | `void js_context_free(js_context *ctx)` |
-| `js_context_new` | function | `src/js_sandbox.c:598` | `js_status js_context_new(const js_limits *lim, js_context **out)` |
-| `js_context_raw` | function | `src/js_sandbox.c:855` | `void *js_context_raw(js_context *ctx)` |
-| `js_devtools_enable` | function | `src/js_sandbox.c:379` | `void js_devtools_enable(js_context *ctx)` |
-| `js_devtools_expose` | function | `src/js_sandbox.c:385` | `js_status js_devtools_expose(js_context *ctx)` |
-| `js_eval` | function | `src/js_sandbox.c:672` | `js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)` |
-| `js_eval_module` | function | `src/js_sandbox.c:965` | `js_status js_eval_module(js_context *ctx, const char *src, size_t len, const char *name,         ...` |
-| `js_eval_named` | function | `src/js_sandbox.c:676` | `js_status js_eval_named(js_context *ctx, const char *src, size_t len,                         con...` |
-| `js_eval_once` | function | `src/js_sandbox.c:778` | `js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_result *res)` |
-| `js_host_slot` | function | `src/js_sandbox.c:76` | `JSValue *js_host_slot(struct js_context *ctx)` |
-| `js_install_realms` | function | `src/js_sandbox.c:1127` | `js_status js_install_realms(js_context *ctx)` |
-| `js_interrupt_cb` | function | `src/js_sandbox.c:401` | `static int js_interrupt_cb(JSRuntime *rt, void *opaque)` |
-| `js_limits_default` | function | `src/js_sandbox.c:569` | `js_limits js_limits_default(void)` |
-| `js_loc_from_stack` | function | `src/js_sandbox.c:427` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap,                       i...` |
-| `js_mem_state` | struct | `src/js_sandbox.c:29` | `` |
-| `js_prime_stack_limit` | function | `src/js_sandbox.c:567` | `void js_prime_stack_limit(void)` |
-| `js_profile_enable` | function | `src/js_sandbox.c:229` | `void js_profile_enable(js_context *ctx)` |
-| `js_profile_report` | function | `src/js_sandbox.c:235` | `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n)` |
-| `js_pump_jobs` | function | `src/js_sandbox.c:759` | `int js_pump_jobs(js_context *ctx, int max_jobs)` |
-| `js_rejection_cb` | function | `src/js_sandbox.c:90` | `static void js_rejection_cb(JSContext *jc, JSValueConst promise, JSValueConst reason,            ...` |
-| `js_result_free` | function | `src/js_sandbox.c:791` | `void js_result_free(js_result *res)` |
-| `js_set_current_script` | function | `src/js_sandbox.c:819` | `void js_set_current_script(js_context *ctx, const char *src, const char *type)` |
-| `js_set_module_host` | function | `src/js_sandbox.c:935` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve,                         js...` |
-| `js_set_time_budget` | function | `src/js_sandbox.c:667` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms)` |
-| `js_stack_limit_for` | function | `src/js_sandbox.c:546` | `size_t js_stack_limit_for(size_t soft_stack)` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

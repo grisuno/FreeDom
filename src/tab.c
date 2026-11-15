@@ -260,6 +260,12 @@ typedef struct child_state {
      * is one: a lazy tick whose tree still has that count sends no view (spec/tab.md). */
     uint64_t        view_gen;
     int             view_gen_ok;
+    /* Query containers of the last derived view and the widths it evaluated with
+     * (spec/css_mq.md). cq_gen/cq_rederives bound the re-derivations a geometry
+     * table may trigger per DOM generation. */
+    pv_cq_src       cq;
+    uint64_t        cq_gen;
+    int             cq_rederives;
     shc_cache      *sheets;            /* the page's parsed sheet, reused while its CSS text
                                         * is unchanged (spec/sheet_cache.md); lazily created */
     pv_computed    *computed;          /* retained cascade behind getComputedStyle (trusted) */
@@ -283,6 +289,51 @@ static void tab_async_sync(tab *t);
 
 /* The worker's sheet cache, created on first use. NULL on OOM: every consumer then
  * parses afresh, exactly as without a cache. */
+/* Re-derivations one DOM generation may spend on container widths that moved. */
+#define TAB_CQ_REDERIVE_MAX 2
+
+/* pv_cq_src.width: the element's laid-out border-box width from the last geometry
+ * table the parent sent, or -1 (no table: an untrusted page never gets one). */
+static int child_cq_width(void *ctx, dom_node_id node) {
+    const child_state *cs = (const child_state *)ctx;
+    const jg_rect *r = jg_find(&cs->geom, node);
+    return (r != NULL && r->w >= 0) ? (int)r->w : -1;
+}
+
+/* pv_node_ids.id_of: the live DOM handle of an element, so every id the view carries
+ * (clicks, events, geometry) names the SAME node the page's JS holds, whatever the
+ * scripts inserted before it (spec/page_view.md "Los ids de la vista..."). */
+static dom_node_id child_node_id(void *ctx, const void *native) {
+    child_state *cs = (child_state *)ctx;
+    return (cs->idx != NULL) ? dom_handle_of_native(cs->idx, native) : DOM_NODE_NONE;
+}
+
+static pv_cq_src *child_cq(child_state *cs) {
+    cs->cq.width = child_cq_width;
+    cs->cq.ctx = cs;
+    return &cs->cq;
+}
+
+/* A new geometry table arrived: when a query container of the view the parent holds
+ * now measures differently from the width that view was derived with, the view is
+ * stale (its @container rules were gated on the old width) and the next tick
+ * re-derives it. Bounded per DOM generation so a container whose width follows its
+ * content can never oscillate forever. */
+static void child_cq_geometry_changed(child_state *cs) {
+    if (!cs->view_gen_ok || cs->cq.n == 0) return;
+    if (cs->cq_gen != cs->view_gen) { cs->cq_gen = cs->view_gen; cs->cq_rederives = 0; }
+    if (cs->cq_rederives >= TAB_CQ_REDERIVE_MAX) return;
+    for (size_t i = 0; i < cs->cq.n && i < PV_CQ_MAX; ++i) {
+        int bw = child_cq_width(cs, cs->cq.node[i]);
+        int w = (bw < 0) ? -1 : (bw > cs->cq.edges[i] ? bw - cs->cq.edges[i] : 0);
+        if (w != cs->cq.used[i]) {
+            cs->view_gen_ok = 0;
+            ++cs->cq_rederives;
+            return;
+        }
+    }
+}
+
 static shc_cache *child_sheets(child_state *cs) {
     if (cs->sheets == NULL) cs->sheets = shc_new(0);
     return cs->sheets;
@@ -302,6 +353,7 @@ static void child_reset_page(child_state *cs) {
     pv_free(cs->preserved_view);
     cs->preserved_view = NULL;
     cs->view_gen_ok = 0;
+    cs->cq.n = 0;
     jg_free(&cs->geom);   /* after js: the context held the only pointer to it */
     free(cs->page_url);
     cs->page_url = NULL;
@@ -1450,8 +1502,8 @@ static pv_view *child_prescript_view(child_state *cs, const char *html, size_t l
     }
     hp_free_scripts(scripts, nscripts);
     pv_view *view = NULL;
-    if (pv_build_cached(doc, run_js, reader, prefers_dark, cs->extern_css, cs->extern_css_len,
-                        cs->last_viewport_w, child_sheets(cs), &view) != PV_OK) view = NULL;
+    if (pv_build_cq(doc, run_js, reader, prefers_dark, cs->extern_css, cs->extern_css_len,
+                        cs->last_viewport_w, child_sheets(cs), child_cq(cs), &view) != PV_OK) view = NULL;
     dom_free(idx);
     hp_document_free(doc);
     return view;
@@ -1825,9 +1877,9 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         double pt2 = prof_now_ms();
         uint64_t gen_at_build = dom_mutation_count(cs->idx);
         int pv_ok = !(title == NULL || text == NULL
-            || pv_build_cached(cs->doc, run_js, reader, prefers_dark,
+            || pv_build_live(cs->doc, run_js, reader, prefers_dark,
                                cs->extern_css, cs->extern_css_len,
-                               cs->last_viewport_w, child_sheets(cs), &view) != PV_OK);
+                               cs->last_viewport_w, child_sheets(cs), child_cq(cs), &(pv_node_ids){ child_node_id, cs }, &view) != PV_OK);
         if (pv_ok) { cs->view_gen = gen_at_build; cs->view_gen_ok = 1; }
         prof_lap("pv-build-styled", &pt2);
         if (!pv_ok) {
@@ -2007,9 +2059,9 @@ static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
             title = hp_get_title(cs->doc, &tl);
             text  = hp_extract_text(cs->doc, &xl);
             if (title != NULL && text != NULL
-                && pv_build_cached(cs->doc, cs->last_run_js, cs->last_reader,
+                && pv_build_live(cs->doc, cs->last_run_js, cs->last_reader,
                                    cs->last_prefers_dark, cs->extern_css,
-                                   cs->extern_css_len, cs->last_viewport_w, child_sheets(cs), &view) == PV_OK) {
+                                   cs->extern_css_len, cs->last_viewport_w, child_sheets(cs), child_cq(cs), &(pv_node_ids){ child_node_id, cs }, &view) == PV_OK) {
                 ok = 1;
                 cs->view_gen = gen_now;
                 cs->view_gen_ok = 1;
@@ -2179,6 +2231,7 @@ static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, si
             accepted = (jd_set_geometry(cs->js, &cs->geom) == JD_OK) ? 1 : 0;
             /* Observers and 'scroll' listeners see the new layout/scroll right away. */
             if (accepted) (void)jt_geometry_changed(cs->js);
+            child_cq_geometry_changed(cs);
         } else {
             jg_free(&tmp);
         }

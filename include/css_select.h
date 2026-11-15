@@ -143,6 +143,7 @@ typedef struct css_sel {
     int  order;     /* document order (tie-break) */
     int  rule;      /* index into rules[] */
     int  layer;     /* @layer rank (css_atrule), 0 = unlayered */
+    int  cq;        /* 1-based index of the sheet's @container condition gating it, 0 = none */
     css_sub_sel subs[CSS_MAX_SUB_SELS];
     int  nsubs;
     /* Feature bits every ancestor chain must contain for this selector to match (the tags, ids and

@@ -62,6 +62,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`cm_clip`](modules/include.css_mask.h.md#cm_clip) enum in `include/css_mask.h`
 - [`cm_comp`](modules/include.css_mask.h.md#cm_comp) enum in `include/css_mask.h`
 - [`cm_layer`](modules/include.css_mask.h.md#cm_layer) struct in `include/css_mask.h`
+- [`cmq_container`](modules/include.css_mq.h.md#cmq_container) struct in `include/css_mq.h`
 - [`cmq_env`](modules/include.css_mq.h.md#cmq_env) struct in `include/css_mq.h`
 - [`cnt_decl`](modules/include.css_counter.h.md#cnt_decl) struct in `include/css_counter.h`
 - [`cnt_inst`](modules/src.css_counter.c.md#cnt_inst) struct in `src/css_counter.c`
@@ -96,6 +97,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`css_column_span`](modules/include.css.h.md#css_column_span) enum in `include/css.h`
 - [`css_compound`](modules/include.css_select.h.md#css_compound) struct in `include/css_select.h`
 - [`css_content_visibility`](modules/include.css.h.md#css_content_visibility) enum in `include/css.h`
+- [`css_sheet.css_cq`](modules/src.css.c.md#css_sheet-css_cq) struct in `src/css.c`
 - [`css_cursor`](modules/include.css.h.md#css_cursor) enum in `include/css.h`
 - [`css_decl`](modules/include.css_decl.h.md#css_decl) struct in `include/css_decl.h`
 - [`css_direction`](modules/include.css.h.md#css_direction) enum in `include/css.h`
@@ -345,6 +347,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`name`](modules/include.css_counter.h.md#name) type_alias in `include/css_counter.h`
 - [`css_attr_match.name`](modules/include.css_select.h.md#css_attr_match-name) type_alias in `include/css_select.h`
 - [`name`](modules/src.text_shape.c.md#name) type_alias in `src/text_shape.c`
+- [`cmq_container.names`](modules/include.css_mq.h.md#cmq_container-names) type_alias in `include/css_mq.h`
 - [`bx_bg_layer.nat_h`](modules/include.box_style.h.md#bx_bg_layer-nat_h) type_alias in `include/box_style.h`
 - [`net_reply`](modules/src.tab.c.md#net_reply) struct in `src/tab.c`
 - [`ng_request`](modules/include.net_guard.h.md#ng_request) struct in `include/net_guard.h`
@@ -405,6 +408,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`pv_cont_def`](modules/include.page_view.h.md#pv_cont_def) struct in `include/page_view.h`
 - [`pv_cont_info`](modules/src.page_view.c.md#pv_cont_info) struct in `src/page_view.c`
 - [`pv_container_reg`](modules/src.page_view.c.md#pv_container_reg) struct in `src/page_view.c`
+- [`pv_cq_src`](modules/include.page_view.h.md#pv_cq_src) struct in `include/page_view.h`
 - [`pv_def_h`](modules/src.page_view.c.md#pv_def_h) struct in `src/page_view.c`
 - [`pv_flow_reg`](modules/src.page_view.c.md#pv_flow_reg) struct in `src/page_view.c`
 - [`pv_flow_reg`](modules/src.page_view.c.md#pv_flow_reg) struct in `src/page_view.c`
@@ -412,6 +416,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`pv_input_type`](modules/include.page_view.h.md#pv_input_type) enum in `include/page_view.h`
 - [`pv_item_track`](modules/src.page_view.c.md#pv_item_track) struct in `src/page_view.c`
 - [`pv_kind`](modules/include.page_view.h.md#pv_kind) enum in `include/page_view.h`
+- [`pv_node_ids`](modules/include.page_view.h.md#pv_node_ids) struct in `include/page_view.h`
 - [`pv_node_map`](modules/src.page_view.c.md#pv_node_map) struct in `src/page_view.c`
 - [`pv_ptrmap`](modules/src.page_view.c.md#pv_ptrmap) struct in `src/page_view.c`
 - [`pv_root_els`](modules/src.page_view.c.md#pv_root_els) struct in `src/page_view.c`

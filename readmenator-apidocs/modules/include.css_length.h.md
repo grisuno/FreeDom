@@ -1,6 +1,6 @@
 # `include/css_length.h`
 
-> Source: [include/css_length.h:1](../../include/css_length.h#L1) | language `h` | coverage 55.0% | [API index](../index.md)
+> Source: [include/css_length.h:1](../../include/css_length.h#L1) | language `h` | coverage 60.0% | [API index](../index.md)
 
 ## Contents
 
@@ -32,7 +32,7 @@ classDiagram
 
 ### `cl_ctx`
 
-`struct` | [include/css_length.h:84](../../include/css_length.h#L84)
+`struct` | [include/css_length.h:91](../../include/css_length.h#L91)
 
 ```c
 typedef struct cl_ctx
@@ -62,7 +62,7 @@ changing at all.
 
 #### `cl_ctx.font_size`
 
-`type_alias` | [include/css_length.h:84](../../include/css_length.h#L84)
+`type_alias` | [include/css_length.h:91](../../include/css_length.h#L91)
 
 ```c
 typedef struct cl_ctx { double font_size;
@@ -88,7 +88,7 @@ changing at all.
 
 ### `cl_lp`
 
-`struct` | [include/css_length.h:132](../../include/css_length.h#L132)
+`struct` | [include/css_length.h:139](../../include/css_length.h#L139)
 
 ```c
 typedef struct cl_lp
@@ -114,7 +114,7 @@ IPC codec's convention, not this type's.
 
 #### `cl_lp.px`
 
-`type_alias` | [include/css_length.h:132](../../include/css_length.h#L132)
+`type_alias` | [include/css_length.h:139](../../include/css_length.h#L139)
 
 ```c
 typedef struct cl_lp { double px;
@@ -138,7 +138,7 @@ IPC codec's convention, not this type's.
 
 ### `cl_status`
 
-`enum` | [include/css_length.h:61](../../include/css_length.h#L61)
+`enum` | [include/css_length.h:68](../../include/css_length.h#L68)
 
 ```c
 typedef enum cl_status
@@ -152,7 +152,7 @@ typedef enum cl_status
 
 ### `prelude`
 
-`function` | [include/css_length.h:99](../../include/css_length.h#L99)
+`function` | [include/css_length.h:106](../../include/css_length.h#L106)
 
 ```c
 * correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the author's root) and the conservative default * everywhere else. */ cl_ctx cl_ctx_initial(voi
@@ -173,7 +173,7 @@ typedef enum cl_status
 
 ### `cl_unit_is_font_relative`
 
-`function` | [include/css_length.h:157](../../include/css_length.h#L157)
+`function` | [include/css_length.h:164](../../include/css_length.h#L164)
 
 ```c
 * cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em * (font_size - from_font_size) * * This is the whole rule and the only place the deri
@@ -187,7 +187,7 @@ typedef enum cl_status
 
 ### `cl_unit_font_ratio`
 
-`function` | [include/css_length.h:182](../../include/css_length.h#L182)
+`function` | [include/css_length.h:189](../../include/css_length.h#L189)
 
 ```c
 double cl_unit_font_ratio(const char *unit, size_t unit_len);
@@ -217,7 +217,7 @@ the derivative of each term to sum them.
 
 ### `here`
 
-`function` | [include/css_length.h:186](../../include/css_length.h#L186)
+`function` | [include/css_length.h:193](../../include/css_length.h#L193)
 
 ```c
 * Every input cl_resolve accepts resolves identically here (with has_pct 0);
@@ -237,7 +237,7 @@ the derivative of each term to sum them.
 
 ### `length`
 
-`function` | [include/css_length.h:206](../../include/css_length.h#L206)
+`function` | [include/css_length.h:213](../../include/css_length.h#L213)
 
 ```c
 * * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute component still survives: dropping it would throw * away a length the author did state. */
@@ -257,7 +257,7 @@ the derivative of each term to sum them.
 
 ### `cl_number`
 
-`function` | [include/css_length.h:230](../../include/css_length.h#L230)
+`function` | [include/css_length.h:237](../../include/css_length.h#L237)
 
 ```c
 int cl_number(const char *s, double *out, const char **endp);
@@ -298,7 +298,7 @@ decimal separator is ',' cannot truncate "1.5px" to 1px.
 
 ### `cl_is_length_unit`
 
-`function` | [include/css_length.h:246](../../include/css_length.h#L246)
+`function` | [include/css_length.h:253](../../include/css_length.h#L253)
 
 ```c
 int cl_is_length_unit(const char *unit, size_t unit_len);
@@ -373,7 +373,7 @@ The engine measures that box for real during layout (see gui/bui_theme.c line_sp
 
 ### `CL_FALLBACK_EX_RATIO`
 
-`macro` | [include/css_length.h:56](../../include/css_length.h#L56)
+`macro` | [include/css_length.h:57](../../include/css_length.h#L57)
 
 ```c
 #define CL_FALLBACK_EX_RATIO
@@ -381,7 +381,7 @@ The engine measures that box for real during layout (see gui/bui_theme.c line_sp
 
 Spec-named fallbacks for font metrics the caller has not supplied.
 
-CSS Values 4: 6.1.1 ex  -- "a value of 0.5em should be used" when x-height is unknown. 6.1.2 ch  -- the `0` glyph "must be assumed to be 0.5em wide" when unknown. 6.1.3 cap -- falls back to the font's ascent metric; 0.7em approximates the cap-height of the default serif/sans faces. 6.1.4 ic  -- the CJK water ideograph "must be assumed to be 1em" when unknown. These are ratios of the element's font-size, never absolute px.
+CSS Values 4: 6.1.1 ex  -- "a value of 0.5em should be used" when x-height is unknown. 6.1.2 ch  -- the `0` glyph "must be assumed to be 0.5em wide" when unknown; deliberately NOT followed, see CL_FALLBACK_CH_RATIO below. 6.1.3 cap -- falls back to the font's ascent metric; 0.7em approximates the cap-height of the default serif/sans faces. 6.1.4 ic  -- the CJK water ideograph "must be assumed to be 1em" when unknown. These are ratios of the element's font-size, never absolute px.
 
 ---
 
@@ -389,11 +389,15 @@ CSS Values 4: 6.1.1 ex  -- "a value of 0.5em should be used" when x-height is un
 
 ### `CL_FALLBACK_CH_RATIO`
 
-`macro` | [include/css_length.h:57](../../include/css_length.h#L57)
+`macro` | [include/css_length.h:64](../../include/css_length.h#L64)
 
 ```c
 #define CL_FALLBACK_CH_RATIO
 ```
+
+ch (tanda 90): the cascade runs in the confined worker, which never touches a font (and must not learn the local ones: anti-fingerprinting), so `ch` is always this ratio.
+
+The spec's 0.5em is the advance of `0` in Times; nearly every page that uses `ch` sets a sans face, whose `0` is wider -- Arial/Helvetica/Liberation Sans 0.556, the web's canonical sans metric (Firefox here, default sans, measures 0.5725). At 0.5 a `16ch` heading was 448 px where Firefox gives 513 and its text wrapped a line early.
 
 ---
 
@@ -401,7 +405,7 @@ CSS Values 4: 6.1.1 ex  -- "a value of 0.5em should be used" when x-height is un
 
 ### `CL_FALLBACK_CAP_RATIO`
 
-`macro` | [include/css_length.h:58](../../include/css_length.h#L58)
+`macro` | [include/css_length.h:65](../../include/css_length.h#L65)
 
 ```c
 #define CL_FALLBACK_CAP_RATIO
@@ -413,7 +417,7 @@ CSS Values 4: 6.1.1 ex  -- "a value of 0.5em should be used" when x-height is un
 
 ### `CL_FALLBACK_IC_RATIO`
 
-`macro` | [include/css_length.h:59](../../include/css_length.h#L59)
+`macro` | [include/css_length.h:66](../../include/css_length.h#L66)
 
 ```c
 #define CL_FALLBACK_IC_RATIO

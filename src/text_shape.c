@@ -14,6 +14,8 @@
 #include "text_shape.h"
 #include "css.h"
 #include "webfont.h"
+#include <hb-ft.h>
+#include <hb-ot.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -22,6 +24,7 @@
 
 #include <cairo/cairo-ft.h>
 #include <ft2build.h>
+#include FT_MULTIPLE_MASTERS_H
 #include FT_FREETYPE_H
 #include <harfbuzz/hb.h>
 #include <fontconfig/fontconfig.h>
@@ -42,7 +45,41 @@ typedef struct tsh_entry {
     hb_blob_t         *blob;
     hb_face_t         *hbface;
     hb_font_t         *hbfont;
+    /* Variable-font instance (spec/webfont.md), webfonts only. has_wght: the face was
+     * instanced at `wght`. has_opsz: its optical-size axis follows the font size
+     * (clamped to [opsz_min, opsz_max]); opsz_cur is the value HarfBuzz holds, 0 = none. */
+    int                has_wght, has_opsz;
+    int                wght, opsz_min, opsz_max, opsz_cur;
 } tsh_entry;
+
+/* The optical size a face is set at for a font size of px (CSS Fonts 4 section 8.1,
+ * font-optical-sizing:auto): the size in CSS px, whole, inside the axis range. */
+static int entry_opsz_for(const tsh_entry *e, double px) {
+    int o = (int)(px + 0.5);
+    if (o < e->opsz_min) o = e->opsz_min;
+    if (o > e->opsz_max) o = e->opsz_max;
+    return o;
+}
+
+/* Points the entry's HarfBuzz font at the instance for this size. A face without an
+ * optical-size axis is untouched; the coordinate is only pushed when it changes. */
+static void entry_apply_size(tsh_entry *e, double px) {
+    if (!e->has_opsz) return;
+    int o = entry_opsz_for(e, px);
+    if (o == e->opsz_cur) return;
+    hb_variation_t v[2];
+    unsigned n = 0;
+    if (e->has_wght) { v[n].tag = HB_TAG('w', 'g', 'h', 't'); v[n].value = (float)e->wght; ++n; }
+    v[n].tag = HB_TAG('o', 'p', 's', 'z'); v[n].value = (float)o; ++n;
+    hb_font_set_variations(e->hbfont, v, n);
+    e->opsz_cur = o;
+}
+
+/* The only shaper text ever goes through. hb_shape() tries every shaper the library
+ * was built with, and a font carrying a `Silf` table selects Graphite2 -- a rule
+ * interpreter of its own -- which a hostile WEBFONT can therefore reach on the trusted
+ * side (found by fuzz-wfr: its failure path leaks). OpenType is what the web ships. */
+static const char *const TSH_SHAPERS[] = { "ot", NULL };
 
 static FT_Library   g_ft;
 static int          g_init_attempted;
@@ -187,7 +224,7 @@ static tsh_entry *get_entry(int family, int bold, int italic) {
  * parent from policy-gated fetches, keyed by (name hash, bold, italic). Memory
  * only, freed by tsh_webfont_clear (navigation) and tsh_shutdown. Never the
  * worker: shaping a registered face runs on the painter side like every face. */
-#define TSH_WEB_SLOTS 16
+#define TSH_WEB_SLOTS 32
 
 typedef struct tsh_web {
     int       used;
@@ -214,7 +251,7 @@ static void web_entry_free(tsh_web *w) {
  * woff2 slice (spec/webfont.md); eot/svg are never faces in any engine. */
 static int web_magic_ok(const unsigned char *b, size_t n) {
     if (b == NULL || n < 4) return 0;
-    if (b[0] == 'w' && b[1] == 'O' && b[2] == 'F' && b[3] == 'F') return 1;
+    if (b[0] == 'w' && b[1] == 'O' && b[2] == 'F' && (b[3] == 'F' || b[3] == '2')) return 1;
     if (b[0] == 0 && b[1] == 1 && b[2] == 0 && b[3] == 0) return 1;
     if (b[0] == 'O' && b[1] == 'T' && b[2] == 'T' && b[3] == 'O') return 1;
     if (b[0] == 't' && b[1] == 'r' && b[2] == 'u' && b[3] == 'e') return 1;
@@ -225,7 +262,52 @@ static int web_magic_ok(const unsigned char *b, size_t n) {
 /* Builds the shaping faces over an OWNED copy of bytes[0,nbytes) into e
  * (shared tail with load_entry's file path: same objects, same order, same
  * failure discipline -- free the copy on any failure, never half-register). */
-static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes) {
+/* Weights a variable face is instanced at (spec/webfont.md): the regular and the
+ * bold key of the registry. */
+#define TSH_WGHT_REGULAR 400.0
+#define TSH_WGHT_BOLD    700.0
+#define TSH_VAR_AXES_MAX 16u
+
+/* Instances a variable face at the weight its registry key stands for: `wght` at
+ * 400 or 700 clamped to the axis range, every other axis at its default. Must run
+ * before the cairo face is created (cairo captures the coordinates then). Returns
+ * 1 and the chosen weight when the face has a `wght` axis, 0 otherwise (a static
+ * face, or one FreeType cannot vary: left exactly as loaded). */
+static int web_instance_weight(FT_Face ft, int bold, double *wght_out, int *has_opsz,
+                               int *opsz_min, int *opsz_max) {
+    FT_MM_Var *mm = NULL;
+    *has_opsz = 0;
+    if (FT_Get_MM_Var(ft, &mm) != 0 || mm == NULL) return 0;
+    int found = 0;
+    if (mm->num_axis > 0 && mm->num_axis <= TSH_VAR_AXES_MAX) {
+        FT_Fixed coords[TSH_VAR_AXES_MAX];
+        for (FT_UInt i = 0; i < mm->num_axis; ++i) {
+            coords[i] = mm->axis[i].def;
+            if (mm->axis[i].tag == FT_MAKE_TAG('o', 'p', 's', 'z') &&
+                mm->axis[i].maximum > mm->axis[i].minimum) {
+                /* Whole units inside the range: ceil the floor, floor the ceiling. */
+                *opsz_min = (int)((mm->axis[i].minimum + 65535) / 65536);
+                *opsz_max = (int)(mm->axis[i].maximum / 65536);
+                *has_opsz = (*opsz_max >= *opsz_min);
+            }
+            if (mm->axis[i].tag != FT_MAKE_TAG('w', 'g', 'h', 't')) continue;
+            double lo = (double)mm->axis[i].minimum / 65536.0;
+            double hi = (double)mm->axis[i].maximum / 65536.0;
+            double w = bold ? TSH_WGHT_BOLD : TSH_WGHT_REGULAR;
+            if (w < lo) w = lo;
+            if (w > hi) w = hi;
+            coords[i] = (FT_Fixed)(w * 65536.0);
+            *wght_out = w;
+            found = 1;
+        }
+        if (found && FT_Set_Var_Design_Coordinates(ft, mm->num_axis, coords) != 0) found = 0;
+    }
+    FT_Done_MM_Var(g_ft, mm);
+    return found;
+}
+
+static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes, int bold,
+                          int *variable) {
     unsigned char *copy = (unsigned char *)malloc(nbytes);
     if (copy == NULL) return 0;
     memcpy(copy, bytes, nbytes);
@@ -234,6 +316,10 @@ static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbyte
         free(copy);
         return 0;
     }
+    double wght = 0.0;
+    int has_opsz = 0, opsz_min = 0, opsz_max = 0;
+    int var = web_instance_weight(ft, bold, &wght, &has_opsz, &opsz_min, &opsz_max);
+    if (variable != NULL) *variable = var;
     cairo_font_face_t *cf = cairo_ft_font_face_create_for_ft_face(ft, 0);
     if (cf == NULL || cairo_font_face_status(cf) != CAIRO_STATUS_SUCCESS) {
         if (cf != NULL) cairo_font_face_destroy(cf);
@@ -243,7 +329,11 @@ static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbyte
     }
     hb_blob_t *blob = hb_blob_create((const char *)copy, (unsigned)nbytes,
                                      HB_MEMORY_MODE_READONLY, NULL, NULL);
-    hb_face_t *hf = hb_face_create(blob, 0);
+    /* A WOFF/WOFF2 container holds compressed tables HarfBuzz cannot read from the
+     * blob (it shaped every character to .notdef): its face is built over the tables
+     * FreeType already decoded. A bare sfnt keeps the blob path. */
+    int container = (nbytes >= 4 && copy[0] == 'w' && copy[1] == 'O' && copy[2] == 'F');
+    hb_face_t *hf = container ? hb_ft_face_create_referenced(ft) : hb_face_create(blob, 0);
     hb_font_t *hfont = hb_font_create(hf);
     if (hfont == NULL || hf == NULL) {
         if (hfont != NULL) hb_font_destroy(hfont);
@@ -254,6 +344,16 @@ static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbyte
         free(copy);
         return 0;
     }
+    if (var) {
+        hb_variation_t v = { HB_TAG('w', 'g', 'h', 't'), (float)wght };
+        hb_font_set_variations(hfont, &v, 1);
+    }
+    e->has_wght = var;
+    e->wght = (int)(wght + 0.5);
+    e->has_opsz = has_opsz;
+    e->opsz_min = opsz_min;
+    e->opsz_max = opsz_max;
+    e->opsz_cur = 0;
     e->bytes = copy;
     e->nbytes = (long)nbytes;
     e->ftface = ft;
@@ -292,7 +392,8 @@ int tsh_webfont_register(const char *name,
     if (slot == NULL) return -1;   /* table full: fail closed */
     if (slot->used) web_entry_free(slot);
     memset(slot, 0, sizeof *slot);
-    if (!web_make_entry(&slot->e, bytes, nbytes)) {
+    int variable = 0;
+    if (!web_make_entry(&slot->e, bytes, nbytes, bb, &variable)) {
         memset(slot, 0, sizeof *slot);
         return -1;
     }
@@ -300,6 +401,27 @@ int tsh_webfont_register(const char *name,
     slot->hash = h;
     slot->bold = bb;
     slot->italic = it;
+    /* One file of a variable family covers both weights: fill the other key while it
+     * is empty (an explicit registration of that key replaces it later). Best effort. */
+    if (variable) {
+        tsh_web *other = NULL;
+        for (int i = 0; i < TSH_WEB_SLOTS; ++i) {
+            if (g_web[i].used && g_web[i].hash == h && g_web[i].bold == !bb &&
+                g_web[i].italic == it) { other = NULL; break; }
+            if (other == NULL && !g_web[i].used) other = &g_web[i];
+        }
+        if (other != NULL) {
+            memset(other, 0, sizeof *other);
+            if (web_make_entry(&other->e, bytes, nbytes, !bb, NULL)) {
+                other->used = 1;
+                other->hash = h;
+                other->bold = !bb;
+                other->italic = it;
+            } else {
+                memset(other, 0, sizeof *other);
+            }
+        }
+    }
     return 0;
 }
 
@@ -571,11 +693,12 @@ tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
     int scale = (int)(px * 64.0 + 0.5);
     if (scale < 1) scale = 1;
     hb_font_set_scale(e->hbfont, scale, scale);
+    entry_apply_size(e, px);
 
     hb_buffer_reset(g_buf);
     hb_buffer_add_utf8(g_buf, text, (int)len, 0, (int)len);
     hb_buffer_guess_segment_properties(g_buf);
-    hb_shape(e->hbfont, g_buf, NULL, 0);
+    (void)hb_shape_full(e->hbfont, g_buf, NULL, 0, TSH_SHAPERS);
 
     unsigned gn = hb_buffer_get_length(g_buf);
     if ((size_t)gn > cap || gn > TSH_MAX_GLYPHS) return TSH_ERR_OVERFLOW;
@@ -834,10 +957,11 @@ static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t 
     int scale = (int)(px * 64.0 + 0.5);
     if (scale < 1) scale = 1;
     hb_font_set_scale(e->hbfont, scale, scale);
+    entry_apply_size(e, px);
     hb_buffer_reset(g_buf);
     hb_buffer_add_utf8(g_buf, text, (int)len, 0, (int)len);
     hb_buffer_guess_segment_properties(g_buf);
-    hb_shape(e->hbfont, g_buf, NULL, 0);
+    (void)hb_shape_full(e->hbfont, g_buf, NULL, 0, TSH_SHAPERS);
     unsigned gn = hb_buffer_get_length(g_buf);
     if (gn > TSH_MAX_GLYPHS) return TSH_ERR_OVERFLOW;
     const hb_glyph_info_t     *info = hb_buffer_get_glyph_infos(g_buf, NULL);
@@ -892,6 +1016,25 @@ static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x
                                     runs[r].end - runs[r].start, &n, &adv);
         if (st != TSH_OK) return st;
         if (cr != NULL && n > 0) {
+            /* The painted outlines take the same optical-size instance the advances
+             * were shaped at: cairo applies it per scaled font from the font options.
+             * Whole numbers only -- a locale decimal comma would not parse. */
+            int vary = re->has_opsz;
+            if (vary) {
+                cairo_save(cr);
+                cairo_font_options_t *fo = cairo_font_options_create();
+                char vs[64];
+                int vr = re->has_wght
+                      ? snprintf(vs, sizeof vs, "wght=%d,opsz=%d", re->wght, entry_opsz_for(re, px))
+                      : snprintf(vs, sizeof vs, "opsz=%d", entry_opsz_for(re, px));
+                if (fo != NULL && cairo_font_options_status(fo) == CAIRO_STATUS_SUCCESS &&
+                    vr > 0 && (size_t)vr < sizeof vs) {
+                    cairo_get_font_options(cr, fo);
+                    cairo_font_options_set_variations(fo, vs);
+                    cairo_set_font_options(cr, fo);
+                }
+                if (fo != NULL) cairo_font_options_destroy(fo);
+            }
             cairo_set_font_face(cr, re->cface);
             cairo_set_font_size(cr, px);
             size_t shown = 0;
@@ -903,6 +1046,7 @@ static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x
                 ++shown;
             }
             if (shown > 0) cairo_show_glyphs(cr, g_scratch, (int)shown);
+            if (vary) cairo_restore(cr);
         }
         pen += adv;
     }

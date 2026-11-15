@@ -102,3 +102,48 @@ Dado-Cuando-Entonces (W = 1000):
   cumplirse); `blankslate (width<=34rem)` → no aplica.
 - `(max-width: 1200px)` → aplica; `(min-width:32px)` → no aplica (falsa en 0).
 - `(width<80rem) or (width>9px)` → no aplica (`or`); `(height<10px)` → no aplica.
+
+## Container queries con layout (tanda 90): `cmq_container_holds`
+
+La cota «seguramente verdadera» deja sin aplicar toda rama `>=` de un componente (el
+formulario de alta de GitHub: `@container homepage-signup (width>=28.5rem)` pone email y
+botón en fila; sin ella quedan apilados). La condición se evalúa ahora contra el **ancho
+real** del contenedor cuando el motor lo conoce, y cae a la cota anterior cuando no.
+
+Modelo (puro, sin I/O):
+
+- `container-type` (`normal` | `inline-size` | `size`), `container-name` (hasta
+  `CMQ_CONTAINER_NAMES` nombres, como hash) y el shorthand `container: <nombres> / <tipo>`
+  son propiedades reales de `css_style`.
+- El motor (page_view, que resuelve de la raíz hacia abajo) entrega a la cascada, como
+  input del elemento igual que `font_size`, la **cadena de contenedores ancestro**
+  (`cmq_container`: tipo, nombres, ancho de contenido en px o `-1` = desconocido, padre).
+- `@container` ya **no se evalúa al parsear**: sus reglas entran a la hoja marcadas con su
+  condición (y la de los `@container` que las anidan) y se filtran al matchear.
+- `cmq_container_holds(prelude, scope, max_width)`: el contenedor consultado es el
+  ancestro más cercano con `container-type != normal` y, si el preludio trae nombre, con
+  ese nombre (Conditional 5 §2.1). Si existe y su ancho es conocido, la condición se evalúa
+  con ese ancho; las mismas formas vetadas (`or`, `not`, altura, `style()`...) siguen
+  fallando cerrado. Si no hay contenedor elegible **o su ancho es desconocido**, el
+  resultado es `cmq_container_surely` (comportamiento anterior, byte-idéntico con
+  `scope == NULL`).
+
+Origen del ancho: la geometría del layout final que el padre ya entrega al worker
+(`OP_GEOM`, `spec/js_geom.md`) — por tanto **solo en hosts allow∩js**; el resto conserva
+la cota. Es el ancho de la caja del contenedor menos su padding y borde horizontales. La
+primera derivación de una página no tiene geometría (cota); al llegar la primera tabla, si
+el ancho de algún contenedor registrado cambió, el worker invalida su vista y el siguiente
+tick la re-deriva. Acotado a `TAB_CQ_REDERIVE_MAX` re-derivaciones por generación del DOM
+(un contenedor cuyo ancho dependiera de su contenido no puede oscilar sin fin).
+
+Dado-Cuando-Entonces:
+- Dado `scope = {inline-size, "card", 480px}`, `card (width>=456px)` → verdadero;
+  `(width>=500px)` → falso; `other (width>=1px)` → sin contenedor con ese nombre → cota → falso.
+- Dado un ancestro `normal` de 900 px y, encima, uno `inline-size` de 300 px:
+  `(width<400px)` → verdadero (el `normal` no es contenedor).
+- Dado `scope` con ancho `-1`: `(width<63.25rem)` → verdadero (cota), `(width>=1px)` → falso.
+- `(height>1px)` con contenedor conocido → falso (vetado).
+
+Fuera de alcance: unidades `cqw`/`cqi`, `style()`, consultas de alto, `::before`/`::after`
+dentro de `@container` con contenedor conocido (siguen con la cota), custom properties
+declaradas dentro de `@container` (cota), hosts no confiables.

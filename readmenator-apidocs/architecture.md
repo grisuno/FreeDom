@@ -15,17 +15,17 @@ flowchart TB
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     subgraph lane_0["Tier 1 - entry / orchestration"]
         direction LR
-        n_c2["include: browser_ui<br/>32 files, 981 symbols<br/>Core / utility"]:::cycle
+        n_c2["include: browser_ui<br/>32 files, 984 symbols<br/>Core / utility"]:::cycle
         n_d_tools["tools<br/>13 files, 69 symbols<br/>Core / utility"]:::default
         n_d__root_["(root)<br/>5 files, 3 symbols<br/>Core / utility"]:::entry
     end
     subgraph lane_1["Tier 2"]
         direction LR
-        n_c3["src: text_shape<br/>27 files, 399 symbols<br/>Core / utility"]:::cycle
+        n_c3["src: text_shape<br/>27 files, 405 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c1["src: tab<br/>38 files, 851 symbols<br/>Core / utility"]:::cycle
+        n_c1["src: tab<br/>38 files, 856 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
@@ -37,7 +37,7 @@ flowchart TB
     end
     subgraph lane_4["Tier 5"]
         direction LR
-        n_c4["include: page_view<br/>18 files, 770 symbols<br/>Core / utility"]:::cycle
+        n_c4["include: page_view<br/>18 files, 782 symbols<br/>Core / utility"]:::cycle
         n_c7["src: http_cache<br/>9 files, 136 symbols<br/>Data access"]:::cycle
     end
     subgraph lane_5["Tier 6"]
@@ -47,7 +47,7 @@ flowchart TB
     end
     subgraph lane_6["Tier 7 - foundation"]
         direction LR
-        n_c0["include: css<br/>39 files, 1070 symbols<br/>Core / utility"]:::cycle
+        n_c0["include: css<br/>39 files, 1086 symbols<br/>Core / utility"]:::cycle
     end
     n_c1 -->|"1"| n_c10
     n_c1 -->|"1"| n_c11
@@ -95,7 +95,7 @@ Entry points are scored from `__main__` guards, `main` functions, entry-style na
 
 ### `browser_ui.main`
 
-`gui/browser_ui.c:565`, score 11: `main` in a compiled-language file; entry-style name `main`.
+`gui/browser_ui.c:566`, score 11: `main` in a compiled-language file; entry-style name `main`.
 
 Call tree:
 
@@ -103,7 +103,7 @@ Call tree:
 flowchart LR
     classDef default fill:#111827,stroke:#38bdf8,color:#e5e7eb;
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
-    n_gui_browser_ui_c__main["browser_ui.main<br/>browser_ui.c:565"]:::entry
+    n_gui_browser_ui_c__main["browser_ui.main<br/>browser_ui.c:566"]:::entry
     n_gui_browser_ui_c__now_ms["browser_ui.now_ms<br/>Largest text slice measured/drawn at once (on...<br/>browser_ui.c:169"]:::default
     n_gui_browser_ui_c__main -->|"1"| n_gui_browser_ui_c__now_ms
 ```
@@ -188,7 +188,7 @@ flowchart LR
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
     n_src_freedom_c__main["freedom.main<br/>freedom.c:1312"]:::entry
-    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2927"]:::external
+    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2928"]:::external
     n_include_prefs_h__free["prefs.free<br/>prefs.h:72"]:::external
     n_src_prefs_c__prefs_format["prefs.prefs_format<br/>prefs.c:183"]:::external
     n_src_prefs_c__prefs_parse["prefs.prefs_parse<br/>prefs.c:247"]:::external
@@ -198,9 +198,9 @@ flowchart LR
     n_src_prefs_c__bookmark_push["prefs.bookmark_push<br/>Appends a cleaned bookmark.<br/>prefs.c:91"]:::external
     n_src_prefs_c__history_push_back["prefs.history_push_back<br/>Appends a history entry at the BACK preservin...<br/>prefs.c:109"]:::external
     n_src_prefs_c__apply_kv["prefs.apply_kv<br/>} for (size_t i = 0#59; i #lt; p-#gt;history_len#59; ++i)...<br/>prefs.c:231"]:::external
-    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1910"]:::external
-    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1129"]:::external
-    n_gui_browser_ui_c__is_https_url["browser_ui.is_https_url<br/>browser_ui.c:1114"]:::external
+    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1911"]:::external
+    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1130"]:::external
+    n_gui_browser_ui_c__is_https_url["browser_ui.is_https_url<br/>browser_ui.c:1115"]:::external
     n_src_hostblock_c__hb_check["hostblock.hb_check<br/>hostblock.c:193"]:::external
     n_src_hostblock_c__lower["hostblock.lower<br/>hostblock.c:107"]:::external
     n_src_hostblock_c__table_contains["hostblock.table_contains<br/>hostblock.c:92"]:::external
@@ -217,9 +217,9 @@ flowchart LR
     n_src_browser_c__browser_url_bar_extend_cursor["browser.browser_url_bar_extend_cursor<br/>browser.c:376"]:::external
     n_src_browser_c__browser_url_bar_set_cursor["browser.browser_url_bar_set_cursor<br/>browser.c:385"]:::external
     n_src_browser_c__browser_url_bar_select_all["browser.browser_url_bar_select_all<br/>browser.c:393"]:::external
-    n_gui_browser_ui_c__apply_operator_override["browser_ui.apply_operator_override<br/>browser_ui.c:1587"]:::external
-    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1860"]:::external
-    n_gui_browser_ui_c__aa_note["browser_ui.aa_note<br/>A fetch thread asks: should #96;host#96; (pulled by...<br/>browser_ui.c:1604"]:::external
+    n_gui_browser_ui_c__apply_operator_override["browser_ui.apply_operator_override<br/>browser_ui.c:1588"]:::external
+    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1861"]:::external
+    n_gui_browser_ui_c__aa_note["browser_ui.aa_note<br/>A fetch thread asks: should #96;host#96; (pulled by...<br/>browser_ui.c:1605"]:::external
     n_src_freedom_c__main -.->|"recursion"| n_src_freedom_c__main
     n_src_freedom_c__main -->|"1"| n_gui_browser_ui_c__strcmp
     n_gui_browser_ui_c__strcmp -.->|"recursion"| n_gui_browser_ui_c__strcmp

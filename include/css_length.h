@@ -47,14 +47,21 @@
 /* Spec-named fallbacks for font metrics the caller has not supplied.
  * CSS Values 4:
  *   6.1.1 ex  -- "a value of 0.5em should be used" when x-height is unknown.
- *   6.1.2 ch  -- the `0` glyph "must be assumed to be 0.5em wide" when unknown.
+ *   6.1.2 ch  -- the `0` glyph "must be assumed to be 0.5em wide" when unknown;
+ *                deliberately NOT followed, see CL_FALLBACK_CH_RATIO below.
  *   6.1.3 cap -- falls back to the font's ascent metric; 0.7em approximates the
  *                cap-height of the default serif/sans faces.
  *   6.1.4 ic  -- the CJK water ideograph "must be assumed to be 1em" when
  *                unknown.
  * These are ratios of the element's font-size, never absolute px. */
 #define CL_FALLBACK_EX_RATIO   0.5
-#define CL_FALLBACK_CH_RATIO   0.5
+/* ch (tanda 90): the cascade runs in the confined worker, which never touches a font
+ * (and must not learn the local ones: anti-fingerprinting), so `ch` is always this
+ * ratio. The spec's 0.5em is the advance of `0` in Times; nearly every page that uses
+ * `ch` sets a sans face, whose `0` is wider -- Arial/Helvetica/Liberation Sans 0.556,
+ * the web's canonical sans metric (Firefox here, default sans, measures 0.5725). At 0.5
+ * a `16ch` heading was 448 px where Firefox gives 513 and its text wrapped a line early. */
+#define CL_FALLBACK_CH_RATIO   0.556
 #define CL_FALLBACK_CAP_RATIO  0.7
 #define CL_FALLBACK_IC_RATIO   1.0
 

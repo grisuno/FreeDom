@@ -1,6 +1,32 @@
 # Subsystem: src (page 10 of 10)
 Previous: [KB_src_p9.md](KB_src_p9.md)
 
+## src/webfont.c
+- Doc: ci_eq_span: #include <stdint.h> #include <stdlib.h> #include <string.h> static int is_ws(char c)...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `is_ws` (function, line 19) `static int is_ws(char c)`
+  - `lower_ch` (function, line 23) `static int lower_ch(char c)`
+  - `ci_eq_span` (function, line 28) `static int ci_eq_span(const char *s, size_t n, const char *kw)`
+  - `wf_list_free` (function, line 49) `void wf_list_free(wf_list *l)`
+  - `wf_ref_move` (function, line 64) `void wf_ref_move(wf_ref *dst, wf_ref *src)`
+  - `wf_supported_format` (function, line 74) `int wf_supported_format(const char *fmt)`
+  - `emit_slot` (function, line 86) `static wf_ref *emit_slot(wf_list *out)`
+  - `emit_family_format` (function, line 101) `static void emit_family_format(wf_ref *r, const char *family, const char *format)`
+  - `span_is_data` (function, line 117) `static int span_is_data(const char *span, size_t slen)`
+  - `emit` (function, line 129) `static void emit(wf_list *out, const char *family,
+                 const char *url, size_t ulen,...`
+  - `emit_data` (function, line 145) `static void emit_data(wf_list *out, const char *family,
+                      const char *span, s...`
+  - `scan_face_block` (function, line 182) `static void scan_face_block(const char *s, size_t bstart, size_t bend,
+                          ...`
+  - `lower_ch` (function, line 313) `&& lower_ch(s[k]) == 's' && k + 3 < bend
+                && lower_ch(s[k + 1]) == 'r' && lower_ch...`
+  - `wf_scan` (function, line 429) `int wf_scan(const char *css, size_t len, wf_list *out)`
+  - `candidates` (function, line 7) `* understanding just far enough to find candidates (family + first url() per * src entry + weight/style descriptors);`
+- Depends on: `include/data_url.h`, `include/webfont.h`
+
 ## src/webfont_load.c
 - Doc: wf_key: size_t k = 0; while (PREF[i][k] != '\0') ++k; size_t j = 0; for (; j < k; ++j) { char a...
 - Layer: utility

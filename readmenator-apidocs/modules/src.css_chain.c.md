@@ -191,7 +191,7 @@ void cch_path_free(cch_path *pa)
 `function` | [src/css_chain.c:372](../../src/css_chain.c#L372)
 
 ```c
-css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet, double parent_font_size, const struct cvr_chain *inherited, struct cvr_table *own_out)
+css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet, double parent_font_size, const struct cvr_chain *inherited, const struct cmq_container *containers, struct cvr_table *own_out)
 ```
 
 **Parameters**
@@ -203,6 +203,7 @@ css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_
 | `sheet` | `css_sheet *` |  |  |
 | `parent_font_size` | `double` |  |  |
 | `inherited` | `struct cvr_chain *` |  |  |
+| `containers` | `struct cmq_container *` |  |  |
 | `own_out` | `struct cvr_table *` |  |  |
 
 **Returns:** `css_style`
@@ -215,7 +216,7 @@ css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_
 
 ### `cch_pseudo_style`
 
-`function` | [src/css_chain.c:439](../../src/css_chain.c#L439)
+`function` | [src/css_chain.c:442](../../src/css_chain.c#L442)
 
 ```c
 css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which, double font_size, const struct cvr_chain *inherited)
@@ -241,7 +242,7 @@ css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int wh
 
 ### `cch_element_style`
 
-`function` | [src/css_chain.c:458](../../src/css_chain.c#L458)
+`function` | [src/css_chain.c:461](../../src/css_chain.c#L461)
 
 ```c
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
@@ -256,7 +257,7 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
 
 **Returns:** `css_style`
 
-*Called by:* [`pv_build_cached`](src.page_view.c.md#pv_build_cached)
+*Called by:* [`pv_build_live`](src.page_view.c.md#pv_build_live)
 
 ---
 
@@ -264,7 +265,7 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
 
 ### `cch_element_matches`
 
-`function` | [src/css_chain.c:462](../../src/css_chain.c#L462)
+`function` | [src/css_chain.c:465](../../src/css_chain.c#L465)
 
 ```c
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)
@@ -283,7 +284,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`cch_element_matches`](#cch_element_matches) (include/css_chain.h:81).
+> **Inherited:** Documentation from [`cch_element_matches`](#cch_element_matches) (include/css_chain.h:82).
 
 *Calls:* [`csel_matches`](include.css_select.h.md#csel_matches), [`csel_needs_structure`](src.css_select.c.md#csel_needs_structure)
 
@@ -295,7 +296,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ### `cch_element_matches_any`
 
-`function` | [src/css_chain.c:476](../../src/css_chain.c#L476)
+`function` | [src/css_chain.c:479](../../src/css_chain.c#L479)
 
 ```c
 int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)

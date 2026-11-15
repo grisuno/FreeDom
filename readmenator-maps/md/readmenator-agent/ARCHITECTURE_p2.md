@@ -2,6 +2,7 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_css_values.c` -> `include/css_values.h`
 - `tests/test_css_vars.c` -> `include/css_vars.h`
 - `tests/test_data_url.c` -> `include/data_url.h`
 - `tests/test_disk_store.c` -> `include/disk_store.h`
@@ -309,7 +310,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/svg_raster.c` -> cairo.h, math.h, stdlib.h, string.h
 - `src/svg_render.c` -> math.h, stddef.h, string.h
 - `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, pthread.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/random.h, sys/wait.h, time.h, unistd.h
-- `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, stdint.h, stdio.h, stdlib.h, string.h
+- `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, hb-ft.h, hb-ot.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/textfield.c` -> string.h
 - `src/tls_impersonate.c` -> stdlib.h, string.h
 - `src/ui_layout.c` -> stdlib.h

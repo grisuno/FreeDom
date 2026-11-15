@@ -134,6 +134,13 @@ struct css_sheet {
     double          rw_rem_px, rw_vw_px, rw_vh_px;
     int             cur_layer;
     char            cur_layer_path[CAR_LAYER_NAME_MAX];
+    /* @container conditions (spec/css_mq.md): a rule inside one is kept and gated per
+     * element. cq[k].text is the prelude, parent the 1-based enclosing condition (0 =
+     * none), max_w the render width its layout-free bound is taken against. cur_cq is
+     * the condition the parser is inside. Owned; emptied by sheet_rewind. */
+    struct css_cq { char *text; int parent; int max_w; } *cq;
+    size_t          ncq, cqcap;
+    int             cur_cq;
     char          (*bg_urls)[CSS_URL_MAX];      /* background-image url() pool (heap) */
     size_t          nbg_urls, bg_cap;
     char          (*content_urls)[CSS_URL_MAX]; /* ::before/::after content strings (heap) */
@@ -3935,9 +3942,9 @@ static int is_inert_prop(const char *prop) {
         "contain-intrinsic-size", "contain-intrinsic-width", "contain-intrinsic-height",
         "touch-callout", "user-drag", "scroll-timeline", "view-timeline",
         /* tanda 83: a container/anchor NAME or TYPE changes nothing by itself -- the
-         * queries that read it are evaluated (or not) on their own (cmq_container_surely);
+         * queries that read it are evaluated (or not) on their own;
          * the rendering hints below are quality knobs with no geometry or colour. */
-        "container-type", "container-name", "container", "anchor-name", "anchor-scope",
+        "anchor-name", "anchor-scope",
         "position-try-fallbacks", "position-try-order", "position-try", "position-visibility",
         "text-rendering", "forced-color-adjust", "print-color-adjust", "color-adjust",
         "interpolate-size",
@@ -3989,6 +3996,27 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         }
         if (known != NULL) *known = 0;
         return 0;   /* an unknown vendor prefix: fail closed */
+    }
+
+    /* Query containers: the grammar is css_mq's; this only lays the slots out. */
+    if (strncmp(prop, "container", 9) == 0) {
+        int type = CMQ_CT_NORMAL, has_type = 0, has_names = 0, n = 0;
+        unsigned names[CMQ_CONTAINER_NAMES];
+        if (!cmq_container_decl(prop, val, &type, names, &has_type, &has_names) ||
+            cap < 1 + CMQ_CONTAINER_NAMES)
+            return 0;
+        if (has_type) {
+            memset(&dst[n], 0, sizeof dst[n]);
+            dst[n].prop = P_CONTAINER_TYPE; dst[n].ival = type; ++n;
+        }
+        if (has_names) {
+            static const int slot[CMQ_CONTAINER_NAMES] = { P_CONTAINER_NAME0, P_CONTAINER_NAME1 };
+            for (int k = 0; k < CMQ_CONTAINER_NAMES; ++k, ++n) {
+                memset(&dst[n], 0, sizeof dst[n]);
+                dst[n].prop = slot[k]; dst[n].ival = (int)names[k];
+            }
+        }
+        return n;
     }
 
     /* CSS Grid 1 section 10.2: `grid-column-gap` / `grid-row-gap` are the legacy
@@ -5121,6 +5149,7 @@ static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
         }
         tmp[g].rule = (int)rule_idx;
         tmp[g].layer = sh->cur_layer;
+        tmp[g].cq = sh->cur_cq;
         tmp[g].order = (int)sh->nsels;
         css_sel *dst = csel_compact_dup(&tmp[g]);
         if (dst == NULL) break;
@@ -5262,6 +5291,46 @@ static void property_initial(const char *s, size_t pa, size_t pb, size_t ba, siz
         }
         i = (j < bb) ? j + 1 : j;
     }
+}
+
+
+/* Anti-DoS bounds of the @container condition table. */
+#define CSS_MAX_CQ      4096u
+#define CSS_CQ_TEXT_MAX 480u
+
+/* Records an @container prelude under the condition the parser is inside and returns
+ * its 1-based id, or 0 when it cannot be recorded (bound, OOM, oversized prelude). */
+static int cq_register(css_sheet *sh, const char *text, size_t len, int max_w) {
+    if (len == 0 || len > CSS_CQ_TEXT_MAX || sh->ncq >= CSS_MAX_CQ) return 0;
+    if (sh->ncq == sh->cqcap) {
+        size_t nc = sh->cqcap ? sh->cqcap * 2 : 16;
+        struct css_cq *g = (struct css_cq *)realloc(sh->cq, nc * sizeof *g);
+        if (g == NULL) return 0;
+        sh->cq = g;
+        sh->cqcap = nc;
+    }
+    char *t = (char *)malloc(len + 1);
+    if (t == NULL) return 0;
+    memcpy(t, text, len);
+    t[len] = '\0';
+    sh->cq[sh->ncq].text = t;
+    sh->cq[sh->ncq].parent = sh->cur_cq;
+    sh->cq[sh->ncq].max_w = max_w;
+    return (int)++sh->ncq;
+}
+
+/* Every @container condition from id outward holds for an element whose ancestor
+ * containers are `scope`. A parent id is always smaller than its child's, so the walk
+ * terminates. */
+static int cq_holds(const css_sheet *sheet, int id, const cmq_container *scope) {
+    while (id > 0) {
+        if ((size_t)id > sheet->ncq) return 0;
+        const struct css_cq *c = &sheet->cq[id - 1];
+        if (!cmq_container_holds(c->text, strlen(c->text), scope, c->max_w)) return 0;
+        if (c->parent >= id) return 0;
+        id = c->parent;
+    }
+    return 1;
 }
 
 /* Registers the layer name s[a,b) (trimmed; empty = anonymous) nested under the
@@ -5455,14 +5524,24 @@ static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
                 i = be;
                 continue;
             }
-            /* @container: parsed iff its condition holds for EVERY container that fits
-             * in the render width (cmq_container_surely, spec/css_mq.md) -- the cascade
-             * runs before layout, and a contained box is never wider than that. */
+            /* @container: its rules are kept, tagged with the condition, and gated per
+             * element at match time against the element's real container when the engine
+             * knows it, or the layout-free bound when it does not (spec/css_mq.md). A
+             * condition the table cannot hold falls back to that bound here. */
             if (at_keyword(s, i, end, "container")) {
                 size_t q, ba, bb, be;
                 if (at_block(s, i + 10, end, &q, &ba, &bb, &be) && depth < CSS_MEDIA_MAX_DEPTH &&
-                    q > i + 10 && cmq_container_surely(s + i + 10, q - (i + 10), media->width_px))
-                    parse_block(sh, s, ba, bb, media, depth + 1, log);
+                    q > i + 10) {
+                    int id = cq_register(sh, s + i + 10, q - (i + 10), media->width_px);
+                    if (id > 0) {
+                        int saved = sh->cur_cq;
+                        sh->cur_cq = id;
+                        parse_block(sh, s, ba, bb, media, depth + 1, log);
+                        sh->cur_cq = saved;
+                    } else if (cmq_container_surely(s + i + 10, q - (i + 10), media->width_px)) {
+                        parse_block(sh, s, ba, bb, media, depth + 1, log);
+                    }
+                }
                 i = be;
                 continue;
             }
@@ -5870,6 +5949,8 @@ static void sheet_rewind(css_sheet *sh) {
     memset(&sh->layers, 0, sizeof sh->layers);
     sh->cur_layer = 0;
     sh->cur_layer_path[0] = '\0';
+    while (sh->ncq > 0) free(sh->cq[--sh->ncq].text);
+    sh->cur_cq = 0;
 }
 
 static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
@@ -6055,6 +6136,8 @@ void css_free(css_sheet *s) {
     free(s->raw);
     free(s->bg_urls);
     free(s->content_urls);
+    while (s->ncq > 0) free(s->cq[--s->ncq].text);
+    free(s->cq);
     free(s);
 }
 
@@ -6356,6 +6439,9 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_BG_ATTACHMENT:       o->bg_attachment = d->ival; break;
             case P_ISOLATION:           o->isolation = d->ival; break;
             case P_CONTAIN:             o->contain = d->ival; break;
+            case P_CONTAINER_TYPE:      o->container_type = d->ival; break;
+            case P_CONTAINER_NAME0:     o->container_names[0] = (unsigned)d->ival; break;
+            case P_CONTAINER_NAME1:     o->container_names[1] = (unsigned)d->ival; break;
             case P_CONTENT_VISIBILITY:  o->content_visibility = d->ival; break;
             case P_IMAGE_RENDERING:     o->image_rendering = d->ival; break;
             case P_COLOR_SCHEME:        o->color_scheme = d->ival; break;
@@ -6936,6 +7022,7 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
             int pseudo_kind = -1;
             if (csel_anc_reject(sel, el)) continue;   /* an ancestor it needs is absent */
             if (!csel_matches(sel, el, NULL, 1, &pseudo_kind)) continue;
+            if (sel->cq != 0 && !cq_holds(sheet, sel->cq, el->containers)) continue;
             if (want_pseudo != 0) {
                 if (pseudo_kind != pseudo_of(want_pseudo)) continue;
                 pseudo_kind = -1;   /* the generated box takes every declaration */
@@ -7126,6 +7213,10 @@ int css_font_face_at(const css_sheet *sheet, size_t i,
 
 css_style css_parse_inline(const char *style, size_t len) {
     return css_resolve(NULL, NULL, NULL, NULL, 0, style, len);
+}
+
+int css_sheet_uses_containers(const css_sheet *sheet) {
+    return sheet != NULL && sheet->ncq > 0;
 }
 
 int css_sheet_uses_counters(const css_sheet *sheet) {

@@ -934,6 +934,43 @@ pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
                           int viewport_w, struct shc_cache *sheets, pv_view **out);
 
+/* Query-container widths for @container (spec/css_mq.md, "Container queries con
+ * layout"). The caller supplies width(): the laid-out BORDER-box width in px of an
+ * element, or -1 when unknown. The build reports back the containers it met -- node,
+ * the horizontal padding+border it subtracted, and the content width it evaluated
+ * with (-1 = unknown) -- so the caller can tell when a later layout changed one. */
+#define PV_CQ_MAX 256
+typedef struct pv_cq_src {
+    int       (*width)(void *ctx, dom_node_id node);
+    void       *ctx;
+    dom_node_id node[PV_CQ_MAX];
+    int         edges[PV_CQ_MAX];
+    int         used[PV_CQ_MAX];
+    size_t      n;
+} pv_cq_src;
+
+/* As pv_build_cached, with real container widths. cq == NULL (or a sheet with no
+ * @container rule) is pv_build_cached exactly; cq->n is reset by the build. */
+pv_status pv_build_cq(const hp_document *doc, int js_enabled, int reader,
+                      int prefers_dark, const char *extern_css, size_t extern_len,
+                      int viewport_w, struct shc_cache *sheets, pv_cq_src *cq,
+                      pv_view **out);
+
+/* Element identity for a LIVE document (spec/page_view.md "Los ids de la vista son
+ * handles del DOM vivo"): id_of returns the handle the caller's DOM index gives a
+ * native element, or DOM_NODE_NONE. Every node id the view carries is then that
+ * handle instead of the element's document ordinal. */
+typedef struct pv_node_ids {
+    dom_node_id (*id_of)(void *ctx, const void *native_el);
+    void         *ctx;
+} pv_node_ids;
+
+/* As pv_build_cq, with the caller's element ids. ids == NULL is pv_build_cq exactly. */
+pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
+                        int prefers_dark, const char *extern_css, size_t extern_len,
+                        int viewport_w, struct shc_cache *sheets, pv_cq_src *cq,
+                        const pv_node_ids *ids, pv_view **out);
+
 /* getComputedStyle bridge (spec/js_computed_style.md). A pv_computed retains the
  * parsed sheet of a document so single elements can be resolved with the full
  * cascade (author sheets, inheritance, capas, !important) long after
@@ -1233,6 +1270,10 @@ void pv_set_block_node(pv_view *v, dom_node_id id);
 /* pv_run.br_line flags. */
 #define PV_BR_EMPTY 1
 #define PV_BR_CONT  2
+/* The run opens an atom of an anonymous inline-block row that collapsible white space
+ * separates from the atom before it, in a row where not every pair is separated
+ * (spec/page_view.md "El espacio entre atomos"). Set by pv_build only. */
+#define PV_BR_ATOM_SPACE 4
 
 /* Sets the last appended run's PV_BR_* flags (see pv_run.br_line); other bits
  * are dropped. No-op on an empty or NULL view. */

@@ -384,7 +384,8 @@ static void test_vendor_prefixes(v...`
   - `test_inline_line_height_calc` (function, line 5880) `static void test_inline_line_height_calc(void **state)`
   - `test_inline_outline_auto` (function, line 5895) `static void test_inline_outline_auto(void **state)`
   - `test_anim_iterations_huge_is_infinite` (function, line 5909) `static void test_anim_iterations_huge_is_infinite(void **state)`
-  - `main` (function, line 5916) `int main(void)`
+  - `test_container_query_real_width` (function, line 5918) `static void test_container_query_real_width(void **state)`
+  - `main` (function, line 5968) `int main(void)`
   - `box` (function, line 234) `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the...`
   - `downstream` (function, line 663) `* and deciding whether to fetch happens downstream (render_doc.c) */ assert_string_equal(css_parse_inline(...`
   - `invalid` (function, line 765) `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color...`

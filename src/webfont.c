@@ -74,9 +74,12 @@ void wf_ref_move(wf_ref *dst, wf_ref *src) {
 int wf_supported_format(const char *fmt) {
     if (fmt == NULL) return 0;
     if (fmt[0] == '\0') return 1;   /* no hint: fetch, sniff magic at receipt */
-    return ci_eq_span(fmt, strlen(fmt), "woff")
-        || ci_eq_span(fmt, strlen(fmt), "truetype")
-        || ci_eq_span(fmt, strlen(fmt), "opentype");
+    /* The base token: `woff2-variations` and `woff2 supports variations` (which the
+     * scanner may have truncated) name the woff2 container. */
+    size_t n = 0;
+    while (fmt[n] != '\0' && fmt[n] != ' ' && fmt[n] != '-') ++n;
+    return ci_eq_span(fmt, n, "woff") || ci_eq_span(fmt, n, "woff2")
+        || ci_eq_span(fmt, n, "truetype") || ci_eq_span(fmt, n, "opentype");
 }
 
 /* Grows out for one more ref. Returns the slot, or NULL (full/OOM). */
@@ -189,8 +192,12 @@ static void scan_face_block(const char *s, size_t bstart, size_t bend,
         size_t pstart = j;
         while (j < bend && s[j] != ':' && s[j] != ';' && s[j] != '{' && s[j] != '}') ++j;
         if (j >= bend || s[j] != ':') {
-            /* Junk to the next separator; nested blocks cannot appear here. */
+            /* Junk to the next separator, and PAST it: stopping on a '}' without
+             * consuming it re-entered this branch at the same byte forever (a stray
+             * brace inside the block is all it took). Every turn of the loop must
+             * advance j. */
             while (j < bend && s[j] != ';' && s[j] != '}') ++j;
+            if (j < bend) ++j;
             continue;
         }
         /* Trim the name for comparison (pstart..j). */

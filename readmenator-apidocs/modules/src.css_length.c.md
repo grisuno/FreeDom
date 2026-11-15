@@ -107,7 +107,7 @@ Used to tell "unsupported unit" apart from "not a length".
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`cl_is_length_unit`](#cl_is_length_unit) (include/css_length.h:246).
+> **Inherited:** Documentation from [`cl_is_length_unit`](#cl_is_length_unit) (include/css_length.h:253).
 
 *Calls:* [`cl_ctx_initial`](#cl_ctx_initial), [`cl_unit_scale`](#cl_unit_scale)
 
@@ -194,7 +194,7 @@ decimal separator is ',' cannot truncate "1.5px" to 1px.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`cl_number`](#cl_number) (include/css_length.h:230).
+> **Inherited:** Documentation from [`cl_number`](#cl_number) (include/css_length.h:237).
 
 ---
 

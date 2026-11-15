@@ -20,6 +20,17 @@ classDiagram
     <<type_alias>> pqs_keys
 ```
 
+## Call Graph
+
+Solid arrows stay in this module, dashed arrows leave it.
+
+```mermaid
+flowchart LR
+    n_include_pq_seal_h__PQS_CT_LEN(["PQS_CT_LEN"])
+    n_src_text_shape_c__blob["text_shape.blob"]
+    n_include_pq_seal_h__PQS_CT_LEN -.-> n_src_text_shape_c__blob
+```
+
 ## Enums
 
 <a id="pqs_status"></a>
@@ -128,5 +139,7 @@ Zeroes then frees a buffer returned by this module.
 ```c
 #define PQS_CT_LEN
 ```
+
+*Calls:* [`blob`](src.text_shape.c.md#blob)
 
 ---

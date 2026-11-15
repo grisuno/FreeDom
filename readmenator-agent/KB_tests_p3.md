@@ -164,7 +164,9 @@ static void test_leading_b...`
   - `test_fail_closed` (function, line 97) `static void test_fail_closed(void **state)`
   - `surely` (function, line 111) `static int surely(const char *q)`
   - `test_container_surely` (function, line 114) `static void test_container_surely(void **state)`
-  - `main` (function, line 135) `int main(void)`
+  - `holds` (function, line 135) `static int holds(const char *q, const cmq_container *sc)`
+  - `test_container_holds` (function, line 139) `static void test_container_holds(void **state)`
+  - `main` (function, line 167) `int main(void)`
 - Depends on: `include/css_mq.h`
 
 ## tests/test_css_text.c

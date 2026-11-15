@@ -1,10 +1,10 @@
 YouTube
-CSS drops: 5177 declaration(s) dropped, 58 distinct
+CSS drops: 5478 declaration(s) dropped, 58 distinct
   count  cause         property                     first value
    2207  unknown-prop  -moz-box-direction           normal
-   1483  bad-value     display                      box
+   1529  bad-value     display                      box
     960  unknown-prop  -moz-box-flex                1
-    345  unknown-prop  font-variation-settings      "wdth" 100
+    600  unknown-prop  font-variation-settings      "wdth" 100
      14  unknown-prop  -moz-padding-start           20px
      13  unknown-prop  -webkit-box-direction        normal
      12  bad-value     background                   linear-gradient(unset,transparent 75%)

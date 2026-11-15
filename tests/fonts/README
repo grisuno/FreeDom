@@ -1,0 +1,7 @@
+Test fixtures for the webfont container tests (tests/test_text_shape.c, tests/test_webfont_load.c).
+Each is a 10-glyph subset ("ABCDabcd 0") made with `python3 -m fontTools.subset --flavor=...`:
+  dejavu-subset.woff / .woff2      from DejaVu Sans (Bitstream Vera / DejaVu licence)
+  robotoslab-wght-subset.woff2     from Roboto Slab [wght], a variable font (Apache License 2.0)
+  robotoslab-opsz-subset.woff2     the same subset with its one axis RETAGGED `opsz` (range 8..144,
+                                   default 16; avar/STAT dropped): a synthetic optical-size axis whose
+                                   advances grow with the size, for the auto optical sizing test

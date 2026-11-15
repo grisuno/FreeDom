@@ -1,6 +1,6 @@
 # Second Brain
 
-*Last synthesized: 2026-11-14 | 325 files | 14 concept pages | offline, zero tokens*
+*Last synthesized: 2026-11-15 | 325 files | 14 concept pages | offline, zero tokens*
 
 > Raw sources -> readmenator wiki -> links (Karpathy LLM Wiki Pattern, deterministic).
 > Start here, then open one community page. Prefer grep over full reads.
@@ -18,13 +18,13 @@ Open work clusters around documentation (17% file coverage), 0 security findings
 | Metric | Value |
 |--------|-------|
 | Files | 325 |
-| Symbols | 7951 |
-| Resolved imports | 623 |
+| Symbols | 8004 |
+| Resolved imports | 624 |
 | Languages | c, h, py, sh |
 | Communities | 14 |
 | Doc coverage | 17% (54/325 files) |
 | Security findings | 0 |
-| Estimated read cost | ~238736 tokens (chars/4, offline so $0) |
+| Estimated read cost | ~240257 tokens (chars/4, offline so $0) |
 | Large files (>256KB, maybe generated) | 4: `browser_ui.c`, `css.c`, `page_view.c`, `test_css.c` |
 
 ## Reading Order
@@ -59,11 +59,11 @@ readmenator query "<question>" --target freedom-0.0.3
 
 | File | Score |
 |------|-------|
-| `gui/browser_ui.c` | 182.4 (large, maybe generated) |
-| `include/css.h` | 96.7 |
-| `src/tab.c` | 81.4 |
+| `gui/browser_ui.c` | 182.7 (large, maybe generated) |
+| `include/css.h` | 98.8 |
+| `src/tab.c` | 81.7 |
 | `src/freedom.c` | 63.0 |
-| `src/css.c` | 60.8 (large, maybe generated) |
+| `src/css.c` | 61.3 (large, maybe generated) |
 
 ## Strongest Connections
 

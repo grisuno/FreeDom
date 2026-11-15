@@ -371,6 +371,7 @@ void cch_path_free(cch_path *pa) {
 
 css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,
                                  double parent_font_size, const struct cvr_chain *inherited,
+                                 const struct cmq_container *containers,
                                  struct cvr_table *own_out) {
     lxb_dom_node_t *up[CCH_CHAIN_MAX];
     int d = 0;
@@ -424,6 +425,7 @@ css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_
     for (int i = 0; i + 1 < ns; ++i) sibs[i].el.prev = &sibs[i + 1].el;
     subj->el.font_size = parent_font_size;
     subj->el.vars = inherited;
+    subj->el.containers = containers;
 
     size_t sl = 0;
     const lxb_char_t *st = lxb_dom_element_get_attribute(el, (const lxb_char_t *)"style", 5, &sl);
@@ -433,6 +435,7 @@ css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_
     subj->el.prev = NULL;
     subj->el.font_size = 0.0;
     subj->el.vars = NULL;
+    subj->el.containers = NULL;
     return out;
 }
 

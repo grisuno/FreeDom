@@ -1,9 +1,9 @@
 Welcome to Reddit
-CSS drops: 39 declaration(s) dropped, 20 distinct
+CSS drops: 41 declaration(s) dropped, 20 distinct
   count  cause         property                     first value
       8  bad-value     font                         normal -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Apple Colo...
+      5  bad-value     grid-auto-columns            calc(100% - 56px)
       5  bad-value     grid-auto-rows               1fr
-      3  bad-value     grid-auto-columns            calc(100% - 56px)
       3  bad-value     flex-basis                   calc(33.33% - 8px)
       2  bad-value     float                        inline-start
       2  bad-value     max-width                    min(230px,100%)

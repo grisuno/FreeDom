@@ -4494,7 +4494,7 @@ static void test_table_sheet_cascade(void **state) {
     (void)state;
     css_sheet *sh = NULL;
     assert_int_equal(css_parse("table{border-collapse:collapse;empty-cells:hide;caption-side:bottom;table-layout:fixed}", 0, &sh), CSS_OK);
-    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0, 0.0, NULL, 0, 0, 0 };
+    css_element el = { "table", NULL, NULL, 0, NULL, 0, NULL, 0, 0, NULL, 0, 0, -1, NULL, 0, 0.0, NULL, 0, 0, 0, NULL };
     css_style s = css_resolve_el(sh, &el, "border-spacing:4px", 0);
     assert_int_equal(s.border_collapse, CSS_BCOL_COLLAPSE);
     assert_int_equal(s.empty_cells, CSS_EC_HIDE);
@@ -5913,6 +5913,58 @@ static void test_anim_iterations_huge_is_infinite(void **state) {
     assert_int_equal(css_parse_inline("animation-iteration-count:2.4", 0).anim_iterations, 2);
 }
 
+/* @container with a known container (spec/css_mq.md, tanda 90): the rule is kept in the
+ * sheet and gated per element against the nearest eligible ancestor container. */
+static void test_container_query_real_width(void **state) {
+    (void)state;
+    css_sheet *sh = NULL;
+    static const char src[] =
+        ".c{container:card/inline-size}"
+        ".n{container-name:a b;container-type:size}"
+        ".f{flex-direction:column}"
+        "@media (min-width:1px){@container card (width>=456px){.f{flex-direction:row}}}"
+        "@container (width<300px){.f{gap:7px}}"
+        "@container (width<5000px){@container card (width>=2000px){.f{order:3}}}";
+    assert_int_equal(css_parse(src, sizeof src - 1, &sh), CSS_OK);
+    const char *cc[] = { "c" }, *cn[] = { "n" }, *cf[] = { "f" };
+    css_element c = { 0 }, n = { 0 }, f = { 0 };
+    c.tag = "div"; c.classes = cc; c.nclasses = 1; c.child_count = -1;
+    n.tag = "div"; n.classes = cn; n.nclasses = 1; n.child_count = -1;
+    f.tag = "form"; f.classes = cf; f.nclasses = 1; f.child_count = -1; f.parent = &c;
+    css_style sc = css_resolve_el(sh, &c, NULL, 0);
+    assert_int_equal(sc.container_type, CMQ_CT_INLINE);
+    assert_int_equal(sc.container_names[0], cmq_name_hash("card", 4));
+    assert_int_equal(sc.container_names[1], 0);
+    css_style sn = css_resolve_el(sh, &n, NULL, 0);
+    assert_int_equal(sn.container_type, CMQ_CT_SIZE);
+    assert_int_equal(sn.container_names[0], cmq_name_hash("a", 1));
+    assert_int_equal(sn.container_names[1], cmq_name_hash("b", 1));
+    /* No scope: the layout-free bound, as before (the >= branch does not apply). */
+    css_style s0 = css_resolve_el(sh, &f, NULL, 0);
+    assert_int_equal(s0.flex_direction, CSS_FD_COLUMN);
+    assert_int_equal(s0.gap, -1);
+    /* A 480 px container named card: the row rule applies, the <300px one does not. */
+    cmq_container k = { { cmq_name_hash("card", 4), 0 }, CMQ_CT_INLINE, 480, NULL };
+    f.containers = &k;
+    css_style s1 = css_resolve_el(sh, &f, NULL, 0);
+    assert_int_equal(s1.flex_direction, CSS_FD_ROW);
+    assert_int_equal(s1.gap, -1);
+    assert_int_equal(s1.order, CSS_LEN_UNSET);       /* nested: inner condition false */
+    k.width_px = 200;
+    css_style s2 = css_resolve_el(sh, &f, NULL, 0);
+    assert_int_equal(s2.flex_direction, CSS_FD_COLUMN);
+    assert_int_equal(s2.gap, 7);
+    k.width_px = 2500;
+    css_style s3 = css_resolve_el(sh, &f, NULL, 0);
+    assert_int_equal(s3.order, 3);                   /* both nested conditions hold */
+    assert_int_equal(css_sheet_uses_containers(sh), 1);
+    css_free(sh);
+    sh = NULL;
+    assert_int_equal(css_parse(".a{color:red}", 13, &sh), CSS_OK);
+    assert_int_equal(css_sheet_uses_containers(sh), 0);
+    css_free(sh);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_position_and_insets),
@@ -6265,6 +6317,7 @@ int main(void) {
         cmocka_unit_test(test_selector_list_splits_top_level_commas_only),
         cmocka_unit_test(test_not_unreadable_argument_fails_closed),
         cmocka_unit_test(test_not_with_pseudo_class),
+        cmocka_unit_test(test_container_query_real_width),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -108,7 +108,7 @@ void cch_path_free(cch_path *pa);
 
 ### `cch_element_matches`
 
-`function` | [include/css_chain.h:81](../../include/css_chain.h#L81)
+`function` | [include/css_chain.h:82](../../include/css_chain.h#L82)
 
 ```c
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);
@@ -135,7 +135,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ### `lacks`
 
-`function` | [include/css_chain.h:85](../../include/css_chain.h#L85)
+`function` | [include/css_chain.h:86](../../include/css_chain.h#L86)
 
 ```c
 * the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a whole document nearly every candidate dies there, so the scan no longer * pays O(depth)
@@ -155,7 +155,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ### `box`
 
-`function` | [include/css_chain.h:91](../../include/css_chain.h#L91)
+`function` | [include/css_chain.h:92](../../include/css_chain.h#L92)
 
 ```c
 * generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size (the pseudo inherits it) and * inherited el's own custom-property chain (NULL = none).

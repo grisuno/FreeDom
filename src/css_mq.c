@@ -488,21 +488,26 @@ static int has_word(const char *t, const char *w) {
     return 0;
 }
 
-int cmq_container_surely(const char *s, size_t len, int max_width) {
-    if (s == NULL || max_width <= 0) return 0;
-    char buf[512];
+/* Normalises an @container prelude into buf (lowercased condition, inline-size spelled
+ * width) and splits off the leading container name. Returns the condition inside buf, or
+ * NULL when the prelude is one this engine never evaluates (or, not, height, style()...).
+ * name and name_len address the ORIGINAL text: a container name is case-sensitive. */
+static const char *container_condition(const char *s, size_t len, char *buf, size_t cap,
+                                       const char **name, size_t *name_len) {
     size_t o = 0;
+    *name = NULL;
+    *name_len = 0;
     for (size_t i = 0; i < len; ++i) {
         /* inline-size IS width for a horizontal writing mode: one spelling to evaluate. */
         if (i + 11 <= len && lower_ch(s[i]) == 'i' && strncmp("inline-size", s + i, 11) == 0 &&
             (i == 0 || !is_ident_ch(s[i - 1])) && (i + 11 == len || !is_ident_ch(s[i + 11]))) {
-            if (o + 5 >= sizeof buf) return 0;
+            if (o + 5 >= cap) return NULL;
             memcpy(buf + o, "width", 5);
             o += 5;
             i += 10;
             continue;
         }
-        if (o + 1 >= sizeof buf) return 0;
+        if (o + 1 >= cap) return NULL;
         buf[o++] = lower_ch(s[i]);
     }
     buf[o] = '\0';
@@ -511,7 +516,10 @@ int cmq_container_surely(const char *s, size_t len, int max_width) {
     if (a < o && buf[a] != '(') {               /* a leading container name */
         size_t b = a;
         while (b < o && is_ident_ch(buf[b])) ++b;
-        if (b - a == 3 && strncmp(buf + a, "not", 3) == 0) return 0;
+        if (b - a == 3 && strncmp(buf + a, "not", 3) == 0) return NULL;
+        /* The name precedes any inline-size rewrite, so offsets agree with s. */
+        *name = s + a;
+        *name_len = b - a;
         a = b;
     }
     const char *cond = buf + a;
@@ -519,11 +527,116 @@ int cmq_container_surely(const char *s, size_t len, int max_width) {
                                         "aspect-ratio", "orientation", "style",
                                         "scroll-state", "min-height", "max-height" };
     for (size_t k = 0; k < sizeof VETO / sizeof *VETO; ++k)
-        if (has_word(cond, VETO[k])) return 0;
-    if (strchr(cond, ',') != NULL) return 0;          /* @container takes ONE condition */
+        if (has_word(cond, VETO[k])) return NULL;
+    if (strchr(cond, ',') != NULL) return NULL;       /* @container takes ONE condition */
     if (!has_word(cond, "width") && !has_word(cond, "min-width") && !has_word(cond, "max-width"))
-        return 0;                                       /* only width intervals are bounded */
+        return NULL;                                    /* only width queries are evaluated */
+    return cond;
+}
+
+int cmq_container_surely(const char *s, size_t len, int max_width) {
+    if (s == NULL || max_width <= 0) return 0;
+    char buf[512];
+    const char *name;
+    size_t nl;
+    const char *cond = container_condition(s, len, buf, sizeof buf, &name, &nl);
+    if (cond == NULL) return 0;
     size_t cl = strlen(cond);
     cmq_env lo = { 0, 0, 0, 0 }, hi = { max_width, 0, 0, 0 };
     return cmq_matches(cond, cl, &lo) && cmq_matches(cond, cl, &hi);
+}
+
+unsigned cmq_name_hash(const char *s, size_t n) {
+    if (s == NULL || n == 0) return 0u;
+    unsigned h = 2166136261u;                     /* FNV-1a */
+    for (size_t i = 0; i < n; ++i) { h ^= (unsigned char)s[i]; h *= 16777619u; }
+    return h != 0u ? h : 1u;
+}
+
+int cmq_container_holds(const char *s, size_t len, const cmq_container *scope, int max_width) {
+    if (s == NULL) return 0;
+    char buf[512];
+    const char *name;
+    size_t nl;
+    const char *cond = container_condition(s, len, buf, sizeof buf, &name, &nl);
+    if (cond == NULL) return 0;
+    unsigned want = cmq_name_hash(name, nl);
+    /* Bounded walk: the chain is engine-built, but a cycle must never hang the cascade. */
+    const cmq_container *c = scope;
+    for (int hop = 0; c != NULL && hop < 4096; ++hop, c = c->parent) {
+        if (c->type == CMQ_CT_NORMAL) continue;
+        if (want == 0u) break;
+        int named = 0;
+        for (int k = 0; k < CMQ_CONTAINER_NAMES; ++k)
+            if (c->names[k] == want) named = 1;
+        if (named) break;
+    }
+    if (c == NULL || c->type == CMQ_CT_NORMAL || c->width_px < 0)
+        return cmq_container_surely(s, len, max_width);
+    cmq_env env = { c->width_px, 0, 0, 0 };
+    return cmq_matches(cond, strlen(cond), &env);
+}
+
+static int container_type_kw(const char *s, size_t n, int *type) {
+    static const struct { const char *kw; int t; } KW[] = {
+        { "normal", CMQ_CT_NORMAL }, { "inline-size", CMQ_CT_INLINE }, { "size", CMQ_CT_SIZE },
+    };
+    while (n > 0 && is_space(s[0])) { ++s; --n; }
+    while (n > 0 && is_space(s[n - 1])) --n;
+    for (size_t k = 0; k < sizeof KW / sizeof *KW; ++k) {
+        size_t kl = strlen(KW[k].kw);
+        if (kl != n) continue;
+        size_t i = 0;
+        while (i < n && lower_ch(s[i]) == KW[k].kw[i]) ++i;
+        if (i == n) { *type = KW[k].t; return 1; }
+    }
+    return 0;
+}
+
+static int container_names(const char *s, size_t n, unsigned names[CMQ_CONTAINER_NAMES]) {
+    for (int k = 0; k < CMQ_CONTAINER_NAMES; ++k) names[k] = 0u;
+    int got = 0;
+    size_t i = 0;
+    while (i < n) {
+        while (i < n && is_space(s[i])) ++i;
+        size_t a = i;
+        while (i < n && is_ident_ch(s[i])) ++i;
+        if (i == a) { if (i < n) return 0; break; }      /* not an identifier */
+        if (i - a == 4 && lower_ch(s[a]) == 'n' && lower_ch(s[a + 1]) == 'o' &&
+            lower_ch(s[a + 2]) == 'n' && lower_ch(s[a + 3]) == 'e') {
+            if (got != 0) return 0;
+            while (i < n && is_space(s[i])) ++i;
+            return i == n;                                /* `none` stands alone */
+        }
+        /* Names past the table are accepted and unused: the declaration stays valid. */
+        if (got < CMQ_CONTAINER_NAMES) names[got] = cmq_name_hash(s + a, i - a);
+        ++got;
+    }
+    return got > 0;
+}
+
+int cmq_container_decl(const char *prop, const char *val, int *type,
+                       unsigned names[CMQ_CONTAINER_NAMES], int *has_type, int *has_names) {
+    if (prop == NULL || val == NULL || type == NULL || names == NULL || has_type == NULL ||
+        has_names == NULL)
+        return 0;
+    *has_type = 0;
+    *has_names = 0;
+    size_t n = strlen(val);
+    if (strcmp(prop, "container-type") == 0) {
+        *has_type = 1;
+        return container_type_kw(val, n, type);
+    }
+    if (strcmp(prop, "container-name") == 0) {
+        *has_names = 1;
+        return container_names(val, n, names);
+    }
+    if (strcmp(prop, "container") != 0) return 0;
+    const char *slash = strchr(val, '/');
+    *has_type = 1;
+    *has_names = 1;
+    *type = CMQ_CT_NORMAL;
+    if (slash == NULL) return container_names(val, n, names);
+    return container_names(val, (size_t)(slash - val), names) &&
+           container_type_kw(slash + 1, n - (size_t)(slash - val) - 1, type);
 }

@@ -3,6 +3,25 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `parse_component` | function | `src/css_color.c:310` | `static int parse_component(const char *b, const char *e, int is_alpha, int *out)` |
+| `parse_func` | function | `src/css_color.c:508` | `static int parse_func(const char *s, cc_rgb *out)` |
+| `parse_hex` | function | `src/css_color.c:146` | `static int parse_hex(const char *s, cc_rgb *out)` |
+| `parse_hsl_comp` | function | `src/css_color.c:343` | `static int parse_hsl_comp(const char *b, const char *e, int is_hue, int *out)` |
+| `parse_lab_family` | function | `src/css_color.c:643` | `static int parse_lab_family(const char *s, cc_rgb *out)` |
+| `parse_named` | function | `src/css_color.c:715` | `static int parse_named(const char *s, cc_rgb *out)` |
+| `span` | function | `src/css_color.c:431` | `* span (when a slash is present) into ab/ae, and returns the component count,  * or -1. Bounded: ...` |
+| `srgb_encode` | function | `src/css_color.c:609` | `static unsigned char srgb_encode(double lin)` |
+| `strncmp` | function | `src/css_color.c:743` | `strncmp(buf, "oklab(", 6) == 0 \|\| strncmp(buf, "oklch(", 6) == 0)` |
+| `v` | type_alias | `src/css_color.c:222` | `typedef struct cc_cv { double v;` |
+| `CCM_NPROPS` | macro | `src/css_computed.c:310` | `#define CCM_NPROPS` |
+| `LEN_FIELD` | macro | `src/css_computed.c:225` | `#define LEN_FIELD(NAME, FIELD, UNSET)` |
+| `NAME` | function | `src/css_computed.c:226` | `static size_t NAME(const ccm_input *in, char *out, size_t cap)` |
+| `ccm_get` | function | `src/css_computed.c:312` | `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap)` |
+| `ccm_prop` | struct | `src/css_computed.c:278` | `` |
+| `ccm_property_count` | function | `src/css_computed.c:325` | `size_t ccm_property_count(void)` |
+| `ccm_property_name` | function | `src/css_computed.c:327` | `const char *ccm_property_name(size_t i)` |
+| `f_align_items` | function | `src/css_computed.c:153` | `static size_t f_align_items(const ccm_input *in, char *out, size_t cap)` |
+| `f_background_color` | function | `src/css_computed.c:200` | `static size_t f_background_color(const ccm_input *in, char *out, size_t cap)` |
 | `f_border_bottom_style` | function | `src/css_computed.c:264` | `static size_t f_border_bottom_style(const ccm_input *in, char *out, size_t cap)` |
 | `f_border_left_style` | function | `src/css_computed.c:267` | `static size_t f_border_left_style(const ccm_input *in, char *out, size_t cap)` |
 | `f_border_right_style` | function | `src/css_computed.c:261` | `static size_t f_border_right_style(const ccm_input *in, char *out, size_t cap)` |
@@ -158,8 +177,13 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `and3` | function | `src/css_mq.c:67` | `static int and3(int a, int b)` |
 | `bool_ctx` | function | `src/css_mq.c:231` | `static int bool_ctx(const fval *v)` |
 | `cmp_op` | function | `src/css_mq.c:208` | `static int cmp_op(double lhs, int op, double rhs)` |
-| `cmq_container_surely` | function | `src/css_mq.c:491` | `int cmq_container_surely(const char *s, size_t len, int max_width)` |
+| `cmq_container_decl` | function | `src/css_mq.c:618` | `int cmq_container_decl(const char *prop, const char *val, int *type,                        unsig...` |
+| `cmq_container_holds` | function | `src/css_mq.c:556` | `int cmq_container_holds(const char *s, size_t len, const cmq_container *scope, int max_width)` |
+| `cmq_container_surely` | function | `src/css_mq.c:537` | `int cmq_container_surely(const char *s, size_t len, int max_width)` |
 | `cmq_matches` | function | `src/css_mq.c:460` | `int cmq_matches(const char *s, size_t len, const cmq_env *env)` |
+| `cmq_name_hash` | function | `src/css_mq.c:549` | `unsigned cmq_name_hash(const char *s, size_t n)` |
+| `container_names` | function | `src/css_mq.c:596` | `static int container_names(const char *s, size_t n, unsigned names[CMQ_CONTAINER_NAMES])` |
+| `container_type_kw` | function | `src/css_mq.c:580` | `static int container_type_kw(const char *s, size_t n, int *type)` |
 | `copy_trim_lower` | function | `src/css_mq.c:84` | `static int copy_trim_lower(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
 | `eval_cond` | function | `src/css_mq.c:382` | `static int eval_cond(mq_cur *c, int depth)` |
 | `eval_feature` | function | `src/css_mq.c:330` | `static int eval_feature(const char *s, size_t a, size_t b, const cmq_env *env)` |
@@ -308,12 +332,13 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `dom_get_connected_by_id` | function | `src/dom.c:369` | `dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id)` |
 | `dom_get_element_by_id` | function | `src/dom.c:363` | `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)` |
 | `dom_get_inner_html` | function | `src/dom.c:929` | `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,                            ...` |
+| `dom_handle_of_native` | function | `src/dom.c:1076` | `dom_node_id dom_handle_of_native(dom_index *idx, const void *native)` |
 | `dom_index` | struct | `src/dom.c:220` | `` |
 | `dom_insert_before` | function | `src/dom.c:959` | `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,              ...` |
 | `dom_matches` | function | `src/dom.c:522` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)` |
 | `dom_move_children` | function | `src/dom.c:991` | `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,                ...` |
 | `dom_mutation_count` | function | `src/dom.c:345` | `uint64_t dom_mutation_count(const dom_index *idx)` |
-| `dom_native_node` | function | `src/dom.c:1076` | `const void *dom_native_node(const dom_index *idx, dom_node_id node)` |
+| `dom_native_node` | function | `src/dom.c:1082` | `const void *dom_native_node(const dom_index *idx, dom_node_id node)` |
 | `dom_next_sibling` | function | `src/dom.c:580` | `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)` |
 | `dom_node_at` | function | `src/dom.c:557` | `dom_node_id dom_node_at(const dom_index *idx, size_t position)` |
 | `dom_node_count` | function | `src/dom.c:349` | `size_t dom_node_count(const dom_index *idx)` |
@@ -471,30 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `fbk_route` | function | `src/frame_broker.c:118` | `fbk_verdict fbk_route(const fbk_table *t, int from, fbk_rel rel, int child,                      ...` |
 | `host_char_ok` | function | `src/frame_broker.c:11` | `static int host_char_ok(char c)` |
 | `lc` | function | `src/frame_broker.c:9` | `static char lc(char c)` |
-| `live` | function | `src/frame_broker.c:62` | `static int live(const fbk_table *t, int id)` |
-| `target_admits` | function | `src/frame_broker.c:101` | `static int target_admits(const char *target, const char *snd, const char *recv)` |
-| `FC_DEFAULT_INTERVAL_MS` | macro | `src/frame_clock.c:8` | `#define FC_DEFAULT_INTERVAL_MS` |
-| `fc_interval_ms` | function | `src/frame_clock.c:26` | `int fc_interval_ms(const fc_clock *c)` |
-| `fc_needs_tick` | function | `src/frame_clock.c:21` | `int fc_needs_tick(const fc_clock *c)` |
-| `fc_set_active` | function | `src/frame_clock.c:16` | `void fc_set_active(fc_clock *c, int active)` |
-| `apply_ops` | function | `src/frame_host.c:199` | `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)` |
-| `fh_apply_top` | function | `src/frame_host.c:222` | `void fh_apply_top(fh_host *h, const tab_page *page)` |
-| `fh_count` | function | `src/frame_host.c:76` | `int fh_count(const fh_host *h)` |
-| `fh_frame_view` | function | `src/frame_host.c:253` | `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)` |
-| `fh_free` | function | `src/frame_host.c:67` | `void fh_free(fh_host *h)` |
-| `fh_generation` | function | `src/frame_host.c:251` | `unsigned fh_generation(const fh_host *h)` |
-| `fh_host` | struct | `src/frame_host.c:22` | `` |
-| `fh_new` | function | `src/frame_host.c:35` | `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,                 fh_top_...` |
-| `fh_slot` | struct | `src/frame_host.c:14` | `` |
-| `fh_tick` | function | `src/frame_host.c:227` | `int fh_tick(fh_host *h, int elapsed_ms)` |
-| `find_child` | function | `src/frame_host.c:130` | `static int find_child(const fh_host *h, int parent, int token)` |
-| `load_frame` | function | `src/frame_host.c:85` | `static void load_frame(fh_host *h, int id, const char *url)` |
-| `post_op` | function | `src/frame_host.c:144` | `static void post_op(fh_host *h, int from, const tab_ws_op *op)` |
-| `reap` | function | `src/frame_host.c:55` | `static void reap(fh_host *h)` |
-| `slot_release_view` | function | `src/frame_host.c:47` | `static void slot_release_view(fh_slot *sl)` |
-| `token_seen_by` | function | `src/frame_host.c:138` | `static int token_seen_by(const fh_host *h, int dest, int from)` |
-| `fb_buffer_at` | function | `src/freebug.c:105` | `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)` |
-| `fb_buffer_count` | function | `src/freebug.c:101` | `size_t fb_buffer_count(const fb_buffer *b)` |
-| `fb_buffer_free` | function | `src/freebug.c:91` | `void fb_buffer_free(fb_buffer *b)` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

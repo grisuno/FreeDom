@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 56 file(s) rooted at `include` with dominant language c (cohesion 0.69). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (369 symbols). Documented purpose: bui_mask_img -- paints a mask-image: url() layer into a mask surface..
+This community groups 56 file(s) rooted at `include` with dominant language c (cohesion 0.69). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (370 symbols). Documented purpose: bui_mask_img -- paints a mask-image: url() layer into a mask surface..
 
 ## Files
 
@@ -13,7 +13,7 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/compositor.h` | h | utility | 9 | no |
-| `include/css.h` | h | utility | 147 | no |
+| `include/css.h` | h | utility | 148 | no |
 | `include/css_atrule.h` | h | utility | 10 | no |
 | `include/css_box.h` | h | utility | 28 | no |
 | `include/css_color.h` | h | utility | 7 | no |
@@ -24,7 +24,7 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/compositor.c` | c | utility | 5 | no |
-| `src/css.c` | c | utility | 268 | no |
+| `src/css.c` | c | utility | 273 | no |
 | `src/css_atrule.c` | c | utility | 11 | no |
 | `src/css_box.c` | c | utility | 53 | no |
 | `src/css_color.c` | c | utility | 36 | no |
@@ -35,7 +35,7 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_compositor.c` | c | testing | 21 | no |
-| `tests/test_css.c` | c | testing | 369 | no |
+| `tests/test_css.c` | c | testing | 370 | no |
 | `tests/test_css_atrule.c` | c | testing | 10 | yes |
 | `tests/test_css_box.c` | c | testing | 13 | no |
 | `tests/test_css_color.c` | c | testing | 37 | no |
@@ -81,12 +81,12 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 - `cx_item_compare` (function, `include/compositor.h:80`) `int cx_item_compare(const cx_item *a, const cx_item *b);` - Total paint order: layer ascending, then z-index ascending (auto == 0), then document order ascendin
 - `cx_sort` (function, `include/compositor.h:84`) `void cx_sort(cx_item *items, size_t n);` - Stable in-place sort of `items` into paint order (uses cx_item_compare). Stable: * equal keys keep t
 - `FREEDOM_CSS_H` (macro, `include/css.h:2`) `#define FREEDOM_CSS_H`
-- `css_status` (enum, `include/css.h:29`)
-- `css_align` (enum, `include/css.h:35`)
+- `css_status` (enum, `include/css.h:30`)
+- `css_align` (enum, `include/css.h:36`)
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 105
+- Internal resolved imports (EXTRACTED): 106
 - Cross-boundary resolved imports (EXTRACTED): 47
 
 ## Connections
@@ -99,7 +99,7 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 ## Risks
 
 - [layer strict] `tests/test_css.c` (testing) -> `include/flex_layout.h` (presentation)
-- [dataflow DEAD_STORE] `src/css.c:6109` `page_view` `had_winner`: `had_winner` assigned at line 6109 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css.c:6192` `page_view` `had_winner`: `had_winner` assigned at line 6192 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:156` `parse_hex` `r`: `r` assigned at line 156 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:157` `parse_hex` `g`: `g` assigned at line 157 but never read afterwards.
 

@@ -70,11 +70,11 @@ static const css_element *build_chain(lxb_dom_ele...`
 - `cch_path_free` (function) `src/css_chain.c:365` `void cch_path_free(cch_path *pa)`
 - `cch_element_style_path` (function) `src/css_chain.c:372` `css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,
    ...`
-- `cch_pseudo_style` (function) `src/css_chain.c:439` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
+- `cch_pseudo_style` (function) `src/css_chain.c:442` `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,
             ...`
-- `cch_element_style` (function) `src/css_chain.c:458` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
-- `cch_element_matches` (function) `src/css_chain.c:462` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
-- `cch_element_matches_any` (function) `src/css_chain.c:476` `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
+- `cch_element_style` (function) `src/css_chain.c:461` `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)`
+- `cch_element_matches` (function) `src/css_chain.c:465` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)`
+- `cch_element_matches_any` (function) `src/css_chain.c:479` `int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)`
 
 ## src/css_color.c
 Depends on: `include/css_color.h`
@@ -297,7 +297,13 @@ Depends on: `include/css_box.h`, `include/css_length.h`, `include/css_mq.h`
 - `eval_query` (function) `src/css_mq.c:406` `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)` -- skip_ws(c); if (c->i >= c->b) break; mq_cur save = *c; if (!read_word(c, w, sizeof w)) { *c = save; break; } int m =...
 - `cmq_matches` (function) `src/css_mq.c:460` `int cmq_matches(const char *s, size_t len, const cmq_env *env)`
 - `has_word` (function) `src/css_mq.c:481` `static int has_word(const char *t, const char *w)` -- while (i < len && !(s[i] == ',' && d == 0)) { if (s[i] == '(') ++d; else if (s[i] == ')') --d; ++i; } if...
-- `cmq_container_surely` (function) `src/css_mq.c:491` `int cmq_container_surely(const char *s, size_t len, int max_width)`
+- `cmq_container_surely` (function) `src/css_mq.c:537` `int cmq_container_surely(const char *s, size_t len, int max_width)`
+- `cmq_name_hash` (function) `src/css_mq.c:549` `unsigned cmq_name_hash(const char *s, size_t n)`
+- `cmq_container_holds` (function) `src/css_mq.c:556` `int cmq_container_holds(const char *s, size_t len, const cmq_container *scope, int max_width)`
+- `container_type_kw` (function) `src/css_mq.c:580` `static int container_type_kw(const char *s, size_t n, int *type)`
+- `container_names` (function) `src/css_mq.c:596` `static int container_names(const char *s, size_t n, unsigned names[CMQ_CONTAINER_NAMES])`
+- `cmq_container_decl` (function) `src/css_mq.c:618` `int cmq_container_decl(const char *prop, const char *val, int *type,
+                       unsig...`
 
 ## src/css_select.c
 Depends on: `include/css_select.h`

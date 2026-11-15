@@ -111,13 +111,13 @@ include: css groups 56 files (c, h) around FREEDOM_CSS_H, css_status, css_align,
 
 **Related Classes/Methods**:
 
-- <a href="../include/css.h#L2-L28">include/css.h::FREEDOM_CSS_H</a>
-- <a href="../include/css.h#L29-L34">include/css.h::css_status</a>
-- <a href="../include/css.h#L35-L42">include/css.h::css_align</a>
-- <a href="../include/css.h#L43-L72">include/css.h::css_display</a>
+- <a href="../include/css.h#L2-L29">include/css.h::FREEDOM_CSS_H</a>
+- <a href="../include/css.h#L30-L35">include/css.h::css_status</a>
+- <a href="../include/css.h#L36-L43">include/css.h::css_align</a>
+- <a href="../include/css.h#L44-L73">include/css.h::css_display</a>
 - <a href="../include/css.h">include/css.h::CSS_DISP_INLINE_OUTER</a>
-- <a href="../include/css.h#L74-L75">include/css.h::CSS_DISP_INNER_MASK</a>
-- <a href="../include/css.h#L76-L86">include/css.h::css_justify</a>
+- <a href="../include/css.h#L75-L76">include/css.h::CSS_DISP_INNER_MASK</a>
+- <a href="../include/css.h#L77-L87">include/css.h::css_justify</a>
 - <a href="../include/css.h">include/css.h::CSS_GAP_MAX</a>
 
 ### src: tab (2)

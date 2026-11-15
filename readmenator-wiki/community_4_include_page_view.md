@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 26 file(s) rooted at `include` with dominant language c (cohesion 0.47). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (284 symbols). Documented purpose: sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md..
+This community groups 26 file(s) rooted at `include` with dominant language c (cohesion 0.47). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (292 symbols). Documented purpose: sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md..
 
 ## Files
 
@@ -18,7 +18,7 @@ This community groups 26 file(s) rooted at `include` with dominant language c (c
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 45 | no |
 | `include/freedom_config.h` | h | infrastructure | 17 | no |
-| `include/page_view.h` | h | presentation | 98 | no |
+| `include/page_view.h` | h | presentation | 102 | no |
 
 ### `src` (8 files)
 
@@ -29,7 +29,7 @@ This community groups 26 file(s) rooted at `include` with dominant language c (c
 | `src/css_chain.c` | c | utility | 26 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 36 | no |
-| `src/page_view.c` | c | presentation | 284 | no |
+| `src/page_view.c` | c | presentation | 292 | no |
 | `src/render_doc.c` | c | presentation | 22 | no |
 
 ### `tests` (8 files)
@@ -40,7 +40,7 @@ This community groups 26 file(s) rooted at `include` with dominant language c (c
 | `tests/test_box_tree.c` | c | testing | 69 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 72 | no |
-| `tests/test_page_view.c` | c | testing | 224 | no |
+| `tests/test_page_view.c` | c | testing | 227 | no |
 | `tests/test_render_doc.c` | c | testing | 37 | no |
 
 *... and 6 more files in this community.*

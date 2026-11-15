@@ -16,58 +16,62 @@ Depends on: `include/css.h`, `include/text_case.h`
 
 ## src/text_shape.c
 Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
-- `generic_name` (function) `src/text_shape.c:56` `static const char *generic_name(int family)`
-- `backend_init` (function) `src/text_shape.c:66` `static int backend_init(void)`
-- `read_font_file` (function) `src/text_shape.c:83` `static unsigned char *read_font_file(const char *path, long *out_n)`
-- `characters` (function) `src/text_shape.c:101` `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
-- `load_entry_named` (function) `src/text_shape.c:104` `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)`
-- `load_entry_file` (function) `src/text_shape.c:134` `static int load_entry_file(tsh_entry *e, const char *path, int index)` -- Loads face `index` of the font file at `path` into e (FreeType + cairo + * HarfBuzz over one owned copy of the bytes).
-- `load_entry` (function) `src/text_shape.c:170` `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
-- `get_entry` (function) `src/text_shape.c:174` `static tsh_entry *get_entry(int family, int bold, int italic)`
-- `web_entry_free` (function) `src/text_shape.c:202` `static void web_entry_free(tsh_web *w)`
-- `slice` (function) `src/text_shape.c:214` `* woff2 slice (spec/webfont.md);`
-- `web_magic_ok` (function) `src/text_shape.c:215` `static int web_magic_ok(const unsigned char *b, size_t n)` -- True for font programs FreeType parses without new decoders: wOFF/TrueType/ CFF-OpenType (and the mac aliases). wOF2...
-- `web_make_entry` (function) `src/text_shape.c:228` `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes)` -- Builds the shaping faces over an OWNED copy of bytes[0,nbytes) into e (shared tail with load_entry's file path: same...
-- `tsh_webfont_register` (function) `src/text_shape.c:271` `int tsh_webfont_register(const char *name,
+- `entry_opsz_for` (function) `src/text_shape.c:57` `static int entry_opsz_for(const tsh_entry *e, double px)` -- The optical size a face is set at for a font size of px (CSS Fonts 4 section 8.1, * font-optical-sizing:auto): the...
+- `entry_apply_size` (function) `src/text_shape.c:66` `static void entry_apply_size(tsh_entry *e, double px)` -- Points the entry's HarfBuzz font at the instance for this size.
+- `generic_name` (function) `src/text_shape.c:93` `static const char *generic_name(int family)`
+- `backend_init` (function) `src/text_shape.c:103` `static int backend_init(void)`
+- `read_font_file` (function) `src/text_shape.c:120` `static unsigned char *read_font_file(const char *path, long *out_n)`
+- `characters` (function) `src/text_shape.c:138` `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
+- `load_entry_named` (function) `src/text_shape.c:141` `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)`
+- `load_entry_file` (function) `src/text_shape.c:171` `static int load_entry_file(tsh_entry *e, const char *path, int index)` -- Loads face `index` of the font file at `path` into e (FreeType + cairo + * HarfBuzz over one owned copy of the bytes).
+- `load_entry` (function) `src/text_shape.c:207` `static int load_entry(tsh_entry *e, int family, int bold, int italic)`
+- `get_entry` (function) `src/text_shape.c:211` `static tsh_entry *get_entry(int family, int bold, int italic)`
+- `web_entry_free` (function) `src/text_shape.c:239` `static void web_entry_free(tsh_web *w)`
+- `slice` (function) `src/text_shape.c:251` `* woff2 slice (spec/webfont.md);`
+- `web_magic_ok` (function) `src/text_shape.c:252` `static int web_magic_ok(const unsigned char *b, size_t n)` -- True for font programs FreeType parses without new decoders: wOFF/TrueType/ CFF-OpenType (and the mac aliases). wOF2...
+- `web_make_entry` (function) `src/text_shape.c:309` `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes, int bold,
+    ...`
+- `blob` (function) `src/text_shape.c:333` `* blob (it shaped every character to .notdef): its face is built over the tables * FreeType already decoded. A bare...`
+- `tsh_webfont_register` (function) `src/text_shape.c:371` `int tsh_webfont_register(const char *name,
                          const unsigned char *bytes, s...`
-- `tsh_webfont_clear` (function) `src/text_shape.c:306` `void tsh_webfont_clear(void)`
-- `web_find` (function) `src/text_shape.c:312` `static tsh_entry *web_find(unsigned h, int bold, int italic)`
-- `entry_free` (function) `src/text_shape.c:324` `static void entry_free(tsh_entry *e)`
-- `ascii_ieq` (function) `src/text_shape.c:337` `static int ascii_ieq(const char *a, const char *b)`
-- `tsh_family_is_generic` (function) `src/text_shape.c:346` `int tsh_family_is_generic(const char *name)`
-- `tsh_pick_from_list` (function) `src/text_shape.c:358` `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
+- `tsh_webfont_clear` (function) `src/text_shape.c:428` `void tsh_webfont_clear(void)`
+- `web_find` (function) `src/text_shape.c:434` `static tsh_entry *web_find(unsigned h, int bold, int italic)`
+- `entry_free` (function) `src/text_shape.c:446` `static void entry_free(tsh_entry *e)`
+- `ascii_ieq` (function) `src/text_shape.c:459` `static int ascii_ieq(const char *a, const char *b)`
+- `tsh_family_is_generic` (function) `src/text_shape.c:468` `int tsh_family_is_generic(const char *name)`
+- `tsh_pick_from_list` (function) `src/text_shape.c:480` `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
                   ...`
-- `tsh_pick_family` (function) `src/text_shape.c:379` `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
+- `tsh_pick_family` (function) `src/text_shape.c:501` `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
         ...`
-- `fc_installed` (function) `src/text_shape.c:392` `static int fc_installed(const char *name, void *ctx)` -- const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...
-- `fc_resolve` (function) `src/text_shape.c:435` `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
-- `local_clear` (function) `src/text_shape.c:480` `static void local_clear(void)`
-- `lfam_index` (function) `src/text_shape.c:491` `static int lfam_index(const char *fam)`
-- `tsh_local_handle` (function) `src/text_shape.c:499` `int tsh_local_handle(const char *list)`
-- `local_entry` (function) `src/text_shape.c:518` `static tsh_entry *local_entry(int handle, int bold, int italic)`
-- `get_entry_ex` (function) `src/text_shape.c:538` `static tsh_entry *get_entry_ex(const tsh_font *f)` -- Entry for a full font selector: a registered @font-face wins over the local bucket stack; a set-but-unregistered...
-- `tsh_ready` (function) `src/text_shape.c:550` `int tsh_ready(void)`
-- `tsh_shape` (function) `src/text_shape.c:555` `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
+- `fc_installed` (function) `src/text_shape.c:514` `static int fc_installed(const char *name, void *ctx)` -- const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...
+- `fc_resolve` (function) `src/text_shape.c:557` `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
+- `local_clear` (function) `src/text_shape.c:602` `static void local_clear(void)`
+- `lfam_index` (function) `src/text_shape.c:613` `static int lfam_index(const char *fam)`
+- `tsh_local_handle` (function) `src/text_shape.c:621` `int tsh_local_handle(const char *list)`
+- `local_entry` (function) `src/text_shape.c:640` `static tsh_entry *local_entry(int handle, int bold, int italic)`
+- `get_entry_ex` (function) `src/text_shape.c:660` `static tsh_entry *get_entry_ex(const tsh_font *f)` -- Entry for a full font selector: a registered @font-face wins over the local bucket stack; a set-but-unregistered...
+- `tsh_ready` (function) `src/text_shape.c:672` `int tsh_ready(void)`
+- `tsh_shape` (function) `src/text_shape.c:677` `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
                 ...`
-- `utf8_next` (function) `src/text_shape.c:604` `static unsigned utf8_next(const char *s, size_t n, size_t *len)` -- Decodes one UTF-8 sequence at s[0..n): the code point (U+FFFD for a malformed * sequence) and its byte length (>= 1...
-- `is_private_use` (function) `src/text_shape.c:623` `static int is_private_use(unsigned cp)` -- if (l > n) l = 1; if (l == 1) { *len = 1; return (c < 0x80) ? c : 0xFFFDu; } unsigned cp = c & (0x7fu >> l); for...
-- `rides_previous` (function) `src/text_shape.c:628` `static int rides_previous(unsigned cp)` -- cp = (cp << 6) | (u[k] & 0x3fu); } len = l; return cp; } #define TSH_BLANK_GLYPH ((unsigned long)-1) /* Private Use...
-- `tsh_segment` (function) `src/text_shape.c:636` `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
+- `utf8_next` (function) `src/text_shape.c:727` `static unsigned utf8_next(const char *s, size_t n, size_t *len)` -- Decodes one UTF-8 sequence at s[0..n): the code point (U+FFFD for a malformed * sequence) and its byte length (>= 1...
+- `is_private_use` (function) `src/text_shape.c:746` `static int is_private_use(unsigned cp)` -- if (l > n) l = 1; if (l == 1) { *len = 1; return (c < 0x80) ? c : 0xFFFDu; } unsigned cp = c & (0x7fu >> l); for...
+- `rides_previous` (function) `src/text_shape.c:751` `static int rides_previous(unsigned cp)` -- cp = (cp << 6) | (u[k] & 0x3fu); } len = l; return cp; } #define TSH_BLANK_GLYPH ((unsigned long)-1) /* Private Use...
+- `tsh_segment` (function) `src/text_shape.c:759` `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
                 tsh_...`
-- `fb_clear` (function) `src/text_shape.c:689` `static void fb_clear(void)`
-- `fb_match_covering` (function) `src/text_shape.c:709` `static FcPattern *fb_match_covering(FcPattern *pat, FcCharSet *cs)` -- Best fontconfig match for `pat` among the installed fonts that contain every code point of `cs`.
-- `fb_entry` (function) `src/text_shape.c:731` `static tsh_entry *fb_entry(unsigned cp, int bold)`
-- `fb_entry_uncached` (function) `src/text_shape.c:748` `static tsh_entry *fb_entry_uncached(unsigned cp, int bold)`
-- `cover_cp` (function) `src/text_shape.c:818` `static int cover_cp(unsigned cp, void *vctx)` -- cover callback: 0 when the requested face has the glyph (or nothing else * does), else the id of the fallback face...
-- `shape_entry` (function) `src/text_shape.c:832` `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
+- `fb_clear` (function) `src/text_shape.c:812` `static void fb_clear(void)`
+- `fb_match_covering` (function) `src/text_shape.c:832` `static FcPattern *fb_match_covering(FcPattern *pat, FcCharSet *cs)` -- Best fontconfig match for `pat` among the installed fonts that contain every code point of `cs`.
+- `fb_entry` (function) `src/text_shape.c:854` `static tsh_entry *fb_entry(unsigned cp, int bold)`
+- `fb_entry_uncached` (function) `src/text_shape.c:871` `static tsh_entry *fb_entry_uncached(unsigned cp, int bold)`
+- `cover_cp` (function) `src/text_shape.c:941` `static int cover_cp(unsigned cp, void *vctx)` -- cover callback: 0 when the requested face has the glyph (or nothing else * does), else the id of the fallback face...
+- `shape_entry` (function) `src/text_shape.c:955` `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
             ...` -- static int cover_cp(unsigned cp, void *vctx) { tsh_cover_ctx *c = (tsh_cover_ctx *)vctx; hb_codepoint_t g; if (cp ==...
-- `shape_runs` (function) `src/text_shape.c:868` `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
+- `shape_runs` (function) `src/text_shape.c:992` `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
                ...` -- Measures (cr == NULL) or draws [text,len) run by run, each with the face that * has its glyphs.
-- `tsh_measure` (function) `src/text_shape.c:929` `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
-- `tsh_draw` (function) `src/text_shape.c:964` `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
+- `tsh_measure` (function) `src/text_shape.c:1073` `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
+- `tsh_draw` (function) `src/text_shape.c:1108` `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
                     double x, doub...`
-- `tsh_face` (function) `src/text_shape.c:971` `cairo_font_face_t *tsh_face(const tsh_font *f)`
-- `tsh_shutdown` (function) `src/text_shape.c:977` `void tsh_shutdown(void)`
+- `tsh_face` (function) `src/text_shape.c:1115` `cairo_font_face_t *tsh_face(const tsh_font *f)`
+- `tsh_shutdown` (function) `src/text_shape.c:1121` `void tsh_shutdown(void)`
 
 ## src/textfield.c
 Depends on: `include/textfield.h`
@@ -186,18 +190,18 @@ Depends on: `include/data_url.h`, `include/webfont.h`
 - `wf_list_free` (function) `src/webfont.c:49` `void wf_list_free(wf_list *l)`
 - `wf_ref_move` (function) `src/webfont.c:64` `void wf_ref_move(wf_ref *dst, wf_ref *src)`
 - `wf_supported_format` (function) `src/webfont.c:74` `int wf_supported_format(const char *fmt)`
-- `emit_slot` (function) `src/webfont.c:83` `static wf_ref *emit_slot(wf_list *out)` -- src->is_data = 0; } int wf_supported_format(const char *fmt) { if (fmt == NULL) return 0; if (fmt[0] == '\0') return...
-- `emit_family_format` (function) `src/webfont.c:98` `static void emit_family_format(wf_ref *r, const char *family, const char *format)`
-- `span_is_data` (function) `src/webfont.c:114` `static int span_is_data(const char *span, size_t slen)` -- if (fl >= WF_FAMILY_MAX) fl = WF_FAMILY_MAX - 1; memcpy(r->family, family, fl); r->family[fl] = '\0'; if (format !=...
-- `emit` (function) `src/webfont.c:126` `static void emit(wf_list *out, const char *family,
+- `emit_slot` (function) `src/webfont.c:86` `static wf_ref *emit_slot(wf_list *out)` -- The base token: `woff2-variations` and `woff2 supports variations` (which the * scanner may have truncated) name the...
+- `emit_family_format` (function) `src/webfont.c:101` `static void emit_family_format(wf_ref *r, const char *family, const char *format)`
+- `span_is_data` (function) `src/webfont.c:117` `static int span_is_data(const char *span, size_t slen)` -- if (fl >= WF_FAMILY_MAX) fl = WF_FAMILY_MAX - 1; memcpy(r->family, family, fl); r->family[fl] = '\0'; if (format !=...
+- `emit` (function) `src/webfont.c:129` `static void emit(wf_list *out, const char *family,
                  const char *url, size_t ulen,...` -- /* True when span[0,slen) is a data: URL (case-insensitive scheme). static int span_is_data(const char *span, size_t...
-- `emit_data` (function) `src/webfont.c:142` `static void emit_data(wf_list *out, const char *family,
+- `emit_data` (function) `src/webfont.c:145` `static void emit_data(wf_list *out, const char *family,
                       const char *span, s...` -- Appends one data: ref, decoding the bytes NOW (a data: URL never fits url[]; * the bytes ride the ref instead).
-- `scan_face_block` (function) `src/webfont.c:179` `static void scan_face_block(const char *s, size_t bstart, size_t bend,
+- `scan_face_block` (function) `src/webfont.c:182` `static void scan_face_block(const char *s, size_t bstart, size_t bend,
                           ...` -- Parses one @font-face {...} body (bstart..bend, braces excluded) into the block's family/weight/style, then emits...
-- `lower_ch` (function) `src/webfont.c:306` `&& lower_ch(s[k]) == 's' && k + 3 < bend
+- `lower_ch` (function) `src/webfont.c:313` `&& lower_ch(s[k]) == 's' && k + 3 < bend
                 && lower_ch(s[k + 1]) == 'r' && lower_ch...`
-- `wf_scan` (function) `src/webfont.c:422` `int wf_scan(const char *css, size_t len, wf_list *out)`
+- `wf_scan` (function) `src/webfont.c:429` `int wf_scan(const char *css, size_t len, wf_list *out)`
 
 ## src/webfont_load.c
 Depends on: `include/data_url.h`, `include/text_shape.h`, `include/url.h`, `include/webfont.h`, `include/webfont_load.h`

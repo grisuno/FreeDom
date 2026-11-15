@@ -226,7 +226,7 @@ Returns its length, 0 on a bad path or small cap.
 size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen, char *ins, size_t ins_cap, char *list, size_t list_cap, size_t *count);
 ```
 
-From the newline-separated `names`, those starting with prefix[0,plen): `ins` gets the longest common extension beyond the prefix, [`list`](include.render_doc.h.md#list) the candidates space-separated; *count how many matched.
+From the newline-separated [`names`](include.css_mq.h.md#cmq_container-names), those starting with prefix[0,plen): `ins` gets the longest common extension beyond the prefix, [`list`](include.render_doc.h.md#list) the candidates space-separated; *count how many matched.
 
 Returns the length of the insertion.
 

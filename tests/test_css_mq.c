@@ -132,6 +132,38 @@ static void test_container_surely(void **state) {
     assert_int_equal(cmq_container_surely("(width<9px)", 11, 0), 0);
 }
 
+static int holds(const char *q, const cmq_container *sc) {
+    return cmq_container_holds(q, strlen(q), sc, 1000);
+}
+
+static void test_container_holds(void **state) {
+    (void)state;
+    cmq_container card = { { cmq_name_hash("card", 4), 0 }, CMQ_CT_INLINE, 480, NULL };
+    assert_int_equal(holds("card (width>=456px)", &card), 1);
+    assert_int_equal(holds("(width>=28.5rem)", &card), 1);
+    assert_int_equal(holds("(width>=500px)", &card), 0);
+    assert_int_equal(holds("(inline-size < 500px)", &card), 1);
+    assert_int_equal(holds("other (width>=1px)", &card), 0);      /* no such container: bound */
+    assert_int_equal(holds("other (width<2000px)", &card), 1);    /* ...which is surely true */
+    assert_int_equal(holds("(height>1px)", &card), 0);
+    assert_int_equal(holds("(width>1px) or (width<0px)", &card), 0);
+    /* A `normal` element is not a query container: the lookup walks past it. */
+    cmq_container outer = { { 0, 0 }, CMQ_CT_INLINE, 300, NULL };
+    cmq_container plain = { { cmq_name_hash("card", 4), 0 }, CMQ_CT_NORMAL, 900, &outer };
+    assert_int_equal(holds("(width<400px)", &plain), 1);
+    assert_int_equal(holds("card (width>=1px)", &plain), 0);
+    /* Unknown width: the layout-free bound, exactly as with no scope at all. */
+    cmq_container unk = { { 0, 0 }, CMQ_CT_INLINE, -1, NULL };
+    assert_int_equal(holds("(width<63.25rem)", &unk), 1);
+    assert_int_equal(holds("(width>=1px)", &unk), 0);
+    assert_int_equal(holds("(width<63.25rem)", NULL), 1);
+    assert_int_equal(holds("(width>=1px)", NULL), 0);
+    assert_int_equal(cmq_container_holds(NULL, 4, &card, 1000), 0);
+    assert_int_not_equal(cmq_name_hash("card", 4), cmq_name_hash("CARD", 4));
+    assert_int_not_equal(cmq_name_hash("card", 4), 0);
+    assert_int_equal(cmq_name_hash(NULL, 0), 0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_math_function_values),
@@ -141,6 +173,7 @@ int main(void) {
         cmocka_unit_test(test_desktop_identity),
         cmocka_unit_test(test_fail_closed),
         cmocka_unit_test(test_container_surely),
+        cmocka_unit_test(test_container_holds),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

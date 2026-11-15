@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include "css_color.h"
 #include "css_counter.h"
+#include "css_mq.h"
 
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."
@@ -860,6 +861,9 @@ typedef struct css_style {
     int         bg_attachment;    /* css_bg_attachment, 0 (unset) */
     int         isolation;        /* css_isolation, 0 (unset) */
     int         contain;          /* bitmask CSS_CONTAIN_*, 0 = none/unset */
+    /* Query container (spec/css_mq.md): CMQ_CT_* and the hashes of its names. */
+    int         container_type;
+    unsigned    container_names[CMQ_CONTAINER_NAMES];
     int         content_visibility; /* css_content_visibility, 0 (unset) */
     int         image_rendering;  /* css_image_rendering, 0 (unset) */
     int         color_scheme;     /* css_color_scheme, 0 (unset) */
@@ -1050,6 +1054,10 @@ css_status css_parse(const char *text, size_t len, css_sheet **out);
  * runs its document-order counter pass only then (it costs a second tree walk). */
 int css_sheet_uses_counters(const css_sheet *sheet);
 
+/* 1 when the sheet holds any rule gated by an @container condition: only then does
+ * the engine need to track query containers and their widths. */
+int css_sheet_uses_containers(const css_sheet *sheet);
+
 /* As css_parse, but @media blocks are gated against *media (prefers-color-scheme,
  * screen/print/all, min/max-width). media == NULL uses the default screen/light/
  * 1920px context. Matched @media rules fold into the sheet as if unconditional, so
@@ -1199,6 +1207,10 @@ typedef struct css_element {
     unsigned long long anc_bloom;
     unsigned long long own_bloom;   /* the element's OWN tag/id/class bits (same hashing) */
     int anc_bloom_valid;
+    /* The element's ancestor query containers, nearest first (css_mq.h): an engine
+     * input like font_size, supplied top-down. NULL = unknown, and every @container
+     * rule then falls back to the layout-free bound (cmq_container_surely). */
+    const struct cmq_container *containers;
 } css_element;
 
 /* As css_resolve, but matches descendant (`A B`) and child (`A > B`) combinators

@@ -1,12 +1,12 @@
 # `src/css_mq.c`
 
-> Source: [src/css_mq.c:1](../../src/css_mq.c#L1) | language `c` | coverage 25.0% | [API index](../index.md)
+> Source: [src/css_mq.c:1](../../src/css_mq.c#L1) | language `c` | coverage 33.3% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`mq_cur`](#mq_cur), [`fval`](#fval)
 - **Type Aliases:** [`kind`](#kind)
-- **Functions:** [`cmq_matches`](#cmq_matches), [`cmq_container_surely`](#cmq_container_surely)
+- **Functions:** [`cmq_matches`](#cmq_matches), [`cmq_container_surely`](#cmq_container_surely), [`cmq_name_hash`](#cmq_name_hash), [`cmq_container_holds`](#cmq_container_holds), [`cmq_container_decl`](#cmq_container_decl)
 - **Macros:** [`CMQ_DEVICE_W`](#cmq_device_w), [`CMQ_DPPX`](#cmq_dppx), [`CMQ_COLOR_BITS`](#cmq_color_bits), [`CMQ_DPI_PER_DPPX`](#cmq_dpi_per_dppx), [`CMQ_CM_PER_IN`](#cmq_cm_per_in), [`MQ_EPS`](#mq_eps)
 
 ## Type Diagram
@@ -30,11 +30,15 @@ Solid arrows stay in this module, dashed arrows leave it.
 flowchart LR
     n_src_css_mq_c__cmq_container_surely(["cmq_container_surely"])
     n_src_css_mq_c__cmq_matches(["cmq_matches"])
-    n_src_css_color_c__strncmp["css_color.strncmp"]
-    n_src_webfont_c__lower_ch_306["webfont.lower_ch"]
+    n_src_css_mq_c__cmq_container_holds(["cmq_container_holds"])
+    n_src_css_mq_c__cmq_name_hash(["cmq_name_hash"])
+    n_src_css_mq_c__cmq_container_decl(["cmq_container_decl"])
+    n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
     n_src_css_mq_c__cmq_container_surely --> n_src_css_mq_c__cmq_matches
-    n_src_css_mq_c__cmq_container_surely -.-> n_src_css_color_c__strncmp
-    n_src_css_mq_c__cmq_container_surely -.-> n_src_webfont_c__lower_ch_306
+    n_src_css_mq_c__cmq_container_holds --> n_src_css_mq_c__cmq_container_surely
+    n_src_css_mq_c__cmq_container_holds --> n_src_css_mq_c__cmq_matches
+    n_src_css_mq_c__cmq_container_holds --> n_src_css_mq_c__cmq_name_hash
+    n_src_css_mq_c__cmq_container_decl -.-> n_gui_browser_ui_c__strcmp
 ```
 
 ## Structs
@@ -105,7 +109,7 @@ An empty list matches (all). NULL s or env -> 0.
 
 > **Inherited:** Documentation from [`cmq_matches`](#cmq_matches) (include/css_mq.h:28).
 
-*Called by:* [`cmq_container_surely`](#cmq_container_surely)
+*Called by:* [`cmq_container_holds`](#cmq_container_holds), [`cmq_container_surely`](#cmq_container_surely)
 
 ---
 
@@ -113,7 +117,7 @@ An empty list matches (all). NULL s or env -> 0.
 
 ### `cmq_container_surely`
 
-`function` | [src/css_mq.c:491](../../src/css_mq.c#L491)
+`function` | [src/css_mq.c:537](../../src/css_mq.c#L537)
 
 ```c
 int cmq_container_surely(const char *s, size_t len, int max_width)
@@ -135,7 +139,94 @@ Anything else -- or, not, height, style(), unknown -- is 0. spec/css_mq.md.
 
 > **Inherited:** Documentation from [`cmq_container_surely`](#cmq_container_surely) (include/css_mq.h:34).
 
-*Calls:* [`strncmp`](src.css_color.c.md#strncmp), [`cmq_matches`](#cmq_matches), [`lower_ch`](src.webfont.c.md#lower_ch)
+*Calls:* [`cmq_matches`](#cmq_matches)
+
+*Called by:* [`cmq_container_holds`](#cmq_container_holds)
+
+---
+
+<a id="cmq_name_hash"></a>
+
+### `cmq_name_hash`
+
+`function` | [src/css_mq.c:549](../../src/css_mq.c#L549)
+
+```c
+unsigned cmq_name_hash(const char *s, size_t n)
+```
+
+Case-sensitive hash of a container name (custom-ident); never 0 for a non-empty name, 0 for NULL/empty.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `s` | `char *` |  |  |
+| `n` | `size_t` |  |  |
+
+**Returns:** `unsigned`
+
+> **Inherited:** Documentation from [`cmq_name_hash`](#cmq_name_hash) (include/css_mq.h:50).
+
+*Called by:* [`cmq_container_holds`](#cmq_container_holds)
+
+---
+
+<a id="cmq_container_holds"></a>
+
+### `cmq_container_holds`
+
+`function` | [src/css_mq.c:556](../../src/css_mq.c#L556)
+
+```c
+int cmq_container_holds(const char *s, size_t len, const cmq_container *scope, int max_width)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `s` | `char *` |  |  |
+| `len` | `size_t` |  |  |
+| `scope` | `cmq_container *` |  |  |
+| `max_width` | `int` |  |  |
+
+**Returns:** `int`
+
+*Calls:* [`cmq_container_surely`](#cmq_container_surely), [`cmq_matches`](#cmq_matches), [`cmq_name_hash`](#cmq_name_hash)
+
+---
+
+<a id="cmq_container_decl"></a>
+
+### `cmq_container_decl`
+
+`function` | [src/css_mq.c:618](../../src/css_mq.c#L618)
+
+```c
+int cmq_container_decl(const char *prop, const char *val, int *type, unsigned names[CMQ_CONTAINER_NAMES], int *has_type, int *has_names)
+```
+
+Interprets a `container-type`, `container-name` or `container` declaration value. *type (CMQ_CT_*) is written when the property carries a type, names[] (hashes, 0 = unused) when it carries names; *has_type / *has_names say which.
+
+Returns 1 when the value is valid for the property, 0 otherwise (nothing written is meaningful then). `container: a b / inline-size` sets both; without a `/` the type is normal.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `prop` | `char *` |  |  |
+| `val` | `char *` |  |  |
+| `type` | `int *` |  |  |
+| `CMQ_CONTAINER_NAMES` | `unsigned names[ ]` |  |  |
+| `has_type` | `int *` |  |  |
+| `has_names` | `int *` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`cmq_container_decl`](#cmq_container_decl) (include/css_mq.h:63).
+
+*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
 ---
 

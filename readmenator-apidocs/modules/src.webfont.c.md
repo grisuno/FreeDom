@@ -13,8 +13,8 @@ Solid arrows stay in this module, dashed arrows leave it.
 ```mermaid
 flowchart LR
     n_src_webfont_c__wf_scan(["wf_scan"])
-    n_src_webfont_c__lower_ch_306(["lower_ch"])
-    n_src_webfont_c__wf_scan --> n_src_webfont_c__lower_ch_306
+    n_src_webfont_c__lower_ch_313(["lower_ch"])
+    n_src_webfont_c__wf_scan --> n_src_webfont_c__lower_ch_313
 ```
 
 ## Functions
@@ -100,7 +100,7 @@ int wf_supported_format(const char *fmt)
 
 ### `lower_ch`
 
-`function` | [src/webfont.c:306](../../src/webfont.c#L306)
+`function` | [src/webfont.c:313](../../src/webfont.c#L313)
 
 ```c
 && lower_ch(s[k]) == 's' && k + 3 < bend && lower_ch(s[k + 1]) == 'r' && lower_ch...
@@ -114,7 +114,7 @@ int wf_supported_format(const char *fmt)
 
 **Returns:** `&&`
 
-*Called by:* [`cmq_container_surely`](src.css_mq.c.md#cmq_container_surely), [`wf_scan`](#wf_scan)
+*Called by:* [`wf_scan`](#wf_scan)
 
 ---
 
@@ -122,7 +122,7 @@ int wf_supported_format(const char *fmt)
 
 ### `wf_scan`
 
-`function` | [src/webfont.c:422](../../src/webfont.c#L422)
+`function` | [src/webfont.c:429](../../src/webfont.c#L429)
 
 ```c
 int wf_scan(const char *css, size_t len, wf_list *out)

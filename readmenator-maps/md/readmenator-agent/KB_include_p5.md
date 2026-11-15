@@ -1,6 +1,19 @@
 # Subsystem: include (page 5 of 5)
 Previous: [KB_include_p4.md](KB_include_p4.md)
 
+## include/sha2.h
+- Doc: sha_digest_len: sha2 -- one-shot SHA-1 / SHA-256 / SHA-384 / SHA-512 (FIPS 180-4), pure and...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `sha_alg` (enum, line 16)
+  - `sha_digest_len` (function, line 21) `size_t sha_digest_len(sha_alg alg);`
+  - `sha_alg_from_name` (function, line 24) `int sha_alg_from_name(const char *name, sha_alg *out);`
+  - `sha_digest` (function, line 28) `int sha_digest(sha_alg alg, const void *data, size_t len, uint8_t *out);`
+  - `FREEDOM_SHA2_H` (macro, line 2) `#define FREEDOM_SHA2_H`
+  - `SHA_MAX_DIGEST` (macro, line 18) `#define SHA_MAX_DIGEST`
+- Imported by: `src/js_env.c`, `src/sha2.c`, `tests/test_sha2.c`
+
 ## include/sheet_cache.h
 - Doc: shc_key: Every input of the parse.
 - Layer: infrastructure

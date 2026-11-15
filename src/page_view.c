@@ -357,6 +357,7 @@ typedef struct pv_node_map {
     size_t count;
     size_t cap;
     pv_ptrmap index;   /* node -> id, so a lookup is O(1) instead of a scan */
+    int explicit_ids;  /* ids came from a resolver: the ordinal of nodes[] is NOT the id */
 } pv_node_map;
 
 static int pv_node_map_init(pv_node_map *m) {
@@ -365,6 +366,7 @@ static int pv_node_map_init(pv_node_map *m) {
     m->count = 0;
     m->cap = PV_NODE_MAP_INIT_CAP;
     m->index = (pv_ptrmap){ NULL, NULL, 0, 0 };
+    m->explicit_ids = 0;
     return 0;
 }
 
@@ -379,7 +381,8 @@ static void pv_node_map_free(pv_node_map *m) {
 /* Records an element node in document order. Returns its id, or DOM_NODE_NONE on
  * overflow (anti-DoS: a hostile document with too many elements still renders, but
  * without stable ids for the overflow nodes). */
-static dom_node_id pv_node_map_add(pv_node_map *m, const lxb_dom_node_t *node) {
+static dom_node_id pv_node_map_add(pv_node_map *m, const lxb_dom_node_t *node,
+                                   const pv_node_ids *ids) {
     if (m->count >= m->cap) {
         size_t ncap = m->cap * 2;
         const lxb_dom_node_t **grown =
@@ -390,6 +393,14 @@ static dom_node_id pv_node_map_add(pv_node_map *m, const lxb_dom_node_t *node) {
     }
     dom_node_id id = (dom_node_id)m->count;
     m->nodes[m->count++] = node;
+    if (ids != NULL && ids->id_of != NULL) {
+        /* The live handle; an element the resolver does not know stays unmapped, so
+         * it never answers to another element's id. */
+        id = ids->id_of(ids->ctx, node);
+        if (id != DOM_NODE_NONE && id <= (dom_node_id)INT_MAX)
+            pv_ptrmap_put(&m->index, node, (int)id);
+        return id;
+    }
     if (m->count <= (size_t)INT_MAX) pv_ptrmap_put(&m->index, node, (int)id);
     return id;
 }
@@ -400,8 +411,9 @@ static dom_node_id pv_node_map_id(const pv_node_map *m, const lxb_dom_node_t *no
     if (m == NULL || node == NULL) return DOM_NODE_NONE;
     int id = -1;
     if (pv_ptrmap_get(&m->index, node, &id)) return (dom_node_id)id;
-    /* The index is complete unless an insert hit OOM; only then scan. */
-    if (m->index.n == m->count) return DOM_NODE_NONE;
+    /* The index is complete unless an insert hit OOM; only then scan. With resolver
+     * ids the scan's ordinal would be a foreign id: unmapped stays unmapped. */
+    if (m->explicit_ids || m->index.n == m->count) return DOM_NODE_NONE;
     for (size_t i = 0; i < m->count; ++i) {
         if (m->nodes[i] == node) return (dom_node_id)i;
     }
@@ -410,11 +422,13 @@ static dom_node_id pv_node_map_id(const pv_node_map *m, const lxb_dom_node_t *no
 
 /* Builds a document-order map of all element nodes under root. Returns 0, or -1 on
  * allocation failure. */
-static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root) {
+static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root,
+                             const pv_node_ids *ids) {
     if (pv_node_map_init(m) != 0) return -1;
+    m->explicit_ids = (ids != NULL && ids->id_of != NULL);
     for (const lxb_dom_node_t *n = root; n != NULL; n = node_next((lxb_dom_node_t *)n, root)) {
         if (n->type == LXB_DOM_NODE_TYPE_ELEMENT)
-            (void)pv_node_map_add(m, n);
+            (void)pv_node_map_add(m, n, ids);
     }
     return 0;
 }
@@ -860,7 +874,7 @@ void pv_set_block_node(pv_view *v, dom_node_id id) {
 
 void pv_set_br_line(pv_view *v, int br_line) {
     if (v == NULL || v->count == 0) return;
-    v->runs[v->count - 1].br_line = br_line & (PV_BR_EMPTY | PV_BR_CONT);
+    v->runs[v->count - 1].br_line = br_line & (PV_BR_EMPTY | PV_BR_CONT | PV_BR_ATOM_SPACE);
 }
 
 void pv_set_input_checked(pv_view *v, int checked) {
@@ -1358,7 +1372,29 @@ int anc_n;
 typedef struct pv_item_track {
     const lxb_dom_node_t **node;   /* PV_MAX_CONTAINERS entries, heap (pv_build owns) */
     int *ord;
+    /* (container, ordinal) of the items that white space separates from the item before
+     * them (PV_BR_ATOM_SPACE); bounded, heap, pv_build owns. */
+    int (*spaced)[2];
+    size_t nspaced, spaced_cap;
 } pv_item_track;
+
+#define PV_ATOM_SPACE_MAX ((size_t)4096)
+
+/* True iff collapsible white space separates element `item` from the sibling element
+ * before it (comments ignored; non-blank text between them is content, not a gap). */
+static int text_node_is_blank(const lxb_dom_node_t *c);
+static int item_space_before(const lxb_dom_node_t *item) {
+    int blank = 0;
+    for (const lxb_dom_node_t *p = item->prev; p != NULL; p = p->prev) {
+        if (p->type == LXB_DOM_NODE_TYPE_TEXT) {
+            if (!text_node_is_blank(p)) return 0;
+            blank = 1;
+        } else if (p->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            return blank;
+        }
+    }
+    return 0;
+}
 
 /* Ordinal for a run of container `cid` whose direct-child item is `item` (NULL =
  * anonymous: every such run is its own item). -1 when the run has no container. */
@@ -1367,6 +1403,18 @@ static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item) 
     if (item == NULL || item != tr->node[cid]) {
         tr->ord[cid]++;
         tr->node[cid] = item;
+        if (item != NULL && tr->nspaced < PV_ATOM_SPACE_MAX && item_space_before(item)) {
+            if (tr->nspaced == tr->spaced_cap) {
+                size_t nc = tr->spaced_cap ? tr->spaced_cap * 2 : 32;
+                int (*g)[2] = realloc(tr->spaced, nc * sizeof *g);
+                if (g == NULL) return tr->ord[cid];   /* the gap is lost, never the item */
+                tr->spaced = g;
+                tr->spaced_cap = nc;
+            }
+            tr->spaced[tr->nspaced][0] = cid;
+            tr->spaced[tr->nspaced][1] = tr->ord[cid];
+            ++tr->nspaced;
+        }
     }
     return tr->ord[cid];
 }
@@ -2347,6 +2395,9 @@ typedef struct {
      * known once its width is, so a child's `height:%` cannot resolve in the
      * style pass and travels to the layout symbolically (CSS Sizing 4 5.1). */
     int aspect_auto;
+    /* The query containers this element's CHILDREN see, nearest first (css_mq.h):
+     * handed down with the heights because it is resolved in the same root-down pass. */
+    const cmq_container *cq;
 } pv_def_h;
 
 #define PV_STYLE_RETIRE_MAX 40
@@ -2381,7 +2432,19 @@ typedef struct pv_style_cache {
      * child of a column asks it again (quadratic in a wide column). */
     pv_ptrmap              flowcol;
     cch_path   *path;     /* root->element selector path reused between resolutions */
+    /* Query containers (spec/css_mq.md). cq_on: the sheet has @container rules, so
+     * the scope chain is built; cq_src/cq_nodes: where real widths come from (NULL =
+     * none known). cqn owns the chain nodes. */
+    int                    cq_on;
+    pv_cq_src             *cq_src;
+    const struct pv_node_map *cq_nodes;
+    cmq_container        **cqn;
+    size_t                 ncqn, cqncap;
 } pv_style_cache;
+
+/* Chain nodes one build may allocate (anti-DoS): past it an element stops being a
+ * query container and its descendants see the enclosing one. */
+#define PV_CQ_NODES_MAX ((size_t)4096)
 
 static size_t pv_ptr_hash(const void *p) {
     uintptr_t x = (uintptr_t)p;
@@ -2438,6 +2501,8 @@ static void pv_style_cache_free(pv_style_cache *c) {
     }
     free(c->vn);
     pv_ptrmap_free(&c->flowcol);
+    for (size_t k = 0; k < c->ncqn; ++k) free(c->cqn[k]);
+    free(c->cqn);
     memset(c, 0, sizeof *c);
 }
 
@@ -2561,6 +2626,47 @@ static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,
     return &n->chain;
 }
 
+/* The scope an element's children see: `parent` unless the element is itself a query
+ * container, in which case a new chain node carrying its names, type and content width
+ * (the laid-out border box minus its horizontal padding and border; -1 = unknown). */
+static const cmq_container *pv_cq_push(pv_style_cache *cache, const lxb_dom_node_t *node,
+                                       const css_style *cs, const cmq_container *parent) {
+    if (cache == NULL || !cache->cq_on || cs->container_type == CMQ_CT_NORMAL) return parent;
+    if (cache->ncqn >= PV_CQ_NODES_MAX) return parent;
+    if (cache->ncqn == cache->cqncap) {
+        size_t nc = cache->cqncap ? cache->cqncap * 2 : 16;
+        cmq_container **g = (cmq_container **)realloc(cache->cqn, nc * sizeof *g);
+        if (g == NULL) return parent;
+        cache->cqn = g;
+        cache->cqncap = nc;
+    }
+    cmq_container *n = (cmq_container *)calloc(1, sizeof *n);
+    if (n == NULL) return parent;
+    for (int k = 0; k < CMQ_CONTAINER_NAMES; ++k) n->names[k] = cs->container_names[k];
+    n->type = cs->container_type;
+    n->width_px = -1;
+    n->parent = parent;
+    pv_cq_src *src = cache->cq_src;
+    if (src != NULL && src->width != NULL && cache->cq_nodes != NULL) {
+        dom_node_id id = pv_node_map_id(cache->cq_nodes, node);
+        int edges = 0;
+        if (cs->pad_left > 0) edges += cs->pad_left;
+        if (cs->pad_right > 0) edges += cs->pad_right;
+        if (cs->border_left_width > 0) edges += cs->border_left_width;
+        if (cs->border_right_width > 0) edges += cs->border_right_width;
+        int bw = (id != DOM_NODE_NONE) ? src->width(src->ctx, id) : -1;
+        if (bw >= 0) n->width_px = (bw > edges) ? bw - edges : 0;
+        if (id != DOM_NODE_NONE && src->n < PV_CQ_MAX) {
+            src->node[src->n] = id;
+            src->edges[src->n] = edges;
+            src->used[src->n] = n->width_px;
+            ++src->n;
+        }
+    }
+    cache->cqn[cache->ncqn++] = n;
+    return n;
+}
+
 /* The nearest ancestor that is an element, or NULL at the root. */
 static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el) {
     lxb_dom_node_t *p = ((lxb_dom_node_t *)el)->parent;
@@ -2630,6 +2736,7 @@ static pv_def_h pv_resolve_block_sizes(css_style *cs, pv_def_h in) {
     /* A positioned element is the containing block of the absolutes below it;
      * a static one passes its ancestor's through. */
     out.padbox = in.padbox;
+    out.cq = in.cq;
     out.aspect_auto = (cs->aspect_num > 0 && cs->aspect_den > 0 && out.content < 0.0 &&
                        cs->pct[CSS_PCT_HEIGHT] == 0 &&
                        (cs->height == CSS_LEN_UNSET || cs->height == CSS_LEN_AUTO));
@@ -2663,7 +2770,7 @@ static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const cs
     size_t n = 0;
     double inherited = CL_INITIAL_FONT_SIZE;
     const cvr_chain *vars = NULL;   /* the inherited custom-property chain */
-    pv_def_h cb_h = { -1.0, -1.0, 0 }; /* what the parent hands its children */
+    pv_def_h cb_h = { -1.0, -1.0, 0, NULL }; /* what the parent hands its children */
     lxb_dom_element_t *cur = el;
     while (cur != NULL && n < PV_FONT_CHAIN_MAX) {
         long h = pv_cache_find(cache, (const lxb_dom_node_t *)cur);
@@ -2693,7 +2800,7 @@ static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const cs
     css_style cs = { 0 };
     for (size_t k = n; k-- > 0; ) {
         cvr_table own = { 0 };
-        cs = cch_element_style_path(cache != NULL ? cache->path : NULL, stack[k], sheet, inherited, vars, &own);
+        cs = cch_element_style_path(cache != NULL ? cache->path : NULL, stack[k], sheet, inherited, vars, cb_h.cq, &own);
         {
             size_t tl = 0;
             const lxb_char_t *tn = lxb_dom_element_local_name(stack[k], &tl);
@@ -2706,6 +2813,7 @@ static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const cs
             inherited = css_computed_font_size_for_tag(&cs, inherited, tagp);
         }
         cb_h = pv_resolve_block_sizes(&cs, cb_h);
+        cb_h.cq = pv_cq_push(cache, (const lxb_dom_node_t *)stack[k], &cs, cb_h.cq);
         vars = pv_var_push(cache, &own, vars);
         pv_cache_put(cache, (const lxb_dom_node_t *)stack[k], &cs, inherited, vars, cb_h);
     }
@@ -5832,8 +5940,24 @@ pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
 pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
                           int prefers_dark, const char *extern_css, size_t extern_len,
                           int viewport_w, shc_cache *sheets, pv_view **out) {
+    return pv_build_cq(doc, js_enabled, reader, prefers_dark, extern_css, extern_len,
+                       viewport_w, sheets, NULL, out);
+}
+
+pv_status pv_build_cq(const hp_document *doc, int js_enabled, int reader,
+                      int prefers_dark, const char *extern_css, size_t extern_len,
+                      int viewport_w, shc_cache *sheets, pv_cq_src *cq, pv_view **out) {
+    return pv_build_live(doc, js_enabled, reader, prefers_dark, extern_css, extern_len,
+                         viewport_w, sheets, cq, NULL, out);
+}
+
+pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
+                        int prefers_dark, const char *extern_css, size_t extern_len,
+                        int viewport_w, shc_cache *sheets, pv_cq_src *cq,
+                        const pv_node_ids *ids, pv_view **out) {
     if (doc == NULL || out == NULL) return PV_ERR_NULL_ARG;
     *out = NULL;
+    if (cq != NULL) cq->n = 0;
 
     pv_view *v = pv_new();
     if (v == NULL) return PV_ERR_OOM;
@@ -5849,7 +5973,7 @@ pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
      * makes pv_run.node_id agree with dom_node_id even though page_view walks from
      * `base` (usually body) while the DOM index counts from root. */
     pv_node_map node_map;
-    if (pv_node_map_build(&node_map, root) != 0) { pv_free(v); return PV_ERR_OOM; }
+    if (pv_node_map_build(&node_map, root, ids) != 0) { pv_free(v); return PV_ERR_OOM; }
 
     /* Parse the document's <style> blocks once into a bounded sheet (pure: it never
      * fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css
@@ -5872,6 +5996,7 @@ pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
     pv_item_track items;         /* per-container item ordinals */
     int reg_oom = cont_reg_init(&reg, PV_MAX_CONTAINERS);
     reg_oom |= cont_reg_init(&float_reg, PV_MAX_FLOATS);
+    memset(&items, 0, sizeof items);
     items.node = calloc(PV_MAX_CONTAINERS, sizeof *items.node);
     items.ord = calloc(PV_MAX_CONTAINERS, sizeof *items.ord);
     reg.nodes = &node_map;
@@ -5884,6 +6009,9 @@ pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
     after_p.box = -1;
     (void)pv_style_cache_init(&cache);  /* on OOM: cap stays 0, every lookup degrades to uncached */
     pv_style_cache_reserve(&cache, node_map.count);
+    cache.cq_on = css_sheet_uses_containers(sheet);
+    cache.cq_src = cq;
+    cache.cq_nodes = &node_map;
     /* Per-table flow-vs-grid decisions, plus the style context the table role
      * resolution needs (a role is a computed `display`, spec/css.md). Declared
      * after `cache` because it borrows it. */
@@ -7508,6 +7636,22 @@ pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
         if (st != PV_OK) { rc = st; goto cleanup; }
     }
 
+    /* Per-atom word space of MIXED anonymous rows (spec/page_view.md "El espacio entre
+     * atomos"): the first run of each recorded item, when its own container is an
+     * anonymous row whose gap stayed 0. spaced[] is in emission order, so one forward
+     * sweep pairs it with the runs. */
+    for (size_t sp = 0, ri = 0; sp < items.nspaced; ++sp) {
+        int cid = items.spaced[sp][0], ord = items.spaced[sp][1];
+        if (cid < 0 || (size_t)cid >= reg.count || !reg.def[cid].anon_row ||
+            reg.def[cid].gap != 0)
+            continue;
+        size_t k = ri;
+        while (k < v->count && !(v->runs[k].cont_id == cid && v->runs[k].cont_item == ord)) ++k;
+        if (k == v->count) continue;      /* the item emitted no run of its own level */
+        v->runs[k].br_line |= PV_BR_ATOM_SPACE;
+        ri = k;
+    }
+
     if (after_p.el != NULL && after_p.text != NULL) {
         const css_style *acs = cached_element_style_ref(
             lxb_dom_interface_element((lxb_dom_node_t *)after_p.el), sheet, &cache);
@@ -7525,7 +7669,7 @@ pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
     box_reg_free(&box_reg);
     cont_reg_free(&reg);
     cont_reg_free(&float_reg);
-    free(items.node); free(items.ord);
+    free(items.node); free(items.ord); free(items.spaced);
     return PV_OK;
 
 cleanup:
@@ -7538,7 +7682,7 @@ cleanup:
     box_reg_free(&box_reg);
     cont_reg_free(&reg);
     cont_reg_free(&float_reg);
-    free(items.node); free(items.ord);
+    free(items.node); free(items.ord); free(items.spaced);
     pv_free(v);
     return rc;
 }

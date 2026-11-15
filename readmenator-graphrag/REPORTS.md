@@ -1,6 +1,6 @@
 # GraphRAG Community Reports
 
-Entities: 8426 | Relationships: 14942 | Communities: 14 | Themes: 4 | Text units: 7943
+Entities: 8481 | Relationships: 15012 | Communities: 14 | Themes: 4 | Text units: 7996
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
@@ -8,11 +8,11 @@ Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank
 
 325 files in 14 communities and 4 themes. Highest-impact communities: include: css (7.0), src: tab (4.9), include: browser_ui (3.4). God nodes: gui/browser_ui.c, include/css.h, src/tab.c, src/freedom.c, src/css.c.
 
-- [include: css] rating 7.0: `include/css.h` ranks 1 by PageRank, 39 importers, 147 symbols: css_style: A resolved presentation.
+- [include: css] rating 7.0: `include/css.h` ranks 1 by PageRank, 39 importers, 148 symbols: css_style: A resolved presentation.
 - [src: tab] rating 4.9: `include/html_parse.h` ranks 1 by PageRank, 19 importers, 24 symbols: hp_script: One executable <script>.
 - [include: browser_ui] rating 3.4: `include/prefs.h` ranks 1 by PageRank, 6 importers, 18 symbols: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
 - [src: text_shape] rating 2.9: `include/js_policy.h` ranks 1 by PageRank, 5 importers, 7 symbols: jsp_trusted: Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its JS is enabled (js_enabled, e.g. the jsp_enabled result) AND it is explicitly on allow.conf (host_allowlisted, e.g. hb_is_allowlisted over...
-- [include: page_view] rating 2.1: `include/page_view.h` ranks 1 by PageRank, 12 importers, 98 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
+- [include: page_view] rating 2.1: `include/page_view.h` ranks 1 by PageRank, 12 importers, 102 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - [include: secure_fetch] rating 2.1: `include/anti_fp.h` ranks 1 by PageRank, 8 importers, 35 symbols: fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  "document" #define FP_SEC_FETCH_MODE_NAV  "navigate" #define FP_SEC_FETCH_SITE_NONE "none" #define FP_SEC_FETCH_USER_ON   "?1" /* --- clocks: coarse granularity against...
 - [include: browser] rating 1.5: `include/hostblock.h` ranks 1 by PageRank, 5 importers, 10 symbols: hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted HB_BLOCK       /* the host is on the blocklist (and not re-enabled) } hb_decision; typedef enum hb_status { HB_OK = 0, HB_ERR_NULL_ARG,  /* set or...
 - [src: http_cache] rating 1.3: `include/local_store.h` ranks 1 by PageRank, 8 importers, 11 symbols: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container so ls_open_passphrase can re-derive. ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len...
@@ -24,9 +24,9 @@ Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank
 
 Theme of 3 communities and 94 files: include: css (56 files, rating 7.0); include: page_view (26 files, rating 2.1); include: svg_render (12 files, rating 1.0).
 
-- [include: css] `include/css.h` ranks 1 by PageRank, 39 importers, 147 symbols: css_style: A resolved presentation.
+- [include: css] `include/css.h` ranks 1 by PageRank, 39 importers, 148 symbols: css_style: A resolved presentation.
 - [include: css] `include/css_color.h` ranks 2 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
-- [include: page_view] `include/page_view.h` ranks 1 by PageRank, 12 importers, 98 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
+- [include: page_view] `include/page_view.h` ranks 1 by PageRank, 12 importers, 102 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - [include: page_view] `include/render_policy.h` ranks 2 by PageRank, 8 importers, 9 symbols: rdp_caps: Render capabilities for a page.
 - [include: svg_render] `include/image_decode.h` ranks 1 by PageRank, 6 importers, 14 symbols: img_pixels: A decoded bitmap that owns its pixel buffer.
 - [include: svg_render] `include/svg_render.h` ranks 2 by PageRank, 6 importers, 19 symbols: sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g> chain, and `m` the flattened affine transform of that chain (a,b,c,d,e,f in Cairo order).
@@ -80,15 +80,15 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.8).
 
 56 files under include (c 37, h 19), mostly utility. Core file include/css.h (PageRank 0.0515, imported by 39 files): css_style: A resolved presentation. Key abstractions: css_status, css_align, css_display, css_justify, css_font_family, css_text_transform. Depends on include: page_view (4), src: tab (2), src: text_shape (2). Used by include: page_view (20), include: browser_ui (8), src: tab (5).
 
-- `include/css.h` ranks 1 by PageRank, 39 importers, 147 symbols: css_style: A resolved presentation.
+- `include/css.h` ranks 1 by PageRank, 39 importers, 148 symbols: css_style: A resolved presentation.
 - `include/css_color.h` ranks 2 by PageRank, 13 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
 - `include/css_counter.h` ranks 3 by PageRank, 3 importers, 19 symbols: cnt_hash: FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are * case-sensitive).
-- Hotspot `src/css.c`: 268 symbols, 40 connections (score 0.33).
-- Hotspot `tests/test_css.c`: 369 symbols, 19 connections (score 0.30).
+- Hotspot `src/css.c`: 273 symbols, 40 connections (score 0.33).
+- Hotspot `tests/test_css.c`: 370 symbols, 19 connections (score 0.30).
 - 1 layer violations, e.g. test_css.c (testing) -> flex_layout.h (presentation).
 - Dataflow: 3 INFERRED issues (first: DEAD_STORE in page_view).
 - Key entities: file:tests/test_css.c, file:src/css.c, file:include/css.h, file:src/css_box.c, file:include/css_select.h, file:src/css_computed.c, file:src/css_select.c, file:src/css_mq.c
-- Rating 7.0/10 = 7 x PageRank share 1.00 + 3 x risk 0.00. Internal imports: 105.
+- Rating 7.0/10 = 7 x PageRank share 1.00 + 3 x risk 0.00. Internal imports: 106.
 
 ## src: tab (`c1`, community, rating 4.9)
 
@@ -96,8 +96,8 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.8).
 
 - `include/html_parse.h` ranks 1 by PageRank, 19 importers, 24 symbols: hp_script: One executable <script>.
 - `include/js_sandbox.h` ranks 2 by PageRank, 19 importers, 37 symbols: js_limits: Per-evaluation resource limits.
-- `include/dom.h` ranks 3 by PageRank, 18 importers, 31 symbols: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node" and "first" cannot be expressed by an element-only reference).
-- Hotspot `src/tab.c`: 194 symbols, 76 connections (score 0.44).
+- `include/dom.h` ranks 3 by PageRank, 18 importers, 32 symbols: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node" and "first" cannot be expressed by an element-only reference).
+- Hotspot `src/tab.c`: 197 symbols, 76 connections (score 0.44).
 - Hotspot `tests/test_js_dom.c`: 277 symbols, 30 connections (score 0.29).
 - Dependency cycle: js_dom.h -> js_location.h -> js_dom.h.
 - Dataflow: 2 INFERRED issues (first: UNCHECKED_ALLOC in jd_click_state_new).
@@ -111,7 +111,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.8).
 - `include/prefs.h` ranks 1 by PageRank, 6 importers, 18 symbols: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, * remember_history on).
 - `include/zoom.h` ranks 2 by PageRank, 5 importers, 10 symbols: zm_clamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
 - `include/ui.h` ranks 3 by PageRank, 6 importers, 20 symbols: ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no copy): render with text + offset over len bytes.
-- Hotspot `gui/browser_ui.c`: 664 symbols, 143 connections (score 1.00).
+- Hotspot `gui/browser_ui.c`: 667 symbols, 143 connections (score 1.00).
 - Hotspot `tests/test_profile.c`: 17 symbols, 16 connections (score 0.08).
 - 3 layer violations, e.g. browser_ui.c (presentation) -> data_url.h (data_access).
 - Dataflow: 34 INFERRED issues (first: UNCHECKED_ALLOC in gui_subresource_fetch).
@@ -126,20 +126,20 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.8).
 - `include/data_url.h` ranks 2 by PageRank, 8 importers, 7 symbols: du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real inline icon/ logo/image, bounding the allocation before decoding a payload whose size a * remote, hostile document controls. #define DU_MAX_ENCODED_LEN...
 - `include/webfont.h` ranks 3 by PageRank, 11 importers, 17 symbols: wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names.
 - Hotspot `src/freedom.c`: 50 symbols, 64 connections (score 0.30).
-- Hotspot `src/text_shape.c`: 68 symbols, 14 connections (score 0.10).
+- Hotspot `src/text_shape.c`: 74 symbols, 16 connections (score 0.11).
 - Dataflow: 1 INFERRED issues (first: UNCHECKED_ALLOC in headless_fetch).
-- Key entities: file:src/text_shape.c, file:src/freedom.c, file:include/text_shape.h, file:tests/test_text_shape.c, file:tests/test_data_url.c, file:include/tls_impersonate.h, file:include/webfont.h, file:tests/test_link_nav.c
+- Key entities: file:src/text_shape.c, file:src/freedom.c, file:tests/test_text_shape.c, file:include/text_shape.h, file:tests/test_data_url.c, file:include/tls_impersonate.h, file:include/webfont.h, file:tests/test_link_nav.c
 - Rating 2.9/10 = 7 x PageRank share 0.41 + 3 x risk 0.00. Internal imports: 47.
 
 ## include: page_view (`c4`, community, rating 2.1)
 
 26 files under include (c 16, h 10), mostly testing. Core file include/page_view.h (PageRank 0.0079, imported by 12 files): pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for... Key abstractions: pv_status, pv_kind, pv_input_type, pv_form_method, pv_run, pv_box_def. Depends on include: css (20), src: tab (7), src: text_shape (2). Used by src: tab (6), include: browser_ui (5), src: text_shape (5).
 
-- `include/page_view.h` ranks 1 by PageRank, 12 importers, 98 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
+- `include/page_view.h` ranks 1 by PageRank, 12 importers, 102 symbols: pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt text for PV_IMAGE, possibly empty). href is owned and NUL-terminated for PV_LINK runs, NULL otherwise. src is owned and NUL-terminated for...
 - `include/render_policy.h` ranks 2 by PageRank, 8 importers, 9 symbols: rdp_caps: Render capabilities for a page.
 - `include/box_style.h` ranks 3 by PageRank, 12 importers, 31 symbols: bx_edges: anything longer fails closed instead of truncating into a wrong match. #define BX_TAG_NAME_MAX 32u typedef enum bx_display { BX_DISPLAY_BLOCK = 0,     /* stacks vertically, takes the available width BX_DISPLAY_INLINE...
-- Hotspot `src/page_view.c`: 284 symbols, 42 connections (score 0.35).
-- Hotspot `tests/test_page_view.c`: 224 symbols, 26 connections (score 0.24).
+- Hotspot `src/page_view.c`: 292 symbols, 42 connections (score 0.35).
+- Hotspot `tests/test_page_view.c`: 227 symbols, 26 connections (score 0.25).
 - 14 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
 - Dataflow: 8 INFERRED issues (first: DEAD_STORE in layout_grid).
 - Key entities: file:src/page_view.c, file:tests/test_page_view.c, file:include/page_view.h, file:tests/test_flex_layout.c, file:tests/test_box_tree.c, file:include/flex_layout.h, file:tests/test_box_style.c, file:src/box_style.c
@@ -210,7 +210,7 @@ Theme of 1 communities and 18 files: unassigned files (18 files, rating 0.8).
 - Hotspot `tools/guitime.py`: 3 symbols, 8 connections (score 0.04).
 - Hotspot `tools/fftime.py`: 1 symbols, 8 connections (score 0.03).
 - Taint: 6 paths reach this group via subprocess, urllib.request.
-- Key entities: file:tools/pngdiff.c, file:tools/gen_psl.c, file:tools/ffgeom.py, file:tools/fbench.py, file:tools/guitime.py, file:tools/snapshot.py, file:tools/mutate.py, file:tools/fftime.py
+- Key entities: file:tools/pngdiff.c, file:tools/gen_psl.c, file:tools/ffgeom.py, file:tools/fbench.py, file:tools/guitime.py, file:tools/mutate.py, file:tools/fftime.py, file:tools/snapshot.py
 - Rating 0.8/10 = 7 x PageRank share 0.12 + 3 x risk 0.00. Internal imports: 0.
 
 ## include: tab (`c9`, community, rating 0.5)

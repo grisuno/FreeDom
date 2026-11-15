@@ -3,24 +3,28 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `css_valign` | enum | `include/css.h:136` | `` |
-| `css_visibility` | enum | `include/css.h:220` | `` |
-| `css_white_space` | enum | `include/css.h:142` | `` |
-| `css_word_break` | enum | `include/css.h:266` | `` |
-| `cvr_table` | struct | `include/css.h:1210` | `` |
-| `declared` | function | `include/css.h:894` | `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...` |
-| `element` | function | `include/css.h:899` | `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...` |
-| `family` | function | `include/css.h:718` | `* LOCAL family (spec/text_shape.md section 7);` |
-| `inherited_px` | function | `include/css.h:1234` | `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...` |
-| `name` | function | `include/css.h:1251` | `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...` |
-| `order` | function | `include/css.h:1121` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
-| `palette` | function | `include/css.h:1068` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
-| `prefers_dark` | type_alias | `include/css.h:1022` | `typedef struct css_media { int prefers_dark;` |
-| `prop` | type_alias | `include/css.h:1091` | `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];` |
-| `scaleY` | function | `include/css.h:890` | `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);` |
-| `slots` | function | `include/css.h:906` | `* parse time into ALL seven slots (singular matrices fail closed);` |
-| `translate` | function | `include/css.h:889` | `* translate()/translateX()/translateY();` |
-| `verbatim` | function | `include/css.h:91` | `* the quoted row strings verbatim (flex_layout parses them);` |
+| `css_text_transform` | enum | `include/css.h:132` | `` |
+| `css_touch_action` | enum | `include/css.h:439` | `` |
+| `css_ua_heading_em` | function | `include/css.h:1258` | `double css_ua_heading_em(int level);` |
+| `css_user_select` | enum | `include/css.h:323` | `` |
+| `css_valign` | enum | `include/css.h:137` | `` |
+| `css_visibility` | enum | `include/css.h:221` | `` |
+| `css_white_space` | enum | `include/css.h:143` | `` |
+| `css_word_break` | enum | `include/css.h:267` | `` |
+| `cvr_table` | struct | `include/css.h:1222` | `` |
+| `declared` | function | `include/css.h:898` | `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...` |
+| `element` | function | `include/css.h:903` | `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...` |
+| `family` | function | `include/css.h:719` | `* LOCAL family (spec/text_shape.md section 7);` |
+| `inherited_px` | function | `include/css.h:1246` | `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...` |
+| `name` | function | `include/css.h:1263` | `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...` |
+| `order` | function | `include/css.h:1129` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
+| `palette` | function | `include/css.h:1076` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
+| `prefers_dark` | type_alias | `include/css.h:1026` | `typedef struct css_media { int prefers_dark;` |
+| `prop` | type_alias | `include/css.h:1099` | `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];` |
+| `scaleY` | function | `include/css.h:894` | `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);` |
+| `slots` | function | `include/css.h:910` | `* parse time into ALL seven slots (singular matrices fail closed);` |
+| `translate` | function | `include/css.h:893` | `* translate()/translateX()/translateY();` |
+| `verbatim` | function | `include/css.h:92` | `* the quoted row strings verbatim (flex_layout parses them);` |
 | `CAR_INLINE_SPEC` | macro | `include/css_atrule.h:18` | `#define CAR_INLINE_SPEC` |
 | `CAR_LAYER_NAME_MAX` | macro | `include/css_atrule.h:17` | `#define CAR_LAYER_NAME_MAX` |
 | `CAR_MAX_DEPTH` | macro | `include/css_atrule.h:15` | `#define CAR_MAX_DEPTH` |
@@ -63,14 +67,14 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CCH_NTH_MAX` | macro | `include/css_chain.h:28` | `#define CCH_NTH_MAX` |
 | `CCH_SIB_MAX` | macro | `include/css_chain.h:27` | `#define CCH_SIB_MAX` |
 | `FREEDOM_CSS_CHAIN_H` | macro | `include/css_chain.h:2` | `#define FREEDOM_CSS_CHAIN_H` |
-| `box` | function | `include/css_chain.h:91` | `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...` |
-| `cch_element_matches` | function | `include/css_chain.h:81` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` |
+| `box` | function | `include/css_chain.h:92` | `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...` |
+| `cch_element_matches` | function | `include/css_chain.h:82` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` |
 | `cch_path` | type_alias | `include/css_chain.h:69` | `typedef struct cch_path cch_path;` |
 | `cch_path_free` | function | `include/css_chain.h:71` | `void cch_path_free(cch_path *pa);` |
 | `cch_path_new` | function | `include/css_chain.h:70` | `cch_path *cch_path_new(void);` |
 | `cvr_chain` | struct | `include/css_chain.h:51` | `` |
 | `cvr_table` | struct | `include/css_chain.h:52` | `` |
-| `lacks` | function | `include/css_chain.h:85` | `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...` |
+| `lacks` | function | `include/css_chain.h:86` | `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...` |
 | `CC_COLOR_CURRENT` | macro | `include/css_color.h:59` | `#define CC_COLOR_CURRENT` |
 | `CC_COLOR_TRANSPARENT` | macro | `include/css_color.h:60` | `#define CC_COLOR_TRANSPARENT` |
 | `FREEDOM_CSS_COLOR_H` | macro | `include/css_color.h:2` | `#define FREEDOM_CSS_COLOR_H` |
@@ -114,10 +118,10 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CSS_WIDE_PROBE_DECLS` | macro | `include/css_decl.h:35` | `#define CSS_WIDE_PROBE_DECLS` |
 | `FREEDOM_CSS_DECL_H` | macro | `include/css_decl.h:2` | `#define FREEDOM_CSS_DECL_H` |
 | `contiguous` | function | `include/css_decl.h:65` | `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...` |
-| `css_decl` | struct | `include/css_decl.h:238` | `` |
+| `css_decl` | struct | `include/css_decl.h:241` | `` |
 | `order` | function | `include/css_decl.h:50` | `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);` |
 | `part` | function | `include/css_decl.h:216` | `* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM...` |
-| `prop` | type_alias | `include/css_decl.h:237` | `typedef struct css_decl { int prop;` |
+| `prop` | type_alias | `include/css_decl.h:240` | `typedef struct css_decl { int prop;` |
 | `CG_LEN_UNSET` | macro | `include/css_gradient.h:22` | `#define CG_LEN_UNSET` |
 | `FREEDOM_CSS_GRADIENT_H` | macro | `include/css_gradient.h:2` | `#define FREEDOM_CSS_GRADIENT_H` |
 | `cg_expand_background` | function | `include/css_gradient.h:17` | `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
@@ -140,26 +144,26 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `cix_index` | struct | `include/css_index.h:23` | `` |
 | `index` | function | `include/css_index.h:44` | `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...` |
 | `key` | type_alias | `include/css_index.h:17` | `typedef struct cix_entry { uint64_t key;` |
-| `CL_FALLBACK_CAP_RATIO` | macro | `include/css_length.h:58` | `#define CL_FALLBACK_CAP_RATIO` |
-| `CL_FALLBACK_CH_RATIO` | macro | `include/css_length.h:57` | `#define CL_FALLBACK_CH_RATIO` |
-| `CL_FALLBACK_EX_RATIO` | macro | `include/css_length.h:56` | `#define CL_FALLBACK_EX_RATIO` |
-| `CL_FALLBACK_IC_RATIO` | macro | `include/css_length.h:59` | `#define CL_FALLBACK_IC_RATIO` |
+| `CL_FALLBACK_CAP_RATIO` | macro | `include/css_length.h:65` | `#define CL_FALLBACK_CAP_RATIO` |
+| `CL_FALLBACK_CH_RATIO` | macro | `include/css_length.h:64` | `#define CL_FALLBACK_CH_RATIO` |
+| `CL_FALLBACK_EX_RATIO` | macro | `include/css_length.h:57` | `#define CL_FALLBACK_EX_RATIO` |
+| `CL_FALLBACK_IC_RATIO` | macro | `include/css_length.h:66` | `#define CL_FALLBACK_IC_RATIO` |
 | `CL_INITIAL_FONT_SIZE` | macro | `include/css_length.h:39` | `#define CL_INITIAL_FONT_SIZE` |
 | `CL_MAX_TOKEN` | macro | `include/css_length.h:33` | `#define CL_MAX_TOKEN` |
 | `CL_NORMAL_LINE_RATIO` | macro | `include/css_length.h:45` | `#define CL_NORMAL_LINE_RATIO` |
 | `FREEDOM_CSS_LENGTH_H` | macro | `include/css_length.h:2` | `#define FREEDOM_CSS_LENGTH_H` |
-| `cl_ctx` | struct | `include/css_length.h:84` | `` |
-| `cl_is_length_unit` | function | `include/css_length.h:246` | `int cl_is_length_unit(const char *unit, size_t unit_len);` |
-| `cl_lp` | struct | `include/css_length.h:132` | `` |
-| `cl_number` | function | `include/css_length.h:230` | `int cl_number(const char *s, double *out, const char **endp);` |
-| `cl_status` | enum | `include/css_length.h:61` | `` |
-| `cl_unit_font_ratio` | function | `include/css_length.h:182` | `double cl_unit_font_ratio(const char *unit, size_t unit_len);` |
-| `cl_unit_is_font_relative` | function | `include/css_length.h:157` | `* cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em *...` |
-| `font_size` | type_alias | `include/css_length.h:84` | `typedef struct cl_ctx { double font_size;` |
-| `here` | function | `include/css_length.h:186` | `* Every input cl_resolve accepts resolves identically here (with has_pct 0);` |
-| `length` | function | `include/css_length.h:206` | `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...` |
-| `prelude` | function | `include/css_length.h:99` | `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...` |
-| `px` | type_alias | `include/css_length.h:132` | `typedef struct cl_lp { double px;` |
+| `cl_ctx` | struct | `include/css_length.h:91` | `` |
+| `cl_is_length_unit` | function | `include/css_length.h:253` | `int cl_is_length_unit(const char *unit, size_t unit_len);` |
+| `cl_lp` | struct | `include/css_length.h:139` | `` |
+| `cl_number` | function | `include/css_length.h:237` | `int cl_number(const char *s, double *out, const char **endp);` |
+| `cl_status` | enum | `include/css_length.h:68` | `` |
+| `cl_unit_font_ratio` | function | `include/css_length.h:189` | `double cl_unit_font_ratio(const char *unit, size_t unit_len);` |
+| `cl_unit_is_font_relative` | function | `include/css_length.h:164` | `* cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em *...` |
+| `font_size` | type_alias | `include/css_length.h:91` | `typedef struct cl_ctx { double font_size;` |
+| `here` | function | `include/css_length.h:193` | `* Every input cl_resolve accepts resolves identically here (with has_pct 0);` |
+| `length` | function | `include/css_length.h:213` | `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...` |
+| `prelude` | function | `include/css_length.h:106` | `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...` |
+| `px` | type_alias | `include/css_length.h:139` | `typedef struct cl_lp { double px;` |
 | `CM_LAYERS` | macro | `include/css_mask.h:12` | `#define CM_LAYERS` |
 | `FREEDOM_CSS_MASK_H` | macro | `include/css_mask.h:2` | `#define FREEDOM_CSS_MASK_H` |
 | `cm_clip` | enum | `include/css_mask.h:15` | `` |
@@ -170,16 +174,21 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `cm_layer` | struct | `include/css_mask.h:19` | `` |
 | `kind` | type_alias | `include/css_mask.h:19` | `typedef struct cm_layer { int kind;` |
 | `malformed` | function | `include/css_mask.h:31` | `* the value is unsupported or malformed (the caller drops the declaration). */ int cm_expand(const char *prop, const...` |
+| `CMQ_CONTAINER_NAMES` | macro | `include/css_mq.h:37` | `#define CMQ_CONTAINER_NAMES` |
 | `CMQ_MAX_DEPTH` | macro | `include/css_mq.h:16` | `#define CMQ_MAX_DEPTH` |
 | `CMQ_TOK_MAX` | macro | `include/css_mq.h:17` | `#define CMQ_TOK_MAX` |
 | `FREEDOM_CSS_MQ_H` | macro | `include/css_mq.h:2` | `#define FREEDOM_CSS_MQ_H` |
+| `cmq_container` | struct | `include/css_mq.h:41` | `` |
+| `cmq_container_decl` | function | `include/css_mq.h:63` | `int cmq_container_decl(const char *prop, const char *val, int *type, unsigned names[CMQ_CONTAINER_NAMES], int...` |
 | `cmq_container_surely` | function | `include/css_mq.h:34` | `int cmq_container_surely(const char *s, size_t len, int max_width);` |
 | `cmq_env` | struct | `include/css_mq.h:19` | `` |
 | `cmq_matches` | function | `include/css_mq.h:28` | `int cmq_matches(const char *s, size_t len, const cmq_env *env);` |
+| `cmq_name_hash` | function | `include/css_mq.h:50` | `unsigned cmq_name_hash(const char *s, size_t n);` |
+| `names` | type_alias | `include/css_mq.h:41` | `typedef struct cmq_container { unsigned names[CMQ_CONTAINER_NAMES];` |
 | `width_px` | type_alias | `include/css_mq.h:18` | `typedef struct cmq_env { int width_px;` |
-| `CSEL_FOLD_MARK` | macro | `include/css_select.h:215` | `#define CSEL_FOLD_MARK` |
-| `CSEL_FOLD_PREFIX` | macro | `include/css_select.h:214` | `#define CSEL_FOLD_PREFIX` |
-| `CSEL_IDENT_SCRATCH` | macro | `include/css_select.h:216` | `#define CSEL_IDENT_SCRATCH` |
+| `CSEL_FOLD_MARK` | macro | `include/css_select.h:216` | `#define CSEL_FOLD_MARK` |
+| `CSEL_FOLD_PREFIX` | macro | `include/css_select.h:215` | `#define CSEL_FOLD_PREFIX` |
+| `CSEL_IDENT_SCRATCH` | macro | `include/css_select.h:217` | `#define CSEL_IDENT_SCRATCH` |
 | `CSS_MAX_CLASSES_PER_SEL` | macro | `include/css_select.h:28` | `#define CSS_MAX_CLASSES_PER_SEL` |
 | `CSS_MAX_SUB_SELS` | macro | `include/css_select.h:83` | `#define CSS_MAX_SUB_SELS` |
 | `CSS_SUB_MAX_ATTRS` | macro | `include/css_select.h:84` | `#define CSS_SUB_MAX_ATTRS` |
@@ -187,32 +196,32 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CSS_TOK_MAX` | macro | `include/css_select.h:27` | `#define CSS_TOK_MAX` |
 | `FREEDOM_CSS_SELECT_H` | macro | `include/css_select.h:2` | `#define FREEDOM_CSS_SELECT_H` |
 | `comb` | type_alias | `include/css_select.h:139` | `typedef struct css_sel { int comb[CSS_MAX_COMPOUNDS];` |
-| `conservative` | function | `include/css_select.h:201` | `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...` |
-| `csel_anc_reject` | function | `include/css_select.h:194` | `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)` |
-| `csel_ci_eq` | function | `include/css_select.h:243` | `static inline int csel_ci_eq(const char *a, const char *b)` |
-| `csel_ci_starts` | function | `include/css_select.h:252` | `static inline int csel_ci_starts(const char *a, const char *p)` |
-| `csel_compact_dup` | function | `include/css_select.h:172` | `css_sel *csel_compact_dup(const css_sel *sel);` |
-| `csel_compact_size` | function | `include/css_select.h:167` | `size_t csel_compact_size(int nparts);` |
-| `csel_decl_end` | function | `include/css_select.h:235` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` |
-| `csel_element_feature_bits` | function | `include/css_select.h:193` | `unsigned long long csel_element_feature_bits(const css_element *e);` |
-| `csel_emit_utf8` | function | `include/css_select.h:219` | `size_t csel_emit_utf8(unsigned int cp, char *out);` |
-| `csel_escape_len` | function | `include/css_select.h:223` | `size_t csel_escape_len(const char *s, size_t i, size_t b);` |
-| `csel_ident_ch` | function | `include/css_select.h:280` | `static inline int csel_ident_ch(char c)` |
-| `csel_ident_eq` | function | `include/css_select.h:227` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` |
-| `csel_ident_fold` | function | `include/css_select.h:225` | `void csel_ident_fold(const char *src, size_t len, char *dst);` |
-| `csel_lower_ch` | function | `include/css_select.h:239` | `static inline char csel_lower_ch(char c)` |
-| `csel_matches` | function | `include/css_select.h:185` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` |
-| `csel_parse` | function | `include/css_select.h:176` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` |
-| `csel_read_ident` | function | `include/css_select.h:230` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` |
-| `csel_span_eq` | function | `include/css_select.h:261` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
-| `csel_substr` | function | `include/css_select.h:272` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
-| `csel_unescape` | function | `include/css_select.h:221` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
+| `conservative` | function | `include/css_select.h:202` | `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...` |
+| `csel_anc_reject` | function | `include/css_select.h:195` | `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)` |
+| `csel_ci_eq` | function | `include/css_select.h:244` | `static inline int csel_ci_eq(const char *a, const char *b)` |
+| `csel_ci_starts` | function | `include/css_select.h:253` | `static inline int csel_ci_starts(const char *a, const char *p)` |
+| `csel_compact_dup` | function | `include/css_select.h:173` | `css_sel *csel_compact_dup(const css_sel *sel);` |
+| `csel_compact_size` | function | `include/css_select.h:168` | `size_t csel_compact_size(int nparts);` |
+| `csel_decl_end` | function | `include/css_select.h:236` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` |
+| `csel_element_feature_bits` | function | `include/css_select.h:194` | `unsigned long long csel_element_feature_bits(const css_element *e);` |
+| `csel_emit_utf8` | function | `include/css_select.h:220` | `size_t csel_emit_utf8(unsigned int cp, char *out);` |
+| `csel_escape_len` | function | `include/css_select.h:224` | `size_t csel_escape_len(const char *s, size_t i, size_t b);` |
+| `csel_ident_ch` | function | `include/css_select.h:281` | `static inline int csel_ident_ch(char c)` |
+| `csel_ident_eq` | function | `include/css_select.h:228` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` |
+| `csel_ident_fold` | function | `include/css_select.h:226` | `void csel_ident_fold(const char *src, size_t len, char *dst);` |
+| `csel_lower_ch` | function | `include/css_select.h:240` | `static inline char csel_lower_ch(char c)` |
+| `csel_matches` | function | `include/css_select.h:186` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` |
+| `csel_parse` | function | `include/css_select.h:177` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` |
+| `csel_read_ident` | function | `include/css_select.h:231` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` |
+| `csel_span_eq` | function | `include/css_select.h:262` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
+| `csel_substr` | function | `include/css_select.h:273` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
+| `csel_unescape` | function | `include/css_select.h:222` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
 | `css_attr_match` | struct | `include/css_select.h:88` | `` |
 | `css_compound` | struct | `include/css_select.h:122` | `` |
 | `css_pseudo_match` | struct | `include/css_select.h:112` | `` |
 | `css_sel` | struct | `include/css_select.h:139` | `` |
 | `css_sub_sel` | struct | `include/css_select.h:95` | `` |
-| `identifier` | function | `include/css_select.h:207` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
+| `identifier` | function | `include/css_select.h:208` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
 | `kind` | type_alias | `include/css_select.h:112` | `typedef struct css_pseudo_match { int kind;` |
 | `name` | type_alias | `include/css_select.h:88` | `typedef struct css_attr_match { char name[CSS_TOK_MAX];` |
 | `tag` | type_alias | `include/css_select.h:94` | `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];` |
@@ -301,6 +310,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `length` | function | `include/dom.h:260` | `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...` |
 | `parent` | function | `include/dom.h:203` | `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...` |
 | `process` | function | `include/dom.h:267` | `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...` |
+| `sight` | function | `include/dom.h:272` | `* first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change...` |
 | `tree` | function | `include/dom.h:59` | `* tree (the index only grows, so a node a script removed is still registered and must not be * found);` |
 | `valid` | function | `include/dom.h:146` | `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...` |
 | `DD_FIELD_MAX` | macro | `include/dom_debug.h:28` | `#define DD_FIELD_MAX` |
@@ -486,15 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `HCF_MAX_FILE_BYTES` | macro | `include/host_conf.h:18` | `#define HCF_MAX_FILE_BYTES` |
 | `HCF_PATH_MAX` | macro | `include/host_conf.h:16` | `#define HCF_PATH_MAX` |
 | `hcf_dirs` | struct | `include/host_conf.h:20` | `` |
-| `hcf_load_allowlist` | function | `include/host_conf.h:39` | `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname);` |
-| `hcf_load_filter` | function | `include/host_conf.h:35` | `hb_set *hcf_load_filter(const hcf_dirs *dirs);` |
-| `hcf_search_dirs` | function | `include/host_conf.h:28` | `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out);` |
-| `hcf_search_dirs_from_env` | function | `include/host_conf.h:31` | `void hcf_search_dirs_from_env(hcf_dirs *out);` |
-| `FREEDOM_HOSTBLOCK_H` | macro | `include/hostblock.h:2` | `#define FREEDOM_HOSTBLOCK_H` |
-| `hb_count` | function | `include/hostblock.h:85` | `size_t hb_count(const hb_set *s, hb_list list);` |
-| `hb_decision` | enum | `include/hostblock.h:37` | `` |
-| `hb_free` | function | `include/hostblock.h:52` | `void hb_free(hb_set *s);` |
-| `hb_is_allowlisted` | function | `include/hostblock.h:75` | `int hb_is_allowlisted(const hb_set *s, const char *host);` |
-| `hb_list` | enum | `include/hostblock.h:32` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

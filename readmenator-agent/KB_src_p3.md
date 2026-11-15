@@ -287,7 +287,13 @@ int cg_expand_bg_imag...`
   - `eval_query` (function, line 406) `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)`
   - `cmq_matches` (function, line 460) `int cmq_matches(const char *s, size_t len, const cmq_env *env)`
   - `has_word` (function, line 481) `static int has_word(const char *t, const char *w)`
-  - `cmq_container_surely` (function, line 491) `int cmq_container_surely(const char *s, size_t len, int max_width)`
+  - `cmq_container_surely` (function, line 537) `int cmq_container_surely(const char *s, size_t len, int max_width)`
+  - `cmq_name_hash` (function, line 549) `unsigned cmq_name_hash(const char *s, size_t n)`
+  - `cmq_container_holds` (function, line 556) `int cmq_container_holds(const char *s, size_t len, const cmq_container *scope, int max_width)`
+  - `container_type_kw` (function, line 580) `static int container_type_kw(const char *s, size_t n, int *type)`
+  - `container_names` (function, line 596) `static int container_names(const char *s, size_t n, unsigned names[CMQ_CONTAINER_NAMES])`
+  - `cmq_container_decl` (function, line 618) `int cmq_container_decl(const char *prop, const char *val, int *type,
+                       unsig...`
   - `CMQ_DEVICE_W` (macro, line 19) `#define CMQ_DEVICE_W`
   - `CMQ_DEVICE_H` (macro, line 20) `#define CMQ_DEVICE_H`
   - `CMQ_DPPX` (macro, line 21) `#define CMQ_DPPX`

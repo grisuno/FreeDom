@@ -376,7 +376,7 @@ const pv_box_def *rd_box_at(const rd_doc *d, size_t i);
 
 **Returns:** `pv_box_def *`
 
-*Called by:* [`string`](gui.browser_ui.c.md#string), [`table`](gui.browser_ui.c.md#table)
+*Called by:* [`string`](gui.browser_ui.c.md#string)
 
 ---
 

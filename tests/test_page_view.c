@@ -1379,6 +1379,41 @@ static void test_build_flex_container(void **state) {
  * sideways instead of wrapping (spec/page_view.md, 2026-08-11 correction). */
 /* spec/page_view.md "El espacio entre atomos": white space between inline-block siblings is
  * one collapsed word space of their line; it travels as a marker the trusted side resolves. */
+/* spec/page_view.md "Los ids de la vista son handles del DOM vivo": with a resolver the
+ * view carries the id the resolver gives each element, not its document ordinal. */
+typedef struct { const void *seen[64]; int n; } ids_probe;
+static dom_node_id ids_probe_fn(void *ctx, const void *native) {
+    ids_probe *p = (ids_probe *)ctx;
+    for (int i = 0; i < p->n; ++i)
+        if (p->seen[i] == native) return (dom_node_id)(1000 - i);
+    if (p->n >= 64) return DOM_NODE_NONE;
+    p->seen[p->n] = native;
+    return (dom_node_id)(1000 - p->n++);
+}
+
+static void test_build_live_uses_resolver_ids(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>one</p><div><b>two</b></div><p>three</p></body>");
+    pv_view *plain = NULL, *live = NULL;
+    assert_int_equal(pv_build(doc, &plain), PV_OK);
+    ids_probe pr;
+    memset(&pr, 0, sizeof pr);
+    pv_node_ids ids = { ids_probe_fn, &pr };
+    assert_int_equal(pv_build_live(doc, 0, 0, 0, NULL, 0, 0, NULL, NULL, &ids, &live), PV_OK);
+    const char *texts[] = { "one", "two", "three" };
+    for (size_t k = 0; k < 3; ++k) {
+        const pv_run *a = find_text(plain, texts[k]), *b = find_text(live, texts[k]);
+        assert_non_null(a);
+        assert_non_null(b);
+        assert_true(a->node_id != DOM_NODE_NONE);
+        /* The resolver was asked in document order, so element ordinal i got 1000 - i. */
+        assert_int_equal((int)b->node_id, 1000 - (int)a->node_id);
+    }
+    pv_free(plain);
+    pv_free(live);
+    hp_document_free(doc);
+}
+
 static void test_build_anon_row_word_space_gap(void **state) {
     (void)state;
     hp_document *doc = parse(
@@ -1402,7 +1437,17 @@ static void test_build_anon_row_word_space_gap(void **state) {
     assert_int_equal(pv_cont_at(v, (size_t)x->cont_id)->gap, 0);
     const pv_run *m = find_text(v, "m");
     assert_non_null(m);
-    assert_int_equal(pv_cont_at(v, (size_t)m->cont_id)->gap, 0);   /* mixed: known limit */
+    assert_int_equal(pv_cont_at(v, (size_t)m->cont_id)->gap, 0);
+    /* Mixed: the space travels per atom, on the first run of the atom it precedes. */
+    const pv_run *n2 = find_text(v, "n"), *o2 = find_text(v, "o");
+    assert_non_null(n2);
+    assert_non_null(o2);
+    assert_int_equal(m->br_line & PV_BR_ATOM_SPACE, 0);
+    assert_int_equal(n2->br_line & PV_BR_ATOM_SPACE, PV_BR_ATOM_SPACE);
+    assert_int_equal(o2->br_line & PV_BR_ATOM_SPACE, 0);
+    /* All spaced (container marker) or none spaced: no per-atom mark. */
+    assert_int_equal(find_text(v, "b")->br_line & PV_BR_ATOM_SPACE, 0);
+    assert_int_equal(find_text(v, "y")->br_line & PV_BR_ATOM_SPACE, 0);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -4652,7 +4697,7 @@ static void test_style_path_matches_uncached_chain(void **state) {
         for (size_t k = 0; k < n; ++k) {
             lxb_dom_element_t *el = els[pass == 0 ? k : n - 1 - k];
             css_style want = cch_element_style_vars(el, sheet, 16.0, NULL, NULL);
-            css_style got = cch_element_style_path(path, el, sheet, 16.0, NULL, NULL);
+            css_style got = cch_element_style_path(path, el, sheet, 16.0, NULL, NULL, NULL);
             assert_int_equal(got.color, want.color);
             assert_int_equal(got.background, want.background);
             assert_int_equal(got.margin_top, want.margin_top);
@@ -5791,6 +5836,7 @@ int main(void) {
         cmocka_unit_test(test_build_flex_container),
         cmocka_unit_test(test_build_flex_item_values),
         cmocka_unit_test(test_build_anon_row_word_space_gap),
+        cmocka_unit_test(test_build_live_uses_resolver_ids),
         cmocka_unit_test(test_build_anon_inline_block_row_wraps),
         cmocka_unit_test(test_build_inline_flex_is_inline_level),
         cmocka_unit_test(test_build_container_registry_holds_a_real_page),

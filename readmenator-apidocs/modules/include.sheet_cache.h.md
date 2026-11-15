@@ -188,7 +188,7 @@ The read-only sheet behind a handle; NULL when the parse itself failed (the css 
 
 **Returns:** `css_sheet *`
 
-*Called by:* [`pv_build_cached`](src.page_view.c.md#pv_build_cached)
+*Called by:* [`pv_build_live`](src.page_view.c.md#pv_build_live)
 
 ---
 

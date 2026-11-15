@@ -3,6 +3,51 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_split_never_overruns` | function | `tests/test_css_mask.c:187` | `static void test_split_never_overruns(void **state)` |
+| `test_unsupported_fails_closed` | function | `tests/test_css_mask.c:134` | `static void test_unsupported_fails_closed(void **state)` |
+| `val_of` | function | `tests/test_css_mask.c:10` | `static int val_of(const css_decl *d, int n, int prop, int def)` |
+| `holds` | function | `tests/test_css_mq.c:135` | `static int holds(const char *q, const cmq_container *sc)` |
+| `m` | function | `tests/test_css_mq.c:13` | `static int m(const char *q)` |
+| `main` | function | `tests/test_css_mq.c:167` | `int main(void)` |
+| `surely` | function | `tests/test_css_mq.c:111` | `static int surely(const char *q)` |
+| `test_container_holds` | function | `tests/test_css_mq.c:139` | `static void test_container_holds(void **state)` |
+| `test_container_surely` | function | `tests/test_css_mq.c:114` | `static void test_container_surely(void **state)` |
+| `test_desktop_identity` | function | `tests/test_css_mq.c:75` | `static void test_desktop_identity(void **state)` |
+| `test_fail_closed` | function | `tests/test_css_mq.c:97` | `static void test_fail_closed(void **state)` |
+| `test_math_function_values` | function | `tests/test_css_mq.c:31` | `static void test_math_function_values(void **state)` |
+| `test_not_or` | function | `tests/test_css_mq.c:63` | `static void test_not_or(void **state)` |
+| `test_plain_and_types` | function | `tests/test_css_mq.c:49` | `static void test_plain_and_types(void **state)` |
+| `test_range_syntax` | function | `tests/test_css_mq.c:15` | `static void test_range_syntax(void **state)` |
+| `main` | function | `tests/test_css_text.c:73` | `int main(void)` |
+| `test_aspect_ratio` | function | `tests/test_css_text.c:44` | `static void test_aspect_ratio(void **state)` |
+| `test_aspect_ratio_large_keeps_shape` | function | `tests/test_css_text.c:59` | `static void test_aspect_ratio_large_keeps_shape(void **state)` |
+| `test_fontfamily_bucket` | function | `tests/test_css_text.c:10` | `static void test_fontfamily_bucket(void **state)` |
+| `test_opacity_shapes` | function | `tests/test_css_text.c:18` | `static void test_opacity_shapes(void **state)` |
+| `test_shadow_needs_both_offsets` | function | `tests/test_css_text.c:34` | `static void test_shadow_needs_both_offsets(void **state)` |
+| `test_whitespace_direction` | function | `tests/test_css_text.c:26` | `static void test_whitespace_direction(void **state)` |
+| `digit` | function | `tests/test_css_values.c:43` | `* digit(s) -- the minifier writes `transparent` as #0000. */ assert_int_equal(cv_bg_alpha_of("#0000"), 0);` |
+| `main` | function | `tests/test_css_values.c:85` | `int main(void)` |
+| `test_alpha` | function | `tests/test_css_values.c:33` | `static void test_alpha(void **state)` |
+| `test_bg_skips_url` | function | `tests/test_css_values.c:65` | `static void test_bg_skips_url(void **state)` |
+| `test_filter_scale_neutral_when_undeclared` | function | `tests/test_css_values.c:72` | `static void test_filter_scale_neutral_when_undeclared(void **state)` |
+| `test_junk_fails_closed` | function | `tests/test_css_values.c:24` | `static void test_junk_fails_closed(void **state)` |
+| `test_parse_named` | function | `tests/test_css_values.c:9` | `static void test_parse_named(void **state)` |
+| `test_sentinels_ok` | function | `tests/test_css_values.c:16` | `static void test_sentinels_ok(void **state)` |
+| `get` | function | `tests/test_css_vars.c:19` | `static const char *get(const cvr_table *t, const char *n)` |
+| `main` | function | `tests/test_css_vars.c:185` | `int main(void)` |
+| `set` | function | `tests/test_css_vars.c:15` | `static int set(cvr_table *t, const char *n, const char *v)` |
+| `test_bounds_drop_whole` | function | `tests/test_css_vars.c:46` | `static void test_bounds_drop_whole(void **state)` |
+| `test_collect_keeps_semicolon_inside_url` | function | `tests/test_css_vars.c:98` | `static void test_collect_keeps_semicolon_inside_url(void **state)` |
+| `test_collect_strips_important_and_trims` | function | `tests/test_css_vars.c:86` | `static void test_collect_strips_important_and_trims(void **state)` |
+| `test_cycle_takes_fallback` | function | `tests/test_css_vars.c:149` | `static void test_cycle_takes_fallback(void **state)` |
+| `test_fallback_fanout_is_budgeted` | function | `tests/test_css_vars.c:162` | `static void test_fallback_fanout_is_budgeted(void **state)` |
+| `test_grows_to_thousands` | function | `tests/test_css_vars.c:66` | `static void test_grows_to_thousands(void **state)` |
+| `test_names_are_case_sensitive` | function | `tests/test_css_vars.c:36` | `static void test_names_are_case_sensitive(void **state)` |
+| `test_resolve_depth_and_cycle` | function | `tests/test_css_vars.c:129` | `static void test_resolve_depth_and_cycle(void **state)` |
+| `test_resolve_overflow_fails` | function | `tests/test_css_vars.c:174` | `static void test_resolve_overflow_fails(void **state)` |
+| `test_resolve_scope_order_and_fallback` | function | `tests/test_css_vars.c:110` | `static void test_resolve_scope_order_and_fallback(void **state)` |
+| `test_set_get_overwrite` | function | `tests/test_css_vars.c:23` | `static void test_set_get_overwrite(void **state)` |
+| `main` | function | `tests/test_data_url.c:317` | `int main(void)` |
 | `test_decode_bad_length_not_multiple_of_4` | function | `tests/test_data_url.c:193` | `static void test_decode_bad_length_not_multiple_of_4(void **state)` |
 | `test_decode_base64_forgiving_and_mime` | function | `tests/test_data_url.c:284` | `static void test_decode_base64_forgiving_and_mime(void **state)` |
 | `test_decode_empty` | function | `tests/test_data_url.c:183` | `static void test_decode_empty(void **state)` |
@@ -451,50 +496,5 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_event_handlers_kept_when_disabled` | function | `tests/test_html_parse.c:150` | `static void test_event_handlers_kept_when_disabled(void **state)` |
 | `test_event_handlers_stripped_by_default` | function | `tests/test_html_parse.c:141` | `static void test_event_handlers_stripped_by_default(void **state)` |
 | `test_extract_script_list_empty` | function | `tests/test_html_parse.c:263` | `static void test_extract_script_list_empty(void **state)` |
-| `test_extract_script_list_external_semantics` | function | `tests/test_html_parse.c:200` | `static void test_extract_script_list_external_semantics(void **state)` |
-| `test_extract_script_list_module_flags` | function | `tests/test_html_parse.c:454` | `static void test_extract_script_list_module_flags(void **state)` |
-| `test_extract_script_list_skips_non_js_type` | function | `tests/test_html_parse.c:234` | `static void test_extract_script_list_skips_non_js_type(void **state)` |
-| `test_extract_stylesheets_basic` | function | `tests/test_html_parse.c:310` | `static void test_extract_stylesheets_basic(void **state)` |
-| `test_extract_stylesheets_caps` | function | `tests/test_html_parse.c:404` | `static void test_extract_stylesheets_caps(void **state)` |
-| `test_extract_stylesheets_none_and_null` | function | `tests/test_html_parse.c:387` | `static void test_extract_stylesheets_none_and_null(void **state)` |
-| `test_extract_stylesheets_rel_tokens` | function | `tests/test_html_parse.c:337` | `static void test_extract_stylesheets_rel_tokens(void **state)` |
-| `test_free_null_and_double` | function | `tests/test_html_parse.c:443` | `static void test_free_null_and_double(void **state)` |
-| `test_parse_malformed_does_not_crash` | function | `tests/test_html_parse.c:431` | `static void test_parse_malformed_does_not_crash(void **state)` |
-| `test_parse_rejects_null_args` | function | `tests/test_html_parse.c:72` | `static void test_parse_rejects_null_args(void **state)` |
-| `test_parse_rejects_oversize` | function | `tests/test_html_parse.c:80` | `static void test_parse_rejects_oversize(void **state)` |
-| `test_parse_simple_document` | function | `tests/test_html_parse.c:91` | `static void test_parse_simple_document(void **state)` |
-| `test_scripts_kept_when_disabled` | function | `tests/test_html_parse.c:131` | `static void test_scripts_kept_when_disabled(void **state)` |
-| `test_scripts_stripped_by_default` | function | `tests/test_html_parse.c:116` | `static void test_scripts_stripped_by_default(void **state)` |
-| `test_validate_accepts_within_cap` | function | `tests/test_html_parse.c:64` | `static void test_validate_accepts_within_cap(void **state)` |
-| `test_validate_rejects_empty` | function | `tests/test_html_parse.c:51` | `static void test_validate_rejects_empty(void **state)` |
-| `test_validate_rejects_null` | function | `tests/test_html_parse.c:45` | `static void test_validate_rejects_null(void **state)` |
-| `test_validate_rejects_oversize` | function | `tests/test_html_parse.c:57` | `static void test_validate_rejects_oversize(void **state)` |
-| `NOW` | macro | `tests/test_http_cache.c:16` | `#define NOW` |
-| `_GNU_SOURCE` | macro | `tests/test_http_cache.c:1` | `#define _GNU_SOURCE` |
-| `count_files` | function | `tests/test_http_cache.c:105` | `static size_t count_files(const char *skip)` |
-| `main` | function | `tests/test_http_cache.c:220` | `int main(void)` |
-| `meta_of` | function | `tests/test_http_cache.c:18` | `static hc_meta meta_of(const char *cc, const char *etag, const char *lm, const char *date,       ...` |
-| `setup` | function | `tests/test_http_cache.c:93` | `static int setup(void **state)` |
-| `teardown` | function | `tests/test_http_cache.c:98` | `static int teardown(void **state)` |
-| `test_classify_fresh_revalidate_unusable` | function | `tests/test_http_cache.c:63` | `static void test_classify_fresh_revalidate_unusable(void **state)` |
-| `test_clear_removes_every_entry` | function | `tests/test_http_cache.c:207` | `static void test_clear_removes_every_entry(void **state)` |
-| `test_foreign_profile_key_empties_the_cache` | function | `tests/test_http_cache.c:175` | `static void test_foreign_profile_key_empties_the_cache(void **state)` |
-| `test_http_date_parses_imf_fixdate` | function | `tests/test_http_cache.c:35` | `static void test_http_date_parses_imf_fixdate(void **state)` |
-| `test_lifetime_rules_in_order` | function | `tests/test_http_cache.c:44` | `static void test_lifetime_rules_in_order(void **state)` |
-| `test_partitions_do_not_share_entries` | function | `tests/test_http_cache.c:138` | `static void test_partitions_do_not_share_entries(void **state)` |
-| `test_put_get_roundtrip_and_no_plaintext_on_disk` | function | `tests/test_http_cache.c:115` | `static void test_put_get_roundtrip_and_no_plaintext_on_disk(void **state)` |
-| `test_redirect_memory_persists_and_expires` | function | `tests/test_http_cache.c:189` | `static void test_redirect_memory_persists_and_expires(void **state)` |
-| `test_storable_rules` | function | `tests/test_http_cache.c:76` | `static void test_storable_rules(void **state)` |
-| `test_tampered_entry_is_removed_and_misses` | function | `tests/test_http_cache.c:151` | `static void test_tampered_entry_is_removed_and_misses(void **state)` |
-| `main` | function | `tests/test_identity.c:230` | `int main(void)` |
-| `test_apply_query` | function | `tests/test_identity.c:127` | `static void test_apply_query(void **state)` |
-| `test_auto_allow_defaults_off_and_counts_as_a_change` | function | `tests/test_identity.c:183` | `static void test_auto_allow_defaults_off_and_counts_as_a_change(void **state)` |
-| `test_auto_allow_query_needs_the_marker` | function | `tests/test_identity.c:194` | `static void test_auto_allow_query_needs_the_marker(void **state)` |
-| `test_auto_allow_roundtrips_and_is_rendered` | function | `tests/test_identity.c:211` | `static void test_auto_allow_roundtrips_and_is_rendered(void **state)` |
-| `test_defaults_are_the_anti_fp_identity` | function | `tests/test_identity.c:16` | `static void test_defaults_are_the_anti_fp_identity(void **state)` |
-| `test_geo_validation` | function | `tests/test_identity.c:74` | `static void test_geo_validation(void **state)` |
-| `test_languages_build_header_and_primary` | function | `tests/test_identity.c:52` | `static void test_languages_build_header_and_primary(void **state)` |
-| `test_page_escapes_user_values_and_states_unavailable_apis` | function | `tests/test_identity.c:160` | `static void test_page_escapes_user_values_and_states_unavailable_apis(void **state)` |
-| `test_parse_keeps_valid_fields_and_defaults_the_bad` | function | `tests/test_identity.c:113` | `static void test_parse_keeps_valid_fields_and_defaults_the_bad(void **state)` |
 
 Next: [SYMBOLS_p14.md](SYMBOLS_p14.md)

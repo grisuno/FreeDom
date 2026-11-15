@@ -84,7 +84,8 @@ static dom_node_id qs_walk(const dom_inde...`
 - `dom_sibling_node` (function) `src/dom.c:1055` `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
 - `dom_create_char_node` (function) `src/dom.c:1062` `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
          ...`
-- `dom_native_node` (function) `src/dom.c:1076` `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
+- `dom_handle_of_native` (function) `src/dom.c:1076` `dom_node_id dom_handle_of_native(dom_index *idx, const void *native)`
+- `dom_native_node` (function) `src/dom.c:1082` `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
 
 ## src/dom_debug.c
 Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`

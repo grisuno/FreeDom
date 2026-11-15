@@ -1073,6 +1073,12 @@ dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size
     return idx_push(idx, n, out_id);
 }
 
+dom_node_id dom_handle_of_native(dom_index *idx, const void *native) {
+    if (idx == NULL || native == NULL) return DOM_NODE_NONE;
+    /* The index owns mutable nodes; the caller only holds them const. */
+    return handle_of(idx, (lxb_dom_node_t *)(uintptr_t)native);
+}
+
 const void *dom_native_node(const dom_index *idx, dom_node_id node) {
     return valid_el(idx, node) ? (const void *)idx->nodes[node] : NULL;
 }

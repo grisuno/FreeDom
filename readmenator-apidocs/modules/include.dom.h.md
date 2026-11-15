@@ -1,12 +1,12 @@
 # `include/dom.h`
 
-> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 58.1% | [API index](../index.md)
+> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 56.2% | [API index](../index.md)
 
 ## Contents
 
 - **Enums:** [`dom_status`](#dom_status), [`dom_place`](#dom_place)
 - **Type Aliases:** [`dom_node_id`](#dom_node_id), [`dom_index`](#dom_index)
-- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`tree`](#tree), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`valid`](#valid), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length), [`process`](#process)
+- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`tree`](#tree), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`valid`](#valid), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length), [`process`](#process), [`sight`](#sight)
 - **Macros:** [`DOM_NODE_NONE`](#dom_node_none), [`DOM_KIND_NONE`](#dom_kind_none), [`DOM_KIND_ELEMENT`](#dom_kind_element), [`DOM_KIND_TEXT`](#dom_kind_text), [`DOM_KIND_COMMENT`](#dom_kind_comment), [`DOM_MAX_HANDLES`](#dom_max_handles)
 
 ## Type Diagram
@@ -542,6 +542,26 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 | `resolution` | `style` |  |  |
 
 **Returns:** `* modules in the same`
+
+---
+
+<a id="sight"></a>
+
+### `sight`
+
+`function` | [include/dom.h:272](../../include/dom.h#L272)
+
+```c
+* first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change: dom_mutation_count does not move. DOM_NODE_NONE for NULL args, * a node kind the index ne
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `asks` | `an innerHTML subtree has no handles until something` |  |  |
+
+**Returns:** `* first`
 
 ---
 

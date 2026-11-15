@@ -346,6 +346,7 @@ typedef struct browser_window {
      * page. Same code path as a user's session; nothing is measured in a separate mode. */
     char              timing_path[512];
     int               timing_done;
+    int               gui_eval_done;   /* FREEDOM_GUI_EVAL already ran for this window */
     uint64_t          nav_start_ms;    /* first navigation requested */
     uint64_t          last_paint_ms;   /* last frame committed */
     uint64_t          idle_paint_ms;   /* last_paint_ms when the page was first seen idle */
@@ -5612,15 +5613,50 @@ static int box_is_strict_descendant(const rd_doc *doc, int id, int anc) {
 
 static int child_cont_at_level(const rd_doc *doc, const rd_block *bk, int cid);
 
-/* item_sides for one item of container `cid`. A NESTED container item takes the
+/* The advance of one collapsed word space in the font of block `b`: what separates two
+ * inline-level atoms written with white space between them (the worker has no fonts, so
+ * the space travels as a marker). The caller's font state is preserved. */
+static double block_space_px(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                             const rd_doc *doc, const rd_block *b) {
+    if (cr == NULL || b == NULL) return 0.0;
+    double size; int bold, italic, underline; ui_rgb color;
+    block_text_style(w, th, b, &size, &bold, &italic, &underline, &color);
+    int family = b->font_family;
+    if (family == CSS_FF_UNSET && doc->author_css && !w->force_theme) family = CSS_FF_SERIF;
+    cairo_save(cr);
+    content_font_ex(cr, size, bold, italic, family, b->fontface, tsh_local_handle(b->font_list));
+    double sp = measure_slice(cr, " ", 1);
+    cairo_restore(cr);
+    return (sp > 0.0) ? sp : 0.0;
+}
+
+static item_sides item_sides_at_level_raw(const rd_doc *doc, size_t b0, size_t b1,
+                                          int cid, int cont_box, double cb_w);
+
+/* item_sides for one item of container `cid`, plus the word space that precedes an atom
+ * of a MIXED anonymous inline-block row (PV_BR_ATOM_SPACE, spec/page_view.md "El espacio
+ * entre atomos"): it is space outside the atom, so it joins the item's left margin. */
+static item_sides item_sides_at_level(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                                      const rd_doc *doc, size_t b0, size_t b1,
+                                      int cid, int cont_box, double cb_w) {
+    item_sides sd = item_sides_at_level_raw(doc, b0, b1, cid, cont_box, cb_w);
+    const rd_block *b = rd_at(doc, b0);
+    if (b != NULL && (b->br_line & PV_BR_ATOM_SPACE) && b->cont_id == cid) {
+        const pv_cont_def *cd = rd_cont_at(doc, (size_t)cid);
+        if (cd != NULL && cd->anon_row) sd.ml += block_space_px(cr, w, th, doc, b);
+    }
+    return sd;
+}
+
+/* The sides proper. A NESTED container item takes the
  * child container's OWN box, not item_root_box's answer: item_root_box derives the
  * box from the run's cont_box_id, which for a nested run names the INNER container's
  * rect -- so it returned one of the inner ITEMS' boxes (a single <span>'s pill) and
  * the nested item inherited that box's padding and, worse, painted its decoration at
  * the inner item's size. The child's box must still be a strict descendant of this
  * container's box, the same rule item_root_box applies, or it is not an item box. */
-static item_sides item_sides_at_level(const rd_doc *doc, size_t b0, size_t b1,
-                                      int cid, int cont_box, double cb_w) {
+static item_sides item_sides_at_level_raw(const rd_doc *doc, size_t b0, size_t b1,
+                                          int cid, int cont_box, double cb_w) {
     int child = child_cont_at_level(doc, rd_at(doc, b0), cid);
     /* The nested container IS the item only when it holds the whole item: an
      * item whose content continues after it (a loader box, then a paragraph)
@@ -6027,15 +6063,7 @@ static double cont_gap_px(cairo_t *cr, const browser_window *w, const ui_theme *
                           const rd_doc *doc, const pv_cont_def *cd, size_t first_run) {
     if (cd->gap >= 0) return (double)cd->gap;
     if (!cd->anon_row || cd->gap != PV_GAP_WORD_SPACE || cr == NULL) return 0.0;
-    const rd_block *b = rd_at(doc, first_run);
-    if (b == NULL) return 0.0;
-    double size; int bold, italic, underline; ui_rgb color;
-    block_text_style(w, th, b, &size, &bold, &italic, &underline, &color);
-    int family = b->font_family;
-    if (family == CSS_FF_UNSET && doc->author_css && !w->force_theme) family = CSS_FF_SERIF;
-    content_font_ex(cr, size, bold, italic, family, b->fontface, tsh_local_handle(b->font_list));
-    double sp = measure_slice(cr, " ", 1);
-    return (sp > 0.0) ? sp : 0.0;
+    return block_space_px(cr, w, th, doc, rd_at(doc, first_run));
 }
 
 static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
@@ -6080,7 +6108,7 @@ static double nested_cont_basis(cairo_t *cr, const browser_window *w,
         int it = item_at_level(doc, rd_at(doc, k), cid);
         size_t e = k + 1;
         while (e < b1 && it >= 0 && item_at_level(doc, rd_at(doc, e), cid) == it) ++e;
-        item_sides isd = item_sides_at_level(doc, k, e, cid, cd->box_id, content_w);
+        item_sides isd = item_sides_at_level(cr, w, th, doc, k, e, cid, cd->box_id, content_w);
         int child = child_cont_at_level(doc, rd_at(doc, k), cid);
         double base;
         /* This container's width is what is being measured, so an item's
@@ -6691,7 +6719,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         for (size_t j = 0; j < g; ++j) {
             const rd_block *bk = rd_at(doc, gstart[j]);
             bt_node *kid = &kids[pos_of[j]];
-            item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+            item_sides sd = item_sides_at_level(cr, w, th, doc, gstart[j], gstart[j + 1],
                                                 cid, item_cbox, content_w);
             kid->display = BX_DISPLAY_BLOCK;
             /* An item that is a nested container reads its flex props from that
@@ -6841,7 +6869,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 int jkw = (jself != CSS_AK_UNSET && jself != CSS_AK_AUTO)
                           ? jself : cdv.justify_items;
                 if (jkw == CSS_AK_START || jkw == CSS_AK_CENTER || jkw == CSS_AK_END) {
-                    item_sides jsd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+                    item_sides jsd = item_sides_at_level(cr, w, th, doc, gstart[j], gstart[j + 1],
                                                          cid, item_cbox, content_w);
                     const pv_box_def *jbd = (jsd.box >= 0) ? rd_box_at(doc, (size_t)jsd.box) : NULL;
                     double fw = (jbd != NULL) ? def_declared_width(jbd, content_w) : 0.0;
@@ -6877,7 +6905,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                     /* The column holds the cell's whole border box, so its own
                      * padding/border/margin counts -- measuring text alone leaves
                      * every cell overflowing its column by its padding. */
-                    item_sides cs = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+                    item_sides cs = item_sides_at_level(cr, w, th, doc, gstart[j], gstart[j + 1],
                                                         cid, item_cbox, content_w);
                     double mw = measure_item_content_w(cr, w, th, doc,
                                                        gstart[j], gstart[j + 1])
@@ -6932,7 +6960,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 for (size_t j = 0; j < g; ++j) {
                     size_t c = j % ncols;
                     if (c >= ncols || cdv.col_w[c] != 0) continue;
-                    item_sides cs = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+                    item_sides cs = item_sides_at_level(cr, w, th, doc, gstart[j], gstart[j + 1],
                                                         cid, item_cbox, content_w);
                     double mw = measure_item_w_at(cr, w, th, doc,
                                                   gstart[j], gstart[j + 1], 1.0)
@@ -6981,7 +7009,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
     if (is_col) {
         for (size_t j = 0; j < g; ++j) {
             bt_node *kid = &kids[pos_of[j]];
-            item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+            item_sides sd = item_sides_at_level(cr, w, th, doc, gstart[j], gstart[j + 1],
                                                 cid, item_cbox, content_w);
             double decl = item_declared_basis(doc, &sd, content_w);
             int ml_auto = (kid->mauto & BT_MAUTO_LEFT) != 0;
@@ -7062,7 +7090,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
          * to zero height and a flex card lost its background/border/radius/shadow
          * (spec/page_view.md §4 "Ítems flex/grid"). block_id < 0 (table cells,
          * author CSS off) => no box => byte-identical to the pre-existing path. */
-        item_sides sd = item_sides_at_level(doc, gstart[j], gstart[j + 1],
+        item_sides sd = item_sides_at_level(cr, w, th, doc, gstart[j], gstart[j + 1],
                                             cid, item_cbox, content_w);
         int rb = sd.box;
         item_box[j] = rb;
@@ -19756,6 +19784,44 @@ static int gui_timing_step(browser_window *w, uint64_t now) {
     return -1;
 }
 
+/* Diagnostic, for reviewing the REAL window (CLAUDE.md: measure in the GUI, not headless):
+ * FREEDOM_GUI_EVAL=<js expression> is evaluated once against the live page worker
+ * FREEDOM_GUI_EVAL_AFTER_MS (default 15000) after the page loaded -- with the
+ * geometry, fonts and timers of a real session, which `--eval` cannot have -- and its value
+ * is written to FREEDOM_GUI_EVAL_OUT. An operator affordance like FREEDOM_GUI_SHOT: the
+ * expression comes from the environment, never from content. Returns the wake-up or -1. */
+#define GUI_EVAL_DEFAULT_AFTER_MS 15000u
+static int gui_eval_step(browser_window *w, uint64_t now) {
+    if (w->gui_eval_done) return -1;
+    const char *expr = getenv("FREEDOM_GUI_EVAL");
+    const char *out = getenv("FREEDOM_GUI_EVAL_OUT");
+    if (expr == NULL || expr[0] == '\0' || out == NULL || out[0] == '\0') {
+        w->gui_eval_done = 1;
+        return -1;
+    }
+    uint64_t after = GUI_EVAL_DEFAULT_AFTER_MS;
+    const char *am = getenv("FREEDOM_GUI_EVAL_AFTER_MS");
+    if (am != NULL) {
+        char *end = NULL;
+        unsigned long v = strtoul(am, &end, 10);
+        if (end != am && *end == '\0' && v <= 600000ul) after = (uint64_t)v;
+    }
+    if (w->page_load_mono_ms == 0 || w->tab_worker == NULL) return 100;
+    if (now < w->page_load_mono_ms || now - w->page_load_mono_ms < after) return 100;
+    w->gui_eval_done = 1;
+    tab_eval_result r;
+    FILE *fp = fopen(out, "w");
+    if (fp == NULL) return -1;
+    if (tab_eval(w->tab_worker, expr, strlen(expr), &r) == TAB_OK) {
+        fprintf(fp, "%s%s\n", r.is_exception ? "EXCEPTION: " : "", r.value != NULL ? r.value : "");
+        tab_eval_result_free(&r);
+    } else {
+        fprintf(fp, "(the page worker is gone)\n");
+    }
+    fclose(fp);
+    return -1;
+}
+
 /* Release what ui_run_browser opened before the window exists (profile, sealed cache, prefs) so a
  * failed start -- no compositor, no xkb -- exits without leaking them. */
 static void startup_abort_release(browser_window *w) {
@@ -20018,6 +20084,10 @@ ui_status ui_run_browser(const char *start_url) {
         aa_commit(&w);
         /* Before the read is prepared: the probe may end the session, and the loop must notice. */
         int tw_step = gui_timing_step(&w, now_ms());
+        {
+            int ev_step = gui_eval_step(&w, now_ms());
+            if (ev_step >= 0 && (tw_step < 0 || ev_step < tw_step)) tw_step = ev_step;
+        }
         if (!w.running) break;
         while (wl_display_prepare_read(w.display) != 0) {
             wl_display_dispatch_pending(w.display);

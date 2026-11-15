@@ -186,6 +186,7 @@ static void test_webfont_rejects_bad_input(void **state) {
     assert_int_equal(tsh_webfont_register("X", ok, 0, 0, 0), -1);
     assert_int_equal(tsh_webfont_register("X", ok, WF_MAX_FACE_BYTES + 1, 0, 0), -1);
     assert_int_equal(tsh_webfont_register("X", &big, 1, 0, 0), -1);   /* short */
+    /* A wOF2 signature with no font behind it fails at parse, never registers. */
     static const unsigned char wof2[8] = { 'w', 'O', 'F', '2', 0, 0, 0, 0 };
     assert_int_equal(tsh_webfont_register("X", wof2, sizeof wof2, 0, 0), -1);
     static const unsigned char junk[8] = { 'J', 'U', 'N', 'K', 0, 0, 0, 0 };
@@ -211,6 +212,112 @@ static unsigned char *read_host_font(const char *path, size_t *out_n) {
     fclose(f);
     *out_n = (size_t)sz;
     return b;
+}
+
+/* The woff2 slice (spec/webfont.md): a WOFF or WOFF2 container registers and SHAPES --
+ * every character maps to a real glyph of that face (a container HarfBuzz cannot read
+ * tables from shapes to .notdef, glyph 0, while still reporting success). */
+static void container_shapes(const char *path, const char *name) {
+    size_t nbytes = 0;
+    unsigned char *bytes = read_host_font(path, &nbytes);
+    assert_non_null(bytes);
+    if (!tsh_ready()) { free(bytes); return; }
+    assert_int_equal(tsh_webfont_register(name, bytes, nbytes, 0, 0), 0);
+    tsh_font wf = { .family = CSS_FF_SERIF, .bold = 0, .italic = 0,
+                    .wfh = wf_name_hash(name, strlen(name)) };
+    cairo_glyph_t g[16];
+    size_t n = 0;
+    double adv = 0.0;
+    assert_int_equal(tsh_shape(&wf, 16.0, "ABCD", 4, g, 16, &n, &adv), TSH_OK);
+    assert_int_equal((int)n, 4);
+    for (size_t i = 0; i < n; ++i) assert_true(g[i].index != 0);
+    /* The subset holds 10 glyphs + .notdef: an index past that came from another face. */
+    for (size_t i = 0; i < n; ++i) assert_true(g[i].index < 16);
+    assert_true(adv > 0.0);
+    tsh_webfont_clear();
+    free(bytes);
+}
+
+static void test_webfont_woff2_container(void **state) {
+    (void)state;
+    container_shapes("tests/fonts/dejavu-subset.woff2", "W2Face");
+}
+
+static void test_webfont_woff_container(void **state) {
+    (void)state;
+    container_shapes("tests/fonts/dejavu-subset.woff", "W1Face");
+}
+
+/* Variable weight (spec/webfont.md): one registration of a `wght` face serves the
+ * regular AND the bold key, instanced at 400 and 700. */
+static void test_webfont_variable_weight(void **state) {
+    (void)state;
+    size_t nbytes = 0;
+    unsigned char *bytes = read_host_font("tests/fonts/robotoslab-wght-subset.woff2", &nbytes);
+    assert_non_null(bytes);
+    if (!tsh_ready()) { free(bytes); return; }
+    assert_int_equal(tsh_webfont_register("VarFace", bytes, nbytes, 0, 0), 0);
+    unsigned h = wf_name_hash("VarFace", 7);
+    tsh_font reg = { .family = CSS_FF_SERIF, .bold = 0, .italic = 0, .wfh = h };
+    tsh_font bold = { .family = CSS_FF_SERIF, .bold = 1, .italic = 0, .wfh = h };
+    cairo_glyph_t g[16];
+    size_t n = 0;
+    double ar = 0.0, ab = 0.0;
+    assert_int_equal(tsh_shape(&reg, 32.0, "ABCD", 4, g, 16, &n, &ar), TSH_OK);
+    assert_int_equal((int)n, 4);
+    for (size_t i = 0; i < n; ++i) assert_true(g[i].index != 0 && g[i].index < 16);
+    assert_int_equal(tsh_shape(&bold, 32.0, "ABCD", 4, g, 16, &n, &ab), TSH_OK);
+    assert_int_equal((int)n, 4);
+    for (size_t i = 0; i < n; ++i) assert_true(g[i].index != 0 && g[i].index < 16);
+    assert_true(ab > ar);
+    tsh_webfont_clear();
+    free(bytes);
+}
+
+/* Automatic optical sizing (spec/webfont.md): an `opsz` axis follows the font size.
+ * The fixture's advances grow with the axis, so advance per px grows with the size;
+ * a face shaped at a fixed axis position would scale linearly. Painting takes the
+ * same instance: more ink per px at the larger size. */
+static void test_webfont_optical_size(void **state) {
+    (void)state;
+    size_t nbytes = 0;
+    unsigned char *bytes = read_host_font("tests/fonts/robotoslab-opsz-subset.woff2", &nbytes);
+    assert_non_null(bytes);
+    if (!tsh_ready()) { free(bytes); return; }
+    assert_int_equal(tsh_webfont_register("OpszFace", bytes, nbytes, 0, 0), 0);
+    tsh_font wf = { .family = CSS_FF_SERIF, .bold = 0, .italic = 0,
+                    .wfh = wf_name_hash("OpszFace", 8) };
+    double a16 = tsh_measure(&wf, 16.0, "ABCD", 4);
+    double a64 = tsh_measure(&wf, 64.0, "ABCD", 4);
+    assert_true(a16 > 0.0);
+    assert_true(a64 / 64.0 > a16 / 16.0 * 1.01);
+    /* Going back to the small size returns the small instance (no sticky coordinate). */
+    assert_true(fabs(tsh_measure(&wf, 16.0, "ABCD", 4) - a16) < 1e-6);
+    cairo_glyph_t g[16];
+    size_t n = 0;
+    double adv = 0.0;
+    assert_int_equal(tsh_shape(&wf, 64.0, "ABCD", 4, g, 16, &n, &adv), TSH_OK);
+    assert_true(fabs(adv - a64) < 1e-6);
+
+    /* Paint: the same four letters at 64 px, once through the opsz face and once with
+     * the axis pinned by comparison at 16 px scaled up -- the large instance is bolder. */
+    cairo_surface_t *big = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 320, 96);
+    cairo_t *cb = cairo_create(big);
+    assert_int_equal(tsh_draw(cb, &wf, 64.0, 4.0, 72.0, "ABCD", 4), TSH_OK);
+    int ink64 = inked_pixels(big);
+    cairo_destroy(cb);
+    cairo_surface_destroy(big);
+    cairo_surface_t *small = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 320, 96);
+    cairo_t *cs = cairo_create(small);
+    cairo_scale(cs, 4.0, 4.0);
+    assert_int_equal(tsh_draw(cs, &wf, 16.0, 1.0, 18.0, "ABCD", 4), TSH_OK);
+    int ink16x4 = inked_pixels(small);
+    cairo_destroy(cs);
+    cairo_surface_destroy(small);
+    assert_true(ink64 > 0 && ink16x4 > 0);
+    assert_true((double)ink64 > (double)ink16x4 * 1.03);
+    tsh_webfont_clear();
+    free(bytes);
 }
 
 static void test_webfont_register_find_clear(void **state) {
@@ -435,6 +542,10 @@ int main(void) {
         cmocka_unit_test(test_uncovered_pua_draws_nothing),
         cmocka_unit_test(test_webfont_rejects_bad_input),
         cmocka_unit_test(test_webfont_register_find_clear),
+        cmocka_unit_test(test_webfont_woff2_container),
+        cmocka_unit_test(test_webfont_variable_weight),
+        cmocka_unit_test(test_webfont_optical_size),
+        cmocka_unit_test(test_webfont_woff_container),
         cmocka_unit_test(test_generic_keywords),
         cmocka_unit_test(test_pick_from_list_order_and_generic_stop),
         cmocka_unit_test(test_pick_family_strong_vs_weak),

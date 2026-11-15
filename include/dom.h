@@ -268,4 +268,10 @@ dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
  * handle. Valid until the next mutation of that node. */
 const void *dom_native_node(const dom_index *idx, dom_node_id node);
 
+/* The inverse: the handle of a native node of this index's document, registering it on
+ * first sight (an innerHTML subtree has no handles until something asks). Registration
+ * is not a tree change: dom_mutation_count does not move. DOM_NODE_NONE for NULL args,
+ * a node kind the index never holds, or OOM. */
+dom_node_id dom_handle_of_native(dom_index *idx, const void *native);
+
 #endif /* FREEDOM_DOM_H */

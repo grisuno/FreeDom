@@ -233,6 +233,9 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
         P_MASK_URL,
         P_MASK_GEO0, P_MASK_GEO1, P_MASK_GEO2, P_MASK_GEO3, P_MASK_GEO4,
         P_MASK_GEO5, P_MASK_GEO6, P_MASK_GEO7, P_MASK_GEO8, P_MASK_GEO9,
+        /* Query containers (spec/css_mq.md, tanda 90; APPENDED): the type is a CMQ_CT_*,
+         * each name its cmq_name_hash carried as an int (0 = none). */
+        P_CONTAINER_TYPE, P_CONTAINER_NAME0, P_CONTAINER_NAME1,
         P_NSLOTS };
 
 typedef struct css_decl {

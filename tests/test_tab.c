@@ -2419,6 +2419,59 @@ static int geom_load_and_measure(int net, char *out, size_t outsz) {
     return rc;
 }
 
+/* spec/page_view.md "Los ids de la vista son handles del DOM vivo": a script inserts an
+ * element BEFORE two buttons. The id the view gives each button must still be the node
+ * the page's JS holds: a click on "second" reaches second (it used to reach its
+ * neighbour, the ordinal having shifted by one), and geometry sent for "second" is what
+ * second measures. */
+static const char LIVE_ID_PAGE[] =
+    "<html><body><button id=\"b1\">first</button><button id=\"b2\">second</button>"
+    "<script>window.__hit='';"
+    "document.getElementById('b1').addEventListener('click',function(){__hit+='1';});"
+    "document.getElementById('b2').addEventListener('click',function(){__hit+='2';});"
+    "var n=document.createElement('p');n.textContent='inserted';"
+    "document.body.insertBefore(n,document.getElementById('b1'));"
+    "window.__w=function(){return document.getElementById('b2').getBoundingClientRect().width+"
+    "','+document.getElementById('b1').getBoundingClientRect().width;};"
+    "</script></body></html>";
+
+static void test_view_ids_survive_script_insertion(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_net_allowed(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, LIVE_ID_PAGE, sizeof LIVE_ID_PAGE - 1, 1, &p), TAB_OK);
+    const pv_run *second = view_find_text(p.view, "second");
+    const pv_run *first = view_find_text(p.view, "first");
+    assert_non_null(second);
+    assert_non_null(first);
+    dom_node_id sid = second->node_id, fid = first->node_id;
+    assert_true(sid != fid);
+    tab_page_free(&p);
+    jg_table g;
+    jg_init(&g);
+    g.view_w = 1000; g.view_h = 700; g.doc_w = 1000; g.doc_h = 700;
+    assert_int_equal(jg_add(&g, sid, 10, 10, 222, 20), 0);
+    assert_int_equal(jg_add(&g, fid, 10, 40, 111, 20), 0);
+    assert_int_equal(jg_finish(&g), 0);
+    assert_int_equal(tab_set_geometry(t, &g), TAB_OK);
+    jg_free(&g);
+    tab_eval_result e;
+    assert_int_equal(tab_eval(t, "__w()", 5, &e), TAB_OK);
+    assert_non_null(e.value);
+    assert_string_equal(e.value, "222,111");
+    tab_eval_result_free(&e);
+    tab_page c;
+    assert_int_equal(tab_click(t, sid, &c), TAB_OK);
+    tab_page_free(&c);
+    assert_int_equal(tab_eval(t, "__hit", 5, &e), TAB_OK);
+    assert_non_null(e.value);
+    assert_string_equal(e.value, "2");
+    tab_eval_result_free(&e);
+    tab_close(t);
+}
+
 static void test_geometry_reaches_trusted_page(void **state) {
     (void)state;
     char v[128];
@@ -3945,6 +3998,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_click_bubbles_to_delegated_document_listener),
         cmocka_unit_test(test_boxdef_node_id_crosses_codec),
         cmocka_unit_test(test_geometry_reaches_trusted_page),
+        cmocka_unit_test(test_view_ids_survive_script_insertion),
         cmocka_unit_test(test_geometry_never_reaches_untrusted_page),
         cmocka_unit_test(test_computed_style_reads_the_cascade_for_trusted_host),
         cmocka_unit_test(test_computed_style_follows_dom_mutation),

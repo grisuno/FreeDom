@@ -112,7 +112,7 @@ Decodes CSS escapes in src[0,n) into dst (cap bytes, NUL-terminated, truncates).
 | `src` | `char *` |  |  |
 | `n` | `size_t` |  |  |
 
-> **Inherited:** Documentation from [`csel_unescape`](#csel_unescape) (include/css_select.h:221).
+> **Inherited:** Documentation from [`csel_unescape`](#csel_unescape) (include/css_select.h:222).
 
 *Calls:* [`csel_emit_utf8`](#csel_emit_utf8), [`csel_hex_val`](#csel_hex_val)
 
@@ -142,7 +142,7 @@ Bytes the escape starting at s[i] occupies (0 when s[i] does not start one).
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`csel_escape_len`](#csel_escape_len) (include/css_select.h:223).
+> **Inherited:** Documentation from [`csel_escape_len`](#csel_escape_len) (include/css_select.h:224).
 
 *Calls:* [`csel_hex_val`](#csel_hex_val)
 
@@ -173,7 +173,7 @@ Index of the ';' ending the declaration that starts at s[i] (or of a '}' when st
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`csel_decl_end`](#csel_decl_end) (include/css_select.h:235).
+> **Inherited:** Documentation from [`csel_decl_end`](#csel_decl_end) (include/css_select.h:236).
 
 ---
 
@@ -197,7 +197,7 @@ dst (CSS_TOK_MAX bytes) receives src[0,len) as-is, or folded when too long.
 | `len` | `size_t` |  |  |
 | `dst` | `char *` |  |  |
 
-> **Inherited:** Documentation from [`csel_ident_fold`](#csel_ident_fold) (include/css_select.h:225).
+> **Inherited:** Documentation from [`csel_ident_fold`](#csel_ident_fold) (include/css_select.h:226).
 
 *Called by:* [`csel_ident_eq`](#csel_ident_eq), [`csel_read_ident`](#csel_read_ident), [`selector`](#selector)
 
@@ -225,7 +225,7 @@ A stored (possibly folded) identifier against an element token of tlen bytes.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_ident_eq`](#csel_ident_eq) (include/css_select.h:227).
+> **Inherited:** Documentation from [`csel_ident_eq`](#csel_ident_eq) (include/css_select.h:228).
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`csel_ident_fold`](#csel_ident_fold)
 
@@ -257,7 +257,7 @@ Returns 0, *ip untouched, when none.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_read_ident`](#csel_read_ident) (include/css_select.h:230).
+> **Inherited:** Documentation from [`csel_read_ident`](#csel_read_ident) (include/css_select.h:231).
 
 *Calls:* [`csel_ident_ch`](include.css_select.h.md#csel_ident_ch), [`csel_lower_ch`](include.css_select.h.md#csel_lower_ch), [`csel_escape_len`](#csel_escape_len), [`csel_ident_fold`](#csel_ident_fold), [`csel_unescape`](#csel_unescape)
 
@@ -321,7 +321,7 @@ Conservative by construction: no bloom (anc_bloom_valid == 0) or no requirement 
 
 **Returns:** `unsigned long long`
 
-> **Inherited:** Documentation from [`csel_element_feature_bits`](#csel_element_feature_bits) (include/css_select.h:193).
+> **Inherited:** Documentation from [`csel_element_feature_bits`](#csel_element_feature_bits) (include/css_select.h:194).
 
 ---
 
@@ -367,7 +367,7 @@ A full css_sel is ~12.8 KiB; a typical rule selector (1-3 compounds) needs a thi
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`csel_compact_size`](#csel_compact_size) (include/css_select.h:167).
+> **Inherited:** Documentation from [`csel_compact_size`](#csel_compact_size) (include/css_select.h:168).
 
 *Called by:* [`csel_compact_dup`](#csel_compact_dup)
 
@@ -395,7 +395,7 @@ The copy is read-only for matching: parts[k] for k >= nparts is not backed by me
 
 **Returns:** `css_sel *`
 
-> **Inherited:** Documentation from [`csel_compact_dup`](#csel_compact_dup) (include/css_select.h:172).
+> **Inherited:** Documentation from [`csel_compact_dup`](#csel_compact_dup) (include/css_select.h:173).
 
 *Calls:* [`csel_compact_size`](#csel_compact_size)
 
@@ -426,7 +426,7 @@ Returns 1 if supported, 0 to drop the selector (fail closed).
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_parse`](#csel_parse) (include/css_select.h:176).
+> **Inherited:** Documentation from [`csel_parse`](#csel_parse) (include/css_select.h:177).
 
 ---
 
@@ -496,7 +496,7 @@ True if *sel matches element *el against its ancestor chain. target_id (optional
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`csel_matches`](#csel_matches) (include/css_select.h:185).
+> **Inherited:** Documentation from [`csel_matches`](#csel_matches) (include/css_select.h:186).
 
 ---
 

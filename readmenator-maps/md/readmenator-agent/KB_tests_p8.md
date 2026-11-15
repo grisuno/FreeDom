@@ -26,19 +26,23 @@ Previous: [KB_tests_p7.md](KB_tests_p7.md)
   - `inked_pixels` (function, line 149) `static int inked_pixels(cairo_surface_t *s)`
   - `test_uncovered_pua_draws_nothing` (function, line 161) `static void test_uncovered_pua_draws_nothing(void **state)`
   - `test_webfont_rejects_bad_input` (function, line 179) `static void test_webfont_rejects_bad_input(void **state)`
-  - `read_host_font` (function, line 201) `static unsigned char *read_host_font(const char *path, size_t *out_n)`
-  - `test_webfont_register_find_clear` (function, line 216) `static void test_webfont_register_find_clear(void **state)`
-  - `test_generic_keywords` (function, line 264) `static void test_generic_keywords(void **state)`
-  - `table_resolve` (function, line 276) `static int table_resolve(const char *name, char *out, size_t cap, void *ctx)`
-  - `test_pick_from_list_order_and_generic_stop` (function, line 286) `static void test_pick_from_list_order_and_generic_stop(void **state)`
-  - `set_installed` (function, line 306) `static int set_installed(const char *name, void *ctx)`
-  - `test_pick_family_strong_vs_weak` (function, line 313) `static void test_pick_family_strong_vs_weak(void **state)`
-  - `test_local_handle_real_fontconfig` (function, line 337) `static void test_local_handle_real_fontconfig(void **state)`
-  - `teardown` (function, line 358) `static int teardown(void **state)`
-  - `fake_cover` (function, line 383) `static int fake_cover(unsigned cp, void *ctx)`
-  - `test_segment_runs` (function, line 390) `static void test_segment_runs(void **state)`
-  - `test_measure_uses_fallback_face` (function, line 415) `static void test_measure_uses_fallback_face(void **state)`
-  - `main` (function, line 426) `int main(void)`
+  - `read_host_font` (function, line 202) `static unsigned char *read_host_font(const char *path, size_t *out_n)`
+  - `test_webfont_woff2_container` (function, line 241) `static void test_webfont_woff2_container(void **state)`
+  - `test_webfont_woff_container` (function, line 246) `static void test_webfont_woff_container(void **state)`
+  - `test_webfont_variable_weight` (function, line 253) `static void test_webfont_variable_weight(void **state)`
+  - `test_webfont_optical_size` (function, line 281) `static void test_webfont_optical_size(void **state)`
+  - `test_webfont_register_find_clear` (function, line 323) `static void test_webfont_register_find_clear(void **state)`
+  - `test_generic_keywords` (function, line 371) `static void test_generic_keywords(void **state)`
+  - `table_resolve` (function, line 383) `static int table_resolve(const char *name, char *out, size_t cap, void *ctx)`
+  - `test_pick_from_list_order_and_generic_stop` (function, line 393) `static void test_pick_from_list_order_and_generic_stop(void **state)`
+  - `set_installed` (function, line 413) `static int set_installed(const char *name, void *ctx)`
+  - `test_pick_family_strong_vs_weak` (function, line 420) `static void test_pick_family_strong_vs_weak(void **state)`
+  - `test_local_handle_real_fontconfig` (function, line 444) `static void test_local_handle_real_fontconfig(void **state)`
+  - `teardown` (function, line 465) `static int teardown(void **state)`
+  - `fake_cover` (function, line 490) `static int fake_cover(unsigned cp, void *ctx)`
+  - `test_segment_runs` (function, line 497) `static void test_segment_runs(void **state)`
+  - `test_measure_uses_fallback_face` (function, line 522) `static void test_measure_uses_fallback_face(void **state)`
+  - `main` (function, line 533) `int main(void)`
 - Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
 
 ## tests/test_textfield.c
@@ -194,11 +198,11 @@ Previous: [KB_tests_p7.md](KB_tests_p7.md)
   - `test_scan_hostile_truncations` (function, line 120) `static void test_scan_hostile_truncations(void **state)`
   - `test_scan_overlong_url_dropped` (function, line 140) `static void test_scan_overlong_url_dropped(void **state)`
   - `test_supported_format` (function, line 155) `static void test_supported_format(void **state)`
-  - `test_scan_ignores_other_at_rules` (function, line 168) `static void test_scan_ignores_other_at_rules(void **state)`
-  - `test_data_url_decodes_at_scan` (function, line 181) `static void test_data_url_decodes_at_scan(void **state)`
-  - `test_ref_move_transfers_bytes` (function, line 198) `static void test_ref_move_transfers_bytes(void **state)`
-  - `test_name_hash` (function, line 218) `static void test_name_hash(void **state)`
-  - `main` (function, line 229) `int main(void)`
+  - `test_scan_ignores_other_at_rules` (function, line 174) `static void test_scan_ignores_other_at_rules(void **state)`
+  - `test_data_url_decodes_at_scan` (function, line 187) `static void test_data_url_decodes_at_scan(void **state)`
+  - `test_ref_move_transfers_bytes` (function, line 204) `static void test_ref_move_transfers_bytes(void **state)`
+  - `test_name_hash` (function, line 224) `static void test_name_hash(void **state)`
+  - `main` (function, line 251) `int main(void)`
 - Depends on: `include/webfont.h`
 
 ## tests/test_webfont_load.c
@@ -213,15 +217,15 @@ Previous: [KB_tests_p7.md](KB_tests_p7.md)
   - `test_b64` (function, line 92) `static char *test_b64(const unsigned char *in, size_t n)`
   - `test_null_args` (function, line 113) `static void test_null_args(void **state)`
   - `test_https_stub_registers` (function, line 126) `static void test_https_stub_registers(void **state)`
-  - `test_woff2_never_fetched` (function, line 152) `static void test_woff2_never_fetched(void **state)`
-  - `test_fallback_second_url` (function, line 170) `static void test_fallback_second_url(void **state)`
-  - `test_first_wins` (function, line 194) `static void test_first_wins(void **state)`
-  - `test_extern_sheet_relative_url` (function, line 217) `static void test_extern_sheet_relative_url(void **state)`
-  - `test_data_url_bad_bytes_skipped` (function, line 240) `static void test_data_url_bad_bytes_skipped(void **state)`
-  - `test_data_url_registers` (function, line 255) `static void test_data_url_registers(void **state)`
-  - `test_null_page_data_only` (function, line 288) `static void test_null_page_data_only(void **state)`
-  - `teardown` (function, line 318) `static int teardown(void **state)`
-  - `main` (function, line 325) `int main(void)`
+  - `test_woff2_fetched_and_validated` (function, line 155) `static void test_woff2_fetched_and_validated(void **state)`
+  - `test_fallback_second_url` (function, line 195) `static void test_fallback_second_url(void **state)`
+  - `test_first_wins` (function, line 219) `static void test_first_wins(void **state)`
+  - `test_extern_sheet_relative_url` (function, line 242) `static void test_extern_sheet_relative_url(void **state)`
+  - `test_data_url_bad_bytes_skipped` (function, line 265) `static void test_data_url_bad_bytes_skipped(void **state)`
+  - `test_data_url_registers` (function, line 280) `static void test_data_url_registers(void **state)`
+  - `test_null_page_data_only` (function, line 313) `static void test_null_page_data_only(void **state)`
+  - `teardown` (function, line 343) `static int teardown(void **state)`
+  - `main` (function, line 350) `int main(void)`
   - `_POSIX_C_SOURCE` (macro, line 13) `#define _POSIX_C_SOURCE`
 - Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`, `include/webfont_load.h`
 
