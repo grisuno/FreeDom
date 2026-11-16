@@ -2,6 +2,12 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_css_mask.c` -> `include/css_mask.h`
+- `tests/test_css_mq.c` -> `include/css_mq.h`
+- `tests/test_css_text.c` -> `include/css.h`
+- `tests/test_css_text.c` -> `include/css_decl.h`
+- `tests/test_css_text.c` -> `include/css_text.h`
+- `tests/test_css_values.c` -> `include/css.h`
 - `tests/test_css_values.c` -> `include/css_values.h`
 - `tests/test_css_vars.c` -> `include/css_vars.h`
 - `tests/test_data_url.c` -> `include/data_url.h`
@@ -87,6 +93,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_prefetch.c` -> `include/prefetch.h`
 - `tests/test_prefs.c` -> `include/prefs.h`
 - `tests/test_prefs.c` -> `include/zoom.h`
+- `tests/test_pres_hints.c` -> `include/pres_hints.h`
 - `tests/test_profile.c` -> `include/prefs.h`
 - `tests/test_profile.c` -> `include/profile.h`
 - `tests/test_render_doc.c` -> `include/box_style.h`
@@ -111,6 +118,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_tab.c` -> `include/tab.h`
 - `tests/test_tab.c` -> `include/url.h`
 - `tests/test_tab.c` -> `include/web_storage.h`
+- `tests/test_table_layout.c` -> `include/table_layout.h`
 - `tests/test_text_case.c` -> `include/css.h`
 - `tests/test_text_case.c` -> `include/text_case.h`
 - `tests/test_text_shape.c` -> `include/css.h`
@@ -196,6 +204,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/pq_seal.h` -> stddef.h, stdint.h
 - `include/prefetch.h` -> pthread.h, stddef.h
 - `include/prefs.h` -> stddef.h
+- `include/pres_hints.h` -> stddef.h
 - `include/profile.h` -> stddef.h, stdint.h
 - `include/psl_data.h` -> stddef.h
 - `include/render_doc.h` -> stddef.h
@@ -210,6 +219,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/svg_raster.h` -> stddef.h, stdint.h
 - `include/svg_render.h` -> stddef.h
 - `include/tab.h` -> stddef.h, stdint.h, sys/types.h
+- `include/table_layout.h` -> stddef.h
 - `include/text_case.h` -> stddef.h, stdint.h
 - `include/text_shape.h` -> cairo/cairo.h, stddef.h
 - `include/textfield.h` -> stddef.h
@@ -298,6 +308,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/pq_seal.c` -> openssl/core_names.h, openssl/crypto.h, openssl/evp.h, openssl/kdf.h, openssl/x509.h, stdlib.h, string.h
 - `src/prefetch.c` -> stdlib.h, string.h, strings.h
 - `src/prefs.c` -> stdio.h, stdlib.h, string.h
+- `src/pres_hints.c` -> string.h
 - `src/profile.c` -> errno.h, fcntl.h, openssl/crypto.h, openssl/rand.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
 - `src/render_doc.c` -> stdlib.h, string.h
 - `src/renderer.c` -> errno.h, stdint.h, stdlib.h, string.h, sys/wait.h, unistd.h
@@ -310,6 +321,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/svg_raster.c` -> cairo.h, math.h, stdlib.h, string.h
 - `src/svg_render.c` -> math.h, stddef.h, string.h
 - `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, pthread.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/random.h, sys/wait.h, time.h, unistd.h
+- `src/table_layout.c` -> math.h
 - `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, hb-ft.h, hb-ot.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/textfield.c` -> string.h
 - `src/tls_impersonate.c` -> stdlib.h, string.h
@@ -388,6 +400,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_pq_seal.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_prefetch.c` -> cmocka.h, pthread.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_prefs.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_pres_hints.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_profile.c` -> cmocka.h, dirent.h, fcntl.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
 - `tests/test_render_doc.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_render_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
@@ -401,6 +414,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_svg_raster.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_tab.c` -> cmocka.h, poll.h, pthread.h, setjmp.h, signal.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/types.h, time.h, unistd.h
+- `tests/test_table_layout.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_text_case.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_text_shape.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_textfield.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h

@@ -53,6 +53,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`cg_radial_size`](modules/include.css_gradient.h.md#cg_radial_size) enum in `include/css_gradient.h`
 - [`chain`](modules/src.page_view.c.md#chain) type_alias in `src/page_view.c`
 - [`child_state`](modules/src.tab.c.md#child_state) struct in `src/tab.c`
+- [`cid`](modules/gui.browser_ui.c.md#cid) type_alias in `gui/browser_ui.c`
 - [`cix_entry`](modules/include.css_index.h.md#cix_entry) struct in `include/css_index.h`
 - [`cix_index`](modules/include.css_index.h.md#cix_index) struct in `include/css_index.h`
 - [`cix_run`](modules/src.css_index.c.md#cix_run) struct in `src/css_index.c`
@@ -70,6 +71,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`cnt_state`](modules/src.css_counter.c.md#cnt_state) struct in `src/css_counter.c`
 - [`cnt_style`](modules/include.css_counter.h.md#cnt_style) enum in `include/css_counter.h`
 - [`col`](modules/gui.browser_ui.c.md#col) type_alias in `gui/browser_ui.c`
+- [`col`](modules/include.table_layout.h.md#col) type_alias in `include/table_layout.h`
 - [`col_founder_box`](modules/gui.browser_ui.c.md#col_founder_box) type_alias in `gui/browser_ui.c`
 - [`color`](modules/include.css.h.md#color) type_alias in `include/css.h`
 - [`cols`](modules/include.flex_layout.h.md#cols) type_alias in `include/flex_layout.h`
@@ -441,6 +443,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`rc_row`](modules/gui.browser_ui.c.md#rc_row) struct in `gui/browser_ui.c`
 - [`rc_rowkind`](modules/gui.browser_ui.c.md#rc_rowkind) enum in `gui/browser_ui.c`
 - [`rc_state`](modules/gui.browser_ui.c.md#rc_state) struct in `gui/browser_ui.c`
+- [`rc_table_ctx`](modules/gui.browser_ui.c.md#rc_table_ctx) struct in `gui/browser_ui.c`
 - [`rd_block`](modules/include.render_doc.h.md#rd_block) struct in `include/render_doc.h`
 - [`rd_doc`](modules/include.render_doc.h.md#rd_doc) struct in `include/render_doc.h`
 - [`rd_doc`](modules/include.ui.h.md#rd_doc) struct in `include/ui.h`
@@ -533,6 +536,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`ti_req`](modules/include.tls_impersonate.h.md#ti_req) struct in `include/tls_impersonate.h`
 - [`ti_resp`](modules/include.tls_impersonate.h.md#ti_resp) struct in `include/tls_impersonate.h`
 - [`ti_wr`](modules/src.tls_impersonate.c.md#ti_wr) struct in `src/tls_impersonate.c`
+- [`tl_cell`](modules/include.table_layout.h.md#tl_cell) struct in `include/table_layout.h`
 - [`tls_capture`](modules/src.secure_fetch.c.md#tls_capture) struct in `src/secure_fetch.c`
 - [`tor_enabled`](modules/include.net_realm.h.md#tor_enabled) type_alias in `include/net_realm.h`
 - [`tsh_cover_ctx`](modules/src.text_shape.c.md#tsh_cover_ctx) struct in `src/text_shape.c`

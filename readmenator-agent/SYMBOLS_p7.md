@@ -3,6 +3,28 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `CC_PERCENT_MAX` | macro | `src/css_color.c:24` | `#define CC_PERCENT_MAX` |
+| `CC_PI` | macro | `src/css_color.c:577` | `#define CC_PI` |
+| `CC_TOKEN_MAX` | macro | `src/css_color.c:20` | `#define CC_TOKEN_MAX` |
+| `ascii_lower` | function | `src/css_color.c:119` | `static int ascii_lower(int c)` |
+| `cc_cexpr` | function | `src/css_color.c:269` | `static int cc_cexpr(cc_cp *c, cc_cv *out, int depth)` |
+| `cc_cfactor` | function | `src/css_color.c:229` | `static int cc_cfactor(cc_cp *c, cc_cv *out, int depth)` |
+| `cc_cp` | struct | `src/css_color.c:224` | `` |
+| `cc_cterm` | function | `src/css_color.c:250` | `static int cc_cterm(cc_cp *c, cc_cv *out, int depth)` |
+| `cc_cv` | struct | `src/css_color.c:223` | `` |
+| `cc_cws` | function | `src/css_color.c:226` | `static void cc_cws(cc_cp *c)` |
+| `cc_fold_calc` | function | `src/css_color.c:285` | `static int cc_fold_calc(const char **b, const char **e, char *buf, size_t cap)` |
+| `cc_named` | struct | `src/css_color.c:34` | `` |
+| `cc_pack` | function | `src/css_color.c:768` | `int cc_pack(cc_rgb c)` |
+| `cc_parse` | function | `src/css_color.c:728` | `cc_status cc_parse(const char *token, cc_rgb *out)` |
+| `cc_round` | function | `src/css_color.c:305` | `static long cc_round(double v)` |
+| `cc_unpack` | function | `src/css_color.c:772` | `cc_rgb cc_unpack(int packed)` |
+| `hex_val` | function | `src/css_color.c:123` | `static int hex_val(int c)` |
+| `lab_comp` | function | `src/css_color.c:581` | `static int lab_comp(const char *b, const char *e, double pct_ref, int is_hue, double *out)` |
+| `lab_to_rgb` | function | `src/css_color.c:627` | `static void lab_to_rgb(double L, double a, double b, cc_rgb *out)` |
+| `named_cmp` | function | `src/css_color.c:681` | `static int named_cmp(const void *key, const void *element)` |
+| `normalize` | function | `src/css_color.c:132` | `static int normalize(const char *token, char *out)` |
+| `oklab_to_rgb` | function | `src/css_color.c:616` | `static void oklab_to_rgb(double L, double a, double b, cc_rgb *out)` |
 | `parse_component` | function | `src/css_color.c:310` | `static int parse_component(const char *b, const char *e, int is_alpha, int *out)` |
 | `parse_func` | function | `src/css_color.c:508` | `static int parse_func(const char *s, cc_rgb *out)` |
 | `parse_hex` | function | `src/css_color.c:146` | `static int parse_hex(const char *s, cc_rgb *out)` |
@@ -474,27 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `fx_multicol_used` | function | `src/flex_layout.c:653` | `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,                ...` |
 | `gl_int` | function | `src/flex_layout.c:830` | `static int gl_int(const char *p, const char *end, long cap, long *out)` |
 | `gl_is_line` | function | `src/flex_layout.c:894` | `static int gl_is_line(int v)` |
-| `gl_is_span` | function | `src/flex_layout.c:893` | `static int gl_is_span(int v)` |
-| `gl_kw` | function | `src/flex_layout.c:820` | `static int gl_kw(const char *p, const char *end, const char *kw)` |
-| `gl_lower` | function | `src/flex_layout.c:817` | `static int gl_lower(char c)` |
-| `gl_side_range` | function | `src/flex_layout.c:845` | `static int gl_side_range(const char *p, const char *end, int *out)` |
-| `gl_ws` | function | `src/flex_layout.c:813` | `static int gl_ws(char c)` |
-| `nn` | function | `src/flex_layout.c:19` | `static double nn(double v)` |
-| `clean_action` | function | `src/form.c:75` | `static int clean_action(const char *action, char *out, size_t outsz)` |
-| `copy_fit` | function | `src/form.c:66` | `static int copy_fit(char *dst, size_t dstsz, const char *src)` |
-| `enc_component` | function | `src/form.c:25` | `static int enc_component(const char *s, char *out, size_t outsz, size_t *pos)` |
-| `fm_build` | function | `src/form.c:120` | `fm_status fm_build(const char *base, const char *action, fm_method method,                    con...` |
-| `fm_encode` | function | `src/form.c:43` | `fm_status fm_encode(const fm_field *fields, size_t n,                     char *out, size_t outsz...` |
-| `put_char` | function | `src/form.c:17` | `static int put_char(char *out, size_t outsz, size_t *pos, char c)` |
-| `resolve_target` | function | `src/form.c:101` | `static fm_block_reason resolve_target(const char *base, const char *act,                         ...` |
-| `strip_query` | function | `src/form.c:93` | `static void strip_query(char *url)` |
-| `fbk_add` | function | `src/frame_broker.c:66` | `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id)` |
-| `fbk_init` | function | `src/frame_broker.c:53` | `int fbk_init(fbk_table *t, const char *top_url)` |
-| `fbk_origin` | function | `src/frame_broker.c:96` | `const char *fbk_origin(const fbk_table *t, int id)` |
-| `fbk_origin_of` | function | `src/frame_broker.c:15` | `int fbk_origin_of(const char *url, char *out, size_t cap)` |
-| `fbk_remove` | function | `src/frame_broker.c:84` | `void fbk_remove(fbk_table *t, int id)` |
-| `fbk_route` | function | `src/frame_broker.c:118` | `fbk_verdict fbk_route(const fbk_table *t, int from, fbk_rel rel, int child,                      ...` |
-| `host_char_ok` | function | `src/frame_broker.c:11` | `static int host_char_ok(char c)` |
-| `lc` | function | `src/frame_broker.c:9` | `static char lc(char c)` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

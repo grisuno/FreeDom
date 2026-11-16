@@ -407,6 +407,7 @@
 - [`child`](modules/src.page_view.c.md#child) function in `src/page_view.c`
 - [`child_state`](modules/src.tab.c.md#child_state) struct in `src/tab.c`
 - [`children`](modules/gui.browser_ui.c.md#children) function in `gui/browser_ui.c`
+- [`cid`](modules/gui.browser_ui.c.md#cid) type_alias in `gui/browser_ui.c`
 - [`cix_build`](modules/include.css_index.h.md#cix_build) function in `include/css_index.h`
 - [`cix_build`](modules/src.css_index.c.md#cix_build) function in `src/css_index.c`
 - [`cix_build_ptrs`](modules/include.css_index.h.md#cix_build_ptrs) function in `include/css_index.h`
@@ -511,6 +512,7 @@
 - [`cnt_style`](modules/include.css_counter.h.md#cnt_style) enum in `include/css_counter.h`
 - [`CNT_VALUE_LIMIT`](modules/src.css_counter.c.md#cnt_value_limit) macro in `src/css_counter.c`
 - [`col`](modules/gui.browser_ui.c.md#col) type_alias in `gui/browser_ui.c`
+- [`col`](modules/include.table_layout.h.md#col) type_alias in `include/table_layout.h`
 - [`col_founder_box`](modules/gui.browser_ui.c.md#col_founder_box) type_alias in `gui/browser_ui.c`
 - [`color`](modules/include.css.h.md#color) type_alias in `include/css.h`
 - [`cols`](modules/include.flex_layout.h.md#cols) type_alias in `include/flex_layout.h`
@@ -1158,6 +1160,7 @@
 - [`FC_SHC_MAX_QUERIES`](modules/include.freedom_config.h.md#fc_shc_max_queries) macro in `include/freedom_config.h`
 - [`FC_SHC_MAX_TEXT_BYTES`](modules/include.freedom_config.h.md#fc_shc_max_text_bytes) macro in `include/freedom_config.h`
 - [`FC_TAB_OP_NET_BUDGET_MS`](modules/include.freedom_config.h.md#fc_tab_op_net_budget_ms) macro in `include/freedom_config.h`
+- [`FC_TABLE_TRACK_MAX_PX`](modules/include.freedom_config.h.md#fc_table_track_max_px) macro in `include/freedom_config.h`
 - [`FC_TRUSTED_JS_BUDGET_MS`](modules/include.freedom_config.h.md#fc_trusted_js_budget_ms) macro in `include/freedom_config.h`
 - [`FC_UI_FONT_SIZE`](modules/include.freedom_config.h.md#fc_ui_font_size) macro in `include/freedom_config.h`
 - [`fd`](modules/src.media_decoder.c.md#fd) function in `src/media_decoder.c`
@@ -1932,7 +1935,6 @@
 - [`line`](modules/gui.browser_ui.c.md#line) function in `gui/browser_ui.c`
 - [`line`](modules/src.page_view.c.md#line) function in `src/page_view.c`
 - [`line_sites`](modules/tools.mutate.py.md#line_sites) function in `tools.mutate`
-- [`links`](modules/src.page_view.c.md#links) function in `src/page_view.c`
 - [`LIST`](modules/src.css.c.md#list) function in `src/css.c`
 - [`list`](modules/include.render_doc.h.md#list) function in `include/render_doc.h`
 - [`list_unique_crashes`](modules/app.py.md#list_unique_crashes) function in `app`
@@ -2259,6 +2261,15 @@
 - [`pf_scan`](modules/src.prefetch.c.md#pf_scan) function in `src/prefetch.c`
 - [`pf_scan_imports`](modules/src.prefetch.c.md#pf_scan_imports) function in `src/prefetch.c`
 - [`PF_SPEC_MAX`](modules/include.prefetch.h.md#pf_spec_max) macro in `include/prefetch.h`
+- [`ph_apply`](modules/include.pres_hints.h.md#ph_apply) function in `include/pres_hints.h`
+- [`ph_apply`](modules/src.pres_hints.c.md#ph_apply) function in `src/pres_hints.c`
+- [`PH_ATTR_MAX`](modules/include.pres_hints.h.md#ph_attr_max) macro in `include/pres_hints.h`
+- [`PH_CENTERED`](modules/include.pres_hints.h.md#ph_centered) macro in `include/pres_hints.h`
+- [`PH_DIM_MAX_PX`](modules/include.pres_hints.h.md#ph_dim_max_px) macro in `include/pres_hints.h`
+- [`ph_parse_dimension`](modules/include.pres_hints.h.md#ph_parse_dimension) function in `include/pres_hints.h`
+- [`ph_parse_dimension`](modules/src.pres_hints.c.md#ph_parse_dimension) function in `src/pres_hints.c`
+- [`PH_PER_MILLE_MAX`](modules/src.pres_hints.c.md#ph_per_mille_max) macro in `src/pres_hints.c`
+- [`PH_QUIRKS`](modules/include.pres_hints.h.md#ph_quirks) macro in `include/pres_hints.h`
 - [`pl`](modules/gui.browser_ui.c.md#pl) type_alias in `gui/browser_ui.c`
 - [`place`](modules/include.js_dom.h.md#place) function in `include/js_dom.h`
 - [`place`](modules/src.render_doc.c.md#place) function in `src/render_doc.c`
@@ -2499,7 +2510,6 @@
 - [`PV_MAX_CONTAINERS_WIRE`](modules/src.tab.c.md#pv_max_containers_wire) macro in `src/tab.c`
 - [`PV_MAX_DIM`](modules/src.page_view.c.md#pv_max_dim) macro in `src/page_view.c`
 - [`PV_MAX_FLOATS`](modules/include.page_view.h.md#pv_max_floats) macro in `include/page_view.h`
-- [`PV_MAX_FLOW_MEMO`](modules/src.page_view.c.md#pv_max_flow_memo) macro in `src/page_view.c`
 - [`PV_MAX_GRID_COLS`](modules/src.page_view.c.md#pv_max_grid_cols) macro in `src/page_view.c`
 - [`PV_MAX_INLINE_ROW_ITEMS`](modules/src.page_view.c.md#pv_max_inline_row_items) macro in `src/page_view.c`
 - [`PV_MAX_STYLE_BYTES`](modules/src.page_view.c.md#pv_max_style_bytes) macro in `src/page_view.c`
@@ -2593,6 +2603,7 @@
 - [`pv_view`](modules/include.page_view.h.md#pv_view) struct in `include/page_view.h`
 - [`px`](modules/src.css_box.c.md#calc_val-px) type_alias of `calc_val` in `src/css_box.c`
 - [`px`](modules/include.css_length.h.md#cl_lp-px) type_alias of `cl_lp` in `include/css_length.h`
+- [`px`](modules/include.table_layout.h.md#px) function in `include/table_layout.h`
 - [`px`](modules/src.page_view.c.md#px) function in `src/page_view.c`
 
 <a id="r"></a>
@@ -2621,6 +2632,8 @@
 - [`rc_row`](modules/gui.browser_ui.c.md#rc_row) struct in `gui/browser_ui.c`
 - [`rc_rowkind`](modules/gui.browser_ui.c.md#rc_rowkind) enum in `gui/browser_ui.c`
 - [`rc_state`](modules/gui.browser_ui.c.md#rc_state) struct in `gui/browser_ui.c`
+- [`rc_table_ctx`](modules/gui.browser_ui.c.md#rc_table_ctx) struct in `gui/browser_ui.c`
+- [`RC_TABLE_SOLVED_N`](modules/gui.browser_ui.c.md#rc_table_solved_n) macro in `gui/browser_ui.c`
 - [`rd_at`](modules/include.render_doc.h.md#rd_at) function in `include/render_doc.h`
 - [`rd_at`](modules/src.render_doc.c.md#rd_at) function in `src/render_doc.c`
 - [`rd_block`](modules/include.render_doc.h.md#rd_block) struct in `include/render_doc.h`
@@ -3110,7 +3123,6 @@
 - [`TABLE`](modules/gui.browser_ui.c.md#table) function in `gui/browser_ui.c`
 - [`table`](modules/gui.browser_ui.c.md#table) function in `gui/browser_ui.c`
 - [`table`](modules/src.js_dom.c.md#table) function in `src/js_dom.c`
-- [`table`](modules/src.page_view.c.md#table) function in `src/page_view.c`
 - [`tag`](modules/src.css_chain.c.md#cch_node-tag) type_alias of `cch_node` in `src/css_chain.c`
 - [`tag`](modules/include.css_select.h.md#css_compound-tag) type_alias of `css_compound` in `include/css_select.h`
 - [`tag`](modules/include.css_select.h.md#tag) type_alias in `include/css_select.h`
@@ -3195,6 +3207,13 @@
 - [`TIMING_BASELINE`](modules/tools.fbench.py.md#timing_baseline) constant in `tools.fbench`
 - [`TIMING_OUT`](modules/tools.fbench.py.md#timing_out) constant in `tools.fbench`
 - [`TIMING_QUIET_MS`](modules/gui.browser_ui.c.md#timing_quiet_ms) macro in `gui/browser_ui.c`
+- [`tl_cell`](modules/include.table_layout.h.md#tl_cell) struct in `include/table_layout.h`
+- [`tl_columns`](modules/src.table_layout.c.md#tl_columns) function in `src/table_layout.c`
+- [`tl_intrinsic`](modules/include.table_layout.h.md#tl_intrinsic) function in `include/table_layout.h`
+- [`tl_intrinsic`](modules/src.table_layout.c.md#tl_intrinsic) function in `src/table_layout.c`
+- [`TL_MAX_COLS`](modules/include.table_layout.h.md#tl_max_cols) macro in `include/table_layout.h`
+- [`TL_PER_MILLE`](modules/include.table_layout.h.md#tl_per_mille) macro in `include/table_layout.h`
+- [`TL_WIDTH_MAX`](modules/include.table_layout.h.md#tl_width_max) macro in `include/table_layout.h`
 - [`tls_capture`](modules/src.secure_fetch.c.md#tls_capture) struct in `src/secure_fetch.c`
 - [`to`](modules/include.render_doc.h.md#rd_block-to) method of `rd_block` in `include/render_doc.h`
 - [`toggle`](modules/gui.browser_ui.c.md#toggle) function in `gui/browser_ui.c`

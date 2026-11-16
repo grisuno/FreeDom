@@ -1,4 +1,4 @@
-# API (page 5 of 12)
+# API (page 5 of 13)
 Previous: [API_p4.md](API_p4.md)
 
 ## include/page_view.h
@@ -114,6 +114,12 @@ Imported by: `gui/browser_ui.c`, `include/profile.h`, `include/ui.h`, `src/prefs
 - `prefs_bookmark_index` (function) `include/prefs.h:82` `int prefs_bookmark_index(const prefs_state *p, const char *url);` -- Parses text[0..len) over an out ALREADY initialised with prefs_init.
 - `prefs_suggest` (function) `include/prefs.h:101` `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);` -- Omnibox autocomplete: up to max_rows distinct URLs matching query (case- insensitive) written to out (rows of...
 - `anyway` (function) `include/prefs.h:106` `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());`
+
+## include/pres_hints.h
+Depends on: `include/css.h`
+Imported by: `src/page_view.c`, `src/pres_hints.c`, `tests/test_pres_hints.c`
+- `ph_parse_dimension` (function) `include/pres_hints.h:24` `int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille);` -- #ifdef __cplusplus #error "Freedom is pure C11 by policy; C++ is not supported." #endif #include <stddef.h> #include...
+- `ph_apply` (function) `include/pres_hints.h:31` `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs);` -- Applies the hints of element `tag` (lower-case, NUL-terminated) to *cs; flags is a set of * PH_*.
 
 ## include/profile.h
 Depends on: `include/local_store.h`, `include/prefs.h`
@@ -284,6 +290,11 @@ Imported by: `gui/browser_ui.c`, `include/frame_host.h`, `src/freedom.c`, `src/t
 - `tab_page_free` (function) `include/tab.h:439` `void tab_page_free(tab_page *p);` -- malformed data: URI is not a transport error: *out stays zeroed, same as an * undecodable format, and the caller...
 - `tab_eval_result_free` (function) `include/tab.h:440` `void tab_eval_result_free(tab_eval_result *r);`
 - `tab_image_free` (function) `include/tab.h:441` `void tab_image_free(tab_image *img);`
+
+## include/table_layout.h
+Imported by: `gui/browser_ui.c`, `src/table_layout.c`, `tests/test_table_layout.c`
+- `px` (function) `include/table_layout.h:41` `* px (< 0 = auto: the table is as wide as its content, capped at avail). gap is the space * between adjacent...`
+- `tl_intrinsic` (function) `include/table_layout.h:53` `void tl_intrinsic(const tl_cell *cells, size_t n, size_t ncols, double gap, double *min_total, double *max_total);` -- The table's min-content and max-content widths (columns plus gaps): what it contributes when it is itself a cell of...
 
 ## include/text_case.h
 Imported by: `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`

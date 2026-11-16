@@ -1,4 +1,4 @@
-# API (page 4 of 12)
+# API (page 4 of 13)
 Previous: [API_p3.md](API_p3.md)
 
 ## include/css_mask.h

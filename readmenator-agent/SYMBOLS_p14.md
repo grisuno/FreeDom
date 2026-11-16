@@ -3,6 +3,41 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_dedup_and_accumulate` | function | `tests/test_hostblock.c:189` | `static void test_dedup_and_accumulate(void **state)` |
+| `test_free_null_idempotent` | function | `tests/test_hostblock.c:47` | `static void test_free_null_idempotent(void **state)` |
+| `test_hosts_line_drops_ip` | function | `tests/test_hostblock.c:70` | `static void test_hosts_line_drops_ip(void **state)` |
+| `test_invalid_tokens_skipped` | function | `tests/test_hostblock.c:154` | `static void test_invalid_tokens_skipped(void **state)` |
+| `test_is_allowlisted` | function | `tests/test_hostblock.c:246` | `static void test_is_allowlisted(void **state)` |
+| `test_lists_independent` | function | `tests/test_hostblock.c:200` | `static void test_lists_independent(void **state)` |
+| `test_load_null_args` | function | `tests/test_hostblock.c:60` | `static void test_load_null_args(void **state)` |
+| `test_lowercased` | function | `tests/test_hostblock.c:133` | `static void test_lowercased(void **state)` |
+| `test_multiple_tokens_per_line` | function | `tests/test_hostblock.c:114` | `static void test_multiple_tokens_per_line(void **state)` |
+| `test_new_free` | function | `tests/test_hostblock.c:38` | `static void test_new_free(void **state)` |
+| `test_no_lists_allows` | function | `tests/test_hostblock.c:239` | `static void test_no_lists_allows(void **state)` |
+| `test_no_trailing_newline` | function | `tests/test_hostblock.c:122` | `static void test_no_trailing_newline(void **state)` |
+| `test_oversize_token_skipped` | function | `tests/test_hostblock.c:170` | `static void test_oversize_token_skipped(void **state)` |
+| `test_tld_entry_blocks_every_host_under_it` | function | `tests/test_hostblock.c:283` | `static void test_tld_entry_blocks_every_host_under_it(void **state)` |
+| `test_trailing_dot_trimmed` | function | `tests/test_hostblock.c:143` | `static void test_trailing_dot_trimmed(void **state)` |
+| `test_underscore_and_hyphen_valid` | function | `tests/test_hostblock.c:181` | `static void test_underscore_and_hyphen_valid(void **state)` |
+| `test_various_ip_tokens_ignored` | function | `tests/test_hostblock.c:79` | `static void test_various_ip_tokens_ignored(void **state)` |
+| `main` | function | `tests/test_hostedit.c:130` | `int main(void)` |
+| `test_cdn_kind_from_url_path` | function | `tests/test_hostedit.c:116` | `static void test_cdn_kind_from_url_path(void **state)` |
+| `test_make_line_lowercases` | function | `tests/test_hostedit.c:11` | `static void test_make_line_lowercases(void **state)` |
+| `test_make_line_null_and_range` | function | `tests/test_hostedit.c:47` | `static void test_make_line_null_and_range(void **state)` |
+| `test_make_line_plain_host` | function | `tests/test_hostedit.c:18` | `static void test_make_line_plain_host(void **state)` |
+| `test_make_line_rejects_bad_labels` | function | `tests/test_hostedit.c:36` | `static void test_make_line_rejects_bad_labels(void **state)` |
+| `test_make_line_rejects_path_scheme_garbage` | function | `tests/test_hostedit.c:25` | `static void test_make_line_rejects_path_scheme_garbage(void **state)` |
+| `test_make_line_single_label_ok` | function | `tests/test_hostedit.c:56` | `static void test_make_line_single_label_ok(void **state)` |
+| `test_suggest_case_insensitive_and_dedup` | function | `tests/test_hostedit.c:92` | `static void test_suggest_case_insensitive_and_dedup(void **state)` |
+| `test_suggest_empty_query_and_cap` | function | `tests/test_hostedit.c:101` | `static void test_suggest_empty_query_and_cap(void **state)` |
+| `test_suggest_prefix_first` | function | `tests/test_hostedit.c:76` | `static void test_suggest_prefix_first(void **state)` |
+| `test_text_has_host` | function | `tests/test_hostedit.c:63` | `static void test_text_has_host(void **state)` |
+| `LIT` | macro | `tests/test_html_parse.c:21` | `#define LIT(s)` |
+| `main` | function | `tests/test_html_parse.c:507` | `int main(void)` |
+| `test_config_default_is_secure` | function | `tests/test_html_parse.c:37` | `static void test_config_default_is_secure(void **state)` |
+| `test_event_handlers_kept_when_disabled` | function | `tests/test_html_parse.c:150` | `static void test_event_handlers_kept_when_disabled(void **state)` |
+| `test_event_handlers_stripped_by_default` | function | `tests/test_html_parse.c:141` | `static void test_event_handlers_stripped_by_default(void **state)` |
+| `test_extract_script_list_empty` | function | `tests/test_html_parse.c:263` | `static void test_extract_script_list_empty(void **state)` |
 | `test_extract_script_list_external_semantics` | function | `tests/test_html_parse.c:200` | `static void test_extract_script_list_external_semantics(void **state)` |
 | `test_extract_script_list_module_flags` | function | `tests/test_html_parse.c:454` | `static void test_extract_script_list_module_flags(void **state)` |
 | `test_extract_script_list_skips_non_js_type` | function | `tests/test_html_parse.c:234` | `static void test_extract_script_list_skips_non_js_type(void **state)` |
@@ -461,40 +496,5 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_date_components` | function | `tests/test_js_intl.c:126` | `static void test_date_components(void **state)` |
 | `test_date_styles_parts` | function | `tests/test_js_intl.c:150` | `static void test_date_styles_parts(void **state)` |
 | `test_install_null` | function | `tests/test_js_intl.c:39` | `static void test_install_null(void **state)` |
-| `test_number_compact` | function | `tests/test_js_intl.c:90` | `static void test_number_compact(void **state)` |
-| `test_number_decimal` | function | `tests/test_js_intl.c:44` | `static void test_number_decimal(void **state)` |
-| `test_number_parts_and_options` | function | `tests/test_js_intl.c:99` | `static void test_number_parts_and_options(void **state)` |
-| `test_number_styles` | function | `tests/test_js_intl.c:71` | `static void test_number_styles(void **state)` |
-| `test_relative_plural_list` | function | `tests/test_js_intl.c:167` | `static void test_relative_plural_list(void **state)` |
-| `test_to_locale_string` | function | `tests/test_js_intl.c:110` | `static void test_to_locale_string(void **state)` |
-| `EXPECT` | macro | `tests/test_js_native.c:61` | `#define EXPECT(f, src, expected)` |
-| `EXPECT` | function | `tests/test_js_native.c:98` | `EXPECT(f,         "(function()` |
-| `EXPECT` | function | `tests/test_js_native.c:112` | `EXPECT(f, "function page(a)` |
-| `EXPECT` | function | `tests/test_js_native.c:113` | `EXPECT(f, "(function()` |
-| `EXPECT` | function | `tests/test_js_native.c:118` | `EXPECT(f, "window.mine=function()` |
-| `EXPECT` | function | `tests/test_js_native.c:120` | `EXPECT(f, "'['+mine.name+']'+mine.toString()", "[]function()` |
-| `EXPECT` | function | `tests/test_js_native.c:164` | `EXPECT(f, "['userAgent','webdriver','languages','plugins','platform','hardwareConcurrency']"     ...` |
-| `EXPECT` | function | `tests/test_js_native.c:180` | `EXPECT(f, "Array.prototype.map.call(navigator.plugins,function(p)` |
-| `EXPECT` | function | `tests/test_js_native.c:184` | `EXPECT(f, "Array.prototype.map.call(navigator.mimeTypes,function(m)` |
-| `K` | class | `tests/test_js_native.c:116` | `` |
-| `K` | class | `tests/test_js_native.c:116` | `` |
-| `NATIVE` | macro | `tests/test_js_native.c:70` | `#define NATIVE(n)` |
-| `fixture` | struct | `tests/test_js_native.c:29` | `` |
-| `main` | function | `tests/test_js_native.c:199` | `int main(void)` |
-| `setup` | function | `tests/test_js_native.c:36` | `static int setup(void **state)` |
-| `teardown` | function | `tests/test_js_native.c:50` | `static int teardown(void **state)` |
-| `test_css_supports` | function | `tests/test_js_native.c:190` | `static void test_css_supports(void **state)` |
-| `test_firefox_plugins` | function | `tests/test_js_native.c:177` | `static void test_firefox_plugins(void **state)` |
-| `test_host_functions_look_native` | function | `tests/test_js_native.c:80` | `static void test_host_functions_look_native(void **state)` |
-| `test_interface_tags` | function | `tests/test_js_native.c:133` | `static void test_interface_tags(void **state)` |
-| `test_names` | function | `tests/test_js_native.c:126` | `static void test_names(void **state)` |
-| `test_navigator_shape` | function | `tests/test_js_native.c:161` | `static void test_navigator_shape(void **state)` |
-| `test_no_global_leaks_source` | function | `tests/test_js_native.c:96` | `static void test_no_global_leaks_source(void **state)` |
-| `test_null_and_idempotent` | function | `tests/test_js_native.c:72` | `static void test_null_and_idempotent(void **state)` |
-| `test_page_functions_keep_source` | function | `tests/test_js_native.c:110` | `static void test_page_functions_keep_source(void **state)` |
-| `test_singleton_interfaces` | function | `tests/test_js_native.c:153` | `static void test_singleton_interfaces(void **state)` |
-| `main` | function | `tests/test_js_policy.c:89` | `int main(void)` |
-| `test_enabled_fail_closed_on_bad_mode` | function | `tests/test_js_policy.c:31` | `static void test_enabled_fail_closed_on_bad_mode(void **state)` |
-| `test_mode_from_str` | function | `tests/test_js_policy.c:36` | `static void test_mode_from_str(void **state)` |
 
 Next: [SYMBOLS_p15.md](SYMBOLS_p15.md)

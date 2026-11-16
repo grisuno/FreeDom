@@ -4263,8 +4263,20 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         return expand_mask_geometry(prop, val, dst, cap);
     if (strcmp(prop, "background") == 0)
     {
+        /* One background layer is painted: the first, the one background-image keeps too.
+         * The list is cut at its first top-level comma (a comma inside a function or a
+         * string is not a separator). */
+        size_t vlen = strlen(val);
+        char *layer = NULL;
+        if (memchr(val, ',', vlen) != NULL && vlen != (size_t)-1) {
+            layer = malloc(vlen + 1);
+            if (layer == NULL) return 0;
+            first_comma_item(val, layer, vlen + 1);
+            val = layer;
+        }
         int n = expand_background(val, dst, cap, urltab, nurl, urlcap);
         if (n > 0 && !css_wide_keyword(val)) n += expand_background_layer(val, dst + n, cap - n);
+        free(layer);
         return n;
     }
     if (strcmp(prop, "background-image") == 0)

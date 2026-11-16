@@ -9,6 +9,7 @@
 
 #define _POSIX_C_SOURCE 200809L
 
+#include "pres_hints.h"
 #include "page_view.h"
 #include "sheet_cache.h"
 #include "freedom_config.h"
@@ -1251,12 +1252,6 @@ static int color_attr(lxb_dom_element_t *el, const char *name, size_t name_len) 
 
 static int font_color_attr(lxb_dom_element_t *el) {
     return color_attr(el, "color", 5);
-}
-
-/* Legacy bgcolor attribute (body/table/tr/td), the background twin of <font
- * color>: pre-CSS sites (Hacker News' orange bar and beige page) still use it. */
-static int bgcolor_attr(lxb_dom_element_t *el) {
-    return color_attr(el, "bgcolor", 7);
 }
 
 /* --- author flex/grid container layout: structure, not author styling. render_doc
@@ -2674,6 +2669,44 @@ static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el) {
     return lxb_dom_interface_element(p);
 }
 
+/* Attribute getter for pres_hints over a Lexbor element. */
+static const char *pv_hint_attr(void *ctx, const char *name, size_t *len) {
+    return (const char *)lxb_dom_element_get_attribute((lxb_dom_element_t *)ctx,
+                                                       (const lxb_char_t *)name, strlen(name), len);
+}
+
+/* Whether an ancestor of el centres its block children: <center>, or align=center on a
+ * block (HTML 15.3.3). Only asked for tables. Bounded walk. */
+static int pv_centered_by_ancestor(lxb_dom_element_t *el) {
+    lxb_dom_element_t *p = pv_parent_element(el);
+    for (int hop = 0; p != NULL && hop < PV_FONT_CHAIN_MAX; ++hop, p = pv_parent_element(p)) {
+        lxb_tag_id_t t = lxb_dom_element_tag_id(p);
+        if (t == LXB_TAG_CENTER) return 1;
+        size_t al = 0;
+        const lxb_char_t *av = lxb_dom_element_get_attribute(p, (const lxb_char_t *)"align", 5, &al);
+        if (av != NULL)
+            return al == 6 && (av[0] == 'c' || av[0] == 'C') && t != LXB_TAG_TABLE;
+    }
+    return 0;
+}
+
+/* HTML presentational attributes, as zero-specificity style (spec/pres_hints.md). */
+static void pv_apply_pres_hints(lxb_dom_element_t *el, css_style *cs) {
+    size_t tl = 0;
+    const lxb_char_t *tn = lxb_dom_element_local_name(el, &tl);
+    char tag[8];
+    if (tn == NULL || tl == 0 || tl >= sizeof tag) return;
+    memcpy(tag, tn, tl);
+    tag[tl] = '\0';
+    unsigned flags = 0;
+    if (lxb_dom_element_tag_id(el) == LXB_TAG_TABLE) {
+        if (pv_centered_by_ancestor(el)) flags |= PH_CENTERED;
+        const lxb_dom_document_t *od = ((lxb_dom_node_t *)el)->owner_document;
+        if (od != NULL && od->compat_mode == LXB_DOM_DOCUMENT_CMODE_QUIRKS) flags |= PH_QUIRKS;
+    }
+    ph_apply(tag, pv_hint_attr, el, flags, cs);
+}
+
 /*
  * cch_element_style(el, sheet), memoized in *cache, resolving font-relative
  * lengths against the element's real computed font-size.
@@ -2801,6 +2834,7 @@ static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const cs
     for (size_t k = n; k-- > 0; ) {
         cvr_table own = { 0 };
         cs = cch_element_style_path(cache != NULL ? cache->path : NULL, stack[k], sheet, inherited, vars, cb_h.cq, &own);
+        pv_apply_pres_hints(stack[k], &cs);
         {
             size_t tl = 0;
             const lxb_char_t *tn = lxb_dom_element_local_name(stack[k], &tl);
@@ -3650,19 +3684,15 @@ static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *she
     return element_is_content_leaf_d(n, sheet, cache, 0);
 }
 
-/* Nonzero when cell (a td/th) is a WALKED cell of a FLOW table (defined after the
- * flow-table machinery below): such a cell's content shares its ROW's line, so the
- * cell must not carry its own box (the painter flushes the line at every box
- * transition -- a per-cell box would split the row). */
 struct pv_flow_reg;
 static bx_table_role node_table_role(const lxb_dom_node_t *n, const struct pv_flow_reg *fr);
-static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
-                              struct pv_flow_reg *fr);
 /* Nonzero when cell is a RICH cell of a gridded table: walked, each of its runs a member
  * of the table's grid with the cell as the item (spec/page_view.md "Celda rica"). */
 static int cell_is_grid_item(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
                              struct pv_flow_reg *fr);
 static int table_columns(const lxb_dom_node_t *table, const struct pv_flow_reg *fr);
+static int table_cell_pos(struct pv_flow_reg *fr, const lxb_dom_node_t *table,
+                          const lxb_dom_node_t *cell, int *row, int *col);
 static int cell_span_attr(const lxb_dom_node_t *cell, const char *name, size_t name_len,
                           long max);
 
@@ -4073,14 +4103,13 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                     int has_bg = (cs->background >= 0 &&
                                   (cs->bg_alpha == CSS_LEN_UNSET || cs->bg_alpha > 0)) ||
                                  cs->bg_grad_n >= 2 || cs->bg_image_url[0] != '\0';
+                    /* A table cell laid out as a grid item is one too (tcell == p). */
                     want_box = sized ||
                                ((has_deco || has_bg || css_has_hmargin(cs)) &&
-                                is_layout_item(p, sheet, style_cache));
+                                (is_layout_item(p, sheet, style_cache) || tcell == p));
                 }
             }
-            if (want_box
-                && !((t == LXB_TAG_TD || t == LXB_TAG_TH)
-                     && in_flow_table_cell(p, base, flowreg))) {
+            if (want_box) {
                 int bid = box_reg_id_ex(box_reg, p, cs, pv_cached_font_px(style_cache, p),
                                          sheet, style_cache);
                 if (bid >= 0 && inline_deco_box) box_reg->def[bid].display = CSS_DISP_INLINE_BOX;
@@ -4149,7 +4178,6 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 if (cs->background >= 0) b = cs->background;
                 else if (cs->background == CC_COLOR_CURRENT && got_color) b = *fg;
                 else if (cs->background == CC_COLOR_TRANSPARENT) b = CC_COLOR_TRANSPARENT;
-                else b = bgcolor_attr(el);
                 if (b >= 0 || b == CC_COLOR_TRANSPARENT) { *bg = b; got_bg = 1; }
             }
             if (!got_align && cs->text_align != CSS_ALIGN_UNSET) {
@@ -4320,6 +4348,17 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             cont->anc_item_gl[a][1]  = item_props ? prev_gce : FX_GL_AUTO;
                             cont->anc_item_gl[a][2]  = item_props ? prev_grs : FX_GL_AUTO;
                             cont->anc_item_gl[a][3]  = item_props ? prev_gre : FX_GL_AUTO;
+                            /* A cell that is itself a container (it holds a nested table)
+                             * sits in its table by its row and column, as grid lines. */
+                            int trow, tcol;
+                            if (is_table_cont && table_cell_pos(flowreg, p, tcell, &trow, &tcol) &&
+                                trow + 2 <= FX_GL_LINE_MAX) {
+                                int csp = cell_span_attr(tcell, "colspan", 7, PV_MAX_GRID_COLS);
+                                cont->anc_item_gl[a][0] = tcol + 1;
+                                cont->anc_item_gl[a][1] = tcol + 1 + ((csp > 1) ? csp : 1);
+                                cont->anc_item_gl[a][2] = trow + 1;
+                                cont->anc_item_gl[a][3] = trow + 2;
+                            }
                             cont->anc_n++;
                         }
 
@@ -4368,6 +4407,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                                 cont->col_span = (csp > 1) ? csp : 0;
                                 cont->row_span = (rsp > 1) ? rsp : 0;
                                 cont->item = tcell;
+                                /* The cell's own slot: a short row, an empty row or a
+                                 * colspan must not let the next row's cells slide into
+                                 * the gap, which auto-placement would do. */
+                                int trow, tcol;
+                                if (table_cell_pos(flowreg, p, tcell, &trow, &tcol)) {
+                                    cont->grid_row_start = trow;
+                                    cont->grid_col_start = tcol;
+                                }
                             } else if (have_prev_el) {
                                 cont->grow = prev_grow; cont->shrink = prev_shrink;
                                 cont->basis = prev_basis; cont->order = prev_order;
@@ -5249,25 +5296,24 @@ static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
     else                       snprintf(out, cap, "\xE2\x80\xA2 ");
 }
 
-/* Cache of the per-table flow decision (a table subtree is scanned at most once,
- * anti-DoS) PLUS the style context the table machinery needs to answer "what role
- * does this element play". Registry full => grid (the previous behaviour), bounded
- * fail-closed.
+/* The style context the table machinery needs to answer "what role does this element
+ * play", plus its one-entry memos.
  *
  * sheet/cache ride here rather than as two more parameters on nine helpers: the
  * table role of an element is its computed `display` (CSS 2.1 17.2), so resolving it
  * needs the cascade, and the memo cache is what keeps that from being quadratic. */
-#define PV_MAX_FLOW_MEMO 256u   /* memoised table/cell verdicts; past it: recomputed */
 typedef struct pv_flow_reg {
-    const lxb_dom_node_t *node[PV_MAX_FLOW_MEMO];
-    unsigned char         flow[PV_MAX_FLOW_MEMO];
-    size_t                count;
     const css_sheet      *sheet;
     pv_style_cache       *cache;
     /* One-entry memo of the last cell classified (cell_kind): the text nodes of a
      * cell arrive consecutively, and each asked for a scan of the whole cell. */
     const lxb_dom_node_t *kind_cell;
     unsigned char         kind;
+    /* table_cell_pos index: a table's rows are numbered ONCE (row -> ordinal, table ->
+     * row count) and each cell's slot is remembered (cell -> row * PV_MAX_GRID_COLS + col).
+     * Every run of a cell asks, and an outer and an inner table alternate, so a memo of
+     * "the last row" rescanned the table per run. NULL (or OOM) = recomputed by scan. */
+    pv_ptrmap            *pos;
 } pv_flow_reg;
 
 /* The table role of an element: its computed `display` when that names one, else the
@@ -5359,16 +5405,6 @@ static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *
     return 1;
 }
 
-/* Nearest table-cell ancestor of n up to base, or NULL. */
-static const lxb_dom_node_t *nearest_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
-                                          const pv_flow_reg *fr) {
-    for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
-        if (node_table_role(p, fr) == BX_TROLE_CELL) return p;
-        if (p == base) break;
-    }
-    return NULL;
-}
-
 /* Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not
  * a leaf cell. Only leaf cells (no nested table) are collected as one text run; a
  * container cell is walked so the inner table's cells are collected separately. This
@@ -5398,65 +5434,6 @@ static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root) 
     return n->next;
 }
 
-/* First <a href> element in the cell's subtree, with *count receiving how many
- * such anchors exist, capped at 2 (only none / exactly-one / several matters). */
-static const lxb_dom_node_t *cell_anchors(const lxb_dom_node_t *cell, int *count) {
-    const lxb_dom_node_t *first = NULL;
-    *count = 0;
-    for (lxb_dom_node_t *k = cell->first_child; k != NULL; k = node_next(k, cell)) {
-        if (k->type != LXB_DOM_NODE_TYPE_ELEMENT || node_tag(k) != LXB_TAG_A) continue;
-        size_t hl = 0;
-        const lxb_char_t *h = lxb_dom_element_get_attribute(
-            lxb_dom_interface_element(k), (const lxb_char_t *)"href", 4, &hl);
-        if (h == NULL || hl == 0) continue;
-        if (first == NULL) first = k;
-        if (++*count >= 2) break;
-    }
-    return first;
-}
-
-/* Nonzero when the table is navigation/layout rather than data: some leaf cell of
- * ITS OWN (nested tables decide for themselves; their subtrees are skipped) holds
- * two or more anchors. Flattening such a cell into one collected run would destroy
- * its links (the Hacker News case: every story link lives inside a <td>), so the
- * caller flows the table's cells through the normal walk instead of gridding them. */
-static int table_prefers_flow(const lxb_dom_node_t *table, const pv_flow_reg *fr) {
-    lxb_dom_node_t *n = table->first_child;
-    while (n != NULL) {
-        int skip_children = 0;
-        bx_table_role role = node_table_role(n, fr);
-        if (role == BX_TROLE_TABLE) {
-            skip_children = 1;
-        } else if (role == BX_TROLE_CELL && !cell_has_nested_table(n, fr)) {
-            int nanch = 0;
-            (void)cell_anchors(n, &nanch);
-            if (nanch >= 2) return 1;
-            skip_children = 1; /* the whole leaf cell was just scanned */
-        }
-        n = skip_children ? next_skip(n, (const lxb_dom_node_t *)table)
-                          : node_next(n, table);
-    }
-    return 0;
-}
-
-static int flow_table(pv_flow_reg *fr, const lxb_dom_node_t *table) {
-    if (table == NULL) return 0;
-    for (size_t i = 0; i < fr->count; ++i)
-        if (fr->node[i] == table) return fr->flow[i];
-    int f = table_prefers_flow(table, fr) ? 1 : 0;
-    if (fr->count >= PV_MAX_FLOW_MEMO) return f;   /* memo full: answer, do not remember */
-    fr->node[fr->count] = table;
-    fr->flow[fr->count] = (unsigned char)f;
-    fr->count++;
-    return f;
-}
-
-static int in_flow_table_cell(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
-                              struct pv_flow_reg *fr) {
-    return fr != NULL && cell != NULL && !cell_has_nested_table(cell, fr)
-        && flow_table(fr, nearest_table(cell, base, fr));
-}
-
 /* A colspan/rowspan attribute of a cell as an int in [2, max], or 0. */
 static int cell_span_attr(const lxb_dom_node_t *cell, const char *name, size_t name_len,
                           long max) {
@@ -5469,12 +5446,70 @@ static int cell_span_attr(const lxb_dom_node_t *cell, const char *name, size_t n
     return (sv > 1 && sv <= max) ? (int)sv : 0;
 }
 
+/* The row after `from` among the rows of `table` in document order (from == NULL: the
+ * first), skipping nested tables: their rows belong to them. */
+static const lxb_dom_node_t *table_next_row(const lxb_dom_node_t *table,
+                                            const lxb_dom_node_t *from, const pv_flow_reg *fr) {
+    lxb_dom_node_t *n = (from == NULL) ? table->first_child
+                                       : next_skip((lxb_dom_node_t *)from, table);
+    while (n != NULL) {
+        bx_table_role role = node_table_role(n, fr);
+        if (role == BX_TROLE_ROW) return n;
+        n = (role == BX_TROLE_TABLE || role == BX_TROLE_CELL) ? next_skip(n, table)
+                                                             : node_next(n, table);
+    }
+    return NULL;
+}
+
+/* The 0-based (row, column) a cell occupies in its table: the row's ordinal among the
+ * table's rows and the sum of the colspans of the cells before it in that row. rowspan does
+ * not shift later rows (spec/table_layout.md, out of scope). Returns 0 with both outputs
+ * untouched when the cell has no row of this table above it. */
+static int table_cell_pos(pv_flow_reg *fr, const lxb_dom_node_t *table,
+                          const lxb_dom_node_t *cell, int *row, int *col) {
+    if (fr == NULL || table == NULL || cell == NULL) return 0;
+    int v = 0;
+    if (fr->pos != NULL && pv_ptrmap_get(fr->pos, cell, &v) && v >= 0) {
+        *row = v / PV_MAX_GRID_COLS; *col = v % PV_MAX_GRID_COLS;
+        return 1;
+    }
+    const lxb_dom_node_t *rown = cell->parent;
+    if (rown == NULL || node_table_role(rown, fr) != BX_TROLE_ROW) return 0;
+    int idx = -1;
+    if (fr->pos != NULL) {
+        if (!pv_ptrmap_get(fr->pos, table, &v)) {
+            int i = 0;
+            for (const lxb_dom_node_t *r = table_next_row(table, NULL, fr); r != NULL;
+                 r = table_next_row(table, r, fr), ++i)
+                pv_ptrmap_put(fr->pos, r, i);
+            pv_ptrmap_put(fr->pos, table, i);
+        }
+        if (pv_ptrmap_get(fr->pos, rown, &v)) idx = v;
+    }
+    if (idx < 0) {                       /* no index (OOM): find the row by scanning */
+        int i = 0;
+        for (const lxb_dom_node_t *r = table_next_row(table, NULL, fr); r != NULL;
+             r = table_next_row(table, r, fr), ++i)
+            if (r == rown) { idx = i; break; }
+    }
+    if (idx < 0) return 0;
+    int c = 0;
+    for (const lxb_dom_node_t *k = rown->first_child; k != NULL && k != cell; k = k->next) {
+        if (node_table_role(k, fr) != BX_TROLE_CELL) continue;
+        int sp = cell_span_attr(k, "colspan", 7, PV_MAX_GRID_COLS);
+        c += (sp > 1) ? sp : 1;
+        if (c >= PV_MAX_GRID_COLS) { c = PV_MAX_GRID_COLS - 1; break; }
+    }
+    if (fr->pos != NULL && idx < INT_MAX / PV_MAX_GRID_COLS)
+        pv_ptrmap_put(fr->pos, cell, idx * PV_MAX_GRID_COLS + c);
+    *row = idx; *col = c;
+    return 1;
+}
+
 /* Nonzero when flattening the cell to one text run would lose structure: it holds a
  * line break, a replaced element or control, a block, or text beside its one link
  * (the collected run would make the whole cell the link). Bounded by the subtree. */
 static int cell_is_rich(const lxb_dom_node_t *cell) {
-    const lxb_dom_node_t *a1 = NULL;
-    int anchors = 0;
     for (lxb_dom_node_t *k = cell->first_child; k != NULL; k = node_next(k, cell)) {
         if (k->type != LXB_DOM_NODE_TYPE_ELEMENT) continue;
         lxb_tag_id_t t = node_tag(k);
@@ -5491,22 +5526,8 @@ static int cell_is_rich(const lxb_dom_node_t *cell) {
             size_t hl = 0;
             const lxb_char_t *h = lxb_dom_element_get_attribute(
                 lxb_dom_interface_element(k), (const lxb_char_t *)"href", 4, &hl);
-            if (h != NULL && hl > 0) {
-                if (a1 == NULL) a1 = k;
-                if (++anchors >= 2) break;
-            }
+            if (h != NULL && hl > 0) return 1;
         }
-    }
-    if (anchors != 1) return 0;
-    for (lxb_dom_node_t *k = cell->first_child; k != NULL; k = node_next(k, cell)) {
-        if (k->type != LXB_DOM_NODE_TYPE_TEXT || text_node_is_blank(k)) continue;
-        int inside = 0;
-        for (const lxb_dom_node_t *q = k->parent; q != NULL && q != cell; q = q->parent) {
-            if (q == a1) { inside = 1; break; }
-            lxb_tag_id_t qt = node_tag(q);
-            if (qt == LXB_TAG_SCRIPT || qt == LXB_TAG_STYLE) { inside = 1; break; }
-        }
-        if (!inside) return 1;
     }
     return 0;
 }
@@ -5526,23 +5547,20 @@ static unsigned cell_kind(pv_flow_reg *fr, const lxb_dom_node_t *cell) {
 
 static int cell_is_grid_item(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
                              pv_flow_reg *fr) {
-    if (fr == NULL || cell == NULL || cell_kind(fr, cell) != PV_CELL_RICH) return 0;
-    const lxb_dom_node_t *table = nearest_table(cell, base, fr);
-    return table != NULL && !flow_table(fr, table);
+    if (fr == NULL || cell == NULL || cell_kind(fr, cell) == 0u) return 0;
+    return nearest_table(cell, base, fr) != NULL;
 }
 
 /* Nonzero if n's NEAREST <td>/<th> ancestor (up to base) is a COLLECTED leaf cell:
  * its text was already emitted as one collected cell run, so the normal walk must
- * not re-emit it. A container cell (one wrapping a nested table) and a cell of a
- * FLOW table (multi-link: walked so its links survive) do NOT suppress their
- * content -- their text/links are emitted normally. */
+ * not re-emit it. A container cell (one wrapping a nested table) and a rich cell (links,
+ * controls, blocks: walked as a grid item) do NOT suppress their content. */
 static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                              pv_flow_reg *fr) {
     for (const lxb_dom_node_t *p = n->parent; p != NULL; p = p->parent) {
         if (node_table_role(p, fr) == BX_TROLE_CELL) {
             /* A container cell, or a rich one walked as a grid item. */
             if (cell_kind(fr, p) != 0u) return 0;
-            if (flow_table(fr, nearest_table(p, base, fr))) return 0;
             return 1;
         }
         if (p == base) break;
@@ -5553,7 +5571,21 @@ static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base
 /* Grid column count of a table: the maximum number of logical columns across all its
  * rows, computed by summing each cell's colspan attribute (default 1), clamped to
  * [1, PV_MAX_GRID_COLS]. */
+static int table_columns_scan(const lxb_dom_node_t *table, const pv_flow_reg *fr);
+
+/* Memoised per table: every run of every rich cell asks, and the scan is the whole table.
+ * The key is the table node offset by one byte, so it cannot collide with the node keys
+ * table_cell_pos stores in the same map. */
 static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr) {
+    const void *key = (const char *)table + 1;
+    int v = 0;
+    if (fr != NULL && fr->pos != NULL && pv_ptrmap_get(fr->pos, key, &v) && v >= 1) return v;
+    v = table_columns_scan(table, fr);
+    if (fr != NULL && fr->pos != NULL) pv_ptrmap_put(fr->pos, key, v);
+    return v;
+}
+
+static int table_columns_scan(const lxb_dom_node_t *table, const pv_flow_reg *fr) {
     int maxc = 1;
     for (lxb_dom_node_t *n = table->first_child; n != NULL; n = node_next(n, table)) {
         if (node_table_role(n, fr) != BX_TROLE_ROW) continue;
@@ -6015,7 +6047,8 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
     /* Per-table flow-vs-grid decisions, plus the style context the table role
      * resolution needs (a role is a computed `display`, spec/css.md). Declared
      * after `cache` because it borrows it. */
-    pv_flow_reg flowreg = { { NULL }, { 0 }, 0, sheet, &cache, NULL, 0 };
+    pv_ptrmap cell_pos = { NULL, NULL, 0, 0 };
+    pv_flow_reg flowreg = { sheet, &cache, NULL, 0, &cell_pos };
     pv_counters_pass(root, sheet, &cache);
     if (reg_oom || items.node == NULL || items.ord == NULL) { rc = PV_ERR_OOM; goto cleanup; }
 
@@ -6105,11 +6138,10 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
              * count is the widest row, and each cell is one column. This reuses the
              * flex/grid layout engine (layout_container/box_tree) so cells align
              * across rows. <th> is bold. The cell's inner text nodes are suppressed
-             * below (in_collected_cell) so they are not re-emitted. A container cell
-             * (nested table) and every cell of a FLOW table (one with a multi-link
-             * cell: flattening would destroy the links -- the Hacker News case) are
-             * WALKED instead: their text/links flow through the normal path, each
-             * <tr> a block, with a separator run between adjacent walked cells. */
+             * below (in_collected_cell) so they are not re-emitted. A cell holding a
+             * nested table or any structure (links, controls, blocks) is WALKED
+             * instead, each of its runs a member of the table's grid with the cell as
+             * the item, so a link keeps its own style and target. */
             if (node_table_role(n, &flowreg) == BX_TROLE_CELL
                 && !in_skipped_subtree(n, base, js_enabled)
                 && !in_collected_cell(n, base, &flowreg)
@@ -6119,7 +6151,7 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                 /* A rich cell is walked: resolve_context makes each of its runs a
                  * member of the table's grid with this cell as the item. */
                 if (cell_is_grid_item(n, base, &flowreg)) continue;
-                if (cell_has_nested_table(n, &flowreg) || flow_table(&flowreg, table)) {
+                if (cell_has_nested_table(n, &flowreg)) {
                     /* Walked cell. If it continues the row block already open, emit
                      * one inter-cell gap so cell texts do not fuse ("1."+"Title"). */
                     const lxb_dom_node_t *row = nearest_row(n, base, &flowreg);
@@ -6151,21 +6183,6 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                 pending_break = 0;
                 prev_block = tblk;
 
-                /* A cell whose subtree holds exactly ONE anchor is collected as a
-                 * LINK run: clickable without breaking column alignment (still one
-                 * run = one grid item). Several anchors cannot happen here (the
-                 * table would be flowed). */
-                int nanch = 0;
-                const lxb_dom_node_t *a1 = cell_anchors(n, &nanch);
-                char *cell_href = NULL;
-                if (nanch == 1 && a1 != NULL) {
-                    size_t hl = 0;
-                    const lxb_char_t *h = lxb_dom_element_get_attribute(
-                        lxb_dom_interface_element((lxb_dom_node_t *)a1),
-                        (const lxb_char_t *)"href", 4, &hl);
-                    if (h != NULL && hl > 0) cell_href = dup_n((const char *)h, hl);
-                }
-
                 /* The collected run carries the cell's author presentation too:
                  * resolve the context AT the cell element (its own td/th rules,
                  * plus row/table inheritance — zebra tr:nth-child backgrounds,
@@ -6190,11 +6207,9 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                                 &box_reg, &float_reg, &cu_bdeco, &cache, &flowreg);
 
                 /* An empty cell still occupies its column. */
-                pv_status st = pv_append(v, (cell_href != NULL) ? PV_LINK : PV_TEXT,
-                                         0, brk,
-                                         (cell[0] != '\0') ? cell : " ", cell_href);
+                pv_status st = pv_append(v, PV_TEXT, 0, brk,
+                                         (cell[0] != '\0') ? cell : " ", NULL);
                 free(cell);
-                free(cell_href);
                 if (st != PV_OK) { rc = st; goto cleanup; }
                 last_was_gap = 0;
                 pv_set_emphasis(v, (t == LXB_TAG_TH) ? 1 : cbold, citalic);
@@ -6259,6 +6274,13 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                  * item identity), so item-grouping downstream never merges cells. */
                 pv_set_cont_item(v, item_ordinal(&items, cid, n));
                 link_table_cont(&reg, &items, cid, &cu_cont);
+                {
+                    int trow = -1, tcol = -1;
+                    if (table != NULL && table_cell_pos(&flowreg, table, n, &trow, &tcol))
+                        pv_set_grid_area(v, trow, tcol);
+                    else
+                        pv_set_grid_area(v, -1, -1);
+                }
                 pv_set_float(v, cu_cont.float_side, cu_cont.float_id, cu_cont.float_clear,
                          cu_cont.float_ml, cu_cont.float_ml_pct,
                          cu_cont.float_mr, cu_cont.float_mr_pct,
@@ -7076,20 +7098,6 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                     /* The placeholder run IS this element's own line content: its own
                      * vertical-align (not inherited, CSS 2.1 10.8.1) places the atom. */
                     if (ecs->valign != CSS_VA_UNSET) eext.valign = ecs->valign;
-                    /* Inside a walked cell of a FLOW table the ROW is the line: a
-                     * decorated leaf (e.g. Hacker News' votearrow icon <div>) must
-                     * join the row's line like its sibling cell text, not split the
-                     * row into three lines. Its box is dropped from the run too --
-                     * the painter flushes the line at every box transition, so a
-                     * boxed placeholder would still split the row. v1 limit: the
-                     * icon's own decoration (a sprite background) does not paint
-                     * inside a flowed row; the row's integrity wins. */
-                    const lxb_dom_node_t *fcell = nearest_cell(n, base, &flowreg);
-                    if (in_flow_table_cell(fcell, base, &flowreg)) {
-                        const lxb_dom_node_t *frow = nearest_row(n, base, &flowreg);
-                        if (frow != NULL) eblock = frow;
-                        ebdeco = -1;
-                    }
                     int eleaf_oof = subtree_is_oof(n, sheet, &cache);
                     int ebrk = (pending_break || (eblock != prev_block))
                         && !eleaf_oof;
@@ -7666,6 +7674,7 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
     pv_node_map_free(&node_map);
     pv_style_cache_free(&cache);
     pv_ptrmap_free(&pseudo_memo);
+    pv_ptrmap_free(&cell_pos);
     box_reg_free(&box_reg);
     cont_reg_free(&reg);
     cont_reg_free(&float_reg);
@@ -7679,6 +7688,7 @@ cleanup:
     pv_node_map_free(&node_map);
     pv_style_cache_free(&cache);
     pv_ptrmap_free(&pseudo_memo);
+    pv_ptrmap_free(&cell_pos);
     box_reg_free(&box_reg);
     cont_reg_free(&reg);
     cont_reg_free(&float_reg);

@@ -13,6 +13,7 @@
 
 #include "browser.h"
 #include "block_flow.h"
+#include "table_layout.h"
 #include "box_style.h"
 #include "box_tree.h"
 #include "compositor.h"
@@ -3602,7 +3603,30 @@ typedef struct rc_box {
 
 struct rc_oof_sub;
 
+/* The column tracks of the table being laid out row-chunk by row-chunk (layout_table):
+ * layout_container reads them instead of sizing the tracks of each chunk on its own. */
+typedef struct rc_table_ctx {
+    int    cid;                    /* the table's container id */
+    int    track[TL_MAX_COLS];     /* used column widths, px */
+    size_t ncols;
+    int    row_base;               /* table row the current chunk starts at */
+} rc_table_ctx;
+
+#define RC_TABLE_SOLVED_N 8u
+
 typedef struct rc_layout {
+    const rc_table_ctx *tbl;       /* non-NULL while a table's chunks are laid out */
+    /* The tables solved in this layout pass. The caller hands a table over in SEGMENTS
+     * (cut wherever a run outside the grid interrupts it: an empty spacer row), and every
+     * segment must use the columns of the WHOLE table; nested tables are solved in
+     * between, so more than one entry is kept (round-robin). Valid for (cid, width, sized). */
+    struct {
+        rc_table_ctx ctx;
+        double       w;
+        int          sized;
+        int          ok;
+    } tbl_solved[RC_TABLE_SOLVED_N];
+    unsigned tbl_solved_next;
     rc_frag *frags; size_t nfrag, capfrag;
     rc_row  *rows;  size_t nrow,  caprow;
     rc_box  *boxes; size_t nbox,  capbox;
@@ -6080,12 +6104,25 @@ static double item_declared_basis(const rd_doc *doc, const item_sides *sd,
  * per-item padding/border, so a nested nav collapsed to a sliver and its labels
  * overflowed their pills. Recurses through flex_item_basis, so a doubly-nested
  * container measures correctly too; bounded by depth. */
+static double table_solve(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                          const rd_doc *doc, size_t b0, size_t b1, int cid, int item_cbox,
+                          double avail, double table_w, double *out,
+                          double *min_out, double *max_out, int depth);
+
 static double nested_cont_basis(cairo_t *cr, const browser_window *w,
                                 const ui_theme *th, const rd_doc *doc,
                                 size_t b0, size_t b1, int cid, double content_w,
                                 int depth, int cyclic) {
     const pv_cont_def *cd = rd_cont_at(doc, (size_t)cid);
     if (cd == NULL || depth > PV_CONT_DEPTH) return 0.0;
+    /* A table is as wide as its columns, not as the sum of all of its cells. */
+    if (cd->is_table) {
+        double tmax = 0.0;
+        int tbox = (cd->box_id >= 0) ? cd->box_id : band_common_box(doc, b0, b1);
+        (void)table_solve(cr, w, th, doc, b0, b1, cid, tbox, content_w, -1.0, NULL,
+                          NULL, &tmax, depth + 1);
+        return tmax;
+    }
     /* CSS Sizing 3 5.1-5.2: a COLUMN container stacks its items, so its
      * max-content width is the LARGEST item contribution, not their sum (the
      * sum is the row-direction rule, where items sit side by side). Summing a
@@ -6492,6 +6529,258 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                               int band_box, int founder_key,
                               int fml, int fmlpct, int fmr, int fmrpct);
 
+/* The next item of container cid at or after *k in [*k, end): returns 1 with [*k, *e) its
+ * runs, 0 when none is left. Same grouping as layout_container: runs sharing an item
+ * ordinal are one item, an out-of-flow run forms none and rides with the item before it. */
+static int cont_next_item(const rd_doc *doc, int cid, size_t end, size_t *k, size_t *e) {
+    size_t s0 = *k;
+    while (s0 < end && block_leaves_flow(doc, rd_at(doc, s0))) ++s0;
+    if (s0 >= end) return 0;
+    int it = item_at_level(doc, rd_at(doc, s0), cid);
+    size_t x = s0 + 1;
+    while (x < end) {
+        if (block_leaves_flow(doc, rd_at(doc, x))) { ++x; continue; }
+        if (it < 0 || item_at_level(doc, rd_at(doc, x), cid) != it) break;
+        ++x;
+    }
+    *k = s0; *e = x;
+    return 1;
+}
+
+/* The row/column/colspan page_view stamped on the cell that starts at run k (-1 = not
+ * stamped). A cell that is itself a container carries them on its descriptor. */
+static void table_item_slot(const rd_doc *doc, size_t k, int cid, int *row, int *col, int *span) {
+    const rd_block *bk = rd_at(doc, k);
+    int nbc = child_cont_at_level(doc, bk, cid);
+    const pv_cont_def *ncd = (nbc >= 0) ? rd_cont_at(doc, (size_t)nbc) : NULL;
+    if (ncd != NULL) {
+        *row = ncd->item_row_start; *col = ncd->item_col_start; *span = ncd->item_col_span;
+    } else {
+        *row = bk->grid_row_start; *col = bk->grid_col_start; *span = bk->grid_span;
+    }
+    if (*span < 1) *span = 1;
+}
+
+static double nested_cont_basis(cairo_t *cr, const browser_window *w,
+                                const ui_theme *th, const rd_doc *doc,
+                                size_t b0, size_t b1, int cid, double content_w,
+                                int depth, int cyclic);
+
+/* Measures every cell of table cid (runs [b0, b1)) and solves its columns (spec/
+ * table_layout.md). With out != NULL writes the used column widths for a table laid out in
+ * `avail` px with declared width table_w (< 0 = auto) and returns the table's width; with
+ * out == NULL only the intrinsic widths are wanted (min_out/max_out). item_cbox bounds each
+ * cell's box walk. A nested table contributes its own intrinsic widths (bounded depth). */
+static double table_solve(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                          const rd_doc *doc, size_t b0, size_t b1, int cid, int item_cbox,
+                          double avail, double table_w, double *out,
+                          double *min_out, double *max_out, int depth) {
+    if (min_out != NULL) *min_out = 0.0;
+    if (max_out != NULL) *max_out = 0.0;
+    const pv_cont_def *cd = rd_cont_at(doc, (size_t)cid);
+    if (cd == NULL) return 0.0;
+    size_t ncols = (cd->cols > 0) ? (size_t)cd->cols : 1;
+    if (ncols > TL_MAX_COLS) ncols = TL_MAX_COLS;
+    size_t n = 0;
+    for (size_t k = b0, e = b0; cont_next_item(doc, cid, b1, &k, &e); k = e)
+        if (item_at_level(doc, rd_at(doc, k), cid) >= 0) ++n;
+    tl_cell *cells = (n > 0) ? calloc(n, sizeof *cells) : NULL;
+    if (n > 0 && cells == NULL) return 0.0;
+    double gap = (cd->gap > 0) ? (double)cd->gap : 0.0;
+    size_t filled = 0;
+    /* Measuring a cell flows its text, and min-content is a second flow of the same text.
+     * Pass 0 measures max-content only (min = max); the minima are measured in pass 1 ONLY
+     * when they can change the answer: the caller asked for them, the table does not fit
+     * at max-content, a column is a percentage, or a cell is declared narrower than its
+     * content. A table that fits -- most of them -- costs one flow per cell, as before. */
+    int want_min = (min_out != NULL);
+    for (int pass = 0; pass < 2; ++pass) {
+        if (pass == 1 && !want_min) break;
+        size_t i = 0;
+        int seq_col = 0;
+        for (size_t k = b0, e = b0; i < n && cont_next_item(doc, cid, b1, &k, &e); k = e) {
+            /* A run that is not a cell of this table (the range may span the whole document). */
+            if (item_at_level(doc, rd_at(doc, k), cid) < 0) continue;
+            item_sides sd = item_sides_at_level(cr, w, th, doc, k, e, cid, item_cbox, avail);
+            double inner = sd.pl + sd.pr + sd.bl + sd.br;
+            double outer = inner + sd.ml + sd.mr;
+            int child = child_cont_at_level(doc, rd_at(doc, k), cid);
+            const pv_cont_def *ccd = (child >= 0) ? rd_cont_at(doc, (size_t)child) : NULL;
+            int nested_table = (ccd != NULL && ccd->is_table && depth < PV_CONT_DEPTH);
+            if (pass == 1) {
+                double mn = 0.0;
+                if (nested_table)
+                    (void)table_solve(cr, w, th, doc, k, e, child, sd.box, avail, -1.0, NULL,
+                                      &mn, NULL, depth + 1);
+                else
+                    mn = measure_item_w_at(cr, w, th, doc, k, e, 1.0);
+                if (mn + outer < cells[i].max_w) cells[i].min_w = mn + outer;
+                ++i;
+                continue;
+            }
+            int row, col, span;
+            table_item_slot(doc, k, cid, &row, &col, &span);
+            if (col < 0) {                       /* unstamped: cells fill the row in order */
+                if (seq_col + span > (int)ncols) seq_col = 0;
+                col = seq_col;
+                seq_col += span;
+            }
+            double mx = 0.0;
+            if (nested_table)
+                (void)table_solve(cr, w, th, doc, k, e, child, sd.box, avail, -1.0, NULL,
+                                  NULL, &mx, depth + 1);
+            else if (ccd != NULL)
+                mx = nested_cont_basis(cr, w, th, doc, k, e, child, avail, depth + 1, 1);
+            else
+                mx = measure_item_content_w(cr, w, th, doc, k, e);
+            cells[i].col = col;
+            cells[i].span = span;
+            cells[i].max_w = mx + outer;
+            cells[i].min_w = cells[i].max_w;
+            cells[i].decl_w = -1.0;
+            const pv_box_def *bd = (sd.box >= 0) ? rd_box_at(doc, (size_t)sd.box) : NULL;
+            /* A px width only: a percentage of a width still being solved is auto. */
+            double dw = (bd != NULL) ? def_declared_width(bd, 0.0) : 0.0;
+            if (dw > 0.0) {
+                cells[i].decl_w = dw + ((bd->box_sizing == CSS_BOXS_BORDER) ? 0.0 : inner)
+                                + sd.ml + sd.mr;
+                if (cells[i].decl_w < cells[i].max_w) want_min = 1;
+            } else if (bd != NULL && bd->box_w_pct > 0) {
+                cells[i].pct = bd->box_w_pct;       /* a share of the table (width: N%) */
+                if (table_w >= 0.0) want_min = 1;
+            }
+            ++i;
+        }
+        filled = i;
+        if (pass == 0 && out != NULL && !want_min) {
+            double smax = 0.0;
+            tl_intrinsic(cells, filled, ncols, gap, NULL, &smax);
+            if (smax > ((table_w >= 0.0) ? table_w : avail) + 0.01) want_min = 1;
+        }
+    }
+    double total = 0.0;
+    if (out != NULL) total = tl_columns(cells, filled, ncols, gap, avail, table_w, out);
+    if (min_out != NULL || max_out != NULL)
+        tl_intrinsic(cells, filled, ncols, gap, min_out, max_out);
+    free(cells);
+    return total;
+}
+
+static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
+                             rc_state *s, const ui_theme *th,
+                             double origin_x, double content_w,
+                             const rd_doc *doc, size_t start, size_t end, int cid);
+
+/* Lays out a table: solves its columns ONCE over every cell, then hands its rows to the
+ * grid engine in chunks that fit it (BT_MAX_CHILDREN items), each with the same tracks. A
+ * table used to degrade to plain flow past 128 cells -- any real listing -- and to an equal
+ * split whenever a cell spanned columns. */
+static void layout_table(cairo_t *cr, const browser_window *w, rc_layout *L,
+                         rc_state *s, const ui_theme *th, double origin_x, double content_w,
+                         const rd_doc *doc, size_t start, size_t end, int cid,
+                         const pv_cont_def *cd) {
+    rc_table_ctx ctx;
+    memset(&ctx, 0, sizeof ctx);
+    ctx.cid = cid;
+    ctx.ncols = (cd->cols > 0) ? (size_t)cd->cols : 1;
+    if (ctx.ncols > TL_MAX_COLS) ctx.ncols = TL_MAX_COLS;
+    int item_cbox = (cd->box_id >= 0) ? cd->box_id : band_common_box(doc, start, end);
+
+    /* The table's own box, when it has one, says whether the author sized the table: then
+     * the box is already that wide and the columns fill it. */
+    double table_w = -1.0;
+    if (cd->node_id != DOM_NODE_NONE) {
+        size_t nb = rd_box_count(doc);
+        for (size_t b = 0; b < nb; ++b) {
+            const pv_box_def *bd = rd_box_at(doc, b);
+            if (bd == NULL || bd->node_id != cd->node_id) continue;
+            if (def_declared_width(bd, content_w) > 0.0) table_w = content_w;
+            break;
+        }
+    }
+    int sized = (table_w >= 0.0);
+    int hit = -1;
+    for (unsigned q = 0; q < RC_TABLE_SOLVED_N; ++q)
+        if (L->tbl_solved[q].ok && L->tbl_solved[q].ctx.cid == cid &&
+            L->tbl_solved[q].sized == sized && fabs(L->tbl_solved[q].w - content_w) < 0.01 &&
+            L->tbl_solved[q].ctx.ncols == ctx.ncols) { hit = (int)q; break; }
+    if (hit >= 0) {
+        memcpy(ctx.track, L->tbl_solved[hit].ctx.track, sizeof ctx.track);
+    } else {
+        double colw[TL_MAX_COLS];
+        for (size_t t = 0; t < TL_MAX_COLS; ++t) colw[t] = 0.0;
+        /* Over every run of the document: the cells of this table wherever its segments are. */
+        (void)table_solve(cr, w, th, doc, 0, rd_count(doc), cid, item_cbox, content_w, table_w,
+                          colw, NULL, NULL, 0);
+        /* Integer tracks. A sized table keeps its exact total (running rounding); an auto
+         * one rounds every column UP, since a track half a pixel short wraps its widest cell. */
+        double acc = 0.0;
+        int placed = 0;
+        for (size_t t = 0; t < ctx.ncols; ++t) {
+            int px;
+            if (sized) {
+                acc += colw[t];
+                px = (acc < (double)FC_TABLE_TRACK_MAX_PX * TL_MAX_COLS)
+                     ? (int)floor(acc + 0.5) - placed : FC_TABLE_TRACK_MAX_PX;
+            } else {
+                px = (colw[t] < (double)FC_TABLE_TRACK_MAX_PX) ? (int)ceil(colw[t] - 0.001)
+                                                              : FC_TABLE_TRACK_MAX_PX;
+            }
+            if (px < 1) px = 1;
+            if (px > FC_TABLE_TRACK_MAX_PX) px = FC_TABLE_TRACK_MAX_PX;   /* int sums stay in range */
+            placed += px;
+            ctx.track[t] = px;
+        }
+        unsigned slot = L->tbl_solved_next++ % RC_TABLE_SOLVED_N;
+        L->tbl_solved[slot].ctx = ctx;
+        L->tbl_solved[slot].w = content_w;
+        L->tbl_solved[slot].sized = sized;
+        L->tbl_solved[slot].ok = 1;
+    }
+
+    const rc_table_ctx *saved = L->tbl;
+    L->tbl = &ctx;
+    size_t chunk_start = start, row_start = start;
+    size_t count = 0, before_row = 0;
+    int prev_row = -2, chunk_row = -1, row_start_row = -1;
+    int seq_row = -1, seq_col = 0;
+    for (size_t k = start, e = start; cont_next_item(doc, cid, end, &k, &e); k = e) {
+        int row, col, span;
+        table_item_slot(doc, k, cid, &row, &col, &span);
+        if (row < 0) {                       /* unstamped: rows fill in document order */
+            if (seq_row < 0 || seq_col + span > (int)ctx.ncols) { ++seq_row; seq_col = 0; }
+            seq_col += span;
+            row = seq_row;
+        }
+        if (getenv("FREEDOM_MEASURE_DEBUG") != NULL)
+            fprintf(stderr, "[table] cid=%d run=%zu..%zu row=%d col=%d span=%d\n",
+                    cid, k, e, row, col, span);
+        if (row != prev_row) {
+            row_start = k; before_row = count; row_start_row = row;
+            if (chunk_row < 0) chunk_row = row;
+            prev_row = row;
+        }
+        if (count >= BT_MAX_CHILDREN - 1u ||
+            row - chunk_row >= (int)BT_MAX_CHILDREN - 1) {
+            /* Close the chunk at the last row boundary; a single row too long for the
+             * engine is cut where it stands. */
+            size_t cut = (row_start > chunk_start) ? row_start : k;
+            ctx.row_base = chunk_row;
+            layout_container(cr, w, L, s, th, origin_x, content_w, doc, chunk_start, cut, cid);
+            count = (cut == row_start) ? count - before_row : 0;
+            chunk_start = cut;
+            chunk_row = (cut == row_start) ? row_start_row : row;
+            row_start = cut; before_row = 0;
+        }
+        ++count;
+    }
+    if (chunk_start < end) {
+        ctx.row_base = (chunk_row >= 0) ? chunk_row : 0;
+        layout_container(cr, w, L, s, th, origin_x, content_w, doc, chunk_start, end, cid);
+    }
+    L->tbl = saved;
+}
+
 static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                              rc_state *s, const ui_theme *th,
                              double origin_x, double content_w,
@@ -6524,6 +6813,11 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
         }
     }
     int is_grid = (cdv.display == BX_DISPLAY_GRID);
+    int tbl_chunk = (L->tbl != NULL && L->tbl->cid == cid);
+    if (is_grid && cdv.is_table && cid >= 0 && !tbl_chunk && nruns > 0) {
+        layout_table(cr, w, L, s, th, origin_x, content_w, doc, start, end, cid, &cdv);
+        return;
+    }
 
     /* Group consecutive runs into ITEMS by cont_item: inline fragments of one
      * direct child of the container share an ordinal and flow together in one
@@ -6836,8 +7130,9 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 /* The cell `grid-area: <name>` resolved to, ONE-BASED on the box
                  * struct (0 = auto); page_view did the name matching, so nothing
                  * here needs to know the template. spec/grid_areas.md. */
+                int row_base = tbl_chunk ? L->tbl->row_base : 0;
                 kids[pos_of[j]].grid_row_start =
-                    (bk->grid_row_start >= 0) ? bk->grid_row_start + 1 : 0;
+                    (bk->grid_row_start >= row_base) ? bk->grid_row_start - row_base + 1 : 0;
                 kids[pos_of[j]].grid_col_start =
                     (bk->grid_col_start >= 0) ? bk->grid_col_start + 1 : 0;
                 /* An item that is itself a container: bk is a run INSIDE it and
@@ -6852,7 +7147,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                     kids[pos_of[j]].grid_col_start =
                         (ncd->item_col_start >= 0) ? ncd->item_col_start + 1 : 0;
                     kids[pos_of[j]].grid_row_start =
-                        (ncd->item_row_start >= 0) ? ncd->item_row_start + 1 : 0;
+                        (ncd->item_row_start >= row_base) ? ncd->item_row_start - row_base + 1 : 0;
                 }
                 int it_align = (ncd != NULL && ncd->item_align_self != CSS_AK_UNSET)
                                ? ncd->item_align_self : bk->flex_align_self;
@@ -6881,60 +7176,11 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                 }
             }
         }
-        /* Automatic table layout (CSS 2.1 §17.5.2): a table's columns are as wide as
-         * their widest cell, not an equal share of the page. Splitting evenly made a
-         * two-character "Qty" column claim a quarter of the width while the long
-         * description column wrapped every row into two or three lines -- the table
-         * came out ~3x taller than Firefox and its narrow columns nearly empty.
-         *
-         * Only a SYNTHESISED table grid takes this path (cdv.is_table), and only when
-         * the author sized no track and no cell spans columns, so an author
-         * `display:grid` keeps the historical equal split byte-for-byte and colspan
-         * still goes through the engine's own placement. */
-        if (is_grid && cdv.is_table && ncols <= PV_GRID_TRACKS) {
-            int author_track = 0, spans = 0;
-            for (int t = 0; t < PV_GRID_TRACKS; ++t)
-                if (cdv.col_w[t] != 0) author_track = 1;
-            for (size_t j = 0; j < g; ++j)
-                if (rd_at(doc, gstart[j])->grid_span > 1) spans = 1;
-            if (!author_track && !spans) {
-                double colw[PV_GRID_TRACKS];
-                for (size_t t = 0; t < PV_GRID_TRACKS; ++t) colw[t] = 0.0;
-                for (size_t j = 0; j < g; ++j) {
-                    size_t c = j % ncols;
-                    /* The column holds the cell's whole border box, so its own
-                     * padding/border/margin counts -- measuring text alone leaves
-                     * every cell overflowing its column by its padding. */
-                    item_sides cs = item_sides_at_level(cr, w, th, doc, gstart[j], gstart[j + 1],
-                                                        cid, item_cbox, content_w);
-                    double mw = measure_item_content_w(cr, w, th, doc,
-                                                       gstart[j], gstart[j + 1])
-                              + cs.pl + cs.pr + cs.bl + cs.br + cs.ml + cs.mr;
-                    if (mw > colw[c]) colw[c] = mw;
-                }
-                double sum = 0.0;
-                for (size_t t = 0; t < ncols; ++t) sum += colw[t];
-                /* A table wider than its containing block shrinks proportionally
-                 * rather than overflowing: the columns keep their relative weights,
-                 * which is what automatic table layout does when it runs out of room. */
-                double avail = content_w - (double)cdv.gap * (double)(ncols - 1);
-                if (avail < 1.0) avail = 1.0;
-                if (sum > avail && sum > 0.0) {
-                    double k = avail / sum;
-                    for (size_t t = 0; t < ncols; ++t) colw[t] *= k;
-                }
-                for (size_t t = 0; t < PV_GRID_TRACKS; ++t) {
-                    double px = (t < ncols) ? colw[t] : 0.0;
-                    if (px < 1.0 && t < ncols) px = 1.0;
-                    /* CEIL, never round: the track is an integer but the measurement
-                     * is not, and a track half a pixel narrower than its widest cell
-                     * makes that cell wrap into a second line -- which is the very
-                     * thing content-sized columns exist to prevent. */
-                    table_track[t] = (int)ceil(px - 0.001);
-                }
-                root.grid_track = table_track;
-                root.grid_ntrack = PV_GRID_TRACKS;
-            }
+        /* A table's columns were solved once, over all of its cells (layout_table,
+         * spec/table_layout.md): every chunk of rows uses the same tracks. */
+        if (is_grid && cdv.is_table && tbl_chunk) {
+            root.grid_track = L->tbl->track;
+            root.grid_ntrack = L->tbl->ncols;
         }
         /* Intrinsic tracks mixed with fr (CSS Grid §11.5): a track sized `min-content`
          * / `max-content` / `auto` (encoded 0) must take its CONTENT width, and the fr

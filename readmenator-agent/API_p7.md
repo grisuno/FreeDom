@@ -1,4 +1,4 @@
-# API (page 7 of 12)
+# API (page 7 of 13)
 Previous: [API_p6.md](API_p6.md)
 
 ## src/css_box.c

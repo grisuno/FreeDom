@@ -1,14 +1,14 @@
 # include: browser_ui
 
-*Community 2 | 47 files | cohesion 0.52*
+*Community 2 | 50 files | cohesion 0.53*
 
 ## Definition
 
-This community groups 47 file(s) rooted at `include` with dominant language c (cohesion 0.52). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (667 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
+This community groups 50 file(s) rooted at `include` with dominant language c (cohesion 0.53). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (673 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
 
 ## Files
 
-### `include` (16 files)
+### `include` (17 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -19,7 +19,7 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 | `include/frame_clock.h` | h | utility | 7 | no |
 | `include/hostedit.h` | h | utility | 7 | no |
 
-### `tests` (15 files)
+### `tests` (16 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -30,7 +30,7 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 | `tests/test_frame_clock.c` | c | testing | 4 | no |
 | `tests/test_hostedit.c` | c | testing | 12 | no |
 
-### `src` (13 files)
+### `src` (14 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -44,49 +44,49 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 667 | no |
+| `gui/browser_ui.c` | c | presentation | 673 | no |
 | `gui/freedom_view.c` | c | presentation | 2 | no |
 | `gui/ui_render.c` | c | presentation | 29 | no |
 
-*... and 27 more files in this community.*
+*... and 30 more files in this community.*
 
 
 ## Key Symbols
 
 - `_GNU_SOURCE` (macro, `gui/browser_ui.c:12`) `#define _GNU_SOURCE`
-- `UI_TOOLBAR_H` (macro, `gui/browser_ui.c:96`) `#define UI_TOOLBAR_H`
-- `UI_TITLEBAR_H` (macro, `gui/browser_ui.c:97`) `#define UI_TITLEBAR_H`
-- `UI_TABBAR_H` (macro, `gui/browser_ui.c:98`) `#define UI_TABBAR_H`
-- `UI_TAB_MIN_W` (macro, `gui/browser_ui.c:99`) `#define UI_TAB_MIN_W`
-- `UI_TAB_MAX_W` (macro, `gui/browser_ui.c:100`) `#define UI_TAB_MAX_W`
-- `UI_TAB_NEW_W` (macro, `gui/browser_ui.c:101`) `#define UI_TAB_NEW_W`
-- `UI_TAB_CLOSE_W` (macro, `gui/browser_ui.c:102`) `#define UI_TAB_CLOSE_W`
-- `UI_BTN_W` (macro, `gui/browser_ui.c:103`) `#define UI_BTN_W`
-- `UI_WIN_BTN_W` (macro, `gui/browser_ui.c:104`) `#define UI_WIN_BTN_W`
-- `UI_MARGIN` (macro, `gui/browser_ui.c:105`) `#define UI_MARGIN`
-- `UI_BTN_LEFT` (macro, `gui/browser_ui.c:106`) `#define UI_BTN_LEFT`
-- `UI_LIST_INDENT` (macro, `gui/browser_ui.c:110`) `#define UI_LIST_INDENT`
-- `UI_SCROLLBAR_W` (macro, `gui/browser_ui.c:115`) `#define UI_SCROLLBAR_W`
-- `UI_SCROLLBAR_MIN` (macro, `gui/browser_ui.c:116`) `#define UI_SCROLLBAR_MIN`
-- `UI_SCROLLBAR_PAD` (macro, `gui/browser_ui.c:117`) `#define UI_SCROLLBAR_PAD`
-- `UI_RESIZE_MARGIN` (macro, `gui/browser_ui.c:121`) `#define UI_RESIZE_MARGIN`
-- `UI_MENU_W` (macro, `gui/browser_ui.c:126`) `#define UI_MENU_W`
-- `UI_MENU_ITEM_H` (macro, `gui/browser_ui.c:127`) `#define UI_MENU_ITEM_H`
-- `UI_MENU_PAD` (macro, `gui/browser_ui.c:128`) `#define UI_MENU_PAD`
-- `UI_CHECK_SZ` (macro, `gui/browser_ui.c:129`) `#define UI_CHECK_SZ`
-- `UI_MENU_LABEL_H` (macro, `gui/browser_ui.c:130`) `#define UI_MENU_LABEL_H`
-- `UI_MENU_INPUT_H` (macro, `gui/browser_ui.c:131`) `#define UI_MENU_INPUT_H`
-- `UI_HAMBURGER_W` (macro, `gui/browser_ui.c:132`) `#define UI_HAMBURGER_W`
-- `UI_HAMBURGER_GAP` (macro, `gui/browser_ui.c:133`) `#define UI_HAMBURGER_GAP`
-- `UI_CURSOR_SIZE` (macro, `gui/browser_ui.c:134`) `#define UI_CURSOR_SIZE`
-- `UI_TOAST_PAD` (macro, `gui/browser_ui.c:135`) `#define UI_TOAST_PAD`
-- `OMNI_MAX_SUGG` (macro, `gui/browser_ui.c:136`) `#define OMNI_MAX_SUGG`
-- `UI_OMNI_ROW_H` (macro, `gui/browser_ui.c:137`) `#define UI_OMNI_ROW_H`
-- `UI_TWO_PI` (macro, `gui/browser_ui.c:138`) `#define UI_TWO_PI`
+- `UI_TOOLBAR_H` (macro, `gui/browser_ui.c:97`) `#define UI_TOOLBAR_H`
+- `UI_TITLEBAR_H` (macro, `gui/browser_ui.c:98`) `#define UI_TITLEBAR_H`
+- `UI_TABBAR_H` (macro, `gui/browser_ui.c:99`) `#define UI_TABBAR_H`
+- `UI_TAB_MIN_W` (macro, `gui/browser_ui.c:100`) `#define UI_TAB_MIN_W`
+- `UI_TAB_MAX_W` (macro, `gui/browser_ui.c:101`) `#define UI_TAB_MAX_W`
+- `UI_TAB_NEW_W` (macro, `gui/browser_ui.c:102`) `#define UI_TAB_NEW_W`
+- `UI_TAB_CLOSE_W` (macro, `gui/browser_ui.c:103`) `#define UI_TAB_CLOSE_W`
+- `UI_BTN_W` (macro, `gui/browser_ui.c:104`) `#define UI_BTN_W`
+- `UI_WIN_BTN_W` (macro, `gui/browser_ui.c:105`) `#define UI_WIN_BTN_W`
+- `UI_MARGIN` (macro, `gui/browser_ui.c:106`) `#define UI_MARGIN`
+- `UI_BTN_LEFT` (macro, `gui/browser_ui.c:107`) `#define UI_BTN_LEFT`
+- `UI_LIST_INDENT` (macro, `gui/browser_ui.c:111`) `#define UI_LIST_INDENT`
+- `UI_SCROLLBAR_W` (macro, `gui/browser_ui.c:116`) `#define UI_SCROLLBAR_W`
+- `UI_SCROLLBAR_MIN` (macro, `gui/browser_ui.c:117`) `#define UI_SCROLLBAR_MIN`
+- `UI_SCROLLBAR_PAD` (macro, `gui/browser_ui.c:118`) `#define UI_SCROLLBAR_PAD`
+- `UI_RESIZE_MARGIN` (macro, `gui/browser_ui.c:122`) `#define UI_RESIZE_MARGIN`
+- `UI_MENU_W` (macro, `gui/browser_ui.c:127`) `#define UI_MENU_W`
+- `UI_MENU_ITEM_H` (macro, `gui/browser_ui.c:128`) `#define UI_MENU_ITEM_H`
+- `UI_MENU_PAD` (macro, `gui/browser_ui.c:129`) `#define UI_MENU_PAD`
+- `UI_CHECK_SZ` (macro, `gui/browser_ui.c:130`) `#define UI_CHECK_SZ`
+- `UI_MENU_LABEL_H` (macro, `gui/browser_ui.c:131`) `#define UI_MENU_LABEL_H`
+- `UI_MENU_INPUT_H` (macro, `gui/browser_ui.c:132`) `#define UI_MENU_INPUT_H`
+- `UI_HAMBURGER_W` (macro, `gui/browser_ui.c:133`) `#define UI_HAMBURGER_W`
+- `UI_HAMBURGER_GAP` (macro, `gui/browser_ui.c:134`) `#define UI_HAMBURGER_GAP`
+- `UI_CURSOR_SIZE` (macro, `gui/browser_ui.c:135`) `#define UI_CURSOR_SIZE`
+- `UI_TOAST_PAD` (macro, `gui/browser_ui.c:136`) `#define UI_TOAST_PAD`
+- `OMNI_MAX_SUGG` (macro, `gui/browser_ui.c:137`) `#define OMNI_MAX_SUGG`
+- `UI_OMNI_ROW_H` (macro, `gui/browser_ui.c:138`) `#define UI_OMNI_ROW_H`
+- `UI_TWO_PI` (macro, `gui/browser_ui.c:139`) `#define UI_TWO_PI`
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 53
+- Internal resolved imports (EXTRACTED): 56
 - Cross-boundary resolved imports (EXTRACTED): 49
 
 ## Connections
@@ -106,25 +106,25 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
+- [layer strict] `tests/test_table_layout.c` (testing) -> `include/table_layout.h` (presentation)
 - [layer strict] `tests/test_ui.c` (testing) -> `include/ui.h` (presentation)
-- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1692` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:1858` `first` `dg`: `dg` assigned at line 1858 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4675` `flow_text` `space_w`: `space_w` assigned at line 4675 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4677` `flow_text` `i`: `i` assigned at line 4677 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5749` `table` `parent`: `parent` assigned at line 5749 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5750` `table` `seen`: `seen` assigned at line 5750 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5752` `table` `j`: `j` assigned at line 5752 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5887` `measure_item_w_at` `repl_max`: `repl_max` assigned at line 5887 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5888` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5888 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5906` `measure_item_w_at` `rw`: `rw` assigned at line 5906 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6097` `nested_cont_basis` `total`: `total` assigned at line 6097 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6098` `nested_cont_basis` `n_items`: `n_items` assigned at line 6098 but never read afterwards.
+- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1693` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:1859` `first` `dg`: `dg` assigned at line 1859 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4699` `flow_text` `space_w`: `space_w` assigned at line 4699 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4701` `flow_text` `i`: `i` assigned at line 4701 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5773` `table` `parent`: `parent` assigned at line 5773 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5774` `table` `seen`: `seen` assigned at line 5774 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5776` `table` `j`: `j` assigned at line 5776 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5911` `measure_item_w_at` `repl_max`: `repl_max` assigned at line 5911 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5912` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5912 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5930` `measure_item_w_at` `rw`: `rw` assigned at line 5930 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6134` `nested_cont_basis` `total`: `total` assigned at line 6134 but never read afterwards.
 
 ## Open Questions
 
 - Why do 44 file(s) lack file-level docs (e.g. `gui/browser_ui.c`)? What purpose do they serve?
 - What would break if the most connected file in include: browser_ui changed?
-- Should include: browser_ui be split, given cohesion 0.52?
+- Should include: browser_ui be split, given cohesion 0.53?
 
 ## Sources
 
@@ -143,9 +143,9 @@ This community groups 47 file(s) rooted at `include` with dominant language c (c
 - `include/prefs.h`
 - `include/profile.h`
 - `include/shm_slots.h`
+- `include/table_layout.h`
 - `include/textfield.h`
 - `include/ui.h`
 - `include/wl_guard.h`
 - `include/zoom.h`
-- `src/block_flow.c`
-- *... and 27 more*
+- *... and 30 more*

@@ -3,12 +3,26 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `PREFS_MAX_URL` | macro | `include/prefs.h:27` | `#define PREFS_MAX_URL` |
+| `PREFS_PAGE_HISTORY` | macro | `include/prefs.h:34` | `#define PREFS_PAGE_HISTORY` |
+| `PREFS_VERSION` | macro | `include/prefs.h:26` | `#define PREFS_VERSION` |
+| `anyway` | function | `include/prefs.h:106` | `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());` |
+| `free` | function | `include/prefs.h:72` | `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);` |
+| `prefs_bookmark_index` | function | `include/prefs.h:82` | `int prefs_bookmark_index(const prefs_state *p, const char *url);` |
+| `prefs_entry` | struct | `include/prefs.h:45` | `` |
 | `prefs_free` | function | `include/prefs.h:69` | `void prefs_free(prefs_state *p);` |
 | `prefs_init` | function | `include/prefs.h:66` | `void prefs_init(prefs_state *p);` |
 | `prefs_state` | struct | `include/prefs.h:50` | `` |
 | `prefs_status` | enum | `include/prefs.h:36` | `` |
 | `prefs_suggest` | function | `include/prefs.h:101` | `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);` |
 | `theme_mode` | type_alias | `include/prefs.h:49` | `typedef struct prefs_state { int theme_mode;` |
+| `FREEDOM_PRES_HINTS_H` | macro | `include/pres_hints.h:8` | `#define FREEDOM_PRES_HINTS_H` |
+| `PH_ATTR_MAX` | macro | `include/pres_hints.h:17` | `#define PH_ATTR_MAX` |
+| `PH_CENTERED` | macro | `include/pres_hints.h:26` | `#define PH_CENTERED` |
+| `PH_DIM_MAX_PX` | macro | `include/pres_hints.h:18` | `#define PH_DIM_MAX_PX` |
+| `PH_QUIRKS` | macro | `include/pres_hints.h:27` | `#define PH_QUIRKS` |
+| `ph_apply` | function | `include/pres_hints.h:31` | `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs);` |
+| `ph_parse_dimension` | function | `include/pres_hints.h:24` | `int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille);` |
 | `FREEDOM_PROFILE_H` | macro | `include/profile.h:2` | `#define FREEDOM_PROFILE_H` |
 | `PROFILE_KEY_FILE` | macro | `include/profile.h:32` | `#define PROFILE_KEY_FILE` |
 | `PROFILE_PREFS_FILE` | macro | `include/profile.h:33` | `#define PROFILE_PREFS_FILE` |
@@ -247,6 +261,14 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `tab_ws_op` | struct | `include/tab.h:72` | `` |
 | `view` | function | `include/tab.h:322` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
 | `width` | type_alias | `include/tab.h:148` | `typedef struct tab_image { uint32_t width;` |
+| `FREEDOM_TABLE_LAYOUT_H` | macro | `include/table_layout.h:11` | `#define FREEDOM_TABLE_LAYOUT_H` |
+| `TL_MAX_COLS` | macro | `include/table_layout.h:20` | `#define TL_MAX_COLS` |
+| `TL_PER_MILLE` | macro | `include/table_layout.h:26` | `#define TL_PER_MILLE` |
+| `TL_WIDTH_MAX` | macro | `include/table_layout.h:23` | `#define TL_WIDTH_MAX` |
+| `col` | type_alias | `include/table_layout.h:27` | `typedef struct tl_cell { int col;` |
+| `px` | function | `include/table_layout.h:41` | `* px (< 0 = auto: the table is as wide as its content, capped at avail). gap is the space * between adjacent...` |
+| `tl_cell` | struct | `include/table_layout.h:28` | `` |
+| `tl_intrinsic` | function | `include/table_layout.h:53` | `void tl_intrinsic(const tl_cell *cells, size_t n, size_t ncols, double gap, double *min_total, double *max_total);` |
 | `FREEDOM_TEXT_CASE_H` | macro | `include/text_case.h:2` | `#define FREEDOM_TEXT_CASE_H` |
 | `TC_SMALLCAPS_SCALE` | macro | `include/text_case.h:15` | `#define TC_SMALLCAPS_SCALE` |
 | `cp` | function | `include/text_case.h:19` | `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);` |
@@ -474,27 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `EDG` | macro | `src/box_style.c:72` | `#define EDG(t, r, b, l)` |
 | `IBLOCK` | macro | `src/box_style.c:69` | `#define IBLOCK` |
 | `INLINE` | macro | `src/box_style.c:68` | `#define INLINE` |
-| `LITEM` | macro | `src/box_style.c:70` | `#define LITEM` |
-| `NONE` | macro | `src/box_style.c:71` | `#define NONE` |
-| `TAG_N` | macro | `src/box_style.c:161` | `#define TAG_N` |
-| `T_CAP` | macro | `src/box_style.c:80` | `#define T_CAP` |
-| `T_CELL` | macro | `src/box_style.c:79` | `#define T_CELL` |
-| `T_COL` | macro | `src/box_style.c:81` | `#define T_COL` |
-| `T_GRP` | macro | `src/box_style.c:77` | `#define T_GRP` |
-| `T_NO` | macro | `src/box_style.c:75` | `#define T_NO` |
-| `T_ROW` | macro | `src/box_style.c:78` | `#define T_ROW` |
-| `T_TBL` | macro | `src/box_style.c:76` | `#define T_TBL` |
-| `ZERO` | macro | `src/box_style.c:73` | `#define ZERO` |
-| `bg_size_component` | function | `src/box_style.c:408` | `static double bg_size_component(int px_val, int pct_pm, double area)` |
-| `bx_background_layer` | function | `src/box_style.c:415` | `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,                     ...` |
-| `bx_block_ua_box` | function | `src/box_style.c:225` | `bx_box bx_block_ua_box(int heading_level, int in_list, bx_ua_tag ua)` |
-| `bx_border_box_h` | function | `src/box_style.c:335` | `double bx_border_box_h(double declared_h, int border_box,                        double pad_t, do...` |
-| `bx_border_span` | function | `src/box_style.c:396` | `double bx_border_span(double width_cap, int border_box,                       double pad_l, doubl...` |
-| `bx_content_cap` | function | `src/box_style.c:378` | `double bx_content_cap(double width_cap, int border_box,                       double pad_l, doubl...` |
-| `bx_content_clipped` | function | `src/box_style.c:361` | `int bx_content_clipped(int overflow_x, int overflow_y)` |
-| `bx_default_for_tag` | function | `src/box_style.c:163` | `bx_box bx_default_for_tag(const char *tag)` |
-| `bx_default_for_ua` | function | `src/box_style.c:219` | `bx_box bx_default_for_ua(bx_ua_tag id)` |
-| `bx_definite_content_h` | function | `src/box_style.c:352` | `double bx_definite_content_h(double h, double min_h, double max_h,                              i...` |
-| `bx_display_name` | function | `src/box_style.c:454` | `const char *bx_display_name(bx_display d)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

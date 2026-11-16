@@ -3,6 +3,28 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `gl_is_span` | function | `src/flex_layout.c:893` | `static int gl_is_span(int v)` |
+| `gl_kw` | function | `src/flex_layout.c:820` | `static int gl_kw(const char *p, const char *end, const char *kw)` |
+| `gl_lower` | function | `src/flex_layout.c:817` | `static int gl_lower(char c)` |
+| `gl_side_range` | function | `src/flex_layout.c:845` | `static int gl_side_range(const char *p, const char *end, int *out)` |
+| `gl_ws` | function | `src/flex_layout.c:813` | `static int gl_ws(char c)` |
+| `nn` | function | `src/flex_layout.c:19` | `static double nn(double v)` |
+| `clean_action` | function | `src/form.c:75` | `static int clean_action(const char *action, char *out, size_t outsz)` |
+| `copy_fit` | function | `src/form.c:66` | `static int copy_fit(char *dst, size_t dstsz, const char *src)` |
+| `enc_component` | function | `src/form.c:25` | `static int enc_component(const char *s, char *out, size_t outsz, size_t *pos)` |
+| `fm_build` | function | `src/form.c:120` | `fm_status fm_build(const char *base, const char *action, fm_method method,                    con...` |
+| `fm_encode` | function | `src/form.c:43` | `fm_status fm_encode(const fm_field *fields, size_t n,                     char *out, size_t outsz...` |
+| `put_char` | function | `src/form.c:17` | `static int put_char(char *out, size_t outsz, size_t *pos, char c)` |
+| `resolve_target` | function | `src/form.c:101` | `static fm_block_reason resolve_target(const char *base, const char *act,                         ...` |
+| `strip_query` | function | `src/form.c:93` | `static void strip_query(char *url)` |
+| `fbk_add` | function | `src/frame_broker.c:66` | `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id)` |
+| `fbk_init` | function | `src/frame_broker.c:53` | `int fbk_init(fbk_table *t, const char *top_url)` |
+| `fbk_origin` | function | `src/frame_broker.c:96` | `const char *fbk_origin(const fbk_table *t, int id)` |
+| `fbk_origin_of` | function | `src/frame_broker.c:15` | `int fbk_origin_of(const char *url, char *out, size_t cap)` |
+| `fbk_remove` | function | `src/frame_broker.c:84` | `void fbk_remove(fbk_table *t, int id)` |
+| `fbk_route` | function | `src/frame_broker.c:118` | `fbk_verdict fbk_route(const fbk_table *t, int from, fbk_rel rel, int child,                      ...` |
+| `host_char_ok` | function | `src/frame_broker.c:11` | `static int host_char_ok(char c)` |
+| `lc` | function | `src/frame_broker.c:9` | `static char lc(char c)` |
 | `live` | function | `src/frame_broker.c:62` | `static int live(const fbk_table *t, int id)` |
 | `target_admits` | function | `src/frame_broker.c:101` | `static int target_admits(const char *target, const char *snd, const char *recv)` |
 | `FC_DEFAULT_INTERVAL_MS` | macro | `src/frame_clock.c:8` | `#define FC_DEFAULT_INTERVAL_MS` |
@@ -474,27 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `jn_css_ok` | function | `src/js_native.c:25` | `static JSValue jn_css_ok(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv)` |
 | `jn_host_eval` | function | `src/js_native.c:15` | `JSValue jn_host_eval(JSContext *c, const char *src, size_t len, const char *name)` |
 | `jn_seal` | function | `src/js_native.c:144` | `int jn_seal(js_context *ctx)` |
-| `FREEDOM_JS_NATIVE_INTERNAL_H` | macro | `src/js_native_internal.h:6` | `#define FREEDOM_JS_NATIVE_INTERNAL_H` |
-| `js_context` | struct | `src/js_native_internal.h:20` | `` |
-| `js_host_slot` | function | `src/js_native_internal.h:21` | `JSValue *js_host_slot(struct js_context *ctx);` |
-| `eq_ci` | function | `src/js_policy.c:12` | `static int eq_ci(const char *a, const char *b)` |
-| `jsp_enabled` | function | `src/js_policy.c:22` | `bool jsp_enabled(jsp_mode mode, int host_allowlisted)` |
-| `jsp_mode_from_str` | function | `src/js_policy.c:39` | `jsp_mode jsp_mode_from_str(const char *s)` |
-| `jsp_mode_str` | function | `src/js_policy.c:51` | `const char *jsp_mode_str(jsp_mode mode)` |
-| `jsp_present_trusted` | function | `src/js_policy.c:35` | `bool jsp_present_trusted(int host_allowlisted)` |
-| `jsp_trusted` | function | `src/js_policy.c:31` | `bool jsp_trusted(bool js_enabled, int host_allowlisted)` |
-| `JS_MODULE_URL_MAX` | macro | `src/js_sandbox.c:860` | `#define JS_MODULE_URL_MAX` |
-| `JS_PROFILE_KEY_MAX` | macro | `src/js_sandbox.c:36` | `#define JS_PROFILE_KEY_MAX` |
-| `JS_PROFILE_SLOTS` | macro | `src/js_sandbox.c:35` | `#define JS_PROFILE_SLOTS` |
-| `_POSIX_C_SOURCE` | macro | `src/js_sandbox.c:12` | `#define _POSIX_C_SOURCE` |
-| `arm_deadline` | function | `src/js_sandbox.c:652` | `static void arm_deadline(js_context *ctx, uint64_t budget_ms)` |
-| `host_dup` | function | `src/js_sandbox.c:178` | `static char *host_dup(const char *src, size_t len)` |
-| `is_ascii_digit` | function | `src/js_sandbox.c:425` | `static int is_ascii_digit(char c)` |
-| `jm_calloc` | function | `src/js_sandbox.c:142` | `static void *jm_calloc(void *opaque, size_t count, size_t size)` |
-| `jm_free` | function | `src/js_sandbox.c:152` | `static void jm_free(void *opaque, void *ptr)` |
-| `jm_malloc` | function | `src/js_sandbox.c:134` | `static void *jm_malloc(void *opaque, size_t size)` |
-| `jm_realloc` | function | `src/js_sandbox.c:158` | `static void *jm_realloc(void *opaque, void *ptr, size_t size)` |
-| `jm_usable_size` | function | `src/js_sandbox.c:168` | `static size_t jm_usable_size(const void *ptr)` |
-| `js_context` | struct | `src/js_sandbox.c:38` | `` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

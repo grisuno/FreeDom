@@ -2,15 +2,15 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 325 files at commit `d2bc26711990`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 331 files at commit `bd6d9b7c381a`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (174), `max` (143), `not` (138), `one` (136), `size` (135), `include` (134), `out` (129), `freedom` (127), `char` (120), `free` (120), `const` (115), `its` (107), `css` (106), `void` (103), `name` (102)
-- Subsystem `include: css`: 56 files, core `src/css.c`: css_cq: @container conditions (spec/css_mq.md): a rule inside one is kept and gated per element....
+- Domain vocabulary (term, files): `null` (177), `max` (148), `not` (142), `include` (139), `size` (137), `one` (137), `out` (131), `freedom` (129), `char` (122), `free` (120), `const` (118), `css` (110), `its` (109), `void` (106), `name` (103)
+- Subsystem `include: css`: 59 files, core `src/css.c`: css_cq: @container conditions (spec/css_mq.md): a rule inside one is kept and gated per element....
 - Subsystem `src: tab`: 51 files, core `src/tab.c`: tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and...
-- Subsystem `include: browser_ui`: 47 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
+- Subsystem `include: browser_ui`: 50 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
 - Subsystem `src: text_shape`: 40 files, core `src/text_shape.c`: tsh_fb_cp: Per-code-point verdicts of fb_entry.
 - Subsystem `include: page_view`: 26 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - Subsystem `include: secure_fetch`: 24 files, core `src/secure_fetch.c`: tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a...
@@ -60,7 +60,7 @@ Declared:
 
 Measured baseline:
 - Security findings at medium or above: 0 (see `readmenator-agent/SECURITY.md`); do not add new ones.
-- Dependency cycles: 1; layer violations: 24 (see `readmenator-agent/GOTCHAS.md`).
+- Dependency cycles: 1; layer violations: 25 (see `readmenator-agent/GOTCHAS.md`).
 
 ## 4. Style norms
 
@@ -68,11 +68,11 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 202 files, 6245 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (1%); median file 234 lines, max 20414.
-- h: 107 files, 1709 symbols; docstrings on 39% of symbols; functions snake_case (98%); types PascalCase (0%); median file 71 lines, max 1336.
+- c: 206 files, 6289 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (1%); median file 234 lines, max 20660.
+- h: 109 files, 1725 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 70 lines, max 1336.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
 - sh: 4 files, 0 symbols; median file 39 lines, max 90.
-- Tests: 94 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
+- Tests: 96 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
 
 ## 5. Minimum deliverables
 
@@ -89,7 +89,7 @@ Measured baseline:
 
 ## 6. Risks to respect
 
-- God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/freedom.c`, `src/css.c`
+- God nodes (changes ripple widely): `gui/browser_ui.c`, `include/css.h`, `src/tab.c`, `src/freedom.c`, `src/page_view.c`
 - Hotspots (complex and central): `gui/browser_ui.c`, `src/tab.c`, `src/page_view.c`, `src/css.c`, `tests/test_css.c`
 - Cycle: `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - Full blast radius: `readmenator-agent/GOTCHAS.md`; findings: `readmenator-agent/SECURITY.md`.

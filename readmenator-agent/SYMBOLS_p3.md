@@ -3,6 +3,12 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `css_status` | enum | `include/css.h:30` | `` |
+| `css_style` | struct | `include/css.h:606` | `` |
+| `css_table_layout` | enum | `include/css.h:305` | `` |
+| `css_text_decoration_style` | enum | `include/css.h:274` | `` |
+| `css_text_overflow` | enum | `include/css.h:253` | `` |
+| `css_text_rendering` | enum | `include/css.h:420` | `` |
 | `css_text_transform` | enum | `include/css.h:132` | `` |
 | `css_touch_action` | enum | `include/css.h:439` | `` |
 | `css_ua_heading_em` | function | `include/css.h:1258` | `double css_ua_heading_em(int level);` |
@@ -479,6 +485,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
 | `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:90` | `#define FC_SHC_MAX_QUERIES` |
 | `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:84` | `#define FC_SHC_MAX_TEXT_BYTES` |
+| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:103` | `#define FC_TABLE_TRACK_MAX_PX` |
 | `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:99` | `#define FC_TAB_OP_NET_BUDGET_MS` |
 | `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:30` | `#define FC_TRUSTED_JS_BUDGET_MS` |
 | `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:70` | `#define FC_UI_FONT_SIZE` |
@@ -489,12 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `hls_segment` | struct | `include/hls.h:29` | `` |
 | `hls_select_variant` | function | `include/hls.h:65` | `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);` |
 | `hls_status` | enum | `include/hls.h:21` | `` |
-| `hls_variant` | struct | `include/hls.h:36` | `` |
-| `resolved` | function | `include/hls.h:68` | `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the * written length, or 0 on failure. */...` |
-| `FREEDOM_HOST_CONF_H` | macro | `include/host_conf.h:2` | `#define FREEDOM_HOST_CONF_H` |
-| `HCF_MAX_DIRS` | macro | `include/host_conf.h:15` | `#define HCF_MAX_DIRS` |
-| `HCF_MAX_FILE_BYTES` | macro | `include/host_conf.h:18` | `#define HCF_MAX_FILE_BYTES` |
-| `HCF_PATH_MAX` | macro | `include/host_conf.h:16` | `#define HCF_PATH_MAX` |
-| `hcf_dirs` | struct | `include/host_conf.h:20` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

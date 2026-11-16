@@ -1,5 +1,5 @@
-# Subsystem: include (page 1 of 5)
-Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB_include_p3.md](KB_include_p3.md), [KB_include_p4.md](KB_include_p4.md), [KB_include_p5.md](KB_include_p5.md)
+# Subsystem: include (page 1 of 6)
+Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB_include_p3.md](KB_include_p3.md), [KB_include_p4.md](KB_include_p4.md), [KB_include_p5.md](KB_include_p5.md), [KB_include_p6.md](KB_include_p6.md)
 
 ## include/anti_fp.h
 - Doc: fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  "document" #define...
@@ -355,7 +355,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CSS_PSEUDO_AFTER` (macro, line 1233) `#define CSS_PSEUDO_AFTER`
   - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1234) `#define CSS_PSEUDO_PLACEHOLDER`
 - Depends on: `include/css_color.h`, `include/css_counter.h`, `include/css_mq.h`
-- Imported by: `gui/browser_ui.c`, `gui/bui_mask_img.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `include/sheet_cache.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/js_native.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
+- Imported by: `gui/browser_ui.c`, `gui/bui_mask_img.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `include/pres_hints.h`, `include/sheet_cache.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/js_native.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 
 ## include/css_atrule.h
 - Doc: car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both...
@@ -441,7 +441,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `FREEDOM_CSS_COLOR_H` (macro, line 2) `#define FREEDOM_CSS_COLOR_H`
   - `CC_COLOR_CURRENT` (macro, line 59) `#define CC_COLOR_CURRENT`
   - `CC_COLOR_TRANSPARENT` (macro, line 60) `#define CC_COLOR_TRANSPARENT`
-- Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/svg_paint.c`, `src/svg_render.c`, `tests/test_css_color.c`
+- Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/pres_hints.c`, `src/svg_paint.c`, `src/svg_render.c`, `tests/test_css_color.c`
 
 ## include/css_computed.h
 - Doc: ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL...

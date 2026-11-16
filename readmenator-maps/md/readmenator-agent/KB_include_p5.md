@@ -1,5 +1,61 @@
-# Subsystem: include (page 5 of 5)
+# Subsystem: include (page 5 of 6)
 Previous: [KB_include_p4.md](KB_include_p4.md)
+
+## include/secure_fetch.h
+- Doc: sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `sf_chain_info` (struct, line 63)
+  - `sf_config` (struct, line 82)
+  - `sf_response` (struct, line 136)
+  - `sf_status` (enum, line 24)
+  - `sf_policy` (enum, line 43)
+  - `sf_proxy_type` (enum, line 72)
+  - `policy` (type_alias, line 81) `typedef struct sf_config { sf_policy policy;`
+  - `status` (type_alias, line 135) `typedef struct sf_response { sf_status status;`
+  - `sf_ws` (type_alias, line 331) `typedef struct sf_ws sf_ws;`
+  - `validators` (function, line 18) `* The security logic lives in pure validators (no I/O);`
+  - `rp_sanitize_request_headers` (function, line 111) `* rp_sanitize_request_headers ("Name: value\n" lines);`
+  - `sf_global_init` (function, line 233) `void sf_global_init(void);`
+  - `EXCLUDED` (function, line 239) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+  - `sf_cookie_put` (function, line 246) `void sf_cookie_put(const char *url, const char *namevalue);`
+  - `sf_cookie_line_matches` (function, line 251) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
+  - `sf_user_agent_or_default` (function, line 260) `const char *sf_user_agent_or_default(const char *ua);`
+  - `sf_accept_language_or_default` (function, line 264) `const char *sf_accept_language_or_default(const char *lang);`
+  - `sf_impersonate_kex_groups` (function, line 268) `const char *sf_impersonate_kex_groups(void);`
+  - `sf_impersonate_tls13_ciphers` (function, line 269) `const char *sf_impersonate_tls13_ciphers(void);`
+  - `skipped` (function, line 289) `* skipped (a classical key exchange is accepted);`
+  - `sf_is_redirect_code` (function, line 300) `int sf_is_redirect_code(long http_code);`
+  - `sf_header_value` (function, line 311) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);`
+  - `bits` (function, line 348) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+  - `sf_ws_fd` (function, line 355) `int sf_ws_fd(const sf_ws *ws);`
+  - `sf_ws_close` (function, line 358) `void sf_ws_close(sf_ws *ws);`
+  - `connection` (function, line 362) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+  - `sf_get` (function, line 371) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+  - `sf_response_free` (function, line 382) `void sf_response_free(sf_response *resp);`
+  - `exhausted` (function, line 393) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+  - `sf_rcache_put` (function, line 406) `int sf_rcache_put(const char *from, const char *to, time_t now);`
+  - `sf_rcache_get` (function, line 407) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+  - `sf_rcache_clear` (function, line 408) `void sf_rcache_clear(void);`
+  - `sf_rcache_set_backing` (function, line 417) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
+  - `FREEDOM_SECURE_FETCH_H` (macro, line 2) `#define FREEDOM_SECURE_FETCH_H`
+  - `SF_META_MAX` (macro, line 79) `#define SF_META_MAX`
+  - `SF_RESPONSE_HEADERS_MAX` (macro, line 80) `#define SF_RESPONSE_HEADERS_MAX`
+  - `SF_DEFAULT_KEX_GROUPS` (macro, line 172) `#define SF_DEFAULT_KEX_GROUPS`
+  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 181) `#define SF_IMPERSONATE_KEX_GROUPS`
+  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 182) `#define SF_IMPERSONATE_TLS13_CIPHERS`
+  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 186) `#define SF_IMPERSONATE_TLS12_CIPHERS`
+  - `SF_DEFAULT_USER_AGENT` (macro, line 197) `#define SF_DEFAULT_USER_AGENT`
+  - `SF_DEFAULT_MAX_BODY` (macro, line 198) `#define SF_DEFAULT_MAX_BODY`
+  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 199) `#define SF_DEFAULT_TIMEOUT_MS`
+  - `SF_CONNECT_TIMEOUT_MS` (macro, line 222) `#define SF_CONNECT_TIMEOUT_MS`
+  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 223) `#define SF_SUBRESOURCE_TIMEOUT_MS`
+  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 224) `#define SF_DEFAULT_MAX_REDIRECTS`
+  - `SF_MAX_URL` (macro, line 225) `#define SF_MAX_URL`
+  - `SF_WS_MAX_MESSAGE` (macro, line 330) `#define SF_WS_MAX_MESSAGE`
+- Depends on: `include/anti_fp.h`
+- Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 
 ## include/sha2.h
 - Doc: sha_digest_len: sha2 -- one-shot SHA-1 / SHA-256 / SHA-384 / SHA-512 (FIPS 180-4), pure and...
@@ -180,6 +236,21 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `TAB_MAX_INPUT` (macro, line 157) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `include/frame_host.h`, `src/freedom.c`, `src/tab.c`, `tests/test_frame_host.c`, `tests/test_tab.c`
+
+## include/table_layout.h
+- Doc: table_layout (tl_) -- used column widths of a table (automatic table layout).
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `tl_cell` (struct, line 28)
+  - `col` (type_alias, line 27) `typedef struct tl_cell { int col;`
+  - `px` (function, line 41) `* px (< 0 = auto: the table is as wide as its content, capped at avail). gap is the space * between adjacent...`
+  - `tl_intrinsic` (function, line 53) `void tl_intrinsic(const tl_cell *cells, size_t n, size_t ncols, double gap, double *min_total, double *max_total);`
+  - `FREEDOM_TABLE_LAYOUT_H` (macro, line 11) `#define FREEDOM_TABLE_LAYOUT_H`
+  - `TL_MAX_COLS` (macro, line 20) `#define TL_MAX_COLS`
+  - `TL_WIDTH_MAX` (macro, line 23) `#define TL_WIDTH_MAX`
+  - `TL_PER_MILLE` (macro, line 26) `#define TL_PER_MILLE`
+- Imported by: `gui/browser_ui.c`, `src/table_layout.c`, `tests/test_table_layout.c`
 
 ## include/text_case.h
 - Doc: Case mapping for text-transform and synthesized small caps (spec/text_case.md).
@@ -425,55 +496,5 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `WD_NONE` (macro, line 11) `#define WD_NONE`
 - Imported by: `src/freedom.c`, `src/wl_display.c`, `tests/test_wl_display.c`
 
-## include/wl_guard.h
-- Doc: wlg_start: wl_guard -- keeps the Wayland connection drained while the GUI thread is busy.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `wl_display` (struct, line 8)
-  - `wl_guard` (type_alias, line 21) `typedef struct wl_guard wl_guard;`
-  - `wlg_start` (function, line 25) `wl_guard *wlg_start(struct wl_display *display);`
-  - `wlg_stop` (function, line 28) `void wlg_stop(wl_guard *g);`
-  - `FREEDOM_WL_GUARD_H` (macro, line 2) `#define FREEDOM_WL_GUARD_H`
-- Imported by: `gui/browser_ui.c`, `src/wl_guard.c`, `tests/test_wl_guard.c`
 
-## include/ws_hub.h
-- Doc: wh_new: #define WH_MAX 8   /* == JD_WS_MAX: sockets per page /* Event kinds delivered to the...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `wh_hub` (type_alias, line 30) `typedef struct wh_hub wh_hub;`
-  - `wh_new` (function, line 34) `wh_hub *wh_new(void);`
-  - `wh_free` (function, line 38) `void wh_free(wh_hub *h);`
-  - `wh_notify_fd` (function, line 41) `int wh_notify_fd(const wh_hub *h);`
-  - `wh_open_async` (function, line 46) `int wh_open_async(wh_hub *h, int id, const char *url, const sf_config *cfg);`
-  - `generation` (function, line 50) `* previous generation (before wh_close_all) are closed and dropped silently. */ void wh_on_notify(wh_hub *h...`
-  - `wh_send` (function, line 54) `int wh_send(wh_hub *h, int id, const void *data, size_t len, int binary);`
-  - `wh_close` (function, line 58) `void wh_close(wh_hub *h, int id);`
-  - `wh_close_all` (function, line 61) `void wh_close_all(wh_hub *h);`
-  - `wh_poll_fds` (function, line 65) `size_t wh_poll_fds(const wh_hub *h, struct pollfd *out, int *ids, size_t cap);`
-  - `wh_on_readable` (function, line 70) `void wh_on_readable(wh_hub *h, int id, wh_emit_fn emit, void *ctx);`
-  - `wh_count` (function, line 73) `size_t wh_count(const wh_hub *h);`
-  - `FREEDOM_WS_HUB_H` (macro, line 2) `#define FREEDOM_WS_HUB_H`
-  - `WH_MAX` (macro, line 21) `#define WH_MAX`
-  - `WH_CLOSE_ABNORMAL` (macro, line 27) `#define WH_CLOSE_ABNORMAL`
-- Depends on: `include/secure_fetch.h`
-- Imported by: `gui/browser_ui.c`, `src/ws_hub.c`, `tests/test_ws_hub.c`
-
-## include/zoom.h
-- Doc: zm_clamp: stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `zm_clamp` (function, line 26) `int zm_clamp(int pct);`
-  - `zm_zoom_in` (function, line 29) `int zm_zoom_in(int pct);`
-  - `zm_zoom_out` (function, line 32) `int zm_zoom_out(int pct);`
-  - `zm_reset` (function, line 35) `int zm_reset(void);`
-  - `zm_scale` (function, line 38) `double zm_scale(int pct);`
-  - `zm_apply` (function, line 42) `double zm_apply(double base_px, int pct);`
-  - `FREEDOM_ZOOM_H` (macro, line 2) `#define FREEDOM_ZOOM_H`
-  - `ZM_MIN_PCT` (macro, line 21) `#define ZM_MIN_PCT`
-  - `ZM_MAX_PCT` (macro, line 22) `#define ZM_MAX_PCT`
-  - `ZM_DEFAULT_PCT` (macro, line 23) `#define ZM_DEFAULT_PCT`
-- Imported by: `gui/browser_ui.c`, `src/prefs.c`, `src/zoom.c`, `tests/test_prefs.c`, `tests/test_zoom.c`
-
+Next: [KB_include_p6.md](KB_include_p6.md)

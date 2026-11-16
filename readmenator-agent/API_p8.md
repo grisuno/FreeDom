@@ -1,4 +1,4 @@
-# API (page 8 of 12)
+# API (page 8 of 13)
 Previous: [API_p7.md](API_p7.md)
 
 ## src/dom.c

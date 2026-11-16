@@ -1,5 +1,23 @@
-# Subsystem: include (page 4 of 5)
+# Subsystem: include (page 4 of 6)
 Previous: [KB_include_p3.md](KB_include_p3.md)
+
+## include/link_nav.h
+- Doc: ln_block_reason: Why a reference was blocked, for a precise user-facing notice and for *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ln_result` (struct, line 62)
+  - `ln_action` (enum, line 40)
+  - `ln_target_kind` (enum, line 46)
+  - `ln_block_reason` (enum, line 54)
+  - `ln_status` (enum, line 70)
+  - `action` (type_alias, line 61) `typedef struct ln_result { ln_action action;`
+  - `dropped` (function, line 36) `* A longer fragment is dropped (stored as "");`
+  - `ln_block_reason_text` (function, line 85) `const char *ln_block_reason_text(ln_block_reason reason);`
+  - `FREEDOM_LINK_NAV_H` (macro, line 2) `#define FREEDOM_LINK_NAV_H`
+  - `LN_MAX_TARGET` (macro, line 33) `#define LN_MAX_TARGET`
+  - `LN_MAX_FRAGMENT` (macro, line 38) `#define LN_MAX_FRAGMENT`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/link_nav.c`, `src/tab.c`, `tests/test_link_nav.c`
 
 ## include/local_store.h
 - Doc: ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and...
@@ -318,6 +336,21 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `PREFS_PAGE_HISTORY` (macro, line 34) `#define PREFS_PAGE_HISTORY`
 - Imported by: `gui/browser_ui.c`, `include/profile.h`, `include/ui.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
 
+## include/pres_hints.h
+- Doc: pres_hints (ph_) -- HTML presentational attributes as zero-specificity style.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ph_parse_dimension` (function, line 24) `int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille);`
+  - `ph_apply` (function, line 31) `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs);`
+  - `FREEDOM_PRES_HINTS_H` (macro, line 8) `#define FREEDOM_PRES_HINTS_H`
+  - `PH_ATTR_MAX` (macro, line 17) `#define PH_ATTR_MAX`
+  - `PH_DIM_MAX_PX` (macro, line 18) `#define PH_DIM_MAX_PX`
+  - `PH_CENTERED` (macro, line 26) `#define PH_CENTERED`
+  - `PH_QUIRKS` (macro, line 27) `#define PH_QUIRKS`
+- Depends on: `include/css.h`
+- Imported by: `src/page_view.c`, `src/pres_hints.c`, `tests/test_pres_hints.c`
+
 ## include/profile.h
 - Doc: profile_close: Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init).
 - Layer: utility
@@ -430,62 +463,6 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `RP_HDR_NAME_MAX` (macro, line 45) `#define RP_HDR_NAME_MAX`
   - `RP_HDR_VALUE_MAX` (macro, line 46) `#define RP_HDR_VALUE_MAX`
 - Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/request_policy.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_request_policy.c`
-
-## include/secure_fetch.h
-- Doc: sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `sf_chain_info` (struct, line 63)
-  - `sf_config` (struct, line 82)
-  - `sf_response` (struct, line 136)
-  - `sf_status` (enum, line 24)
-  - `sf_policy` (enum, line 43)
-  - `sf_proxy_type` (enum, line 72)
-  - `policy` (type_alias, line 81) `typedef struct sf_config { sf_policy policy;`
-  - `status` (type_alias, line 135) `typedef struct sf_response { sf_status status;`
-  - `sf_ws` (type_alias, line 331) `typedef struct sf_ws sf_ws;`
-  - `validators` (function, line 18) `* The security logic lives in pure validators (no I/O);`
-  - `rp_sanitize_request_headers` (function, line 111) `* rp_sanitize_request_headers ("Name: value\n" lines);`
-  - `sf_global_init` (function, line 233) `void sf_global_init(void);`
-  - `EXCLUDED` (function, line 239) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-  - `sf_cookie_put` (function, line 246) `void sf_cookie_put(const char *url, const char *namevalue);`
-  - `sf_cookie_line_matches` (function, line 251) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
-  - `sf_user_agent_or_default` (function, line 260) `const char *sf_user_agent_or_default(const char *ua);`
-  - `sf_accept_language_or_default` (function, line 264) `const char *sf_accept_language_or_default(const char *lang);`
-  - `sf_impersonate_kex_groups` (function, line 268) `const char *sf_impersonate_kex_groups(void);`
-  - `sf_impersonate_tls13_ciphers` (function, line 269) `const char *sf_impersonate_tls13_ciphers(void);`
-  - `skipped` (function, line 289) `* skipped (a classical key exchange is accepted);`
-  - `sf_is_redirect_code` (function, line 300) `int sf_is_redirect_code(long http_code);`
-  - `sf_header_value` (function, line 311) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);`
-  - `bits` (function, line 348) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-  - `sf_ws_fd` (function, line 355) `int sf_ws_fd(const sf_ws *ws);`
-  - `sf_ws_close` (function, line 358) `void sf_ws_close(sf_ws *ws);`
-  - `connection` (function, line 362) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-  - `sf_get` (function, line 371) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-  - `sf_response_free` (function, line 382) `void sf_response_free(sf_response *resp);`
-  - `exhausted` (function, line 393) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
-  - `sf_rcache_put` (function, line 406) `int sf_rcache_put(const char *from, const char *to, time_t now);`
-  - `sf_rcache_get` (function, line 407) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
-  - `sf_rcache_clear` (function, line 408) `void sf_rcache_clear(void);`
-  - `sf_rcache_set_backing` (function, line 417) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
-  - `FREEDOM_SECURE_FETCH_H` (macro, line 2) `#define FREEDOM_SECURE_FETCH_H`
-  - `SF_META_MAX` (macro, line 79) `#define SF_META_MAX`
-  - `SF_RESPONSE_HEADERS_MAX` (macro, line 80) `#define SF_RESPONSE_HEADERS_MAX`
-  - `SF_DEFAULT_KEX_GROUPS` (macro, line 172) `#define SF_DEFAULT_KEX_GROUPS`
-  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 181) `#define SF_IMPERSONATE_KEX_GROUPS`
-  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 182) `#define SF_IMPERSONATE_TLS13_CIPHERS`
-  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 186) `#define SF_IMPERSONATE_TLS12_CIPHERS`
-  - `SF_DEFAULT_USER_AGENT` (macro, line 197) `#define SF_DEFAULT_USER_AGENT`
-  - `SF_DEFAULT_MAX_BODY` (macro, line 198) `#define SF_DEFAULT_MAX_BODY`
-  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 199) `#define SF_DEFAULT_TIMEOUT_MS`
-  - `SF_CONNECT_TIMEOUT_MS` (macro, line 222) `#define SF_CONNECT_TIMEOUT_MS`
-  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 223) `#define SF_SUBRESOURCE_TIMEOUT_MS`
-  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 224) `#define SF_DEFAULT_MAX_REDIRECTS`
-  - `SF_MAX_URL` (macro, line 225) `#define SF_MAX_URL`
-  - `SF_WS_MAX_MESSAGE` (macro, line 330) `#define SF_WS_MAX_MESSAGE`
-- Depends on: `include/anti_fp.h`
-- Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 
 
 Next: [KB_include_p5.md](KB_include_p5.md)

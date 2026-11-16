@@ -1,6 +1,6 @@
 # include: css
 
-include: css groups 56 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
+include: css groups 59 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
 
 ```mermaid
 graph LR
@@ -23,15 +23,15 @@ gui groups 3 files (c, h) around FREEDOM_BROWSER_UI_INTERNAL_H, UI_FONT_SIZE, UI
 
 ## include (1.2)
 
-include groups 18 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
+include groups 19 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
 ## src (1.3)
 
-src groups 18 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...
+src groups 19 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...
 
 ## tests (1.4)
 
-tests groups 17 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
+tests groups 18 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
 
 **Files**:
 
@@ -55,6 +55,7 @@ tests groups 17 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - include/css_text.h
 - include/css_values.h
 - include/css_vars.h
+- include/pres_hints.h
 - include/text_case.h
 - src/compositor.c
 - src/css.c
@@ -73,6 +74,7 @@ tests groups 17 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - src/css_values.c
 - src/css_vars.c
 - src/js_native.c
+- src/pres_hints.c
 - src/text_case.c
 - tests/test_compositor.c
 - tests/test_css.c
@@ -90,4 +92,5 @@ tests groups 17 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_iso
 - tests/test_css_text.c
 - tests/test_css_values.c
 - tests/test_css_vars.c
+- tests/test_pres_hints.c
 - tests/test_text_case.c

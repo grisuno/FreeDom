@@ -37,6 +37,22 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `PREFS_MAGIC` (macro, line 20) `#define PREFS_MAGIC`
 - Depends on: `include/prefs.h`, `include/zoom.h`
 
+## src/pres_hints.c
+- Doc: pres_hints (ph_) -- see include/pres_hints.h and spec/pres_hints.md.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `ph_is_space` (function, line 10) `static int ph_is_space(char c)`
+  - `ph_parse_dimension` (function, line 14) `int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille)`
+  - `ph_ci_eq` (function, line 42) `static int ph_ci_eq(const char *s, size_t len, const char *word)`
+  - `ph_align` (function, line 53) `static css_align ph_align(ph_attr_fn get, void *ctx)`
+  - `ph_width` (function, line 64) `static void ph_width(ph_attr_fn get, void *ctx, css_style *cs)`
+  - `ph_is_heading` (function, line 76) `static int ph_is_heading(const char *tag)`
+  - `ph_bgcolor` (function, line 81) `static void ph_bgcolor(ph_attr_fn get, void *ctx, css_style *cs)`
+  - `ph_apply` (function, line 93) `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs)`
+  - `PH_PER_MILLE_MAX` (macro, line 8) `#define PH_PER_MILLE_MAX`
+- Depends on: `include/css_color.h`, `include/pres_hints.h`
+
 ## src/profile.c
 - Doc: keyfile_create: #include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h>...
 - Layer: utility

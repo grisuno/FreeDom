@@ -1,4 +1,4 @@
-# Subsystem: include (page 3 of 5)
+# Subsystem: include (page 3 of 6)
 Previous: [KB_include_p2.md](KB_include_p2.md)
 
 ## include/frame_host.h
@@ -66,6 +66,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FC_SHC_MAX_QUERIES` (macro, line 90) `#define FC_SHC_MAX_QUERIES`
   - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 93) `#define FC_LAZY_IMAGE_MARGIN_PX`
   - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 99) `#define FC_TAB_OP_NET_BUDGET_MS`
+  - `FC_TABLE_TRACK_MAX_PX` (macro, line 103) `#define FC_TABLE_TRACK_MAX_PX`
 - Imported by: `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/svg_paint.c`, `src/tab.c`, `tests/test_sheet_cache.c`
 
 ## include/hls.h
@@ -477,24 +478,6 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
 - Symbols:
   - `FREEDOM_LAZY_LOAD_H` (macro, line 2) `#define FREEDOM_LAZY_LOAD_H`
 - Imported by: `gui/browser_ui.c`, `tests/test_ui.c`
-
-## include/link_nav.h
-- Doc: ln_block_reason: Why a reference was blocked, for a precise user-facing notice and for *...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `ln_result` (struct, line 62)
-  - `ln_action` (enum, line 40)
-  - `ln_target_kind` (enum, line 46)
-  - `ln_block_reason` (enum, line 54)
-  - `ln_status` (enum, line 70)
-  - `action` (type_alias, line 61) `typedef struct ln_result { ln_action action;`
-  - `dropped` (function, line 36) `* A longer fragment is dropped (stored as "");`
-  - `ln_block_reason_text` (function, line 85) `const char *ln_block_reason_text(ln_block_reason reason);`
-  - `FREEDOM_LINK_NAV_H` (macro, line 2) `#define FREEDOM_LINK_NAV_H`
-  - `LN_MAX_TARGET` (macro, line 33) `#define LN_MAX_TARGET`
-  - `LN_MAX_FRAGMENT` (macro, line 38) `#define LN_MAX_FRAGMENT`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/link_nav.c`, `src/tab.c`, `tests/test_link_nav.c`
 
 
 Next: [KB_include_p4.md](KB_include_p4.md)

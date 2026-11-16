@@ -1,4 +1,4 @@
-# API (page 9 of 12)
+# API (page 9 of 13)
 Previous: [API_p8.md](API_p8.md)
 
 ## src/image_decode.c

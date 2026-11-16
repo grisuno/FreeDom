@@ -98,4 +98,8 @@
  * that operation's requests fail (status 0) instead of blocking. */
 #define FC_TAB_OP_NET_BUDGET_MS 3000
 
+/* Widest column track (px) a table hands the grid engine: far past any real page, and small
+ * enough that TL_MAX_COLS of them sum inside an int. */
+#define FC_TABLE_TRACK_MAX_PX 1000000
+
 #endif /* FREEDOM_CONFIG_H */

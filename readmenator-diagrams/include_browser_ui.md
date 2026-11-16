@@ -1,6 +1,6 @@
 # include: browser_ui
 
-include: browser_ui groups 47 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ui_input_state: Live editable state for one form text control, aliasing a block of the...
+include: browser_ui groups 50 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ui_input_state: Live editable state for one form text control, aliasing a block of the...
 
 ```mermaid
 graph LR
@@ -25,15 +25,15 @@ gui groups 3 files (c) around _GNU_SOURCE, UI_TOOLBAR_H, UI_TITLEBAR_H, UI_TABBA
 
 ## include (3.2)
 
-include groups 16 files (h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. block_flow (bf_) -- vertical margin collapsing for block-level boxes.
+include groups 17 files (h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. block_flow (bf_) -- vertical margin collapsing for block-level boxes.
 
 ## src (3.3)
 
-src groups 13 files (c) around finite_or_zero, bf_collapse_n, bf_collapse, bf_margins_adjoin, bb_box_sizes. block_flow (bf_) -- vertical margin collapsing.
+src groups 14 files (c) around finite_or_zero, bf_collapse_n, bf_collapse, bf_margins_adjoin, bb_box_sizes. block_flow (bf_) -- vertical margin collapsing.
 
 ## tests (3.4)
 
-tests groups 15 files (c) around dbl_eq, test_two_positive_collapse_to_max, test_two_negative_take_the_most_negative, test_non_finite_is_absent, test_collapse_n_matches_binary. test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never...
+tests groups 16 files (c) around dbl_eq, test_two_positive_collapse_to_max, test_two_negative_take_the_most_negative, test_non_finite_is_absent, test_collapse_n_matches_binary. test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never...
 
 **Files**:
 
@@ -52,6 +52,7 @@ tests groups 15 files (c) around dbl_eq, test_two_positive_collapse_to_max, test
 - include/prefs.h
 - include/profile.h
 - include/shm_slots.h
+- include/table_layout.h
 - include/textfield.h
 - include/ui.h
 - include/wl_guard.h
@@ -65,6 +66,7 @@ tests groups 15 files (c) around dbl_eq, test_two_positive_collapse_to_max, test
 - src/interp.c
 - src/pdf_export.c
 - src/prefs.c
+- src/table_layout.c
 - src/textfield.c
 - src/ui_layout.c
 - src/wl_guard.c
@@ -80,6 +82,7 @@ tests groups 15 files (c) around dbl_eq, test_two_positive_collapse_to_max, test
 - tests/test_prefs.c
 - tests/test_profile.c
 - tests/test_shm_slots.c
+- tests/test_table_layout.c
 - tests/test_textfield.c
 - tests/test_ui.c
 - tests/test_wl_guard.c

@@ -3,6 +3,41 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_number_compact` | function | `tests/test_js_intl.c:90` | `static void test_number_compact(void **state)` |
+| `test_number_decimal` | function | `tests/test_js_intl.c:44` | `static void test_number_decimal(void **state)` |
+| `test_number_parts_and_options` | function | `tests/test_js_intl.c:99` | `static void test_number_parts_and_options(void **state)` |
+| `test_number_styles` | function | `tests/test_js_intl.c:71` | `static void test_number_styles(void **state)` |
+| `test_relative_plural_list` | function | `tests/test_js_intl.c:167` | `static void test_relative_plural_list(void **state)` |
+| `test_to_locale_string` | function | `tests/test_js_intl.c:110` | `static void test_to_locale_string(void **state)` |
+| `EXPECT` | macro | `tests/test_js_native.c:61` | `#define EXPECT(f, src, expected)` |
+| `EXPECT` | function | `tests/test_js_native.c:98` | `EXPECT(f,         "(function()` |
+| `EXPECT` | function | `tests/test_js_native.c:112` | `EXPECT(f, "function page(a)` |
+| `EXPECT` | function | `tests/test_js_native.c:113` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_native.c:118` | `EXPECT(f, "window.mine=function()` |
+| `EXPECT` | function | `tests/test_js_native.c:120` | `EXPECT(f, "'['+mine.name+']'+mine.toString()", "[]function()` |
+| `EXPECT` | function | `tests/test_js_native.c:164` | `EXPECT(f, "['userAgent','webdriver','languages','plugins','platform','hardwareConcurrency']"     ...` |
+| `EXPECT` | function | `tests/test_js_native.c:180` | `EXPECT(f, "Array.prototype.map.call(navigator.plugins,function(p)` |
+| `EXPECT` | function | `tests/test_js_native.c:184` | `EXPECT(f, "Array.prototype.map.call(navigator.mimeTypes,function(m)` |
+| `K` | class | `tests/test_js_native.c:116` | `` |
+| `K` | class | `tests/test_js_native.c:116` | `` |
+| `NATIVE` | macro | `tests/test_js_native.c:70` | `#define NATIVE(n)` |
+| `fixture` | struct | `tests/test_js_native.c:29` | `` |
+| `main` | function | `tests/test_js_native.c:199` | `int main(void)` |
+| `setup` | function | `tests/test_js_native.c:36` | `static int setup(void **state)` |
+| `teardown` | function | `tests/test_js_native.c:50` | `static int teardown(void **state)` |
+| `test_css_supports` | function | `tests/test_js_native.c:190` | `static void test_css_supports(void **state)` |
+| `test_firefox_plugins` | function | `tests/test_js_native.c:177` | `static void test_firefox_plugins(void **state)` |
+| `test_host_functions_look_native` | function | `tests/test_js_native.c:80` | `static void test_host_functions_look_native(void **state)` |
+| `test_interface_tags` | function | `tests/test_js_native.c:133` | `static void test_interface_tags(void **state)` |
+| `test_names` | function | `tests/test_js_native.c:126` | `static void test_names(void **state)` |
+| `test_navigator_shape` | function | `tests/test_js_native.c:161` | `static void test_navigator_shape(void **state)` |
+| `test_no_global_leaks_source` | function | `tests/test_js_native.c:96` | `static void test_no_global_leaks_source(void **state)` |
+| `test_null_and_idempotent` | function | `tests/test_js_native.c:72` | `static void test_null_and_idempotent(void **state)` |
+| `test_page_functions_keep_source` | function | `tests/test_js_native.c:110` | `static void test_page_functions_keep_source(void **state)` |
+| `test_singleton_interfaces` | function | `tests/test_js_native.c:153` | `static void test_singleton_interfaces(void **state)` |
+| `main` | function | `tests/test_js_policy.c:89` | `int main(void)` |
+| `test_enabled_fail_closed_on_bad_mode` | function | `tests/test_js_policy.c:31` | `static void test_enabled_fail_closed_on_bad_mode(void **state)` |
+| `test_mode_from_str` | function | `tests/test_js_policy.c:36` | `static void test_mode_from_str(void **state)` |
 | `test_mode_str_roundtrip` | function | `tests/test_js_policy.c:53` | `static void test_mode_str_roundtrip(void **state)` |
 | `test_trusted_requires_both_signals` | function | `tests/test_js_policy.c:68` | `static void test_trusted_requires_both_signals(void **state)` |
 | `assert_int_equal` | function | `tests/test_js_sandbox.c:175` | `assert_int_equal(js_eval_once("while(true)` |
@@ -141,38 +176,38 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_policy_denies_io_uring` | function | `tests/test_os_sandbox.c:64` | `static void test_policy_denies_io_uring(void **state)` |
 | `test_policy_size` | function | `tests/test_os_sandbox.c:71` | `static void test_policy_size(void **state)` |
 | `test_prot_allowed_wx` | function | `tests/test_os_sandbox.c:151` | `static void test_prot_allowed_wx(void **state)` |
-| `applies` | function | `tests/test_page_view.c:4952` | `* <style>: an extern rule applies (presentation and display:none alike);` |
-| `box_of_run_with_bg` | function | `tests/test_page_view.c:4016` | `static const pv_box_def *box_of_run_with_bg(const pv_view *v, int bg)` |
-| `break` | function | `tests/test_page_view.c:705` | `* block break (from entering <p>);` |
-| `collect_elements` | function | `tests/test_page_view.c:4667` | `static void collect_elements(lxb_dom_node_t *n, lxb_dom_element_t **out, size_t *cnt, size_t cap)` |
-| `count_empty_lines` | function | `tests/test_page_view.c:3719` | `static int count_empty_lines(const pv_view *v)` |
-| `count_inputs` | function | `tests/test_page_view.c:3616` | `static size_t count_inputs(const pv_view *v, int type)` |
+| `applies` | function | `tests/test_page_view.c:4968` | `* <style>: an extern rule applies (presentation and display:none alike);` |
+| `box_of_run_with_bg` | function | `tests/test_page_view.c:4032` | `static const pv_box_def *box_of_run_with_bg(const pv_view *v, int bg)` |
+| `break` | function | `tests/test_page_view.c:716` | `* block break (from entering <p>);` |
+| `collect_elements` | function | `tests/test_page_view.c:4683` | `static void collect_elements(lxb_dom_node_t *n, lxb_dom_element_t **out, size_t *cnt, size_t cap)` |
+| `count_empty_lines` | function | `tests/test_page_view.c:3735` | `static int count_empty_lines(const pv_view *v)` |
+| `count_inputs` | function | `tests/test_page_view.c:3632` | `static size_t count_inputs(const pv_view *v, int type)` |
 | `dropped` | function | `tests/test_page_view.c:429` | `* either flank is dropped (the inter-cell rule above stays). */ static void test_build_table_inli...` |
 | `find_image` | function | `tests/test_page_view.c:57` | `static const pv_run *find_image(const pv_view *v, const char *src)` |
-| `find_input` | function | `tests/test_page_view.c:3518` | `static const pv_run *find_input(const pv_view *v, const char *name)` |
+| `find_input` | function | `tests/test_page_view.c:3534` | `static const pv_run *find_input(const pv_view *v, const char *name)` |
 | `find_link` | function | `tests/test_page_view.c:75` | `static const pv_run *find_link(const pv_view *v, const char *href)` |
 | `find_sub` | function | `tests/test_page_view.c:48` | `static const pv_run *find_sub(const pv_view *v, const char *sub)` |
 | `find_svg` | function | `tests/test_page_view.c:83` | `static const pv_run *find_svg(const pv_view *v)` |
 | `find_text` | function | `tests/test_page_view.c:39` | `static const pv_run *find_text(const pv_view *v, const char *text)` |
 | `find_video` | function | `tests/test_page_view.c:66` | `static const pv_run *find_video(const pv_view *v, const char *src)` |
-| `float_id` | function | `tests/test_page_view.c:1634` | `* A run inside a float nested in another float reports the inner element as * float_id (unchanged) plus the outer...` |
-| `form` | function | `tests/test_page_view.c:3584` | `* invisible PV_IN_SUBMIT_BOX proxy carries the form (spec/page_view.md). */ assert_non_null(find_text(v, "Log in"));` |
-| `height` | function | `tests/test_page_view.c:4926` | `* real height (jkanime's donghuas/ovas panes are display:none, yet all their  * thumbnails flowed...` |
-| `ids_probe` | struct | `tests/test_page_view.c:1384` | `` |
-| `ids_probe_fn` | function | `tests/test_page_view.c:1385` | `static dom_node_id ids_probe_fn(void *ctx, const void *native)` |
-| `it` | function | `tests/test_page_view.c:636` | `* the rest of the row share it (so an overflowing table degrades to one row per * line, not one blob). */...` |
-| `line` | function | `tests/test_page_view.c:2008` | `* contiguous item run and dropped every cell onto its own line (Wikipedia's sister  * projects ta...` |
-| `main` | function | `tests/test_page_view.c:5760` | `int main(void)` |
-| `ordinal` | function | `tests/test_page_view.c:1936` | `* cont_item ordinal (they are one flex/grid item and must flow together in one * cell);` |
+| `float_id` | function | `tests/test_page_view.c:1645` | `* A run inside a float nested in another float reports the inner element as * float_id (unchanged) plus the outer...` |
+| `form` | function | `tests/test_page_view.c:3600` | `* invisible PV_IN_SUBMIT_BOX proxy carries the form (spec/page_view.md). */ assert_non_null(find_text(v, "Log in"));` |
+| `height` | function | `tests/test_page_view.c:4942` | `* real height (jkanime's donghuas/ovas panes are display:none, yet all their  * thumbnails flowed...` |
+| `ids_probe` | struct | `tests/test_page_view.c:1395` | `` |
+| `ids_probe_fn` | function | `tests/test_page_view.c:1396` | `static dom_node_id ids_probe_fn(void *ctx, const void *native)` |
+| `it` | function | `tests/test_page_view.c:647` | `* the rest of the row share it (so an overflowing table degrades to one row per * line, not one blob). */...` |
+| `line` | function | `tests/test_page_view.c:2019` | `* contiguous item run and dropped every cell onto its own line (Wikipedia's sister  * projects ta...` |
+| `main` | function | `tests/test_page_view.c:5776` | `int main(void)` |
+| `ordinal` | function | `tests/test_page_view.c:1947` | `* cont_item ordinal (they are one flex/grid item and must flow together in one * cell);` |
 | `parse` | function | `tests/test_page_view.c:31` | `static hp_document *parse(const char *html)` |
-| `reverted` | function | `tests/test_page_view.c:4912` | `* behavior of treating inline display:none as visible when JS is off * was reverted (commit 897f414 regression)...` |
-| `run_with_text` | function | `tests/test_page_view.c:4086` | `static const pv_run *run_with_text(const pv_view *v, const char *text)` |
-| `scales` | function | `tests/test_page_view.c:4828` | `* value the UA rule scales (tanda 19). */ static void test_build_heading_own_relative_size_replac...` |
-| `short` | function | `tests/test_page_view.c:1820` | `* heading came out two thirds short (and its UA margin with it, once it had a box). */ static voi...` |
-| `size` | function | `tests/test_page_view.c:774` | `* size (~100px) instead of the CSS 40px, blowing up flex rows (slashdot socials). */ static void ...` |
-| `table` | function | `tests/test_page_view.c:5717` | `* table (the cache replays the root matcher), and must equal the uncached build. */ static void t...` |
-| `test_after_box_on_empty_element` | function | `tests/test_page_view.c:4375` | `static void test_after_box_on_empty_element(void **state)` |
-| `test_after_content_stays_in_flex_item` | function | `tests/test_page_view.c:4352` | `static void test_after_content_stays_in_flex_item(void **state)` |
+| `reverted` | function | `tests/test_page_view.c:4928` | `* behavior of treating inline display:none as visible when JS is off * was reverted (commit 897f414 regression)...` |
+| `run_with_text` | function | `tests/test_page_view.c:4102` | `static const pv_run *run_with_text(const pv_view *v, const char *text)` |
+| `scales` | function | `tests/test_page_view.c:4844` | `* value the UA rule scales (tanda 19). */ static void test_build_heading_own_relative_size_replac...` |
+| `short` | function | `tests/test_page_view.c:1831` | `* heading came out two thirds short (and its UA margin with it, once it had a box). */ static voi...` |
+| `size` | function | `tests/test_page_view.c:785` | `* size (~100px) instead of the CSS 40px, blowing up flex rows (slashdot socials). */ static void ...` |
+| `table` | function | `tests/test_page_view.c:5733` | `* table (the cache replays the root matcher), and must equal the uncached build. */ static void t...` |
+| `test_after_box_on_empty_element` | function | `tests/test_page_view.c:4391` | `static void test_after_box_on_empty_element(void **state)` |
+| `test_after_content_stays_in_flex_item` | function | `tests/test_page_view.c:4368` | `static void test_after_content_stays_in_flex_item(void **state)` |
 | `test_append_copies_fields` | function | `tests/test_page_view.c:102` | `static void test_append_copies_fields(void **state)` |
 | `test_append_image_copies_fields` | function | `tests/test_page_view.c:129` | `static void test_append_image_copies_fields(void **state)` |
 | `test_append_image_null_args` | function | `tests/test_page_view.c:145` | `static void test_append_image_null_args(void **state)` |
@@ -182,192 +217,192 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_append_transcodes_word` | function | `tests/test_page_view.c:170` | `static void test_append_transcodes_word(void **state)` |
 | `test_append_undefined_cp1252_is_qmark` | function | `tests/test_page_view.c:191` | `static void test_append_undefined_cp1252_is_qmark(void **state)` |
 | `test_append_valid_utf8_passthrough` | function | `tests/test_page_view.c:201` | `static void test_append_valid_utf8_passthrough(void **state)` |
-| `test_append_video_copies_fields` | function | `tests/test_page_view.c:5505` | `static void test_append_video_copies_fields(void **state)` |
-| `test_append_video_no_poster` | function | `tests/test_page_view.c:5524` | `static void test_append_video_no_poster(void **state)` |
-| `test_append_video_null_args` | function | `tests/test_page_view.c:5540` | `static void test_append_video_null_args(void **state)` |
-| `test_author_list_padding_replaces_ua_indent` | function | `tests/test_page_view.c:4985` | `static void test_author_list_padding_replaces_ua_indent(void **state)` |
-| `test_before_box_before_text` | function | `tests/test_page_view.c:4256` | `static void test_before_box_before_text(void **state)` |
-| `test_before_box_on_empty_element` | function | `tests/test_page_view.c:4156` | `static void test_before_box_on_empty_element(void **state)` |
-| `test_before_box_on_host_with_only_element_children` | function | `tests/test_page_view.c:4175` | `static void test_before_box_on_host_with_only_element_children(void **state)` |
-| `test_before_rides_float_and_container` | function | `tests/test_page_view.c:5010` | `static void test_before_rides_float_and_container(void **state)` |
-| `test_block_inside_inline_block_in_line` | function | `tests/test_page_view.c:5108` | `static void test_block_inside_inline_block_in_line(void **state)` |
-| `test_body_background_propagates_to_canvas` | function | `tests/test_page_view.c:4194` | `static void test_body_background_propagates_to_canvas(void **state)` |
-| `test_box_defaults_and_setter` | function | `tests/test_page_view.c:2853` | `static void test_box_defaults_and_setter(void **state)` |
-| `test_box_min_width_zero_is_declared` | function | `tests/test_page_view.c:3967` | `static void test_box_min_width_zero_is_declared(void **state)` |
-| `test_br_continuation_flag` | function | `tests/test_page_view.c:3762` | `static void test_br_continuation_flag(void **state)` |
-| `test_br_opening_line_is_empty_line` | function | `tests/test_page_view.c:3731` | `static void test_br_opening_line_is_empty_line(void **state)` |
-| `test_build_abs_child_is_not_a_flex_item` | function | `tests/test_page_view.c:2605` | `static void test_build_abs_child_is_not_a_flex_item(void **state)` |
-| `test_build_absolute_inside_float_escapes` | function | `tests/test_page_view.c:1783` | `static void test_build_absolute_inside_float_escapes(void **state)` |
-| `test_build_anon_inline_block_row_wraps` | function | `tests/test_page_view.c:1455` | `static void test_build_anon_inline_block_row_wraps(void **state)` |
-| `test_build_anon_row_word_space_gap` | function | `tests/test_page_view.c:1417` | `static void test_build_anon_row_word_space_gap(void **state)` |
-| `test_build_audio_as_video_kind` | function | `tests/test_page_view.c:5634` | `static void test_build_audio_as_video_kind(void **state)` |
-| `test_build_author_color` | function | `tests/test_page_view.c:1169` | `static void test_build_author_color(void **state)` |
-| `test_build_bgcolor_attr_fallback` | function | `tests/test_page_view.c:589` | `static void test_build_bgcolor_attr_fallback(void **state)` |
-| `test_build_block_break_between_paragraphs` | function | `tests/test_page_view.c:673` | `static void test_build_block_break_between_paragraphs(void **state)` |
-| `test_build_box_leaf_inline` | function | `tests/test_page_view.c:2818` | `static void test_build_box_leaf_inline(void **state)` |
-| `test_build_box_tree_empty_no_box` | function | `tests/test_page_view.c:3506` | `static void test_build_box_tree_empty_no_box(void **state)` |
-| `test_build_box_tree_textless_wrapper` | function | `tests/test_page_view.c:3414` | `static void test_build_box_tree_textless_wrapper(void **state)` |
-| `test_build_boxdeco_border_padding` | function | `tests/test_page_view.c:3005` | `static void test_build_boxdeco_border_padding(void **state)` |
-| `test_build_boxdeco_defaults_no_box` | function | `tests/test_page_view.c:3320` | `static void test_build_boxdeco_defaults_no_box(void **state)` |
-| `test_build_boxdeco_dims_alone_trigger_box` | function | `tests/test_page_view.c:3215` | `static void test_build_boxdeco_dims_alone_trigger_box(void **state)` |
-| `test_build_boxdeco_fit_content_height_is_auto` | function | `tests/test_page_view.c:2965` | `static void test_build_boxdeco_fit_content_height_is_auto(void **state)` |
-| `test_build_boxdeco_h_margin_alone_creates_box` | function | `tests/test_page_view.c:2884` | `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)` |
-| `test_build_boxdeco_h_margin_zero_auto_no_box` | function | `tests/test_page_view.c:2904` | `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)` |
-| `test_build_boxdeco_min_content_height_is_auto` | function | `tests/test_page_view.c:2987` | `static void test_build_boxdeco_min_content_height_is_auto(void **state)` |
-| `test_build_boxdeco_shadow_outline` | function | `tests/test_page_view.c:3113` | `static void test_build_boxdeco_shadow_outline(void **state)` |
-| `test_build_boxdeco_shared_id_within_block` | function | `tests/test_page_view.c:3352` | `static void test_build_boxdeco_shared_id_within_block(void **state)` |
-| `test_build_boxdeco_sibling_blocks_distinct_ids` | function | `tests/test_page_view.c:3334` | `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)` |
-| `test_build_boxdeco_visibility_overflow_cursor` | function | `tests/test_page_view.c:3136` | `static void test_build_boxdeco_visibility_overflow_cursor(void **state)` |
-| `test_build_boxdef_carries_node_id` | function | `tests/test_page_view.c:2928` | `static void test_build_boxdef_carries_node_id(void **state)` |
-| `test_build_caret_color_inherited` | function | `tests/test_page_view.c:5481` | `static void test_build_caret_color_inherited(void **state)` |
-| `test_build_combinator_selectors` | function | `tests/test_page_view.c:1301` | `static void test_build_combinator_selectors(void **state)` |
-| `test_build_component_custom_props` | function | `tests/test_page_view.c:4861` | `static void test_build_component_custom_props(void **state)` |
-| `test_build_cont_item_identity` | function | `tests/test_page_view.c:1938` | `static void test_build_cont_item_identity(void **state)` |
-| `test_build_container_registry_holds_a_real_page` | function | `tests/test_page_view.c:2407` | `static void test_build_container_registry_holds_a_real_page(void **state)` |
-| `test_build_content_visibility_hidden_folds` | function | `tests/test_page_view.c:5436` | `static void test_build_content_visibility_hidden_folds(void **state)` |
-| `test_build_control_without_form` | function | `tests/test_page_view.c:4448` | `static void test_build_control_without_form(void **state)` |
-| `test_build_css_bold_and_inline_wins` | function | `tests/test_page_view.c:4805` | `static void test_build_css_bold_and_inline_wins(void **state)` |
-| `test_build_cursor_alone_triggers_box` | function | `tests/test_page_view.c:3160` | `static void test_build_cursor_alone_triggers_box(void **state)` |
-| `test_build_display_none_hidden` | function | `tests/test_page_view.c:4900` | `static void test_build_display_none_hidden(void **state)` |
-| `test_build_empty_box_gets_run_and_box` | function | `tests/test_page_view.c:3036` | `static void test_build_empty_box_gets_run_and_box(void **state)` |
-| `test_build_empty_document` | function | `tests/test_page_view.c:1133` | `static void test_build_empty_document(void **state)` |
-| `test_build_empty_flex_grow_spacer` | function | `tests/test_page_view.c:951` | `static void test_build_empty_flex_grow_spacer(void **state)` |
-| `test_build_flex_anchor_is_its_own_block` | function | `tests/test_page_view.c:1844` | `static void test_build_flex_anchor_is_its_own_block(void **state)` |
-| `test_build_flex_container` | function | `tests/test_page_view.c:1339` | `static void test_build_flex_container(void **state)` |
-| `test_build_flex_container_from_sheet` | function | `tests/test_page_view.c:2706` | `static void test_build_flex_container_from_sheet(void **state)` |
-| `test_build_flex_item_values` | function | `tests/test_page_view.c:1527` | `static void test_build_flex_item_values(void **state)` |
-| `test_build_flex_whitespace_not_item` | function | `tests/test_page_view.c:1860` | `static void test_build_flex_whitespace_not_item(void **state)` |
-| `test_build_flex_wrap_align_row_gap` | function | `tests/test_page_view.c:1486` | `static void test_build_flex_wrap_align_row_gap(void **state)` |
-| `test_build_float_outermost_founder` | function | `tests/test_page_view.c:1637` | `static void test_build_float_outermost_founder(void **state)` |
-| `test_build_float_threading` | function | `tests/test_page_view.c:1591` | `static void test_build_float_threading(void **state)` |
-| `test_build_float_widthless_stays_unset` | function | `tests/test_page_view.c:895` | `static void test_build_float_widthless_stays_unset(void **state)` |
-| `test_build_flow_table_row_is_one_block` | function | `tests/test_page_view.c:3078` | `static void test_build_flow_table_row_is_one_block(void **state)` |
-| `test_build_font_list_inherits` | function | `tests/test_page_view.c:2535` | `static void test_build_font_list_inherits(void **state)` |
-| `test_build_fontface_hash` | function | `tests/test_page_view.c:2178` | `static void test_build_fontface_hash(void **state)` |
-| `test_build_form_post_and_hidden` | function | `tests/test_page_view.c:3561` | `static void test_build_form_post_and_hidden(void **state)` |
-| `test_build_frame_with_only_oof_content_keeps_box` | function | `tests/test_page_view.c:3442` | `static void test_build_frame_with_only_oof_content_keeps_box(void **state)` |
-| `test_build_grid_autofill_marker` | function | `tests/test_page_view.c:2158` | `static void test_build_grid_autofill_marker(void **state)` |
-| `test_build_grid_columns_from_sheet` | function | `tests/test_page_view.c:2728` | `static void test_build_grid_columns_from_sheet(void **state)` |
-| `test_build_grid_container` | function | `tests/test_page_view.c:2138` | `static void test_build_grid_container(void **state)` |
-| `test_build_hbox_container_width_never_seeds_items` | function | `tests/test_page_view.c:1754` | `static void test_build_hbox_container_width_never_seeds_items(void **state)` |
-| `test_build_hbox_margin_above_container_merges` | function | `tests/test_page_view.c:1734` | `static void test_build_hbox_margin_above_container_merges(void **state)` |
+| `test_append_video_copies_fields` | function | `tests/test_page_view.c:5521` | `static void test_append_video_copies_fields(void **state)` |
+| `test_append_video_no_poster` | function | `tests/test_page_view.c:5540` | `static void test_append_video_no_poster(void **state)` |
+| `test_append_video_null_args` | function | `tests/test_page_view.c:5556` | `static void test_append_video_null_args(void **state)` |
+| `test_author_list_padding_replaces_ua_indent` | function | `tests/test_page_view.c:5001` | `static void test_author_list_padding_replaces_ua_indent(void **state)` |
+| `test_before_box_before_text` | function | `tests/test_page_view.c:4272` | `static void test_before_box_before_text(void **state)` |
+| `test_before_box_on_empty_element` | function | `tests/test_page_view.c:4172` | `static void test_before_box_on_empty_element(void **state)` |
+| `test_before_box_on_host_with_only_element_children` | function | `tests/test_page_view.c:4191` | `static void test_before_box_on_host_with_only_element_children(void **state)` |
+| `test_before_rides_float_and_container` | function | `tests/test_page_view.c:5026` | `static void test_before_rides_float_and_container(void **state)` |
+| `test_block_inside_inline_block_in_line` | function | `tests/test_page_view.c:5124` | `static void test_block_inside_inline_block_in_line(void **state)` |
+| `test_body_background_propagates_to_canvas` | function | `tests/test_page_view.c:4210` | `static void test_body_background_propagates_to_canvas(void **state)` |
+| `test_box_defaults_and_setter` | function | `tests/test_page_view.c:2864` | `static void test_box_defaults_and_setter(void **state)` |
+| `test_box_min_width_zero_is_declared` | function | `tests/test_page_view.c:3983` | `static void test_box_min_width_zero_is_declared(void **state)` |
+| `test_br_continuation_flag` | function | `tests/test_page_view.c:3778` | `static void test_br_continuation_flag(void **state)` |
+| `test_br_opening_line_is_empty_line` | function | `tests/test_page_view.c:3747` | `static void test_br_opening_line_is_empty_line(void **state)` |
+| `test_build_abs_child_is_not_a_flex_item` | function | `tests/test_page_view.c:2616` | `static void test_build_abs_child_is_not_a_flex_item(void **state)` |
+| `test_build_absolute_inside_float_escapes` | function | `tests/test_page_view.c:1794` | `static void test_build_absolute_inside_float_escapes(void **state)` |
+| `test_build_anon_inline_block_row_wraps` | function | `tests/test_page_view.c:1466` | `static void test_build_anon_inline_block_row_wraps(void **state)` |
+| `test_build_anon_row_word_space_gap` | function | `tests/test_page_view.c:1428` | `static void test_build_anon_row_word_space_gap(void **state)` |
+| `test_build_audio_as_video_kind` | function | `tests/test_page_view.c:5650` | `static void test_build_audio_as_video_kind(void **state)` |
+| `test_build_author_color` | function | `tests/test_page_view.c:1180` | `static void test_build_author_color(void **state)` |
+| `test_build_bgcolor_attr_fallback` | function | `tests/test_page_view.c:600` | `static void test_build_bgcolor_attr_fallback(void **state)` |
+| `test_build_block_break_between_paragraphs` | function | `tests/test_page_view.c:684` | `static void test_build_block_break_between_paragraphs(void **state)` |
+| `test_build_box_leaf_inline` | function | `tests/test_page_view.c:2829` | `static void test_build_box_leaf_inline(void **state)` |
+| `test_build_box_tree_empty_no_box` | function | `tests/test_page_view.c:3522` | `static void test_build_box_tree_empty_no_box(void **state)` |
+| `test_build_box_tree_textless_wrapper` | function | `tests/test_page_view.c:3430` | `static void test_build_box_tree_textless_wrapper(void **state)` |
+| `test_build_boxdeco_border_padding` | function | `tests/test_page_view.c:3016` | `static void test_build_boxdeco_border_padding(void **state)` |
+| `test_build_boxdeco_defaults_no_box` | function | `tests/test_page_view.c:3336` | `static void test_build_boxdeco_defaults_no_box(void **state)` |
+| `test_build_boxdeco_dims_alone_trigger_box` | function | `tests/test_page_view.c:3231` | `static void test_build_boxdeco_dims_alone_trigger_box(void **state)` |
+| `test_build_boxdeco_fit_content_height_is_auto` | function | `tests/test_page_view.c:2976` | `static void test_build_boxdeco_fit_content_height_is_auto(void **state)` |
+| `test_build_boxdeco_h_margin_alone_creates_box` | function | `tests/test_page_view.c:2895` | `static void test_build_boxdeco_h_margin_alone_creates_box(void **state)` |
+| `test_build_boxdeco_h_margin_zero_auto_no_box` | function | `tests/test_page_view.c:2915` | `static void test_build_boxdeco_h_margin_zero_auto_no_box(void **state)` |
+| `test_build_boxdeco_min_content_height_is_auto` | function | `tests/test_page_view.c:2998` | `static void test_build_boxdeco_min_content_height_is_auto(void **state)` |
+| `test_build_boxdeco_shadow_outline` | function | `tests/test_page_view.c:3129` | `static void test_build_boxdeco_shadow_outline(void **state)` |
+| `test_build_boxdeco_shared_id_within_block` | function | `tests/test_page_view.c:3368` | `static void test_build_boxdeco_shared_id_within_block(void **state)` |
+| `test_build_boxdeco_sibling_blocks_distinct_ids` | function | `tests/test_page_view.c:3350` | `static void test_build_boxdeco_sibling_blocks_distinct_ids(void **state)` |
+| `test_build_boxdeco_visibility_overflow_cursor` | function | `tests/test_page_view.c:3152` | `static void test_build_boxdeco_visibility_overflow_cursor(void **state)` |
+| `test_build_boxdef_carries_node_id` | function | `tests/test_page_view.c:2939` | `static void test_build_boxdef_carries_node_id(void **state)` |
+| `test_build_caret_color_inherited` | function | `tests/test_page_view.c:5497` | `static void test_build_caret_color_inherited(void **state)` |
+| `test_build_combinator_selectors` | function | `tests/test_page_view.c:1312` | `static void test_build_combinator_selectors(void **state)` |
+| `test_build_component_custom_props` | function | `tests/test_page_view.c:4877` | `static void test_build_component_custom_props(void **state)` |
+| `test_build_cont_item_identity` | function | `tests/test_page_view.c:1949` | `static void test_build_cont_item_identity(void **state)` |
+| `test_build_container_registry_holds_a_real_page` | function | `tests/test_page_view.c:2418` | `static void test_build_container_registry_holds_a_real_page(void **state)` |
+| `test_build_content_visibility_hidden_folds` | function | `tests/test_page_view.c:5452` | `static void test_build_content_visibility_hidden_folds(void **state)` |
+| `test_build_control_without_form` | function | `tests/test_page_view.c:4464` | `static void test_build_control_without_form(void **state)` |
+| `test_build_css_bold_and_inline_wins` | function | `tests/test_page_view.c:4821` | `static void test_build_css_bold_and_inline_wins(void **state)` |
+| `test_build_cursor_alone_triggers_box` | function | `tests/test_page_view.c:3176` | `static void test_build_cursor_alone_triggers_box(void **state)` |
+| `test_build_display_none_hidden` | function | `tests/test_page_view.c:4916` | `static void test_build_display_none_hidden(void **state)` |
+| `test_build_empty_box_gets_run_and_box` | function | `tests/test_page_view.c:3047` | `static void test_build_empty_box_gets_run_and_box(void **state)` |
+| `test_build_empty_document` | function | `tests/test_page_view.c:1144` | `static void test_build_empty_document(void **state)` |
+| `test_build_empty_flex_grow_spacer` | function | `tests/test_page_view.c:962` | `static void test_build_empty_flex_grow_spacer(void **state)` |
+| `test_build_flex_anchor_is_its_own_block` | function | `tests/test_page_view.c:1855` | `static void test_build_flex_anchor_is_its_own_block(void **state)` |
+| `test_build_flex_container` | function | `tests/test_page_view.c:1350` | `static void test_build_flex_container(void **state)` |
+| `test_build_flex_container_from_sheet` | function | `tests/test_page_view.c:2717` | `static void test_build_flex_container_from_sheet(void **state)` |
+| `test_build_flex_item_values` | function | `tests/test_page_view.c:1538` | `static void test_build_flex_item_values(void **state)` |
+| `test_build_flex_whitespace_not_item` | function | `tests/test_page_view.c:1871` | `static void test_build_flex_whitespace_not_item(void **state)` |
+| `test_build_flex_wrap_align_row_gap` | function | `tests/test_page_view.c:1497` | `static void test_build_flex_wrap_align_row_gap(void **state)` |
+| `test_build_float_outermost_founder` | function | `tests/test_page_view.c:1648` | `static void test_build_float_outermost_founder(void **state)` |
+| `test_build_float_threading` | function | `tests/test_page_view.c:1602` | `static void test_build_float_threading(void **state)` |
+| `test_build_float_widthless_stays_unset` | function | `tests/test_page_view.c:906` | `static void test_build_float_widthless_stays_unset(void **state)` |
+| `test_build_flow_table_row_is_one_block` | function | `tests/test_page_view.c:3089` | `static void test_build_flow_table_row_is_one_block(void **state)` |
+| `test_build_font_list_inherits` | function | `tests/test_page_view.c:2546` | `static void test_build_font_list_inherits(void **state)` |
+| `test_build_fontface_hash` | function | `tests/test_page_view.c:2189` | `static void test_build_fontface_hash(void **state)` |
+| `test_build_form_post_and_hidden` | function | `tests/test_page_view.c:3577` | `static void test_build_form_post_and_hidden(void **state)` |
+| `test_build_frame_with_only_oof_content_keeps_box` | function | `tests/test_page_view.c:3458` | `static void test_build_frame_with_only_oof_content_keeps_box(void **state)` |
+| `test_build_grid_autofill_marker` | function | `tests/test_page_view.c:2169` | `static void test_build_grid_autofill_marker(void **state)` |
+| `test_build_grid_columns_from_sheet` | function | `tests/test_page_view.c:2739` | `static void test_build_grid_columns_from_sheet(void **state)` |
+| `test_build_grid_container` | function | `tests/test_page_view.c:2149` | `static void test_build_grid_container(void **state)` |
+| `test_build_hbox_container_width_never_seeds_items` | function | `tests/test_page_view.c:1765` | `static void test_build_hbox_container_width_never_seeds_items(void **state)` |
+| `test_build_hbox_margin_above_container_merges` | function | `tests/test_page_view.c:1745` | `static void test_build_hbox_margin_above_container_merges(void **state)` |
 | `test_build_heading_level` | function | `tests/test_page_view.c:248` | `static void test_build_heading_level(void **state)` |
-| `test_build_iframe_display_none_hidden` | function | `tests/test_page_view.c:5701` | `static void test_build_iframe_display_none_hidden(void **state)` |
-| `test_build_iframe_emits_navigable_link` | function | `tests/test_page_view.c:5648` | `static void test_build_iframe_emits_navigable_link(void **state)` |
-| `test_build_iframe_without_src_ignored` | function | `tests/test_page_view.c:5688` | `static void test_build_iframe_without_src_ignored(void **state)` |
-| `test_build_image_auto_size_keeps_attr` | function | `tests/test_page_view.c:931` | `static void test_build_image_auto_size_keeps_attr(void **state)` |
-| `test_build_image_css_size_overrides_attr` | function | `tests/test_page_view.c:914` | `static void test_build_image_css_size_overrides_attr(void **state)` |
-| `test_build_image_in_skipped_subtree_ignored` | function | `tests/test_page_view.c:969` | `static void test_build_image_in_skipped_subtree_ignored(void **state)` |
-| `test_build_image_no_src_and_no_srcset_ignored` | function | `tests/test_page_view.c:1118` | `static void test_build_image_no_src_and_no_srcset_ignored(void **state)` |
-| `test_build_image_plain_src_wins_over_srcset` | function | `tests/test_page_view.c:1075` | `static void test_build_image_plain_src_wins_over_srcset(void **state)` |
-| `test_build_image_px_and_tracking_dims` | function | `tests/test_page_view.c:749` | `static void test_build_image_px_and_tracking_dims(void **state)` |
-| `test_build_image_rendering_inherited` | function | `tests/test_page_view.c:5462` | `static void test_build_image_rendering_inherited(void **state)` |
-| `test_build_image_srcset_data_url_not_truncated_at_comma` | function | `tests/test_page_view.c:1103` | `static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state)` |
-| `test_build_image_srcset_fallback_when_no_src` | function | `tests/test_page_view.c:1059` | `static void test_build_image_srcset_fallback_when_no_src(void **state)` |
-| `test_build_image_srcset_single_no_descriptor` | function | `tests/test_page_view.c:1090` | `static void test_build_image_srcset_single_no_descriptor(void **state)` |
-| `test_build_image_unknown_dims` | function | `tests/test_page_view.c:734` | `static void test_build_image_unknown_dims(void **state)` |
-| `test_build_image_with_dims` | function | `tests/test_page_view.c:717` | `static void test_build_image_with_dims(void **state)` |
-| `test_build_image_without_src_dims_emit_broken` | function | `tests/test_page_view.c:1042` | `static void test_build_image_without_src_dims_emit_broken(void **state)` |
-| `test_build_image_without_src_ignored` | function | `tests/test_page_view.c:1011` | `static void test_build_image_without_src_ignored(void **state)` |
-| `test_build_img_loading_lazy_is_recorded` | function | `tests/test_page_view.c:2274` | `static void test_build_img_loading_lazy_is_recorded(void **state)` |
-| `test_build_inline_block_row_alignment` | function | `tests/test_page_view.c:2250` | `static void test_build_inline_block_row_alignment(void **state)` |
-| `test_build_inline_block_row_ignores_oof_child` | function | `tests/test_page_view.c:2347` | `static void test_build_inline_block_row_ignores_oof_child(void **state)` |
+| `test_build_iframe_display_none_hidden` | function | `tests/test_page_view.c:5717` | `static void test_build_iframe_display_none_hidden(void **state)` |
+| `test_build_iframe_emits_navigable_link` | function | `tests/test_page_view.c:5664` | `static void test_build_iframe_emits_navigable_link(void **state)` |
+| `test_build_iframe_without_src_ignored` | function | `tests/test_page_view.c:5704` | `static void test_build_iframe_without_src_ignored(void **state)` |
+| `test_build_image_auto_size_keeps_attr` | function | `tests/test_page_view.c:942` | `static void test_build_image_auto_size_keeps_attr(void **state)` |
+| `test_build_image_css_size_overrides_attr` | function | `tests/test_page_view.c:925` | `static void test_build_image_css_size_overrides_attr(void **state)` |
+| `test_build_image_in_skipped_subtree_ignored` | function | `tests/test_page_view.c:980` | `static void test_build_image_in_skipped_subtree_ignored(void **state)` |
+| `test_build_image_no_src_and_no_srcset_ignored` | function | `tests/test_page_view.c:1129` | `static void test_build_image_no_src_and_no_srcset_ignored(void **state)` |
+| `test_build_image_plain_src_wins_over_srcset` | function | `tests/test_page_view.c:1086` | `static void test_build_image_plain_src_wins_over_srcset(void **state)` |
+| `test_build_image_px_and_tracking_dims` | function | `tests/test_page_view.c:760` | `static void test_build_image_px_and_tracking_dims(void **state)` |
+| `test_build_image_rendering_inherited` | function | `tests/test_page_view.c:5478` | `static void test_build_image_rendering_inherited(void **state)` |
+| `test_build_image_srcset_data_url_not_truncated_at_comma` | function | `tests/test_page_view.c:1114` | `static void test_build_image_srcset_data_url_not_truncated_at_comma(void **state)` |
+| `test_build_image_srcset_fallback_when_no_src` | function | `tests/test_page_view.c:1070` | `static void test_build_image_srcset_fallback_when_no_src(void **state)` |
+| `test_build_image_srcset_single_no_descriptor` | function | `tests/test_page_view.c:1101` | `static void test_build_image_srcset_single_no_descriptor(void **state)` |
+| `test_build_image_unknown_dims` | function | `tests/test_page_view.c:745` | `static void test_build_image_unknown_dims(void **state)` |
+| `test_build_image_with_dims` | function | `tests/test_page_view.c:728` | `static void test_build_image_with_dims(void **state)` |
+| `test_build_image_without_src_dims_emit_broken` | function | `tests/test_page_view.c:1053` | `static void test_build_image_without_src_dims_emit_broken(void **state)` |
+| `test_build_image_without_src_ignored` | function | `tests/test_page_view.c:1022` | `static void test_build_image_without_src_ignored(void **state)` |
+| `test_build_img_loading_lazy_is_recorded` | function | `tests/test_page_view.c:2285` | `static void test_build_img_loading_lazy_is_recorded(void **state)` |
+| `test_build_inline_block_row_alignment` | function | `tests/test_page_view.c:2261` | `static void test_build_inline_block_row_alignment(void **state)` |
+| `test_build_inline_block_row_ignores_oof_child` | function | `tests/test_page_view.c:2358` | `static void test_build_inline_block_row_ignores_oof_child(void **state)` |
 | `test_build_inline_emphasis` | function | `tests/test_page_view.c:265` | `static void test_build_inline_emphasis(void **state)` |
-| `test_build_inline_flex_is_inline_level` | function | `tests/test_page_view.c:2371` | `static void test_build_inline_flex_is_inline_level(void **state)` |
-| `test_build_inline_link_no_break_within_paragraph` | function | `tests/test_page_view.c:699` | `static void test_build_inline_link_no_break_within_paragraph(void **state)` |
-| `test_build_inline_whitespace_kept` | function | `tests/test_page_view.c:1916` | `static void test_build_inline_whitespace_kept(void **state)` |
-| `test_build_input_bare_chrome` | function | `tests/test_page_view.c:2299` | `static void test_build_input_bare_chrome(void **state)` |
-| `test_build_input_own_box_and_placeholder` | function | `tests/test_page_view.c:2320` | `static void test_build_input_own_box_and_placeholder(void **state)` |
-| `test_build_intrinsic_width_flag` | function | `tests/test_page_view.c:2461` | `static void test_build_intrinsic_width_flag(void **state)` |
-| `test_build_link_with_href` | function | `tests/test_page_view.c:654` | `static void test_build_link_with_href(void **state)` |
-| `test_build_live_iframe_is_a_sized_replaced_run` | function | `tests/test_page_view.c:5668` | `static void test_build_live_iframe_is_a_sized_replaced_run(void **state)` |
-| `test_build_live_uses_resolver_ids` | function | `tests/test_page_view.c:1394` | `static void test_build_live_uses_resolver_ids(void **state)` |
-| `test_build_lone_float_container_is_row_item` | function | `tests/test_page_view.c:2433` | `static void test_build_lone_float_container_is_row_item(void **state)` |
-| `test_build_long_class_attribute_keeps_classes` | function | `tests/test_page_view.c:2203` | `static void test_build_long_class_attribute_keeps_classes(void **state)` |
-| `test_build_nested_table_not_flattened` | function | `tests/test_page_view.c:605` | `static void test_build_nested_table_not_flattened(void **state)` |
-| `test_build_node_id_matches_dom_index` | function | `tests/test_page_view.c:5347` | `static void test_build_node_id_matches_dom_index(void **state)` |
-| `test_build_noscript_hidden_when_js_on` | function | `tests/test_page_view.c:998` | `static void test_build_noscript_hidden_when_js_on(void **state)` |
-| `test_build_noscript_shown_when_js_off` | function | `tests/test_page_view.c:985` | `static void test_build_noscript_shown_when_js_off(void **state)` |
+| `test_build_inline_flex_is_inline_level` | function | `tests/test_page_view.c:2382` | `static void test_build_inline_flex_is_inline_level(void **state)` |
+| `test_build_inline_link_no_break_within_paragraph` | function | `tests/test_page_view.c:710` | `static void test_build_inline_link_no_break_within_paragraph(void **state)` |
+| `test_build_inline_whitespace_kept` | function | `tests/test_page_view.c:1927` | `static void test_build_inline_whitespace_kept(void **state)` |
+| `test_build_input_bare_chrome` | function | `tests/test_page_view.c:2310` | `static void test_build_input_bare_chrome(void **state)` |
+| `test_build_input_own_box_and_placeholder` | function | `tests/test_page_view.c:2331` | `static void test_build_input_own_box_and_placeholder(void **state)` |
+| `test_build_intrinsic_width_flag` | function | `tests/test_page_view.c:2472` | `static void test_build_intrinsic_width_flag(void **state)` |
+| `test_build_link_with_href` | function | `tests/test_page_view.c:665` | `static void test_build_link_with_href(void **state)` |
+| `test_build_live_iframe_is_a_sized_replaced_run` | function | `tests/test_page_view.c:5684` | `static void test_build_live_iframe_is_a_sized_replaced_run(void **state)` |
+| `test_build_live_uses_resolver_ids` | function | `tests/test_page_view.c:1405` | `static void test_build_live_uses_resolver_ids(void **state)` |
+| `test_build_lone_float_container_is_row_item` | function | `tests/test_page_view.c:2444` | `static void test_build_lone_float_container_is_row_item(void **state)` |
+| `test_build_long_class_attribute_keeps_classes` | function | `tests/test_page_view.c:2214` | `static void test_build_long_class_attribute_keeps_classes(void **state)` |
+| `test_build_nested_table_not_flattened` | function | `tests/test_page_view.c:616` | `static void test_build_nested_table_not_flattened(void **state)` |
+| `test_build_node_id_matches_dom_index` | function | `tests/test_page_view.c:5363` | `static void test_build_node_id_matches_dom_index(void **state)` |
+| `test_build_noscript_hidden_when_js_on` | function | `tests/test_page_view.c:1009` | `static void test_build_noscript_hidden_when_js_on(void **state)` |
+| `test_build_noscript_shown_when_js_off` | function | `tests/test_page_view.c:996` | `static void test_build_noscript_shown_when_js_off(void **state)` |
 | `test_build_null_args` | function | `tests/test_page_view.c:226` | `static void test_build_null_args(void **state)` |
-| `test_build_oof_flag_badges_idiom` | function | `tests/test_page_view.c:2686` | `static void test_build_oof_flag_badges_idiom(void **state)` |
-| `test_build_oof_flag_via_cascade` | function | `tests/test_page_view.c:2662` | `static void test_build_oof_flag_via_cascade(void **state)` |
-| `test_build_oof_image_carries_block_id` | function | `tests/test_page_view.c:1669` | `static void test_build_oof_image_carries_block_id(void **state)` |
+| `test_build_oof_flag_badges_idiom` | function | `tests/test_page_view.c:2697` | `static void test_build_oof_flag_badges_idiom(void **state)` |
+| `test_build_oof_flag_via_cascade` | function | `tests/test_page_view.c:2673` | `static void test_build_oof_flag_via_cascade(void **state)` |
+| `test_build_oof_image_carries_block_id` | function | `tests/test_page_view.c:1680` | `static void test_build_oof_image_carries_block_id(void **state)` |
 | `test_build_ordered_and_nested_list` | function | `tests/test_page_view.c:324` | `static void test_build_ordered_and_nested_list(void **state)` |
 | `test_build_plain_text` | function | `tests/test_page_view.c:235` | `static void test_build_plain_text(void **state)` |
-| `test_build_pointer_events_on_box` | function | `tests/test_page_view.c:5417` | `static void test_build_pointer_events_on_box(void **state)` |
-| `test_build_pseudo_classes_and_siblings` | function | `tests/test_page_view.c:4520` | `static void test_build_pseudo_classes_and_siblings(void **state)` |
-| `test_build_reader_skips_boilerplate` | function | `tests/test_page_view.c:5303` | `static void test_build_reader_skips_boilerplate(void **state)` |
-| `test_build_root_element_style_inherits` | function | `tests/test_page_view.c:2567` | `static void test_build_root_element_style_inherits(void **state)` |
-| `test_build_root_font_size_is_overridable` | function | `tests/test_page_view.c:2585` | `static void test_build_root_font_size_is_overridable(void **state)` |
-| `test_build_search_form_get` | function | `tests/test_page_view.c:3528` | `static void test_build_search_form_get(void **state)` |
-| `test_build_select_defaults_to_first_option` | function | `tests/test_page_view.c:4431` | `static void test_build_select_defaults_to_first_option(void **state)` |
-| `test_build_select_shows_selected_option` | function | `tests/test_page_view.c:4392` | `static void test_build_select_shows_selected_option(void **state)` |
-| `test_build_skips_script_and_style` | function | `tests/test_page_view.c:685` | `static void test_build_skips_script_and_style(void **state)` |
-| `test_build_sourceless_video_keeps_its_box` | function | `tests/test_page_view.c:3466` | `static void test_build_sourceless_video_keeps_its_box(void **state)` |
-| `test_build_style_cache_distinct_siblings` | function | `tests/test_page_view.c:4643` | `static void test_build_style_cache_distinct_siblings(void **state)` |
-| `test_build_styled_external_css` | function | `tests/test_page_view.c:4956` | `static void test_build_styled_external_css(void **state)` |
-| `test_build_svg_css_stroke_inherited` | function | `tests/test_page_view.c:2499` | `static void test_build_svg_css_stroke_inherited(void **state)` |
-| `test_build_svg_fills_border_box_ancestor` | function | `tests/test_page_view.c:834` | `static void test_build_svg_fills_border_box_ancestor(void **state)` |
-| `test_build_svg_no_ancestor_width_unset` | function | `tests/test_page_view.c:854` | `static void test_build_svg_no_ancestor_width_unset(void **state)` |
-| `test_build_table_cell_author_styles` | function | `tests/test_page_view.c:4583` | `static void test_build_table_cell_author_styles(void **state)` |
-| `test_build_table_cellless_display_table_is_not_nested` | function | `tests/test_page_view.c:2066` | `static void test_build_table_cellless_display_table_is_not_nested(void **state)` |
-| `test_build_table_colspan_rowspan` | function | `tests/test_page_view.c:2092` | `static void test_build_table_colspan_rowspan(void **state)` |
+| `test_build_pointer_events_on_box` | function | `tests/test_page_view.c:5433` | `static void test_build_pointer_events_on_box(void **state)` |
+| `test_build_pseudo_classes_and_siblings` | function | `tests/test_page_view.c:4536` | `static void test_build_pseudo_classes_and_siblings(void **state)` |
+| `test_build_reader_skips_boilerplate` | function | `tests/test_page_view.c:5319` | `static void test_build_reader_skips_boilerplate(void **state)` |
+| `test_build_root_element_style_inherits` | function | `tests/test_page_view.c:2578` | `static void test_build_root_element_style_inherits(void **state)` |
+| `test_build_root_font_size_is_overridable` | function | `tests/test_page_view.c:2596` | `static void test_build_root_font_size_is_overridable(void **state)` |
+| `test_build_search_form_get` | function | `tests/test_page_view.c:3544` | `static void test_build_search_form_get(void **state)` |
+| `test_build_select_defaults_to_first_option` | function | `tests/test_page_view.c:4447` | `static void test_build_select_defaults_to_first_option(void **state)` |
+| `test_build_select_shows_selected_option` | function | `tests/test_page_view.c:4408` | `static void test_build_select_shows_selected_option(void **state)` |
+| `test_build_skips_script_and_style` | function | `tests/test_page_view.c:696` | `static void test_build_skips_script_and_style(void **state)` |
+| `test_build_sourceless_video_keeps_its_box` | function | `tests/test_page_view.c:3482` | `static void test_build_sourceless_video_keeps_its_box(void **state)` |
+| `test_build_style_cache_distinct_siblings` | function | `tests/test_page_view.c:4659` | `static void test_build_style_cache_distinct_siblings(void **state)` |
+| `test_build_styled_external_css` | function | `tests/test_page_view.c:4972` | `static void test_build_styled_external_css(void **state)` |
+| `test_build_svg_css_stroke_inherited` | function | `tests/test_page_view.c:2510` | `static void test_build_svg_css_stroke_inherited(void **state)` |
+| `test_build_svg_fills_border_box_ancestor` | function | `tests/test_page_view.c:845` | `static void test_build_svg_fills_border_box_ancestor(void **state)` |
+| `test_build_svg_no_ancestor_width_unset` | function | `tests/test_page_view.c:865` | `static void test_build_svg_no_ancestor_width_unset(void **state)` |
+| `test_build_table_cell_author_styles` | function | `tests/test_page_view.c:4599` | `static void test_build_table_cell_author_styles(void **state)` |
+| `test_build_table_cellless_display_table_is_not_nested` | function | `tests/test_page_view.c:2077` | `static void test_build_table_cellless_display_table_is_not_nested(void **state)` |
+| `test_build_table_colspan_rowspan` | function | `tests/test_page_view.c:2103` | `static void test_build_table_colspan_rowspan(void **state)` |
 | `test_build_table_flattens_cell` | function | `tests/test_page_view.c:455` | `static void test_build_table_flattens_cell(void **state)` |
 | `test_build_table_grid` | function | `tests/test_page_view.c:347` | `static void test_build_table_grid(void **state)` |
 | `test_build_table_intercell_whitespace_dropped` | function | `tests/test_page_view.c:387` | `static void test_build_table_intercell_whitespace_dropped(void **state)` |
-| `test_build_text_align_and_font_size` | function | `tests/test_page_view.c:4735` | `static void test_build_text_align_and_font_size(void **state)` |
-| `test_build_text_balance_inherits` | function | `tests/test_page_view.c:2520` | `static void test_build_text_balance_inherits(void **state)` |
-| `test_build_text_decoration` | function | `tests/test_page_view.c:4782` | `static void test_build_text_decoration(void **state)` |
-| `test_build_text_overflow_and_word_break` | function | `tests/test_page_view.c:3260` | `static void test_build_text_overflow_and_word_break(void **state)` |
-| `test_build_textarea_value` | function | `tests/test_page_view.c:3597` | `static void test_build_textarea_value(void **state)` |
-| `test_build_two_forms_distinct_groups` | function | `tests/test_page_view.c:4461` | `static void test_build_two_forms_distinct_groups(void **state)` |
+| `test_build_text_align_and_font_size` | function | `tests/test_page_view.c:4751` | `static void test_build_text_align_and_font_size(void **state)` |
+| `test_build_text_balance_inherits` | function | `tests/test_page_view.c:2531` | `static void test_build_text_balance_inherits(void **state)` |
+| `test_build_text_decoration` | function | `tests/test_page_view.c:4798` | `static void test_build_text_decoration(void **state)` |
+| `test_build_text_overflow_and_word_break` | function | `tests/test_page_view.c:3276` | `static void test_build_text_overflow_and_word_break(void **state)` |
+| `test_build_textarea_value` | function | `tests/test_page_view.c:3613` | `static void test_build_textarea_value(void **state)` |
+| `test_build_two_forms_distinct_groups` | function | `tests/test_page_view.c:4477` | `static void test_build_two_forms_distinct_groups(void **state)` |
 | `test_build_unordered_list` | function | `tests/test_page_view.c:306` | `static void test_build_unordered_list(void **state)` |
-| `test_build_video_fallback_suppressed` | function | `tests/test_page_view.c:5608` | `static void test_build_video_fallback_suppressed(void **state)` |
-| `test_build_video_source_type_preference` | function | `tests/test_page_view.c:5590` | `static void test_build_video_source_type_preference(void **state)` |
-| `test_build_video_uses_source_child` | function | `tests/test_page_view.c:5570` | `static void test_build_video_uses_source_child(void **state)` |
-| `test_build_video_with_source` | function | `tests/test_page_view.c:5550` | `static void test_build_video_with_source(void **state)` |
-| `test_build_video_without_src_ignored` | function | `tests/test_page_view.c:5623` | `static void test_build_video_without_src_ignored(void **state)` |
-| `test_build_zero_padding_is_not_a_box` | function | `tests/test_page_view.c:3061` | `static void test_build_zero_padding_is_not_a_box(void **state)` |
-| `test_button_content_flows` | function | `tests/test_page_view.c:3638` | `static void test_button_content_flows(void **state)` |
-| `test_button_icon_invents_no_label` | function | `tests/test_page_view.c:3623` | `static void test_button_icon_invents_no_label(void **state)` |
-| `test_button_submit_proxy` | function | `tests/test_page_view.c:3652` | `static void test_button_submit_proxy(void **state)` |
-| `test_button_ua_face_loses_to_author` | function | `tests/test_page_view.c:3677` | `static void test_button_ua_face_loses_to_author(void **state)` |
-| `test_checked_boolean_attribute_is_detected` | function | `tests/test_page_view.c:4063` | `static void test_checked_boolean_attribute_is_detected(void **state)` |
-| `test_container_defaults` | function | `tests/test_page_view.c:2767` | `static void test_container_defaults(void **state)` |
-| `test_flex_item_inline_is_blockified` | function | `tests/test_page_view.c:3987` | `static void test_flex_item_inline_is_blockified(void **state)` |
-| `test_float_inner_blocks_keep_breaks` | function | `tests/test_page_view.c:3814` | `static void test_float_inner_blocks_keep_breaks(void **state)` |
+| `test_build_video_fallback_suppressed` | function | `tests/test_page_view.c:5624` | `static void test_build_video_fallback_suppressed(void **state)` |
+| `test_build_video_source_type_preference` | function | `tests/test_page_view.c:5606` | `static void test_build_video_source_type_preference(void **state)` |
+| `test_build_video_uses_source_child` | function | `tests/test_page_view.c:5586` | `static void test_build_video_uses_source_child(void **state)` |
+| `test_build_video_with_source` | function | `tests/test_page_view.c:5566` | `static void test_build_video_with_source(void **state)` |
+| `test_build_video_without_src_ignored` | function | `tests/test_page_view.c:5639` | `static void test_build_video_without_src_ignored(void **state)` |
+| `test_build_zero_padding_is_not_a_box` | function | `tests/test_page_view.c:3072` | `static void test_build_zero_padding_is_not_a_box(void **state)` |
+| `test_button_content_flows` | function | `tests/test_page_view.c:3654` | `static void test_button_content_flows(void **state)` |
+| `test_button_icon_invents_no_label` | function | `tests/test_page_view.c:3639` | `static void test_button_icon_invents_no_label(void **state)` |
+| `test_button_submit_proxy` | function | `tests/test_page_view.c:3668` | `static void test_button_submit_proxy(void **state)` |
+| `test_button_ua_face_loses_to_author` | function | `tests/test_page_view.c:3693` | `static void test_button_ua_face_loses_to_author(void **state)` |
+| `test_checked_boolean_attribute_is_detected` | function | `tests/test_page_view.c:4079` | `static void test_checked_boolean_attribute_is_detected(void **state)` |
+| `test_container_defaults` | function | `tests/test_page_view.c:2778` | `static void test_container_defaults(void **state)` |
+| `test_flex_item_inline_is_blockified` | function | `tests/test_page_view.c:4003` | `static void test_flex_item_inline_is_blockified(void **state)` |
+| `test_float_inner_blocks_keep_breaks` | function | `tests/test_page_view.c:3830` | `static void test_float_inner_blocks_keep_breaks(void **state)` |
 | `test_free_null_and_double` | function | `tests/test_page_view.c:217` | `static void test_free_null_and_double(void **state)` |
-| `test_gradient_text_runs` | function | `tests/test_page_view.c:1223` | `static void test_gradient_text_runs(void **state)` |
-| `test_grid_line_placement_nested_container_item` | function | `tests/test_page_view.c:3879` | `static void test_grid_line_placement_nested_container_item(void **state)` |
-| `test_grid_line_placement_plain_item` | function | `tests/test_page_view.c:3854` | `static void test_grid_line_placement_plain_item(void **state)` |
-| `test_hidden_attribute_is_display_none` | function | `tests/test_page_view.c:3831` | `static void test_hidden_attribute_is_display_none(void **state)` |
-| `test_inline_level_tag_list_stays_in_line` | function | `tests/test_page_view.c:5041` | `static void test_inline_level_tag_list_stays_in_line(void **state)` |
-| `test_inline_pseudo_registers_no_box` | function | `tests/test_page_view.c:4289` | `static void test_inline_pseudo_registers_no_box(void **state)` |
-| `test_link_color_inherit` | function | `tests/test_page_view.c:4033` | `static void test_link_color_inherit(void **state)` |
-| `test_marker_only_for_list_item_display` | function | `tests/test_page_view.c:5069` | `static void test_marker_only_for_list_item_display(void **state)` |
-| `test_mask_reaches_the_box` | function | `tests/test_page_view.c:4218` | `static void test_mask_reaches_the_box(void **state)` |
+| `test_gradient_text_runs` | function | `tests/test_page_view.c:1234` | `static void test_gradient_text_runs(void **state)` |
+| `test_grid_line_placement_nested_container_item` | function | `tests/test_page_view.c:3895` | `static void test_grid_line_placement_nested_container_item(void **state)` |
+| `test_grid_line_placement_plain_item` | function | `tests/test_page_view.c:3870` | `static void test_grid_line_placement_plain_item(void **state)` |
+| `test_hidden_attribute_is_display_none` | function | `tests/test_page_view.c:3847` | `static void test_hidden_attribute_is_display_none(void **state)` |
+| `test_inline_level_tag_list_stays_in_line` | function | `tests/test_page_view.c:5057` | `static void test_inline_level_tag_list_stays_in_line(void **state)` |
+| `test_inline_pseudo_registers_no_box` | function | `tests/test_page_view.c:4305` | `static void test_inline_pseudo_registers_no_box(void **state)` |
+| `test_link_color_inherit` | function | `tests/test_page_view.c:4049` | `static void test_link_color_inherit(void **state)` |
+| `test_marker_only_for_list_item_display` | function | `tests/test_page_view.c:5085` | `static void test_marker_only_for_list_item_display(void **state)` |
+| `test_mask_reaches_the_box` | function | `tests/test_page_view.c:4234` | `static void test_mask_reaches_the_box(void **state)` |
 | `test_new_is_empty` | function | `tests/test_page_view.c:93` | `static void test_new_is_empty(void **state)` |
-| `test_pct_padding_generates_box` | function | `tests/test_page_view.c:4047` | `static void test_pct_padding_generates_box(void **state)` |
-| `test_phrasing_ua_faces` | function | `tests/test_page_view.c:3699` | `static void test_phrasing_ua_faces(void **state)` |
-| `test_pseudo_after_on_element_with_children` | function | `tests/test_page_view.c:5184` | `static void test_pseudo_after_on_element_with_children(void **state)` |
-| `test_pseudo_after_on_whitespace_only_no_run` | function | `tests/test_page_view.c:5262` | `static void test_pseudo_after_on_whitespace_only_no_run(void **state)` |
-| `test_pseudo_before_escape_end_to_end` | function | `tests/test_page_view.c:5249` | `static void test_pseudo_before_escape_end_to_end(void **state)` |
-| `test_pseudo_before_fires_with_nested_text` | function | `tests/test_page_view.c:5276` | `static void test_pseudo_before_fires_with_nested_text(void **state)` |
-| `test_pseudo_before_on_element_with_children` | function | `tests/test_page_view.c:5169` | `static void test_pseudo_before_on_element_with_children(void **state)` |
-| `test_pseudo_before_on_empty` | function | `tests/test_page_view.c:5156` | `static void test_pseudo_before_on_empty(void **state)` |
-| `test_pseudo_before_on_textless_subtree` | function | `tests/test_page_view.c:5233` | `static void test_pseudo_before_on_textless_subtree(void **state)` |
-| `test_pseudo_both_before_and_after` | function | `tests/test_page_view.c:5199` | `static void test_pseudo_both_before_and_after(void **state)` |
-| `test_pseudo_content_inherits_color` | function | `tests/test_page_view.c:4332` | `static void test_pseudo_content_inherits_color(void **state)` |
-| `test_pseudo_display_none_generates_nothing` | function | `tests/test_page_view.c:4272` | `static void test_pseudo_display_none_generates_nothing(void **state)` |
-| `test_pseudo_no_content_no_run` | function | `tests/test_page_view.c:5289` | `static void test_pseudo_no_content_no_run(void **state)` |
-| `test_root_insets` | function | `tests/test_page_view.c:2230` | `static void test_root_insets(void **state)` |
-| `test_set_color_model` | function | `tests/test_page_view.c:1147` | `static void test_set_color_model(void **state)` |
-| `test_set_node_id_model` | function | `tests/test_page_view.c:5331` | `static void test_set_node_id_model(void **state)` |
-| `test_set_text_style_model` | function | `tests/test_page_view.c:5386` | `static void test_set_text_style_model(void **state)` |
-| `test_style_path_matches_uncached_chain` | function | `tests/test_page_view.c:4675` | `static void test_style_path_matches_uncached_chain(void **state)` |
-| `test_svg_append_root_attrs` | function | `tests/test_page_view.c:2482` | `static void test_svg_append_root_attrs(void **state)` |
-| `test_text_fill_color_runs` | function | `tests/test_page_view.c:1255` | `static void test_text_fill_color_runs(void **state)` |
-| `unset` | function | `tests/test_page_view.c:814` | `* unset (-1) so the render step derives it from the viewBox aspect. */ static void test_build_svg...` |
+| `test_pct_padding_generates_box` | function | `tests/test_page_view.c:4063` | `static void test_pct_padding_generates_box(void **state)` |
+| `test_phrasing_ua_faces` | function | `tests/test_page_view.c:3715` | `static void test_phrasing_ua_faces(void **state)` |
+| `test_pseudo_after_on_element_with_children` | function | `tests/test_page_view.c:5200` | `static void test_pseudo_after_on_element_with_children(void **state)` |
+| `test_pseudo_after_on_whitespace_only_no_run` | function | `tests/test_page_view.c:5278` | `static void test_pseudo_after_on_whitespace_only_no_run(void **state)` |
+| `test_pseudo_before_escape_end_to_end` | function | `tests/test_page_view.c:5265` | `static void test_pseudo_before_escape_end_to_end(void **state)` |
+| `test_pseudo_before_fires_with_nested_text` | function | `tests/test_page_view.c:5292` | `static void test_pseudo_before_fires_with_nested_text(void **state)` |
+| `test_pseudo_before_on_element_with_children` | function | `tests/test_page_view.c:5185` | `static void test_pseudo_before_on_element_with_children(void **state)` |
+| `test_pseudo_before_on_empty` | function | `tests/test_page_view.c:5172` | `static void test_pseudo_before_on_empty(void **state)` |
+| `test_pseudo_before_on_textless_subtree` | function | `tests/test_page_view.c:5249` | `static void test_pseudo_before_on_textless_subtree(void **state)` |
+| `test_pseudo_both_before_and_after` | function | `tests/test_page_view.c:5215` | `static void test_pseudo_both_before_and_after(void **state)` |
+| `test_pseudo_content_inherits_color` | function | `tests/test_page_view.c:4348` | `static void test_pseudo_content_inherits_color(void **state)` |
+| `test_pseudo_display_none_generates_nothing` | function | `tests/test_page_view.c:4288` | `static void test_pseudo_display_none_generates_nothing(void **state)` |
+| `test_pseudo_no_content_no_run` | function | `tests/test_page_view.c:5305` | `static void test_pseudo_no_content_no_run(void **state)` |
+| `test_root_insets` | function | `tests/test_page_view.c:2241` | `static void test_root_insets(void **state)` |
+| `test_set_color_model` | function | `tests/test_page_view.c:1158` | `static void test_set_color_model(void **state)` |
+| `test_set_node_id_model` | function | `tests/test_page_view.c:5347` | `static void test_set_node_id_model(void **state)` |
+| `test_set_text_style_model` | function | `tests/test_page_view.c:5402` | `static void test_set_text_style_model(void **state)` |
+| `test_style_path_matches_uncached_chain` | function | `tests/test_page_view.c:4691` | `static void test_style_path_matches_uncached_chain(void **state)` |
+| `test_svg_append_root_attrs` | function | `tests/test_page_view.c:2493` | `static void test_svg_append_root_attrs(void **state)` |
+| `test_text_fill_color_runs` | function | `tests/test_page_view.c:1266` | `static void test_text_fill_color_runs(void **state)` |
+| `unset` | function | `tests/test_page_view.c:825` | `* unset (-1) so the render step derives it from the viewBox aspect. */ static void test_build_svg...` |
 | `main` | function | `tests/test_pdf_export.c:290` | `int main(void)` |
 | `pagination` | function | `tests/test_pdf_export.c:8` | `* deterministic pagination (single/multi page, no row splitting, oversized row,  * gap preservati...` |
 | `test_basename_all_separators_fall_back` | function | `tests/test_pdf_export.c:105` | `static void test_basename_all_separators_fall_back(void **state)` |
@@ -450,51 +485,16 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `test_parse_unknown_and_malformed_skipped` | function | `tests/test_prefs.c:165` | `static void test_parse_unknown_and_malformed_skipped(void **state)` |
 | `test_roundtrip` | function | `tests/test_prefs.c:80` | `static void test_roundtrip(void **state)` |
 | `test_suggest_priorities` | function | `tests/test_prefs.c:320` | `static void test_suggest_priorities(void **state)` |
-| `_GNU_SOURCE` | macro | `tests/test_profile.c:9` | `#define _GNU_SOURCE` |
-| `dir` | type_alias | `tests/test_profile.c:27` | `typedef struct fixture { char dir[64];` |
-| `file_size` | function | `tests/test_profile.c:64` | `static size_t file_size(const char *path)` |
-| `fixture` | struct | `tests/test_profile.c:28` | `` |
-| `main` | function | `tests/test_profile.c:278` | `int main(void)` |
-| `path_of` | function | `tests/test_profile.c:60` | `static void path_of(const fixture *f, const char *name, char *out, size_t cap)` |
-| `setup` | function | `tests/test_profile.c:30` | `static int setup(void **state)` |
-| `teardown` | function | `tests/test_profile.c:39` | `static int teardown(void **state)` |
-| `test_first_launch_defaults` | function | `tests/test_profile.c:115` | `static void test_first_launch_defaults(void **state)` |
-| `test_foreign_key_auth_fails` | function | `tests/test_profile.c:236` | `static void test_foreign_key_auth_fails(void **state)` |
-| `test_nothing_readable_on_disk` | function | `tests/test_profile.c:174` | `static void test_nothing_readable_on_disk(void **state)` |
-| `test_null_and_not_ready` | function | `tests/test_profile.c:261` | `static void test_null_and_not_ready(void **state)` |
-| `test_open_bad_dir` | function | `tests/test_profile.c:103` | `static void test_open_bad_dir(void **state)` |
-| `test_open_creates_keyfile` | function | `tests/test_profile.c:72` | `static void test_open_creates_keyfile(void **state)` |
-| `test_open_rejects_corrupt_keyfile` | function | `tests/test_profile.c:89` | `static void test_open_rejects_corrupt_keyfile(void **state)` |
-| `test_save_load_roundtrip_two_ctx` | function | `tests/test_profile.c:128` | `static void test_save_load_roundtrip_two_ctx(void **state)` |
-| `test_tampered_blob_auth_fails` | function | `tests/test_profile.c:204` | `static void test_tampered_blob_auth_fails(void **state)` |
-| `caps_images_on` | function | `tests/test_render_doc.c:28` | `static rdp_caps caps_images_on(void)` |
-| `first_kind` | function | `tests/test_render_doc.c:35` | `static const rd_block *first_kind(const rd_doc *d, rd_kind k)` |
-| `main` | function | `tests/test_render_doc.c:873` | `int main(void)` |
-| `test_author_color_gated_by_css` | function | `tests/test_render_doc.c:403` | `static void test_author_color_gated_by_css(void **state)` |
-| `test_block_tag_total` | function | `tests/test_render_doc.c:824` | `static void test_block_tag_total(void **state)` |
-| `test_build_null_out` | function | `tests/test_render_doc.c:44` | `static void test_build_null_out(void **state)` |
-| `test_build_null_view_is_empty` | function | `tests/test_render_doc.c:51` | `static void test_build_null_view_is_empty(void **state)` |
-| `test_caret_color_gated_on_input` | function | `tests/test_render_doc.c:537` | `static void test_caret_color_gated_on_input(void **state)` |
-| `test_cont_item_carried_by_default` | function | `tests/test_render_doc.c:659` | `static void test_cont_item_carried_by_default(void **state)` |
-| `test_container_carried_by_default` | function | `tests/test_render_doc.c:627` | `static void test_container_carried_by_default(void **state)` |
-| `test_emphasis_propagates` | function | `tests/test_render_doc.c:94` | `static void test_emphasis_propagates(void **state)` |
-| `test_flex_item_carried_by_default` | function | `tests/test_render_doc.c:728` | `static void test_flex_item_carried_by_default(void **state)` |
-| `test_flex_wrap_align_row_gap_carried_by_default` | function | `tests/test_render_doc.c:776` | `static void test_flex_wrap_align_row_gap_carried_by_default(void **state)` |
-| `test_float_carried_by_default` | function | `tests/test_render_doc.c:692` | `static void test_float_carried_by_default(void **state)` |
-| `test_free_null_and_double` | function | `tests/test_render_doc.c:393` | `static void test_free_null_and_double(void **state)` |
-| `test_heading_level_of_link` | function | `tests/test_render_doc.c:808` | `static void test_heading_level_of_link(void **state)` |
-| `test_heading_paragraph_link` | function | `tests/test_render_doc.c:64` | `static void test_heading_paragraph_link(void **state)` |
-| `test_href_sanitised` | function | `tests/test_render_doc.c:353` | `static void test_href_sanitised(void **state)` |
-| `test_image_data_url_allowed_no_top` | function | `tests/test_render_doc.c:302` | `static void test_image_data_url_allowed_no_top(void **state)` |
-| `test_image_data_url_allowed_remote_top` | function | `tests/test_render_doc.c:284` | `static void test_image_data_url_allowed_remote_top(void **state)` |
-| `test_image_data_url_disabled_by_default` | function | `tests/test_render_doc.c:315` | `static void test_image_data_url_disabled_by_default(void **state)` |
-| `test_image_data_url_percent_encoded_allowed` | function | `tests/test_render_doc.c:331` | `static void test_image_data_url_percent_encoded_allowed(void **state)` |
-| `test_image_label_total` | function | `tests/test_render_doc.c:380` | `static void test_image_label_total(void **state)` |
-| `test_image_off_emits_notice_and_blocked` | function | `tests/test_render_doc.c:125` | `static void test_image_off_emits_notice_and_blocked(void **state)` |
-| `test_image_on_allows_normal` | function | `tests/test_render_doc.c:188` | `static void test_image_on_allows_normal(void **state)` |
-| `test_image_on_blocks_non_https` | function | `tests/test_render_doc.c:249` | `static void test_image_on_blocks_non_https(void **state)` |
-| `test_image_on_blocks_tracker` | function | `tests/test_render_doc.c:236` | `static void test_image_on_blocks_tracker(void **state)` |
-| `test_image_on_resolves_doc_relative_src` | function | `tests/test_render_doc.c:222` | `static void test_image_on_resolves_doc_relative_src(void **state)` |
-| `test_image_on_resolves_relative_src` | function | `tests/test_render_doc.c:206` | `static void test_image_on_resolves_relative_src(void **state)` |
+| `fresh` | function | `tests/test_pres_hints.c:19` | `static css_style fresh(void)` |
+| `get` | function | `tests/test_pres_hints.c:13` | `static const char *get(void *ctx, const char *name, size_t *len)` |
+| `kv` | struct | `tests/test_pres_hints.c:11` | `` |
+| `main` | function | `tests/test_pres_hints.c:176` | `int main(void)` |
+| `test_bgcolor_and_quirks` | function | `tests/test_pres_hints.c:132` | `static void test_bgcolor_and_quirks(void **state)` |
+| `test_cell_hints` | function | `tests/test_pres_hints.c:93` | `static void test_cell_hints(void **state)` |
+| `test_center_and_block_align` | function | `tests/test_pres_hints.c:106` | `static void test_center_and_block_align(void **state)` |
+| `test_css_wins` | function | `tests/test_pres_hints.c:72` | `static void test_css_wins(void **state)` |
+| `test_dimension` | function | `tests/test_pres_hints.c:28` | `static void test_dimension(void **state)` |
+| `test_fail_closed` | function | `tests/test_pres_hints.c:162` | `static void test_fail_closed(void **state)` |
+| `test_table_width_and_centering` | function | `tests/test_pres_hints.c:49` | `static void test_table_width_and_centering(void **state)` |
 
 Next: [SYMBOLS_p16.md](SYMBOLS_p16.md)

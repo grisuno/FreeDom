@@ -48,6 +48,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/svg_paint.h`
 - `gui/browser_ui.c` -> `include/svg_render.h`
 - `gui/browser_ui.c` -> `include/tab.h`
+- `gui/browser_ui.c` -> `include/table_layout.h`
 - `gui/browser_ui.c` -> `include/text_case.h`
 - `gui/browser_ui.c` -> `include/text_shape.h`
 - `gui/browser_ui.c` -> `include/textfield.h`
@@ -119,6 +120,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/page_view.h` -> `include/dom.h`
 - `include/page_view.h` -> `include/html_parse.h`
 - `include/pq_seal.h` -> `include/local_store.h`
+- `include/pres_hints.h` -> `include/css.h`
 - `include/profile.h` -> `include/local_store.h`
 - `include/profile.h` -> `include/prefs.h`
 - `include/render_doc.h` -> `include/page_view.h`
@@ -362,6 +364,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/page_view.c` -> `include/freedom_config.h`
 - `src/page_view.c` -> `include/html_parse.h`
 - `src/page_view.c` -> `include/page_view.h`
+- `src/page_view.c` -> `include/pres_hints.h`
 - `src/page_view.c` -> `include/sheet_cache.h`
 - `src/page_view.c` -> `include/svg_render.h`
 - `src/page_view.c` -> `include/util.h`
@@ -373,6 +376,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/prefetch.c` -> `include/url.h`
 - `src/prefs.c` -> `include/prefs.h`
 - `src/prefs.c` -> `include/zoom.h`
+- `src/pres_hints.c` -> `include/css_color.h`
+- `src/pres_hints.c` -> `include/pres_hints.h`
 - `src/profile.c` -> `include/disk_store.h`
 - `src/profile.c` -> `include/profile.h`
 - `src/render_doc.c` -> `include/box_style.h`
@@ -439,6 +444,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/url.h`
 - `src/tab.c` -> `include/util.h`
 - `src/tab.c` -> `include/web_storage.h`
+- `src/table_layout.c` -> `include/table_layout.h`
 - `src/text_case.c` -> `include/css.h`
 - `src/text_case.c` -> `include/text_case.h`
 - `src/text_shape.c` -> `include/css.h`
@@ -490,11 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_css_index.c` -> `include/css_index.h`
 - `tests/test_css_length.c` -> `include/css.h`
 - `tests/test_css_length.c` -> `include/css_length.h`
-- `tests/test_css_mask.c` -> `include/css_mask.h`
-- `tests/test_css_mq.c` -> `include/css_mq.h`
-- `tests/test_css_text.c` -> `include/css.h`
-- `tests/test_css_text.c` -> `include/css_decl.h`
-- `tests/test_css_text.c` -> `include/css_text.h`
-- `tests/test_css_values.c` -> `include/css.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

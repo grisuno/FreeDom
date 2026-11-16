@@ -230,6 +230,22 @@ static void child_fetch_stylesheets(child_state *cs)`
   - `TAB_MAX_EXTERN_CSS` (macro, line 1294) `#define TAB_MAX_EXTERN_CSS`
 - Depends on: `include/anti_fp.h`, `include/box_tree.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/data_url.h`, `include/dom.h`, `include/flex_layout.h`, `include/freebug.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/identity.h`, `include/image_decode.h`, `include/import_map.h`, `include/js_dom.h`, `include/js_env.h`, `include/js_native.h`, `include/js_sandbox.h`, `include/js_trusted.h`, `include/link_nav.h`, `include/os_sandbox.h`, `include/page_view.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/sheet_cache.h`, `include/subreq_batch.h`, `include/svg_raster.h`, `include/tab.h`, `include/url.h`, `include/util.h`, `include/web_storage.h`
 
+## src/table_layout.c
+- Doc: table_layout (tl_) -- see include/table_layout.h and spec/table_layout.md.
+- Layer: presentation
+- Language: c
+- Symbols:
+  - `tl_spread` (function, line 14) `static void tl_spread(double *w, const double *weight, size_t c0, size_t c1, double extra)`
+  - `tl_measure` (function, line 23) `static void tl_measure(const tl_cell *cells, size_t n, size_t ncols, double gap,
+                ...`
+  - `tl_intrinsic` (function, line 78) `void tl_intrinsic(const tl_cell *cells, size_t n, size_t ncols, double gap,
+                  dou...`
+  - `tl_distribute` (function, line 98) `static void tl_distribute(const double *minw, const double *maxw, const int *sized,
+             ...`
+  - `tl_columns` (function, line 134) `double tl_columns(const tl_cell *cells, size_t n, size_t ncols, double gap,
+                  dou...`
+- Depends on: `include/table_layout.h`
+
 ## src/text_case.c
 - Doc: Latin Extended-A and the Cyrillic historic block pair letters on adjacent code
 - Layer: utility

@@ -2,34 +2,34 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 231,
-  "entities": 3674,
+  "modules": 235,
+  "entities": 3697,
   "languages": {
-   "c": 108,
-   "h": 107,
+   "c": 110,
+   "h": 109,
    "py": 12,
    "sh": 4
   },
   "kinds": {
    "constant": 23,
    "enum": 163,
-   "function": 2054,
-   "macro": 743,
+   "function": 2060,
+   "macro": 752,
    "method": 27,
-   "module": 231,
-   "struct": 280,
-   "type_alias": 146,
+   "module": 235,
+   "struct": 282,
+   "type_alias": 148,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 94,
+  "skipped_files": 96,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1613,
-   "total": 3644,
-   "percent": 44.3
+   "documented": 1630,
+   "total": 3667,
+   "percent": 44.5
   },
   "by_kind": {
    "enum": {
@@ -38,14 +38,14 @@
     "percent": 49.7
    },
    "function": {
-    "documented": 919,
-    "total": 2054,
-    "percent": 44.7
+    "documented": 925,
+    "total": 2060,
+    "percent": 44.9
    },
    "macro": {
-    "documented": 346,
-    "total": 743,
-    "percent": 46.6
+    "documented": 351,
+    "total": 752,
+    "percent": 46.7
    },
    "method": {
     "documented": 0,
@@ -53,19 +53,19 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 34,
-    "total": 231,
-    "percent": 14.7
+    "documented": 38,
+    "total": 235,
+    "percent": 16.2
    },
    "struct": {
     "documented": 126,
-    "total": 280,
-    "percent": 45.0
+    "total": 282,
+    "percent": 44.7
    },
    "type_alias": {
-    "documented": 107,
-    "total": 146,
-    "percent": 73.3
+    "documented": 109,
+    "total": 148,
+    "percent": 73.6
    }
   },
   "by_module": {
@@ -85,9 +85,9 @@
     "percent": 100.0
    },
    "gui/browser_ui.c": {
-    "documented": 84,
-    "total": 256,
-    "percent": 32.8
+    "documented": 86,
+    "total": 259,
+    "percent": 33.2
    },
    "gui/browser_ui_internal.h": {
     "documented": 5,
@@ -305,9 +305,9 @@
     "percent": 72.2
    },
    "include/freedom_config.h": {
-    "documented": 14,
-    "total": 15,
-    "percent": 93.3
+    "documented": 15,
+    "total": 16,
+    "percent": 93.8
    },
    "include/hls.h": {
     "documented": 5,
@@ -469,6 +469,11 @@
     "total": 18,
     "percent": 38.9
    },
+   "include/pres_hints.h": {
+    "documented": 5,
+    "total": 7,
+    "percent": 71.4
+   },
    "include/profile.h": {
     "documented": 2,
     "total": 9,
@@ -543,6 +548,11 @@
     "documented": 28,
     "total": 55,
     "percent": 50.9
+   },
+   "include/table_layout.h": {
+    "documented": 6,
+    "total": 8,
+    "percent": 75.0
    },
    "include/text_case.h": {
     "documented": 6,
@@ -995,9 +1005,9 @@
     "percent": 33.3
    },
    "src/page_view.c": {
-    "documented": 67,
-    "total": 151,
-    "percent": 44.4
+    "documented": 65,
+    "total": 148,
+    "percent": 43.9
    },
    "src/pdf_export.c": {
     "documented": 1,
@@ -1023,6 +1033,11 @@
     "documented": 4,
     "total": 13,
     "percent": 30.8
+   },
+   "src/pres_hints.c": {
+    "documented": 3,
+    "total": 4,
+    "percent": 75.0
    },
    "src/profile.c": {
     "documented": 1,
@@ -1088,6 +1103,11 @@
     "documented": 47,
     "total": 107,
     "percent": 43.9
+   },
+   "src/table_layout.c": {
+    "documented": 2,
+    "total": 3,
+    "percent": 66.7
    },
    "src/text_case.c": {
     "documented": 3,
@@ -1245,7 +1265,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 256
+   "entities": 259
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1465,7 +1485,7 @@
   {
    "uid": "include/freedom_config.h",
    "path": "modules/include.freedom_config.h.jsonl",
-   "entities": 15
+   "entities": 16
   },
   {
    "uid": "include/hls.h",
@@ -1628,6 +1648,11 @@
    "entities": 18
   },
   {
+   "uid": "include/pres_hints.h",
+   "path": "modules/include.pres_hints.h.jsonl",
+   "entities": 7
+  },
+  {
    "uid": "include/profile.h",
    "path": "modules/include.profile.h.jsonl",
    "entities": 9
@@ -1701,6 +1726,11 @@
    "uid": "include/tab.h",
    "path": "modules/include.tab.h.jsonl",
    "entities": 55
+  },
+  {
+   "uid": "include/table_layout.h",
+   "path": "modules/include.table_layout.h.jsonl",
+   "entities": 8
   },
   {
    "uid": "include/text_case.h",
@@ -2155,7 +2185,7 @@
   {
    "uid": "src/page_view.c",
    "path": "modules/src.page_view.c.jsonl",
-   "entities": 151
+   "entities": 148
   },
   {
    "uid": "src/pdf_export.c",
@@ -2181,6 +2211,11 @@
    "uid": "src/prefs.c",
    "path": "modules/src.prefs.c.jsonl",
    "entities": 13
+  },
+  {
+   "uid": "src/pres_hints.c",
+   "path": "modules/src.pres_hints.c.jsonl",
+   "entities": 4
   },
   {
    "uid": "src/profile.c",
@@ -2246,6 +2281,11 @@
    "uid": "src/tab.c",
    "path": "modules/src.tab.c.jsonl",
    "entities": 107
+  },
+  {
+   "uid": "src/table_layout.c",
+   "path": "modules/src.table_layout.c.jsonl",
+   "entities": 3
   },
   {
    "uid": "src/text_case.c",
@@ -2385,7 +2425,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2032
+  "total": 2038
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

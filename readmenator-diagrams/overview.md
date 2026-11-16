@@ -103,11 +103,11 @@ graph LR
 
 ## Details
 
-Static architecture map of 325 files (c, h, py, sh) in 13 components: include: css, src: tab, include: browser_ui, src: text_shape, include: page_view, include: secure_fetch, include: browser, src: http_cache. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 331 files (c, h, py, sh) in 13 components: include: css, src: tab, include: browser_ui, src: text_shape, include: page_view, include: secure_fetch, include: browser, src: http_cache. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### include: css (1)
 
-include: css groups 56 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
+include: css groups 59 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb...
 
 **Related Classes/Methods**:
 
@@ -137,7 +137,7 @@ src: tab groups 51 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_byte
 
 ### include: browser_ui (3)
 
-include: browser_ui groups 47 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ui_input_state: Live editable state for one form text control, aliasing a block of the...
+include: browser_ui groups 50 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ui_input_state: Live editable state for one form text control, aliasing a block of the...
 
 **Related Classes/Methods**:
 

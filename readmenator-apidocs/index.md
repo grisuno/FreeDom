@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 231 modules, 3674 documented entities, documentation coverage 44.3% (1613/3644 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 235 modules, 3697 documented entities, documentation coverage 44.5% (1630/3667 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (108), h (107), py (12), sh (4)
+Languages: c (110), h (109), py (12), sh (4)
 
 ## Modules
 
@@ -22,7 +22,7 @@ Languages: c (108), h (107), py (12), sh (4)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 42 | 213 | 32.8% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 44 | 214 | 33.2% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 5 | 5 | 45.5% |
 | [`gui/bui_mask_img.c`](modules/gui.bui_mask_img.c.md) | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | 0 | 1 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
@@ -71,7 +71,7 @@ Languages: c (108), h (107), py (12), sh (4)
 | [`include/frame_clock.h`](modules/include.frame_clock.h.md) |  | 2 | 4 | 14.3% |
 | [`include/frame_host.h`](modules/include.frame_host.h.md) |  | 1 | 9 | 72.7% |
 | [`include/freebug.h`](modules/include.freebug.h.md) |  | 4 | 13 | 72.2% |
-| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 14 | 93.3% |
+| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 15 | 93.8% |
 | [`include/hls.h`](modules/include.hls.h.md) |  | 4 | 3 | 62.5% |
 | [`include/host_conf.h`](modules/include.host_conf.h.md) |  | 1 | 7 | 55.6% |
 | [`include/hostblock.h`](modules/include.hostblock.h.md) |  | 4 | 5 | 50.0% |
@@ -104,6 +104,7 @@ Languages: c (108), h (107), py (12), sh (4)
 | [`include/pq_seal.h`](modules/include.pq_seal.h.md) |  | 2 | 5 | 12.5% |
 | [`include/prefetch.h`](modules/include.prefetch.h.md) |  | 11 | 16 | 53.6% |
 | [`include/prefs.h`](modules/include.prefs.h.md) |  | 4 | 13 | 38.9% |
+| [`include/pres_hints.h`](modules/include.pres_hints.h.md) | pres_hints (ph_) -- HTML presentational attributes as zero-specificity style. | 0 | 6 | 71.4% |
 | [`include/profile.h`](modules/include.profile.h.md) |  | 3 | 5 | 22.2% |
 | [`include/psl_data.h`](modules/include.psl_data.h.md) |  | 0 | 0 | 0.0% |
 | [`include/render_doc.h`](modules/include.render_doc.h.md) |  | 6 | 20 | 48.1% |
@@ -119,6 +120,7 @@ Languages: c (108), h (107), py (12), sh (4)
 | [`include/svg_raster.h`](modules/include.svg_raster.h.md) |  | 0 | 4 | 60.0% |
 | [`include/svg_render.h`](modules/include.svg_render.h.md) |  | 9 | 8 | 38.9% |
 | [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 42 | 50.9% |
+| [`include/table_layout.h`](modules/include.table_layout.h.md) | table_layout (tl_) -- used column widths of a table (automatic table layout). | 2 | 5 | 75.0% |
 | [`include/text_case.h`](modules/include.text_case.h.md) | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | 1 | 6 | 75.0% |
 | [`include/text_shape.h`](modules/include.text_shape.h.md) |  | 5 | 18 | 70.8% |
 | [`include/textfield.h`](modules/include.textfield.h.md) |  | 3 | 11 | 53.3% |
@@ -212,12 +214,13 @@ Languages: c (108), h (107), py (12), sh (4)
 | [`src/net_guard.c`](modules/src.net_guard.c.md) | net_guard -- see include/net_guard.h and spec/net_guard.md. | 0 | 9 | 50.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
-| [`src/page_view.c`](modules/src.page_view.c.md) |  | 22 | 128 | 44.4% |
+| [`src/page_view.c`](modules/src.page_view.c.md) |  | 22 | 125 | 43.9% |
 | [`src/pdf_export.c`](modules/src.pdf_export.c.md) |  | 0 | 4 | 20.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) |  | 0 | 11 | 75.0% |
 | [`src/pq_seal.c`](modules/src.pq_seal.c.md) |  | 1 | 8 | 10.0% |
 | [`src/prefetch.c`](modules/src.prefetch.c.md) |  | 1 | 12 | 42.9% |
 | [`src/prefs.c`](modules/src.prefs.c.md) |  | 1 | 11 | 30.8% |
+| [`src/pres_hints.c`](modules/src.pres_hints.c.md) | pres_hints (ph_) -- see include/pres_hints.h and spec/pres_hints.md. | 0 | 3 | 75.0% |
 | [`src/profile.c`](modules/src.profile.c.md) |  | 0 | 6 | 14.3% |
 | [`src/render_doc.c`](modules/src.render_doc.c.md) |  | 0 | 18 | 47.4% |
 | [`src/render_policy.c`](modules/src.render_policy.c.md) |  | 0 | 5 | 50.0% |
@@ -231,6 +234,7 @@ Languages: c (108), h (107), py (12), sh (4)
 | [`src/svg_raster.c`](modules/src.svg_raster.c.md) | svg_raster -- SVG served as an image, rasterized inside the confined worker. spec/svg_raster.md. | 0 | 2 | 66.7% |
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
 | [`src/tab.c`](modules/src.tab.c.md) |  | 7 | 99 | 43.9% |
+| [`src/table_layout.c`](modules/src.table_layout.c.md) | table_layout (tl_) -- see include/table_layout.h and spec/table_layout.md. | 0 | 2 | 66.7% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |
 | [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 12 | 31 | 47.7% |
 | [`src/textfield.c`](modules/src.textfield.c.md) |  | 0 | 12 | 46.2% |

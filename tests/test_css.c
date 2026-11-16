@@ -3867,6 +3867,26 @@ static void test_background_shorthand_sets_layer_longhands(void **state) {
 }
 
 
+/* A multi-layer `background` paints its FIRST layer (the one background-image keeps):
+ * Hacker News' vote arrow is `url("triangle.svg"), linear-gradient(...) no-repeat`. A comma
+ * inside a function or a string is not a layer separator. */
+static void test_background_shorthand_multi_layer_takes_first(void **state) {
+    (void)state;
+    css_style a = css_parse_inline(
+        "background: url(\"triangle.svg\"), linear-gradient(transparent, transparent) no-repeat", 0);
+    assert_string_equal(a.bg_image_url, "triangle.svg");
+    css_style b = css_parse_inline("background: url(a.png) no-repeat 3px 4px, url(b.png) repeat-x", 0);
+    assert_string_equal(b.bg_image_url, "a.png");
+    assert_int_equal(b.bg_repeat, CSS_BGR_NO_REPEAT);
+    assert_int_equal(b.bg_pos_x, 3);
+    css_style c = css_parse_inline("background: linear-gradient(red, blue), url(b.png)", 0);
+    assert_true(c.bg_grad_n >= 2);
+    assert_string_equal(c.bg_image_url, "");
+    /* Single layer with commas only inside the function: unchanged. */
+    css_style d = css_parse_inline("background: rgba(1, 2, 3, 0.5)", 0);
+    assert_int_equal(d.background, 0x010203);
+}
+
 static void test_mask_image_url_and_geometry(void **state) {
     (void)state;
     css_sheet *sh = NULL;
@@ -6016,6 +6036,7 @@ int main(void) {
         cmocka_unit_test(test_flat_3d_transforms),
         cmocka_unit_test(test_color_calc_and_angle_hue),
         cmocka_unit_test(test_background_shorthand_sets_layer_longhands),
+        cmocka_unit_test(test_background_shorthand_multi_layer_takes_first),
         cmocka_unit_test(test_mask_image_url_and_geometry),
         cmocka_unit_test(test_container_query_surely_true_applies),
         cmocka_unit_test(test_calc_shape_mismatch_drops),

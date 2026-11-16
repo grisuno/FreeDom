@@ -3,6 +3,26 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `pe_safe_basename` | function | `src/pdf_export.c:25` | `pe_status pe_safe_basename(const char *title, char *out, size_t outsz)` |
+| `PT_LINE_CAP` | macro | `src/perf_trace.c:107` | `#define PT_LINE_CAP` |
+| `cmp_u64` | function | `src/perf_trace.c:71` | `static int cmp_u64(const void *a, const void *b)` |
+| `pt_count` | function | `src/perf_trace.c:35` | `size_t pt_count(const pt_trace *t, pt_stage stage)` |
+| `pt_elapsed_us` | function | `src/perf_trace.c:21` | `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us)` |
+| `pt_format` | function | `src/perf_trace.c:109` | `size_t pt_format(const pt_trace *t, char *buf, size_t cap)` |
+| `pt_init` | function | `src/perf_trace.c:16` | `void pt_init(pt_trace *t)` |
+| `pt_last_us` | function | `src/perf_trace.c:40` | `uint64_t pt_last_us(const pt_trace *t, pt_stage stage)` |
+| `pt_max_us` | function | `src/perf_trace.c:60` | `uint64_t pt_max_us(const pt_trace *t, pt_stage stage)` |
+| `pt_median_us` | function | `src/perf_trace.c:79` | `uint64_t pt_median_us(const pt_trace *t, pt_stage stage)` |
+| `pt_min_us` | function | `src/perf_trace.c:49` | `uint64_t pt_min_us(const pt_trace *t, pt_stage stage)` |
+| `pt_record` | function | `src/perf_trace.c:26` | `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us)` |
+| `pt_stage_name` | function | `src/perf_trace.c:89` | `const char *pt_stage_name(pt_stage stage)` |
+| `PQS_SS_LEN` | macro | `src/pq_seal.c:17` | `#define PQS_SS_LEN` |
+| `derive_key` | function | `src/pq_seal.c:81` | `static int derive_key(const uint8_t ss[PQS_SS_LEN], const uint8_t wrap[LS_KEY_LEN],              ...` |
+| `keys_wrap` | function | `src/pq_seal.c:35` | `static pqs_keys *keys_wrap(EVP_PKEY *pkey)` |
+| `pqs_buf_free` | function | `src/pq_seal.c:23` | `void pqs_buf_free(uint8_t *buf, size_t len)` |
+| `pqs_export` | function | `src/pq_seal.c:55` | `pqs_status pqs_export(const pqs_keys *k, uint8_t **der, size_t *len)` |
+| `pqs_free` | function | `src/pq_seal.c:29` | `void pqs_free(pqs_keys *k)` |
+| `pqs_generate` | function | `src/pq_seal.c:42` | `pqs_status pqs_generate(pqs_keys **out)` |
 | `pqs_import` | function | `src/pq_seal.c:68` | `pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out)` |
 | `pqs_keys` | struct | `src/pq_seal.c:19` | `` |
 | `pqs_open` | function | `src/pq_seal.c:147` | `pqs_status pqs_open(const pqs_keys *k, const uint8_t wrap[LS_KEY_LEN],                     const ...` |
@@ -63,6 +83,15 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `title_clean` | function | `src/prefs.c:39` | `static char *title_clean(const char *src)` |
 | `url_prefix_match` | function | `src/prefs.c:336` | `static int url_prefix_match(const char *url, const char *q)` |
 | `url_valid` | function | `src/prefs.c:26` | `static int url_valid(const char *url)` |
+| `PH_PER_MILLE_MAX` | macro | `src/pres_hints.c:8` | `#define PH_PER_MILLE_MAX` |
+| `ph_align` | function | `src/pres_hints.c:53` | `static css_align ph_align(ph_attr_fn get, void *ctx)` |
+| `ph_apply` | function | `src/pres_hints.c:93` | `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs)` |
+| `ph_bgcolor` | function | `src/pres_hints.c:81` | `static void ph_bgcolor(ph_attr_fn get, void *ctx, css_style *cs)` |
+| `ph_ci_eq` | function | `src/pres_hints.c:42` | `static int ph_ci_eq(const char *s, size_t len, const char *word)` |
+| `ph_is_heading` | function | `src/pres_hints.c:76` | `static int ph_is_heading(const char *tag)` |
+| `ph_is_space` | function | `src/pres_hints.c:10` | `static int ph_is_space(char c)` |
+| `ph_parse_dimension` | function | `src/pres_hints.c:14` | `int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille)` |
+| `ph_width` | function | `src/pres_hints.c:64` | `static void ph_width(ph_attr_fn get, void *ctx, css_style *cs)` |
 | `PROFILE_KEYFILE_LEN` | macro | `src/profile.c:27` | `#define PROFILE_KEYFILE_LEN` |
 | `_POSIX_C_SOURCE` | macro | `src/profile.c:11` | `#define _POSIX_C_SOURCE` |
 | `join_path` | function | `src/profile.c:29` | `static int join_path(const profile_ctx *ctx, const char *name,                      char *out, si...` |
@@ -467,34 +496,5 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `tab_spawned` | struct | `src/tab.c:3379` | `` |
 | `tab_submit` | function | `src/tab.c:4214` | `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` |
 | `tab_submit_async` | function | `src/tab.c:3725` | `static int tab_submit_async(tab *t, int net_granted, int css_granted)` |
-| `tab_subreq_permitted` | function | `src/tab.c:3575` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)` |
-| `tab_tick` | function | `src/tab.c:4204` | `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)` |
-| `tab_tick_async` | function | `src/tab.c:4748` | `tab_status tab_tick_async(tab *t, int elapsed_ms)` |
-| `tab_url_resolve` | function | `src/tab.c:1349` | `static int tab_url_resolve(void *ctx, const char *base, const char *ref,                         ...` |
-| `tab_wflush` | function | `src/tab.c:69` | `static int tab_wflush(void)` |
-| `tab_worker_dispatch` | function | `src/tab.c:2645` | `void tab_worker_dispatch(int argc, char **argv)` |
-| `tab_worker_run` | function | `src/tab.c:2389` | `static void tab_worker_run(int rfd, int wfd)` |
-| `tab_write_full` | function | `src/tab.c:76` | `static int tab_write_full(int fd, const void *buf, size_t n)` |
-| `tab_write_reply` | function | `src/tab.c:3607` | `static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t rlen,           ...` |
-| `tab_ws_event` | function | `src/tab.c:4802` | `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,        ...` |
-| `tests` | function | `src/tab.c:2832` | `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...` |
-| `tzset` | function | `src/tab.c:2407` | `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);` |
-| `unchanged` | function | `src/tab.c:270` | `* is unchanged (spec/sheet_cache.md);` |
-| `window` | function | `src/tab.c:1429` | `* net window (cs->net_active). */ static void child_fetch_stylesheets(child_state *cs)` |
-| `write_field` | function | `src/tab.c:735` | `static int write_field(int fd, const char *s)` |
-| `write_full` | macro | `src/tab.c:113` | `#define write_full(fd, buf, n)` |
-| `write_full` | function | `src/tab.c:1934` | `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 \|\| write_full(wfd, text, xl) == 0) && write_view(wfd...` |
-| `write_history` | function | `src/tab.c:1410` | `static int write_history(int wfd, child_state *cs)` |
-| `write_opens` | function | `src/tab.c:1989` | `static int write_opens(int wfd, child_state *cs)` |
-| `write_storage` | function | `src/tab.c:1975` | `static int write_storage(int wfd, child_state *cs)` |
-| `write_view` | function | `src/tab.c:777` | `static int write_view(int wfd, const pv_view *v)` |
-| `write_view_raw` | function | `src/tab.c:788` | `static int write_view_raw(int wfd, const pv_view *v)` |
-| `write_ws` | function | `src/tab.c:1958` | `static int write_ws(int wfd, child_state *cs)` |
-| `ws_ops_free` | function | `src/tab.c:3895` | `static void ws_ops_free(tab_ws_op *ops, size_t n)` |
-| `pair_parity` | function | `src/text_case.c:8` | `static int pair_parity(uint32_t cp)` |
-| `tc_is_lower` | function | `src/text_case.c:54` | `int tc_is_lower(uint32_t cp)` |
-| `tc_lower` | function | `src/text_case.c:37` | `uint32_t tc_lower(uint32_t cp)` |
-| `tc_smallcaps_runs` | function | `src/text_case.c:117` | `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap)` |
-| `tc_transform` | function | `src/text_case.c:95` | `size_t tc_transform(const char *s, size_t n, int transform, int word_start,                     c...` |
 
 Next: [SYMBOLS_p11.md](SYMBOLS_p11.md)

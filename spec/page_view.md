@@ -433,30 +433,30 @@ la profundidad la controla el atacante). Para cada **nodo de texto**:
     padding/borde del envoltorio por celda). Candados E2E:
     `test_dump_layout_nested_table_inside_item_box`,
     `test_dump_layout_table_cells_do_not_reopen_wrappers`.
-  - **Tablas con celdas multi-link = FLUJO, no grid (los links sobreviven).** El aplanado a
-    texto de una celda recolectada **destruye sus `<a href>`** (Hacker News quedaba sin un solo
-    link). Regla: una tabla con **alguna celda hoja que contenga ≥2 anclas con `href`** es una
-    **tabla de navegación/layout**, no de datos: sus celdas hoja **no se recolectan** — se
-    **recorren** como contenido normal (dado que `<tr>` es block-tag, cada fila sigue siendo un
-    bloque; los links salen como `PV_LINK` con su href/colores/énfasis por `resolve_context`).
-    Al visitar una celda recorrida que continúa la fila ya abierta se emite un **run separador
-    `" "`** (dedupe: nunca dos seguidos), así "1." y el título no se fusionan. La decisión es
-    por tabla, **cacheada** (`pv_flow_reg`, tope `PV_MAX_CONTAINERS`; registro lleno ⇒ grid,
-    comportamiento previo — fail-closed y acotado, anti-DoS). Las tablas anidadas deciden cada
-    una por sí misma (el scan salta sub-tablas).
-  - **Celda hoja con exactamente UNA ancla (tabla grid) = run-link.** En una tabla de datos
-    (sin celdas multi-link) una celda cuyo subárbol contiene exactamente un `<a href>` se
-    recolecta igual (un run, la grilla no pierde ítems) pero el run es **`PV_LINK`** con ese
-    href: el caso común "celda = un link" queda clickeable sin romper la alineación de columnas.
-    Con 0 anclas queda `PV_TEXT` como siempre; con ≥2 la tabla entera ya fluyó (regla anterior).
-  - **`bgcolor` legacy como fallback de fondo.** Como `<font color>` para el fg: si ningún
-    `background` de CSS ganó, el ancestro más cercano con atributo `bgcolor` válido
-    (`cc_parse`) aporta `bg_rgb` (p. ej. la barra naranja `#ff6600` y el beige `#f6f6ef` de
-    Hacker News, que no usa CSS para eso). Presentación de autor: gateado por `caps.css` en
-    `render_doc` como todo color. Las hojas de estilo **externas** (`<link rel=stylesheet>`)
-    llegan desde el Hito 27 vía `pv_build_styled` (el worker las fetchea por el padre bajo
-    política; ver `spec/tab.md` §8): los colores de clase de HN — títulos negros, subtexto
-    gris — ya resuelven cuando `caps.css` está activo.
+  - **Toda celda con estructura es un ÍTEM de la rejilla de su tabla (2026-11-16, reemplaza
+    «multi-link = FLUJO» y «una ancla = run-link»).** Una celda con cualquier `<a href>`,
+    control, reemplazado, bloque o tabla anidada se **recorre**: cada run sale con el
+    contenedor de la tabla y la celda como ítem, así un link conserva su propio estilo y
+    destino. Solo la celda de texto puro se recolecta en un run. Antes una tabla con una
+    celda de ≥ 2 enlaces caía entera a flujo (Hacker News: sin columnas, sin ancho, sin
+    centrado), y una celda con un enlace perdía el estilo de su `<a>`.
+    **Dado** `<tr><td>1.</td><td><a>T</a> (<a>s</a>)</td></tr>` **entonces** los dos enlaces
+    son `PV_LINK` con su href, comparten `cont_item`, y la tabla es un contenedor `is_table`.
+    Candados: `test_build_multilink_table_flows_links`, `test_build_flow_table_row_is_one_block`.
+  - **Cada celda lleva su fila y su columna (`grid_row_start`/`grid_col_start`).** La columna
+    es la suma de los `colspan` de las celdas anteriores de su fila; la fila, su ordinal entre
+    las filas de la tabla (las vacías cuentan). Sin eso la auto-colocación del grid deslizaba
+    las celdas de la fila siguiente al hueco de una fila corta o de un `colspan`. Una celda
+    que es contenedor (tabla anidada) lo lleva como líneas de grid en el descriptor
+    (`item_row_start`/`item_col_start`/`item_col_span`). Índice por tabla en un `pv_ptrmap`
+    (filas numeradas UNA vez, conteo de columnas memoizado: recalcularlo por run costaba 60 ms
+    en Hacker News). `rowspan` no desplaza filas posteriores (fuera de alcance).
+  - **Atributos de presentación** (`width`, `align`, `bgcolor`, `nowrap`, `<center>`): módulo
+    puro `pres_hints`, aplicado en el único punto donde se resuelve el estilo de un elemento
+    (`cached_element_style_ref`), solo sobre campos que la cascada dejó sin declarar.
+    `spec/pres_hints.md`. Una celda-ítem con fondo genera caja (la barra naranja de HN).
+  - **Anchos de columna:** `spec/table_layout.md` (módulo puro `tl_`); el lado confiable mide
+    las celdas y maqueta la tabla por tramos de filas (`layout_table`).
   - **Tablas anidadas (celda = contenedor, no hoja).** Una celda que contiene una `<table>`
     descendiente es una **hoja = no**: NO se recolecta como un run (eso aplanaría todo su subárbol).
     Es un **contenedor estructural** que se recorre normalmente, de modo que las celdas de la tabla

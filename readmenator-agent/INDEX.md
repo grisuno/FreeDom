@@ -5,7 +5,7 @@
 | `app.py` | Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL... | root | 3 | 0 |
 | `docker-entrypoint.sh` | - | root | 0 | 0 |
 | `docker_run.sh` | Thin wrapper. | root | 0 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 667 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 673 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 11 | 3 |
 | `gui/bui_mask_img.c` | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | gui | 1 | 0 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
@@ -19,11 +19,11 @@
 | `include/browser.h` | browser_free: Zero-initialise or reset a state. | include | 19 | 3 |
 | `include/cached_fetch.h` | cf_set_store: Cache-aware GET. | include | 4 | 3 |
 | `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 9 | 4 |
-| `include/css.h` | css_style: A resolved presentation. | include | 148 | 39 |
+| `include/css.h` | css_style: A resolved presentation. | include | 148 | 40 |
 | `include/css_atrule.h` | car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both... | include | 10 | 3 |
 | `include/css_box.h` | - | include | 28 | 5 |
 | `include/css_chain.h` | cch_element_matches: Nonzero iff the parsed selector *sel matches element `el`, built against... | include | 12 | 4 |
-| `include/css_color.h` | cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for... | include | 7 | 13 |
+| `include/css_color.h` | cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for... | include | 7 | 14 |
 | `include/css_computed.h` | ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL... | include | 6 | 3 |
 | `include/css_counter.h` | cnt_hash: FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are *... | include | 19 | 3 |
 | `include/css_decl.h` | The sheet's two string pools -- background url()s, and the ::before/::after | include | 15 | 12 |
@@ -49,7 +49,7 @@
 | `include/frame_clock.h` | active: frame_clock (fc_) — pure animation frame scheduler. | include | 7 | 3 |
 | `include/frame_host.h` | fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource... | include | 11 | 4 |
 | `include/freebug.h` | fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated).... | include | 18 | 13 |
-| `include/freedom_config.h` | - | include | 17 | 7 |
+| `include/freedom_config.h` | - | include | 18 | 7 |
 | `include/hls.h` | hls_segment: or variant info. | include | 8 | 4 |
 | `include/host_conf.h` | hcf_search_dirs: Pure. | include | 9 | 4 |
 | `include/hostblock.h` | hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted... | include | 10 | 5 |
@@ -82,6 +82,7 @@
 | `include/pq_seal.h` | pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der... | include | 8 | 3 |
 | `include/prefetch.h` | pf_ref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher *... | include | 28 | 4 |
 | `include/prefs.h` | prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, *... | include | 18 | 6 |
+| `include/pres_hints.h` | pres_hints (ph_) -- HTML presentational attributes as zero-specificity style. | include | 7 | 3 |
 | `include/profile.h` | profile_close: Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init). | include | 9 | 3 |
 | `include/psl_data.h` | - | include | 7 | 1 |
 | `include/render_doc.h` | rd_block: One paint-ready block in document order. text is owned, NUL-terminated and valid... | include | 27 | 6 |
@@ -97,6 +98,7 @@
 | `include/svg_raster.h` | sr_sniff: 1 when the first element of the document (after BOM, whitespace, the XML *... | include | 5 | 3 |
 | `include/svg_render.h` | sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>... | include | 19 | 6 |
 | `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 55 | 6 |
+| `include/table_layout.h` | table_layout (tl_) -- used column widths of a table (automatic table layout). | include | 8 | 3 |
 | `include/text_case.h` | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | include | 8 | 3 |
 | `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 24 | 6 |
 | `include/textfield.h` | tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at... | include | 15 | 3 |
@@ -187,12 +189,13 @@
 | `src/net_guard.c` | net_guard -- see include/net_guard.h and spec/net_guard.md. | src | 14 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 292 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 290 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/pq_seal.c` | derive_key: pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out) { if (der ==... | src | 11 | 0 |
 | `src/prefetch.c` | ci_starts: static int is_ws(char c) { return c == ' ' \|\| c == '\t' \|\| c == '\n' \|\| c == '\r' \|\|... | src | 30 | 0 |
 | `src/prefs.c` | url_valid: A representable URL: 1..PREFS_MAX_URL-1 bytes, no control bytes, no DEL. * Space is... | src | 26 | 0 |
+| `src/pres_hints.c` | pres_hints (ph_) -- see include/pres_hints.h and spec/pres_hints.md. | src | 9 | 0 |
 | `src/profile.c` | keyfile_create: #include <unistd.h> #include <openssl/crypto.h> #include <openssl/rand.h>... | src | 9 | 0 |
 | `src/render_doc.c` | rd_push: Appends one block, taking owned copies of text (required) and href (optional). *... | src | 22 | 0 |
 | `src/render_policy.c` | - | src | 5 | 0 |
@@ -206,6 +209,7 @@
 | `src/svg_raster.c` | svg_raster -- SVG served as an image, rasterized inside the confined worker. spec/svg_raster.md. | src | 4 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 34 | 0 |
 | `src/tab.c` | tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and... | src | 197 | 0 |
+| `src/table_layout.c` | table_layout (tl_) -- see include/table_layout.h and spec/table_layout.md. | src | 5 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
 | `src/text_shape.c` | tsh_fb_cp: Per-code-point verdicts of fb_entry. | src | 74 | 0 |
 | `src/textfield.c` | - | src | 12 | 0 |
@@ -229,7 +233,7 @@
 | `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
 | `tests/test_cached_fetch.c` | - | tests | 14 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
-| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 370 | 0 |
+| `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 371 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
 | `tests/test_css_box.c` | test_lineheight_abs_vs_scale: line-height (CSS 2.1 10.8.1): a number, a percentage and an em... | tests | 13 | 0 |
 | `tests/test_css_color.c` | test_hsl_fractional_hue: A fractional hue is a <number> too (and hsl() takes an <angle>, whose... | tests | 37 | 0 |
@@ -287,6 +291,7 @@
 | `tests/test_pq_seal.c` | test_requires_both_secrets_and_detects_tamper: static void test_each_seal_is_fresh(void **state)... | tests | 7 | 0 |
 | `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 18 | 0 |
 | `tests/test_prefs.c` | - | tests | 15 | 0 |
+| `tests/test_pres_hints.c` | test_pres_hints -- HTML presentational attributes (spec/pres_hints.md). | tests | 11 | 0 |
 | `tests/test_profile.c` | dir: include "prefs.h" include "profile.h" | tests | 17 | 0 |
 | `tests/test_render_doc.c` | first_kind: #include "flex_layout.h" #include "page_view.h" #include "render_doc.h" #include... | tests | 37 | 0 |
 | `tests/test_render_policy.c` | test_image_allow_data_url: A data: URI embeds its bytes inline: no socket opens, so it skips the... | tests | 21 | 0 |
@@ -300,6 +305,7 @@
 | `tests/test_svg_raster.c` | tests/test_svg_raster.c -- CMocka suite for SVG-as-image rasterization (sr_). spec/svg_raster.md... | tests | 10 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
 | `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 166 | 0 |
+| `tests/test_table_layout.c` | test_table_layout -- automatic table layout (spec/table_layout.md). | tests | 14 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
 | `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 27 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |

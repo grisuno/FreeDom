@@ -1,14 +1,14 @@
 # include: css
 
-*Community 0 | 56 files | cohesion 0.69*
+*Community 0 | 59 files | cohesion 0.70*
 
 ## Definition
 
-This community groups 56 file(s) rooted at `include` with dominant language c (cohesion 0.69). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (370 symbols). Documented purpose: bui_mask_img -- paints a mask-image: url() layer into a mask surface..
+This community groups 59 file(s) rooted at `include` with dominant language c (cohesion 0.70). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (371 symbols). Documented purpose: bui_mask_img -- paints a mask-image: url() layer into a mask surface..
 
 ## Files
 
-### `include` (18 files)
+### `include` (19 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -19,7 +19,7 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 | `include/css_color.h` | h | utility | 7 | no |
 | `include/css_computed.h` | h | utility | 6 | no |
 
-### `src` (18 files)
+### `src` (19 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -30,12 +30,12 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 | `src/css_color.c` | c | utility | 36 | no |
 | `src/css_computed.c` | c | utility | 45 | no |
 
-### `tests` (17 files)
+### `tests` (18 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_compositor.c` | c | testing | 21 | no |
-| `tests/test_css.c` | c | testing | 370 | no |
+| `tests/test_css.c` | c | testing | 371 | no |
 | `tests/test_css_atrule.c` | c | testing | 10 | yes |
 | `tests/test_css_box.c` | c | testing | 13 | no |
 | `tests/test_css_color.c` | c | testing | 37 | no |
@@ -48,7 +48,7 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 | `gui/bui_mask_img.c` | c | utility | 1 | yes |
 | `gui/bui_theme.c` | c | utility | 6 | no |
 
-*... and 36 more files in this community.*
+*... and 39 more files in this community.*
 
 
 ## Key Symbols
@@ -86,8 +86,8 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 106
-- Cross-boundary resolved imports (EXTRACTED): 47
+- Internal resolved imports (EXTRACTED): 110
+- Cross-boundary resolved imports (EXTRACTED): 48
 
 ## Connections
 
@@ -99,7 +99,7 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 ## Risks
 
 - [layer strict] `tests/test_css.c` (testing) -> `include/flex_layout.h` (presentation)
-- [dataflow DEAD_STORE] `src/css.c:6192` `page_view` `had_winner`: `had_winner` assigned at line 6192 but never read afterwards.
+- [dataflow DEAD_STORE] `src/css.c:6204` `page_view` `had_winner`: `had_winner` assigned at line 6204 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:156` `parse_hex` `r`: `r` assigned at line 156 but never read afterwards.
 - [dataflow DEAD_STORE] `src/css_color.c:157` `parse_hex` `g`: `g` assigned at line 157 but never read afterwards.
 
@@ -107,7 +107,7 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 
 - Why do 40 file(s) lack file-level docs (e.g. `gui/browser_ui_internal.h`)? What purpose do they serve?
 - What would break if the most connected file in include: css changed?
-- Should include: css be split, given cohesion 0.69?
+- Should include: css be split, given cohesion 0.70?
 
 ## Sources
 
@@ -131,4 +131,4 @@ This community groups 56 file(s) rooted at `include` with dominant language c (c
 - `include/css_text.h`
 - `include/css_values.h`
 - `include/css_vars.h`
-- *... and 36 more*
+- *... and 39 more*
