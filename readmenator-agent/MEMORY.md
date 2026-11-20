@@ -2,14 +2,14 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 331 files at commit `bd6d9b7c381a`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 334 files at commit `123bfb2f8eb9`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (177), `max` (148), `not` (142), `include` (139), `size` (137), `one` (137), `out` (131), `freedom` (129), `char` (122), `free` (120), `const` (118), `css` (110), `its` (109), `void` (106), `name` (103)
+- Domain vocabulary (term, files): `null` (179), `max` (150), `not` (143), `include` (141), `one` (139), `size` (138), `out` (132), `freedom` (130), `char` (123), `free` (120), `const` (119), `css` (113), `its` (110), `void` (106), `spec` (105)
 - Subsystem `include: css`: 59 files, core `src/css.c`: css_cq: @container conditions (spec/css_mq.md): a rule inside one is kept and gated per element....
-- Subsystem `src: tab`: 51 files, core `src/tab.c`: tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and...
+- Subsystem `src: tab`: 54 files, core `src/tab.c`: tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and...
 - Subsystem `include: browser_ui`: 50 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
 - Subsystem `src: text_shape`: 40 files, core `src/text_shape.c`: tsh_fb_cp: Per-code-point verdicts of fb_entry.
 - Subsystem `include: page_view`: 26 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
@@ -68,11 +68,11 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 206 files, 6289 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (1%); median file 234 lines, max 20660.
-- h: 109 files, 1725 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 70 lines, max 1336.
+- c: 208 files, 6326 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (1%); median file 234 lines, max 20706.
+- h: 110 files, 1736 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 70 lines, max 1336.
 - py: 12 files, 50 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
 - sh: 4 files, 0 symbols; median file 39 lines, max 90.
-- Tests: 96 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
+- Tests: 97 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
 
 ## 5. Minimum deliverables
 

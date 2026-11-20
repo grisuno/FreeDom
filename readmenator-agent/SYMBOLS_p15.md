@@ -3,6 +3,46 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_canvas_unlinkable` | function | `tests/test_js_env.c:411` | `static void test_canvas_unlinkable(void **state)` |
+| `test_clocks_coarse` | function | `tests/test_js_env.c:213` | `static void test_clocks_coarse(void **state)` |
+| `test_coexists_with_dom` | function | `tests/test_js_env.c:442` | `static void test_coexists_with_dom(void **state)` |
+| `test_crypto_present` | function | `tests/test_js_env.c:148` | `static void test_crypto_present(void **state)` |
+| `test_crypto_random_uuid` | function | `tests/test_js_env.c:156` | `static void test_crypto_random_uuid(void **state)` |
+| `test_crypto_random_values` | function | `tests/test_js_env.c:165` | `static void test_crypto_random_values(void **state)` |
+| `test_install_identity_override` | function | `tests/test_js_env.c:73` | `static void test_install_identity_override(void **state)` |
+| `test_install_null_args` | function | `tests/test_js_env.c:62` | `static void test_install_null_args(void **state)` |
+| `test_legacy_nav_props` | function | `tests/test_js_env.c:111` | `static void test_legacy_nav_props(void **state)` |
+| `test_navigator_identity` | function | `tests/test_js_env.c:93` | `static void test_navigator_identity(void **state)` |
+| `test_navigator_mime_types` | function | `tests/test_js_env.c:139` | `static void test_navigator_mime_types(void **state)` |
+| `test_navigator_plugins` | function | `tests/test_js_env.c:131` | `static void test_navigator_plugins(void **state)` |
+| `test_performance_timing_identity_safe` | function | `tests/test_js_env.c:225` | `static void test_performance_timing_identity_safe(void **state)` |
+| `test_screen_bucketed` | function | `tests/test_js_env.c:201` | `static void test_screen_bucketed(void **state)` |
+| `test_screen_edges` | function | `tests/test_js_env.c:259` | `static void test_screen_edges(void **state)` |
+| `test_screen_orientation` | function | `tests/test_js_env.c:191` | `static void test_screen_orientation(void **state)` |
+| `test_subtle_digest_rejects_bad_input` | function | `tests/test_js_env.c:344` | `static void test_subtle_digest_rejects_bad_input(void **state)` |
+| `test_subtle_digest_resolves_known_vectors` | function | `tests/test_js_env.c:329` | `static void test_subtle_digest_resolves_known_vectors(void **state)` |
+| `test_trusted_fidelity_clock_is_millisecond_and_consistent` | function | `tests/test_js_env.c:279` | `static void test_trusted_fidelity_clock_is_millisecond_and_consistent(void **state)` |
+| `test_unforgeable` | function | `tests/test_js_env.c:241` | `static void test_unforgeable(void **state)` |
+| `chain_parent` | function | `tests/test_js_geom.c:97` | `static dom_node_id chain_parent(void *ctx, dom_node_id n)` |
+| `cyclic_parent` | function | `tests/test_js_geom.c:132` | `static dom_node_id cyclic_parent(void *ctx, dom_node_id n)` |
+| `main` | function | `tests/test_js_geom.c:213` | `int main(void)` |
+| `test_add_and_find` | function | `tests/test_js_geom.c:29` | `static void test_add_and_find(void **state)` |
+| `test_add_rejects_and_clamps` | function | `tests/test_js_geom.c:65` | `static void test_add_rejects_and_clamps(void **state)` |
+| `test_aggregate_cycle_terminates` | function | `tests/test_js_geom.c:137` | `static void test_aggregate_cycle_terminates(void **state)` |
+| `test_aggregate_unions_into_ancestors` | function | `tests/test_js_geom.c:108` | `static void test_aggregate_unions_into_ancestors(void **state)` |
+| `test_capacity_bound` | function | `tests/test_js_geom.c:85` | `static void test_capacity_bound(void **state)` |
+| `test_decode_fails_closed` | function | `tests/test_js_geom.c:179` | `static void test_decode_fails_closed(void **state)` |
+| `test_same_node_unions` | function | `tests/test_js_geom.c:48` | `static void test_same_node_unions(void **state)` |
+| `test_wire_roundtrip` | function | `tests/test_js_geom.c:149` | `static void test_wire_roundtrip(void **state)` |
+| `EXPECT` | macro | `tests/test_js_intl.c:30` | `#define EXPECT(src, expected)` |
+| `EXPECT` | function | `tests/test_js_intl.c:152` | `EXPECT("['full','long','medium','short'].map(function(s)` |
+| `EXPECT` | function | `tests/test_js_intl.c:154` | `EXPECT("['medium','short'].map(function(s)` |
+| `main` | function | `tests/test_js_intl.c:202` | `int main(void)` |
+| `teardown` | function | `tests/test_js_intl.c:25` | `static int teardown(void **state)` |
+| `test_collator_and_rest` | function | `tests/test_js_intl.c:189` | `static void test_collator_and_rest(void **state)` |
+| `test_date_components` | function | `tests/test_js_intl.c:126` | `static void test_date_components(void **state)` |
+| `test_date_styles_parts` | function | `tests/test_js_intl.c:150` | `static void test_date_styles_parts(void **state)` |
+| `test_install_null` | function | `tests/test_js_intl.c:39` | `static void test_install_null(void **state)` |
 | `test_number_compact` | function | `tests/test_js_intl.c:90` | `static void test_number_compact(void **state)` |
 | `test_number_decimal` | function | `tests/test_js_intl.c:44` | `static void test_number_decimal(void **state)` |
 | `test_number_parts_and_options` | function | `tests/test_js_intl.c:99` | `static void test_number_parts_and_options(void **state)` |
@@ -456,45 +496,5 @@ Previous: [SYMBOLS_p14.md](SYMBOLS_p14.md)
 | `bare_fetch` | function | `tests/test_prefetch.c:333` | `static int bare_fetch(void *ctx, const char *method, const char *url,                       const...` |
 | `barrier` | type_alias | `tests/test_prefetch.c:126` | `typedef struct fake_ctx { pthread_barrier_t barrier;` |
 | `fake_ctx` | struct | `tests/test_prefetch.c:126` | `` |
-| `fake_fetch` | function | `tests/test_prefetch.c:135` | `static int fake_fetch(void *vctx, const char *method, const char *url,                       cons...` |
-| `graph_fetch` | function | `tests/test_prefetch.c:320` | `static int graph_fetch(void *ctx, const char *method, const char *url,                        con...` |
-| `main` | function | `tests/test_prefetch.c:395` | `int main(void)` |
-| `test_find_importmap` | function | `tests/test_prefetch.c:366` | `static void test_find_importmap(void **state)` |
-| `test_pool_finish_unconsumed_and_empty` | function | `tests/test_prefetch.c:234` | `static void test_pool_finish_unconsumed_and_empty(void **state)` |
-| `test_pool_follows_module_graph` | function | `tests/test_prefetch.c:346` | `static void test_pool_follows_module_graph(void **state)` |
-| `test_pool_miss_consume_and_failure` | function | `tests/test_prefetch.c:191` | `static void test_pool_miss_consume_and_failure(void **state)` |
-| `test_pool_parallel_fetch_and_take` | function | `tests/test_prefetch.c:153` | `static void test_pool_parallel_fetch_and_take(void **state)` |
-| `test_pool_start_page_import_map` | function | `tests/test_prefetch.c:378` | `static void test_pool_start_page_import_map(void **state)` |
-| `test_pooled_fetch_adapter` | function | `tests/test_prefetch.c:255` | `static void test_pooled_fetch_adapter(void **state)` |
-| `test_scan_basic_stylesheet_and_script` | function | `tests/test_prefetch.c:32` | `static void test_scan_basic_stylesheet_and_script(void **state)` |
-| `test_scan_imports_static_only` | function | `tests/test_prefetch.c:298` | `static void test_scan_imports_static_only(void **state)` |
-| `test_scan_null_args` | function | `tests/test_prefetch.c:22` | `static void test_scan_null_args(void **state)` |
-| `test_scan_ref_cap` | function | `tests/test_prefetch.c:104` | `static void test_scan_ref_cap(void **state)` |
-| `_POSIX_C_SOURCE` | macro | `tests/test_prefs.c:9` | `#define _POSIX_C_SOURCE` |
-| `main` | function | `tests/test_prefs.c:424` | `int main(void)` |
-| `test_bookmark_toggle_and_cap` | function | `tests/test_prefs.c:267` | `static void test_bookmark_toggle_and_cap(void **state)` |
-| `test_bookmarks_page_escapes` | function | `tests/test_prefs.c:375` | `static void test_bookmarks_page_escapes(void **state)` |
-| `test_format_null_args` | function | `tests/test_prefs.c:412` | `static void test_format_null_args(void **state)` |
-| `test_history_dedup_and_evict` | function | `tests/test_prefs.c:295` | `static void test_history_dedup_and_evict(void **state)` |
-| `test_hostile_title_cleaned` | function | `tests/test_prefs.c:237` | `static void test_hostile_title_cleaned(void **state)` |
-| `test_init_defaults` | function | `tests/test_prefs.c:25` | `static void test_init_defaults(void **state)` |
-| `test_invalid_urls_rejected` | function | `tests/test_prefs.c:209` | `static void test_invalid_urls_rejected(void **state)` |
-| `test_parse_bad_magic` | function | `tests/test_prefs.c:140` | `static void test_parse_bad_magic(void **state)` |
-| `test_parse_clamps_out_of_range` | function | `tests/test_prefs.c:187` | `static void test_parse_clamps_out_of_range(void **state)` |
-| `test_parse_too_large` | function | `tests/test_prefs.c:156` | `static void test_parse_too_large(void **state)` |
-| `test_parse_unknown_and_malformed_skipped` | function | `tests/test_prefs.c:165` | `static void test_parse_unknown_and_malformed_skipped(void **state)` |
-| `test_roundtrip` | function | `tests/test_prefs.c:80` | `static void test_roundtrip(void **state)` |
-| `test_suggest_priorities` | function | `tests/test_prefs.c:320` | `static void test_suggest_priorities(void **state)` |
-| `fresh` | function | `tests/test_pres_hints.c:19` | `static css_style fresh(void)` |
-| `get` | function | `tests/test_pres_hints.c:13` | `static const char *get(void *ctx, const char *name, size_t *len)` |
-| `kv` | struct | `tests/test_pres_hints.c:11` | `` |
-| `main` | function | `tests/test_pres_hints.c:176` | `int main(void)` |
-| `test_bgcolor_and_quirks` | function | `tests/test_pres_hints.c:132` | `static void test_bgcolor_and_quirks(void **state)` |
-| `test_cell_hints` | function | `tests/test_pres_hints.c:93` | `static void test_cell_hints(void **state)` |
-| `test_center_and_block_align` | function | `tests/test_pres_hints.c:106` | `static void test_center_and_block_align(void **state)` |
-| `test_css_wins` | function | `tests/test_pres_hints.c:72` | `static void test_css_wins(void **state)` |
-| `test_dimension` | function | `tests/test_pres_hints.c:28` | `static void test_dimension(void **state)` |
-| `test_fail_closed` | function | `tests/test_pres_hints.c:162` | `static void test_fail_closed(void **state)` |
-| `test_table_width_and_centering` | function | `tests/test_pres_hints.c:49` | `static void test_table_width_and_centering(void **state)` |
 
 Next: [SYMBOLS_p16.md](SYMBOLS_p16.md)

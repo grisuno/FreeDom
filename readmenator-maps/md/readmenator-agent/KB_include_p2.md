@@ -46,6 +46,24 @@ Previous: [KB_include.md](KB_include.md)
 - Depends on: `include/css_decl.h`
 - Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_gradient.c`, `src/css_mask.c`, `src/tab.c`, `tests/test_css_gradient.c`
 
+## include/css_import.h
+- Doc: ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ci_import` (struct, line 25)
+  - `url` (type_alias, line 24) `typedef struct ci_import { char url[CI_URL_MAX];`
+  - `ci_scan` (function, line 36) `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap);`
+  - `ci_wrap` (function, line 41) `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap);`
+  - `ci_balanced` (function, line 45) `int ci_balanced(const char *css, size_t len);`
+  - `FREEDOM_CSS_IMPORT_H` (macro, line 2) `#define FREEDOM_CSS_IMPORT_H`
+  - `CI_URL_MAX` (macro, line 19) `#define CI_URL_MAX`
+  - `CI_COND_MAX` (macro, line 20) `#define CI_COND_MAX`
+  - `CI_MAX_DEPTH` (macro, line 21) `#define CI_MAX_DEPTH`
+  - `CI_MAX_PER_PAGE` (macro, line 22) `#define CI_MAX_PER_PAGE`
+  - `CI_MAX_PER_SHEET` (macro, line 23) `#define CI_MAX_PER_SHEET`
+- Imported by: `src/css_import.c`, `src/tab.c`, `tests/test_css_import.c`, `tests/test_tab.c`
+
 ## include/css_index.h
 - Doc: cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *...
 - Layer: utility
@@ -472,20 +490,6 @@ Previous: [KB_include.md](KB_include.md)
   - `FBK_ORIGIN_MAX` (macro, line 19) `#define FBK_ORIGIN_MAX`
   - `FBK_URL_MAX` (macro, line 20) `#define FBK_URL_MAX`
 - Imported by: `src/frame_broker.c`, `src/frame_host.c`, `tests/test_frame_broker.c`
-
-## include/frame_clock.h
-- Doc: active: frame_clock (fc_) — pure animation frame scheduler.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `fc_clock` (struct, line 15)
-  - `active` (type_alias, line 14) `typedef struct fc_clock { int active;`
-  - `fc_init` (function, line 20) `void fc_init(fc_clock *c);`
-  - `fc_set_active` (function, line 21) `void fc_set_active(fc_clock *c, int active);`
-  - `fc_needs_tick` (function, line 22) `int fc_needs_tick(const fc_clock *c);`
-  - `fc_interval_ms` (function, line 23) `int fc_interval_ms(const fc_clock *c);`
-  - `FREEDOM_FRAME_CLOCK_H` (macro, line 2) `#define FREEDOM_FRAME_CLOCK_H`
-- Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

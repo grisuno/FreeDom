@@ -1,6 +1,20 @@
 # Subsystem: include (page 3 of 6)
 Previous: [KB_include_p2.md](KB_include_p2.md)
 
+## include/frame_clock.h
+- Doc: active: frame_clock (fc_) — pure animation frame scheduler.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fc_clock` (struct, line 15)
+  - `active` (type_alias, line 14) `typedef struct fc_clock { int active;`
+  - `fc_init` (function, line 20) `void fc_init(fc_clock *c);`
+  - `fc_set_active` (function, line 21) `void fc_set_active(fc_clock *c, int active);`
+  - `fc_needs_tick` (function, line 22) `int fc_needs_tick(const fc_clock *c);`
+  - `fc_interval_ms` (function, line 23) `int fc_interval_ms(const fc_clock *c);`
+  - `FREEDOM_FRAME_CLOCK_H` (macro, line 2) `#define FREEDOM_FRAME_CLOCK_H`
+- Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
+
 ## include/frame_host.h
 - Doc: fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource...
 - Layer: utility

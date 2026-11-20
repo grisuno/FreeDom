@@ -3,6 +3,31 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `serialize_subtree` | function | `src/page_view.c:4580` | `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)` |
+| `size` | function | `src/page_view.c:3076` | `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */ static void app...` |
+| `srcset_slot_width` | function | `src/page_view.c:4750` | `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,                               ...` |
+| `string` | function | `src/page_view.c:4866` | `* Returns a heap string (caller frees) or NULL when neither carries a class —  * NULL simply mean...` |
+| `subtree_has_own_text` | function | `src/page_view.c:3608` | `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,             ...` |
+| `subtree_is_oof` | function | `src/page_view.c:3056` | `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,                      ...` |
+| `sz_count` | function | `src/page_view.c:4558` | `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` |
+| `sz_fill` | struct | `src/page_view.c:4566` | `` |
+| `sz_write` | function | `src/page_view.c:4572` | `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)` |
+| `table_cell_pos` | function | `src/page_view.c:3694` | `static int table_cell_pos(struct pv_flow_reg *fr, const lxb_dom_node_t *table, const lxb_dom_node_t *cell, int *row...` |
+| `table_columns` | function | `src/page_view.c:5579` | `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
+| `table_columns_scan` | function | `src/page_view.c:5588` | `static int table_columns_scan(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
+| `table_next_row` | function | `src/page_view.c:5451` | `static const lxb_dom_node_t *table_next_row(const lxb_dom_node_t *table,                         ...` |
+| `text_node_is_blank` | function | `src/page_view.c:1380` | `static int text_node_is_blank(const lxb_dom_node_t *c);` |
+| `them` | function | `src/page_view.c:1371` | `* them (PV_BR_ATOM_SPACE);` |
+| `trying` | function | `src/page_view.c:1996` | `* a real page passes without trying (slashdot's front page saturates it), and past  * it box_reg_...` |
+| `ua_tag_of` | function | `src/page_view.c:1153` | `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` |
+| `under_unrendered` | function | `src/page_view.c:5021` | `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` |
+| `url` | function | `src/page_view.c:6011` | `* fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css * module, so OOM here degrades to...` |
+| `utf8_encode` | function | `src/page_view.c:109` | `static size_t utf8_encode(unsigned int cp, char *out)` |
+| `utf8_sanitized_dup` | function | `src/page_view.c:122` | `static char *utf8_sanitized_dup(const char *s)` |
+| `walk` | function | `src/page_view.c:4371` | `* far on this walk (they are all inside this element). */                          /* The innermo...` |
+| `pe_build_path` | function | `src/pdf_export.c:91` | `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)` |
+| `pe_build_path_ext` | function | `src/pdf_export.c:66` | `pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,                 ...` |
+| `pe_paginate` | function | `src/pdf_export.c:95` | `size_t pe_paginate(const double *tops, const double *heights, size_t n,                    double...` |
 | `pe_safe_basename` | function | `src/pdf_export.c:25` | `pe_status pe_safe_basename(const char *title, char *out, size_t outsz)` |
 | `PT_LINE_CAP` | macro | `src/perf_trace.c:107` | `#define PT_LINE_CAP` |
 | `cmp_u64` | function | `src/perf_trace.c:71` | `static int cmp_u64(const void *a, const void *b)` |
@@ -323,178 +348,153 @@ Previous: [SYMBOLS_p9.md](SYMBOLS_p9.md)
 | `sv_skip_subtree` | function | `src/svg_render.c:704` | `static void sv_skip_subtree(const char *s, size_t n, size_t *i, const char *name, size_t nlen)` |
 | `sv_span_eq` | function | `src/svg_render.c:32` | `static int sv_span_eq(const char *s, size_t n, const char *lit)` |
 | `sv_style_next` | function | `src/svg_render.c:238` | `static int sv_style_next(const char *s, size_t n, size_t *i,                          const char ...` |
-| `EPIPE` | function | `src/tab.c:2391` | `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();` |
-| `FB_MAX_FILE_BYTES` | function | `src/tab.c:1221` | `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify  * the stream. ...` |
-| `PV_MAX_CONTAINERS_WIRE` | macro | `src/tab.c:167` | `#define PV_MAX_CONTAINERS_WIRE` |
-| `TAB_ASYNC_THREADS` | macro | `src/tab.c:213` | `#define TAB_ASYNC_THREADS` |
-| `TAB_CQ_REDERIVE_MAX` | macro | `src/tab.c:293` | `#define TAB_CQ_REDERIVE_MAX` |
-| `TAB_IOBUF_BYTES` | macro | `src/tab.c:59` | `#define TAB_IOBUF_BYTES` |
-| `TAB_MAX_ASYNC_PENDING` | macro | `src/tab.c:211` | `#define TAB_MAX_ASYNC_PENDING` |
-| `TAB_MAX_BATCH_BYTES` | macro | `src/tab.c:214` | `#define TAB_MAX_BATCH_BYTES` |
-| `TAB_MAX_EXTERN_CSS` | macro | `src/tab.c:1294` | `#define TAB_MAX_EXTERN_CSS` |
-| `TAB_MAX_GEOM_WORDS` | macro | `src/tab.c:199` | `#define TAB_MAX_GEOM_WORDS` |
-| `TAB_MAX_HIST_BYTES` | macro | `src/tab.c:193` | `#define TAB_MAX_HIST_BYTES` |
-| `TAB_MAX_HIST_OPS` | macro | `src/tab.c:192` | `#define TAB_MAX_HIST_OPS` |
-| `TAB_MAX_JS_JOBS` | macro | `src/tab.c:220` | `#define TAB_MAX_JS_JOBS` |
-| `TAB_MAX_NET_ROUNDS` | macro | `src/tab.c:212` | `#define TAB_MAX_NET_ROUNDS` |
-| `TAB_MAX_OPENS` | macro | `src/tab.c:195` | `#define TAB_MAX_OPENS` |
-| `TAB_MAX_OPEN_BYTES` | macro | `src/tab.c:196` | `#define TAB_MAX_OPEN_BYTES` |
-| `TAB_MAX_RUNS` | macro | `src/tab.c:163` | `#define TAB_MAX_RUNS` |
-| `TAB_MAX_STORAGE` | macro | `src/tab.c:188` | `#define TAB_MAX_STORAGE` |
-| `TAB_MAX_SUBREQ` | macro | `src/tab.c:218` | `#define TAB_MAX_SUBREQ` |
-| `TAB_MAX_SUBRESOURCE` | macro | `src/tab.c:219` | `#define TAB_MAX_SUBRESOURCE` |
-| `TAB_MAX_URL` | macro | `src/tab.c:170` | `#define TAB_MAX_URL` |
-| `TAB_MAX_WS_MSG` | macro | `src/tab.c:184` | `#define TAB_MAX_WS_MSG` |
-| `TAB_SCREEN_H` | macro | `src/tab.c:136` | `#define TAB_SCREEN_H` |
-| `TAB_SCREEN_W` | macro | `src/tab.c:135` | `#define TAB_SCREEN_W` |
-| `TAB_WIRE_A_N` | macro | `src/tab.c:141` | `#define TAB_WIRE_A_N` |
-| `TAB_WIRE_BOX_F_N` | macro | `src/tab.c:143` | `#define TAB_WIRE_BOX_F_N` |
-| `TAB_WIRE_B_N` | macro | `src/tab.c:142` | `#define TAB_WIRE_B_N` |
-| `TAB_WIRE_GRID_N` | macro | `src/tab.c:144` | `#define TAB_WIRE_GRID_N` |
-| `TAB_WIRE_HEAD_N` | macro | `src/tab.c:140` | `#define TAB_WIRE_HEAD_N` |
-| `WHERE` | function | `src/tab.c:1786` | `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...` |
+| `EPIPE` | function | `src/tab.c:2508` | `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();` |
+| `FB_MAX_FILE_BYTES` | function | `src/tab.c:1222` | `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify  * the stream. ...` |
+| `PV_MAX_CONTAINERS_WIRE` | macro | `src/tab.c:168` | `#define PV_MAX_CONTAINERS_WIRE` |
+| `TAB_ASYNC_THREADS` | macro | `src/tab.c:214` | `#define TAB_ASYNC_THREADS` |
+| `TAB_CQ_REDERIVE_MAX` | macro | `src/tab.c:294` | `#define TAB_CQ_REDERIVE_MAX` |
+| `TAB_IOBUF_BYTES` | macro | `src/tab.c:60` | `#define TAB_IOBUF_BYTES` |
+| `TAB_MAX_ASYNC_PENDING` | macro | `src/tab.c:212` | `#define TAB_MAX_ASYNC_PENDING` |
+| `TAB_MAX_BATCH_BYTES` | macro | `src/tab.c:215` | `#define TAB_MAX_BATCH_BYTES` |
+| `TAB_MAX_EXTERN_CSS` | macro | `src/tab.c:1295` | `#define TAB_MAX_EXTERN_CSS` |
+| `TAB_MAX_GEOM_WORDS` | macro | `src/tab.c:200` | `#define TAB_MAX_GEOM_WORDS` |
+| `TAB_MAX_HIST_BYTES` | macro | `src/tab.c:194` | `#define TAB_MAX_HIST_BYTES` |
+| `TAB_MAX_HIST_OPS` | macro | `src/tab.c:193` | `#define TAB_MAX_HIST_OPS` |
+| `TAB_MAX_JS_JOBS` | macro | `src/tab.c:221` | `#define TAB_MAX_JS_JOBS` |
+| `TAB_MAX_NET_ROUNDS` | macro | `src/tab.c:213` | `#define TAB_MAX_NET_ROUNDS` |
+| `TAB_MAX_OPENS` | macro | `src/tab.c:196` | `#define TAB_MAX_OPENS` |
+| `TAB_MAX_OPEN_BYTES` | macro | `src/tab.c:197` | `#define TAB_MAX_OPEN_BYTES` |
+| `TAB_MAX_RUNS` | macro | `src/tab.c:164` | `#define TAB_MAX_RUNS` |
+| `TAB_MAX_STORAGE` | macro | `src/tab.c:189` | `#define TAB_MAX_STORAGE` |
+| `TAB_MAX_SUBREQ` | macro | `src/tab.c:219` | `#define TAB_MAX_SUBREQ` |
+| `TAB_MAX_SUBRESOURCE` | macro | `src/tab.c:220` | `#define TAB_MAX_SUBRESOURCE` |
+| `TAB_MAX_URL` | macro | `src/tab.c:171` | `#define TAB_MAX_URL` |
+| `TAB_MAX_WS_MSG` | macro | `src/tab.c:185` | `#define TAB_MAX_WS_MSG` |
+| `TAB_SCREEN_H` | macro | `src/tab.c:137` | `#define TAB_SCREEN_H` |
+| `TAB_SCREEN_W` | macro | `src/tab.c:136` | `#define TAB_SCREEN_W` |
+| `TAB_WIRE_A_N` | macro | `src/tab.c:142` | `#define TAB_WIRE_A_N` |
+| `TAB_WIRE_BOX_F_N` | macro | `src/tab.c:144` | `#define TAB_WIRE_BOX_F_N` |
+| `TAB_WIRE_B_N` | macro | `src/tab.c:143` | `#define TAB_WIRE_B_N` |
+| `TAB_WIRE_GRID_N` | macro | `src/tab.c:145` | `#define TAB_WIRE_GRID_N` |
+| `TAB_WIRE_HEAD_N` | macro | `src/tab.c:141` | `#define TAB_WIRE_HEAD_N` |
+| `WHERE` | function | `src/tab.c:1903` | `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...` |
 | `_GNU_SOURCE` | macro | `src/tab.c:14` | `#define _GNU_SOURCE` |
-| `adopt_worker` | function | `src/tab.c:3430` | `static tab_status adopt_worker(const tab_spawned *sp, tab **out)` |
-| `blocks` | function | `src/tab.c:769` | `* * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the * grid array, block B[26])...` |
-| `budget_remaining_ms` | function | `src/tab.c:1251` | `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` |
-| `buffer` | function | `src/tab.c:699` | `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of...` |
-| `child_cq` | function | `src/tab.c:311` | `static pv_cq_src *child_cq(child_state *cs)` |
-| `child_cq_width` | function | `src/tab.c:297` | `static int child_cq_width(void *ctx, dom_node_id node)` |
-| `child_fetch` | function | `src/tab.c:530` | `static int child_fetch(void *vctx, const char *method, const char *url,                        co...` |
-| `child_fetch_async` | function | `src/tab.c:546` | `static int child_fetch_async(void *vctx, const char *method, const char *url,                    ...` |
-| `child_handle_click` | function | `src/tab.c:2124` | `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)` |
-| `child_handle_decode_image` | function | `src/tab.c:2322` | `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` |
-| `child_handle_decode_image_data` | function | `src/tab.c:2349` | `static void child_handle_decode_image_data(int wfd, const char *url, size_t len)` |
-| `child_handle_eval` | function | `src/tab.c:2281` | `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` |
-| `child_handle_event` | function | `src/tab.c:2134` | `static void child_handle_event(int wfd, child_state *cs)` |
-| `child_handle_geom` | function | `src/tab.c:2220` | `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)` |
-| `child_handle_load` | function | `src/tab.c:1512` | `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,            ...` |
-| `child_handle_mouse` | function | `src/tab.c:2182` | `static void child_handle_mouse(int wfd, child_state *cs)` |
-| `child_handle_mutation` | function | `src/tab.c:2018` | `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,                         ...` |
-| `child_handle_mutation_ex` | function | `src/tab.c:2025` | `static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,                      ...` |
-| `child_handle_submit` | function | `src/tab.c:2247` | `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` |
-| `child_load` | function | `src/tab.c:631` | `static int child_load(child_state *cs, const char *html, size_t len, int run_js,                 ...` |
-| `child_next_timer_ms` | function | `src/tab.c:2001` | `static int32_t child_next_timer_ms(child_state *cs)` |
-| `child_prescript_view` | function | `src/tab.c:1482` | `static pv_view *child_prescript_view(child_state *cs, const char *html, size_t len,              ...` |
-| `child_read_reply` | function | `src/tab.c:502` | `static int child_read_reply(child_state *cs, net_reply *out)` |
-| `child_reset_page` | function | `src/tab.c:342` | `static void child_reset_page(child_state *cs)` |
-| `child_sheets` | function | `src/tab.c:337` | `static shc_cache *child_sheets(child_state *cs)` |
-| `child_state` | struct | `src/tab.c:231` | `` |
-| `child_write_subreq` | function | `src/tab.c:477` | `static int child_write_subreq(child_state *cs, uint8_t tag, const char *method, const char *url, ...` |
-| `clip_pm_ok` | function | `src/tab.c:148` | `static int clip_pm_ok(int32_t v)` |
-| `column` | function | `src/tab.c:2956` | `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...` |
-| `computed_signature` | function | `src/tab.c:372` | `static uint64_t computed_signature(const dom_index *idx)` |
-| `content` | function | `src/tab.c:1851` | `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...` |
-| `ctype_is_css` | function | `src/tab.c:1274` | `static int ctype_is_css(const char *ctype)` |
-| `ctype_is_javascript` | function | `src/tab.c:1265` | `static int ctype_is_javascript(const char *ctype)` |
-| `depth` | function | `src/tab.c:2421` | `* defense in depth (seccomp already excludes open/socket/exec);` |
-| `does` | function | `src/tab.c:1604` | `* native browser does (spec/js_native.md). Best effort -- an unsealed page still runs. */ (void)jn_seal(cs->js);` |
-| `exec_worker_child` | function | `src/tab.c:3359` | `static void exec_worker_child(int rfd, int wfd)` |
-| `fd` | type_alias | `src/tab.c:60` | `typedef struct tab_iobuf { int fd;` |
-| `frames` | function | `src/tab.c:4328` | `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...` |
-| `gate_js_nav` | function | `src/tab.c:3973` | `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` |
-| `gen_session_key` | function | `src/tab.c:2369` | `static uint64_t gen_session_key(void)` |
-| `geom_parent` | function | `src/tab.c:2212` | `static dom_node_id geom_parent(void *ctx, dom_node_id n)` |
-| `geometry_encode` | function | `src/tab.c:4659` | `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)` |
-| `hist_ops_free` | function | `src/tab.c:3782` | `static void hist_ops_free(tab_hist_op *ops, size_t n)` |
-| `ignore_sigpipe` | function | `src/tab.c:2706` | `static void ignore_sigpipe(void)` |
-| `io_failure` | function | `src/tab.c:3351` | `static tab_status io_failure(tab *t)` |
-| `is_activation_event` | function | `src/tab.c:3847` | `static int is_activation_event(const char *type)` |
-| `job_discard` | function | `src/tab.c:4683` | `static void job_discard(tab *t)` |
-| `job_main` | function | `src/tab.c:4706` | `static void *job_main(void *arg)` |
-| `job_start` | function | `src/tab.c:4735` | `static tab_status job_start(tab *t)` |
-| `layout` | function | `src/tab.c:2945` | `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....` |
-| `libraries` | function | `src/tab.c:1621` | `* load heavier libraries (jQuery, Bootstrap, etc.) that need more time. * Untrusted hosts get the default budget...` |
-| `load` | function | `src/tab.c:2662` | `* subresource requests this load (set per page: host in allow.conf AND js.conf);` |
-| `log_external_skip` | function | `src/tab.c:1282` | `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,                 ...` |
-| `net_reply` | struct | `src/tab.c:466` | `` |
-| `net_reply_free` | function | `src/tab.c:474` | `static void net_reply_free(net_reply *r)` |
-| `once` | function | `src/tab.c:1904` | `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);` |
-| `open_urls_free` | function | `src/tab.c:3856` | `static void open_urls_free(char **u, size_t n)` |
-| `parse_worker_fd` | function | `src/tab.c:2623` | `static int parse_worker_fd(const char *s, int *out)` |
-| `prof_lap` | function | `src/tab.c:593` | `static void prof_lap(const char *what, double *t0)` |
-| `prof_now_ms` | function | `src/tab.c:583` | `static double prof_now_ms(void)` |
-| `prof_on` | function | `src/tab.c:588` | `static int prof_on(void)` |
-| `rad_len_ok` | function | `src/tab.c:154` | `static int rad_len_ok(int32_t v, int dflt)` |
-| `read_console` | function | `src/tab.c:3304` | `static int read_console(int fd, fb_buffer *out)` |
-| `read_field` | function | `src/tab.c:2732` | `static int read_field(int fd, char **out, size_t *out_len)` |
-| `read_full` | macro | `src/tab.c:114` | `#define read_full(fd, buf, n)` |
-| `read_opens` | function | `src/tab.c:3866` | `static tab_status read_opens(tab *t, const char *page_url, int gesture,                          ...` |
-| `read_view` | function | `src/tab.c:2749` | `static int read_view(int fd, pv_view **out)` |
-| `read_view_raw` | function | `src/tab.c:2757` | `static int read_view_raw(int fd, pv_view **out)` |
-| `read_ws` | function | `src/tab.c:3904` | `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` |
-| `reap_spawned` | function | `src/tab.c:3421` | `static void reap_spawned(const tab_spawned *sp, int kill_it)` |
-| `replies` | function | `src/tab.c:559` | `* writing replies (no pipe deadlock). */ static void child_net_drain(child_state *cs)` |
-| `run` | function | `src/tab.c:1300` | `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).  * Call after every ...` |
-| `run_js` | function | `src/tab.c:604` | `* regardless of run_js (a no-JS load simply never records a request). */ /* Installs the page-ind...` |
-| `send_request` | function | `src/tab.c:3341` | `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` |
-| `sig_mix` | function | `src/tab.c:364` | `static uint64_t sig_mix(uint64_t h, const char *s, size_t n)` |
-| `spawn_worker` | function | `src/tab.c:3391` | `static tab_status spawn_worker(tab_spawned *sp)` |
-| `status` | type_alias | `src/tab.c:466` | `typedef struct net_reply { int32_t status;` |
-| `swap` | function | `src/tab.c:1913` | `* display:none hiding an element via class swap (CSS, not      * DOM removal). */     if (ok && v...` |
-| `tab` | struct | `src/tab.c:2655` | `` |
-| `tab_alive` | function | `src/tab.c:4562` | `int tab_alive(const tab *t)` |
-| `tab_async_busy` | function | `src/tab.c:4731` | `int tab_async_busy(const tab *t)` |
-| `tab_async_fd` | function | `src/tab.c:4722` | `int tab_async_fd(tab *t)` |
-| `tab_async_finish` | function | `src/tab.c:4773` | `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)` |
-| `tab_async_sync` | function | `src/tab.c:4696` | `static void tab_async_sync(tab *t)` |
-| `tab_await_result` | function | `src/tab.c:4331` | `static tab_status tab_await_result(tab *t)` |
-| `tab_await_result_inner` | function | `src/tab.c:4339` | `static tab_status tab_await_result_inner(tab *t)` |
-| `tab_batch_discard` | function | `src/tab.c:3777` | `static void tab_batch_discard(tab *t)` |
-| `tab_batch_run` | function | `src/tab.c:3710` | `static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out)` |
-| `tab_child_pid` | function | `src/tab.c:4568` | `pid_t tab_child_pid(const tab *t)` |
-| `tab_click` | function | `src/tab.c:4196` | `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)` |
-| `tab_close` | function | `src/tab.c:4572` | `void tab_close(tab *t)` |
-| `tab_decode_image` | function | `src/tab.c:4541` | `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)` |
-| `tab_decode_image_data_url` | function | `src/tab.c:4548` | `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)` |
-| `tab_decode_image_op` | function | `src/tab.c:4494` | `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,         ...` |
-| `tab_eval` | function | `src/tab.c:4453` | `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)` |
-| `tab_eval_result_free` | function | `src/tab.c:4620` | `void tab_eval_result_free(tab_eval_result *r)` |
-| `tab_geometry_async` | function | `src/tab.c:4758` | `tab_status tab_geometry_async(tab *t, const jg_table *g)` |
-| `tab_geometry_send` | function | `src/tab.c:4641` | `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)` |
-| `tab_image_free` | function | `src/tab.c:4629` | `void tab_image_free(tab_image *img)` |
-| `tab_inflight_request_headers` | function | `src/tab.c:3601` | `const char *tab_inflight_request_headers(void)` |
-| `tab_iobuf` | struct | `src/tab.c:60` | `` |
-| `tab_last_subreq_stats` | function | `src/tab.c:3546` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)` |
-| `tab_load` | function | `src/tab.c:3983` | `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)` |
-| `tab_load_ex` | function | `src/tab.c:3987` | `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)` |
-| `tab_load_full` | function | `src/tab.c:3991` | `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,             ...` |
-| `tab_mod_fetch` | function | `src/tab.c:1388` | `static char *tab_mod_fetch(void *host, const char *url, size_t *len)` |
-| `tab_mod_resolve` | function | `src/tab.c:1358` | `static int tab_mod_resolve(void *host, const char *base, const char *spec,                       ...` |
-| `tab_note_css_served` | function | `src/tab.c:3667` | `static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,  ...` |
-| `tab_op_budget_us` | function | `src/tab.c:3663` | `static int64_t tab_op_budget_us(const tab *t)` |
-| `tab_open` | function | `src/tab.c:3481` | `tab_status tab_open(tab **out)` |
-| `tab_page_free` | function | `src/tab.c:4590` | `void tab_page_free(tab_page *p)` |
-| `tab_page_keep_view` | function | `src/tab.c:3530` | `void tab_page_keep_view(tab_page *prev, tab_page *next)` |
-| `tab_parse_worker_args` | function | `src/tab.c:2635` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)` |
-| `tab_popstate` | function | `src/tab.c:4795` | `tab_status tab_popstate(tab *t, int index, tab_page *out)` |
-| `tab_prewarm` | function | `src/tab.c:3452` | `void tab_prewarm(void)` |
-| `tab_prewarmed` | function | `src/tab.c:3458` | `int tab_prewarmed(void)` |
-| `tab_prewarmed_pid` | function | `src/tab.c:3465` | `int tab_prewarmed_pid(void)` |
-| `tab_read_full` | function | `src/tab.c:88` | `static int tab_read_full(int fd, void *buf, size_t n)` |
-| `tab_read_subreq_fields` | function | `src/tab.c:3652` | `static int tab_read_subreq_fields(tab *t, char **method, char **url, char **body, size_t *blen,  ...` |
-| `tab_read_view` | function | `src/tab.c:4322` | `tab_status tab_read_view(tab *t, tab_page *out)` |
-| `tab_read_view_ex` | function | `src/tab.c:4348` | `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)` |
-| `tab_refresh_alive` | function | `src/tab.c:2713` | `static void tab_refresh_alive(tab *t)` |
-| `tab_report_response_headers` | function | `src/tab.c:3589` | `void tab_report_response_headers(const char *lines)` |
-| `tab_serve_netwait` | function | `src/tab.c:3747` | `static int tab_serve_netwait(tab *t)` |
-| `tab_serve_subreq` | function | `src/tab.c:3683` | `static int tab_serve_subreq(tab *t, int net_granted, int css_granted)` |
-| `tab_serve_tag` | function | `src/tab.c:3769` | `static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted)` |
-| `tab_set_cookies` | function | `src/tab.c:3569` | `void tab_set_cookies(tab *t, const char *cookies)` |
-| `tab_set_css_allowed` | function | `src/tab.c:3541` | `void tab_set_css_allowed(tab *t, int allowed)` |
-| `tab_set_css_sink` | function | `src/tab.c:3510` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)` |
-| `tab_set_fetcher` | function | `src/tab.c:3504` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)` |
-| `tab_set_frame_id` | function | `src/tab.c:3559` | `void tab_set_frame_id(tab *t, int id)` |
-| `tab_set_geometry` | function | `src/tab.c:4669` | `tab_status tab_set_geometry(tab *t, const jg_table *g)` |
-| `tab_set_identity` | function | `src/tab.c:3551` | `void tab_set_identity(tab *t, const char *serialized)` |
-| `tab_set_lazy_ticks` | function | `src/tab.c:3525` | `void tab_set_lazy_ticks(tab *t, int on)` |
-| `tab_set_net_allowed` | function | `src/tab.c:3520` | `void tab_set_net_allowed(tab *t, int allowed)` |
-| `tab_set_op_net_budget_ms` | function | `src/tab.c:3516` | `void tab_set_op_net_budget_ms(tab *t, int ms)` |
-| `tab_set_storage` | function | `src/tab.c:4822` | `void tab_set_storage(tab *t, const char *blob, size_t len)` |
-| `tab_set_viewport_w` | function | `src/tab.c:3564` | `void tab_set_viewport_w(tab *t, int px)` |
-| `tab_shutdown_spare` | function | `src/tab.c:3472` | `void tab_shutdown_spare(void)` |
-| `tab_spawned` | struct | `src/tab.c:3379` | `` |
-| `tab_submit` | function | `src/tab.c:4214` | `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` |
-| `tab_submit_async` | function | `src/tab.c:3725` | `static int tab_submit_async(tab *t, int net_granted, int css_granted)` |
+| `adopt_worker` | function | `src/tab.c:3547` | `static tab_status adopt_worker(const tab_spawned *sp, tab **out)` |
+| `blocks` | function | `src/tab.c:770` | `* * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the * grid array, block B[26])...` |
+| `budget_remaining_ms` | function | `src/tab.c:1252` | `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` |
+| `buffer` | function | `src/tab.c:700` | `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of...` |
+| `child_cq` | function | `src/tab.c:312` | `static pv_cq_src *child_cq(child_state *cs)` |
+| `child_cq_width` | function | `src/tab.c:298` | `static int child_cq_width(void *ctx, dom_node_id node)` |
+| `child_fetch` | function | `src/tab.c:531` | `static int child_fetch(void *vctx, const char *method, const char *url,                        co...` |
+| `child_fetch_async` | function | `src/tab.c:547` | `static int child_fetch_async(void *vctx, const char *method, const char *url,                    ...` |
+| `child_handle_click` | function | `src/tab.c:2241` | `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)` |
+| `child_handle_decode_image` | function | `src/tab.c:2439` | `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` |
+| `child_handle_decode_image_data` | function | `src/tab.c:2466` | `static void child_handle_decode_image_data(int wfd, const char *url, size_t len)` |
+| `child_handle_eval` | function | `src/tab.c:2398` | `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` |
+| `child_handle_event` | function | `src/tab.c:2251` | `static void child_handle_event(int wfd, child_state *cs)` |
+| `child_handle_geom` | function | `src/tab.c:2337` | `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)` |
+| `child_handle_load` | function | `src/tab.c:1629` | `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,            ...` |
+| `child_handle_mouse` | function | `src/tab.c:2299` | `static void child_handle_mouse(int wfd, child_state *cs)` |
+| `child_handle_mutation` | function | `src/tab.c:2135` | `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,                         ...` |
+| `child_handle_mutation_ex` | function | `src/tab.c:2142` | `static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,                      ...` |
+| `child_handle_submit` | function | `src/tab.c:2364` | `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` |
+| `child_load` | function | `src/tab.c:632` | `static int child_load(child_state *cs, const char *html, size_t len, int run_js,                 ...` |
+| `child_next_timer_ms` | function | `src/tab.c:2118` | `static int32_t child_next_timer_ms(child_state *cs)` |
+| `child_prescript_view` | function | `src/tab.c:1599` | `static pv_view *child_prescript_view(child_state *cs, const char *html, size_t len,              ...` |
+| `child_read_reply` | function | `src/tab.c:503` | `static int child_read_reply(child_state *cs, net_reply *out)` |
+| `child_reset_page` | function | `src/tab.c:343` | `static void child_reset_page(child_state *cs)` |
+| `child_sheets` | function | `src/tab.c:338` | `static shc_cache *child_sheets(child_state *cs)` |
+| `child_state` | struct | `src/tab.c:232` | `` |
+| `child_write_subreq` | function | `src/tab.c:478` | `static int child_write_subreq(child_state *cs, uint8_t tag, const char *method, const char *url, ...` |
+| `clip_pm_ok` | function | `src/tab.c:149` | `static int clip_pm_ok(int32_t v)` |
+| `column` | function | `src/tab.c:3073` | `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...` |
+| `computed_signature` | function | `src/tab.c:373` | `static uint64_t computed_signature(const dom_index *idx)` |
+| `content` | function | `src/tab.c:1968` | `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...` |
+| `css_text` | struct | `src/tab.c:1426` | `` |
+| `css_text_put` | function | `src/tab.c:1431` | `static int css_text_put(css_text *t, const char *s, size_t n)` |
+| `ctype_is_css` | function | `src/tab.c:1275` | `static int ctype_is_css(const char *ctype)` |
+| `ctype_is_javascript` | function | `src/tab.c:1266` | `static int ctype_is_javascript(const char *ctype)` |
+| `depth` | function | `src/tab.c:2538` | `* defense in depth (seccomp already excludes open/socket/exec);` |
+| `does` | function | `src/tab.c:1721` | `* native browser does (spec/js_native.md). Best effort -- an unsealed page still runs. */ (void)jn_seal(cs->js);` |
+| `exec_worker_child` | function | `src/tab.c:3476` | `static void exec_worker_child(int rfd, int wfd)` |
+| `fd` | type_alias | `src/tab.c:61` | `typedef struct tab_iobuf { int fd;` |
+| `frames` | function | `src/tab.c:4445` | `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...` |
+| `gate_js_nav` | function | `src/tab.c:4090` | `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` |
+| `gen_session_key` | function | `src/tab.c:2486` | `static uint64_t gen_session_key(void)` |
+| `geom_parent` | function | `src/tab.c:2329` | `static dom_node_id geom_parent(void *ctx, dom_node_id n)` |
+| `geometry_encode` | function | `src/tab.c:4776` | `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)` |
+| `hist_ops_free` | function | `src/tab.c:3899` | `static void hist_ops_free(tab_hist_op *ops, size_t n)` |
+| `ignore_sigpipe` | function | `src/tab.c:2823` | `static void ignore_sigpipe(void)` |
+| `io_failure` | function | `src/tab.c:3468` | `static tab_status io_failure(tab *t)` |
+| `is_activation_event` | function | `src/tab.c:3964` | `static int is_activation_event(const char *type)` |
+| `job_discard` | function | `src/tab.c:4800` | `static void job_discard(tab *t)` |
+| `job_main` | function | `src/tab.c:4823` | `static void *job_main(void *arg)` |
+| `job_start` | function | `src/tab.c:4852` | `static tab_status job_start(tab *t)` |
+| `layout` | function | `src/tab.c:3062` | `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....` |
+| `libraries` | function | `src/tab.c:1738` | `* load heavier libraries (jQuery, Bootstrap, etc.) that need more time. * Untrusted hosts get the default budget...` |
+| `load` | function | `src/tab.c:2779` | `* subresource requests this load (set per page: host in allow.conf AND js.conf);` |
+| `log_external_skip` | function | `src/tab.c:1283` | `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,                 ...` |
+| `net_reply` | struct | `src/tab.c:467` | `` |
+| `net_reply_free` | function | `src/tab.c:475` | `static void net_reply_free(net_reply *r)` |
+| `once` | function | `src/tab.c:2021` | `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);` |
+| `open_urls_free` | function | `src/tab.c:3973` | `static void open_urls_free(char **u, size_t n)` |
+| `parse_worker_fd` | function | `src/tab.c:2740` | `static int parse_worker_fd(const char *s, int *out)` |
+| `prof_lap` | function | `src/tab.c:594` | `static void prof_lap(const char *what, double *t0)` |
+| `prof_now_ms` | function | `src/tab.c:584` | `static double prof_now_ms(void)` |
+| `prof_on` | function | `src/tab.c:589` | `static int prof_on(void)` |
+| `rad_len_ok` | function | `src/tab.c:155` | `static int rad_len_ok(int32_t v, int dflt)` |
+| `read_console` | function | `src/tab.c:3421` | `static int read_console(int fd, fb_buffer *out)` |
+| `read_field` | function | `src/tab.c:2849` | `static int read_field(int fd, char **out, size_t *out_len)` |
+| `read_full` | macro | `src/tab.c:115` | `#define read_full(fd, buf, n)` |
+| `read_opens` | function | `src/tab.c:3983` | `static tab_status read_opens(tab *t, const char *page_url, int gesture,                          ...` |
+| `read_view` | function | `src/tab.c:2866` | `static int read_view(int fd, pv_view **out)` |
+| `read_view_raw` | function | `src/tab.c:2874` | `static int read_view_raw(int fd, pv_view **out)` |
+| `read_ws` | function | `src/tab.c:4021` | `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` |
+| `reap_spawned` | function | `src/tab.c:3538` | `static void reap_spawned(const tab_spawned *sp, int kill_it)` |
+| `replies` | function | `src/tab.c:560` | `* writing replies (no pipe deadlock). */ static void child_net_drain(child_state *cs)` |
+| `run` | function | `src/tab.c:1301` | `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).  * Call after every ...` |
+| `run_js` | function | `src/tab.c:605` | `* regardless of run_js (a no-JS load simply never records a request). */ /* Installs the page-ind...` |
+| `send_request` | function | `src/tab.c:3458` | `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` |
+| `sheet_expand` | function | `src/tab.c:1477` | `static int sheet_expand(child_state *cs, const char *base, const char *body, size_t blen,        ...` |
+| `sheets` | function | `src/tab.c:1546` | `* sheets (their own text is read from the DOM by page_view). Every failure is  * fail-open for th...` |
+| `sig_mix` | function | `src/tab.c:365` | `static uint64_t sig_mix(uint64_t h, const char *s, size_t n)` |
+| `spawn_worker` | function | `src/tab.c:3508` | `static tab_status spawn_worker(tab_spawned *sp)` |
+| `status` | type_alias | `src/tab.c:467` | `typedef struct net_reply { int32_t status;` |
+| `swap` | function | `src/tab.c:2030` | `* display:none hiding an element via class swap (CSS, not      * DOM removal). */     if (ok && v...` |
+| `tab` | struct | `src/tab.c:2772` | `` |
+| `tab_alive` | function | `src/tab.c:4679` | `int tab_alive(const tab *t)` |
+| `tab_async_busy` | function | `src/tab.c:4848` | `int tab_async_busy(const tab *t)` |
+| `tab_async_fd` | function | `src/tab.c:4839` | `int tab_async_fd(tab *t)` |
+| `tab_async_finish` | function | `src/tab.c:4890` | `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)` |
+| `tab_async_sync` | function | `src/tab.c:4813` | `static void tab_async_sync(tab *t)` |
+| `tab_await_result` | function | `src/tab.c:4448` | `static tab_status tab_await_result(tab *t)` |
+| `tab_await_result_inner` | function | `src/tab.c:4456` | `static tab_status tab_await_result_inner(tab *t)` |
+| `tab_batch_discard` | function | `src/tab.c:3894` | `static void tab_batch_discard(tab *t)` |
+| `tab_batch_run` | function | `src/tab.c:3827` | `static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out)` |
+| `tab_child_pid` | function | `src/tab.c:4685` | `pid_t tab_child_pid(const tab *t)` |
+| `tab_click` | function | `src/tab.c:4313` | `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)` |
+| `tab_close` | function | `src/tab.c:4689` | `void tab_close(tab *t)` |
+| `tab_decode_image` | function | `src/tab.c:4658` | `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)` |
+| `tab_decode_image_data_url` | function | `src/tab.c:4665` | `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)` |
+| `tab_decode_image_op` | function | `src/tab.c:4611` | `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,         ...` |
+| `tab_eval` | function | `src/tab.c:4570` | `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)` |
+| `tab_eval_result_free` | function | `src/tab.c:4737` | `void tab_eval_result_free(tab_eval_result *r)` |
+| `tab_geometry_async` | function | `src/tab.c:4875` | `tab_status tab_geometry_async(tab *t, const jg_table *g)` |
+| `tab_geometry_send` | function | `src/tab.c:4758` | `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)` |
+| `tab_image_free` | function | `src/tab.c:4746` | `void tab_image_free(tab_image *img)` |
+| `tab_inflight_request_headers` | function | `src/tab.c:3718` | `const char *tab_inflight_request_headers(void)` |
+| `tab_iobuf` | struct | `src/tab.c:61` | `` |
+| `tab_last_subreq_stats` | function | `src/tab.c:3663` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)` |
+| `tab_load` | function | `src/tab.c:4100` | `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)` |
+| `tab_load_ex` | function | `src/tab.c:4104` | `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)` |
+| `tab_load_full` | function | `src/tab.c:4108` | `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,             ...` |
+| `tab_mod_fetch` | function | `src/tab.c:1389` | `static char *tab_mod_fetch(void *host, const char *url, size_t *len)` |
+| `tab_mod_resolve` | function | `src/tab.c:1359` | `static int tab_mod_resolve(void *host, const char *base, const char *spec,                       ...` |
+| `tab_note_css_served` | function | `src/tab.c:3784` | `static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,  ...` |
+| `tab_op_budget_us` | function | `src/tab.c:3780` | `static int64_t tab_op_budget_us(const tab *t)` |
+| `tab_open` | function | `src/tab.c:3598` | `tab_status tab_open(tab **out)` |
+| `tab_page_free` | function | `src/tab.c:4707` | `void tab_page_free(tab_page *p)` |
+| `tab_page_keep_view` | function | `src/tab.c:3647` | `void tab_page_keep_view(tab_page *prev, tab_page *next)` |
+| `tab_parse_worker_args` | function | `src/tab.c:2752` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)` |
 
 Next: [SYMBOLS_p11.md](SYMBOLS_p11.md)

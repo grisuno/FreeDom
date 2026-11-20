@@ -323,7 +323,7 @@ size_t dom_get_by_tag(const dom_index *idx, const char *tag, dom_node_id *out, s
 
 **Returns:** `size_t`
 
-*Called by:* [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`run`](src.tab.c.md#run)
+*Called by:* [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`run`](src.tab.c.md#run), [`sheets`](src.tab.c.md#sheets)
 
 ---
 

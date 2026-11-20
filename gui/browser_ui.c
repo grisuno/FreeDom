@@ -3760,6 +3760,10 @@ typedef struct rc_ibox {
      * row height come from ONE computation. */
     double up, down;
     int valign;         /* css_valign of the atom itself (its run carries it) */
+    /* 1-based index of the inline-level box this one sits INSIDE (0 = none): a tag
+     * pill (display:inline with a border) inside an inline-block list of tags. The
+     * open boxes form a chain, innermost at ibx_open. */
+    int parent;
 } rc_ibox;
 #define RC_IBOX_MAX 16
 
@@ -4309,18 +4313,24 @@ static void close_inline_boxes(rc_layout *L, rc_state *s, double row_top, double
  * to stay on the line, and that is exactly the run that follows a badge inside a
  * paragraph -- so hanging the close off reconcile let the pill's rect swallow the
  * rest of the sentence. */
-static void leave_inline_box(rc_layout *L, rc_state *s, int block_id) {
-    if (s->ibx_open <= 0) return;
-    rc_ibox *ib = &s->ibx[s->ibx_open - 1];
-    if (block_id == ib->id) return;
-    if (ib->frag1 != (size_t)-1) return;
-    ib->frag1 = L->nfrag;
-    /* A sized atom whose content was narrower still occupies its declared width. */
-    if (ib->min_w > 0.0 && s->pen_x < ib->pen0 + ib->pad_l + ib->min_w)
-        s->pen_x = ib->pen0 + ib->pad_l + ib->min_w;
-    s->pen_x += ib->pad_r + ib->mar_r;
-    if (ib->def != NULL && ib->def->display == CSS_DISP_INLINE_BLOCK) ++s->line_atoms;
-    s->ibx_open = 0;
+static int box_path_has(const rd_doc *doc, int block_id, int want);
+
+static void leave_inline_box(rc_layout *L, rc_state *s, const rd_doc *doc, int block_id) {
+    /* Closes the open inline-level boxes, innermost first, until the block is inside
+     * the one left open: a run of a pill nested in an atom keeps the atom open. */
+    while (s->ibx_open > 0) {
+        rc_ibox *ib = &s->ibx[s->ibx_open - 1];
+        if (block_id == ib->id || (block_id >= 0 && box_path_has(doc, block_id, ib->id))) return;
+        if (ib->frag1 == (size_t)-1) {
+            ib->frag1 = L->nfrag;
+            /* A sized atom whose content was narrower still occupies its declared width. */
+            if (ib->min_w > 0.0 && s->pen_x < ib->pen0 + ib->pad_l + ib->min_w)
+                s->pen_x = ib->pen0 + ib->pad_l + ib->min_w;
+            s->pen_x += ib->pad_r + ib->mar_r;
+            if (ib->def != NULL && ib->def->display == CSS_DISP_INLINE_BLOCK) ++s->line_atoms;
+        }
+        s->ibx_open = ib->parent;
+    }
 }
 
 /* A sized inline-block is part of the line box (CSS 2.1 10.8): the line grows to hold
@@ -4540,8 +4550,8 @@ static void flow_emit_frag(rc_layout *L, rc_state *s, cairo_font_extents_t *fe,
         f->hidden = pv_content_hidden(s->hidden_from != 0, x->visibility);
     }
     s->pen_x += width;
-    if (s->ibx_open > 0) {
-        rc_ibox *ib = &s->ibx[s->ibx_open - 1];
+    for (int o = s->ibx_open, guard = 0; o > 0 && guard < RC_IBOX_MAX; o = s->ibx[o - 1].parent, ++guard) {
+        rc_ibox *ib = &s->ibx[o - 1];
         if (fe->ascent > ib->max_asc) ib->max_asc = fe->ascent;
         if (fe->descent > ib->max_desc) ib->max_desc = fe->descent;
     }
@@ -4625,8 +4635,9 @@ static const char FLOW_ELLIPSIS[] = "\xE2\x80\xA6";
  * separates the box from what precedes it -- so the box's left edge moves with it
  * instead of keeping the gap inside its own padding. */
 static void ibx_advance(const rc_layout *L, rc_state *s, double adv) {
-    if (adv > 0.0 && s->ibx_open > 0) {
-        rc_ibox *ib = &s->ibx[s->ibx_open - 1];
+    for (int o = (adv > 0.0) ? s->ibx_open : 0, guard = 0; o > 0 && guard < RC_IBOX_MAX;
+         o = s->ibx[o - 1].parent, ++guard) {
+        rc_ibox *ib = &s->ibx[o - 1];
         if (ib->frag0 == L->nfrag) ib->pen0 += adv;
     }
     s->pen_x += adv;
@@ -5901,6 +5912,24 @@ static double empty_atom_outer_w(const rd_doc *doc, size_t k, const rd_block *bk
     return bw + (ml > 0.0 ? ml : 0.0) + (mr > 0.0 ? mr : 0.0);
 }
 
+/* The content width a run's OWN block-level box declares in px (CSS 2.1 10.2), or 0
+ * when it declares none, declares a percentage (cyclic inside a max-content measure:
+ * auto, Sizing 3 section 5.2.1) or is not a block. Only the run that opens the box
+ * answers, so a box with several runs is counted once. */
+static double sized_block_content_w(const rd_doc *doc, const rd_block *bk) {
+    if (bk->block_id < 0 || !bk->block_break) return 0.0;
+    const pv_box_def *d = rd_box_at(doc, (size_t)bk->block_id);
+    /* UNSET is the element's own UA display: a box that opens a block break is a block. */
+    if (d == NULL || d->box_w <= 0 || d->box_w_pct != 0) return 0.0;
+    if (d->display != CSS_DISP_UNSET && d->display != CSS_DISP_BLOCK &&
+        d->display != CSS_DISP_LIST_ITEM) return 0.0;
+    double cw = (double)d->box_w;
+    if (d->box_sizing == CSS_BOXS_BORDER)
+        cw -= box_pad_px(d->pad_l, d->pad_l_pct, 0.0) + box_pad_px(d->pad_r, d->pad_r_pct, 0.0)
+            + box_edge_px(d->bord_lw) + box_edge_px(d->bord_rw);
+    return (cw > 0.0) ? cw : 0.0;
+}
+
 static double measure_item_w_at(cairo_t *cr, const browser_window *w,
                                 const ui_theme *th, const rd_doc *doc,
                                 size_t b0, size_t b1, double measure_w) {
@@ -5929,7 +5958,14 @@ static double measure_item_w_at(cairo_t *cr, const browser_window *w,
          * (flow_nested_block); one on its own row counts as max, not sum. */
         double rw = replaced_item_width(w, bk);
         double aw = empty_atom_outer_w(doc, k, bk);
-        if (aw > 0.0) {
+        double dw = sized_block_content_w(doc, bk);
+        if (dw > 0.0) {
+            /* A block with a definite width contributes that width to its container's
+             * max-content size (CSS Sizing 3 section 5.1), whatever its text measures:
+             * the 16px logo link inside lobste.rs' flex `<h1>` measured as empty. Its
+             * padding and border are item_inner_inset's to add. */
+            if (dw > repl_max) repl_max = dw;
+        } else if (aw > 0.0) {
             /* A sized empty inline-block (an icon `<i>` before a label) is an atom of
              * the line: the layout spends its width (reconcile_boxes_below), so the
              * measure must too, or the label wraps inside a float sized without it. */
@@ -7529,7 +7565,7 @@ static void layout_container(cairo_t *cr, const browser_window *w, rc_layout *L,
                  * container's box, or it re-opens the container (and its ancestors)
                  * INSIDE the item -- which is what painted a nested nav's own backdrop a
                  * second time, at item size, on top of itself. */
-                leave_inline_box(L, &si, bk->block_id);
+                leave_inline_box(L, &si, doc, bk->block_id);
                 int stop_at = (rb >= 0) ? rb : nested_stop(s, doc, bk->block_id, item_cbox);
                 reconcile_boxes_below(cr, w, L, &si, th, doc, inner_w, bk->block_id, m, stop_at);
                 int owns = (rb >= 0 && bk->block_id == rb);
@@ -8608,9 +8644,16 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
         /* The open inline-level box lives OFF the stack, so the common-prefix walk
          * cannot see it: a later run of the same box must continue it, not reopen it
          * as a block (which flushed the line after the first of two tags). */
-        if (s->ibx_open > 0 && s->ibx[s->ibx_open - 1].id == path[k] &&
-            s->ibx[s->ibx_open - 1].frag1 == (size_t)-1)
-            break;
+        if (s->ibx_open > 0) {
+            int is_open = 0;
+            for (int o = s->ibx_open, guard = 0; o > 0 && guard < RC_IBOX_MAX;
+                 o = s->ibx[o - 1].parent, ++guard)
+                if (s->ibx[o - 1].id == path[k] && s->ibx[o - 1].frag1 == (size_t)-1) is_open = 1;
+            if (is_open) continue;
+            /* Inside an open inline-level box only another inline-level box may open
+             * (a pill in a tag list); a block box there is internal to the atom. */
+            if (d->display != CSS_DISP_INLINE_BOX && d->display != CSS_DISP_INLINE_BLOCK) break;
+        }
         /* An INLINE-LEVEL box sitting on a line that already has text (a badge, a
          * pill, a chip inside a sentence) must flow INSIDE that line: opening it as
          * a block box flushes the line and insets the content rect, which broke the
@@ -8630,7 +8673,9 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                        s->line_open && L->nfrag > s->line_first);
         int ib_empty = (!ib_atom && d->display == CSS_DISP_INLINE_BLOCK && k == n - 1 &&
                         empty_atom_continues_line(doc, run_i, path[k]));
-        if ((ib_inline || ib_atom || ib_empty) && s->ibx_open == 0 && s->n_ibx < RC_IBOX_MAX) {
+        if (s->ibx_open > 0 && !((ib_inline || ib_atom || ib_empty) && s->n_ibx < RC_IBOX_MAX))
+            break;
+        if ((ib_inline || ib_atom || ib_empty) && s->n_ibx < RC_IBOX_MAX) {
             if (ib_inline || ib_empty) open_line(L, s);
             /* The collapsible space the previous run ended with separates the atom from
              * it (`dot <i class=ico></i>`): an atom is not a word, so no later word
@@ -8661,6 +8706,7 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
             ib->pad_l = ipl + box_edge_px(d->bord_lw);
             ib->pad_r = ipr + box_edge_px(d->bord_rw);
             ib->mar_r = imr;
+            ib->parent = s->ibx_open;
             if (run_i < rd_count(doc) && rd_at(doc, run_i)->block_id == path[k])
                 ib->valign = rd_at(doc, run_i)->valign;
             /* A declared width/height is the atom's content size whether it is empty
@@ -8680,7 +8726,7 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
              * content to do the advancing, so it spends its declared width now. A
              * sized atom with text reaches it when the flow leaves it (leave_inline_box). */
             s->pen_x += ib->pad_l + (ib_empty ? ib->min_w : 0.0);
-            break;
+            continue;   /* an inline-level box nested in this one opens next */
         }
         double ctx_left, ctx_w;
         rc_box_context(s, content_w, &ctx_left, &ctx_w);
@@ -9905,7 +9951,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
                     ++ce;
                 }
                 if (k > gstart[j]) flush_line(L, &si, th);
-                leave_inline_box(L, &si, bk->block_id);
+                leave_inline_box(L, &si, doc, bk->block_id);
                 {
                     int cbx = container_box_of(doc, k, ce, rootc);
                     reconcile_boxes_below(cr, w, L, &si, th, doc, cw, cbx, k,
@@ -9927,7 +9973,7 @@ static void layout_float_band(cairo_t *cr, const browser_window *w, rc_layout *L
              * band's common box so ancestors shared by every column are not reopened
              * per column. Without this the header box is never created, so its bar
              * never paints and its white-on-teal title reads white-on-white. */
-            leave_inline_box(L, &si, bk->block_id);
+            leave_inline_box(L, &si, doc, bk->block_id);
             reconcile_boxes_below(cr, w, L, &si, th, doc, cw, bk->block_id, k,
                                   float_item_stop(doc, bk, founder_key,
                                                   nested_stop(s, doc, bk->block_id, band_box)));
@@ -10373,7 +10419,7 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
          * boxless continuation run (no break): it stays on the current line, so it
          * stays in the current box context too; closing would flush the line and
          * split e.g. a flowed table row at its inter-cell gap runs. */
-        leave_inline_box(L, &s, b->block_id);
+        leave_inline_box(L, &s, doc, b->block_id);
         /* An empty inline-block icon opens its line INSIDE reconcile below, so the
          * previous block's line and this block's top margin are settled first: the
          * flush that follows reconcile would otherwise close the icon's line empty. */

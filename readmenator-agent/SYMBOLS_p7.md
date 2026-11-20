@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cls_space` | function | `src/css_chain.c:42` | `static int cls_space(char c)` |
+| `count_children` | function | `src/css_chain.c:227` | `static int count_children(lxb_dom_node_t *n)` |
+| `fill_css_node` | function | `src/css_chain.c:99` | `static void fill_css_node(lxb_dom_element_t *e, cch_node *node)` |
+| `inputs` | function | `src/css_chain.c:241` | `* identical inputs (single source of truth). */ static const css_element *build_chain(lxb_dom_ele...` |
+| `path_truncate` | function | `src/css_chain.c:357` | `static void path_truncate(cch_path *pa, int keep)` |
+| `release_nodes` | function | `src/css_chain.c:90` | `static void release_nodes(cch_node *nodes, int n)` |
+| `sibling_position` | function | `src/css_chain.c:181` | `static void sibling_position(lxb_dom_node_t *n, int *nth, int *nsib)` |
+| `sibling_type_position` | function | `src/css_chain.c:199` | `static void sibling_type_position(lxb_dom_node_t *n, int *nth, int *nsib)` |
+| `tag` | type_alias | `src/css_chain.c:27` | `typedef struct cch_node { char tag[CCH_TAG_MAX];` |
+| `CC_CALC_DEPTH` | macro | `src/css_color.c:221` | `#define CC_CALC_DEPTH` |
+| `CC_CHANNEL_MAX` | macro | `src/css_color.c:23` | `#define CC_CHANNEL_MAX` |
+| `CC_HSL_SCALE` | macro | `src/css_color.c:32` | `#define CC_HSL_SCALE` |
+| `CC_NUMBER_MAX_DIGITS` | macro | `src/css_color.c:29` | `#define CC_NUMBER_MAX_DIGITS` |
 | `CC_PERCENT_MAX` | macro | `src/css_color.c:24` | `#define CC_PERCENT_MAX` |
 | `CC_PI` | macro | `src/css_color.c:577` | `#define CC_PI` |
 | `CC_TOKEN_MAX` | macro | `src/css_color.c:20` | `#define CC_TOKEN_MAX` |
@@ -146,6 +159,18 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `rad_len` | function | `src/css_gradient.c:626` | `static int rad_len(const char *tok, int *enc)` |
 | `rad_parse_position` | function | `src/css_gradient.c:661` | `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)` |
 | `rad_pos_kw` | function | `src/css_gradient.c:652` | `static int rad_pos_kw(const char *t, int *axis)` |
+| `ci_balanced` | function | `src/css_import.c:220` | `int ci_balanced(const char *css, size_t len)` |
+| `ci_scan` | function | `src/css_import.c:156` | `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap)` |
+| `ci_wrap` | function | `src/css_import.c:194` | `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap)` |
+| `copy_trim` | function | `src/css_import.c:53` | `static int copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
+| `is_ident_char` | function | `src/css_import.c:21` | `static int is_ident_char(char c)` |
+| `is_ws` | function | `src/css_import.c:8` | `static int is_ws(char c)` |
+| `kw_at` | function | `src/css_import.c:13` | `static int kw_at(const char *s, size_t i, size_t e, const char *kw)` |
+| `lower` | function | `src/css_import.c:10` | `static char lower(char c)` |
+| `match_paren` | function | `src/css_import.c:79` | `static size_t match_paren(const char *s, size_t i, size_t e)` |
+| `parse_prelude` | function | `src/css_import.c:97` | `static int parse_prelude(const char *s, size_t a, size_t b, ci_import *im)` |
+| `read_string` | function | `src/css_import.c:64` | `static size_t read_string(const char *s, size_t a, size_t e, char *dst, size_t cap)` |
+| `skip_ws` | function | `src/css_import.c:27` | `static size_t skip_ws(const char *s, size_t i, size_t e)` |
 | `add_bucket` | function | `src/css_index.c:106` | `static void add_bucket(const cix_index *idx, uint64_t k, cix_run *runs, size_t *nr)` |
 | `build` | function | `src/css_index.c:47` | `static void build(const css_sel *arr, css_sel *const *ptrs, size_t n, cix_index *idx)` |
 | `cix_build` | function | `src/css_index.c:166` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx)` |
@@ -471,30 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `float_pack_impl` | function | `src/flex_layout.c:474` | `static fx_status float_pack_impl(const double *width, const int *side, size_t n,                 ...` |
 | `fx_auto_margins` | function | `src/flex_layout.c:613` | `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,                 ...` |
 | `fx_auto_min_size` | function | `src/flex_layout.c:636` | `double fx_auto_min_size(double min_content, double basis, double author_min,                     ...` |
-| `fx_autofill_count` | function | `src/flex_layout.c:141` | `size_t fx_autofill_count(double avail, double gap, double minw)` |
-| `fx_col_free_split` | function | `src/flex_layout.c:938` | `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,         ...` |
-| `fx_column_place` | function | `src/flex_layout.c:733` | `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,             ...` |
-| `fx_column_place_m` | function | `src/flex_layout.c:740` | `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,               ...` |
-| `fx_cross_offset` | function | `src/flex_layout.c:801` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)` |
-| `fx_flex_line` | function | `src/flex_layout.c:23` | `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,                 ...` |
-| `fx_float_insets` | function | `src/flex_layout.c:514` | `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,                  ...` |
-| `fx_float_pack` | function | `src/flex_layout.c:554` | `fx_status fx_float_pack(const double *width, const int *side, size_t n,                         d...` |
-| `fx_float_pack_wrap` | function | `src/flex_layout.c:559` | `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,                     ...` |
-| `fx_grid_area_hash` | function | `src/flex_layout.c:327` | `unsigned fx_grid_area_hash(const char *name)` |
-| `fx_grid_area_rect` | function | `src/flex_layout.c:432` | `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,                             int ...` |
-| `fx_grid_areas_parse` | function | `src/flex_layout.c:357` | `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)` |
-| `fx_grid_cell` | function | `src/flex_layout.c:601` | `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)` |
-| `fx_grid_column_count` | function | `src/flex_layout.c:133` | `int fx_grid_column_count(int flow, int cols, int rows, size_t items)` |
-| `fx_grid_columns` | function | `src/flex_layout.c:128` | `fx_status fx_grid_columns(double avail, size_t ncols, double gap,                           doubl...` |
-| `fx_grid_columns_weighted` | function | `src/flex_layout.c:151` | `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,                       ...` |
-| `fx_grid_line_parse` | function | `src/flex_layout.c:876` | `int fx_grid_line_parse(const char *v, int *start, int *end)` |
-| `fx_grid_line_resolve` | function | `src/flex_layout.c:896` | `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)` |
-| `fx_grid_line_side` | function | `src/flex_layout.c:868` | `int fx_grid_line_side(const char *s, int *out)` |
-| `fx_grid_place_span` | function | `src/flex_layout.c:185` | `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,                       ...` |
-| `fx_justify_name` | function | `src/flex_layout.c:721` | `const char *fx_justify_name(fx_justify j)` |
-| `fx_multicol_balance` | function | `src/flex_layout.c:690` | `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,                         ...` |
-| `fx_multicol_used` | function | `src/flex_layout.c:653` | `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,                ...` |
-| `gl_int` | function | `src/flex_layout.c:830` | `static int gl_int(const char *p, const char *end, long cap, long *out)` |
-| `gl_is_line` | function | `src/flex_layout.c:894` | `static int gl_is_line(int v)` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

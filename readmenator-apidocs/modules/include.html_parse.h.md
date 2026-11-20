@@ -119,7 +119,7 @@ Opaque parsed document.
 
 **Returns:** `*`
 
-*Called by:* [`window`](src.tab.c.md#window)
+*Called by:* [`sheets`](src.tab.c.md#sheets)
 
 ---
 
@@ -343,7 +343,7 @@ The parser never fetches: whether those bytes may be requested at all is the tab
 
 **Returns:** `char **`
 
-*Called by:* [`window`](src.tab.c.md#window)
+*Called by:* [`sheets`](src.tab.c.md#sheets)
 
 ---
 
@@ -368,7 +368,7 @@ Idempotent on NULL.
 | `hrefs` | `char **` |  |  |
 | `count` | `size_t` |  |  |
 
-*Called by:* [`window`](src.tab.c.md#window)
+*Called by:* [`sheets`](src.tab.c.md#sheets)
 
 ---
 

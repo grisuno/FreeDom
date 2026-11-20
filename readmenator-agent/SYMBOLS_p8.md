@@ -3,6 +3,31 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `fx_autofill_count` | function | `src/flex_layout.c:141` | `size_t fx_autofill_count(double avail, double gap, double minw)` |
+| `fx_col_free_split` | function | `src/flex_layout.c:938` | `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,         ...` |
+| `fx_column_place` | function | `src/flex_layout.c:733` | `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,             ...` |
+| `fx_column_place_m` | function | `src/flex_layout.c:740` | `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,               ...` |
+| `fx_cross_offset` | function | `src/flex_layout.c:801` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)` |
+| `fx_flex_line` | function | `src/flex_layout.c:23` | `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,                 ...` |
+| `fx_float_insets` | function | `src/flex_layout.c:514` | `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,                  ...` |
+| `fx_float_pack` | function | `src/flex_layout.c:554` | `fx_status fx_float_pack(const double *width, const int *side, size_t n,                         d...` |
+| `fx_float_pack_wrap` | function | `src/flex_layout.c:559` | `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,                     ...` |
+| `fx_grid_area_hash` | function | `src/flex_layout.c:327` | `unsigned fx_grid_area_hash(const char *name)` |
+| `fx_grid_area_rect` | function | `src/flex_layout.c:432` | `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,                             int ...` |
+| `fx_grid_areas_parse` | function | `src/flex_layout.c:357` | `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)` |
+| `fx_grid_cell` | function | `src/flex_layout.c:601` | `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)` |
+| `fx_grid_column_count` | function | `src/flex_layout.c:133` | `int fx_grid_column_count(int flow, int cols, int rows, size_t items)` |
+| `fx_grid_columns` | function | `src/flex_layout.c:128` | `fx_status fx_grid_columns(double avail, size_t ncols, double gap,                           doubl...` |
+| `fx_grid_columns_weighted` | function | `src/flex_layout.c:151` | `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,                       ...` |
+| `fx_grid_line_parse` | function | `src/flex_layout.c:876` | `int fx_grid_line_parse(const char *v, int *start, int *end)` |
+| `fx_grid_line_resolve` | function | `src/flex_layout.c:896` | `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)` |
+| `fx_grid_line_side` | function | `src/flex_layout.c:868` | `int fx_grid_line_side(const char *s, int *out)` |
+| `fx_grid_place_span` | function | `src/flex_layout.c:185` | `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,                       ...` |
+| `fx_justify_name` | function | `src/flex_layout.c:721` | `const char *fx_justify_name(fx_justify j)` |
+| `fx_multicol_balance` | function | `src/flex_layout.c:690` | `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,                         ...` |
+| `fx_multicol_used` | function | `src/flex_layout.c:653` | `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,                ...` |
+| `gl_int` | function | `src/flex_layout.c:830` | `static int gl_int(const char *p, const char *end, long cap, long *out)` |
+| `gl_is_line` | function | `src/flex_layout.c:894` | `static int gl_is_line(int v)` |
 | `gl_is_span` | function | `src/flex_layout.c:893` | `static int gl_is_span(int v)` |
 | `gl_kw` | function | `src/flex_layout.c:820` | `static int gl_kw(const char *p, const char *end, const char *kw)` |
 | `gl_lower` | function | `src/flex_layout.c:817` | `static int gl_lower(char c)` |
@@ -471,30 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `in_range` | function | `src/js_geom.c:182` | `static int in_range(int32_t v, int32_t lo)` |
 | `index_of` | function | `src/js_geom.c:109` | `static size_t index_of(jg_table *t, uint32_t *slots, dom_node_id node, const jg_rect *seed,      ...` |
 | `jg_add` | function | `src/js_geom.c:52` | `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h)` |
-| `jg_aggregate` | function | `src/js_geom.c:124` | `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx)` |
-| `jg_decode` | function | `src/js_geom.c:186` | `int jg_decode(const int32_t *in, size_t n, jg_table *out)` |
-| `jg_encode` | function | `src/js_geom.c:167` | `int jg_encode(const jg_table *t, int32_t *out, size_t cap)` |
-| `jg_find` | function | `src/js_geom.c:96` | `const jg_rect *jg_find(const jg_table *t, dom_node_id node)` |
-| `jg_finish` | function | `src/js_geom.c:83` | `int jg_finish(jg_table *t)` |
-| `jg_free` | function | `src/js_geom.c:21` | `void jg_free(jg_table *t)` |
-| `jg_hash` | function | `src/js_geom.c:221` | `uint64_t jg_hash(const jg_table *t)` |
-| `jg_init` | function | `src/js_geom.c:17` | `void jg_init(jg_table *t)` |
-| `jg_wire_len` | function | `src/js_geom.c:163` | `size_t jg_wire_len(const jg_table *t)` |
-| `push` | function | `src/js_geom.c:45` | `static int push(jg_table *t, dom_node_id node, int32_t x, int32_t y, int32_t w, int32_t h)` |
-| `slot_of` | function | `src/js_geom.c:102` | `static uint32_t slot_of(dom_node_id n)` |
-| `unite` | function | `src/js_geom.c:63` | `static int unite(jg_rect *a, const jg_rect *b)` |
-| `ji_install` | function | `src/js_intl.c:423` | `int ji_install(js_context *ctx)` |
-| `jd_lp_set` | function | `src/js_location.c:25` | `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,                       const ...` |
-| `jd_pop_state` | function | `src/js_location.c:251` | `int jd_pop_state(js_context *ctx, int index)` |
-| `jd_set_location` | function | `src/js_location.c:140` | `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)` |
-| `jd_take_history` | function | `src/js_location.c:220` | `char *jd_take_history(js_context *ctx, int *go)` |
-| `jd_take_nav_request` | function | `src/js_location.c:174` | `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)` |
-| `jl_m_hist_target` | function | `src/js_location.c:36` | `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `FREEDOM_JS_LOCATION_INTERNAL_H` | macro | `src/js_location_internal.h:2` | `#define FREEDOM_JS_LOCATION_INTERNAL_H` |
-| `header` | function | `src/js_location_internal.h:6` | `* stay out of every public header (include/ never sees quickjs.h). */ #include "quickjs.h" JSValue...` |
-| `JN_SUPPORTS_MAX` | macro | `src/js_native.c:13` | `#define JN_SUPPORTS_MAX` |
-| `jn_css_ok` | function | `src/js_native.c:25` | `static JSValue jn_css_ok(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `jn_host_eval` | function | `src/js_native.c:15` | `JSValue jn_host_eval(JSContext *c, const char *src, size_t len, const char *name)` |
-| `jn_seal` | function | `src/js_native.c:144` | `int jn_seal(js_context *ctx)` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

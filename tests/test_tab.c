@@ -32,6 +32,7 @@
 
 #include "css.h"
 #include "tab.h"
+#include "css_import.h"
 #include "url.h"
 #include "js_geom.h"
 #include "web_storage.h"
@@ -2212,6 +2213,116 @@ static void test_external_css_applied_when_allowed(void **state) {
     tab_close(t);
 }
 
+/* --- @import (spec/css_import.md): imported sheets ride the same parent-gated fetch --- */
+
+static int g_imp_calls;
+static char g_imp_urls[16][128];
+
+static int stub_import_fetch(void *ctx, const char *method, const char *url,
+                             const char *body, size_t body_len,
+                             int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx; (void)body; (void)body_len;
+    if (url == NULL || method == NULL || strcmp(method, "GET") != 0) return -1;
+    if (g_imp_calls < 16) snprintf(g_imp_urls[g_imp_calls], sizeof g_imp_urls[0], "%s", url);
+    g_imp_calls++;
+    const char *css = NULL;
+    if (strcmp(url, "https://site.test/css/main.css") == 0)
+        css = "@charset \"utf-8\";\n@import \"imp/center.css\";\np{color:#123456}";
+    else if (strcmp(url, "https://site.test/css/imp/center.css") == 0)
+        css = "p{text-align:center}";
+    else if (strcmp(url, "https://site.test/css/gated.css") == 0)
+        css = "@import url(right.css) (prefers-color-scheme: dark);";
+    else if (strcmp(url, "https://site.test/css/right.css") == 0)
+        css = "p{text-align:right}";
+    else if (strcmp(url, "https://site.test/css/loop.css") == 0)
+        css = "@import \"loop.css\"; p{text-align:center}";
+    else if (strcmp(url, "https://site.test/css/leak.css") == 0)
+        css = "@import \"evil.css\" (prefers-color-scheme: dark);";
+    else if (strcmp(url, "https://site.test/css/evil.css") == 0)
+        css = "} p{text-align:right} @media x {";        /* tries to escape the gate */
+    if (css == NULL) return -1;
+    *ob = strdup(css); *ol = strlen(css);
+    *oct = strdup("text/css");
+    if (*ob == NULL || *oct == NULL) { free(*ob); free(*oct); return -1; }
+    *st = 200;
+    return 0;
+}
+
+static int import_align(const char *html, int prefers_dark) {
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_import_fetch, NULL);
+    tab_set_css_allowed(t, 1);
+    g_imp_calls = 0;
+    tab_page p;
+    assert_int_equal(tab_load_full(t, html, strlen(html), "https://site.test/page.html",
+                                   0, 0, prefers_dark, &p), TAB_OK);
+    const pv_run *r = view_find_text(p.view, "styled");
+    assert_non_null(r);
+    int a = (int)r->text_align;
+    tab_page_free(&p);
+    tab_close(t);
+    return a;
+}
+
+/* A <link> sheet's @import resolves against the SHEET's URL and is fetched through
+ * the parent; the imported rules apply. */
+static void test_import_resolved_against_sheet(void **state) {
+    (void)state;
+    assert_int_equal(import_align(CSS_PAGE("css/main.css"), 0), CSS_ALIGN_CENTER);
+    assert_int_equal(g_imp_calls, 2);
+    assert_string_equal(g_imp_urls[1], "https://site.test/css/imp/center.css");
+}
+
+/* The import's media condition gates its rules exactly like an @media block. */
+static void test_import_media_gated(void **state) {
+    (void)state;
+    assert_int_not_equal(import_align(CSS_PAGE("css/gated.css"), 0), CSS_ALIGN_RIGHT);
+    assert_int_equal(import_align(CSS_PAGE("css/gated.css"), 1), CSS_ALIGN_RIGHT);
+}
+
+/* A self-import terminates at CI_MAX_DEPTH; the sheet still applies. */
+static void test_import_cycle_bounded(void **state) {
+    (void)state;
+    assert_int_equal(import_align(CSS_PAGE("css/loop.css"), 0), CSS_ALIGN_CENTER);
+    assert_true(g_imp_calls <= 1 + CI_MAX_DEPTH);
+}
+
+/* An imported text with a stray '}' cannot close the media wrapper and leak its
+ * rules past the gate: it is dropped. */
+static void test_import_unbalanced_dropped(void **state) {
+    (void)state;
+    assert_int_not_equal(import_align(CSS_PAGE("css/leak.css"), 1), CSS_ALIGN_RIGHT);
+    assert_int_not_equal(import_align(CSS_PAGE("css/leak.css"), 0), CSS_ALIGN_RIGHT);
+}
+
+/* An inline <style> @import resolves against the page and applies. */
+static void test_import_from_inline_style(void **state) {
+    (void)state;
+    static const char H[] =
+        "<!DOCTYPE html><html><head><title>x</title>"
+        "<style>@import \"css/imp/center.css\"; b{color:red}</style></head>"
+        "<body><p>styled</p></body></html>";
+    assert_int_equal(import_align(H, 0), CSS_ALIGN_CENTER);
+    assert_int_equal(g_imp_calls, 1);
+}
+
+/* No css grant => no import is fetched either. */
+static void test_import_needs_css_grant(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_import_fetch, NULL);
+    g_imp_calls = 0;
+    static const char H[] = "<!DOCTYPE html><html><head><style>@import \"css/imp/center.css\";"
+                            "</style></head><body><p>styled</p></body></html>";
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/", 0, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    assert_int_equal(g_imp_calls, 0);
+    tab_close(t);
+}
+
 /* Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served
  * 2xx CSS body -- the @font-face pass input. Fires for the stylesheet, never
  * for a non-CSS body served on the same path. */
@@ -3990,6 +4101,12 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_external_script_blocked_host_refused),
         cmocka_unit_test(test_external_css_applied_when_allowed),
         cmocka_unit_test(test_css_sink_observes_served_stylesheet),
+        cmocka_unit_test(test_import_resolved_against_sheet),
+        cmocka_unit_test(test_import_media_gated),
+        cmocka_unit_test(test_import_cycle_bounded),
+        cmocka_unit_test(test_import_unbalanced_dropped),
+        cmocka_unit_test(test_import_from_inline_style),
+        cmocka_unit_test(test_import_needs_css_grant),
         cmocka_unit_test(test_css_sink_ignores_non_css_body),
         cmocka_unit_test(test_external_css_skipped_without_grant),
         cmocka_unit_test(test_external_css_bad_ctype_not_parsed),

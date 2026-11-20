@@ -4,9 +4,9 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 185.30)
+- `gui/browser_ui.c` (score: 185.50)
 - `include/css.h` (score: 100.80, imported by 40 files)
-- `src/tab.c` (score: 81.70)
+- `src/tab.c` (score: 84.00)
 - `src/freedom.c` (score: 63.00)
 - `src/page_view.c` (score: 63.00)
 - `src/css.c` (score: 61.30)
@@ -16,10 +16,10 @@ These files have the most connections. Changes here have high blast radius.
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css_counter.h` -- 3 direct, 56 total dependents
-- `include/css_mq.h` -- 4 direct, 56 total dependents
-- `include/css.h` -- 40 direct, 53 total dependents
-- `include/css_color.h` -- 14 direct, 52 total dependents
+- `include/css.h` -- 40 direct, 54 total dependents
+- `include/css_color.h` -- 14 direct, 54 total dependents
+- `include/css_counter.h` -- 3 direct, 51 total dependents
+- `include/css_mq.h` -- 4 direct, 51 total dependents
 - `include/html_parse.h` -- 19 direct, 44 total dependents
 - `include/dom.h` -- 17 direct, 40 total dependents
 - `include/css_select.h` -- 15 direct, 31 total dependents
@@ -63,11 +63,11 @@ Circular dependencies. Refactor to break the cycle.
 
 - `gui/browser_ui.c:1693` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
 - `gui/browser_ui.c:1859` `first` [DEAD_STORE] `dg`: `dg` assigned at line 1859 but never read afterwards.
-- `gui/browser_ui.c:4699` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 4699 but never read afterwards.
-- `gui/browser_ui.c:4701` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 4701 but never read afterwards.
-- `gui/browser_ui.c:5773` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5773 but never read afterwards.
-- `gui/browser_ui.c:5774` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5774 but never read afterwards.
-- `gui/browser_ui.c:5776` `table` [DEAD_STORE] `j`: `j` assigned at line 5776 but never read afterwards.
-- `gui/browser_ui.c:5911` `measure_item_w_at` [DEAD_STORE] `repl_max`: `repl_max` assigned at line 5911 but never read afterwards.
-- `gui/browser_ui.c:5912` `measure_item_w_at` [DEAD_STORE] `atom_line_max`: `atom_line_max` assigned at line 5912 but never read afterwards.
-- `gui/browser_ui.c:5930` `measure_item_w_at` [DEAD_STORE] `rw`: `rw` assigned at line 5930 but never read afterwards.
+- `gui/browser_ui.c:4710` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 4710 but never read afterwards.
+- `gui/browser_ui.c:4712` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 4712 but never read afterwards.
+- `gui/browser_ui.c:5784` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5784 but never read afterwards.
+- `gui/browser_ui.c:5785` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5785 but never read afterwards.
+- `gui/browser_ui.c:5787` `table` [DEAD_STORE] `j`: `j` assigned at line 5787 but never read afterwards.
+- `gui/browser_ui.c:5941` `measure_item_w_at` [DEAD_STORE] `atom_line_max`: `atom_line_max` assigned at line 5941 but never read afterwards.
+- `gui/browser_ui.c:5959` `measure_item_w_at` [DEAD_STORE] `rw`: `rw` assigned at line 5959 but never read afterwards.
+- `gui/browser_ui.c:6170` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 6170 but never read afterwards.

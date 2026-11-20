@@ -6,6 +6,7 @@ em-units	1.30
 empty-inline-block-atom	0.27
 flex-col-maxwidth	9.82
 flex-pct-visual	0.45
+flex-sized-block-item	0.97
 float-beside	0.74
 float-icon-row	0.24
 float-narrow-parent	9.07
@@ -31,14 +32,15 @@ jkanime-main-col	0.19
 jkanime-tile	0.14
 jkanime-tile2	0.11
 jkanime-tile3	0.08
-jkanime	6.84
-lobsters	2.51
+jkanime	6.83
+lobsters	2.49
 margin-collapse	0.46
 marquee-flex	0.78
 mask-icons	0.32
 multicol	2.64
 nav-inline-blocks	0.38
 navbox-table	0.13
+nested-inline-pills	0.66
 pct-box	0.37
 pseudo-rule	0.01
 rail-negative-margin	0.11

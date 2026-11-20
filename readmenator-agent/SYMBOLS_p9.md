@@ -3,6 +3,31 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `jg_aggregate` | function | `src/js_geom.c:124` | `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx)` |
+| `jg_decode` | function | `src/js_geom.c:186` | `int jg_decode(const int32_t *in, size_t n, jg_table *out)` |
+| `jg_encode` | function | `src/js_geom.c:167` | `int jg_encode(const jg_table *t, int32_t *out, size_t cap)` |
+| `jg_find` | function | `src/js_geom.c:96` | `const jg_rect *jg_find(const jg_table *t, dom_node_id node)` |
+| `jg_finish` | function | `src/js_geom.c:83` | `int jg_finish(jg_table *t)` |
+| `jg_free` | function | `src/js_geom.c:21` | `void jg_free(jg_table *t)` |
+| `jg_hash` | function | `src/js_geom.c:221` | `uint64_t jg_hash(const jg_table *t)` |
+| `jg_init` | function | `src/js_geom.c:17` | `void jg_init(jg_table *t)` |
+| `jg_wire_len` | function | `src/js_geom.c:163` | `size_t jg_wire_len(const jg_table *t)` |
+| `push` | function | `src/js_geom.c:45` | `static int push(jg_table *t, dom_node_id node, int32_t x, int32_t y, int32_t w, int32_t h)` |
+| `slot_of` | function | `src/js_geom.c:102` | `static uint32_t slot_of(dom_node_id n)` |
+| `unite` | function | `src/js_geom.c:63` | `static int unite(jg_rect *a, const jg_rect *b)` |
+| `ji_install` | function | `src/js_intl.c:423` | `int ji_install(js_context *ctx)` |
+| `jd_lp_set` | function | `src/js_location.c:25` | `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,                       const ...` |
+| `jd_pop_state` | function | `src/js_location.c:251` | `int jd_pop_state(js_context *ctx, int index)` |
+| `jd_set_location` | function | `src/js_location.c:140` | `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)` |
+| `jd_take_history` | function | `src/js_location.c:220` | `char *jd_take_history(js_context *ctx, int *go)` |
+| `jd_take_nav_request` | function | `src/js_location.c:174` | `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)` |
+| `jl_m_hist_target` | function | `src/js_location.c:36` | `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `FREEDOM_JS_LOCATION_INTERNAL_H` | macro | `src/js_location_internal.h:2` | `#define FREEDOM_JS_LOCATION_INTERNAL_H` |
+| `header` | function | `src/js_location_internal.h:6` | `* stay out of every public header (include/ never sees quickjs.h). */ #include "quickjs.h" JSValue...` |
+| `JN_SUPPORTS_MAX` | macro | `src/js_native.c:13` | `#define JN_SUPPORTS_MAX` |
+| `jn_css_ok` | function | `src/js_native.c:25` | `static JSValue jn_css_ok(JSContext *c, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `jn_host_eval` | function | `src/js_native.c:15` | `JSValue jn_host_eval(JSContext *c, const char *src, size_t len, const char *name)` |
+| `jn_seal` | function | `src/js_native.c:144` | `int jn_seal(js_context *ctx)` |
 | `FREEDOM_JS_NATIVE_INTERNAL_H` | macro | `src/js_native_internal.h:6` | `#define FREEDOM_JS_NATIVE_INTERNAL_H` |
 | `js_context` | struct | `src/js_native_internal.h:20` | `` |
 | `js_host_slot` | function | `src/js_native_internal.h:21` | `JSValue *js_host_slot(struct js_context *ctx);` |
@@ -471,30 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `roman_marker` | function | `src/page_view.c:5255` | `static void roman_marker(int n, int upper, char *out, size_t cap)` |
 | `row_lone_float_side` | function | `src/page_view.c:3230` | `static int row_lone_float_side(const lxb_dom_node_t *p, const css_sheet *sheet,                  ...` |
 | `run_init_common` | function | `src/page_view.c:170` | `static void run_init_common(pv_run *r)` |
-| `serialize_subtree` | function | `src/page_view.c:4580` | `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)` |
-| `size` | function | `src/page_view.c:3076` | `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */ static void app...` |
-| `srcset_slot_width` | function | `src/page_view.c:4750` | `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,                               ...` |
-| `string` | function | `src/page_view.c:4866` | `* Returns a heap string (caller frees) or NULL when neither carries a class —  * NULL simply mean...` |
-| `subtree_has_own_text` | function | `src/page_view.c:3608` | `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,             ...` |
-| `subtree_is_oof` | function | `src/page_view.c:3056` | `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,                      ...` |
-| `sz_count` | function | `src/page_view.c:4558` | `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` |
-| `sz_fill` | struct | `src/page_view.c:4566` | `` |
-| `sz_write` | function | `src/page_view.c:4572` | `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)` |
-| `table_cell_pos` | function | `src/page_view.c:3694` | `static int table_cell_pos(struct pv_flow_reg *fr, const lxb_dom_node_t *table, const lxb_dom_node_t *cell, int *row...` |
-| `table_columns` | function | `src/page_view.c:5579` | `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
-| `table_columns_scan` | function | `src/page_view.c:5588` | `static int table_columns_scan(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
-| `table_next_row` | function | `src/page_view.c:5451` | `static const lxb_dom_node_t *table_next_row(const lxb_dom_node_t *table,                         ...` |
-| `text_node_is_blank` | function | `src/page_view.c:1380` | `static int text_node_is_blank(const lxb_dom_node_t *c);` |
-| `them` | function | `src/page_view.c:1371` | `* them (PV_BR_ATOM_SPACE);` |
-| `trying` | function | `src/page_view.c:1996` | `* a real page passes without trying (slashdot's front page saturates it), and past  * it box_reg_...` |
-| `ua_tag_of` | function | `src/page_view.c:1153` | `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` |
-| `under_unrendered` | function | `src/page_view.c:5021` | `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` |
-| `url` | function | `src/page_view.c:6011` | `* fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css * module, so OOM here degrades to...` |
-| `utf8_encode` | function | `src/page_view.c:109` | `static size_t utf8_encode(unsigned int cp, char *out)` |
-| `utf8_sanitized_dup` | function | `src/page_view.c:122` | `static char *utf8_sanitized_dup(const char *s)` |
-| `walk` | function | `src/page_view.c:4371` | `* far on this walk (they are all inside this element). */                          /* The innermo...` |
-| `pe_build_path` | function | `src/pdf_export.c:91` | `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)` |
-| `pe_build_path_ext` | function | `src/pdf_export.c:66` | `pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,                 ...` |
-| `pe_paginate` | function | `src/pdf_export.c:95` | `size_t pe_paginate(const double *tops, const double *heights, size_t n,                    double...` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

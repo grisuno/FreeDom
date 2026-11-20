@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:90` | `#define FC_SHC_MAX_QUERIES` |
+| `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:84` | `#define FC_SHC_MAX_TEXT_BYTES` |
+| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:103` | `#define FC_TABLE_TRACK_MAX_PX` |
+| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:99` | `#define FC_TAB_OP_NET_BUDGET_MS` |
+| `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:30` | `#define FC_TRUSTED_JS_BUDGET_MS` |
+| `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:70` | `#define FC_UI_FONT_SIZE` |
+| `FREEDOM_CONFIG_H` | macro | `include/freedom_config.h:14` | `#define FREEDOM_CONFIG_H` |
+| `FREEDOM_HLS_H` | macro | `include/hls.h:2` | `#define FREEDOM_HLS_H` |
+| `hls_playlist` | struct | `include/hls.h:45` | `` |
+| `hls_playlist_free` | function | `include/hls.h:74` | `void hls_playlist_free(hls_playlist *pl);` |
+| `hls_segment` | struct | `include/hls.h:29` | `` |
+| `hls_select_variant` | function | `include/hls.h:65` | `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);` |
+| `hls_status` | enum | `include/hls.h:21` | `` |
 | `hls_variant` | struct | `include/hls.h:36` | `` |
 | `resolved` | function | `include/hls.h:68` | `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the * written length, or 0 on failure. */...` |
 | `FREEDOM_HOST_CONF_H` | macro | `include/host_conf.h:2` | `#define FREEDOM_HOST_CONF_H` |
@@ -483,18 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `pf_pool` | struct | `include/prefetch.h:90` | `` |
 | `pf_pool_add` | function | `include/prefetch.h:127` | `int pf_pool_add(pf_pool *p, const char *url);` |
 | `pf_pool_finish` | function | `include/prefetch.h:151` | `void pf_pool_finish(pf_pool *p);` |
-| `pf_pool_take` | function | `include/prefetch.h:145` | `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);` |
-| `pf_pooled_fetch` | function | `include/prefetch.h:165` | `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...` |
-| `pf_ref` | struct | `include/prefetch.h:42` | `` |
-| `pf_scan` | function | `include/prefetch.h:62` | `int pf_scan(const char *html, size_t len, pf_list *out);` |
-| `pool` | function | `include/prefetch.h:155` | `* whose URL is pooled is served from the pool (a failed prefetch propagates the * failure -- never refetched);` |
-| `refs` | type_alias | `include/prefetch.h:52` | `typedef struct pf_list { pf_ref refs[PF_MAX_REFS];` |
-| `specifiers` | function | `include/prefetch.h:110` | `* specifiers (each < PF_SPEC_MAX) into out[k] and returns how many. Pure. */ size_t pf_scan_imports(const char *js...` |
-| `started` | function | `include/prefetch.h:121` | `* to fetch or no thread started (the caller fetches serially). */ int pf_pool_start_page(pf_pool *p, const char...` |
-| `FREEDOM_PREFS_H` | macro | `include/prefs.h:2` | `#define FREEDOM_PREFS_H` |
-| `PREFS_MAX_BOOKMARKS` | macro | `include/prefs.h:29` | `#define PREFS_MAX_BOOKMARKS` |
-| `PREFS_MAX_HISTORY` | macro | `include/prefs.h:30` | `#define PREFS_MAX_HISTORY` |
-| `PREFS_MAX_TEXT` | macro | `include/prefs.h:31` | `#define PREFS_MAX_TEXT` |
-| `PREFS_MAX_TITLE` | macro | `include/prefs.h:28` | `#define PREFS_MAX_TITLE` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

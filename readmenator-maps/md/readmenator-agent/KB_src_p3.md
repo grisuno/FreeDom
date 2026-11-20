@@ -187,6 +187,25 @@ int cg_expand_bg_imag...`
   - `CG_SQRT2` (macro, line 773) `#define CG_SQRT2`
 - Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
+## src/css_import.c
+- Doc: css_import -- @import prelude reader (spec/css_import.md).
+- Layer: utility
+- Language: c
+- Symbols:
+  - `is_ws` (function, line 8) `static int is_ws(char c)`
+  - `lower` (function, line 10) `static char lower(char c)`
+  - `kw_at` (function, line 13) `static int kw_at(const char *s, size_t i, size_t e, const char *kw)`
+  - `is_ident_char` (function, line 21) `static int is_ident_char(char c)`
+  - `skip_ws` (function, line 27) `static size_t skip_ws(const char *s, size_t i, size_t e)`
+  - `copy_trim` (function, line 53) `static int copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)`
+  - `read_string` (function, line 64) `static size_t read_string(const char *s, size_t a, size_t e, char *dst, size_t cap)`
+  - `match_paren` (function, line 79) `static size_t match_paren(const char *s, size_t i, size_t e)`
+  - `parse_prelude` (function, line 97) `static int parse_prelude(const char *s, size_t a, size_t b, ci_import *im)`
+  - `ci_scan` (function, line 156) `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap)`
+  - `ci_wrap` (function, line 194) `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap)`
+  - `ci_balanced` (function, line 220) `int ci_balanced(const char *css, size_t len)`
+- Depends on: `include/css_import.h`
+
 ## src/css_index.c
 - Doc: css_index -- see include/css_index.h and spec/css_index.md.
 - Layer: utility

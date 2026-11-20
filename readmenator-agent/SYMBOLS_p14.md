@@ -3,6 +3,46 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_local_form_renders_inputs` | function | `tests/test_freedom.c:242` | `static void test_local_form_renders_inputs(void **state)` |
+| `test_local_html` | function | `tests/test_freedom.c:136` | `static void test_local_html(void **state)` |
+| `test_missing_file` | function | `tests/test_freedom.c:268` | `static void test_missing_file(void **state)` |
+| `test_no_args` | function | `tests/test_freedom.c:126` | `static void test_no_args(void **state)` |
+| `test_no_dump_console_without_flag` | function | `tests/test_freedom.c:2357` | `static void test_no_dump_console_without_flag(void **state)` |
+| `test_rejects_http_url` | function | `tests/test_freedom.c:3963` | `static void test_rejects_http_url(void **state)` |
+| `test_version` | function | `tests/test_freedom.c:117` | `static void test_version(void **state)` |
+| `wf_test_host_font` | function | `tests/test_freedom.c:1800` | `static uint8_t *wf_test_host_font(const char *name, size_t *out_n)` |
+| `white` | function | `tests/test_freedom.c:4025` | `* and not white (the old behaviour where only text rows got background fills). */ static void tes...` |
+| `main` | function | `tests/test_hls.c:219` | `int main(void)` |
+| `test_empty_m3u8_is_ok` | function | `tests/test_hls.c:22` | `static void test_empty_m3u8_is_ok(void **state)` |
+| `test_handles_windows_line_endings` | function | `tests/test_hls.c:209` | `static void test_handles_windows_line_endings(void **state)` |
+| `test_multi_variant_collects_all` | function | `tests/test_hls.c:114` | `static void test_multi_variant_collects_all(void **state)` |
+| `test_multiple_segments` | function | `tests/test_hls.c:46` | `static void test_multiple_segments(void **state)` |
+| `test_not_m3u8_returns_parse_error` | function | `tests/test_hls.c:15` | `static void test_not_m3u8_returns_parse_error(void **state)` |
+| `test_resolve_url_absolute_passthrough` | function | `tests/test_hls.c:180` | `static void test_resolve_url_absolute_passthrough(void **state)` |
+| `test_resolve_url_deep_relative` | function | `tests/test_hls.c:200` | `static void test_resolve_url_deep_relative(void **state)` |
+| `test_resolve_url_relative` | function | `tests/test_hls.c:190` | `static void test_resolve_url_relative(void **state)` |
+| `test_select_variant_empty_returns_error` | function | `tests/test_hls.c:170` | `static void test_select_variant_empty_returns_error(void **state)` |
+| `test_select_variant_highest_bandwidth_no_limit` | function | `tests/test_hls.c:135` | `static void test_select_variant_highest_bandwidth_no_limit(void **state)` |
+| `test_select_variant_respects_max_dimensions` | function | `tests/test_hls.c:152` | `static void test_select_variant_respects_max_dimensions(void **state)` |
+| `test_single_segment` | function | `tests/test_hls.c:31` | `static void test_single_segment(void **state)` |
+| `test_target_duration_is_parsed` | function | `tests/test_hls.c:68` | `static void test_target_duration_is_parsed(void **state)` |
+| `test_variant_playlist_collects_variants` | function | `tests/test_hls.c:97` | `static void test_variant_playlist_collects_variants(void **state)` |
+| `test_variant_playlist_detected` | function | `tests/test_hls.c:83` | `static void test_variant_playlist_detected(void **state)` |
+| `_DEFAULT_SOURCE` | macro | `tests/test_host_conf.c:6` | `#define _DEFAULT_SOURCE` |
+| `main` | function | `tests/test_host_conf.c:101` | `int main(void)` |
+| `make_dir` | function | `tests/test_host_conf.c:29` | `static void make_dir(char *buf, size_t cap)` |
+| `test_allowlist_reads_named_file` | function | `tests/test_host_conf.c:70` | `static void test_allowlist_reads_named_file(void **state)` |
+| `test_filter_is_cumulative_and_allow_wins` | function | `tests/test_host_conf.c:50` | `static void test_filter_is_cumulative_and_allow_wins(void **state)` |
+| `test_missing_files_fail_open` | function | `tests/test_host_conf.c:88` | `static void test_missing_files_fail_open(void **state)` |
+| `test_search_order_and_dedup` | function | `tests/test_host_conf.c:34` | `static void test_search_order_and_dedup(void **state)` |
+| `write_file` | function | `tests/test_host_conf.c:20` | `static void write_file(const char *dir, const char *name, const char *text)` |
+| `main` | function | `tests/test_hostblock.c:297` | `int main(void)` |
+| `test_allow_wins_and_covers_subdomains` | function | `tests/test_hostblock.c:225` | `static void test_allow_wins_and_covers_subdomains(void **state)` |
+| `test_bare_domain_per_line` | function | `tests/test_hostblock.c:88` | `static void test_bare_domain_per_line(void **state)` |
+| `test_block_covers_subdomains` | function | `tests/test_hostblock.c:212` | `static void test_block_covers_subdomains(void **state)` |
+| `test_check_fail_open_edges` | function | `tests/test_hostblock.c:267` | `static void test_check_fail_open_edges(void **state)` |
+| `test_comments_and_blanks` | function | `tests/test_hostblock.c:98` | `static void test_comments_and_blanks(void **state)` |
+| `test_count_null_set` | function | `tests/test_hostblock.c:52` | `static void test_count_null_set(void **state)` |
 | `test_dedup_and_accumulate` | function | `tests/test_hostblock.c:189` | `static void test_dedup_and_accumulate(void **state)` |
 | `test_free_null_idempotent` | function | `tests/test_hostblock.c:47` | `static void test_free_null_idempotent(void **state)` |
 | `test_hosts_line_drops_ip` | function | `tests/test_hostblock.c:70` | `static void test_hosts_line_drops_ip(void **state)` |
@@ -456,45 +496,5 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_canvas_readback` | function | `tests/test_js_env.c:355` | `static void test_canvas_readback(void **state)` |
 | `test_canvas_readback_exact_for_trusted` | function | `tests/test_js_env.c:308` | `static void test_canvas_readback_exact_for_trusted(void **state)` |
 | `test_canvas_unforgeable` | function | `tests/test_js_env.c:419` | `static void test_canvas_unforgeable(void **state)` |
-| `test_canvas_unlinkable` | function | `tests/test_js_env.c:411` | `static void test_canvas_unlinkable(void **state)` |
-| `test_clocks_coarse` | function | `tests/test_js_env.c:213` | `static void test_clocks_coarse(void **state)` |
-| `test_coexists_with_dom` | function | `tests/test_js_env.c:442` | `static void test_coexists_with_dom(void **state)` |
-| `test_crypto_present` | function | `tests/test_js_env.c:148` | `static void test_crypto_present(void **state)` |
-| `test_crypto_random_uuid` | function | `tests/test_js_env.c:156` | `static void test_crypto_random_uuid(void **state)` |
-| `test_crypto_random_values` | function | `tests/test_js_env.c:165` | `static void test_crypto_random_values(void **state)` |
-| `test_install_identity_override` | function | `tests/test_js_env.c:73` | `static void test_install_identity_override(void **state)` |
-| `test_install_null_args` | function | `tests/test_js_env.c:62` | `static void test_install_null_args(void **state)` |
-| `test_legacy_nav_props` | function | `tests/test_js_env.c:111` | `static void test_legacy_nav_props(void **state)` |
-| `test_navigator_identity` | function | `tests/test_js_env.c:93` | `static void test_navigator_identity(void **state)` |
-| `test_navigator_mime_types` | function | `tests/test_js_env.c:139` | `static void test_navigator_mime_types(void **state)` |
-| `test_navigator_plugins` | function | `tests/test_js_env.c:131` | `static void test_navigator_plugins(void **state)` |
-| `test_performance_timing_identity_safe` | function | `tests/test_js_env.c:225` | `static void test_performance_timing_identity_safe(void **state)` |
-| `test_screen_bucketed` | function | `tests/test_js_env.c:201` | `static void test_screen_bucketed(void **state)` |
-| `test_screen_edges` | function | `tests/test_js_env.c:259` | `static void test_screen_edges(void **state)` |
-| `test_screen_orientation` | function | `tests/test_js_env.c:191` | `static void test_screen_orientation(void **state)` |
-| `test_subtle_digest_rejects_bad_input` | function | `tests/test_js_env.c:344` | `static void test_subtle_digest_rejects_bad_input(void **state)` |
-| `test_subtle_digest_resolves_known_vectors` | function | `tests/test_js_env.c:329` | `static void test_subtle_digest_resolves_known_vectors(void **state)` |
-| `test_trusted_fidelity_clock_is_millisecond_and_consistent` | function | `tests/test_js_env.c:279` | `static void test_trusted_fidelity_clock_is_millisecond_and_consistent(void **state)` |
-| `test_unforgeable` | function | `tests/test_js_env.c:241` | `static void test_unforgeable(void **state)` |
-| `chain_parent` | function | `tests/test_js_geom.c:97` | `static dom_node_id chain_parent(void *ctx, dom_node_id n)` |
-| `cyclic_parent` | function | `tests/test_js_geom.c:132` | `static dom_node_id cyclic_parent(void *ctx, dom_node_id n)` |
-| `main` | function | `tests/test_js_geom.c:213` | `int main(void)` |
-| `test_add_and_find` | function | `tests/test_js_geom.c:29` | `static void test_add_and_find(void **state)` |
-| `test_add_rejects_and_clamps` | function | `tests/test_js_geom.c:65` | `static void test_add_rejects_and_clamps(void **state)` |
-| `test_aggregate_cycle_terminates` | function | `tests/test_js_geom.c:137` | `static void test_aggregate_cycle_terminates(void **state)` |
-| `test_aggregate_unions_into_ancestors` | function | `tests/test_js_geom.c:108` | `static void test_aggregate_unions_into_ancestors(void **state)` |
-| `test_capacity_bound` | function | `tests/test_js_geom.c:85` | `static void test_capacity_bound(void **state)` |
-| `test_decode_fails_closed` | function | `tests/test_js_geom.c:179` | `static void test_decode_fails_closed(void **state)` |
-| `test_same_node_unions` | function | `tests/test_js_geom.c:48` | `static void test_same_node_unions(void **state)` |
-| `test_wire_roundtrip` | function | `tests/test_js_geom.c:149` | `static void test_wire_roundtrip(void **state)` |
-| `EXPECT` | macro | `tests/test_js_intl.c:30` | `#define EXPECT(src, expected)` |
-| `EXPECT` | function | `tests/test_js_intl.c:152` | `EXPECT("['full','long','medium','short'].map(function(s)` |
-| `EXPECT` | function | `tests/test_js_intl.c:154` | `EXPECT("['medium','short'].map(function(s)` |
-| `main` | function | `tests/test_js_intl.c:202` | `int main(void)` |
-| `teardown` | function | `tests/test_js_intl.c:25` | `static int teardown(void **state)` |
-| `test_collator_and_rest` | function | `tests/test_js_intl.c:189` | `static void test_collator_and_rest(void **state)` |
-| `test_date_components` | function | `tests/test_js_intl.c:126` | `static void test_date_components(void **state)` |
-| `test_date_styles_parts` | function | `tests/test_js_intl.c:150` | `static void test_date_styles_parts(void **state)` |
-| `test_install_null` | function | `tests/test_js_intl.c:39` | `static void test_install_null(void **state)` |
 
 Next: [SYMBOLS_p15.md](SYMBOLS_p15.md)

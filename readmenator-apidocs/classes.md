@@ -53,6 +53,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`cg_radial_size`](modules/include.css_gradient.h.md#cg_radial_size) enum in `include/css_gradient.h`
 - [`chain`](modules/src.page_view.c.md#chain) type_alias in `src/page_view.c`
 - [`child_state`](modules/src.tab.c.md#child_state) struct in `src/tab.c`
+- [`ci_import`](modules/include.css_import.h.md#ci_import) struct in `include/css_import.h`
 - [`cid`](modules/gui.browser_ui.c.md#cid) type_alias in `gui/browser_ui.c`
 - [`cix_entry`](modules/include.css_index.h.md#cix_entry) struct in `include/css_index.h`
 - [`cix_index`](modules/include.css_index.h.md#cix_index) struct in `include/css_index.h`
@@ -147,6 +148,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`css_style`](modules/include.css.h.md#css_style) struct in `include/css.h`
 - [`css_sub_sel`](modules/include.css_select.h.md#css_sub_sel) struct in `include/css_select.h`
 - [`css_table_layout`](modules/include.css.h.md#css_table_layout) enum in `include/css.h`
+- [`css_text`](modules/src.tab.c.md#css_text) struct in `src/tab.c`
 - [`css_text_decoration_style`](modules/include.css.h.md#css_text_decoration_style) enum in `include/css.h`
 - [`css_text_overflow`](modules/include.css.h.md#css_text_overflow) enum in `include/css.h`
 - [`css_text_rendering`](modules/include.css.h.md#css_text_rendering) enum in `include/css.h`
@@ -563,6 +565,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`ui_theme`](modules/gui.browser_ui_internal.h.md#ui_theme) struct in `gui/browser_ui_internal.h`
 - [`ui_theme_mode`](modules/gui.browser_ui_internal.h.md#ui_theme_mode) enum in `gui/browser_ui_internal.h`
 - [`ui_window`](modules/gui.ui_render.c.md#ui_window) struct in `gui/ui_render.c`
+- [`url`](modules/include.css_import.h.md#url) type_alias in `include/css_import.h`
 - [`url_omni_kind`](modules/include.url.h.md#url_omni_kind) enum in `include/url.h`
 - [`url_parts`](modules/include.url.h.md#url_parts) struct in `include/url.h`
 - [`url_status`](modules/include.url.h.md#url_status) enum in `include/url.h`

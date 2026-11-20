@@ -1,6 +1,16 @@
 # API (page 4 of 13)
 Previous: [API_p3.md](API_p3.md)
 
+## include/css_length.h
+Imported by: `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_length.c`, `src/css_mq.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_length.c`
+- `prelude` (function) `include/css_length.h:106` `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...`
+- `cl_unit_is_font_relative` (function) `include/css_length.h:164` `* cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em *...`
+- `cl_unit_font_ratio` (function) `include/css_length.h:189` `double cl_unit_font_ratio(const char *unit, size_t unit_len);` -- How many px one of `unit` is worth per 1px of font-size -- the per-unit derivative behind cl_lp.em.
+- `here` (function) `include/css_length.h:193` `* Every input cl_resolve accepts resolves identically here (with has_pct 0);`
+- `length` (function) `include/css_length.h:213` `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...`
+- `cl_number` (function) `include/css_length.h:237` `int cl_number(const char *s, double *out, const char **endp);` -- Returns 1 on success, writing *out and pointing *endp at the first unconsumed character; 0 if there is no number there.
+- `cl_is_length_unit` (function) `include/css_length.h:253` `int cl_is_length_unit(const char *unit, size_t unit_len);` -- Non-zero when `unit` names a <length> unit at all (any of the three families * plus px).
+
 ## include/css_mask.h
 Depends on: `include/css_decl.h`
 Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_mask.c`, `tests/test_css_mask.c`

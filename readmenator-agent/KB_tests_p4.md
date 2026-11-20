@@ -1,5 +1,86 @@
-# Subsystem: tests (page 4 of 8)
+# Subsystem: tests (page 4 of 9)
 Previous: [KB_tests_p3.md](KB_tests_p3.md)
+
+## tests/test_flex_layout.c
+- Doc: test_grid_column_count_for_column_flow: Given `grid-auto-flow: column` with no explicit rows...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `assert_item` (function, line 26) `static void assert_item(fx_result r, double pos, double size)`
+  - `test_grow_equal` (function, line 31) `static void test_grow_equal(void **state)`
+  - `test_grow_weighted` (function, line 40) `static void test_grow_weighted(void **state)`
+  - `test_shrink_equal` (function, line 49) `static void test_shrink_equal(void **state)`
+  - `test_shrink_with_min_clamp` (function, line 58) `static void test_shrink_with_min_clamp(void **state)`
+  - `test_gap_start` (function, line 68) `static void test_gap_start(void **state)`
+  - `test_justify_center` (function, line 77) `static void test_justify_center(void **state)`
+  - `test_justify_end` (function, line 86) `static void test_justify_end(void **state)`
+  - `test_justify_space_between` (function, line 95) `static void test_justify_space_between(void **state)`
+  - `test_justify_space_around` (function, line 104) `static void test_justify_space_around(void **state)`
+  - `test_justify_space_evenly` (function, line 113) `static void test_justify_space_evenly(void **state)`
+  - `test_space_between_single_item_is_start` (function, line 123) `static void test_space_between_single_item_is_start(void **state)`
+  - `test_negative_fields_clamped` (function, line 131) `static void test_negative_fields_clamped(void **state)`
+  - `test_grid_column_count_for_column_flow` (function, line 145) `static void test_grid_column_count_for_column_flow(void **state)`
+  - `test_autofill_count` (function, line 158) `static void test_autofill_count(void **state)`
+  - `test_flex_zero_items_is_noop` (function, line 168) `static void test_flex_zero_items_is_noop(void **state)`
+  - `test_flex_errors` (function, line 173) `static void test_flex_errors(void **state)`
+  - `test_grid_columns` (function, line 185) `static void test_grid_columns(void **state)`
+  - `test_grid_columns_too_narrow_clamps_to_zero` (function, line 197) `static void test_grid_columns_too_narrow_clamps_to_zero(void **state)`
+  - `test_grid_columns_edges` (function, line 204) `static void test_grid_columns_edges(void **state)`
+  - `test_grid_cell` (function, line 214) `static void test_grid_cell(void **state)`
+  - `test_grid_weighted_fr` (function, line 225) `static void test_grid_weighted_fr(void **state)`
+  - `test_grid_weighted_fixed_px_reserved_first` (function, line 237) `static void test_grid_weighted_fixed_px_reserved_first(void **state)`
+  - `test_grid_weighted_all_auto_matches_equal` (function, line 249) `static void test_grid_weighted_all_auto_matches_equal(void **state)`
+  - `test_grid_weighted_fixed_overflow_zeroes_fr` (function, line 262) `static void test_grid_weighted_fixed_overflow_zeroes_fr(void **state)`
+  - `test_grid_weighted_errors` (function, line 272) `static void test_grid_weighted_errors(void **state)`
+  - `test_grid_place_span_basic` (function, line 282) `static void test_grid_place_span_basic(void **state)`
+  - `test_grid_place_span_wraps_when_it_does_not_fit` (function, line 293) `static void test_grid_place_span_wraps_when_it_does_not_fit(void **state)`
+  - `test_grid_place_span_clamps_and_defaults` (function, line 305) `static void test_grid_place_span_clamps_and_defaults(void **state)`
+  - `test_grid_place_rowspan` (function, line 321) `static void test_grid_place_rowspan(void **state)`
+  - `test_float_pack_left` (function, line 338) `static void test_float_pack_left(void **state)`
+  - `test_float_pack_left_and_right` (function, line 349) `static void test_float_pack_left_and_right(void **state)`
+  - `test_float_pack_two_right` (function, line 361) `static void test_float_pack_two_right(void **state)`
+  - `article` (function, line 378) `* article (slashdot-cols probe: score 13.41). */
+
+static void test_float_pack_m_holy_grail_pull_u...`
+  - `test_float_pack_m_zero_margins_match_wrap` (function, line 397) `static void test_float_pack_m_zero_margins_match_wrap(void **state)`
+  - `test_float_pack_m_positive_margin_widens` (function, line 417) `static void test_float_pack_m_positive_margin_widens(void **state)`
+  - `test_float_pack_m_right_float_negative_margin` (function, line 433) `static void test_float_pack_m_right_float_negative_margin(void **state)`
+  - `test_float_pack_m_errors` (function, line 449) `static void test_float_pack_m_errors(void **state)`
+  - `test_float_insets_left_overlapping_line` (function, line 474) `static void test_float_insets_left_overlapping_line(void **state)`
+  - `test_float_insets_line_past_bottom_is_full_width` (function, line 484) `static void test_float_insets_line_past_bottom_is_full_width(void **state)`
+  - `test_float_insets_right` (function, line 501) `static void test_float_insets_right(void **state)`
+  - `test_float_insets_both_sides_take_the_tightest` (function, line 511) `static void test_float_insets_both_sides_take_the_tightest(void **state)`
+  - `test_float_insets_never_starve_the_line` (function, line 526) `static void test_float_insets_never_starve_the_line(void **state)`
+  - `test_float_insets_edges` (function, line 548) `static void test_float_insets_edges(void **state)`
+  - `test_float_pack_edges` (function, line 568) `static void test_float_pack_edges(void **state)`
+  - `test_float_pack_wrap_full_width_stack` (function, line 584) `static void test_float_pack_wrap_full_width_stack(void **state)`
+  - `test_float_pack_wrap_fits_matches_v1` (function, line 598) `static void test_float_pack_wrap_fits_matches_v1(void **state)`
+  - `test_float_pack_wrap_partial` (function, line 621) `static void test_float_pack_wrap_partial(void **state)`
+  - `test_float_pack_wrap_errors` (function, line 644) `static void test_float_pack_wrap_errors(void **state)`
+  - `test_justify_name` (function, line 653) `static void test_justify_name(void **state)`
+  - `test_auto_min_size_is_min_content` (function, line 669) `static void test_auto_min_size_is_min_content(void **state)`
+  - `test_multicol_used_counts` (function, line 702) `static void test_multicol_used_counts(void **state)`
+  - `test_multicol_used_edges` (function, line 739) `static void test_multicol_used_edges(void **state)`
+  - `test_area_hash_basics` (function, line 808) `static void test_area_hash_basics(void **state)`
+  - `test_areas_parse_and_resolve` (function, line 820) `static void test_areas_parse_and_resolve(void **state)`
+  - `test_areas_null_cell` (function, line 854) `static void test_areas_null_cell(void **state)`
+  - `test_areas_rect_spans_rows_and_cols` (function, line 869) `static void test_areas_rect_spans_rows_and_cols(void **state)`
+  - `test_areas_non_rectangular_is_rejected` (function, line 886) `static void test_areas_non_rectangular_is_rejected(void **state)`
+  - `test_areas_parse_fails_closed` (function, line 900) `static void test_areas_parse_fails_closed(void **state)`
+  - `test_areas_parse_bounds` (function, line 918) `static void test_areas_parse_bounds(void **state)`
+  - `test_grid_line_side` (function, line 947) `static void test_grid_line_side(void **state)`
+  - `test_grid_line_parse` (function, line 975) `static void test_grid_line_parse(void **state)`
+  - `test_grid_line_resolve_table` (function, line 994) `static void test_grid_line_resolve_table(void **state)`
+  - `test_grid_place_fixed_col_auto_row` (function, line 1025) `static void test_grid_place_fixed_col_auto_row(void **state)`
+  - `test_grid_place_null_fixed_is_unchanged` (function, line 1056) `static void test_grid_place_null_fixed_is_unchanged(void **state)`
+  - `test_grid_place_explicit_out_of_range_clamps` (function, line 1068) `static void test_grid_place_explicit_out_of_range_clamps(void **state)`
+  - `test_auto_margins_push_right_and_center` (function, line 1079) `static void test_auto_margins_push_right_and_center(void **state)`
+  - `test_column_place_stack_and_justify` (function, line 1112) `static void test_column_place_stack_and_justify(void **state)`
+  - `test_cross_offset` (function, line 1141) `static void test_cross_offset(void **state)`
+  - `test_column_place_auto_margins` (function, line 1155) `static void test_column_place_auto_margins(void **state)`
+  - `main` (function, line 1196) `int main(void)`
+  - `to` (function, line 296) `* jumps to (1,0);`
+- Depends on: `include/flex_layout.h`
 
 ## tests/test_form.c
 - Layer: testing
@@ -382,108 +463,6 @@ static void tes...`
   - `test_auto_allow_roundtrips_and_is_rendered` (function, line 211) `static void test_auto_allow_roundtrips_and_is_rendered(void **state)`
   - `main` (function, line 230) `int main(void)`
 - Depends on: `include/anti_fp.h`, `include/identity.h`
-
-## tests/test_image_decode.c
-- Layer: testing
-- Language: c
-- Symbols:
-  - `px` (function, line 65) `static uint32_t px(const img_pixels *p, uint32_t x, uint32_t y)`
-  - `test_sniff_png` (function, line 75) `static void test_sniff_png(void **state)`
-  - `test_sniff_unsupported` (function, line 80) `static void test_sniff_unsupported(void **state)`
-  - `test_dimensions_from_ihdr` (function, line 89) `static void test_dimensions_from_ihdr(void **state)`
-  - `test_dimensions_truncated` (function, line 97) `static void test_dimensions_truncated(void **state)`
-  - `test_dimensions_non_png` (function, line 104) `static void test_dimensions_non_png(void **state)`
-  - `test_dimensions_null` (function, line 111) `static void test_dimensions_null(void **state)`
-  - `test_dimensions_ok_bounds` (function, line 120) `static void test_dimensions_ok_bounds(void **state)`
-  - `test_fit_landscape_into_square` (function, line 136) `static void test_fit_landscape_into_square(void **state)`
-  - `test_fit_portrait_into_box` (function, line 145) `static void test_fit_portrait_into_box(void **state)`
-  - `test_fit_degenerate` (function, line 154) `static void test_fit_degenerate(void **state)`
-  - `test_decode_dimensions_and_stride` (function, line 166) `static void test_decode_dimensions_and_stride(void **state)`
-  - `test_decode_pixels_premultiplied` (function, line 178) `static void test_decode_pixels_premultiplied(void **state)`
-  - `test_decode_rejects_non_png` (function, line 190) `static void test_decode_rejects_non_png(void **state)`
-  - `test_decode_rejects_truncated` (function, line 200) `static void test_decode_rejects_truncated(void **state)`
-  - `test_decode_null_args` (function, line 210) `static void test_decode_null_args(void **state)`
-  - `test_pixels_free_idempotent` (function, line 218) `static void test_pixels_free_idempotent(void **state)`
-  - `test_format_name` (function, line 227) `static void test_format_name(void **state)`
-  - `test_sniff_jpeg` (function, line 236) `static void test_sniff_jpeg(void **state)`
-  - `test_decode_jpeg_dimensions_and_alpha` (function, line 244) `static void test_decode_jpeg_dimensions_and_alpha(void **state)`
-  - `test_decode_dispatch_routes_jpeg_and_png` (function, line 267) `static void test_decode_dispatch_routes_jpeg_and_png(void **state)`
-  - `test_decode_dispatch_rejects_unknown` (function, line 279) `static void test_decode_dispatch_rejects_unknown(void **state)`
-  - `test_decode_jpeg_rejects_truncated` (function, line 287) `static void test_decode_jpeg_rejects_truncated(void **state)`
-  - `test_decode_jpeg_rejects_non_jpeg` (function, line 295) `static void test_decode_jpeg_rejects_non_jpeg(void **state)`
-  - `test_decode_jpeg_null_args` (function, line 302) `static void test_decode_jpeg_null_args(void **state)`
-  - `test_sniff_gif` (function, line 356) `static void test_sniff_gif(void **state)`
-  - `test_decode_gif_pixels` (function, line 363) `static void test_decode_gif_pixels(void **state)`
-  - `test_decode_gif_transparency` (function, line 378) `static void test_decode_gif_transparency(void **state)`
-  - `test_decode_gif_interlaced` (function, line 390) `static void test_decode_gif_interlaced(void **state)`
-  - `test_decode_gif_animated_first_frame` (function, line 405) `static void test_decode_gif_animated_first_frame(void **state)`
-  - `test_decode_gif_fail_closed` (function, line 414) `static void test_decode_gif_fail_closed(void **state)`
-  - `test_decode_dispatch_routes_gif` (function, line 430) `static void test_decode_dispatch_routes_gif(void **state)`
-  - `test_sniff_webp` (function, line 448) `static void test_sniff_webp(void **state)`
-  - `test_decode_webp_dimensions_and_pixels` (function, line 454) `static void test_decode_webp_dimensions_and_pixels(void **state)`
-  - `test_decode_webp_fail_closed` (function, line 471) `static void test_decode_webp_fail_closed(void **state)`
-  - `test_decode_dispatch_routes_webp` (function, line 483) `static void test_decode_dispatch_routes_webp(void **state)`
-  - `main` (function, line 492) `int main(void)`
-- Depends on: `include/image_decode.h`
-
-## tests/test_import_map.c
-- Doc: tres: Test URL resolver: absolute https passes, "/x" is origin-relative, "./x" and "../x" * are...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `tres` (function, line 17) `static int tres(void *ctx, const char *base, const char *ref, char *out, size_t outsz)`
-  - `expect_res` (function, line 38) `static void expect_res(const im_map *m, const char *base, const char *spec, const char *want)`
-  - `test_exact_and_prefix_imports` (function, line 48) `static void test_exact_and_prefix_imports(void **state)`
-  - `test_scopes_win_by_longest_prefix` (function, line 74) `static void test_scopes_win_by_longest_prefix(void **state)`
-  - `test_json_escapes_and_ignored_members` (function, line 90) `static void test_json_escapes_and_ignored_members(void **state)`
-  - `test_invalid_input_yields_empty_map` (function, line 102) `static void test_invalid_input_yields_empty_map(void **state)`
-  - `main` (function, line 123) `int main(void)`
-  - `DOC` (macro, line 36) `#define DOC`
-- Depends on: `include/import_map.h`
-
-## tests/test_interp.c
-- Doc: assert_float_equal: ip_ease_fn fns_0to0[] = { { .kind = IP_EASE_LINEAR }, { .kind = IP_EASE_EASE...
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_ease_endpoints` (function, line 31) `static void test_ease_endpoints(void **state)`
-  - `assert_float_equal` (function, line 64) `assert_float_equal(ip_ease(0.0, &(ip_ease_fn)`
-  - `assert_float_equal` (function, line 66) `assert_float_equal(ip_ease(0.0, &(ip_ease_fn)`
-  - `test_ease_clamp` (function, line 78) `static void test_ease_clamp(void **state)`
-  - `test_ease_null_fn` (function, line 85) `static void test_ease_null_fn(void **state)`
-  - `test_ease_ease_in_concave` (function, line 92) `static void test_ease_ease_in_concave(void **state)`
-  - `test_ease_ease_out_convex` (function, line 99) `static void test_ease_ease_out_convex(void **state)`
-  - `test_ease_monotonic` (function, line 106) `static void test_ease_monotonic(void **state)`
-  - `test_ease_steps_end` (function, line 127) `static void test_ease_steps_end(void **state)`
-  - `test_ease_steps_start` (function, line 138) `static void test_ease_steps_start(void **state)`
-  - `test_ease_step_start_end_aliases` (function, line 147) `static void test_ease_step_start_end_aliases(void **state)`
-  - `test_lerp_scalar` (function, line 163) `static void test_lerp_scalar(void **state)`
-  - `test_lerp_color_rgb` (function, line 171) `static void test_lerp_color_rgb(void **state)`
-  - `test_interp_dispatches` (function, line 192) `static void test_interp_dispatches(void **state)`
-  - `test_kf_two_keyframes` (function, line 205) `static void test_kf_two_keyframes(void **state)`
-  - `test_kf_three_keyframes` (function, line 212) `static void test_kf_three_keyframes(void **state)`
-  - `test_kf_exact_match` (function, line 219) `static void test_kf_exact_match(void **state)`
-  - `test_kf_before_first` (function, line 225) `static void test_kf_before_first(void **state)`
-  - `test_kf_after_last` (function, line 231) `static void test_kf_after_last(void **state)`
-  - `test_kf_null_or_empty` (function, line 237) `static void test_kf_null_or_empty(void **state)`
-  - `test_kf_color_interp` (function, line 247) `static void test_kf_color_interp(void **state)`
-  - `linear_ease` (function, line 258) `static ip_ease_fn linear_ease(void)`
-  - `test_anim_delay_no_fill` (function, line 263) `static void test_anim_delay_no_fill(void **state)`
-  - `test_anim_delay_backwards_fill` (function, line 278) `static void test_anim_delay_backwards_fill(void **state)`
-  - `test_anim_active_linear` (function, line 292) `static void test_anim_active_linear(void **state)`
-  - `test_anim_single_iteration_done` (function, line 310) `static void test_anim_single_iteration_done(void **state)`
-  - `test_anim_forwards_fill` (function, line 325) `static void test_anim_forwards_fill(void **state)`
-  - `test_anim_two_iterations` (function, line 338) `static void test_anim_two_iterations(void **state)`
-  - `test_anim_infinite` (function, line 367) `static void test_anim_infinite(void **state)`
-  - `test_anim_reverse_direction` (function, line 380) `static void test_anim_reverse_direction(void **state)`
-  - `test_anim_alternate` (function, line 393) `static void test_anim_alternate(void **state)`
-  - `test_anim_alternate_reverse` (function, line 410) `static void test_anim_alternate_reverse(void **state)`
-  - `test_anim_zero_duration` (function, line 423) `static void test_anim_zero_duration(void **state)`
-  - `test_anim_no_keyframes` (function, line 436) `static void test_anim_no_keyframes(void **state)`
-  - `test_anim_negative_dt` (function, line 448) `static void test_anim_negative_dt(void **state)`
-  - `test_anim_null_init` (function, line 463) `static void test_anim_null_init(void **state)`
-  - `main` (function, line 474) `int main(void)`
-- Depends on: `include/interp.h`
 
 
 Next: [KB_tests_p5.md](KB_tests_p5.md)

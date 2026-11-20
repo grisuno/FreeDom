@@ -1,5 +1,123 @@
-# Subsystem: tests (page 7 of 8)
+# Subsystem: tests (page 7 of 9)
 Previous: [KB_tests_p6.md](KB_tests_p6.md)
+
+## tests/test_pdf_export.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `pagination` (function, line 8) `* deterministic pagination (single/multi page, no row splitting, oversized row,
+ * gap preservati...`
+  - `test_basename_maps_spaces_and_reserved` (function, line 31) `static void test_basename_maps_spaces_and_reserved(void **state)`
+  - `test_basename_rejects_path_separators` (function, line 39) `static void test_basename_rejects_path_separators(void **state)`
+  - `test_basename_neutralizes_traversal` (function, line 49) `static void test_basename_neutralizes_traversal(void **state)`
+  - `test_basename_dotdot_only_falls_back` (function, line 57) `static void test_basename_dotdot_only_falls_back(void **state)`
+  - `test_basename_trims_edges` (function, line 64) `static void test_basename_trims_edges(void **state)`
+  - `test_basename_collapses_underscores` (function, line 72) `static void test_basename_collapses_underscores(void **state)`
+  - `test_basename_control_bytes_mapped` (function, line 79) `static void test_basename_control_bytes_mapped(void **state)`
+  - `test_basename_non_ascii_mapped` (function, line 87) `static void test_basename_non_ascii_mapped(void **state)`
+  - `test_basename_empty_and_null_fall_back` (function, line 96) `static void test_basename_empty_and_null_fall_back(void **state)`
+  - `test_basename_all_separators_fall_back` (function, line 105) `static void test_basename_all_separators_fall_back(void **state)`
+  - `test_basename_length_bound` (function, line 112) `static void test_basename_length_bound(void **state)`
+  - `test_basename_null_out_and_zero_size` (function, line 123) `static void test_basename_null_out_and_zero_size(void **state)`
+  - `test_basename_overflow_fails_closed` (function, line 130) `static void test_basename_overflow_fails_closed(void **state)`
+  - `test_build_path_basic` (function, line 139) `static void test_build_path_basic(void **state)`
+  - `test_build_path_trailing_slash` (function, line 146) `static void test_build_path_trailing_slash(void **state)`
+  - `test_build_path_hostile_title_contained` (function, line 153) `static void test_build_path_hostile_title_contained(void **state)`
+  - `test_build_path_empty_title_fallback` (function, line 162) `static void test_build_path_empty_title_fallback(void **state)`
+  - `test_build_path_overflow_fails_closed` (function, line 169) `static void test_build_path_overflow_fails_closed(void **state)`
+  - `test_build_path_null_args` (function, line 176) `static void test_build_path_null_args(void **state)`
+  - `test_build_path_ext_png` (function, line 186) `static void test_build_path_ext_png(void **state)`
+  - `test_build_path_ext_null_ext` (function, line 194) `static void test_build_path_ext_null_ext(void **state)`
+  - `test_build_path_ext_hostile_title_contained` (function, line 202) `static void test_build_path_ext_hostile_title_contained(void **state)`
+  - `test_build_path_ext_overflow_fails_closed` (function, line 213) `static void test_build_path_ext_overflow_fails_closed(void **state)`
+  - `test_paginate_single_page` (function, line 223) `static void test_paginate_single_page(void **state)`
+  - `test_paginate_breaks_without_splitting` (function, line 238) `static void test_paginate_breaks_without_splitting(void **state)`
+  - `test_paginate_oversized_row_not_split` (function, line 252) `static void test_paginate_oversized_row_not_split(void **state)`
+  - `test_paginate_preserves_gaps` (function, line 264) `static void test_paginate_preserves_gaps(void **state)`
+  - `test_paginate_invalid_args` (function, line 276) `static void test_paginate_invalid_args(void **state)`
+  - `main` (function, line 290) `int main(void)`
+- Depends on: `include/pdf_export.h`
+
+## tests/test_perf_trace.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_single_record` (function, line 28) `static void test_single_record(void **state)`
+  - `test_min_max_median` (function, line 42) `static void test_min_max_median(void **state)`
+  - `test_ring_wraparound_fifo` (function, line 55) `static void test_ring_wraparound_fifo(void **state)`
+  - `test_stage_out_of_range_is_noop` (function, line 72) `static void test_stage_out_of_range_is_noop(void **state)`
+  - `test_elapsed_us_normal` (function, line 89) `static void test_elapsed_us_normal(void **state)`
+  - `test_elapsed_us_underflow_guard` (function, line 95) `static void test_elapsed_us_underflow_guard(void **state)`
+  - `test_stage_name` (function, line 101) `static void test_stage_name(void **state)`
+  - `test_format_deterministic_and_only_nonempty_stages` (function, line 115) `static void test_format_deterministic_and_only_nonempty_stages(void **state)`
+  - `test_format_truncates_never_overflows` (function, line 138) `static void test_format_truncates_never_overflows(void **state)`
+  - `test_format_null_or_zero_cap` (function, line 152) `static void test_format_null_or_zero_cap(void **state)`
+  - `test_null_safe` (function, line 163) `static void test_null_safe(void **state)`
+  - `main` (function, line 174) `int main(void)`
+- Depends on: `include/perf_trace.h`
+
+## tests/test_pq_seal.c
+- Doc: test_requires_both_secrets_and_detects_tamper: static void test_each_seal_is_fresh(void **state)...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_seal_open_roundtrip` (function, line 12) `static void test_seal_open_roundtrip(void **state)`
+  - `test_each_seal_is_fresh` (function, line 31) `static void test_each_seal_is_fresh(void **state)`
+  - `test_requires_both_secrets_and_detects_tamper` (function, line 44) `static void test_requires_both_secrets_and_detects_tamper(void **state)`
+  - `test_format_errors` (function, line 65) `static void test_format_errors(void **state)`
+  - `test_export_import_keeps_decapsulation` (function, line 77) `static void test_export_import_keeps_decapsulation(void **state)`
+  - `main` (function, line 95) `int main(void)`
+  - `_GNU_SOURCE` (macro, line 1) `#define _GNU_SOURCE`
+- Depends on: `include/pq_seal.h`
+
+## tests/test_prefetch.c
+- Doc: Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool.
+- Layer: testing
+- Language: c
+- Symbols:
+  - `fake_ctx` (struct, line 126)
+  - `barrier` (type_alias, line 126) `typedef struct fake_ctx { pthread_barrier_t barrier;`
+  - `test_scan_null_args` (function, line 22) `static void test_scan_null_args(void **state)`
+  - `test_scan_basic_stylesheet_and_script` (function, line 32) `static void test_scan_basic_stylesheet_and_script(void **state)`
+  - `test_scan_ref_cap` (function, line 104) `static void test_scan_ref_cap(void **state)`
+  - `fake_fetch` (function, line 135) `static int fake_fetch(void *vctx, const char *method, const char *url,
+                      cons...`
+  - `test_pool_parallel_fetch_and_take` (function, line 153) `static void test_pool_parallel_fetch_and_take(void **state)`
+  - `test_pool_miss_consume_and_failure` (function, line 191) `static void test_pool_miss_consume_and_failure(void **state)`
+  - `test_pool_finish_unconsumed_and_empty` (function, line 234) `static void test_pool_finish_unconsumed_and_empty(void **state)`
+  - `test_pooled_fetch_adapter` (function, line 255) `static void test_pooled_fetch_adapter(void **state)`
+  - `test_scan_imports_static_only` (function, line 298) `static void test_scan_imports_static_only(void **state)`
+  - `graph_fetch` (function, line 320) `static int graph_fetch(void *ctx, const char *method, const char *url,
+                       con...`
+  - `bare_fetch` (function, line 333) `static int bare_fetch(void *ctx, const char *method, const char *url,
+                      const...`
+  - `test_pool_follows_module_graph` (function, line 346) `static void test_pool_follows_module_graph(void **state)`
+  - `test_find_importmap` (function, line 366) `static void test_find_importmap(void **state)`
+  - `test_pool_start_page_import_map` (function, line 378) `static void test_pool_start_page_import_map(void **state)`
+  - `main` (function, line 395) `int main(void)`
+  - `_POSIX_C_SOURCE` (macro, line 5) `#define _POSIX_C_SOURCE`
+- Depends on: `include/prefetch.h`
+
+## tests/test_prefs.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_init_defaults` (function, line 25) `static void test_init_defaults(void **state)`
+  - `test_roundtrip` (function, line 80) `static void test_roundtrip(void **state)`
+  - `test_parse_bad_magic` (function, line 140) `static void test_parse_bad_magic(void **state)`
+  - `test_parse_too_large` (function, line 156) `static void test_parse_too_large(void **state)`
+  - `test_parse_unknown_and_malformed_skipped` (function, line 165) `static void test_parse_unknown_and_malformed_skipped(void **state)`
+  - `test_parse_clamps_out_of_range` (function, line 187) `static void test_parse_clamps_out_of_range(void **state)`
+  - `test_invalid_urls_rejected` (function, line 209) `static void test_invalid_urls_rejected(void **state)`
+  - `test_hostile_title_cleaned` (function, line 237) `static void test_hostile_title_cleaned(void **state)`
+  - `test_bookmark_toggle_and_cap` (function, line 267) `static void test_bookmark_toggle_and_cap(void **state)`
+  - `test_history_dedup_and_evict` (function, line 295) `static void test_history_dedup_and_evict(void **state)`
+  - `test_suggest_priorities` (function, line 320) `static void test_suggest_priorities(void **state)`
+  - `test_bookmarks_page_escapes` (function, line 375) `static void test_bookmarks_page_escapes(void **state)`
+  - `test_format_null_args` (function, line 412) `static void test_format_null_args(void **state)`
+  - `main` (function, line 424) `int main(void)`
+  - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
+- Depends on: `include/prefs.h`, `include/zoom.h`
 
 ## tests/test_pres_hints.c
 - Doc: test_pres_hints -- HTML presentational attributes (spec/pres_hints.md).

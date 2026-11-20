@@ -15,7 +15,7 @@ flowchart TB
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     subgraph lane_0["Tier 1 - entry / orchestration"]
         direction LR
-        n_c2["include: browser_ui<br/>34 files, 1003 symbols<br/>Core / utility"]:::cycle
+        n_c2["include: browser_ui<br/>34 files, 1005 symbols<br/>Core / utility"]:::cycle
         n_d_tools["tools<br/>13 files, 69 symbols<br/>Core / utility"]:::default
         n_d__root_["(root)<br/>5 files, 3 symbols<br/>Core / utility"]:::entry
     end
@@ -29,7 +29,7 @@ flowchart TB
     end
     subgraph lane_3["Tier 4"]
         direction LR
-        n_c1["src: tab<br/>38 files, 856 symbols<br/>Core / utility"]:::cycle
+        n_c1["src: tab<br/>40 files, 882 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_4["Tier 5"]
         direction LR

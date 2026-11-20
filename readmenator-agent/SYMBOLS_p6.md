@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `finite_or_zero` | function | `src/block_flow.c:11` | `static double finite_or_zero(double v)` |
+| `bb_blur_a8` | function | `src/box_blur.c:41` | `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)` |
+| `bb_box_sizes` | function | `src/box_blur.c:7` | `int bb_box_sizes(double sigma, int sizes[3])` |
+| `bb_ink_rect` | function | `src/box_blur.c:57` | `int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])` |
+| `box_line` | function | `src/box_blur.c:28` | `static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)` |
+| `variance` | function | `src/box_blur.c:10` | `* width w has variance (w^2 - 1) / 12): the ideal common width, rounded down * to an odd wl and up to wu = wl + 2...` |
+| `BLOCK` | macro | `src/box_style.c:67` | `#define BLOCK` |
+| `BX_DISPLAY_MAX` | macro | `src/box_style.c:25` | `#define BX_DISPLAY_MAX` |
+| `BX_TAG_MAX` | macro | `src/box_style.c:24` | `#define BX_TAG_MAX` |
+| `DISP_N` | macro | `src/box_style.c:259` | `#define DISP_N` |
+| `EDG` | macro | `src/box_style.c:72` | `#define EDG(t, r, b, l)` |
+| `IBLOCK` | macro | `src/box_style.c:69` | `#define IBLOCK` |
+| `INLINE` | macro | `src/box_style.c:68` | `#define INLINE` |
 | `LITEM` | macro | `src/box_style.c:70` | `#define LITEM` |
 | `NONE` | macro | `src/box_style.c:71` | `#define NONE` |
 | `TAG_N` | macro | `src/box_style.c:161` | `#define TAG_N` |
@@ -483,18 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `cch_path_free` | function | `src/css_chain.c:365` | `void cch_path_free(cch_path *pa)` |
 | `cch_path_new` | function | `src/css_chain.c:353` | `cch_path *cch_path_new(void)` |
 | `cch_pseudo_style` | function | `src/css_chain.c:442` | `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,             ...` |
-| `cls_space` | function | `src/css_chain.c:42` | `static int cls_space(char c)` |
-| `count_children` | function | `src/css_chain.c:227` | `static int count_children(lxb_dom_node_t *n)` |
-| `fill_css_node` | function | `src/css_chain.c:99` | `static void fill_css_node(lxb_dom_element_t *e, cch_node *node)` |
-| `inputs` | function | `src/css_chain.c:241` | `* identical inputs (single source of truth). */ static const css_element *build_chain(lxb_dom_ele...` |
-| `path_truncate` | function | `src/css_chain.c:357` | `static void path_truncate(cch_path *pa, int keep)` |
-| `release_nodes` | function | `src/css_chain.c:90` | `static void release_nodes(cch_node *nodes, int n)` |
-| `sibling_position` | function | `src/css_chain.c:181` | `static void sibling_position(lxb_dom_node_t *n, int *nth, int *nsib)` |
-| `sibling_type_position` | function | `src/css_chain.c:199` | `static void sibling_type_position(lxb_dom_node_t *n, int *nth, int *nsib)` |
-| `tag` | type_alias | `src/css_chain.c:27` | `typedef struct cch_node { char tag[CCH_TAG_MAX];` |
-| `CC_CALC_DEPTH` | macro | `src/css_color.c:221` | `#define CC_CALC_DEPTH` |
-| `CC_CHANNEL_MAX` | macro | `src/css_color.c:23` | `#define CC_CHANNEL_MAX` |
-| `CC_HSL_SCALE` | macro | `src/css_color.c:32` | `#define CC_HSL_SCALE` |
-| `CC_NUMBER_MAX_DIGITS` | macro | `src/css_color.c:29` | `#define CC_NUMBER_MAX_DIGITS` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

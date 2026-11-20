@@ -375,6 +375,8 @@ Concatenated text content of node's subtree (borrowed, valid while idx/doc are a
 
 **Returns:** `char *`
 
+*Called by:* [`sheets`](src.tab.c.md#sheets)
+
 ---
 
 <a id="dom_document_title"></a>

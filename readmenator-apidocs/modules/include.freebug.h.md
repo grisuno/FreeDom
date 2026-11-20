@@ -112,8 +112,6 @@ Zero-initialise b (no allocation).
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
-*Called by:* [`tab_load_full`](src.tab.c.md#tab_load_full)
-
 ---
 
 <a id="truncated"></a>
@@ -227,8 +225,6 @@ Idempotent; safe on NULL.
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
-
-*Called by:* [`tab_load_full`](src.tab.c.md#tab_load_full)
 
 ---
 

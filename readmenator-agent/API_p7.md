@@ -219,6 +219,21 @@ int cg_expand_bg_imag...`
                         double *c...`
 - `cg_parse_linear` (function) `src/css_gradient.c:815` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
 
+## src/css_import.c
+Depends on: `include/css_import.h`
+- `is_ws` (function) `src/css_import.c:8` `static int is_ws(char c)`
+- `lower` (function) `src/css_import.c:10` `static char lower(char c)`
+- `kw_at` (function) `src/css_import.c:13` `static int kw_at(const char *s, size_t i, size_t e, const char *kw)` -- css_import -- @import prelude reader (spec/css_import.md).
+- `is_ident_char` (function) `src/css_import.c:21` `static int is_ident_char(char c)`
+- `skip_ws` (function) `src/css_import.c:27` `static size_t skip_ws(const char *s, size_t i, size_t e)` -- static int kw_at(const char *s, size_t i, size_t e, const char *kw) { size_t n = strlen(kw); if (e - i < n) return...
+- `copy_trim` (function) `src/css_import.c:53` `static int copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` -- Past the string that opens at s[i] (a quote), or (size_t)-1 when it does not * terminate before e or a newline (a...
+- `read_string` (function) `src/css_import.c:64` `static size_t read_string(const char *s, size_t a, size_t e, char *dst, size_t cap)` -- Copies the body of the string opening at s[a] (quotes stripped, escapes kept * verbatim except an escaped quote).
+- `match_paren` (function) `src/css_import.c:79` `static size_t match_paren(const char *s, size_t i, size_t e)` -- size_t end = skip_string(s, a, e); if (end == (size_t)-1) return end; size_t n = 0; for (size_t j = a + 1; j + 1 <...
+- `parse_prelude` (function) `src/css_import.c:97` `static int parse_prelude(const char *s, size_t a, size_t b, ci_import *im)` -- Parses one import prelude s[a, b) (after "@import", before ';') into im. * Returns 0, or -1 when the import is...
+- `ci_scan` (function) `src/css_import.c:156` `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap)`
+- `ci_wrap` (function) `src/css_import.c:194` `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap)`
+- `ci_balanced` (function) `src/css_import.c:220` `int ci_balanced(const char *css, size_t len)`
+
 ## src/css_index.c
 Depends on: `include/css_index.h`
 - `key_of` (function) `src/css_index.c:11` `static uint64_t key_of(int kind, const char *s, size_t n, int lower)` -- FNV-1a over the kind byte then the name; the tag is hashed lowercased because * compound_matches compares it with...

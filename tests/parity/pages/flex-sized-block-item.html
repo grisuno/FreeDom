@@ -1,0 +1,14 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>flex sized block item</title>
+<style>
+body{margin:20px;font:16px/1.5 sans-serif}
+.bar{display:flex;gap:8px;align-items:center}
+.logo{margin:0;flex-shrink:0;background:#ac130d}
+.logo a{display:block;width:1rem;height:1rem;padding:1px}
+.box{flex-shrink:0;background:#cde}
+.box div{width:120px;height:30px;padding:4px;box-sizing:border-box;background:#9ab}
+.filler{height:900px;background:#f4f4f4}
+</style></head><body>
+<div class="bar"><h1 class="logo"><a href="#"></a></h1><span>Active</span><span>Recent</span><div class="box"><div></div></div><span>end</span></div>
+<div class="filler"></div>
+</body></html>

@@ -1119,8 +1119,9 @@ inner rules are kept **only if the query matches** the render-time `css_media` c
 A query list is comma-separated (**OR**); within a query, parts are joined by `and`
 (**AND**). **Fail closed:** `not`, unknown media types, and unknown features make that
 query (segment) **not match** — Freedom never applies a rule it cannot correctly gate.
-Nested `@media` and any other `@`-rule inside a matched block are skipped. `@import` /
-`@font-face` / other top-level `@`-rules are still skipped entirely (no network/font surface).
+Nested `@media` and any other `@`-rule inside a matched block are skipped. The parser still skips
+`@import` (it never opens the network); the worker follows imports BEFORE parsing, through the same
+gated fetch as a `<link>`, and wraps each imported sheet in its condition — `spec/css_import.md`.
 
 
 ### El VALOR también se descarta — inventario medido por el motor (2026-08-15)

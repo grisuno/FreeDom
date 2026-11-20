@@ -1,6 +1,6 @@
 # src: tab
 
-src: tab groups 51 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
+src: tab groups 54 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
 
 ```mermaid
 graph LR
@@ -16,18 +16,19 @@ graph LR
 
 ## include (2.1)
 
-include groups 14 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
+include groups 15 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
 
 ## src (2.2)
 
-src groups 24 files (c, h) around FREEDOM_JS_NATIVE_INTERNAL_H, js_context, js_host_slot, FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install. to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
+src groups 25 files (c, h) around FREEDOM_JS_NATIVE_INTERNAL_H, js_context, js_host_slot, FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install. css_import -- @import prelude reader (spec/css_import.md).
 
 ## tests (2.3)
 
-tests groups 13 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, IDX. setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] =...
+tests groups 14 files (c) around scan, test_plain_url, test_url_forms, test_lobsters_media, assert_string_equal. test_css_import -- @import prelude reader (spec/css_import.md).
 
 **Files**:
 
+- include/css_import.h
 - include/dom.h
 - include/fb_cmdline.h
 - include/freebug.h
@@ -42,6 +43,7 @@ tests groups 13 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, 
 - include/js_trusted.h
 - include/url.h
 - include/web_storage.h
+- src/css_import.c
 - src/dom.c
 - src/fb_cmdline.c
 - src/freebug.c
@@ -66,6 +68,7 @@ tests groups 13 files (c) around _POSIX_C_SOURCE, setup_doc, teardown_doc, DOC, 
 - src/tab.c
 - src/url.c
 - src/web_storage.c
+- tests/test_css_import.c
 - tests/test_dom.c
 - tests/test_fb_cmdline.c
 - tests/test_freebug.c

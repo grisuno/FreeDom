@@ -407,6 +407,18 @@
 - [`child`](modules/src.page_view.c.md#child) function in `src/page_view.c`
 - [`child_state`](modules/src.tab.c.md#child_state) struct in `src/tab.c`
 - [`children`](modules/gui.browser_ui.c.md#children) function in `gui/browser_ui.c`
+- [`ci_balanced`](modules/include.css_import.h.md#ci_balanced) function in `include/css_import.h`
+- [`ci_balanced`](modules/src.css_import.c.md#ci_balanced) function in `src/css_import.c`
+- [`CI_COND_MAX`](modules/include.css_import.h.md#ci_cond_max) macro in `include/css_import.h`
+- [`ci_import`](modules/include.css_import.h.md#ci_import) struct in `include/css_import.h`
+- [`CI_MAX_DEPTH`](modules/include.css_import.h.md#ci_max_depth) macro in `include/css_import.h`
+- [`CI_MAX_PER_PAGE`](modules/include.css_import.h.md#ci_max_per_page) macro in `include/css_import.h`
+- [`CI_MAX_PER_SHEET`](modules/include.css_import.h.md#ci_max_per_sheet) macro in `include/css_import.h`
+- [`ci_scan`](modules/include.css_import.h.md#ci_scan) function in `include/css_import.h`
+- [`ci_scan`](modules/src.css_import.c.md#ci_scan) function in `src/css_import.c`
+- [`CI_URL_MAX`](modules/include.css_import.h.md#ci_url_max) macro in `include/css_import.h`
+- [`ci_wrap`](modules/include.css_import.h.md#ci_wrap) function in `include/css_import.h`
+- [`ci_wrap`](modules/src.css_import.c.md#ci_wrap) function in `src/css_import.c`
 - [`cid`](modules/gui.browser_ui.c.md#cid) type_alias in `gui/browser_ui.c`
 - [`cix_build`](modules/include.css_index.h.md#cix_build) function in `include/css_index.h`
 - [`cix_build`](modules/src.css_index.c.md#cix_build) function in `src/css_index.c`
@@ -759,6 +771,7 @@
 - [`css_sub_sel`](modules/include.css_select.h.md#css_sub_sel) struct in `include/css_select.h`
 - [`CSS_SVG_PAINT_NONE`](modules/include.css.h.md#css_svg_paint_none) macro in `include/css.h`
 - [`css_table_layout`](modules/include.css.h.md#css_table_layout) enum in `include/css.h`
+- [`css_text`](modules/src.tab.c.md#css_text) struct in `src/tab.c`
 - [`css_text_decoration_style`](modules/include.css.h.md#css_text_decoration_style) enum in `include/css.h`
 - [`css_text_overflow`](modules/include.css.h.md#css_text_overflow) enum in `include/css.h`
 - [`css_text_rendering`](modules/include.css.h.md#css_text_rendering) enum in `include/css.h`
@@ -2885,6 +2898,7 @@
 - [`shc_stats`](modules/include.sheet_cache.h.md#shc_stats) struct in `include/sheet_cache.h`
 - [`shc_stats_get`](modules/include.sheet_cache.h.md#shc_stats_get) function in `include/sheet_cache.h`
 - [`shc_stats_get`](modules/src.sheet_cache.c.md#shc_stats_get) function in `src/sheet_cache.c`
+- [`sheets`](modules/src.tab.c.md#sheets) function in `src/tab.c`
 - [`shortcut`](modules/include.ui.h.md#shortcut) function in `include/ui.h`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
@@ -3372,6 +3386,7 @@
 - [`unset`](modules/src.render_doc.c.md#unset) function in `src/render_doc.c`
 - [`upstream`](modules/gui.browser_ui.c.md#upstream) function in `gui/browser_ui.c`
 - [`URL`](modules/src.page_view.c.md#url) function in `src/page_view.c`
+- [`url`](modules/include.css_import.h.md#url) type_alias in `include/css_import.h`
 - [`url`](modules/include.url.h.md#url) function in `include/url.h`
 - [`url`](modules/src.page_view.c.md#url) function in `src/page_view.c`
 - [`url_authority_len`](modules/include.url.h.md#url_authority_len) function in `include/url.h`
@@ -3513,7 +3528,6 @@
 - [`widths`](modules/gui.browser_ui.c.md#widths) function in `gui/browser_ui.c`
 - [`widths`](modules/include.flex_layout.h.md#widths) function in `include/flex_layout.h`
 - [`win`](modules/include.flex_layout.h.md#win) function in `include/flex_layout.h`
-- [`window`](modules/src.tab.c.md#window) function in `src/tab.c`
 - [`wins`](modules/gui.browser_ui.c.md#wins) function in `gui/browser_ui.c`
 - [`wins`](modules/include.text_shape.h.md#wins) function in `include/text_shape.h`
 - [`wl_array_for_each`](modules/gui.browser_ui.c.md#wl_array_for_each) function in `gui/browser_ui.c`

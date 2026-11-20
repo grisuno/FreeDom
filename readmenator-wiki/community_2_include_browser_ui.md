@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 50 file(s) rooted at `include` with dominant language c (cohesion 0.53). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (673 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
+This community groups 50 file(s) rooted at `include` with dominant language c (cohesion 0.53). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_MAX_PIXELS`, `BUI_CONIC_SLICES`, `DL_ERR_OVERFLOW`, `DL_FALLBACK_NAME`. Core file: `gui/browser_ui.c` (675 symbols). Documented purpose: block_flow (bf_) -- vertical margin collapsing for block-level boxes..
 
 ## Files
 
@@ -44,7 +44,7 @@ This community groups 50 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 673 | no |
+| `gui/browser_ui.c` | c | presentation | 675 | no |
 | `gui/freedom_view.c` | c | presentation | 2 | no |
 | `gui/ui_render.c` | c | presentation | 29 | no |
 
@@ -110,15 +110,15 @@ This community groups 50 file(s) rooted at `include` with dominant language c (c
 - [layer strict] `tests/test_ui.c` (testing) -> `include/ui.h` (presentation)
 - [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1693` `gui_subresource_fetch` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
 - [dataflow DEAD_STORE] `gui/browser_ui.c:1859` `first` `dg`: `dg` assigned at line 1859 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4699` `flow_text` `space_w`: `space_w` assigned at line 4699 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:4701` `flow_text` `i`: `i` assigned at line 4701 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5773` `table` `parent`: `parent` assigned at line 5773 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5774` `table` `seen`: `seen` assigned at line 5774 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5776` `table` `j`: `j` assigned at line 5776 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5911` `measure_item_w_at` `repl_max`: `repl_max` assigned at line 5911 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5912` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5912 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5930` `measure_item_w_at` `rw`: `rw` assigned at line 5930 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6134` `nested_cont_basis` `total`: `total` assigned at line 6134 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4710` `flow_text` `space_w`: `space_w` assigned at line 4710 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:4712` `flow_text` `i`: `i` assigned at line 4712 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5784` `table` `parent`: `parent` assigned at line 5784 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5785` `table` `seen`: `seen` assigned at line 5785 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5787` `table` `j`: `j` assigned at line 5787 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5941` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 5941 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5959` `measure_item_w_at` `rw`: `rw` assigned at line 5959 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6170` `nested_cont_basis` `total`: `total` assigned at line 6170 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6171` `nested_cont_basis` `n_items`: `n_items` assigned at line 6171 but never read afterwards.
 
 ## Open Questions
 

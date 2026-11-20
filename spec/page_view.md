@@ -1626,3 +1626,21 @@ las palabras del titular (creadas por SplitText) con rect 0x0.
   ordinal de documento, byte-idéntico.
 - Dado un resolvedor que devuelve `ordinal + 100`, cuando se construye la vista, entonces
   el `node_id` de cada run es el de su elemento más 100.
+
+### Cajas inline anidadas (2026-11-20, tanda 92)
+
+Las cajas de nivel inline de una línea forman una **cadena**: `rc_ibox.parent` es el índice (1-based)
+de la caja inline que la contiene. Una píldora `display:inline` con borde dentro de un `inline-block`
+(`.tags` de lobste.rs, con `margin-right` para tener caja propia) es caja HIJA del átomo, no su fin.
+`leave_inline_box` cierra desde la más interna mientras el run no pertenezca a ella ni a un
+descendiente; la reconciliación salta las cajas ya abiertas de la cadena, abre dentro solo cajas
+de nivel inline (un bloque dentro de un átomo sigue siendo interno) y, tras abrir una, sigue con la
+siguiente del camino. Ascenso/descenso y el avance del espacio inicial se propagan a toda la cadena.
+
+Dado `<span style="display:inline-block;margin-right:4px"><a style="border:1px solid">x</a></span>`
+entonces se pintan las dos cajas, como en Firefox (sonda `nested-inline-pills`).
+
+**Bloque con ancho en la medida max-content:** un run que abre la caja de un bloque (o `display`
+UA de bloque) con `width` px declarado aporta ese ancho de contenido a la medida del ítem que lo
+contiene (Sizing 3 §5.1), haya texto o no; el padding lo suma `item_inner_inset`. Un `%` es cíclico
+(= auto). Sonda `flex-sized-block-item`.

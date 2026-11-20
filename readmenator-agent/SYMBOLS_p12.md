@@ -3,6 +3,34 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_layer_zero_z_positioned_auto` | function | `tests/test_compositor.c:109` | `static void test_layer_zero_z_positioned_auto(void **state)` |
+| `test_sc_fixed_sticky_always` | function | `tests/test_compositor.c:70` | `static void test_sc_fixed_sticky_always(void **state)` |
+| `test_sc_isolation` | function | `tests/test_compositor.c:43` | `static void test_sc_isolation(void **state)` |
+| `test_sc_mix_blend` | function | `tests/test_compositor.c:35` | `static void test_sc_mix_blend(void **state)` |
+| `test_sc_opacity` | function | `tests/test_compositor.c:26` | `static void test_sc_opacity(void **state)` |
+| `test_sc_positioned_z` | function | `tests/test_compositor.c:58` | `static void test_sc_positioned_z(void **state)` |
+| `test_sc_static_none` | function | `tests/test_compositor.c:77` | `static void test_sc_static_none(void **state)` |
+| `test_sc_transform` | function | `tests/test_compositor.c:51` | `static void test_sc_transform(void **state)` |
+| `test_sort_full_paint_order` | function | `tests/test_compositor.c:160` | `static void test_sort_full_paint_order(void **state)` |
+| `test_sort_matches_zindex_only_ordering` | function | `tests/test_compositor.c:218` | `static void test_sort_matches_zindex_only_ordering(void **state)` |
+| `test_sort_noop_guards` | function | `tests/test_compositor.c:207` | `static void test_sort_noop_guards(void **state)` |
+| `test_sort_stability` | function | `tests/test_compositor.c:193` | `static void test_sort_stability(void **state)` |
+| `test_sort_z_within_layer` | function | `tests/test_compositor.c:177` | `static void test_sort_z_within_layer(void **state)` |
+| `assert_int_equal` | function | `tests/test_css.c:1046` | `assert_int_equal(css_parse(         "@supports (display:grid)` |
+| `assert_int_equal` | function | `tests/test_css.c:1060` | `assert_int_equal(css_parse(         "@supports (display:flex)` |
+| `assert_int_equal` | function | `tests/test_css.c:1124` | `assert_int_equal(css_parse("@container (width>=10px)` |
+| `assert_int_equal` | function | `tests/test_css.c:1707` | `assert_int_equal(css_parse("tr:nth-child(even)` |
+| `assert_int_equal` | function | `tests/test_css.c:1730` | `assert_int_equal(css_parse("li:nth-last-child(2)` |
+| `assert_int_equal` | function | `tests/test_css.c:1826` | `assert_int_equal(css_parse(".s:not(:focus)` |
+| `assert_int_equal` | function | `tests/test_css.c:1854` | `assert_int_equal(css_parse("p:not(.x > y)` |
+| `assert_int_equal` | function | `tests/test_css.c:2272` | `assert_int_equal(css_parse("li:nth-child()` |
+| `assert_int_equal` | function | `tests/test_css.c:2307` | `assert_int_equal(css_parse("li:nth-of-type(2n)` |
+| `assert_int_equal` | function | `tests/test_css.c:2339` | `assert_int_equal(css_parse("div:has(.x)` |
+| `assert_int_equal` | function | `tests/test_css.c:2360` | `assert_int_equal(css_parse("html:lang(en)` |
+| `assert_int_equal` | function | `tests/test_css.c:2716` | `assert_int_equal(css_parse(         "@media (min-width: 600px)` |
+| `assert_int_equal` | function | `tests/test_css.c:2731` | `assert_int_equal(css_parse(         "@media screen and (min-width: 600px)` |
+| `assert_int_equal` | function | `tests/test_css.c:2747` | `assert_int_equal(css_parse(         "@media (frobnicate: 1)` |
+| `assert_int_equal` | function | `tests/test_css.c:5615` | `assert_int_equal(css_resolve(sh, "div", NULL, (const char *[])` |
 | `assert_int_equal` | function | `tests/test_css.c:5739` | `assert_int_equal(css_parse("@media (min-width: 200em)` |
 | `assert_int_equal` | function | `tests/test_css.c:5745` | `assert_int_equal(css_parse("@media (min-width: 40em)` |
 | `box` | function | `tests/test_css.c:234` | `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the...` |
@@ -468,33 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_transform_origin_number_component` | function | `tests/test_css_drops.c:363` | `static void test_transform_origin_number_component(void **state)` |
 | `test_unknown_property_is_logged` | function | `tests/test_css_drops.c:39` | `static void test_unknown_property_is_logged(void **state)` |
 | `test_vendor_prefixed_value_keyword` | function | `tests/test_css_drops.c:463` | `static void test_vendor_prefixed_value_keyword(void **state)` |
-| `test_vertical_align_length` | function | `tests/test_css_drops.c:404` | `static void test_vertical_align_length(void **state)` |
-| `var` | function | `tests/test_css_drops.c:304` | `* was never collected and 40 var() declarations died as bad values. */ static void test_leading_b...` |
-| `main` | function | `tests/test_css_gradient.c:196` | `int main(void)` |
-| `near_d` | function | `tests/test_css_gradient.c:157` | `static int near_d(double a, double b)` |
-| `test_degree_prelude_edges` | function | `tests/test_css_gradient.c:64` | `static void test_degree_prelude_edges(void **state)` |
-| `test_junk_drops` | function | `tests/test_css_gradient.c:22` | `static void test_junk_drops(void **state)` |
-| `test_linear_basic` | function | `tests/test_css_gradient.c:9` | `static void test_linear_basic(void **state)` |
-| `test_radial_geometry_keywords` | function | `tests/test_css_gradient.c:159` | `static void test_radial_geometry_keywords(void **state)` |
-| `test_radial_len_resolution` | function | `tests/test_css_gradient.c:148` | `static void test_radial_len_resolution(void **state)` |
-| `test_radial_prelude_github_glow` | function | `tests/test_css_gradient.c:85` | `static void test_radial_prelude_github_glow(void **state)` |
-| `test_radial_prelude_keywords_and_defaults` | function | `tests/test_css_gradient.c:98` | `static void test_radial_prelude_keywords_and_defaults(void **state)` |
-| `test_radial_prelude_px_sizes_and_failures` | function | `tests/test_css_gradient.c:123` | `static void test_radial_prelude_px_sizes_and_failures(void **state)` |
-| `test_shorthand_broken_drops` | function | `tests/test_css_gradient.c:54` | `static void test_shorthand_broken_drops(void **state)` |
-| `test_shorthand_resets` | function | `tests/test_css_gradient.c:43` | `static void test_shorthand_resets(void **state)` |
-| `test_url_single` | function | `tests/test_css_gradient.c:32` | `static void test_url_single(void **state)` |
-| `elem` | function | `tests/test_css_index.c:24` | `static css_element elem(const char *tag, const char *id,                         const char *cons...` |
-| `has` | function | `tests/test_css_index.c:35` | `static int has(const uint32_t *v, size_t n, uint32_t x)` |
-| `main` | function | `tests/test_css_index.c:252` | `int main(void)` |
-| `parse_all` | function | `tests/test_css_index.c:14` | `static css_sel *parse_all(const char *const *src, size_t n)` |
-| `test_anc_filter_also_checks_the_subjects_own_tag_id_and_classes` | function | `tests/test_css_index.c:234` | `static void test_anc_filter_also_checks_the_subjects_own_tag_id_and_classes(void **state)` |
-| `test_anc_filter_is_off_without_a_bloom_and_ignores_sibling_combinators` | function | `tests/test_css_index.c:188` | `static void test_anc_filter_is_off_without_a_bloom_and_ignores_sibling_combinators(void **state)` |
-| `test_anc_filter_long_class_names_fold_the_same_way` | function | `tests/test_css_index.c:202` | `static void test_anc_filter_long_class_names_fold_the_same_way(void **state)` |
-| `test_anc_filter_never_rejects_a_matching_selector` | function | `tests/test_css_index.c:217` | `static void test_anc_filter_never_rejects_a_matching_selector(void **state)` |
-| `test_anc_filter_rejects_when_a_required_ancestor_is_absent` | function | `tests/test_css_index.c:167` | `static void test_anc_filter_rejects_when_a_required_ancestor_is_absent(void **state)` |
-| `test_buckets_and_order` | function | `tests/test_css_index.c:40` | `static void test_buckets_and_order(void **state)` |
-| `test_id_key` | function | `tests/test_css_index.c:61` | `static void test_id_key(void **state)` |
-| `test_invalid_index_reports_fallback` | function | `tests/test_css_index.c:140` | `static void test_invalid_index_reports_fallback(void **state)` |
-| `test_long_class_folds` | function | `tests/test_css_index.c:82` | `static void test_long_class_folds(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

@@ -5,7 +5,7 @@
 | `app.py` | Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL... | root | 3 | 0 |
 | `docker-entrypoint.sh` | - | root | 0 | 0 |
 | `docker_run.sh` | Thin wrapper. | root | 0 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 673 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 675 | 0 |
 | `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 11 | 3 |
 | `gui/bui_mask_img.c` | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | gui | 1 | 0 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
@@ -28,6 +28,7 @@
 | `include/css_counter.h` | cnt_hash: FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are *... | include | 19 | 3 |
 | `include/css_decl.h` | The sheet's two string pools -- background url()s, and the ::before/::after | include | 15 | 12 |
 | `include/css_gradient.h` | The first url(...) token of val, unquoted and trimmed, into out. | include | 14 | 6 |
+| `include/css_import.h` | ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap). | include | 11 | 4 |
 | `include/css_index.h` | cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *... | include | 8 | 3 |
 | `include/css_length.h` | cl_ctx: The state a <length> is measured against. | include | 20 | 9 |
 | `include/css_mask.h` | CSS Masking 1, alpha gradients only (spec/css_mask.md). | include | 10 | 4 |
@@ -132,6 +133,7 @@
 | `src/css_computed.c` | ua_display: The HTML Rendering UA sheet's `display` for a tag when the cascade declared none *... | src | 45 | 0 |
 | `src/css_counter.c` | valid_name: A <custom-ident> usable as a counter name: identifier syntax, not a CSS-wide *... | src | 34 | 0 |
 | `src/css_gradient.c` | find_gradient_call: Locates a gradient function call `fn` (e.g. "linear-gradient(") in v... | src | 32 | 0 |
+| `src/css_import.c` | css_import -- @import prelude reader (spec/css_import.md). | src | 12 | 0 |
 | `src/css_index.c` | css_index -- see include/css_index.h and spec/css_index.md. | src | 13 | 0 |
 | `src/css_length.c` | cl_unit_eq: ASCII case-insensitive compare of a possibly-unterminated unit slice against a... | src | 18 | 0 |
 | `src/css_mask.c` | A layer token can be a whole url(...) (a data: SVG icon is routinely 400-900 bytes): the token... | src | 12 | 0 |
@@ -208,7 +210,7 @@
 | `src/svg_paint.c` | svg_paint — Cairo back end for the shapes svg_render extracted. | src | 6 | 0 |
 | `src/svg_raster.c` | svg_raster -- SVG served as an image, rasterized inside the confined worker. spec/svg_raster.md. | src | 4 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 34 | 0 |
-| `src/tab.c` | tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and... | src | 197 | 0 |
+| `src/tab.c` | tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and... | src | 200 | 0 |
 | `src/table_layout.c` | table_layout (tl_) -- see include/table_layout.h and spec/table_layout.md. | src | 5 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
 | `src/text_shape.c` | tsh_fb_cp: Per-code-point verdicts of fb_entry. | src | 74 | 0 |
@@ -241,6 +243,7 @@
 | `tests/test_css_counter.c` | Suite for css_counter (spec/css_counter.md). | tests | 12 | 0 |
 | `tests/test_css_drops.c` | Suite for the parser drop log (spec/css_drops.md). | tests | 30 | 0 |
 | `tests/test_css_gradient.c` | - | tests | 13 | 0 |
+| `tests/test_css_import.c` | test_css_import -- @import prelude reader (spec/css_import.md). | tests | 12 | 0 |
 | `tests/test_css_index.c` | test_css_index -- cascade rule index (spec/css_index.md). | tests | 14 | 0 |
 | `tests/test_css_length.c` | test_unitless: static double px_of(const char *value, const cl_ctx *ctx) { double px = -12345.0... | tests | 25 | 0 |
 | `tests/test_css_mask.c` | Finds the value a decl list assigns to prop, or def when absent. | tests | 12 | 0 |
@@ -304,7 +307,7 @@
 | `tests/test_subreq_batch.c` | subreq_batch (spec/subreq_async.md): parallelism, issue order, refusals, reuse. | tests | 9 | 0 |
 | `tests/test_svg_raster.c` | tests/test_svg_raster.c -- CMocka suite for SVG-as-image rasterization (sr_). spec/svg_raster.md... | tests | 10 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
-| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 166 | 0 |
+| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 174 | 0 |
 | `tests/test_table_layout.c` | test_table_layout -- automatic table layout (spec/table_layout.md). | tests | 14 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
 | `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 27 | 0 |

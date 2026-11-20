@@ -1,53 +1,64 @@
 # src: tab
 
-*Community 1 | 51 files | cohesion 0.69*
+*Community 1 | 54 files | cohesion 0.70*
 
 ## Definition
 
-This community groups 51 file(s) rooted at `src` with dominant language c (cohesion 0.69). Central symbols: `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`, `DOM_KIND_ELEMENT`, `DOM_KIND_NONE`, `DOM_KIND_TEXT`, `DOM_MAX_HANDLES`, `DOM_NODE_NONE`. Core file: `tests/test_js_dom.c` (277 symbols). Documented purpose: Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. Returns 0 or -1..
+This community groups 54 file(s) rooted at `src` with dominant language c (cohesion 0.70). Central symbols: `CI_COND_MAX`, `CI_MAX_DEPTH`, `CI_MAX_PER_PAGE`, `CI_MAX_PER_SHEET`, `CI_URL_MAX`, `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`. Core file: `tests/test_js_dom.c` (277 symbols). Documented purpose: css_import -- @import prelude reader (spec/css_import.md). Pure: no I/O, no allocation, no global state. Every read is bounded by len..
 
 ## Files
 
-### `src` (24 files)
+### `src` (25 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
+| `src/css_import.c` | c | utility | 12 | yes |
 | `src/dom.c` | c | utility | 77 | no |
 | `src/fb_cmdline.c` | c | utility | 13 | no |
 | `src/freebug.c` | c | utility | 9 | no |
 | `src/html_parse.c` | c | utility | 29 | no |
 | `src/js_custom_elements.c` | c | utility | 1 | no |
 | `src/js_custom_elements.h` | h | utility | 2 | yes |
-| `src/js_dom.c` | c | utility | 64 | no |
 
-### `include` (14 files)
+### `include` (15 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
+| `include/css_import.h` | h | utility | 11 | no |
 | `include/dom.h` | h | utility | 32 | no |
 | `include/fb_cmdline.h` | h | utility | 18 | no |
 | `include/freebug.h` | h | utility | 18 | no |
 | `include/html_parse.h` | h | utility | 24 | no |
 | `include/js_dom.h` | h | utility | 23 | no |
 | `include/js_env.h` | h | infrastructure | 4 | no |
-| `include/js_geom.h` | h | utility | 19 | no |
 
-### `tests` (13 files)
+### `tests` (14 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
+| `tests/test_css_import.c` | c | testing | 12 | yes |
 | `tests/test_dom.c` | c | testing | 45 | no |
 | `tests/test_fb_cmdline.c` | c | testing | 7 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
 | `tests/test_js_dom.c` | c | testing | 277 | no |
-| `tests/test_js_env.c` | c | testing | 32 | no |
 
-*... and 31 more files in this community.*
+*... and 34 more files in this community.*
 
 
 ## Key Symbols
 
+- `FREEDOM_CSS_IMPORT_H` (macro, `include/css_import.h:2`) `#define FREEDOM_CSS_IMPORT_H`
+- `CI_URL_MAX` (macro, `include/css_import.h:19`) `#define CI_URL_MAX`
+- `CI_COND_MAX` (macro, `include/css_import.h:20`) `#define CI_COND_MAX`
+- `CI_MAX_DEPTH` (macro, `include/css_import.h:21`) `#define CI_MAX_DEPTH`
+- `CI_MAX_PER_PAGE` (macro, `include/css_import.h:22`) `#define CI_MAX_PER_PAGE`
+- `CI_MAX_PER_SHEET` (macro, `include/css_import.h:23`) `#define CI_MAX_PER_SHEET`
+- `url` (type_alias, `include/css_import.h:24`) `typedef struct ci_import { char url[CI_URL_MAX];` - css_import -- pure reader of a stylesheet's @import prelude (spec/css_import.md).  No I/O, no alloca
+- `ci_import` (struct, `include/css_import.h:25`)
+- `ci_scan` (function, `include/css_import.h:36`) `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap);` - Reads the leading @import rules of css[0,len) into out (at most cap). Skips whitespace, comments, @c
+- `ci_wrap` (function, `include/css_import.h:41`) `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t cc` - Builds the wrapper for one import: open = "@layer N {@supports (S) {@media M {" (only the parts pres
+- `ci_balanced` (function, `include/css_import.h:45`) `int ci_balanced(const char *css, size_t len);` - 1 iff every comment and string in css[0,len) terminates and the braces outside * them never go negat
 - `FREEDOM_DOM_H` (macro, `include/dom.h:2`) `#define FREEDOM_DOM_H`
 - `dom_status` (enum, `include/dom.h:26`)
 - `dom_node_id` (type_alias, `include/dom.h:34`) `typedef uint32_t dom_node_id;` - tree. The Lexbor backend stays encapsulated: no lxb_* type appears here.  The index references the t
@@ -67,21 +78,10 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 - `dom_text_content` (function, `include/dom.h:138`) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len` - Concatenated text content of node's subtree (borrowed, valid while idx/doc are * alive), or NULL. *l
 - `dom_document_title` (function, `include/dom.h:141`) `const char *dom_document_title(const dom_index *idx, size_t *len);` - Concatenated text content of node's subtree (borrowed, valid while idx/doc are * alive), or NULL. *l
 - `valid` (function, `include/dom.h:146`) `* detached node stays valid (it just becomes unreachable from the root and is no`
-- `cycle` (function, `include/dom.h:176`) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / c`
-- `dom_place` (enum, `include/dom.h:194`) - Where dom_move_children places the moved nodes (insertAdjacent* needs all four: * "after this node"
-- `parent` (function, `include/dom.h:203`) `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_AR`
-- `DOM_KIND_NONE` (macro, `include/dom.h:210`) `#define DOM_KIND_NONE`
-- `DOM_KIND_ELEMENT` (macro, `include/dom.h:211`) `#define DOM_KIND_ELEMENT`
-- `DOM_KIND_TEXT` (macro, `include/dom.h:212`) `#define DOM_KIND_TEXT`
-- `DOM_KIND_COMMENT` (macro, `include/dom.h:213`) `#define DOM_KIND_COMMENT`
-- `DOM_MAX_HANDLES` (macro, `include/dom.h:216`) `#define DOM_MAX_HANDLES`
-- `dom_node_kind` (function, `include/dom.h:219`) `int dom_node_kind(const dom_index *idx, dom_node_id node);` - -- text and comment nodes (spec/dom.md 9) --- Character-data nodes get LAZY handles in the same aren
-- `index` (function, `include/dom.h:235`) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_`
-- `length` (function, `include/dom.h:260`) `* length (no children => an owned empty string). Uses a chain of fixed-size * bl`
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 126
+- Internal resolved imports (EXTRACTED): 130
 - Cross-boundary resolved imports (EXTRACTED): 56
 
 ## Connections
@@ -96,16 +96,18 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 
 - [cycle] `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
+- [dataflow UNCHECKED_ALLOC] `src/js_events.c:31` `jd_click_state_new` `s`: Result of allocator stored in `s` is never checked against NULL.
 
 ## Open Questions
 
-- Why do 47 file(s) lack file-level docs (e.g. `include/dom.h`)? What purpose do they serve?
+- Why do 48 file(s) lack file-level docs (e.g. `include/css_import.h`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
 - What would break if the most connected file in src: tab changed?
-- Should src: tab be split, given cohesion 0.69?
+- Should src: tab be split, given cohesion 0.70?
 
 ## Sources
 
+- `include/css_import.h`
 - `include/dom.h`
 - `include/fb_cmdline.h`
 - `include/freebug.h`
@@ -120,10 +122,9 @@ This community groups 51 file(s) rooted at `src` with dominant language c (cohes
 - `include/js_trusted.h`
 - `include/url.h`
 - `include/web_storage.h`
+- `src/css_import.c`
 - `src/dom.c`
 - `src/fb_cmdline.c`
 - `src/freebug.c`
 - `src/html_parse.c`
-- `src/js_custom_elements.c`
-- `src/js_custom_elements.h`
-- *... and 31 more*
+- *... and 34 more*

@@ -12,7 +12,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: What does tab.c depend on, and what depends on it? (31 connections)
+### Q: What does tab.c depend on, and what depends on it? (32 connections)
 
 - Status: unanswered
 

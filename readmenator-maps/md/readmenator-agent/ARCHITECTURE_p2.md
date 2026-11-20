@@ -2,6 +2,9 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_css_index.c` -> `include/css_index.h`
+- `tests/test_css_length.c` -> `include/css.h`
+- `tests/test_css_length.c` -> `include/css_length.h`
 - `tests/test_css_mask.c` -> `include/css_mask.h`
 - `tests/test_css_mq.c` -> `include/css_mq.h`
 - `tests/test_css_text.c` -> `include/css.h`
@@ -114,6 +117,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_svg_raster.c` -> `include/svg_raster.h`
 - `tests/test_svg_render.c` -> `include/svg_render.h`
 - `tests/test_tab.c` -> `include/css.h`
+- `tests/test_tab.c` -> `include/css_import.h`
 - `tests/test_tab.c` -> `include/js_geom.h`
 - `tests/test_tab.c` -> `include/tab.h`
 - `tests/test_tab.c` -> `include/url.h`
@@ -161,6 +165,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/css_computed.h` -> stddef.h
 - `include/css_counter.h` -> stddef.h
 - `include/css_gradient.h` -> stddef.h
+- `include/css_import.h` -> stddef.h
 - `include/css_index.h` -> stddef.h, stdint.h
 - `include/css_length.h` -> stddef.h
 - `include/css_mq.h` -> stddef.h
@@ -247,6 +252,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/css_computed.c` -> stdarg.h, stdio.h, string.h
 - `src/css_counter.c` -> stdint.h, stdio.h, stdlib.h, string.h
 - `src/css_gradient.c` -> ctype.h, math.h, stdlib.h, string.h
+- `src/css_import.c` -> stdio.h, string.h
 - `src/css_index.c` -> stdlib.h, string.h
 - `src/css_length.c` -> math.h, string.h
 - `src/css_mask.c` -> ctype.h, string.h
@@ -350,6 +356,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_css_counter.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_css_drops.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_gradient.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
+- `tests/test_css_import.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
 - `tests/test_css_index.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_length.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_css_mask.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h

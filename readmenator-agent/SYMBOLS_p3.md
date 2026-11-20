@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `css_sheet_uses_containers` | function | `include/css.h:1059` | `int css_sheet_uses_containers(const css_sheet *sheet);` |
+| `css_sheet_uses_counters` | function | `include/css.h:1055` | `int css_sheet_uses_counters(const css_sheet *sheet);` |
 | `css_status` | enum | `include/css.h:30` | `` |
 | `css_style` | struct | `include/css.h:606` | `` |
 | `css_table_layout` | enum | `include/css.h:305` | `` |
@@ -142,6 +144,17 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `shape` | type_alias | `include/css_gradient.h:28` | `typedef struct cg_radial { int shape;` |
 | `width` | function | `include/css_gradient.h:21` | `* width (x, rx) or height (y, ry);` |
 | `zero` | function | `include/css_gradient.h:45` | `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....` |
+| `CI_COND_MAX` | macro | `include/css_import.h:20` | `#define CI_COND_MAX` |
+| `CI_MAX_DEPTH` | macro | `include/css_import.h:21` | `#define CI_MAX_DEPTH` |
+| `CI_MAX_PER_PAGE` | macro | `include/css_import.h:22` | `#define CI_MAX_PER_PAGE` |
+| `CI_MAX_PER_SHEET` | macro | `include/css_import.h:23` | `#define CI_MAX_PER_SHEET` |
+| `CI_URL_MAX` | macro | `include/css_import.h:19` | `#define CI_URL_MAX` |
+| `FREEDOM_CSS_IMPORT_H` | macro | `include/css_import.h:2` | `#define FREEDOM_CSS_IMPORT_H` |
+| `ci_balanced` | function | `include/css_import.h:45` | `int ci_balanced(const char *css, size_t len);` |
+| `ci_import` | struct | `include/css_import.h:25` | `` |
+| `ci_scan` | function | `include/css_import.h:36` | `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap);` |
+| `ci_wrap` | function | `include/css_import.h:41` | `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap);` |
+| `url` | type_alias | `include/css_import.h:24` | `typedef struct ci_import { char url[CI_URL_MAX];` |
 | `FREEDOM_CSS_INDEX_H` | macro | `include/css_index.h:11` | `#define FREEDOM_CSS_INDEX_H` |
 | `cix_build` | function | `include/css_index.h:34` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` |
 | `cix_build_ptrs` | function | `include/css_index.h:37` | `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);` |
@@ -483,18 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FC_PNG_MARGIN` | macro | `include/freedom_config.h:34` | `#define FC_PNG_MARGIN` |
 | `FC_PNG_MAX_H` | macro | `include/freedom_config.h:39` | `#define FC_PNG_MAX_H` |
 | `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
-| `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:90` | `#define FC_SHC_MAX_QUERIES` |
-| `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:84` | `#define FC_SHC_MAX_TEXT_BYTES` |
-| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:103` | `#define FC_TABLE_TRACK_MAX_PX` |
-| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:99` | `#define FC_TAB_OP_NET_BUDGET_MS` |
-| `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:30` | `#define FC_TRUSTED_JS_BUDGET_MS` |
-| `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:70` | `#define FC_UI_FONT_SIZE` |
-| `FREEDOM_CONFIG_H` | macro | `include/freedom_config.h:14` | `#define FREEDOM_CONFIG_H` |
-| `FREEDOM_HLS_H` | macro | `include/hls.h:2` | `#define FREEDOM_HLS_H` |
-| `hls_playlist` | struct | `include/hls.h:45` | `` |
-| `hls_playlist_free` | function | `include/hls.h:74` | `void hls_playlist_free(hls_playlist *pl);` |
-| `hls_segment` | struct | `include/hls.h:29` | `` |
-| `hls_select_variant` | function | `include/hls.h:65` | `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);` |
-| `hls_status` | enum | `include/hls.h:21` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

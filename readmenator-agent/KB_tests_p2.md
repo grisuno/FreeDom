@@ -1,4 +1,4 @@
-# Subsystem: tests (page 2 of 8)
+# Subsystem: tests (page 2 of 9)
 Previous: [KB_tests.md](KB_tests.md)
 
 ## tests/test_css.c

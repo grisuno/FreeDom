@@ -118,7 +118,7 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
               $(BUILD_DIR)/test_interp $(BUILD_DIR)/test_frame_clock \
               $(BUILD_DIR)/test_media_decoder $(BUILD_DIR)/test_svg_render $(BUILD_DIR)/test_svg_raster \
              $(BUILD_DIR)/test_perf_trace $(BUILD_DIR)/test_css_length \
-               $(BUILD_DIR)/test_block_flow $(BUILD_DIR)/test_table_layout $(BUILD_DIR)/test_pres_hints $(BUILD_DIR)/test_css_values $(BUILD_DIR)/test_css_gradient $(BUILD_DIR)/test_css_mask $(BUILD_DIR)/test_css_box $(BUILD_DIR)/test_css_text \
+               $(BUILD_DIR)/test_block_flow $(BUILD_DIR)/test_table_layout $(BUILD_DIR)/test_pres_hints $(BUILD_DIR)/test_css_import $(BUILD_DIR)/test_css_values $(BUILD_DIR)/test_css_gradient $(BUILD_DIR)/test_css_mask $(BUILD_DIR)/test_css_box $(BUILD_DIR)/test_css_text \
                $(BUILD_DIR)/test_css_vars $(BUILD_DIR)/test_css_atrule $(BUILD_DIR)/test_css_mq \
                $(BUILD_DIR)/test_js_geom $(BUILD_DIR)/test_ws_hub \
                $(BUILD_DIR)/test_web_storage $(BUILD_DIR)/test_import_map \
@@ -128,7 +128,7 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
                $(BUILD_DIR)/test_css_counter $(BUILD_DIR)/test_sheet_cache \
                $(BUILD_DIR)/test_net_guard
 
-.PHONY: fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -396,6 +396,10 @@ $(BUILD_DIR)/test_table_layout: $(TEST_DIR)/test_table_layout.c $(BUILD_DIR)/tab
 $(BUILD_DIR)/test_pres_hints: $(TEST_DIR)/test_pres_hints.c $(BUILD_DIR)/pres_hints.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
+# @import prelude reader (spec/css_import.md). Pure, no deps.
+$(BUILD_DIR)/test_css_import: $(TEST_DIR)/test_css_import.c $(BUILD_DIR)/css_import.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 $(BUILD_DIR)/test_js_geom: $(TEST_DIR)/test_js_geom.c $(BUILD_DIR)/js_geom.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
@@ -605,7 +609,7 @@ $(BUILD_DIR)/test_disk_store: $(TEST_DIR)/test_disk_store.c $(BUILD_DIR)/disk_st
 
 # Long-lived per-tab worker: links the whole hostile-content pipeline that runs
 # inside the confined child (parse + DOM + JS sandbox + bindings) plus os_sandbox.
-$(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_import.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
@@ -620,7 +624,7 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/su
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(CAIRO_LIBS) $(CMOCKA_LIBS)
 
 # Trusted-parent iframe host over real confined workers.
-$(BUILD_DIR)/test_frame_host: $(TEST_DIR)/test_frame_host.c $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/tab.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/test_frame_host: $(TEST_DIR)/test_frame_host.c $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_import.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
@@ -643,7 +647,7 @@ FREEDOM_GUI_OBJ = $(GUI_DIR)/browser_ui.c \
                   $(BUILD_DIR)/xdg-shell-protocol.c \
                   $(BUILD_DIR)/xdg-decoration-protocol.c
 
-$(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_import.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                       $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
@@ -986,6 +990,14 @@ fuzz-tl: | $(BUILD_DIR)
 	  $(SRC_DIR)/css_color.c -lm \
 	  -o $(BUILD_DIR)/fuzz_table_layout
 	./$(BUILD_DIR)/fuzz_table_layout -max_total_time=30 -rss_limit_mb=2048
+
+# @import prelude reader (spec/css_import.md): hostile sheet text; the oracle checks that
+# no condition can smuggle a brace into the wrapper that gates an imported sheet.
+fuzz-ci: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_css_import.c $(SRC_DIR)/css_import.c \
+	  -o $(BUILD_DIR)/fuzz_css_import
+	./$(BUILD_DIR)/fuzz_css_import -max_total_time=30 -rss_limit_mb=2048
 
 fuzz-cnt: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \

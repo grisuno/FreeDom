@@ -186,6 +186,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/css_gradient.c` -> `include/css_length.h`
 - `src/css_gradient.c` -> `include/css_select.h`
 - `src/css_gradient.c` -> `include/css_values.h`
+- `src/css_import.c` -> `include/css_import.h`
 - `src/css_index.c` -> `include/css_index.h`
 - `src/css_length.c` -> `include/css.h`
 - `src/css_length.c` -> `include/css_length.h`
@@ -418,6 +419,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tab.c` -> `include/css.h`
 - `src/tab.c` -> `include/css_computed.h`
 - `src/tab.c` -> `include/css_gradient.h`
+- `src/tab.c` -> `include/css_import.h`
 - `src/tab.c` -> `include/data_url.h`
 - `src/tab.c` -> `include/dom.h`
 - `src/tab.c` -> `include/flex_layout.h`
@@ -493,8 +495,6 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_css_drops.c` -> `include/css.h`
 - `tests/test_css_gradient.c` -> `include/css.h`
 - `tests/test_css_gradient.c` -> `include/css_gradient.h`
-- `tests/test_css_index.c` -> `include/css_index.h`
-- `tests/test_css_length.c` -> `include/css.h`
-- `tests/test_css_length.c` -> `include/css_length.h`
+- `tests/test_css_import.c` -> `include/css_import.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

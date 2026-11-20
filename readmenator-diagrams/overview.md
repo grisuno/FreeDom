@@ -31,6 +31,8 @@ graph LR
     include_prefetch -- "calls into" --> src_tab
     include_prefetch -- "calls into" --> include_browser_ui
     include_prefetch -- "calls into" --> src_text_shape
+    include_sha2 -- "calls into" --> src_tab
+    include_subreq_batch -- "calls into" --> src_tab
     include_subreq_batch -- "calls into" --> src_text_shape
     src_tab -- "calls into" --> include_css
     src_tab -- "calls into" --> include_tab
@@ -86,6 +88,7 @@ graph LR
     src_http_cache -- "calls into" --> src_text_shape
     src_http_cache -- "calls into" --> include_browser
     include_svg_render -- "calls into" --> include_css
+    include_svg_render -- "calls into" --> src_tab
     include_svg_render -- "calls into" --> src_text_shape
     include_svg_render -- "calls into" --> include_page_view
     click include_css href "./include_css.md" "Details"
@@ -103,7 +106,7 @@ graph LR
 
 ## Details
 
-Static architecture map of 331 files (c, h, py, sh) in 13 components: include: css, src: tab, include: browser_ui, src: text_shape, include: page_view, include: secure_fetch, include: browser, src: http_cache. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 334 files (c, h, py, sh) in 13 components: include: css, src: tab, include: browser_ui, src: text_shape, include: page_view, include: secure_fetch, include: browser, src: http_cache. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### include: css (1)
 
@@ -122,7 +125,7 @@ include: css groups 59 files (c, h) around FREEDOM_CSS_H, css_status, css_align,
 
 ### src: tab (2)
 
-src: tab groups 51 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all...
+src: tab groups 54 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
 
 **Related Classes/Methods**:
 

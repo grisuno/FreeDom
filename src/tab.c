@@ -22,6 +22,7 @@
 #include "css.h"
 #include "css_computed.h"
 #include "sheet_cache.h"
+#include "css_import.h"
 #include "data_url.h"
 #include "dom.h"
 #include "freebug.h"
@@ -1420,53 +1421,169 @@ static int write_history(int wfd, child_state *cs) {
     return rc;
 }
 
+/* A growable CSS text bounded by TAB_MAX_EXTERN_CSS (a protocol-level cap, so a
+ * realloc'd buffer is enough). put fails WHOLE when the text would not fit. */
+typedef struct css_text {
+    char  *p;
+    size_t n;
+} css_text;
+
+static int css_text_put(css_text *t, const char *s, size_t n) {
+    if (n == 0) return 0;
+    if (n > TAB_MAX_EXTERN_CSS || t->n > TAB_MAX_EXTERN_CSS - n) return -1;
+    char *g = (char *)realloc(t->p, t->n + n + 1);
+    if (g == NULL) return -1;
+    t->p = g;
+    memcpy(t->p + t->n, s, n);
+    t->n += n;
+    t->p[t->n] = '\0';
+    return 0;
+}
+
+/* GETs one stylesheet through the trusted parent (TAG_SUBREQ: the full network
+ * policy applies) and accepts it only as a 2xx CSS body. Returns the owned body or
+ * NULL (logged). */
+static char *child_get_sheet(child_state *cs, const char *kind, const char *url, size_t *len) {
+    int st = 0;
+    char *body = NULL, *ctype = NULL;
+    size_t blen = 0;
+    *len = 0;
+    int fr = child_fetch(cs, "GET", url, NULL, 0, NULL, &st, &body, &blen, &ctype, NULL);
+    if (fr != 0 || st < 200 || st >= 300 || !ctype_is_css(ctype)) {
+        char why[96];
+        int why_r;
+        if (fr != 0)
+            why_r = snprintf(why, sizeof why, "blocked or failed");
+        else
+            why_r = snprintf(why, sizeof why, "refused (status %d, type %s)",
+                             st, (ctype != NULL && ctype[0] != '\0') ? ctype : "none");
+        if (why_r < 0 || (size_t)why_r >= sizeof why) why[sizeof why - 1] = '\0';
+        log_external_skip(&cs->log, kind, why, url);
+        free(body);
+        free(ctype);
+        return NULL;
+    }
+    free(ctype);
+    *len = blen;
+    return body;
+}
+
+/* Writes into out the sheet's @import tree (spec/css_import.md) -- each imported
+ * sheet fetched like a <link>, expanded recursively and wrapped in its
+ * layer/supports/media condition -- followed by the sheet's own text when
+ * with_body. base is the sheet's URL (imports resolve against it). *left bounds the
+ * imports followed per load. Returns 0, or -1 when out would overflow (the caller
+ * drops the sheet whole). */
+static int sheet_expand(child_state *cs, const char *base, const char *body, size_t blen,
+                        int depth, int with_body, int *left, css_text *out) {
+    ci_import *ims = (blen > 0) ? (ci_import *)calloc(CI_MAX_PER_SHEET, sizeof *ims) : NULL;
+    size_t n = (ims != NULL) ? ci_scan(body, blen, ims, CI_MAX_PER_SHEET) : 0;
+    int rc = 0;
+    for (size_t i = 0; i < n && rc == 0; i++) {
+        char url[CI_URL_MAX];
+        if (*left <= 0 || depth >= CI_MAX_DEPTH) {
+            log_external_skip(&cs->log, "@import", "dropped (import bound)", ims[i].url);
+            continue;
+        }
+        --*left;
+        const char *target = ims[i].url;
+        if (base != NULL && tab_url_resolve(NULL, base, ims[i].url, url, sizeof url) == 0)
+            target = url;
+        size_t clen = 0;
+        char *cbody = child_get_sheet(cs, "@import", target, &clen);
+        if (cbody == NULL) continue;
+        css_text sub = { NULL, 0 };
+        char open[3 * CI_COND_MAX + 64], close[8];
+        int ok = sheet_expand(cs, target, cbody, clen, depth + 1, 1, left, &sub) == 0
+              && ci_wrap(&ims[i], open, sizeof open, close, sizeof close) == 0;
+        /* A wrapper only holds around a balanced text: a stray '}' or an open comment
+         * would close it early and leak the rules past their media gate. */
+        if (ok && open[0] != '\0' && !ci_balanced(sub.p != NULL ? sub.p : "", sub.n)) {
+            log_external_skip(&cs->log, "@import", "dropped (unbalanced)", target);
+            ok = 0;
+        }
+        if (ok) {
+            size_t mark = out->n;
+            if (css_text_put(out, open, strlen(open)) != 0
+                || css_text_put(out, sub.p, sub.n) != 0
+                || css_text_put(out, "\n", 1) != 0
+                || css_text_put(out, close, strlen(close)) != 0
+                || css_text_put(out, "\n", 1) != 0) {
+                out->n = mark;                          /* never a half-written wrapper */
+                if (out->p != NULL) out->p[mark] = '\0';
+                log_external_skip(&cs->log, "@import", "dropped (over budget)", target);
+            }
+        }
+        free(sub.p);
+        free(cbody);
+    }
+    free(ims);
+    if (with_body && css_text_put(out, body, blen) != 0) rc = -1;
+    return rc;
+}
+
+/* Appends one expanded sheet to cs->extern_css, newline-terminated, or drops it
+ * whole (fail closed, never truncated mid-rule). */
+static void extern_css_append(child_state *cs, const css_text *t, const char *src) {
+    if (t->n == 0) return;
+    if (t->n > TAB_MAX_EXTERN_CSS || cs->extern_css_len > TAB_MAX_EXTERN_CSS - t->n - 1) {
+        log_external_skip(&cs->log, "stylesheet", "dropped (over budget)", src);
+        return;
+    }
+    char *grown = (char *)realloc(cs->extern_css, cs->extern_css_len + t->n + 2);
+    if (grown == NULL) return;
+    cs->extern_css = grown;
+    memcpy(cs->extern_css + cs->extern_css_len, t->p, t->n);
+    cs->extern_css_len += t->n;
+    cs->extern_css[cs->extern_css_len++] = '\n';
+    cs->extern_css[cs->extern_css_len] = '\0';
+}
+
 /* Fetches the page's <link rel=stylesheet> sheets through the trusted parent
  * (TAG_SUBREQ; the confined worker never touches a socket) and accumulates the
- * accepted bodies into cs->extern_css, newline-separated, in document order.
- * Every failure is fail-open for the PAGE (the sheet is skipped with a Freebug
- * warn and the load continues) and fail-closed for the SHEET (status non-2xx,
- * non-CSS Content-Type or over-budget bodies are never parsed). Caller opens the
- * net window (cs->net_active). */
+ * accepted bodies into cs->extern_css, newline-separated, in document order, each
+ * preceded by its @import tree; then the @import trees of the inline <style>
+ * sheets (their own text is read from the DOM by page_view). Every failure is
+ * fail-open for the PAGE (the sheet is skipped with a Freebug warn and the load
+ * continues) and fail-closed for the SHEET (status non-2xx, non-CSS Content-Type
+ * or over-budget bodies are never parsed). Caller opens the net window
+ * (cs->net_active). */
 static void child_fetch_stylesheets(child_state *cs) {
     size_t nhrefs = 0;
+    int left = CI_MAX_PER_PAGE;
     char **hrefs = hp_extract_stylesheet_hrefs(cs->doc, &nhrefs);
     for (size_t i = 0; i < nhrefs; i++) {
-        int st = 0;
-        char *body = NULL, *ctype = NULL;
+        char abs[CI_URL_MAX];
+        const char *base = hrefs[i];
+        if (cs->page_url != NULL
+            && tab_url_resolve(NULL, cs->page_url, hrefs[i], abs, sizeof abs) == 0)
+            base = abs;
         size_t blen = 0;
-        int fr = child_fetch(cs, "GET", hrefs[i], NULL, 0, NULL, &st, &body, &blen, &ctype, NULL);
-        if (fr != 0 || st < 200 || st >= 300 || !ctype_is_css(ctype)) {
-            char why[96];
-            int why_r;
-            if (fr != 0)
-                why_r = snprintf(why, sizeof why, "blocked or failed");
-            else
-                why_r = snprintf(why, sizeof why, "refused (status %d, type %s)",
-                                 st, (ctype != NULL && ctype[0] != '\0') ? ctype : "none");
-            if (why_r < 0 || (size_t)why_r >= sizeof why) why[sizeof why - 1] = '\0';
-            log_external_skip(&cs->log, "stylesheet", why, hrefs[i]);
-            free(body);
-            free(ctype);
-            continue;
-        }
-        free(ctype);
-        if (blen == 0 || blen > TAB_MAX_EXTERN_CSS
-            || cs->extern_css_len > TAB_MAX_EXTERN_CSS - blen - 1) {
-            if (blen != 0)
-                log_external_skip(&cs->log, "stylesheet", "dropped (over budget)", hrefs[i]);
-            free(body);
-            continue;
-        }
-        char *grown = (char *)realloc(cs->extern_css, cs->extern_css_len + blen + 2);
-        if (grown == NULL) { free(body); continue; }
-        cs->extern_css = grown;
-        memcpy(cs->extern_css + cs->extern_css_len, body, blen);
-        cs->extern_css_len += blen;
-        cs->extern_css[cs->extern_css_len++] = '\n';
-        cs->extern_css[cs->extern_css_len] = '\0';
+        char *body = child_get_sheet(cs, "stylesheet", base, &blen);
+        if (body == NULL) continue;
+        css_text t = { NULL, 0 };
+        if (blen > 0 && sheet_expand(cs, base, body, blen, 0, 1, &left, &t) == 0)
+            extern_css_append(cs, &t, hrefs[i]);
+        else if (blen > 0)
+            log_external_skip(&cs->log, "stylesheet", "dropped (over budget)", hrefs[i]);
+        free(t.p);
         free(body);
     }
     hp_free_stylesheet_hrefs(hrefs, nhrefs);
+
+    size_t nst = (cs->idx != NULL) ? dom_get_by_tag(cs->idx, "style", NULL, 0) : 0;
+    dom_node_id *st = (nst > 0) ? (dom_node_id *)calloc(nst, sizeof *st) : NULL;
+    if (st != NULL) nst = dom_get_by_tag(cs->idx, "style", st, nst); else nst = 0;
+    for (size_t i = 0; i < nst && left > 0; i++) {
+        size_t tl = 0;
+        const char *txt = dom_text_content(cs->idx, st[i], &tl);
+        if (txt == NULL || tl == 0) continue;
+        css_text t = { NULL, 0 };
+        if (sheet_expand(cs, cs->page_url, txt, tl, 0, 0, &left, &t) == 0)
+            extern_css_append(cs, &t, "inline <style> @import");
+        free(t.p);
+    }
+    free(st);
 }
 
 static int32_t child_next_timer_ms(child_state *cs);
