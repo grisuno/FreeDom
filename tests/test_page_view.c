@@ -503,6 +503,48 @@ static void test_build_collected_text_skips_style_and_script(void **state) {
     hp_document_free(doc);
 }
 
+/* cellspacing / cellpadding / the UA table defaults (spec/pres_hints.md): the spacing
+ * is the table grid's gap on both axes, the padding reaches every cell, and a table's
+ * background alone gives it a box (it shows through the spacing). */
+static void test_build_table_cellspacing_cellpadding(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<body><table cellspacing='4' cellpadding='7'><tr><td>alpha</td><td>beta</td></tr></table>"
+        "<table><tr><td>gamma</td><td>delta</td></tr></table>"
+        "<table bgcolor='#ffcc99' cellspacing='0' cellpadding='0'><tr><td>eps</td><td>zeta</td></tr>"
+        "</table><table style='border-collapse:collapse' cellspacing='9'><tr><td>iota</td>"
+        "<td>kappa</td></tr></table></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_text(v, "alpha");
+    const pv_run *g = find_text(v, "gamma");
+    const pv_run *e = find_text(v, "eps");
+    assert_non_null(a);
+    assert_non_null(g);
+    assert_non_null(e);
+    const pv_cont_def *ca = pv_cont_at(v, (size_t)a->cont_id);
+    const pv_cont_def *cg = pv_cont_at(v, (size_t)g->cont_id);
+    assert_non_null(ca);
+    assert_non_null(cg);
+    assert_int_equal(ca->gap, 4);
+    assert_int_equal(ca->row_gap, 4);
+    assert_int_equal(cg->gap, 2);                     /* UA border-spacing: 2px */
+    const pv_run *io = find_text(v, "iota");
+    assert_non_null(io);
+    assert_int_equal(pv_cont_at(v, (size_t)io->cont_id)->gap, 0);   /* collapse: none */
+    assert_true(a->block_id >= 0);
+    assert_int_equal(pv_box_at(v, (size_t)a->block_id)->pad_l, 7);
+    assert_int_equal(pv_box_at(v, (size_t)a->block_id)->pad_t, 7);
+    assert_true(g->block_id >= 0);
+    assert_int_equal(pv_box_at(v, (size_t)g->block_id)->pad_l, 1);   /* UA td padding */
+    int table_bg = 0;
+    for (size_t i = 0; i < pv_box_count(v); ++i)
+        if (pv_box_at(v, i)->bg_rgb == 0xffcc99) table_bg = 1;
+    assert_true(table_bg);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A table with a multi-link leaf cell is navigation/layout, not data: its cells
  * are WALKED (links survive as PV_LINK runs, one block per <tr>), not flattened
  * into grid runs. This is the Hacker News case: every story title and subtext
@@ -608,7 +650,12 @@ static void test_build_bgcolor_attr_fallback(void **state) {
     assert_int_equal(pv_build(doc, &v), PV_OK);
     const pv_run *one = find_text(v, "one");
     assert_non_null(one);
-    assert_int_equal(one->bg_rgb, 0xff6600);
+    /* A table's background is its own box (it shows through the border-spacing); a
+     * run inherits it only when no box carries it. */
+    int boxed = 0;
+    for (size_t i = 0; i < pv_box_count(v); ++i)
+        if (pv_box_at(v, i)->bg_rgb == 0xff6600) boxed = 1;
+    assert_true(one->bg_rgb == 0xff6600 || boxed);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -5811,6 +5858,7 @@ int main(void) {
         cmocka_unit_test(test_build_table_flattens_cell),
         cmocka_unit_test(test_build_collected_text_skips_style_and_script),
         cmocka_unit_test(test_build_multilink_table_flows_links),
+        cmocka_unit_test(test_build_table_cellspacing_cellpadding),
         cmocka_unit_test(test_build_single_link_cell_collected_as_link),
         cmocka_unit_test(test_build_bgcolor_attr_fallback),
         cmocka_unit_test(test_build_nested_table_not_flattened),

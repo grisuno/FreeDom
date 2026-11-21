@@ -343,6 +343,9 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
 - Symbols:
   - `ph_parse_dimension` (function, line 24) `int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille);`
   - `ph_apply` (function, line 31) `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs);`
+  - `ph_parse_nonneg` (function, line 34) `int ph_parse_nonneg(const char *s, size_t len, int *out);`
+  - `ph_table_cellpadding` (function, line 37) `int ph_table_cellpadding(ph_attr_fn get, void *ctx);`
+  - `ph_cell_padding` (function, line 41) `void ph_cell_padding(int cellpad, css_style *cs);`
   - `FREEDOM_PRES_HINTS_H` (macro, line 8) `#define FREEDOM_PRES_HINTS_H`
   - `PH_ATTR_MAX` (macro, line 17) `#define PH_ATTR_MAX`
   - `PH_DIM_MAX_PX` (macro, line 18) `#define PH_DIM_MAX_PX`

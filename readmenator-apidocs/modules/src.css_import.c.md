@@ -1,6 +1,6 @@
 # `src/css_import.c`
 
-> Source: [src/css_import.c:1](../../src/css_import.c#L1) | language `c` | coverage 100.0% | [API index](../index.md)
+> Source: [src/css_import.c:1](../../src/css_import.c#L1) | language `c` | coverage 80.0% | [API index](../index.md)
 
 css_import -- @import prelude reader (spec/css_import.md).
 
@@ -8,7 +8,22 @@ Pure: no I/O, no allocation, no global state. Every read is bounded by len.
 
 ## Contents
 
-- **Functions:** [`ci_scan`](#ci_scan), [`ci_wrap`](#ci_wrap), [`ci_balanced`](#ci_balanced)
+- **Functions:** [`ci_scan`](#ci_scan), [`ci_wrap`](#ci_wrap), [`ci_balanced`](#ci_balanced), [`ci_rebase_urls`](#ci_rebase_urls)
+
+## Call Graph
+
+Solid arrows stay in this module, dashed arrows leave it.
+
+```mermaid
+flowchart LR
+    n_src_css_import_c__ci_rebase_urls(["ci_rebase_urls"])
+    n_gui_browser_ui_c__resolve["browser_ui.resolve"]
+    n_include_css_import_h__url["css_import.url"]
+    n_src_css_c__emit["css.emit"]
+    n_src_css_import_c__ci_rebase_urls -.-> n_gui_browser_ui_c__resolve
+    n_src_css_import_c__ci_rebase_urls -.-> n_include_css_import_h__url
+    n_src_css_import_c__ci_rebase_urls -.-> n_src_css_c__emit
+```
 
 ## Functions
 
@@ -95,5 +110,33 @@ NULL => 0 (empty text => 1).
 **Returns:** `int`
 
 > **Inherited:** Documentation from [`ci_balanced`](#ci_balanced) (include/css_import.h:45).
+
+---
+
+<a id="ci_rebase_urls"></a>
+
+### `ci_rebase_urls`
+
+`function` | [src/css_import.c:303](../../src/css_import.c#L303)
+
+```c
+int ci_rebase_urls(const char *css, size_t len, const char *base, ci_resolve_fn resolve, void *rctx, ci_emit_fn emit, void *ectx)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `css` | `char *` |  |  |
+| `len` | `size_t` |  |  |
+| `base` | `char *` |  |  |
+| `resolve` | `ci_resolve_fn` |  |  |
+| `rctx` | `void *` |  |  |
+| `emit` | `ci_emit_fn` |  |  |
+| `ectx` | `void *` |  |  |
+
+**Returns:** `int`
+
+*Calls:* [`resolve`](gui.browser_ui.c.md#resolve), [`url`](include.css_import.h.md#url), [`emit`](src.css.c.md#emit)
 
 ---

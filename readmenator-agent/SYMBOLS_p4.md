@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `FC_PNG_MAX_H` | macro | `include/freedom_config.h:39` | `#define FC_PNG_MAX_H` |
+| `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
 | `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:90` | `#define FC_SHC_MAX_QUERIES` |
 | `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:84` | `#define FC_SHC_MAX_TEXT_BYTES` |
 | `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:103` | `#define FC_TABLE_TRACK_MAX_PX` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `pf_list` | struct | `include/prefetch.h:53` | `` |
 | `pf_list_free` | function | `include/prefetch.h:63` | `void pf_list_free(pf_list *l);` |
 | `pf_pool` | struct | `include/prefetch.h:90` | `` |
-| `pf_pool_add` | function | `include/prefetch.h:127` | `int pf_pool_add(pf_pool *p, const char *url);` |
-| `pf_pool_finish` | function | `include/prefetch.h:151` | `void pf_pool_finish(pf_pool *p);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

@@ -3,6 +3,11 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `fp_vendor` | function | `src/anti_fp.c:43` | `const char *fp_vendor(void)` |
+| `splitmix64` | function | `src/anti_fp.c:121` | `static uint64_t splitmix64(uint64_t *state)` |
+| `bf_collapse` | function | `src/block_flow.c:30` | `double bf_collapse(double a, double b)` |
+| `bf_collapse_n` | function | `src/block_flow.c:15` | `double bf_collapse_n(const double *m, size_t n)` |
+| `bf_margins_adjoin` | function | `src/block_flow.c:35` | `int bf_margins_adjoin(double border_px, double padding_px)` |
 | `finite_or_zero` | function | `src/block_flow.c:11` | `static double finite_or_zero(double v)` |
 | `bb_blur_a8` | function | `src/box_blur.c:41` | `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)` |
 | `bb_box_sizes` | function | `src/box_blur.c:7` | `int bb_box_sizes(double sigma, int sizes[3])` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `cch_element_style` | function | `src/css_chain.c:461` | `css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)` |
 | `cch_element_style_path` | function | `src/css_chain.c:372` | `css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet,    ...` |
 | `cch_element_style_vars` | function | `src/css_chain.c:310` | `css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet,                  ...` |
-| `cch_node` | struct | `src/css_chain.c:27` | `` |
-| `cch_path` | struct | `src/css_chain.c:347` | `` |
-| `cch_path_free` | function | `src/css_chain.c:365` | `void cch_path_free(cch_path *pa)` |
-| `cch_path_new` | function | `src/css_chain.c:353` | `cch_path *cch_path_new(void)` |
-| `cch_pseudo_style` | function | `src/css_chain.c:442` | `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,             ...` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

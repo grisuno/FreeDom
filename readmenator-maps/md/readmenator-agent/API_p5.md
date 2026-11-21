@@ -120,6 +120,9 @@ Depends on: `include/css.h`
 Imported by: `src/page_view.c`, `src/pres_hints.c`, `tests/test_pres_hints.c`
 - `ph_parse_dimension` (function) `include/pres_hints.h:24` `int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille);` -- #ifdef __cplusplus #error "Freedom is pure C11 by policy; C++ is not supported." #endif #include <stddef.h> #include...
 - `ph_apply` (function) `include/pres_hints.h:31` `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs);` -- Applies the hints of element `tag` (lower-case, NUL-terminated) to *cs; flags is a set of * PH_*.
+- `ph_parse_nonneg` (function) `include/pres_hints.h:34` `int ph_parse_nonneg(const char *s, size_t len, int *out);` -- Applies the hints of element `tag` (lower-case, NUL-terminated) to *cs; flags is a set of * PH_*.
+- `ph_table_cellpadding` (function) `include/pres_hints.h:37` `int ph_table_cellpadding(ph_attr_fn get, void *ctx);` -- Applies the hints of element `tag` (lower-case, NUL-terminated) to *cs; flags is a set of * PH_*.
+- `ph_cell_padding` (function) `include/pres_hints.h:41` `void ph_cell_padding(int cellpad, css_style *cs);` -- A table cell's padding: every side the cascade left unset takes cellpad px, or the UA * sheet's 1px when cellpad < 0.
 
 ## include/profile.h
 Depends on: `include/local_store.h`, `include/prefs.h`

@@ -239,3 +239,103 @@ int ci_balanced(const char *css, size_t len) {
     }
     return depth == 0;
 }
+
+static int is_ident_ch(char c) {
+    unsigned char u = (unsigned char)c;
+    return (u >= 'a' && u <= 'z') || (u >= 'A' && u <= 'Z') || (u >= '0' && u <= '9')
+        || u == '-' || u == '_' || u >= 0x80;
+}
+
+/* RFC 3986 scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) ":" */
+static int has_scheme(const char *r) {
+    unsigned char u = (unsigned char)r[0];
+    if (!((u >= 'a' && u <= 'z') || (u >= 'A' && u <= 'Z'))) return 0;
+    for (size_t k = 1; r[k] != '\0'; ++k) {
+        u = (unsigned char)r[k];
+        if (u == ':') return 1;
+        if (!((u >= 'a' && u <= 'z') || (u >= 'A' && u <= 'Z') || (u >= '0' && u <= '9')
+              || u == '+' || u == '-' || u == '.'))
+            return 0;
+    }
+    return 0;
+}
+
+/* Reads the argument of the url( whose '(' ends at s[a-1]: the raw reference into
+ * ref and the index past ')' into *end. -1 for anything that is not a plain,
+ * escape-free, terminated reference (the token is then left as written). */
+static int url_arg(const char *s, size_t a, size_t e, char *ref, size_t cap, size_t *end) {
+    while (a < e && is_ws(s[a])) ++a;
+    if (a >= e) return -1;
+    size_t b0, b1, j;
+    if (s[a] == '"' || s[a] == '\'') {
+        j = skip_string(s, a, e);
+        if (j == (size_t)-1) return -1;
+        b0 = a + 1;
+        b1 = j - 1;
+    } else {
+        b0 = a;
+        for (j = a; j < e && s[j] != ')' && !is_ws(s[j]); ++j) {
+            unsigned char u = (unsigned char)s[j];
+            /* A brace or comment opener here is structure to every reader that is not
+             * url-token aware (ci_balanced, the wrapper gate): moving it into a string
+             * would change what they see, so such a token is left as written. */
+            if (u == '"' || u == '\'' || u == '(' || u == '{' || u == '}' || u < 0x20
+                || u == 0x7f || (u == '/' && j + 1 < e && s[j + 1] == '*'))
+                return -1;
+        }
+        b1 = j;
+    }
+    while (j < e && is_ws(s[j])) ++j;
+    if (j >= e || s[j] != ')' || b1 <= b0 || b1 - b0 >= cap) return -1;
+    if (memchr(s + b0, '\\', b1 - b0) != NULL) return -1;
+    memcpy(ref, s + b0, b1 - b0);
+    ref[b1 - b0] = '\0';
+    *end = j + 1;
+    return 0;
+}
+
+static int abs_ok(const char *u) {
+    for (; *u != '\0'; ++u)
+        if (*u == '"' || *u == '\\' || (unsigned char)*u < 0x20) return 0;
+    return 1;
+}
+
+int ci_rebase_urls(const char *css, size_t len, const char *base,
+                   ci_resolve_fn resolve, void *rctx, ci_emit_fn emit, void *ectx) {
+    if (css == NULL || base == NULL || resolve == NULL || emit == NULL) return -1;
+    size_t from = 0, i = 0;
+    while (i < len) {
+        char c = css[i];
+        if (c == '/' && i + 1 < len && css[i + 1] == '*') {
+            size_t j = i + 2;
+            while (j + 1 < len && !(css[j] == '*' && css[j + 1] == '/')) ++j;
+            i = (j + 1 < len) ? j + 2 : len;
+            continue;
+        }
+        if (c == '"' || c == '\'') {
+            size_t j = skip_string(css, i, len);
+            i = (j == (size_t)-1) ? len : j;
+            continue;
+        }
+        if ((c == 'u' || c == 'U') && len - i >= 4 && (css[i + 1] | 0x20) == 'r'
+            && (css[i + 2] | 0x20) == 'l' && css[i + 3] == '('
+            && (i == 0 || !is_ident_ch(css[i - 1]))) {
+            char ref[CI_URL_MAX], abs[CI_URL_MAX];
+            size_t end = 0;
+            if (url_arg(css, i + 4, len, ref, sizeof ref, &end) == 0 && ref[0] != '#'
+                && !has_scheme(ref) && resolve(rctx, base, ref, abs, sizeof abs) == 0
+                && abs_ok(abs)) {
+                if (emit(ectx, css + from, i - from) != 0 || emit(ectx, "url(\"", 5) != 0
+                    || emit(ectx, abs, strlen(abs)) != 0 || emit(ectx, "\")", 2) != 0)
+                    return -1;
+                from = end;
+                i = end;
+                continue;
+            }
+            i += 4;
+            continue;
+        }
+        ++i;
+    }
+    return emit(ectx, css + from, len - from) != 0 ? -1 : 0;
+}

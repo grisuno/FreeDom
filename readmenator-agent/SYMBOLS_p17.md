@@ -3,6 +3,36 @@ Previous: [SYMBOLS_p16.md](SYMBOLS_p16.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `teardown` | function | `tests/test_text_shape.c:465` | `static int teardown(void **state)` |
+| `test_determinism` | function | `tests/test_text_shape.c:95` | `static void test_determinism(void **state)` |
+| `test_draw_paints` | function | `tests/test_text_shape.c:133` | `static void test_draw_paints(void **state)` |
+| `test_empty_slice_is_ok` | function | `tests/test_text_shape.c:60` | `static void test_empty_slice_is_ok(void **state)` |
+| `test_generic_keywords` | function | `tests/test_text_shape.c:371` | `static void test_generic_keywords(void **state)` |
+| `test_local_handle_real_fontconfig` | function | `tests/test_text_shape.c:444` | `static void test_local_handle_real_fontconfig(void **state)` |
+| `test_measure_matches_shape` | function | `tests/test_text_shape.c:111` | `static void test_measure_matches_shape(void **state)` |
+| `test_measure_uses_fallback_face` | function | `tests/test_text_shape.c:522` | `static void test_measure_uses_fallback_face(void **state)` |
+| `test_null_and_bad_inputs` | function | `tests/test_text_shape.c:30` | `static void test_null_and_bad_inputs(void **state)` |
+| `test_overflow_cap` | function | `tests/test_text_shape.c:123` | `static void test_overflow_cap(void **state)` |
+| `test_pick_family_strong_vs_weak` | function | `tests/test_text_shape.c:420` | `static void test_pick_family_strong_vs_weak(void **state)` |
+| `test_pick_from_list_order_and_generic_stop` | function | `tests/test_text_shape.c:393` | `static void test_pick_from_list_order_and_generic_stop(void **state)` |
+| `test_segment_runs` | function | `tests/test_text_shape.c:497` | `static void test_segment_runs(void **state)` |
+| `test_shape_ascii` | function | `tests/test_text_shape.c:73` | `static void test_shape_ascii(void **state)` |
+| `test_uncovered_pua_draws_nothing` | function | `tests/test_text_shape.c:161` | `static void test_uncovered_pua_draws_nothing(void **state)` |
+| `test_webfont_optical_size` | function | `tests/test_text_shape.c:281` | `static void test_webfont_optical_size(void **state)` |
+| `test_webfont_register_find_clear` | function | `tests/test_text_shape.c:323` | `static void test_webfont_register_find_clear(void **state)` |
+| `test_webfont_rejects_bad_input` | function | `tests/test_text_shape.c:179` | `static void test_webfont_rejects_bad_input(void **state)` |
+| `test_webfont_variable_weight` | function | `tests/test_text_shape.c:253` | `static void test_webfont_variable_weight(void **state)` |
+| `test_webfont_woff2_container` | function | `tests/test_text_shape.c:241` | `static void test_webfont_woff2_container(void **state)` |
+| `test_webfont_woff_container` | function | `tests/test_text_shape.c:246` | `static void test_webfont_woff_container(void **state)` |
+| `main` | function | `tests/test_textfield.c:140` | `int main(void)` |
+| `test_backspace_delete` | function | `tests/test_textfield.c:76` | `static void test_backspace_delete(void **state)` |
+| `test_full_fails_closed` | function | `tests/test_textfield.c:113` | `static void test_full_fails_closed(void **state)` |
+| `test_init_and_accessors` | function | `tests/test_textfield.c:20` | `static void test_init_and_accessors(void **state)` |
+| `test_insert_sequence` | function | `tests/test_textfield.c:59` | `static void test_insert_sequence(void **state)` |
+| `test_move_saturates` | function | `tests/test_textfield.c:100` | `static void test_move_saturates(void **state)` |
+| `test_null_safe` | function | `tests/test_textfield.c:29` | `static void test_null_safe(void **state)` |
+| `test_set` | function | `tests/test_textfield.c:46` | `static void test_set(void **state)` |
+| `main` | function | `tests/test_tls_impersonate.c:218` | `int main(void)` |
 | `test_decode_rejects_bad_magic` | function | `tests/test_tls_impersonate.c:163` | `static void test_decode_rejects_bad_magic(void **state)` |
 | `test_decode_rejects_overlong_field` | function | `tests/test_tls_impersonate.c:177` | `static void test_decode_rejects_overlong_field(void **state)` |
 | `test_decode_rejects_truncated` | function | `tests/test_tls_impersonate.c:144` | `static void test_decode_rejects_truncated(void **state)` |

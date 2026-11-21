@@ -3,7 +3,7 @@
  "format": "jsonl",
  "meta": {
   "modules": 237,
-  "entities": 3713,
+  "entities": 3721,
   "languages": {
    "c": 111,
    "h": 110,
@@ -13,7 +13,7 @@
   "kinds": {
    "constant": 23,
    "enum": 163,
-   "function": 2066,
+   "function": 2074,
    "macro": 757,
    "method": 27,
    "module": 237,
@@ -27,9 +27,9 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1643,
-   "total": 3683,
-   "percent": 44.6
+   "documented": 1649,
+   "total": 3691,
+   "percent": 44.7
   },
   "by_kind": {
    "enum": {
@@ -38,9 +38,9 @@
     "percent": 49.7
    },
    "function": {
-    "documented": 931,
-    "total": 2066,
-    "percent": 45.1
+    "documented": 937,
+    "total": 2074,
+    "percent": 45.2
    },
    "macro": {
     "documented": 355,
@@ -201,8 +201,8 @@
    },
    "include/css_import.h": {
     "documented": 8,
-    "total": 11,
-    "percent": 72.7
+    "total": 12,
+    "percent": 66.7
    },
    "include/css_index.h": {
     "documented": 4,
@@ -475,9 +475,9 @@
     "percent": 38.9
    },
    "include/pres_hints.h": {
-    "documented": 5,
-    "total": 7,
-    "percent": 71.4
+    "documented": 8,
+    "total": 10,
+    "percent": 80.0
    },
    "include/profile.h": {
     "documented": 2,
@@ -726,8 +726,8 @@
    },
    "src/css_import.c": {
     "documented": 4,
-    "total": 4,
-    "percent": 100.0
+    "total": 5,
+    "percent": 80.0
    },
    "src/css_index.c": {
     "documented": 6,
@@ -1045,9 +1045,9 @@
     "percent": 30.8
    },
    "src/pres_hints.c": {
-    "documented": 3,
-    "total": 4,
-    "percent": 75.0
+    "documented": 6,
+    "total": 7,
+    "percent": 85.7
    },
    "src/profile.c": {
     "documented": 1,
@@ -1390,7 +1390,7 @@
   {
    "uid": "include/css_import.h",
    "path": "modules/include.css_import.h.jsonl",
-   "entities": 11
+   "entities": 12
   },
   {
    "uid": "include/css_index.h",
@@ -1665,7 +1665,7 @@
   {
    "uid": "include/pres_hints.h",
    "path": "modules/include.pres_hints.h.jsonl",
-   "entities": 7
+   "entities": 10
   },
   {
    "uid": "include/profile.h",
@@ -1915,7 +1915,7 @@
   {
    "uid": "src/css_import.c",
    "path": "modules/src.css_import.c.jsonl",
-   "entities": 4
+   "entities": 5
   },
   {
    "uid": "src/css_index.c",
@@ -2235,7 +2235,7 @@
   {
    "uid": "src/pres_hints.c",
    "path": "modules/src.pres_hints.c.jsonl",
-   "entities": 4
+   "entities": 7
   },
   {
    "uid": "src/profile.c",
@@ -2445,7 +2445,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2041
+  "total": 2043
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

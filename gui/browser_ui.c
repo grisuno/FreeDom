@@ -6698,6 +6698,9 @@ static double table_solve(cairo_t *cr, const browser_window *w, const ui_theme *
     if (out != NULL) total = tl_columns(cells, filled, ncols, gap, avail, table_w, out);
     if (min_out != NULL || max_out != NULL)
         tl_intrinsic(cells, filled, ncols, gap, min_out, max_out);
+    /* The edge spacing layout_table insets the grid by is part of the table's width. */
+    if (min_out != NULL) *min_out += 2.0 * gap;
+    if (max_out != NULL) *max_out += 2.0 * gap;
     free(cells);
     return total;
 }
@@ -6721,6 +6724,17 @@ static void layout_table(cairo_t *cr, const browser_window *w, rc_layout *L,
     ctx.ncols = (cd->cols > 0) ? (size_t)cd->cols : 1;
     if (ctx.ncols > TL_MAX_COLS) ctx.ncols = TL_MAX_COLS;
     int item_cbox = (cd->box_id >= 0) ? cd->box_id : band_common_box(doc, start, end);
+    /* border-spacing also separates the cells from the table's edges (CSS 2.1 17.6.1):
+     * the grid is inset by it on all four sides. */
+    double edge = (cd->gap > 0) ? (double)cd->gap : 0.0;
+    if (edge > 0.0 && content_w > 2.0 * edge) {
+        flush_line(L, s, th);
+        s->pending_gap += edge;
+        origin_x += edge;
+        content_w -= 2.0 * edge;
+    } else {
+        edge = 0.0;
+    }
 
     /* The table's own box, when it has one, says whether the author sized the table: then
      * the box is already that wide and the columns fill it. */
@@ -6814,6 +6828,7 @@ static void layout_table(cairo_t *cr, const browser_window *w, rc_layout *L,
         ctx.row_base = (chunk_row >= 0) ? chunk_row : 0;
         layout_container(cr, w, L, s, th, origin_x, content_w, doc, chunk_start, end, cid);
     }
+    s->cur_top += edge;
     L->tbl = saved;
 }
 
@@ -8508,6 +8523,54 @@ static int nested_stop(const rc_state *outer, const rd_doc *doc, int block_id, i
     return stop_at;
 }
 
+/* The used width of an auto-width table whose own box is `box`: its solved columns, the
+ * spacing between them and the border-spacing at both edges (CSS 2.1 17.5.2.2 / 17.6.1),
+ * rounded per column exactly as layout_table rounds its tracks. 0.0 when `box` is not the
+ * box of a table container. A table's box is shrink-to-fit, never the line's width. */
+static double table_box_shrink_width(cairo_t *cr, const browser_window *w, const ui_theme *th,
+                                     rc_layout *L, const rd_doc *doc, int box,
+                                     const pv_box_def *d, double avail) {
+    if (d == NULL || d->node_id == DOM_NODE_NONE || avail <= 0.0) return 0.0;
+    size_t nc = rd_cont_count(doc);
+    for (size_t c = 0; c < nc; ++c) {
+        const pv_cont_def *cd = rd_cont_at(doc, c);
+        if (cd == NULL || !cd->is_table || cd->node_id != d->node_id) continue;
+        size_t ncols = (cd->cols > 0) ? (size_t)cd->cols : 1;
+        if (ncols > TL_MAX_COLS) ncols = TL_MAX_COLS;
+        double gap = (cd->gap > 0) ? (double)cd->gap : 0.0;
+        double inner = avail - 2.0 * gap;
+        if (inner < 1.0) return 0.0;
+        double colw[TL_MAX_COLS];
+        for (size_t t = 0; t < TL_MAX_COLS; ++t) colw[t] = 0.0;
+        (void)table_solve(cr, w, th, doc, 0, rd_count(doc), (int)c,
+                          (cd->box_id >= 0) ? cd->box_id : box, inner, -1.0, colw,
+                          NULL, NULL, 0);
+        rc_table_ctx ctx;
+        memset(&ctx, 0, sizeof ctx);
+        ctx.cid = (int)c;
+        ctx.ncols = ncols;
+        double sum = gap * (double)(ncols - 1);
+        for (size_t t = 0; t < ncols; ++t) {
+            double px = ceil(colw[t] - 0.001);
+            if (px < 1.0) px = 1.0;
+            if (px > (double)FC_TABLE_TRACK_MAX_PX) px = (double)FC_TABLE_TRACK_MAX_PX;
+            ctx.track[t] = (int)px;
+            sum += px;
+        }
+        /* The same tracks are the answer for the box this width produces: layout_table
+         * finds them in the pass cache instead of measuring every cell a second time. */
+        if (L != NULL) {
+            unsigned slot = L->tbl_solved_next++ % RC_TABLE_SOLVED_N;
+            L->tbl_solved[slot].ctx = ctx;
+            L->tbl_solved[slot].w = sum;
+            L->tbl_solved[slot].sized = 0;
+            L->tbl_solved[slot].ok = 1;
+        }
+        return sum + 2.0 * gap;
+    }
+    return 0.0;
+}
+
 /* Max-content width (px) of the box `box_id` opening at run `start`: the widest
  * line produced by the maximal run of blocks that box encloses, measured through
  * the real flow so it cannot drift from the width the content lays out at. Returns
@@ -8738,6 +8801,11 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
             /* Placed by the LINE's text-align (its parent's), not by its own: a
              * button's UA text-align:center centres its label, not the button. */
             align = d->line_align;
+        } else if (cr != NULL && def_declared_width(d, ctx_w) <= 0.0) {
+            double ins = box_pad_px(d->pad_l, d->pad_l_pct, ctx_w) +
+                         box_pad_px(d->pad_r, d->pad_r_pct, ctx_w) +
+                         box_edge_px(d->bord_lw) + box_edge_px(d->bord_rw);
+            shrink = table_box_shrink_width(cr, w, th, L, doc, path[k], d, ctx_w - ins);
         }
         open_box(L, s, th, path[k], d, ctx_left, ctx_w, shrink, align);
     }
@@ -15586,8 +15654,9 @@ static void paint_png_inflow(const png_flow_ctx *c, int only_root) {
             const rc_row *r = &L->rows[i];
             int row_bid = row_owner_block_id(L, r);
             if (!defer_wants(L, row_bid, only_root)) continue;
+            /* (origin, left): the row paints at y = c->margin + top, x = c->left. */
             ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, L,
-                         c->left, c->margin);
+                         c->margin, c->left);
             paint_content_row_ex(cr, w, L, r, c->left,
                                  c->margin + r->top, c->content_w, c->page_w, 0, pass);
         }

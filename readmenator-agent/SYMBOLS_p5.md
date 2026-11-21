@@ -3,6 +3,8 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `pf_pool_add` | function | `include/prefetch.h:127` | `int pf_pool_add(pf_pool *p, const char *url);` |
+| `pf_pool_finish` | function | `include/prefetch.h:151` | `void pf_pool_finish(pf_pool *p);` |
 | `pf_pool_take` | function | `include/prefetch.h:145` | `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);` |
 | `pf_pooled_fetch` | function | `include/prefetch.h:165` | `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...` |
 | `pf_ref` | struct | `include/prefetch.h:42` | `` |
@@ -35,7 +37,10 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `PH_DIM_MAX_PX` | macro | `include/pres_hints.h:18` | `#define PH_DIM_MAX_PX` |
 | `PH_QUIRKS` | macro | `include/pres_hints.h:27` | `#define PH_QUIRKS` |
 | `ph_apply` | function | `include/pres_hints.h:31` | `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs);` |
+| `ph_cell_padding` | function | `include/pres_hints.h:41` | `void ph_cell_padding(int cellpad, css_style *cs);` |
 | `ph_parse_dimension` | function | `include/pres_hints.h:24` | `int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille);` |
+| `ph_parse_nonneg` | function | `include/pres_hints.h:34` | `int ph_parse_nonneg(const char *s, size_t len, int *out);` |
+| `ph_table_cellpadding` | function | `include/pres_hints.h:37` | `int ph_table_cellpadding(ph_attr_fn get, void *ctx);` |
 | `FREEDOM_PROFILE_H` | macro | `include/profile.h:2` | `#define FREEDOM_PROFILE_H` |
 | `PROFILE_KEY_FILE` | macro | `include/profile.h:32` | `#define PROFILE_KEY_FILE` |
 | `PROFILE_PREFS_FILE` | macro | `include/profile.h:33` | `#define PROFILE_PREFS_FILE` |
@@ -491,10 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `fp_product_sub` | function | `src/anti_fp.c:73` | `const char *fp_product_sub(void)` |
 | `fp_timezone` | function | `src/anti_fp.c:35` | `const char *fp_timezone(void)` |
 | `fp_user_agent` | function | `src/anti_fp.c:23` | `const char *fp_user_agent(void)` |
-| `fp_vendor` | function | `src/anti_fp.c:43` | `const char *fp_vendor(void)` |
-| `splitmix64` | function | `src/anti_fp.c:121` | `static uint64_t splitmix64(uint64_t *state)` |
-| `bf_collapse` | function | `src/block_flow.c:30` | `double bf_collapse(double a, double b)` |
-| `bf_collapse_n` | function | `src/block_flow.c:15` | `double bf_collapse_n(const double *m, size_t n)` |
-| `bf_margins_adjoin` | function | `src/block_flow.c:35` | `int bf_margins_adjoin(double border_px, double padding_px)` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

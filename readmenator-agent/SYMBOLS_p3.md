@@ -3,6 +3,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `css_sheet` | type_alias | `include/css.h:1019` | `typedef struct css_sheet css_sheet;` |
 | `css_sheet_uses_containers` | function | `include/css.h:1059` | `int css_sheet_uses_containers(const css_sheet *sheet);` |
 | `css_sheet_uses_counters` | function | `include/css.h:1055` | `int css_sheet_uses_counters(const css_sheet *sheet);` |
 | `css_status` | enum | `include/css.h:30` | `` |
@@ -155,6 +156,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `ci_scan` | function | `include/css_import.h:36` | `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap);` |
 | `ci_wrap` | function | `include/css_import.h:41` | `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap);` |
 | `url` | type_alias | `include/css_import.h:24` | `typedef struct ci_import { char url[CI_URL_MAX];` |
+| `url` | function | `include/css_import.h:55` | `* rewritten to url("ABS"), ABS = resolve(base, ref) (spec/css_import.md, "Rebase"). * Fragment-only, schemed, empty...` |
 | `FREEDOM_CSS_INDEX_H` | macro | `include/css_index.h:11` | `#define FREEDOM_CSS_INDEX_H` |
 | `cix_build` | function | `include/css_index.h:34` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` |
 | `cix_build_ptrs` | function | `include/css_index.h:37` | `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);` |
@@ -494,7 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:78` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
 | `FC_MAX_BOXES` | macro | `include/freedom_config.h:61` | `#define FC_MAX_BOXES` |
 | `FC_PNG_MARGIN` | macro | `include/freedom_config.h:34` | `#define FC_PNG_MARGIN` |
-| `FC_PNG_MAX_H` | macro | `include/freedom_config.h:39` | `#define FC_PNG_MAX_H` |
-| `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

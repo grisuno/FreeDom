@@ -3,6 +3,21 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_miss_fetches_stores_then_fresh_hit_skips_network` | function | `tests/test_cached_fetch.c:66` | `static void test_miss_fetches_stores_then_fresh_hit_skips_network(void **state)` |
+| `test_no_store_credentials_range_and_non_200_are_never_cached` | function | `tests/test_cached_fetch.c:129` | `static void test_no_store_credentials_range_and_non_200_are_never_cached(void **state)` |
+| `test_non_https_url_bypasses_the_cache` | function | `tests/test_cached_fetch.c:154` | `static void test_non_https_url_bypasses_the_cache(void **state)` |
+| `test_null_store_is_a_plain_fetch` | function | `tests/test_cached_fetch.c:163` | `static void test_null_store_is_a_plain_fetch(void **state)` |
+| `test_partitions_isolated` | function | `tests/test_cached_fetch.c:118` | `static void test_partitions_isolated(void **state)` |
+| `test_stale_entry_revalidates_and_304_serves_cached_body` | function | `tests/test_cached_fetch.c:82` | `static void test_stale_entry_revalidates_and_304_serves_cached_body(void **state)` |
+| `test_stale_entry_with_new_200_replaces_the_body` | function | `tests/test_cached_fetch.c:101` | `static void test_stale_entry_with_new_200_replaces_the_body(void **state)` |
+| `main` | function | `tests/test_compositor.c:231` | `int main(void)` |
+| `mk` | function | `tests/test_compositor.c:133` | `static cx_item mk(cx_layer layer, int z, int z_auto, size_t doc, size_t ref)` |
+| `test_compare_layer_then_z_then_doc` | function | `tests/test_compositor.c:139` | `static void test_compare_layer_then_z_then_doc(void **state)` |
+| `test_layer_float` | function | `tests/test_compositor.c:116` | `static void test_layer_float(void **state)` |
+| `test_layer_inline_and_block` | function | `tests/test_compositor.c:123` | `static void test_layer_inline_and_block(void **state)` |
+| `test_layer_negative_z` | function | `tests/test_compositor.c:86` | `static void test_layer_negative_z(void **state)` |
+| `test_layer_positive_z` | function | `tests/test_compositor.c:93` | `static void test_layer_positive_z(void **state)` |
+| `test_layer_zero_z_context` | function | `tests/test_compositor.c:100` | `static void test_layer_zero_z_context(void **state)` |
 | `test_layer_zero_z_positioned_auto` | function | `tests/test_compositor.c:109` | `static void test_layer_zero_z_positioned_auto(void **state)` |
 | `test_sc_fixed_sticky_always` | function | `tests/test_compositor.c:70` | `static void test_sc_fixed_sticky_always(void **state)` |
 | `test_sc_isolation` | function | `tests/test_compositor.c:43` | `static void test_sc_isolation(void **state)` |
@@ -481,20 +496,5 @@ Previous: [SYMBOLS_p11.md](SYMBOLS_p11.md)
 | `test_font_shorthand_with_line_height` | function | `tests/test_css_drops.c:473` | `static void test_font_shorthand_with_line_height(void **state)` |
 | `test_full_log_still_counts_total` | function | `tests/test_css_drops.c:212` | `static void test_full_log_still_counts_total(void **state)` |
 | `test_grid_auto_tracks_only_what_the_engine_does` | function | `tests/test_css_drops.c:131` | `static void test_grid_auto_tracks_only_what_the_engine_does(void **state)` |
-| `test_individual_transform_properties` | function | `tests/test_css_drops.c:105` | `static void test_individual_transform_properties(void **state)` |
-| `test_inert_properties_are_recognised` | function | `tests/test_css_drops.c:69` | `static void test_inert_properties_are_recognised(void **state)` |
-| `test_intrinsic_sizing_keywords` | function | `tests/test_css_drops.c:451` | `static void test_intrinsic_sizing_keywords(void **state)` |
-| `test_legacy_grid_gap_aliases_are_the_standard_properties` | function | `tests/test_css_drops.c:55` | `static void test_legacy_grid_gap_aliases_are_the_standard_properties(void **state)` |
-| `test_log_does_not_change_resolution` | function | `tests/test_css_drops.c:264` | `static void test_log_does_not_change_resolution(void **state)` |
-| `test_long_value_truncates_and_control_bytes_are_stripped` | function | `tests/test_css_drops.c:236` | `static void test_long_value_truncates_and_control_bytes_are_stripped(void **state)` |
-| `test_null_items_disables_listing` | function | `tests/test_css_drops.c:223` | `static void test_null_items_disables_listing(void **state)` |
-| `test_overflow_two_values` | function | `tests/test_css_drops.c:425` | `static void test_overflow_two_values(void **state)` |
-| `test_repeats_coalesce_by_property_and_cause` | function | `tests/test_css_drops.c:173` | `static void test_repeats_coalesce_by_property_and_cause(void **state)` |
-| `test_transform_3d_flattens` | function | `tests/test_css_drops.c:351` | `static void test_transform_3d_flattens(void **state)` |
-| `test_transform_angle_units` | function | `tests/test_css_drops.c:340` | `static void test_transform_angle_units(void **state)` |
-| `test_transform_function_names_are_case_insensitive` | function | `tests/test_css_drops.c:329` | `static void test_transform_function_names_are_case_insensitive(void **state)` |
-| `test_transform_origin_number_component` | function | `tests/test_css_drops.c:363` | `static void test_transform_origin_number_component(void **state)` |
-| `test_unknown_property_is_logged` | function | `tests/test_css_drops.c:39` | `static void test_unknown_property_is_logged(void **state)` |
-| `test_vendor_prefixed_value_keyword` | function | `tests/test_css_drops.c:463` | `static void test_vendor_prefixed_value_keyword(void **state)` |
 
 Next: [SYMBOLS_p13.md](SYMBOLS_p13.md)

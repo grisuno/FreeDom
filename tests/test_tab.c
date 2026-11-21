@@ -2240,6 +2240,10 @@ static int stub_import_fetch(void *ctx, const char *method, const char *url,
         css = "@import \"evil.css\" (prefers-color-scheme: dark);";
     else if (strcmp(url, "https://site.test/css/evil.css") == 0)
         css = "} p{text-align:right} @media x {";        /* tries to escape the gate */
+    else if (strcmp(url, "https://site.test/css/bg.css") == 0)
+        css = "@import \"imp/bgi.css\"; p{text-align:center;background-image:url(../img/a.png)}";
+    else if (strcmp(url, "https://site.test/css/imp/bgi.css") == 0)
+        css = "b{display:block;background-image:url('dot.png')}";
     if (css == NULL) return -1;
     *ob = strdup(css); *ol = strlen(css);
     *oct = strdup("text/css");
@@ -2305,6 +2309,32 @@ static void test_import_from_inline_style(void **state) {
         "<body><p>styled</p></body></html>";
     assert_int_equal(import_align(H, 0), CSS_ALIGN_CENTER);
     assert_int_equal(g_imp_calls, 1);
+}
+
+static int view_has_bg(const pv_view *v, const char *url) {
+    for (size_t i = 0; i < pv_box_count(v); ++i)
+        if (strcmp(pv_box_at(v, i)->bg_image_url, url) == 0) return 1;
+    return 0;
+}
+
+/* A relative url() resolves against the sheet that holds it, <link> or @import
+ * (CSS Values 4 4.5.1), never against the page. */
+static void test_sheet_url_resolved_against_sheet(void **state) {
+    (void)state;
+    static const char H[] =
+        "<!DOCTYPE html><html><head><link rel=stylesheet href=\"css/bg.css\"></head>"
+        "<body><p>styled <b>x</b></p></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, stub_import_fetch, NULL);
+    tab_set_css_allowed(t, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://site.test/page.html",
+                                   0, 0, 0, &p), TAB_OK);
+    assert_true(view_has_bg(p.view, "https://site.test/img/a.png"));
+    assert_true(view_has_bg(p.view, "https://site.test/css/imp/dot.png"));
+    tab_page_free(&p);
+    tab_close(t);
 }
 
 /* No css grant => no import is fetched either. */
@@ -4106,6 +4136,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_import_cycle_bounded),
         cmocka_unit_test(test_import_unbalanced_dropped),
         cmocka_unit_test(test_import_from_inline_style),
+        cmocka_unit_test(test_sheet_url_resolved_against_sheet),
         cmocka_unit_test(test_import_needs_css_grant),
         cmocka_unit_test(test_css_sink_ignores_non_css_body),
         cmocka_unit_test(test_external_css_skipped_without_grant),

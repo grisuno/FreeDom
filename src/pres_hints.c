@@ -102,6 +102,12 @@ void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_st
 
     if (is_table) {
         ph_width(get, ctx, cs);
+        if (cs->border_spacing == CSS_LEN_UNSET) {
+            size_t len = 0;
+            const char *v = get(ctx, "cellspacing", &len);
+            int px = 0;
+            cs->border_spacing = ph_parse_nonneg(v, len, &px) ? px : 2;   /* UA: 2px */
+        }
         /* A table's width is its border box (the UA sheet's box-sizing: border-box). */
         if (cs->box_sizing == CSS_BOXS_UNSET) cs->box_sizing = CSS_BOXS_BORDER;
         /* Quirks mode: a table does not inherit text-align (the UA sheet resets it), so a
@@ -129,4 +135,38 @@ void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_st
         strcmp(tag, "p") == 0 || ph_is_heading(tag)) {
         if (cs->text_align == CSS_ALIGN_UNSET) cs->text_align = ph_align(get, ctx);
     }
+}
+
+int ph_parse_nonneg(const char *s, size_t len, int *out) {
+    if (s == NULL || len == 0 || len > PH_ATTR_MAX) return 0;
+    size_t i = 0;
+    while (i < len && ph_is_space(s[i])) ++i;
+    if (i < len && s[i] == '+') ++i;
+    long v = 0;
+    size_t digits = 0;
+    for (; i < len && s[i] >= '0' && s[i] <= '9'; ++i, ++digits) {
+        v = v * 10 + (s[i] - '0');
+        if (v > PH_DIM_MAX_PX) return 0;
+    }
+    if (digits == 0) return 0;
+    if (out != NULL) *out = (int)v;
+    return 1;
+}
+
+int ph_table_cellpadding(ph_attr_fn get, void *ctx) {
+    if (get == NULL) return -1;
+    size_t len = 0;
+    const char *v = get(ctx, "cellpadding", &len);
+    int px = 0;
+    return ph_parse_nonneg(v, len, &px) ? px : -1;
+}
+
+void ph_cell_padding(int cellpad, css_style *cs) {
+    if (cs == NULL) return;
+    int px = (cellpad >= 0) ? cellpad : 1;
+    int *side[4] = { &cs->pad_top, &cs->pad_right, &cs->pad_bottom, &cs->pad_left };
+    static const int slot[4] = { CSS_PCT_PAD_TOP, CSS_PCT_PAD_RIGHT, CSS_PCT_PAD_BOTTOM,
+                                 CSS_PCT_PAD_LEFT };
+    for (int k = 0; k < 4; ++k)
+        if (*side[k] == CSS_LEN_UNSET && cs->pct[slot[k]] == 0) *side[k] = px;
 }

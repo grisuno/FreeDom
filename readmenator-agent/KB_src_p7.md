@@ -16,15 +16,15 @@ Previous: [KB_src_p6.md](KB_src_p6.md)
   - `pv_box_reg` (struct, line 1986)
   - `pv_var_node` (struct, line 2377)
   - `pv_style_cache` (struct, line 2400)
-  - `pv_flow_reg` (struct, line 3687)
-  - `sz_fill` (struct, line 4566)
-  - `pv_root_els` (struct, line 4837)
-  - `form_rec` (struct, line 4946)
-  - `form_table` (struct, line 4952)
-  - `pv_flow_reg` (struct, line 5305)
-  - `pv_computed` (struct, line 7734)
+  - `pv_flow_reg` (struct, line 3708)
+  - `sz_fill` (struct, line 4593)
+  - `pv_root_els` (struct, line 4864)
+  - `form_rec` (struct, line 4973)
+  - `form_table` (struct, line 4979)
+  - `pv_flow_reg` (struct, line 5332)
+  - `pv_computed` (struct, line 7765)
   - `pv_def_h` (struct, line 2386)
-  - `pv_cnt_attr_ctx` (struct, line 5876)
+  - `pv_cnt_attr_ctx` (struct, line 5903)
   - `cols` (type_alias, line 1284) `typedef struct pv_cont_info { int id, display, gap, justify, cols;`
   - `mb` (type_alias, line 1420) `typedef struct pv_box_info { int l, r, w, center, mt, mb;`
   - `chain` (type_alias, line 2377) `typedef struct pv_var_node { cvr_chain chain;`
@@ -169,175 +169,176 @@ Previous: [KB_src_p6.md](KB_src_p6.md)
        ...`
   - `pv_parent_element` (function, line 2666) `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)`
   - `pv_hint_attr` (function, line 2673) `static const char *pv_hint_attr(void *ctx, const char *name, size_t *len)`
-  - `pv_apply_pres_hints` (function, line 2694) `static void pv_apply_pres_hints(lxb_dom_element_t *el, css_style *cs)`
-  - `cached_element_style_ref` (function, line 2789) `static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const css_sheet *sheet,
+  - `pv_cell_table` (function, line 2694) `static lxb_dom_element_t *pv_cell_table(lxb_dom_element_t *el)`
+  - `pv_apply_pres_hints` (function, line 2710) `static void pv_apply_pres_hints(lxb_dom_element_t *el, css_style *cs)`
+  - `cached_element_style_ref` (function, line 2810) `static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const css_sheet *sheet,
  ...`
-  - `cached_element_style` (function, line 2874) `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
+  - `cached_element_style` (function, line 2895) `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
             ...`
-  - `inherited_text_color` (function, line 2941) `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,
+  - `inherited_text_color` (function, line 2962) `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,
              ...`
-  - `is_inline_container_style` (function, line 2954) `static int is_inline_container_style(const css_style *cs)`
-  - `css_width_declared` (function, line 2962) `static int css_width_declared(const css_style *cs)`
-  - `parent_is_author_container` (function, line 2969) `static int parent_is_author_container(const lxb_dom_node_t *node, const css_sheet *sheet,
+  - `is_inline_container_style` (function, line 2975) `static int is_inline_container_style(const css_style *cs)`
+  - `css_width_declared` (function, line 2983) `static int css_width_declared(const css_style *cs)`
+  - `parent_is_author_container` (function, line 2990) `static int parent_is_author_container(const lxb_dom_node_t *node, const css_sheet *sheet,
        ...`
-  - `box_reg_id_ex` (function, line 2978) `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
+  - `box_reg_id_ex` (function, line 2999) `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
         ...`
-  - `cached_pseudo_style` (function, line 3038) `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,
+  - `cached_pseudo_style` (function, line 3059) `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,
              ...`
-  - `subtree_is_oof` (function, line 3056) `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
+  - `subtree_is_oof` (function, line 3077) `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
                      ...`
-  - `size` (function, line 3076) `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
+  - `size` (function, line 3097) `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
 static void app...`
-  - `css_replaced_h_fixed` (function, line 3085) `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,
+  - `css_replaced_h_fixed` (function, line 3106) `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,
                   ...`
-  - `builder` (function, line 3103) `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
+  - `builder` (function, line 3124) `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
  * (the ...`
-  - `css_to_fx_justify` (function, line 3132) `static int css_to_fx_justify(css_justify j)`
-  - `is_bold_tag` (function, line 3151) `static int is_bold_tag(lxb_tag_id_t t)`
-  - `is_italic_tag` (function, line 3156) `static int is_italic_tag(lxb_tag_id_t t)`
-  - `is_inline_level_style` (function, line 3193) `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)`
-  - `in_mixed_line` (function, line 3201) `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
+  - `css_to_fx_justify` (function, line 3153) `static int css_to_fx_justify(css_justify j)`
+  - `is_bold_tag` (function, line 3172) `static int is_bold_tag(lxb_tag_id_t t)`
+  - `is_italic_tag` (function, line 3177) `static int is_italic_tag(lxb_tag_id_t t)`
+  - `is_inline_level_style` (function, line 3214) `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)`
+  - `in_mixed_line` (function, line 3222) `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
                        ...`
-  - `is_float_container_style` (function, line 3222) `static int is_float_container_style(const css_style *cs)`
-  - `row_lone_float_side` (function, line 3230) `static int row_lone_float_side(const lxb_dom_node_t *p, const css_sheet *sheet,
+  - `is_float_container_style` (function, line 3243) `static int is_float_container_style(const css_style *cs)`
+  - `row_lone_float_side` (function, line 3251) `static int row_lone_float_side(const lxb_dom_node_t *p, const css_sheet *sheet,
                  ...`
-  - `children_all_inline_block` (function, line 3249) `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
+  - `children_all_inline_block` (function, line 3270) `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
            ...`
-  - `it` (function, line 3277) `* without it (minified markup) keeps the row gapless -- the mixed case is a known limit. */
+  - `it` (function, line 3298) `* without it (minified markup) keeps the row gapless -- the mixed case is a known limit. */
 stati...`
-  - `col_has_free_space` (function, line 3302) `static int col_has_free_space(const css_style *cs)`
-  - `flex_column_flows_as_block` (function, line 3316) `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
+  - `col_has_free_space` (function, line 3323) `static int col_has_free_space(const css_style *cs)`
+  - `flex_column_flows_as_block` (function, line 3337) `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
             ...`
-  - `flex_column_flows_as_block_uncached` (function, line 3325) `static int flex_column_flows_as_block_uncached(const lxb_dom_node_t *el, const css_style *cs,
+  - `flex_column_flows_as_block_uncached` (function, line 3346) `static int flex_column_flows_as_block_uncached(const lxb_dom_node_t *el, const css_style *cs,
    ...`
-  - `fold_column_gap` (function, line 3393) `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
+  - `fold_column_gap` (function, line 3414) `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
                             ...`
-  - `column_gap_candidate` (function, line 3418) `static int column_gap_candidate(const lxb_dom_node_t *el, const css_sheet *sheet,
+  - `column_gap_candidate` (function, line 3439) `static int column_gap_candidate(const lxb_dom_node_t *el, const css_sheet *sheet,
                ...`
-  - `is_layout_container` (function, line 3428) `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
+  - `is_layout_container` (function, line 3449) `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
                    ...`
-  - `css_has_hmargin` (function, line 3454) `static int css_has_hmargin(const css_style *cs)`
-  - `item_sizes_itself` (function, line 3483) `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
+  - `css_has_hmargin` (function, line 3475) `static int css_has_hmargin(const css_style *cs)`
+  - `item_sizes_itself` (function, line 3504) `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
                      ...`
-  - `li_is_list_item` (function, line 3499) `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
+  - `li_is_list_item` (function, line 3520) `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
                     ...`
-  - `pv_element_has_before` (function, line 3576) `static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,
+  - `pv_element_has_before` (function, line 3597) `static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,
                      ...`
-  - `subtree_has_own_text` (function, line 3608) `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+  - `subtree_has_own_text` (function, line 3629) `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             ...`
-  - `is_plain_wrapper` (function, line 3630) `static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs)`
-  - `element_is_content_leaf_d` (function, line 3642) `static int element_is_content_leaf_d(const lxb_dom_node_t *n, const css_sheet *sheet,
+  - `is_plain_wrapper` (function, line 3651) `static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs)`
+  - `element_is_content_leaf_d` (function, line 3663) `static int element_is_content_leaf_d(const lxb_dom_node_t *n, const css_sheet *sheet,
            ...`
-  - `media_has_source` (function, line 3668) `static int media_has_source(const lxb_dom_node_t *n)`
-  - `element_is_content_leaf` (function, line 3682) `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
+  - `media_has_source` (function, line 3689) `static int media_has_source(const lxb_dom_node_t *n)`
+  - `element_is_content_leaf` (function, line 3703) `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
              ...`
-  - `resolve_context` (function, line 3699) `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+  - `resolve_context` (function, line 3720) `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 ...`
-  - `opens` (function, line 4037) `* painter applies it when the box opens (band/shared context) — seeding
+  - `opens` (function, line 4058) `* painter applies it when the box opens (band/shared context) — seeding
              * it onto ru...`
-  - `css_inline_boxdeco` (function, line 4085) `css_inline_boxdeco(cs) &&
+  - `css_inline_boxdeco` (function, line 4111) `css_inline_boxdeco(cs) &&
                            !is_layout_item(p, sheet, style_cache))`
-  - `margins` (function, line 4124) `* margins (boxdef_from_style) and the painter applies them when
+  - `margins` (function, line 4150) `* margins (boxdef_from_style) and the painter applies them when
                          * it ope...`
-  - `container` (function, line 4251) `* membership in this container (and none in any container further out,
+  - `container` (function, line 4277) `* membership in this container (and none in any container further out,
                  * since i...`
-  - `walk` (function, line 4371) `* far on this walk (they are all inside this element). */
+  - `walk` (function, line 4398) `* far on this walk (they are all inside this element). */
 
                         /* The innermo...`
-  - `float` (function, line 4512) `* genuinely nested float (oid != id) takes the deferred-column path. */
+  - `float` (function, line 4539) `* genuinely nested float (oid != id) takes the deferred-column path. */
     if (cont->float_oid =...`
-  - `sz_count` (function, line 4558) `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)`
-  - `sz_write` (function, line 4572) `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
-  - `serialize_subtree` (function, line 4580) `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
-  - `collapse_ws` (function, line 4599) `static char *collapse_ws(const char *s, size_t n)`
-  - `pv_frame_marked` (function, line 4629) `static int pv_frame_marked(const lxb_dom_node_t *n)`
-  - `parse_dim` (function, line 4638) `static int parse_dim(const lxb_char_t *s, size_t len)`
-  - `present` (function, line 4655) `* when no width descriptors are present (density-only or bare URLs). */
+  - `sz_count` (function, line 4585) `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)`
+  - `sz_write` (function, line 4599) `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
+  - `serialize_subtree` (function, line 4607) `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
+  - `collapse_ws` (function, line 4626) `static char *collapse_ws(const char *s, size_t n)`
+  - `pv_frame_marked` (function, line 4656) `static int pv_frame_marked(const lxb_dom_node_t *n)`
+  - `parse_dim` (function, line 4665) `static int parse_dim(const lxb_char_t *s, size_t len)`
+  - `present` (function, line 4682) `* when no width descriptors are present (density-only or bare URLs). */
 static void srcset_best_u...`
-  - `srcset_slot_width` (function, line 4750) `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
+  - `srcset_slot_width` (function, line 4777) `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
                               ...`
-  - `dimensions` (function, line 4796) `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
+  - `dimensions` (function, line 4823) `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
 static void srcse...`
-  - `find_body` (function, line 4828) `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
-  - `find_root_els` (function, line 4841) `static pv_root_els find_root_els(lxb_dom_node_t *root)`
-  - `attributes` (function, line 4855) `* carries those attributes (spec/css.md, "Root matcher"). */
+  - `find_body` (function, line 4855) `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
+  - `find_root_els` (function, line 4868) `static pv_root_els find_root_els(lxb_dom_node_t *root)`
+  - `attributes` (function, line 4882) `* carries those attributes (spec/css.md, "Root matcher"). */
 static int root_els_match(void *ctx,...`
-  - `string` (function, line 4866) `* Returns a heap string (caller frees) or NULL when neither carries a class —
+  - `string` (function, line 4893) `* Returns a heap string (caller frees) or NULL when neither carries a class —
  * NULL simply mean...`
-  - `acquire_page_sheet` (function, line 4905) `static shc_sheet *acquire_page_sheet(lxb_dom_node_t *root, const char *extern_css,
+  - `acquire_page_sheet` (function, line 4932) `static shc_sheet *acquire_page_sheet(lxb_dom_node_t *root, const char *extern_css,
               ...`
-  - `forms_free` (function, line 4957) `static void forms_free(form_table *ft)`
-  - `ascii_ieq` (function, line 4964) `static int ascii_ieq(const char *s, const char *lit)`
-  - `attr_dup` (function, line 4976) `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)`
-  - `forms_add` (function, line 4985) `static int forms_add(form_table *ft, const lxb_dom_node_t *node)`
-  - `form_for` (function, line 5005) `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
+  - `forms_free` (function, line 4984) `static void forms_free(form_table *ft)`
+  - `ascii_ieq` (function, line 4991) `static int ascii_ieq(const char *s, const char *lit)`
+  - `attr_dup` (function, line 5003) `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)`
+  - `forms_add` (function, line 5012) `static int forms_add(form_table *ft, const lxb_dom_node_t *node)`
+  - `form_for` (function, line 5032) `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
                     const lxb_...`
-  - `under_unrendered` (function, line 5021) `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)`
-  - `collect_text` (function, line 5034) `static char *collect_text(const lxb_dom_node_t *el)`
-  - `classify_input` (function, line 5058) `static pv_input_type classify_input(const char *type)`
-  - `li_ordinal` (function, line 5229) `static int li_ordinal(const lxb_dom_node_t *li)`
-  - `roman_marker` (function, line 5255) `static void roman_marker(int n, int upper, char *out, size_t cap)`
-  - `list_marker` (function, line 5280) `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
+  - `under_unrendered` (function, line 5048) `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)`
+  - `collect_text` (function, line 5061) `static char *collect_text(const lxb_dom_node_t *el)`
+  - `classify_input` (function, line 5085) `static pv_input_type classify_input(const char *type)`
+  - `li_ordinal` (function, line 5256) `static int li_ordinal(const lxb_dom_node_t *li)`
+  - `roman_marker` (function, line 5282) `static void roman_marker(int n, int upper, char *out, size_t cap)`
+  - `list_marker` (function, line 5307) `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
                   ...`
-  - `node_table_role` (function, line 5325) `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
-  - `nearest_table` (function, line 5343) `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+  - `node_table_role` (function, line 5352) `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
+  - `nearest_table` (function, line 5370) `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
  ...`
-  - `parent_is_table_internal` (function, line 5382) `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
-  - `cell_has_nested_table` (function, line 5414) `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)`
-  - `next_skip` (function, line 5428) `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)`
-  - `cell_span_attr` (function, line 5438) `static int cell_span_attr(const lxb_dom_node_t *cell, const char *name, size_t name_len,
+  - `parent_is_table_internal` (function, line 5409) `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)`
+  - `cell_has_nested_table` (function, line 5441) `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)`
+  - `next_skip` (function, line 5455) `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)`
+  - `cell_span_attr` (function, line 5465) `static int cell_span_attr(const lxb_dom_node_t *cell, const char *name, size_t name_len,
         ...`
-  - `table_next_row` (function, line 5451) `static const lxb_dom_node_t *table_next_row(const lxb_dom_node_t *table,
+  - `table_next_row` (function, line 5478) `static const lxb_dom_node_t *table_next_row(const lxb_dom_node_t *table,
                         ...`
-  - `cell_is_rich` (function, line 5512) `static int cell_is_rich(const lxb_dom_node_t *cell)`
-  - `cell_kind` (function, line 5539) `static unsigned cell_kind(pv_flow_reg *fr, const lxb_dom_node_t *cell)`
-  - `cell_is_grid_item` (function, line 5548) `static int cell_is_grid_item(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
+  - `cell_is_rich` (function, line 5539) `static int cell_is_rich(const lxb_dom_node_t *cell)`
+  - `cell_kind` (function, line 5566) `static unsigned cell_kind(pv_flow_reg *fr, const lxb_dom_node_t *cell)`
+  - `cell_is_grid_item` (function, line 5575) `static int cell_is_grid_item(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
             ...`
-  - `in_collected_cell` (function, line 5558) `static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+  - `in_collected_cell` (function, line 5585) `static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...`
-  - `table_columns` (function, line 5579) `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
-  - `table_columns_scan` (function, line 5588) `static int table_columns_scan(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
-  - `in_hidden_subtree` (function, line 5662) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+  - `table_columns` (function, line 5606) `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
+  - `table_columns_scan` (function, line 5615) `static int table_columns_scan(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
+  - `in_hidden_subtree` (function, line 5689) `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...`
-  - `in_boilerplate_subtree` (function, line 5689) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-  - `in_closed_details_subtree` (function, line 5704) `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
-  - `pv_build` (function, line 5724) `pv_status pv_build(const hp_document *doc, pv_view **out)`
-  - `pv_build_ex` (function, line 5728) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-  - `pv_build_full` (function, line 5732) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+  - `in_boilerplate_subtree` (function, line 5716) `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
+  - `in_closed_details_subtree` (function, line 5731) `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)`
+  - `pv_build` (function, line 5751) `pv_status pv_build(const hp_document *doc, pv_view **out)`
+  - `pv_build_ex` (function, line 5755) `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
+  - `pv_build_full` (function, line 5759) `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...`
-  - `annotate_replaced_run` (function, line 5754) `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
+  - `annotate_replaced_run` (function, line 5781) `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                             ...`
-  - `pv_root_insets` (function, line 5829) `void pv_root_insets(const css_style *body, int out[4])`
-  - `collect_page_css` (function, line 5839) `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
+  - `pv_root_insets` (function, line 5856) `void pv_root_insets(const css_style *body, int out[4])`
+  - `collect_page_css` (function, line 5866) `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
                      ...`
-  - `pv_cnt_attr` (function, line 5881) `static const char *pv_cnt_attr(void *ctx, const char *name)`
-  - `pv_cnt_resolve_field` (function, line 5894) `static void pv_cnt_resolve_field(const cnt_state *st, lxb_dom_element_t *el, char *field)`
-  - `pv_cnt_enter` (function, line 5905) `static int pv_cnt_enter(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
+  - `pv_cnt_attr` (function, line 5908) `static const char *pv_cnt_attr(void *ctx, const char *name)`
+  - `pv_cnt_resolve_field` (function, line 5921) `static void pv_cnt_resolve_field(const cnt_state *st, lxb_dom_element_t *el, char *field)`
+  - `pv_cnt_enter` (function, line 5932) `static int pv_cnt_enter(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
     ...`
-  - `pv_cnt_exit` (function, line 5929) `static void pv_cnt_exit(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
+  - `pv_cnt_exit` (function, line 5956) `static void pv_cnt_exit(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
     ...`
-  - `pv_counters_pass` (function, line 5941) `static void pv_counters_pass(lxb_dom_node_t *root, const css_sheet *sheet, pv_style_cache *cache)`
-  - `pv_build_styled` (function, line 5965) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+  - `pv_counters_pass` (function, line 5968) `static void pv_counters_pass(lxb_dom_node_t *root, const css_sheet *sheet, pv_style_cache *cache)`
+  - `pv_build_styled` (function, line 5992) `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...`
-  - `pv_build_cached` (function, line 5972) `pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
+  - `pv_build_cached` (function, line 5999) `pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
                    ...`
-  - `pv_build_cq` (function, line 5979) `pv_status pv_build_cq(const hp_document *doc, int js_enabled, int reader,
+  - `pv_build_cq` (function, line 6006) `pv_status pv_build_cq(const hp_document *doc, int js_enabled, int reader,
                       i...`
-  - `pv_build_live` (function, line 5986) `pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
+  - `pv_build_live` (function, line 6013) `pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                      ...`
-  - `px` (function, line 6580) `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
+  - `px` (function, line 6611) `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
                 if (iw <...`
-  - `engine` (function, line 7537) `* layout engine (contiguous item gather) drops every cell onto its own row and
+  - `engine` (function, line 7568) `* layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-col...`
-  - `pv_css_drops` (function, line 7705) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+  - `pv_css_drops` (function, line 7736) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...`
-  - `pv_computed_new` (function, line 7739) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
+  - `pv_computed_new` (function, line 7770) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
   ...`
-  - `pv_computed_new_cached` (function, line 7744) `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,
+  - `pv_computed_new_cached` (function, line 7775) `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,
                    ...`
-  - `pv_computed_get` (function, line 7758) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
+  - `pv_computed_get` (function, line 7789) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
                     do...`
-  - `pv_computed_free` (function, line 7780) `void pv_computed_free(pv_computed *pc)`
+  - `pv_computed_free` (function, line 7811) `void pv_computed_free(pv_computed *pc)`
   - `positions` (function, line 145) `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);`
   - `content` (function, line 1213) `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);`
   - `address` (function, line 1274) `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...`
@@ -347,20 +348,20 @@ static int root_els_match(void *ctx,...`
   - `text_node_is_blank` (function, line 1380) `static int text_node_is_blank(const lxb_dom_node_t *c);`
   - `here` (function, line 2136) `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3...`
   - `glyphs` (function, line 2187) `* glyphs (the runs carry it as their fill source);`
-  - `col_free_share` (function, line 2935) `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...`
-  - `none` (function, line 2983) `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...`
-  - `table_cell_pos` (function, line 3694) `static int table_cell_pos(struct pv_flow_reg *fr, const lxb_dom_node_t *table, const lxb_dom_node_t *cell, int *row...`
-  - `outermost` (function, line 3980) `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
-  - `url` (function, line 6011) `* fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css * module, so OOM here degrades to...`
-  - `inside` (function, line 6096) `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
-  - `control` (function, line 6402) `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
-  - `band` (function, line 6646) `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...`
-  - `height` (function, line 6673) `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-  - `block_id` (function, line 6831) `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
-  - `URL` (function, line 6972) `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-  - `block` (function, line 7249) `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
-  - `flow` (function, line 7428) `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
-  - `line` (function, line 7546) `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
+  - `col_free_share` (function, line 2956) `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...`
+  - `none` (function, line 3004) `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...`
+  - `table_cell_pos` (function, line 3715) `static int table_cell_pos(struct pv_flow_reg *fr, const lxb_dom_node_t *table, const lxb_dom_node_t *cell, int *row...`
+  - `outermost` (function, line 4001) `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
+  - `url` (function, line 6038) `* fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css * module, so OOM here degrades to...`
+  - `inside` (function, line 6123) `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
+  - `control` (function, line 6433) `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
+  - `band` (function, line 6677) `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...`
+  - `height` (function, line 6704) `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+  - `block_id` (function, line 6862) `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
+  - `URL` (function, line 7003) `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+  - `block` (function, line 7280) `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
+  - `flow` (function, line 7459) `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
+  - `line` (function, line 7577) `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
   - `_POSIX_C_SOURCE` (macro, line 10) `#define _POSIX_C_SOURCE`
   - `PV_MAX_DIM` (macro, line 57) `#define PV_MAX_DIM`
   - `PV_FONT_REL_MIN` (macro, line 62) `#define PV_FONT_REL_MIN`
@@ -376,14 +377,14 @@ static int root_els_match(void *ctx,...`
   - `PV_STYLE_RETIRE_MAX` (macro, line 2398) `#define PV_STYLE_RETIRE_MAX`
   - `PV_CQ_NODES_MAX` (macro, line 2442) `#define PV_CQ_NODES_MAX`
   - `PV_STYLE_RESERVE_MAX` (macro, line 2464) `#define PV_STYLE_RESERVE_MAX`
-  - `PV_MAX_INLINE_ROW_ITEMS` (macro, line 3189) `#define PV_MAX_INLINE_ROW_ITEMS`
-  - `PV_TEXTLESS_DEPTH_MAX` (macro, line 3591) `#define PV_TEXTLESS_DEPTH_MAX`
-  - `PV_FRAME_DEF_W` (macro, line 4625) `#define PV_FRAME_DEF_W`
-  - `PV_FRAME_DEF_H` (macro, line 4626) `#define PV_FRAME_DEF_H`
-  - `PV_FRAME_URL_MAX` (macro, line 4627) `#define PV_FRAME_URL_MAX`
-  - `PV_CELL_NESTED` (macro, line 5535) `#define PV_CELL_NESTED`
-  - `PV_CELL_RICH` (macro, line 5536) `#define PV_CELL_RICH`
-  - `PV_MAX_STYLE_BYTES` (macro, line 5615) `#define PV_MAX_STYLE_BYTES`
+  - `PV_MAX_INLINE_ROW_ITEMS` (macro, line 3210) `#define PV_MAX_INLINE_ROW_ITEMS`
+  - `PV_TEXTLESS_DEPTH_MAX` (macro, line 3612) `#define PV_TEXTLESS_DEPTH_MAX`
+  - `PV_FRAME_DEF_W` (macro, line 4652) `#define PV_FRAME_DEF_W`
+  - `PV_FRAME_DEF_H` (macro, line 4653) `#define PV_FRAME_DEF_H`
+  - `PV_FRAME_URL_MAX` (macro, line 4654) `#define PV_FRAME_URL_MAX`
+  - `PV_CELL_NESTED` (macro, line 5562) `#define PV_CELL_NESTED`
+  - `PV_CELL_RICH` (macro, line 5563) `#define PV_CELL_RICH`
+  - `PV_MAX_STYLE_BYTES` (macro, line 5642) `#define PV_MAX_STYLE_BYTES`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_vars.h`, `include/dom.h`, `include/flex_layout.h`, `include/freedom_config.h`, `include/html_parse.h`, `include/page_view.h`, `include/pres_hints.h`, `include/sheet_cache.h`, `include/svg_render.h`, `include/util.h`
 
 ## src/pdf_export.c

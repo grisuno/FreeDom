@@ -82,6 +82,7 @@ static void test_leading_b...`
 - Layer: testing
 - Language: c
 - Symbols:
+  - `rb_out` (struct, line 147)
   - `scan` (function, line 14) `static size_t scan(const char *s)`
   - `test_plain_url` (function, line 16) `static void test_plain_url(void **state)`
   - `test_url_forms` (function, line 29) `static void test_url_forms(void **state)`
@@ -95,6 +96,13 @@ static void test_leading_b...`
   - `test_oversize` (function, line 106) `static void test_oversize(void **state)`
   - `test_cap_and_null` (function, line 121) `static void test_cap_and_null(void **state)`
   - `test_balanced` (function, line 133) `static void test_balanced(void **state)`
+  - `rb_emit` (function, line 148) `static int rb_emit(void *ctx, const char *s, size_t n)`
+  - `rb_resolve` (function, line 158) `static int rb_resolve(void *ctx, const char *base, const char *ref, char *out, size_t outsz)`
+  - `rebase` (function, line 175) `static const char *rebase(const char *css, int fail)`
+  - `test_rebase_relative` (function, line 184) `static void test_rebase_relative(void **state)`
+  - `test_rebase_left_alone` (function, line 194) `static void test_rebase_left_alone(void **state)`
+  - `test_rebase_args` (function, line 206) `static void test_rebase_args(void **state)`
+  - `main` (function, line 215) `int main(void)`
 - Depends on: `include/css_import.h`
 
 ## tests/test_css_index.c

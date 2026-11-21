@@ -3,6 +3,11 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `cch_node` | struct | `src/css_chain.c:27` | `` |
+| `cch_path` | struct | `src/css_chain.c:347` | `` |
+| `cch_path_free` | function | `src/css_chain.c:365` | `void cch_path_free(cch_path *pa)` |
+| `cch_path_new` | function | `src/css_chain.c:353` | `cch_path *cch_path_new(void)` |
+| `cch_pseudo_style` | function | `src/css_chain.c:442` | `css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which,             ...` |
 | `cls_space` | function | `src/css_chain.c:42` | `static int cls_space(char c)` |
 | `count_children` | function | `src/css_chain.c:227` | `static int count_children(lxb_dom_node_t *n)` |
 | `fill_css_node` | function | `src/css_chain.c:99` | `static void fill_css_node(lxb_dom_element_t *e, cch_node *node)` |
@@ -159,10 +164,14 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `rad_len` | function | `src/css_gradient.c:626` | `static int rad_len(const char *tok, int *enc)` |
 | `rad_parse_position` | function | `src/css_gradient.c:661` | `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)` |
 | `rad_pos_kw` | function | `src/css_gradient.c:652` | `static int rad_pos_kw(const char *t, int *axis)` |
+| `abs_ok` | function | `src/css_import.c:297` | `static int abs_ok(const char *u)` |
 | `ci_balanced` | function | `src/css_import.c:220` | `int ci_balanced(const char *css, size_t len)` |
+| `ci_rebase_urls` | function | `src/css_import.c:303` | `int ci_rebase_urls(const char *css, size_t len, const char *base,                    ci_resolve_f...` |
 | `ci_scan` | function | `src/css_import.c:156` | `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap)` |
 | `ci_wrap` | function | `src/css_import.c:194` | `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap)` |
 | `copy_trim` | function | `src/css_import.c:53` | `static int copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
+| `has_scheme` | function | `src/css_import.c:250` | `static int has_scheme(const char *r)` |
+| `is_ident_ch` | function | `src/css_import.c:243` | `static int is_ident_ch(char c)` |
 | `is_ident_char` | function | `src/css_import.c:21` | `static int is_ident_char(char c)` |
 | `is_ws` | function | `src/css_import.c:8` | `static int is_ws(char c)` |
 | `kw_at` | function | `src/css_import.c:13` | `static int kw_at(const char *s, size_t i, size_t e, const char *kw)` |
@@ -171,6 +180,7 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `parse_prelude` | function | `src/css_import.c:97` | `static int parse_prelude(const char *s, size_t a, size_t b, ci_import *im)` |
 | `read_string` | function | `src/css_import.c:64` | `static size_t read_string(const char *s, size_t a, size_t e, char *dst, size_t cap)` |
 | `skip_ws` | function | `src/css_import.c:27` | `static size_t skip_ws(const char *s, size_t i, size_t e)` |
+| `url_arg` | function | `src/css_import.c:266` | `static int url_arg(const char *s, size_t a, size_t e, char *ref, size_t cap, size_t *end)` |
 | `add_bucket` | function | `src/css_index.c:106` | `static void add_bucket(const cix_index *idx, uint64_t k, cix_run *runs, size_t *nr)` |
 | `build` | function | `src/css_index.c:47` | `static void build(const css_sel *arr, css_sel *const *ptrs, size_t n, cix_index *idx)` |
 | `cix_build` | function | `src/css_index.c:166` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx)` |
@@ -486,15 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `fbp_js_quote` | function | `src/fb_panes.c:157` | `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)` |
 | `fbp_tab_at` | function | `src/fb_panes.c:145` | `int fbp_tab_at(double px, double cell_w, double pad_cells)` |
 | `fbp_tab_from_name` | function | `src/fb_panes.c:123` | `int fbp_tab_from_name(const char *name)` |
-| `fbp_tab_label` | function | `src/fb_panes.c:112` | `const char *fbp_tab_label(int tab)` |
-| `fbp_tab_span` | function | `src/fb_panes.c:136` | `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)` |
-| `fbp_tab_wrap` | function | `src/fb_panes.c:130` | `int fbp_tab_wrap(int tab, int dir)` |
-| `ieq` | function | `src/fb_panes.c:114` | `static int ieq(const char *a, const char *b)` |
-| `tab_ok` | function | `src/fb_panes.c:110` | `static int tab_ok(int tab)` |
-| `FX_EPS` | macro | `src/flex_layout.c:16` | `#define FX_EPS` |
-| `area_token_is_null_cell` | function | `src/flex_layout.c:351` | `static int area_token_is_null_cell(const char *tok, size_t len)` |
-| `float_pack_impl` | function | `src/flex_layout.c:474` | `static fx_status float_pack_impl(const double *width, const int *side, size_t n,                 ...` |
-| `fx_auto_margins` | function | `src/flex_layout.c:613` | `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,                 ...` |
-| `fx_auto_min_size` | function | `src/flex_layout.c:636` | `double fx_auto_min_size(double min_content, double basis, double author_min,                     ...` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

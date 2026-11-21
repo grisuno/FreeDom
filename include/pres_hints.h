@@ -30,4 +30,14 @@ int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille);
  * PH_*. No-op on a NULL tag, getter or style. */
 void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs);
 
+/* HTML "rules for parsing non-negative integers": 1 with *out set (0 is valid), 0 = invalid. */
+int ph_parse_nonneg(const char *s, size_t len, int *out);
+
+/* The cellpadding of a <table> whose attributes `get` reads: px, or -1 when absent/invalid. */
+int ph_table_cellpadding(ph_attr_fn get, void *ctx);
+
+/* A table cell's padding: every side the cascade left unset takes cellpad px, or the UA
+ * sheet's 1px when cellpad < 0. No-op on a NULL style. */
+void ph_cell_padding(int cellpad, css_style *cs);
+
 #endif /* FREEDOM_PRES_HINTS_H */

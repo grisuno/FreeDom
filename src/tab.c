@@ -1426,18 +1426,28 @@ static int write_history(int wfd, child_state *cs) {
 typedef struct css_text {
     char  *p;
     size_t n;
+    size_t cap;                 /* bytes allocated at p (grows geometrically) */
 } css_text;
 
 static int css_text_put(css_text *t, const char *s, size_t n) {
     if (n == 0) return 0;
     if (n > TAB_MAX_EXTERN_CSS || t->n > TAB_MAX_EXTERN_CSS - n) return -1;
-    char *g = (char *)realloc(t->p, t->n + n + 1);
-    if (g == NULL) return -1;
-    t->p = g;
+    if (t->n + n + 1 > t->cap) {
+        size_t want = (t->cap < 4096) ? 4096 : t->cap * 2;
+        if (want < t->n + n + 1) want = t->n + n + 1;
+        char *g = (char *)realloc(t->p, want);
+        if (g == NULL) return -1;
+        t->p = g;
+        t->cap = want;
+    }
     memcpy(t->p + t->n, s, n);
     t->n += n;
     t->p[t->n] = '\0';
     return 0;
+}
+
+static int css_text_emit(void *ctx, const char *s, size_t n) {
+    return css_text_put((css_text *)ctx, s, n);
 }
 
 /* GETs one stylesheet through the trusted parent (TAG_SUBREQ: the full network
@@ -1492,7 +1502,7 @@ static int sheet_expand(child_state *cs, const char *base, const char *body, siz
         size_t clen = 0;
         char *cbody = child_get_sheet(cs, "@import", target, &clen);
         if (cbody == NULL) continue;
-        css_text sub = { NULL, 0 };
+        css_text sub = { NULL, 0, 0 };
         char open[3 * CI_COND_MAX + 64], close[8];
         int ok = sheet_expand(cs, target, cbody, clen, depth + 1, 1, left, &sub) == 0
               && ci_wrap(&ims[i], open, sizeof open, close, sizeof close) == 0;
@@ -1518,7 +1528,15 @@ static int sheet_expand(child_state *cs, const char *base, const char *body, siz
         free(cbody);
     }
     free(ims);
-    if (with_body && css_text_put(out, body, blen) != 0) rc = -1;
+    /* A relative url() names a file next to the SHEET (CSS Values 4 4.5.1); the
+     * sheets are joined into one text and the image gate only knows the page, so
+     * the references are made absolute here, against this sheet's own URL. */
+    if (with_body) {
+        int put = (base != NULL)
+            ? ci_rebase_urls(body, blen, base, tab_url_resolve, NULL, css_text_emit, out)
+            : css_text_put(out, body, blen);
+        if (put != 0) rc = -1;
+    }
     return rc;
 }
 
@@ -1561,7 +1579,7 @@ static void child_fetch_stylesheets(child_state *cs) {
         size_t blen = 0;
         char *body = child_get_sheet(cs, "stylesheet", base, &blen);
         if (body == NULL) continue;
-        css_text t = { NULL, 0 };
+        css_text t = { NULL, 0, 0 };
         if (blen > 0 && sheet_expand(cs, base, body, blen, 0, 1, &left, &t) == 0)
             extern_css_append(cs, &t, hrefs[i]);
         else if (blen > 0)
@@ -1578,7 +1596,7 @@ static void child_fetch_stylesheets(child_state *cs) {
         size_t tl = 0;
         const char *txt = dom_text_content(cs->idx, st[i], &tl);
         if (txt == NULL || tl == 0) continue;
-        css_text t = { NULL, 0 };
+        css_text t = { NULL, 0, 0 };
         if (sheet_expand(cs, cs->page_url, txt, tl, 0, 0, &left, &t) == 0)
             extern_css_append(cs, &t, "inline <style> @import");
         free(t.p);

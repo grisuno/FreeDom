@@ -2690,6 +2690,22 @@ static int pv_centered_by_ancestor(lxb_dom_element_t *el) {
     return 0;
 }
 
+/* The <table> a cell belongs to: the nearest table ancestor (bounded walk), or NULL. */
+static lxb_dom_element_t *pv_cell_table(lxb_dom_element_t *el) {
+    lxb_dom_element_t *p = pv_parent_element(el);
+    for (int hop = 0; p != NULL && hop < PV_FONT_CHAIN_MAX; ++hop, p = pv_parent_element(p))
+        if (lxb_dom_element_tag_id(p) == LXB_TAG_TABLE) return p;
+    return NULL;
+}
+
+/* border-spacing as the table grid's gap (spec/pres_hints.md): never negative, and
+ * none at all in the collapsing border model (CSS 2.1 17.6.2). */
+static int pv_table_spacing(const css_style *cs) {
+    if (cs == NULL || cs->border_collapse == CSS_BCOL_COLLAPSE) return 0;
+    return (cs->border_spacing != CSS_LEN_UNSET && cs->border_spacing > 0)
+           ? cs->border_spacing : 0;
+}
+
 /* HTML presentational attributes, as zero-specificity style (spec/pres_hints.md). */
 static void pv_apply_pres_hints(lxb_dom_element_t *el, css_style *cs) {
     size_t tl = 0;
@@ -2705,6 +2721,11 @@ static void pv_apply_pres_hints(lxb_dom_element_t *el, css_style *cs) {
         if (od != NULL && od->compat_mode == LXB_DOM_DOCUMENT_CMODE_QUIRKS) flags |= PH_QUIRKS;
     }
     ph_apply(tag, pv_hint_attr, el, flags, cs);
+    lxb_tag_id_t tid = lxb_dom_element_tag_id(el);
+    if (tid == LXB_TAG_TD || tid == LXB_TAG_TH) {
+        lxb_dom_element_t *tbl = pv_cell_table(el);
+        ph_cell_padding((tbl != NULL) ? ph_table_cellpadding(pv_hint_attr, tbl) : -1, cs);
+    }
 }
 
 /*
@@ -4065,9 +4086,14 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                  * of text, so a wrapper whose content is all floats or boxes (slashdot's
                  * `body > section{background:#fff}`) painted nothing and the page showed
                  * the body colour through it. */
+                /* A <table> too: its background shows through the border-spacing
+                 * around and between the cells (CSS 2.1 17.5.1). Rows and row groups
+                 * stay on the runs. */
+                bx_table_role brole = (!has_deco && cs->background >= 0)
+                    ? node_table_role((const lxb_dom_node_t *)p, flowreg) : BX_TROLE_NONE;
                 if (!has_deco && cs->background >= 0 &&
                     (cs->bg_alpha == CSS_LEN_UNSET || cs->bg_alpha > 0) &&
-                    node_table_role((const lxb_dom_node_t *)p, flowreg) == BX_TROLE_NONE)
+                    (brole == BX_TROLE_NONE || brole == BX_TROLE_TABLE))
                     has_deco = 1;
                 int cgrow = 0;
                 if (gen && has_deco) {
@@ -4261,7 +4287,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                             cd->display = BX_DISPLAY_GRID;
                             cd->cols = table_columns(p, flowreg);
                             cd->justify = FX_JUSTIFY_START;
-                            cd->gap = 0;
+                            cd->gap = pv_table_spacing(cs);
+                            cd->row_gap = cd->gap;
                             cd->is_table = 1;
                         } else if (is_real) {
                             cd->display = (cs->display == CSS_DISP_FLEX) ? BX_DISPLAY_FLEX
@@ -6232,7 +6259,11 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                     reg.def[cid].display = BX_DISPLAY_GRID;
                     reg.def[cid].cols = cols;
                     reg.def[cid].justify = FX_JUSTIFY_START;
-                    reg.def[cid].gap = 0;
+                    reg.def[cid].gap = (table != NULL)
+                        ? pv_table_spacing(cached_element_style_ref(
+                              lxb_dom_interface_element((lxb_dom_node_t *)table), sheet, &cache))
+                        : 0;
+                    reg.def[cid].row_gap = reg.def[cid].gap;
                     /* Marks the grid as a TABLE so the layout engine sizes its
                      * columns to their content instead of splitting the width
                      * evenly (spec/page_view.md "Tablas: ancho automatico"). */

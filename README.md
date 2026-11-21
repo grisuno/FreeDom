@@ -63,7 +63,7 @@ the page. Both engines ran under the same rules: author CSS on, JavaScript off, 
 third-party network. Each pair shows the top of the page; the number is the
 `make parity` divergence (lower is better, 0 = identical geometry).
 
-| Hacker News (1.31) | Wikipedia (2.17) |
+| Hacker News (1.25) | Wikipedia (2.18) |
 | :-: | :-: |
 | ![Hacker News](docs/img/compare-hackernews.png) | ![Wikipedia](docs/img/compare-wikipedia.png) |
 | **andreagrandi.it (3.01)** | **Hugging Face (5.67)** |

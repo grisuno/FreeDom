@@ -233,6 +233,12 @@ Depends on: `include/css_import.h`
 - `ci_scan` (function) `src/css_import.c:156` `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap)`
 - `ci_wrap` (function) `src/css_import.c:194` `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap)`
 - `ci_balanced` (function) `src/css_import.c:220` `int ci_balanced(const char *css, size_t len)`
+- `is_ident_ch` (function) `src/css_import.c:243` `static int is_ident_ch(char c)`
+- `has_scheme` (function) `src/css_import.c:250` `static int has_scheme(const char *r)` -- } else if (c == '}') { if (--depth < 0) return 0; } } return depth == 0; } static int is_ident_ch(char c) { unsigned...
+- `url_arg` (function) `src/css_import.c:266` `static int url_arg(const char *s, size_t a, size_t e, char *ref, size_t cap, size_t *end)` -- Reads the argument of the url( whose '(' ends at s[a-1]: the raw reference into ref and the index past ')' into...
+- `abs_ok` (function) `src/css_import.c:297` `static int abs_ok(const char *u)`
+- `ci_rebase_urls` (function) `src/css_import.c:303` `int ci_rebase_urls(const char *css, size_t len, const char *base,
+                   ci_resolve_f...`
 
 ## src/css_index.c
 Depends on: `include/css_index.h`

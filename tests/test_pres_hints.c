@@ -173,8 +173,76 @@ static void test_fail_closed(void **state) {
     assert_int_equal(cs.width, CSS_LEN_UNSET);
 }
 
+static void test_nonneg(void **state) {
+    (void)state;
+    int v = -1;
+    assert_int_equal(ph_parse_nonneg("0", 1, &v), 1);       assert_int_equal(v, 0);
+    assert_int_equal(ph_parse_nonneg(" +12px", 6, &v), 1);  assert_int_equal(v, 12);
+    assert_int_equal(ph_parse_nonneg("-3", 2, &v), 0);
+    assert_int_equal(ph_parse_nonneg("x", 1, &v), 0);
+    assert_int_equal(ph_parse_nonneg("", 0, &v), 0);
+    assert_int_equal(ph_parse_nonneg("99999999999", 11, &v), 0);
+    assert_int_equal(ph_parse_nonneg(NULL, 3, &v), 0);
+}
+
+static void test_cellspacing(void **state) {
+    (void)state;
+    kv a[] = { { "cellspacing", "6" }, { NULL, NULL } };
+    css_style cs = fresh();
+    cs.border_spacing = CSS_LEN_UNSET;
+    ph_apply("table", get, a, 0, &cs);
+    assert_int_equal(cs.border_spacing, 6);
+    kv none[] = { { NULL, NULL } };
+    cs = fresh();
+    cs.border_spacing = CSS_LEN_UNSET;
+    ph_apply("table", get, none, 0, &cs);
+    assert_int_equal(cs.border_spacing, 2);                 /* the UA sheet's default */
+    kv zero[] = { { "cellspacing", "0" }, { NULL, NULL } };
+    cs = fresh();
+    cs.border_spacing = CSS_LEN_UNSET;
+    ph_apply("table", get, zero, 0, &cs);
+    assert_int_equal(cs.border_spacing, 0);
+    cs = fresh();
+    cs.border_spacing = 10;                                 /* declared: CSS wins */
+    ph_apply("table", get, a, 0, &cs);
+    assert_int_equal(cs.border_spacing, 10);
+}
+
+static void test_cellpadding(void **state) {
+    (void)state;
+    kv a[] = { { "cellpadding", "12" }, { NULL, NULL } };
+    kv z[] = { { "cellpadding", "0" }, { NULL, NULL } };
+    kv bad[] = { { "cellpadding", "x" }, { NULL, NULL } };
+    assert_int_equal(ph_table_cellpadding(get, a), 12);
+    assert_int_equal(ph_table_cellpadding(get, z), 0);
+    assert_int_equal(ph_table_cellpadding(get, bad), -1);
+    assert_int_equal(ph_table_cellpadding(NULL, a), -1);
+    css_style cs = fresh();
+    cs.pad_top = cs.pad_right = cs.pad_bottom = cs.pad_left = CSS_LEN_UNSET;
+    cs.pad_left = 3;                                        /* declared side wins */
+    ph_cell_padding(12, &cs);
+    assert_int_equal(cs.pad_top, 12);
+    assert_int_equal(cs.pad_right, 12);
+    assert_int_equal(cs.pad_bottom, 12);
+    assert_int_equal(cs.pad_left, 3);
+    cs = fresh();
+    cs.pad_top = cs.pad_right = cs.pad_bottom = cs.pad_left = CSS_LEN_UNSET;
+    ph_cell_padding(-1, &cs);
+    assert_int_equal(cs.pad_top, 1);                        /* the UA sheet's td padding */
+    assert_int_equal(cs.pad_left, 1);
+    cs = fresh();
+    cs.pad_top = cs.pad_right = cs.pad_bottom = cs.pad_left = CSS_LEN_UNSET;
+    cs.pct[CSS_PCT_PAD_TOP] = 50;                           /* a % side is declared too */
+    ph_cell_padding(12, &cs);
+    assert_int_equal(cs.pad_top, CSS_LEN_UNSET);
+    ph_cell_padding(12, NULL);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_nonneg),
+        cmocka_unit_test(test_cellspacing),
+        cmocka_unit_test(test_cellpadding),
         cmocka_unit_test(test_dimension),
         cmocka_unit_test(test_table_width_and_centering),
         cmocka_unit_test(test_css_wins),

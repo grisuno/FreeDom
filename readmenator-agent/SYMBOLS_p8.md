@@ -3,6 +3,16 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `fbp_tab_label` | function | `src/fb_panes.c:112` | `const char *fbp_tab_label(int tab)` |
+| `fbp_tab_span` | function | `src/fb_panes.c:136` | `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w)` |
+| `fbp_tab_wrap` | function | `src/fb_panes.c:130` | `int fbp_tab_wrap(int tab, int dir)` |
+| `ieq` | function | `src/fb_panes.c:114` | `static int ieq(const char *a, const char *b)` |
+| `tab_ok` | function | `src/fb_panes.c:110` | `static int tab_ok(int tab)` |
+| `FX_EPS` | macro | `src/flex_layout.c:16` | `#define FX_EPS` |
+| `area_token_is_null_cell` | function | `src/flex_layout.c:351` | `static int area_token_is_null_cell(const char *tok, size_t len)` |
+| `float_pack_impl` | function | `src/flex_layout.c:474` | `static fx_status float_pack_impl(const double *width, const int *side, size_t n,                 ...` |
+| `fx_auto_margins` | function | `src/flex_layout.c:613` | `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,                 ...` |
+| `fx_auto_min_size` | function | `src/flex_layout.c:636` | `double fx_auto_min_size(double min_content, double basis, double author_min,                     ...` |
 | `fx_autofill_count` | function | `src/flex_layout.c:141` | `size_t fx_autofill_count(double avail, double gap, double minw)` |
 | `fx_col_free_split` | function | `src/flex_layout.c:938` | `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,         ...` |
 | `fx_column_place` | function | `src/flex_layout.c:733` | `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,             ...` |
@@ -486,15 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `m_host_fetch` | function | `src/js_fetch.c:74` | `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,                             in...` |
 | `m_host_fetch_async` | function | `src/js_fetch.c:105` | `static JSValue m_host_fetch_async(JSContext *ctx, JSValueConst this_val,                         ...` |
 | `send` | function | `src/js_fetch.c:128` | `* callbacks fire right after send();` |
-| `task` | function | `src/js_fetch.c:312` | `* current task (the page never waits on it);` |
-| `JG_INDEX_SLOTS` | macro | `src/js_geom.c:14` | `#define JG_INDEX_SLOTS` |
-| `JG_SLOT_EMPTY` | macro | `src/js_geom.c:15` | `#define JG_SLOT_EMPTY` |
-| `clamp_coord` | function | `src/js_geom.c:27` | `static int32_t clamp_coord(double v, double lo)` |
-| `cmp_node` | function | `src/js_geom.c:78` | `static int cmp_node(const void *pa, const void *pb)` |
-| `fnv` | function | `src/js_geom.c:212` | `static uint64_t fnv(uint64_t h, int32_t v)` |
-| `grow` | function | `src/js_geom.c:33` | `static int grow(jg_table *t)` |
-| `in_range` | function | `src/js_geom.c:182` | `static int in_range(int32_t v, int32_t lo)` |
-| `index_of` | function | `src/js_geom.c:109` | `static size_t index_of(jg_table *t, uint32_t *slots, dom_node_id node, const jg_rect *seed,      ...` |
-| `jg_add` | function | `src/js_geom.c:52` | `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h)` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

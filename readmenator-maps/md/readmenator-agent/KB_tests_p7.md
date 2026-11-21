@@ -134,7 +134,10 @@ Previous: [KB_tests_p6.md](KB_tests_p6.md)
   - `test_center_and_block_align` (function, line 106) `static void test_center_and_block_align(void **state)`
   - `test_bgcolor_and_quirks` (function, line 132) `static void test_bgcolor_and_quirks(void **state)`
   - `test_fail_closed` (function, line 162) `static void test_fail_closed(void **state)`
-  - `main` (function, line 176) `int main(void)`
+  - `test_nonneg` (function, line 176) `static void test_nonneg(void **state)`
+  - `test_cellspacing` (function, line 188) `static void test_cellspacing(void **state)`
+  - `test_cellpadding` (function, line 211) `static void test_cellpadding(void **state)`
+  - `main` (function, line 241) `int main(void)`
 - Depends on: `include/pres_hints.h`
 
 ## tests/test_profile.c

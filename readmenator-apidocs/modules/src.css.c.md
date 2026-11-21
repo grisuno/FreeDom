@@ -257,7 +257,7 @@ A competing `--name` declaration: cascade key, then its text.
 
 **Returns:** `* * It must exceed the most slots ANY single declaration can`
 
-*Called by:* [`pf_scan`](src.prefetch.c.md#pf_scan), [`wh_on_notify`](src.ws_hub.c.md#wh_on_notify), [`wh_on_readable`](src.ws_hub.c.md#wh_on_readable), [`main`](tools.gen_psl.c.md#main)
+*Called by:* [`ci_rebase_urls`](src.css_import.c.md#ci_rebase_urls), [`pf_scan`](src.prefetch.c.md#pf_scan), [`wh_on_notify`](src.ws_hub.c.md#wh_on_notify), [`wh_on_readable`](src.ws_hub.c.md#wh_on_readable), [`main`](tools.gen_psl.c.md#main)
 
 ---
 

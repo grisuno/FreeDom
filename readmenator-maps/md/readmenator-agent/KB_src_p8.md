@@ -50,6 +50,9 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
   - `ph_is_heading` (function, line 76) `static int ph_is_heading(const char *tag)`
   - `ph_bgcolor` (function, line 81) `static void ph_bgcolor(ph_attr_fn get, void *ctx, css_style *cs)`
   - `ph_apply` (function, line 93) `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs)`
+  - `ph_parse_nonneg` (function, line 140) `int ph_parse_nonneg(const char *s, size_t len, int *out)`
+  - `ph_table_cellpadding` (function, line 156) `int ph_table_cellpadding(ph_attr_fn get, void *ctx)`
+  - `ph_cell_padding` (function, line 164) `void ph_cell_padding(int cellpad, css_style *cs)`
   - `PH_PER_MILLE_MAX` (macro, line 8) `#define PH_PER_MILLE_MAX`
 - Depends on: `include/css_color.h`, `include/pres_hints.h`
 

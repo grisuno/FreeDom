@@ -1,12 +1,12 @@
 # `include/css_import.h`
 
-> Source: [include/css_import.h:1](../../include/css_import.h#L1) | language `h` | coverage 72.7% | [API index](../index.md)
+> Source: [include/css_import.h:1](../../include/css_import.h#L1) | language `h` | coverage 66.7% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`ci_import`](#ci_import)
 - **Type Aliases:** [`url`](#url)
-- **Functions:** [`ci_scan`](#ci_scan), [`ci_wrap`](#ci_wrap), [`ci_balanced`](#ci_balanced)
+- **Functions:** [`ci_scan`](#ci_scan), [`ci_wrap`](#ci_wrap), [`ci_balanced`](#ci_balanced), [`url`](#url)
 - **Macros:** [`CI_URL_MAX`](#ci_url_max), [`CI_COND_MAX`](#ci_cond_max), [`CI_MAX_DEPTH`](#ci_max_depth), [`CI_MAX_PER_PAGE`](#ci_max_per_page), [`CI_MAX_PER_SHEET`](#ci_max_per_sheet)
 
 ## Type Diagram
@@ -129,6 +129,26 @@ NULL => 0 (empty text => 1).
 | `len` | `size_t` |  |  |
 
 **Returns:** `int`
+
+---
+
+<a id="url"></a>
+
+### `url`
+
+`function` | [include/css_import.h:55](../../include/css_import.h#L55)
+
+```c
+* rewritten to url("ABS"), ABS = resolve(base, ref) (spec/css_import.md, "Rebase"). * Fragment-only, schemed, empty, escaped, unterminated or unresolvable references * are emitted unchanged. Returns 0
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ABS` |  |  |  |
+
+**Returns:** `* rewritten to`
 
 ---
 

@@ -4,11 +4,11 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 185.50)
+- `gui/browser_ui.c` (score: 185.60)
 - `include/css.h` (score: 100.80, imported by 40 files)
-- `src/tab.c` (score: 84.00)
+- `src/tab.c` (score: 84.10)
+- `src/page_view.c` (score: 63.10)
 - `src/freedom.c` (score: 63.00)
-- `src/page_view.c` (score: 63.00)
 - `src/css.c` (score: 61.30)
 - `include/js_sandbox.h` (score: 41.70, imported by 19 files)
 
@@ -16,10 +16,10 @@ These files have the most connections. Changes here have high blast radius.
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css.h` -- 40 direct, 54 total dependents
+- `include/css.h` -- 40 direct, 57 total dependents
 - `include/css_color.h` -- 14 direct, 54 total dependents
-- `include/css_counter.h` -- 3 direct, 51 total dependents
-- `include/css_mq.h` -- 4 direct, 51 total dependents
+- `include/css_counter.h` -- 3 direct, 50 total dependents
+- `include/css_mq.h` -- 4 direct, 50 total dependents
 - `include/html_parse.h` -- 19 direct, 44 total dependents
 - `include/dom.h` -- 17 direct, 40 total dependents
 - `include/css_select.h` -- 15 direct, 31 total dependents

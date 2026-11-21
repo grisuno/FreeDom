@@ -1,6 +1,6 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 237 modules, 3713 documented entities, documentation coverage 44.6% (1643/3683 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 237 modules, 3721 documented entities, documentation coverage 44.7% (1649/3691 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
@@ -50,7 +50,7 @@ Languages: c (111), h (110), py (12), sh (4)
 | [`include/css_counter.h`](modules/include.css_counter.h.md) |  | 4 | 14 | 36.8% |
 | [`include/css_decl.h`](modules/include.css_decl.h.md) |  | 2 | 12 | 13.3% |
 | [`include/css_gradient.h`](modules/include.css_gradient.h.md) |  | 4 | 9 | 35.7% |
-| [`include/css_import.h`](modules/include.css_import.h.md) |  | 2 | 8 | 72.7% |
+| [`include/css_import.h`](modules/include.css_import.h.md) |  | 2 | 9 | 66.7% |
 | [`include/css_index.h`](modules/include.css_index.h.md) |  | 3 | 4 | 50.0% |
 | [`include/css_length.h`](modules/include.css_length.h.md) |  | 5 | 14 | 60.0% |
 | [`include/css_mask.h`](modules/include.css_mask.h.md) | CSS Masking 1, alpha gradients only (spec/css_mask.md). | 4 | 5 | 50.0% |
@@ -105,7 +105,7 @@ Languages: c (111), h (110), py (12), sh (4)
 | [`include/pq_seal.h`](modules/include.pq_seal.h.md) |  | 2 | 5 | 12.5% |
 | [`include/prefetch.h`](modules/include.prefetch.h.md) |  | 11 | 16 | 53.6% |
 | [`include/prefs.h`](modules/include.prefs.h.md) |  | 4 | 13 | 38.9% |
-| [`include/pres_hints.h`](modules/include.pres_hints.h.md) | pres_hints (ph_) -- HTML presentational attributes as zero-specificity style. | 0 | 6 | 71.4% |
+| [`include/pres_hints.h`](modules/include.pres_hints.h.md) | pres_hints (ph_) -- HTML presentational attributes as zero-specificity style. | 0 | 9 | 80.0% |
 | [`include/profile.h`](modules/include.profile.h.md) |  | 3 | 5 | 22.2% |
 | [`include/psl_data.h`](modules/include.psl_data.h.md) |  | 0 | 0 | 0.0% |
 | [`include/render_doc.h`](modules/include.render_doc.h.md) |  | 6 | 20 | 48.1% |
@@ -158,7 +158,7 @@ Languages: c (111), h (110), py (12), sh (4)
 | [`src/css_computed.c`](modules/src.css_computed.c.md) |  | 1 | 5 | 28.6% |
 | [`src/css_counter.c`](modules/src.css_counter.c.md) |  | 3 | 16 | 30.0% |
 | [`src/css_gradient.c`](modules/src.css_gradient.c.md) |  | 0 | 16 | 23.5% |
-| [`src/css_import.c`](modules/src.css_import.c.md) | css_import -- @import prelude reader (spec/css_import.md). | 0 | 3 | 100.0% |
+| [`src/css_import.c`](modules/src.css_import.c.md) | css_import -- @import prelude reader (spec/css_import.md). | 0 | 4 | 80.0% |
 | [`src/css_index.c`](modules/src.css_index.c.md) | css_index -- see include/css_index.h and spec/css_index.md. | 1 | 4 | 100.0% |
 | [`src/css_length.c`](modules/src.css_length.c.md) |  | 0 | 11 | 25.0% |
 | [`src/css_mask.c`](modules/src.css_mask.c.md) |  | 0 | 6 | 42.9% |
@@ -222,7 +222,7 @@ Languages: c (111), h (110), py (12), sh (4)
 | [`src/pq_seal.c`](modules/src.pq_seal.c.md) |  | 1 | 8 | 10.0% |
 | [`src/prefetch.c`](modules/src.prefetch.c.md) |  | 1 | 12 | 42.9% |
 | [`src/prefs.c`](modules/src.prefs.c.md) |  | 1 | 11 | 30.8% |
-| [`src/pres_hints.c`](modules/src.pres_hints.c.md) | pres_hints (ph_) -- see include/pres_hints.h and spec/pres_hints.md. | 0 | 3 | 75.0% |
+| [`src/pres_hints.c`](modules/src.pres_hints.c.md) | pres_hints (ph_) -- see include/pres_hints.h and spec/pres_hints.md. | 0 | 6 | 85.7% |
 | [`src/profile.c`](modules/src.profile.c.md) |  | 0 | 6 | 14.3% |
 | [`src/render_doc.c`](modules/src.render_doc.c.md) |  | 0 | 18 | 47.4% |
 | [`src/render_policy.c`](modules/src.render_policy.c.md) |  | 0 | 5 | 50.0% |

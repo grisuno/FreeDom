@@ -12,7 +12,7 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `src/css_import.c` | c | utility | 12 | yes |
+| `src/css_import.c` | c | utility | 17 | yes |
 | `src/dom.c` | c | utility | 77 | no |
 | `src/fb_cmdline.c` | c | utility | 13 | no |
 | `src/freebug.c` | c | utility | 9 | no |
@@ -24,7 +24,7 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `include/css_import.h` | h | utility | 11 | no |
+| `include/css_import.h` | h | utility | 12 | no |
 | `include/dom.h` | h | utility | 32 | no |
 | `include/fb_cmdline.h` | h | utility | 18 | no |
 | `include/freebug.h` | h | utility | 18 | no |
@@ -36,7 +36,7 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `tests/test_css_import.c` | c | testing | 12 | yes |
+| `tests/test_css_import.c` | c | testing | 20 | yes |
 | `tests/test_dom.c` | c | testing | 45 | no |
 | `tests/test_fb_cmdline.c` | c | testing | 7 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
@@ -59,6 +59,7 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 - `ci_scan` (function, `include/css_import.h:36`) `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap);` - Reads the leading @import rules of css[0,len) into out (at most cap). Skips whitespace, comments, @c
 - `ci_wrap` (function, `include/css_import.h:41`) `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t cc` - Builds the wrapper for one import: open = "@layer N {@supports (S) {@media M {" (only the parts pres
 - `ci_balanced` (function, `include/css_import.h:45`) `int ci_balanced(const char *css, size_t len);` - 1 iff every comment and string in css[0,len) terminates and the braces outside * them never go negat
+- `url` (function, `include/css_import.h:55`) `* rewritten to url("ABS"), ABS = resolve(base, ref) (spec/css_import.md, "Rebase`
 - `FREEDOM_DOM_H` (macro, `include/dom.h:2`) `#define FREEDOM_DOM_H`
 - `dom_status` (enum, `include/dom.h:26`)
 - `dom_node_id` (type_alias, `include/dom.h:34`) `typedef uint32_t dom_node_id;` - tree. The Lexbor backend stays encapsulated: no lxb_* type appears here.  The index references the t
@@ -77,7 +78,6 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 - `dom_attribute_names` (function, `include/dom.h:133`) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **` - Qualified names of node's attributes, in document order, written to names[] (borrowed, valid while i
 - `dom_text_content` (function, `include/dom.h:138`) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len` - Concatenated text content of node's subtree (borrowed, valid while idx/doc are * alive), or NULL. *l
 - `dom_document_title` (function, `include/dom.h:141`) `const char *dom_document_title(const dom_index *idx, size_t *len);` - Concatenated text content of node's subtree (borrowed, valid while idx/doc are * alive), or NULL. *l
-- `valid` (function, `include/dom.h:146`) `* detached node stays valid (it just becomes unreachable from the root and is no`
 
 ## Internal vs External Edges
 

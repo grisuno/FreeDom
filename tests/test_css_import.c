@@ -144,6 +144,74 @@ static void test_balanced(void **state) {
     assert_int_equal(ci_balanced(NULL, 0), 0);
 }
 
+typedef struct { char buf[4096]; size_t n; } rb_out;
+static int rb_emit(void *ctx, const char *s, size_t n) {
+    rb_out *o = (rb_out *)ctx;
+    if (n >= sizeof o->buf - o->n) return -1;
+    memcpy(o->buf + o->n, s, n);
+    o->n += n;
+    o->buf[o->n] = '\0';
+    return 0;
+}
+/* Toy resolver: base directory + ref, "../" pops one segment. Enough to see WHICH
+ * base was used; the real one is url_resolve_https. */
+static int rb_resolve(void *ctx, const char *base, const char *ref, char *out, size_t outsz) {
+    if (ctx != NULL) return -1;
+    char dir[512];
+    snprintf(dir, sizeof dir, "%s", base);
+    char *slash = strrchr(dir, '/');
+    if (slash == NULL) return -1;
+    slash[1] = '\0';
+    while (strncmp(ref, "../", 3) == 0) {
+        slash[0] = '\0';
+        slash = strrchr(dir, '/');
+        if (slash == NULL) return -1;
+        slash[1] = '\0';
+        ref += 3;
+    }
+    int r = snprintf(out, outsz, "%s%s", dir, ref);
+    return (r < 0 || (size_t)r >= outsz) ? -1 : 0;
+}
+static const char *rebase(const char *css, int fail) {
+    static rb_out o;
+    o.n = 0;
+    o.buf[0] = '\0';
+    int rc = ci_rebase_urls(css, strlen(css), "https://h/css/m.css", rb_resolve,
+                            fail ? (void *)&o : NULL, rb_emit, &o);
+    return rc == 0 ? o.buf : "<error>";
+}
+
+static void test_rebase_relative(void **state) {
+    (void)state;
+    assert_string_equal(rebase("a{background:url(../i/b.png)}", 0),
+                        "a{background:url(\"https://h/i/b.png\")}");
+    assert_string_equal(rebase("a{b:url( 'x.svg#ic' )}", 0),
+                        "a{b:url(\"https://h/css/x.svg#ic\")}");
+    assert_string_equal(rebase("a{b:URL(\"y.png\") , url(z.png)}", 0),
+                        "a{b:url(\"https://h/css/y.png\") , url(\"https://h/css/z.png\")}");
+}
+
+static void test_rebase_left_alone(void **state) {
+    (void)state;
+    const char *keep[] = {
+        "a{mask:url(#m)}", "a{b:url(data:image/png;base64,AA)}", "a{b:url(https://o/x)}",
+        "/* url(a) */ b{content:\"url(a)\"}", "a{b:xurl(a)}", "a{b:url(a", "a{b:url()}",
+        "a{b:url(a\\)b)}", "a{b:url('a\"b')}", "", "a{b:url(x}y)}", "a{b:url(x/*y)}",
+    };
+    for (size_t i = 0; i < sizeof keep / sizeof keep[0]; ++i)
+        assert_string_equal(rebase(keep[i], 0), keep[i]);
+    assert_string_equal(rebase("a{b:url(x.png)}", 1), "a{b:url(x.png)}");
+}
+
+static void test_rebase_args(void **state) {
+    (void)state;
+    rb_out o = { "", 0 };
+    assert_int_equal(ci_rebase_urls(NULL, 0, "b", rb_resolve, NULL, rb_emit, &o), -1);
+    assert_int_equal(ci_rebase_urls("a", 1, NULL, rb_resolve, NULL, rb_emit, &o), -1);
+    assert_int_equal(ci_rebase_urls("a", 1, "b", NULL, NULL, rb_emit, &o), -1);
+    assert_int_equal(ci_rebase_urls("a", 1, "b", rb_resolve, NULL, NULL, &o), -1);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_plain_url),
@@ -156,6 +224,9 @@ int main(void) {
         cmocka_unit_test(test_oversize),
         cmocka_unit_test(test_cap_and_null),
         cmocka_unit_test(test_balanced),
+        cmocka_unit_test(test_rebase_relative),
+        cmocka_unit_test(test_rebase_left_alone),
+        cmocka_unit_test(test_rebase_args),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 13 communities, 334 files, 1927 imports, 4 languages, 8112 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 13 communities, 334 files, 1927 imports, 4 languages, 8142 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -14,7 +14,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/API_p12.md](md/readmenator-agent/API_p12.md): Depends on: include/antifp.h, include/boxtree.h, include/css.h, include/csscomputed.h, include/cssgradient.h, include/cssimport.h, include/dataurl.h...
 - [readmenator-agent/API_p13.md](md/readmenator-agent/API_p13.md): vecpush (function) tools/genpsl.c:27 static void vecpush(vec v, const char s)
 - [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/cachedfetch.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): lazyslot (function) gui/browserui.c:15121 static uiimage lazyslot(browserwindow w, const char href, sizet idx)
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): buipopgroupcomposite (function) gui/browserui.c:15135 buipopgroupcomposite(cr, def, nowms() - w->pageloadmonoms, bx, left, origin,
 - [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: src/css.c, src/cssbox.c, src/cssgradient.c, src/csslength.c, src/cssmq.c, src/csstext.c, src/cssvalues.c, src/pageview.c, tests/testcsslength.c
 - [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Depends on: include/css.h, include/dom.h, include/htmlparse.h
 - [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/boxstyle.h
@@ -25,7 +25,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testcssindex.c -> include/cssindex.h
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): uirenderpngframes (function, line 15984) uistatus uirenderpngframes(const rddoc doc, tab t, const char topurl,
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): uirenderpngimages (function, line 16047) uistatus uirenderpngimages(const rddoc doc, tab t, const char topurl,
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
 - [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: The sheet's two string pools -- background url()s, and the ::before/::after
 - [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: active: frameclock (fc) — pure animation frame scheduler.
@@ -53,7 +53,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p8.md](md/readmenator-agent/KB_tests_p8.md): Doc: sinkcap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS...
 - [readmenator-agent/KB_tests_p9.md](md/readmenator-agent/KB_tests_p9.md): testclampbounds (function, line 17) static void testclampbounds(void state)
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 334 files at commit 123bfb2f8eb9. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 334 files at commit bba54a0396c6. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)

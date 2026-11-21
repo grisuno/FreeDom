@@ -44,4 +44,18 @@ int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t cc
  * them never go negative and end at zero; else 0. NULL => 0 (empty text => 1). */
 int ci_balanced(const char *css, size_t len);
 
+/* Resolver of a relative reference against a base URL: 0 and a NUL-terminated out,
+ * or -1 (the reference is then left as written). */
+typedef int (*ci_resolve_fn)(void *ctx, const char *base, const char *ref,
+                             char *out, size_t outsz);
+/* Output sink: appends s[0,n). Returns 0, or -1 to abort the rewrite. */
+typedef int (*ci_emit_fn)(void *ctx, const char *s, size_t n);
+
+/* Emits css[0,len) with every relative url() token outside comments and strings
+ * rewritten to url("ABS"), ABS = resolve(base, ref) (spec/css_import.md, "Rebase").
+ * Fragment-only, schemed, empty, escaped, unterminated or unresolvable references
+ * are emitted unchanged. Returns 0, or -1 when an argument is NULL or emit failed. */
+int ci_rebase_urls(const char *css, size_t len, const char *base,
+                   ci_resolve_fn resolve, void *rctx, ci_emit_fn emit, void *ectx);
+
 #endif /* FREEDOM_CSS_IMPORT_H */

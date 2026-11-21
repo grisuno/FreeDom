@@ -946,6 +946,59 @@ static void test_download_png_negative_zindex_paints_behind_inflow(void **state)
  * else changes. Handing that matrix to Cairo puts the context into a sticky
  * error state and silently dropped every later paint: ipinfo.io lost all its
  * text. A blue box painted AFTER the degenerate one must still reach the PNG. */
+/* An overflow:hidden table cell clips its rows to ITS padding box: the deferred row pass
+ * handed the clip (left, top) as (top, left), so on any page with a body margin the clip
+ * slid 8px left and 8px down -- Hacker News' rank numbers vanished and every title lost
+ * its top (`.title{overflow:hidden}`). The glyphs' top rows must paint. */
+static void test_download_png_overflow_cell_clip_not_shifted(void **state) {
+    (void)state;
+    /* The Hacker News story row: rank cell, vote cell with a sized block, title cell, all
+     * in a nested table inside the 85% page table. */
+    const char *html =
+        "<!DOCTYPE html><html><head><style>body{background:#fff}"
+        ".title{color:#000;font-size:20px;overflow:hidden}"
+        ".votearrow{width:10px;height:10px;margin:3px 2px 6px;background:#999}</style></head><body>"
+        "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"85%\" bgcolor=\"#f6f6ef\">"
+        "<tr><td><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">"
+        "<tr><td align=\"right\" valign=\"top\" class=\"title\"><span>1.</span></td>"
+        "<td valign=\"top\"><center><a href=\"x\"><div class=\"votearrow\"></div></a></center></td>"
+        "<td class=\"title\"><a href=\"y\">MMMM</a></td></tr>"
+        "<tr><td colspan=\"2\"></td><td>sub</td></tr>"
+        "</table></td></tr></table></body></html>";
+    const char *path = "__freedom_ovcell_page.html";
+    const char *png = "__freedom_ovcell_out.png";
+    FILE *f = fopen(path, "w");
+    assert_non_null(f);
+    assert_int_equal(fwrite(html, 1, strlen(html), f), strlen(html));
+    fclose(f);
+    (void)unlink(png);
+    char args[512];
+    assert_true((size_t)snprintf(args, sizeof args,
+                 "--author-css --download-png=%s %s", png, path) < sizeof args);
+    int rc = -1;
+    assert_int_equal(run_freedom_raw(args, &rc), 0);
+    assert_int_equal(rc, 0);
+    size_t len = 0;
+    uint8_t *bytes = read_file_all(png, &len);
+    assert_non_null(bytes);
+    img_pixels px;
+    assert_int_equal(img_decode(bytes, len, &px), IMG_OK);
+    free(bytes);
+    assert_true(px.width > 100 && px.height >= 32);
+    /* The title link's last glyph ends at x ~112; the shifted clip cut it at ~106. */
+    int right = -1;
+    for (int y = 8; y < 30; ++y)
+        for (int x = 0; x < 300 && x < (int)px.width; ++x) {
+            uint32_t p = ((const uint32_t *)(const void *)px.data)[y * (px.stride / 4) + x];
+            uint8_t r = (uint8_t)(p >> 16), b = (uint8_t)p;
+            if (r < 120 && b > 150 && x > right) right = x;
+        }
+    assert_true(right >= 110);
+    img_pixels_free(&px);
+    unlink(path);
+    unlink(png);
+}
+
 static void test_download_png_degenerate_transform_paints_rest(void **state) {
     (void)state;
     const char *html =
@@ -2601,7 +2654,9 @@ static void test_dump_layout_table_cells_do_not_reopen_wrappers(void **state) {
     (void)state;
     const char *html =
         "<html><head><style>body{margin:0}.wrap{display:flex;margin:0 -8px}"
-        ".col{margin:0 8px}.box{padding:16px}</style></head><body>"
+        ".col{margin:0 8px}.box{padding:16px}"
+        /* undecorated cells (no UA 1px padding): only wrapper boxes are counted */
+        "td{padding:0}</style></head><body>"
         "<div class=\"wrap\"><div class=\"col\"><div class=\"box\"><p>Left</p></div></div>"
         "<div class=\"col\"><div class=\"box\"><p>Intro</p>"
         "<table><tr><td>a one</td><td>b two</td><td>c three</td></tr>"
@@ -4636,6 +4691,7 @@ int main(void) {
         cmocka_unit_test(test_dump_layout_nested_table_inside_item_box),
         cmocka_unit_test(test_dump_layout_table_cells_do_not_reopen_wrappers),
         cmocka_unit_test(test_download_png_degenerate_transform_paints_rest),
+        cmocka_unit_test(test_download_png_overflow_cell_clip_not_shifted),
         cmocka_unit_test(test_rejects_http_url),
     };
     int rc = cmocka_run_group_tests(tests, NULL, NULL);

@@ -1,6 +1,6 @@
 # Documentation Coverage
 
-Overall: **44.6%** (1643 of 3683 public modules, types, and callables). Data members are excluded from the ratio.
+Overall: **44.7%** (1649 of 3691 public modules, types, and callables). Data members are excluded from the ratio.
 
 [Back to index](index.md)
 
@@ -9,7 +9,7 @@ Overall: **44.6%** (1643 of 3683 public modules, types, and callables). Data mem
 | Kind | Documented | Total | Coverage |
 |---|---|---|---|
 | enum | 81 | 163 | 49.7% |
-| function | 931 | 2066 | 45.1% |
+| function | 937 | 2074 | 45.2% |
 | macro | 355 | 757 | 46.9% |
 | method | 0 | 27 | 0.0% |
 | module | 39 | 237 | 16.5% |
@@ -209,6 +209,7 @@ Overall: **44.6%** (1643 of 3683 public modules, types, and callables). Data mem
 | [`src/request_policy.c`](modules/src.request_policy.c.md) | 5 | 8 | 62.5% |
 | [`include/box_style.h`](modules/include.box_style.h.md) | 20 | 31 | 64.5% |
 | [`src/css_select.c`](modules/src.css_select.c.md) | 13 | 20 | 65.0% |
+| [`include/css_import.h`](modules/include.css_import.h.md) | 8 | 12 | 66.7% |
 | [`include/sheet_cache.h`](modules/include.sheet_cache.h.md) | 8 | 12 | 66.7% |
 | [`src/fb_cmdline.c`](modules/src.fb_cmdline.c.md) | 8 | 12 | 66.7% |
 | [`src/svg_paint.c`](modules/src.svg_paint.c.md) | 2 | 3 | 66.7% |
@@ -219,13 +220,11 @@ Overall: **44.6%** (1643 of 3683 public modules, types, and callables). Data mem
 | [`src/freebug.c`](modules/src.freebug.c.md) | 7 | 10 | 70.0% |
 | [`src/ws_hub.c`](modules/src.ws_hub.c.md) | 14 | 20 | 70.0% |
 | [`include/text_shape.h`](modules/include.text_shape.h.md) | 17 | 24 | 70.8% |
-| [`include/pres_hints.h`](modules/include.pres_hints.h.md) | 5 | 7 | 71.4% |
 | [`src/css_text.c`](modules/src.css_text.c.md) | 10 | 14 | 71.4% |
 | [`src/frame_broker.c`](modules/src.frame_broker.c.md) | 5 | 7 | 71.4% |
 | [`src/interp.c`](modules/src.interp.c.md) | 10 | 14 | 71.4% |
 | [`include/css.h`](modules/include.css.h.md) | 106 | 148 | 71.6% |
 | [`include/freebug.h`](modules/include.freebug.h.md) | 13 | 18 | 72.2% |
-| [`include/css_import.h`](modules/include.css_import.h.md) | 8 | 11 | 72.7% |
 | [`include/frame_host.h`](modules/include.frame_host.h.md) | 8 | 11 | 72.7% |
 | [`include/ws_hub.h`](modules/include.ws_hub.h.md) | 11 | 15 | 73.3% |
 | [`include/css_vars.h`](modules/include.css_vars.h.md) | 14 | 19 | 73.7% |
@@ -238,16 +237,18 @@ Overall: **44.6%** (1643 of 3683 public modules, types, and callables). Data mem
 | [`include/text_case.h`](modules/include.text_case.h.md) | 6 | 8 | 75.0% |
 | [`src/dom_debug.c`](modules/src.dom_debug.c.md) | 3 | 4 | 75.0% |
 | [`src/perf_trace.c`](modules/src.perf_trace.c.md) | 9 | 12 | 75.0% |
-| [`src/pres_hints.c`](modules/src.pres_hints.c.md) | 3 | 4 | 75.0% |
 | [`src/zoom.c`](modules/src.zoom.c.md) | 6 | 8 | 75.0% |
 | [`include/render_policy.h`](modules/include.render_policy.h.md) | 7 | 9 | 77.8% |
 | [`include/js_geom.h`](modules/include.js_geom.h.md) | 15 | 19 | 78.9% |
 | [`include/box_blur.h`](modules/include.box_blur.h.md) | 4 | 5 | 80.0% |
+| [`include/pres_hints.h`](modules/include.pres_hints.h.md) | 8 | 10 | 80.0% |
 | [`include/webcaps.h`](modules/include.webcaps.h.md) | 4 | 5 | 80.0% |
 | [`src/css_atrule.c`](modules/src.css_atrule.c.md) | 4 | 5 | 80.0% |
+| [`src/css_import.c`](modules/src.css_import.c.md) | 4 | 5 | 80.0% |
 | [`src/sheet_cache.c`](modules/src.sheet_cache.c.md) | 9 | 11 | 81.8% |
 | [`src/js_geom.c`](modules/src.js_geom.c.md) | 11 | 13 | 84.6% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) | 6 | 7 | 85.7% |
+| [`src/pres_hints.c`](modules/src.pres_hints.c.md) | 6 | 7 | 85.7% |
 | [`include/compositor.h`](modules/include.compositor.h.md) | 8 | 9 | 88.9% |
 | [`src/fb_panes.c`](modules/src.fb_panes.c.md) | 8 | 9 | 88.9% |
 | [`include/freedom_config.h`](modules/include.freedom_config.h.md) | 15 | 16 | 93.8% |
@@ -255,14 +256,13 @@ Overall: **44.6%** (1643 of 3683 public modules, types, and callables). Data mem
 | [`docker_run.sh`](modules/docker_run.sh.md) | 1 | 1 | 100.0% |
 | [`install.sh`](modules/install.sh.md) | 1 | 1 | 100.0% |
 | [`run_freedom.sh`](modules/run_freedom.sh.md) | 1 | 1 | 100.0% |
-| [`src/css_import.c`](modules/src.css_import.c.md) | 4 | 4 | 100.0% |
 | [`src/css_index.c`](modules/src.css_index.c.md) | 6 | 6 | 100.0% |
 
 ## Warnings
 
 DOC001 undocumented public item, DOC002 parameter not documented, DOC003 documented parameter missing from the signature (stale doc), DOC004 return value not documented, DOC005 raised exception not documented.
 
-DOC001: 2040, DOC004: 1
+DOC001: 2042, DOC004: 1
 
 - DOC004 `app.py:47` return value of run_freedom_headless is not documented
 - DOC001 `docker-entrypoint.sh:1` module docker-entrypoint.sh is not documented
@@ -328,117 +328,117 @@ DOC001: 2040, DOC004: 1
 - DOC001 `gui/browser_ui.c:5970` function width is not documented
 - DOC001 `gui/browser_ui.c:6215` function layout is not documented
 - DOC001 `gui/browser_ui.c:6450` function TABLE is not documented
-- DOC001 `gui/browser_ui.c:6963` function axis is not documented
-- DOC001 `gui/browser_ui.c:7016` function slot is not documented
-- DOC001 `gui/browser_ui.c:7167` function struct is not documented
-- DOC001 `gui/browser_ui.c:7176` function descriptor is not documented
-- DOC001 `gui/browser_ui.c:7420` function builds is not documented
-- DOC001 `gui/browser_ui.c:7516` function flow is not documented
-- DOC001 `gui/browser_ui.c:7564` function own is not documented
-- DOC001 `gui/browser_ui.c:7645` function items is not documented
-- DOC001 `gui/browser_ui.c:7957` function wins is not documented
-- DOC001 `gui/browser_ui.c:8108` function children is not documented
-- DOC001 `gui/browser_ui.c:8117` function behind is not documented
-- DOC001 `gui/browser_ui.c:8360` function column is not documented
-- DOC001 `gui/browser_ui.c:8468` function columns is not documented
-- DOC001 `gui/browser_ui.c:8663` function treatment is not documented
-- DOC001 `gui/browser_ui.c:8727` function it is not documented
-- DOC001 `gui/browser_ui.c:8901` function context is not documented
-- DOC001 `gui/browser_ui.c:8933` function path is not documented
-- DOC001 `gui/browser_ui.c:8937` macro RC_DEFER_RANGES is not documented
-- DOC001 `gui/browser_ui.c:8948` struct rc_defer_col is not documented
-- DOC001 `gui/browser_ui.c:8948` type_alias key is not documented
-- DOC001 `gui/browser_ui.c:8955` struct rc_defer is not documented
-- DOC001 `gui/browser_ui.c:8955` type_alias col is not documented
-- DOC001 `gui/browser_ui.c:9132` function beside is not documented
-- DOC001 `gui/browser_ui.c:9395` function x is not documented
-- DOC001 `gui/browser_ui.c:10091` function yet is not documented
-- DOC001 `gui/browser_ui.c:10160` function chain is not documented
-- DOC001 `gui/browser_ui.c:10275` function anchor is not documented
-- DOC001 `gui/browser_ui.c:10344` function key is not documented
-- DOC001 `gui/browser_ui.c:10346` function inline is not documented
-- DOC001 `gui/browser_ui.c:10381` function have is not documented
-- DOC001 `gui/browser_ui.c:10402` function standalone is not documented
-- DOC001 `gui/browser_ui.c:10634` function count is not documented
-- DOC001 `gui/browser_ui.c:10653` function approximation is not documented
-- DOC001 `gui/browser_ui.c:10825` function margin is not documented
-- DOC001 `gui/browser_ui.c:10883` function page is not documented
-- DOC001 `gui/browser_ui.c:11543` function rd_build is not documented
-- DOC001 `gui/browser_ui.c:11784` function dies is not documented
-- DOC001 `gui/browser_ui.c:11807` function descriptors is not documented
-- DOC001 `gui/browser_ui.c:11888` function again is not documented
-- DOC001 `gui/browser_ui.c:12176` function blocking is not documented
-- DOC001 `gui/browser_ui.c:12197` function video_stop is not documented
-- DOC001 `gui/browser_ui.c:12403` function upstream is not documented
-- DOC001 `gui/browser_ui.c:12529` function rect is not documented
-- DOC001 `gui/browser_ui.c:12533` function text is not documented
-- DOC001 `gui/browser_ui.c:12602` macro BUI_CONIC_SLICES is not documented
-- DOC001 `gui/browser_ui.c:12608` function spaced is not documented
-- DOC001 `gui/browser_ui.c:12838` function layer is not documented
-- DOC001 `gui/browser_ui.c:12886` function widths is not documented
-- DOC001 `gui/browser_ui.c:12922` function cairo_set_dash is not documented
-- DOC001 `gui/browser_ui.c:12925` function cairo_set_dash is not documented
-- DOC001 `gui/browser_ui.c:12971` function cairo_set_dash is not documented
-- DOC001 `gui/browser_ui.c:12974` function cairo_set_dash is not documented
-- DOC001 `gui/browser_ui.c:12994` function convention is not documented
-- DOC001 `gui/browser_ui.c:13032` function cairo_set_dash is not documented
-- DOC001 `gui/browser_ui.c:13035` function cairo_set_dash is not documented
-- DOC001 `gui/browser_ui.c:13127` function cairo_set_dash is not documented
-- DOC001 `gui/browser_ui.c:13129` function cairo_set_dash is not documented
-- DOC001 `gui/browser_ui.c:13190` function exactly is not documented
-- DOC001 `gui/browser_ui.c:13215` macro ROW_PAINT_BAND is not documented
-- DOC001 `gui/browser_ui.c:13216` macro ROW_PAINT_CONTENT is not documented
-- DOC001 `gui/browser_ui.c:13288` function bg is not documented
-- DOC001 `gui/browser_ui.c:13514` function rows is not documented
-- DOC001 `gui/browser_ui.c:13515` function fragment is not documented
-- DOC001 `gui/browser_ui.c:14083` function made is not documented
-- DOC001 `gui/browser_ui.c:14139` macro H2R is not documented
-- DOC001 `gui/browser_ui.c:14187` function the is not documented
-- DOC001 `gui/browser_ui.c:14272` function limits is not documented
-- DOC001 `gui/browser_ui.c:14371` function fill is not documented
-- DOC001 `gui/browser_ui.c:14431` function overflow is not documented
-- DOC001 `gui/browser_ui.c:14458` function bui_pop_group_composite is not documented
-- DOC001 `gui/browser_ui.c:14474` function compositing is not documented
-- DOC001 `gui/browser_ui.c:14671` function box is not documented
-- DOC001 `gui/browser_ui.c:14815` function bui_pop_group_composite is not documented
-- DOC001 `gui/browser_ui.c:15067` function bui_pop_group_composite is not documented
-- DOC001 `gui/browser_ui.c:15119` macro UI_LAZY_PASSES is not documented
-- DOC001 `gui/browser_ui.c:15187` function once is not documented
-- DOC001 `gui/browser_ui.c:15356` macro PDF_MARGIN is not documented
-- DOC001 `gui/browser_ui.c:15750` macro FRAME_BOX_MAX is not documented
-- DOC001 `gui/browser_ui.c:15862` function caller is not documented
-- DOC001 `gui/browser_ui.c:15941` function origin is not documented
-- DOC001 `gui/browser_ui.c:15978` function ui_render_png_images is not documented
-- DOC001 `gui/browser_ui.c:15984` function ui_render_png_frames is not documented
-- DOC001 `gui/browser_ui.c:15990` function ui_render_pdf_images is not documented
-- DOC001 `gui/browser_ui.c:16027` function in is not documented
-- DOC001 `gui/browser_ui.c:16271` function Firefox is not documented
-- DOC001 `gui/browser_ui.c:16344` function reference is not documented
-- DOC001 `gui/browser_ui.c:16446` function sf_ws_url_check is not documented
-- DOC001 `gui/browser_ui.c:16513` function wc_render_caps is not documented
-- DOC001 `gui/browser_ui.c:16611` function memory is not documented
-- DOC001 `gui/browser_ui.c:16705` function GET is not documented
-- DOC001 `gui/browser_ui.c:17041` function presentation is not documented
-- DOC001 `gui/browser_ui.c:17770` function resizes is not documented
-- DOC001 `gui/browser_ui.c:17778` function wl_array_for_each is not documented
-- DOC001 `gui/browser_ui.c:17835` function element is not documented
-- DOC001 `gui/browser_ui.c:17871` macro FBW_W is not documented
-- DOC001 `gui/browser_ui.c:17873` macro FBW_HEADER is not documented
-- DOC001 `gui/browser_ui.c:17874` macro FBW_TABBAR is not documented
-- DOC001 `gui/browser_ui.c:17875` macro FBW_TOP is not documented
-- DOC001 `gui/browser_ui.c:17878` macro FBW_LINE is not documented
-- DOC001 `gui/browser_ui.c:17879` macro FBW_GUTTER is not documented
-- DOC001 `gui/browser_ui.c:17880` macro FBW_MIN_SPLIT is not documented
-- DOC001 `gui/browser_ui.c:17881` macro FBW_MAX_SPLIT is not documented
-- DOC001 `gui/browser_ui.c:17882` macro FBW_COPY_BTN_W is not documented
-- DOC001 `gui/browser_ui.c:17885` struct freebug_window is not documented
-- DOC001 `gui/browser_ui.c:18688` function down is not documented
-- DOC001 `gui/browser_ui.c:19278` function loop is not documented
-- DOC001 `gui/browser_ui.c:20128` function ui_run_browser is not documented
-- DOC001 `gui/browser_ui.c:20150` function saving is not documented
-- DOC001 `gui/browser_ui.c:20244` function redraws is not documented
-- DOC001 `gui/browser_ui.c:20257` function moves is not documented
-- DOC001 `gui/browser_ui.c:20606` function cost is not documented
+- DOC001 `gui/browser_ui.c:6978` function axis is not documented
+- DOC001 `gui/browser_ui.c:7031` function slot is not documented
+- DOC001 `gui/browser_ui.c:7182` function struct is not documented
+- DOC001 `gui/browser_ui.c:7191` function descriptor is not documented
+- DOC001 `gui/browser_ui.c:7435` function builds is not documented
+- DOC001 `gui/browser_ui.c:7531` function flow is not documented
+- DOC001 `gui/browser_ui.c:7579` function own is not documented
+- DOC001 `gui/browser_ui.c:7660` function items is not documented
+- DOC001 `gui/browser_ui.c:7972` function wins is not documented
+- DOC001 `gui/browser_ui.c:8123` function children is not documented
+- DOC001 `gui/browser_ui.c:8132` function behind is not documented
+- DOC001 `gui/browser_ui.c:8375` function column is not documented
+- DOC001 `gui/browser_ui.c:8483` function columns is not documented
+- DOC001 `gui/browser_ui.c:8726` function treatment is not documented
+- DOC001 `gui/browser_ui.c:8790` function it is not documented
+- DOC001 `gui/browser_ui.c:8969` function context is not documented
+- DOC001 `gui/browser_ui.c:9001` function path is not documented
+- DOC001 `gui/browser_ui.c:9005` macro RC_DEFER_RANGES is not documented
+- DOC001 `gui/browser_ui.c:9016` struct rc_defer_col is not documented
+- DOC001 `gui/browser_ui.c:9016` type_alias key is not documented
+- DOC001 `gui/browser_ui.c:9023` struct rc_defer is not documented
+- DOC001 `gui/browser_ui.c:9023` type_alias col is not documented
+- DOC001 `gui/browser_ui.c:9200` function beside is not documented
+- DOC001 `gui/browser_ui.c:9463` function x is not documented
+- DOC001 `gui/browser_ui.c:10159` function yet is not documented
+- DOC001 `gui/browser_ui.c:10228` function chain is not documented
+- DOC001 `gui/browser_ui.c:10343` function anchor is not documented
+- DOC001 `gui/browser_ui.c:10412` function key is not documented
+- DOC001 `gui/browser_ui.c:10414` function inline is not documented
+- DOC001 `gui/browser_ui.c:10449` function have is not documented
+- DOC001 `gui/browser_ui.c:10470` function standalone is not documented
+- DOC001 `gui/browser_ui.c:10702` function count is not documented
+- DOC001 `gui/browser_ui.c:10721` function approximation is not documented
+- DOC001 `gui/browser_ui.c:10893` function margin is not documented
+- DOC001 `gui/browser_ui.c:10951` function page is not documented
+- DOC001 `gui/browser_ui.c:11611` function rd_build is not documented
+- DOC001 `gui/browser_ui.c:11852` function dies is not documented
+- DOC001 `gui/browser_ui.c:11875` function descriptors is not documented
+- DOC001 `gui/browser_ui.c:11956` function again is not documented
+- DOC001 `gui/browser_ui.c:12244` function blocking is not documented
+- DOC001 `gui/browser_ui.c:12265` function video_stop is not documented
+- DOC001 `gui/browser_ui.c:12471` function upstream is not documented
+- DOC001 `gui/browser_ui.c:12597` function rect is not documented
+- DOC001 `gui/browser_ui.c:12601` function text is not documented
+- DOC001 `gui/browser_ui.c:12670` macro BUI_CONIC_SLICES is not documented
+- DOC001 `gui/browser_ui.c:12676` function spaced is not documented
+- DOC001 `gui/browser_ui.c:12906` function layer is not documented
+- DOC001 `gui/browser_ui.c:12954` function widths is not documented
+- DOC001 `gui/browser_ui.c:12990` function cairo_set_dash is not documented
+- DOC001 `gui/browser_ui.c:12993` function cairo_set_dash is not documented
+- DOC001 `gui/browser_ui.c:13039` function cairo_set_dash is not documented
+- DOC001 `gui/browser_ui.c:13042` function cairo_set_dash is not documented
+- DOC001 `gui/browser_ui.c:13062` function convention is not documented
+- DOC001 `gui/browser_ui.c:13100` function cairo_set_dash is not documented
+- DOC001 `gui/browser_ui.c:13103` function cairo_set_dash is not documented
+- DOC001 `gui/browser_ui.c:13195` function cairo_set_dash is not documented
+- DOC001 `gui/browser_ui.c:13197` function cairo_set_dash is not documented
+- DOC001 `gui/browser_ui.c:13258` function exactly is not documented
+- DOC001 `gui/browser_ui.c:13283` macro ROW_PAINT_BAND is not documented
+- DOC001 `gui/browser_ui.c:13284` macro ROW_PAINT_CONTENT is not documented
+- DOC001 `gui/browser_ui.c:13356` function bg is not documented
+- DOC001 `gui/browser_ui.c:13582` function rows is not documented
+- DOC001 `gui/browser_ui.c:13583` function fragment is not documented
+- DOC001 `gui/browser_ui.c:14151` function made is not documented
+- DOC001 `gui/browser_ui.c:14207` macro H2R is not documented
+- DOC001 `gui/browser_ui.c:14255` function the is not documented
+- DOC001 `gui/browser_ui.c:14340` function limits is not documented
+- DOC001 `gui/browser_ui.c:14439` function fill is not documented
+- DOC001 `gui/browser_ui.c:14499` function overflow is not documented
+- DOC001 `gui/browser_ui.c:14526` function bui_pop_group_composite is not documented
+- DOC001 `gui/browser_ui.c:14542` function compositing is not documented
+- DOC001 `gui/browser_ui.c:14739` function box is not documented
+- DOC001 `gui/browser_ui.c:14883` function bui_pop_group_composite is not documented
+- DOC001 `gui/browser_ui.c:15135` function bui_pop_group_composite is not documented
+- DOC001 `gui/browser_ui.c:15187` macro UI_LAZY_PASSES is not documented
+- DOC001 `gui/browser_ui.c:15255` function once is not documented
+- DOC001 `gui/browser_ui.c:15424` macro PDF_MARGIN is not documented
+- DOC001 `gui/browser_ui.c:15819` macro FRAME_BOX_MAX is not documented
+- DOC001 `gui/browser_ui.c:15931` function caller is not documented
+- DOC001 `gui/browser_ui.c:16010` function origin is not documented
+- DOC001 `gui/browser_ui.c:16047` function ui_render_png_images is not documented
+- DOC001 `gui/browser_ui.c:16053` function ui_render_png_frames is not documented
+- DOC001 `gui/browser_ui.c:16059` function ui_render_pdf_images is not documented
+- DOC001 `gui/browser_ui.c:16096` function in is not documented
+- DOC001 `gui/browser_ui.c:16340` function Firefox is not documented
+- DOC001 `gui/browser_ui.c:16413` function reference is not documented
+- DOC001 `gui/browser_ui.c:16515` function sf_ws_url_check is not documented
+- DOC001 `gui/browser_ui.c:16582` function wc_render_caps is not documented
+- DOC001 `gui/browser_ui.c:16680` function memory is not documented
+- DOC001 `gui/browser_ui.c:16774` function GET is not documented
+- DOC001 `gui/browser_ui.c:17110` function presentation is not documented
+- DOC001 `gui/browser_ui.c:17839` function resizes is not documented
+- DOC001 `gui/browser_ui.c:17847` function wl_array_for_each is not documented
+- DOC001 `gui/browser_ui.c:17904` function element is not documented
+- DOC001 `gui/browser_ui.c:17940` macro FBW_W is not documented
+- DOC001 `gui/browser_ui.c:17942` macro FBW_HEADER is not documented
+- DOC001 `gui/browser_ui.c:17943` macro FBW_TABBAR is not documented
+- DOC001 `gui/browser_ui.c:17944` macro FBW_TOP is not documented
+- DOC001 `gui/browser_ui.c:17947` macro FBW_LINE is not documented
+- DOC001 `gui/browser_ui.c:17948` macro FBW_GUTTER is not documented
+- DOC001 `gui/browser_ui.c:17949` macro FBW_MIN_SPLIT is not documented
+- DOC001 `gui/browser_ui.c:17950` macro FBW_MAX_SPLIT is not documented
+- DOC001 `gui/browser_ui.c:17951` macro FBW_COPY_BTN_W is not documented
+- DOC001 `gui/browser_ui.c:17954` struct freebug_window is not documented
+- DOC001 `gui/browser_ui.c:18757` function down is not documented
+- DOC001 `gui/browser_ui.c:19347` function loop is not documented
+- DOC001 `gui/browser_ui.c:20197` function ui_run_browser is not documented
+- DOC001 `gui/browser_ui.c:20219` function saving is not documented
+- DOC001 `gui/browser_ui.c:20313` function redraws is not documented
+- DOC001 `gui/browser_ui.c:20326` function moves is not documented
+- DOC001 `gui/browser_ui.c:20675` function cost is not documented
 - DOC001 `gui/browser_ui_internal.h:1` module gui/browser_ui_internal.h is not documented
 - DOC001 `gui/browser_ui_internal.h:31` macro UI_TEXT_MARGIN is not documented
 - DOC001 `gui/browser_ui_internal.h:41` struct ui_rgb is not documented
@@ -644,6 +644,7 @@ DOC001: 2040, DOC004: 1
 - DOC001 `include/css_import.h:1` module include/css_import.h is not documented
 - DOC001 `include/css_import.h:19` macro CI_URL_MAX is not documented
 - DOC001 `include/css_import.h:25` struct ci_import is not documented
+- DOC001 `include/css_import.h:55` function url is not documented
 - DOC001 `include/css_index.h:1` module include/css_index.h is not documented
 - DOC001 `include/css_index.h:18` struct cix_entry is not documented
 - DOC001 `include/css_index.h:23` struct cix_index is not documented
@@ -763,5 +764,4 @@ DOC001: 2040, DOC004: 1
 - DOC001 `include/flex_layout.h:204` function widths is not documented
 - DOC001 `include/flex_layout.h:238` function FX_ERR_NULL_ARG is not documented
 - DOC001 `include/flex_layout.h:244` function space is not documented
-- DOC001 `include/flex_layout.h:337` function height is not documented
-- ... 1541 more in `api/warnings.jsonl`
+- ... 1543 more in `api/warnings.jsonl`

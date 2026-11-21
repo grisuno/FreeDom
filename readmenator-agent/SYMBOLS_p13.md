@@ -3,6 +3,21 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_individual_transform_properties` | function | `tests/test_css_drops.c:105` | `static void test_individual_transform_properties(void **state)` |
+| `test_inert_properties_are_recognised` | function | `tests/test_css_drops.c:69` | `static void test_inert_properties_are_recognised(void **state)` |
+| `test_intrinsic_sizing_keywords` | function | `tests/test_css_drops.c:451` | `static void test_intrinsic_sizing_keywords(void **state)` |
+| `test_legacy_grid_gap_aliases_are_the_standard_properties` | function | `tests/test_css_drops.c:55` | `static void test_legacy_grid_gap_aliases_are_the_standard_properties(void **state)` |
+| `test_log_does_not_change_resolution` | function | `tests/test_css_drops.c:264` | `static void test_log_does_not_change_resolution(void **state)` |
+| `test_long_value_truncates_and_control_bytes_are_stripped` | function | `tests/test_css_drops.c:236` | `static void test_long_value_truncates_and_control_bytes_are_stripped(void **state)` |
+| `test_null_items_disables_listing` | function | `tests/test_css_drops.c:223` | `static void test_null_items_disables_listing(void **state)` |
+| `test_overflow_two_values` | function | `tests/test_css_drops.c:425` | `static void test_overflow_two_values(void **state)` |
+| `test_repeats_coalesce_by_property_and_cause` | function | `tests/test_css_drops.c:173` | `static void test_repeats_coalesce_by_property_and_cause(void **state)` |
+| `test_transform_3d_flattens` | function | `tests/test_css_drops.c:351` | `static void test_transform_3d_flattens(void **state)` |
+| `test_transform_angle_units` | function | `tests/test_css_drops.c:340` | `static void test_transform_angle_units(void **state)` |
+| `test_transform_function_names_are_case_insensitive` | function | `tests/test_css_drops.c:329` | `static void test_transform_function_names_are_case_insensitive(void **state)` |
+| `test_transform_origin_number_component` | function | `tests/test_css_drops.c:363` | `static void test_transform_origin_number_component(void **state)` |
+| `test_unknown_property_is_logged` | function | `tests/test_css_drops.c:39` | `static void test_unknown_property_is_logged(void **state)` |
+| `test_vendor_prefixed_value_keyword` | function | `tests/test_css_drops.c:463` | `static void test_vendor_prefixed_value_keyword(void **state)` |
 | `test_vertical_align_length` | function | `tests/test_css_drops.c:404` | `static void test_vertical_align_length(void **state)` |
 | `var` | function | `tests/test_css_drops.c:304` | `* was never collected and 40 var() declarations died as bad values. */ static void test_leading_b...` |
 | `main` | function | `tests/test_css_gradient.c:196` | `int main(void)` |
@@ -19,6 +34,11 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_shorthand_resets` | function | `tests/test_css_gradient.c:43` | `static void test_shorthand_resets(void **state)` |
 | `test_url_single` | function | `tests/test_css_gradient.c:32` | `static void test_url_single(void **state)` |
 | `assert_string_equal` | function | `tests/test_css_import.c:52` | `assert_string_equal(o,         "@media (prefers-color-scheme: dark) and (not (prefers-contrast: m...` |
+| `main` | function | `tests/test_css_import.c:215` | `int main(void)` |
+| `rb_emit` | function | `tests/test_css_import.c:148` | `static int rb_emit(void *ctx, const char *s, size_t n)` |
+| `rb_out` | struct | `tests/test_css_import.c:147` | `` |
+| `rb_resolve` | function | `tests/test_css_import.c:158` | `static int rb_resolve(void *ctx, const char *base, const char *ref, char *out, size_t outsz)` |
+| `rebase` | function | `tests/test_css_import.c:175` | `static const char *rebase(const char *css, int fail)` |
 | `scan` | function | `tests/test_css_import.c:14` | `static size_t scan(const char *s)` |
 | `test_balanced` | function | `tests/test_css_import.c:133` | `static void test_balanced(void **state)` |
 | `test_cap_and_null` | function | `tests/test_css_import.c:121` | `static void test_cap_and_null(void **state)` |
@@ -29,6 +49,9 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_oversize` | function | `tests/test_css_import.c:106` | `static void test_oversize(void **state)` |
 | `test_plain_url` | function | `tests/test_css_import.c:16` | `static void test_plain_url(void **state)` |
 | `test_prelude_skips` | function | `tests/test_css_import.c:76` | `static void test_prelude_skips(void **state)` |
+| `test_rebase_args` | function | `tests/test_css_import.c:206` | `static void test_rebase_args(void **state)` |
+| `test_rebase_left_alone` | function | `tests/test_css_import.c:194` | `static void test_rebase_left_alone(void **state)` |
+| `test_rebase_relative` | function | `tests/test_css_import.c:184` | `static void test_rebase_relative(void **state)` |
 | `test_url_forms` | function | `tests/test_css_import.c:29` | `static void test_url_forms(void **state)` |
 | `elem` | function | `tests/test_css_index.c:24` | `static css_element elem(const char *tag, const char *id,                         const char *cons...` |
 | `has` | function | `tests/test_css_index.c:35` | `static int has(const uint32_t *v, size_t n, uint32_t x)` |
@@ -389,112 +412,89 @@ Previous: [SYMBOLS_p12.md](SYMBOLS_p12.md)
 | `test_total_bytes_cap_fails_closed` | function | `tests/test_freebug.c:93` | `static void test_total_bytes_cap_fails_closed(void **state)` |
 | `ERR_FILE` | macro | `tests/test_freedom.c:29` | `#define ERR_FILE` |
 | `FREEDOM_BIN` | macro | `tests/test_freedom.c:27` | `#define FREEDOM_BIN` |
-| `NAV_CSS` | macro | `tests/test_freedom.c:2703` | `#define NAV_CSS` |
+| `NAV_CSS` | macro | `tests/test_freedom.c:2758` | `#define NAV_CSS` |
 | `OUT_FILE` | macro | `tests/test_freedom.c:28` | `#define OUT_FILE` |
 | `PIXEL` | macro | `tests/test_freedom.c:509` | `#define PIXEL(yy, xx)` |
 | `_DEFAULT_SOURCE` | macro | `tests/test_freedom.c:1` | `#define _DEFAULT_SOURCE` |
 | `_POSIX_C_SOURCE` | macro | `tests/test_freedom.c:12` | `#define _POSIX_C_SOURCE` |
-| `ballooned` | function | `tests/test_freedom.c:2415` | `* ballooned (body + wrapper re-opened per child) and the LAST wrapper piece  * became the contain...` |
-| `band` | function | `tests/test_freedom.c:3701` | `* band (which already recurses into nested containers) owns it. */ static void test_dump_layout_c...` |
-| `blend` | function | `tests/test_freedom.c:1048` | `* not some other blend (double-composited or wrong alpha). */ static void test_download_png_group...` |
-| `blend` | function | `tests/test_freedom.c:2074` | `* visibly different from either input color or an OVER blend (which would show  * opaque blue). E...` |
-| `bottom` | function | `tests/test_freedom.c:3484` | `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...` |
+| `ballooned` | function | `tests/test_freedom.c:2468` | `* ballooned (body + wrapper re-opened per child) and the LAST wrapper piece  * became the contain...` |
+| `band` | function | `tests/test_freedom.c:3756` | `* band (which already recurses into nested containers) owns it. */ static void test_dump_layout_c...` |
+| `blend` | function | `tests/test_freedom.c:1101` | `* not some other blend (double-composited or wrong alpha). */ static void test_download_png_group...` |
+| `blend` | function | `tests/test_freedom.c:2127` | `* visibly different from either input color or an OVER blend (which would show  * opaque blue). E...` |
+| `bottom` | function | `tests/test_freedom.c:3539` | `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...` |
 | `cleanup_files` | function | `tests/test_freedom.c:85` | `static void cleanup_files(void)` |
 | `count_color_in_row` | function | `tests/test_freedom.c:757` | `static int count_color_in_row(const img_pixels *px, uint32_t y, uint32_t rgb)` |
-| `dump_layout_of` | function | `tests/test_freedom.c:2556` | `static void dump_layout_of(const char *html, const char *path, char *out, size_t cap)` |
-| `has_box` | function | `tests/test_freedom.c:3132` | `static int has_box(const char *out, double w, double h, double t0, double t1)` |
-| `has_box_x` | function | `tests/test_freedom.c:3146` | `static int has_box_x(const char *out, double x0, double w0)` |
-| `has_row_x` | function | `tests/test_freedom.c:3159` | `static int has_row_x(const char *out, double x0)` |
-| `has_sub_x` | function | `tests/test_freedom.c:3170` | `static int has_sub_x(const char *out, double x0)` |
-| `ink_width` | function | `tests/test_freedom.c:1187` | `static double ink_width(const char *html)` |
+| `dump_layout_of` | function | `tests/test_freedom.c:2609` | `static void dump_layout_of(const char *html, const char *path, char *out, size_t cap)` |
+| `has_box` | function | `tests/test_freedom.c:3187` | `static int has_box(const char *out, double w, double h, double t0, double t1)` |
+| `has_box_x` | function | `tests/test_freedom.c:3201` | `static int has_box_x(const char *out, double x0, double w0)` |
+| `has_row_x` | function | `tests/test_freedom.c:3214` | `static int has_row_x(const char *out, double x0)` |
+| `has_sub_x` | function | `tests/test_freedom.c:3225` | `static int has_sub_x(const char *out, double x0)` |
+| `ink_width` | function | `tests/test_freedom.c:1240` | `static double ink_width(const char *html)` |
 | `is_pdf_file` | function | `tests/test_freedom.c:65` | `static int is_pdf_file(const char *path)` |
 | `is_png_file` | function | `tests/test_freedom.c:75` | `static int is_png_file(const char *path)` |
-| `it` | function | `tests/test_freedom.c:2652` | `* the clip does not hide it (slashdot with JS on, tanda 53). */ static void test_dump_layout_rail...` |
-| `layout_of` | function | `tests/test_freedom.c:3118` | `static void layout_of(const char *html, const char *path, char *out, size_t cap)` |
+| `it` | function | `tests/test_freedom.c:2707` | `* the clip does not hide it (slashdot with JS on, tanda 53). */ static void test_dump_layout_rail...` |
+| `layout_of` | function | `tests/test_freedom.c:3173` | `static void layout_of(const char *html, const char *path, char *out, size_t cap)` |
 | `lost` | function | `tests/test_freedom.c:356` | `* lost (every code sample on animate.css lost its leading characters). */ static void test_pre_le...` |
-| `main` | function | `tests/test_freedom.c:4526` | `int main(void)` |
-| `markup` | function | `tests/test_freedom.c:2204` | `* against an unrotated control render of the identical markup (a 50-char-wide box  * at x:[24,975...` |
-| `markup` | function | `tests/test_freedom.c:2263` | `* unscaled control render of the identical markup (box y:[24,49] at x=500,  * center y~36.5): y=2...` |
-| `nav_layout_of` | function | `tests/test_freedom.c:2690` | `static void nav_layout_of(const char *html, const char *path, char *out, size_t cap)` |
+| `main` | function | `tests/test_freedom.c:4581` | `int main(void)` |
+| `markup` | function | `tests/test_freedom.c:2257` | `* against an unrotated control render of the identical markup (a 50-char-wide box  * at x:[24,975...` |
+| `markup` | function | `tests/test_freedom.c:2316` | `* unscaled control render of the identical markup (box y:[24,49] at x=500,  * center y~36.5): y=2...` |
+| `nav_layout_of` | function | `tests/test_freedom.c:2745` | `static void nav_layout_of(const char *html, const char *path, char *out, size_t cap)` |
 | `png_leftmost_ink` | function | `tests/test_freedom.c:340` | `static int png_leftmost_ink(const img_pixels *px, uint32_t y0, uint32_t y1, uint32_t *row)` |
 | `read_file_all` | function | `tests/test_freedom.c:91` | `static uint8_t *read_file_all(const char *path, size_t *out_len)` |
 | `render_html_pixels` | function | `tests/test_freedom.c:730` | `static int render_html_pixels(const char *html, img_pixels *out)` |
-| `rows` | function | `tests/test_freedom.c:1549` | `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);` |
+| `rows` | function | `tests/test_freedom.c:1602` | `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);` |
 | `run_freedom` | function | `tests/test_freedom.c:31` | `static int run_freedom(const char *arg, char *out, size_t out_size, int *exit_status)` |
 | `run_freedom_raw` | function | `tests/test_freedom.c:53` | `static int run_freedom_raw(const char *args, int *exit_status)` |
-| `test_absolute_font_size_lands_exact` | function | `tests/test_freedom.c:1234` | `static void test_absolute_font_size_lands_exact(void **state)` |
-| `test_absolute_span_honours_right_bottom` | function | `tests/test_freedom.c:1346` | `static void test_absolute_span_honours_right_bottom(void **state)` |
-| `test_author_can_unbold_a_heading` | function | `tests/test_freedom.c:1327` | `static void test_author_can_unbold_a_heading(void **state)` |
-| `test_author_font_size_on_heading_replaces_ua_scale` | function | `tests/test_freedom.c:1252` | `static void test_author_font_size_on_heading_replaces_ua_scale(void **state)` |
+| `test_absolute_font_size_lands_exact` | function | `tests/test_freedom.c:1287` | `static void test_absolute_font_size_lands_exact(void **state)` |
+| `test_absolute_span_honours_right_bottom` | function | `tests/test_freedom.c:1399` | `static void test_absolute_span_honours_right_bottom(void **state)` |
+| `test_author_can_unbold_a_heading` | function | `tests/test_freedom.c:1380` | `static void test_author_can_unbold_a_heading(void **state)` |
+| `test_author_font_size_on_heading_replaces_ua_scale` | function | `tests/test_freedom.c:1305` | `static void test_author_font_size_on_heading_replaces_ua_scale(void **state)` |
 | `test_download_pdf_local` | function | `tests/test_freedom.c:278` | `static void test_download_pdf_local(void **state)` |
 | `test_download_pdf_requires_path` | function | `tests/test_freedom.c:304` | `static void test_download_pdf_requires_path(void **state)` |
-| `test_download_png_absolute_shrinks_and_anchors_right` | function | `tests/test_freedom.c:1113` | `static void test_download_png_absolute_shrinks_and_anchors_right(void **state)` |
+| `test_download_png_absolute_shrinks_and_anchors_right` | function | `tests/test_freedom.c:1166` | `static void test_download_png_absolute_shrinks_and_anchors_right(void **state)` |
 | `test_download_png_background_clip_content_and_padding_box` | function | `tests/test_freedom.c:480` | `static void test_download_png_background_clip_content_and_padding_box(void **state)` |
-| `test_download_png_broken_image_keeps_row_order` | function | `tests/test_freedom.c:1669` | `static void test_download_png_broken_image_keeps_row_order(void **state)` |
-| `test_download_png_flex_container_paints_one_band` | function | `tests/test_freedom.c:4146` | `static void test_download_png_flex_container_paints_one_band(void **state)` |
-| `test_download_png_gradient_box_text_keeps_gradient` | function | `tests/test_freedom.c:4121` | `static void test_download_png_gradient_box_text_keeps_gradient(void **state)` |
+| `test_download_png_broken_image_keeps_row_order` | function | `tests/test_freedom.c:1722` | `static void test_download_png_broken_image_keeps_row_order(void **state)` |
+| `test_download_png_degenerate_transform_paints_rest` | function | `tests/test_freedom.c:1002` | `static void test_download_png_degenerate_transform_paints_rest(void **state)` |
+| `test_download_png_flex_container_paints_one_band` | function | `tests/test_freedom.c:4201` | `static void test_download_png_flex_container_paints_one_band(void **state)` |
+| `test_download_png_gradient_box_text_keeps_gradient` | function | `tests/test_freedom.c:4176` | `static void test_download_png_gradient_box_text_keeps_gradient(void **state)` |
 | `test_download_png_images_local` | function | `tests/test_freedom.c:819` | `static void test_download_png_images_local(void **state)` |
-| `test_download_png_inline_block_flows_in_line` | function | `tests/test_freedom.c:1495` | `static void test_download_png_inline_block_flows_in_line(void **state)` |
-| `test_download_png_inline_block_shrinks_and_centers` | function | `tests/test_freedom.c:4166` | `static void test_download_png_inline_block_shrinks_and_centers(void **state)` |
-| `test_download_png_inline_replaced_share_row` | function | `tests/test_freedom.c:1609` | `static void test_download_png_inline_replaced_share_row(void **state)` |
-| `test_download_png_inline_svg_path_and_drops_image` | function | `tests/test_freedom.c:4210` | `static void test_download_png_inline_svg_path_and_drops_image(void **state)` |
-| `test_download_png_line_height_zero_does_not_shrink_line` | function | `tests/test_freedom.c:1943` | `static void test_download_png_line_height_zero_does_not_shrink_line(void **state)` |
+| `test_download_png_inline_block_flows_in_line` | function | `tests/test_freedom.c:1548` | `static void test_download_png_inline_block_flows_in_line(void **state)` |
+| `test_download_png_inline_block_shrinks_and_centers` | function | `tests/test_freedom.c:4221` | `static void test_download_png_inline_block_shrinks_and_centers(void **state)` |
+| `test_download_png_inline_replaced_share_row` | function | `tests/test_freedom.c:1662` | `static void test_download_png_inline_replaced_share_row(void **state)` |
+| `test_download_png_inline_svg_path_and_drops_image` | function | `tests/test_freedom.c:4265` | `static void test_download_png_inline_svg_path_and_drops_image(void **state)` |
+| `test_download_png_line_height_zero_does_not_shrink_line` | function | `tests/test_freedom.c:1996` | `static void test_download_png_line_height_zero_does_not_shrink_line(void **state)` |
 | `test_download_png_local` | function | `tests/test_freedom.c:313` | `static void test_download_png_local(void **state)` |
 | `test_download_png_negative_zindex_paints_behind_inflow` | function | `tests/test_freedom.c:896` | `static void test_download_png_negative_zindex_paints_behind_inflow(void **state)` |
-| `test_download_png_nested_flex_lays_out_on_one_row` | function | `tests/test_freedom.c:1416` | `static void test_download_png_nested_flex_lays_out_on_one_row(void **state)` |
+| `test_download_png_nested_flex_lays_out_on_one_row` | function | `tests/test_freedom.c:1469` | `static void test_download_png_nested_flex_lays_out_on_one_row(void **state)` |
+| `test_download_png_overflow_cell_clip_not_shifted` | function | `tests/test_freedom.c:953` | `static void test_download_png_overflow_cell_clip_not_shifted(void **state)` |
 | `test_download_png_overflow_clips_at_padding_box` | function | `tests/test_freedom.c:439` | `static void test_download_png_overflow_clips_at_padding_box(void **state)` |
-| `test_download_png_positioned_overflow_clips_own_content` | function | `tests/test_freedom.c:1000` | `static void test_download_png_positioned_overflow_clips_own_content(void **state)` |
-| `test_download_png_replaced_pct_width` | function | `tests/test_freedom.c:1721` | `static void test_download_png_replaced_pct_width(void **state)` |
+| `test_download_png_positioned_overflow_clips_own_content` | function | `tests/test_freedom.c:1053` | `static void test_download_png_positioned_overflow_clips_own_content(void **state)` |
+| `test_download_png_replaced_pct_width` | function | `tests/test_freedom.c:1774` | `static void test_download_png_replaced_pct_width(void **state)` |
 | `test_download_png_requires_path` | function | `tests/test_freedom.c:880` | `static void test_download_png_requires_path(void **state)` |
 | `test_download_png_svg_in_button_stays_in_its_box` | function | `tests/test_freedom.c:401` | `static void test_download_png_svg_in_button_stays_in_its_box(void **state)` |
-| `test_download_png_text_color_alpha_blends` | function | `tests/test_freedom.c:4443` | `static void test_download_png_text_color_alpha_blends(void **state)` |
-| `test_download_png_webfont_shapes` | function | `tests/test_freedom.c:1821` | `static void test_download_png_webfont_shapes(void **state)` |
-| `test_dump_console_shows_output_and_error` | function | `tests/test_freedom.c:2322` | `static void test_dump_console_shows_output_and_error(void **state)` |
-| `test_dump_dom_prints_render_tree` | function | `tests/test_freedom.c:2382` | `static void test_dump_dom_prints_render_tree(void **state)` |
-| `test_dump_layout_band_flushes_line_before_clear` | function | `tests/test_freedom.c:3770` | `static void test_dump_layout_band_flushes_line_before_clear(void **state)` |
-| `test_dump_layout_bounded_wrapper_around_lone_right_float` | function | `tests/test_freedom.c:3215` | `static void test_dump_layout_bounded_wrapper_around_lone_right_float(void **state)` |
-| `test_dump_layout_br_after_block_is_a_line` | function | `tests/test_freedom.c:4374` | `static void test_dump_layout_br_after_block_is_a_line(void **state)` |
-| `test_dump_layout_deferred_float_column_shrinks_to_content` | function | `tests/test_freedom.c:2960` | `static void test_dump_layout_deferred_float_column_shrinks_to_content(void **state)` |
-| `test_dump_layout_fixed_header_float_navs` | function | `tests/test_freedom.c:2755` | `static void test_dump_layout_fixed_header_float_navs(void **state)` |
-| `test_dump_layout_flex_auto_margin_push_right` | function | `tests/test_freedom.c:3810` | `static void test_dump_layout_flex_auto_margin_push_right(void **state)` |
-| `test_dump_layout_flex_definite_height_centres_item` | function | `tests/test_freedom.c:4419` | `static void test_dump_layout_flex_definite_height_centres_item(void **state)` |
-| `test_dump_layout_flex_item_contains_block_margins` | function | `tests/test_freedom.c:4394` | `static void test_dump_layout_flex_item_contains_block_margins(void **state)` |
-| `test_dump_layout_flex_item_is_wrapper_around_nested_container` | function | `tests/test_freedom.c:3880` | `static void test_dump_layout_flex_item_is_wrapper_around_nested_container(void **state)` |
-| `test_dump_layout_flex_item_negative_margin_widens_sibling` | function | `tests/test_freedom.c:3850` | `static void test_dump_layout_flex_item_negative_margin_widens_sibling(void **state)` |
-| `test_dump_layout_flex_item_sibling_boxes` | function | `tests/test_freedom.c:2803` | `static void test_dump_layout_flex_item_sibling_boxes(void **state)` |
-| `test_dump_layout_float_band_keeps_wrapper_width` | function | `tests/test_freedom.c:2999` | `static void test_dump_layout_float_band_keeps_wrapper_width(void **state)` |
-| `test_dump_layout_float_counts_icon_atom` | function | `tests/test_freedom.c:2783` | `static void test_dump_layout_float_counts_icon_atom(void **state)` |
-| `test_dump_layout_float_pct_widths_resolve_once` | function | `tests/test_freedom.c:3082` | `static void test_dump_layout_float_pct_widths_resolve_once(void **state)` |
-| `test_dump_layout_inline_abs_static_position_on_line` | function | `tests/test_freedom.c:3199` | `static void test_dump_layout_inline_abs_static_position_on_line(void **state)` |
-| `test_dump_layout_inline_box_second_run_stays` | function | `tests/test_freedom.c:3672` | `static void test_dump_layout_inline_box_second_run_stays(void **state)` |
-| `test_dump_layout_inline_input_shares_line` | function | `tests/test_freedom.c:4293` | `static void test_dump_layout_inline_input_shares_line(void **state)` |
-| `test_dump_layout_line_opening_image_is_inline` | function | `tests/test_freedom.c:3744` | `static void test_dump_layout_line_opening_image_is_inline(void **state)` |
-| `test_dump_layout_margin_before_container_in_wrapper` | function | `tests/test_freedom.c:2623` | `static void test_dump_layout_margin_before_container_in_wrapper(void **state)` |
-| `test_dump_layout_nested_column_takes_max` | function | `tests/test_freedom.c:3913` | `static void test_dump_layout_nested_column_takes_max(void **state)` |
-| `test_dump_layout_nested_padded_item_opens_once` | function | `tests/test_freedom.c:3038` | `static void test_dump_layout_nested_padded_item_opens_once(void **state)` |
-| `test_dump_layout_oof_label_does_not_widen_nested_container` | function | `tests/test_freedom.c:4339` | `static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state)` |
-| `test_dump_layout_oof_subtree_real_layout` | function | `tests/test_freedom.c:2484` | `static void test_dump_layout_oof_subtree_real_layout(void **state)` |
-| `test_dump_layout_pulled_rail_single_margin` | function | `tests/test_freedom.c:3504` | `static void test_dump_layout_pulled_rail_single_margin(void **state)` |
-| `test_dump_layout_relative_offset_moves_content` | function | `tests/test_freedom.c:3182` | `static void test_dump_layout_relative_offset_moves_content(void **state)` |
-| `test_dump_layout_root_box_survives_replaced_run` | function | `tests/test_freedom.c:3411` | `static void test_dump_layout_root_box_survives_replaced_run(void **state)` |
-| `test_dump_layout_row_nested_in_column` | function | `tests/test_freedom.c:3621` | `static void test_dump_layout_row_nested_in_column(void **state)` |
-| `test_dump_layout_shrink_pill_nested_container` | function | `tests/test_freedom.c:4256` | `static void test_dump_layout_shrink_pill_nested_container(void **state)` |
-| `test_dump_layout_sticky_footer` | function | `tests/test_freedom.c:3376` | `static void test_dump_layout_sticky_footer(void **state)` |
-| `test_dump_layout_table_cells_do_not_reopen_wrappers` | function | `tests/test_freedom.c:2600` | `static void test_dump_layout_table_cells_do_not_reopen_wrappers(void **state)` |
-| `test_dump_layout_total_h_covers_overflowing_content` | function | `tests/test_freedom.c:2528` | `static void test_dump_layout_total_h_covers_overflowing_content(void **state)` |
-| `test_dump_layout_two_auto_floats_shrink_to_fit` | function | `tests/test_freedom.c:2921` | `static void test_dump_layout_two_auto_floats_shrink_to_fit(void **state)` |
-| `test_dump_layout_ua_margin_scales_with_font_size` | function | `tests/test_freedom.c:4480` | `static void test_dump_layout_ua_margin_scales_with_font_size(void **state)` |
-| `test_dump_timings_prints_stages` | function | `tests/test_freedom.c:4226` | `static void test_dump_timings_prints_stages(void **state)` |
-| `test_grid_item_nested_box_keeps_padding` | function | `tests/test_freedom.c:619` | `static void test_grid_item_nested_box_keeps_padding(void **state)` |
-| `test_heading_colour_matches_body_text` | function | `tests/test_freedom.c:1272` | `static void test_heading_colour_matches_body_text(void **state)` |
-| `test_headless_intersection_observer_reveals_visible_only` | function | `tests/test_freedom.c:190` | `static void test_headless_intersection_observer_reveals_visible_only(void **state)` |
-| `test_headless_js_measures_real_geometry` | function | `tests/test_freedom.c:162` | `static void test_headless_js_measures_real_geometry(void **state)` |
-| `test_headless_timer_navigation_followed` | function | `tests/test_freedom.c:219` | `static void test_headless_timer_navigation_followed(void **state)` |
-| `test_help` | function | `tests/test_freedom.c:108` | `static void test_help(void **state)` |
-| `test_inline_box_paints_padding_around_text` | function | `tests/test_freedom.c:794` | `static void test_inline_box_paints_padding_around_text(void **state)` |
-| `test_inline_horizontal_padding_spaces_neighbours` | function | `tests/test_freedom.c:770` | `static void test_inline_horizontal_padding_spaces_neighbours(void **state)` |
-| `test_inline_run_boundary_collapses_runs_of_space` | function | `tests/test_freedom.c:1589` | `static void test_inline_run_boundary_collapses_runs_of_space(void **state)` |
-| `test_inline_run_boundary_does_not_invent_space` | function | `tests/test_freedom.c:1568` | `static void test_inline_run_boundary_does_not_invent_space(void **state)` |
-| `test_line_height_leading_is_split_above_and_below` | function | `tests/test_freedom.c:688` | `static void test_line_height_leading_is_split_above_and_below(void **state)` |
+| `test_download_png_text_color_alpha_blends` | function | `tests/test_freedom.c:4498` | `static void test_download_png_text_color_alpha_blends(void **state)` |
+| `test_download_png_webfont_shapes` | function | `tests/test_freedom.c:1874` | `static void test_download_png_webfont_shapes(void **state)` |
+| `test_dump_console_shows_output_and_error` | function | `tests/test_freedom.c:2375` | `static void test_dump_console_shows_output_and_error(void **state)` |
+| `test_dump_dom_prints_render_tree` | function | `tests/test_freedom.c:2435` | `static void test_dump_dom_prints_render_tree(void **state)` |
+| `test_dump_layout_band_flushes_line_before_clear` | function | `tests/test_freedom.c:3825` | `static void test_dump_layout_band_flushes_line_before_clear(void **state)` |
+| `test_dump_layout_bounded_wrapper_around_lone_right_float` | function | `tests/test_freedom.c:3270` | `static void test_dump_layout_bounded_wrapper_around_lone_right_float(void **state)` |
+| `test_dump_layout_br_after_block_is_a_line` | function | `tests/test_freedom.c:4429` | `static void test_dump_layout_br_after_block_is_a_line(void **state)` |
+| `test_dump_layout_deferred_float_column_shrinks_to_content` | function | `tests/test_freedom.c:3015` | `static void test_dump_layout_deferred_float_column_shrinks_to_content(void **state)` |
+| `test_dump_layout_fixed_header_float_navs` | function | `tests/test_freedom.c:2810` | `static void test_dump_layout_fixed_header_float_navs(void **state)` |
+| `test_dump_layout_flex_auto_margin_push_right` | function | `tests/test_freedom.c:3865` | `static void test_dump_layout_flex_auto_margin_push_right(void **state)` |
+| `test_dump_layout_flex_definite_height_centres_item` | function | `tests/test_freedom.c:4474` | `static void test_dump_layout_flex_definite_height_centres_item(void **state)` |
+| `test_dump_layout_flex_item_contains_block_margins` | function | `tests/test_freedom.c:4449` | `static void test_dump_layout_flex_item_contains_block_margins(void **state)` |
+| `test_dump_layout_flex_item_is_wrapper_around_nested_container` | function | `tests/test_freedom.c:3935` | `static void test_dump_layout_flex_item_is_wrapper_around_nested_container(void **state)` |
+| `test_dump_layout_flex_item_negative_margin_widens_sibling` | function | `tests/test_freedom.c:3905` | `static void test_dump_layout_flex_item_negative_margin_widens_sibling(void **state)` |
+| `test_dump_layout_flex_item_sibling_boxes` | function | `tests/test_freedom.c:2858` | `static void test_dump_layout_flex_item_sibling_boxes(void **state)` |
+| `test_dump_layout_float_band_keeps_wrapper_width` | function | `tests/test_freedom.c:3054` | `static void test_dump_layout_float_band_keeps_wrapper_width(void **state)` |
+| `test_dump_layout_float_counts_icon_atom` | function | `tests/test_freedom.c:2838` | `static void test_dump_layout_float_counts_icon_atom(void **state)` |
+| `test_dump_layout_float_pct_widths_resolve_once` | function | `tests/test_freedom.c:3137` | `static void test_dump_layout_float_pct_widths_resolve_once(void **state)` |
+| `test_dump_layout_inline_abs_static_position_on_line` | function | `tests/test_freedom.c:3254` | `static void test_dump_layout_inline_abs_static_position_on_line(void **state)` |
+| `test_dump_layout_inline_box_second_run_stays` | function | `tests/test_freedom.c:3727` | `static void test_dump_layout_inline_box_second_run_stays(void **state)` |
+| `test_dump_layout_inline_input_shares_line` | function | `tests/test_freedom.c:4348` | `static void test_dump_layout_inline_input_shares_line(void **state)` |
+| `test_dump_layout_line_opening_image_is_inline` | function | `tests/test_freedom.c:3799` | `static void test_dump_layout_line_opening_image_is_inline(void **state)` |
+| `test_dump_layout_margin_before_container_in_wrapper` | function | `tests/test_freedom.c:2678` | `static void test_dump_layout_margin_before_container_in_wrapper(void **state)` |
+| `test_dump_layout_nested_column_takes_max` | function | `tests/test_freedom.c:3968` | `static void test_dump_layout_nested_column_takes_max(void **state)` |
 
 Next: [SYMBOLS_p14.md](SYMBOLS_p14.md)

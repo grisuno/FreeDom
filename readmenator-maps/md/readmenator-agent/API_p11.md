@@ -40,6 +40,9 @@ Depends on: `include/css_color.h`, `include/pres_hints.h`
 - `ph_is_heading` (function) `src/pres_hints.c:76` `static int ph_is_heading(const char *tag)`
 - `ph_bgcolor` (function) `src/pres_hints.c:81` `static void ph_bgcolor(ph_attr_fn get, void *ctx, css_style *cs)` -- const char *v = get(ctx, "width", &len); int px = 0, pm = 0; switch (ph_parse_dimension(v, len, &px, &pm)) { case 1...
 - `ph_apply` (function) `src/pres_hints.c:93` `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs)`
+- `ph_parse_nonneg` (function) `src/pres_hints.c:140` `int ph_parse_nonneg(const char *s, size_t len, int *out)`
+- `ph_table_cellpadding` (function) `src/pres_hints.c:156` `int ph_table_cellpadding(ph_attr_fn get, void *ctx)`
+- `ph_cell_padding` (function) `src/pres_hints.c:164` `void ph_cell_padding(int cellpad, css_style *cs)`
 
 ## src/profile.c
 Depends on: `include/disk_store.h`, `include/profile.h`

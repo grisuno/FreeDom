@@ -414,6 +414,7 @@
 - [`CI_MAX_DEPTH`](modules/include.css_import.h.md#ci_max_depth) macro in `include/css_import.h`
 - [`CI_MAX_PER_PAGE`](modules/include.css_import.h.md#ci_max_per_page) macro in `include/css_import.h`
 - [`CI_MAX_PER_SHEET`](modules/include.css_import.h.md#ci_max_per_sheet) macro in `include/css_import.h`
+- [`ci_rebase_urls`](modules/src.css_import.c.md#ci_rebase_urls) function in `src/css_import.c`
 - [`ci_scan`](modules/include.css_import.h.md#ci_scan) function in `include/css_import.h`
 - [`ci_scan`](modules/src.css_import.c.md#ci_scan) function in `src/css_import.c`
 - [`CI_URL_MAX`](modules/include.css_import.h.md#ci_url_max) macro in `include/css_import.h`
@@ -2277,12 +2278,18 @@
 - [`ph_apply`](modules/include.pres_hints.h.md#ph_apply) function in `include/pres_hints.h`
 - [`ph_apply`](modules/src.pres_hints.c.md#ph_apply) function in `src/pres_hints.c`
 - [`PH_ATTR_MAX`](modules/include.pres_hints.h.md#ph_attr_max) macro in `include/pres_hints.h`
+- [`ph_cell_padding`](modules/include.pres_hints.h.md#ph_cell_padding) function in `include/pres_hints.h`
+- [`ph_cell_padding`](modules/src.pres_hints.c.md#ph_cell_padding) function in `src/pres_hints.c`
 - [`PH_CENTERED`](modules/include.pres_hints.h.md#ph_centered) macro in `include/pres_hints.h`
 - [`PH_DIM_MAX_PX`](modules/include.pres_hints.h.md#ph_dim_max_px) macro in `include/pres_hints.h`
 - [`ph_parse_dimension`](modules/include.pres_hints.h.md#ph_parse_dimension) function in `include/pres_hints.h`
 - [`ph_parse_dimension`](modules/src.pres_hints.c.md#ph_parse_dimension) function in `src/pres_hints.c`
+- [`ph_parse_nonneg`](modules/include.pres_hints.h.md#ph_parse_nonneg) function in `include/pres_hints.h`
+- [`ph_parse_nonneg`](modules/src.pres_hints.c.md#ph_parse_nonneg) function in `src/pres_hints.c`
 - [`PH_PER_MILLE_MAX`](modules/src.pres_hints.c.md#ph_per_mille_max) macro in `src/pres_hints.c`
 - [`PH_QUIRKS`](modules/include.pres_hints.h.md#ph_quirks) macro in `include/pres_hints.h`
+- [`ph_table_cellpadding`](modules/include.pres_hints.h.md#ph_table_cellpadding) function in `include/pres_hints.h`
+- [`ph_table_cellpadding`](modules/src.pres_hints.c.md#ph_table_cellpadding) function in `src/pres_hints.c`
 - [`pl`](modules/gui.browser_ui.c.md#pl) type_alias in `gui/browser_ui.c`
 - [`place`](modules/include.js_dom.h.md#place) function in `include/js_dom.h`
 - [`place`](modules/src.render_doc.c.md#place) function in `src/render_doc.c`
@@ -3387,6 +3394,7 @@
 - [`upstream`](modules/gui.browser_ui.c.md#upstream) function in `gui/browser_ui.c`
 - [`URL`](modules/src.page_view.c.md#url) function in `src/page_view.c`
 - [`url`](modules/include.css_import.h.md#url) type_alias in `include/css_import.h`
+- [`url`](modules/include.css_import.h.md#url) function in `include/css_import.h`
 - [`url`](modules/include.url.h.md#url) function in `include/url.h`
 - [`url`](modules/src.page_view.c.md#url) function in `src/page_view.c`
 - [`url_authority_len`](modules/include.url.h.md#url_authority_len) function in `include/url.h`

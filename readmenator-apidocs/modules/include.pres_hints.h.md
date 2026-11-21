@@ -1,12 +1,12 @@
 # `include/pres_hints.h`
 
-> Source: [include/pres_hints.h:1](../../include/pres_hints.h#L1) | language `h` | coverage 71.4% | [API index](../index.md)
+> Source: [include/pres_hints.h:1](../../include/pres_hints.h#L1) | language `h` | coverage 80.0% | [API index](../index.md)
 
 pres_hints (ph_) -- HTML presentational attributes as zero-specificity style.
 
 ## Contents
 
-- **Functions:** [`ph_parse_dimension`](#ph_parse_dimension), [`ph_apply`](#ph_apply)
+- **Functions:** [`ph_parse_dimension`](#ph_parse_dimension), [`ph_apply`](#ph_apply), [`ph_parse_nonneg`](#ph_parse_nonneg), [`ph_table_cellpadding`](#ph_table_cellpadding), [`ph_cell_padding`](#ph_cell_padding)
 - **Macros:** [`PH_ATTR_MAX`](#ph_attr_max), [`PH_DIM_MAX_PX`](#ph_dim_max_px), [`PH_CENTERED`](#ph_centered), [`PH_QUIRKS`](#ph_quirks)
 
 ## Functions
@@ -58,6 +58,76 @@ No-op on a NULL tag, getter or style.
 | `get` | `ph_attr_fn` |  |  |
 | `ctx` | `void *` |  |  |
 | `flags` | `unsigned` |  |  |
+| `cs` | `css_style *` |  |  |
+
+---
+
+<a id="ph_parse_nonneg"></a>
+
+### `ph_parse_nonneg`
+
+`function` | [include/pres_hints.h:34](../../include/pres_hints.h#L34)
+
+```c
+int ph_parse_nonneg(const char *s, size_t len, int *out);
+```
+
+HTML "rules for parsing non-negative integers": 1 with *out set (0 is valid), 0 = invalid.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `s` | `char *` |  |  |
+| `len` | `size_t` |  |  |
+| `out` | `int *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="ph_table_cellpadding"></a>
+
+### `ph_table_cellpadding`
+
+`function` | [include/pres_hints.h:37](../../include/pres_hints.h#L37)
+
+```c
+int ph_table_cellpadding(ph_attr_fn get, void *ctx);
+```
+
+The cellpadding of a <table> whose attributes `get` reads: px, or -1 when absent/invalid.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `get` | `ph_attr_fn` |  |  |
+| `ctx` | `void *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="ph_cell_padding"></a>
+
+### `ph_cell_padding`
+
+`function` | [include/pres_hints.h:41](../../include/pres_hints.h#L41)
+
+```c
+void ph_cell_padding(int cellpad, css_style *cs);
+```
+
+A table cell's padding: every side the cascade left unset takes cellpad px, or the UA sheet's 1px when cellpad < 0.
+
+No-op on a NULL style.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `cellpad` | `int` |  |  |
 | `cs` | `css_style *` |  |  |
 
 ---

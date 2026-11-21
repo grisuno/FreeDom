@@ -56,6 +56,7 @@ Previous: [KB_include.md](KB_include.md)
   - `ci_scan` (function, line 36) `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap);`
   - `ci_wrap` (function, line 41) `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap);`
   - `ci_balanced` (function, line 45) `int ci_balanced(const char *css, size_t len);`
+  - `url` (function, line 55) `* rewritten to url("ABS"), ABS = resolve(base, ref) (spec/css_import.md, "Rebase"). * Fragment-only, schemed, empty...`
   - `FREEDOM_CSS_IMPORT_H` (macro, line 2) `#define FREEDOM_CSS_IMPORT_H`
   - `CI_URL_MAX` (macro, line 19) `#define CI_URL_MAX`
   - `CI_COND_MAX` (macro, line 20) `#define CI_COND_MAX`
