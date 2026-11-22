@@ -28,6 +28,8 @@
 #define CHL_BTN_GAP         2.0
 #define CHL_URL_H           32.0
 #define CHL_ID_W            30.0  /* identity badge slot at the pill's left */
+#define CHL_MORE_W          26.0  /* hidden-tabs indicator at each end of an overflowing strip */
+#define CHL_DRAG_THRESHOLD  6.0   /* px a pressed tab must travel before it is dragged */
 
 typedef enum chl_status { CHL_OK = 0, CHL_EINVAL = -1 } chl_status;
 
@@ -37,6 +39,8 @@ typedef enum chl_part {
     CHL_PART_NONE = 0,
     CHL_PART_TAB,
     CHL_PART_TAB_CLOSE,
+    CHL_PART_TABS_LEFT,  /* indicator: tabs hidden before the strip */
+    CHL_PART_TABS_RIGHT, /* indicator: tabs hidden after the strip */
     CHL_PART_NEW_TAB,
     CHL_PART_DRAG,
     CHL_PART_WIN_MIN,
@@ -61,6 +65,9 @@ typedef struct chl_layout {
     double   tab_w;        /* width of every tab */
     int      tabs_visible; /* tabs that fit before the new-tab button */
     int      tab_first;    /* first visible tab: the strip scrolls to keep `active` visible */
+    int      hidden_left;  /* tabs before tab_first */
+    int      hidden_right; /* tabs after the last visible one */
+    chl_rect more_left, more_right; /* indicators; zero-sized when every tab fits */
     chl_rect new_tab;
     chl_rect win_min, win_max, win_close; /* zero-sized under SSD */
     chl_rect back, fwd, reload, url, identity, menu;
@@ -80,6 +87,17 @@ int chl_rect_has(chl_rect r, double x, double y);
 /* The chrome part under (x, y); *tab gets the tab index for TAB/TAB_CLOSE, else -1.
  * tab may be NULL. */
 chl_part chl_hit(const chl_layout *l, double x, double y, int *tab);
+
+/* Absolute index of the visible tab slot under x (clamped to the visible tabs): where a
+ * dragged tab dropped at x lands. -1 if l is NULL or no tab is visible. */
+int chl_tab_drop_index(const chl_layout *l, double x);
+
+/* Where element i ends up after the element at `from` moves to `to` (the others shift to
+ * close the gap and open the slot). The single remapping for every index the GUI keeps. */
+int chl_move_index(int i, int from, int to);
+
+/* Ctrl+<digit>: 1..8 select that tab, 9 the last one (Firefox). -1 when there is none. */
+int chl_tab_for_digit(int digit, int tab_count);
 
 /* --- find bar (spec/find_text.md), docked at the bottom of the window --- */
 

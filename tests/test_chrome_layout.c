@@ -222,6 +222,96 @@ static void test_findbar(void **state) {
     assert_true(f.field.w > 0.0);
 }
 
+
+static void test_hidden_tab_indicators(void **state) {
+    (void)state;
+    chl_layout l;
+    /* Everything fits: no indicators. */
+    assert_int_equal(chl_compute(1300, 1, 3, 1, &l), CHL_OK);
+    assert_int_equal(l.hidden_left, 0);
+    assert_int_equal(l.hidden_right, 0);
+    assert_true(l.more_left.w == 0.0 && l.more_right.w == 0.0);
+
+    /* 60 tabs, the middle one active: tabs hidden on both sides, counted exactly. */
+    assert_int_equal(chl_compute(1300, 1, 60, 30, &l), CHL_OK);
+    assert_true(l.tabs_visible > 0 && l.tabs_visible < 60);
+    assert_int_equal(l.hidden_left, l.tab_first);
+    assert_int_equal(l.hidden_left + l.tabs_visible + l.hidden_right, 60);
+    assert_true(l.hidden_left > 0);
+    assert_true(l.more_left.w > 0.0 && l.more_right.w > 0.0);
+    chl_rect first, last;
+    assert_int_equal(chl_tab_rect(&l, l.tab_first, &first), 1);
+    assert_int_equal(chl_tab_rect(&l, l.tab_first + l.tabs_visible - 1, &last), 1);
+    assert_false(overlaps(l.more_left, first));
+    assert_false(overlaps(l.more_right, last));
+    assert_false(overlaps(l.more_right, l.new_tab));
+    assert_true(l.more_left.x + l.more_left.w <= first.x + 1e-9);
+    assert_true(last.x + last.w <= l.more_right.x + 1e-9);
+    assert_true(l.more_right.x + l.more_right.w <= l.new_tab.x + 1e-9);
+    assert_true(l.new_tab.x + l.new_tab.w <= l.win_min.x - CHL_DRAG_MIN + 1e-9);
+    int t = 9;
+    assert_int_equal(chl_hit(&l, cx(l.more_left), cy(l.more_left), &t), CHL_PART_TABS_LEFT);
+    assert_int_equal(t, -1);
+    assert_int_equal(chl_hit(&l, cx(l.more_right), cy(l.more_right), NULL), CHL_PART_TABS_RIGHT);
+
+    /* First tab active: nothing hidden on the left, so the left indicator is inert. */
+    assert_int_equal(chl_compute(1300, 1, 60, 0, &l), CHL_OK);
+    assert_int_equal(l.hidden_left, 0);
+    assert_true(l.hidden_right > 0);
+    assert_true(chl_hit(&l, cx(l.more_left), cy(l.more_left), NULL) != CHL_PART_TABS_LEFT);
+}
+
+static void test_tab_drop_index(void **state) {
+    (void)state;
+    chl_layout l;
+    assert_int_equal(chl_compute(1300, 1, 5, 0, &l), CHL_OK);
+    for (int i = 0; i < 5; ++i) {
+        chl_rect r;
+        assert_int_equal(chl_tab_rect(&l, i, &r), 1);
+        assert_int_equal(chl_tab_drop_index(&l, r.x + 1.0), i);
+        assert_int_equal(chl_tab_drop_index(&l, r.x + r.w - 1.0), i);
+    }
+    assert_int_equal(chl_tab_drop_index(&l, -500.0), 0);
+    assert_int_equal(chl_tab_drop_index(&l, 1.0e9), 4);
+    assert_int_equal(chl_tab_drop_index(&l, NAN), 0);
+    assert_int_equal(chl_tab_drop_index(NULL, 10.0), -1);
+
+    /* Scrolled strip: the index is absolute, inside the visible window. */
+    assert_int_equal(chl_compute(1300, 1, 60, 40, &l), CHL_OK);
+    assert_int_equal(chl_tab_drop_index(&l, -1.0), l.tab_first);
+    assert_int_equal(chl_tab_drop_index(&l, 1.0e9), l.tab_first + l.tabs_visible - 1);
+}
+
+static void test_tab_for_digit(void **state) {
+    (void)state;
+    assert_int_equal(chl_tab_for_digit(1, 5), 0);
+    assert_int_equal(chl_tab_for_digit(5, 5), 4);
+    assert_int_equal(chl_tab_for_digit(6, 5), -1);
+    assert_int_equal(chl_tab_for_digit(8, 20), 7);
+    assert_int_equal(chl_tab_for_digit(9, 20), 19);  /* 9 = the last tab, Firefox */
+    assert_int_equal(chl_tab_for_digit(9, 1), 0);
+    assert_int_equal(chl_tab_for_digit(0, 5), -1);
+    assert_int_equal(chl_tab_for_digit(10, 5), -1);
+    assert_int_equal(chl_tab_for_digit(1, 0), -1);
+}
+
+static void test_move_index(void **state) {
+    (void)state;
+    /* Moving 1 -> 3 in [a b c d e] gives [a c d b e]. */
+    assert_int_equal(chl_move_index(0, 1, 3), 0);
+    assert_int_equal(chl_move_index(1, 1, 3), 3);
+    assert_int_equal(chl_move_index(2, 1, 3), 1);
+    assert_int_equal(chl_move_index(3, 1, 3), 2);
+    assert_int_equal(chl_move_index(4, 1, 3), 4);
+    /* Moving 3 -> 1 gives [a d b c e]. */
+    assert_int_equal(chl_move_index(1, 3, 1), 2);
+    assert_int_equal(chl_move_index(2, 3, 1), 3);
+    assert_int_equal(chl_move_index(3, 3, 1), 1);
+    assert_int_equal(chl_move_index(0, 3, 1), 0);
+    assert_int_equal(chl_move_index(4, 3, 1), 4);
+    assert_int_equal(chl_move_index(2, 2, 2), 2);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_rejects_bad_input),
@@ -234,6 +324,10 @@ int main(void) {
         cmocka_unit_test(test_identity_table),
         cmocka_unit_test(test_identity_labels),
         cmocka_unit_test(test_findbar),
+        cmocka_unit_test(test_hidden_tab_indicators),
+        cmocka_unit_test(test_tab_drop_index),
+        cmocka_unit_test(test_move_index),
+        cmocka_unit_test(test_tab_for_digit),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

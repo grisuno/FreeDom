@@ -86,7 +86,24 @@ insignia de la anterior.
 - **Dado** `https://x` con transporte conocido y sin degradación, **entonces** `PQ`; con
   `--insecure`, `UNVERIFIED`; sin transporte conocido, `UNKNOWN`.
 
+## Pestañas ocultas, arrastre y atajos (tanda 98)
+
+- Cuando las pestañas no caben, se reserva un **indicador** de `CHL_MORE_W` en cada extremo
+  de la tira (posiciones estables): `more_left` antes de la primera visible, `more_right`
+  tras la última y antes de `+`. `hidden_left = tab_first`,
+  `hidden_right = tab_count − tab_first − tabs_visible`. El pintor muestra un chevrón y la
+  cuenta; un indicador sin pestañas ocultas de su lado es **inerte** (`chl_hit` da `NONE`, ni
+  siquiera zona de arrastre). Clic ⇒ activa la pestaña oculta contigua (la tira se desplaza).
+- **Arrastre:** al pulsar una pestaña se selecciona y queda armada; tras `CHL_DRAG_THRESHOLD`
+  px de movimiento horizontal sigue al puntero: `chl_tab_drop_index(l, x)` da el índice
+  absoluto del hueco visible bajo `x` (acotado a las visibles) y la GUI mueve la pestaña ahí.
+  `chl_move_index(i, from, to)` es la ÚNICA reasignación de índices (permutación: el fuzzer
+  lo comprueba).
+- **`Ctrl+1…8`** selecciona esa pestaña, **`Ctrl+9`** la última (Firefox):
+  `chl_tab_for_digit`, también con la barra de URL enfocada.
+- La insignia de identidad abre el **panel del sitio** (`spec/site_panel.md`), no un aviso.
+
 ## Fuera de alcance
 
-Arrastrar pestañas para reordenarlas, favicons (exigirían un fetch extra por página: se
-decidirá en su propio hito por su coste de privacidad), panel de detalles de la conexión.
+Favicons (exigirían un fetch extra por página: se decidirá en su propio hito por su coste de
+privacidad), arrastrar una pestaña fuera de la ventana, animación de deslizamiento.

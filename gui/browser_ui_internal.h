@@ -173,6 +173,11 @@ size_t bui_url_index_at(cairo_t *cr, const bui_chrome_view *v, double x);
 /* Rounded rectangle path. */
 void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r);
 
+#include "site_panel.h"
+/* The site identity panel (spec/site_panel.md); hot_action = action under the pointer or -1. */
+void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g,
+                          int hot_action);
+
 /* --- bui_mask_img.c: a mask-image url() layer into a mask surface --- */
 
 /* Paints the decoded image `img` (nat_w x nat_h) as an alpha source into `c`, placed and

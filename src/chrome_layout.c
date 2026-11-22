@@ -53,26 +53,42 @@ chl_status chl_compute(double width, int csd, int tab_count, int active, chl_lay
         right_limit = width - CHL_PAD;
     }
 
-    l.tab_x0 = CHL_PAD;
-    double tabs_room = right_limit - CHL_NEWTAB_W - l.tab_x0; /* tabs + their gaps */
-    double tw = tabs_room / (double)tab_count - CHL_TAB_GAP;
-    if (!(tw <= CHL_TAB_MAX_W)) tw = CHL_TAB_MAX_W;
-    if (tw < CHL_TAB_MIN_W) tw = CHL_TAB_MIN_W;
-    l.tab_w = tw;
-    double slot = tw + CHL_TAB_GAP;
-    int fit = 0;
-    if (tabs_room + CHL_TAB_GAP >= slot) {
-        double f = floor((tabs_room + CHL_TAB_GAP) / slot);
-        fit = (f >= (double)tab_count) ? tab_count : (int)f;
+    /* Tabs share the room; when they do not all fit, an indicator at each end of the strip
+     * takes its slot (stable positions whichever side hides tabs). */
+    int overflow = 0, fit = 0;
+    double tw = CHL_TAB_MIN_W, slot = tw + CHL_TAB_GAP;
+    for (int pass = 0; pass < 2; ++pass) {
+        double more = overflow ? CHL_MORE_W : 0.0;
+        l.tab_x0 = CHL_PAD + more;
+        double tabs_room = right_limit - CHL_NEWTAB_W - l.tab_x0 - more; /* tabs + their gaps */
+        tw = tabs_room / (double)tab_count - CHL_TAB_GAP;
+        if (!(tw <= CHL_TAB_MAX_W)) tw = CHL_TAB_MAX_W;
+        if (tw < CHL_TAB_MIN_W) tw = CHL_TAB_MIN_W;
+        slot = tw + CHL_TAB_GAP;
+        fit = 0;
+        if (tabs_room + CHL_TAB_GAP >= slot) {
+            double f = floor((tabs_room + CHL_TAB_GAP) / slot);
+            fit = (f >= (double)tab_count) ? tab_count : (int)f;
+        }
+        if (fit >= tab_count || overflow) break;
+        overflow = 1;
     }
+    l.tab_w = tw;
     l.tabs_visible = fit;
     /* Scroll the strip so the active tab is always among the visible ones. */
     l.tab_first = (fit > 0 && active >= fit) ? active - fit + 1 : 0;
+    l.hidden_left = l.tab_first;
+    l.hidden_right = tab_count - l.tab_first - fit;
 
     double tab_y = CHL_TAB_TOP_GAP;
     double tab_h = CHL_TABBAR_H - CHL_TAB_TOP_GAP;
-    double nx = l.tab_x0 + (double)fit * slot;
-    l.new_tab = rect(nx, tab_y + (tab_h - CHL_NEWTAB_W) / 2.0, CHL_NEWTAB_W, CHL_NEWTAB_W);
+    double strip_end = l.tab_x0 + (double)fit * slot;
+    if (overflow) {
+        l.more_left  = rect(CHL_PAD, tab_y, CHL_MORE_W - CHL_TAB_GAP, tab_h);
+        l.more_right = rect(strip_end, tab_y, CHL_MORE_W - CHL_TAB_GAP, tab_h);
+        strip_end += CHL_MORE_W;
+    }
+    l.new_tab = rect(strip_end, tab_y + (tab_h - CHL_NEWTAB_W) / 2.0, CHL_NEWTAB_W, CHL_NEWTAB_W);
 
     /* Row 2: round buttons, the URL pill with its identity badge, the menu. */
     double by = l.toolbar_top + (CHL_TOOLBAR_H - CHL_BTN) / 2.0;
@@ -123,6 +139,10 @@ chl_part chl_hit(const chl_layout *l, double x, double y, int *tab) {
             if (chl_rect_has(l->win_max, x, y))   return CHL_PART_WIN_MAX;
             if (chl_rect_has(l->win_min, x, y))   return CHL_PART_WIN_MIN;
         }
+        if (l->hidden_left > 0 && chl_rect_has(l->more_left, x, y))   return CHL_PART_TABS_LEFT;
+        if (l->hidden_right > 0 && chl_rect_has(l->more_right, x, y)) return CHL_PART_TABS_RIGHT;
+        if (chl_rect_has(l->more_left, x, y) || chl_rect_has(l->more_right, x, y))
+            return CHL_PART_NONE;  /* an inert indicator is not a drag handle either */
         for (int i = l->tab_first; i < l->tab_first + l->tabs_visible; ++i) {
             chl_rect t, c;
             if (!chl_tab_rect(l, i, &t) || !chl_rect_has(t, x, y)) continue;
@@ -140,6 +160,29 @@ chl_part chl_hit(const chl_layout *l, double x, double y, int *tab) {
     if (chl_rect_has(l->url, x, y))      return CHL_PART_URL;
     if (chl_rect_has(l->menu, x, y))     return CHL_PART_MENU;
     return CHL_PART_NONE;
+}
+
+int chl_tab_drop_index(const chl_layout *l, double x) {
+    if (l == NULL || l->tabs_visible < 1) return -1;
+    int lo = l->tab_first, hi = l->tab_first + l->tabs_visible - 1;
+    if (hi >= l->tab_count) hi = l->tab_count - 1;
+    if (!isfinite(x) || x < l->tab_x0) return lo;
+    double k = floor((x - l->tab_x0) / (l->tab_w + CHL_TAB_GAP));
+    if (!(k < (double)(hi - lo))) return hi;
+    return lo + (int)k;
+}
+
+int chl_move_index(int i, int from, int to) {
+    if (i == from) return to;
+    if (from < to && i > from && i <= to) return i - 1;
+    if (to < from && i >= to && i < from) return i + 1;
+    return i;
+}
+
+int chl_tab_for_digit(int digit, int tab_count) {
+    if (tab_count < 1 || digit < 1 || digit > 9) return -1;
+    if (digit == 9) return tab_count - 1;
+    return (digit <= tab_count) ? digit - 1 : -1;
 }
 
 /* --- identity badge --- */
@@ -267,3 +310,4 @@ chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y) {
     if (chl_rect_has(f->close, x, y)) return CHL_FIND_CLOSE;
     return CHL_FIND_BAR;
 }
+

@@ -56,6 +56,8 @@
 #include "webfont_load.h"
 #include "textfield.h"
 #include "find_text.h"
+#include "site_panel.h"
+#include "nav_token.h"
 #include "webcaps.h"
 #include "host_conf.h"
 #include "css_gradient.h"
@@ -306,7 +308,10 @@ typedef struct tab_ctx {
     ui_bg_image    *bg_images; size_t bg_image_count;
     char           *cur_html; size_t cur_html_len; char *cur_top;
     int             conn_known, conn_downgrade; /* transport of cur_html (identity badge) */
+    char            conn_tls[24], conn_group[48]; /* negotiated TLS version / KE group */
     int             loading;
+    nt_token       *nav;   /* this tab's network navigation in flight (spec/nav_token.md) */
+    struct fetch_job *ready; /* its result, arrived while the tab was parked; shown on return */
     const char     *hover_href; /* aliases doc; moves with it */
     int             hover_cursor; /* css_cursor resolved at the pointer, moves with hover_href */
 } tab_ctx;
@@ -472,6 +477,8 @@ typedef struct browser_window {
      * this document; any other document change clears it (fail-closed badge). */
     int    conn_known;
     int    conn_downgrade;
+    char   conn_tls[24];    /* TLS version and KE group that fetch negotiated (site panel) */
+    char   conn_group[48];
 
     /* @font-face pass (spec/webfont.md b3b): stash of served external CSS
      * (rebuilt every load via the tab css sink, freed after the font pass),
@@ -531,6 +538,8 @@ typedef struct browser_window {
      * is discarded -- the active tab is then guaranteed unchanged since the launch. */
     int      fetch_pipe[2];  /* [0] read end (polled), [1] write end (threads) */
     uint64_t net_gen;        /* current navigation generation */
+    nt_token *nav;           /* the active tab's network navigation (spec/nav_token.md): a
+                              * parked tab keeps loading under its own token */
     const char *nav_redirect_from; /* borrowed, non-NULL only while do_load runs for a
                                     * navigation a server redirect caused: the hop that
                                     * sent it is the initiator the private-network guard
@@ -546,7 +555,7 @@ typedef struct browser_window {
     char           *stream_body;
     size_t          stream_body_len;
     int             stream_evfd;
-    uint64_t        stream_launch_gen; /* net_gen at launch; progress_cb checks this */
+    uint64_t        stream_nav_id;     /* nt_id of the navigation stream_body belongs to */
     uint64_t        last_stream_render;/* timestamp of last streaming render (rate limit) */
 
     /* Tabs. The active tab's state lives in the fields above; the other tabs are
@@ -656,6 +665,13 @@ typedef struct browser_window {
     uint64_t   fip_serial;   /* doc_serial they were computed for */
     int        fip_painting; /* 1 only while the on-screen painter runs */
     chl_find_part fip_hot;
+    /* Site identity panel (spec/site_panel.md), anchored to the badge. */
+    int    site_panel_open;
+    int    site_panel_hot;  /* action under the pointer, or -1 */
+    /* Tab drag-reorder: the pressed tab and whether it has moved past the threshold. */
+    int    tab_press;       /* -1 = none */
+    double tab_press_x;
+    int    tab_dragging;
     uint64_t   lc_gen;
     browser_closed closed_tabs;  /* Ctrl+Shift+T; in RAM only */
 } browser_window;
@@ -978,7 +994,7 @@ static void aa_commit(browser_window *w) {
 
 /* Appends the current page's host to one of the user's .conf lists (block/allow/js),
  * then reloads the in-memory filter so it applies. Feedback goes through the status toast. */
-static void add_current_host_to_list(browser_window *w, int sel) {
+static int add_current_host_to_list(browser_window *w, int sel) {
     gui_quiesce(w);   /* a background tick reads what this changes */
     const char *filename = (sel == HOSTLIST_BLOCK) ? "block.conf"
                          : (sel == HOSTLIST_ALLOW) ? "allow.conf" : "js.conf";
@@ -986,14 +1002,14 @@ static void add_current_host_to_list(browser_window *w, int sel) {
     char host[HE_MAX_HOST + 1];
     if (rp_host_of(browser_current_url(&w->bs), host, sizeof host) != 0) {
         browser_set_status(&w->bs, "Cannot edit lists: this page has no host.", now_ms());
-        return;
+        return 0;
     }
     char msg[HE_MAX_HOST + 80];
     int r = list_append_host(filename, host);
     if (r == LIST_DUPLICATE) {
         snprintf(msg, sizeof msg, "%s is already in %s.", host, filename);
         browser_set_status(&w->bs, msg, now_ms());
-        return;
+        return 0;
     }
     if (r != LIST_APPENDED) {
         browser_set_status(&w->bs,
@@ -1001,12 +1017,13 @@ static void add_current_host_to_list(browser_window *w, int sel) {
           : r == LIST_ERR_DIR  ? "Cannot edit lists: no writable config dir."
           : r == LIST_ERR_PATH ? "Cannot edit lists: path too long."
                                : "Cannot edit lists: write failed.", now_ms());
-        return;
+        return 0;
     }
     reload_host_list(w, sel);
     snprintf(msg, sizeof msg, "Added %s to %s. Reload to apply.", host, filename);
     browser_set_status(&w->bs, msg, now_ms());
     render_current(w);
+    return 1;
 }
 
 /* Concatenates the allow.conf bodies along the same search path build_host_filter
@@ -1512,6 +1529,7 @@ static void set_cache(browser_window *w, char *html, size_t len, const char *top
     w->cur_top = (top != NULL) ? strdup(top) : NULL;
     w->conn_known = 0;
     w->conn_downgrade = SF_DOWNGRADE_NONE;
+    w->conn_tls[0] = w->conn_group[0] = '\0';
 }
 
 /* Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row
@@ -2033,7 +2051,7 @@ static int prepare_fetch(browser_window *w, const char *url, sf_config *cfg,
 typedef struct fetch_job {
     browser_window *window;  /* for streaming progress; the thread is disciplined */
     int       write_fd;     /* fetch_pipe[1]: where the thread posts itself when done */
-    uint64_t  gen;          /* navigation generation; stale results are discarded */
+    nt_token *nav;          /* the tab navigation this job serves (one reference) */
     int       is_post;
 
     /* Input (owned). cfg is rebuilt from these on the thread. */
@@ -2056,6 +2074,7 @@ typedef struct fetch_job {
     /* Output (filled by the thread). */
     sf_status status;
     int       downgraded;        /* DOWNGRADE_* */
+    char      tls[24], group[48]; /* negotiated by the transfer that delivered html */
     char     *html;              /* response body (owned), or NULL */
     size_t    html_len;
     long      http_code;
@@ -2066,6 +2085,7 @@ typedef struct fetch_job {
 
 static void fetch_job_free(fetch_job *j) {
     if (j == NULL) return;
+    nt_unref(&j->nav);
     free(j->url);
     free(j->user_agent);
     free(j->proxy_address);
@@ -2086,13 +2106,14 @@ static void fetch_job_free(fetch_job *j) {
  * loop via eventfd, which triggers a progressive re-render. Runs under the
  * curl transfer thread, not the main thread: only touches stream_* fields. */
 static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userdata) {
-    browser_window *w = (browser_window *)userdata;
+    const fetch_job *j = (const fetch_job *)userdata;
+    browser_window *w = (j != NULL) ? j->window : NULL;
     if (w == NULL || w->stream_evfd < 0) return;
-    /* Discard if the main thread has launched a new navigation since this fetch
-     * started (net_gen was bumped). Reading net_gen from the fetch thread is safe:
-     * the main thread only writes it before launching, and x86_64 reads are atomic. */
-    if (w->net_gen != w->stream_launch_gen) return;
+    /* Only the navigation of the tab on screen streams (spec/nav_token.md): a superseded
+     * or parked one keeps downloading silently. The consumer re-checks the id. */
+    if (nt_cancelled(j->nav) || !nt_foreground(j->nav)) return;
     pthread_mutex_lock(&w->stream_lock);
+    w->stream_nav_id = nt_id(j->nav);
     free(w->stream_body);
     w->stream_body = (char *)malloc(body_len + 1);
     if (w->stream_body != NULL) {
@@ -2111,8 +2132,7 @@ static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userd
  * nobody will see. Same benign read of net_gen as stream_progress_cb. */
 static int fetch_job_cancelled(void *ctx) {
     const fetch_job *j = (const fetch_job *)ctx;
-    return j->window != NULL
-        && __atomic_load_n(&j->window->net_gen, __ATOMIC_RELAXED) != j->gen;
+    return nt_cancelled(j->nav);
 }
 
 /* Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer
@@ -2138,7 +2158,7 @@ static void *fetch_thread(void *arg) {
      * window's stream_lock and signals the main loop via eventfd. */
     if (!j->is_post && w != NULL) {
         cfg.progress_cb = stream_progress_cb;
-        cfg.progress_ctx = w;
+        cfg.progress_ctx = j;
     }
     cfg.cancel_cb = fetch_job_cancelled;
     cfg.cancel_ctx = j;
@@ -2159,12 +2179,34 @@ static void *fetch_thread(void *arg) {
         /* Move the headers that drive the render-vs-download decision (no extra copy). */
         j->resp_ctype = resp.content_type; resp.content_type = NULL;
         j->resp_disp  = resp.content_disposition; resp.content_disposition = NULL;
+        int r1 = snprintf(j->tls, sizeof j->tls, "%s", resp.tls_version ? resp.tls_version : "");
+        int r2 = snprintf(j->group, sizeof j->group, "%s",
+                          resp.negotiated_group ? resp.negotiated_group : "");
+        if (r1 < 0 || (size_t)r1 >= sizeof j->tls) j->tls[0] = '\0';       /* never a cut name */
+        if (r2 < 0 || (size_t)r2 >= sizeof j->group) j->group[0] = '\0';
     }
     sf_response_free(&resp);
 
     ssize_t wr = write(j->write_fd, &j, sizeof j);
     if (wr != (ssize_t)sizeof j) fetch_job_free(j); /* pipe gone (shutdown): no reader */
     return NULL;
+}
+
+/* Drops any streamed partial body: it belongs to the tab that was on screen. */
+static void stream_discard(browser_window *w) {
+    pthread_mutex_lock(&w->stream_lock);
+    free(w->stream_body);
+    w->stream_body = NULL;
+    w->stream_body_len = 0;
+    w->stream_nav_id = 0;
+    pthread_mutex_unlock(&w->stream_lock);
+}
+
+/* Cancels the active tab's network navigation (its transfer stops at the next libcurl
+ * poll, its result is dropped) and lets go of it. Idempotent. */
+static void nav_supersede(browser_window *w) {
+    nt_cancel(w->nav);
+    nt_unref(&w->nav);
 }
 
 /* Spawns a detached worker to fetch url under cfg (already gated by prepare_fetch).
@@ -2179,10 +2221,11 @@ static int fetch_launch(browser_window *w, const char *url, const sf_config *cfg
 
     j->window = w;
     j->write_fd = w->fetch_pipe[1];
-    j->gen = w->net_gen;
-    /* Snapshot the launch generation so the progress callback discards its data
-     * if the main thread starts a new navigation before this fetch finishes. */
-    w->stream_launch_gen = w->net_gen;
+    /* A launch supersedes this tab's previous navigation and opens its own. */
+    nav_supersede(w);
+    w->nav = nt_new();
+    j->nav = nt_ref(w->nav);
+    if (j->nav == NULL) { fetch_job_free(j); return 0; }
     j->is_post = is_post;
     j->proxy_type = cfg->proxy_type;
     j->allow_overlay_http = cfg->allow_overlay_http;
@@ -2895,6 +2938,7 @@ static void do_load(browser_window *w, const char *url) {
     if (w->timing_path[0] != '\0' && w->nav_start_ms == 0) w->nav_start_ms = now_ms();
     if (url == NULL) return;
     w->net_gen++;        /* new navigation: supersede any in-flight fetch */
+    nav_supersede(w);
     w->menu_open = 0;
     w->config_page = 0;
     /* Only a network fetch keeps the history entry provisional (spec/browser.md 3c);
@@ -3070,7 +3114,11 @@ static void tab_save(browser_window *w) {
     c->bg_images = w->bg_images; c->bg_image_count = w->bg_image_count;
     c->cur_html = w->cur_html; c->cur_html_len = w->cur_html_len; c->cur_top = w->cur_top;
     c->conn_known = w->conn_known; c->conn_downgrade = w->conn_downgrade;
+    memcpy(c->conn_tls, w->conn_tls, sizeof c->conn_tls);
+    memcpy(c->conn_group, w->conn_group, sizeof c->conn_group);
     c->loading = w->loading;
+    c->nav = w->nav;           /* the navigation moves with its tab and keeps loading */
+    nt_set_foreground(c->nav, 0);
     c->hover_href = w->hover_href;
     c->hover_cursor = w->hover_cursor;
 }
@@ -3089,7 +3137,11 @@ static void tab_restore(browser_window *w) {
     w->bg_images = c->bg_images; w->bg_image_count = c->bg_image_count;
     w->cur_html = c->cur_html; w->cur_html_len = c->cur_html_len; w->cur_top = c->cur_top;
     w->conn_known = c->conn_known; w->conn_downgrade = c->conn_downgrade;
+    memcpy(w->conn_tls, c->conn_tls, sizeof w->conn_tls);
+    memcpy(w->conn_group, c->conn_group, sizeof w->conn_group);
     w->loading = c->loading;
+    w->nav = c->nav;
+    nt_set_foreground(w->nav, 1);
     w->hover_href = c->hover_href;
     w->hover_cursor = c->hover_cursor;
 }
@@ -3097,6 +3149,7 @@ static void tab_restore(browser_window *w) {
 /* Frees the LIVE page's owned state (used when closing the foreground tab). */
 static void free_live_page(browser_window *w) {
     gui_quiesce(w);   /* a background tick reads what this changes */
+    nav_supersede(w);             /* a closed tab's load stops */
     clear_doc(w);                 /* inputs, images, doc, hover_href */
     font_stash_reset(w);          /* served-CSS stash never outlives its load */
     free(w->font_done_for); w->font_done_for = NULL;
@@ -3108,6 +3161,10 @@ static void free_live_page(browser_window *w) {
 
 /* Frees a parked (inactive) tab's owned state. */
 static void tab_ctx_release(tab_ctx *c) {
+    nt_cancel(c->nav);            /* a closed tab's load stops */
+    nt_unref(&c->nav);
+    fetch_job_free(c->ready);
+    c->ready = NULL;
     if (c->images != NULL) {
         for (size_t i = 0; i < c->image_count; ++i) {
             if (c->images[i].surface != NULL) cairo_surface_destroy(c->images[i].surface);
@@ -3130,25 +3187,35 @@ static void tab_ctx_release(tab_ctx *c) {
     memset(c, 0, sizeof *c);
 }
 
+static void deliver_fetch_result(browser_window *w, fetch_job *j);
+
+/* The tab just brought to the foreground finished loading while parked: show it now. */
+static void tab_show_ready(browser_window *w) {
+    fetch_job *ready = w->tab_slots[w->active_tab].ready;
+    w->tab_slots[w->active_tab].ready = NULL;
+    if (ready != NULL) deliver_fetch_result(w, ready);
+    fetch_job_free(ready);
+}
+
 /* Brings tab idx to the foreground (no network: the cached doc is restored). */
 static void tab_switch(browser_window *w, int idx) {
     gui_quiesce(w);   /* a background tick reads what this changes */
     if (idx < 0 || idx >= w->tab_count || idx == w->active_tab) return;
-    /* Single-load model: leaving a tab abandons its in-flight fetch (the discarded
-     * result is dropped by the generation check). Concurrent per-tab loading is future
-     * work. Clear the spinner now so the parked tab does not show it on return. */
-    w->net_gen++;
-    w->loading = 0;
-    (void)browser_abort_pending(&w->bs);   /* its fetch is abandoned: no ghost entry */
+    /* Leaving a tab does NOT abandon its load (spec/nav_token.md): its navigation moves
+     * into the slot with its provisional history entry and keeps downloading; a result
+     * that lands meanwhile is kept and shown when the tab comes back. */
     drop_repl_worker(w); /* active page changes without a render; rebind on next eval */
     tab_save(w);
     w->active_tab = idx;
     tab_restore(w);
+    stream_discard(w);
     w->menu_open = 0;
+    w->site_panel_open = 0;
     fip_close_bar(w);
     w->url_bar_focused = 0;
     const char *u = browser_current_url(&w->bs);
     browser_set_url_bar(&w->bs, (u != NULL) ? u : "");
+    tab_show_ready(w);
     redraw(w);
 }
 
@@ -3157,16 +3224,16 @@ static void tab_switch(browser_window *w, int idx) {
  * the new tab: it enters its history and stays in the URL bar. */
 static void tab_new(browser_window *w, const char *url) {
     fip_close_bar(w);
+    w->site_panel_open = 0;
     gui_quiesce(w);   /* a background tick reads what this changes */
     if (w->tab_count >= UI_MAX_TABS) {
         browser_set_status(&w->bs, "Tab limit reached.", now_ms());
         redraw(w);
         return;
     }
-    w->loading = 0; /* clear the current tab's spinner before parking it (its fetch,
-                     * if any, is abandoned: do_load below bumps the generation) */
-    (void)browser_abort_pending(&w->bs);
-    tab_save(w);
+    tab_save(w);   /* the current tab keeps loading in the background (spec/nav_token.md) */
+    w->nav = NULL; /* the new tab has no navigation yet; the slot owns the old one */
+    stream_discard(w);
     int idx = w->active_tab + 1;
     for (int i = w->tab_count; i > idx; --i) w->tab_slots[i] = w->tab_slots[i - 1];
     memset(&w->tab_slots[idx], 0, sizeof w->tab_slots[idx]); /* drop the stale duplicate */
@@ -3211,7 +3278,9 @@ static void uitab_close(browser_window *w, int idx) {
          * leaves the active tab's load untouched (its generation still matches). */
         w->net_gen++;
         drop_repl_worker(w); /* the active page is going away; rebind on next eval */
-        free_live_page(w);
+        free_live_page(w);   /* cancels its navigation */
+        w->tab_slots[idx].nav = NULL;   /* the slot held a stale alias of the live one */
+        w->tab_slots[idx].ready = NULL;
     } else {
         tab_ctx_release(&w->tab_slots[idx]);
     }
@@ -3222,9 +3291,11 @@ static void uitab_close(browser_window *w, int idx) {
     if (idx == w->active_tab) {
         if (w->active_tab >= w->tab_count) w->active_tab = w->tab_count - 1;
         tab_restore(w);
+        stream_discard(w);
         const char *u = browser_current_url(&w->bs);
         browser_set_url_bar(&w->bs, (u != NULL) ? u : "");
         w->menu_open = 0; w->url_bar_focused = 0;
+        tab_show_ready(w);
     } else if (idx < w->active_tab) {
         w->active_tab--;
     }
@@ -3239,6 +3310,34 @@ static chl_layout chrome_of(const browser_window *w) {
     if (chl_compute((double)w->width, w->use_csd, n, a, &l) != CHL_OK)
         (void)chl_compute((double)w->width, w->use_csd, 1, 0, &l);
     return l;
+}
+
+/* Moves tab `from` to slot `to`; the others shift (chl_move_index is the one remapping). The
+ * live tab's fields stay in the window: only the parked slots and the active index move. */
+static void tab_move(browser_window *w, int from, int to) {
+    if (from < 0 || to < 0 || from >= w->tab_count || to >= w->tab_count || from == to) return;
+    tab_ctx moving = w->tab_slots[from];
+    if (from < to)
+        memmove(&w->tab_slots[from], &w->tab_slots[from + 1], (size_t)(to - from) * sizeof moving);
+    else
+        memmove(&w->tab_slots[to + 1], &w->tab_slots[to], (size_t)(from - to) * sizeof moving);
+    w->tab_slots[to] = moving;
+    w->active_tab = chl_move_index(w->active_tab, from, to);
+}
+
+/* Pointer motion with a tab pressed: past the threshold the tab follows the pointer,
+ * swapping slots as it crosses its neighbours (spec/chrome_layout.md). */
+static void tab_drag_motion(browser_window *w) {
+    if (!w->tab_dragging) {
+        if (fabs(w->ptr_x - w->tab_press_x) < CHL_DRAG_THRESHOLD) return;
+        w->tab_dragging = 1;
+    }
+    chl_layout cl = chrome_of(w);
+    int to = chl_tab_drop_index(&cl, w->ptr_x);
+    if (to < 0 || to == w->active_tab) return;
+    tab_move(w, w->active_tab, to);
+    w->tab_press = w->active_tab;
+    redraw(w);
 }
 
 /* Title shown on a tab: the page title, else the URL, else a placeholder. */
@@ -17229,6 +17328,7 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
  * the network under weaker rules than a GET (Zero Trust). */
 static void do_submit_post(browser_window *w, const fm_plan *plan) {
     w->net_gen++;        /* new navigation: supersede any in-flight fetch */
+    nav_supersede(w);
     w->menu_open = 0;
 
     sf_config cfg;
@@ -17341,7 +17441,8 @@ static void save_current_page(browser_window *w) {
 }
 
 static void deliver_fetch_result(browser_window *w, fetch_job *j) {
-    if (j->gen != w->net_gen) return; /* superseded/abandoned navigation */
+    if (j->nav == NULL || j->nav != w->nav || nt_cancelled(j->nav))
+        return;                       /* superseded or abandoned navigation */
     w->loading = 0;
 
     if (j->status != SF_OK) {
@@ -17389,6 +17490,8 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j) {
     set_cache(w, html, len, j->url);
     w->conn_known = 1;               /* this document is exactly what this fetch delivered */
     w->conn_downgrade = j->downgraded;
+    memcpy(w->conn_tls, j->tls, sizeof w->conn_tls);
+    memcpy(w->conn_group, j->group, sizeof w->conn_group);
     if (j->is_post) browser_set_url_bar(&w->bs, j->url); /* reflect action URL; no history push */
     render_current_ex(w, 1); /* a fresh load may honor a JS-requested navigation */
 
@@ -17409,7 +17512,28 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j) {
 static void drain_fetch_results(browser_window *w) {
     fetch_job *j;
     while (read(w->fetch_pipe[0], &j, sizeof j) == (ssize_t)sizeof j) {
-        deliver_fetch_result(w, j);
+        /* Route by token identity, not tab position (tabs are reordered by drag). */
+        nt_token *parked[UI_MAX_TABS];
+        for (int i = 0; i < w->tab_count && i < UI_MAX_TABS; ++i)
+            parked[i] = (i == w->active_tab) ? NULL : w->tab_slots[i].nav;
+        int slot = -1;
+        switch (nt_route(j->nav, w->nav, parked, w->tab_count, &slot)) {
+            case NT_DELIVER:
+                deliver_fetch_result(w, j);
+                break;
+            case NT_PARK: {                /* a parked tab finished: keep it for its return */
+                tab_ctx *c = &w->tab_slots[slot];
+                fetch_job_free(c->ready);
+                c->ready = j;
+                c->loading = 0;
+                j = NULL;
+                redraw(w);
+                break;
+            }
+            case NT_DROP:
+            default:
+                break;
+        }
         fetch_job_free(j);
     }
 }
@@ -17641,7 +17765,7 @@ static void menu_item_toggle(browser_window *w, size_t i) {
         return;
     }
     if (it->action == UI_MENU_HOSTADD) {
-        add_current_host_to_list(w, it->theme_val);  /* theme_val = HOSTLIST_* */
+        (void)add_current_host_to_list(w, it->theme_val);  /* theme_val = HOSTLIST_* */
         return;
     }
     if (it->action == UI_MENU_BOOKMARK) {
@@ -17866,6 +17990,42 @@ static chl_identity page_identity(const browser_window *w) {
     return chl_identity_of(w->cur_top, w->conn_known, w->conn_downgrade, g_operator_insecure);
 }
 
+/* The site identity panel for the page on screen and where it sits (spec/site_panel.md).
+ * Built from live state every time, so it never shows a stale page. 1 on success. */
+static int site_panel_now(const browser_window *w, sp_panel *p, sp_geom *g) {
+    sp_facts f;
+    memset(&f, 0, sizeof f);
+    f.url = w->cur_top;
+    f.identity = page_identity(w);
+    f.tls_version = (w->conn_tls[0] != '\0') ? w->conn_tls : NULL;
+    f.group = (w->conn_group[0] != '\0') ? w->conn_group : NULL;
+    nr_route r = (w->cur_top != NULL) ? nr_route_for(w->cur_top, w->net_cfg) : NR_ROUTE_DIRECT;
+    f.route = (r == NR_ROUTE_TOR) ? SP_ROUTE_TOR : (r == NR_ROUTE_I2P) ? SP_ROUTE_I2P : SP_ROUTE_DIRECT;
+    f.allowlisted = page_host_allowlisted(w);
+    f.js_site = page_js_host_allowlisted(w);
+    f.trusted = page_trusted(w);
+    char host[HE_MAX_HOST + 1], line[HE_MAX_HOST + 2];
+    f.listable = rp_host_of(browser_current_url(&w->bs), host, sizeof host) == 0
+              && he_make_line(host, line, sizeof line) == HE_OK;
+    if (sp_build(&f, p) != SP_OK) return 0;
+    chl_layout l = chrome_of(w);
+    return sp_layout(p, l.identity, (double)w->width, (double)w->height, g) == SP_OK;
+}
+
+static void draw_site_panel(cairo_t *cr, browser_window *w) {
+    if (!w->site_panel_open) return;
+    sp_panel p;
+    sp_geom g;
+    if (site_panel_now(w, &p, &g)) bui_paint_site_panel(cr, &w->theme, &p, &g, w->site_panel_hot);
+}
+
+/* A panel action: add the host to its list and reload so the permission applies now. */
+static void site_panel_act(browser_window *w, sp_action a) {
+    int sel = (a == SP_ACT_ALLOW) ? HOSTLIST_ALLOW : (a == SP_ACT_JS) ? HOSTLIST_JS : -1;
+    if (sel < 0) return;
+    if (add_current_host_to_list(w, sel)) load_current(w);
+}
+
 /* Gathers what the chrome painter shows; titles/loading must hold UI_MAX_TABS. */
 static void chrome_view_fill(browser_window *w, const chl_layout *l, const char **titles,
                              int *loading, bui_chrome_view *v) {
@@ -18055,6 +18215,7 @@ static void paint(browser_window *w) {
     draw_scrollbar(cr, w);
     draw_findbar(cr, w);
     draw_menu(cr, w);
+    draw_site_panel(cr, w);
     draw_omnibox(cr, w);
     double hover_h = draw_hover_url(cr, w);
     draw_toast(cr, w, hover_h);
@@ -18208,6 +18369,15 @@ static void update_hover(browser_window *w) {
     int cur = (w->doc != NULL && !w->menu_open)
               ? cursor_at_point(w, w->ptr_x, w->ptr_y) : CSS_CUR_UNSET;
     ui_hot hot = chrome_hot_at(w, w->ptr_x, w->ptr_y);
+    if (w->site_panel_open) {
+        sp_panel sp;
+        sp_geom sg;
+        int sh = site_panel_now(w, &sp, &sg) ? sp_hit(&sg, w->ptr_x, w->ptr_y) : SP_HIT_OUTSIDE;
+        int ah = (sh >= SP_HIT_ACTION0) ? sh : -1;
+        if (sh != SP_HIT_OUTSIDE) { h = NULL; cur = CSS_CUR_UNSET; hot = UI_HOT_NONE; }
+        if (ah >= 0) cur = CSS_CUR_POINTER;
+        if (ah != w->site_panel_hot) { w->site_panel_hot = ah; redraw(w); }
+    }
     chl_find_part fhot = fip_hot_at(w, w->ptr_x, w->ptr_y);
     if (fhot != CHL_FIND_NONE) { h = NULL; cur = CSS_CUR_UNSET; }
     if (fhot != w->fip_hot) { w->fip_hot = fhot; redraw(w); }
@@ -19095,6 +19265,7 @@ static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, 
     w->ptr_y = wl_fixed_to_double(y);
     if (freebug_owns_surface(w, w->ptr_focus)) { freebug_pointer_motion(w); return; }
     if (w->dragging_scroll) { scrollbar_drag_to(w); return; }
+    if (w->tab_press >= 0) { tab_drag_motion(w); return; }
     update_hover(w);
     /* Track hovered-node changes for JS mouseover/mouseout events. */
     if (w->js_mode != JSP_OFF && w->tab_worker != NULL) {
@@ -19120,6 +19291,7 @@ static int stop_loading(browser_window *w) {
     if (!w->loading) return 0;
     gui_quiesce(w);
     w->net_gen++;
+    nav_supersede(w);
     w->loading = 0;
     (void)browser_abort_pending(&w->bs);
     w->url_bar_focused = 0;
@@ -19198,6 +19370,7 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
     if (button != UI_BTN_LEFT) return;
     if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
         if (w->dragging_scroll) { w->dragging_scroll = 0; redraw(w); }
+        if (w->tab_press >= 0) { w->tab_press = -1; w->tab_dragging = 0; update_hover(w); }
         /* Dispatch mouseup on the element under the pointer. */
         if (w->js_mode != JSP_OFF && w->tab_worker != NULL && !freebug_owns_surface(w, w->ptr_focus)) {
             dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
@@ -19211,7 +19384,7 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
      * when the UI consumes the release (e.g. toolbar click). Only content-area
      * presses get dispatched (chrome has no DOM element). */
     if (w->js_mode != JSP_OFF && w->tab_worker != NULL && !freebug_owns_surface(w, w->ptr_focus)) {
-        if (w->ptr_y >= toolbar_top(w) + UI_TOOLBAR_H
+        if (w->ptr_y >= toolbar_top(w) + UI_TOOLBAR_H && !w->site_panel_open
             && fip_hot_at(w, w->ptr_x, w->ptr_y) == CHL_FIND_NONE) {
             dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
             if (nid != DOM_NODE_NONE)
@@ -19224,10 +19397,33 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
     int hit_tab = -1;
     chl_part part = chl_hit(&cl, w->ptr_x, w->ptr_y, &hit_tab);
 
-    /* Tabs: the "+" opens a tab, a tab's close button closes it, its body selects it. */
+    /* The open site panel captures the click: an action runs, a click inside stays, any
+     * click elsewhere (the badge included) only dismisses it, like a Firefox popup. */
+    if (w->site_panel_open) {
+        sp_panel sp;
+        sp_geom sg;
+        int h = site_panel_now(w, &sp, &sg) ? sp_hit(&sg, w->ptr_x, w->ptr_y) : SP_HIT_OUTSIDE;
+        if (h == SP_HIT_PANEL) return;
+        w->site_panel_open = 0;
+        w->site_panel_hot = -1;
+        if (h >= SP_HIT_ACTION0 && h < sg.action_count) site_panel_act(w, sp.actions[h]);
+        redraw(w);
+        return;
+    }
+
+    /* Tabs: the "+" opens a tab, a tab's close button closes it, its body selects it and
+     * arms a drag-reorder; the end indicators bring the next hidden tab into view. */
     if (part == CHL_PART_NEW_TAB) { tab_new(w, NULL); return; }
     if (part == CHL_PART_TAB_CLOSE && hit_tab >= 0) { uitab_close(w, hit_tab); return; }
-    if (part == CHL_PART_TAB && hit_tab >= 0) { tab_switch(w, hit_tab); return; }
+    if (part == CHL_PART_TAB && hit_tab >= 0) {
+        tab_switch(w, hit_tab);
+        w->tab_press = (w->active_tab == hit_tab) ? hit_tab : -1;
+        w->tab_press_x = w->ptr_x;
+        w->tab_dragging = 0;
+        return;
+    }
+    if (part == CHL_PART_TABS_LEFT)  { tab_switch(w, cl.tab_first - 1); return; }
+    if (part == CHL_PART_TABS_RIGHT) { tab_switch(w, cl.tab_first + cl.tabs_visible); return; }
 
     if (fip_click(w, w->ptr_x, w->ptr_y)) return;
 
@@ -19313,8 +19509,11 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
                 break;
             case CHL_PART_FWD:    history_step(w, 1); break;
             case CHL_PART_BACK:   history_step(w, -1); break;
-            case CHL_PART_IDENTITY:
-                browser_set_status(&w->bs, chl_identity_label(page_identity(w)), now_ms());
+            case CHL_PART_IDENTITY:     /* the site identity panel (spec/site_panel.md) */
+                w->site_panel_open = 1;
+                w->site_panel_hot = -1;
+                w->menu_open = 0;
+                w->url_bar_focused = 0;
                 break;
             case CHL_PART_URL: {
                 if (!w->url_bar_focused) {
@@ -20162,20 +20361,25 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
 
     /* Esc on the page stops a load in flight (Firefox); in the URL bar it still
      * abandons the edit (below). */
+    if (sym == XKB_KEY_Escape && w->site_panel_open) {
+        w->site_panel_open = 0;
+        redraw(w);
+        return;
+    }
     if (sym == XKB_KEY_Escape && !w->url_bar_focused && stop_loading(w)) return;
 
     /* Ctrl+Shift+B / A / J add the current host to block.conf / allow.conf / js.conf
      * (hostedit validates fail-closed) and reload the matching filter immediately. */
     if (ctrl && shift && (sym == XKB_KEY_b || sym == XKB_KEY_B)) {
-        add_current_host_to_list(w, HOSTLIST_BLOCK);
+        (void)add_current_host_to_list(w, HOSTLIST_BLOCK);
         return;
     }
     if (ctrl && shift && (sym == XKB_KEY_a || sym == XKB_KEY_A)) {
-        add_current_host_to_list(w, HOSTLIST_ALLOW);
+        (void)add_current_host_to_list(w, HOSTLIST_ALLOW);
         return;
     }
     if (ctrl && shift && (sym == XKB_KEY_j || sym == XKB_KEY_J)) {
-        add_current_host_to_list(w, HOSTLIST_JS);
+        (void)add_current_host_to_list(w, HOSTLIST_JS);
         return;
     }
 
@@ -20205,6 +20409,12 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
     }
     if (ctrl && !shift && (sym == XKB_KEY_w || sym == XKB_KEY_W)) {
         uitab_close(w, w->active_tab);
+        return;
+    }
+    /* Ctrl+1..8 select that tab, Ctrl+9 the last (Firefox); also from the URL bar. */
+    if (ctrl && !shift && sym >= XKB_KEY_1 && sym <= XKB_KEY_9) {
+        int t = chl_tab_for_digit((int)(sym - XKB_KEY_1) + 1, w->tab_count);
+        if (t >= 0) tab_switch(w, t);
         return;
     }
     /* Ctrl+Shift+T reopens the most recently closed tab. */
@@ -20697,6 +20907,8 @@ ui_status ui_run_browser(const char *start_url) {
     w.scroll = 0.0;
     w.focused_input = -1;       /* no form control focused */
     w.tab_count = 1;            /* the foreground tab lives in the window's own fields */
+    w.tab_press = -1;
+    w.site_panel_hot = -1;
     w.active_tab = 0;
     tf_init(&w.ua_field);       /* empty => SF_DEFAULT_USER_AGENT */
     idn_defaults(&w.identity);
@@ -20733,7 +20945,7 @@ ui_status ui_run_browser(const char *start_url) {
     w.stream_body = NULL;
     w.stream_body_len = 0;
     w.stream_evfd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-    w.stream_launch_gen = 0;
+    w.stream_nav_id = 0;
     w.last_stream_render = 0;
     w.video_evfd = -1;
     w.video_thread = 0;
@@ -21075,7 +21287,8 @@ ui_status ui_run_browser(const char *start_url) {
             if (w.configured && w.loading &&
                 now - w.last_stream_render >= 250) {
                 pthread_mutex_lock(&w.stream_lock);
-                if (w.stream_body != NULL && w.stream_body_len > 0) {
+                if (w.stream_body != NULL && w.stream_body_len > 0
+                    && w.stream_nav_id == nt_id(w.nav) && w.stream_nav_id != 0) {
                     free(w.cur_html);
                     w.cur_html = w.stream_body;
                     w.cur_html_len = w.stream_body_len;
@@ -21194,6 +21407,7 @@ ui_status ui_run_browser(const char *start_url) {
     for (int i = 0; i < w.tab_count; ++i) {
         if (i != w.active_tab) tab_ctx_release(&w.tab_slots[i]);
     }
+    nav_supersede(&w);
 
     clear_doc(&w);
     font_stash_reset(&w);

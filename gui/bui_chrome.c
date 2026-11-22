@@ -477,6 +477,40 @@ static void tab_title(cairo_t *cr, const char *s, ui_rgb c, double alpha,
     cairo_restore(cr);
 }
 
+/* A chevron pointing left (dir < 0) or right. */
+static void icon_side_chevron(cairo_t *cr, double cx, double cy, int dir) {
+    double d = (dir < 0) ? -1.0 : 1.0;
+    cairo_move_to(cr, cx - 2.5 * d, cy - 5.0);
+    cairo_line_to(cr, cx + 2.5 * d, cy);
+    cairo_line_to(cr, cx - 2.5 * d, cy + 5.0);
+    icon_stroke(cr);
+}
+
+/* Hidden-tabs indicator: a chevron toward the hidden tabs with their count under it;
+ * dimmed (and inert, chl_hit) when nothing is hidden on that side. */
+static void paint_more(cairo_t *cr, const bui_chrome_view *v, chl_rect r, int hidden,
+                       chl_part part, int dir) {
+    if (r.w <= 0.0) return;
+    const ui_theme *th = v->th;
+    if (hidden > 0 && v->hot_part == part) {
+        set_rgb(cr, th->btn_hover_bg);
+        bui_round_rect(cr, r.x, r.y + 2.0, r.w, r.h - 6.0, 6.0);
+        cairo_fill(cr);
+    }
+    set_rgba(cr, th->chrome_text, hidden > 0 ? 0.9 : BUI_DISABLED * 0.6);
+    double cx = rcx(r), cy = rcy(r) - 6.0;
+    icon_side_chevron(cr, cx, cy, dir);
+    if (hidden <= 0) return;
+    char num[8];
+    if (hidden > 99) snprintf(num, sizeof num, "99+");
+    else             snprintf(num, sizeof num, "%d", hidden);
+    bui_chrome_font(cr, 9.5);
+    cairo_text_extents_t te;
+    cairo_text_extents(cr, num, &te);
+    cairo_move_to(cr, cx - te.x_advance / 2.0, cy + 16.0);
+    cairo_show_text(cr, num);
+}
+
 static void paint_tabstrip(cairo_t *cr, const bui_chrome_view *v) {
     const chl_layout *l = v->l;
     const ui_theme *th = v->th;
@@ -526,6 +560,9 @@ static void paint_tabstrip(cairo_t *cr, const bui_chrome_view *v) {
             icon_cross(cr, rcx(c), rcy(c), 3.5);
         }
     }
+
+    paint_more(cr, v, l->more_left, l->hidden_left, CHL_PART_TABS_LEFT, -1);
+    paint_more(cr, v, l->more_right, l->hidden_right, CHL_PART_TABS_RIGHT, 1);
 
     chl_rect n = l->new_tab;
     if (v->hot_part == CHL_PART_NEW_TAB) {
@@ -695,6 +732,125 @@ void bui_paint_findbar(cairo_t *cr, const bui_find_view *v) {
         cairo_move_to(cr, f->count.x, rcy(f->count) + (fe.ascent - fe.descent) / 2.0);
         cairo_show_text(cr, label);
         cairo_restore(cr);
+    }
+    cairo_restore(cr);
+}
+
+/* --- site identity panel (spec/site_panel.md) --- */
+
+#define BUI_SP_RADIUS   10.0
+#define BUI_SP_LABEL_W  118.0  /* label column; values start after it */
+
+/* a toward b by t in [0,1]: tone colours tuned for the dark chrome read on a light panel. */
+static ui_rgb mix_rgb(ui_rgb a, ui_rgb b, double t) {
+    ui_rgb c = a;
+    c.r = a.r + (b.r - a.r) * t;
+    c.g = a.g + (b.g - a.g) * t;
+    c.b = a.b + (b.b - a.b) * t;
+    return c;
+}
+
+static ui_rgb tone_rgb(const ui_theme *th, sp_tone t) {
+    switch (t) {
+        case SP_TONE_GOOD: return th->id_good;
+        case SP_TONE_WARN: return th->id_warn;
+        case SP_TONE_BAD:  return th->id_bad;
+        case SP_TONE_NEUTRAL:
+        default:           return th->menu_text;
+    }
+}
+
+/* Shows s clipped to [x, x + w). */
+static void text_in(cairo_t *cr, const char *s, double x, double baseline, double w, double top,
+                    double h) {
+    if (w <= 0.0) return;
+    cairo_save(cr);
+    cairo_rectangle(cr, x, top, w, h);
+    cairo_clip(cr);
+    cairo_move_to(cr, x, baseline);
+    cairo_show_text(cr, s);
+    cairo_restore(cr);
+}
+
+void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g,
+                          int hot_action) {
+    if (cr == NULL || th == NULL || p == NULL || g == NULL) return;
+    chl_rect b = g->panel;
+    if (b.w <= 0.0 || b.h <= 0.0) return;
+    cairo_save(cr);
+    cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
+    for (int k = 4; k >= 1; --k) {
+        cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.06);
+        bui_round_rect(cr, b.x - (double)k, b.y - (double)k + 3.0, b.w + 2.0 * (double)k,
+                       b.h + 2.0 * (double)k, BUI_SP_RADIUS + (double)k);
+        cairo_fill(cr);
+    }
+    set_rgb(cr, th->menu_bg);
+    bui_round_rect(cr, b.x, b.y, b.w, b.h, BUI_SP_RADIUS);
+    cairo_fill_preserve(cr);
+    set_rgba(cr, th->url_border, 0.9);
+    cairo_set_line_width(cr, 1.0);
+    cairo_stroke(cr);
+    bui_round_rect(cr, b.x, b.y, b.w, b.h, BUI_SP_RADIUS);
+    cairo_clip(cr);
+
+    /* Header: the badge glyph in its tone, the host, the headline. */
+    ui_rgb tc = tone_rgb(th, p->tone);
+    double gx = b.x + SP_PAD + 9.0, gy = b.y + 24.0;
+    set_rgb(cr, tc);
+    switch (p->tone) {
+        case SP_TONE_GOOD: glyph_shield(cr, gx, gy, 1, 1); break;
+        case SP_TONE_WARN: glyph_lock(cr, gx, gy); break;
+        case SP_TONE_BAD:  glyph_warning(cr, gx, gy); break;
+        default:           glyph_shield(cr, gx, gy, 0, 0); break;
+    }
+    double tx = b.x + SP_PAD + 28.0, tw = b.x + b.w - SP_PAD - tx;
+    cairo_select_font_face(cr, BUI_CHROME_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_font_size(cr, 15.0);
+    set_rgb(cr, th->menu_text);
+    text_in(cr, p->title, tx, b.y + 28.0, tw, b.y, SP_HEADER_H);
+    bui_chrome_font(cr, 12.0);
+    set_rgb(cr, p->tone == SP_TONE_NEUTRAL ? tc : mix_rgb(tc, th->menu_text, 0.35));
+    text_in(cr, p->headline, tx, b.y + 47.0, tw, b.y, SP_HEADER_H);
+    set_rgba(cr, th->url_border, 0.7);
+    cairo_rectangle(cr, b.x + SP_PAD, b.y + SP_HEADER_H - 4.0, b.w - 2.0 * SP_PAD, 1.0);
+    cairo_fill(cr);
+
+    /* Rows: label (dimmed) and value (in its tone). */
+    bui_chrome_font(cr, BUI_CHROME_FONT_SIZE);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    double y = b.y + SP_HEADER_H;
+    double vx = b.x + SP_PAD + BUI_SP_LABEL_W, vw = b.x + b.w - SP_PAD - vx;
+    for (int i = 0; i < p->row_count && i < SP_MAX_ROWS; ++i) {
+        double base = y + SP_ROW_H / 2.0 + (fe.ascent - fe.descent) / 2.0;
+        set_rgba(cr, th->menu_text, 0.62);
+        text_in(cr, p->rows[i].label, b.x + SP_PAD, base, BUI_SP_LABEL_W - 6.0, y, SP_ROW_H);
+        if (p->rows[i].tone != SP_TONE_NEUTRAL) {   /* the tone as a dot, the text readable */
+            set_rgb(cr, tone_rgb(th, p->rows[i].tone));
+            cairo_new_sub_path(cr);
+            cairo_arc(cr, vx + 4.0, y + SP_ROW_H / 2.0, 3.5, 0.0, BUI_TWO_PI);
+            cairo_fill(cr);
+        }
+        set_rgb(cr, th->menu_text);
+        text_in(cr, p->rows[i].value, vx + 14.0, base, vw - 14.0, y, SP_ROW_H);
+        y += SP_ROW_H;
+    }
+
+    /* Actions: full-width buttons, accent on hover. */
+    for (int i = 0; i < g->action_count && i < p->action_count && i < SP_MAX_ACTIONS; ++i) {
+        chl_rect a = g->action[i];
+        int hot = (i == hot_action);
+        set_rgb(cr, hot ? th->accent : mix_rgb(th->menu_bg, th->menu_text, 0.10));
+        bui_round_rect(cr, a.x, a.y, a.w, a.h, 7.0);
+        cairo_fill(cr);
+        const char *lab = sp_action_label(p->actions[i]);
+        cairo_text_extents_t te;
+        cairo_text_extents(cr, lab, &te);
+        if (hot) cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+        else     set_rgb(cr, th->menu_text);
+        text_in(cr, lab, a.x + (a.w - te.x_advance) / 2.0,
+                rcy(a) + (fe.ascent - fe.descent) / 2.0, a.w, a.y, a.h);
     }
     cairo_restore(cr);
 }

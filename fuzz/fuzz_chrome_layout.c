@@ -54,6 +54,26 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         chl_part part = chl_hit(&l, hx, hy, &ti);
         if ((part == CHL_PART_TAB || part == CHL_PART_TAB_CLOSE) != (ti >= 0)) abort();
         if (ti >= 0 && !chl_tab_rect(&l, ti, NULL)) abort();
+        /* Hidden-tab indicators: exact counts, live only when they hide something. */
+        check_rect(l.more_left);
+        check_rect(l.more_right);
+        if (l.hidden_left != l.tab_first || l.hidden_left < 0 || l.hidden_right < 0
+            || l.hidden_left + l.tabs_visible + l.hidden_right != tabs) abort();
+        if (part == CHL_PART_TABS_LEFT && l.hidden_left == 0) abort();
+        if (part == CHL_PART_TABS_RIGHT && l.hidden_right == 0) abort();
+        /* A drop lands on a visible tab; a move is a permutation. */
+        int d = chl_tab_drop_index(&l, hx);
+        if (l.tabs_visible > 0 ? (d < l.tab_first || d >= l.tab_first + l.tabs_visible) : d != -1)
+            abort();
+        if (tabs > 0) {
+            int from = (int)((unsigned)data[1] % (unsigned)tabs), to = (d >= 0) ? d : 0;
+            unsigned char seen[40] = { 0 };
+            for (int i = 0; i < tabs; ++i) {
+                int j = chl_move_index(i, from, to);
+                if (j < 0 || j >= tabs || seen[j]) abort();
+                seen[j] = 1;
+            }
+        }
     }
 
     chl_findbar fb;
