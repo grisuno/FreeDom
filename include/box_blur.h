@@ -17,7 +17,8 @@ int bb_box_sizes(double sigma, int sizes[3]);
 
 /* Blurs buf (w x h, stride bytes per row) in place. Outside the buffer is 0.
  * Returns 1 when blurred, 0 when sigma <= 0 (nothing to do), -1 on invalid
- * arguments or a mask larger than BB_MAX_PIXELS (buffer untouched). */
+ * arguments, a mask larger than BB_MAX_PIXELS or a sigma whose box would be
+ * BB_BOX_MAX px or wider (buffer untouched). One scratch copy of w x h bytes. */
 int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma);
 
 /* Smallest rectangle of a premultiplied ARGB32 surface that a blur of `sigma` can change: the

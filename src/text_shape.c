@@ -368,6 +368,8 @@ static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbyte
 /* Bumped whenever a face may be freed or replaced: memoized measures hold entry pointers. */
 static unsigned g_measure_gen = 1;
 
+unsigned tsh_face_generation(void) { return (g_measure_gen != 0u) ? g_measure_gen : 1u; }
+
 int tsh_webfont_register(const char *name,
                          const unsigned char *bytes, size_t nbytes,
                          int bold, int italic) {

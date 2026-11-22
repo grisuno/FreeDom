@@ -83,4 +83,15 @@ int cx_item_compare(const cx_item *a, const cx_item *b);
  * equal keys keep their original relative order. NULL or n == 0 is a no-op. */
 void cx_sort(cx_item *items, size_t n);
 
+/* How far (px, >= 0) a box's paint may reach beyond its border box (spec/compositor.md,
+ * tanda 95): each outset box-shadow layer {dx, dy, blur, spread, color, inset} with
+ * color != -1 reaches max(|dx|,|dy|) + max(spread,0) + ceil(1.5*blur) + 1; an inset layer
+ * stays inside; an outline reaches outline_w + max(offset,0) when outline_w > 0. The max.
+ * layers NULL or n <= 0 counts only the outline. */
+double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset);
+
+/* 1 when [top - reach, top + h + reach] touches [view_top, view_top + view_h] (edges
+ * included), else 0. Any non-finite input is visible (fail-open: content never vanishes). */
+int cx_span_visible(double top, double h, double reach, double view_top, double view_h);
+
 #endif /* FREEDOM_COMPOSITOR_H */

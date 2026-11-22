@@ -47,3 +47,24 @@ deja 0, asi que desenfocar solo ese rectangulo es identico a desenfocar todo. El
 `bui_gaussian_blur_surface`: el grupo con `filter: blur()` crea una superficie del tamano del recorte (hasta
 4096 x 4096) y antes pagaba tres pasadas por cada pixel de cada canal aunque el elemento fuera pequeno o
 estuviera vacio. Discord (cientos de `blur(30..130px)`): pintado 10.5 s -> ~0.1 s por cuadro; PNG identico.
+
+## Pasadas sin división y por filas (tanda 95)
+
+**Medido** con `tools/guiscroll.py` en la ventana real: el «glow» del hero de GitHub (una caja de
+936×528 con `filter: blur(42px)`) costaba **57–116 ms por cuadro** mientras estaba en pantalla, y
+la sombra de 1 px de un panel de es.wikipedia 24 ms en su primer cuadro. Microbenchmark sobre el
+tamaño real del glow (1080×672, 4 canales, σ = 42): **116 → 15 ms**, con salida idéntica.
+
+- **Sin división por píxel.** `floor((sum + bw/2) / bw)` se calcula como `(n·m) >> 32` con
+  `m = floor(2³²/bw) + 1`, exacto para todo `n < 2³²/bw` (Granlund–Montgomery). Aquí
+  `n <= 256·bw`, así que basta `bw < BB_BOX_MAX` (4096): un sigma cuya caja llegue a ese ancho
+  devuelve -1 (fail-closed; los llamadores ya acotan el radio a 256).
+- **Pasada vertical por filas** (una suma por columna, acceso secuencial) en vez de columna a
+  columna (un byte por línea de caché). Memoria de trabajo: una copia `w·h` (antes una fila).
+- **Una caja de ancho 1 es la identidad** y se salta (σ < ~0,6: `blur: 1px` en una sombra).
+- Misma aritmética: `test_blur_matches_reference_byte_for_byte` compara byte a byte contra la
+  implementación anterior, copiada en el test como oráculo, sobre máscaras aleatorias, strides
+  con relleno y seis sigmas (hasta 130, cajas de ~150 px).
+- Se probó y se **descartó** desenfocar a resolución reducida para sigmas grandes (lo que hacen
+  Skia/Firefox): con las pasadas ya sin división solo ganaba 1,5× y se apartaba hasta 5/255 de la
+  exacta. No compensa una aproximación.

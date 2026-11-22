@@ -17,6 +17,8 @@
 #include "box_style.h"
 #include "box_tree.h"
 #include "compositor.h"
+#include "mask_cache.h"
+#include "exact_key.h"
 #include "box_blur.h"
 #include "text_case.h"
 #include "css.h"
@@ -94,15 +96,9 @@
 
 #include "browser_ui_internal.h"
 
-#define UI_TOOLBAR_H   36.0
-#define UI_TITLEBAR_H  30.0
-#define UI_TABBAR_H    30.0   /* height of the tab strip (between titlebar and toolbar) */
-#define UI_TAB_MIN_W   80.0   /* minimum drawn width of a tab before it shrinks further */
-#define UI_TAB_MAX_W   200.0  /* preferred width of a tab when there is room */
-#define UI_TAB_NEW_W   30.0   /* width of the trailing "new tab" (+) button */
-#define UI_TAB_CLOSE_W 18.0   /* width of a tab's close (x) hot zone at its right edge */
-#define UI_BTN_W       48.0
-#define UI_WIN_BTN_W   30.0
+/* Chrome geometry lives in chrome_layout (spec/chrome_layout.md): one source of
+ * truth for the painter (gui/bui_chrome.c) and every pointer hit-test. */
+#define UI_TOOLBAR_H   CHL_TOOLBAR_H
 #define UI_MARGIN      6.0
 #define UI_BTN_LEFT    0x110  /* BTN_LEFT */
 /* Left indent (px) per UA-padded list level: the HTML UA sheet gives ul/ol
@@ -127,6 +123,7 @@
 #define UI_MENU_W       340.0
 #define UI_MENU_ITEM_H  28.0
 #define UI_MENU_PAD     6.0
+#define UI_MENU_RADIUS  8.0
 #define UI_CHECK_SZ     16.0
 #define UI_MENU_LABEL_H 22.0   /* height of the "User-Agent" section label row */
 #define UI_MENU_INPUT_H 26.0   /* height of the editable User-Agent box */
@@ -230,9 +227,12 @@ static const ui_menu_item UI_MENU_ITEMS[] = {
 
 /* Toolbar control under the pointer, for the hover highlight (the same affordance
  * links already get). */
-typedef enum ui_hot {
-    UI_HOT_NONE = 0, UI_HOT_BACK, UI_HOT_FWD, UI_HOT_RELOAD, UI_HOT_GO, UI_HOT_MENU
-} ui_hot;
+/* The chrome part under the pointer, packed with its tab: (tab + 1) << 8 | chl_part.
+ * One integer so a hover that moves between tabs (same part) still repaints. */
+typedef int ui_hot;
+#define UI_HOT_NONE 0
+#define UI_HOT_PART(h) ((chl_part)((h) & 0xff))
+#define UI_HOT_TAB(h)  (((h) >> 8) - 1)
 
 /* Live editable state for one form text control, aliasing a block of the current
  * rd_doc (not owned; valid until the doc is replaced). The field carries the value
@@ -304,6 +304,7 @@ typedef struct tab_ctx {
     ui_image       *images; size_t image_count;
     ui_bg_image    *bg_images; size_t bg_image_count;
     char           *cur_html; size_t cur_html_len; char *cur_top;
+    int             conn_known, conn_downgrade; /* transport of cur_html (identity badge) */
     int             loading;
     const char     *hover_href; /* aliases doc; moves with it */
     int             hover_cursor; /* css_cursor resolved at the pointer, moves with hover_href */
@@ -330,6 +331,14 @@ typedef struct browser_window {
     int running;
     int redraw_pending;
     hc_store *http_cache;   /* sealed HTTP cache + redirect memory (NULL = off) */
+    mkc_cache *mask_cache;  /* blurred box-shadow masks retained across frames (NULL = off) */
+    /* The layout retained across frames (spec/exact_key.md): lc_layout was laid out for the
+     * inputs lc_key observed; a frame whose observed inputs are byte-identical paints it.
+     * doc_serial advances on every reassignment of doc (set_doc), so a new document that
+     * lands at the address of a freed one never matches. */
+    struct rc_layout *lc_layout;
+    ek_key            lc_key, lc_probe;
+    uint64_t          doc_serial;
     wl_guard *wl_guard;     /* drains the Wayland socket while this thread is busy */
 
     /* Double buffer (spec/shm_slots.md): the page is repainted whole every frame, so painting
@@ -389,7 +398,8 @@ typedef struct browser_window {
     int       force_theme; /* ignore author fg/bg colors, use the theme (reading) */
     int       reader;      /* distraction-free mode: drop boilerplate + author CSS, wide margins */
     int       loading;   /* a network request is in flight (busy clock shown) */
-    ui_hot    hot;       /* toolbar button under the pointer, or UI_HOT_NONE */
+    ui_hot    hot;       /* chrome part under the pointer, or UI_HOT_NONE */
+    int       menu_hot_row; /* options-menu row under the pointer, or -1 */
     rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
     hb_set   *hosts;    /* /etc/hosts-format blocklist + allowlist; consulted pre-fetch */
@@ -457,6 +467,10 @@ typedef struct browser_window {
     char  *cur_html;
     size_t cur_html_len;
     char  *cur_top;
+    /* How cur_html arrived (spec/chrome_layout.md): set only by the fetch that delivered
+     * this document; any other document change clears it (fail-closed badge). */
+    int    conn_known;
+    int    conn_downgrade;
 
     /* @font-face pass (spec/webfont.md b3b): stash of served external CSS
      * (rebuilt every load via the tab css sink, freed after the font pass),
@@ -1444,13 +1458,20 @@ static ui_input_state *find_input_state(browser_window *w, const rd_block *blk) 
     return NULL;
 }
 
+/* The ONE way the window's document changes: every reassignment advances doc_serial, which
+ * the retained layout's key holds (spec/exact_key.md). */
+static void set_doc(browser_window *w, rd_doc *d) {
+    w->doc = d;
+    ++w->doc_serial;
+}
+
 /* Releases the structured render of the previous page (text mode resumes). The
  * hovered link and the live form controls alias the doc, so they are cleared too. */
 static void clear_doc(browser_window *w) {
     free_inputs(w);
     free_images(w);
     free_bg_images(w);
-    if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
+    if (w->doc != NULL) { rd_free(w->doc); set_doc(w, NULL); }
     w->hover_href = NULL;
     w->hover_cursor = CSS_CUR_UNSET;
 }
@@ -1463,6 +1484,8 @@ static void set_cache(browser_window *w, char *html, size_t len, const char *top
     w->cur_html = html;
     w->cur_html_len = len;
     w->cur_top = (top != NULL) ? strdup(top) : NULL;
+    w->conn_known = 0;
+    w->conn_downgrade = SF_DOWNGRADE_NONE;
 }
 
 /* Wraps decoded ARGB32 pixels in a Cairo surface the painter can blit. Copies row
@@ -2680,7 +2703,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * plain-text painter still shows the extracted text. */
     rd_doc *doc = NULL;
     if (rd_build(page.view, eff, w->cur_top, &doc) == RD_OK) {
-        w->doc = doc;
+        set_doc(w, doc);
     }
     w->page_load_mono_ms = now_ms();  /* Phase R1: animation frame clock baseline */
     /* Activate the frame clock if any box has a CSS animation duration set.
@@ -3000,6 +3023,7 @@ static void tab_save(browser_window *w) {
     c->images = w->images; c->image_count = w->image_count;
     c->bg_images = w->bg_images; c->bg_image_count = w->bg_image_count;
     c->cur_html = w->cur_html; c->cur_html_len = w->cur_html_len; c->cur_top = w->cur_top;
+    c->conn_known = w->conn_known; c->conn_downgrade = w->conn_downgrade;
     c->loading = w->loading;
     c->hover_href = w->hover_href;
     c->hover_cursor = w->hover_cursor;
@@ -3010,7 +3034,7 @@ static void tab_restore(browser_window *w) {
     gui_quiesce(w);   /* a background tick reads what this changes */
     tab_ctx *c = &w->tab_slots[w->active_tab];
     w->bs = c->bs;
-    w->doc = c->doc;
+    set_doc(w, c->doc);
     w->caps = c->caps;
     w->scroll = c->scroll;
     w->content_total_h = c->content_total_h;
@@ -3018,6 +3042,7 @@ static void tab_restore(browser_window *w) {
     w->images = c->images; w->image_count = c->image_count;
     w->bg_images = c->bg_images; w->bg_image_count = c->bg_image_count;
     w->cur_html = c->cur_html; w->cur_html_len = c->cur_html_len; w->cur_top = c->cur_top;
+    w->conn_known = c->conn_known; w->conn_downgrade = c->conn_downgrade;
     w->loading = c->loading;
     w->hover_href = c->hover_href;
     w->hover_cursor = c->hover_cursor;
@@ -3100,7 +3125,7 @@ static void tab_new(browser_window *w, const char *url) {
 
     /* Blank live page, then load. */
     drop_repl_worker(w); /* the previous tab's worker/console must not bleed into the new one */
-    w->doc = NULL; w->hover_href = NULL; w->hover_cursor = CSS_CUR_UNSET;
+    set_doc(w, NULL); w->hover_href = NULL; w->hover_cursor = CSS_CUR_UNSET;
     w->inputs = NULL; w->input_count = 0; w->focused_input = -1;
     w->images = NULL; w->image_count = 0;
     w->bg_images = NULL; w->bg_image_count = 0;
@@ -3151,23 +3176,14 @@ static void uitab_close(browser_window *w, int idx) {
     redraw(w);
 }
 
-/* Width of one tab: the strip (minus the trailing + button) split evenly, clamped to
- * a readable maximum and a grabbable floor (many tabs shrink, they never vanish). */
-static double tab_width(const browser_window *w) {
-    double avail = (double)w->width - UI_TAB_NEW_W;
-    if (avail < 1.0) avail = 1.0;
-    double tw = avail / (double)w->tab_count;
-    if (tw > UI_TAB_MAX_W) tw = UI_TAB_MAX_W;
-    if (tw < 36.0) tw = 36.0;
-    return tw;
-}
-
-/* X of the "new tab" (+) button: right after the last tab, clamped to the reserved
- * slot at the right edge. */
-static double newtab_x(const browser_window *w) {
-    double after = (double)w->tab_count * tab_width(w);
-    double maxx = (double)w->width - UI_TAB_NEW_W;
-    return (after < maxx) ? after : maxx;
+/* The chrome geometry for the window as it is now (spec/chrome_layout.md). */
+static chl_layout chrome_of(const browser_window *w) {
+    chl_layout l;
+    int n = (w->tab_count > 0) ? w->tab_count : 1;
+    int a = (w->active_tab >= 0 && w->active_tab < n) ? w->active_tab : 0;
+    if (chl_compute((double)w->width, w->use_csd, n, a, &l) != CHL_OK)
+        (void)chl_compute((double)w->width, w->use_csd, 1, 0, &l);
+    return l;
 }
 
 /* Title shown on a tab: the page title, else the URL, else a placeholder. */
@@ -3180,21 +3196,17 @@ static const char *tab_title(const browser_window *w, int i) {
 
 /* --- painting --- */
 
-static void toolbar_rects(const browser_window *w,
-                          double *back_x, double *fwd_x,
-                          double *url_x, double *url_w,
-                          double *go_x, double *menu_x);
-
 /* Top of the tab strip: directly under the client-side titlebar (or at the surface
  * top under server-side decorations). */
 static double tabbar_top(const browser_window *w) {
-    return w->use_csd ? UI_TITLEBAR_H : 0.0;
+    (void)w;
+    return 0.0;
 }
 
 /* Top of the toolbar: under the tab strip, which is always reserved. The whole
  * content area derives from this, so adding the strip reflows everything below it. */
 static double toolbar_top(const browser_window *w) {
-    return tabbar_top(w) + UI_TABBAR_H;
+    return tabbar_top(w) + CHL_TABBAR_H;
 }
 
 /* The content area rectangle below the toolbar, in surface coordinates. The
@@ -3352,53 +3364,26 @@ static uint32_t resize_edge_at(const browser_window *w, double x, double y) {
     return XDG_TOPLEVEL_RESIZE_EDGE_NONE;
 }
 
-static void window_button_rects(const browser_window *w, double *min_x, double *max_x, double *close_x) {
-    *close_x = w->width - UI_WIN_BTN_W;
-    *max_x   = w->width - 2 * UI_WIN_BTN_W;
-    *min_x   = w->width - 3 * UI_WIN_BTN_W;
+/* The chrome part under (px, py), packed with its tab (ui_hot). Shared by the hover
+ * highlight and the cursor shape so they cannot drift from the click hit-test. */
+static ui_hot chrome_hot_at(const browser_window *w, double px, double py) {
+    chl_layout l = chrome_of(w);
+    int ti = -1;
+    chl_part part = chl_hit(&l, px, py, &ti);
+    if (part == CHL_PART_CONTENT || part == CHL_PART_DRAG) return UI_HOT_NONE;
+    if (w->menu_open && part != CHL_PART_MENU) return UI_HOT_NONE;
+    return (ui_hot)(((ti + 1) << 8) | (int)part);
 }
 
-/* The reload button sits as the third left chrome button (after back/forward), at a
- * fixed x; callers that need it derive it here so the layout stays single-sourced. */
-#define UI_RELOAD_X (UI_BTN_W * 2.0)
-
-static void toolbar_rects(const browser_window *w,
-                          double *back_x, double *fwd_x,
-                          double *url_x, double *url_w,
-                          double *go_x, double *menu_x) {
-    *back_x = 0.0;
-    *fwd_x  = UI_BTN_W;
-    *menu_x = (double)w->width - UI_BTN_W;
-    *go_x   = *menu_x - UI_BTN_W;
-    *url_x  = UI_BTN_W * 3.0 + UI_MARGIN;   /* after back, forward, reload */
-    *url_w  = *go_x - *url_x - UI_MARGIN;
-    if (*url_w < 20.0) *url_w = 20.0;
-}
-
-/* Which toolbar button (if any) is at (px, py). Shared by the hover highlight and
- * the cursor shape so they cannot drift from the click hit-test. */
-static ui_hot toolbar_button_at(const browser_window *w, double px, double py) {
-    if (w->menu_open) return UI_HOT_NONE;
-    double ttop = toolbar_top(w);
-    if (py < ttop || py >= ttop + UI_TOOLBAR_H) return UI_HOT_NONE;
-    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
-    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
-    if (px >= menu_x) return UI_HOT_MENU;
-    if (px >= go_x && px < menu_x) return UI_HOT_GO;
-    if (px >= UI_RELOAD_X && px < UI_RELOAD_X + UI_BTN_W) return UI_HOT_RELOAD;
-    if (px >= fwd_x && px < fwd_x + UI_BTN_W) return UI_HOT_FWD;
-    if (px >= back_x && px < back_x + UI_BTN_W) return UI_HOT_BACK;
-    return UI_HOT_NONE;
-}
-
-/* A hovered button is "actionable" (gets the hand cursor) when clicking it would
- * do something: Go/menu always, Back/Forward only when there is history. */
+/* A hovered chrome part is "actionable" (gets the hand cursor) when clicking it would
+ * do something: Back/Forward only when there is history. */
 static int hot_actionable(const browser_window *w, ui_hot hot) {
-    switch (hot) {
-        case UI_HOT_GO: case UI_HOT_MENU: case UI_HOT_RELOAD: return 1;
-        case UI_HOT_BACK: return browser_can_back(&w->bs);
-        case UI_HOT_FWD:  return browser_can_forward(&w->bs);
-        default: return 0;
+    switch (UI_HOT_PART(hot)) {
+        case CHL_PART_BACK: return browser_can_back(&w->bs);
+        case CHL_PART_FWD:  return browser_can_forward(&w->bs);
+        case CHL_PART_NONE: case CHL_PART_URL: case CHL_PART_DRAG: case CHL_PART_CONTENT:
+            return 0;
+        default: return 1;
     }
 }
 
@@ -3406,12 +3391,11 @@ static int hot_actionable(const browser_window *w, ui_hot hot) {
  * height. The single source of truth for drawing and hit-testing the panel. */
 static void menu_panel_rect(const browser_window *w, double *x, double *y,
                             double *width, double *height, double *item_h) {
-    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
-    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
+    chl_layout l = chrome_of(w);
     *width  = UI_MENU_W;
-    *x      = menu_x + UI_BTN_W - UI_MENU_W; /* right-aligned under the gear */
+    *x      = l.menu.x + l.menu.w - UI_MENU_W; /* right-aligned under the menu button */
     if (*x < 0.0) *x = 0.0;
-    *y      = toolbar_top(w) + UI_TOOLBAR_H;
+    *y      = l.content_top;
     *item_h = UI_MENU_ITEM_H;
     /* Checkbox rows, then the User-Agent section (label + editable box). */
     *height = 2.0 * UI_MENU_PAD + (double)UI_MENU_COUNT * UI_MENU_ITEM_H
@@ -3428,15 +3412,6 @@ static void ua_box_rect(const browser_window *w, double *x, double *y,
     *width  = mw - 2.0 * UI_MENU_PAD;
     *y      = my + UI_MENU_PAD + (double)UI_MENU_COUNT * UI_MENU_ITEM_H + UI_MENU_LABEL_H;
     *height = UI_MENU_INPUT_H;
-}
-
-static void draw_text(cairo_t *cr, const char *s, double x, double y, int centered) {
-    if (s == NULL) return;
-    cairo_text_extents_t te;
-    cairo_text_extents(cr, s, &te);
-    double dx = centered ? x - te.width / 2.0 : x;
-    cairo_move_to(cr, dx, y);
-    cairo_show_text(cr, s);
 }
 
 /* ===================== structured content layout + paint ==================== */
@@ -12326,7 +12301,7 @@ static void *video_feeder_thread(void *arg) {
      double draw_left = left, draw_top = ry, draw_w = content_w, draw_h = row_h;
      if (w->fullscreen) {
          draw_left = 0.0;
-         draw_top = w->use_csd ? UI_TITLEBAR_H : 0.0;
+         draw_top = w->use_csd ? CHL_TABBAR_H : 0.0;
          draw_w = (double)w->width - UI_SCROLLBAR_W;
          draw_h = (double)w->height - draw_top;
      }
@@ -12507,6 +12482,110 @@ static void box_path(cairo_t *cr, double x, double y, double w, double h, double
  * Backgrounds 3 7.1), applied to the shadow's silhouette in an A8 mask
  * (box_blur); a mask too large for the anti-DoS cap paints the silhouette sharp.
  * An outset shadow never paints under the box, an inset one never outside it. */
+/* The box-shadow layers of a box as {dx, dy, blur, spread, color, inset} rows, first on
+ * top; returns how many (0 = no shadow). */
+static int box_shadow_layers(const rc_box *bx, int layers[PV_BSHADOW_LAYERS][6]) {
+    if (bx->bsh_color == -1) return 0;
+    layers[0][0] = bx->bsh_dx; layers[0][1] = bx->bsh_dy;
+    layers[0][2] = bx->bsh_blur; layers[0][3] = bx->bsh_spread;
+    layers[0][4] = bx->bsh_color; layers[0][5] = bx->bsh_inset;
+    int nl = (bx->bsh_n > 1 && bx->bsh_n <= PV_BSHADOW_LAYERS) ? bx->bsh_n : 1;
+    for (int k = 1; k < nl; ++k) memcpy(layers[k], bx->bsh_x[k - 1], sizeof layers[k]);
+    return nl;
+}
+
+/* How far past its border box a box's decoration paints (outset shadows, outline):
+ * the margin the viewport cull grows the box by (cx_ink_reach, spec/compositor.md). */
+static double box_ink_reach(const rc_box *bx) {
+    int layers[PV_BSHADOW_LAYERS][6];
+    int nl = box_shadow_layers(bx, layers);
+    int ow = box_line_visible(bx->outline_style) ? bx->outline_w : 0;
+    int off = (bx->outline_offset == CSS_LEN_UNSET) ? 0 : bx->outline_offset;
+    return cx_ink_reach((const int (*)[6])layers, nl, ow, off);
+}
+
+/* The blurred-silhouette cache the screen painter hangs on its cairo_t (spec/mask_cache.md);
+ * NULL on every other context (PDF, headless PNG), which then paints uncached. */
+static const cairo_user_data_key_t bui_mask_cache_key;
+
+static mkc_cache *cr_mask_cache(cairo_t *cr) {
+    return (mkc_cache *)cairo_get_user_data(cr, &bui_mask_cache_key);
+}
+
+/* Builds the blurred silhouette of key k into buf (stride bytes per row): the silhouette
+ * filled at full alpha (inverted for inset), then the Gaussian of k->sigma. Returns 1 on
+ * success, 0 when the blur refused (the caller then paints the unblurred fill). */
+static int build_shadow_mask(unsigned char *buf, int stride, const mkc_key *k) {
+    cairo_surface_t *m = cairo_image_surface_create_for_data(buf, CAIRO_FORMAT_A8, k->w, k->h,
+                                                             stride);
+    if (cairo_surface_status(m) != CAIRO_STATUS_SUCCESS) {
+        cairo_surface_destroy(m);
+        return 0;
+    }
+    cairo_t *mc = cairo_create(m);
+    cairo_set_source_rgba(mc, 0, 0, 0, 1.0);
+    if (k->inset) {
+        /* Everything but the shrunken silhouette casts the inner shadow. */
+        cairo_rectangle(mc, 0, 0, k->w, k->h);
+        if (k->sw > 0.0 && k->sh > 0.0) box_path(mc, k->sx, k->sy, k->sw, k->sh, k->sr);
+        cairo_set_fill_rule(mc, CAIRO_FILL_RULE_EVEN_ODD);
+    } else {
+        box_path(mc, k->sx, k->sy, k->sw, k->sh, k->sr);
+    }
+    cairo_fill(mc);
+    cairo_destroy(mc);
+    cairo_surface_flush(m);
+    cairo_surface_destroy(m);
+    return bb_blur_a8(buf, k->w, k->h, stride, k->sigma) >= 0;
+}
+
+/* The blurred mask for k as an A8 surface the caller masks with and destroys: from the
+ * window's cache when it holds k, built (and retained) otherwise. Without a cache (PDF,
+ * headless PNG) the surface owns its pixels, so a backend that keeps a reference past the
+ * call (the PDF surface does, until the page ends) never sees freed memory; the cached
+ * path only runs on the screen's image surface, which composites immediately.
+ * FREEDOM_MASK_CACHE_CHECK=1 rebuilds every hit and aborts on any differing byte (the
+ * differential oracle of spec/mask_cache.md). NULL when the mask cannot be built. */
+static cairo_surface_t *shadow_mask_surface(mkc_cache *mc, const mkc_key *k) {
+    if (mc == NULL) {
+        cairo_surface_t *m = cairo_image_surface_create(CAIRO_FORMAT_A8, k->w, k->h);
+        if (cairo_surface_status(m) != CAIRO_STATUS_SUCCESS) {
+            cairo_surface_destroy(m);
+            return NULL;
+        }
+        cairo_surface_flush(m);
+        if (!build_shadow_mask(cairo_image_surface_get_data(m), cairo_image_surface_get_stride(m), k)) {
+            cairo_surface_destroy(m);
+            return NULL;
+        }
+        cairo_surface_mark_dirty(m);
+        return m;
+    }
+    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_A8, k->w);
+    if (stride <= 0) return NULL;
+    const unsigned char *hit = mkc_get(mc, k, &stride);
+    if (hit != NULL) {
+        static int check = -1;
+        if (check < 0) check = (getenv("FREEDOM_MASK_CACHE_CHECK") != NULL);
+        if (check) {
+            size_t n = (size_t)stride * (size_t)k->h;
+            unsigned char *fresh = (unsigned char *)calloc(n, 1);
+            if (fresh != NULL && build_shadow_mask(fresh, stride, k) &&
+                memcmp(fresh, hit, n) != 0) {
+                fprintf(stderr, "mask_cache: stale hit %dx%d sigma %.2f\n", k->w, k->h, k->sigma);
+                abort();
+            }
+            free(fresh);
+        }
+        return cairo_image_surface_create_for_data((unsigned char *)hit, CAIRO_FORMAT_A8,
+                                                   k->w, k->h, stride);
+    }
+    unsigned char *buf = mkc_put(mc, k, stride);
+    if (buf == NULL) return shadow_mask_surface(NULL, k);   /* over budget: paint uncached */
+    if (!build_shadow_mask(buf, stride, k)) return NULL;
+    return cairo_image_surface_create_for_data(buf, CAIRO_FORMAT_A8, k->w, k->h, stride);
+}
+
 static void paint_box_shadow_layer(cairo_t *cr, double x, double y, double w, double h,
                                    double r, const int L6[6]) {
     int col = L6[4];
@@ -12547,29 +12626,15 @@ static void paint_box_shadow_layer(cairo_t *cr, double x, double y, double w, do
     int iw = (int)ceil(mw), ih = (int)ceil(mh);
     int blurred = 0;
     if (blur > 0.0 && iw > 0 && ih > 0 && (long long)iw * ih <= (long long)BB_MAX_PIXELS) {
-        cairo_surface_t *m = cairo_image_surface_create(CAIRO_FORMAT_A8, iw, ih);
-        if (cairo_surface_status(m) == CAIRO_STATUS_SUCCESS) {
-            cairo_t *mc = cairo_create(m);
-            cairo_set_source_rgba(mc, 0, 0, 0, 1.0);
-            if (inset) {
-                /* Everything but the shrunken silhouette casts the inner shadow. */
-                cairo_rectangle(mc, 0, 0, iw, ih);
-                if (sw > 0.0 && sh > 0.0) box_path(mc, sx - mx, sy - my, sw, sh, sr);
-                cairo_set_fill_rule(mc, CAIRO_FILL_RULE_EVEN_ODD);
-            } else {
-                box_path(mc, sx - mx, sy - my, sw, sh, sr);
-            }
-            cairo_fill(mc);
-            cairo_destroy(mc);
-            cairo_surface_flush(m);
-            if (bb_blur_a8(cairo_image_surface_get_data(m), iw, ih,
-                           cairo_image_surface_get_stride(m), blur / 2.0) >= 0) {
-                cairo_surface_mark_dirty(m);
-                cairo_mask_surface(cr, m, mx, my);
-                blurred = 1;
-            }
+        /* The mask is a function of the silhouette's geometry inside it and the sigma, never
+         * of where the box sits on screen: retained across frames (spec/mask_cache.md). */
+        mkc_key k = { iw, ih, sx - mx, sy - my, sw, sh, sr, blur / 2.0, inset };
+        cairo_surface_t *m = shadow_mask_surface(cr_mask_cache(cr), &k);
+        if (m != NULL && cairo_surface_status(m) == CAIRO_STATUS_SUCCESS) {
+            cairo_mask_surface(cr, m, mx, my);
+            blurred = 1;
         }
-        cairo_surface_destroy(m);
+        if (m != NULL) cairo_surface_destroy(m);
     }
     if (!blurred) {
         if (inset) {
@@ -12852,14 +12917,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
     /* box-shadow (CSS Backgrounds 3 7.1): every layer, the first painted on top. */
     {
         int layers[PV_BSHADOW_LAYERS][6];
-        int nl = 0;
-        if (bx->bsh_color != -1) {
-            layers[0][0] = bx->bsh_dx; layers[0][1] = bx->bsh_dy;
-            layers[0][2] = bx->bsh_blur; layers[0][3] = bx->bsh_spread;
-            layers[0][4] = bx->bsh_color; layers[0][5] = bx->bsh_inset;
-            nl = (bx->bsh_n > 1 && bx->bsh_n <= PV_BSHADOW_LAYERS) ? bx->bsh_n : 1;
-            for (int k = 1; k < nl; ++k) memcpy(layers[k], bx->bsh_x[k - 1], sizeof layers[k]);
-        }
+        int nl = box_shadow_layers(bx, layers);
         for (int k = nl - 1; k >= 0; --k)
             paint_box_shadow_layer(cr, x, y, w, h, rad, layers[k]);
     }
@@ -14127,7 +14185,9 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
             bui_gaussian_blur_surface(flt_surf, (double)radius);
         }
 
-        if (needs_blur || needs_grayscale || needs_brightness || needs_contrast
+        /* Colour filters only: with blur alone this pass was an unpremultiply/premultiply
+         * round trip that changed nothing but rounding, over every pixel of the group. */
+        if (needs_grayscale || needs_brightness || needs_contrast
             || needs_sepia || needs_invert || needs_saturate || needs_hue_rotate) {
             unsigned char *data = cairo_image_surface_get_data(flt_surf);
             int stride = cairo_image_surface_get_stride(flt_surf);
@@ -14883,9 +14943,15 @@ static void paint_nested_children(cairo_t *cr, browser_window *w,
             bui_pop_group_composite(cr, cdef, now_ms() - w->page_load_mono_ms, &L->boxes[j], left, origin,
                                     &(bui_mask_ctx){ L, w->doc, w });
         } else {
-            paint_box_and_direct_rows(cr, w, L, &L->boxes[j], left, origin,
-                                       content_w, (double)w->width, content_top,
-                                       content_h, 0, row_done);
+            /* A non-context child paints only its decoration here (its rows stay in the
+             * caller's row pass, which culls them itself): off screen, there is nothing to
+             * draw. Culled on its layout rect grown by its ink reach -- the same geometry it
+             * would paint at, since a nested child is drawn without its parent's matrix. */
+            const rc_box *cb = &L->boxes[j];
+            if (cx_span_visible(origin + cb->top, cb->h, box_ink_reach(cb), content_top, content_h))
+                paint_box_and_direct_rows(cr, w, L, cb, left, origin,
+                                           content_w, (double)w->width, content_top,
+                                           content_h, 0, row_done);
             box_done[j] = 1;
         }
     }
@@ -15117,8 +15183,8 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
             sticky_bx.top += sticky_delta;
             bx = &sticky_bx;
         }
-        double by = origin + bx->top;
-        if (by + bx->h < content_top || by > content_top + content_h) continue;
+        if (!cx_span_visible(origin + bx->top, bx->h, box_ink_reach(bx), content_top, content_h))
+            continue;
 
         if (is_sc) {
             bui_paint_backdrop_blur(cr, def, left + bx->x, origin + bx->top,
@@ -15304,24 +15370,188 @@ static void gui_prof_log(const char *what, double ms) {
     if (on) fprintf(stderr, "gui-profile %-14s %7.1f ms\n", what, ms);
 }
 
+/* --- The layout retained across frames (spec/exact_key.md) ------------------------------- */
+
+/* Every input layout_doc + position_doc read, observed into k: the document and its serial,
+ * the sizes, the whole theme (doubles only: no padding), the toggles, the faces text is
+ * measured with, and the state of every image, background and control the layout sizes. */
+static void layout_key_build(const browser_window *w, double content_w, double content_h,
+                             ek_key *k) {
+    ek_reset(k);
+    const void *dp = w->doc;
+    ek_put(k, &dp, sizeof dp);
+    ek_put(k, &w->doc_serial, sizeof w->doc_serial);
+    double geo[2] = { content_w, content_h };
+    ek_put(k, geo, sizeof geo);
+    int ints[6] = { w->width, w->height, w->zoom_pct, w->force_theme, w->reader, w->use_csd };
+    ek_put(k, ints, sizeof ints);
+    ek_put(k, &w->theme, sizeof w->theme);
+    unsigned char caps[3] = { (unsigned char)w->caps.images, (unsigned char)w->caps.css,
+                              (unsigned char)w->caps.js };
+    ek_put(k, caps, sizeof caps);
+    unsigned faces = tsh_face_generation();
+    ek_put(k, &faces, sizeof faces);
+    ek_put(k, &w->image_count, sizeof w->image_count);
+    for (size_t i = 0; i < w->image_count; ++i) {
+        const ui_image *im = &w->images[i];
+        const void *href = im->href;
+        int st[4] = { im->deferred, im->surface != NULL, im->nat_w, im->nat_h };
+        ek_put(k, &href, sizeof href);
+        ek_put(k, st, sizeof st);
+    }
+    ek_put(k, &w->bg_image_count, sizeof w->bg_image_count);
+    for (size_t i = 0; i < w->bg_image_count; ++i) {
+        const ui_bg_image *bg = &w->bg_images[i];
+        const void *url = bg->url;
+        int st[5] = { bg->deferred, bg->surface != NULL, bg->nat_w, bg->nat_h, bg->box };
+        ek_put(k, &url, sizeof url);
+        ek_put(k, st, sizeof st);
+    }
+    ek_put(k, &w->input_count, sizeof w->input_count);
+    ek_put(k, &w->focused_input, sizeof w->focused_input);
+    for (size_t i = 0; i < w->input_count; ++i) {
+        const void *blk = w->inputs[i].blk;
+        size_t st[2] = { (size_t)w->inputs[i].checked, w->inputs[i].field.len };
+        ek_put(k, &blk, sizeof blk);
+        ek_put(k, st, sizeof st);
+    }
+}
+
+/* First difference between two layouts of the same inputs, or NULL when they are the same
+ * geometry: the differential oracle FREEDOM_LAYOUT_CACHE_CHECK=1 runs on every hit. */
+static const char *layout_diff(const rc_layout *a, const rc_layout *b) {
+    if (a->total_h != b->total_h) return "total_h";
+    if (a->nrow != b->nrow || a->nfrag != b->nfrag || a->nbox != b->nbox) return "counts";
+    if (a->npositioned != b->npositioned || a->ndefer != b->ndefer) return "positioned counts";
+    for (size_t i = 0; i < a->nrow; ++i) {
+        const rc_row *x = &a->rows[i], *y = &b->rows[i];
+        if (x->kind != y->kind || x->top != y->top || x->height != y->height ||
+            x->ascent != y->ascent || x->first != y->first || x->count != y->count ||
+            x->x_off != y->x_off || x->bg_rgb != y->bg_rgb || x->bg_w != y->bg_w ||
+            x->align != y->align || x->blk != y->blk || x->hidden != y->hidden)
+            return "row";
+    }
+    for (size_t i = 0; i < a->nfrag; ++i) {
+        const rc_frag *x = &a->frags[i], *y = &b->frags[i];
+        if (x->x != y->x || x->width != y->width || x->font_size != y->font_size ||
+            x->len != y->len || x->block_id != y->block_id || x->node_id != y->node_id ||
+            x->href != y->href || x->repl != y->repl || memcmp(&x->color, &y->color, sizeof x->color) ||
+            (x->len > 0 && (x->text == NULL || y->text == NULL || memcmp(x->text, y->text, x->len))))
+            return "fragment";
+    }
+    for (size_t i = 0; i < a->nbox; ++i) {
+        const rc_box *x = &a->boxes[i], *y = &b->boxes[i];
+        if (x->x != y->x || x->top != y->top || x->w != y->w || x->h != y->h ||
+            x->block_id != y->block_id || x->bg_rgb != y->bg_rgb)
+            return "box";
+    }
+    for (size_t i = 0; i < a->npositioned; ++i) {
+        const bt_positioned *x = &a->positioned[i], *y = &b->positioned[i];
+        if (x->box_index != y->box_index || x->z_index != y->z_index || x->x != y->x ||
+            x->y != y->y || x->w != y->w || x->h != y->h)
+            return "positioned";
+    }
+    for (size_t i = 0; i < a->ndefer; ++i)
+        if (a->defer_root[i] != b->defer_root[i]) return "defer_root";
+    return NULL;
+}
+
+/* Lays the document out for this frame and returns the layout to paint: the retained one when
+ * every observed input is unchanged, else a fresh one, which is then retained. NULL only when
+ * the retained slot cannot be allocated; the caller then lays out into its own. */
+static rc_layout *layout_for_frame(cairo_t *cr, browser_window *w, double content_w,
+                                   double content_h) {
+    if (w->lc_layout == NULL) {
+        w->lc_layout = (rc_layout *)calloc(1, sizeof *w->lc_layout);
+        if (w->lc_layout == NULL) return NULL;
+        ek_init(&w->lc_key);
+        ek_init(&w->lc_probe);
+        w->lc_key.bad = 1;   /* nothing retained yet: never a hit */
+    }
+    layout_key_build(w, content_w, content_h, &w->lc_probe);
+    rc_layout *L = w->lc_layout;
+    if (ek_equal(&w->lc_probe, &w->lc_key)) {
+        static int check = -1;
+        if (check < 0) check = (getenv("FREEDOM_LAYOUT_CACHE_CHECK") != NULL);
+        if (check) {
+            rc_layout F;
+            layout_doc(cr, w, content_w, &F);
+            position_doc(cr, w, content_w, content_h, &F);
+            const char *why = layout_diff(L, &F);
+            if (why != NULL) {
+                fprintf(stderr, "layout cache: stale hit (%s)\n", why);
+                abort();
+            }
+            rc_free(&F);
+        }
+        gui_prof_log("layout(cached)", 0.0);
+        return L;
+    }
+    rc_free(L);
+    double prof_t0 = gui_prof_now_ms();
+    layout_doc(cr, w, content_w, L);
+    double prof_t1 = gui_prof_now_ms();
+    position_doc(cr, w, content_w, content_h, L);
+    gui_prof_log("layout_doc", prof_t1 - prof_t0);
+    gui_prof_log("position_doc", gui_prof_now_ms() - prof_t1);
+    ek_swap(&w->lc_key, &w->lc_probe);
+    return L;
+}
+
+/* Releases the retained layout (window teardown). Idempotent. */
+static void layout_cache_free(browser_window *w) {
+    if (w->lc_layout == NULL) return;
+    rc_free(w->lc_layout);
+    free(w->lc_layout);
+    w->lc_layout = NULL;
+    ek_free(&w->lc_key);
+    ek_free(&w->lc_probe);
+}
+
+/* What the painter changes on a layout during one frame, so a retained layout can be put back
+ * exactly as layout_doc + position_doc left it: the sticky shifts of rows and positioned boxes
+ * (saved before they are applied) and the canvas pre-pass mark. */
+typedef struct frame_undo {
+    double *row_top;     /* nrow saved row tops, NULL = no row moved */
+    double  pos_y[BT_MAX_POSITIONED];
+    int     pos_saved;
+} frame_undo;
+
+static void frame_undo_restore(rc_layout *L, frame_undo *u) {
+    if (u->row_top != NULL)
+        for (size_t i = 0; i < L->nrow; ++i) L->rows[i].top = u->row_top[i];
+    if (u->pos_saved)
+        for (size_t i = 0; i < L->npositioned; ++i) L->positioned[i].y = u->pos_y[i];
+    for (size_t i = 0; i < L->nbox; ++i) L->boxes[i].canvas_done = 0;
+    free(u->row_top);
+    u->row_top = NULL;
+    u->pos_saved = 0;
+}
+
 static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
                              double content_h) {
     const ui_theme *th = &w->theme;
     double left = content_margin_x(w) + html_center_offset(w);
     double content_w = content_width(w);
 
-    rc_layout L;
+    /* The layout is retained across frames while its inputs stay the same (scroll, hover,
+     * animation, caret blink: spec/exact_key.md); Lown only when the retained slot cannot be
+     * allocated. */
+    rc_layout Lown;
+    rc_layout *Lp = NULL;
+    int owned = 0;
     double origin;
     for (int lazy_pass = 0;; ++lazy_pass) {
-        double prof_t0 = gui_prof_now_ms();
-        layout_doc(cr, w, content_w, &L);
-        double prof_t1 = gui_prof_now_ms();
-        position_doc(cr, w, content_w, content_h, &L);
-        gui_prof_log("layout_doc", prof_t1 - prof_t0);
-        gui_prof_log("position_doc", gui_prof_now_ms() - prof_t1);
-        w->content_total_h = L.total_h;  /* cached for the scrollbar */
+        Lp = layout_for_frame(cr, w, content_w, content_h);
+        if (Lp == NULL) {
+            layout_doc(cr, w, content_w, &Lown);
+            position_doc(cr, w, content_w, content_h, &Lown);
+            Lp = &Lown;
+            owned = 1;
+        }
+        w->content_total_h = Lp->total_h;  /* cached for the scrollbar */
 
-        double max_scroll = L.total_h - content_h;
+        double max_scroll = Lp->total_h - content_h;
         if (max_scroll < 0.0) max_scroll = 0.0;
         if (w->scroll < 0.0) w->scroll = 0.0;
         if (w->scroll > max_scroll) w->scroll = max_scroll;
@@ -15329,28 +15559,37 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         /* Lazy images that just came near the viewport load now, then the flow is re-laid
          * out with their real size (bounded passes). */
         if (lazy_pass >= UI_LAZY_PASSES ||
-            load_lazy_images(w, &L, origin, content_top, content_h) == 0)
+            load_lazy_images(w, Lp, origin, content_top, content_h) == 0)
             break;
-        rc_free(&L);
+        if (owned) { rc_free(&Lown); owned = 0; }   /* a retained one is re-keyed next pass */
     }
-    publish_geometry(w, &L, left, content_w, content_h);
-    load_lazy_bg_images(w, &L, origin, content_top, content_h);
+    frame_undo undo = { NULL, { 0 }, 0 };
+    double prof_g0 = gui_prof_now_ms();
+    publish_geometry(w, Lp, left, content_w, content_h);
+    load_lazy_bg_images(w, Lp, origin, content_top, content_h);
+    gui_prof_log("geometry", gui_prof_now_ms() - prof_g0);
 
     /* R4: sticky positioning for OUT-OF-FLOW boxes — clamp to viewport top
      * (inset_top) when scrolled past. For in-flow sticky boxes (the common
      * case, e.g. a nav bar), the row/box paint loop below adjusts positions
-     * directly rather than going through L.positioned (which drops in-flow
+     * directly rather than going through Lp->positioned (which drops in-flow
      * boxes at position_doc). */
-    for (size_t i = 0; i < L.npositioned; ++i) {
-        int bid = (int)L.positioned[i].box_index;
+    for (size_t i = 0; i < Lp->npositioned; ++i) {
+        int bid = (int)Lp->positioned[i].box_index;
         if (bid < 0) continue;
         const pv_box_def *bd = rd_box_at(w->doc, bid);
         if (bd == NULL || bd->position != CSS_POS_STICKY) continue;
         double inset = (bd->inset_top != PV_LEN_UNSET && bd->inset_top != CSS_LEN_AUTO)
                      ? (double)bd->inset_top : 0.0;
-        double natural_y = origin + L.positioned[i].y;
+        double natural_y = origin + Lp->positioned[i].y;
         double sticky_y = content_top + inset;
-        if (natural_y < sticky_y) L.positioned[i].y = sticky_y - origin;
+        if (natural_y < sticky_y) {
+            if (!undo.pos_saved) {
+                for (size_t q = 0; q < Lp->npositioned; ++q) undo.pos_y[q] = Lp->positioned[q].y;
+                undo.pos_saved = 1;
+            }
+            Lp->positioned[i].y = sticky_y - origin;
+        }
     }
     /* R6: sticky positioning for IN-FLOW boxes — compute a viewport-relative
      * sticky offset per box and apply it to the box's rows so the row paint
@@ -15363,23 +15602,31 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     if (nbox_total > 0) {
         sticky_off = (double *)calloc(nbox_total, sizeof(double));
         if (sticky_off) {
-            for (size_t i = 0; i < L.nbox; ++i) {
-                int bid = L.boxes[i].block_id;
+            for (size_t i = 0; i < Lp->nbox; ++i) {
+                int bid = Lp->boxes[i].block_id;
                 if (bid < 0) continue;
                 const pv_box_def *bd = rd_box_at(w->doc, bid);
                 if (bd == NULL || bd->position != CSS_POS_STICKY) continue;
                 double inset = (bd->inset_top != PV_LEN_UNSET && bd->inset_top != CSS_LEN_AUTO)
                              ? (double)bd->inset_top : 0.0;
-                double natural_y = L.boxes[i].top - w->scroll;  /* screen-space */
+                double natural_y = Lp->boxes[i].top - w->scroll;  /* screen-space */
                 double target_y = inset;  /* viewport-relative target */
                 if (natural_y < target_y)
                     sticky_off[bid] = target_y - natural_y;
             }
-            /* Apply sticky offsets to row positions */
-            for (size_t i = 0; i < L.nrow; ++i) {
-                int bid = row_owner_block_id(&L, &L.rows[i]);
+            /* Apply sticky offsets to row positions (saved first: the layout is retained) */
+            for (size_t i = 0; i < Lp->nrow && undo.row_top == NULL; ++i) {
+                int bid = row_owner_block_id(Lp, &Lp->rows[i]);
+                if (bid >= 0 && (size_t)bid < nbox_total && sticky_off[bid] != 0.0) {
+                    undo.row_top = (double *)malloc(Lp->nrow * sizeof *undo.row_top);
+                    if (undo.row_top != NULL)
+                        for (size_t q = 0; q < Lp->nrow; ++q) undo.row_top[q] = Lp->rows[q].top;
+                }
+            }
+            for (size_t i = 0; i < Lp->nrow; ++i) {
+                int bid = row_owner_block_id(Lp, &Lp->rows[i]);
                 if (bid >= 0 && (size_t)bid < nbox_total && sticky_off[bid] != 0.0)
-                    L.rows[i].top += sticky_off[bid];
+                    Lp->rows[i].top += sticky_off[bid];
             }
         }
     }
@@ -15387,34 +15634,39 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     /* Stage 2, negative z-index PAINTS FIRST: CSS 2.1 App E layer 1 (NEG_Z)
      * precedes the in-flow BLOCK/FLOAT/INLINE layers, so an overlapping in-flow
      * box or text run must cover a negative-z positioned box, not the other way
-     * around. cx_sort (M1.1, box_tree.c) already groups L.positioned by layer, so
+     * around. cx_sort (M1.1, box_tree.c) already groups Lp->positioned by layer, so
      * every z<0 entry is a contiguous prefix of the array. */
     {
-        paint_canvas_background(cr, &L);
+        paint_canvas_background(cr, Lp);
         int neg_ov_stack[OV_MAX_DEPTH] = {0};
         int neg_ov_depth = 0;
-        for (size_t i = 0; i < L.npositioned && L.positioned[i].z_index < 0; ++i) {
-            if (negz_owner_box(w, &L, &L.positioned[i]) >= 0) continue;
-            paint_positioned_one(cr, w, th, &L.positioned[i], left, origin,
+        for (size_t i = 0; i < Lp->npositioned && Lp->positioned[i].z_index < 0; ++i) {
+            if (negz_owner_box(w, Lp, &Lp->positioned[i]) >= 0) continue;
+            paint_positioned_one(cr, w, th, &Lp->positioned[i], left, origin,
                                  content_top, content_h, (double)w->width,
-                                 neg_ov_stack, &neg_ov_depth, &L);
+                                 neg_ov_stack, &neg_ov_depth, Lp);
         }
         while (neg_ov_depth > 0) { cairo_restore(cr); neg_ov_depth--; }
     }
 
-    screen_flow_ctx sfc = { cr, w, &L, origin, left, content_top, content_h, content_w,
+    screen_flow_ctx sfc = { cr, w, Lp, origin, left, content_top, content_h, content_w,
                             sticky_off, nbox_total };
+    double prof_i0 = gui_prof_now_ms();
     paint_screen_inflow(&sfc, -1);
+    double prof_i1 = gui_prof_now_ms();
+    gui_prof_log("paint_inflow", prof_i1 - prof_i0);
 
     /* Stage 2, non-negative z-index PAINTS ABOVE in-flow content (App E layers
      * ZERO_Z/POS_Z), honouring overflow:hidden ancestor clipping (ov_reconcile) --
      * a positioned box inside e.g. a <div style="overflow:hidden"> is clipped to
      * that ancestor's padding-box. In-flow positioned subtrees that follow an
      * absolute box in the tree are interleaved by paint_positioned_layer. */
-    paint_positioned_layer(cr, w, th, &L, left, origin, content_top, content_h,
+    paint_positioned_layer(cr, w, th, Lp, left, origin, content_top, content_h,
                            (double)w->width, paint_screen_deferred, &sfc);
+    gui_prof_log("paint_positioned", gui_prof_now_ms() - prof_i1);
     free(sticky_off);
-    rc_free(&L);
+    frame_undo_restore(Lp, &undo);
+    if (owned) rc_free(&Lown);
 }
 
 /* PDF page geometry: US Letter at 72 dpi (Cairo's PDF user-space unit is 1 point =
@@ -16611,13 +16863,13 @@ static int apply_click_result(browser_window *w, tab_page *page) {
     /* A lazy tick that found the document untouched carries no view: the laid-out document,
      * the hover state and the page title/text all stay exactly as they are. */
     if (!page->unchanged) {
-        if (w->doc != NULL) { rd_free(w->doc); w->doc = NULL; }
+        if (w->doc != NULL) { rd_free(w->doc); set_doc(w, NULL); }
         w->hover_href = NULL; /* aliased the doc we just freed; recomputed on next hover */
         w->hover_cursor = CSS_CUR_UNSET;
         rdp_caps eff = page_render_caps(w);
         rd_doc *doc = NULL;
         if (rd_build(page->view, eff, w->cur_top, &doc) == RD_OK) {
-            w->doc = doc;
+            set_doc(w, doc);
         }
         rebuild_inputs(w);
         browser_set_page(&w->bs, page->title, page->text, 0);
@@ -16928,6 +17180,8 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j) {
 
     /* Image policy resolves srcs against this origin (the requested URL, as before). */
     set_cache(w, html, len, j->url);
+    w->conn_known = 1;               /* this document is exactly what this fetch delivered */
+    w->conn_downgrade = j->downgraded;
     if (j->is_post) browser_set_url_bar(&w->bs, j->url); /* reflect action URL; no history push */
     render_current_ex(w, 1); /* a fresh load may honor a JS-requested navigation */
 
@@ -17071,8 +17325,6 @@ static void submit_form(browser_window *w, const rd_block *rep) {
     }
 }
 
-/* Draws the three-bar "hamburger" icon for the options-menu button, centred in a
- * UI_BTN_W-wide button starting at bx within the toolbar. */
 /* Toggles distraction-free (reader) mode and re-renders from cache (no network):
  * the worker drops boilerplate, author styling/images are gated off, and the content
  * is centered in a reading column. Shared by the menu item and the Ctrl+D shortcut. */
@@ -17221,57 +17473,6 @@ static void menu_item_toggle(browser_window *w, size_t i) {
     render_current(w);
 }
 
-/* A small spinner meaning "busy". Now that the fetch runs off the event-loop thread,
- * the loop ticks ~12 fps while loading and rotates a leading arc so the user sees real
- * progress. phase in [0,1) is the rotation, derived from the wall clock. */
-static void draw_clock(cairo_t *cr, ui_rgb color, double cx, double cy, double r,
-                       double phase) {
-    double a0 = phase * UI_TWO_PI;
-    set_rgb(cr, color);
-    cairo_set_line_width(cr, 2.0);
-    cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-    /* A 270-degree arc that sweeps around, leaving a moving gap (a classic spinner). */
-    cairo_new_sub_path(cr);
-    cairo_arc(cr, cx, cy, r, a0, a0 + UI_TWO_PI * 0.75);
-    cairo_stroke(cr);
-}
-
-static void draw_hamburger(cairo_t *cr, ui_rgb color, double bx, double ttop) {
-    set_rgb(cr, color);
-    cairo_set_line_width(cr, 2.0);
-    double cx = bx + (UI_BTN_W - UI_HAMBURGER_W) / 2.0;
-    double cy = ttop + (UI_TOOLBAR_H - 2.0 * UI_HAMBURGER_GAP) / 2.0;
-    for (int i = 0; i < 3; ++i) {
-        double y = cy + (double)i * UI_HAMBURGER_GAP;
-        cairo_move_to(cr, cx, y);
-        cairo_line_to(cr, cx + UI_HAMBURGER_W, y);
-        cairo_stroke(cr);
-    }
-}
-
-/* The reload button glyph: a ~300-degree circular arrow centred in a UI_BTN_W button
- * starting at bx. Drawn with Cairo (not a font glyph) so it never depends on the
- * chrome face having a reload codepoint. */
-static void draw_reload(cairo_t *cr, ui_rgb color, double bx, double ttop) {
-    set_rgb(cr, color);
-    cairo_set_line_width(cr, 2.0);
-    cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-    double cx = bx + UI_BTN_W / 2.0;
-    double cy = ttop + UI_TOOLBAR_H / 2.0;
-    double r = 6.0;
-    double a0 = -UI_TWO_PI * 0.08;          /* start just right of top */
-    double a1 = a0 + UI_TWO_PI * 0.82;      /* leave a gap for the arrowhead */
-    cairo_new_sub_path(cr);
-    cairo_arc(cr, cx, cy, r, a0, a1);
-    cairo_stroke(cr);
-    /* Arrowhead at the arc's start (top), pointing clockwise. */
-    double hx = cx + r * cos(a0), hy = cy + r * sin(a0);
-    cairo_move_to(cr, hx, hy);
-    cairo_line_to(cr, hx - 4.0, hy - 1.0);
-    cairo_move_to(cr, hx, hy);
-    cairo_line_to(cr, hx + 1.0, hy - 4.5);
-    cairo_stroke(cr);
-}
 
 /* Draws the options-menu panel (checkbox per capability) when open. */
 static void draw_menu(cairo_t *cr, browser_window *w) {
@@ -17280,23 +17481,34 @@ static void draw_menu(cairo_t *cr, browser_window *w) {
     double mx, my, mw, mh, ih;
     menu_panel_rect(w, &mx, &my, &mw, &mh, &ih);
 
+    /* A soft drop shadow, then the rounded panel. */
+    for (int k = 3; k >= 1; --k) {
+        cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.07);
+        bui_round_rect(cr, mx - (double)k, my - (double)k + 2.0, mw + 2.0 * (double)k,
+                       mh + 2.0 * (double)k, UI_MENU_RADIUS + (double)k);
+        cairo_fill(cr);
+    }
     set_rgb(cr, th->menu_bg);
-    cairo_rectangle(cr, mx, my, mw, mh);
+    bui_round_rect(cr, mx, my, mw, mh, UI_MENU_RADIUS);
     cairo_fill(cr);
     set_rgb(cr, th->menu_border);
     cairo_set_line_width(cr, 1.0);
-    cairo_rectangle(cr, mx, my, mw, mh);
+    bui_round_rect(cr, mx + 0.5, my + 0.5, mw - 1.0, mh - 1.0, UI_MENU_RADIUS);
     cairo_stroke(cr);
 
-    cairo_select_font_face(cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, th->body_font);
+    bui_chrome_font(cr, BUI_URL_FONT_SIZE);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
 
     for (size_t i = 0; i < UI_MENU_COUNT; ++i) {
         double row_y = my + UI_MENU_PAD + (double)i * ih;
         double box_y = row_y + (ih - UI_CHECK_SZ) / 2.0;
-        double box_x = mx + UI_MENU_PAD;
+        double box_x = mx + UI_MENU_PAD + UI_MENU_PAD;
+        if (w->menu_hot_row == (int)i) {
+            set_rgb(cr, th->link_hover_bg);
+            bui_round_rect(cr, mx + UI_MENU_PAD / 2.0, row_y, mw - UI_MENU_PAD, ih, 4.0);
+            cairo_fill(cr);
+        }
 
         set_rgb(cr, th->check_border);
         cairo_set_line_width(cr, 1.5);
@@ -17335,10 +17547,10 @@ static void draw_menu(cairo_t *cr, browser_window *w) {
 
     double bx, by, bw, bh;
     ua_box_rect(w, &bx, &by, &bw, &bh);
-    set_rgb(cr, w->ua_field_focused ? th->url_bg_focused : th->url_bg);
+    set_rgb(cr, w->ua_field_focused ? th->input_bg_focused : th->input_bg);
     cairo_rectangle(cr, bx, by, bw, bh);
     cairo_fill(cr);
-    set_rgb(cr, w->ua_field_focused ? th->link : th->url_border);
+    set_rgb(cr, w->ua_field_focused ? th->link : th->input_border);
     cairo_set_line_width(cr, 1.0);
     cairo_rectangle(cr, bx, by, bw, bh);
     cairo_stroke(cr);
@@ -17431,75 +17643,59 @@ static void draw_toast(cairo_t *cr, browser_window *w, double bottom_offset) {
 
     double bh = fe.height + 2.0 * UI_TOAST_PAD;
     double bw = te.width + 2.0 * UI_TOAST_PAD;
-    double bx = UI_MARGIN;
-    double by = (double)w->height - bh - UI_MARGIN - bottom_offset;
+    double bx = 2.0 * UI_MARGIN;
+    double by = (double)w->height - bh - 2.0 * UI_MARGIN - bottom_offset;
 
     set_rgb(cr, th->toast_bg);
-    cairo_rectangle(cr, bx, by, bw, bh);
+    bui_round_rect(cr, bx, by, bw, bh, 6.0);
     cairo_fill(cr);
     set_rgb(cr, th->toast_text);
     cairo_move_to(cr, bx + UI_TOAST_PAD, by + UI_TOAST_PAD + fe.ascent);
     cairo_show_text(cr, msg);
 }
 
-/* Paints the tab strip: one cell per tab (the active one connected to the content
- * background, the rest dimmed), each with its clipped title and a close 'x', then a
- * trailing '+' to open a new tab. The geometry mirrors the pointer hit-test
- * (tab_width/newtab_x) so a click lands on exactly what is drawn. Uses the chrome
- * (monospace) font already selected by paint(). */
-static void draw_tabstrip(cairo_t *cr, browser_window *w) {
-    const ui_theme *th = &w->theme;
-    double top = tabbar_top(w);
-    double h = UI_TABBAR_H;
+/* The connection identity of the page on screen (spec/chrome_layout.md). */
+static chl_identity page_identity(const browser_window *w) {
+    return chl_identity_of(w->cur_top, w->conn_known, w->conn_downgrade, g_operator_insecure);
+}
 
-    set_rgb(cr, th->titlebar_bg);
-    cairo_rectangle(cr, 0, top, w->width, h);
-    cairo_fill(cr);
-
-    cairo_font_extents_t fe;
-    cairo_font_extents(cr, &fe);
-    double baseline = top + (h + fe.ascent - fe.descent) / 2.0;
-    double tw = tab_width(w);
-
-    for (int i = 0; i < w->tab_count; ++i) {
-        double x = (double)i * tw;
-        int active = (i == w->active_tab);
-        int hot = (w->ptr_y >= top && w->ptr_y < top + h
-                   && w->ptr_x >= x && w->ptr_x < x + tw);
-
-        /* The active tab continues into the toolbar below it (one surface, one ink), so its
-         * title is legible in every palette; it used to take the page background, which under
-         * the light theme put light chrome text on white. */
-        set_rgb(cr, active ? th->toolbar_bg : (hot ? th->btn_hover_bg : th->titlebar_bg));
-        cairo_rectangle(cr, x, top, tw - 1.0, h);
-        cairo_fill(cr);
-
-        cairo_save(cr);
-        cairo_rectangle(cr, x + 6.0, top, tw - 6.0 - UI_TAB_CLOSE_W, h);
-        cairo_clip(cr);
-        set_rgb(cr, active ? th->chrome_text : th->chrome_text_dim);
-        cairo_move_to(cr, x + 6.0, baseline);
-        cairo_show_text(cr, tab_title(w, i));
-        cairo_restore(cr);
-
-        if (w->tab_count > 1) {
-            double cxr = x + tw - UI_TAB_CLOSE_W;
-            int cl_hot = (w->ptr_y >= top && w->ptr_y < top + h
-                          && w->ptr_x >= cxr && w->ptr_x < x + tw);
-            set_rgb(cr, cl_hot ? th->close_button
-                                : (active ? th->chrome_text : th->chrome_text_dim));
-            draw_text(cr, "x", cxr + UI_TAB_CLOSE_W / 2.0, baseline, 1);
-        }
+/* Gathers what the chrome painter shows; titles/loading must hold UI_MAX_TABS. */
+static void chrome_view_fill(browser_window *w, const chl_layout *l, const char **titles,
+                             int *loading, bui_chrome_view *v) {
+    memset(v, 0, sizeof *v);
+    for (int i = 0; i < l->tab_count && i < UI_MAX_TABS; ++i) {
+        titles[i] = tab_title(w, i);
+        loading[i] = (i == w->active_tab) ? w->loading : w->tab_slots[i].loading;
     }
+    v->l = l;
+    v->th = &w->theme;
+    v->hot_part = UI_HOT_PART(w->hot);
+    v->hot_tab = UI_HOT_TAB(w->hot);
+    v->titles = titles;
+    v->tab_loading = loading;
+    v->phase = (double)(now_ms() % 1000u) / 1000.0;
+    v->can_back = browser_can_back(&w->bs);
+    v->can_fwd = browser_can_forward(&w->bs);
+    v->maximized = w->maximized;
+    v->url = w->bs.url_bar;
+    v->url_len = w->bs.url_bar_len;
+    v->cursor = w->bs.url_bar_cursor;
+    v->url_focused = w->url_bar_focused;
+    size_t ss = 0, sl = 0;
+    if (w->url_bar_focused && browser_url_bar_selection(&w->bs, &ss, &sl)) {
+        v->sel_start = ss;
+        v->sel_len = sl;
+    }
+    v->identity = page_identity(w);
+}
 
-    double nx = newtab_x(w);
-    int nhot = (w->ptr_y >= top && w->ptr_y < top + h
-                && w->ptr_x >= nx && w->ptr_x < nx + UI_TAB_NEW_W);
-    set_rgb(cr, nhot ? th->btn_hover_bg : th->titlebar_bg);
-    cairo_rectangle(cr, nx, top, UI_TAB_NEW_W, h);
-    cairo_fill(cr);
-    set_rgb(cr, th->chrome_text);
-    draw_text(cr, "+", nx + UI_TAB_NEW_W / 2.0, baseline, 1);
+static void paint_chrome(cairo_t *cr, browser_window *w) {
+    chl_layout l = chrome_of(w);
+    const char *titles[UI_MAX_TABS];
+    int loading[UI_MAX_TABS];
+    bui_chrome_view v;
+    chrome_view_fill(w, &l, titles, loading, &v);
+    bui_paint_chrome(cr, &v);
 }
 
 /* Omnibox autocomplete dropdown: a panel of favorite-host suggestions below the URL
@@ -17509,20 +17705,20 @@ static void draw_omnibox(cairo_t *cr, browser_window *w) {
     omni_refresh(w);
     if (w->omni_sugg_n <= 0) return;
     const ui_theme *th = &w->theme;
-    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
-    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
-    double top = toolbar_top(w) + UI_TOOLBAR_H;
+    chl_layout cl = chrome_of(w);
+    double url_x = cl.url.x, url_w = cl.url.w;
+    double top = cl.content_top;
     double h = UI_OMNI_ROW_H * (double)w->omni_sugg_n;
 
-    set_rgb(cr, th->url_bg);
-    cairo_rectangle(cr, url_x, top, url_w, h);
+    set_rgb(cr, th->url_bg_focused);
+    bui_round_rect(cr, url_x, top, url_w, h, 6.0);
     cairo_fill(cr);
     set_rgb(cr, th->url_border);
-    cairo_rectangle(cr, url_x, top, url_w, h);
+    cairo_set_line_width(cr, 1.0);
+    bui_round_rect(cr, url_x + 0.5, top + 0.5, url_w - 1.0, h - 1.0, 6.0);
     cairo_stroke(cr);
 
-    cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, UI_FONT_SIZE);
+    bui_chrome_font(cr, BUI_URL_FONT_SIZE);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
     for (int i = 0; i < w->omni_sugg_n; ++i) {
@@ -17532,8 +17728,8 @@ static void draw_omnibox(cairo_t *cr, browser_window *w) {
             cairo_rectangle(cr, url_x, ry, url_w, UI_OMNI_ROW_H);
             cairo_fill(cr);
         }
-        set_rgb(cr, th->chrome_text);
-        cairo_move_to(cr, url_x + UI_MARGIN,
+        set_rgb(cr, th->url_text);
+        cairo_move_to(cr, cl.identity.x + cl.identity.w + 4.0,
                       ry + (UI_OMNI_ROW_H + fe.ascent - fe.descent) / 2.0);
         cairo_show_text(cr, w->omni_sugg[i]);
     }
@@ -17541,163 +17737,20 @@ static void draw_omnibox(cairo_t *cr, browser_window *w) {
 
 static void paint(browser_window *w) {
     cairo_t *cr = cairo_create(w->cairo_surface);
+    if (w->mask_cache != NULL) cairo_set_user_data(cr, &bui_mask_cache_key, w->mask_cache, NULL);
     const ui_theme *th = &w->theme;
-    double ttop = toolbar_top(w);
 
     /* Background. */
     set_rgb(cr, th->window_bg);
     cairo_paint(cr);
 
-    /* The chrome (titlebar, toolbar, URL bar) uses a monospace face for stable
-     * caret math; page content is painted separately with a proportional face. */
+    paint_chrome(cr, w);
+
+    /* The plain-text viewer (start and error pages) keeps a monospace cell grid. */
     cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size(cr, th->body_font);
     cairo_font_extents_t fe;
     cairo_font_extents(cr, &fe);
-
-    /* Client-side titlebar (when the compositor offers no SSD). */
-    if (w->use_csd) {
-        double bl = (UI_TITLEBAR_H + fe.ascent - fe.descent) / 2.0;
-        set_rgb(cr, th->titlebar_bg);
-        cairo_rectangle(cr, 0, 0, w->width, UI_TITLEBAR_H);
-        cairo_fill(cr);
-
-        set_rgb(cr, th->chrome_text);
-        cairo_move_to(cr, UI_MARGIN, bl);
-        cairo_show_text(cr, w->loading ? "Loading..."
-                          : (w->bs.page_title != NULL) ? w->bs.page_title : "Freedom");
-
-        double min_x, max_x, close_x;
-        window_button_rects(w, &min_x, &max_x, &close_x);
-        set_rgb(cr, th->chrome_text);
-        draw_text(cr, "_", min_x + UI_WIN_BTN_W / 2.0, bl, 1);
-        draw_text(cr, "[]", max_x + UI_WIN_BTN_W / 2.0, bl, 1);
-        set_rgb(cr, th->close_button);
-        draw_text(cr, "X", close_x + UI_WIN_BTN_W / 2.0, bl, 1);
-    }
-
-    /* Tab strip, between the titlebar and the toolbar. */
-    draw_tabstrip(cr, w);
-
-    /* Toolbar. */
-    set_rgb(cr, th->toolbar_bg);
-    cairo_rectangle(cr, 0, ttop, w->width, UI_TOOLBAR_H);
-    cairo_fill(cr);
-
-    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
-    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
-    double bl = ttop + (UI_TOOLBAR_H + fe.ascent - fe.descent) / 2.0;
-
-    /* Hover highlight behind the toolbar button under the pointer (the same
-     * affordance links get). */
-    if (w->hot != UI_HOT_NONE) {
-        double hx = back_x;
-        switch (w->hot) {
-            case UI_HOT_BACK:   hx = back_x;      break;
-            case UI_HOT_FWD:    hx = fwd_x;       break;
-            case UI_HOT_RELOAD: hx = UI_RELOAD_X; break;
-            case UI_HOT_GO:     hx = go_x;        break;
-            case UI_HOT_MENU:   hx = menu_x;      break;
-            default: break;
-        }
-        set_rgb(cr, th->btn_hover_bg);
-        cairo_rectangle(cr, hx, ttop, UI_BTN_W, UI_TOOLBAR_H);
-        cairo_fill(cr);
-    }
-
-    /* Buttons. */
-    int can_back = browser_can_back(&w->bs);
-    int can_fwd  = browser_can_forward(&w->bs);
-
-    set_rgb(cr, can_back ? th->chrome_text : th->chrome_text_dim);
-    draw_text(cr, "<", back_x + UI_BTN_W / 2.0, bl, 1);
-
-    set_rgb(cr, can_fwd ? th->chrome_text : th->chrome_text_dim);
-    draw_text(cr, ">", fwd_x + UI_BTN_W / 2.0, bl, 1);
-
-    /* Reload button (also F5 / Ctrl+R). */
-    draw_reload(cr, th->chrome_text, UI_RELOAD_X, ttop);
-
-    set_rgb(cr, th->chrome_text);
-    draw_text(cr, "Go", go_x + UI_BTN_W / 2.0, bl, 1);
-
-    /* Options-menu (gear) button: a three-bar icon. */
-    draw_hamburger(cr, th->chrome_text, menu_x, ttop);
-
-    /* URL bar. */
-    set_rgb(cr, w->url_bar_focused ? th->url_bg_focused : th->url_bg);
-    cairo_rectangle(cr, url_x, ttop + UI_MARGIN, url_w, UI_TOOLBAR_H - 2 * UI_MARGIN);
-    cairo_fill(cr);
-
-    set_rgb(cr, th->url_border);
-    cairo_rectangle(cr, url_x, ttop + UI_MARGIN, url_w, UI_TOOLBAR_H - 2 * UI_MARGIN);
-    cairo_stroke(cr);
-
-    /* URL text + cursor. */
-    const char *url = w->bs.url_bar;
-    if (url != NULL) {
-        char buf[BROWSER_URL_MAX];
-        snprintf(buf, sizeof buf, "%s", url);
-        cairo_text_extents_t te;
-        cairo_text_extents(cr, buf, &te);
-        double tx = url_x + UI_MARGIN;
-        double ty = bl;
-
-        /* Clip to URL bar interior. */
-        cairo_save(cr);
-        cairo_rectangle(cr, url_x + 2, ttop + UI_MARGIN + 2, url_w - 4, UI_TOOLBAR_H - 2 * UI_MARGIN - 4);
-        cairo_clip(cr);
-
-        /* Selection highlight behind the text (omnibar). Wrapped in save/restore so the
-         * source colour for the text below is unchanged when there is no selection. */
-        if (w->url_bar_focused) {
-            size_t ss = 0, sl = 0;
-            if (browser_url_bar_selection(&w->bs, &ss, &sl)) {
-                char m[2] = {0};
-                double sx = tx;
-                for (size_t i = 0; i < ss && i < w->bs.url_bar_len; ++i) {
-                    m[0] = url[i]; cairo_text_extents(cr, m, &te); sx += te.x_advance;
-                }
-                double ex = sx;
-                for (size_t i = ss; i < ss + sl && i < w->bs.url_bar_len; ++i) {
-                    m[0] = url[i]; cairo_text_extents(cr, m, &te); ex += te.x_advance;
-                }
-                cairo_save(cr);
-                set_rgb(cr, th->btn_hover_bg);
-                cairo_rectangle(cr, sx, ty - fe.ascent, ex - sx, fe.height);
-                cairo_fill(cr);
-                cairo_restore(cr);
-            }
-        }
-
-        cairo_move_to(cr, tx, ty);
-        cairo_show_text(cr, buf);
-
-        if (w->url_bar_focused) {
-            /* Cursor position. */
-            char left[2] = {0};
-            double cx = tx;
-            for (size_t i = 0; i < w->bs.url_bar_cursor && i < w->bs.url_bar_len; ++i) {
-                left[0] = url[i];
-                cairo_text_extents(cr, left, &te);
-                cx += te.x_advance;
-            }
-            set_rgb(cr, th->caret);
-            cairo_rectangle(cr, cx, ty - fe.ascent, 1.5, fe.height);
-            cairo_fill(cr);
-        }
-        cairo_restore(cr);
-    }
-
-    /* Animated spinner at the right of the URL bar while a request is in flight. The
-     * rotation comes from the wall clock; the loop wakes ~12 fps while loading. */
-    if (w->loading) {
-        double r = (UI_TOOLBAR_H - 2.0 * UI_MARGIN) * 0.30;
-        double ccx = url_x + url_w - r - UI_MARGIN;
-        double ccy = ttop + UI_TOOLBAR_H / 2.0;
-        double phase = (double)(now_ms() % 1000u) / 1000.0;
-        draw_clock(cr, th->link, ccx, ccy, r, phase);
-    }
 
     /* Content area. CSS 2.1 §14.2: root <html> background fills the canvas. */
     double content_top, content_h;
@@ -17904,24 +17957,34 @@ static void set_cursor(browser_window *w, int cur_kind) {
  * cursor:pointer element (a JS-driven button/div, not just an <a>) shows the hand
  * even without an href. v1 supports: default (arrow), pointer (hand), text (I-beam),
  * move, wait (watch), not-allowed, crosshair, help, grab, zoom-in, none. */
+/* The pointer shape: the page's `cursor` when it set one, else a hand over a link or
+ * an actionable chrome part, an I-beam over the URL pill, else the arrow. */
+static int pointer_cursor(const browser_window *w, int css_cur, const char *href, ui_hot hot) {
+    if (css_cur != CSS_CUR_UNSET && css_cur != CSS_CUR_AUTO) return css_cur;
+    if (UI_HOT_PART(hot) == CHL_PART_URL) return CSS_CUR_TEXT;
+    return (href != NULL || hot_actionable(w, hot)) ? CSS_CUR_POINTER : CSS_CUR_DEFAULT;
+}
+
 static void update_hover(browser_window *w) {
+    if (w->menu_open) {
+        double mx, my, mw, mh, ih;
+        menu_panel_rect(w, &mx, &my, &mw, &mh, &ih);
+        int row = -1;
+        if (w->ptr_x >= mx && w->ptr_x < mx + mw && w->ptr_y >= my + UI_MENU_PAD) {
+            double r = (w->ptr_y - (my + UI_MENU_PAD)) / ih;
+            if (r < (double)UI_MENU_COUNT) row = (int)r;
+        }
+        if (row != w->menu_hot_row) { w->menu_hot_row = row; redraw(w); }
+    }
     const char *h = (w->doc != NULL && !w->menu_open)
                     ? link_at_point(w, w->ptr_x, w->ptr_y) : NULL;
     int cur = (w->doc != NULL && !w->menu_open)
               ? cursor_at_point(w, w->ptr_x, w->ptr_y) : CSS_CUR_UNSET;
-    ui_hot hot = toolbar_button_at(w, w->ptr_x, w->ptr_y);
+    ui_hot hot = chrome_hot_at(w, w->ptr_x, w->ptr_y);
     if (h == w->hover_href && cur == w->hover_cursor && hot == w->hot) return;
 
-    int cursor_kind = cur;
-    if (cursor_kind == CSS_CUR_UNSET || cursor_kind == CSS_CUR_AUTO) {
-        int is_link = (h != NULL) || hot_actionable(w, hot);
-        cursor_kind = is_link ? CSS_CUR_POINTER : CSS_CUR_DEFAULT;
-    }
-    int old_cursor_kind = w->hover_cursor;
-    if (old_cursor_kind == CSS_CUR_UNSET || old_cursor_kind == CSS_CUR_AUTO) {
-        int was_link = (w->hover_href != NULL) || hot_actionable(w, w->hot);
-        old_cursor_kind = was_link ? CSS_CUR_POINTER : CSS_CUR_DEFAULT;
-    }
+    int cursor_kind = pointer_cursor(w, cur, h, hot);
+    int old_cursor_kind = pointer_cursor(w, w->hover_cursor, w->hover_href, w->hot);
     w->hover_href = h;
     w->hover_cursor = cur;
     w->hot = hot;
@@ -18903,35 +18966,22 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
      * when the UI consumes the release (e.g. toolbar click). Only content-area
      * presses get dispatched (chrome has no DOM element). */
     if (w->js_mode != JSP_OFF && w->tab_worker != NULL && !freebug_owns_surface(w, w->ptr_focus)) {
-        double tbtop = tabbar_top(w);
-        double top_of_toolbar = toolbar_top(w);
-        double bottom_of_chrome = top_of_toolbar + UI_TOOLBAR_H;
-        if (w->ptr_y >= tbtop + UI_TABBAR_H && w->ptr_y >= bottom_of_chrome) {
+        if (w->ptr_y >= toolbar_top(w) + UI_TOOLBAR_H) {
             dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
             if (nid != DOM_NODE_NONE)
                 dispatch_mouse_event(w, nid, "mousedown", (int)w->ptr_x, (int)w->ptr_y, 0);
         }
     }
 
-    double ttop = toolbar_top(w);
+    /* Chrome hit-test: one geometry with the painter (spec/chrome_layout.md). */
+    chl_layout cl = chrome_of(w);
+    int hit_tab = -1;
+    chl_part part = chl_hit(&cl, w->ptr_x, w->ptr_y, &hit_tab);
 
-    /* Tab strip (between titlebar and toolbar): the "+" opens a tab, the close 'x' at
-     * a tab's right edge closes it, and a click on the body switches to it. */
-    double tbtop = tabbar_top(w);
-    if (w->ptr_y >= tbtop && w->ptr_y < tbtop + UI_TABBAR_H) {
-        double nx = newtab_x(w);
-        if (w->ptr_x >= nx && w->ptr_x < nx + UI_TAB_NEW_W) { tab_new(w, NULL); return; }
-        double tw = tab_width(w);
-        int i = (int)(w->ptr_x / tw);
-        if (i >= 0 && i < w->tab_count) {
-            double cxr = (double)i * tw + tw - UI_TAB_CLOSE_W;
-            if (w->tab_count > 1 && w->ptr_x >= cxr && w->ptr_x < (double)i * tw + tw)
-                uitab_close(w, i);
-            else
-                tab_switch(w, i);
-        }
-        return; /* clicks anywhere on the strip stay on the strip */
-    }
+    /* Tabs: the "+" opens a tab, a tab's close button closes it, its body selects it. */
+    if (part == CHL_PART_NEW_TAB) { tab_new(w, NULL); return; }
+    if (part == CHL_PART_TAB_CLOSE && hit_tab >= 0) { uitab_close(w, hit_tab); return; }
+    if (part == CHL_PART_TAB && hit_tab >= 0) { tab_switch(w, hit_tab); return; }
 
     /* While the options menu is open it captures the click: a hit on a row toggles
      * that capability and re-renders from cache (no network); any click elsewhere
@@ -18990,67 +19040,60 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
         }
     }
 
-    /* Client-side decoration controls: close / maximize-toggle / minimize, and a
-     * drag on the empty titlebar moves the window. */
-    if (w->use_csd && w->ptr_y < UI_TITLEBAR_H) {
-        double min_x, max_x, close_x;
-        window_button_rects(w, &min_x, &max_x, &close_x);
-        if (w->ptr_x >= close_x) {
-            w->running = 0;
-        } else if (w->ptr_x >= max_x) {
-            if (w->maximized) xdg_toplevel_unset_maximized(w->xdg_toplevel);
-            else              xdg_toplevel_set_maximized(w->xdg_toplevel);
-        } else if (w->ptr_x >= min_x) {
-            xdg_toplevel_set_minimized(w->xdg_toplevel);
-        } else if (w->seat != NULL) {
-            xdg_toplevel_move(w->xdg_toplevel, w->seat, serial);
+    /* Row 1: window controls (CSD) and the free strip, which moves the window. */
+    if (w->ptr_y < cl.toolbar_top) {
+        switch (part) {
+            case CHL_PART_WIN_CLOSE: w->running = 0; break;
+            case CHL_PART_WIN_MAX:
+                if (w->maximized) xdg_toplevel_unset_maximized(w->xdg_toplevel);
+                else              xdg_toplevel_set_maximized(w->xdg_toplevel);
+                break;
+            case CHL_PART_WIN_MIN: xdg_toplevel_set_minimized(w->xdg_toplevel); break;
+            case CHL_PART_DRAG:
+                if (w->seat != NULL) xdg_toplevel_move(w->xdg_toplevel, w->seat, serial);
+                break;
+            default: break;
         }
         return;
     }
 
-    double back_x, fwd_x, url_x, url_w, go_x, menu_x;
-    toolbar_rects(w, &back_x, &fwd_x, &url_x, &url_w, &go_x, &menu_x);
-
-    if (w->ptr_y >= ttop && w->ptr_y < ttop + UI_TOOLBAR_H) {
-        if (w->ptr_x >= menu_x) {
-            w->menu_open = 1;
-        } else if (w->ptr_x >= go_x && w->ptr_x < menu_x) {
-            go_omnibox(w);
-        } else if (w->ptr_x >= UI_RELOAD_X && w->ptr_x < UI_RELOAD_X + UI_BTN_W) {
-            load_current(w);  /* reload: re-fetch, full TLS/PQ policy re-applied (also F5/Ctrl+R) */
-        } else if (w->ptr_x >= url_x && w->ptr_x < url_x + url_w) {
-            w->url_bar_focused = 1;
-            w->focused_input = -1; /* the URL bar takes the keyboard */
-            /* Place cursor roughly by pixel offset. */
-            double cx = w->ptr_x - url_x - UI_MARGIN;
-            w->bs.url_bar_cursor = 0;
-            cairo_t *cr = cairo_create(w->cairo_surface);
-            cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-            cairo_set_font_size(cr, UI_FONT_SIZE);
-            cairo_text_extents_t te;
-            double acc = 0.0;
-            for (size_t i = 0; i < w->bs.url_bar_len; ++i) {
-                char tmp[2] = { w->bs.url_bar[i], '\0' };
-                cairo_text_extents(cr, tmp, &te);
-                acc += te.x_advance;
-                if (acc >= cx) { w->bs.url_bar_cursor = i; break; }
-                w->bs.url_bar_cursor = i + 1;
+    if (w->ptr_y < cl.content_top) {
+        switch (part) {
+            case CHL_PART_MENU:   w->menu_open = 1; w->menu_hot_row = -1; break;
+            case CHL_PART_RELOAD: load_current(w); break; /* full TLS/PQ policy re-applied (F5/Ctrl+R) */
+            case CHL_PART_FWD:    history_step(w, 1); break;
+            case CHL_PART_BACK:   history_step(w, -1); break;
+            case CHL_PART_IDENTITY:
+                browser_set_status(&w->bs, chl_identity_label(page_identity(w)), now_ms());
+                break;
+            case CHL_PART_URL: {
+                if (!w->url_bar_focused) {
+                    /* The first click selects the whole address so typing replaces it. */
+                    w->url_bar_focused = 1;
+                    w->focused_input = -1;
+                    w->bs.url_bar_anchor = 0;
+                    w->bs.url_bar_cursor = w->bs.url_bar_len;
+                    break;
+                }
+                w->focused_input = -1; /* the URL bar takes the keyboard */
+                const char *titles[UI_MAX_TABS];
+                int loading[UI_MAX_TABS];
+                bui_chrome_view v;
+                chrome_view_fill(w, &cl, titles, loading, &v);
+                cairo_t *cr = cairo_create(w->cairo_surface);
+                w->bs.url_bar_cursor = bui_url_index_at(cr, &v, w->ptr_x);
+                cairo_destroy(cr);
+                w->bs.url_bar_anchor = w->bs.url_bar_cursor;  /* a click collapses any selection */
+                break;
             }
-            w->bs.url_bar_anchor = w->bs.url_bar_cursor;  /* a click collapses any selection */
-            cairo_destroy(cr);
-        } else if (w->ptr_x >= fwd_x && w->ptr_x < fwd_x + UI_BTN_W) {
-            history_step(w, 1);
-        } else if (w->ptr_x >= back_x && w->ptr_x < back_x + UI_BTN_W) {
-            history_step(w, -1);
-        } else {
-            w->url_bar_focused = 0;
+            default: w->url_bar_focused = 0; break;
         }
     } else {
         /* Omnibox autocomplete dropdown: a click on a favorite row commits it (the
          * dropdown overlays the content top, so this is checked before content). */
         if (w->url_bar_focused && w->omni_sugg_n > 0) {
-            double dtop = ttop + UI_TOOLBAR_H;
-            if (w->ptr_x >= url_x && w->ptr_x < url_x + url_w &&
+            double dtop = cl.content_top;
+            if (w->ptr_x >= cl.url.x && w->ptr_x < cl.url.x + cl.url.w &&
                 w->ptr_y >= dtop && w->ptr_y < dtop + UI_OMNI_ROW_H * (double)w->omni_sugg_n) {
                 int row = (int)((w->ptr_y - dtop) / UI_OMNI_ROW_H);
                 if (row >= 0 && row < w->omni_sugg_n) {
@@ -19137,7 +19180,7 @@ static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
     if (axis != WL_POINTER_AXIS_VERTICAL_SCROLL) return;
     browser_window *w = (browser_window *)data;
     if (freebug_owns_surface(w, w->ptr_focus)) { freebug_pointer_axis(w, value); return; }
-    if (w->ptr_y < UI_TOOLBAR_H) return;
+    if (w->ptr_y < toolbar_top(w) + UI_TOOLBAR_H) return; /* the wheel scrolls the page, not the chrome */
 
     double v = wl_fixed_to_double(value);
     double step = w->theme.scroll_step_lines * scroll_line_px(w);
@@ -19785,6 +19828,12 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
         return;
     }
 
+    if (w->menu_open && !w->ua_field_focused && sym == XKB_KEY_Escape) {
+        w->menu_open = 0;
+        redraw(w);
+        return;
+    }
+
     /* Editing the configurable User-Agent in the options menu takes priority over
      * the URL bar and page scroll. Enter applies it (used on the next load). */
     if (w->ua_field_focused) {
@@ -19894,6 +19943,9 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
     }
 
     if (sym == XKB_KEY_Escape) {
+        /* Abandon the edit: the bar shows where the page on screen really is again. */
+        const char *cur = browser_current_url(&w->bs);
+        if (cur != NULL) browser_set_url_bar(&w->bs, cur);
         w->url_bar_focused = 0;
         w->omni_sugg_n = 0; w->omni_sel = -1;
     } else if (sym == XKB_KEY_Return || sym == XKB_KEY_KP_Enter) {
@@ -20186,6 +20238,8 @@ static int gui_eval_step(browser_window *w, uint64_t now) {
 /* Release what ui_run_browser opened before the window exists (profile, sealed cache, prefs) so a
  * failed start -- no compositor, no xkb -- exits without leaking them. */
 static void startup_abort_release(browser_window *w) {
+    mkc_free(w->mask_cache);
+    w->mask_cache = NULL;
     prefs_free(&w->prefs);
     cf_attach_redirect_memory(NULL);
     cf_set_store(NULL);
@@ -20211,6 +20265,7 @@ ui_status ui_run_browser(const char *start_url) {
     w.height = 780;
     w.running = 1;
     w.use_csd = 1;
+    w.mask_cache = mkc_new(FC_MASK_CACHE_BYTES, FC_MASK_CACHE_ENTRIES);
     w.caps = rdp_caps_safe();   /* Privacy by Default: images/CSS/JS off */
 
     /* Persisted profile (Hito 10): open the encrypted profile in the writable
@@ -20761,6 +20816,9 @@ ui_status ui_run_browser(const char *start_url) {
     cf_set_store(NULL);
     hc_close(w.http_cache);
     w.http_cache = NULL;
+    mkc_free(w.mask_cache);
+    w.mask_cache = NULL;
+    layout_cache_free(&w);
     profile_close(&w.profile);
 
     /* Release the process-wide font caches so a leak checker sees a clean exit.

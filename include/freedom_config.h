@@ -89,6 +89,12 @@
  * retained. Sized against what real pages ask (measured on the allowlist corpus). */
 #define FC_SHC_MAX_QUERIES 4096u
 
+/* Blurred box-shadow masks the window retains across frames (spec/mask_cache.md): the byte
+ * budget of all retained A8 buffers and how many masks. A mask is a function of its geometry
+ * alone, so it stays valid across scrolls, frames and documents; LRU bounds the memory. */
+#define FC_MASK_CACHE_BYTES   ((size_t)48u * 1024u * 1024u)
+#define FC_MASK_CACHE_ENTRIES 256u
+
 /* Distance (px) beyond the viewport at which a loading="lazy" image starts loading. */
 #define FC_LAZY_IMAGE_MARGIN_PX 1000.0
 

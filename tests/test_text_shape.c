@@ -530,6 +530,30 @@ static void test_measure_uses_fallback_face(void **state) {
     assert_true(a > 2.0 * 20.0 * 0.7 && a < 2.0 * 20.0 * 1.3);
 }
 
+
+/* tsh_face_generation (spec/exact_key.md): every change of the measured faces is visible. */
+static void test_face_generation_moves_with_faces(void **state) {
+    (void)state;
+    unsigned g0 = tsh_face_generation();
+    assert_true(g0 != 0);
+    assert_int_equal(tsh_face_generation(), g0);
+    tsh_webfont_clear();
+    unsigned g1 = tsh_face_generation();
+    assert_true(g1 != g0);
+    static const unsigned char junk[8] = { 'J', 'U', 'N', 'K', 0, 0, 0, 0 };
+    assert_int_equal(tsh_webfont_register("X", junk, sizeof junk, 0, 0), -1);
+    assert_int_equal(tsh_face_generation(), g1);
+    size_t nbytes = 0;
+    unsigned char *bytes = read_host_font("tests/fonts/dejavu-subset.woff2", &nbytes);
+    assert_non_null(bytes);
+    if (tsh_ready()) {
+        assert_int_equal(tsh_webfont_register("GenFace", bytes, nbytes, 0, 0), 0);
+        assert_true(tsh_face_generation() != g1);
+        tsh_webfont_clear();
+    }
+    free(bytes);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_null_and_bad_inputs),
@@ -541,6 +565,7 @@ int main(void) {
         cmocka_unit_test(test_draw_paints),
         cmocka_unit_test(test_uncovered_pua_draws_nothing),
         cmocka_unit_test(test_webfont_rejects_bad_input),
+        cmocka_unit_test(test_face_generation_moves_with_faces),
         cmocka_unit_test(test_webfont_register_find_clear),
         cmocka_unit_test(test_webfont_woff2_container),
         cmocka_unit_test(test_webfont_variable_weight),

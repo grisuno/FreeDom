@@ -127,6 +127,57 @@ static void test_ink_rect_covers_every_pixel_the_blur_can_touch(void **state) {
     free(a); free(b); free(argb);
 }
 
+
+/* --- the column pass: same arithmetic, row-major (tanda 95) ---------------------------------- */
+
+/* The pre-tanda-95 implementation, kept verbatim as the oracle the faster one must match. */
+static void ref_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp) {
+    int r = bw / 2;
+    long sum = 0;
+    for (int i = 0; i < n; ++i) tmp[i] = p[(long)i * step];
+    for (int i = 0; i <= r && i < n; ++i) sum += tmp[i];
+    for (int i = 0; i < n; ++i) {
+        p[(long)i * step] = (unsigned char)((sum + bw / 2) / bw);
+        int add = i + r + 1, sub = i - r;
+        if (add < n) sum += tmp[add];
+        if (sub >= 0) sum -= tmp[sub];
+    }
+}
+
+static void ref_blur(unsigned char *buf, int w, int h, int stride, double sigma) {
+    int sizes[3];
+    if (!bb_box_sizes(sigma, sizes)) return;
+    int longest = (w > h) ? w : h;
+    unsigned char *tmp = calloc((size_t)longest, 1);
+    for (int k = 0; k < 3; ++k) {
+        for (int y = 0; y < h; ++y) ref_line(buf + (long)y * stride, w, 1, sizes[k], tmp);
+        for (int x = 0; x < w; ++x) ref_line(buf + x, h, stride, sizes[k], tmp);
+    }
+    free(tmp);
+}
+
+static unsigned rng_next(unsigned *s) { *s = *s * 1103515245u + 12345u; return *s >> 16; }
+
+static void test_blur_matches_reference_byte_for_byte(void **state) {
+    (void)state;
+    static const int dims[][3] = { { 1, 1, 1 }, { 7, 3, 9 }, { 40, 25, 44 }, { 3, 60, 3 },
+                                   { 97, 61, 100 }, { 200, 9, 203 } };
+    static const double sig[] = { 0.4, 1.0, 2.5, 7.0, 19.0, 130.0 };
+    unsigned seed = 7;
+    for (size_t d = 0; d < sizeof dims / sizeof dims[0]; ++d)
+        for (size_t q = 0; q < sizeof sig / sizeof sig[0]; ++q) {
+            int w = dims[d][0], h = dims[d][1], st = dims[d][2];
+            size_t n = (size_t)st * (size_t)h;
+            unsigned char *a = malloc(n), *b = malloc(n);
+            for (size_t i = 0; i < n; ++i) a[i] = (rng_next(&seed) & 3) ? 0 : (unsigned char)rng_next(&seed);
+            memcpy(b, a, n);
+            assert_int_equal(bb_blur_a8(a, w, h, st, sig[q]), 1);
+            ref_blur(b, w, h, st, sig[q]);
+            assert_memory_equal(a, b, n);
+            free(a); free(b);
+        }
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_box_sizes),
@@ -137,6 +188,7 @@ int main(void) {
         cmocka_unit_test(test_ink_rect_empty_surface_has_no_ink),
         cmocka_unit_test(test_ink_rect_grows_by_the_blur_reach_and_clamps),
         cmocka_unit_test(test_ink_rect_covers_every_pixel_the_blur_can_touch),
+        cmocka_unit_test(test_blur_matches_reference_byte_for_byte),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

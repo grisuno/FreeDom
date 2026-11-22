@@ -126,9 +126,10 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
                $(BUILD_DIR)/test_css_index $(BUILD_DIR)/test_box_blur \
                $(BUILD_DIR)/test_text_case $(BUILD_DIR)/test_css_computed \
                $(BUILD_DIR)/test_css_counter $(BUILD_DIR)/test_sheet_cache \
-               $(BUILD_DIR)/test_net_guard
+               $(BUILD_DIR)/test_net_guard $(BUILD_DIR)/test_chrome_layout \
+               $(BUILD_DIR)/test_mask_cache $(BUILD_DIR)/test_exact_key
 
-.PHONY: fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: gscroll fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -303,7 +304,7 @@ $(BUILD_DIR)/test_webcaps: $(TEST_DIR)/test_webcaps.c $(BUILD_DIR)/webcaps.o $(B
 # Pure CSS stacking-context + paint-order logic (M1.1, compositor foundation). Uses
 # only css.h enum constants (no css.o), no I/O deps. See spec/compositor.md.
 $(BUILD_DIR)/test_compositor: $(TEST_DIR)/test_compositor.c $(BUILD_DIR)/compositor.o | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
 # Pure inline-SVG parser (spec/svg_render.md): hostile markup in, bounded geometry
 # out. No I/O, no Cairo -- the Cairo half lives in svg_paint.c on the trusted side.
@@ -434,6 +435,42 @@ $(BUILD_DIR)/test_css: $(TEST_DIR)/test_css.c $(BUILD_DIR)/css.o $(BUILD_DIR)/cs
 $(BUILD_DIR)/test_net_guard: $(TEST_DIR)/test_net_guard.c $(BUILD_DIR)/net_guard.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Shadow-mask cache (spec/mask_cache.md): hostile key sequences (geometry comes from page
+# CSS) against a byte/entry budget; a shadow model checks every hit returns what was put.
+fuzz-mkc: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_mask_cache.c $(SRC_DIR)/mask_cache.c \
+	  -o $(BUILD_DIR)/fuzz_mask_cache
+	./$(BUILD_DIR)/fuzz_mask_cache -max_total_time=30 -rss_limit_mb=2048
+
+# Gaussian mask blur (spec/box_blur.md): hostile mask/size/stride/sigma, differential
+# against the pre-tanda-95 implementation (byte for byte), never past w in a row.
+fuzz-bb: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_box_blur.c $(SRC_DIR)/box_blur.c -lm \
+	  -o $(BUILD_DIR)/fuzz_box_blur
+	./$(BUILD_DIR)/fuzz_box_blur -max_total_time=30 -rss_limit_mb=2048
+
+# Exact frame key (spec/exact_key.md): equality must be exactly memcmp of the two byte
+# streams, whatever the chunking -- a false hit would paint a stale layout.
+fuzz-ek: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_exact_key.c $(SRC_DIR)/exact_key.c \
+	  -o $(BUILD_DIR)/fuzz_exact_key
+	./$(BUILD_DIR)/fuzz_exact_key -max_total_time=30 -rss_limit_mb=2048
+
+# Browser chrome geometry + identity badge (spec/chrome_layout.md). Pure, no deps.
+# Exact cache key built by observation (spec/exact_key.md). Pure, no deps.
+$(BUILD_DIR)/test_exact_key: $(TEST_DIR)/test_exact_key.c $(BUILD_DIR)/exact_key.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Blurred-mask retention across frames (spec/mask_cache.md). Pure, no deps but libm.
+$(BUILD_DIR)/test_mask_cache: $(TEST_DIR)/test_mask_cache.c $(BUILD_DIR)/mask_cache.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
+
+$(BUILD_DIR)/test_chrome_layout: $(TEST_DIR)/test_chrome_layout.c $(BUILD_DIR)/chrome_layout.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
+
 # Parsed-stylesheet cache (spec/sheet_cache.md).
 $(BUILD_DIR)/test_sheet_cache: $(TEST_DIR)/test_sheet_cache.c $(BUILD_DIR)/sheet_cache.o $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o $(BUILD_DIR)/css_color.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) $(LEXBOR_LIBS) -lm
@@ -488,7 +525,7 @@ $(BUILD_DIR)/test_flex_layout: $(TEST_DIR)/test_flex_layout.c $(BUILD_DIR)/flex_
 
 # Pure recursive block/flex/grid box-tree layout. Composes flex_layout. No I/O deps.
 $(BUILD_DIR)/test_box_tree: $(TEST_DIR)/test_box_tree.c $(BUILD_DIR)/box_tree.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/compositor.o $(BUILD_DIR)/box_style.o $(BUILD_DIR)/block_flow.o | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
 # Pure /etc/hosts-format host filter (blocklist + allowlist). No I/O deps.
 $(BUILD_DIR)/test_subreq_batch: $(TEST_DIR)/test_subreq_batch.c $(BUILD_DIR)/subreq_batch.o | $(BUILD_DIR)
@@ -644,6 +681,7 @@ FREEDOM_UI_OBJ = $(BUILD_DIR)/browser.o $(BUILD_DIR)/ui_layout.o
 FREEDOM_GUI_OBJ = $(GUI_DIR)/browser_ui.c \
                   $(GUI_DIR)/bui_theme.c \
                   $(GUI_DIR)/bui_mask_img.c \
+                  $(GUI_DIR)/bui_chrome.c \
                   $(BUILD_DIR)/xdg-shell-protocol.c \
                   $(BUILD_DIR)/xdg-decoration-protocol.c
 
@@ -652,7 +690,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_i
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/pres_hints.o $(BUILD_DIR)/sheet_cache.o $(BUILD_DIR)/css_chain.o $(QJS_OBJ) \
-                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/net_guard.o $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/url.o \
+                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/net_guard.o $(BUILD_DIR)/chrome_layout.o $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/url.o \
                       $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
                       $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
                       $(BUILD_DIR)/request_policy.o \
@@ -663,7 +701,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_i
                       $(BUILD_DIR)/net_realm.o \
                       $(BUILD_DIR)/textfield.o $(BUILD_DIR)/form.o \
                       $(BUILD_DIR)/js_policy.o $(BUILD_DIR)/webcaps.o \
-                       $(BUILD_DIR)/compositor.o $(BUILD_DIR)/box_blur.o $(BUILD_DIR)/text_case.o \
+                       $(BUILD_DIR)/compositor.o $(BUILD_DIR)/box_blur.o $(BUILD_DIR)/mask_cache.o $(BUILD_DIR)/exact_key.o $(BUILD_DIR)/text_case.o \
                        $(BUILD_DIR)/interp.o $(BUILD_DIR)/frame_clock.o \
                        $(BUILD_DIR)/image_decode.o $(BUILD_DIR)/data_url.o $(BUILD_DIR)/pdf_export.o \
                       $(BUILD_DIR)/zoom.o $(BUILD_DIR)/download.o $(BUILD_DIR)/wl_display.o \
@@ -1005,6 +1043,14 @@ fuzz-cnt: | $(BUILD_DIR)
 	  -o $(BUILD_DIR)/fuzz_css_counter
 	./$(BUILD_DIR)/fuzz_css_counter -max_total_time=30 -rss_limit_mb=2048
 
+# Browser chrome geometry + identity badge (spec/chrome_layout.md): hostile URL and
+# geometry. The only green badge (PQ) needs known transport, https, no downgrade.
+fuzz-chl: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_chrome_layout.c $(SRC_DIR)/chrome_layout.c \
+	  -o $(BUILD_DIR)/fuzz_chrome_layout
+	./$(BUILD_DIR)/fuzz_chrome_layout -max_total_time=30 -rss_limit_mb=2048
+
 # Private-network guard (spec/net_guard.md): hostile host / address text, with libc's
 # inet_pton as a differential oracle. A public page must never reach a private peer.
 fuzz-ng: | $(BUILD_DIR)
@@ -1321,6 +1367,15 @@ parity-snapshot:
 fbench:
 	@$(MAKE) --no-print-directory parity PAGES="$(PAGES)" | sed -n '/^PAGE/,/^TOTAL/p'
 	@python3 tools/fbench.py --from $(if $(FROM),$(FROM),0) --rows $(if $(ROWS),$(ROWS),1100) $(if $(NOTIME),--no-time) $(PAGES)
+
+# make gscroll [PAGES="a b"] [NOTCHES=n]: what ONE frame costs in the real window while the user
+# scrolls (tools/guiscroll.py: nested weston, xdotool wheel, FREEDOM_JS_PROFILE phases). Prints
+# frames, median/p90 frame ms and median layout ms per page. Set FREEDOM_LAYOUT_CACHE_CHECK=1
+# and FREEDOM_MASK_CACHE_CHECK=1 to run the differential oracles of the frame caches as well.
+GSCROLL_PAGES ?= site-github site-eswikipedia wikipedia hackernews huggingface jkanime
+gscroll: $(BUILD_DIR)/freedom
+	@python3 tools/guiscroll.py --notches $(if $(NOTCHES),$(NOTCHES),20) \
+	  $(addprefix $(PARITY_DIR)/pages/,$(addsuffix .html,$(if $(PAGES),$(PAGES),$(GSCROLL_PAGES))))
 
 # Freeze the render-to-idle numbers of the last `make fbench` as the baseline later runs diff against.
 timing-update:

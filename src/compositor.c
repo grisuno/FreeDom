@@ -4,6 +4,8 @@
  */
 
 #include "compositor.h"
+
+#include <math.h>
 #include "css.h" /* css_position / css_mix_blend / css_isolation constants */
 
 /* A box is "positioned" for stacking purposes when position is anything but static
@@ -80,4 +82,28 @@ void cx_sort(cx_item *items, size_t n) {
         }
         items[j] = key;
     }
+}
+
+double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset) {
+    double reach = 0.0;
+    for (int k = 0; layers != NULL && k < n; ++k) {
+        const int *l = layers[k];
+        if (l[4] == -1 || l[5] == 1) continue;
+        double off = fabs((double)l[0]) > fabs((double)l[1]) ? fabs((double)l[0]) : fabs((double)l[1]);
+        double blur = (l[2] > 0) ? (double)l[2] : 0.0;
+        double r = off + ((l[3] > 0) ? (double)l[3] : 0.0) + ceil(blur * 1.5) + 1.0;
+        if (r > reach) reach = r;
+    }
+    if (outline_w > 0) {
+        double r = (double)outline_w + ((outline_offset > 0) ? (double)outline_offset : 0.0);
+        if (r > reach) reach = r;
+    }
+    return reach;
+}
+
+int cx_span_visible(double top, double h, double reach, double view_top, double view_h) {
+    if (!isfinite(top) || !isfinite(h) || !isfinite(reach) || !isfinite(view_top) ||
+        !isfinite(view_h))
+        return 1;
+    return (top + h + reach >= view_top) && (top - reach <= view_top + view_h);
 }

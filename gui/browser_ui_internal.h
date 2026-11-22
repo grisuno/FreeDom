@@ -86,6 +86,18 @@ typedef struct ui_theme {
     ui_rgb scrollbar_track;
     ui_rgb scrollbar_thumb;
     ui_rgb scrollbar_thumb_hot; /* thumb under the pointer / being dragged */
+    /* Browser chrome (gui/bui_chrome.c). */
+    ui_rgb tab_active_bg;   /* the selected tab; continues into the toolbar */
+    ui_rgb url_text;        /* URL pill text (the host when unfocused) */
+    ui_rgb url_text_dim;    /* scheme/path around the emphasised host */
+    ui_rgb url_caret;
+    ui_rgb url_select_bg;
+    ui_rgb accent;          /* focus ring of the URL pill, active-tab marker */
+    ui_rgb win_close_hot;   /* window close button under the pointer */
+    ui_rgb id_good;         /* identity badge: post-quantum */
+    ui_rgb id_warn;         /* identity badge: classical / weak / unknown */
+    ui_rgb id_bad;          /* identity badge: unverified / plaintext */
+    ui_rgb id_overlay;      /* identity badge: Tor / I2P */
 } ui_theme;
 
 /* Selectable palettes for the options menu. */
@@ -103,6 +115,43 @@ ui_theme ui_theme_sepia(void);
 ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to a palette */
 ui_rgb   rgb_from_packed(int packed);     /* 0xRRGGBB author colour -> theme RGB */
 void     set_rgb(cairo_t *cr, ui_rgb c);  /* cairo_set_source_rgb from a ui_rgb */
+
+/* --- bui_chrome.c: the browser chrome painter (geometry from chrome_layout) --- */
+
+#include "chrome_layout.h"
+#include <stddef.h>
+
+#define BUI_CHROME_FONT      "sans-serif"
+#define BUI_CHROME_FONT_SIZE 13.0
+#define BUI_URL_FONT_SIZE    14.0
+
+/* Everything the chrome painter shows, gathered by the orchestrator. Borrowed. */
+typedef struct bui_chrome_view {
+    const chl_layout  *l;
+    const ui_theme    *th;
+    chl_part           hot_part;     /* part under the pointer */
+    int                hot_tab;      /* tab under the pointer, or -1 */
+    const char *const *titles;       /* tab_count titles (never NULL entries) */
+    const int         *tab_loading;  /* tab_count flags, or NULL */
+    double             phase;        /* spinner phase in [0,1) */
+    int                can_back, can_fwd, maximized;
+    const char        *url;          /* URL bar text */
+    size_t             url_len, cursor, sel_start, sel_len;
+    int                url_focused;
+    chl_identity       identity;
+} bui_chrome_view;
+
+/* Selects the chrome face at `size` on cr. */
+void bui_chrome_font(cairo_t *cr, double size);
+/* Paints both chrome rows. */
+void bui_paint_chrome(cairo_t *cr, const bui_chrome_view *v);
+/* X where URL text starts and the horizontal shift keeping the caret visible:
+ * the single geometry the painter and the click-to-caret mapping share. */
+double bui_url_text_x(const bui_chrome_view *v, cairo_t *cr, double *shift);
+/* Byte index of the URL caret for a click at surface x (UTF-8 boundary). */
+size_t bui_url_index_at(cairo_t *cr, const bui_chrome_view *v, double x);
+/* Rounded rectangle path. */
+void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r);
 
 /* --- bui_mask_img.c: a mask-image url() layer into a mask surface --- */
 

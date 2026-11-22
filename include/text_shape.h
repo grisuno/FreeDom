@@ -115,6 +115,12 @@ int tsh_webfont_register(const char *name,
                          const unsigned char *bytes, size_t nbytes,
                          int bold, int italic);
 
+/* Advances whenever a face text is measured with may have been added, freed or replaced
+ * (a webfont registered or cleared, the local family lists or fallback faces dropped): a
+ * measure taken under an older generation may no longer hold. A cache of anything measured
+ * (the window's layout cache, spec/exact_key.md) keys on it. Never 0. */
+unsigned tsh_face_generation(void);
+
 /* Drops every registered webfont (document teardown / navigation). Idempotent,
  * NULL-safe by construction (no args). tsh_shutdown also clears the table. */
 void tsh_webfont_clear(void);

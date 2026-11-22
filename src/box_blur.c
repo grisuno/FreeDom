@@ -1,6 +1,7 @@
 #include "box_blur.h"
 
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -23,18 +24,58 @@ int bb_box_sizes(double sigma, int sizes[3]) {
     return 1;
 }
 
+/* floor((sum + bw/2) / bw) without a division: m = floor(2^32 / bw) + 1 makes (n * m) >> 32
+ * exact for every n < 2^32 / bw (Granlund-Montgomery), and here n <= 256 * bw with bw <
+ * BB_BOX_MAX, so 256 * bw^2 < 2^32 holds. The byte-for-byte test against the division keeps it
+ * honest. */
+#define BB_BOX_MAX 4096
+static uint64_t box_recip(int bw) { return (UINT64_C(1) << 32) / (uint64_t)bw + 1u; }
+static unsigned char box_avg(long sum, int bw, uint64_t m) {
+    return (unsigned char)(((uint64_t)(sum + bw / 2) * m) >> 32);
+}
+
 /* One box pass of odd width bw over n samples spaced `step` apart, through tmp
  * (n bytes). Samples outside [0, n) are 0. Running sum, so O(n) per line. */
 static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp) {
     int r = bw / 2;
+    uint64_t m = box_recip(bw);
     long sum = 0;
     for (int i = 0; i < n; ++i) tmp[i] = p[(long)i * step];
     for (int i = 0; i <= r && i < n; ++i) sum += tmp[i];
     for (int i = 0; i < n; ++i) {
-        p[(long)i * step] = (unsigned char)((sum + bw / 2) / bw);
+        p[(long)i * step] = box_avg(sum, bw, m);
         int add = i + r + 1, sub = i - r;
         if (add < n) sum += tmp[add];
         if (sub >= 0) sum -= tmp[sub];
+    }
+}
+
+/* One box pass of odd width bw down every column at once: the same running sums as box_line
+ * with step = stride, but walked row by row so every access is sequential (the column-at-a-time
+ * walk touched one byte per cache line). src is an h x w copy of the rows; sum holds w longs. */
+static void box_cols(unsigned char *buf, int w, int h, int stride, int bw,
+                     unsigned char *src, long *sum) {
+    int r = bw / 2;
+    uint64_t m = box_recip(bw);
+    for (int y = 0; y < h; ++y)
+        memcpy(src + (size_t)y * (size_t)w, buf + (size_t)y * (size_t)stride, (size_t)w);
+    memset(sum, 0, (size_t)w * sizeof *sum);
+    for (int i = 0; i <= r && i < h; ++i) {
+        const unsigned char *row = src + (size_t)i * (size_t)w;
+        for (int x = 0; x < w; ++x) sum[x] += row[x];
+    }
+    for (int i = 0; i < h; ++i) {
+        unsigned char *out = buf + (size_t)i * (size_t)stride;
+        for (int x = 0; x < w; ++x) out[x] = box_avg(sum[x], bw, m);
+        int add = i + r + 1, sub = i - r;
+        if (add < h) {
+            const unsigned char *row = src + (size_t)add * (size_t)w;
+            for (int x = 0; x < w; ++x) sum[x] += row[x];
+        }
+        if (sub >= 0) {
+            const unsigned char *row = src + (size_t)sub * (size_t)w;
+            for (int x = 0; x < w; ++x) sum[x] -= row[x];
+        }
     }
 }
 
@@ -43,14 +84,18 @@ int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma) {
     if ((long long)w * (long long)h > (long long)BB_MAX_PIXELS) return -1;
     int sizes[3];
     if (!bb_box_sizes(sigma, sizes)) return 0;
-    int longest = (w > h) ? w : h;
-    unsigned char *tmp = (unsigned char *)calloc((size_t)longest, 1);
-    if (tmp == NULL) return -1;
+    for (int k = 0; k < 3; ++k)
+        if (sizes[k] >= BB_BOX_MAX) return -1;
+    unsigned char *tmp = (unsigned char *)calloc((size_t)w * (size_t)h, 1);
+    long *sum = (long *)calloc((size_t)w, sizeof *sum);
+    if (tmp == NULL || sum == NULL) { free(tmp); free(sum); return -1; }
     for (int k = 0; k < 3; ++k) {
+        if (sizes[k] <= 1) continue;   /* a width-1 box is the identity */
         for (int y = 0; y < h; ++y) box_line(buf + (long)y * stride, w, 1, sizes[k], tmp);
-        for (int x = 0; x < w; ++x) box_line(buf + x, h, stride, sizes[k], tmp);
+        box_cols(buf, w, h, stride, sizes[k], tmp, sum);
     }
     free(tmp);
+    free(sum);
     return 1;
 }
 

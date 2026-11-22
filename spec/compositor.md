@@ -227,3 +227,38 @@ void cx_sort(cx_item *items, size_t n);                   /* orden de pintado, e
   anidadas (esas se agrupan, si corresponde, en su propia iteración independiente del loop de
   cajas, no como parte del subárbol de su padre). No hay todavía un árbol recursivo real de
   sub-contextos.
+
+## Recorte por viewport con alcance de tinta (tanda 95)
+
+**Medido:** los hijos de un contexto de apilamiento (`paint_nested_children`) se pintaban
+TODOS en cada cuadro, estuvieran o no en pantalla: GitHub tiene `isolation: isolate` en
+`<html>` y en la sección hero, así que cada cuadro de scroll pintaba decoración de cajas a
+miles de px del viewport (60 ms de 94 por cuadro). Y el recorte del pase normal miraba solo el
+border box: una caja justo por encima del viewport cuya sombra o `outline` sí entra perdía ese
+borde.
+
+```c
+double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset);
+int    cx_span_visible(double top, double h, double reach, double view_top, double view_h);
+```
+
+- `cx_ink_reach`: cuánto (px, ≥ 0) puede salirse del border box lo que pinta la caja. Cada capa
+  `{dx, dy, blur, spread, color, inset}` de `box-shadow` con `color != -1` e `inset == 0` llega
+  a `max(|dx|,|dy|) + max(spread,0) + ceil(1,5·blur) + 1` (el mismo `ext` de 3σ que usa el
+  pintor); una sombra `inset` queda dentro (0). El `outline` llega a `outline_w + max(offset,0)`
+  si `outline_w > 0`. Devuelve el máximo. `layers` NULL o `n <= 0` ⇒ solo el outline.
+- `cx_span_visible`: 1 si el intervalo vertical `[top − reach, top + h + reach]` toca
+  `[view_top, view_top + view_h]` (bordes incluidos), 0 si no. Un valor no finito ⇒ 1
+  (fail-open: nunca desaparece contenido por un número raro).
+
+**Dado-Cuando-Entonces**
+- **Dado** una caja sin sombra ni outline **entonces** `reach = 0` y el recorte es el de antes.
+- **Dado** `0 4px 8px` **entonces** `reach = 4 + 0 + 12 + 1 = 17`.
+- **Dado** una sombra `inset` grande **entonces** no aporta alcance.
+- **Dado** una caja que termina 10 px por encima del viewport con `reach = 17` **entonces**
+  es visible; con `reach = 0`, no.
+- **Dado** `top = NaN` **entonces** visible.
+
+En el pintor, un hijo de contexto fuera de pantalla no pinta su decoración ni sus filas
+directas, pero se marca hecho igual que antes y su subárbol se sigue recorriendo con las mismas
+reglas (un nieto puede estar en pantalla aunque su padre no).

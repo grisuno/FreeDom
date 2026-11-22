@@ -228,6 +228,40 @@ static void test_sort_matches_zindex_only_ordering(void **state) {
     assert_int_equal(items[2].z_index, 5);
 }
 
+
+static void test_ink_reach(void **state) {
+    (void)state;
+    assert_true(cx_ink_reach(NULL, 0, 0, 0) == 0.0);
+    int one[1][6] = { { 0, 4, 8, 0, 0x000000, 0 } };
+    assert_true(cx_ink_reach((const int (*)[6])one, 1, 0, 0) == 17.0);
+    int neg[1][6] = { { -6, 2, 0, 3, 0x112233, 0 } };
+    assert_true(cx_ink_reach((const int (*)[6])neg, 1, 0, 0) == 10.0);
+    int inset[1][6] = { { 0, 40, 80, 20, 0x000000, 1 } };
+    assert_true(cx_ink_reach((const int (*)[6])inset, 1, 0, 0) == 0.0);
+    int none[1][6] = { { 0, 40, 80, 20, -1, 0 } };
+    assert_true(cx_ink_reach((const int (*)[6])none, 1, 0, 0) == 0.0);
+    int two[2][6] = { { 0, 1, 2, 0, 0, 0 }, { 0, 0, 20, 5, 0, 0 } };
+    assert_true(cx_ink_reach((const int (*)[6])two, 2, 0, 0) == 36.0);
+    assert_true(cx_ink_reach(NULL, 0, 3, 2) == 5.0);
+    assert_true(cx_ink_reach(NULL, 0, 3, -9) == 3.0);
+    assert_true(cx_ink_reach(NULL, 0, 0, 50) == 0.0);
+    assert_true(cx_ink_reach((const int (*)[6])one, 1, 30, 0) == 30.0);
+}
+
+static void test_span_visible(void **state) {
+    (void)state;
+    assert_int_equal(cx_span_visible(100, 50, 0, 0, 800), 1);
+    assert_int_equal(cx_span_visible(-60, 50, 0, 0, 800), 0);
+    assert_int_equal(cx_span_visible(-60, 50, 17, 0, 800), 1);
+    assert_int_equal(cx_span_visible(900, 50, 0, 0, 800), 0);
+    assert_int_equal(cx_span_visible(800, 50, 0, 0, 800), 1);
+    assert_int_equal(cx_span_visible(-50, 50, 0, 0, 800), 1);
+    assert_int_equal(cx_span_visible(-1e9, 2e9, 0, 0, 800), 1);
+    double nan = 0.0 / 0.0;
+    assert_int_equal(cx_span_visible(nan, 50, 0, 0, 800), 1);
+    assert_int_equal(cx_span_visible(900, 1.0 / 0.0, 0, 0, 800), 1);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_sc_opacity),
@@ -249,6 +283,8 @@ int main(void) {
         cmocka_unit_test(test_sort_stability),
         cmocka_unit_test(test_sort_noop_guards),
         cmocka_unit_test(test_sort_matches_zindex_only_ordering),
+        cmocka_unit_test(test_ink_reach),
+        cmocka_unit_test(test_span_visible),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
