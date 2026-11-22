@@ -10,6 +10,7 @@
  */
 
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "browser_ui_internal.h"
@@ -573,5 +574,125 @@ void bui_paint_chrome(cairo_t *cr, const bui_chrome_view *v) {
     set_rgba(cr, v->th->url_border, 0.6);
     cairo_rectangle(cr, 0.0, v->l->content_top - 1.0, v->l->width, 1.0);
     cairo_fill(cr);
+    cairo_restore(cr);
+}
+
+/* --- find bar (spec/find_text.md) --- */
+
+static const char BUI_FIND_PLACEHOLDER[] = "Find in page";
+
+static void paint_find_field(cairo_t *cr, const bui_find_view *v) {
+    const ui_theme *th = v->th;
+    chl_rect p = v->f->field;
+    if (p.w <= 0.0) return;
+    int none = (v->len > 0 && v->total == 0);
+    set_rgb(cr, v->focused ? th->url_bg_focused : th->url_bg);
+    bui_round_rect(cr, p.x, p.y, p.w, p.h, BUI_PILL_RADIUS);
+    cairo_fill(cr);
+    if (v->focused || none) {
+        set_rgb(cr, none ? th->id_bad : th->accent);
+        cairo_set_line_width(cr, BUI_FOCUS_RING);
+        bui_round_rect(cr, p.x + 1.0, p.y + 1.0, p.w - 2.0, p.h - 2.0, BUI_PILL_RADIUS - 1.0);
+        cairo_stroke(cr);
+    }
+    bui_chrome_font(cr, BUI_URL_FONT_SIZE);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    double tx = p.x + BUI_URL_END_PAD;
+    double ty = rcy(p) + (fe.ascent - fe.descent) / 2.0;
+    double room = p.w - 2.0 * BUI_URL_END_PAD;
+    size_t n = v->len, cur = v->cursor < n ? v->cursor : n;
+    double shift = text_w(cr, v->text, cur) - room;   /* keep the caret in view */
+    if (shift < 0.0) shift = 0.0;
+    cairo_save(cr);
+    cairo_rectangle(cr, tx, p.y, room, p.h);
+    cairo_clip(cr);
+    tx -= shift;
+    if (n == 0) {
+        set_rgb(cr, th->url_text_dim);
+        cairo_move_to(cr, tx, ty);
+        cairo_show_text(cr, BUI_FIND_PLACEHOLDER);
+    } else {
+        if (v->selected) {
+            set_rgb(cr, th->url_select_bg);
+            cairo_rectangle(cr, tx, ty - fe.ascent, text_w(cr, v->text, n), fe.height);
+            cairo_fill(cr);
+        }
+        set_rgb(cr, th->url_text);
+        cairo_move_to(cr, tx, ty);
+        show_n(cr, v->text, n);
+    }
+    if (v->focused) {
+        set_rgb(cr, th->url_caret);
+        cairo_rectangle(cr, tx + text_w(cr, v->text, cur), ty - fe.ascent, 1.5, fe.height);
+        cairo_fill(cr);
+    }
+    cairo_restore(cr);
+}
+
+static void find_button(cairo_t *cr, const bui_find_view *v, chl_rect r, chl_find_part part,
+                        int enabled) {
+    if (r.w <= 0.0) return;
+    if (enabled && v->hot == part) {
+        set_rgb(cr, v->th->btn_hover_bg);
+        bui_round_rect(cr, r.x, r.y, r.w, r.h, 6.0);
+        cairo_fill(cr);
+    }
+    set_rgba(cr, v->th->chrome_text, enabled ? 1.0 : BUI_DISABLED);
+}
+
+/* A chevron pointing up (dir > 0) or down. */
+static void icon_chevron(cairo_t *cr, double cx, double cy, int dir) {
+    double d = (dir > 0) ? -1.0 : 1.0;
+    cairo_move_to(cr, cx - 5.0, cy - 2.5 * d);
+    cairo_line_to(cr, cx, cy + 2.5 * d);
+    cairo_line_to(cr, cx + 5.0, cy - 2.5 * d);
+    icon_stroke(cr);
+}
+
+void bui_paint_findbar(cairo_t *cr, const bui_find_view *v) {
+    if (cr == NULL || v == NULL || v->f == NULL || v->th == NULL) return;
+    if (v->text == NULL && v->len > 0) return;
+    const chl_findbar *f = v->f;
+    cairo_save(cr);
+    cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
+    set_rgb(cr, v->th->toolbar_bg);
+    cairo_rectangle(cr, f->bar.x, f->bar.y, f->bar.w, f->bar.h);
+    cairo_fill(cr);
+    set_rgba(cr, v->th->url_border, 0.6);
+    cairo_rectangle(cr, f->bar.x, f->bar.y, f->bar.w, 1.0);
+    cairo_fill(cr);
+
+    bui_find_view vv = *v;
+    if (vv.text == NULL) vv.text = "";
+    paint_find_field(cr, &vv);
+    int can = (v->total > 0);
+    find_button(cr, v, f->prev, CHL_FIND_PREV, can);
+    if (f->prev.w > 0.0) icon_chevron(cr, rcx(f->prev), rcy(f->prev), 1);
+    find_button(cr, v, f->next, CHL_FIND_NEXT, can);
+    if (f->next.w > 0.0) icon_chevron(cr, rcx(f->next), rcy(f->next), -1);
+    find_button(cr, v, f->close, CHL_FIND_CLOSE, 1);
+    if (f->close.w > 0.0) icon_cross(cr, rcx(f->close), rcy(f->close), 4.5);
+
+    if (f->count.w > 0.0 && v->len > 0) {
+        char label[64];
+        if (v->total == 0)
+            snprintf(label, sizeof label, "No matches");
+        else if (v->truncated)
+            snprintf(label, sizeof label, "%ld of more than %zu matches", v->current + 1, v->total);
+        else
+            snprintf(label, sizeof label, "%ld of %zu match%s", v->current + 1, v->total,
+                     v->total == 1 ? "" : "es");
+        bui_chrome_font(cr, BUI_CHROME_FONT_SIZE);
+        cairo_font_extents_t fe;
+        cairo_font_extents(cr, &fe);
+        cairo_save(cr);
+        cairo_rectangle(cr, f->count.x, f->count.y, f->count.w, f->count.h);
+        cairo_clip(cr);
+        set_rgb(cr, v->total == 0 ? v->th->id_bad : v->th->chrome_text);
+        cairo_move_to(cr, f->count.x, rcy(f->count) + (fe.ascent - fe.descent) / 2.0);
+        cairo_show_text(cr, label);
+        cairo_restore(cr);
+    }
     cairo_restore(cr);
 }

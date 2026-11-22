@@ -98,6 +98,9 @@ typedef struct ui_theme {
     ui_rgb id_warn;         /* identity badge: classical / weak / unknown */
     ui_rgb id_bad;          /* identity badge: unverified / plaintext */
     ui_rgb id_overlay;      /* identity badge: Tor / I2P */
+    /* Find in page: fixed in every theme, since they paint over the author's colours. */
+    ui_rgb find_hl;         /* every match */
+    ui_rgb find_hl_cur;     /* the current match */
 } ui_theme;
 
 /* Selectable palettes for the options menu. */
@@ -142,6 +145,22 @@ typedef struct bui_chrome_view {
 } bui_chrome_view;
 
 /* Selects the chrome face at `size` on cr. */
+/* The find bar (spec/find_text.md). */
+typedef struct bui_find_view {
+    const chl_findbar *f;
+    const ui_theme    *th;
+    const char        *text;        /* query */
+    size_t             len, cursor;
+    int                focused;
+    int                selected;    /* the whole query is selected (just reopened) */
+    size_t             total;       /* matches kept */
+    long               current;     /* index of the current match, -1 = none */
+    int                truncated;   /* more matches than kept */
+    chl_find_part      hot;         /* part under the pointer */
+} bui_find_view;
+
+void bui_paint_findbar(cairo_t *cr, const bui_find_view *v);
+
 void bui_chrome_font(cairo_t *cr, double size);
 /* Paints both chrome rows. */
 void bui_paint_chrome(cairo_t *cr, const bui_chrome_view *v);

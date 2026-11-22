@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <setjmp.h>
 #include <string.h>
+#include <stdio.h>
 #include <cmocka.h>
 
 #include "browser.h"
@@ -375,6 +376,40 @@ static void test_push_state_rejects_and_guards(void **state) {
     browser_free(&bs);
 }
 
+static void test_closed_tabs(void **state) {
+    (void)state;
+    browser_closed c;
+    memset(&c, 0, sizeof c);
+    char out[BROWSER_URL_MAX];
+    assert_int_equal(browser_closed_pop(&c, out, sizeof out), 0);
+    assert_int_equal(browser_closed_push(NULL, "https://a.example/"), BROWSER_ERR_NULL);
+    assert_int_equal(browser_closed_push(&c, NULL), BROWSER_ERR_INVALID_URL);
+    assert_int_equal(browser_closed_push(&c, ""), BROWSER_ERR_INVALID_URL);
+    char big[BROWSER_URL_MAX + 1];
+    memset(big, 'a', BROWSER_URL_MAX);
+    big[BROWSER_URL_MAX] = '\0';
+    assert_int_equal(browser_closed_push(&c, big), BROWSER_ERR_INVALID_URL);
+    assert_int_equal(c.n, 0);
+    for (int i = 0; i < BROWSER_CLOSED_MAX + 2; ++i) {
+        char u[64];
+        snprintf(u, sizeof u, "https://t%d.example/", i);
+        assert_int_equal(browser_closed_push(&c, u), BROWSER_OK);
+    }
+    assert_int_equal(c.n, BROWSER_CLOSED_MAX);
+    char tiny[8];
+    assert_int_equal(browser_closed_pop(&c, tiny, sizeof tiny), 0);
+    assert_int_equal(c.n, BROWSER_CLOSED_MAX);
+    assert_int_equal(browser_closed_pop(&c, out, sizeof out), 1);
+    assert_string_equal(out, "https://t11.example/");
+    for (int i = 10; i >= 2; --i) {
+        char u[64];
+        snprintf(u, sizeof u, "https://t%d.example/", i);
+        assert_int_equal(browser_closed_pop(&c, out, sizeof out), 1);
+        assert_string_equal(out, u);
+    }
+    assert_int_equal(browser_closed_pop(&c, out, sizeof out), 0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_init),
@@ -392,6 +427,7 @@ int main(void) {
         cmocka_unit_test(test_exceptions),
         cmocka_unit_test(test_status_toast),
         cmocka_unit_test(test_status_truncates),
+        cmocka_unit_test(test_closed_tabs),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

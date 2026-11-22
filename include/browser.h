@@ -149,4 +149,19 @@ browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t n
 /* The active status text, or NULL when there is none or it has expired at now_ms. */
 const char *browser_status_text(const browser_state *bs, uint64_t now_ms);
 
+/* Recently closed tabs (Ctrl+Shift+T), newest last. In RAM only, never persisted. */
+#define BROWSER_CLOSED_MAX 10
+typedef struct browser_closed {
+    char   url[BROWSER_CLOSED_MAX][BROWSER_URL_MAX];
+    size_t n;
+} browser_closed;
+
+/* Remembers a closed tab's URL; a full ring drops its oldest entry. NULL c:
+ * BROWSER_ERR_NULL; NULL, empty or >= BROWSER_URL_MAX bytes: BROWSER_ERR_INVALID_URL. */
+browser_status browser_closed_push(browser_closed *c, const char *url);
+
+/* Takes the most recently closed URL into out[cap]. 1 = taken, 0 = none (or it does not
+ * fit, in which case it stays). */
+int browser_closed_pop(browser_closed *c, char *out, size_t cap);
+
 #endif /* FREEDOM_BROWSER_H */

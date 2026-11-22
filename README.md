@@ -30,9 +30,13 @@ telemetry, mandatory API keys or hidden solver workers.
   sandbox.
 - **Sandboxed JS.** QuickJS-ng with sealed bindings. ES modules and import maps run on
   trusted hosts, and network access is proxied through the parent, which re-applies policy.
+- **A modern browser to use, too.** Tabs in the title bar, a connection identity badge
+  (post-quantum, classical, override, Tor/I2P), find in page (`Ctrl+F`, case- and
+  accent-insensitive, invisible to the page), reopen closed tab (`Ctrl+Shift+T`, kept in
+  memory only) and Firefox's keyboard shortcuts.
 - **Agent-safe and agent-friendly.** Deterministic headless mode with `--download-png`,
   `--dump-dom`, `--dump-layout` and `--dump-console`, plus an MCP server.
-- **Tested and fuzzed.** 66+ CMocka suites, ASan/UBSan, 20+ libFuzzer targets, and
+- **Tested and fuzzed.** 100 CMocka suites, ASan/UBSan, 38 libFuzzer targets, and
   measured parity against Firefox (`make parity`, `make wpt`).
 
 ## Quick start

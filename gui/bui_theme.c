@@ -81,6 +81,8 @@ ui_theme ui_theme_default(void) {
     t.id_warn        = (ui_rgb){ 1.00, 0.75, 0.30 };
     t.id_bad         = (ui_rgb){ 1.00, 0.42, 0.42 };
     t.id_overlay     = (ui_rgb){ 0.75, 0.55, 1.00 };
+    t.find_hl        = (ui_rgb){ 1.00, 0.91, 0.30 };
+    t.find_hl_cur    = (ui_rgb){ 1.00, 0.59, 0.20 };
     return t;
 }
 

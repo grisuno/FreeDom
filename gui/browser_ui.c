@@ -55,6 +55,7 @@
 #include "webfont.h"
 #include "webfont_load.h"
 #include "textfield.h"
+#include "find_text.h"
 #include "webcaps.h"
 #include "host_conf.h"
 #include "css_gradient.h"
@@ -639,7 +640,32 @@ typedef struct browser_window {
     /* In-memory localStorage of trusted origins, shared by every tab of the window and
      * never written to disk (owner decision; spec/web_storage.md). */
     struct wst_db *web_store;
+    /* Find in page (spec/find_text.md): a bar docked at the bottom, searching the text the
+     * retained layout painted. fip_hits are the match spans by text address (sorted), so
+     * the painter finds them in whichever pass paints the fragment. Never sent to the
+     * worker, never persisted. lc_gen advances on every fresh layout. */
+    int        fip_open, fip_focused, fip_selected, fip_dirty, fip_scroll;
+    tf_field   fip_field;
+    struct fip_hit *fip_hits;
+    size_t     fip_nhit;
+    double    *fip_y;        /* layout-space top of each match's row */
+    size_t     fip_total;
+    long       fip_cur;
+    int        fip_trunc;
+    uint64_t   fip_gen;      /* lc_gen the hits were computed for */
+    uint64_t   fip_serial;   /* doc_serial they were computed for */
+    int        fip_painting; /* 1 only while the on-screen painter runs */
+    chl_find_part fip_hot;
+    uint64_t   lc_gen;
+    browser_closed closed_tabs;  /* Ctrl+Shift+T; in RAM only */
 } browser_window;
+
+typedef struct fip_hit {
+    uintptr_t addr;   /* first byte of the span */
+    size_t    len;    /* bytes */
+    size_t    match;
+    int       cont;   /* the match goes on in a later piece: fill the pen gap after it */
+} fip_hit;
 
 /* Freebug second-window forward declarations (defined further down, but referenced
  * by render_current_ex, the menu and the input listeners above their definition). */
@@ -2423,6 +2449,10 @@ static void history_step(browser_window *w, int steps);
 static int  apply_click_result(browser_window *w, tab_page *page);
 static void load_current(browser_window *w);
 static void tab_new(browser_window *w, const char *url);
+static void fip_close_bar(browser_window *w);
+static void fip_type(browser_window *w, const char *s, size_t n);
+static int fip_click(browser_window *w, double x, double y);
+static chl_find_part fip_hot_at(const browser_window *w, double x, double y);
 static void ws_apply_ops(browser_window *w, const tab_page *page);
 
 /* Cap on consecutive JS-driven navigations (location.href=) without a settling page,
@@ -3098,6 +3128,7 @@ static void tab_switch(browser_window *w, int idx) {
     w->active_tab = idx;
     tab_restore(w);
     w->menu_open = 0;
+    fip_close_bar(w);
     w->url_bar_focused = 0;
     const char *u = browser_current_url(&w->bs);
     browser_set_url_bar(&w->bs, (u != NULL) ? u : "");
@@ -3108,6 +3139,7 @@ static void tab_switch(browser_window *w, int idx) {
  * url (a window.open target, already policy-gated by the parent) is a navigation of
  * the new tab: it enters its history and stays in the URL bar. */
 static void tab_new(browser_window *w, const char *url) {
+    fip_close_bar(w);
     gui_quiesce(w);   /* a background tick reads what this changes */
     if (w->tab_count >= UI_MAX_TABS) {
         browser_set_status(&w->bs, "Tab limit reached.", now_ms());
@@ -3149,6 +3181,11 @@ static void tab_new(browser_window *w, const char *url) {
 /* Closes tab idx. Never closes the last tab (always keeps one). */
 static void uitab_close(browser_window *w, int idx) {
     if (w->tab_count <= 1 || idx < 0 || idx >= w->tab_count) return;
+    {
+        const char *u = browser_current_url(idx == w->active_tab ? &w->bs : &w->tab_slots[idx].bs);
+        if (u != NULL) (void)browser_closed_push(&w->closed_tabs, u);
+    }
+    if (idx == w->active_tab) fip_close_bar(w);
 
     if (idx == w->active_tab) {
         /* The active tab may have a fetch in flight; abandon it so its result is not
@@ -3215,6 +3252,7 @@ static double toolbar_top(const browser_window *w) {
 static void content_geometry(const browser_window *w, double *top, double *height) {
     double t = toolbar_top(w) + UI_TOOLBAR_H;
     double h = (double)w->height - t - 2.0 * w->theme.content_margin;
+    if (w->fip_open) h -= CHL_FIND_H;      /* the find bar takes the bottom of the viewport */
     if (h < 1.0) h = 1.0;
     *top = t;
     *height = h;
@@ -13337,6 +13375,140 @@ static void paint_inline_replaced(cairo_t *cr, browser_window *w,
  * and the row's CONTENT. Painting every band first, then every content, keeps
  * the in-flow block backgrounds BELOW the floats beside them (CSS 2.1 Appendix
  * E: block backgrounds, then floats, then inline content). */
+/* --- Find in page (spec/find_text.md) ------------------------------------------------- */
+
+/* First hit whose span starts at or after addr (fip_hits is sorted by addr). */
+static size_t fip_lower(const browser_window *w, uintptr_t addr) {
+    size_t lo = 0, hi = w->fip_nhit;
+    while (lo < hi) {
+        size_t mid = lo + (hi - lo) / 2;
+        if (w->fip_hits[mid].addr < addr) lo = mid + 1; else hi = mid;
+    }
+    return lo;
+}
+
+/* Highlights the parts of fragment f that are matches, behind its glyphs. The content font
+ * is already selected; a styled fragment (letter-spacing, transform) highlights whole. */
+static void fip_paint_frag(cairo_t *cr, const browser_window *w, const rc_frag *f,
+                           double fx, double ry, double rh, double gap) {
+    if (f->text == NULL || f->len == 0 || f->repl != NULL) return;
+    uintptr_t a0 = (uintptr_t)f->text, a1 = a0 + f->len;
+    for (size_t i = fip_lower(w, a0); i < w->fip_nhit && w->fip_hits[i].addr < a1; ++i) {
+        const fip_hit *h = &w->fip_hits[i];
+        size_t st = (size_t)(h->addr - a0);
+        size_t en = st + h->len;
+        if (en > f->len) en = f->len;
+        double x0 = 0.0, x1 = f->width;
+        if (!frag_styled(f)) {
+            x0 = (st > 0) ? measure_slice(cr, f->text, st) : 0.0;
+            x1 = (en < f->len) ? measure_slice(cr, f->text, en) : f->width;
+        }
+        if (h->cont && en == f->len && gap > 0.0) x1 = f->width + gap;
+        set_rgb(cr, ((long)h->match == w->fip_cur) ? w->theme.find_hl_cur : w->theme.find_hl);
+        cairo_rectangle(cr, fx + x0, ry, x1 - x0, rh);
+        cairo_fill(cr);
+    }
+}
+
+static void fip_clear_hits(browser_window *w) {
+    free(w->fip_hits);
+    free(w->fip_y);
+    w->fip_hits = NULL;
+    w->fip_y = NULL;
+    w->fip_nhit = 0;
+    w->fip_total = 0;
+    w->fip_cur = -1;
+    w->fip_trunc = 0;
+}
+
+static int fip_hit_cmp(const void *a, const void *b) {
+    uintptr_t x = ((const fip_hit *)a)->addr, y = ((const fip_hit *)b)->addr;
+    return (x > y) - (x < y);
+}
+
+/* Appends the visible text fragments of L as find pieces (layout-space row top in ys). */
+static void fip_collect(const rc_layout *L, double dy, ft_piece *p, double *ys, size_t cap,
+                        size_t *n) {
+    for (size_t ri = 0; ri < L->nrow; ++ri) {
+        const rc_row *r = &L->rows[ri];
+        if (r->kind != RC_TEXT || r->hidden) continue;
+        const rc_frag *prev = NULL;
+        for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
+            const rc_frag *f = &L->frags[k];
+            if (f->hidden || f->repl != NULL || f->text == NULL || f->len == 0) continue;
+            if (*n >= cap) return;
+            p[*n].text = f->text;
+            p[*n].len = f->len;
+            p[*n].gap_before = (prev == NULL) || (f->x > prev->x + prev->width + 0.5);
+            ys[*n] = r->top + dy;
+            ++*n;
+            prev = f;
+        }
+    }
+}
+
+/* Recomputes the matches against layout L when the query, the layout or the document
+ * changed. Keeps the current match index when it is still in range. */
+static void fip_sync(browser_window *w, const rc_layout *L) {
+    if (!w->fip_open) return;
+    if (!w->fip_dirty && w->fip_gen == w->lc_gen && w->fip_serial == w->doc_serial) return;
+    long keep = w->fip_dirty ? 0 : w->fip_cur;
+    w->fip_dirty = 0;
+    w->fip_gen = w->lc_gen;
+    w->fip_serial = w->doc_serial;
+    fip_clear_hits(w);
+    uint32_t q[FT_QUERY_MAX];
+    size_t qn = ft_compile(tf_text(&w->fip_field), tf_len(&w->fip_field), q, FT_QUERY_MAX);
+    if (qn == 0 || L == NULL) return;
+    size_t cap = L->nfrag;
+    for (size_t i = 0; i < L->noof_sub; ++i)
+        if (L->oof_sub[i].L != NULL) cap += L->oof_sub[i].L->nfrag;
+    if (cap == 0) return;
+    ft_piece *p = (ft_piece *)calloc(cap, sizeof *p);
+    double *ys = (double *)calloc(cap, sizeof *ys);
+    ft_match *m = (ft_match *)calloc(FT_MATCH_MAX, sizeof *m);
+    size_t scap = (size_t)FT_MATCH_MAX * 8u;
+    ft_span *sp = (ft_span *)calloc(scap, sizeof *sp);
+    if (p == NULL || ys == NULL || m == NULL || sp == NULL) goto out;
+    size_t n = 0;
+    fip_collect(L, 0.0, p, ys, cap, &n);
+    for (size_t i = 0; i < L->noof_sub; ++i)
+        if (L->oof_sub[i].L != NULL) fip_collect(L->oof_sub[i].L, L->oof_sub[i].dy, p, ys, cap, &n);
+    size_t nm = 0;
+    if (ft_search(p, n, q, qn, m, FT_MATCH_MAX, &nm, &w->fip_trunc) != FT_OK || nm == 0) goto out;
+    size_t ns = ft_spans(p, n, m, nm, sp, scap);
+    w->fip_hits = (fip_hit *)calloc(ns > 0 ? ns : 1, sizeof *w->fip_hits);
+    w->fip_y = (double *)calloc(nm, sizeof *w->fip_y);
+    if (w->fip_hits == NULL || w->fip_y == NULL) { fip_clear_hits(w); goto out; }
+    for (size_t i = 0; i < ns; ++i) {
+        w->fip_hits[i].addr = (uintptr_t)p[sp[i].piece].text + sp[i].start;
+        w->fip_hits[i].len = sp[i].end - sp[i].start;
+        w->fip_hits[i].match = sp[i].match;
+        w->fip_hits[i].cont = (i + 1 < ns && sp[i + 1].match == sp[i].match);
+    }
+    qsort(w->fip_hits, ns, sizeof *w->fip_hits, fip_hit_cmp);
+    for (size_t i = 0; i < nm; ++i) w->fip_y[i] = ys[m[i].start.piece];
+    w->fip_nhit = ns;
+    w->fip_total = nm;
+    w->fip_cur = (keep >= 0 && (size_t)keep < nm) ? keep : 0;
+out:
+    free(p);
+    free(ys);
+    free(m);
+    free(sp);
+}
+
+/* Scrolls the current match into view (a third of the way down) when it is outside it. */
+static void fip_reveal(browser_window *w, double content_h) {
+    if (!w->fip_scroll) return;
+    w->fip_scroll = 0;
+    if (w->fip_cur < 0 || (size_t)w->fip_cur >= w->fip_total || w->fip_y == NULL) return;
+    double y = w->fip_y[w->fip_cur] + page_gutter(w);
+    double margin = content_h * 0.1;
+    if (y >= w->scroll + margin && y <= w->scroll + content_h - margin) return;
+    w->scroll = y - content_h / 3.0;
+}
+
 #define ROW_PAINT_ALL     0
 #define ROW_PAINT_BAND    1
 #define ROW_PAINT_CONTENT 2
@@ -13486,6 +13658,13 @@ static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout
         }
         content_font_ex(cr, f->font_size, f->bold, f->italic, f->family, f->webfont,
                         f->localfont);
+        if (w->fip_painting && w->fip_nhit > 0) {
+            const rc_frag *gf = (k + 1 < r->first + r->count && k + 1 < L->nfrag)
+                              ? &L->frags[k + 1] : NULL;
+            double gap = (gf != NULL && gf->x > f->x + f->width && gf->x - (f->x + f->width) < f->font_size)
+                       ? gf->x - (f->x + f->width) : 0.0;
+            fip_paint_frag(cr, w, f, fx, ry, r->height, gap);
+        }
         /* vertical-align sub/super shifts this fragment's baseline (and the
          * decorations below); default valign_dy 0 keeps it on the line. */
         double fbaseline = baseline + f->valign_dy;
@@ -15488,6 +15667,7 @@ static rc_layout *layout_for_frame(cairo_t *cr, browser_window *w, double conten
         return L;
     }
     rc_free(L);
+    ++w->lc_gen;
     double prof_t0 = gui_prof_now_ms();
     layout_doc(cr, w, content_w, L);
     double prof_t1 = gui_prof_now_ms();
@@ -15500,6 +15680,7 @@ static rc_layout *layout_for_frame(cairo_t *cr, browser_window *w, double conten
 
 /* Releases the retained layout (window teardown). Idempotent. */
 static void layout_cache_free(browser_window *w) {
+    fip_clear_hits(w);
     if (w->lc_layout == NULL) return;
     rc_free(w->lc_layout);
     free(w->lc_layout);
@@ -15548,8 +15729,11 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
             position_doc(cr, w, content_w, content_h, &Lown);
             Lp = &Lown;
             owned = 1;
+            ++w->lc_gen;
         }
         w->content_total_h = Lp->total_h;  /* cached for the scrollbar */
+        fip_sync(w, Lp);
+        fip_reveal(w, content_h);
 
         double max_scroll = Lp->total_h - content_h;
         if (max_scroll < 0.0) max_scroll = 0.0;
@@ -17735,6 +17919,22 @@ static void draw_omnibox(cairo_t *cr, browser_window *w) {
     }
 }
 
+/* The find bar over the bottom of the window (spec/find_text.md). */
+static void draw_findbar(cairo_t *cr, browser_window *w) {
+    if (!w->fip_open) return;
+    chl_findbar f;
+    if (chl_findbar_compute((double)w->width, (double)w->height, &f) != CHL_OK) return;
+    bui_find_view v = {
+        .f = &f, .th = &w->theme,
+        .text = tf_text(&w->fip_field), .len = tf_len(&w->fip_field),
+        .cursor = tf_cursor(&w->fip_field),
+        .focused = w->fip_focused, .selected = w->fip_selected && w->fip_focused,
+        .total = w->fip_total, .current = w->fip_cur, .truncated = w->fip_trunc,
+        .hot = w->fip_hot,
+    };
+    bui_paint_findbar(cr, &v);
+}
+
 static void paint(browser_window *w) {
     cairo_t *cr = cairo_create(w->cairo_surface);
     if (w->mask_cache != NULL) cairo_set_user_data(cr, &bui_mask_cache_key, w->mask_cache, NULL);
@@ -17774,7 +17974,9 @@ static void paint(browser_window *w) {
 
     w->content_total_h = 0.0;  /* each branch sets the real height; 0 => no scrollbar */
     if (w->doc != NULL) {
+        w->fip_painting = w->fip_open;
         paint_structured(cr, w, content_top, content_h);
+        w->fip_painting = 0;
     } else {
         /* Plain-text fallback for the start page and error pages: monospace,
          * word-wrapped, scrolled by the same pixel offset (converted to lines). */
@@ -17827,6 +18029,7 @@ static void paint(browser_window *w) {
 
     /* Scrollbar over the content's right gutter, then overlays on top. */
     draw_scrollbar(cr, w);
+    draw_findbar(cr, w);
     draw_menu(cr, w);
     draw_omnibox(cr, w);
     double hover_h = draw_hover_url(cr, w);
@@ -17981,6 +18184,9 @@ static void update_hover(browser_window *w) {
     int cur = (w->doc != NULL && !w->menu_open)
               ? cursor_at_point(w, w->ptr_x, w->ptr_y) : CSS_CUR_UNSET;
     ui_hot hot = chrome_hot_at(w, w->ptr_x, w->ptr_y);
+    chl_find_part fhot = fip_hot_at(w, w->ptr_x, w->ptr_y);
+    if (fhot != CHL_FIND_NONE) { h = NULL; cur = CSS_CUR_UNSET; }
+    if (fhot != w->fip_hot) { w->fip_hot = fhot; redraw(w); }
     if (h == w->hover_href && cur == w->hover_cursor && hot == w->hot) return;
 
     int cursor_kind = pointer_cursor(w, cur, h, hot);
@@ -18966,7 +19172,8 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
      * when the UI consumes the release (e.g. toolbar click). Only content-area
      * presses get dispatched (chrome has no DOM element). */
     if (w->js_mode != JSP_OFF && w->tab_worker != NULL && !freebug_owns_surface(w, w->ptr_focus)) {
-        if (w->ptr_y >= toolbar_top(w) + UI_TOOLBAR_H) {
+        if (w->ptr_y >= toolbar_top(w) + UI_TOOLBAR_H
+            && fip_hot_at(w, w->ptr_x, w->ptr_y) == CHL_FIND_NONE) {
             dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
             if (nid != DOM_NODE_NONE)
                 dispatch_mouse_event(w, nid, "mousedown", (int)w->ptr_x, (int)w->ptr_y, 0);
@@ -18982,6 +19189,8 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
     if (part == CHL_PART_NEW_TAB) { tab_new(w, NULL); return; }
     if (part == CHL_PART_TAB_CLOSE && hit_tab >= 0) { uitab_close(w, hit_tab); return; }
     if (part == CHL_PART_TAB && hit_tab >= 0) { tab_switch(w, hit_tab); return; }
+
+    if (fip_click(w, w->ptr_x, w->ptr_y)) return;
 
     /* While the options menu is open it captures the click: a hit on a row toggles
      * that capability and re-renders from cache (no network); any click elsewhere
@@ -19400,7 +19609,9 @@ static void insert_pasted_text(browser_window *w, const char *text, size_t len) 
     for (size_t i = 0; i < len; ++i) {
         unsigned char c = (unsigned char)text[i];
         if (c < 0x20 || c == 0x7f) continue;
-        if (w->ua_field_focused) {
+        if (w->fip_focused && w->fip_open) {
+            fip_type(w, (const char *)&text[i], 1);
+        } else if (w->ua_field_focused) {
             tf_insert(&w->ua_field, (char)c);
         } else if (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count) {
             tf_insert(&w->inputs[w->focused_input].field, (char)c);
@@ -19419,7 +19630,7 @@ static void insert_pasted_text(browser_window *w, const char *text, size_t len) 
 static void clipboard_paste(browser_window *w) {
     if (w->selection_offer == NULL || !w->selection_offer_has_text) return;
     /* Only paste when a text field is focused, else the bytes have nowhere to go. */
-    if (!w->ua_field_focused && w->url_bar_focused == 0 &&
+    if (!w->ua_field_focused && w->url_bar_focused == 0 && !(w->fip_open && w->fip_focused) &&
         !(w->focused_input >= 0 && (size_t)w->focused_input < w->input_count))
         return;
 
@@ -19465,7 +19676,9 @@ static void clipboard_copy(browser_window *w) {
 
     const char *text = NULL;
     char selbuf[BROWSER_URL_MAX];
-    if (w->ua_field_focused) {
+    if (w->fip_open && w->fip_focused) {
+        text = tf_text(&w->fip_field);
+    } else if (w->ua_field_focused) {
         text = tf_text(&w->ua_field);
     } else if (w->focused_input >= 0 && (size_t)w->focused_input < w->input_count) {
         text = tf_text(&w->inputs[w->focused_input].field);
@@ -19650,6 +19863,120 @@ static void dispatch_mouse_event(browser_window *w, dom_node_id node_id,
     tab_page_free(&page);
 }
 
+/* --- Find bar control (spec/find_text.md) --- */
+
+static void fip_focus(browser_window *w) {
+    w->fip_focused = 1;
+    w->url_bar_focused = 0;
+    w->ua_field_focused = 0;
+    w->focused_input = -1;
+    w->menu_open = 0;
+}
+
+/* Ctrl+F: opens the bar (or refocuses it) with the last query selected. */
+static void fip_open_bar(browser_window *w) {
+    if (!w->fip_open) {
+        w->fip_open = 1;
+        w->fip_dirty = 1;
+        w->fip_scroll = 1;
+    }
+    fip_focus(w);
+    w->fip_selected = (tf_len(&w->fip_field) > 0);
+    redraw(w);
+}
+
+static void fip_close_bar(browser_window *w) {
+    if (!w->fip_open) return;
+    w->fip_open = 0;
+    w->fip_focused = 0;
+    w->fip_selected = 0;
+    w->fip_hot = CHL_FIND_NONE;
+    fip_clear_hits(w);
+    redraw(w);
+}
+
+/* Enter / F3 (dir > 0) and Shift+Enter / Shift+F3 (dir < 0). */
+static void fip_step(browser_window *w, int dir) {
+    if (!w->fip_open) { fip_open_bar(w); return; }
+    w->fip_selected = 0;
+    if (w->fip_total > 0) w->fip_cur = ft_step(w->fip_cur, w->fip_total, dir);
+    w->fip_scroll = 1;
+    redraw(w);
+}
+
+/* A query edit: a selected query is replaced by the first typed character. */
+static void fip_edited(browser_window *w) {
+    w->fip_dirty = 1;
+    w->fip_scroll = 1;
+    redraw(w);
+}
+
+static void fip_type(browser_window *w, const char *s, size_t n) {
+    if (w->fip_selected) { tf_clear(&w->fip_field); w->fip_selected = 0; }
+    for (size_t i = 0; i < n; ++i) {
+        unsigned char c = (unsigned char)s[i];
+        if (c < 0x20 || c == 0x7f) continue;
+        tf_insert(&w->fip_field, (char)c);
+    }
+    fip_edited(w);
+}
+
+/* Keys while the find field has focus. Returns 1 when consumed. */
+static int fip_key(browser_window *w, xkb_keysym_t sym, const char *utf8, int n, int ctrl,
+                   int shift) {
+    if (!w->fip_open || !w->fip_focused) return 0;
+    switch (sym) {
+    case XKB_KEY_Escape: fip_close_bar(w); return 1;
+    case XKB_KEY_Return: case XKB_KEY_KP_Enter: fip_step(w, shift ? -1 : 1); return 1;
+    case XKB_KEY_BackSpace:
+        if (w->fip_selected) { tf_clear(&w->fip_field); w->fip_selected = 0; }
+        else tf_backspace(&w->fip_field);
+        fip_edited(w);
+        return 1;
+    case XKB_KEY_Delete: case XKB_KEY_KP_Delete:
+        if (w->fip_selected) { tf_clear(&w->fip_field); w->fip_selected = 0; }
+        else tf_delete(&w->fip_field);
+        fip_edited(w);
+        return 1;
+    case XKB_KEY_Left:  w->fip_selected = 0; tf_move(&w->fip_field, -1); redraw(w); return 1;
+    case XKB_KEY_Right: w->fip_selected = 0; tf_move(&w->fip_field, 1);  redraw(w); return 1;
+    case XKB_KEY_Home:  w->fip_selected = 0; tf_home(&w->fip_field);     redraw(w); return 1;
+    case XKB_KEY_End:   w->fip_selected = 0; tf_end(&w->fip_field);      redraw(w); return 1;
+    default: break;
+    }
+    if (ctrl && (sym == XKB_KEY_a || sym == XKB_KEY_A)) {
+        w->fip_selected = (tf_len(&w->fip_field) > 0);
+        redraw(w);
+        return 1;
+    }
+    if (ctrl) return 0;                 /* the window's shortcuts still apply */
+    if (n > 0) fip_type(w, utf8, (size_t)n);
+    return 1;
+}
+
+/* A press inside the find bar. Returns 1 when the bar took it. */
+static int fip_click(browser_window *w, double x, double y) {
+    if (!w->fip_open) return 0;
+    chl_findbar f;
+    if (chl_findbar_compute((double)w->width, (double)w->height, &f) != CHL_OK) return 0;
+    switch (chl_findbar_hit(&f, x, y)) {
+    case CHL_FIND_NONE:  w->fip_focused = 0; return 0;
+    case CHL_FIND_FIELD: fip_focus(w); w->fip_selected = 0; redraw(w); return 1;
+    case CHL_FIND_PREV:  fip_step(w, -1); return 1;
+    case CHL_FIND_NEXT:  fip_step(w, 1);  return 1;
+    case CHL_FIND_CLOSE: fip_close_bar(w); return 1;
+    case CHL_FIND_BAR:   return 1;
+    }
+    return 1;
+}
+
+static chl_find_part fip_hot_at(const browser_window *w, double x, double y) {
+    if (!w->fip_open) return CHL_FIND_NONE;
+    chl_findbar f;
+    if (chl_findbar_compute((double)w->width, (double)w->height, &f) != CHL_OK) return CHL_FIND_NONE;
+    return chl_findbar_hit(&f, x, y);
+}
+
 /* Performs the effect of a single key press. Factored out of keyboard_key so a held
  * key can be re-fired from the repeat timer with the exact same semantics (the caller
  * recomputes sym/utf8/modifiers from the live xkb_state each time). */
@@ -19659,6 +19986,21 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
      * main window regardless of which field is focused; closing it from inside is handled
      * in freebug_handle_key. */
      if (sym == XKB_KEY_F12) { freebug_toggle(w); return; }
+
+    /* Alt+Left / Alt+Right walk the session history from any focus, as in Firefox. */
+    if (!ctrl && (sym == XKB_KEY_Left || sym == XKB_KEY_Right)
+        && xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_ALT, XKB_STATE_MODS_EFFECTIVE)) {
+        history_step(w, sym == XKB_KEY_Left ? -1 : 1);
+        redraw(w);
+        return;
+    }
+
+    /* Find in page: Ctrl+F opens/refocuses the bar, F3 / Shift+F3 step through matches,
+     * and the focused field takes the rest (spec/find_text.md). */
+    if (ctrl && !shift && (sym == XKB_KEY_f || sym == XKB_KEY_F)) { fip_open_bar(w); return; }
+    if (sym == XKB_KEY_F3) { fip_step(w, shift ? -1 : 1); return; }
+    if (ctrl && (sym == XKB_KEY_g || sym == XKB_KEY_G)) { fip_step(w, shift ? -1 : 1); return; }
+    if (fip_key(w, sym, utf8, n, ctrl, shift)) return;
 
       /* Alt+Enter toggles compositor-managed fullscreen. While a video is
        * playing the frame fills the viewport; otherwise it is a no-op on
@@ -19679,6 +20021,7 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
 
       /* Ctrl+L focuses and clears the URL bar. */
     if (ctrl && !shift && (sym == XKB_KEY_l || sym == XKB_KEY_L)) {
+        w->fip_focused = 0;
         w->url_bar_focused = 1;
         browser_url_bar_clear(&w->bs);
         redraw(w);
@@ -19817,6 +20160,14 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
     }
     if (ctrl && !shift && (sym == XKB_KEY_w || sym == XKB_KEY_W)) {
         uitab_close(w, w->active_tab);
+        return;
+    }
+    /* Ctrl+Shift+T reopens the most recently closed tab. */
+    if (ctrl && shift && (sym == XKB_KEY_t || sym == XKB_KEY_T)) {
+        char u[BROWSER_URL_MAX];
+        if (browser_closed_pop(&w->closed_tabs, u, sizeof u)) tab_new(w, u);
+        else browser_set_status(&w->bs, "No recently closed tabs.", now_ms());
+        redraw(w);
         return;
     }
     if (ctrl && (sym == XKB_KEY_Tab || sym == XKB_KEY_ISO_Left_Tab)) {

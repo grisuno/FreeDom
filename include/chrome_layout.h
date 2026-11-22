@@ -81,6 +81,34 @@ int chl_rect_has(chl_rect r, double x, double y);
  * tab may be NULL. */
 chl_part chl_hit(const chl_layout *l, double x, double y, int *tab);
 
+/* --- find bar (spec/find_text.md), docked at the bottom of the window --- */
+
+#define CHL_FIND_H        40.0  /* bar height */
+#define CHL_FIND_FIELD_W  320.0 /* preferred field width */
+#define CHL_FIND_FIELD_H  28.0
+#define CHL_FIND_BTN      28.0  /* prev / next / close square buttons */
+#define CHL_FIND_COUNT_W  170.0 /* "999 of 1000 matches" */
+
+typedef enum chl_find_part {
+    CHL_FIND_NONE = 0,  /* outside the bar */
+    CHL_FIND_BAR,       /* inside the bar, on no control */
+    CHL_FIND_FIELD,
+    CHL_FIND_PREV,
+    CHL_FIND_NEXT,
+    CHL_FIND_CLOSE
+} chl_find_part;
+
+typedef struct chl_findbar {
+    chl_rect bar, field, prev, next, count, close;
+} chl_findbar;
+
+/* The bar for a window of (width, height). Non-finite or < 1 sizes are treated as 1;
+ * controls never overlap one another and never leave the bar. out == NULL: CHL_EINVAL. */
+chl_status chl_findbar_compute(double width, double height, chl_findbar *out);
+
+/* The find-bar part under (x, y). */
+chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y);
+
 /* --- connection identity badge --- */
 
 typedef enum chl_identity {

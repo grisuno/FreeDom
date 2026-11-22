@@ -220,3 +220,50 @@ const char *chl_identity_label(chl_identity id) {
         default:                return "Connection security unknown";
     }
 }
+
+/* Find bar: the field at the left, prev/next right after it, the match count, and the
+ * close button at the right edge. A narrow window shrinks the count, then the field. */
+chl_status chl_findbar_compute(double width, double height, chl_findbar *out) {
+    if (out == NULL) return CHL_EINVAL;
+    if (!isfinite(width) || width < 1.0) width = 1.0;
+    if (width > CHL_WIDTH_MAX) width = CHL_WIDTH_MAX;
+    if (!isfinite(height) || height < 1.0) height = 1.0;
+    if (height > CHL_WIDTH_MAX) height = CHL_WIDTH_MAX;
+    chl_findbar f;
+    memset(&f, 0, sizeof f);
+    double top = height - CHL_FIND_H;
+    f.bar = rect(0.0, top, width, CHL_FIND_H);
+    double fy = top + (CHL_FIND_H - CHL_FIND_FIELD_H) / 2.0;
+    double by = top + (CHL_FIND_H - CHL_FIND_BTN) / 2.0;
+    double room = width - 2.0 * CHL_PAD;            /* everything sits inside the padding */
+    double fixed = 3.0 * CHL_FIND_BTN + 3.0 * CHL_BTN_GAP + CHL_URL_GAP;
+    double count_w = CHL_FIND_COUNT_W;
+    double field_w = CHL_FIND_FIELD_W;
+    double over = fixed + field_w + count_w - room;
+    if (over > 0.0) { double c = (over < count_w) ? over : count_w; count_w -= c; over -= c; }
+    if (over > 0.0) { double c = (over < field_w) ? over : field_w; field_w -= c; over -= c; }
+    if (over > 0.0) {                               /* not even the buttons fit: show none */
+        *out = f;
+        return CHL_OK;
+    }
+    double x = CHL_PAD;
+    f.field = rect(x, fy, field_w, CHL_FIND_FIELD_H);
+    x += field_w + CHL_BTN_GAP;
+    f.prev = rect(x, by, CHL_FIND_BTN, CHL_FIND_BTN);
+    x += CHL_FIND_BTN + CHL_BTN_GAP;
+    f.next = rect(x, by, CHL_FIND_BTN, CHL_FIND_BTN);
+    x += CHL_FIND_BTN + CHL_URL_GAP;
+    f.count = rect(x, fy, count_w, CHL_FIND_FIELD_H);
+    f.close = rect(width - CHL_PAD - CHL_FIND_BTN, by, CHL_FIND_BTN, CHL_FIND_BTN);
+    *out = f;
+    return CHL_OK;
+}
+
+chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y) {
+    if (f == NULL || !chl_rect_has(f->bar, x, y)) return CHL_FIND_NONE;
+    if (chl_rect_has(f->field, x, y)) return CHL_FIND_FIELD;
+    if (chl_rect_has(f->prev, x, y))  return CHL_FIND_PREV;
+    if (chl_rect_has(f->next, x, y))  return CHL_FIND_NEXT;
+    if (chl_rect_has(f->close, x, y)) return CHL_FIND_CLOSE;
+    return CHL_FIND_BAR;
+}

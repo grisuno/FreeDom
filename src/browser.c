@@ -486,3 +486,29 @@ browser_status browser_add_exception(browser_state *bs, const char *host) {
     bs->exceptions[bs->exceptions_len++] = copy;
     return BROWSER_OK;
 }
+
+browser_status browser_closed_push(browser_closed *c, const char *url) {
+    if (c == NULL) return BROWSER_ERR_NULL;
+    if (url == NULL) return BROWSER_ERR_INVALID_URL;
+    size_t len = strnlen(url, BROWSER_URL_MAX);
+    if (len == 0 || len >= BROWSER_URL_MAX) return BROWSER_ERR_INVALID_URL;
+    if (c->n > BROWSER_CLOSED_MAX) c->n = BROWSER_CLOSED_MAX;
+    if (c->n == BROWSER_CLOSED_MAX) {
+        memmove(c->url[0], c->url[1], (BROWSER_CLOSED_MAX - 1) * sizeof c->url[0]);
+        c->n--;
+    }
+    memcpy(c->url[c->n], url, len + 1);
+    c->n++;
+    return BROWSER_OK;
+}
+
+int browser_closed_pop(browser_closed *c, char *out, size_t cap) {
+    if (c == NULL || out == NULL || c->n == 0) return 0;
+    if (c->n > BROWSER_CLOSED_MAX) c->n = BROWSER_CLOSED_MAX;
+    const char *u = c->url[c->n - 1];
+    size_t len = strnlen(u, BROWSER_URL_MAX);
+    if (len >= cap || len >= BROWSER_URL_MAX) return 0;
+    memcpy(out, u, len + 1);
+    c->n--;
+    return 1;
+}

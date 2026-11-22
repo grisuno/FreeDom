@@ -99,6 +99,17 @@ GUI decida, al ir Atrás/Adelante, entre **popstate** (mismo documento: sin reca
   pendiente para que no sobreviva al cambio de página. El temporizado y la capacidad viven en
   `BROWSER_STATUS_DURATION_MS` / `BROWSER_STATUS_MAX` (sin números mágicos en el código).
 
+## 4b. Pestañas cerradas recientemente (Ctrl+Shift+T)
+
+`browser_closed` es un anillo de las últimas `BROWSER_CLOSED_MAX` (10) URLs de pestañas
+cerradas, **solo en RAM** (Zero Knowledge: nunca se persiste ni sobrevive a la ventana).
+
+- **Dado** pestañas cerradas A, B, C **cuando** `browser_closed_pop` tres veces **entonces**
+  devuelve C, B, A (la más reciente primero) y luego 0.
+- **Dado** el anillo lleno **cuando** se cierra otra **entonces** se descarta la más vieja.
+- URL `NULL`, vacía o de `BROWSER_URL_MAX` bytes o más ⇒ `BROWSER_ERR_INVALID_URL`, sin
+  tocar el anillo. `pop` con `cap` menor que la URL ⇒ 0 y la URL queda.
+
 ## 5. Qué queda fuera de alcance
 
 - Layout de cajas/CSS/imágenes: el renderizado es texto extraído (igual que

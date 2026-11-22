@@ -182,6 +182,46 @@ static void test_identity_labels(void **state) {
     assert_non_null(chl_identity_label((chl_identity)1234));
 }
 
+static void test_findbar(void **state) {
+    (void)state;
+    assert_int_equal(chl_findbar_compute(1000, 800, NULL), CHL_EINVAL);
+    chl_findbar f;
+    assert_int_equal(chl_findbar_compute(1300, 900, &f), CHL_OK);
+    assert_true(fabs(f.bar.y + f.bar.h - 900.0) < 1e-9);
+    assert_true(fabs(f.bar.h - CHL_FIND_H) < 1e-9);
+    assert_true(fabs(f.bar.w - 1300.0) < 1e-9);
+    assert_true(fabs(f.field.w - CHL_FIND_FIELD_W) < 1e-9);
+    assert_true(f.prev.x >= f.field.x + f.field.w);
+    assert_true(f.next.x >= f.prev.x + f.prev.w);
+    assert_true(f.count.x >= f.next.x + f.next.w);
+    assert_true(fabs(f.close.x + f.close.w + CHL_PAD - 1300.0) < 1e-9);
+    assert_int_equal(chl_findbar_hit(&f, cx(f.field), cy(f.field)), CHL_FIND_FIELD);
+    assert_int_equal(chl_findbar_hit(&f, cx(f.prev), cy(f.prev)), CHL_FIND_PREV);
+    assert_int_equal(chl_findbar_hit(&f, cx(f.next), cy(f.next)), CHL_FIND_NEXT);
+    assert_int_equal(chl_findbar_hit(&f, cx(f.close), cy(f.close)), CHL_FIND_CLOSE);
+    assert_int_equal(chl_findbar_hit(&f, cx(f.count), cy(f.count)), CHL_FIND_BAR);
+    assert_int_equal(chl_findbar_hit(&f, 10, 10), CHL_FIND_NONE);
+    assert_int_equal(chl_findbar_hit(NULL, 10, 10), CHL_FIND_NONE);
+    const double widths[] = { 0.0, 1.0, 90.0, 250.0, 500.0, NAN, INFINITY, -5.0, 1e300 };
+    for (size_t i = 0; i < sizeof widths / sizeof widths[0]; ++i) {
+        assert_int_equal(chl_findbar_compute(widths[i], widths[i], &f), CHL_OK);
+        chl_rect parts[] = { f.field, f.prev, f.next, f.count, f.close };
+        for (size_t a = 0; a < 5; ++a) {
+            assert_true(isfinite(parts[a].x) && isfinite(parts[a].w));
+            if (parts[a].w > 0.0) {
+                assert_true(parts[a].x >= f.bar.x - 1e-9);
+                assert_true(parts[a].x + parts[a].w <= f.bar.x + f.bar.w + 1e-9);
+            }
+            for (size_t b = a + 1; b < 5; ++b) assert_false(overlaps(parts[a], parts[b]));
+        }
+    }
+    /* narrow window: the field shrinks before anything overlaps */
+    assert_int_equal(chl_findbar_compute(380, 600, &f), CHL_OK);
+    assert_true(f.count.w < 1e-9);
+    assert_true(f.field.w < CHL_FIND_FIELD_W);
+    assert_true(f.field.w > 0.0);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_rejects_bad_input),
@@ -193,6 +233,7 @@ int main(void) {
         cmocka_unit_test(test_tiny_and_hostile_widths),
         cmocka_unit_test(test_identity_table),
         cmocka_unit_test(test_identity_labels),
+        cmocka_unit_test(test_findbar),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

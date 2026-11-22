@@ -191,6 +191,9 @@ your system locale. Challenges that require WebAssembly or WebGL are not support
 | `Ctrl+C` / `Ctrl+X` / `Ctrl+V` | Copy / cut / paste |
 | `Ctrl+B` | Bookmark the current page (toggle) |
 | `Ctrl+T` / `Ctrl+W` / `Ctrl+Tab` | New tab / close tab / next tab |
+| `Ctrl+Shift+T` | Reopen the last closed tab (in memory only) |
+| `Ctrl+F`, `Enter`/`Shift+Enter`, `F3`/`Shift+F3`, `Esc` | Find in page (case- and accent-insensitive, all matches highlighted; never visible to the page) |
+| `Alt+Left` / `Alt+Right` | Back / forward |
 | `Ctrl+Shift+B` | Add current host to `block.conf` |
 | `Ctrl+Shift+A` | Add current host to `allow.conf` |
 | `Ctrl+Shift+J` | Add current host to `js.conf` |
