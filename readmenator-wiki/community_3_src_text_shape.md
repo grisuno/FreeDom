@@ -1,14 +1,14 @@
 # src: text_shape
 
-*Community 3 | 40 files | cohesion 0.52*
+*Community 3 | 49 files | cohesion 0.56*
 
 ## Definition
 
-This community groups 40 file(s) rooted at `src` with dominant language c (cohesion 0.52). Central symbols: `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FBP_EXPR_MAX`, `FBP_SELECTOR_MAX`. Core file: `src/text_shape.c` (74 symbols). Documented purpose: test_wl_display — CMocka suite for the pure Wayland socket picker..
+This community groups 49 file(s) rooted at `src` with dominant language c (cohesion 0.56). Central symbols: `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FBP_EXPR_MAX`, `FBP_SELECTOR_MAX`. Core file: `src/text_shape.c` (75 symbols). Documented purpose: test_wl_display — CMocka suite for the pure Wayland socket picker..
 
 ## Files
 
-### `src` (14 files)
+### `src` (17 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -16,34 +16,34 @@ This community groups 40 file(s) rooted at `src` with dominant language c (cohes
 | `src/fb_panes.c` | c | utility | 10 | no |
 | `src/freedom.c` | c | utility | 50 | no |
 | `src/hls.c` | c | utility | 10 | no |
+| `src/host_conf.c` | c | utility | 9 | no |
+| `src/hostblock.c` | c | utility | 19 | no |
 | `src/js_policy.c` | c | business_logic | 6 | no |
-| `src/link_nav.c` | c | utility | 10 | no |
-| `src/net_realm.c` | c | utility | 10 | no |
 
-### `include` (13 files)
+### `include` (16 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/data_url.h` | h | data_access | 7 | no |
 | `include/fb_panes.h` | h | utility | 12 | no |
 | `include/hls.h` | h | utility | 8 | no |
+| `include/host_conf.h` | h | utility | 9 | no |
+| `include/hostblock.h` | h | utility | 10 | no |
 | `include/js_policy.h` | h | business_logic | 7 | no |
 | `include/link_nav.h` | h | utility | 11 | no |
-| `include/net_realm.h` | h | utility | 10 | no |
-| `include/perf_trace.h` | h | utility | 17 | no |
 
-### `tests` (13 files)
+### `tests` (16 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_data_url.c` | c | testing | 26 | no |
 | `tests/test_fb_panes.c` | c | testing | 11 | no |
 | `tests/test_hls.c` | c | testing | 16 | no |
+| `tests/test_host_conf.c` | c | testing | 8 | no |
+| `tests/test_hostblock.c` | c | testing | 24 | no |
 | `tests/test_js_policy.c` | c | testing | 5 | no |
-| `tests/test_link_nav.c` | c | testing | 22 | no |
-| `tests/test_net_realm.c` | c | testing | 13 | no |
 
-*... and 20 more files in this community.*
+*... and 29 more files in this community.*
 
 
 ## Key Symbols
@@ -75,20 +75,23 @@ This community groups 40 file(s) rooted at `src` with dominant language c (cohes
 - `hls_select_variant` (function, `include/hls.h:65`) `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);` - Selects the best variant from a multi-variant playlist. Returns the index of the chosen variant, or
 - `resolved` (function, `include/hls.h:68`) `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the *`
 - `hls_playlist_free` (function, `include/hls.h:74`) `void hls_playlist_free(hls_playlist *pl);` - Resolves a (possibly relative) segment URL against the playlist base URL. Writes the absolute URL in
-- `FREEDOM_JS_POLICY_H` (macro, `include/js_policy.h:2`) `#define FREEDOM_JS_POLICY_H`
-- `membership` (function, `include/js_policy.h:16`) `* membership (the allowlist itself is matched by the hostblock module, which * a`
-- `jsp_mode` (enum, `include/js_policy.h:27`)
+- `FREEDOM_HOST_CONF_H` (macro, `include/host_conf.h:2`) `#define FREEDOM_HOST_CONF_H`
+- `HCF_MAX_DIRS` (macro, `include/host_conf.h:15`) `#define HCF_MAX_DIRS`
+- `HCF_PATH_MAX` (macro, `include/host_conf.h:16`) `#define HCF_PATH_MAX`
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 47
-- Cross-boundary resolved imports (EXTRACTED): 43
+- Internal resolved imports (EXTRACTED): 57
+- Cross-boundary resolved imports (EXTRACTED): 45
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
+- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
 - [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
 - [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/css.c imports include/webfont.h.
+- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/fb_cmdline.c imports include/fb_panes.h.
+- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/identity.h.
+- [EXTRACTED] depends_on community 3 <-> 9 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
 
 ## Risks
 
@@ -96,20 +99,24 @@ This community groups 40 file(s) rooted at `src` with dominant language c (cohes
 - [layer strict] `src/render_doc.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `src/render_policy.c` (presentation) -> `include/data_url.h` (data_access)
 - [dataflow UNCHECKED_ALLOC] `src/freedom.c:561` `headless_fetch` `oct`: Result of allocator stored in `oct` is never checked against NULL.
+- [dataflow UNCHECKED_ALLOC] `src/hostblock.c:145` `hb_new` `s`: Result of allocator stored in `s` is never checked against NULL.
 
 ## Open Questions
 
-- Why do 39 file(s) lack file-level docs (e.g. `include/data_url.h`)? What purpose do they serve?
+- Why do 48 file(s) lack file-level docs (e.g. `include/data_url.h`)? What purpose do they serve?
 - What would break if the most connected file in src: text_shape changed?
-- Should src: text_shape be split, given cohesion 0.52?
+- Should src: text_shape be split, given cohesion 0.56?
 
 ## Sources
 
 - `include/data_url.h`
 - `include/fb_panes.h`
 - `include/hls.h`
+- `include/host_conf.h`
+- `include/hostblock.h`
 - `include/js_policy.h`
 - `include/link_nav.h`
+- `include/media_decoder.h`
 - `include/net_realm.h`
 - `include/perf_trace.h`
 - `include/text_shape.h`
@@ -122,7 +129,4 @@ This community groups 40 file(s) rooted at `src` with dominant language c (cohes
 - `src/fb_panes.c`
 - `src/freedom.c`
 - `src/hls.c`
-- `src/js_policy.c`
-- `src/link_nav.c`
-- `src/net_realm.c`
-- *... and 20 more*
+- *... and 29 more*

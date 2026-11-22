@@ -2,6 +2,16 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `tests/test_css_atrule.c` -> `include/css_atrule.h`
+- `tests/test_css_box.c` -> `include/css_box.h`
+- `tests/test_css_box.c` -> `include/css_decl.h`
+- `tests/test_css_color.c` -> `include/css_color.h`
+- `tests/test_css_computed.c` -> `include/css_computed.h`
+- `tests/test_css_counter.c` -> `include/css_counter.h`
+- `tests/test_css_drops.c` -> `include/css.h`
+- `tests/test_css_gradient.c` -> `include/css.h`
+- `tests/test_css_gradient.c` -> `include/css_gradient.h`
+- `tests/test_css_import.c` -> `include/css_import.h`
 - `tests/test_css_index.c` -> `include/css_index.h`
 - `tests/test_css_length.c` -> `include/css.h`
 - `tests/test_css_length.c` -> `include/css_length.h`
@@ -26,9 +36,11 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_dom_debug.c` -> `include/render_doc.h`
 - `tests/test_dom_debug.c` -> `include/render_policy.h`
 - `tests/test_download.c` -> `include/download.h`
+- `tests/test_exact_key.c` -> `include/exact_key.h`
 - `tests/test_fb_cmdline.c` -> `include/fb_cmdline.h`
 - `tests/test_fb_cmdline.c` -> `include/freebug.h`
 - `tests/test_fb_panes.c` -> `include/fb_panes.h`
+- `tests/test_find_text.c` -> `include/find_text.h`
 - `tests/test_flex_layout.c` -> `include/flex_layout.h`
 - `tests/test_form.c` -> `include/form.h`
 - `tests/test_frame_broker.c` -> `include/frame_broker.h`
@@ -77,6 +89,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_js_sandbox.c` -> `include/js_sandbox.h`
 - `tests/test_link_nav.c` -> `include/link_nav.h`
 - `tests/test_local_store.c` -> `include/local_store.h`
+- `tests/test_mask_cache.c` -> `include/mask_cache.h`
 - `tests/test_media_decoder.c` -> `include/media_decoder.h`
 - `tests/test_net_guard.c` -> `include/net_guard.h`
 - `tests/test_net_realm.c` -> `include/net_realm.h`
@@ -144,12 +157,14 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_wl_guard.c` -> `include/wl_guard.h`
 - `tests/test_ws_hub.c` -> `include/ws_hub.h`
 - `tests/test_zoom.c` -> `include/zoom.h`
+- `tools/guiscroll.py` -> `tools/guitime.py`
 
 ## External Imports
 
 - `app.py` -> logging, mcp.server.fastmcp, os, subprocess, sys
 - `gui/browser_ui.c` -> cairo/cairo-pdf.h, cairo/cairo.h, errno.h, fcntl.h, fontconfig/fontconfig.h, limits.h, math.h, poll.h, pthread.h, signal.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/mman.h, sys/stat.h, sys/timerfd.h, sys/wait.h, time.h, unistd.h, wayland-client.h, wayland-cursor.h, xdg-decoration-client-protocol.h, xdg-shell-client-protocol.h, xkbcommon/xkbcommon.h
-- `gui/browser_ui_internal.h` -> cairo/cairo.h
+- `gui/browser_ui_internal.h` -> cairo/cairo.h, stddef.h
+- `gui/bui_chrome.c` -> math.h, stdio.h, string.h
 - `gui/bui_mask_img.c` -> cairo.h
 - `gui/freedom_view.c` -> stdio.h, stdlib.h, string.h
 - `gui/ui_render.c` -> cairo/cairo.h, stdio.h, stdlib.h, string.h, sys/mman.h, unistd.h, wayland-client.h, xdg-decoration-client-protocol.h, xdg-shell-client-protocol.h
@@ -176,8 +191,10 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/dom.h` -> stddef.h, stdint.h
 - `include/dom_debug.h` -> stddef.h
 - `include/download.h` -> stddef.h
+- `include/exact_key.h` -> stddef.h
 - `include/fb_cmdline.h` -> stddef.h
 - `include/fb_panes.h` -> stddef.h
+- `include/find_text.h` -> stddef.h, stdint.h
 - `include/flex_layout.h` -> stddef.h
 - `include/form.h` -> stddef.h
 - `include/frame_broker.h` -> stddef.h
@@ -200,6 +217,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/js_trusted.h` -> stddef.h
 - `include/link_nav.h` -> stddef.h
 - `include/local_store.h` -> stddef.h, stdint.h
+- `include/mask_cache.h` -> stddef.h
 - `include/media_decoder.h` -> stddef.h, stdint.h, sys/types.h
 - `include/net_guard.h` -> stddef.h
 - `include/os_sandbox.h` -> stddef.h
@@ -239,11 +257,13 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `include/wl_display.h` -> stddef.h
 - `include/ws_hub.h` -> poll.h, stddef.h
 - `src/block_flow.c` -> math.h
-- `src/box_blur.c` -> math.h, stdlib.h, string.h
+- `src/box_blur.c` -> math.h, stdint.h, stdlib.h, string.h
 - `src/box_style.c` -> math.h, stddef.h, stdlib.h, string.h
 - `src/box_tree.c` -> stddef.h
 - `src/browser.c` -> stdlib.h, string.h
 - `src/cached_fetch.c` -> stdio.h, stdlib.h, string.h
+- `src/chrome_layout.c` -> math.h, stddef.h, string.h
+- `src/compositor.c` -> math.h
 - `src/css.c` -> limits.h, math.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/css_atrule.c` -> string.h
 - `src/css_box.c` -> math.h, stdlib.h, string.h
@@ -266,6 +286,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/dom.c` -> lexbor/html/html.h, stdint.h, stdlib.h, string.h
 - `src/dom_debug.c` -> stdarg.h, stddef.h, stdio.h
 - `src/download.c` -> ctype.h, string.h
+- `src/exact_key.c` -> stdlib.h, string.h
 - `src/fb_cmdline.c` -> stdio.h, stdlib.h, string.h
 - `src/fb_panes.c` -> stdio.h, string.h
 - `src/flex_layout.c` -> stddef.h, string.h
@@ -304,6 +325,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/js_trusted.c` -> quickjs.h, stdint.h, stdlib.h, string.h
 - `src/link_nav.c` -> string.h
 - `src/local_store.c` -> openssl/core_names.h, openssl/crypto.h, openssl/evp.h, openssl/kdf.h, openssl/params.h, openssl/rand.h, stdlib.h, string.h
+- `src/mask_cache.c` -> stdint.h, stdlib.h
 - `src/media_decoder.c` -> errno.h, libavcodec/avcodec.h, libavformat/avformat.h, libavutil/avutil.h, libavutil/imgutils.h, libswscale/swscale.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, unistd.h
 - `src/net_guard.c` -> arpa/inet.h, string.h, sys/socket.h
 - `src/net_realm.c` -> stddef.h, string.h
@@ -345,8 +367,9 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_box_blur.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_box_style.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_box_tree.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
-- `tests/test_browser.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_browser.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_cached_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h
+- `tests/test_chrome_layout.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_compositor.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_css.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_css_atrule.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
@@ -369,8 +392,10 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_dom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, time.h
 - `tests/test_dom_debug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_download.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_exact_key.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_fb_cmdline.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, string.h
 - `tests/test_fb_panes.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
+- `tests/test_find_text.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_flex_layout.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
 - `tests/test_form.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_frame_broker.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
@@ -397,6 +422,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_js_sandbox.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_link_nav.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_local_store.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
+- `tests/test_mask_cache.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_media_decoder.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_net_guard.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_net_realm.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
@@ -442,6 +468,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tools/ffshot.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, sys
 - `tools/fftime.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, statistics, sys, time
 - `tools/gen_psl.c` -> stdio.h, stdlib.h, string.h
+- `tools/guiscroll.py` -> os, shutil, statistics, subprocess, sys, tempfile, time
 - `tools/guitime.py` -> json, os, shutil, statistics, subprocess, sys, tempfile, time
 - `tools/mutate.py` -> os, re, shutil, subprocess, sys
 - `tools/pngdiff.c` -> math.h, png.h, stdint.h, stdio.h, stdlib.h, string.h

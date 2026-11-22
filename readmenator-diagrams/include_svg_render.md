@@ -13,15 +13,15 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (9.1)
+## include (8.1)
 
 include groups 4 files (h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. img_pixels: A decoded bitmap that owns its pixel buffer.
 
-## src (9.2)
+## src (8.2)
 
 src groups 4 files (c) around exit, PNG_IHDR_MIN, read_be32, img_png_dimensions, img_dimensions_ok. jpeg_err_ctx: libjpeg error manager that longjmps instead of calling exit(), so a...
 
-## tests (9.3)
+## tests (8.3)
 
 tests groups 4 files (c) around _DEFAULT_SOURCE, _POSIX_C_SOURCE, FREEDOM_BIN, OUT_FILE, ERR_FILE. run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless)...
 

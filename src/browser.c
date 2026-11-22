@@ -39,6 +39,42 @@ static void free_history(browser_state *bs) {
     bs->history_pos = 0;
 }
 
+enum { PENDING_NONE = 0, PENDING_NEW = 1, PENDING_MOVE = 2 };
+
+static void free_stash(browser_state *bs) {
+    for (size_t i = 0; i < bs->stash_len; ++i) free(bs->stash[i]);
+    free(bs->stash);
+    free(bs->stash_doc);
+    bs->stash = NULL;
+    bs->stash_doc = NULL;
+    bs->stash_len = 0;
+}
+
+/* Forgets the pending navigation's saved state (stash + committed page). */
+static void free_pending(browser_state *bs) {
+    free_stash(bs);
+    free(bs->pending_title);
+    free(bs->pending_text);
+    bs->pending_title = NULL;
+    bs->pending_text = NULL;
+    bs->pending_error = 0;
+    bs->pending = PENDING_NONE;
+    bs->pending_pos = 0;
+}
+
+/* Opens a pending navigation of kind: the committed position and page are saved
+ * (the page moves, it is not copied) so Stop can bring them back. */
+static void begin_pending(browser_state *bs, int kind) {
+    bs->pending = kind;
+    bs->pending_pos = bs->history_pos;
+    bs->pending_title = bs->page_title;
+    bs->pending_text = bs->page_text;
+    bs->pending_error = bs->loading_error;
+    bs->page_title = NULL;
+    bs->page_text = NULL;
+    bs->loading_error = 0;
+}
+
 static void free_exceptions(browser_state *bs) {
     if (bs == NULL || bs->exceptions == NULL) return;
     for (size_t i = 0; i < bs->exceptions_len; ++i) free(bs->exceptions[i]);
@@ -166,6 +202,7 @@ browser_status browser_init(browser_state *bs) {
 
 void browser_free(browser_state *bs) {
     if (bs == NULL) return;
+    free_pending(bs);
     free_history(bs);
     free_page(bs);
     free_exceptions(bs);
@@ -193,13 +230,25 @@ browser_status browser_commit_url_bar(browser_state *bs) {
 }
 
 /* Appends url as a new entry of document doc after history_pos, discarding the
- * forward entries (standard Back/Forward semantics). Both arrays grow together. */
-static browser_status append_entry(browser_state *bs, const char *url, int doc) {
-    if (bs->history_pos < bs->history_len) {
-        for (size_t i = bs->history_pos + 1; i < bs->history_len; ++i) {
-            free(bs->history[i]);
-        }
-        bs->history_len = bs->history_pos + 1;
+ * forward entries (standard Back/Forward semantics). Both arrays grow together.
+ * stash != 0 MOVES the discarded entries to bs->stash (empty on entry) instead of
+ * freeing them, so a pending navigation can be undone. Fails before any change. */
+static browser_status append_entry(browser_state *bs, const char *url, int doc, int stash) {
+    size_t keep = (bs->history_len == 0) ? 0 : bs->history_pos + 1;
+    size_t tail = bs->history_len - keep;
+    if (stash && tail > 0) {
+        char **sh = (char **)calloc(tail, sizeof *sh);
+        int   *sd = (int *)calloc(tail, sizeof *sd);
+        if (sh == NULL || sd == NULL) { free(sh); free(sd); return BROWSER_ERR_OOM; }
+        memcpy(sh, bs->history + keep, tail * sizeof *sh);
+        memcpy(sd, bs->history_doc + keep, tail * sizeof *sd);
+        bs->stash = sh;
+        bs->stash_doc = sd;
+        bs->stash_len = tail;
+        bs->history_len = keep;
+    } else if (tail > 0) {
+        for (size_t i = keep; i < bs->history_len; ++i) free(bs->history[i]);
+        bs->history_len = keep;
     }
     if (bs->history_len >= bs->history_cap) {
         size_t new_cap = bs->history_cap ? bs->history_cap * 2 : 8;
@@ -224,11 +273,29 @@ static browser_status append_entry(browser_state *bs, const char *url, int doc) 
 browser_status browser_navigate(browser_state *bs, const char *url) {
     if (bs == NULL || url == NULL) return BROWSER_ERR_NULL;
     if (!url_is_allowed(url)) return BROWSER_ERR_INVALID_URL;
-    browser_status st = append_entry(bs, url, bs->next_doc);
-    if (st != BROWSER_OK) return st;
+    (void)browser_abort_pending(bs);   /* a new navigation replaces a pending one */
+    size_t pos0 = bs->history_pos;
+    browser_status st = append_entry(bs, url, bs->next_doc, 1);
+    if (st != BROWSER_OK) {
+        /* Allocation failed after the forward tail moved to the stash: put it back. */
+        for (size_t i = 0; i < bs->stash_len; ++i) {
+            bs->history[bs->history_len] = bs->stash[i];
+            bs->history_doc[bs->history_len] = bs->stash_doc[i];
+            bs->history_len++;
+            bs->stash[i] = NULL;
+        }
+        bs->stash_len = 0;
+        free_stash(bs);
+        bs->history_pos = pos0;
+        return st;
+    }
     bs->next_doc++;
-    free_page(bs);
-    bs->loading_error = 0;
+    {
+        char **sh = bs->stash; int *sd = bs->stash_doc; size_t sl = bs->stash_len;
+        begin_pending(bs, PENDING_NEW);
+        bs->stash = sh; bs->stash_doc = sd; bs->stash_len = sl;
+    }
+    bs->pending_pos = pos0;
     clear_status(bs);
     return BROWSER_OK;
 }
@@ -236,13 +303,15 @@ browser_status browser_navigate(browser_state *bs, const char *url) {
 browser_status browser_push_state(browser_state *bs, const char *url) {
     if (bs == NULL || url == NULL) return BROWSER_ERR_NULL;
     if (bs->history_len == 0) return BROWSER_ERR_NO_BACK;
+    if (bs->pending != PENDING_NONE) return BROWSER_ERR_PENDING;
     if (!url_is_allowed(url)) return BROWSER_ERR_INVALID_URL;
-    return append_entry(bs, url, bs->history_doc[bs->history_pos]);
+    return append_entry(bs, url, bs->history_doc[bs->history_pos], 0);
 }
 
 browser_status browser_replace_state(browser_state *bs, const char *url) {
     if (bs == NULL || url == NULL) return BROWSER_ERR_NULL;
     if (bs->history_len == 0) return BROWSER_ERR_NO_BACK;
+    if (bs->pending != PENDING_NONE) return BROWSER_ERR_PENDING;
     if (!url_is_allowed(url)) return BROWSER_ERR_INVALID_URL;
     char *copy = xstrdup(url);
     if (copy == NULL) return BROWSER_ERR_OOM;
@@ -267,24 +336,26 @@ int browser_doc_index(const browser_state *bs) {
 
 browser_status browser_back(browser_state *bs) {
     if (bs == NULL) return BROWSER_ERR_NULL;
+    if (bs->pending == PENDING_NEW) (void)browser_abort_pending(bs);
     if (bs->history_pos == 0 || bs->history_len == 0) return BROWSER_ERR_NO_BACK;
+    if (bs->pending == PENDING_NONE) begin_pending(bs, PENDING_MOVE);
+    else free_page(bs);
     bs->history_pos--;
     const char *url = bs->history[bs->history_pos];
     browser_set_url_bar(bs, url ? url : "");
-    free_page(bs);
-    bs->loading_error = 0;
     clear_status(bs);
     return BROWSER_OK;
 }
 
 browser_status browser_forward(browser_state *bs) {
     if (bs == NULL) return BROWSER_ERR_NULL;
+    if (bs->pending == PENDING_NEW) (void)browser_abort_pending(bs);
     if (bs->history_pos + 1 >= bs->history_len) return BROWSER_ERR_NO_FORWARD;
+    if (bs->pending == PENDING_NONE) begin_pending(bs, PENDING_MOVE);
+    else free_page(bs);
     bs->history_pos++;
     const char *url = bs->history[bs->history_pos];
     browser_set_url_bar(bs, url ? url : "");
-    free_page(bs);
-    bs->loading_error = 0;
     clear_status(bs);
     return BROWSER_OK;
 }
@@ -511,4 +582,43 @@ int browser_closed_pop(browser_closed *c, char *out, size_t cap) {
     memcpy(out, u, len + 1);
     c->n--;
     return 1;
+}
+
+
+void browser_commit_pending(browser_state *bs) {
+    if (bs == NULL || bs->pending == PENDING_NONE) return;
+    free_pending(bs);
+}
+
+int browser_abort_pending(browser_state *bs) {
+    if (bs == NULL || bs->pending == PENDING_NONE) return 0;
+    if (bs->pending == PENDING_NEW && bs->history_len > 0) {
+        /* The provisional entry is the last one (navigate discarded the future). */
+        bs->history_len--;
+        free(bs->history[bs->history_len]);
+        bs->history[bs->history_len] = NULL;
+        /* The stash fits: those slots held exactly these entries before navigate. */
+        for (size_t i = 0; i < bs->stash_len; ++i) {
+            bs->history[bs->history_len] = bs->stash[i];
+            bs->history_doc[bs->history_len] = bs->stash_doc[i];
+            bs->history_len++;
+            bs->stash[i] = NULL;
+        }
+        bs->stash_len = 0;
+    }
+    bs->history_pos = (bs->history_len == 0) ? 0 : bs->pending_pos;
+    free_page(bs);
+    bs->page_title = bs->pending_title;
+    bs->page_text = bs->pending_text;
+    bs->loading_error = bs->pending_error;
+    bs->pending_title = NULL;
+    bs->pending_text = NULL;
+    free_pending(bs);
+    const char *cur = browser_current_url(bs);
+    browser_set_url_bar(bs, cur != NULL ? cur : "about:blank");
+    return 1;
+}
+
+int browser_has_pending(const browser_state *bs) {
+    return (bs != NULL && bs->pending != PENDING_NONE);
 }

@@ -32,6 +32,17 @@ typedef struct browser_state {
     int   *history_doc;  /* document id per entry (same-document pushState entries share it) */
     int    next_doc;     /* id the next browser_navigate opens */
 
+    /* Provisional navigation (spec/browser.md 3c): set from navigate/back/forward until
+     * browser_commit_pending (the document landed) or browser_abort_pending (Stop). */
+    int    pending;          /* 0 none, 1 new entry (navigate), 2 move (back/forward) */
+    size_t pending_pos;      /* history_pos before the pending navigation */
+    char **stash;            /* forward entries navigate discarded, restored on abort */
+    int   *stash_doc;
+    size_t stash_len;
+    char  *pending_title;    /* the committed page's title/text, restored on abort */
+    char  *pending_text;
+    int    pending_error;
+
     char   url_bar[BROWSER_URL_MAX];
     size_t url_bar_len;
     size_t url_bar_cursor;
@@ -55,7 +66,8 @@ typedef enum browser_status {
     BROWSER_ERR_OOM,
     BROWSER_ERR_INVALID_URL,
     BROWSER_ERR_NO_BACK,
-    BROWSER_ERR_NO_FORWARD
+    BROWSER_ERR_NO_FORWARD,
+    BROWSER_ERR_PENDING      /* refused while a navigation is pending (spec 3c) */
 } browser_status;
 
 /* Zero-initialise or reset a state. Safe to call on an already-initialised
@@ -82,6 +94,17 @@ browser_status browser_forward(browser_state *bs);
  * URL browser_navigate would refuse. */
 browser_status browser_push_state(browser_state *bs, const char *url);
 browser_status browser_replace_state(browser_state *bs, const char *url);
+
+/* Provisional navigation (spec/browser.md 3c). commit: the document (or its error
+ * page) landed -- the entry stays and the stashed forward entries are freed. abort:
+ * Stop -- the history returns to exactly what it was before the pending navigation
+ * and the URL bar shows the current entry; 1 if something was reverted, else 0.
+ * A navigate while pending first aborts the pending one (the new one replaces it);
+ * several back/forward steps are ONE pending navigation. push/replace_state while
+ * pending return BROWSER_ERR_PENDING. All NULL-safe. */
+void browser_commit_pending(browser_state *bs);
+int  browser_abort_pending(browser_state *bs);
+int  browser_has_pending(const browser_state *bs);
 
 /* Document id of entry pos, or -1 when out of range / NULL. */
 int browser_entry_doc(const browser_state *bs, size_t pos);

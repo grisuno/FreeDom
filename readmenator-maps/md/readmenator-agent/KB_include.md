@@ -60,8 +60,8 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Language: h
 - Symbols:
   - `bb_box_sizes` (function, line 16) `int bb_box_sizes(double sigma, int sizes[3]);`
-  - `BB_MAX_PIXELS` (function, line 20) `* arguments or a mask larger than BB_MAX_PIXELS (buffer untouched). */ int bb_blur_a8(unsigned char *buf, int w, int...`
-  - `alpha` (function, line 26) `* no pixel has alpha (nothing to blur), 1 otherwise. Everything outside rect stays 0 after the blur, * so blurring...`
+  - `wider` (function, line 21) `* BB_BOX_MAX px or wider (buffer untouched). One scratch copy of w x h bytes. */ int bb_blur_a8(unsigned char *buf...`
+  - `alpha` (function, line 27) `* no pixel has alpha (nothing to blur), 1 otherwise. Everything outside rect stays 0 after the blur, * so blurring...`
   - `FREEDOM_BOX_BLUR_H` (macro, line 2) `#define FREEDOM_BOX_BLUR_H`
   - `BB_MAX_PIXELS` (macro, line 12) `#define BB_MAX_PIXELS`
 - Imported by: `gui/browser_ui.c`, `src/box_blur.c`, `tests/test_box_blur.c`
@@ -148,29 +148,36 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ## include/browser.h
-- Doc: browser_free: Zero-initialise or reset a state.
+- Doc: browser_closed: Transient status line (a toast, e.g. "blocked: insecure http link"). msg is...
 - Layer: utility
 - Language: h
 - Symbols:
   - `browser_state` (struct, line 27)
-  - `browser_status` (enum, line 52)
-  - `state` (function, line 62) `* state (frees old history and page buffers). */ browser_status browser_init(browser_state *bs);`
-  - `browser_free` (function, line 66) `void browser_free(browser_state *bs);`
-  - `browser_set_page` (function, line 71) `* browser_set_page() with the result. */ browser_status browser_navigate(browser_state *bs, const char *url);`
-  - `browser_entry_doc` (function, line 87) `int browser_entry_doc(const browser_state *bs, size_t pos);`
-  - `browser_doc_index` (function, line 91) `int browser_doc_index(const browser_state *bs);`
-  - `browser_can_back` (function, line 94) `int browser_can_back(const browser_state *bs);`
-  - `browser_can_forward` (function, line 95) `int browser_can_forward(const browser_state *bs);`
-  - `browser_current_url` (function, line 96) `const char *browser_current_url(const browser_state *bs);`
-  - `browser_is_exception` (function, line 99) `int browser_is_exception(const browser_state *bs, const char *host);`
-  - `browser_url_bar_selection` (function, line 131) `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len);`
-  - `browser_url_bar_delete_selection` (function, line 135) `int browser_url_bar_delete_selection(browser_state *bs);`
-  - `copied` (function, line 143) `* copied (truncated to fit) and shown until now_ms reaches the expiry * (now_ms + BROWSER_STATUS_DURATION_MS). A...`
-  - `browser_status_text` (function, line 150) `const char *browser_status_text(const browser_state *bs, uint64_t now_ms);`
+  - `browser_closed` (struct, line 177)
+  - `browser_status` (enum, line 63)
+  - `state` (function, line 74) `* state (frees old history and page buffers). */ browser_status browser_init(browser_state *bs);`
+  - `browser_free` (function, line 78) `void browser_free(browser_state *bs);`
+  - `browser_set_page` (function, line 83) `* browser_set_page() with the result. */ browser_status browser_navigate(browser_state *bs, const char *url);`
+  - `one` (function, line 102) `* A navigate while pending first aborts the pending one (the new one replaces it);`
+  - `browser_commit_pending` (function, line 105) `void browser_commit_pending(browser_state *bs);`
+  - `browser_abort_pending` (function, line 106) `int browser_abort_pending(browser_state *bs);`
+  - `browser_has_pending` (function, line 107) `int browser_has_pending(const browser_state *bs);`
+  - `browser_entry_doc` (function, line 110) `int browser_entry_doc(const browser_state *bs, size_t pos);`
+  - `browser_doc_index` (function, line 114) `int browser_doc_index(const browser_state *bs);`
+  - `browser_can_back` (function, line 117) `int browser_can_back(const browser_state *bs);`
+  - `browser_can_forward` (function, line 118) `int browser_can_forward(const browser_state *bs);`
+  - `browser_current_url` (function, line 119) `const char *browser_current_url(const browser_state *bs);`
+  - `browser_is_exception` (function, line 122) `int browser_is_exception(const browser_state *bs, const char *host);`
+  - `browser_url_bar_selection` (function, line 154) `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len);`
+  - `browser_url_bar_delete_selection` (function, line 158) `int browser_url_bar_delete_selection(browser_state *bs);`
+  - `copied` (function, line 166) `* copied (truncated to fit) and shown until now_ms reaches the expiry * (now_ms + BROWSER_STATUS_DURATION_MS). A...`
+  - `browser_status_text` (function, line 173) `const char *browser_status_text(const browser_state *bs, uint64_t now_ms);`
+  - `browser_closed_pop` (function, line 188) `int browser_closed_pop(browser_closed *c, char *out, size_t cap);`
   - `FREEDOM_BROWSER_H` (macro, line 2) `#define FREEDOM_BROWSER_H`
   - `BROWSER_URL_MAX` (macro, line 21) `#define BROWSER_URL_MAX`
   - `BROWSER_STATUS_MAX` (macro, line 24) `#define BROWSER_STATUS_MAX`
   - `BROWSER_STATUS_DURATION_MS` (macro, line 25) `#define BROWSER_STATUS_DURATION_MS`
+  - `BROWSER_CLOSED_MAX` (macro, line 176) `#define BROWSER_CLOSED_MAX`
 - Imported by: `gui/browser_ui.c`, `src/browser.c`, `tests/test_browser.c`
 
 ## include/cached_fetch.h
@@ -185,6 +192,49 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Depends on: `include/http_cache.h`, `include/secure_fetch.h`
 - Imported by: `gui/browser_ui.c`, `src/cached_fetch.c`, `tests/test_cached_fetch.c`
 
+## include/chrome_layout.h
+- Doc: chl_tab_rect: Computes the layout. tab_count >= 1 and 0 <= active < tab_count, else CHL_EINVAL *...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `chl_rect` (struct, line 34)
+  - `chl_layout` (struct, line 54)
+  - `chl_findbar` (struct, line 101)
+  - `chl_status` (enum, line 32)
+  - `chl_part` (enum, line 36)
+  - `chl_find_part` (enum, line 92)
+  - `chl_identity` (enum, line 114)
+  - `h` (type_alias, line 33) `typedef struct chl_rect { double x, y, w, h;`
+  - `width` (type_alias, line 53) `typedef struct chl_layout { double width;`
+  - `close` (type_alias, line 100) `typedef struct chl_findbar { chl_rect bar, field, prev, next, count, close;`
+  - `chl_tab_rect` (function, line 74) `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r);`
+  - `chl_tab_close_rect` (function, line 75) `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r);`
+  - `chl_rect_has` (function, line 78) `int chl_rect_has(chl_rect r, double x, double y);`
+  - `chl_identity_label` (function, line 133) `const char *chl_identity_label(chl_identity id);`
+  - `FREEDOM_CHROME_LAYOUT_H` (macro, line 2) `#define FREEDOM_CHROME_LAYOUT_H`
+  - `CHL_TABBAR_H` (macro, line 15) `#define CHL_TABBAR_H`
+  - `CHL_TOOLBAR_H` (macro, line 16) `#define CHL_TOOLBAR_H`
+  - `CHL_PAD` (macro, line 17) `#define CHL_PAD`
+  - `CHL_TAB_TOP_GAP` (macro, line 18) `#define CHL_TAB_TOP_GAP`
+  - `CHL_TAB_MIN_W` (macro, line 19) `#define CHL_TAB_MIN_W`
+  - `CHL_TAB_MAX_W` (macro, line 20) `#define CHL_TAB_MAX_W`
+  - `CHL_TAB_GAP` (macro, line 21) `#define CHL_TAB_GAP`
+  - `CHL_TAB_CLOSE` (macro, line 22) `#define CHL_TAB_CLOSE`
+  - `CHL_TAB_CLOSE_MIN_W` (macro, line 23) `#define CHL_TAB_CLOSE_MIN_W`
+  - `CHL_NEWTAB_W` (macro, line 24) `#define CHL_NEWTAB_W`
+  - `CHL_WIN_BTN_W` (macro, line 25) `#define CHL_WIN_BTN_W`
+  - `CHL_DRAG_MIN` (macro, line 26) `#define CHL_DRAG_MIN`
+  - `CHL_BTN` (macro, line 27) `#define CHL_BTN`
+  - `CHL_BTN_GAP` (macro, line 28) `#define CHL_BTN_GAP`
+  - `CHL_URL_H` (macro, line 29) `#define CHL_URL_H`
+  - `CHL_ID_W` (macro, line 30) `#define CHL_ID_W`
+  - `CHL_FIND_H` (macro, line 86) `#define CHL_FIND_H`
+  - `CHL_FIND_FIELD_W` (macro, line 87) `#define CHL_FIND_FIELD_W`
+  - `CHL_FIND_FIELD_H` (macro, line 88) `#define CHL_FIND_FIELD_H`
+  - `CHL_FIND_BTN` (macro, line 89) `#define CHL_FIND_BTN`
+  - `CHL_FIND_COUNT_W` (macro, line 90) `#define CHL_FIND_COUNT_W`
+- Imported by: `gui/browser_ui_internal.h`, `src/chrome_layout.c`, `tests/test_chrome_layout.c`
+
 ## include/compositor.h
 - Doc: cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position...
 - Layer: utility
@@ -198,6 +248,8 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `cx_forms_stacking_context` (function, line 60) `int cx_forms_stacking_context(const cx_style *s);`
   - `cx_item_compare` (function, line 80) `int cx_item_compare(const cx_item *a, const cx_item *b);`
   - `cx_sort` (function, line 84) `void cx_sort(cx_item *items, size_t n);`
+  - `cx_ink_reach` (function, line 91) `double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset);`
+  - `cx_span_visible` (function, line 95) `int cx_span_visible(double top, double h, double reach, double view_top, double view_h);`
   - `FREEDOM_COMPOSITOR_H` (macro, line 2) `#define FREEDOM_COMPOSITOR_H`
 - Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/compositor.c`, `tests/test_compositor.c`
 
@@ -442,46 +494,6 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CC_COLOR_CURRENT` (macro, line 59) `#define CC_COLOR_CURRENT`
   - `CC_COLOR_TRANSPARENT` (macro, line 60) `#define CC_COLOR_TRANSPARENT`
 - Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/pres_hints.c`, `src/svg_paint.c`, `src/svg_render.c`, `tests/test_css_color.c`
-
-## include/css_computed.h
-- Doc: ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `ccm_input` (struct, line 19)
-  - `ccm_get` (function, line 29) `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap);`
-  - `ccm_property_count` (function, line 32) `size_t ccm_property_count(void);`
-  - `ccm_property_name` (function, line 33) `const char *ccm_property_name(size_t i);`
-  - `FREEDOM_CSS_COMPUTED_H` (macro, line 2) `#define FREEDOM_CSS_COMPUTED_H`
-  - `CCM_VALUE_MAX` (macro, line 17) `#define CCM_VALUE_MAX`
-- Depends on: `include/css.h`
-- Imported by: `src/css_computed.c`, `src/tab.c`, `tests/test_css_computed.c`
-
-## include/css_counter.h
-- Doc: cnt_hash: FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are *...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `cnt_decl` (struct, line 21)
-  - `cnt_style` (enum, line 26)
-  - `name` (type_alias, line 20) `typedef struct cnt_decl { unsigned name;`
-  - `cnt_state` (type_alias, line 50) `typedef struct cnt_state cnt_state;`
-  - `cnt_hash` (function, line 34) `unsigned cnt_hash(const char *name, size_t len);`
-  - `written` (function, line 37) `* written (0 for `none`) or -1 when invalid. `dflt` is the value of an entry with no * integer: 0 for reset, 1 for...`
-  - `cnt_parse_content` (function, line 44) `int cnt_parse_content(const char *val, char *out, size_t cap);`
-  - `cnt_is_marker` (function, line 45) `int cnt_is_marker(const char *s);`
-  - `cnt_format` (function, line 49) `size_t cnt_format(int style, long value, char *out, size_t cap);`
-  - `cnt_state_new` (function, line 52) `cnt_state *cnt_state_new(void);`
-  - `cnt_state_free` (function, line 53) `void cnt_state_free(cnt_state *s);`
-  - `cnt_reset` (function, line 56) `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n);`
-  - `cnt_increment` (function, line 57) `void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n);`
-  - `cnt_leave` (function, line 60) `void cnt_leave(cnt_state *s, int depth);`
-  - `cnt_resolve` (function, line 67) `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx, char *out, size_t cap);`
-  - `FREEDOM_CSS_COUNTER_H` (macro, line 9) `#define FREEDOM_CSS_COUNTER_H`
-  - `CNT_MAX_DECL` (macro, line 17) `#define CNT_MAX_DECL`
-  - `CNT_MAX_INSTANCES` (macro, line 18) `#define CNT_MAX_INSTANCES`
-  - `CNT_NAME_MAX` (macro, line 19) `#define CNT_NAME_MAX`
-- Imported by: `include/css.h`, `src/css_counter.c`, `tests/test_css_counter.c`
 
 
 Next: [KB_include_p2.md](KB_include_p2.md)

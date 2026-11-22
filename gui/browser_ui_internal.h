@@ -138,6 +138,7 @@ typedef struct bui_chrome_view {
     const int         *tab_loading;  /* tab_count flags, or NULL */
     double             phase;        /* spinner phase in [0,1) */
     int                can_back, can_fwd, maximized;
+    int                loading;      /* the active tab is loading: reload shows Stop */
     const char        *url;          /* URL bar text */
     size_t             url_len, cursor, sel_start, sel_len;
     int                url_focused;

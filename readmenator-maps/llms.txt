@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 13 communities, 334 files, 1927 imports, 4 languages, 8142 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 14 communities, 348 files, 1991 imports, 4 languages, 8441 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -9,41 +9,42 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/INDEX.md](md/readmenator-agent/INDEX.md)
 - [readmenator-agent/GOTCHAS.md](md/readmenator-agent/GOTCHAS.md): These files have the most connections. Changes here have high blast radius.
 - [readmenator-agent/API.md](md/readmenator-agent/API.md): readfuzzstats (function) app.py:30 def readfuzzstats() -- Reads the current status of the active AFL++ fuzzing session.
-- [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/mediadecoder.h, include/util.h
-- [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): Depends on: include/prefs.h, include/zoom.h
-- [readmenator-agent/API_p12.md](md/readmenator-agent/API_p12.md): Depends on: include/antifp.h, include/boxtree.h, include/css.h, include/csscomputed.h, include/cssgradient.h, include/cssimport.h, include/dataurl.h...
-- [readmenator-agent/API_p13.md](md/readmenator-agent/API_p13.md): vecpush (function) tools/genpsl.c:27 static void vecpush(vec v, const char s)
+- [readmenator-agent/API_p10.md](md/readmenator-agent/API_p10.md): Depends on: include/dom.h, include/freebug.h, include/htmlparse.h, include/jsdom.h, include/jsintl.h, include/jssandbox.h, include/webstorage.h...
+- [readmenator-agent/API_p11.md](md/readmenator-agent/API_p11.md): Depends on: include/boxstyle.h, include/boxtree.h, include/css.h, include/csschain.h, include/csscolor.h, include/cssdecl.h, include/csslength.h...
+- [readmenator-agent/API_p12.md](md/readmenator-agent/API_p12.md): Depends on: include/dataurl.h, include/renderpolicy.h, include/requestpolicy.h
+- [readmenator-agent/API_p13.md](md/readmenator-agent/API_p13.md): Depends on: include/css.h, include/textshape.h, include/webfont.h
 - [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h, include/cachedfetch.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): buipopgroupcomposite (function) gui/browserui.c:15135 buipopgroupcomposite(cr, def, nowms() - w->pageloadmonoms, bx, left, origin,
-- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Imported by: src/css.c, src/cssbox.c, src/cssgradient.c, src/csslength.c, src/cssmq.c, src/csstext.c, src/cssvalues.c, src/pageview.c, tests/testcsslength.c
-- [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Depends on: include/css.h, include/dom.h, include/htmlparse.h
-- [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Depends on: include/boxstyle.h
-- [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/css.h, include/cssbox.h, include/csscolor.h, include/cssdecl.h, include/csslength.h, include/cssselect.h, include/cssvalues.h
-- [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/csschain.h, include/cssselect.h, include/dom.h, include/htmlparse.h, include/util.h
-- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/imagedecode.h
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): geomfromlayout (function) gui/browserui.c:15161 static void geomfromlayout(const rddoc doc, const rclayout L, double left,
+- [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Depends on: include/cssdecl.h
+- [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Depends on: include/jssandbox.h
+- [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Imported by: gui/browserui.c, src/css.c, src/freedom.c, src/textshape.c, src/webfont.c, src/webfontload.c, tests/testcss.c, tests/testpageview.c...
+- [readmenator-agent/API_p7.md](md/readmenator-agent/API_p7.md): Depends on: include/css.h, include/cssatrule.h, include/cssbox.h, include/csscolor.h, include/cssdecl.h, include/cssgradient.h, include/cssindex.h...
+- [readmenator-agent/API_p8.md](md/readmenator-agent/API_p8.md): Depends on: include/csscolor.h, include/cssdecl.h, include/cssgradient.h, include/csslength.h, include/cssselect.h, include/cssvalues.h
+- [readmenator-agent/API_p9.md](md/readmenator-agent/API_p9.md): Depends on: include/flexlayout.h
 - [readmenator-agent/ARCHITECTURE.md](md/readmenator-agent/ARCHITECTURE.md): gui/browserui.c -> gui/browseruiinternal.h
-- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testcssindex.c -> include/cssindex.h
+- [readmenator-agent/ARCHITECTURE_p2.md](md/readmenator-agent/ARCHITECTURE_p2.md): tests/testcssatrule.c -> include/cssatrule.h
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): uirenderpngimages (function, line 16047) uistatus uirenderpngimages(const rddoc doc, tab t, const char topurl,
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): layoutcachefree (function, line 15700) static void layoutcachefree(browserwindow w)
+- [readmenator-agent/KB_gui_p3.md](md/readmenator-agent/KB_gui_p3.md): Doc: sanitizeutf8inplace: Rewrites s in place to well-formed UTF-8, replacing any byte that is not...
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: fpacceptlanguageheader: #define FPSECFETCHDESTNAV "document" #define...
-- [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: The sheet's two string pools -- background url()s, and the ::before/::after
-- [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: active: frameclock (fc) — pure animation frame scheduler.
-- [readmenator-agent/KB_include_p4.md](md/readmenator-agent/KB_include_p4.md): Doc: lnblockreason: Why a reference was blocked, for a precise user-facing notice and for ...
-- [readmenator-agent/KB_include_p5.md](md/readmenator-agent/KB_include_p5.md): Doc: sfchaininfo: Minimal view of the verified certificate chain, used by sfcheckchainpolicy. ...
-- [readmenator-agent/KB_include_p6.md](md/readmenator-agent/KB_include_p6.md): Doc: wlgstart: wlguard -- keeps the Wayland connection drained while the GUI thread is busy.
+- [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: ccmget: Writes the computed value of the kebab-case property prop into out (cap bytes, NUL...
+- [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: fxitem: Upper bound on items per flex line / grid columns.
+- [readmenator-agent/KB_include_p4.md](md/readmenator-agent/KB_include_p4.md): failure (function, line 22) engine failure (the page then simply runs with the unsealed surface). / int jnseal(jscontext ctx);
+- [readmenator-agent/KB_include_p5.md](md/readmenator-agent/KB_include_p5.md): pslrules (variable, line 21) extern const char const pslrules[];
+- [readmenator-agent/KB_include_p6.md](md/readmenator-agent/KB_include_p6.md): Doc: — shared pure helpers (no I/O except where noted).
 - [readmenator-agent/KB_root.md](md/readmenator-agent/KB_root.md): Doc: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL...
 - [readmenator-agent/KB_src.md](md/readmenator-agent/KB_src.md): fpcoarsentimems (function, line 17) uint64t fpcoarsentimems(uint64t rawms)
 - [readmenator-agent/KB_src_p10.md](md/readmenator-agent/KB_src_p10.md): Doc: cieqspan: #include <stdint.h> #include <stdlib.h> #include <string.h> static int isws(char c)...
 - [readmenator-agent/KB_src_p2.md](md/readmenator-agent/KB_src_p2.md): Doc: csscq: @container conditions (spec/cssmq.md): a rule inside one is kept and gated per element....
 - [readmenator-agent/KB_src_p3.md](md/readmenator-agent/KB_src_p3.md): Doc: normalize: Trims surrounding ASCII spaces and lowercases into out (CCTOKENMAX bytes). ...
 - [readmenator-agent/KB_src_p4.md](md/readmenator-agent/KB_src_p4.md): Doc: tolowerbuf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
-- [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): Doc: nodenext: }; / --- helpers --- static char dupbytes(const lxbchart src, sizet len) { if...
-- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): Doc: unite: Bounding box of a and b into a; returns 1 if a changed.
+- [readmenator-agent/KB_src_p5.md](md/readmenator-agent/KB_src_p5.md): Doc: validhost: #include "hostedit.h" #include <string.h> static char helower(char c) { return (c...
+- [readmenator-agent/KB_src_p6.md](md/readmenator-agent/KB_src_p6.md): Doc: jdpackptr: Carry the host fetch fn + its ctx as a function's closure data, each split into...
 - [readmenator-agent/KB_src_p7.md](md/readmenator-agent/KB_src_p7.md): Doc: pvptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
 - [readmenator-agent/KB_src_p8.md](md/readmenator-agent/KB_src_p8.md): Doc: urlvalid: A representable URL: 1..PREFSMAXURL-1 bytes, no control bytes, no DEL. Space is...
 - [readmenator-agent/KB_src_p9.md](md/readmenator-agent/KB_src_p9.md): Doc: tabiobuf: Batched pipe I/O for the view codec. writeview/readview move one int32 block and...
-- [readmenator-agent/KB_tests.md](md/readmenator-agent/KB_tests.md): main (function, line 26) int main(void)
+- [readmenator-agent/KB_tests.md](md/readmenator-agent/KB_tests.md): alwayscancel (function, line 16) static int alwayscancel(void ctx)
 - [readmenator-agent/KB_tests_p2.md](md/readmenator-agent/KB_tests_p2.md): Doc: testinlinefontsizeabsoluteflag: 2026-07-31: a font-size carries whether its percent is OF...
 - [readmenator-agent/KB_tests_p3.md](md/readmenator-agent/KB_tests_p3.md): Doc: Suite for csscounter (spec/csscounter.md).
 - [readmenator-agent/KB_tests_p4.md](md/readmenator-agent/KB_tests_p4.md): Doc: testgridcolumncountforcolumnflow: Given grid-auto-flow: column with no explicit rows...
@@ -53,7 +54,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p8.md](md/readmenator-agent/KB_tests_p8.md): Doc: sinkcap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS...
 - [readmenator-agent/KB_tests_p9.md](md/readmenator-agent/KB_tests_p9.md): testclampbounds (function, line 17) static void testclampbounds(void state)
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 334 files at commit bba54a0396c6. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 348 files at commit 78e17774985b. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)
@@ -62,7 +63,6 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/SYMBOLS_p13.md](md/readmenator-agent/SYMBOLS_p13.md)
 - [readmenator-agent/SYMBOLS_p14.md](md/readmenator-agent/SYMBOLS_p14.md)
 - [readmenator-agent/SYMBOLS_p15.md](md/readmenator-agent/SYMBOLS_p15.md)
-- [readmenator-agent/SYMBOLS_p16.md](md/readmenator-agent/SYMBOLS_p16.md)
 
 ## Project Docs
 

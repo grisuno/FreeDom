@@ -31,6 +31,7 @@ flowchart LR
     n_src_os_sandbox_c__os_landlock_abi(["os_landlock_abi"])
     n_src_os_sandbox_c__os_landlock_abi_331(["os_landlock_abi"])
     n_src_os_sandbox_c__os_landlock_restrict_332(["os_landlock_restrict"])
+    n_include_chrome_layout_h__close["chrome_layout.close"]
     n_src_os_sandbox_c__os_prot_allowed --> n_src_os_sandbox_c__os_policy_allows
     n_src_os_sandbox_c__excluded --> n_src_os_sandbox_c__os_namespace_flags
     n_src_os_sandbox_c__os_isolate_namespaces --> n_src_os_sandbox_c__os_namespace_flags
@@ -43,6 +44,7 @@ flowchart LR
     n_src_os_sandbox_c__os_landlock_restrict --> n_src_os_sandbox_c__os_landlock_abi
     n_src_os_sandbox_c__os_landlock_abi_331 --> n_src_os_sandbox_c__os_landlock_abi
     n_src_os_sandbox_c__os_landlock_restrict_332 --> n_src_os_sandbox_c__os_landlock_restrict
+    n_src_os_sandbox_c__os_landlock_restrict -.-> n_include_chrome_layout_h__close
 ```
 
 ## Functions
@@ -427,7 +429,7 @@ os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)
 
 **Returns:** `os_status`
 
-*Calls:* [`os_landlock_abi`](#os_landlock_abi)
+*Calls:* [`close`](include.chrome_layout.h.md#close), [`os_landlock_abi`](#os_landlock_abi)
 
 *Called by:* [`os_landlock_restrict`](#os_landlock_restrict)
 

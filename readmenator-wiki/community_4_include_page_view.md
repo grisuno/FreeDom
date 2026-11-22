@@ -1,14 +1,14 @@
 # include: page_view
 
-*Community 4 | 26 files | cohesion 0.46*
+*Community 4 | 27 files | cohesion 0.45*
 
 ## Definition
 
-This community groups 26 file(s) rooted at `include` with dominant language c (cohesion 0.46). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (291 symbols). Documented purpose: sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md..
+This community groups 27 file(s) rooted at `include` with dominant language c (cohesion 0.45). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (291 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
 
 ## Files
 
-### `include` (10 files)
+### `include` (11 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -17,7 +17,7 @@ This community groups 26 file(s) rooted at `include` with dominant language c (c
 | `include/css_chain.h` | h | utility | 12 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 45 | no |
-| `include/freedom_config.h` | h | infrastructure | 18 | no |
+| `include/freedom_config.h` | h | infrastructure | 20 | no |
 | `include/page_view.h` | h | presentation | 102 | no |
 
 ### `src` (8 files)
@@ -26,7 +26,7 @@ This community groups 26 file(s) rooted at `include` with dominant language c (c
 |------|----------|-------|---------|-----|
 | `src/box_style.c` | c | utility | 48 | no |
 | `src/box_tree.c` | c | utility | 25 | no |
-| `src/css_chain.c` | c | utility | 26 | no |
+| `src/dom.c` | c | utility | 77 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 36 | no |
 | `src/page_view.c` | c | presentation | 291 | no |
@@ -43,7 +43,7 @@ This community groups 26 file(s) rooted at `include` with dominant language c (c
 | `tests/test_page_view.c` | c | testing | 227 | no |
 | `tests/test_render_doc.c` | c | testing | 37 | no |
 
-*... and 6 more files in this community.*
+*... and 7 more files in this community.*
 
 
 ## Key Symbols
@@ -81,16 +81,17 @@ This community groups 26 file(s) rooted at `include` with dominant language c (c
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 49
-- Cross-boundary resolved imports (EXTRACTED): 57
+- Internal resolved imports (EXTRACTED): 52
+- Cross-boundary resolved imports (EXTRACTED): 65
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
 - [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui_internal.h imports include/freedom_config.h.
-- [EXTRACTED] depends_on community 9 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
-- [EXTRACTED] depends_on community 4 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 8 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
+- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
 - [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
+- [EXTRACTED] depends_on community 6 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
 
 ## Risks
 
@@ -114,7 +115,7 @@ This community groups 26 file(s) rooted at `include` with dominant language c (c
 
 - Why do 24 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.46?
+- Should include: page_view be split, given cohesion 0.45?
 
 ## Sources
 
@@ -128,14 +129,14 @@ This community groups 26 file(s) rooted at `include` with dominant language c (c
 - `include/render_doc.h`
 - `include/render_policy.h`
 - `include/sheet_cache.h`
+- `include/util.h`
 - `src/box_style.c`
 - `src/box_tree.c`
-- `src/css_chain.c`
+- `src/dom.c`
 - `src/dom_debug.c`
 - `src/flex_layout.c`
 - `src/page_view.c`
 - `src/render_doc.c`
 - `src/sheet_cache.c`
 - `tests/test_box_style.c`
-- `tests/test_box_tree.c`
-- *... and 6 more*
+- *... and 7 more*

@@ -34,6 +34,7 @@ Solid arrows stay in this module, dashed arrows leave it.
 flowchart LR
     n_src_ws_hub_c__wh_free(["wh_free"])
     n_src_ws_hub_c__wh_close_all(["wh_close_all"])
+    n_include_chrome_layout_h__close["chrome_layout.close"]
     n_src_ws_hub_c__wh_open_async(["wh_open_async"])
     n_src_secure_fetch_c__sf_config_default["secure_fetch.sf_config_default"]
     n_src_ws_hub_c__wh_on_notify(["wh_on_notify"])
@@ -43,6 +44,8 @@ flowchart LR
     n_src_ws_hub_c__wh_on_readable(["wh_on_readable"])
     n_src_secure_fetch_c__sf_ws_recv["secure_fetch.sf_ws_recv"]
     n_src_ws_hub_c__wh_free --> n_src_ws_hub_c__wh_close_all
+    n_src_ws_hub_c__wh_free -.-> n_include_chrome_layout_h__close
+    n_src_ws_hub_c__wh_open_async -.-> n_include_chrome_layout_h__close
     n_src_ws_hub_c__wh_open_async -.-> n_src_secure_fetch_c__sf_config_default
     n_src_ws_hub_c__wh_on_notify -.-> n_src_css_c__emit
     n_src_ws_hub_c__wh_send -.-> n_src_secure_fetch_c__sf_ws_send
@@ -166,7 +169,7 @@ Pending opens finish on their own threads and discard their result. NULL is a no
 
 > **Inherited:** Documentation from [`wh_free`](#wh_free) (include/ws_hub.h:38).
 
-*Calls:* [`wh_close_all`](#wh_close_all)
+*Calls:* [`close`](include.chrome_layout.h.md#close), [`wh_close_all`](#wh_close_all)
 
 ---
 
@@ -221,7 +224,7 @@ Returns 0 when started; -1 (nothing started) on a duplicate id, a full hub, NULL
 
 > **Inherited:** Documentation from [`wh_open_async`](#wh_open_async) (include/ws_hub.h:46).
 
-*Calls:* [`sf_config_default`](src.secure_fetch.c.md#sf_config_default)
+*Calls:* [`close`](include.chrome_layout.h.md#close), [`sf_config_default`](src.secure_fetch.c.md#sf_config_default)
 
 ---
 

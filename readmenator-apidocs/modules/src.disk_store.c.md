@@ -14,6 +14,7 @@ Solid arrows stay in this module, dashed arrows leave it.
 ```mermaid
 flowchart LR
     n_src_disk_store_c__ds_write(["ds_write"])
+    n_include_chrome_layout_h__close["chrome_layout.close"]
     n_include_local_store_h__ls_free["local_store.ls_free"]
     n_include_util_h__write_full["util.write_full"]
     n_src_local_store_c__ls_seal["local_store.ls_seal"]
@@ -21,9 +22,11 @@ flowchart LR
     n_include_util_h__read_full["util.read_full"]
     n_src_local_store_c__ls_open["local_store.ls_open"]
     n_src_disk_store_c__ds_free(["ds_free"])
+    n_src_disk_store_c__ds_write -.-> n_include_chrome_layout_h__close
     n_src_disk_store_c__ds_write -.-> n_include_local_store_h__ls_free
     n_src_disk_store_c__ds_write -.-> n_include_util_h__write_full
     n_src_disk_store_c__ds_write -.-> n_src_local_store_c__ls_seal
+    n_src_disk_store_c__ds_read -.-> n_include_chrome_layout_h__close
     n_src_disk_store_c__ds_read -.-> n_include_local_store_h__ls_free
     n_src_disk_store_c__ds_read -.-> n_include_util_h__read_full
     n_src_disk_store_c__ds_read -.-> n_src_local_store_c__ls_open
@@ -54,7 +57,7 @@ ds_status ds_write(const char *path, const uint8_t key[LS_KEY_LEN], ls_aead aead
 
 **Returns:** `ds_status`
 
-*Calls:* [`ls_free`](include.local_store.h.md#ls_free), [`write_full`](include.util.h.md#write_full), [`ls_seal`](src.local_store.c.md#ls_seal)
+*Calls:* [`close`](include.chrome_layout.h.md#close), [`ls_free`](include.local_store.h.md#ls_free), [`write_full`](include.util.h.md#write_full), [`ls_seal`](src.local_store.c.md#ls_seal)
 
 *Called by:* [`hc_open`](src.http_cache.c.md#hc_open), [`profile_save`](src.profile.c.md#profile_save)
 
@@ -81,7 +84,7 @@ ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN], uint8_t **out
 
 **Returns:** `ds_status`
 
-*Calls:* [`ls_free`](include.local_store.h.md#ls_free), [`read_full`](include.util.h.md#read_full), [`ls_open`](src.local_store.c.md#ls_open)
+*Calls:* [`close`](include.chrome_layout.h.md#close), [`ls_free`](include.local_store.h.md#ls_free), [`read_full`](include.util.h.md#read_full), [`ls_open`](src.local_store.c.md#ls_open)
 
 *Called by:* [`hc_open`](src.http_cache.c.md#hc_open), [`profile_load`](src.profile.c.md#profile_load)
 

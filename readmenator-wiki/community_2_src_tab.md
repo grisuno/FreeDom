@@ -1,24 +1,24 @@
 # src: tab
 
-*Community 1 | 54 files | cohesion 0.70*
+*Community 2 | 53 files | cohesion 0.70*
 
 ## Definition
 
-This community groups 54 file(s) rooted at `src` with dominant language c (cohesion 0.70). Central symbols: `CI_COND_MAX`, `CI_MAX_DEPTH`, `CI_MAX_PER_PAGE`, `CI_MAX_PER_SHEET`, `CI_URL_MAX`, `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`. Core file: `tests/test_js_dom.c` (277 symbols). Documented purpose: css_import -- @import prelude reader (spec/css_import.md). Pure: no I/O, no allocation, no global state. Every read is bounded by len..
+This community groups 53 file(s) rooted at `src` with dominant language c (cohesion 0.70). Central symbols: `CI_COND_MAX`, `CI_MAX_DEPTH`, `CI_MAX_PER_PAGE`, `CI_MAX_PER_SHEET`, `CI_URL_MAX`, `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`. Core file: `tests/test_js_dom.c` (277 symbols). Documented purpose: css_import -- @import prelude reader (spec/css_import.md). Pure: no I/O, no allocation, no global state. Every read is bounded by len..
 
 ## Files
 
-### `src` (25 files)
+### `src` (24 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/css_import.c` | c | utility | 17 | yes |
-| `src/dom.c` | c | utility | 77 | no |
 | `src/fb_cmdline.c` | c | utility | 13 | no |
 | `src/freebug.c` | c | utility | 9 | no |
 | `src/html_parse.c` | c | utility | 29 | no |
 | `src/js_custom_elements.c` | c | utility | 1 | no |
 | `src/js_custom_elements.h` | h | utility | 2 | yes |
+| `src/js_dom.c` | c | utility | 64 | no |
 
 ### `include` (15 files)
 
@@ -43,7 +43,7 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_html_parse.c` | c | testing | 24 | no |
 | `tests/test_js_dom.c` | c | testing | 277 | no |
 
-*... and 34 more files in this community.*
+*... and 33 more files in this community.*
 
 
 ## Key Symbols
@@ -81,16 +81,15 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 130
+- Internal resolved imports (EXTRACTED): 127
 - Cross-boundary resolved imports (EXTRACTED): 56
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 1 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
-- [EXTRACTED] depends_on community 4 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 9 <-> 1 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
-- [EXTRACTED] depends_on community 1 <-> 0 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/css_select.h.
-- [EXTRACTED] depends_on community 1 <-> 6 (strength 0.9): Extracted import edge crosses communities: src/dom.c imports include/util.h.
+- [EXTRACTED] depends_on community 1 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
+- [EXTRACTED] depends_on community 8 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
+- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/fb_cmdline.c imports include/fb_panes.h.
 
 ## Risks
 
@@ -100,7 +99,7 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 48 file(s) lack file-level docs (e.g. `include/css_import.h`)? What purpose do they serve?
+- Why do 47 file(s) lack file-level docs (e.g. `include/css_import.h`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
 - What would break if the most connected file in src: tab changed?
 - Should src: tab be split, given cohesion 0.70?
@@ -123,8 +122,8 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 - `include/url.h`
 - `include/web_storage.h`
 - `src/css_import.c`
-- `src/dom.c`
 - `src/fb_cmdline.c`
 - `src/freebug.c`
 - `src/html_parse.c`
-- *... and 34 more*
+- `src/js_custom_elements.c`
+- *... and 33 more*

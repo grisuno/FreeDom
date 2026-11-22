@@ -35,8 +35,9 @@ typedef enum sf_status {
     SF_ERR_OOM,          /* allocation failed */
     SF_ERR_TOO_MANY_REDIRECTS, /* sf_get_follow exceeded max_redirects hops */
     SF_ERR_INTERNAL,     /* transport library returned an unexpected state */
-    SF_ERR_PRIVATE_NET   /* remote content asked for a private/loopback address
+    SF_ERR_PRIVATE_NET,  /* remote content asked for a private/loopback address
                           * (spec/net_guard.md); appended so earlier codes keep their values */
+    SF_ERR_CANCELLED     /* the caller's cancel_cb asked to stop the transfer (Stop) */
 } sf_status;
 
 /* Post-quantum enforcement policy. */
@@ -123,6 +124,11 @@ typedef struct sf_config {
      * must be copied to thread-safe storage. NULL/0 => no callback. */
     void *progress_ctx;       /* userdata for progress_cb */
     void (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);
+    /* Cancellation (the user pressed Stop): polled from the transfer thread while the
+     * request runs, including during connect/TLS; nonzero aborts it with
+     * SF_ERR_CANCELLED and no further redirect hop is made. NULL => never cancelled. */
+    void *cancel_ctx;
+    int (*cancel_cb)(void *ctx);
     /* Byte-range request (HTTP Range: header). range_start >= 0 enables it;
      * range_end >= range_start specifies an inclusive end, or -1 for open-ended. */
     int64_t range_start;

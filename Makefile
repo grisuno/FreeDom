@@ -130,7 +130,7 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
                $(BUILD_DIR)/test_mask_cache $(BUILD_DIR)/test_exact_key \
                $(BUILD_DIR)/test_find_text
 
-.PHONY: gscroll fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: gscroll fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -1047,6 +1047,14 @@ fuzz-cnt: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_css_counter.c $(SRC_DIR)/css_counter.c \
 	  -o $(BUILD_DIR)/fuzz_css_counter
 	./$(BUILD_DIR)/fuzz_css_counter -max_total_time=30 -rss_limit_mb=2048
+
+# Browser history (spec/browser.md 3c): hostile navigate/back/forward/pushState/
+# commit/abort sequences; Stop must restore exactly the committed history.
+fuzz-br: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_browser.c $(SRC_DIR)/browser.c \
+	  -o $(BUILD_DIR)/fuzz_browser
+	./$(BUILD_DIR)/fuzz_browser -max_total_time=30 -rss_limit_mb=2048
 
 # Find in page (spec/find_text.md): hostile UTF-8 pieces x hostile query; the
 # matches must stay inside their pieces and spans must tile them.

@@ -1,8 +1,227 @@
-# Symbols (page 9 of 17)
+# Symbols (page 9 of 18)
 Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `idn_set_user_agent` | function | `src/identity.c:35` | `int idn_set_user_agent(idn_config *c, const char *ua)` |
+| `idn_user_agent` | function | `src/identity.c:110` | `const char *idn_user_agent(const idn_config *c)` |
+| `is_alnum` | function | `src/identity.c:21` | `static int is_alnum(char c)` |
+| `is_alpha` | function | `src/identity.c:20` | `static int is_alpha(char c)` |
+| `parse_geo` | function | `src/identity.c:228` | `static int parse_geo(const char *s, double *lat, double *lon, double *acc)` |
+| `parse_number` | function | `src/identity.c:275` | `static int parse_number(const char *s, double *out)` |
+| `pct_decode` | function | `src/identity.c:167` | `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)` |
+| `tag_valid` | function | `src/identity.c:51` | `static int tag_valid(const char *s, size_t n)` |
+| `GIF_LZW_MAX_CODES` | macro | `src/image_decode.c:253` | `#define GIF_LZW_MAX_CODES` |
+| `PNG_IHDR_MIN` | macro | `src/image_decode.c:34` | `#define PNG_IHDR_MIN` |
+| `exit` | function | `src/image_decode.c:6` | `* malformed stream fails closed instead of calling exit(). GIF uses an own pure-C * bounded LZW decoder (no giflib)....` |
+| `gb_next_code` | function | `src/image_decode.c:298` | `static int gb_next_code(gif_bits *b, unsigned width, unsigned *out)` |
+| `gif_bits` | struct | `src/image_decode.c:290` | `` |
+| `gif_deinterlace_row` | function | `src/image_decode.c:319` | `static uint32_t gif_deinterlace_row(uint32_t r, uint32_t fh)` |
+| `gif_put_pixel` | function | `src/image_decode.c:334` | `static void gif_put_pixel(uint32_t *canvas, uint32_t cw, uint32_t ch,                           u...` |
+| `gif_reader` | struct | `src/image_decode.c:255` | `` |
+| `gr_skip` | function | `src/image_decode.c:273` | `static int gr_skip(gif_reader *r, size_t n)` |
+| `gr_skip_subblocks` | function | `src/image_decode.c:280` | `static int gr_skip_subblocks(gif_reader *r)` |
+| `gr_u16le` | function | `src/image_decode.c:266` | `static int gr_u16le(gif_reader *r, uint16_t *out)` |
+| `gr_u8` | function | `src/image_decode.c:260` | `static int gr_u8(gif_reader *r, uint8_t *out)` |
+| `img_decode` | function | `src/image_decode.c:553` | `img_status img_decode(const uint8_t *bytes, size_t len, img_pixels *out)` |
+| `img_decode_gif` | function | `src/image_decode.c:354` | `img_status img_decode_gif(const uint8_t *bytes, size_t len, img_pixels *out)` |
+| `img_decode_jpeg` | function | `src/image_decode.c:166` | `img_status img_decode_jpeg(const uint8_t *bytes, size_t len, img_pixels *out)` |
+| `img_decode_png` | function | `src/image_decode.c:102` | `img_status img_decode_png(const uint8_t *bytes, size_t len, img_pixels *out)` |
+| `img_decode_webp` | function | `src/image_decode.c:520` | `img_status img_decode_webp(const uint8_t *bytes, size_t len, img_pixels *out)` |
+| `img_dimensions_ok` | function | `src/image_decode.c:68` | `int img_dimensions_ok(uint32_t w, uint32_t h)` |
+| `img_fit` | function | `src/image_decode.c:76` | `void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h,              double *out_w, do...` |
+| `img_format_name` | function | `src/image_decode.c:575` | `const char *img_format_name(img_format f)` |
+| `img_pixels_free` | function | `src/image_decode.c:566` | `void img_pixels_free(img_pixels *p)` |
+| `img_png_dimensions` | function | `src/image_decode.c:57` | `img_status img_png_dimensions(const uint8_t *bytes, size_t len,                               uin...` |
+| `jpeg_err_ctx` | struct | `src/image_decode.c:153` | `` |
+| `jpeg_error_longjmp` | function | `src/image_decode.c:158` | `static void jpeg_error_longjmp(j_common_ptr cinfo)` |
+| `jpeg_silence` | function | `src/image_decode.c:164` | `static void jpeg_silence(j_common_ptr cinfo)` |
+| `premultiply` | function | `src/image_decode.c:90` | `static void premultiply(uint8_t *data, size_t pixels)` |
+| `read_be32` | function | `src/image_decode.c:52` | `static uint32_t read_be32(const uint8_t *p)` |
+| `IM_MAX_DEPTH` | macro | `src/import_map.c:16` | `#define IM_MAX_DEPTH` |
+| `IM_URL_MAX` | macro | `src/import_map.c:17` | `#define IM_URL_MAX` |
+| `add` | function | `src/import_map.c:185` | `static int add(im_map *m, int scope, const char *key, const char *addr, const char *doc_url,     ...` |
+| `clear` | function | `src/import_map.c:175` | `static void clear(im_map *m)` |
+| `dup_s` | function | `src/import_map.c:168` | `static char *dup_s(const char *s)` |
+| `eat` | function | `src/import_map.c:44` | `static int eat(jr *r, char c)` |
+| `hex4` | function | `src/import_map.c:50` | `static int hex4(const char *s, uint32_t *out)` |
+| `im_count` | function | `src/import_map.c:339` | `size_t im_count(const im_map *m)` |
+| `im_entry` | struct | `src/import_map.c:19` | `` |
+| `im_free` | function | `src/import_map.c:343` | `void im_free(im_map *m)` |
+| `im_map` | struct | `src/import_map.c:25` | `` |
+| `im_parse` | function | `src/import_map.c:225` | `im_map *im_parse(const char *json, size_t len, const char *doc_url, im_url_fn resolve, void *ctx)` |
+| `im_resolve` | function | `src/import_map.c:301` | `int im_resolve(const im_map *m, const char *base, const char *specifier,                im_url_fn...` |
+| `jr` | struct | `src/import_map.c:34` | `` |
+| `match` | function | `src/import_map.c:272` | `static int match(const im_map *m, int scope, const char *key, char *out, size_t outsz)` |
+| `put_utf8` | function | `src/import_map.c:64` | `static size_t put_utf8(char *o, uint32_t cp)` |
+| `scope` | type_alias | `src/import_map.c:18` | `typedef struct im_entry { int scope;` |
+| `skip` | function | `src/import_map.c:128` | `static void skip(jr *r, int depth)` |
+| `specifier_map` | function | `src/import_map.c:209` | `static void specifier_map(jr *r, im_map *m, int scope, const char *doc_url,                      ...` |
+| `str` | function | `src/import_map.c:78` | `static char *str(jr *r)` |
+| `url_like` | function | `src/import_map.c:156` | `static int url_like(const char *s)` |
+| `ws` | function | `src/import_map.c:39` | `static void ws(jr *r)` |
+| `anim_effective_dir` | function | `src/interp.c:232` | `static int anim_effective_dir(const ip_anim *a)` |
+| `anim_effective_dir_for` | function | `src/interp.c:222` | `static int anim_effective_dir_for(const ip_anim *a, int iter)` |
+| `ip_anim_current` | function | `src/interp.c:282` | `double ip_anim_current(const ip_anim *a)` |
+| `ip_anim_done` | function | `src/interp.c:320` | `int ip_anim_done(const ip_anim *a)` |
+| `ip_anim_init` | function | `src/interp.c:196` | `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease,                   const ip_...` |
+| `ip_anim_tick` | function | `src/interp.c:236` | `int ip_anim_tick(ip_anim *a, double dt_ms)` |
+| `ip_ease` | function | `src/interp.c:55` | `double ip_ease(double t, const ip_ease_fn *fn)` |
+| `ip_ease` | function | `src/interp.c:64` | `case IP_EASE_EASE:         return ip_ease(t, &(ip_ease_fn)` |
+| `ip_ease` | function | `src/interp.c:70` | `case IP_EASE_EASE_IN:         return ip_ease(t, &(ip_ease_fn)` |
+| `ip_ease` | function | `src/interp.c:76` | `case IP_EASE_EASE_OUT:         return ip_ease(t, &(ip_ease_fn)` |
+| `ip_ease` | function | `src/interp.c:82` | `case IP_EASE_EASE_IN_OUT:         return ip_ease(t, &(ip_ease_fn)` |
+| `ip_interp` | function | `src/interp.c:162` | `double ip_interp(ip_val_kind kind, double a, double b, double t)` |
+| `ip_kf_interp` | function | `src/interp.c:175` | `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf,                     int n_kf, do...` |
+| `ip_lerp` | function | `src/interp.c:134` | `double ip_lerp(double a, double b, double t)` |
+| `ip_lerp_color` | function | `src/interp.c:139` | `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t)` |
+| `sample_bezier_dx` | function | `src/interp.c:23` | `static double sample_bezier_dx(double t, double cx1, double cx2)` |
+| `sample_bezier_x` | function | `src/interp.c:18` | `static double sample_bezier_x(double t, double cx1, double cx2)` |
+| `sample_bezier_y` | function | `src/interp.c:29` | `static double sample_bezier_y(double t, double cy1, double cy2)` |
+| `solve_bezier_t` | function | `src/interp.c:35` | `static double solve_bezier_t(double x, double cx1, double cx2)` |
+| `jdce_install` | function | `src/js_custom_elements.c:200` | `int jdce_install(JSContext *ctx)` |
+| `FREEDOM_JS_CUSTOM_ELEMENTS_H` | macro | `src/js_custom_elements.h:2` | `#define FREEDOM_JS_CUSTOM_ELEMENTS_H` |
+| `jdce_install` | function | `src/js_custom_elements.h:9` | `int jdce_install(JSContext *ctx);` |
+| `JD_COMPUTED_VALUE_MAX` | macro | `src/js_dom.c:414` | `#define JD_COMPUTED_VALUE_MAX` |
+| `JD_QSA_INLINE` | macro | `src/js_dom.c:477` | `#define JD_QSA_INLINE` |
+| `_GNU_SOURCE` | macro | `src/js_dom.c:10` | `#define _GNU_SOURCE` |
+| `attrNames` | function | `src/js_dom.c:697` | `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so      * a missing '...` |
+| `empty` | function | `src/js_dom.c:1436` | `* inert: DOM interface constructors are empty (instanceof yields false, harmless);` |
+| `enough` | function | `src/js_dom.c:1088` | `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...` |
+| `fails` | function | `src/js_dom.c:2093` | `* cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...` |
+| `geometry` | function | `src/js_dom.c:1438` | `* constant geometry (zero real leak);` |
+| `jd_flush_custom_elements` | function | `src/js_dom.c:2079` | `void jd_flush_custom_elements(js_context *ctx)` |
+| `jd_freeze_mutators` | function | `src/js_dom.c:611` | `static int jd_freeze_mutators(JSContext *jsctx)` |
+| `jd_get_cookies` | function | `src/js_dom.c:2264` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)` |
+| `jd_handle` | function | `src/js_dom.c:40` | `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)` |
+| `jd_handle_or_null` | function | `src/js_dom.c:47` | `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)` |
+| `jd_idx` | function | `src/js_dom.c:31` | `dom_index *jd_idx(JSContext *ctx)` |
+| `jd_install` | function | `src/js_dom.c:1985` | `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)` |
+| `jd_install_console` | function | `src/js_dom.c:2207` | `jd_status jd_install_console(js_context *ctx, fb_buffer *log)` |
+| `jd_is_mutator` | function | `src/js_dom.c:605` | `static int jd_is_mutator(const char *name)` |
+| `jd_method` | struct | `src/js_dom.c:456` | `` |
+| `jd_opaque_get` | function | `src/js_dom.c:27` | `jd_opaque *jd_opaque_get(JSContext *ctx)` |
+| `jd_query_list` | function | `src/js_dom.c:70` | `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)` |
+| `jd_rebind` | function | `src/js_dom.c:2069` | `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)` |
+| `jd_set_computed` | function | `src/js_dom.c:2287` | `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)` |
+| `jd_set_cookies` | function | `src/js_dom.c:2244` | `jd_status jd_set_cookies(js_context *ctx, const char *cookies)` |
+| `jd_set_geometry` | function | `src/js_dom.c:2298` | `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)` |
+| `js_env` | function | `src/js_dom.c:1444` | `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the  * document shim (uses...` |
+| `m_append_child` | function | `src/js_dom.c:264` | `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,                             ...` |
+| `m_attr_names` | function | `src/js_dom.c:538` | `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,                             in...` |
+| `m_child_node` | function | `src/js_dom.c:159` | `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_clone_node` | function | `src/js_dom.c:289` | `static JSValue m_clone_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_closest` | function | `src/js_dom.c:526` | `static JSValue m_closest(JSContext *ctx, JSValueConst this_val,                          int argc...` |
+| `m_computed` | function | `src/js_dom.c:420` | `static JSValue m_computed(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_create_char` | function | `src/js_dom.c:174` | `static JSValue m_create_char(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_create_element` | function | `src/js_dom.c:252` | `static JSValue m_create_element(JSContext *ctx, JSValueConst this_val,                           ...` |
+| `m_first_child` | function | `src/js_dom.c:143` | `static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,                              ...` |
+| `m_get_attribute` | function | `src/js_dom.c:122` | `static JSValue m_get_attribute(JSContext *ctx, JSValueConst this_val,                            ...` |
+| `m_get_by_class` | function | `src/js_dom.c:106` | `static JSValue m_get_by_class(JSContext *ctx, JSValueConst this_val,                             ...` |
+| `m_get_by_tag` | function | `src/js_dom.c:100` | `static JSValue m_get_by_tag(JSContext *ctx, JSValueConst this_val,                             in...` |
+| `m_get_element_by_id` | function | `src/js_dom.c:59` | `static JSValue m_get_element_by_id(JSContext *ctx, JSValueConst this_val,                        ...` |
+| `m_get_inner_html` | function | `src/js_dom.c:364` | `static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,                           ...` |
+| `m_get_title` | function | `src/js_dom.c:231` | `static JSValue m_get_title(JSContext *ctx, JSValueConst this_val,                            int ...` |
+| `m_insert_before` | function | `src/js_dom.c:299` | `static JSValue m_insert_before(JSContext *ctx, JSValueConst this_val,                            ...` |
+| `m_matches` | function | `src/js_dom.c:514` | `static JSValue m_matches(JSContext *ctx, JSValueConst this_val,                          int argc...` |
+| `m_move_children` | function | `src/js_dom.c:275` | `static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_next_sibling` | function | `src/js_dom.c:188` | `static JSValue m_next_sibling(JSContext *ctx, JSValueConst this_val,                             ...` |
+| `m_node_count` | function | `src/js_dom.c:53` | `static JSValue m_node_count(JSContext *ctx, JSValueConst this_val,                             in...` |
+| `m_node_kind` | function | `src/js_dom.c:152` | `static JSValue m_node_kind(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_parent` | function | `src/js_dom.c:135` | `static JSValue m_parent(JSContext *ctx, JSValueConst this_val,                         int argc, ...` |
+| `m_precedes` | function | `src/js_dom.c:196` | `static JSValue m_precedes(JSContext *ctx, JSValueConst this_val,                           int ar...` |
+| `m_query_selector` | function | `src/js_dom.c:465` | `static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,                           ...` |
+| `m_query_selector_all` | function | `src/js_dom.c:480` | `static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,                       ...` |
+| `m_rect` | function | `src/js_dom.c:399` | `static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_remove_attribute` | function | `src/js_dom.c:336` | `static JSValue m_remove_attribute(JSContext *ctx, JSValueConst this_val,                         ...` |
+| `m_remove_child` | function | `src/js_dom.c:311` | `static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,                             ...` |
+| `m_set_attribute` | function | `src/js_dom.c:320` | `static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,                            ...` |
+| `m_set_inner_html` | function | `src/js_dom.c:348` | `static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,                           ...` |
+| `m_set_text` | function | `src/js_dom.c:217` | `static JSValue m_set_text(JSContext *ctx, JSValueConst this_val,                           int ar...` |
+| `m_set_title` | function | `src/js_dom.c:239` | `static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,                            int ...` |
+| `m_sibling_node` | function | `src/js_dom.c:166` | `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
+| `m_tag_name` | function | `src/js_dom.c:112` | `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,                           int ar...` |
+| `m_text_content` | function | `src/js_dom.c:207` | `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,                             ...` |
+| `ms` | function | `src/js_dom.c:1235` | `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);` |
+| `scripts` | function | `src/js_dom.c:915` | `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...` |
+| `size` | function | `src/js_dom.c:1441` | `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);` |
+| `table` | function | `src/js_dom.c:645` | `* a table (dom.viewport() non-null);` |
+| `cancels` | function | `src/js_dom_ext.c:954` | `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);` |
+| `identity` | function | `src/js_dom_ext.c:105` | `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...` |
+| `jd_install_geolocation` | function | `src/js_dom_ext.c:1396` | `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)` |
+| `jd_install_indexeddb` | function | `src/js_dom_ext.c:1415` | `jd_status jd_install_indexeddb(js_context *ctx)` |
+| `jd_install_repl_api` | function | `src/js_dom_ext.c:1375` | `jd_status jd_install_repl_api(js_context *ctx)` |
+| `jd_set_repl_css` | function | `src/js_dom_ext.c:1383` | `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)` |
+| `jdx_install` | function | `src/js_dom_ext.c:1366` | `int jdx_install(JSContext *ctx)` |
+| `registration` | function | `src/js_dom_ext.c:482` | `* registration (options, attributeFilter, subtree) and delivered in one microtask. An  * observer...` |
+| `run` | function | `src/js_dom_ext.c:1301` | `static int run(JSContext *ctx, const char *src, size_t len, const char *name)` |
+| `FREEDOM_JS_DOM_EXT_H` | macro | `src/js_dom_ext.h:2` | `#define FREEDOM_JS_DOM_EXT_H` |
+| `jdx_install` | function | `src/js_dom_ext.h:10` | `int jdx_install(JSContext *ctx);` |
+| `FREEDOM_JS_DOM_INTERNAL_H` | macro | `src/js_dom_internal.h:2` | `#define FREEDOM_JS_DOM_INTERNAL_H` |
+| `jd_handle` | function | `src/js_dom_internal.h:14` | `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out);` |
+| `jd_idx` | function | `src/js_dom_internal.h:12` | `dom_index *jd_idx(JSContext *ctx);` |
+| `jd_opaque_get` | function | `src/js_dom_internal.h:11` | `jd_opaque *jd_opaque_get(JSContext *ctx);` |
+| `_GNU_SOURCE` | macro | `src/js_embed.c:6` | `#define _GNU_SOURCE` |
+| `jd_inject_video_shim` | function | `src/js_embed.c:243` | `jd_status jd_inject_video_shim(js_context *ctx)` |
+| `jd_process_iframes` | function | `src/js_embed.c:295` | `void jd_process_iframes(js_context *ctx, dom_index *idx,                         jd_fetch_fn fn, ...` |
+| `jd_video_from_scripts` | function | `src/js_embed.c:204` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts,                    ...` |
+| `scan_video_url` | function | `src/js_embed.c:257` | `static int scan_video_url(const char *body, size_t blen,                            char *out, si...` |
+| `try_create_iframe_from_script` | function | `src/js_embed.c:87` | `static int try_create_iframe_from_script(dom_index *idx,                                         ...` |
+| `PERF_ORIGIN_EPOCH` | macro | `src/js_env.c:466` | `#define PERF_ORIGIN_EPOCH` |
+| `_POSIX_C_SOURCE` | macro | `src/js_env.c:17` | `#define _POSIX_C_SOURCE` |
+| `build_crypto` | function | `src/js_env.c:468` | `static int build_crypto(JSContext *ctx, JSValueConst global)` |
+| `build_languages` | function | `src/js_env.c:264` | `static JSValue build_languages(JSContext *ctx, const char *langs)` |
+| `build_navigator` | function | `src/js_env.c:332` | `static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,         ...` |
+| `build_perf_navigation` | function | `src/js_env.c:510` | `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)` |
+| `build_perf_timing` | function | `src/js_env.c:496` | `static int build_perf_timing(JSContext *ctx, JSValueConst perf)` |
+| `build_performance` | function | `src/js_env.c:522` | `static int build_performance(JSContext *ctx, JSValueConst global, int exact)` |
+| `build_readback_obj` | function | `src/js_env.c:606` | `static int build_readback_obj(JSContext *ctx, JSValueConst global,                               ...` |
+| `build_screen` | function | `src/js_env.c:424` | `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)` |
+| `def_fn` | function | `src/js_env.c:257` | `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,                   JSCFuncti...` |
+| `def_int` | function | `src/js_env.c:253` | `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)` |
+| `def_str` | function | `src/js_env.c:249` | `static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const char *s)` |
+| `def_val` | function | `src/js_env.c:243` | `static int def_val(JSContext *ctx, JSValueConst obj, const char *name, JSValue v)` |
+| `je_install` | function | `src/js_env.c:619` | `je_status je_install(js_context *ctx, int screen_w, int screen_h)` |
+| `je_install_canvas` | function | `src/js_env.c:649` | `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)` |
+| `je_install_identity` | function | `src/js_env.c:623` | `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,                       ...` |
+| `je_install_identity_trusted` | function | `src/js_env.c:628` | `je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_h,               ...` |
+| `m_captured` | function | `src/js_env.c:299` | `static JSValue m_captured(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv,   ...` |
+| `m_date_now` | function | `src/js_env.c:51` | `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,                           int ar...` |
+| `m_date_now_exact` | function | `src/js_env.c:73` | `static JSValue m_date_now_exact(JSContext *ctx, JSValueConst this_val,                           ...` |
+| `m_empty_array` | function | `src/js_env.c:99` | `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,                              ...` |
+| `m_get_random_values` | function | `src/js_env.c:117` | `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,                        ...` |
+| `m_perf_now` | function | `src/js_env.c:59` | `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,                           int ar...` |
+| `m_perf_now_exact` | function | `src/js_env.c:79` | `static JSValue m_perf_now_exact(JSContext *ctx, JSValueConst this_val,                           ...` |
+| `m_random_uuid` | function | `src/js_env.c:147` | `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,                              ...` |
+| `m_subtle_digest` | function | `src/js_env.c:190` | `static JSValue m_subtle_digest(JSContext *ctx, JSValueConst this_val,                            ...` |
+| `m_subtle_null` | function | `src/js_env.c:164` | `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,                              ...` |
+| `make_readback` | function | `src/js_env.c:598` | `static JSValue make_readback(JSContext *ctx, uint64_t key)` |
+| `monotonic_ms` | function | `src/js_env.c:43` | `static double monotonic_ms(void)` |
+| `override_date_now` | function | `src/js_env.c:554` | `static int override_date_now(JSContext *ctx, JSValueConst global, int exact)` |
+| `primitives` | function | `src/js_env.c:6` | `* the pure anti_fp primitives (one audited source of normalized constants);` |
+| `promote_to_getters` | function | `src/js_env.c:307` | `static int promote_to_getters(JSContext *ctx, JSValueConst vals, JSValueConst proto)` |
+| `reject_named` | function | `src/js_env.c:173` | `static JSValue reject_named(JSContext *ctx, const char *name, const char *msg)` |
+| `wall_clock_ms` | function | `src/js_env.c:37` | `static uint64_t wall_clock_ms(void)` |
+| `_GNU_SOURCE` | macro | `src/js_events.c:6` | `#define _GNU_SOURCE` |
+| `jd_click_state` | struct | `src/js_events.c:26` | `` |
+| `jd_click_state_free` | function | `src/js_events.c:35` | `void jd_click_state_free(jd_click_state *s)` |
+| `jd_click_state_new` | function | `src/js_events.c:30` | `jd_click_state *jd_click_state_new(void)` |
+| `jd_escape_js_str` | function | `src/js_events.c:92` | `static size_t jd_escape_js_str(const char *src, char *dst, size_t dstsz)` |
+| `jd_eval_default_action` | function | `src/js_events.c:53` | `static int jd_eval_default_action(JSContext *jsctx, const char *src, size_t n,                   ...` |
+| `jd_fire_click` | function | `src/js_events.c:67` | `int jd_fire_click(js_context *ctx, dom_node_id node_id)` |
+| `jd_fire_mouse_event` | function | `src/js_events.c:164` | `int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,                         const char ...` |
+| `jd_fire_submit` | function | `src/js_events.c:79` | `int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)` |
+| `jd_install_events` | function | `src/js_events.c:39` | `jd_status jd_install_events(js_context *ctx, jd_click_state *state)` |
+| `_GNU_SOURCE` | macro | `src/js_fetch.c:6` | `#define _GNU_SOURCE` |
+| `jd_install_xhr` | function | `src/js_fetch.c:336` | `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)` |
+| `jd_install_xhr_ex` | function | `src/js_fetch.c:361` | `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,                    ...` |
+| `jd_net_deliver` | function | `src/js_fetch.c:340` | `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,      ...` |
+| `jd_pack_ptr` | function | `src/js_fetch.c:29` | `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` |
+| `jd_reply_object` | function | `src/js_fetch.c:44` | `static JSValue jd_reply_object(JSContext *ctx, int rc, int status, const char *rbody,            ...` |
+| `jd_unpack_ptr` | function | `src/js_fetch.c:34` | `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)` |
+| `m_host_fetch` | function | `src/js_fetch.c:74` | `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,                             in...` |
+| `m_host_fetch_async` | function | `src/js_fetch.c:105` | `static JSValue m_host_fetch_async(JSContext *ctx, JSValueConst this_val,                         ...` |
+| `send` | function | `src/js_fetch.c:128` | `* callbacks fire right after send();` |
 | `task` | function | `src/js_fetch.c:312` | `* current task (the page never waits on it);` |
 | `JG_INDEX_SLOTS` | macro | `src/js_geom.c:14` | `#define JG_INDEX_SLOTS` |
 | `JG_SLOT_EMPTY` | macro | `src/js_geom.c:15` | `#define JG_SLOT_EMPTY` |
@@ -168,6 +387,20 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `ls_seal` | function | `src/local_store.c:239` | `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,                   const uint8_t *p...` |
 | `ls_seal_passphrase` | function | `src/local_store.c:263` | `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,           ...` |
 | `seal_core` | function | `src/local_store.c:171` | `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,                     ...` |
+| `drop` | function | `src/mask_cache.c:28` | `static void drop(mkc_cache *c, mkc_entry *e)` |
+| `find` | function | `src/mask_cache.c:36` | `static mkc_entry *find(mkc_cache *c, const mkc_key *k)` |
+| `key` | type_alias | `src/mask_cache.c:7` | `typedef struct mkc_entry { mkc_key key;` |
+| `key_eq` | function | `src/mask_cache.c:22` | `static int key_eq(const mkc_key *a, const mkc_key *b)` |
+| `mkc_bytes` | function | `src/mask_cache.c:111` | `size_t mkc_bytes(const mkc_cache *c)` |
+| `mkc_cache` | struct | `src/mask_cache.c:15` | `` |
+| `mkc_clear` | function | `src/mask_cache.c:60` | `void mkc_clear(mkc_cache *c)` |
+| `mkc_count` | function | `src/mask_cache.c:113` | `size_t mkc_count(const mkc_cache *c)` |
+| `mkc_entry` | struct | `src/mask_cache.c:7` | `` |
+| `mkc_free` | function | `src/mask_cache.c:65` | `void mkc_free(mkc_cache *c)` |
+| `mkc_get` | function | `src/mask_cache.c:72` | `const unsigned char *mkc_get(mkc_cache *c, const mkc_key *k, int *stride)` |
+| `mkc_new` | function | `src/mask_cache.c:49` | `mkc_cache *mkc_new(size_t byte_budget, size_t max_entries)` |
+| `mkc_put` | function | `src/mask_cache.c:81` | `unsigned char *mkc_put(mkc_cache *c, const mkc_key *k, int stride)` |
+| `oldest` | function | `src/mask_cache.c:42` | `static mkc_entry *oldest(mkc_cache *c)` |
 | `_POSIX_C_SOURCE` | macro | `src/media_decoder.c:23` | `#define _POSIX_C_SOURCE` |
 | `av_rescale_q` | function | `src/media_decoder.c:217` | `return av_rescale_q(f->pts, tb, (AVRational)` |
 | `decode_segment` | function | `src/media_decoder.c:276` | `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)` |
@@ -263,238 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `URL` | function | `src/page_view.c:7003` | `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
 | `_POSIX_C_SOURCE` | macro | `src/page_view.c:10` | `#define _POSIX_C_SOURCE` |
 | `acquire_page_sheet` | function | `src/page_view.c:4932` | `static shc_sheet *acquire_page_sheet(lxb_dom_node_t *root, const char *extern_css,               ...` |
-| `address` | function | `src/page_view.c:1274` | `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...` |
-| `after_pending_emit` | function | `src/page_view.c:1958` | `static pv_status after_pending_emit(pv_view *v, pv_container_reg *reg, pv_item_track *items,     ...` |
-| `annotate_flow_run` | function | `src/page_view.c:1909` | `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,           ...` |
-| `annotate_replaced_run` | function | `src/page_view.c:5781` | `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,                             ...` |
-| `ascii_ieq` | function | `src/page_view.c:4991` | `static int ascii_ieq(const char *s, const char *lit)` |
-| `attr_dup` | function | `src/page_view.c:5003` | `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` |
-| `attributes` | function | `src/page_view.c:4882` | `* carries those attributes (spec/css.md, "Root matcher"). */ static int root_els_match(void *ctx,...` |
-| `band` | function | `src/page_view.c:6677` | `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...` |
-| `block` | function | `src/page_view.c:7280` | `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break \|\| block...` |
-| `block_id` | function | `src/page_view.c:6862` | `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...` |
-| `border_side_cleared` | function | `src/page_view.c:1621` | `static int border_side_cleared(int width, int style)` |
-| `box_reg_free` | function | `src/page_view.c:2025` | `static void box_reg_free(pv_box_reg *r)` |
-| `box_reg_id` | function | `src/page_view.c:2285` | `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,            ...` |
-| `box_reg_id_ex` | function | `src/page_view.c:2999` | `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,         ...` |
-| `boxdef_from_style` | function | `src/page_view.c:2034` | `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` |
-| `builder` | function | `src/page_view.c:3124` | `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box  * (the ...` |
-| `cached_element_style` | function | `src/page_view.c:2895` | `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,             ...` |
-| `cached_element_style_ref` | function | `src/page_view.c:2810` | `static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const css_sheet *sheet,  ...` |
-| `cached_pseudo_style` | function | `src/page_view.c:3059` | `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,              ...` |
-| `causes_block_break` | function | `src/page_view.c:1115` | `static int causes_block_break(lxb_tag_id_t t, css_display display)` |
-| `cell_has_nested_table` | function | `src/page_view.c:5441` | `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` |
-| `cell_is_grid_item` | function | `src/page_view.c:5575` | `static int cell_is_grid_item(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,             ...` |
-| `cell_is_rich` | function | `src/page_view.c:5539` | `static int cell_is_rich(const lxb_dom_node_t *cell)` |
-| `cell_kind` | function | `src/page_view.c:5566` | `static unsigned cell_kind(pv_flow_reg *fr, const lxb_dom_node_t *cell)` |
-| `cell_span_attr` | function | `src/page_view.c:5465` | `static int cell_span_attr(const lxb_dom_node_t *cell, const char *name, size_t name_len,         ...` |
-| `chain` | type_alias | `src/page_view.c:2377` | `typedef struct pv_var_node { cvr_chain chain;` |
-| `child` | function | `src/page_view.c:1282` | `* child (NULL = anonymous item: text directly inside the container);` |
-| `children_all_inline_block` | function | `src/page_view.c:3270` | `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,            ...` |
-| `classify_input` | function | `src/page_view.c:5085` | `static pv_input_type classify_input(const char *type)` |
-| `col_free_share` | function | `src/page_view.c:2956` | `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...` |
-| `col_has_free_space` | function | `src/page_view.c:3323` | `static int col_has_free_space(const css_style *cs)` |
-| `collapse_ws` | function | `src/page_view.c:4626` | `static char *collapse_ws(const char *s, size_t n)` |
-| `collect_page_css` | function | `src/page_view.c:5866` | `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,                      ...` |
-| `collect_text` | function | `src/page_view.c:5061` | `static char *collect_text(const lxb_dom_node_t *el)` |
-| `cols` | type_alias | `src/page_view.c:1284` | `typedef struct pv_cont_info { int id, display, gap, justify, cols;` |
-| `column_gap_candidate` | function | `src/page_view.c:3439` | `static int column_gap_candidate(const lxb_dom_node_t *el, const css_sheet *sheet,                ...` |
-| `cont_def_reset` | function | `src/page_view.c:1782` | `static void cont_def_reset(pv_cont_def *d)` |
-| `cont_reg_free` | function | `src/page_view.c:1815` | `static void cont_reg_free(pv_container_reg *reg)` |
-| `cont_reg_init` | function | `src/page_view.c:1802` | `static int cont_reg_init(pv_container_reg *reg, size_t cap)` |
-| `container` | function | `src/page_view.c:4277` | `* membership in this container (and none in any container further out,                  * since i...` |
-| `container_id` | function | `src/page_view.c:1821` | `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` |
-| `content` | function | `src/page_view.c:1213` | `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);` |
-| `control` | function | `src/page_view.c:6433` | `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);` |
-| `cp1252_to_ucs` | function | `src/page_view.c:95` | `static unsigned int cp1252_to_ucs(unsigned char c)` |
-| `css_has_boxdeco` | function | `src/page_view.c:1635` | `static int css_has_boxdeco(const css_style *cs)` |
-| `css_has_hbox` | function | `src/page_view.c:1540` | `static int css_has_hbox(const css_style *cs)` |
-| `css_has_hmargin` | function | `src/page_view.c:3475` | `static int css_has_hmargin(const css_style *cs)` |
-| `css_has_position` | function | `src/page_view.c:1614` | `static int css_has_position(const css_style *cs)` |
-| `css_hbox_resolve` | function | `src/page_view.c:1561` | `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)` |
-| `css_inline_boxdeco` | function | `src/page_view.c:4111` | `css_inline_boxdeco(cs) &&                            !is_layout_item(p, sheet, style_cache))` |
-| `css_replaced_h_fixed` | function | `src/page_view.c:3106` | `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,                   ...` |
-| `css_to_fx_justify` | function | `src/page_view.c:3153` | `static int css_to_fx_justify(css_justify j)` |
-| `css_width_declared` | function | `src/page_view.c:2983` | `static int css_width_declared(const css_style *cs)` |
-| `dimensions` | function | `src/page_view.c:4823` | `* viewport dimensions (data: inline detection, <picture> <source> scanning). */ static void srcse...` |
-| `dup_n` | function | `src/page_view.c:156` | `static char *dup_n(const char *s, size_t n)` |
-| `element_is_content_leaf` | function | `src/page_view.c:3703` | `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,              ...` |
-| `element_is_content_leaf_d` | function | `src/page_view.c:3663` | `static int element_is_content_leaf_d(const lxb_dom_node_t *n, const css_sheet *sheet,            ...` |
-| `engine` | function | `src/page_view.c:7568` | `* layout engine (contiguous item gather) drops every cell onto its own row and          * a 2-col...` |
-| `find_body` | function | `src/page_view.c:4855` | `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)` |
-| `find_root_els` | function | `src/page_view.c:4868` | `static pv_root_els find_root_els(lxb_dom_node_t *root)` |
-| `flex_column_flows_as_block` | function | `src/page_view.c:3337` | `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,             ...` |
-| `flex_column_flows_as_block_uncached` | function | `src/page_view.c:3346` | `static int flex_column_flows_as_block_uncached(const lxb_dom_node_t *el, const css_style *cs,    ...` |
-| `float` | function | `src/page_view.c:4539` | `* genuinely nested float (oid != id) takes the deferred-column path. */     if (cont->float_oid =...` |
-| `flow` | function | `src/page_view.c:7459` | `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...` |
-| `fold_column_gap` | function | `src/page_view.c:3414` | `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,                             ...` |
-| `font_color_attr` | function | `src/page_view.c:1253` | `static int font_color_attr(lxb_dom_element_t *el)` |
-| `form_for` | function | `src/page_view.c:5032` | `static int form_for(const form_table *ft, const lxb_dom_node_t *n,                     const lxb_...` |
-| `form_rec` | struct | `src/page_view.c:4973` | `` |
-| `form_table` | struct | `src/page_view.c:4979` | `` |
-| `forms_add` | function | `src/page_view.c:5012` | `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` |
-| `forms_free` | function | `src/page_view.c:4984` | `static void forms_free(form_table *ft)` |
-| `generates_box` | function | `src/page_view.c:1096` | `static int generates_box(lxb_tag_id_t t, css_display display)` |
-| `generates_box_style` | function | `src/page_view.c:1108` | `static int generates_box_style(lxb_tag_id_t t, const css_style *cs)` |
-| `glyphs` | function | `src/page_view.c:2187` | `* glyphs (the runs carry it as their fill source);` |
-| `heading_level` | function | `src/page_view.c:1175` | `static int heading_level(lxb_tag_id_t t)` |
-| `height` | function | `src/page_view.c:6704` | `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
-| `here` | function | `src/page_view.c:2136` | `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3...` |
-| `id` | function | `src/page_view.c:1306` | `* group id (-1 = the nearest IS the outermost: single-level float, the * painter's old path);` |
-| `ignored` | function | `src/page_view.c:695` | `* source is ignored (fail-visible: never invisible text from half a      * pattern). A real text-...` |
-| `in_boilerplate_subtree` | function | `src/page_view.c:5716` | `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
-| `in_closed_details_subtree` | function | `src/page_view.c:5731` | `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
-| `in_collected_cell` | function | `src/page_view.c:5585` | `static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                ...` |
-| `in_hidden_subtree` | function | `src/page_view.c:5689` | `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                ...` |
-| `in_mixed_line` | function | `src/page_view.c:3222` | `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,                        ...` |
-| `in_skipped_subtree` | function | `src/page_view.c:1216` | `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,               ...` |
-| `inherited_text_color` | function | `src/page_view.c:2962` | `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,              ...` |
-| `inside` | function | `src/page_view.c:6123` | `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...` |
-| `is_block_like` | function | `src/page_view.c:1045` | `static int is_block_like(lxb_tag_id_t t, css_display display)` |
-| `is_block_like_style` | function | `src/page_view.c:1084` | `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` |
-| `is_block_tag` | function | `src/page_view.c:1020` | `static int is_block_tag(lxb_tag_id_t t)` |
-| `is_bold_tag` | function | `src/page_view.c:3172` | `static int is_bold_tag(lxb_tag_id_t t)` |
-| `is_float_container_style` | function | `src/page_view.c:3243` | `static int is_float_container_style(const css_style *cs)` |
-| `is_inline_container_style` | function | `src/page_view.c:2975` | `static int is_inline_container_style(const css_style *cs)` |
-| `is_inline_level_style` | function | `src/page_view.c:3214` | `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` |
-| `is_italic_tag` | function | `src/page_view.c:3177` | `static int is_italic_tag(lxb_tag_id_t t)` |
-| `is_layout_container` | function | `src/page_view.c:3449` | `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,                    ...` |
-| `is_plain_wrapper` | function | `src/page_view.c:3651` | `static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs)` |
-| `is_skipped_tag` | function | `src/page_view.c:1187` | `static int is_skipped_tag(lxb_tag_id_t t)` |
-| `it` | function | `src/page_view.c:3298` | `* without it (minified markup) keeps the row gapless -- the mixed case is a known limit. */ stati...` |
-| `item_ordinal` | function | `src/page_view.c:1396` | `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` |
-| `item_sizes_itself` | function | `src/page_view.c:3504` | `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,                      ...` |
-| `item_space_before` | function | `src/page_view.c:1381` | `static int item_space_before(const lxb_dom_node_t *item)` |
-| `li_is_list_item` | function | `src/page_view.c:3520` | `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,                     ...` |
-| `li_ordinal` | function | `src/page_view.c:5256` | `static int li_ordinal(const lxb_dom_node_t *li)` |
-| `line` | function | `src/page_view.c:7577` | `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);` |
-| `list_marker` | function | `src/page_view.c:5307` | `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,                   ...` |
-| `margins` | function | `src/page_view.c:4150` | `* margins (boxdef_from_style) and the painter applies them when                          * it ope...` |
-| `mb` | type_alias | `src/page_view.c:1420` | `typedef struct pv_box_info { int l, r, w, center, mt, mb;` |
-| `media_has_source` | function | `src/page_view.c:3689` | `static int media_has_source(const lxb_dom_node_t *n)` |
-| `nearest_table` | function | `src/page_view.c:5370` | `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,  ...` |
-| `next_skip` | function | `src/page_view.c:5455` | `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` |
-| `node_next` | function | `src/page_view.c:1010` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
-| `node_table_role` | function | `src/page_view.c:5352` | `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
-| `node_tag` | function | `src/page_view.c:1208` | `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)` |
-| `none` | function | `src/page_view.c:3004` | `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...` |
-| `opens` | function | `src/page_view.c:4058` | `* painter applies it when the box opens (band/shared context) — seeding              * it onto ru...` |
-| `outermost` | function | `src/page_view.c:4001` | `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);` |
-| `paints` | function | `src/page_view.c:1128` | `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas  * vacías"). Comment a...` |
-| `parent_is_author_container` | function | `src/page_view.c:2990` | `static int parent_is_author_container(const lxb_dom_node_t *node, const css_sheet *sheet,        ...` |
-| `parent_is_table_internal` | function | `src/page_view.c:5409` | `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
-| `parse_dim` | function | `src/page_view.c:4665` | `static int parse_dim(const lxb_char_t *s, size_t len)` |
-| `positions` | function | `src/page_view.c:145` | `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);` |
-| `present` | function | `src/page_view.c:4682` | `* when no width descriptors are present (density-only or bare URLs). */ static void srcset_best_u...` |
-| `pseudo_box_reg` | function | `src/page_view.c:2314` | `static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,                    ...` |
-| `pseudo_generates_box` | function | `src/page_view.c:2335` | `static int pseudo_generates_box(const css_style *ps)` |
-| `pseudo_is_block` | function | `src/page_view.c:2352` | `static int pseudo_is_block(const css_style *ps)` |
-| `pseudo_is_oof` | function | `src/page_view.c:2348` | `static int pseudo_is_oof(const css_style *ps)` |
-| `pseudo_key` | function | `src/page_view.c:2358` | `static const void *pseudo_key(const lxb_dom_node_t *el, int which)` |
-| `pv_add_box_def` | function | `src/page_view.c:958` | `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)` |
-| `pv_add_cont_def` | function | `src/page_view.c:936` | `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)` |
-| `pv_after_pending` | struct | `src/page_view.c:1944` | `` |
-| `pv_append` | function | `src/page_view.c:441` | `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,                     c...` |
-| `pv_append_image` | function | `src/page_view.c:476` | `pv_status pv_append_image(pv_view *v, int heading, int block_break,                           con...` |
-| `pv_append_input` | function | `src/page_view.c:506` | `pv_status pv_append_input(pv_view *v, int heading, int block_break,                           pv_...` |
-| `pv_append_svg` | function | `src/page_view.c:582` | `pv_status pv_append_svg(pv_view *v, int heading, int block_break,                         const c...` |
-| `pv_append_video` | function | `src/page_view.c:546` | `pv_status pv_append_video(pv_view *v, int heading, int block_break,                           con...` |
-| `pv_apply_pres_hints` | function | `src/page_view.c:2710` | `static void pv_apply_pres_hints(lxb_dom_element_t *el, css_style *cs)` |
-| `pv_at` | function | `src/page_view.c:993` | `const pv_run *pv_at(const pv_view *v, size_t i)` |
-| `pv_box_at` | function | `src/page_view.c:1002` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i)` |
-| `pv_box_count` | function | `src/page_view.c:998` | `size_t pv_box_count(const pv_view *v)` |
-| `pv_box_info` | struct | `src/page_view.c:1420` | `` |
-| `pv_box_reg` | struct | `src/page_view.c:1986` | `` |
-| `pv_build` | function | `src/page_view.c:5751` | `pv_status pv_build(const hp_document *doc, pv_view **out)` |
-| `pv_build_cached` | function | `src/page_view.c:5999` | `pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,                    ...` |
-| `pv_build_cq` | function | `src/page_view.c:6006` | `pv_status pv_build_cq(const hp_document *doc, int js_enabled, int reader,                       i...` |
-| `pv_build_ex` | function | `src/page_view.c:5755` | `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)` |
-| `pv_build_full` | function | `src/page_view.c:5759` | `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,                      ...` |
-| `pv_build_live` | function | `src/page_view.c:6013` | `pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,                      ...` |
-| `pv_build_styled` | function | `src/page_view.c:5992` | `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,                    ...` |
-| `pv_cache_find` | function | `src/page_view.c:2534` | `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
-| `pv_cache_put` | function | `src/page_view.c:2554` | `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,                      ...` |
-| `pv_cache_reindex` | function | `src/page_view.c:2452` | `static void pv_cache_reindex(pv_style_cache *c)` |
-| `pv_cached_font_px` | function | `src/page_view.c:2549` | `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
-| `pv_cell_table` | function | `src/page_view.c:2694` | `static lxb_dom_element_t *pv_cell_table(lxb_dom_element_t *el)` |
-| `pv_cnt_attr` | function | `src/page_view.c:5908` | `static const char *pv_cnt_attr(void *ctx, const char *name)` |
-| `pv_cnt_attr_ctx` | struct | `src/page_view.c:5903` | `` |
-| `pv_cnt_enter` | function | `src/page_view.c:5932` | `static int pv_cnt_enter(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,     ...` |
-| `pv_cnt_exit` | function | `src/page_view.c:5956` | `static void pv_cnt_exit(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,     ...` |
-| `pv_cnt_resolve_field` | function | `src/page_view.c:5921` | `static void pv_cnt_resolve_field(const cnt_state *st, lxb_dom_element_t *el, char *field)` |
-| `pv_computed` | struct | `src/page_view.c:7765` | `` |
-| `pv_computed_free` | function | `src/page_view.c:7811` | `void pv_computed_free(pv_computed *pc)` |
-| `pv_computed_get` | function | `src/page_view.c:7789` | `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,                     do...` |
-| `pv_computed_new` | function | `src/page_view.c:7770` | `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,   ...` |
-| `pv_computed_new_cached` | function | `src/page_view.c:7775` | `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,                    ...` |
-| `pv_cont_at` | function | `src/page_view.c:953` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)` |
-| `pv_cont_count` | function | `src/page_view.c:949` | `size_t pv_cont_count(const pv_view *v)` |
-| `pv_cont_info` | struct | `src/page_view.c:1284` | `` |
-| `pv_container_reg` | struct | `src/page_view.c:1768` | `` |
-| `pv_content_hidden` | function | `src/page_view.c:1441` | `int pv_content_hidden(int box_hidden, int run_visibility)` |
-| `pv_control_frame_cleared` | function | `src/page_view.c:1627` | `static int pv_control_frame_cleared(const css_style *cs)` |
-| `pv_count` | function | `src/page_view.c:989` | `size_t pv_count(const pv_view *v)` |
-| `pv_counters_pass` | function | `src/page_view.c:5968` | `static void pv_counters_pass(lxb_dom_node_t *root, const css_sheet *sheet, pv_style_cache *cache)` |
-| `pv_cq_push` | function | `src/page_view.c:2627` | `static const cmq_container *pv_cq_push(pv_style_cache *cache, const lxb_dom_node_t *node,        ...` |
-| `pv_css_drops` | function | `src/page_view.c:7736` | `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,                        const cha...` |
-| `pv_def_h` | struct | `src/page_view.c:2386` | `` |
-| `pv_element_has_before` | function | `src/page_view.c:3597` | `static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,                      ...` |
-| `pv_flow_reg` | struct | `src/page_view.c:3708` | `` |
-| `pv_flow_reg` | struct | `src/page_view.c:5332` | `` |
-| `pv_frame_marked` | function | `src/page_view.c:4656` | `static int pv_frame_marked(const lxb_dom_node_t *n)` |
-| `pv_free` | function | `src/page_view.c:971` | `void pv_free(pv_view *v)` |
-| `pv_hint_attr` | function | `src/page_view.c:2673` | `static const char *pv_hint_attr(void *ctx, const char *name, size_t *len)` |
-| `pv_item_track` | struct | `src/page_view.c:1367` | `` |
-| `pv_mauto_of` | function | `src/page_view.c:1554` | `static int pv_mauto_of(const css_style *cs)` |
-| `pv_new` | function | `src/page_view.c:437` | `pv_view *pv_new(void)` |
-| `pv_node_map` | struct | `src/page_view.c:356` | `` |
-| `pv_node_map_build` | function | `src/page_view.c:426` | `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root,                         ...` |
-| `pv_node_map_free` | function | `src/page_view.c:374` | `static void pv_node_map_free(pv_node_map *m)` |
-| `pv_node_map_init` | function | `src/page_view.c:364` | `static int pv_node_map_init(pv_node_map *m)` |
-| `pv_parent_element` | function | `src/page_view.c:2666` | `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` |
-| `pv_placeholder_color` | function | `src/page_view.c:920` | `int pv_placeholder_color(const css_style *ph)` |
-| `pv_ptr_hash` | function | `src/page_view.c:2444` | `static size_t pv_ptr_hash(const void *p)` |
-| `pv_ptrmap` | struct | `src/page_view.c:302` | `` |
-| `pv_ptrmap_free` | function | `src/page_view.c:348` | `static void pv_ptrmap_free(pv_ptrmap *m)` |
-| `pv_ptrmap_get` | function | `src/page_view.c:318` | `static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out)` |
-| `pv_ptrmap_put` | function | `src/page_view.c:326` | `static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v)` |
-| `pv_ptrmap_slot` | function | `src/page_view.c:308` | `static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k)` |
-| `pv_root_els` | struct | `src/page_view.c:4864` | `` |
-| `pv_root_insets` | function | `src/page_view.c:5856` | `void pv_root_insets(const css_style *body, int out[4])` |
-| `pv_set_bgcolor` | function | `src/page_view.c:628` | `void pv_set_bgcolor(pv_view *v, int bg_rgb)` |
-| `pv_set_block_id` | function | `src/page_view.c:851` | `void pv_set_block_id(pv_view *v, int block_id)` |
-| `pv_set_block_node` | function | `src/page_view.c:871` | `void pv_set_block_node(pv_view *v, dom_node_id id)` |
-| `pv_set_box` | function | `src/page_view.c:810` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,                 int box_center, int ...` |
-| `pv_set_box_maxw` | function | `src/page_view.c:833` | `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct)` |
-| `pv_set_box_pct` | function | `src/page_view.c:822` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,                     ...` |
-| `pv_set_br_line` | function | `src/page_view.c:876` | `void pv_set_br_line(pv_view *v, int br_line)` |
-| `pv_set_color` | function | `src/page_view.c:623` | `void pv_set_color(pv_view *v, int fg_rgb)` |
-| `pv_set_cont_box` | function | `src/page_view.c:750` | `void pv_set_cont_box(pv_view *v, int cont_box_id)` |
-| `pv_set_cont_item` | function | `src/page_view.c:772` | `void pv_set_cont_item(pv_view *v, int cont_item)` |
-| `pv_set_container` | function | `src/page_view.c:710` | `void pv_set_container(pv_view *v, int cont_id, int cont_display,                       int cont_g...` |
-| `pv_set_emphasis` | function | `src/page_view.c:611` | `void pv_set_emphasis(pv_view *v, int bold, int italic)` |
-| `pv_set_flex` | function | `src/page_view.c:754` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,                  int...` |
-| `pv_set_flex_mauto` | function | `src/page_view.c:766` | `void pv_set_flex_mauto(pv_view *v, int mauto)` |
-| `pv_set_float` | function | `src/page_view.c:788` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,                 int ...` |
-| `pv_set_float_w` | function | `src/page_view.c:777` | `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box,                     ...` |
-| `pv_set_grad_text` | function | `src/page_view.c:644` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)` |
-| `pv_set_grid` | function | `src/page_view.c:736` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)` |
-| `pv_set_grid_area` | function | `src/page_view.c:729` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start)` |
-| `pv_set_grid_rows` | function | `src/page_view.c:746` | `void pv_set_grid_rows(pv_view *v, int grid_rows)` |
-| `pv_set_indent` | function | `src/page_view.c:618` | `void pv_set_indent(pv_view *v, int indent)` |
-| `pv_set_input_checked` | function | `src/page_view.c:881` | `void pv_set_input_checked(pv_view *v, int checked)` |
-| `pv_set_input_placeholder` | function | `src/page_view.c:886` | `void pv_set_input_placeholder(pv_view *v, int ph_color)` |
-| `pv_set_input_select_opts` | function | `src/page_view.c:928` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts)` |
-| `pv_set_justify_self` | function | `src/page_view.c:866` | `void pv_set_justify_self(pv_view *v, int justify_self)` |
-| `pv_set_node_id` | function | `src/page_view.c:846` | `void pv_set_node_id(pv_view *v, dom_node_id node_id)` |
-| `pv_set_oof` | function | `src/page_view.c:861` | `void pv_set_oof(pv_view *v, int oof)` |
-| `pv_set_own_box` | function | `src/page_view.c:856` | `void pv_set_own_box(pv_view *v, int box_id)` |
-| `pv_set_row_span` | function | `src/page_view.c:725` | `void pv_set_row_span(pv_view *v, int row_span)` |
-| `pv_set_text_ext` | function | `src/page_view.c:652` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)` |
-| `pv_set_text_style` | function | `src/page_view.c:633` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,                 ...` |
-| `pv_set_ua_tag` | function | `src/page_view.c:840` | `void pv_set_ua_tag(pv_view *v, int ua_tag)` |
-| `pv_style_cache` | struct | `src/page_view.c:2400` | `` |
-| `pv_style_cache_free` | function | `src/page_view.c:2488` | `static void pv_style_cache_free(pv_style_cache *c)` |
-| `pv_style_cache_reserve` | function | `src/page_view.c:2509` | `static void pv_style_cache_reserve(pv_style_cache *c, size_t n)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

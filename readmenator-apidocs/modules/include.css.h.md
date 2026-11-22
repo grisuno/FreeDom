@@ -2199,7 +2199,7 @@ emitter of a <length-percentage> writes both slots, so a more specific
 silently combining with it.
 
 This replaces the ad-hoc width_pct/max_width_pct pair: a percentage is a
-property of the VALUE TYPE, not of `width`.
+property of the VALUE TYPE, not of [`width`](include.chrome_layout.h.md#width).
 
 ---
 

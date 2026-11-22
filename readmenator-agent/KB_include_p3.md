@@ -1,6 +1,102 @@
 # Subsystem: include (page 3 of 6)
 Previous: [KB_include_p2.md](KB_include_p2.md)
 
+## include/flex_layout.h
+- Doc: fx_item: Upper bound on items per flex line / grid columns.
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `fx_item` (struct, line 40)
+  - `fx_result` (struct, line 48)
+  - `fx_area_map` (struct, line 154)
+  - `fx_float_rect` (struct, line 224)
+  - `fx_justify` (enum, line 30)
+  - `fx_status` (enum, line 53)
+  - `basis` (type_alias, line 40) `typedef struct fx_item { double basis;`
+  - `pos` (type_alias, line 48) `typedef struct fx_result { double pos;`
+  - `cols` (type_alias, line 154) `typedef struct fx_area_map { int rows, cols;`
+  - `bottom` (type_alias, line 224) `typedef struct fx_float_rect { double top, bottom;`
+  - `size` (function, line 60) `* content size (px);`
+  - `out` (function, line 62) `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item...`
+  - `fx_grid_cell` (function, line 74) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);`
+  - `number` (function, line 106) `* line number (negative counts from the end). */ #define FX_GL_AUTO 0 #define FX_GL_SPAN_BASE (1 << 20) #define...`
+  - `fx_grid_line_parse` (function, line 117) `int fx_grid_line_parse(const char *v, int *start, int *end);`
+  - `fx_grid_line_resolve` (function, line 122) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);`
+  - `fx_autofill_count` (function, line 129) `size_t fx_autofill_count(double avail, double gap, double minw);`
+  - `fx_grid_column_count` (function, line 139) `int fx_grid_column_count(int flow, int cols, int rows, size_t items);`
+  - `fx_grid_area_hash` (function, line 163) `unsigned fx_grid_area_hash(const char *name);`
+  - `offset` (function, line 181) `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...`
+  - `required` (function, line 194) `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
+  - `widths` (function, line 204) `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...`
+  - `FX_ERR_NULL_ARG` (function, line 238) `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
+  - `space` (function, line 244) `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...`
+  - `fx_auto_min_size` (function, line 275) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
+  - `fx_justify_name` (function, line 331) `const char *fx_justify_name(fx_justify j);`
+  - `height` (function, line 337) `* used height (h_out);`
+  - `it` (function, line 354) `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
+  - `win` (function, line 362) `* margins win (both = centre, left only = end);`
+  - `fx_cross_offset` (function, line 364) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
+  - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2) `#define FREEDOM_FLEX_LAYOUT_H`
+  - `FX_MAX_ITEMS` (macro, line 28) `#define FX_MAX_ITEMS`
+  - `FX_GL_AUTO` (macro, line 107) `#define FX_GL_AUTO`
+  - `FX_GL_SPAN_BASE` (macro, line 108) `#define FX_GL_SPAN_BASE`
+  - `FX_GL_SPAN_MAX` (macro, line 109) `#define FX_GL_SPAN_MAX`
+  - `FX_GL_LINE_MAX` (macro, line 110) `#define FX_GL_LINE_MAX`
+  - `FX_GRID_COLS_MAX` (macro, line 132) `#define FX_GRID_COLS_MAX`
+  - `FX_AREA_MAX_ROWS` (macro, line 146) `#define FX_AREA_MAX_ROWS`
+  - `FX_AREA_MAX_COLS` (macro, line 147) `#define FX_AREA_MAX_COLS`
+  - `FX_AREA_MAX_CELLS` (macro, line 148) `#define FX_AREA_MAX_CELLS`
+  - `FX_AREA_NAME_MAX` (macro, line 149) `#define FX_AREA_NAME_MAX`
+  - `FX_FLOAT_MIN_LINE` (macro, line 218) `#define FX_FLOAT_MIN_LINE`
+  - `FX_MAX_COLUMNS` (macro, line 280) `#define FX_MAX_COLUMNS`
+  - `FX_MAUTO_TOP` (macro, line 347) `#define FX_MAUTO_TOP`
+  - `FX_MAUTO_BOTTOM` (macro, line 348) `#define FX_MAUTO_BOTTOM`
+- Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+
+## include/form.h
+- Doc: fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fm_field` (struct, line 37)
+  - `fm_plan` (struct, line 52)
+  - `fm_method` (enum, line 33)
+  - `fm_kind` (enum, line 39)
+  - `fm_block_reason` (enum, line 45)
+  - `fm_status` (enum, line 61)
+  - `kind` (type_alias, line 51) `typedef struct fm_plan { fm_kind kind;`
+  - `FM_CONTENT_TYPE_URLENCODED` (variable, line 68) `extern const char FM_CONTENT_TYPE_URLENCODED[];`
+  - `FREEDOM_FORM_H` (macro, line 2) `#define FREEDOM_FORM_H`
+  - `FM_URL_MAX` (macro, line 29) `#define FM_URL_MAX`
+  - `FM_BODY_MAX` (macro, line 30) `#define FM_BODY_MAX`
+  - `FM_MAX_FIELDS` (macro, line 31) `#define FM_MAX_FIELDS`
+- Depends on: `include/url.h`
+- Imported by: `gui/browser_ui.c`, `src/form.c`, `tests/test_form.c`
+
+## include/frame_broker.h
+- Doc: fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fbk_frame` (struct, line 31)
+  - `fbk_table` (struct, line 38)
+  - `fbk_rel` (enum, line 22)
+  - `fbk_verdict` (enum, line 24)
+  - `used` (type_alias, line 30) `typedef struct fbk_frame { int used;`
+  - `f` (type_alias, line 37) `typedef struct fbk_table { fbk_frame f[FBK_MAX_FRAMES];`
+  - `fbk_origin_of` (function, line 42) `int fbk_origin_of(const char *url, char *out, size_t cap);`
+  - `fbk_init` (function, line 45) `int fbk_init(fbk_table *t, const char *top_url);`
+  - `fbk_add` (function, line 49) `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id);`
+  - `fbk_remove` (function, line 52) `void fbk_remove(fbk_table *t, int id);`
+  - `fbk_origin` (function, line 55) `const char *fbk_origin(const fbk_table *t, int id);`
+  - `FREEDOM_FRAME_BROKER_H` (macro, line 2) `#define FREEDOM_FRAME_BROKER_H`
+  - `FBK_MAX_FRAMES` (macro, line 16) `#define FBK_MAX_FRAMES`
+  - `FBK_MAX_DEPTH` (macro, line 17) `#define FBK_MAX_DEPTH`
+  - `FBK_MAX_MSG` (macro, line 18) `#define FBK_MAX_MSG`
+  - `FBK_ORIGIN_MAX` (macro, line 19) `#define FBK_ORIGIN_MAX`
+  - `FBK_URL_MAX` (macro, line 20) `#define FBK_URL_MAX`
+- Imported by: `src/frame_broker.c`, `src/frame_host.c`, `tests/test_frame_broker.c`
+
 ## include/frame_clock.h
 - Doc: active: frame_clock (fc_) — pure animation frame scheduler.
 - Layer: utility
@@ -78,9 +174,11 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 78) `#define FC_MAX_AUTHOR_CSS_BYTES`
   - `FC_SHC_MAX_TEXT_BYTES` (macro, line 84) `#define FC_SHC_MAX_TEXT_BYTES`
   - `FC_SHC_MAX_QUERIES` (macro, line 90) `#define FC_SHC_MAX_QUERIES`
-  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 93) `#define FC_LAZY_IMAGE_MARGIN_PX`
-  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 99) `#define FC_TAB_OP_NET_BUDGET_MS`
-  - `FC_TABLE_TRACK_MAX_PX` (macro, line 103) `#define FC_TABLE_TRACK_MAX_PX`
+  - `FC_MASK_CACHE_BYTES` (macro, line 95) `#define FC_MASK_CACHE_BYTES`
+  - `FC_MASK_CACHE_ENTRIES` (macro, line 96) `#define FC_MASK_CACHE_ENTRIES`
+  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 99) `#define FC_LAZY_IMAGE_MARGIN_PX`
+  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 105) `#define FC_TAB_OP_NET_BUDGET_MS`
+  - `FC_TABLE_TRACK_MAX_PX` (macro, line 109) `#define FC_TABLE_TRACK_MAX_PX`
 - Imported by: `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/svg_paint.c`, `src/tab.c`, `tests/test_sheet_cache.c`
 
 ## include/hls.h
@@ -394,104 +492,6 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `JD_HIST_MAX` (macro, line 31) `#define JD_HIST_MAX`
 - Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `include/url.h`
 - Imported by: `include/js_dom.h`
-
-## include/js_native.h
-- Layer: utility
-- Language: h
-- Symbols:
-  - `failure` (function, line 22) `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);`
-  - `FREEDOM_JS_NATIVE_H` (macro, line 12) `#define FREEDOM_JS_NATIVE_H`
-- Depends on: `include/js_sandbox.h`
-- Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_native.c`
-
-## include/js_policy.h
-- Doc: jsp_trusted: Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its...
-- Layer: business_logic
-- Language: h
-- Symbols:
-  - `jsp_mode` (enum, line 27)
-  - `membership` (function, line 16) `* membership (the allowlist itself is matched by the hostblock module, which * already covers subdomains). No I/O...`
-  - `allowlist` (function, line 34) `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode * yields false. */ bool...`
-  - `jsp_trusted` (function, line 45) `bool jsp_trusted(bool js_enabled, int host_allowlisted);`
-  - `jsp_present_trusted` (function, line 54) `bool jsp_present_trusted(int host_allowlisted);`
-  - `jsp_mode_str` (function, line 64) `const char *jsp_mode_str(jsp_mode mode);`
-  - `FREEDOM_JS_POLICY_H` (macro, line 2) `#define FREEDOM_JS_POLICY_H`
-- Imported by: `gui/browser_ui.c`, `include/webcaps.h`, `src/freedom.c`, `src/js_policy.c`, `tests/test_js_policy.c`
-
-## include/js_sandbox.h
-- Doc: js_limits: Per-evaluation resource limits.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `js_limits` (struct, line 39)
-  - `js_result` (struct, line 49)
-  - `js_status` (enum, line 24)
-  - `max_source_bytes` (type_alias, line 39) `typedef struct js_limits { size_t max_source_bytes;`
-  - `js_context` (type_alias, line 47) `typedef struct js_context js_context;`
-  - `status` (type_alias, line 48) `typedef struct js_result { js_status status;`
-  - `js_stack_limit_for` (function, line 75) `size_t js_stack_limit_for(size_t soft_stack);`
-  - `js_prime_stack_limit` (function, line 79) `void js_prime_stack_limit(void);`
-  - `js_context_free` (function, line 96) `void js_context_free(js_context *ctx);`
-  - `loaded` (function, line 124) `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...`
-  - `js_set_module_host` (function, line 129) `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);`
-  - `js_loc_from_stack` (function, line 150) `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);`
-  - `js_set_time_budget` (function, line 158) `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);`
-  - `out` (function, line 163) `* into out (NUL-terminated, truncated at cap);`
-  - `js_profile_enable` (function, line 166) `void js_profile_enable(js_context *ctx);`
-  - `js_profile_report` (function, line 167) `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
-  - `silently` (function, line 171) `* fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows * its real first...`
-  - `js_throws_report` (function, line 176) `size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
-  - `global` (function, line 181) `* Freebug REPL installs: its shim takes them once and deletes them from the global (like * __netLog), because the...`
-  - `js_result_free` (function, line 187) `void js_result_free(js_result *res);`
-  - `js_pump_jobs` (function, line 195) `int js_pump_jobs(js_context *ctx, int max_jobs);`
-  - `handle` (function, line 198) `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
-  - `js_set_current_script` (function, line 207) `void js_set_current_script(js_context *ctx, const char *src, const char *type);`
-  - `FREEDOM_JS_SANDBOX_H` (macro, line 2) `#define FREEDOM_JS_SANDBOX_H`
-  - `JS_LOC_FILE_MAX` (macro, line 64) `#define JS_LOC_FILE_MAX`
-  - `JS_DEFAULT_MAX_SOURCE` (macro, line 66) `#define JS_DEFAULT_MAX_SOURCE`
-  - `JS_DEFAULT_MEM_LIMIT` (macro, line 67) `#define JS_DEFAULT_MEM_LIMIT`
-  - `JS_MIN_STACK_LIMIT` (macro, line 68) `#define JS_MIN_STACK_LIMIT`
-  - `JS_MAX_STACK_LIMIT` (macro, line 69) `#define JS_MAX_STACK_LIMIT`
-  - `JS_DEFAULT_STACK_LIMIT` (macro, line 70) `#define JS_DEFAULT_STACK_LIMIT`
-  - `JS_DEFAULT_TIME_BUDGET` (macro, line 71) `#define JS_DEFAULT_TIME_BUDGET`
-  - `JS_MODULE_MAX` (macro, line 115) `#define JS_MODULE_MAX`
-  - `JS_MODULE_BYTES_MAX` (macro, line 116) `#define JS_MODULE_BYTES_MAX`
-  - `JS_PROFILE_PERIOD_MS` (macro, line 165) `#define JS_PROFILE_PERIOD_MS`
-  - `JS_THROW_SLOTS` (macro, line 174) `#define JS_THROW_SLOTS`
-  - `JS_REALM_MAX` (macro, line 215) `#define JS_REALM_MAX`
-  - `JS_REJECT_MAX` (macro, line 218) `#define JS_REJECT_MAX`
-- Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_intl.h`, `include/js_location.h`, `include/js_native.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_intl.c`, `tests/test_js_native.c`, `tests/test_js_sandbox.c`
-
-## include/js_trusted.h
-- Doc: jt_take_opens: The parent installed a new geometry table (layout or scroll changed)...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `jt_ws_op` (struct, line 61)
-  - `jt_ws_kind` (enum, line 50)
-  - `jt_ws_event_kind` (enum, line 68)
-  - `kind` (type_alias, line 60) `typedef struct jt_ws_op { int kind;`
-  - `null` (function, line 24) `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...`
-  - `jt_take_opens` (function, line 42) `char *jt_take_opens(js_context *ctx);`
-  - `parent` (function, line 80) `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);`
-  - `jt_take_ws` (function, line 86) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);`
-  - `jt_ws_ops_free` (function, line 87) `void jt_ws_ops_free(jt_ws_op *ops, size_t n);`
-  - `jt_ws_event` (function, line 92) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);`
-  - `jt_take_storage` (function, line 104) `int jt_take_storage(js_context *ctx, char **out, size_t *len);`
-  - `realm` (function, line 107) `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...`
-  - `FREEDOM_JS_TRUSTED_H` (macro, line 2) `#define FREEDOM_JS_TRUSTED_H`
-  - `JT_WS_MAX` (macro, line 46) `#define JT_WS_MAX`
-  - `JT_WS_MAX_OPS` (macro, line 47) `#define JT_WS_MAX_OPS`
-  - `JT_WS_MAX_BYTES` (macro, line 48) `#define JT_WS_MAX_BYTES`
-- Depends on: `include/js_dom.h`, `include/js_sandbox.h`
-- Imported by: `src/js_trusted.c`, `src/tab.c`, `tests/test_js_dom.c`
-
-## include/lazy_load.h
-- Layer: utility
-- Language: h
-- Symbols:
-  - `FREEDOM_LAZY_LOAD_H` (macro, line 2) `#define FREEDOM_LAZY_LOAD_H`
-- Imported by: `gui/browser_ui.c`, `tests/test_ui.c`
 
 
 Next: [KB_include_p4.md](KB_include_p4.md)

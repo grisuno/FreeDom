@@ -15,6 +15,7 @@
 - [`acting`](modules/include.js_location.h.md#acting) function in `include/js_location.h`
 - [`action`](modules/include.link_nav.h.md#action) type_alias in `include/link_nav.h`
 - [`active`](modules/include.frame_clock.h.md#active) type_alias in `include/frame_clock.h`
+- [`addr`](modules/gui.browser_ui.c.md#addr) type_alias in `gui/browser_ui.c`
 - [`address`](modules/include.net_realm.h.md#address) function in `include/net_realm.h`
 - [`address`](modules/src.page_view.c.md#address) function in `src/page_view.c`
 - [`again`](modules/gui.browser_ui.c.md#again) function in `gui/browser_ui.c`
@@ -60,11 +61,11 @@
 - [`basename`](modules/include.download.h.md#basename) function in `include/download.h`
 - [`basis`](modules/include.flex_layout.h.md#basis) type_alias in `include/flex_layout.h`
 - [`bb_blur_a8`](modules/src.box_blur.c.md#bb_blur_a8) function in `src/box_blur.c`
+- [`BB_BOX_MAX`](modules/src.box_blur.c.md#bb_box_max) macro in `src/box_blur.c`
 - [`bb_box_sizes`](modules/include.box_blur.h.md#bb_box_sizes) function in `include/box_blur.h`
 - [`bb_box_sizes`](modules/src.box_blur.c.md#bb_box_sizes) function in `src/box_blur.c`
 - [`bb_ink_rect`](modules/src.box_blur.c.md#bb_ink_rect) function in `src/box_blur.c`
 - [`BB_MAX_PIXELS`](modules/include.box_blur.h.md#bb_max_pixels) macro in `include/box_blur.h`
-- [`BB_MAX_PIXELS`](modules/include.box_blur.h.md#bb_max_pixels) function in `include/box_blur.h`
 - [`behind`](modules/gui.browser_ui.c.md#behind) function in `gui/browser_ui.c`
 - [`beside`](modules/gui.browser_ui.c.md#beside) function in `gui/browser_ui.c`
 - [`between`](modules/src.css_select.c.md#between) function in `src/css_select.c`
@@ -98,12 +99,21 @@
 - [`box`](modules/include.box_style.h.md#box) function in `include/box_style.h`
 - [`box`](modules/include.css_chain.h.md#box) function in `include/css_chain.h`
 - [`box_index`](modules/include.box_tree.h.md#box_index) type_alias in `include/box_tree.h`
+- [`browser_abort_pending`](modules/include.browser.h.md#browser_abort_pending) function in `include/browser.h`
+- [`browser_abort_pending`](modules/src.browser.c.md#browser_abort_pending) function in `src/browser.c`
 - [`browser_add_exception`](modules/src.browser.c.md#browser_add_exception) function in `src/browser.c`
 - [`browser_back`](modules/src.browser.c.md#browser_back) function in `src/browser.c`
 - [`browser_can_back`](modules/include.browser.h.md#browser_can_back) function in `include/browser.h`
 - [`browser_can_back`](modules/src.browser.c.md#browser_can_back) function in `src/browser.c`
 - [`browser_can_forward`](modules/include.browser.h.md#browser_can_forward) function in `include/browser.h`
 - [`browser_can_forward`](modules/src.browser.c.md#browser_can_forward) function in `src/browser.c`
+- [`browser_closed`](modules/include.browser.h.md#browser_closed) struct in `include/browser.h`
+- [`BROWSER_CLOSED_MAX`](modules/include.browser.h.md#browser_closed_max) macro in `include/browser.h`
+- [`browser_closed_pop`](modules/include.browser.h.md#browser_closed_pop) function in `include/browser.h`
+- [`browser_closed_pop`](modules/src.browser.c.md#browser_closed_pop) function in `src/browser.c`
+- [`browser_closed_push`](modules/src.browser.c.md#browser_closed_push) function in `src/browser.c`
+- [`browser_commit_pending`](modules/include.browser.h.md#browser_commit_pending) function in `include/browser.h`
+- [`browser_commit_pending`](modules/src.browser.c.md#browser_commit_pending) function in `src/browser.c`
 - [`browser_commit_url_bar`](modules/src.browser.c.md#browser_commit_url_bar) function in `src/browser.c`
 - [`browser_current_url`](modules/include.browser.h.md#browser_current_url) function in `include/browser.h`
 - [`browser_current_url`](modules/src.browser.c.md#browser_current_url) function in `src/browser.c`
@@ -114,6 +124,8 @@
 - [`browser_forward`](modules/src.browser.c.md#browser_forward) function in `src/browser.c`
 - [`browser_free`](modules/include.browser.h.md#browser_free) function in `include/browser.h`
 - [`browser_free`](modules/src.browser.c.md#browser_free) function in `src/browser.c`
+- [`browser_has_pending`](modules/include.browser.h.md#browser_has_pending) function in `include/browser.h`
+- [`browser_has_pending`](modules/src.browser.c.md#browser_has_pending) function in `src/browser.c`
 - [`browser_init`](modules/src.browser.c.md#browser_init) function in `src/browser.c`
 - [`browser_is_exception`](modules/include.browser.h.md#browser_is_exception) function in `include/browser.h`
 - [`browser_is_exception`](modules/src.browser.c.md#browser_is_exception) function in `src/browser.c`
@@ -182,12 +194,43 @@
 - [`BT_WRAP_EPS`](modules/src.box_tree.c.md#bt_wrap_eps) macro in `src/box_tree.c`
 - [`buf`](modules/include.textfield.h.md#buf) type_alias in `include/textfield.h`
 - [`buffer`](modules/src.tab.c.md#buffer) function in `src/tab.c`
+- [`BUI_CHROME_FONT`](modules/gui.browser_ui_internal.h.md#bui_chrome_font) macro in `gui/browser_ui_internal.h`
+- [`bui_chrome_font`](modules/gui.browser_ui_internal.h.md#bui_chrome_font) function in `gui/browser_ui_internal.h`
+- [`bui_chrome_font`](modules/gui.bui_chrome.c.md#bui_chrome_font) function in `gui/bui_chrome.c`
+- [`BUI_CHROME_FONT_SIZE`](modules/gui.browser_ui_internal.h.md#bui_chrome_font_size) macro in `gui/browser_ui_internal.h`
+- [`bui_chrome_view`](modules/gui.browser_ui_internal.h.md#bui_chrome_view) struct in `gui/browser_ui_internal.h`
 - [`BUI_CONIC_SLICES`](modules/gui.browser_ui.c.md#bui_conic_slices) macro in `gui/browser_ui.c`
+- [`BUI_DISABLED`](modules/gui.bui_chrome.c.md#bui_disabled) macro in `gui/bui_chrome.c`
+- [`bui_find_view`](modules/gui.browser_ui_internal.h.md#bui_find_view) struct in `gui/browser_ui_internal.h`
+- [`BUI_FOCUS_RING`](modules/gui.bui_chrome.c.md#bui_focus_ring) macro in `gui/bui_chrome.c`
+- [`BUI_ICON_LINE`](modules/gui.bui_chrome.c.md#bui_icon_line) macro in `gui/bui_chrome.c`
+- [`BUI_INACTIVE_TEXT`](modules/gui.bui_chrome.c.md#bui_inactive_text) macro in `gui/bui_chrome.c`
 - [`bui_mask_ctx`](modules/gui.browser_ui.c.md#bui_mask_ctx) struct in `gui/browser_ui.c`
+- [`bui_paint_chrome`](modules/gui.browser_ui_internal.h.md#bui_paint_chrome) function in `gui/browser_ui_internal.h`
+- [`bui_paint_chrome`](modules/gui.bui_chrome.c.md#bui_paint_chrome) function in `gui/bui_chrome.c`
+- [`bui_paint_findbar`](modules/gui.browser_ui_internal.h.md#bui_paint_findbar) function in `gui/browser_ui_internal.h`
+- [`bui_paint_findbar`](modules/gui.bui_chrome.c.md#bui_paint_findbar) function in `gui/bui_chrome.c`
 - [`bui_paint_mask_image`](modules/gui.bui_mask_img.c.md#bui_paint_mask_image) function in `gui/bui_mask_img.c`
+- [`BUI_PILL_RADIUS`](modules/gui.bui_chrome.c.md#bui_pill_radius) macro in `gui/bui_chrome.c`
 - [`bui_pop_group_composite`](modules/gui.browser_ui.c.md#bui_pop_group_composite) function in `gui/browser_ui.c`
 - [`bui_pop_group_composite`](modules/gui.browser_ui.c.md#bui_pop_group_composite) function in `gui/browser_ui.c`
 - [`bui_pop_group_composite`](modules/gui.browser_ui.c.md#bui_pop_group_composite) function in `gui/browser_ui.c`
+- [`bui_round_rect`](modules/gui.browser_ui_internal.h.md#bui_round_rect) function in `gui/browser_ui_internal.h`
+- [`bui_round_rect`](modules/gui.bui_chrome.c.md#bui_round_rect) function in `gui/bui_chrome.c`
+- [`BUI_SPINNER_R`](modules/gui.bui_chrome.c.md#bui_spinner_r) macro in `gui/bui_chrome.c`
+- [`BUI_STOP_HALF`](modules/gui.bui_chrome.c.md#bui_stop_half) macro in `gui/bui_chrome.c`
+- [`BUI_TAB_FADE`](modules/gui.bui_chrome.c.md#bui_tab_fade) macro in `gui/bui_chrome.c`
+- [`BUI_TAB_PAD`](modules/gui.bui_chrome.c.md#bui_tab_pad) macro in `gui/bui_chrome.c`
+- [`BUI_TAB_RADIUS`](modules/gui.bui_chrome.c.md#bui_tab_radius) macro in `gui/bui_chrome.c`
+- [`BUI_TWO_PI`](modules/gui.bui_chrome.c.md#bui_two_pi) macro in `gui/bui_chrome.c`
+- [`BUI_URL_END_PAD`](modules/gui.bui_chrome.c.md#bui_url_end_pad) macro in `gui/bui_chrome.c`
+- [`BUI_URL_FONT_SIZE`](modules/gui.browser_ui_internal.h.md#bui_url_font_size) macro in `gui/browser_ui_internal.h`
+- [`bui_url_index_at`](modules/gui.browser_ui_internal.h.md#bui_url_index_at) function in `gui/browser_ui_internal.h`
+- [`bui_url_index_at`](modules/gui.bui_chrome.c.md#bui_url_index_at) function in `gui/bui_chrome.c`
+- [`BUI_URL_MEASURE`](modules/gui.bui_chrome.c.md#bui_url_measure) macro in `gui/bui_chrome.c`
+- [`BUI_URL_TEXT_PAD`](modules/gui.bui_chrome.c.md#bui_url_text_pad) macro in `gui/bui_chrome.c`
+- [`bui_url_text_x`](modules/gui.browser_ui_internal.h.md#bui_url_text_x) function in `gui/browser_ui_internal.h`
+- [`bui_url_text_x`](modules/gui.bui_chrome.c.md#bui_url_text_x) function in `gui/bui_chrome.c`
 - [`builder`](modules/src.page_view.c.md#builder) function in `src/page_view.c`
 - [`builds`](modules/gui.browser_ui.c.md#builds) function in `gui/browser_ui.c`
 - [`built`](modules/src.css_select.c.md#built) function in `src/css_select.c`
@@ -407,6 +450,46 @@
 - [`child`](modules/src.page_view.c.md#child) function in `src/page_view.c`
 - [`child_state`](modules/src.tab.c.md#child_state) struct in `src/tab.c`
 - [`children`](modules/gui.browser_ui.c.md#children) function in `gui/browser_ui.c`
+- [`CHL_BTN`](modules/include.chrome_layout.h.md#chl_btn) macro in `include/chrome_layout.h`
+- [`CHL_BTN_GAP`](modules/include.chrome_layout.h.md#chl_btn_gap) macro in `include/chrome_layout.h`
+- [`chl_compute`](modules/src.chrome_layout.c.md#chl_compute) function in `src/chrome_layout.c`
+- [`CHL_DRAG_MIN`](modules/include.chrome_layout.h.md#chl_drag_min) macro in `include/chrome_layout.h`
+- [`CHL_FIND_BTN`](modules/include.chrome_layout.h.md#chl_find_btn) macro in `include/chrome_layout.h`
+- [`CHL_FIND_COUNT_W`](modules/include.chrome_layout.h.md#chl_find_count_w) macro in `include/chrome_layout.h`
+- [`CHL_FIND_FIELD_W`](modules/include.chrome_layout.h.md#chl_find_field_w) macro in `include/chrome_layout.h`
+- [`chl_find_part`](modules/include.chrome_layout.h.md#chl_find_part) enum in `include/chrome_layout.h`
+- [`chl_findbar`](modules/include.chrome_layout.h.md#chl_findbar) struct in `include/chrome_layout.h`
+- [`chl_findbar_compute`](modules/src.chrome_layout.c.md#chl_findbar_compute) function in `src/chrome_layout.c`
+- [`chl_findbar_hit`](modules/src.chrome_layout.c.md#chl_findbar_hit) function in `src/chrome_layout.c`
+- [`chl_hit`](modules/src.chrome_layout.c.md#chl_hit) function in `src/chrome_layout.c`
+- [`CHL_ID_INSET`](modules/src.chrome_layout.c.md#chl_id_inset) macro in `src/chrome_layout.c`
+- [`CHL_ID_W`](modules/include.chrome_layout.h.md#chl_id_w) macro in `include/chrome_layout.h`
+- [`chl_identity`](modules/include.chrome_layout.h.md#chl_identity) enum in `include/chrome_layout.h`
+- [`chl_identity_label`](modules/include.chrome_layout.h.md#chl_identity_label) function in `include/chrome_layout.h`
+- [`chl_identity_label`](modules/src.chrome_layout.c.md#chl_identity_label) function in `src/chrome_layout.c`
+- [`chl_identity_of`](modules/src.chrome_layout.c.md#chl_identity_of) function in `src/chrome_layout.c`
+- [`chl_layout`](modules/include.chrome_layout.h.md#chl_layout) struct in `include/chrome_layout.h`
+- [`CHL_NEWTAB_W`](modules/include.chrome_layout.h.md#chl_newtab_w) macro in `include/chrome_layout.h`
+- [`CHL_PAD`](modules/include.chrome_layout.h.md#chl_pad) macro in `include/chrome_layout.h`
+- [`chl_part`](modules/include.chrome_layout.h.md#chl_part) enum in `include/chrome_layout.h`
+- [`chl_rect`](modules/include.chrome_layout.h.md#chl_rect) struct in `include/chrome_layout.h`
+- [`chl_rect_has`](modules/include.chrome_layout.h.md#chl_rect_has) function in `include/chrome_layout.h`
+- [`chl_rect_has`](modules/src.chrome_layout.c.md#chl_rect_has) function in `src/chrome_layout.c`
+- [`chl_status`](modules/include.chrome_layout.h.md#chl_status) enum in `include/chrome_layout.h`
+- [`CHL_TAB_CLOSE`](modules/include.chrome_layout.h.md#chl_tab_close) macro in `include/chrome_layout.h`
+- [`CHL_TAB_CLOSE_INSET`](modules/src.chrome_layout.c.md#chl_tab_close_inset) macro in `src/chrome_layout.c`
+- [`CHL_TAB_CLOSE_MIN_W`](modules/include.chrome_layout.h.md#chl_tab_close_min_w) macro in `include/chrome_layout.h`
+- [`chl_tab_close_rect`](modules/include.chrome_layout.h.md#chl_tab_close_rect) function in `include/chrome_layout.h`
+- [`chl_tab_close_rect`](modules/src.chrome_layout.c.md#chl_tab_close_rect) function in `src/chrome_layout.c`
+- [`CHL_TAB_GAP`](modules/include.chrome_layout.h.md#chl_tab_gap) macro in `include/chrome_layout.h`
+- [`CHL_TAB_MAX_W`](modules/include.chrome_layout.h.md#chl_tab_max_w) macro in `include/chrome_layout.h`
+- [`CHL_TAB_MIN_W`](modules/include.chrome_layout.h.md#chl_tab_min_w) macro in `include/chrome_layout.h`
+- [`chl_tab_rect`](modules/include.chrome_layout.h.md#chl_tab_rect) function in `include/chrome_layout.h`
+- [`chl_tab_rect`](modules/src.chrome_layout.c.md#chl_tab_rect) function in `src/chrome_layout.c`
+- [`CHL_TAB_TOP_GAP`](modules/include.chrome_layout.h.md#chl_tab_top_gap) macro in `include/chrome_layout.h`
+- [`CHL_URL_GAP`](modules/src.chrome_layout.c.md#chl_url_gap) macro in `src/chrome_layout.c`
+- [`CHL_WIDTH_MAX`](modules/src.chrome_layout.c.md#chl_width_max) macro in `src/chrome_layout.c`
+- [`CHL_WIN_BTN_W`](modules/include.chrome_layout.h.md#chl_win_btn_w) macro in `include/chrome_layout.h`
 - [`ci_balanced`](modules/include.css_import.h.md#ci_balanced) function in `include/css_import.h`
 - [`ci_balanced`](modules/src.css_import.c.md#ci_balanced) function in `src/css_import.c`
 - [`CI_COND_MAX`](modules/include.css_import.h.md#ci_cond_max) macro in `include/css_import.h`
@@ -455,6 +538,7 @@
 - [`cl_unit_is_font_relative`](modules/include.css_length.h.md#cl_unit_is_font_relative) function in `include/css_length.h`
 - [`cl_unit_is_font_relative`](modules/src.css_length.c.md#cl_unit_is_font_relative) function in `src/css_length.c`
 - [`cl_unit_scale`](modules/src.css_length.c.md#cl_unit_scale) function in `src/css_length.c`
+- [`close`](modules/include.chrome_layout.h.md#close) type_alias in `include/chrome_layout.h`
 - [`closed`](modules/include.box_tree.h.md#closed) function in `include/box_tree.h`
 - [`closed`](modules/include.data_url.h.md#closed) function in `include/data_url.h`
 - [`closed`](modules/include.profile.h.md#closed) function in `include/profile.h`
@@ -864,12 +948,16 @@
 - [`cx_box_layer`](modules/src.compositor.c.md#cx_box_layer) function in `src/compositor.c`
 - [`cx_forms_stacking_context`](modules/include.compositor.h.md#cx_forms_stacking_context) function in `include/compositor.h`
 - [`cx_forms_stacking_context`](modules/src.compositor.c.md#cx_forms_stacking_context) function in `src/compositor.c`
+- [`cx_ink_reach`](modules/include.compositor.h.md#cx_ink_reach) function in `include/compositor.h`
+- [`cx_ink_reach`](modules/src.compositor.c.md#cx_ink_reach) function in `src/compositor.c`
 - [`cx_item`](modules/include.compositor.h.md#cx_item) struct in `include/compositor.h`
 - [`cx_item_compare`](modules/include.compositor.h.md#cx_item_compare) function in `include/compositor.h`
 - [`cx_item_compare`](modules/src.compositor.c.md#cx_item_compare) function in `src/compositor.c`
 - [`cx_layer`](modules/include.compositor.h.md#cx_layer) enum in `include/compositor.h`
 - [`cx_sort`](modules/include.compositor.h.md#cx_sort) function in `include/compositor.h`
 - [`cx_sort`](modules/src.compositor.c.md#cx_sort) function in `src/compositor.c`
+- [`cx_span_visible`](modules/include.compositor.h.md#cx_span_visible) function in `include/compositor.h`
+- [`cx_span_visible`](modules/src.compositor.c.md#cx_span_visible) function in `src/compositor.c`
 - [`cx_style`](modules/include.compositor.h.md#cx_style) struct in `include/compositor.h`
 - [`cycle`](modules/include.dom.h.md#cycle) function in `include/dom.h`
 
@@ -1015,12 +1103,27 @@
 ## E
 
 - [`EDG`](modules/src.box_style.c.md#edg) macro in `src/box_style.c`
+- [`ek_equal`](modules/include.exact_key.h.md#ek_equal) function in `include/exact_key.h`
+- [`ek_equal`](modules/src.exact_key.c.md#ek_equal) function in `src/exact_key.c`
+- [`ek_free`](modules/include.exact_key.h.md#ek_free) function in `include/exact_key.h`
+- [`ek_free`](modules/src.exact_key.c.md#ek_free) function in `src/exact_key.c`
+- [`ek_init`](modules/include.exact_key.h.md#ek_init) function in `include/exact_key.h`
+- [`ek_init`](modules/src.exact_key.c.md#ek_init) function in `src/exact_key.c`
+- [`ek_key`](modules/include.exact_key.h.md#ek_key) struct in `include/exact_key.h`
+- [`EK_MAX_BYTES`](modules/include.exact_key.h.md#ek_max_bytes) macro in `include/exact_key.h`
+- [`ek_put`](modules/include.exact_key.h.md#ek_put) function in `include/exact_key.h`
+- [`ek_put`](modules/src.exact_key.c.md#ek_put) function in `src/exact_key.c`
+- [`ek_reset`](modules/include.exact_key.h.md#ek_reset) function in `include/exact_key.h`
+- [`ek_reset`](modules/src.exact_key.c.md#ek_reset) function in `src/exact_key.c`
+- [`ek_swap`](modules/include.exact_key.h.md#ek_swap) function in `include/exact_key.h`
+- [`ek_swap`](modules/src.exact_key.c.md#ek_swap) function in `src/exact_key.c`
 - [`element`](modules/include.css.h.md#css_style-element) method of `css_style` in `include/css.h`
 - [`element`](modules/gui.browser_ui.c.md#element) function in `gui/browser_ui.c`
 - [`elsewhere`](modules/src.freedom.c.md#elsewhere) function in `src/freedom.c`
 - [`emit`](modules/src.css.c.md#emit) function in `src/css.c`
 - [`empty`](modules/src.css.c.md#empty) function in `src/css.c`
 - [`empty`](modules/src.js_dom.c.md#empty) function in `src/js_dom.c`
+- [`end`](modules/include.find_text.h.md#end) type_alias in `include/find_text.h`
 - [`end`](modules/include.text_shape.h.md#end) type_alias in `include/text_shape.h`
 - [`engine`](modules/src.page_view.c.md#engine) function in `src/page_view.c`
 - [`enough`](modules/src.js_dom.c.md#enough) function in `src/js_dom.c`
@@ -1032,6 +1135,7 @@
 - [`excluded`](modules/src.os_sandbox.c.md#excluded) function in `src/os_sandbox.c`
 - [`exclusively`](modules/include.tab.h.md#exclusively) function in `include/tab.h`
 - [`exhausted`](modules/include.secure_fetch.h.md#exhausted) function in `include/secure_fetch.h`
+- [`exist`](modules/include.find_text.h.md#exist) function in `include/find_text.h`
 - [`exit`](modules/src.image_decode.c.md#exit) function in `src/image_decode.c`
 - [`EXIT_ERROR`](modules/src.freedom.c.md#exit_error) macro in `src/freedom.c`
 - [`EXIT_OK`](modules/src.freedom.c.md#exit_ok) macro in `src/freedom.c`
@@ -1163,6 +1267,8 @@
 - [`fc_interval_ms`](modules/include.frame_clock.h.md#fc_interval_ms) function in `include/frame_clock.h`
 - [`fc_interval_ms`](modules/src.frame_clock.c.md#fc_interval_ms) function in `src/frame_clock.c`
 - [`FC_LAZY_IMAGE_MARGIN_PX`](modules/include.freedom_config.h.md#fc_lazy_image_margin_px) macro in `include/freedom_config.h`
+- [`FC_MASK_CACHE_BYTES`](modules/include.freedom_config.h.md#fc_mask_cache_bytes) macro in `include/freedom_config.h`
+- [`FC_MASK_CACHE_ENTRIES`](modules/include.freedom_config.h.md#fc_mask_cache_entries) macro in `include/freedom_config.h`
 - [`FC_MAX_AUTHOR_CSS_BYTES`](modules/include.freedom_config.h.md#fc_max_author_css_bytes) macro in `include/freedom_config.h`
 - [`FC_MAX_BOXES`](modules/include.freedom_config.h.md#fc_max_boxes) macro in `include/freedom_config.h`
 - [`fc_needs_tick`](modules/include.frame_clock.h.md#fc_needs_tick) function in `include/frame_clock.h`
@@ -1210,6 +1316,8 @@
 - [`fill`](modules/gui.browser_ui.c.md#fill) function in `gui/browser_ui.c`
 - [`final_url`](modules/include.http_cache.h.md#final_url) type_alias in `include/http_cache.h`
 - [`find_modules`](modules/tools.mutate.py.md#find_modules) function in `tools.mutate`
+- [`find_text`](modules/include.find_text.h.md#find_text) function in `include/find_text.h`
+- [`fip_hit`](modules/gui.browser_ui.c.md#fip_hit) struct in `gui/browser_ui.c`
 - [`Firefox`](modules/gui.browser_ui.c.md#firefox) function in `gui/browser_ui.c`
 - [`first`](modules/gui.browser_ui.c.md#first) function in `gui/browser_ui.c`
 - [`first`](modules/src.freedom.c.md#first) function in `src/freedom.c`
@@ -1296,11 +1404,29 @@
 - [`fp_vendor`](modules/src.anti_fp.c.md#fp_vendor) function in `src/anti_fp.c`
 - [`fragment`](modules/gui.browser_ui.c.md#fragment) function in `gui/browser_ui.c`
 - [`FRAME_BOX_MAX`](modules/gui.browser_ui.c.md#frame_box_max) macro in `gui/browser_ui.c`
+- [`frame_undo`](modules/gui.browser_ui.c.md#frame_undo) struct in `gui/browser_ui.c`
 - [`frames`](modules/src.tab.c.md#frames) function in `src/tab.c`
 - [`free`](modules/include.prefs.h.md#free) function in `include/prefs.h`
 - [`free`](modules/include.webfont_load.h.md#free) function in `include/webfont_load.h`
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) type_alias in `gui/browser_ui.c`
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) struct in `gui/browser_ui.c`
+- [`ft_compile`](modules/include.find_text.h.md#ft_compile) function in `include/find_text.h`
+- [`ft_compile`](modules/src.find_text.c.md#ft_compile) function in `src/find_text.c`
+- [`ft_fold`](modules/include.find_text.h.md#ft_fold) function in `include/find_text.h`
+- [`ft_fold`](modules/src.find_text.c.md#ft_fold) function in `src/find_text.c`
+- [`FT_INVALID`](modules/src.find_text.c.md#ft_invalid) macro in `src/find_text.c`
+- [`ft_match`](modules/include.find_text.h.md#ft_match) struct in `include/find_text.h`
+- [`FT_MATCH_MAX`](modules/include.find_text.h.md#ft_match_max) macro in `include/find_text.h`
+- [`ft_piece`](modules/include.find_text.h.md#ft_piece) struct in `include/find_text.h`
+- [`ft_pos`](modules/include.find_text.h.md#ft_pos) struct in `include/find_text.h`
+- [`FT_QUERY_MAX`](modules/include.find_text.h.md#ft_query_max) macro in `include/find_text.h`
+- [`ft_search`](modules/src.find_text.c.md#ft_search) function in `src/find_text.c`
+- [`ft_span`](modules/include.find_text.h.md#ft_span) struct in `include/find_text.h`
+- [`ft_spans`](modules/include.find_text.h.md#ft_spans) function in `include/find_text.h`
+- [`ft_spans`](modules/src.find_text.c.md#ft_spans) function in `src/find_text.c`
+- [`ft_status`](modules/include.find_text.h.md#ft_status) enum in `include/find_text.h`
+- [`ft_step`](modules/include.find_text.h.md#ft_step) function in `include/find_text.h`
+- [`ft_step`](modules/src.find_text.c.md#ft_step) function in `src/find_text.c`
 - [`full`](modules/include.web_storage.h.md#full) function in `include/web_storage.h`
 - [`function`](modules/src.css.c.md#function) function in `src/css.c`
 - [`fval`](modules/src.css_mq.c.md#fval) struct in `src/css_mq.c`
@@ -1400,6 +1526,8 @@
 ## H
 
 - [`h`](modules/gui.browser_ui.c.md#h) type_alias in `gui/browser_ui.c`
+- [`h`](modules/include.chrome_layout.h.md#h) type_alias in `include/chrome_layout.h`
+- [`h`](modules/include.mask_cache.h.md#h) type_alias in `include/mask_cache.h`
 - [`H2R`](modules/gui.browser_ui.c.md#h2r) macro in `gui/browser_ui.c`
 - [`handle`](modules/include.js_sandbox.h.md#handle) function in `include/js_sandbox.h`
 - [`HarfBuzz`](modules/gui.browser_ui.c.md#harfbuzz) function in `gui/browser_ui.c`
@@ -1911,6 +2039,7 @@
 - [`key`](modules/gui.browser_ui.c.md#key) type_alias in `gui/browser_ui.c`
 - [`key`](modules/gui.browser_ui.c.md#key) function in `gui/browser_ui.c`
 - [`key`](modules/include.css_index.h.md#key) type_alias in `include/css_index.h`
+- [`key`](modules/src.mask_cache.c.md#key) type_alias in `src/mask_cache.c`
 - [`key_ref`](modules/src.web_storage.c.md#key_ref) struct in `src/web_storage.c`
 - [`kind`](modules/include.css_mask.h.md#cm_layer-kind) type_alias of `cm_layer` in `include/css_mask.h`
 - [`kind`](modules/include.css_select.h.md#css_pseudo_match-kind) type_alias of `css_pseudo_match` in `include/css_select.h`
@@ -1973,6 +2102,7 @@
 - [`load_rows`](modules/tools.ffgeom.py.md#load_rows) function in `tools.ffgeom`
 - [`load_rows`](modules/tools.pngprof.py.md#load_rows) function in `tools.pngprof`
 - [`load_timing_baseline`](modules/tools.fbench.py.md#load_timing_baseline) function in `tools.fbench`
+- [`LOAD_WAIT_S`](modules/tools.guiscroll.py.md#load_wait_s) constant in `tools.guiscroll`
 - [`loaded`](modules/include.js_sandbox.h.md#loaded) function in `include/js_sandbox.h`
 - [`loaded`](modules/src.text_shape.c.md#loaded) type_alias in `src/text_shape.c`
 - [`loop`](modules/gui.browser_ui.c.md#loop) function in `gui/browser_ui.c`
@@ -2018,6 +2148,7 @@
 - [`main`](modules/tools.ffshot.py.md#main) function in `tools.ffshot`
 - [`main`](modules/tools.fftime.py.md#main) function in `tools.fftime`
 - [`main`](modules/tools.gen_psl.c.md#main) function in `tools/gen_psl.c`
+- [`main`](modules/tools.guiscroll.py.md#main) function in `tools.guiscroll`
 - [`main`](modules/tools.guitime.py.md#main) function in `tools.guitime`
 - [`main`](modules/tools.mutate.py.md#main) function in `tools.mutate`
 - [`main`](modules/tools.pngdiff.c.md#main) function in `tools/pngdiff.c`
@@ -2029,6 +2160,8 @@
 - [`map`](modules/include.import_map.h.md#map) function in `include/import_map.h`
 - [`margin`](modules/gui.browser_ui.c.md#margin) function in `gui/browser_ui.c`
 - [`margins`](modules/src.page_view.c.md#margins) function in `src/page_view.c`
+- [`MARK`](modules/tools.guiscroll.py.md#mark) constant in `tools.guiscroll`
+- [`match`](modules/include.find_text.h.md#ft_span-match) type_alias of `ft_span` in `include/find_text.h`
 - [`matrix`](modules/src.css.c.md#matrix) function in `src/css.c`
 - [`MAX_BYTES`](modules/tools.snapshot.py.md#max_bytes) constant in `tools.snapshot`
 - [`max_bytes`](modules/include.html_parse.h.md#max_bytes) type_alias in `include/html_parse.h`
@@ -2051,6 +2184,24 @@
 - [`membership`](modules/include.js_policy.h.md#membership) function in `include/js_policy.h`
 - [`memory`](modules/gui.browser_ui.c.md#memory) function in `gui/browser_ui.c`
 - [`min`](modules/src.css_box.c.md#min) function in `src/css_box.c`
+- [`mkc_bytes`](modules/include.mask_cache.h.md#mkc_bytes) function in `include/mask_cache.h`
+- [`mkc_bytes`](modules/src.mask_cache.c.md#mkc_bytes) function in `src/mask_cache.c`
+- [`mkc_cache`](modules/include.mask_cache.h.md#mkc_cache) type_alias in `include/mask_cache.h`
+- [`mkc_cache`](modules/src.mask_cache.c.md#mkc_cache) struct in `src/mask_cache.c`
+- [`mkc_clear`](modules/include.mask_cache.h.md#mkc_clear) function in `include/mask_cache.h`
+- [`mkc_clear`](modules/src.mask_cache.c.md#mkc_clear) function in `src/mask_cache.c`
+- [`mkc_count`](modules/include.mask_cache.h.md#mkc_count) function in `include/mask_cache.h`
+- [`mkc_count`](modules/src.mask_cache.c.md#mkc_count) function in `src/mask_cache.c`
+- [`mkc_entry`](modules/src.mask_cache.c.md#mkc_entry) struct in `src/mask_cache.c`
+- [`mkc_free`](modules/include.mask_cache.h.md#mkc_free) function in `include/mask_cache.h`
+- [`mkc_free`](modules/src.mask_cache.c.md#mkc_free) function in `src/mask_cache.c`
+- [`mkc_get`](modules/include.mask_cache.h.md#mkc_get) function in `include/mask_cache.h`
+- [`mkc_get`](modules/src.mask_cache.c.md#mkc_get) function in `src/mask_cache.c`
+- [`mkc_key`](modules/include.mask_cache.h.md#mkc_key) struct in `include/mask_cache.h`
+- [`mkc_new`](modules/include.mask_cache.h.md#mkc_new) function in `include/mask_cache.h`
+- [`mkc_new`](modules/src.mask_cache.c.md#mkc_new) function in `src/mask_cache.c`
+- [`mkc_put`](modules/include.mask_cache.h.md#mkc_put) function in `include/mask_cache.h`
+- [`mkc_put`](modules/src.mask_cache.c.md#mkc_put) function in `src/mask_cache.c`
 - [`module`](modules/src.secure_fetch.c.md#module) function in `src/secure_fetch.c`
 - [`modules`](modules/include.html_parse.h.md#modules) function in `include/html_parse.h`
 - [`moves`](modules/gui.browser_ui.c.md#moves) function in `gui/browser_ui.c`
@@ -2137,6 +2288,8 @@
 - [`once`](modules/gui.browser_ui.c.md#once) function in `gui/browser_ui.c`
 - [`once`](modules/src.tab.c.md#once) function in `src/tab.c`
 - [`one`](modules/include.box_tree.h.md#bt_node-one) method of `bt_node` in `include/box_tree.h`
+- [`one`](modules/include.browser.h.md#one) function in `include/browser.h`
+- [`one_page`](modules/tools.guiscroll.py.md#one_page) function in `tools.guiscroll`
 - [`one_run`](modules/tools.guitime.py.md#one_run) function in `tools.guitime`
 - [`only`](modules/gui.browser_ui.c.md#only) function in `gui/browser_ui.c`
 - [`only`](modules/src.freedom.c.md#only) function in `src/freedom.c`
@@ -2290,6 +2443,8 @@
 - [`PH_QUIRKS`](modules/include.pres_hints.h.md#ph_quirks) macro in `include/pres_hints.h`
 - [`ph_table_cellpadding`](modules/include.pres_hints.h.md#ph_table_cellpadding) function in `include/pres_hints.h`
 - [`ph_table_cellpadding`](modules/src.pres_hints.c.md#ph_table_cellpadding) function in `src/pres_hints.c`
+- [`phase_ms`](modules/tools.guiscroll.py.md#phase_ms) function in `tools.guiscroll`
+- [`piece`](modules/include.find_text.h.md#piece) type_alias in `include/find_text.h`
 - [`pl`](modules/gui.browser_ui.c.md#pl) type_alias in `gui/browser_ui.c`
 - [`place`](modules/include.js_dom.h.md#place) function in `include/js_dom.h`
 - [`place`](modules/src.render_doc.c.md#place) function in `src/render_doc.c`
@@ -2388,6 +2543,7 @@
 - [`proceed`](modules/gui.browser_ui.c.md#proceed) function in `gui/browser_ui.c`
 - [`process`](modules/include.dom.h.md#process) function in `include/dom.h`
 - [`processed`](modules/include.js_dom.h.md#jd_iframe_track-processed) type_alias of `jd_iframe_track` in `include/js_dom.h`
+- [`procs_display`](modules/tools.guiscroll.py.md#procs_display) function in `tools.guiscroll`
 - [`produced`](modules/gui.browser_ui.c.md#produced) function in `gui/browser_ui.c`
 - [`profile_close`](modules/include.profile.h.md#profile_close) function in `include/profile.h`
 - [`profile_close`](modules/src.profile.c.md#profile_close) function in `src/profile.c`
@@ -2795,6 +2951,7 @@
 - [`set_rgb`](modules/gui.browser_ui.c.md#set_rgb) function in `gui/browser_ui.c`
 - [`set_rgb`](modules/gui.browser_ui_internal.h.md#set_rgb) function in `gui/browser_ui_internal.h`
 - [`set_rgb`](modules/gui.bui_theme.c.md#set_rgb) function in `gui/bui_theme.c`
+- [`SETTLE_S`](modules/tools.guiscroll.py.md#settle_s) constant in `tools.guiscroll`
 - [`seven`](modules/src.css_select.c.md#seven) function in `src/css_select.c`
 - [`sf_accept_language_or_default`](modules/include.secure_fetch.h.md#sf_accept_language_or_default) function in `include/secure_fetch.h`
 - [`sf_accept_language_or_default`](modules/src.secure_fetch.c.md#sf_accept_language_or_default) function in `src/secure_fetch.c`
@@ -3257,6 +3414,8 @@
 - [`tsh_entry`](modules/src.text_shape.c.md#tsh_entry) struct in `src/text_shape.c`
 - [`tsh_face`](modules/include.text_shape.h.md#tsh_face) function in `include/text_shape.h`
 - [`tsh_face`](modules/src.text_shape.c.md#tsh_face) function in `src/text_shape.c`
+- [`tsh_face_generation`](modules/include.text_shape.h.md#tsh_face_generation) function in `include/text_shape.h`
+- [`tsh_face_generation`](modules/src.text_shape.c.md#tsh_face_generation) function in `src/text_shape.c`
 - [`tsh_family_is_generic`](modules/include.text_shape.h.md#tsh_family_is_generic) function in `include/text_shape.h`
 - [`tsh_family_is_generic`](modules/src.text_shape.c.md#tsh_family_is_generic) function in `src/text_shape.c`
 - [`TSH_FAMILY_MAX`](modules/include.text_shape.h.md#tsh_family_max) macro in `include/text_shape.h`
@@ -3312,7 +3471,6 @@
 - [`ui_bg_image`](modules/gui.browser_ui.c.md#ui_bg_image) struct in `gui/browser_ui.c`
 - [`UI_BTN_LEFT`](modules/gui.browser_ui.c.md#ui_btn_left) macro in `gui/browser_ui.c`
 - [`UI_BTN_LEFT`](modules/gui.ui_render.c.md#ui_btn_left) macro in `gui/ui_render.c`
-- [`UI_BTN_W`](modules/gui.browser_ui.c.md#ui_btn_w) macro in `gui/browser_ui.c`
 - [`UI_BTN_W`](modules/gui.ui_render.c.md#ui_btn_w) macro in `gui/ui_render.c`
 - [`UI_BUTTON_HPAD`](modules/gui.browser_ui.c.md#ui_button_hpad) macro in `gui/browser_ui.c`
 - [`UI_CHECK_SZ`](modules/gui.browser_ui.c.md#ui_check_sz) macro in `gui/browser_ui.c`
@@ -3327,7 +3485,10 @@
 - [`UI_HAMBURGER_GAP`](modules/gui.browser_ui.c.md#ui_hamburger_gap) macro in `gui/browser_ui.c`
 - [`UI_HAMBURGER_W`](modules/gui.browser_ui.c.md#ui_hamburger_w) macro in `gui/browser_ui.c`
 - [`UI_HEADING_LEVELS`](modules/gui.browser_ui_internal.h.md#ui_heading_levels) macro in `gui/browser_ui_internal.h`
-- [`ui_hot`](modules/gui.browser_ui.c.md#ui_hot) enum in `gui/browser_ui.c`
+- [`ui_hot`](modules/gui.browser_ui.c.md#ui_hot) type_alias in `gui/browser_ui.c`
+- [`UI_HOT_NONE`](modules/gui.browser_ui.c.md#ui_hot_none) macro in `gui/browser_ui.c`
+- [`UI_HOT_PART`](modules/gui.browser_ui.c.md#ui_hot_part) macro in `gui/browser_ui.c`
+- [`UI_HOT_TAB`](modules/gui.browser_ui.c.md#ui_hot_tab) macro in `gui/browser_ui.c`
 - [`ui_image`](modules/gui.browser_ui.c.md#ui_image) struct in `gui/browser_ui.c`
 - [`UI_IMAGE_MAX_BODY`](modules/gui.browser_ui.c.md#ui_image_max_body) macro in `gui/browser_ui.c`
 - [`UI_INPUT_MEASURE_W`](modules/gui.browser_ui.c.md#ui_input_measure_w) macro in `gui/browser_ui.c`
@@ -3348,11 +3509,11 @@
 - [`UI_MENU_COUNT`](modules/gui.browser_ui.c.md#ui_menu_count) macro in `gui/browser_ui.c`
 - [`ui_menu_item`](modules/gui.browser_ui.c.md#ui_menu_item) struct in `gui/browser_ui.c`
 - [`UI_MENU_PAD`](modules/gui.browser_ui.c.md#ui_menu_pad) macro in `gui/browser_ui.c`
+- [`UI_MENU_RADIUS`](modules/gui.browser_ui.c.md#ui_menu_radius) macro in `gui/browser_ui.c`
 - [`UI_MENU_W`](modules/gui.browser_ui.c.md#ui_menu_w) macro in `gui/browser_ui.c`
 - [`UI_OVERLINE_OFFSET`](modules/gui.browser_ui.c.md#ui_overline_offset) macro in `gui/browser_ui.c`
 - [`ui_persisted_prefs`](modules/include.ui.h.md#ui_persisted_prefs) function in `include/ui.h`
 - [`UI_READER_COLUMN_W`](modules/gui.browser_ui.c.md#ui_reader_column_w) macro in `gui/browser_ui.c`
-- [`UI_RELOAD_X`](modules/gui.browser_ui.c.md#ui_reload_x) macro in `gui/browser_ui.c`
 - [`ui_render_pdf_images`](modules/gui.browser_ui.c.md#ui_render_pdf_images) function in `gui/browser_ui.c`
 - [`ui_render_png`](modules/gui.browser_ui.c.md#ui_render_png) function in `gui/browser_ui.c`
 - [`ui_render_png_frames`](modules/gui.browser_ui.c.md#ui_render_png_frames) function in `gui/browser_ui.c`
@@ -3370,10 +3531,6 @@
 - [`UI_SLICE_MAX`](modules/gui.browser_ui.c.md#ui_slice_max) macro in `gui/browser_ui.c`
 - [`ui_status`](modules/include.ui.h.md#ui_status) enum in `include/ui.h`
 - [`UI_STRIKE_OFFSET`](modules/gui.browser_ui.c.md#ui_strike_offset) macro in `gui/browser_ui.c`
-- [`UI_TAB_CLOSE_W`](modules/gui.browser_ui.c.md#ui_tab_close_w) macro in `gui/browser_ui.c`
-- [`UI_TAB_MAX_W`](modules/gui.browser_ui.c.md#ui_tab_max_w) macro in `gui/browser_ui.c`
-- [`UI_TAB_MIN_W`](modules/gui.browser_ui.c.md#ui_tab_min_w) macro in `gui/browser_ui.c`
-- [`UI_TAB_NEW_W`](modules/gui.browser_ui.c.md#ui_tab_new_w) macro in `gui/browser_ui.c`
 - [`UI_TEXT_MARGIN`](modules/gui.browser_ui_internal.h.md#ui_text_margin) macro in `gui/browser_ui_internal.h`
 - [`ui_theme`](modules/gui.browser_ui_internal.h.md#ui_theme) struct in `gui/browser_ui_internal.h`
 - [`ui_theme_dark`](modules/gui.bui_theme.c.md#ui_theme_dark) function in `gui/bui_theme.c`
@@ -3385,7 +3542,6 @@
 - [`UI_TWO_PI`](modules/gui.browser_ui.c.md#ui_two_pi) macro in `gui/browser_ui.c`
 - [`UI_UNDERLINE_OFFSET`](modules/gui.browser_ui.c.md#ui_underline_offset) macro in `gui/browser_ui.c`
 - [`UI_UNDERLINE_THICK`](modules/gui.browser_ui.c.md#ui_underline_thick) macro in `gui/browser_ui.c`
-- [`UI_WIN_BTN_W`](modules/gui.browser_ui.c.md#ui_win_btn_w) macro in `gui/browser_ui.c`
 - [`ui_window`](modules/gui.ui_render.c.md#ui_window) struct in `gui/ui_render.c`
 - [`ui_wrap_text`](modules/src.ui_layout.c.md#ui_wrap_text) function in `src/ui_layout.c`
 - [`unchanged`](modules/src.tab.c.md#child_state-unchanged) method of `child_state` in `src/tab.c`
@@ -3525,12 +3681,15 @@
 - [`WH_RECV_CHUNK`](modules/src.ws_hub.c.md#wh_recv_chunk) macro in `src/ws_hub.c`
 - [`wh_send`](modules/include.ws_hub.h.md#wh_send) function in `include/ws_hub.h`
 - [`wh_send`](modules/src.ws_hub.c.md#wh_send) function in `src/ws_hub.c`
+- [`WHEEL_GAP_S`](modules/tools.guiscroll.py.md#wheel_gap_s) constant in `tools.guiscroll`
 - [`WHERE`](modules/src.tab.c.md#where) function in `src/tab.c`
 - [`whole`](modules/src.freebug.c.md#whole) function in `src/freebug.c`
 - [`whole`](modules/src.textfield.c.md#whole) function in `src/textfield.c`
+- [`wider`](modules/include.box_blur.h.md#wider) function in `include/box_blur.h`
 - [`width`](modules/include.image_decode.h.md#img_pixels-width) type_alias of `img_pixels` in `include/image_decode.h`
 - [`width`](modules/include.tab.h.md#tab_image-width) type_alias of `tab_image` in `include/tab.h`
 - [`width`](modules/gui.browser_ui.c.md#width) function in `gui/browser_ui.c`
+- [`width`](modules/include.chrome_layout.h.md#width) type_alias in `include/chrome_layout.h`
 - [`width`](modules/include.css_gradient.h.md#width) function in `include/css_gradient.h`
 - [`width_px`](modules/include.css_mq.h.md#width_px) type_alias in `include/css_mq.h`
 - [`widths`](modules/gui.browser_ui.c.md#widths) function in `gui/browser_ui.c`
@@ -3555,6 +3714,7 @@
 - [`write_full`](modules/src.tab.c.md#write_full) function in `src/tab.c`
 - [`writing`](modules/src.css.c.md#writing) function in `src/css.c`
 - [`written`](modules/include.css_counter.h.md#written) function in `include/css_counter.h`
+- [`written`](modules/include.find_text.h.md#written) function in `include/find_text.h`
 - [`wst_db`](modules/include.web_storage.h.md#wst_db) type_alias in `include/web_storage.h`
 - [`wst_db`](modules/src.web_storage.c.md#wst_db) struct in `src/web_storage.c`
 - [`wst_decode_check`](modules/include.web_storage.h.md#wst_decode_check) function in `include/web_storage.h`

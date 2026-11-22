@@ -275,16 +275,16 @@ static void child_net_drain(child_state *cs)`
 - Symbols:
   - `tsh_entry` (struct, line 39)
   - `tsh_web` (struct, line 229)
-  - `tsh_lfam` (struct, line 586)
-  - `tsh_llist` (struct, line 592)
-  - `tsh_fb` (struct, line 788)
-  - `tsh_cover_ctx` (struct, line 932)
-  - `tsh_fb_cp` (struct, line 804)
-  - `tsh_measure_slot` (struct, line 1063)
+  - `tsh_lfam` (struct, line 588)
+  - `tsh_llist` (struct, line 594)
+  - `tsh_fb` (struct, line 790)
+  - `tsh_cover_ctx` (struct, line 934)
+  - `tsh_fb_cp` (struct, line 806)
+  - `tsh_measure_slot` (struct, line 1065)
   - `loaded` (type_alias, line 38) `typedef struct tsh_entry { int loaded;`
   - `used` (type_alias, line 228) `typedef struct tsh_web { int used;`
-  - `name` (type_alias, line 585) `typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];`
-  - `file` (type_alias, line 787) `typedef struct tsh_fb { char file[512];`
+  - `name` (type_alias, line 587) `typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];`
+  - `file` (type_alias, line 789) `typedef struct tsh_fb { char file[512];`
   - `entry_opsz_for` (function, line 57) `static int entry_opsz_for(const tsh_entry *e, double px)`
   - `entry_apply_size` (function, line 66) `static void entry_apply_size(tsh_entry *e, double px)`
   - `generic_name` (function, line 93) `static const char *generic_name(int family)`
@@ -298,46 +298,47 @@ static void child_net_drain(child_state *cs)`
   - `web_magic_ok` (function, line 252) `static int web_magic_ok(const unsigned char *b, size_t n)`
   - `web_make_entry` (function, line 309) `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes, int bold,
     ...`
-  - `tsh_webfont_register` (function, line 371) `int tsh_webfont_register(const char *name,
+  - `tsh_face_generation` (function, line 371) `unsigned tsh_face_generation(void)`
+  - `tsh_webfont_register` (function, line 373) `int tsh_webfont_register(const char *name,
                          const unsigned char *bytes, s...`
-  - `tsh_webfont_clear` (function, line 428) `void tsh_webfont_clear(void)`
-  - `web_find` (function, line 434) `static tsh_entry *web_find(unsigned h, int bold, int italic)`
-  - `entry_free` (function, line 446) `static void entry_free(tsh_entry *e)`
-  - `ascii_ieq` (function, line 459) `static int ascii_ieq(const char *a, const char *b)`
-  - `tsh_family_is_generic` (function, line 468) `int tsh_family_is_generic(const char *name)`
-  - `tsh_pick_from_list` (function, line 480) `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
+  - `tsh_webfont_clear` (function, line 430) `void tsh_webfont_clear(void)`
+  - `web_find` (function, line 436) `static tsh_entry *web_find(unsigned h, int bold, int italic)`
+  - `entry_free` (function, line 448) `static void entry_free(tsh_entry *e)`
+  - `ascii_ieq` (function, line 461) `static int ascii_ieq(const char *a, const char *b)`
+  - `tsh_family_is_generic` (function, line 470) `int tsh_family_is_generic(const char *name)`
+  - `tsh_pick_from_list` (function, line 482) `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,
                   ...`
-  - `tsh_pick_family` (function, line 501) `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
+  - `tsh_pick_family` (function, line 503) `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,
         ...`
-  - `fc_installed` (function, line 514) `static int fc_installed(const char *name, void *ctx)`
-  - `fc_resolve` (function, line 557) `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
-  - `local_clear` (function, line 602) `static void local_clear(void)`
-  - `lfam_index` (function, line 613) `static int lfam_index(const char *fam)`
-  - `tsh_local_handle` (function, line 621) `int tsh_local_handle(const char *list)`
-  - `local_entry` (function, line 640) `static tsh_entry *local_entry(int handle, int bold, int italic)`
-  - `get_entry_ex` (function, line 660) `static tsh_entry *get_entry_ex(const tsh_font *f)`
-  - `tsh_ready` (function, line 672) `int tsh_ready(void)`
-  - `tsh_shape` (function, line 677) `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
+  - `fc_installed` (function, line 516) `static int fc_installed(const char *name, void *ctx)`
+  - `fc_resolve` (function, line 559) `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)`
+  - `local_clear` (function, line 604) `static void local_clear(void)`
+  - `lfam_index` (function, line 615) `static int lfam_index(const char *fam)`
+  - `tsh_local_handle` (function, line 623) `int tsh_local_handle(const char *list)`
+  - `local_entry` (function, line 642) `static tsh_entry *local_entry(int handle, int bold, int italic)`
+  - `get_entry_ex` (function, line 662) `static tsh_entry *get_entry_ex(const tsh_font *f)`
+  - `tsh_ready` (function, line 674) `int tsh_ready(void)`
+  - `tsh_shape` (function, line 679) `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
                 ...`
-  - `utf8_next` (function, line 727) `static unsigned utf8_next(const char *s, size_t n, size_t *len)`
-  - `is_private_use` (function, line 746) `static int is_private_use(unsigned cp)`
-  - `rides_previous` (function, line 751) `static int rides_previous(unsigned cp)`
-  - `tsh_segment` (function, line 759) `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
+  - `utf8_next` (function, line 729) `static unsigned utf8_next(const char *s, size_t n, size_t *len)`
+  - `is_private_use` (function, line 748) `static int is_private_use(unsigned cp)`
+  - `rides_previous` (function, line 753) `static int rides_previous(unsigned cp)`
+  - `tsh_segment` (function, line 761) `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,
                 tsh_...`
-  - `fb_clear` (function, line 812) `static void fb_clear(void)`
-  - `fb_match_covering` (function, line 832) `static FcPattern *fb_match_covering(FcPattern *pat, FcCharSet *cs)`
-  - `fb_entry` (function, line 854) `static tsh_entry *fb_entry(unsigned cp, int bold)`
-  - `fb_entry_uncached` (function, line 871) `static tsh_entry *fb_entry_uncached(unsigned cp, int bold)`
-  - `cover_cp` (function, line 941) `static int cover_cp(unsigned cp, void *vctx)`
-  - `shape_entry` (function, line 955) `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
+  - `fb_clear` (function, line 814) `static void fb_clear(void)`
+  - `fb_match_covering` (function, line 834) `static FcPattern *fb_match_covering(FcPattern *pat, FcCharSet *cs)`
+  - `fb_entry` (function, line 856) `static tsh_entry *fb_entry(unsigned cp, int bold)`
+  - `fb_entry_uncached` (function, line 873) `static tsh_entry *fb_entry_uncached(unsigned cp, int bold)`
+  - `cover_cp` (function, line 943) `static int cover_cp(unsigned cp, void *vctx)`
+  - `shape_entry` (function, line 957) `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,
             ...`
-  - `shape_runs` (function, line 992) `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
+  - `shape_runs` (function, line 994) `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,
                ...`
-  - `tsh_measure` (function, line 1073) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
-  - `tsh_draw` (function, line 1108) `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
+  - `tsh_measure` (function, line 1075) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)`
+  - `tsh_draw` (function, line 1110) `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,
                     double x, doub...`
-  - `tsh_face` (function, line 1115) `cairo_font_face_t *tsh_face(const tsh_font *f)`
-  - `tsh_shutdown` (function, line 1121) `void tsh_shutdown(void)`
+  - `tsh_face` (function, line 1117) `cairo_font_face_t *tsh_face(const tsh_font *f)`
+  - `tsh_shutdown` (function, line 1123) `void tsh_shutdown(void)`
   - `characters` (function, line 138) `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...`
   - `slice` (function, line 251) `* woff2 slice (spec/webfont.md);`
   - `blob` (function, line 333) `* blob (it shaped every character to .notdef): its face is built over the tables * FreeType already decoded. A bare...`
@@ -348,14 +349,14 @@ static void child_net_drain(child_state *cs)`
   - `TSH_WGHT_REGULAR` (macro, line 267) `#define TSH_WGHT_REGULAR`
   - `TSH_WGHT_BOLD` (macro, line 268) `#define TSH_WGHT_BOLD`
   - `TSH_VAR_AXES_MAX` (macro, line 269) `#define TSH_VAR_AXES_MAX`
-  - `TSH_SUBS_MAX` (macro, line 528) `#define TSH_SUBS_MAX`
-  - `TSH_BLANK_GLYPH` (macro, line 743) `#define TSH_BLANK_GLYPH`
-  - `TSH_FB_SLOTS` (macro, line 785) `#define TSH_FB_SLOTS`
-  - `TSH_FB_BLOCKS` (macro, line 786) `#define TSH_FB_BLOCKS`
-  - `TSH_FB_CP_SLOTS` (macro, line 803) `#define TSH_FB_CP_SLOTS`
-  - `TSH_MAX_RUNS` (macro, line 988) `#define TSH_MAX_RUNS`
-  - `TSH_MEASURE_SLOTS` (macro, line 1061) `#define TSH_MEASURE_SLOTS`
-  - `TSH_MEASURE_TEXT_MAX` (macro, line 1062) `#define TSH_MEASURE_TEXT_MAX`
+  - `TSH_SUBS_MAX` (macro, line 530) `#define TSH_SUBS_MAX`
+  - `TSH_BLANK_GLYPH` (macro, line 745) `#define TSH_BLANK_GLYPH`
+  - `TSH_FB_SLOTS` (macro, line 787) `#define TSH_FB_SLOTS`
+  - `TSH_FB_BLOCKS` (macro, line 788) `#define TSH_FB_BLOCKS`
+  - `TSH_FB_CP_SLOTS` (macro, line 805) `#define TSH_FB_CP_SLOTS`
+  - `TSH_MAX_RUNS` (macro, line 990) `#define TSH_MAX_RUNS`
+  - `TSH_MEASURE_SLOTS` (macro, line 1063) `#define TSH_MEASURE_SLOTS`
+  - `TSH_MEASURE_TEXT_MAX` (macro, line 1064) `#define TSH_MEASURE_TEXT_MAX`
 - Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
 
 ## src/textfield.c

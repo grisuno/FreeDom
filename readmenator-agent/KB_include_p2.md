@@ -1,6 +1,46 @@
 # Subsystem: include (page 2 of 6)
 Previous: [KB_include.md](KB_include.md)
 
+## include/css_computed.h
+- Doc: ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ccm_input` (struct, line 19)
+  - `ccm_get` (function, line 29) `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap);`
+  - `ccm_property_count` (function, line 32) `size_t ccm_property_count(void);`
+  - `ccm_property_name` (function, line 33) `const char *ccm_property_name(size_t i);`
+  - `FREEDOM_CSS_COMPUTED_H` (macro, line 2) `#define FREEDOM_CSS_COMPUTED_H`
+  - `CCM_VALUE_MAX` (macro, line 17) `#define CCM_VALUE_MAX`
+- Depends on: `include/css.h`
+- Imported by: `src/css_computed.c`, `src/tab.c`, `tests/test_css_computed.c`
+
+## include/css_counter.h
+- Doc: cnt_hash: FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `cnt_decl` (struct, line 21)
+  - `cnt_style` (enum, line 26)
+  - `name` (type_alias, line 20) `typedef struct cnt_decl { unsigned name;`
+  - `cnt_state` (type_alias, line 50) `typedef struct cnt_state cnt_state;`
+  - `cnt_hash` (function, line 34) `unsigned cnt_hash(const char *name, size_t len);`
+  - `written` (function, line 37) `* written (0 for `none`) or -1 when invalid. `dflt` is the value of an entry with no * integer: 0 for reset, 1 for...`
+  - `cnt_parse_content` (function, line 44) `int cnt_parse_content(const char *val, char *out, size_t cap);`
+  - `cnt_is_marker` (function, line 45) `int cnt_is_marker(const char *s);`
+  - `cnt_format` (function, line 49) `size_t cnt_format(int style, long value, char *out, size_t cap);`
+  - `cnt_state_new` (function, line 52) `cnt_state *cnt_state_new(void);`
+  - `cnt_state_free` (function, line 53) `void cnt_state_free(cnt_state *s);`
+  - `cnt_reset` (function, line 56) `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n);`
+  - `cnt_increment` (function, line 57) `void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n);`
+  - `cnt_leave` (function, line 60) `void cnt_leave(cnt_state *s, int depth);`
+  - `cnt_resolve` (function, line 67) `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx, char *out, size_t cap);`
+  - `FREEDOM_CSS_COUNTER_H` (macro, line 9) `#define FREEDOM_CSS_COUNTER_H`
+  - `CNT_MAX_DECL` (macro, line 17) `#define CNT_MAX_DECL`
+  - `CNT_MAX_INSTANCES` (macro, line 18) `#define CNT_MAX_INSTANCES`
+  - `CNT_NAME_MAX` (macro, line 19) `#define CNT_NAME_MAX`
+- Imported by: `include/css.h`, `src/css_counter.c`, `tests/test_css_counter.c`
+
 ## include/css_decl.h
 - Doc: The sheet's two string pools -- background url()s, and the ::before/::after
 - Layer: utility
@@ -352,6 +392,22 @@ Previous: [KB_include.md](KB_include.md)
   - `DL_MAX_BYTES` (macro, line 31) `#define DL_MAX_BYTES`
 - Imported by: `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 
+## include/exact_key.h
+- Doc: exact_key (ek_) -- a cache key built by OBSERVING every input of what is cached, compared
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ek_key` (struct, line 17)
+  - `ek_init` (function, line 24) `void ek_init(ek_key *k);`
+  - `ek_reset` (function, line 27) `void ek_reset(ek_key *k);`
+  - `ek_put` (function, line 31) `void ek_put(ek_key *k, const void *p, size_t len);`
+  - `ek_equal` (function, line 34) `int ek_equal(const ek_key *a, const ek_key *b);`
+  - `ek_swap` (function, line 37) `void ek_swap(ek_key *a, ek_key *b);`
+  - `ek_free` (function, line 40) `void ek_free(ek_key *k);`
+  - `FREEDOM_EXACT_KEY_H` (macro, line 2) `#define FREEDOM_EXACT_KEY_H`
+  - `EK_MAX_BYTES` (macro, line 15) `#define EK_MAX_BYTES`
+- Imported by: `gui/browser_ui.c`, `src/exact_key.c`, `tests/test_exact_key.c`
+
 ## include/fb_cmdline.h
 - Doc: fbc_history_push: #define FBC_BASE_MAX   256    /* bytes of a completion base path #define...
 - Layer: utility
@@ -396,101 +452,30 @@ Previous: [KB_include.md](KB_include.md)
   - `FBP_EXPR_MAX` (macro, line 31) `#define FBP_EXPR_MAX`
 - Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
 
-## include/flex_layout.h
-- Doc: fx_item: Upper bound on items per flex line / grid columns.
-- Layer: presentation
-- Language: h
-- Symbols:
-  - `fx_item` (struct, line 40)
-  - `fx_result` (struct, line 48)
-  - `fx_area_map` (struct, line 154)
-  - `fx_float_rect` (struct, line 224)
-  - `fx_justify` (enum, line 30)
-  - `fx_status` (enum, line 53)
-  - `basis` (type_alias, line 40) `typedef struct fx_item { double basis;`
-  - `pos` (type_alias, line 48) `typedef struct fx_result { double pos;`
-  - `cols` (type_alias, line 154) `typedef struct fx_area_map { int rows, cols;`
-  - `bottom` (type_alias, line 224) `typedef struct fx_float_rect { double top, bottom;`
-  - `size` (function, line 60) `* content size (px);`
-  - `out` (function, line 62) `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item...`
-  - `fx_grid_cell` (function, line 74) `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);`
-  - `number` (function, line 106) `* line number (negative counts from the end). */ #define FX_GL_AUTO 0 #define FX_GL_SPAN_BASE (1 << 20) #define...`
-  - `fx_grid_line_parse` (function, line 117) `int fx_grid_line_parse(const char *v, int *start, int *end);`
-  - `fx_grid_line_resolve` (function, line 122) `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);`
-  - `fx_autofill_count` (function, line 129) `size_t fx_autofill_count(double avail, double gap, double minw);`
-  - `fx_grid_column_count` (function, line 139) `int fx_grid_column_count(int flow, int cols, int rows, size_t items);`
-  - `fx_grid_area_hash` (function, line 163) `unsigned fx_grid_area_hash(const char *name);`
-  - `offset` (function, line 181) `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...`
-  - `required` (function, line 194) `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);`
-  - `widths` (function, line 204) `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...`
-  - `FX_ERR_NULL_ARG` (function, line 238) `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);`
-  - `space` (function, line 244) `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...`
-  - `fx_auto_min_size` (function, line 275) `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);`
-  - `fx_justify_name` (function, line 331) `const char *fx_justify_name(fx_justify j);`
-  - `height` (function, line 337) `* used height (h_out);`
-  - `it` (function, line 354) `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...`
-  - `win` (function, line 362) `* margins win (both = centre, left only = end);`
-  - `fx_cross_offset` (function, line 364) `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);`
-  - `FREEDOM_FLEX_LAYOUT_H` (macro, line 2) `#define FREEDOM_FLEX_LAYOUT_H`
-  - `FX_MAX_ITEMS` (macro, line 28) `#define FX_MAX_ITEMS`
-  - `FX_GL_AUTO` (macro, line 107) `#define FX_GL_AUTO`
-  - `FX_GL_SPAN_BASE` (macro, line 108) `#define FX_GL_SPAN_BASE`
-  - `FX_GL_SPAN_MAX` (macro, line 109) `#define FX_GL_SPAN_MAX`
-  - `FX_GL_LINE_MAX` (macro, line 110) `#define FX_GL_LINE_MAX`
-  - `FX_GRID_COLS_MAX` (macro, line 132) `#define FX_GRID_COLS_MAX`
-  - `FX_AREA_MAX_ROWS` (macro, line 146) `#define FX_AREA_MAX_ROWS`
-  - `FX_AREA_MAX_COLS` (macro, line 147) `#define FX_AREA_MAX_COLS`
-  - `FX_AREA_MAX_CELLS` (macro, line 148) `#define FX_AREA_MAX_CELLS`
-  - `FX_AREA_NAME_MAX` (macro, line 149) `#define FX_AREA_NAME_MAX`
-  - `FX_FLOAT_MIN_LINE` (macro, line 218) `#define FX_FLOAT_MIN_LINE`
-  - `FX_MAX_COLUMNS` (macro, line 280) `#define FX_MAX_COLUMNS`
-  - `FX_MAUTO_TOP` (macro, line 347) `#define FX_MAUTO_TOP`
-  - `FX_MAUTO_BOTTOM` (macro, line 348) `#define FX_MAUTO_BOTTOM`
-- Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
-
-## include/form.h
-- Doc: fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *...
+## include/find_text.h
+- Doc: ft_piece: One laid-out text piece. gap_before = 1: white space separates it from the previous *...
 - Layer: utility
 - Language: h
 - Symbols:
-  - `fm_field` (struct, line 37)
-  - `fm_plan` (struct, line 52)
-  - `fm_method` (enum, line 33)
-  - `fm_kind` (enum, line 39)
-  - `fm_block_reason` (enum, line 45)
-  - `fm_status` (enum, line 61)
-  - `kind` (type_alias, line 51) `typedef struct fm_plan { fm_kind kind;`
-  - `FM_CONTENT_TYPE_URLENCODED` (variable, line 68) `extern const char FM_CONTENT_TYPE_URLENCODED[];`
-  - `FREEDOM_FORM_H` (macro, line 2) `#define FREEDOM_FORM_H`
-  - `FM_URL_MAX` (macro, line 29) `#define FM_URL_MAX`
-  - `FM_BODY_MAX` (macro, line 30) `#define FM_BODY_MAX`
-  - `FM_MAX_FIELDS` (macro, line 31) `#define FM_MAX_FIELDS`
-- Depends on: `include/url.h`
-- Imported by: `gui/browser_ui.c`, `src/form.c`, `tests/test_form.c`
-
-## include/frame_broker.h
-- Doc: fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `fbk_frame` (struct, line 31)
-  - `fbk_table` (struct, line 38)
-  - `fbk_rel` (enum, line 22)
-  - `fbk_verdict` (enum, line 24)
-  - `used` (type_alias, line 30) `typedef struct fbk_frame { int used;`
-  - `f` (type_alias, line 37) `typedef struct fbk_table { fbk_frame f[FBK_MAX_FRAMES];`
-  - `fbk_origin_of` (function, line 42) `int fbk_origin_of(const char *url, char *out, size_t cap);`
-  - `fbk_init` (function, line 45) `int fbk_init(fbk_table *t, const char *top_url);`
-  - `fbk_add` (function, line 49) `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id);`
-  - `fbk_remove` (function, line 52) `void fbk_remove(fbk_table *t, int id);`
-  - `fbk_origin` (function, line 55) `const char *fbk_origin(const fbk_table *t, int id);`
-  - `FREEDOM_FRAME_BROKER_H` (macro, line 2) `#define FREEDOM_FRAME_BROKER_H`
-  - `FBK_MAX_FRAMES` (macro, line 16) `#define FBK_MAX_FRAMES`
-  - `FBK_MAX_DEPTH` (macro, line 17) `#define FBK_MAX_DEPTH`
-  - `FBK_MAX_MSG` (macro, line 18) `#define FBK_MAX_MSG`
-  - `FBK_ORIGIN_MAX` (macro, line 19) `#define FBK_ORIGIN_MAX`
-  - `FBK_URL_MAX` (macro, line 20) `#define FBK_URL_MAX`
-- Imported by: `src/frame_broker.c`, `src/frame_host.c`, `tests/test_frame_broker.c`
+  - `ft_piece` (struct, line 24)
+  - `ft_pos` (struct, line 30)
+  - `ft_match` (struct, line 31)
+  - `ft_span` (struct, line 32)
+  - `ft_status` (enum, line 20)
+  - `piece` (type_alias, line 29) `typedef struct ft_pos { size_t piece;`
+  - `end` (type_alias, line 31) `typedef struct ft_match { ft_pos start, end;`
+  - `match` (type_alias, line 32) `typedef struct ft_span { size_t piece, start, end, match;`
+  - `find_text` (function, line 2) `* find_text (ft_) -- find in page over the rendered text (spec/find_text.md). * * Pure: no I/O, no global state...`
+  - `ft_fold` (function, line 35) `uint32_t ft_fold(uint32_t cp);`
+  - `written` (function, line 38) `* number of code points written (<= cap, <= FT_QUERY_MAX);`
+  - `ft_compile` (function, line 39) `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap);`
+  - `exist` (function, line 42) `* cap matches exist (truncated may be NULL). */ ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t...`
+  - `ft_spans` (function, line 48) `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm, ft_span *out, size_t cap);`
+  - `ft_step` (function, line 53) `long ft_step(long cur, size_t n, int dir);`
+  - `FREEDOM_FIND_TEXT_H` (macro, line 8) `#define FREEDOM_FIND_TEXT_H`
+  - `FT_QUERY_MAX` (macro, line 17) `#define FT_QUERY_MAX`
+  - `FT_MATCH_MAX` (macro, line 18) `#define FT_MATCH_MAX`
+- Imported by: `gui/browser_ui.c`, `src/find_text.c`, `tests/test_find_text.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

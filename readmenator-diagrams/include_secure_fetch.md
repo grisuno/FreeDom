@@ -23,7 +23,7 @@ src groups 8 files (c) around fp_coarsen_time_ms, fp_user_agent, fp_accept_langu
 
 ## tests (6.3)
 
-tests groups 8 files (c) around CHECK, main, test_coarsen_time, test_identity_is_fixed, test_legacy_identity_fixed. test_origin_key_unlinks_readback: The property that actually matters: the same canvas...
+tests groups 8 files (c) around always_cancel, CHECK, main, test_coarsen_time, test_identity_is_fixed. test_origin_key_unlinks_readback: The property that actually matters: the same canvas...
 
 **Files**:
 

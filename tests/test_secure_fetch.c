@@ -48,6 +48,8 @@ static void test_config_blend_fields_default_null(void **state) {
     assert_null(c.sec_fetch_mode);
     assert_null(c.progress_ctx);
     assert_null(c.progress_cb);
+    assert_null(c.cancel_ctx);
+    assert_null(c.cancel_cb);
 }
 
 /* --- sf_user_agent_or_default --- */
@@ -318,6 +320,10 @@ static void test_fallback_ladder_is_shared_and_ordered(void **state) {
     assert_int_equal(sf_fallback_policy(SF_ERR_KEM_NOT_PQ, SF_POLICY_ALLOWLISTED_INSECURE, 1, &n), 0);
     assert_int_equal(sf_fallback_policy(SF_ERR_TOO_MANY_REDIRECTS, SF_POLICY_PQ_HYBRID_KE, 0, &n), 0);
     assert_int_equal(sf_fallback_policy(SF_ERR_KEM_NOT_PQ, SF_POLICY_PQ_HYBRID_KE, 0, NULL), 0);
+    /* Stop is the user's decision, not a crypto failure: never retried, not even on the
+     * allowlist (spec/browser.md 3c). */
+    assert_int_equal(sf_fallback_policy(SF_ERR_CANCELLED, SF_POLICY_PQ_HYBRID_KE, 1, &n), 0);
+    assert_int_equal(sf_fallback_policy(SF_ERR_CANCELLED, SF_POLICY_ALLOW_CLASSICAL_KE, 1, &n), 0);
 }
 
 /* A persistent backing remembers permanent redirects across sessions: `save` hears every put,

@@ -36,7 +36,7 @@ This community groups 24 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `tests/itest_secure_fetch.c` | c | testing | 2 | no |
+| `tests/itest_secure_fetch.c` | c | testing | 3 | no |
 | `tests/test_anti_fp.c` | c | testing | 15 | no |
 | `tests/test_cached_fetch.c` | c | testing | 14 | no |
 | `tests/test_identity.c` | c | testing | 12 | no |
@@ -86,8 +86,9 @@ This community groups 24 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 2 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
-- [EXTRACTED] depends_on community 5 <-> 7 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/http_cache.h.
+- [EXTRACTED] depends_on community 1 <-> 5 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.
+- [EXTRACTED] depends_on community 5 <-> 6 (strength 0.9): Extracted import edge crosses communities: include/cached_fetch.h imports include/http_cache.h.
+- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/identity.h.
 
 ## Risks
 

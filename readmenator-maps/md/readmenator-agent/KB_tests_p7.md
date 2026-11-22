@@ -282,62 +282,63 @@ Previous: [KB_tests_p6.md](KB_tests_p6.md)
 - Symbols:
   - `test_default_groups_offer_p384` (function, line 37) `static void test_default_groups_offer_p384(void **state)`
   - `test_config_blend_fields_default_null` (function, line 43) `static void test_config_blend_fields_default_null(void **state)`
-  - `test_user_agent_default_when_unset` (function, line 55) `static void test_user_agent_default_when_unset(void **state)`
-  - `test_user_agent_uses_override` (function, line 61) `static void test_user_agent_uses_override(void **state)`
-  - `test_url_rejects_null` (function, line 82) `static void test_url_rejects_null(void **state)`
-  - `test_url_rejects_plain_http` (function, line 87) `static void test_url_rejects_plain_http(void **state)`
-  - `test_url_rejects_dangerous_schemes` (function, line 92) `static void test_url_rejects_dangerous_schemes(void **state)`
-  - `test_url_accepts_https` (function, line 102) `static void test_url_accepts_https(void **state)`
-  - `test_tls_rejects_12` (function, line 110) `static void test_tls_rejects_12(void **state)`
-  - `test_tls_rejects_older_and_garbage` (function, line 115) `static void test_tls_rejects_older_and_garbage(void **state)`
-  - `test_tls_accepts_13` (function, line 124) `static void test_tls_accepts_13(void **state)`
-  - `test_group_rejects_classical` (function, line 131) `static void test_group_rejects_classical(void **state)`
-  - `test_group_rejects_pure_pq` (function, line 138) `static void test_group_rejects_pure_pq(void **state)`
-  - `test_group_accepts_hybrid` (function, line 145) `static void test_group_accepts_hybrid(void **state)`
-  - `test_chain_strict_rejects_classical` (function, line 154) `static void test_chain_strict_rejects_classical(void **state)`
-  - `test_chain_strict_accepts_pq` (function, line 163) `static void test_chain_strict_accepts_pq(void **state)`
-  - `test_chain_hybrid_allows_classical` (function, line 171) `static void test_chain_hybrid_allows_classical(void **state)`
-  - `test_chain_rejects_sha1_in_any_policy` (function, line 179) `static void test_chain_rejects_sha1_in_any_policy(void **state)`
-  - `test_chain_permissive_allows_weak_certs` (function, line 188) `static void test_chain_permissive_allows_weak_certs(void **state)`
-  - `test_chain_rejects_weak_rsa` (function, line 201) `static void test_chain_rejects_weak_rsa(void **state)`
-  - `test_chain_rejects_null` (function, line 209) `static void test_chain_rejects_null(void **state)`
-  - `test_enforce_all_good_hybrid` (function, line 223) `static void test_enforce_all_good_hybrid(void **state)`
-  - `test_enforce_checks_version_first` (function, line 229) `static void test_enforce_checks_version_first(void **state)`
-  - `test_enforce_checks_group_after_version` (function, line 238) `static void test_enforce_checks_group_after_version(void **state)`
-  - `test_enforce_fails_closed_on_null_chain` (function, line 246) `static void test_enforce_fails_closed_on_null_chain(void **state)`
-  - `test_enforce_strict_requires_pq_chain` (function, line 253) `static void test_enforce_strict_requires_pq_chain(void **state)`
-  - `test_enforce_allow_classical_ke` (function, line 266) `static void test_enforce_allow_classical_ke(void **state)`
-  - `test_enforce_allowlisted_insecure` (function, line 285) `static void test_enforce_allowlisted_insecure(void **state)`
-  - `test_fallback_ladder_is_shared_and_ordered` (function, line 307) `static void test_fallback_ladder_is_shared_and_ordered(void **state)`
-  - `bk_save` (function, line 327) `static void bk_save(void *c, const char *from, const char *to, time_t now)`
-  - `bk_load` (function, line 333) `static int bk_load(void *c, const char *from, time_t now, char *out, size_t cap)`
-  - `test_rcache_backing_persists_and_serves_after_ram_loss` (function, line 340) `static void test_rcache_backing_persists_and_serves_after_ram_loss(void **state)`
-  - `test_rcache_remembers_permanent_redirects` (function, line 358) `static void test_rcache_remembers_permanent_redirects(void **state)`
-  - `test_redirect_code_recognizes_3xx` (function, line 377) `static void test_redirect_code_recognizes_3xx(void **state)`
-  - `test_redirect_code_rejects_others` (function, line 386) `static void test_redirect_code_rejects_others(void **state)`
-  - `test_header_value_reads_named_header` (function, line 397) `static void test_header_value_reads_named_header(void **state)`
-  - `test_header_value_rejects_other_empty_and_oversize` (function, line 408) `static void test_header_value_rejects_other_empty_and_oversize(void **state)`
-  - `test_location_parses_value` (function, line 421) `static void test_location_parses_value(void **state)`
-  - `test_location_is_case_insensitive_and_trims` (function, line 429) `static void test_location_is_case_insensitive_and_trims(void **state)`
-  - `test_location_rejects_non_location_and_empty` (function, line 439) `static void test_location_rejects_non_location_and_empty(void **state)`
-  - `test_location_rejects_overflow` (function, line 451) `static void test_location_rejects_overflow(void **state)`
-  - `test_resolve_absolute_https` (function, line 460) `static void test_resolve_absolute_https(void **state)`
-  - `test_resolve_refuses_http_downgrade` (function, line 468) `static void test_resolve_refuses_http_downgrade(void **state)`
-  - `test_resolve_refuses_dangerous_schemes` (function, line 475) `static void test_resolve_refuses_dangerous_schemes(void **state)`
-  - `test_resolve_scheme_relative` (function, line 486) `static void test_resolve_scheme_relative(void **state)`
-  - `test_resolve_absolute_path` (function, line 494) `static void test_resolve_absolute_path(void **state)`
-  - `test_resolve_relative_path` (function, line 506) `static void test_resolve_relative_path(void **state)`
-  - `test_resolve_null_args` (function, line 518) `static void test_resolve_null_args(void **state)`
-  - `test_response_free_on_zeroed` (function, line 529) `static void test_response_free_on_zeroed(void **state)`
-  - `test_response_free_releases_location` (function, line 538) `static void test_response_free_releases_location(void **state)`
-  - `test_get_follow_null_args` (function, line 552) `static void test_get_follow_null_args(void **state)`
-  - `test_get_null_args` (function, line 561) `static void test_get_null_args(void **state)`
-  - `test_post_null_args` (function, line 570) `static void test_post_null_args(void **state)`
-  - `test_cookie_line_matches_pure` (function, line 596) `static void test_cookie_line_matches_pure(void **state)`
-  - `test_cookie_jar_put_and_header` (function, line 632) `static void test_cookie_jar_put_and_header(void **state)`
-  - `test_ws_url_check` (function, line 650) `static void test_ws_url_check(void **state)`
-  - `test_ws_open_rejects_before_any_io` (function, line 662) `static void test_ws_open_rejects_before_any_io(void **state)`
-  - `main` (function, line 736) `int main(void)`
+  - `test_user_agent_default_when_unset` (function, line 57) `static void test_user_agent_default_when_unset(void **state)`
+  - `test_user_agent_uses_override` (function, line 63) `static void test_user_agent_uses_override(void **state)`
+  - `test_url_rejects_null` (function, line 84) `static void test_url_rejects_null(void **state)`
+  - `test_url_rejects_plain_http` (function, line 89) `static void test_url_rejects_plain_http(void **state)`
+  - `test_url_rejects_dangerous_schemes` (function, line 94) `static void test_url_rejects_dangerous_schemes(void **state)`
+  - `test_url_accepts_https` (function, line 104) `static void test_url_accepts_https(void **state)`
+  - `test_tls_rejects_12` (function, line 112) `static void test_tls_rejects_12(void **state)`
+  - `test_tls_rejects_older_and_garbage` (function, line 117) `static void test_tls_rejects_older_and_garbage(void **state)`
+  - `test_tls_accepts_13` (function, line 126) `static void test_tls_accepts_13(void **state)`
+  - `test_group_rejects_classical` (function, line 133) `static void test_group_rejects_classical(void **state)`
+  - `test_group_rejects_pure_pq` (function, line 140) `static void test_group_rejects_pure_pq(void **state)`
+  - `test_group_accepts_hybrid` (function, line 147) `static void test_group_accepts_hybrid(void **state)`
+  - `test_chain_strict_rejects_classical` (function, line 156) `static void test_chain_strict_rejects_classical(void **state)`
+  - `test_chain_strict_accepts_pq` (function, line 165) `static void test_chain_strict_accepts_pq(void **state)`
+  - `test_chain_hybrid_allows_classical` (function, line 173) `static void test_chain_hybrid_allows_classical(void **state)`
+  - `test_chain_rejects_sha1_in_any_policy` (function, line 181) `static void test_chain_rejects_sha1_in_any_policy(void **state)`
+  - `test_chain_permissive_allows_weak_certs` (function, line 190) `static void test_chain_permissive_allows_weak_certs(void **state)`
+  - `test_chain_rejects_weak_rsa` (function, line 203) `static void test_chain_rejects_weak_rsa(void **state)`
+  - `test_chain_rejects_null` (function, line 211) `static void test_chain_rejects_null(void **state)`
+  - `test_enforce_all_good_hybrid` (function, line 225) `static void test_enforce_all_good_hybrid(void **state)`
+  - `test_enforce_checks_version_first` (function, line 231) `static void test_enforce_checks_version_first(void **state)`
+  - `test_enforce_checks_group_after_version` (function, line 240) `static void test_enforce_checks_group_after_version(void **state)`
+  - `test_enforce_fails_closed_on_null_chain` (function, line 248) `static void test_enforce_fails_closed_on_null_chain(void **state)`
+  - `test_enforce_strict_requires_pq_chain` (function, line 255) `static void test_enforce_strict_requires_pq_chain(void **state)`
+  - `test_enforce_allow_classical_ke` (function, line 268) `static void test_enforce_allow_classical_ke(void **state)`
+  - `test_enforce_allowlisted_insecure` (function, line 287) `static void test_enforce_allowlisted_insecure(void **state)`
+  - `test_fallback_ladder_is_shared_and_ordered` (function, line 309) `static void test_fallback_ladder_is_shared_and_ordered(void **state)`
+  - `bk_save` (function, line 333) `static void bk_save(void *c, const char *from, const char *to, time_t now)`
+  - `bk_load` (function, line 339) `static int bk_load(void *c, const char *from, time_t now, char *out, size_t cap)`
+  - `test_rcache_backing_persists_and_serves_after_ram_loss` (function, line 346) `static void test_rcache_backing_persists_and_serves_after_ram_loss(void **state)`
+  - `test_rcache_remembers_permanent_redirects` (function, line 364) `static void test_rcache_remembers_permanent_redirects(void **state)`
+  - `test_redirect_code_recognizes_3xx` (function, line 383) `static void test_redirect_code_recognizes_3xx(void **state)`
+  - `test_redirect_code_rejects_others` (function, line 392) `static void test_redirect_code_rejects_others(void **state)`
+  - `test_header_value_reads_named_header` (function, line 403) `static void test_header_value_reads_named_header(void **state)`
+  - `test_header_value_rejects_other_empty_and_oversize` (function, line 414) `static void test_header_value_rejects_other_empty_and_oversize(void **state)`
+  - `test_location_parses_value` (function, line 427) `static void test_location_parses_value(void **state)`
+  - `test_location_is_case_insensitive_and_trims` (function, line 435) `static void test_location_is_case_insensitive_and_trims(void **state)`
+  - `test_location_rejects_non_location_and_empty` (function, line 445) `static void test_location_rejects_non_location_and_empty(void **state)`
+  - `test_location_rejects_overflow` (function, line 457) `static void test_location_rejects_overflow(void **state)`
+  - `test_resolve_absolute_https` (function, line 466) `static void test_resolve_absolute_https(void **state)`
+  - `test_resolve_refuses_http_downgrade` (function, line 474) `static void test_resolve_refuses_http_downgrade(void **state)`
+  - `test_resolve_refuses_dangerous_schemes` (function, line 481) `static void test_resolve_refuses_dangerous_schemes(void **state)`
+  - `test_resolve_scheme_relative` (function, line 492) `static void test_resolve_scheme_relative(void **state)`
+  - `test_resolve_absolute_path` (function, line 500) `static void test_resolve_absolute_path(void **state)`
+  - `test_resolve_relative_path` (function, line 512) `static void test_resolve_relative_path(void **state)`
+  - `test_resolve_null_args` (function, line 524) `static void test_resolve_null_args(void **state)`
+  - `test_response_free_on_zeroed` (function, line 535) `static void test_response_free_on_zeroed(void **state)`
+  - `test_response_free_releases_location` (function, line 544) `static void test_response_free_releases_location(void **state)`
+  - `test_get_follow_null_args` (function, line 558) `static void test_get_follow_null_args(void **state)`
+  - `test_get_null_args` (function, line 567) `static void test_get_null_args(void **state)`
+  - `test_post_null_args` (function, line 576) `static void test_post_null_args(void **state)`
+  - `test_cookie_line_matches_pure` (function, line 602) `static void test_cookie_line_matches_pure(void **state)`
+  - `test_cookie_jar_put_and_header` (function, line 638) `static void test_cookie_jar_put_and_header(void **state)`
+  - `test_ws_url_check` (function, line 656) `static void test_ws_url_check(void **state)`
+  - `test_ws_open_rejects_before_any_io` (function, line 668) `static void test_ws_open_rejects_before_any_io(void **state)`
+  - `main` (function, line 742) `int main(void)`
+  - `allowlist` (function, line 324) `* allowlist (spec/browser.md 3c). */ assert_int_equal(sf_fallback_policy(SF_ERR_CANCELLED, SF_POLICY_PQ_HYBRID_KE...`
 - Depends on: `include/secure_fetch.h`
 
 ## tests/test_sha2.c

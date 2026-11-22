@@ -1,10 +1,10 @@
 # orphans
 
-*Community 13 | 18 files | cohesion 0.00*
+*Community 14 | 17 files | cohesion 0.00*
 
 ## Definition
 
-This community groups 18 file(s) rooted at `tools` with dominant language py (cohesion 0.00). Central symbols: `PD_COLS`, `PD_INK_DELTA`, `PD_ROWS`, `_POSIX_C_SOURCE`, `_append_probe`, `_word_reader`, `ascii_lower`, `bands`. Core file: `tools/pngdiff.c` (14 symbols). Documented purpose: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and.
+This community groups 17 file(s) rooted at `tools` with dominant language py (cohesion 0.00). Central symbols: `PD_COLS`, `PD_INK_DELTA`, `PD_ROWS`, `_POSIX_C_SOURCE`, `_append_probe`, `_word_reader`, `ascii_lower`, `bands`. Core file: `tools/pngdiff.c` (14 symbols). Documented purpose: Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL v3  Description: MCP server to monitor AFL++ fuzzing sessions and.
 
 ## Files
 
@@ -21,7 +21,6 @@ This community groups 18 file(s) rooted at `tools` with dominant language py (co
 | `tools/ffshot.py` | py | utility | 1 | yes |
 | `tools/fftime.py` | py | utility | 1 | yes |
 | `tools/gen_psl.c` | c | utility | 8 | no |
-| `tools/guitime.py` | py | utility | 3 | yes |
 | `tools/mutate.py` | py | utility | 6 | yes |
 | `tools/pngdiff.c` | c | utility | 14 | no |
 | `tools/pngprof.py` | py | utility | 4 | yes |
@@ -76,7 +75,6 @@ This community groups 18 file(s) rooted at `tools` with dominant language py (co
 - [taint high] `app.py` -> `app.py` via `subprocess` (0 hops)
 - [taint high] `tools/fbench.py` -> `tools/fbench.py` via `subprocess` (0 hops)
 - [taint high] `tools/ffgeom.py` -> `tools/ffgeom.py` via `subprocess` (0 hops)
-- [taint high] `tools/guitime.py` -> `tools/guitime.py` via `subprocess` (0 hops)
 - [taint high] `tools/mutate.py` -> `tools/mutate.py` via `subprocess` (0 hops)
 - [taint medium] `tools/snapshot.py` -> `tools/snapshot.py` via `urllib.request` (0 hops)
 
@@ -100,7 +98,6 @@ This community groups 18 file(s) rooted at `tools` with dominant language py (co
 - `tools/ffshot.py`
 - `tools/fftime.py`
 - `tools/gen_psl.c`
-- `tools/guitime.py`
 - `tools/mutate.py`
 - `tools/pngdiff.c`
 - `tools/pngprof.py`

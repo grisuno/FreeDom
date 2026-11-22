@@ -54,7 +54,7 @@ The single source of truth for the look of the browser.
 
 ### `ui_theme_dark`
 
-`function` | [gui/bui_theme.c:78](../../gui/bui_theme.c#L78)
+`function` | [gui/bui_theme.c:91](../../gui/bui_theme.c#L91)
 
 ```c
 ui_theme ui_theme_dark(void)
@@ -76,7 +76,7 @@ Shares all the metrics (font sizes, spacing) with the default theme; only the co
 
 ### `ui_theme_sepia`
 
-`function` | [gui/bui_theme.c:123](../../gui/bui_theme.c#L123)
+`function` | [gui/bui_theme.c:137](../../gui/bui_theme.c#L137)
 
 ```c
 ui_theme ui_theme_sepia(void)
@@ -98,7 +98,7 @@ Shares all the metrics with the default theme; only the colours change.
 
 ### `ui_theme_for`
 
-`function` | [gui/bui_theme.c:165](../../gui/bui_theme.c#L165)
+`function` | [gui/bui_theme.c:189](../../gui/bui_theme.c#L189)
 
 ```c
 ui_theme ui_theme_for(int mode)
@@ -124,7 +124,7 @@ The single place that maps the theme mode to a palette.
 
 ### `rgb_from_packed`
 
-`function` | [gui/bui_theme.c:174](../../gui/bui_theme.c#L174)
+`function` | [gui/bui_theme.c:198](../../gui/bui_theme.c#L198)
 
 ```c
 ui_rgb rgb_from_packed(int packed)
@@ -148,7 +148,7 @@ Converts a packed 0xRRGGBB author color into a theme RGB triple.
 
 ### `set_rgb`
 
-`function` | [gui/bui_theme.c:179](../../gui/bui_theme.c#L179)
+`function` | [gui/bui_theme.c:203](../../gui/bui_theme.c#L203)
 
 ```c
 void set_rgb(cairo_t *cr, ui_rgb c)
@@ -163,6 +163,6 @@ void set_rgb(cairo_t *cr, ui_rgb c)
 | `cr` | `cairo_t *` |  |  |
 | `c` | `ui_rgb` |  |  |
 
-> **Inherited:** Documentation from [`set_rgb`](#set_rgb) (gui/browser_ui_internal.h:105).
+> **Inherited:** Documentation from [`set_rgb`](#set_rgb) (gui/browser_ui_internal.h:120).
 
 ---

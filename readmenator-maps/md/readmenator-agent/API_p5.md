@@ -1,6 +1,102 @@
 # API (page 5 of 13)
 Previous: [API_p4.md](API_p4.md)
 
+## include/js_native.h
+Depends on: `include/js_sandbox.h`
+Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_native.c`
+- `failure` (function) `include/js_native.h:22` `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);`
+
+## include/js_policy.h
+Imported by: `gui/browser_ui.c`, `include/webcaps.h`, `src/freedom.c`, `src/js_policy.c`, `tests/test_js_policy.c`
+- `membership` (function) `include/js_policy.h:16` `* membership (the allowlist itself is matched by the hostblock module, which * already covers subdomains). No I/O...`
+- `allowlist` (function) `include/js_policy.h:34` `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode * yields false. */ bool...`
+- `jsp_trusted` (function) `include/js_policy.h:45` `bool jsp_trusted(bool js_enabled, int host_allowlisted);` -- Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its JS is enabled (js_enabled, e.g....
+- `jsp_present_trusted` (function) `include/js_policy.h:54` `bool jsp_present_trusted(int host_allowlisted);` -- Presentation-trust (2026-07-11): a host EXPLICITLY on allow.conf (host_allowlisted, e.g. hb_is_allowlisted over...
+- `jsp_mode_str` (function) `include/js_policy.h:64` `const char *jsp_mode_str(jsp_mode mode);` -- Stable lowercase name of a mode ("off"/"allowlist"/"on"); an unknown value * yields "off" (fail closed).
+
+## include/js_sandbox.h
+Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_intl.h`, `include/js_location.h`, `include/js_native.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_intl.c`, `tests/test_js_native.c`, `tests/test_js_sandbox.c`
+- `js_stack_limit_for` (function) `include/js_sandbox.h:75` `size_t js_stack_limit_for(size_t soft_stack);` -- Engine stack cap for a process whose soft stack limit is `soft_stack` bytes (0 = unknown): * 75 % of it (the rest is...
+- `js_prime_stack_limit` (function) `include/js_sandbox.h:79` `void js_prime_stack_limit(void);` -- Reads the process stack limit now.
+- `js_context_free` (function) `include/js_sandbox.h:96` `void js_context_free(js_context *ctx);` -- Creates an isolated, hardened sandbox (memory/stack/time limits armed; no I/O modules). lim == NULL =>...
+- `loaded` (function) `include/js_sandbox.h:124` `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...`
+- `js_set_module_host` (function) `include/js_sandbox.h:129` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` -- Installs the host every static import and dynamic import() goes through. host must * outlive ctx.
+- `js_loc_from_stack` (function) `include/js_sandbox.h:150` `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` -- Pure parser: extracts the throw site (file, line, column) from the FIRST frame of a QuickJS .stack string.
+- `js_set_time_budget` (function) `include/js_sandbox.h:158` `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` -- Adjusts the wall-clock budget armed on each subsequent js_eval.
+- `out` (function) `include/js_sandbox.h:163` `* into out (NUL-terminated, truncated at cap);`
+- `js_profile_enable` (function) `include/js_sandbox.h:166` `void js_profile_enable(js_context *ctx);` -- Sampling profiler (FREEDOM_JS_PROFILE=2).
+- `js_profile_report` (function) `include/js_sandbox.h:167` `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
+- `silently` (function) `include/js_sandbox.h:171` `* fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows * its real first...`
+- `js_throws_report` (function) `include/js_sandbox.h:176` `size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
+- `global` (function) `include/js_sandbox.h:181` `* Freebug REPL installs: its shim takes them once and deletes them from the global (like * __netLog), because the...`
+- `js_result_free` (function) `include/js_sandbox.h:187` `void js_result_free(js_result *res);` -- Devtools for a TRUSTED page. js_devtools_enable turns the profiler and the throw tracer on when the page loads...
+- `js_pump_jobs` (function) `include/js_sandbox.h:195` `int js_pump_jobs(js_context *ctx, int max_jobs);` -- Runs up to max_jobs pending microtasks/jobs (promise reactions queued by the last eval), under the context's current...
+- `handle` (function) `include/js_sandbox.h:198` `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
+- `js_set_current_script` (function) `include/js_sandbox.h:207` `void js_set_current_script(js_context *ctx, const char *src, const char *type);` -- Sets document.currentScript on the global object so external scripts can read their own src / type / data-*...
+
+## include/js_trusted.h
+Depends on: `include/js_dom.h`, `include/js_sandbox.h`
+Imported by: `src/js_trusted.c`, `src/tab.c`, `tests/test_js_dom.c`
+- `null` (function) `include/js_trusted.h:24` `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...`
+- `jt_take_opens` (function) `include/js_trusted.h:42` `char *jt_take_opens(js_context *ctx);` -- The parent installed a new geometry table (layout or scroll changed): re-evaluates every observed target and fires a...
+- `parent` (function) `include/js_trusted.h:80` `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);`
+- `jt_take_ws` (function) `include/js_trusted.h:86` `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);` -- Drains up to cap recorded operations into ops (each data owned; release with jt_ws_ops_free).
+- `jt_ws_ops_free` (function) `include/js_trusted.h:87` `void jt_ws_ops_free(jt_ws_op *ops, size_t n);`
+- `jt_ws_event` (function) `include/js_trusted.h:92` `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);` -- Delivers a socket event from the parent: data enters JS as a VALUE (a string for text, an ArrayBuffer for binary...
+- `jt_take_storage` (function) `include/js_trusted.h:104` `int jt_take_storage(js_context *ctx, char **out, size_t *len);` -- When the store changed since the last call, returns 1 with an owned snapshot of * the whole store in *out (length...
+- `realm` (function) `include/js_trusted.h:107` `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...`
+
+## include/link_nav.h
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/link_nav.c`, `src/tab.c`, `tests/test_link_nav.c`
+- `dropped` (function) `include/link_nav.h:36` `* A longer fragment is dropped (stored as "");`
+- `ln_block_reason_text` (function) `include/link_nav.h:85` `const char *ln_block_reason_text(ln_block_reason reason);` -- Stable, short English notice for a block reason (e.g. for a UI toast or agent * output).
+
+## include/local_store.h
+Imported by: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`, `include/profile.h`, `src/disk_store.c`, `src/local_store.c`, `tests/test_disk_store.c`, `tests/test_local_store.c`
+- `ls_free` (function) `include/local_store.h:80` `void ls_free(uint8_t *buf, size_t len);` -- Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container...
+
+## include/mask_cache.h
+Imported by: `gui/browser_ui.c`, `src/mask_cache.c`, `tests/test_mask_cache.c`
+- `mkc_new` (function) `include/mask_cache.h:29` `mkc_cache *mkc_new(size_t byte_budget, size_t max_entries);` -- A cache holding at most byte_budget bytes of mask buffers in at most max_entries masks. * NULL when either bound is...
+- `mkc_free` (function) `include/mask_cache.h:32` `void mkc_free(mkc_cache *c);` -- A cache holding at most byte_budget bytes of mask buffers in at most max_entries masks. * NULL when either bound is...
+- `mkc_clear` (function) `include/mask_cache.h:35` `void mkc_clear(mkc_cache *c);` -- A cache holding at most byte_budget bytes of mask buffers in at most max_entries masks. * NULL when either bound is...
+- `mkc_get` (function) `include/mask_cache.h:39` `const unsigned char *mkc_get(mkc_cache *c, const mkc_key *k, int *stride);` -- The buffer retained for k (stride bytes per row) and makes it the most recent, or NULL. * Valid until the next...
+- `mkc_put` (function) `include/mask_cache.h:45` `unsigned char *mkc_put(mkc_cache *c, const mkc_key *k, int stride);` -- Reserves a zeroed buffer of stride * k->h bytes owned by the cache for k (replacing any entry for k), evicting...
+- `mkc_bytes` (function) `include/mask_cache.h:48` `size_t mkc_bytes(const mkc_cache *c);` -- Reserves a zeroed buffer of stride * k->h bytes owned by the cache for k (replacing any entry for k), evicting...
+- `mkc_count` (function) `include/mask_cache.h:49` `size_t mkc_count(const mkc_cache *c);`
+
+## include/media_decoder.h
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/media_decoder.c`, `tests/test_media_decoder.c`
+- `md_pace_due_ms` (function) `include/media_decoder.h:79` `static inline uint64_t md_pace_due_ms(md_pacer *p, uint64_t now_ms,
+                             ...` -- Returns the wall-clock instant (ms) at which the frame carrying pts_us is due for display.
+- `media_decoder_run` (function) `include/media_decoder.h:99` `void media_decoder_run(int out_fd, int cmd_fd);` -- Entry point for the decoder child process.
+- `media_decoder_spawn` (function) `include/media_decoder.h:104` `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd);` -- Spawns a media decoder child via fork+exec.
+
+## include/net_guard.h
+Imported by: `src/net_guard.c`, `src/secure_fetch.c`, `tests/test_net_guard.c`
+- `ng_addr_is_private` (function) `include/net_guard.h:38` `int ng_addr_is_private(int family, const unsigned char *addr, size_t len);` -- 1 when the address is not globally routable (loopback, RFC 1918, link-local, CGNAT, documentation, multicast...
+- `ng_text_is_private` (function) `include/net_guard.h:42` `int ng_text_is_private(const char *ip_text);` -- As ng_addr_is_private over a textual IPv4/IPv6 address (optionally bracketed).
+- `ng_host_is_ip` (function) `include/net_guard.h:46` `int ng_host_is_ip(const char *host);` -- 1 when host is an IPv4/IPv6 literal (optionally bracketed), 0 for a name or NULL.
+- `ng_host_is_local` (function) `include/net_guard.h:50` `int ng_host_is_local(const char *host);` -- 1 when host names this machine or a private address without resolving anything: * "localhost", any "*.localhost", or...
+
+## include/net_realm.h
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/net_realm.c`, `tests/test_net_realm.c`
+- `NR_ROUTE_BLOCKED` (function) `include/net_realm.h:57` `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm * whose proxy is not enabled =>...`
+- `address` (function) `include/net_realm.h:62` `* and encrypts by its address (the I2P destination / onion key), so http over it is * not a downgrade. Currently...`
+- `nr_realm_allows_http` (function) `include/net_realm.h:66` `int nr_realm_allows_http(nr_realm r);` -- 1 iff plain http:// is acceptable for this realm.
+- `nr_realm_name` (function) `include/net_realm.h:69` `const char *nr_realm_name(nr_realm r);` -- 1 iff plain http:// is acceptable for this realm.
+- `nr_route_name` (function) `include/net_realm.h:70` `const char *nr_route_name(nr_route r);`
+
+## include/os_sandbox.h
+Imported by: `src/os_sandbox.c`, `src/renderer.c`, `src/tab.c`, `tests/test_os_sandbox.c`
+- `flags` (function) `include/os_sandbox.h:39` `* permission also depends on the protection flags (see os_prot_allowed / W^X). */ int os_policy_allows(long syscall_nr);`
+- `os_policy_size` (function) `include/os_sandbox.h:43` `size_t os_policy_size(void);` -- Nonzero iff syscall_nr is on the strict allowlist (mirrors the BPF program).
+- `os_prot_allowed` (function) `include/os_sandbox.h:52` `int os_prot_allowed(long syscall_nr, unsigned long prot);` -- Pure mirror of the BPF program's EFFECTIVE decision for memory syscalls (W^X).
+- `denied` (function) `include/os_sandbox.h:59` `* request PROT_EXEC are denied (see os_prot_allowed). * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf...`
+- `namespace` (function) `include/os_sandbox.h:75` `* namespace (the unprivileged enabler), network (the worker never needs the * network -- the parent fetches and...`
+- `os_namespace_flags` (function) `include/os_sandbox.h:81` `int os_namespace_flags(void);` -- The set of CLONE_* namespace flags the worker isolates into: a new user namespace (the unprivileged enabler)...
+- `os_landlock_abi` (function) `include/os_sandbox.h:114` `int os_landlock_abi(void);` -- /* What a Landlock rule permits at/below a path. typedef enum os_fs_access { OS_FS_NONE       = 0, /* no access (not...
+
 ## include/page_view.h
 Depends on: `include/css.h`, `include/dom.h`, `include/html_parse.h`
 Imported by: `include/box_tree.h`, `include/frame_host.h`, `include/render_doc.h`, `include/tab.h`, `src/dom_debug.c`, `src/freedom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
@@ -178,29 +274,29 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/re
 Depends on: `include/anti_fp.h`
 Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 - `validators` (function) `include/secure_fetch.h:18` `* The security logic lives in pure validators (no I/O);`
-- `rp_sanitize_request_headers` (function) `include/secure_fetch.h:111` `* rp_sanitize_request_headers ("Name: value\n" lines);`
-- `sf_global_init` (function) `include/secure_fetch.h:233` `void sf_global_init(void);` -- Initialises process-global transport state (libcurl/OpenSSL) once, from the main thread, before any concurrent...
-- `EXCLUDED` (function) `include/secure_fetch.h:239` `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-- `sf_cookie_put` (function) `include/secure_fetch.h:246` `void sf_cookie_put(const char *url, const char *namevalue);` -- Injects a JS-set cookie ("name=value") into the shared jar, scoped to url's host, as if it arrived via Set-Cookie...
-- `sf_cookie_line_matches` (function) `include/secure_fetch.h:251` `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` -- Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecure\\t expiry\\tname\\tvalue"); if...
-- `sf_user_agent_or_default` (function) `include/secure_fetch.h:260` `const char *sf_user_agent_or_default(const char *ua);` -- Returns ua when it is a non-empty string, else SF_DEFAULT_USER_AGENT.
-- `sf_accept_language_or_default` (function) `include/secure_fetch.h:264` `const char *sf_accept_language_or_default(const char *lang);` -- As sf_user_agent_or_default for Accept-Language.
-- `sf_impersonate_kex_groups` (function) `include/secure_fetch.h:268` `const char *sf_impersonate_kex_groups(void);` -- The interim impersonation ClientHello strings (pure; single source of truth so the * shaping is unit-testable...
-- `sf_impersonate_tls13_ciphers` (function) `include/secure_fetch.h:269` `const char *sf_impersonate_tls13_ciphers(void);`
-- `skipped` (function) `include/secure_fetch.h:289` `* skipped (a classical key exchange is accepted);`
-- `sf_is_redirect_code` (function) `include/secure_fetch.h:300` `int sf_is_redirect_code(long http_code);` -- Enforces the full connection policy in order: TLS version, then KE group, then certificate chain.
-- `sf_header_value` (function) `include/secure_fetch.h:311` `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` -- Generic header-line reader for the cache validators: when header_line is `name:` (matched case-insensitively, name...
-- `bits` (function) `include/secure_fetch.h:348` `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-- `sf_ws_fd` (function) `include/secure_fetch.h:355` `int sf_ws_fd(const sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
-- `sf_ws_close` (function) `include/secure_fetch.h:358` `void sf_ws_close(sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
-- `connection` (function) `include/secure_fetch.h:362` `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-- `sf_get` (function) `include/secure_fetch.h:371` `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-- `sf_response_free` (function) `include/secure_fetch.h:382` `void sf_response_free(sf_response *resp);` -- Performs an HTTPS POST under the given policy, sending body (body_len bytes) with the given Content-Type.
-- `exhausted` (function) `include/secure_fetch.h:393` `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
-- `sf_rcache_put` (function) `include/secure_fetch.h:406` `int sf_rcache_put(const char *from, const char *to, time_t now);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
-- `sf_rcache_get` (function) `include/secure_fetch.h:407` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
-- `sf_rcache_clear` (function) `include/secure_fetch.h:408` `void sf_rcache_clear(void);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
-- `sf_rcache_set_backing` (function) `include/secure_fetch.h:417` `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
+- `rp_sanitize_request_headers` (function) `include/secure_fetch.h:112` `* rp_sanitize_request_headers ("Name: value\n" lines);`
+- `sf_global_init` (function) `include/secure_fetch.h:239` `void sf_global_init(void);` -- Initialises process-global transport state (libcurl/OpenSSL) once, from the main thread, before any concurrent...
+- `EXCLUDED` (function) `include/secure_fetch.h:245` `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+- `sf_cookie_put` (function) `include/secure_fetch.h:252` `void sf_cookie_put(const char *url, const char *namevalue);` -- Injects a JS-set cookie ("name=value") into the shared jar, scoped to url's host, as if it arrived via Set-Cookie...
+- `sf_cookie_line_matches` (function) `include/secure_fetch.h:257` `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` -- Pure: parses one CURLINFO_COOKIELIST Netscape line ("domain\\tflag\\tpath\\tsecure\\t expiry\\tname\\tvalue"); if...
+- `sf_user_agent_or_default` (function) `include/secure_fetch.h:266` `const char *sf_user_agent_or_default(const char *ua);` -- Returns ua when it is a non-empty string, else SF_DEFAULT_USER_AGENT.
+- `sf_accept_language_or_default` (function) `include/secure_fetch.h:270` `const char *sf_accept_language_or_default(const char *lang);` -- As sf_user_agent_or_default for Accept-Language.
+- `sf_impersonate_kex_groups` (function) `include/secure_fetch.h:274` `const char *sf_impersonate_kex_groups(void);` -- The interim impersonation ClientHello strings (pure; single source of truth so the * shaping is unit-testable...
+- `sf_impersonate_tls13_ciphers` (function) `include/secure_fetch.h:275` `const char *sf_impersonate_tls13_ciphers(void);`
+- `skipped` (function) `include/secure_fetch.h:295` `* skipped (a classical key exchange is accepted);`
+- `sf_is_redirect_code` (function) `include/secure_fetch.h:306` `int sf_is_redirect_code(long http_code);` -- Enforces the full connection policy in order: TLS version, then KE group, then certificate chain.
+- `sf_header_value` (function) `include/secure_fetch.h:317` `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` -- Generic header-line reader for the cache validators: when header_line is `name:` (matched case-insensitively, name...
+- `bits` (function) `include/secure_fetch.h:354` `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+- `sf_ws_fd` (function) `include/secure_fetch.h:361` `int sf_ws_fd(const sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
+- `sf_ws_close` (function) `include/secure_fetch.h:364` `void sf_ws_close(sf_ws *ws);` -- Non-blocking: reads one frame chunk into buf. *got == 0 when nothing is pending. *flags receives CURLWS_* bits...
+- `connection` (function) `include/secure_fetch.h:368` `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+- `sf_get` (function) `include/secure_fetch.h:377` `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+- `sf_response_free` (function) `include/secure_fetch.h:388` `void sf_response_free(sf_response *resp);` -- Performs an HTTPS POST under the given policy, sending body (body_len bytes) with the given Content-Type.
+- `exhausted` (function) `include/secure_fetch.h:399` `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+- `sf_rcache_put` (function) `include/secure_fetch.h:412` `int sf_rcache_put(const char *from, const char *to, time_t now);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
+- `sf_rcache_get` (function) `include/secure_fetch.h:413` `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+- `sf_rcache_clear` (function) `include/secure_fetch.h:414` `void sf_rcache_clear(void);` -- Permanent-redirect memory: a 301/308 seen by sf_get_follow is remembered in RAM only (never on disk) for a day, so...
+- `sf_rcache_set_backing` (function) `include/secure_fetch.h:423` `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
 
 ## include/sha2.h
 Imported by: `src/js_env.c`, `src/sha2.c`, `tests/test_sha2.c`
@@ -318,10 +414,11 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfo
 - `origin` (function) `include/text_shape.h:92` `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...`
 - `tsh_measure` (function) `include/text_shape.h:101` `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);` -- Total advance (px) of [text,len).
 - `tsh_webfont_register` (function) `include/text_shape.h:114` `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);` -- Registers one fetched @font-face for this document (spec/webfont.md): name is the author family (hashed with...
-- `tsh_webfont_clear` (function) `include/text_shape.h:120` `void tsh_webfont_clear(void);` -- Drops every registered webfont (document teardown / navigation).
-- `tsh_face` (function) `include/text_shape.h:127` `cairo_font_face_t *tsh_face(const tsh_font *f);` -- The cairo face tsh_draw paints f with (webfont, local family or bucket), or NULL when no face resolves.
-- `own` (function) `include/text_shape.h:136` `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....`
-- `tsh_shutdown` (function) `include/text_shape.h:143` `void tsh_shutdown(void);` -- Splits [text,len) into maximal runs of one face.
+- `tsh_face_generation` (function) `include/text_shape.h:122` `unsigned tsh_face_generation(void);` -- Advances whenever a face text is measured with may have been added, freed or replaced (a webfont registered or...
+- `tsh_webfont_clear` (function) `include/text_shape.h:126` `void tsh_webfont_clear(void);` -- Drops every registered webfont (document teardown / navigation).
+- `tsh_face` (function) `include/text_shape.h:133` `cairo_font_face_t *tsh_face(const tsh_font *f);` -- The cairo face tsh_draw paints f with (webfont, local family or bucket), or NULL when no face resolves.
+- `own` (function) `include/text_shape.h:142` `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....`
+- `tsh_shutdown` (function) `include/text_shape.h:149` `void tsh_shutdown(void);` -- Splits [text,len) into maximal runs of one face.
 
 ## include/textfield.h
 Imported by: `gui/browser_ui.c`, `src/textfield.c`, `tests/test_textfield.c`
@@ -391,96 +488,6 @@ Imported by: `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`
 - `wst_replace` (function) `include/web_storage.h:42` `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len);` -- Replaces origin's contents with the snapshot after wst_decode_check.
 - `full` (function) `include/web_storage.h:45` `* validating it in full (wst_decode_check). Returns 0, or -1 when invalid (fn is then * never called). The one...`
 - `wst_origin_bytes` (function) `include/web_storage.h:59` `size_t wst_origin_bytes(const wst_db *db, const char *origin);` -- Builds a snapshot from n pairs into an owned *out.
-
-## include/webfont.h
-Imported by: `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
-- `here` (function) `include/webfont.h:38` `* set with the decoded bytes owned here (freed by wf_list_free);`
-- `wf_scan` (function) `include/webfont.h:52` `int wf_scan(const char *css, size_t len, wf_list *out);`
-- `wf_list_free` (function) `include/webfont.h:53` `void wf_list_free(wf_list *l);`
-- `boundaries` (function) `include/webfont.h:57` `* boundaries (scan_inline accumulation, loader collection). */ void wf_ref_move(wf_ref *dst, wf_ref *src);`
-- `wf_supported_format` (function) `include/webfont.h:60` `int wf_supported_format(const char *fmt);`
-- `wf_name_hash` (function) `include/webfont.h:69` `static inline unsigned wf_name_hash(const char *s, size_t n)` -- FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names.
-
-## include/webfont_load.h
-Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webfont_load.c`, `tests/test_webfont_load.c`
-- `free` (function) `include/webfont_load.h:31` `* free()), *out_status the HTTP status. Nonzero on refusal/error (fail-closed: * the face is skipped, never the...`
-- `skipped` (function) `include/webfont_load.h:47` `* URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */ int wf_load_document(wf_fetch_fn fetch...`
-
-## include/wl_display.h
-Imported by: `src/freedom.c`, `src/wl_display.c`, `tests/test_wl_display.c`
-- `pure` (function) `include/wl_display.h:3` `* wd_pick is pure (no I/O);`
-- `wd_pick` (function) `include/wl_display.h:16` `int wd_pick(const char *const *names, size_t n, char *out, size_t cap);` -- Choose the lowest-numbered "wayland-N" (N = digits only) from names[0..n).
-- `wd_resolve_env` (function) `include/wl_display.h:20` `int wd_resolve_env(void);` -- If WAYLAND_DISPLAY is unset/empty, set it from the sockets found in XDG_RUNTIME_DIR. * Returns WD_OK if the variable...
-
-## include/wl_guard.h
-Imported by: `gui/browser_ui.c`, `src/wl_guard.c`, `tests/test_wl_guard.c`
-- `wlg_start` (function) `include/wl_guard.h:25` `wl_guard *wlg_start(struct wl_display *display);` -- wl_guard -- keeps the Wayland connection drained while the GUI thread is busy.
-- `wlg_stop` (function) `include/wl_guard.h:28` `void wlg_stop(wl_guard *g);` -- client that does not read for a few seconds while the pointer moves gets DISCONNECTED ("libwayland: Data too big for...
-
-## include/ws_hub.h
-Depends on: `include/secure_fetch.h`
-Imported by: `gui/browser_ui.c`, `src/ws_hub.c`, `tests/test_ws_hub.c`
-- `wh_new` (function) `include/ws_hub.h:34` `wh_hub *wh_new(void);` -- #define WH_MAX 8   /* == JD_WS_MAX: sockets per page /* Event kinds delivered to the page; values match...
-- `wh_free` (function) `include/ws_hub.h:38` `void wh_free(wh_hub *h);` -- Closes every connection and frees the hub.
-- `wh_notify_fd` (function) `include/ws_hub.h:41` `int wh_notify_fd(const wh_hub *h);` -- Closes every connection and frees the hub.
-- `wh_open_async` (function) `include/ws_hub.h:46` `int wh_open_async(wh_hub *h, int id, const char *url, const sf_config *cfg);` -- Starts opening url for page socket id on a thread (cfg and all its strings are copied).
-- `generation` (function) `include/ws_hub.h:50` `* previous generation (before wh_close_all) are closed and dropped silently. */ void wh_on_notify(wh_hub *h...`
-- `wh_send` (function) `include/ws_hub.h:54` `int wh_send(wh_hub *h, int id, const void *data, size_t len, int binary);` -- Drains finished opens: success => the connection joins the hub and WH_EV_OPEN is emitted; failure => WH_EV_ERROR...
-- `wh_close` (function) `include/ws_hub.h:58` `void wh_close(wh_hub *h, int id);` -- The page closed socket id: sends a close frame and frees it (also cancels a * pending open for that id: its result...
-- `wh_close_all` (function) `include/ws_hub.h:61` `void wh_close_all(wh_hub *h);` -- The page closed socket id: sends a close frame and frees it (also cancels a * pending open for that id: its result...
-- `wh_poll_fds` (function) `include/ws_hub.h:65` `size_t wh_poll_fds(const wh_hub *h, struct pollfd *out, int *ids, size_t cap);` -- Fills up to cap pollfds (POLLIN) and the matching page ids for the open * connections.
-- `wh_on_readable` (function) `include/ws_hub.h:70` `void wh_on_readable(wh_hub *h, int id, wh_emit_fn emit, void *ctx);` -- Reads everything pending on socket id without blocking, emitting each complete message; a close frame emits...
-- `wh_count` (function) `include/ws_hub.h:73` `size_t wh_count(const wh_hub *h);` -- Reads everything pending on socket id without blocking, emitting each complete message; a close frame emits...
-
-## include/zoom.h
-Imported by: `gui/browser_ui.c`, `src/prefs.c`, `src/zoom.c`, `tests/test_prefs.c`, `tests/test_zoom.c`
-- `zm_clamp` (function) `include/zoom.h:26` `int zm_clamp(int pct);` -- stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
-- `zm_zoom_in` (function) `include/zoom.h:29` `int zm_zoom_in(int pct);` -- never escape the bounds.
-- `zm_zoom_out` (function) `include/zoom.h:32` `int zm_zoom_out(int pct);` -- only calls these.
-- `zm_reset` (function) `include/zoom.h:35` `int zm_reset(void);` -- #define ZM_MIN_PCT     50 #define ZM_MAX_PCT     300 #define ZM_DEFAULT_PCT 100 /* Clamp pct to [ZM_MIN_PCT...
-- `zm_scale` (function) `include/zoom.h:38` `double zm_scale(int pct);` -- /* Clamp pct to [ZM_MIN_PCT, ZM_MAX_PCT]. int zm_clamp(int pct); /* Smallest ladder stop strictly greater than...
-- `zm_apply` (function) `include/zoom.h:42` `double zm_apply(double base_px, int pct);` -- base_px * zm_scale(pct), floored to 1.0 when base_px > 0 so a font can never * scale away to nothing. base_px <= 0...
-
-## src/anti_fp.c
-Depends on: `include/anti_fp.h`
-- `fp_coarsen_time_ms` (function) `src/anti_fp.c:17` `uint64_t fp_coarsen_time_ms(uint64_t raw_ms)`
-- `fp_user_agent` (function) `src/anti_fp.c:23` `const char *fp_user_agent(void)`
-- `fp_accept_language` (function) `src/anti_fp.c:27` `const char *fp_accept_language(void)`
-- `fp_accept_language_header` (function) `src/anti_fp.c:31` `const char *fp_accept_language_header(void)`
-- `fp_timezone` (function) `src/anti_fp.c:35` `const char *fp_timezone(void)`
-- `fp_platform` (function) `src/anti_fp.c:39` `const char *fp_platform(void)`
-- `fp_vendor` (function) `src/anti_fp.c:43` `const char *fp_vendor(void)`
-- `fp_hardware_concurrency` (function) `src/anti_fp.c:47` `int fp_hardware_concurrency(void)`
-- `fp_device_memory_gb` (function) `src/anti_fp.c:51` `int fp_device_memory_gb(void)`
-- `fp_app_version` (function) `src/anti_fp.c:57` `const char *fp_app_version(void)`
-- `fp_app_code_name` (function) `src/anti_fp.c:61` `const char *fp_app_code_name(void)`
-- `fp_product` (function) `src/anti_fp.c:65` `const char *fp_product(void)`
-- `fp_app_name` (function) `src/anti_fp.c:69` `const char *fp_app_name(void)`
-- `fp_product_sub` (function) `src/anti_fp.c:73` `const char *fp_product_sub(void)`
-- `fp_oscpu` (function) `src/anti_fp.c:77` `const char *fp_oscpu(void)`
-- `fp_build_id` (function) `src/anti_fp.c:81` `const char *fp_build_id(void)`
-- `fp_max_touch_points` (function) `src/anti_fp.c:85` `int fp_max_touch_points(void)`
-- `fp_on_line` (function) `src/anti_fp.c:89` `int fp_on_line(void)`
-- `fp_cookie_enabled` (function) `src/anti_fp.c:93` `int fp_cookie_enabled(void)`
-- `fp_bucket_screen` (function) `src/anti_fp.c:99` `void fp_bucket_screen(int w, int h, int *out_w, int *out_h)`
-- `splitmix64` (function) `src/anti_fp.c:121` `static uint64_t splitmix64(uint64_t *state)`
-- `fp_perturb` (function) `src/anti_fp.c:128` `void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key)`
-- `fp_origin_key` (function) `src/anti_fp.c:139` `uint64_t fp_origin_key(uint64_t session_key, const char *registrable_domain)`
-
-## src/block_flow.c
-Depends on: `include/block_flow.h`
-- `finite_or_zero` (function) `src/block_flow.c:11` `static double finite_or_zero(double v)` -- A margin the caller could not compute (NaN from a hostile calc(), an infinity from an overflowing unit conversion)...
-- `bf_collapse_n` (function) `src/block_flow.c:15` `double bf_collapse_n(const double *m, size_t n)`
-- `bf_collapse` (function) `src/block_flow.c:30` `double bf_collapse(double a, double b)`
-- `bf_margins_adjoin` (function) `src/block_flow.c:35` `int bf_margins_adjoin(double border_px, double padding_px)`
-
-## src/box_blur.c
-Depends on: `include/box_blur.h`
-- `bb_box_sizes` (function) `src/box_blur.c:7` `int bb_box_sizes(double sigma, int sizes[3])`
-- `variance` (function) `src/box_blur.c:10` `* width w has variance (w^2 - 1) / 12): the ideal common width, rounded down * to an odd wl and up to wu = wl + 2...`
-- `box_line` (function) `src/box_blur.c:28` `static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)` -- One box pass of odd width bw over n samples spaced `step` apart, through tmp * (n bytes).
-- `bb_blur_a8` (function) `src/box_blur.c:41` `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)`
-- `bb_ink_rect` (function) `src/box_blur.c:57` `int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])`
 
 
 Next: [API_p6.md](API_p6.md)

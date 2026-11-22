@@ -14,6 +14,7 @@ Solid arrows stay in this module, dashed arrows leave it.
 ```mermaid
 flowchart LR
     n_src_profile_c__profile_open(["profile_open"])
+    n_include_chrome_layout_h__close["chrome_layout.close"]
     n_src_local_store_c__ls_derive_key["local_store.ls_derive_key"]
     n_src_profile_c__profile_load(["profile_load"])
     n_include_disk_store_h__ds_free["disk_store.ds_free"]
@@ -22,6 +23,7 @@ flowchart LR
     n_src_profile_c__profile_save(["profile_save"])
     n_src_disk_store_c__ds_write["disk_store.ds_write"]
     n_src_prefs_c__prefs_format["prefs.prefs_format"]
+    n_src_profile_c__profile_open -.-> n_include_chrome_layout_h__close
     n_src_profile_c__profile_open -.-> n_src_local_store_c__ls_derive_key
     n_src_profile_c__profile_load -.-> n_include_disk_store_h__ds_free
     n_src_profile_c__profile_load -.-> n_src_disk_store_c__ds_read
@@ -51,7 +53,7 @@ profile_status profile_open(profile_ctx *ctx, const char *dir)
 
 **Returns:** `profile_status`
 
-*Calls:* [`ls_derive_key`](src.local_store.c.md#ls_derive_key)
+*Calls:* [`close`](include.chrome_layout.h.md#close), [`ls_derive_key`](src.local_store.c.md#ls_derive_key)
 
 ---
 

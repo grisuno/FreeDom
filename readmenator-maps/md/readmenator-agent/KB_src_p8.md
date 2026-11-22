@@ -160,12 +160,12 @@ static void gate_box_image_...`
 - Layer: utility
 - Language: c
 - Symbols:
-  - `body_sink` (struct, line 497)
-  - `tls_capture` (struct, line 510)
-  - `fetch_ctx` (struct, line 522)
-  - `sf_ws` (struct, line 1432)
-  - `sf_rcache_entry` (struct, line 1258)
-  - `sink` (type_alias, line 521) `typedef struct fetch_ctx { body_sink sink;`
+  - `body_sink` (struct, line 499)
+  - `tls_capture` (struct, line 512)
+  - `fetch_ctx` (struct, line 524)
+  - `sf_ws` (struct, line 1441)
+  - `sf_rcache_entry` (struct, line 1267)
+  - `sink` (type_alias, line 523) `typedef struct fetch_ctx { body_sink sink;`
   - `ci_starts_with` (function, line 49) `static int ci_starts_with(const char *haystack, const char *prefix)`
   - `ci_index` (function, line 61) `static long ci_index(const char *haystack, const char *needle)`
   - `sf_share_lock` (function, line 77) `static void sf_share_lock(CURL *handle, curl_lock_data data,
@@ -179,88 +179,88 @@ static void gate_box_image_...`
   - `sf_cookie_header_for` (function, line 188) `size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)`
   - `sf_cookie_put` (function, line 217) `void sf_cookie_put(const char *url, const char *namevalue)`
   - `sf_config_default` (function, line 238) `sf_config sf_config_default(void)`
-  - `header_value_clean` (function, line 265) `static int header_value_clean(const char *s)`
-  - `sf_user_agent_or_default` (function, line 271) `const char *sf_user_agent_or_default(const char *ua)`
-  - `sf_accept_language_or_default` (function, line 275) `const char *sf_accept_language_or_default(const char *lang)`
-  - `sf_impersonate_kex_groups` (function, line 279) `const char *sf_impersonate_kex_groups(void)`
-  - `sf_impersonate_tls13_ciphers` (function, line 280) `const char *sf_impersonate_tls13_ciphers(void)`
-  - `sf_validate_url` (function, line 284) `sf_status sf_validate_url(const char *url)`
-  - `sf_url_is_http` (function, line 292) `static int sf_url_is_http(const char *url)`
-  - `sf_check_tls_version` (function, line 304) `sf_status sf_check_tls_version(const char *negotiated_version)`
-  - `sf_check_group_is_pq` (function, line 309) `sf_status sf_check_group_is_pq(const char *negotiated_group)`
-  - `sf_check_chain_policy` (function, line 318) `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)`
-  - `sf_enforce_policy` (function, line 328) `sf_status sf_enforce_policy(const char *tls_version, const char *group,
+  - `header_value_clean` (function, line 267) `static int header_value_clean(const char *s)`
+  - `sf_user_agent_or_default` (function, line 273) `const char *sf_user_agent_or_default(const char *ua)`
+  - `sf_accept_language_or_default` (function, line 277) `const char *sf_accept_language_or_default(const char *lang)`
+  - `sf_impersonate_kex_groups` (function, line 281) `const char *sf_impersonate_kex_groups(void)`
+  - `sf_impersonate_tls13_ciphers` (function, line 282) `const char *sf_impersonate_tls13_ciphers(void)`
+  - `sf_validate_url` (function, line 286) `sf_status sf_validate_url(const char *url)`
+  - `sf_url_is_http` (function, line 294) `static int sf_url_is_http(const char *url)`
+  - `sf_check_tls_version` (function, line 306) `sf_status sf_check_tls_version(const char *negotiated_version)`
+  - `sf_check_group_is_pq` (function, line 311) `sf_status sf_check_group_is_pq(const char *negotiated_group)`
+  - `sf_check_chain_policy` (function, line 320) `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)`
+  - `sf_enforce_policy` (function, line 330) `sf_status sf_enforce_policy(const char *tls_version, const char *group,
                          ...`
-  - `copy_checked` (function, line 359) `static int copy_checked(char *dst, size_t dstsz, const char *src)`
-  - `sf_is_redirect_code` (function, line 368) `int sf_is_redirect_code(long http_code)`
-  - `sf_header_value` (function, line 375) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz)`
-  - `sf_parse_location_header` (function, line 397) `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)`
-  - `sf_resolve_redirect` (function, line 415) `sf_status sf_resolve_redirect(const char *base_url, const char *location,
+  - `copy_checked` (function, line 361) `static int copy_checked(char *dst, size_t dstsz, const char *src)`
+  - `sf_is_redirect_code` (function, line 370) `int sf_is_redirect_code(long http_code)`
+  - `sf_header_value` (function, line 377) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz)`
+  - `sf_parse_location_header` (function, line 399) `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)`
+  - `sf_resolve_redirect` (function, line 417) `sf_status sf_resolve_redirect(const char *base_url, const char *location,
                        ...`
-  - `sf_ci_prefix` (function, line 427) `static int sf_ci_prefix(const char *s, const char *p)`
-  - `sf_response_free` (function, line 467) `void sf_response_free(sf_response *resp)`
-  - `copy_bounded` (function, line 544) `static void copy_bounded(char *dst, size_t dstsz, const char *src)`
-  - `get_negotiated_group_name` (function, line 555) `static const char *get_negotiated_group_name(SSL *ssl)`
-  - `tls_capture_try` (function, line 588) `static void tls_capture_try(tls_capture *cap)`
-  - `tls_capture_from_ssl` (function, line 598) `static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl)`
-  - `header_cb` (function, line 624) `static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata)`
-  - `write_cb` (function, line 681) `static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)`
-  - `name_is_pq_sig` (function, line 713) `static int name_is_pq_sig(int pknid)`
-  - `inspect_chain` (function, line 723) `static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len)`
-  - `refused` (function, line 781) `* a private peer is then refused (fail closed). */
+  - `sf_ci_prefix` (function, line 429) `static int sf_ci_prefix(const char *s, const char *p)`
+  - `sf_response_free` (function, line 469) `void sf_response_free(sf_response *resp)`
+  - `copy_bounded` (function, line 548) `static void copy_bounded(char *dst, size_t dstsz, const char *src)`
+  - `get_negotiated_group_name` (function, line 559) `static const char *get_negotiated_group_name(SSL *ssl)`
+  - `tls_capture_try` (function, line 592) `static void tls_capture_try(tls_capture *cap)`
+  - `tls_capture_from_ssl` (function, line 602) `static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl)`
+  - `header_cb` (function, line 628) `static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata)`
+  - `write_cb` (function, line 685) `static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)`
+  - `name_is_pq_sig` (function, line 717) `static int name_is_pq_sig(int pknid)`
+  - `inspect_chain` (function, line 727) `static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len)`
+  - `refused` (function, line 785) `* a private peer is then refused (fail closed). */
 static void sf_guard_init(fetch_ctx *ctx, cons...`
-  - `sf_guard_opensocket` (function, line 808) `static curl_socket_t sf_guard_opensocket(void *clientp, curlsocktype purpose,
+  - `sf_guard_opensocket` (function, line 812) `static curl_socket_t sf_guard_opensocket(void *clientp, curlsocktype purpose,
                    ...`
-  - `sf_guard_prereq` (function, line 835) `static int sf_guard_prereq(void *clientp, char *conn_primary_ip, char *conn_local_ip,
+  - `sf_guard_prereq` (function, line 839) `static int sf_guard_prereq(void *clientp, char *conn_primary_ip, char *conn_local_ip,
            ...`
-  - `map_curl_error` (function, line 846) `static sf_status map_curl_error(CURLcode rc, const body_sink *sink)`
-  - `add_header` (function, line 887) `static int add_header(struct curl_slist **h, const char *line)`
-  - `sf_setup_handle` (function, line 901) `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
+  - `map_curl_error` (function, line 850) `static sf_status map_curl_error(CURLcode rc, const body_sink *sink)`
+  - `add_header` (function, line 894) `static int add_header(struct curl_slist **h, const char *line)`
+  - `sf_setup_handle` (function, line 908) `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
            ...`
-  - `redirect` (function, line 983) `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
+  - `redirect` (function, line 990) `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
      * different orig...`
-  - `sf_perform` (function, line 1075) `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
+  - `sf_perform` (function, line 1082) `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
             ...`
-  - `sf_get` (function, line 1235) `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
-  - `sf_post` (function, line 1239) `sf_status sf_post(const char *url, const sf_config *cfg,
+  - `sf_get` (function, line 1244) `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
+  - `sf_post` (function, line 1248) `sf_status sf_post(const char *url, const sf_config *cfg,
                   const void *body, size...`
-  - `sf_rcache_clear` (function, line 1269) `void sf_rcache_clear(void)`
-  - `sf_rcache_set_backing` (function, line 1280) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx)`
-  - `rcache_put_ram` (function, line 1288) `static int rcache_put_ram(const char *from, const char *to, time_t now)`
-  - `sf_rcache_put` (function, line 1307) `int sf_rcache_put(const char *from, const char *to, time_t now)`
-  - `sf_rcache_get` (function, line 1317) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)`
-  - `sf_get_follow` (function, line 1346) `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
+  - `sf_rcache_clear` (function, line 1278) `void sf_rcache_clear(void)`
+  - `sf_rcache_set_backing` (function, line 1289) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx)`
+  - `rcache_put_ram` (function, line 1297) `static int rcache_put_ram(const char *from, const char *to, time_t now)`
+  - `sf_rcache_put` (function, line 1316) `int sf_rcache_put(const char *from, const char *to, time_t now)`
+  - `sf_rcache_get` (function, line 1326) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)`
+  - `sf_get_follow` (function, line 1355) `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
                 ...`
-  - `ws_ssl_info_cb` (function, line 1418) `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)`
-  - `ws_ssl_ctx_cb` (function, line 1425) `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
-  - `sf_ws_url_check` (function, line 1439) `sf_status sf_ws_url_check(const char *url)`
-  - `ws_free` (function, line 1451) `static void ws_free(sf_ws *ws)`
-  - `sf_ws_open` (function, line 1460) `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
-  - `sf_ws_send` (function, line 1515) `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
-  - `sf_ws_recv` (function, line 1538) `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
-  - `sf_ws_fd` (function, line 1560) `int sf_ws_fd(const sf_ws *ws)`
-  - `sf_ws_close` (function, line 1567) `void sf_ws_close(sf_ws *ws)`
-  - `sf_fallback_policy` (function, line 1578) `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)`
-  - `sf_downgrade_of` (function, line 1595) `static int sf_downgrade_of(sf_policy p)`
-  - `sf_attempt_get` (function, line 1604) `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
+  - `ws_ssl_info_cb` (function, line 1427) `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)`
+  - `ws_ssl_ctx_cb` (function, line 1434) `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
+  - `sf_ws_url_check` (function, line 1448) `sf_status sf_ws_url_check(const char *url)`
+  - `ws_free` (function, line 1460) `static void ws_free(sf_ws *ws)`
+  - `sf_ws_open` (function, line 1469) `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
+  - `sf_ws_send` (function, line 1525) `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
+  - `sf_ws_recv` (function, line 1548) `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
+  - `sf_ws_fd` (function, line 1570) `int sf_ws_fd(const sf_ws *ws)`
+  - `sf_ws_close` (function, line 1577) `void sf_ws_close(sf_ws *ws)`
+  - `sf_fallback_policy` (function, line 1588) `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)`
+  - `sf_downgrade_of` (function, line 1607) `static int sf_downgrade_of(sf_policy p)`
+  - `sf_attempt_get` (function, line 1616) `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
         ...`
-  - `sf_attempt_post` (function, line 1610) `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
+  - `sf_attempt_post` (function, line 1622) `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
        ...`
-  - `sf_navigable` (function, line 1615) `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
+  - `sf_navigable` (function, line 1627) `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
            ...`
-  - `sf_get_follow_navigable` (function, line 1635) `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
+  - `sf_get_follow_navigable` (function, line 1647) `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
             ...`
-  - `sf_post_navigable` (function, line 1640) `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
+  - `sf_post_navigable` (function, line 1652) `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
                   ...`
-  - `module` (function, line 420) `* pure url module (DRY);`
-  - `progress` (function, line 506) `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
-  - `database` (function, line 559) `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...`
-  - `group` (function, line 573) `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);`
-  - `this` (function, line 605) `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...`
+  - `module` (function, line 422) `* pure url module (DRY);`
+  - `progress` (function, line 508) `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
+  - `database` (function, line 563) `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...`
+  - `group` (function, line 577) `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);`
+  - `this` (function, line 609) `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...`
   - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
-  - `SF_GUARD_HOST_MAX` (macro, line 520) `#define SF_GUARD_HOST_MAX`
-  - `SF_RCACHE_SLOTS` (macro, line 1255) `#define SF_RCACHE_SLOTS`
-  - `SF_RCACHE_TTL_S` (macro, line 1256) `#define SF_RCACHE_TTL_S`
+  - `SF_GUARD_HOST_MAX` (macro, line 522) `#define SF_GUARD_HOST_MAX`
+  - `SF_RCACHE_SLOTS` (macro, line 1264) `#define SF_RCACHE_SLOTS`
+  - `SF_RCACHE_TTL_S` (macro, line 1265) `#define SF_RCACHE_TTL_S`
 - Depends on: `include/anti_fp.h`, `include/net_guard.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/url.h`
 
 ## src/sha2.c

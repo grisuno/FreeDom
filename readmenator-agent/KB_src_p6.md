@@ -1,6 +1,29 @@
 # Subsystem: src (page 6 of 10)
 Previous: [KB_src_p5.md](KB_src_p5.md)
 
+## src/js_fetch.c
+- Doc: jd_pack_ptr: Carry the host fetch fn + its ctx as a function's closure data, each split into...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `jd_pack_ptr` (function, line 29) `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)`
+  - `jd_unpack_ptr` (function, line 34) `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)`
+  - `jd_reply_object` (function, line 44) `static JSValue jd_reply_object(JSContext *ctx, int rc, int status, const char *rbody,
+           ...`
+  - `m_host_fetch` (function, line 74) `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
+                            in...`
+  - `m_host_fetch_async` (function, line 105) `static JSValue m_host_fetch_async(JSContext *ctx, JSValueConst this_val,
+                        ...`
+  - `jd_install_xhr` (function, line 336) `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
+  - `jd_net_deliver` (function, line 340) `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
+     ...`
+  - `jd_install_xhr_ex` (function, line 361) `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
+                   ...`
+  - `send` (function, line 128) `* callbacks fire right after send();`
+  - `task` (function, line 312) `* current task (the page never waits on it);`
+  - `_GNU_SOURCE` (macro, line 6) `#define _GNU_SOURCE`
+- Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`, `src/js_native_internal.h`
+
 ## src/js_geom.c
 - Doc: unite: Bounding box of a and b into a; returns 1 if a changed.
 - Layer: utility
@@ -262,6 +285,27 @@ static const char JT_W...`
   - `OFF_SALT` (macro, line 62) `#define OFF_SALT`
   - `OFF_NONCE` (macro, line 63) `#define OFF_NONCE`
 - Depends on: `include/local_store.h`
+
+## src/mask_cache.c
+- Doc: One retained mask. tick orders recency (larger = more recent); buf NULL = free slot.
+- Layer: infrastructure
+- Language: c
+- Symbols:
+  - `mkc_entry` (struct, line 7)
+  - `mkc_cache` (struct, line 15)
+  - `key` (type_alias, line 7) `typedef struct mkc_entry { mkc_key key;`
+  - `key_eq` (function, line 22) `static int key_eq(const mkc_key *a, const mkc_key *b)`
+  - `drop` (function, line 28) `static void drop(mkc_cache *c, mkc_entry *e)`
+  - `find` (function, line 36) `static mkc_entry *find(mkc_cache *c, const mkc_key *k)`
+  - `oldest` (function, line 42) `static mkc_entry *oldest(mkc_cache *c)`
+  - `mkc_new` (function, line 49) `mkc_cache *mkc_new(size_t byte_budget, size_t max_entries)`
+  - `mkc_clear` (function, line 60) `void mkc_clear(mkc_cache *c)`
+  - `mkc_free` (function, line 65) `void mkc_free(mkc_cache *c)`
+  - `mkc_get` (function, line 72) `const unsigned char *mkc_get(mkc_cache *c, const mkc_key *k, int *stride)`
+  - `mkc_put` (function, line 81) `unsigned char *mkc_put(mkc_cache *c, const mkc_key *k, int stride)`
+  - `mkc_bytes` (function, line 111) `size_t mkc_bytes(const mkc_cache *c)`
+  - `mkc_count` (function, line 113) `size_t mkc_count(const mkc_cache *c)`
+- Depends on: `include/mask_cache.h`
 
 ## src/media_decoder.c
 - Doc: decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*...

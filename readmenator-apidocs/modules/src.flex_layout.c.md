@@ -419,7 +419,7 @@ This is what `min-width: auto` -- the INITIAL value, so the case for almost ever
 min_content  the item's min-content size (its longest unbreakable word, or a
                replaced element's intrinsic size), in the same border-box+margin
                units as fx_item.basis. Negative is treated as 0.
-  basis        the item's SPECIFIED size (its declared `width`, in the same units),
+  basis        the item's SPECIFIED size (its declared [`width`](include.chrome_layout.h.md#width), in the same units),
                the "specified size suggestion": the content-based minimum is clamped
                by it, so an item the author sized small is not inflated by one long
                word. Negative means no specified size and leaves the minimum at

@@ -257,7 +257,8 @@ static void tes...`
   - `fake_cover` (function, line 490) `static int fake_cover(unsigned cp, void *ctx)`
   - `test_segment_runs` (function, line 497) `static void test_segment_runs(void **state)`
   - `test_measure_uses_fallback_face` (function, line 522) `static void test_measure_uses_fallback_face(void **state)`
-  - `main` (function, line 533) `int main(void)`
+  - `test_face_generation_moves_with_faces` (function, line 535) `static void test_face_generation_moves_with_faces(void **state)`
+  - `main` (function, line 557) `int main(void)`
 - Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
 
 ## tests/test_textfield.c

@@ -256,6 +256,8 @@ sf_config sf_config_default(void) {
     c.sec_fetch_mode = NULL;
     c.progress_ctx = NULL;
     c.progress_cb = NULL;
+    c.cancel_ctx = NULL;
+    c.cancel_cb = NULL;
     c.range_start = -1; /* -1 means no byte-range */
     c.range_end = -1;
     return c;
@@ -530,6 +532,8 @@ typedef struct fetch_ctx {
     char        expires[SF_META_MAX], date[SF_META_MAX];
     void       *progress_ctx; /* userdata passed to the progress callback */
     void      (*progress_cb)(const uint8_t *body, size_t body_len, void *ctx);
+    void       *cancel_ctx;   /* userdata for cancel_cb */
+    int       (*cancel_cb)(void *ctx);
     char        hdr_all[SF_RESPONSE_HEADERS_MAX]; /* final hop's header lines, status line excluded */
     size_t      hdr_len;
     /* Private-network guard (spec/net_guard.md): who asked, and whether a connection
@@ -858,6 +862,8 @@ static sf_status map_curl_error(CURLcode rc, const body_sink *sink) {
         case CURLE_SSL_CERTPROBLEM:
         case CURLE_SSL_CONNECT_ERROR:
             return SF_ERR_CERT_INVALID;
+        case CURLE_ABORTED_BY_CALLBACK:
+            return SF_ERR_CANCELLED;
         case CURLE_UNSUPPORTED_PROTOCOL:
         case CURLE_URL_MALFORMAT:
             return SF_ERR_INVALID_URL;
@@ -873,6 +879,7 @@ static int xferinfo_cb(void *userdata, curl_off_t dltotal, curl_off_t dlnow,
                        curl_off_t ultotal, curl_off_t ulnow) {
     (void)dltotal; (void)ultotal; (void)ulnow;
     fetch_ctx *ctx = (fetch_ctx *)userdata;
+    if (ctx->cancel_cb != NULL && ctx->cancel_cb(ctx->cancel_ctx) != 0) return 1;
     if (ctx->progress_cb != NULL && ctx->sink.len > 0 && dlnow > 0) {
         ctx->progress_cb(ctx->sink.data, ctx->sink.len, ctx->progress_ctx);
     }
@@ -1000,7 +1007,7 @@ static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *l
     /* Streaming progress: fires xferinfo_cb ~1/sec during download, passing the
      * accumulated body to the caller's progress callback so it can progressively
      * render before the response is complete. Only enabled when requested. */
-    if (ctx->progress_cb != NULL) {
+    if (ctx->progress_cb != NULL || ctx->cancel_cb != NULL) {
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, ctx);
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
@@ -1113,6 +1120,8 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
     ctx.cap.curl = curl;
     ctx.progress_cb = local.progress_cb;
     ctx.progress_ctx = local.progress_ctx;
+    ctx.cancel_cb = local.cancel_cb;
+    ctx.cancel_ctx = local.cancel_ctx;
 
     struct curl_slist *hdrs = NULL;
     sf_status result = SF_ERR_INTERNAL;
@@ -1470,6 +1479,7 @@ sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out) {
     if (local.sec_fetch_mode == NULL) local.sec_fetch_mode = "websocket";
     local.allow_overlay_http = 0;          /* never a plaintext WebSocket */
     local.progress_cb = NULL;
+    local.cancel_cb = NULL;
 
     sf_ws *ws = (sf_ws *)calloc(1, sizeof *ws);
     if (ws == NULL) return SF_ERR_OOM;
@@ -1584,6 +1594,8 @@ int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_po
     /* The private-network refusal is about WHERE the request goes, not how strong its
      * crypto is: no policy level changes it, so there is nothing to retry. */
     if (failed == SF_ERR_PRIVATE_NET) return 0;
+    /* Stop is the user's decision, not a crypto failure: nothing to retry. */
+    if (failed == SF_ERR_CANCELLED) return 0;
     if (allowlisted && tried != SF_POLICY_ALLOWLISTED_INSECURE
         && failed != SF_OK) {
         *next = SF_POLICY_ALLOWLISTED_INSECURE;

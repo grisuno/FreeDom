@@ -18,8 +18,10 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/css_values.h`
 - `gui/browser_ui.c` -> `include/data_url.h`
 - `gui/browser_ui.c` -> `include/download.h`
+- `gui/browser_ui.c` -> `include/exact_key.h`
 - `gui/browser_ui.c` -> `include/fb_cmdline.h`
 - `gui/browser_ui.c` -> `include/fb_panes.h`
+- `gui/browser_ui.c` -> `include/find_text.h`
 - `gui/browser_ui.c` -> `include/form.h`
 - `gui/browser_ui.c` -> `include/frame_clock.h`
 - `gui/browser_ui.c` -> `include/frame_host.h`
@@ -34,6 +36,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/js_policy.h`
 - `gui/browser_ui.c` -> `include/lazy_load.h`
 - `gui/browser_ui.c` -> `include/link_nav.h`
+- `gui/browser_ui.c` -> `include/mask_cache.h`
 - `gui/browser_ui.c` -> `include/media_decoder.h`
 - `gui/browser_ui.c` -> `include/net_realm.h`
 - `gui/browser_ui.c` -> `include/pdf_export.h`
@@ -62,7 +65,9 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/wl_guard.h`
 - `gui/browser_ui.c` -> `include/ws_hub.h`
 - `gui/browser_ui.c` -> `include/zoom.h`
+- `gui/browser_ui_internal.h` -> `include/chrome_layout.h`
 - `gui/browser_ui_internal.h` -> `include/freedom_config.h`
+- `gui/bui_chrome.c` -> `gui/browser_ui_internal.h`
 - `gui/bui_mask_img.c` -> `gui/browser_ui_internal.h`
 - `gui/bui_mask_img.c` -> `include/box_style.h`
 - `gui/bui_mask_img.c` -> `include/css.h`
@@ -147,6 +152,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/browser.c` -> `include/browser.h`
 - `src/browser.c` -> `include/util.h`
 - `src/cached_fetch.c` -> `include/cached_fetch.h`
+- `src/chrome_layout.c` -> `include/chrome_layout.h`
 - `src/compositor.c` -> `include/compositor.h`
 - `src/compositor.c` -> `include/css.h`
 - `src/css.c` -> `include/css.h`
@@ -228,10 +234,12 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/dom_debug.c` -> `include/page_view.h`
 - `src/download.c` -> `include/download.h`
 - `src/download.c` -> `include/pdf_export.h`
+- `src/exact_key.c` -> `include/exact_key.h`
 - `src/fb_cmdline.c` -> `include/fb_cmdline.h`
 - `src/fb_cmdline.c` -> `include/fb_panes.h`
 - `src/fb_cmdline.c` -> `include/freebug.h`
 - `src/fb_panes.c` -> `include/fb_panes.h`
+- `src/find_text.c` -> `include/find_text.h`
 - `src/flex_layout.c` -> `include/flex_layout.h`
 - `src/form.c` -> `include/form.h`
 - `src/frame_broker.c` -> `include/frame_broker.h`
@@ -347,6 +355,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/link_nav.c` -> `include/link_nav.h`
 - `src/link_nav.c` -> `include/url.h`
 - `src/local_store.c` -> `include/local_store.h`
+- `src/mask_cache.c` -> `include/mask_cache.h`
 - `src/media_decoder.c` -> `include/media_decoder.h`
 - `src/media_decoder.c` -> `include/util.h`
 - `src/net_guard.c` -> `include/net_guard.h`
@@ -479,6 +488,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_box_tree.c` -> `include/page_view.h`
 - `tests/test_browser.c` -> `include/browser.h`
 - `tests/test_cached_fetch.c` -> `include/cached_fetch.h`
+- `tests/test_chrome_layout.c` -> `include/chrome_layout.h`
 - `tests/test_compositor.c` -> `include/compositor.h`
 - `tests/test_compositor.c` -> `include/css.h`
 - `tests/test_css.c` -> `include/css.h`
@@ -486,15 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_css.c` -> `include/css_vars.h`
 - `tests/test_css.c` -> `include/flex_layout.h`
 - `tests/test_css.c` -> `include/webfont.h`
-- `tests/test_css_atrule.c` -> `include/css_atrule.h`
-- `tests/test_css_box.c` -> `include/css_box.h`
-- `tests/test_css_box.c` -> `include/css_decl.h`
-- `tests/test_css_color.c` -> `include/css_color.h`
-- `tests/test_css_computed.c` -> `include/css_computed.h`
-- `tests/test_css_counter.c` -> `include/css_counter.h`
-- `tests/test_css_drops.c` -> `include/css.h`
-- `tests/test_css_gradient.c` -> `include/css.h`
-- `tests/test_css_gradient.c` -> `include/css_gradient.h`
-- `tests/test_css_import.c` -> `include/css_import.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

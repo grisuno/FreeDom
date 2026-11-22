@@ -78,6 +78,41 @@ el worker lleva en su propio `history`. `browser_entry_doc(bs, pos)` expone el i
 GUI decida, al ir Atrás/Adelante, entre **popstate** (mismo documento: sin recarga) y recarga.
 `url_is_allowed` sigue aplicando a toda URL que entra al historial.
 
+### 3c. Navegación provisional y Detener (tanda 97, 2026-11-22)
+
+Una navegación de red tarda; hasta que la respuesta llega la página vieja sigue en pantalla.
+La entrada nueva del historial es **provisional** hasta que la carga se confirma (Firefox
+confirma la entrada recién cuando llega el documento): detener la carga, una descarga en vez
+de un documento o abandonar la pestaña no deja entradas fantasma ni destruye el futuro.
+
+- `browser_navigate` / `browser_back` / `browser_forward` abren una navegación pendiente. Si
+  `browser_navigate` descarta entradas futuras, las **guarda** (no las libera) hasta confirmar.
+- `browser_commit_pending(bs)` — llegó el documento (o la página de error): la entrada queda,
+  las futuras guardadas se liberan. Sin pendiente, no hace nada.
+- `browser_abort_pending(bs)` — **Detener**: devuelve el historial exacto de antes (posición,
+  entradas futuras restauradas, entrada provisional liberada) y la barra de URL muestra la
+  entrada actual. Devuelve 1 si revirtió algo, 0 si no había pendiente.
+- `browser_has_pending(bs)` — 1 mientras hay una navegación sin confirmar.
+
+Dado-Cuando-Entonces:
+
+- **Dado** A, B confirmadas y Atrás a A (confirmada) **cuando** se navega a C y se detiene
+  **entonces** el historial es A, B con posición en A, se puede ir Adelante a B y la barra dice A.
+- **Dado** A confirmada **cuando** se navega a B y se confirma **entonces** el historial es A, B.
+- **Dado** A confirmada **cuando** se navega a B y, antes de confirmar, a C **entonces** B se
+  descarta (la nueva reemplaza a la pendiente): historial A, C; detener deja solo A.
+- **Dado** A, B, C confirmadas en C **cuando** Atrás dos veces sin confirmar y se detiene
+  **entonces** la posición vuelve a C (varios pasos son UNA navegación pendiente).
+- **Dado** una navegación pendiente **cuando** la página vieja llama `pushState`/`replaceState`
+  **entonces** `BROWSER_ERR_PENDING` y el historial no cambia (fail-closed: el documento viejo
+  no escribe sobre la entrada provisional).
+- `browser_free`/`browser_init` liberan también las entradas guardadas (sin fugas).
+
+La GUI llama a confirmar en la entrega de la carga (éxito, error o primer render en streaming) y
+en toda carga síncrona (archivo, `about:`), y a detener desde el botón (recarga ⇄ X mientras
+carga), `Esc` fuera de la barra de URL, al abandonar la pestaña y cuando la respuesta es una
+descarga. Detener también sube la generación de red: el resultado en vuelo se descarta.
+
 ## 4. Garantías de seguridad
 
 - Solo se cargan URLs `https://` o ficheros locales; cualquier otro esquema se

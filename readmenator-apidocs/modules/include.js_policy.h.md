@@ -77,7 +77,7 @@ typedef enum jsp_mode
 
 **Returns:** `*`
 
-*Called by:* [`membership`](#membership)
+*Called by:* [`membership`](#membership), [`chl_identity_label`](src.chrome_layout.c.md#chl_identity_label)
 
 ---
 

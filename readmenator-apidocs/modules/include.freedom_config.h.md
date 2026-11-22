@@ -1,10 +1,10 @@
 # `include/freedom_config.h`
 
-> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 93.8% | [API index](../index.md)
+> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 88.9% | [API index](../index.md)
 
 ## Contents
 
-- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes), [`FC_SHC_MAX_TEXT_BYTES`](#fc_shc_max_text_bytes), [`FC_SHC_MAX_QUERIES`](#fc_shc_max_queries), [`FC_LAZY_IMAGE_MARGIN_PX`](#fc_lazy_image_margin_px), [`FC_TAB_OP_NET_BUDGET_MS`](#fc_tab_op_net_budget_ms), [`FC_TABLE_TRACK_MAX_PX`](#fc_table_track_max_px)
+- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes), [`FC_SHC_MAX_TEXT_BYTES`](#fc_shc_max_text_bytes), [`FC_SHC_MAX_QUERIES`](#fc_shc_max_queries), [`FC_MASK_CACHE_BYTES`](#fc_mask_cache_bytes), [`FC_MASK_CACHE_ENTRIES`](#fc_mask_cache_entries), [`FC_LAZY_IMAGE_MARGIN_PX`](#fc_lazy_image_margin_px), [`FC_TAB_OP_NET_BUDGET_MS`](#fc_tab_op_net_budget_ms), [`FC_TABLE_TRACK_MAX_PX`](#fc_table_track_max_px)
 
 ## Macros
 
@@ -200,11 +200,39 @@ Each is a compact selector copy re-asked on every later derivation, so the bound
 
 ---
 
+<a id="fc_mask_cache_bytes"></a>
+
+### `FC_MASK_CACHE_BYTES`
+
+`macro` | [include/freedom_config.h:95](../../include/freedom_config.h#L95)
+
+```c
+#define FC_MASK_CACHE_BYTES
+```
+
+Blurred box-shadow masks the window retains across frames (spec/mask_cache.md): the byte budget of all retained A8 buffers and how many masks.
+
+A mask is a function of its geometry alone, so it stays valid across scrolls, frames and documents; LRU bounds the memory.
+
+---
+
+<a id="fc_mask_cache_entries"></a>
+
+### `FC_MASK_CACHE_ENTRIES`
+
+`macro` | [include/freedom_config.h:96](../../include/freedom_config.h#L96)
+
+```c
+#define FC_MASK_CACHE_ENTRIES
+```
+
+---
+
 <a id="fc_lazy_image_margin_px"></a>
 
 ### `FC_LAZY_IMAGE_MARGIN_PX`
 
-`macro` | [include/freedom_config.h:93](../../include/freedom_config.h#L93)
+`macro` | [include/freedom_config.h:99](../../include/freedom_config.h#L99)
 
 ```c
 #define FC_LAZY_IMAGE_MARGIN_PX
@@ -218,7 +246,7 @@ Distance (px) beyond the viewport at which a loading="lazy" image starts loading
 
 ### `FC_TAB_OP_NET_BUDGET_MS`
 
-`macro` | [include/freedom_config.h:99](../../include/freedom_config.h#L99)
+`macro` | [include/freedom_config.h:105](../../include/freedom_config.h#L105)
 
 ```c
 #define FC_TAB_OP_NET_BUDGET_MS
@@ -234,7 +262,7 @@ The fetch is synchronous in the GUI thread, so this bounds how long a slow serve
 
 ### `FC_TABLE_TRACK_MAX_PX`
 
-`macro` | [include/freedom_config.h:103](../../include/freedom_config.h#L103)
+`macro` | [include/freedom_config.h:109](../../include/freedom_config.h#L109)
 
 ```c
 #define FC_TABLE_TRACK_MAX_PX

@@ -1006,6 +1006,7 @@ static const char *sf_reason(sf_status ss) {
         case SF_ERR_NETWORK:      return "network error";
         case SF_ERR_TOO_MANY_REDIRECTS: return "too many redirects";
         case SF_ERR_PRIVATE_NET:  return "private network address refused";
+        case SF_ERR_CANCELLED:    return "cancelled";
         default:                  return "fetch error";
     }
 }

@@ -1,13 +1,13 @@
 # `include/browser.h`
 
-> Source: [include/browser.h:1](../../include/browser.h#L1) | language `h` | coverage 47.4% | [API index](../index.md)
+> Source: [include/browser.h:1](../../include/browser.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
 
 ## Contents
 
-- **Structs:** [`browser_state`](#browser_state)
+- **Structs:** [`browser_state`](#browser_state), [`browser_closed`](#browser_closed)
 - **Enums:** [`browser_status`](#browser_status)
-- **Functions:** [`state`](#state), [`browser_free`](#browser_free), [`browser_set_page`](#browser_set_page), [`browser_entry_doc`](#browser_entry_doc), [`browser_doc_index`](#browser_doc_index), [`browser_can_back`](#browser_can_back), [`browser_can_forward`](#browser_can_forward), [`browser_current_url`](#browser_current_url), [`browser_is_exception`](#browser_is_exception), [`browser_url_bar_selection`](#browser_url_bar_selection), [`browser_url_bar_delete_selection`](#browser_url_bar_delete_selection), [`copied`](#copied), [`browser_status_text`](#browser_status_text)
-- **Macros:** [`BROWSER_URL_MAX`](#browser_url_max), [`BROWSER_STATUS_MAX`](#browser_status_max), [`BROWSER_STATUS_DURATION_MS`](#browser_status_duration_ms)
+- **Functions:** [`state`](#state), [`browser_free`](#browser_free), [`browser_set_page`](#browser_set_page), [`one`](#one), [`browser_commit_pending`](#browser_commit_pending), [`browser_abort_pending`](#browser_abort_pending), [`browser_has_pending`](#browser_has_pending), [`browser_entry_doc`](#browser_entry_doc), [`browser_doc_index`](#browser_doc_index), [`browser_can_back`](#browser_can_back), [`browser_can_forward`](#browser_can_forward), [`browser_current_url`](#browser_current_url), [`browser_is_exception`](#browser_is_exception), [`browser_url_bar_selection`](#browser_url_bar_selection), [`browser_url_bar_delete_selection`](#browser_url_bar_delete_selection), [`copied`](#copied), [`browser_status_text`](#browser_status_text), [`browser_closed_pop`](#browser_closed_pop)
+- **Macros:** [`BROWSER_URL_MAX`](#browser_url_max), [`BROWSER_STATUS_MAX`](#browser_status_max), [`BROWSER_STATUS_DURATION_MS`](#browser_status_duration_ms), [`BROWSER_CLOSED_MAX`](#browser_closed_max)
 
 ## Type Diagram
 
@@ -18,6 +18,8 @@ classDiagram
     <<struct>> browser_state
     class browser_status
     <<enum>> browser_status
+    class browser_closed
+    <<struct>> browser_closed
 ```
 
 ## Structs
@@ -34,13 +36,29 @@ typedef struct browser_state
 
 ---
 
+<a id="browser_closed"></a>
+
+### `browser_closed`
+
+`struct` | [include/browser.h:177](../../include/browser.h#L177)
+
+```c
+typedef struct browser_closed
+```
+
+Transient status line (a toast, e.g.
+
+"blocked: insecure http link"). msg is copied (truncated to fit) and shown until now_ms reaches the expiry (now_ms + BROWSER_STATUS_DURATION_MS). A NULL or empty msg clears it. now_ms is a caller-supplied monotonic millisecond clock, so this stays pure (no time syscall * here, fully testable). browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms); /* The active status text, or NULL when there is none or it has expired at now_ms. const char *browser_status_text(const browser_state *bs, uint64_t now_ms); /* Recently closed tabs (Ctrl+Shift+T), newest last. In RAM only, never persisted. define BROWSER_CLOSED_MAX 10
+
+---
+
 ## Enums
 
 <a id="browser_status"></a>
 
 ### `browser_status`
 
-`enum` | [include/browser.h:52](../../include/browser.h#L52)
+`enum` | [include/browser.h:63](../../include/browser.h#L63)
 
 ```c
 typedef enum browser_status
@@ -54,7 +72,7 @@ typedef enum browser_status
 
 ### `state`
 
-`function` | [include/browser.h:62](../../include/browser.h#L62)
+`function` | [include/browser.h:74](../../include/browser.h#L74)
 
 ```c
 * state (frees old history and page buffers). */ browser_status browser_init(browser_state *bs);
@@ -74,7 +92,7 @@ typedef enum browser_status
 
 ### `browser_free`
 
-`function` | [include/browser.h:66](../../include/browser.h#L66)
+`function` | [include/browser.h:78](../../include/browser.h#L78)
 
 ```c
 void browser_free(browser_state *bs);
@@ -96,7 +114,7 @@ Safe on NULL and zero-initialised.
 
 ### `browser_set_page`
 
-`function` | [include/browser.h:71](../../include/browser.h#L71)
+`function` | [include/browser.h:83](../../include/browser.h#L83)
 
 ```c
 * browser_set_page() with the result. */ browser_status browser_navigate(browser_state *bs, const char *url);
@@ -108,11 +126,95 @@ Safe on NULL and zero-initialised.
 
 ---
 
+<a id="one"></a>
+
+### `one`
+
+`function` | [include/browser.h:102](../../include/browser.h#L102)
+
+```c
+* A navigate while pending first aborts the pending one (the new one replaces it);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `it` | `the new one replaces` |  |  |
+
+**Returns:** `* A navigate while pending first aborts the pending`
+
+---
+
+<a id="browser_commit_pending"></a>
+
+### `browser_commit_pending`
+
+`function` | [include/browser.h:105](../../include/browser.h#L105)
+
+```c
+void browser_commit_pending(browser_state *bs);
+```
+
+Provisional navigation (spec/browser.md 3c). commit: the document (or its error page) landed -- the entry stays and the stashed forward entries are freed. abort: Stop -- the history returns to exactly what it was before the pending navigation and the URL bar shows the current entry; 1 if something was reverted, else 0.
+
+A navigate while pending first aborts the pending one (the new one replaces it); several back/forward steps are ONE pending navigation. push/replace_state while pending return BROWSER_ERR_PENDING. All NULL-safe.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `bs` | `browser_state *` |  |  |
+
+*Called by:* [`arrives`](gui.browser_ui.c.md#arrives)
+
+---
+
+<a id="browser_abort_pending"></a>
+
+### `browser_abort_pending`
+
+`function` | [include/browser.h:106](../../include/browser.h#L106)
+
+```c
+int browser_abort_pending(browser_state *bs);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `bs` | `browser_state *` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="browser_has_pending"></a>
+
+### `browser_has_pending`
+
+`function` | [include/browser.h:107](../../include/browser.h#L107)
+
+```c
+int browser_has_pending(const browser_state *bs);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `bs` | `browser_state *` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="browser_entry_doc"></a>
 
 ### `browser_entry_doc`
 
-`function` | [include/browser.h:87](../../include/browser.h#L87)
+`function` | [include/browser.h:110](../../include/browser.h#L110)
 
 ```c
 int browser_entry_doc(const browser_state *bs, size_t pos);
@@ -135,7 +237,7 @@ Document id of entry pos, or -1 when out of range / NULL.
 
 ### `browser_doc_index`
 
-`function` | [include/browser.h:91](../../include/browser.h#L91)
+`function` | [include/browser.h:114](../../include/browser.h#L114)
 
 ```c
 int browser_doc_index(const browser_state *bs);
@@ -157,7 +259,7 @@ Index of the current entry within its document's contiguous run of entries (0 fo
 
 ### `browser_can_back`
 
-`function` | [include/browser.h:94](../../include/browser.h#L94)
+`function` | [include/browser.h:117](../../include/browser.h#L117)
 
 ```c
 int browser_can_back(const browser_state *bs);
@@ -179,7 +281,7 @@ Query helpers.
 
 ### `browser_can_forward`
 
-`function` | [include/browser.h:95](../../include/browser.h#L95)
+`function` | [include/browser.h:118](../../include/browser.h#L118)
 
 ```c
 int browser_can_forward(const browser_state *bs);
@@ -199,7 +301,7 @@ int browser_can_forward(const browser_state *bs);
 
 ### `browser_current_url`
 
-`function` `const` | [include/browser.h:96](../../include/browser.h#L96)
+`function` `const` | [include/browser.h:119](../../include/browser.h#L119)
 
 ```c
 const char *browser_current_url(const browser_state *bs);
@@ -219,7 +321,7 @@ const char *browser_current_url(const browser_state *bs);
 
 ### `browser_is_exception`
 
-`function` | [include/browser.h:99](../../include/browser.h#L99)
+`function` | [include/browser.h:122](../../include/browser.h#L122)
 
 ```c
 int browser_is_exception(const browser_state *bs, const char *host);
@@ -244,7 +346,7 @@ Exception list: hosts explicitly allowed to use weak TLS.
 
 ### `browser_url_bar_selection`
 
-`function` | [include/browser.h:131](../../include/browser.h#L131)
+`function` | [include/browser.h:154](../../include/browser.h#L154)
 
 ```c
 int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len);
@@ -270,7 +372,7 @@ Lets the GUI copy/cut the selected text and paint the highlight. NULL-safe.
 
 ### `browser_url_bar_delete_selection`
 
-`function` | [include/browser.h:135](../../include/browser.h#L135)
+`function` | [include/browser.h:158](../../include/browser.h#L158)
 
 ```c
 int browser_url_bar_delete_selection(browser_state *bs);
@@ -294,7 +396,7 @@ Used by cut and by an edit over a selection.
 
 ### `copied`
 
-`function` | [include/browser.h:143](../../include/browser.h#L143)
+`function` | [include/browser.h:166](../../include/browser.h#L166)
 
 ```c
 * copied (truncated to fit) and shown until now_ms reaches the expiry * (now_ms + BROWSER_STATUS_DURATION_MS). A NULL or empty msg clears it. now_ms is a * caller-supplied monotonic millisecond clock,
@@ -314,7 +416,7 @@ Used by cut and by an edit over a selection.
 
 ### `browser_status_text`
 
-`function` `const` | [include/browser.h:150](../../include/browser.h#L150)
+`function` `const` | [include/browser.h:173](../../include/browser.h#L173)
 
 ```c
 const char *browser_status_text(const browser_state *bs, uint64_t now_ms);
@@ -330,6 +432,32 @@ The active status text, or NULL when there is none or it has expired at now_ms.
 | `now_ms` | `uint64_t` |  |  |
 
 **Returns:** `char *`
+
+---
+
+<a id="browser_closed_pop"></a>
+
+### `browser_closed_pop`
+
+`function` | [include/browser.h:188](../../include/browser.h#L188)
+
+```c
+int browser_closed_pop(browser_closed *c, char *out, size_t cap);
+```
+
+Takes the most recently closed URL into out[cap].
+
+1 = taken, 0 = none (or it does not fit, in which case it stays).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `c` | `browser_closed *` |  |  |
+| `out` | `char *` |  |  |
+| `cap` | `size_t` |  |  |
+
+**Returns:** `int`
 
 ---
 
@@ -370,5 +498,21 @@ Transient status line (toast): capacity and how long it stays visible.
 ```c
 #define BROWSER_STATUS_DURATION_MS
 ```
+
+---
+
+<a id="browser_closed_max"></a>
+
+### `BROWSER_CLOSED_MAX`
+
+`macro` | [include/browser.h:176](../../include/browser.h#L176)
+
+```c
+#define BROWSER_CLOSED_MAX
+```
+
+Recently closed tabs (Ctrl+Shift+T), newest last.
+
+In RAM only, never persisted.
 
 ---

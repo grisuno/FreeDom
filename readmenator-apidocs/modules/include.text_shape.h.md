@@ -1,13 +1,13 @@
 # `include/text_shape.h`
 
-> Source: [include/text_shape.h:1](../../include/text_shape.h#L1) | language `h` | coverage 70.8% | [API index](../index.md)
+> Source: [include/text_shape.h:1](../../include/text_shape.h#L1) | language `h` | coverage 72.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`tsh_font`](#tsh_font), [`tsh_run`](#tsh_run)
 - **Enums:** [`tsh_status`](#tsh_status)
 - **Type Aliases:** [`family`](#family), [`end`](#end)
-- **Functions:** [`content`](#content), [`tsh_family_is_generic`](#tsh_family_is_generic), [`wins`](#wins), [`tsh_pick_family`](#tsh_pick_family), [`tsh_local_handle`](#tsh_local_handle), [`tsh_ready`](#tsh_ready), [`origin`](#origin), [`tsh_measure`](#tsh_measure), [`tsh_webfont_register`](#tsh_webfont_register), [`tsh_webfont_clear`](#tsh_webfont_clear), [`tsh_face`](#tsh_face), [`own`](#own), [`tsh_shutdown`](#tsh_shutdown)
+- **Functions:** [`content`](#content), [`tsh_family_is_generic`](#tsh_family_is_generic), [`wins`](#wins), [`tsh_pick_family`](#tsh_pick_family), [`tsh_local_handle`](#tsh_local_handle), [`tsh_ready`](#tsh_ready), [`origin`](#origin), [`tsh_measure`](#tsh_measure), [`tsh_webfont_register`](#tsh_webfont_register), [`tsh_face_generation`](#tsh_face_generation), [`tsh_webfont_clear`](#tsh_webfont_clear), [`tsh_face`](#tsh_face), [`own`](#own), [`tsh_shutdown`](#tsh_shutdown)
 - **Macros:** [`TSH_LOCAL_LISTS`](#tsh_local_lists), [`TSH_LOCAL_FAMILIES`](#tsh_local_families), [`TSH_FAMILY_MAX`](#tsh_family_max), [`TSH_MAX_GLYPHS`](#tsh_max_glyphs), [`TSH_MAX_TEXT`](#tsh_max_text)
 
 ## Type Diagram
@@ -60,7 +60,7 @@ The engine matches the generic group only, never an exact author family -- unles
 
 ### `tsh_run`
 
-`struct` | [include/text_shape.h:132](../../include/text_shape.h#L132)
+`struct` | [include/text_shape.h:138](../../include/text_shape.h#L138)
 
 ```c
 typedef struct tsh_run { size_t start, end; int face; } tsh_run;
@@ -108,7 +108,7 @@ The engine matches the generic group only, never an exact author family -- unles
 
 ### `end`
 
-`type_alias` | [include/text_shape.h:132](../../include/text_shape.h#L132)
+`type_alias` | [include/text_shape.h:138](../../include/text_shape.h#L138)
 
 ```c
 typedef struct tsh_run { size_t start, end;
@@ -336,11 +336,29 @@ Re-registering a key replaces it. Returns 0 on success, -1 fail-closed (NULL/emp
 
 ---
 
+<a id="tsh_face_generation"></a>
+
+### `tsh_face_generation`
+
+`function` | [include/text_shape.h:122](../../include/text_shape.h#L122)
+
+```c
+unsigned tsh_face_generation(void);
+```
+
+Advances whenever a face text is measured with may have been added, freed or replaced (a webfont registered or cleared, the local family lists or fallback faces dropped): a measure taken under an older generation may no longer hold.
+
+A cache of anything measured (the window's layout cache, spec/exact_key.md) keys on it. Never 0.
+
+**Returns:** `unsigned`
+
+---
+
 <a id="tsh_webfont_clear"></a>
 
 ### `tsh_webfont_clear`
 
-`function` | [include/text_shape.h:120](../../include/text_shape.h#L120)
+`function` | [include/text_shape.h:126](../../include/text_shape.h#L126)
 
 ```c
 void tsh_webfont_clear(void);
@@ -358,7 +376,7 @@ Idempotent, NULL-safe by construction (no args). tsh_shutdown also clears the ta
 
 ### `tsh_face`
 
-`function` | [include/text_shape.h:127](../../include/text_shape.h#L127)
+`function` | [include/text_shape.h:133](../../include/text_shape.h#L133)
 
 ```c
 cairo_font_face_t *tsh_face(const tsh_font *f);
@@ -384,7 +402,7 @@ Borrowed: owned by the cache, valid until tsh_shutdown / tsh_webfont_clear. The 
 
 ### `own`
 
-`function` | [include/text_shape.h:136](../../include/text_shape.h#L136)
+`function` | [include/text_shape.h:142](../../include/text_shape.h#L142)
 
 ```c
 * face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them. Returns the run count, 0 for empty text, -1 when * more than cap runs would be needed or o
@@ -406,7 +424,7 @@ Borrowed: owned by the cache, valid until tsh_shutdown / tsh_webfont_clear. The 
 
 ### `tsh_shutdown`
 
-`function` | [include/text_shape.h:143](../../include/text_shape.h#L143)
+`function` | [include/text_shape.h:149](../../include/text_shape.h#L149)
 
 ```c
 void tsh_shutdown(void);

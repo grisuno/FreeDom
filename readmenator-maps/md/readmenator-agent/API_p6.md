@@ -1,6 +1,100 @@
 # API (page 6 of 13)
 Previous: [API_p5.md](API_p5.md)
 
+## include/webfont.h
+Imported by: `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
+- `here` (function) `include/webfont.h:38` `* set with the decoded bytes owned here (freed by wf_list_free);`
+- `wf_scan` (function) `include/webfont.h:52` `int wf_scan(const char *css, size_t len, wf_list *out);`
+- `wf_list_free` (function) `include/webfont.h:53` `void wf_list_free(wf_list *l);`
+- `boundaries` (function) `include/webfont.h:57` `* boundaries (scan_inline accumulation, loader collection). */ void wf_ref_move(wf_ref *dst, wf_ref *src);`
+- `wf_supported_format` (function) `include/webfont.h:60` `int wf_supported_format(const char *fmt);`
+- `wf_name_hash` (function) `include/webfont.h:69` `static inline unsigned wf_name_hash(const char *s, size_t n)` -- FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names.
+
+## include/webfont_load.h
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webfont_load.c`, `tests/test_webfont_load.c`
+- `free` (function) `include/webfont_load.h:31` `* free()), *out_status the HTTP status. Nonzero on refusal/error (fail-closed: * the face is skipped, never the...`
+- `skipped` (function) `include/webfont_load.h:47` `* URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */ int wf_load_document(wf_fetch_fn fetch...`
+
+## include/wl_display.h
+Imported by: `src/freedom.c`, `src/wl_display.c`, `tests/test_wl_display.c`
+- `pure` (function) `include/wl_display.h:3` `* wd_pick is pure (no I/O);`
+- `wd_pick` (function) `include/wl_display.h:16` `int wd_pick(const char *const *names, size_t n, char *out, size_t cap);` -- Choose the lowest-numbered "wayland-N" (N = digits only) from names[0..n).
+- `wd_resolve_env` (function) `include/wl_display.h:20` `int wd_resolve_env(void);` -- If WAYLAND_DISPLAY is unset/empty, set it from the sockets found in XDG_RUNTIME_DIR. * Returns WD_OK if the variable...
+
+## include/wl_guard.h
+Imported by: `gui/browser_ui.c`, `src/wl_guard.c`, `tests/test_wl_guard.c`
+- `wlg_start` (function) `include/wl_guard.h:25` `wl_guard *wlg_start(struct wl_display *display);` -- wl_guard -- keeps the Wayland connection drained while the GUI thread is busy.
+- `wlg_stop` (function) `include/wl_guard.h:28` `void wlg_stop(wl_guard *g);` -- client that does not read for a few seconds while the pointer moves gets DISCONNECTED ("libwayland: Data too big for...
+
+## include/ws_hub.h
+Depends on: `include/secure_fetch.h`
+Imported by: `gui/browser_ui.c`, `src/ws_hub.c`, `tests/test_ws_hub.c`
+- `wh_new` (function) `include/ws_hub.h:34` `wh_hub *wh_new(void);` -- #define WH_MAX 8   /* == JD_WS_MAX: sockets per page /* Event kinds delivered to the page; values match...
+- `wh_free` (function) `include/ws_hub.h:38` `void wh_free(wh_hub *h);` -- Closes every connection and frees the hub.
+- `wh_notify_fd` (function) `include/ws_hub.h:41` `int wh_notify_fd(const wh_hub *h);` -- Closes every connection and frees the hub.
+- `wh_open_async` (function) `include/ws_hub.h:46` `int wh_open_async(wh_hub *h, int id, const char *url, const sf_config *cfg);` -- Starts opening url for page socket id on a thread (cfg and all its strings are copied).
+- `generation` (function) `include/ws_hub.h:50` `* previous generation (before wh_close_all) are closed and dropped silently. */ void wh_on_notify(wh_hub *h...`
+- `wh_send` (function) `include/ws_hub.h:54` `int wh_send(wh_hub *h, int id, const void *data, size_t len, int binary);` -- Drains finished opens: success => the connection joins the hub and WH_EV_OPEN is emitted; failure => WH_EV_ERROR...
+- `wh_close` (function) `include/ws_hub.h:58` `void wh_close(wh_hub *h, int id);` -- The page closed socket id: sends a close frame and frees it (also cancels a * pending open for that id: its result...
+- `wh_close_all` (function) `include/ws_hub.h:61` `void wh_close_all(wh_hub *h);` -- The page closed socket id: sends a close frame and frees it (also cancels a * pending open for that id: its result...
+- `wh_poll_fds` (function) `include/ws_hub.h:65` `size_t wh_poll_fds(const wh_hub *h, struct pollfd *out, int *ids, size_t cap);` -- Fills up to cap pollfds (POLLIN) and the matching page ids for the open * connections.
+- `wh_on_readable` (function) `include/ws_hub.h:70` `void wh_on_readable(wh_hub *h, int id, wh_emit_fn emit, void *ctx);` -- Reads everything pending on socket id without blocking, emitting each complete message; a close frame emits...
+- `wh_count` (function) `include/ws_hub.h:73` `size_t wh_count(const wh_hub *h);` -- Reads everything pending on socket id without blocking, emitting each complete message; a close frame emits...
+
+## include/zoom.h
+Imported by: `gui/browser_ui.c`, `src/prefs.c`, `src/zoom.c`, `tests/test_prefs.c`, `tests/test_zoom.c`
+- `zm_clamp` (function) `include/zoom.h:26` `int zm_clamp(int pct);` -- stops (50..300) so Ctrl + / Ctrl - land on predictable values, like a mainstream browser.
+- `zm_zoom_in` (function) `include/zoom.h:29` `int zm_zoom_in(int pct);` -- never escape the bounds.
+- `zm_zoom_out` (function) `include/zoom.h:32` `int zm_zoom_out(int pct);` -- only calls these.
+- `zm_reset` (function) `include/zoom.h:35` `int zm_reset(void);` -- #define ZM_MIN_PCT     50 #define ZM_MAX_PCT     300 #define ZM_DEFAULT_PCT 100 /* Clamp pct to [ZM_MIN_PCT...
+- `zm_scale` (function) `include/zoom.h:38` `double zm_scale(int pct);` -- /* Clamp pct to [ZM_MIN_PCT, ZM_MAX_PCT]. int zm_clamp(int pct); /* Smallest ladder stop strictly greater than...
+- `zm_apply` (function) `include/zoom.h:42` `double zm_apply(double base_px, int pct);` -- base_px * zm_scale(pct), floored to 1.0 when base_px > 0 so a font can never * scale away to nothing. base_px <= 0...
+
+## src/anti_fp.c
+Depends on: `include/anti_fp.h`
+- `fp_coarsen_time_ms` (function) `src/anti_fp.c:17` `uint64_t fp_coarsen_time_ms(uint64_t raw_ms)`
+- `fp_user_agent` (function) `src/anti_fp.c:23` `const char *fp_user_agent(void)`
+- `fp_accept_language` (function) `src/anti_fp.c:27` `const char *fp_accept_language(void)`
+- `fp_accept_language_header` (function) `src/anti_fp.c:31` `const char *fp_accept_language_header(void)`
+- `fp_timezone` (function) `src/anti_fp.c:35` `const char *fp_timezone(void)`
+- `fp_platform` (function) `src/anti_fp.c:39` `const char *fp_platform(void)`
+- `fp_vendor` (function) `src/anti_fp.c:43` `const char *fp_vendor(void)`
+- `fp_hardware_concurrency` (function) `src/anti_fp.c:47` `int fp_hardware_concurrency(void)`
+- `fp_device_memory_gb` (function) `src/anti_fp.c:51` `int fp_device_memory_gb(void)`
+- `fp_app_version` (function) `src/anti_fp.c:57` `const char *fp_app_version(void)`
+- `fp_app_code_name` (function) `src/anti_fp.c:61` `const char *fp_app_code_name(void)`
+- `fp_product` (function) `src/anti_fp.c:65` `const char *fp_product(void)`
+- `fp_app_name` (function) `src/anti_fp.c:69` `const char *fp_app_name(void)`
+- `fp_product_sub` (function) `src/anti_fp.c:73` `const char *fp_product_sub(void)`
+- `fp_oscpu` (function) `src/anti_fp.c:77` `const char *fp_oscpu(void)`
+- `fp_build_id` (function) `src/anti_fp.c:81` `const char *fp_build_id(void)`
+- `fp_max_touch_points` (function) `src/anti_fp.c:85` `int fp_max_touch_points(void)`
+- `fp_on_line` (function) `src/anti_fp.c:89` `int fp_on_line(void)`
+- `fp_cookie_enabled` (function) `src/anti_fp.c:93` `int fp_cookie_enabled(void)`
+- `fp_bucket_screen` (function) `src/anti_fp.c:99` `void fp_bucket_screen(int w, int h, int *out_w, int *out_h)`
+- `splitmix64` (function) `src/anti_fp.c:121` `static uint64_t splitmix64(uint64_t *state)`
+- `fp_perturb` (function) `src/anti_fp.c:128` `void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key)`
+- `fp_origin_key` (function) `src/anti_fp.c:139` `uint64_t fp_origin_key(uint64_t session_key, const char *registrable_domain)`
+
+## src/block_flow.c
+Depends on: `include/block_flow.h`
+- `finite_or_zero` (function) `src/block_flow.c:11` `static double finite_or_zero(double v)` -- A margin the caller could not compute (NaN from a hostile calc(), an infinity from an overflowing unit conversion)...
+- `bf_collapse_n` (function) `src/block_flow.c:15` `double bf_collapse_n(const double *m, size_t n)`
+- `bf_collapse` (function) `src/block_flow.c:30` `double bf_collapse(double a, double b)`
+- `bf_margins_adjoin` (function) `src/block_flow.c:35` `int bf_margins_adjoin(double border_px, double padding_px)`
+
+## src/box_blur.c
+Depends on: `include/box_blur.h`
+- `bb_box_sizes` (function) `src/box_blur.c:8` `int bb_box_sizes(double sigma, int sizes[3])`
+- `variance` (function) `src/box_blur.c:11` `* width w has variance (w^2 - 1) / 12): the ideal common width, rounded down * to an odd wl and up to wu = wl + 2...`
+- `box_recip` (function) `src/box_blur.c:32` `static uint64_t box_recip(int bw)` -- floor((sum + bw/2) / bw) without a division: m = floor(2^32 / bw) + 1 makes (n * m) >> 32 exact for every n < 2^32 /...
+- `box_avg` (function) `src/box_blur.c:33` `static unsigned char box_avg(long sum, int bw, uint64_t m)`
+- `box_line` (function) `src/box_blur.c:39` `static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)` -- One box pass of odd width bw over n samples spaced `step` apart, through tmp * (n bytes).
+- `box_cols` (function) `src/box_blur.c:56` `static void box_cols(unsigned char *buf, int w, int h, int stride, int bw,
+                     u...` -- One box pass of odd width bw down every column at once: the same running sums as box_line with step = stride, but...
+- `bb_blur_a8` (function) `src/box_blur.c:82` `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)`
+- `bb_ink_rect` (function) `src/box_blur.c:102` `int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])`
+
 ## src/box_style.c
 Depends on: `include/box_style.h`
 - `is_ws` (function) `src/box_style.c:31` `static int is_ws(char c)`
@@ -85,44 +179,52 @@ Depends on: `include/browser.h`, `include/util.h`
 - `free_page` (function) `src/browser.c:15` `static void free_page(browser_state *bs)`
 - `clear_status` (function) `src/browser.c:25` `static void clear_status(browser_state *bs)` -- #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) { if (bs == NULL) return...
 - `free_history` (function) `src/browser.c:30` `static void free_history(browser_state *bs)`
-- `free_exceptions` (function) `src/browser.c:42` `static void free_exceptions(browser_state *bs)`
-- `is_https_url` (function) `src/browser.c:51` `static int is_https_url(const char *s)`
-- `is_local_path` (function) `src/browser.c:55` `static int is_local_path(const char *s)`
-- `url_is_allowed` (function) `src/browser.c:60` `static int url_is_allowed(const char *url)`
-- `xstrdup` (function) `src/browser.c:74` `static char *xstrdup(const char *s)`
-- `cp1252_to_ucs` (function) `src/browser.c:88` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
-- `utf8_encode` (function) `src/browser.c:102` `static size_t utf8_encode(unsigned int cp, char *out)` -- Encodes a BMP scalar (<= 0xFFFF) as UTF-8 into out (up to 3 bytes); returns the * byte count written.
-- `browser_init` (function) `src/browser.c:156` `browser_status browser_init(browser_state *bs)`
-- `browser_free` (function) `src/browser.c:167` `void browser_free(browser_state *bs)`
-- `browser_set_url_bar` (function) `src/browser.c:178` `browser_status browser_set_url_bar(browser_state *bs, const char *url)`
-- `browser_commit_url_bar` (function) `src/browser.c:190` `browser_status browser_commit_url_bar(browser_state *bs)`
-- `browser_navigate` (function) `src/browser.c:224` `browser_status browser_navigate(browser_state *bs, const char *url)`
-- `browser_push_state` (function) `src/browser.c:236` `browser_status browser_push_state(browser_state *bs, const char *url)`
-- `browser_replace_state` (function) `src/browser.c:243` `browser_status browser_replace_state(browser_state *bs, const char *url)`
-- `browser_entry_doc` (function) `src/browser.c:255` `int browser_entry_doc(const browser_state *bs, size_t pos)`
-- `browser_doc_index` (function) `src/browser.c:260` `int browser_doc_index(const browser_state *bs)`
-- `browser_back` (function) `src/browser.c:268` `browser_status browser_back(browser_state *bs)`
-- `browser_forward` (function) `src/browser.c:280` `browser_status browser_forward(browser_state *bs)`
-- `browser_can_back` (function) `src/browser.c:292` `int browser_can_back(const browser_state *bs)`
-- `browser_can_forward` (function) `src/browser.c:296` `int browser_can_forward(const browser_state *bs)`
-- `browser_current_url` (function) `src/browser.c:300` `const char *browser_current_url(const browser_state *bs)`
-- `browser_url_bar_selection` (function) `src/browser.c:305` `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)`
-- `browser_url_bar_delete_selection` (function) `src/browser.c:316` `int browser_url_bar_delete_selection(browser_state *bs)`
-- `browser_url_bar_insert` (function) `src/browser.c:326` `browser_status browser_url_bar_insert(browser_state *bs, char c)`
-- `browser_url_bar_backspace` (function) `src/browser.c:341` `browser_status browser_url_bar_backspace(browser_state *bs)`
-- `browser_url_bar_delete` (function) `src/browser.c:355` `browser_status browser_url_bar_delete(browser_state *bs)`
-- `browser_url_bar_move_cursor` (function) `src/browser.c:366` `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)`
-- `browser_url_bar_extend_cursor` (function) `src/browser.c:376` `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)`
-- `browser_url_bar_set_cursor` (function) `src/browser.c:385` `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)`
-- `browser_url_bar_select_all` (function) `src/browser.c:393` `browser_status browser_url_bar_select_all(browser_state *bs)`
-- `browser_url_bar_clear` (function) `src/browser.c:400` `browser_status browser_url_bar_clear(browser_state *bs)`
-- `browser_set_page` (function) `src/browser.c:409` `browser_status browser_set_page(browser_state *bs, const char *title,
+- `free_stash` (function) `src/browser.c:44` `static void free_stash(browser_state *bs)`
+- `free_pending` (function) `src/browser.c:54` `static void free_pending(browser_state *bs)` -- } enum { PENDING_NONE = 0, PENDING_NEW = 1, PENDING_MOVE = 2 }; static void free_stash(browser_state *bs) { for...
+- `begin_pending` (function) `src/browser.c:67` `static void begin_pending(browser_state *bs, int kind)` -- Opens a pending navigation of kind: the committed position and page are saved * (the page moves, it is not copied)...
+- `free_exceptions` (function) `src/browser.c:78` `static void free_exceptions(browser_state *bs)`
+- `is_https_url` (function) `src/browser.c:87` `static int is_https_url(const char *s)`
+- `is_local_path` (function) `src/browser.c:91` `static int is_local_path(const char *s)`
+- `url_is_allowed` (function) `src/browser.c:96` `static int url_is_allowed(const char *url)`
+- `xstrdup` (function) `src/browser.c:110` `static char *xstrdup(const char *s)`
+- `cp1252_to_ucs` (function) `src/browser.c:124` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
+- `utf8_encode` (function) `src/browser.c:138` `static size_t utf8_encode(unsigned int cp, char *out)` -- Encodes a BMP scalar (<= 0xFFFF) as UTF-8 into out (up to 3 bytes); returns the * byte count written.
+- `browser_init` (function) `src/browser.c:192` `browser_status browser_init(browser_state *bs)`
+- `browser_free` (function) `src/browser.c:203` `void browser_free(browser_state *bs)`
+- `browser_set_url_bar` (function) `src/browser.c:215` `browser_status browser_set_url_bar(browser_state *bs, const char *url)`
+- `browser_commit_url_bar` (function) `src/browser.c:227` `browser_status browser_commit_url_bar(browser_state *bs)`
+- `browser_navigate` (function) `src/browser.c:273` `browser_status browser_navigate(browser_state *bs, const char *url)`
+- `browser_push_state` (function) `src/browser.c:303` `browser_status browser_push_state(browser_state *bs, const char *url)`
+- `browser_replace_state` (function) `src/browser.c:311` `browser_status browser_replace_state(browser_state *bs, const char *url)`
+- `browser_entry_doc` (function) `src/browser.c:324` `int browser_entry_doc(const browser_state *bs, size_t pos)`
+- `browser_doc_index` (function) `src/browser.c:329` `int browser_doc_index(const browser_state *bs)`
+- `browser_back` (function) `src/browser.c:337` `browser_status browser_back(browser_state *bs)`
+- `browser_forward` (function) `src/browser.c:350` `browser_status browser_forward(browser_state *bs)`
+- `browser_can_back` (function) `src/browser.c:363` `int browser_can_back(const browser_state *bs)`
+- `browser_can_forward` (function) `src/browser.c:367` `int browser_can_forward(const browser_state *bs)`
+- `browser_current_url` (function) `src/browser.c:371` `const char *browser_current_url(const browser_state *bs)`
+- `browser_url_bar_selection` (function) `src/browser.c:376` `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)`
+- `browser_url_bar_delete_selection` (function) `src/browser.c:387` `int browser_url_bar_delete_selection(browser_state *bs)`
+- `browser_url_bar_insert` (function) `src/browser.c:397` `browser_status browser_url_bar_insert(browser_state *bs, char c)`
+- `browser_url_bar_backspace` (function) `src/browser.c:412` `browser_status browser_url_bar_backspace(browser_state *bs)`
+- `browser_url_bar_delete` (function) `src/browser.c:426` `browser_status browser_url_bar_delete(browser_state *bs)`
+- `browser_url_bar_move_cursor` (function) `src/browser.c:437` `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)`
+- `browser_url_bar_extend_cursor` (function) `src/browser.c:447` `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)`
+- `browser_url_bar_set_cursor` (function) `src/browser.c:456` `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)`
+- `browser_url_bar_select_all` (function) `src/browser.c:464` `browser_status browser_url_bar_select_all(browser_state *bs)`
+- `browser_url_bar_clear` (function) `src/browser.c:471` `browser_status browser_url_bar_clear(browser_state *bs)`
+- `browser_set_page` (function) `src/browser.c:480` `browser_status browser_set_page(browser_state *bs, const char *title,
                            ...`
-- `browser_set_status` (function) `src/browser.c:431` `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)`
-- `browser_status_text` (function) `src/browser.c:445` `const char *browser_status_text(const browser_state *bs, uint64_t now_ms)`
-- `host_equal` (function) `src/browser.c:453` `static int host_equal(const char *a, const char *b)`
-- `browser_is_exception` (function) `src/browser.c:464` `int browser_is_exception(const browser_state *bs, const char *host)`
-- `browser_add_exception` (function) `src/browser.c:472` `browser_status browser_add_exception(browser_state *bs, const char *host)`
+- `browser_set_status` (function) `src/browser.c:502` `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)`
+- `browser_status_text` (function) `src/browser.c:516` `const char *browser_status_text(const browser_state *bs, uint64_t now_ms)`
+- `host_equal` (function) `src/browser.c:524` `static int host_equal(const char *a, const char *b)`
+- `browser_is_exception` (function) `src/browser.c:535` `int browser_is_exception(const browser_state *bs, const char *host)`
+- `browser_add_exception` (function) `src/browser.c:543` `browser_status browser_add_exception(browser_state *bs, const char *host)`
+- `browser_closed_push` (function) `src/browser.c:561` `browser_status browser_closed_push(browser_closed *c, const char *url)`
+- `browser_closed_pop` (function) `src/browser.c:576` `int browser_closed_pop(browser_closed *c, char *out, size_t cap)`
+- `browser_commit_pending` (function) `src/browser.c:588` `void browser_commit_pending(browser_state *bs)`
+- `browser_abort_pending` (function) `src/browser.c:593` `int browser_abort_pending(browser_state *bs)`
+- `browser_has_pending` (function) `src/browser.c:622` `int browser_has_pending(const browser_state *bs)`
 
 ## src/cached_fetch.c
 Depends on: `include/cached_fetch.h`
@@ -142,328 +244,33 @@ Depends on: `include/cached_fetch.h`
 - `redirect_save` (function) `src/cached_fetch.c:144` `static void redirect_save(void *ctx, const char *from, const char *to, time_t now)`
 - `cf_attach_redirect_memory` (function) `src/cached_fetch.c:148` `void cf_attach_redirect_memory(hc_store *store)`
 
+## src/chrome_layout.c
+Depends on: `include/chrome_layout.h`
+- `rect` (function) `src/chrome_layout.c:17` `static chl_rect rect(double x, double y, double w, double h)`
+- `chl_rect_has` (function) `src/chrome_layout.c:26` `int chl_rect_has(chl_rect r, double x, double y)`
+- `chl_compute` (function) `src/chrome_layout.c:30` `chl_status chl_compute(double width, int csd, int tab_count, int active, chl_layout *out)`
+- `chl_tab_rect` (function) `src/chrome_layout.c:96` `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)`
+- `chl_tab_close_rect` (function) `src/chrome_layout.c:106` `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)`
+- `chl_hit` (function) `src/chrome_layout.c:116` `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)`
+- `lower` (function) `src/chrome_layout.c:147` `static int lower(int c)`
+- `has_prefix_ci` (function) `src/chrome_layout.c:150` `static int has_prefix_ci(const char *s, const char *prefix)` -- if (chl_rect_has(l->back, x, y))     return CHL_PART_BACK; if (chl_rect_has(l->fwd, x, y))      return CHL_PART_FWD...
+- `host_ends_with` (function) `src/chrome_layout.c:157` `static int host_ends_with(const char *h, size_t n, const char *suffix)` -- } /* --- identity badge --- static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* 1 if...
+- `url_host` (function) `src/chrome_layout.c:167` `static size_t url_host(const char *rest, const char **out)` -- Host of an authority-bearing URL after "scheme://": userinfo, port and one trailing * dot removed.
+- `chl_identity_of` (function) `src/chrome_layout.c:185` `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,
+               ...`
+- `chl_identity_label` (function) `src/chrome_layout.c:209` `const char *chl_identity_label(chl_identity id)`
+- `chl_findbar_compute` (function) `src/chrome_layout.c:226` `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)` -- Find bar: the field at the left, prev/next right after it, the match count, and the * close button at the right edge.
+- `chl_findbar_hit` (function) `src/chrome_layout.c:262` `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)`
+
 ## src/compositor.c
 Depends on: `include/compositor.h`, `include/css.h`
-- `cx_forms_stacking_context` (function) `src/compositor.c:16` `int cx_forms_stacking_context(const cx_style *s)`
-- `cx_box_layer` (function) `src/compositor.c:34` `cx_layer cx_box_layer(const cx_style *s)`
-- `eff_z` (function) `src/compositor.c:50` `static int eff_z(const cx_item *it)` -- Not a stacking context: a positioned box with z:auto still paints in the * positioned/zero layer (CSS 2.1 App E...
-- `cx_item_compare` (function) `src/compositor.c:54` `int cx_item_compare(const cx_item *a, const cx_item *b)`
-- `cx_sort` (function) `src/compositor.c:70` `void cx_sort(cx_item *items, size_t n)` -- Stable insertion sort: n is bounded by the caller (BT_MAX_POSITIONED), so O(n^2) is fine, and stability keeps...
-
-## src/css.c
-Depends on: `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_index.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_mq.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/css_vars.h`, `include/flex_layout.h`, `include/interp.h`, `include/webfont.h`
-- `emit` (function) `src/css.c:64` `* * It must exceed the most slots ANY single declaration can emit (the widest today * is the `background` shorthand...`
-- `css_decl` (function) `src/css.c:91` `* text and stores the INDEX in the css_decl (int-only, see P_BG_IMAGE_URL);`
-- `parse_num` (function) `src/css.c:188` `static int parse_num(const char *s, double *out, const char **endp)` -- Parses a leading non-negative number (digits + optional fraction).
-- `parse_color` (function) `src/css.c:199` `static int parse_color(const char *v)` -- Delegates to the canonical CSS <number> grammar so a number means the same thing here as in a length, a colour...
-- `interp_color` (function) `src/css.c:203` `static int interp_color(const char *v)`
-- `through` (function) `src/css.c:219` `* at the two SHARED chokepoints every property funnels through (the generic
- * dispatch tail, and...`
-- `bg_alpha_of` (function) `src/css.c:243` `static int bg_alpha_of(const char *v)` -- Alpha (4th) component of the first rgba()/hsla() call inside v, as a percent 0..100; CSS_LEN_UNSET when there is none.
-- `interp_bg` (function) `src/css.c:247` `static int interp_bg(const char *v)`
-- `expand_bg_image` (function) `src/css.c:255` `static int expand_bg_image(const char *val, css_decl *dst, int cap,
-                           ch...`
-- `expand_bg_position` (function) `src/css.c:260` `static int expand_bg_position(const char *val, css_decl *dst, int cap);`
-- `expand_background` (function) `src/css.c:263` `static int expand_background(const char *val, css_decl *dst, int cap,
-                           ...`
-- `text` (function) `src/css.c:275` `* source text (rem_rebase, see below) rather than by threading a context here.
- *
- * Viewport uni...`
-- `expand_box4` (function) `src/css.c:295` `static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg,
-            ...`
-- `expand_box2` (function) `src/css.c:300` `static int expand_box2(const char *val, int slot_start, int slot_end,
-                       int ...`
-- `interp_len` (function) `src/css.c:305` `static int interp_len(const char *v, int allow_auto, int *out)`
-- `interp_lp` (function) `src/css.c:309` `static int interp_lp(const char *v, int allow_auto, int allow_pct,
-                     int *out_...`
-- `lp_can_be_nonneg` (function) `src/css.c:314` `static int lp_can_be_nonneg(int px_val, int pct_pm)`
-- `next_ws_token` (function) `src/css.c:318` `static int next_ws_token(const char **p, char *tok, size_t cap)`
-- `interp_align` (function) `src/css.c:322` `static int interp_align(const char *v)`
-- `interp_fontsize_ex` (function) `src/css.c:326` `static int interp_fontsize_ex(const char *v, int *abs_out)`
-- `interp_lineheight` (function) `src/css.c:340` `static int interp_lineheight(const char *v)`
-- `interp_weight` (function) `src/css.c:344` `static int interp_weight(const char *v)`
-- `interp_style` (function) `src/css.c:348` `static int interp_style(const char *v)`
-- `interp_textdeco` (function) `src/css.c:352` `static int interp_textdeco(const char *v)`
-- `interp_display` (function) `src/css.c:356` `static int interp_display(const char *v)`
-- `interp_gap` (function) `src/css.c:360` `static int interp_gap(const char *v)`
-- `interp_justify` (function) `src/css.c:364` `static int interp_justify(const char *v)`
-- `expand_grid_template_cols` (function) `src/css.c:368` `static int expand_grid_template_cols(const char *val, css_decl *dst, int cap)`
-- `interp_fontfamily` (function) `src/css.c:374` `static int interp_fontfamily(const char *v)` -- Text-presentation family lives in css_text.c (single owner).
-- `interp_texttransform` (function) `src/css.c:375` `static int interp_texttransform(const char *v)`
-- `interp_opacity` (function) `src/css.c:376` `static int interp_opacity(const char *v)`
-- `expand_valign` (function) `src/css.c:377` `static int expand_valign(const char *val, css_decl *dst, int cap)`
-- `interp_transition_property` (function) `src/css.c:378` `static int interp_transition_property(const char *v)`
-- `interp_whitespace` (function) `src/css.c:379` `static int interp_whitespace(const char *v)`
-- `interp_tabsize` (function) `src/css.c:380` `static int interp_tabsize(const char *v)`
-- `interp_textdeco_style` (function) `src/css.c:381` `static int interp_textdeco_style(const char *v)`
-- `interp_textdeco_thickness` (function) `src/css.c:382` `static int interp_textdeco_thickness(const char *v)`
-- `interp_aspect_ratio` (function) `src/css.c:383` `static int interp_aspect_ratio(const char *v, int *num, int *den)`
-- `interp_direction` (function) `src/css.c:384` `static int interp_direction(const char *v)`
-- `interp_liststyle` (function) `src/css.c:385` `static int interp_liststyle(const char *v)`
-- `emit_spacing` (function) `src/css.c:386` `static int emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
-- `expand_shadow` (function) `src/css.c:387` `static int expand_shadow(const char *val, css_decl *dst, int cap)`
-- `interp_position` (function) `src/css.c:391` `static int interp_position(const char *v)`
-- `interp_boxsizing` (function) `src/css.c:400` `static int interp_boxsizing(const char *v)`
-- `interp_float` (function) `src/css.c:406` `static int interp_float(const char *v)`
-- `interp_clear` (function) `src/css.c:413` `static int interp_clear(const char *v)`
-- `interp_visibility` (function) `src/css.c:423` `static int interp_visibility(const char *v)`
-- `interp_overflow` (function) `src/css.c:430` `static int interp_overflow(const char *v)`
-- `interp_cursor` (function) `src/css.c:462` `static int interp_cursor(const char *v)`
-- `interp_text_overflow` (function) `src/css.c:494` `static int interp_text_overflow(const char *v)`
-- `interp_word_break` (function) `src/css.c:500` `static int interp_word_break(const char *v)`
-- `interp_overflow_wrap` (function) `src/css.c:508` `static int interp_overflow_wrap(const char *v)`
-- `interp_border_collapse` (function) `src/css.c:516` `static int interp_border_collapse(const char *v)` -- if (csel_ci_eq(v, "break-all"))  return CSS_WB_BREAK;       /* greedy mid-line break if (csel_ci_eq(v...
-- `number` (function) `src/css.c:525` `* number (no unit) as px (common in shorthand context like "10 5"). */
-static int interp_border_s...`
-- `interp_empty_cells` (function) `src/css.c:550` `static int interp_empty_cells(const char *v)` -- if (interp_len(tok, 0, &px) && px >= 0) { if (px > CSS_BORDER_SPACING_MAX) px = CSS_BORDER_SPACING_MAX; return px; }...
-- `interp_caption_side` (function) `src/css.c:557` `static int interp_caption_side(const char *v)` -- px = css_round_clamp(num, 0, CSS_BORDER_SPACING_MAX); return px; } return -1; } /* empty-cells: show/hide. -1...
-- `interp_table_layout` (function) `src/css.c:564` `static int interp_table_layout(const char *v)` -- static int interp_empty_cells(const char *v) { if (csel_ci_eq(v, "show")) return CSS_EC_SHOW; if (csel_ci_eq(v...
-- `interp_font_variant` (function) `src/css.c:571` `static int interp_font_variant(const char *v)` -- static int interp_caption_side(const char *v) { if (csel_ci_eq(v, "top"))    return CSS_CS_TOP; if (csel_ci_eq(v...
-- `interp_hyphens` (function) `src/css.c:579` `static int interp_hyphens(const char *v)` -- if (csel_ci_eq(v, "auto"))  return CSS_TL_AUTO; if (csel_ci_eq(v, "fixed")) return CSS_TL_FIXED; return -1; } /*...
-- `interp_user_select` (function) `src/css.c:587` `static int interp_user_select(const char *v)` -- if (csel_ci_eq(v, "small-caps")) return CSS_FV_SMALL_CAPS; /* all-small-caps, petite-caps, etc: out of scope, fail...
-- `interp_caret_color` (function) `src/css.c:596` `static int interp_caret_color(const char *v)` -- if (csel_ci_eq(v, "auto"))   return CSS_HY_AUTO; return -1; } /* user-select: none/text/all/auto. -1 unknown. static...
-- `interp_appearance` (function) `src/css.c:608` `static int interp_appearance(const char *v)` -- appearance (CSS Basic UI 4 section 6.1).
-- `interp_pointer_events` (function) `src/css.c:626` `static int interp_pointer_events(const char *v)` -- pointer-events.
-- `interp_bg_repeat` (function) `src/css.c:638` `static int interp_bg_repeat(const char *v)` -- of them means "this element is a target" -- the same answer as `auto`.
-- `interp_bg_repeat2` (function) `src/css.c:649` `static int interp_bg_repeat2(const char *v)` -- Two-value background-repeat (CSS Backgrounds 3 3.4): `repeat no-repeat` is * repeat-x, `no-repeat repeat` is...
-- `layer` (function) `src/css.c:670` `* first layer (the one painted) -- so `background: url(x) no-repeat` stops tiling
- * and a later ...`
-- `expand_background_layer` (function) `src/css.c:679` `static int expand_background_layer(const char *val, css_decl *dst, int cap)`
-- `first_comma_item` (function) `src/css.c:753` `static void first_comma_item(const char *val, char *buf, size_t cap);` -- The mask layer shares the background layer's geometry vocabulary (CSS Masking 1 7.4-7.6 define...
-- `bg_to_mask_slot` (function) `src/css.c:755` `static int bg_to_mask_slot(int prop)`
-- `remap_to_mask` (function) `src/css.c:769` `static int remap_to_mask(css_decl *dst, int n)`
-- `expand_mask_geometry` (function) `src/css.c:778` `static int expand_mask_geometry(const char *prop, const char *val, css_decl *dst, int cap)`
-- `emit_mask_image` (function) `src/css.c:797` `static int emit_mask_image(const char *prop, const char *val, css_decl *dst, int cap,
-           ...` -- mask / mask-image with a url(): the URL into the image pool (gated downstream like a background-image; a data: SVG...
-- `interp_bg_size` (function) `src/css.c:816` `static int interp_bg_size(const char *v)` -- dst[n].prop = P_MASK_URL; dst[n].ival = -1; if (has && urltab != NULL && *nurl < urlcap) { memcpy(urltab[*nurl], u...
-- `interp_bg_clip` (function) `src/css.c:823` `static int interp_bg_clip(const char *v)` -- +n; if (strcmp(prop, "mask") == 0 && !css_wide_keyword(val)) n += remap_to_mask(dst + n...
-- `interp_bg_origin` (function) `src/css.c:831` `static int interp_bg_origin(const char *v)` -- if (csel_ci_eq(v, "auto"))    return CSS_BGS_AUTO; if (csel_ci_eq(v, "cover"))   return CSS_BGS_COVER; if...
-- `interp_bg_attachment` (function) `src/css.c:838` `static int interp_bg_attachment(const char *v)` -- if (csel_ci_eq(v, "border-box"))   return CSS_BGC_BORDER_BOX; if (csel_ci_eq(v, "padding-box"))  return...
-- `interp_isolation` (function) `src/css.c:845` `static int interp_isolation(const char *v)` -- static int interp_bg_origin(const char *v) { if (csel_ci_eq(v, "padding-box"))  return CSS_BGO_PADDING_BOX; if...
-- `interp_contain` (function) `src/css.c:851` `static int interp_contain(const char *v)` -- /* background-attachment: scroll/fixed/local. -1 unknown. static int interp_bg_attachment(const char *v) { if...
-- `interp_content_visibility` (function) `src/css.c:872` `static int interp_content_visibility(const char *v)` -- while (*p == ' ' || *p == '\t') ++p; if (*p == '\0') break; char tok[CSS_TOK_MAX]; size_t k = 0; while (*p != '\0'...
-- `interp_image_rendering` (function) `src/css.c:879` `static int interp_image_rendering(const char *v)` -- else if (csel_ci_eq(tok, "layout")) mask |= CSS_CONTAIN_LAYOUT; else if (csel_ci_eq(tok, "style"))  mask |=...
-- `interp_color_scheme` (function) `src/css.c:886` `static int interp_color_scheme(const char *v)` -- static int interp_content_visibility(const char *v) { if (csel_ci_eq(v, "visible")) return CSS_CV_VISIBLE; if...
-- `interp_accent_color` (function) `src/css.c:904` `static int interp_accent_color(const char *v)` -- const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t') ++p; if (*p == '\0') break; char...
-- `interp_print_color_adjust` (function) `src/css.c:909` `static int interp_print_color_adjust(const char *v)` -- size_t k = 0; while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++; tok[k] = '\0'; if...
-- `interp_forced_color_adjust` (function) `src/css.c:915` `static int interp_forced_color_adjust(const char *v)` -- return -1; } /* accent-color: auto -> CSS_LEN_AUTO; color -> 0xRRGGBB; -1 unknown. static int...
-- `interp_mix_blend_mode` (function) `src/css.c:922` `static int interp_mix_blend_mode(const char *v)` -- /* print-color-adjust: economy/exact. -1 unknown. static int interp_print_color_adjust(const char *v) { if...
-- `interp_object_pos` (function) `src/css.c:945` `static int interp_object_pos(const char *v)` -- object-position: <position> restricted to keywords and percentages (a length would need the free space at paint...
-- `interp_object_fit` (function) `src/css.c:987` `static int interp_object_fit(const char *v)`
-- `interp_list_style_pos` (function) `src/css.c:996` `static int interp_list_style_pos(const char *v)` -- y = swap ? pm[0] : pm[1]; } return CSS_OBJPOS_PACK(x, y); } static int interp_object_fit(const char *v) { if...
-- `interp_font_kerning` (function) `src/css.c:1002` `static int interp_font_kerning(const char *v)` -- if (csel_ci_eq(v, "fill"))        return CSS_OFI_FILL; if (csel_ci_eq(v, "contain"))     return CSS_OFI_CONTAIN; if...
-- `interp_text_rendering` (function) `src/css.c:1009` `static int interp_text_rendering(const char *v)` -- /* list-style-position: inside/outside. -1 unknown. static int interp_list_style_pos(const char *v) { if...
-- `interp_font_stretch` (function) `src/css.c:1017` `static int interp_font_stretch(const char *v)` -- if (csel_ci_eq(v, "auto"))   return CSS_FK_AUTO; if (csel_ci_eq(v, "normal")) return CSS_FK_NORMAL; if...
-- `interp_resize` (function) `src/css.c:1030` `static int interp_resize(const char *v)` -- /* font-stretch: normal/condensed/expanded/etc. -1 unknown. static int interp_font_stretch(const char *v) { if...
-- `interp_scroll_behavior` (function) `src/css.c:1038` `static int interp_scroll_behavior(const char *v)` -- if (csel_ci_eq(v, "semi-expanded"))      return CSS_FS_SEMI_EXPANDED; if (csel_ci_eq(v, "extra-expanded"))...
-- `interp_overscroll_behavior` (function) `src/css.c:1060` `static int interp_overscroll_behavior(const char *v)` -- all, so every one of them behaves exactly like the default -- the same answer as `auto`.
-- `interp_backface_visibility` (function) `src/css.c:1067` `static int interp_backface_visibility(const char *v)` -- if (csel_ci_eq(v, "pan-x") || csel_ci_eq(v, "pan-y") || csel_ci_eq(v, "pan-left") || csel_ci_eq(v, "pan-right") ||...
-- `interp_border_style` (function) `src/css.c:1090` `static int interp_border_style(const char *v)`
-- `interp_bwidth1` (function) `src/css.c:1116` `static int interp_bwidth1(const char *v)`
-- `interp_time_ms` (function) `src/css.c:1125` `static int interp_time_ms(const char *v)` -- Parses a CSS time: "2s" → 2000, "500ms" → 500, "0s" → 0. * Returns -1 on invalid/missing unit.
-- `emit_radius_corner` (function) `src/css.c:1158` `static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)` -- One corner longhand (border-top-left-radius and friends).
-- `interp_bw_tok` (function) `src/css.c:1166` `static int interp_bw_tok(const char *t, int *o)` -- One corner longhand (border-top-left-radius and friends).
-- `interp_bs_tok` (function) `src/css.c:1167` `static int interp_bs_tok(const char *t, int *o)`
-- `interp_bc_tok` (function) `src/css.c:1168` `static int interp_bc_tok(const char *t, int *o)`
-- `interp_outline_style` (function) `src/css.c:1236` `static int interp_outline_style(const char *v)` -- `outline-style: auto` (CSS UI 4 section 3.3) is the UA focus ring.
-- `expand_outline` (function) `src/css.c:1241` `static int expand_outline(const char *val, css_decl *dst, int cap)`
-- `interp_column_count` (function) `src/css.c:1267` `static int interp_column_count(const char *v)` -- `column-count`: a positive <integer>, or `auto`.
-- `interp_column_width` (function) `src/css.c:1279` `static int interp_column_width(const char *v)` -- layout, for the same reason CSS_LEN_MAX lives on the emitter: it is an * anti-DoS policy of the box model, not a...
-- `expand_columns` (function) `src/css.c:1290` `static int expand_columns(const char *val, css_decl *dst, int cap)` -- `columns` shorthand: <'column-width'> || <'column-count'> in either order, one or two tokens.
-- `expand_flex_flow` (function) `src/css.c:1324` `static int expand_flex_flow(const char *val, css_decl *dst, int cap)` -- `flex-flow` shorthand: the direction and the wrap keyword in either order, one or two tokens.
-- `expand_column_rule` (function) `src/css.c:1346` `static int expand_column_rule(const char *val, css_decl *dst, int cap)` -- `column-rule` shorthand: same <line-width> || <line-style> || <color> grammar * as `border`/`outline`, so it reuses...
-- `interp_filter_pct` (function) `src/css.c:1358` `static int interp_filter_pct(const char *s)` -- Parse a percentage (or 0..1 float) from inside a filter function's parens. * Returns 0..100 (clamped), -1 on error.
-- `interp_filter_deg` (function) `src/css.c:1372` `static int interp_filter_deg(const char *s)` -- Parse a degrees value (e.g. "45deg") from inside a filter function's parens.
-- `filter_paren_body` (function) `src/css.c:1387` `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)` -- Helper: extract content inside filter(...) parens.
-- `item` (function) `src/css.c:1400` `* timing list takes its first item (CSS Animations/Transitions 1: with one
- * transition/animatio...`
-- `easing_steps` (function) `src/css.c:1471` `static int easing_steps(const char *tok)`
-- `anim_easing_iv` (function) `src/css.c:1493` `static int anim_easing_iv(const char *tok)`
-- `is_anim_ident` (function) `src/css.c:1510` `static int is_anim_ident(const char *tok)` -- True when tok is a CSS <custom-ident> (the shape an animation-name takes): starts with a letter, underscore, hyphen...
-- `expand_animation` (function) `src/css.c:1526` `static int expand_animation(const char *val, css_decl *dst, int cap)` -- animation shorthand (CSS Animations 1 6.2): every longhand in any order in the first top-level comma item.
-- `order` (function) `src/css.c:1752` `* declaration order (dx, dy, optional blur >= 0);`
-- `blur` (function) `src/css.c:1787` `* consumes ONLY blur(Npx);`
-- `expand_backdrop_filter` (function) `src/css.c:1790` `static int expand_backdrop_filter(const char *val, css_decl *dst, int cap)` -- backdrop-filter / -webkit-backdrop-filter (2026-07-19, glassmorphism v1): same lax space-separated function-list...
-- `axis` (function) `src/css.c:1824` `* bare center displaces it to the free axis (`center right` = x:right, y:center).
- * Any other co...`
-- `expand_bg_size` (function) `src/css.c:1940` `static int expand_bg_size(const char *val, css_decl *dst, int cap)` -- background-size (CSS Backgrounds 3 section 3.9): either a keyword (cover/contain) or one-to-two...
-- `emit_content` (function) `src/css.c:1980` `static int emit_content(css_decl *dst, int cap, const char *str,
-                        char (*c...` -- h = (n == 2) ? comp_px[1] : CSS_LEN_AUTO; hp = (n == 2) ? comp_pm[1] : 0; /* The bare keyword keeps its own code; an...
-- `cap` (function) `src/css.c:2056` `* string past the cap (emit_content): a conforming declaration must not * count as a discard just because an icon...`
-- `expand_counter_decls` (function) `src/css.c:2087` `static int expand_counter_decls(const char *prop, const char *val, css_decl *dst, int cap,
-      ...` -- counter-reset / counter-increment: validated here (hostile text), stored VERBATIM in the content pool and re-parsed...
-- `expand_content` (function) `src/css.c:2105` `static int expand_content(const char *val, css_decl *dst, int cap,
-                          char...` -- R8: content property.
-- `empty` (function) `src/css.c:2109` `* the slot with an explicit empty (ival -1) instead of dropping, or a * lower-priority string would leak through and...`
-- `expand_grid_areas` (function) `src/css.c:2156` `static int expand_grid_areas(const char *val, css_decl *dst, int cap,
-                           ...` -- grid-template-areas (CSS Grid 1 7.3): the value is a list of quoted strings, one per grid row.
-- `expand_grid_area_lines` (function) `src/css.c:2184` `static int expand_grid_area_lines(const char *val, css_decl *dst, int cap)` -- grid-area on an ITEM.
-- `expand_grid_line` (function) `src/css.c:2209` `static int expand_grid_line(const char *val, css_decl *dst, int cap, int p_start, int p_end)` -- if (!fx_grid_line_side(part, &side[k])) return 0; if (slash == NULL) break; p = slash + 1; if (k == 3) return 0...
-- `expand_grid_area` (function) `src/css.c:2218` `static int expand_grid_area(const char *val, css_decl *dst, int cap)`
-- `expand_grid_template` (function) `src/css.c:2257` `static int expand_grid_template(const char *val, css_decl *dst, int cap,
-                        ...` -- grid-template: <rows> / <columns>            e.g.
-- `sel_list_comma` (function) `src/css.c:2302` `static size_t sel_list_comma(const char *s, size_t i, size_t end);`
-- `box_shadow_layer` (function) `src/css.c:2309` `static int box_shadow_layer(const char *val, size_t len, int out[6])` -- One box-shadow layer: up to four lengths in order dx, dy, blur, spread, an optional color, and an optional `inset`...
-- `declaration` (function) `src/css.c:2345` `* invalid layer drops the whole declaration (fail closed). `none` is an explicit
- * no-shadow. ur...`
-- `interp_flex_factor` (function) `src/css.c:2387` `static int interp_flex_factor(const char *v)` -- flex-grow / flex-shrink: a non-negative number stored x100 (0.5 -> 50), clamped to * [0, CSS_FLEX_FACTOR_MAX].
-- `interp_flex_basis` (function) `src/css.c:2397` `static int interp_flex_basis(const char *v, int *out)` -- flex-basis: `auto`/`content` -> CSS_LEN_AUTO; a non-negative length -> px; a percentage as per-mille encoded...
-- `column` (function) `src/css.c:2410` `* column (`flex: 1 1 0%`);`
-- `expand_flex` (function) `src/css.c:2431` `static int expand_flex(const char *val, css_decl *dst, int cap)` -- flex shorthand -> the three contiguous P_FLEX_GROW/SHRINK/BASIS slots.
-- `interp_align_kw` (function) `src/css.c:2476` `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)` -- align-items / align-self / align-content / justify-items keyword. allow_auto is for * align-self; allow_dist...
-- `interp_flex_direction` (function) `src/css.c:2500` `static int interp_flex_direction(const char *v)`
-- `interp_box_orient` (function) `src/css.c:2518` `static int interp_box_orient(const char *v)` -- 2009 flexbox `box-orient` axis names onto `css_flex_direction`.
-- `interp_flex_line_pack` (function) `src/css.c:2545` `static int interp_flex_line_pack(const char *v)` -- `flex-line-pack` (2012 align-content): the `flex-pack` vocabulary plus `stretch`, mapped onto the css_align_kw slots...
-- `interp_flex_wrap` (function) `src/css.c:2555` `static int interp_flex_wrap(const char *v)`
-- `interp_grid_flow` (function) `src/css.c:2563` `static int interp_grid_flow(const char *v)` -- if (csel_ci_eq(v, "justify")) return CSS_AK_SPACE_BETWEEN; if (csel_ci_eq(v, "distribute")) return...
-- `copy_trim` (function) `src/css.c:2581` `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` -- Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from * both ends.
-- `strip_important` (function) `src/css.c:2594` `static int strip_important(char *val)` -- Strips a trailing "!important" (case-insensitive, with optional whitespace before '!' and between '!' and the...
-- `var` (function) `src/css.c:2619` `* cvr_resolve then substitutes var() references when a declaration's value is
- * interpreted (par...`
-- `has_double_dash` (function) `src/css.c:2641` `static int has_double_dash(const char *p, size_t n)` -- True when the caller's root matcher (css_media.scope_match) says the selector s[a,b) matches the document's <html>...
-- `subject_may_be_root` (function) `src/css.c:2650` `static int subject_may_be_root(const char *s, size_t a, size_t b, const char *root_scope)`
-- `selector_matches_root` (function) `src/css.c:2698` `static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m,
-         ...`
-- `tr_mul` (function) `src/css.c:2827` `static void tr_mul(double out[6], const double l[6], const double r[6])` -- Right-multiply 2D affine matrices: out = l * r (r applies first).
-- `matrix` (function) `src/css.c:2840` `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands...`
-- `tr_decompose` (function) `src/css.c:2847` `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
-                        in...` -- QR-decompose an affine matrix into whole px/percent/degree slots.
-- `parse_numlist` (function) `src/css.c:2870` `static int parse_numlist(const char *p, size_t argn, double *m6, int count)` -- Parse matrix(a,b,c,d,e,f): six comma-separated unitless numbers.
-- `parse_matrix6` (function) `src/css.c:2893` `static int parse_matrix6(const char *p, size_t argn, double m6[6])`
-- `split_top_args` (function) `src/css.c:2906` `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
-               ...` -- Split a top-level comma list honouring paren depth.
-- `LIST` (function) `src/css.c:2929` `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...`
-- `translate3d` (function) `src/css.c:2936` `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
- * renders z as nothing,...`
-- `translateX` (function) `src/css.c:3247` `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...`
-- `parse_angle_deg` (function) `src/css.c:3251` `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);`
-- `expand_transform_list` (function) `src/css.c:3254` `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);`
-- `translateZ` (function) `src/css.c:3256` `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);`
-- `function` (function) `src/css.c:3258` `* transform function (perspective/rotate3d/...), or unparseable syntax,
- * rejects the WHOLE decl...`
-- `origin_component` (function) `src/css.c:3459` `static int origin_component(const char *tok, int axis, int *out)` -- One transform-origin component: keyword (axis-checked), a percent, or a bare zero. axis: 0 = x (left/right valid), 1...
-- `expand_transform_origin` (function) `src/css.c:3485` `static int expand_transform_origin(const char *val, css_decl *dst, int cap)` -- transform-origin (M1.2c): 1-2 values; keywords and percents only (px lengths fail closed -- the parser has no box...
-- `expand_gap` (function) `src/css.c:3517` `static int expand_gap(const char *val, css_decl *dst, int cap)` -- gap / grid-gap (2026-07-10): one value keeps the pre-existing semantics (both axes; row-gap stays unset and falls...
-- `shorthand` (function) `src/css.c:3541` `* An uninterpretable token drops the whole shorthand (fail closed). */
-static int expand_place(co...`
-- `property` (function) `src/css.c:3576` `* error drops the whole property (fail closed). */
-static int expand_clip(const char *val, css_de...`
-- `expand_clip_path` (function) `src/css.c:3620` `static int expand_clip_path(const char *val, css_decl *dst, int cap)` -- clip-path (CSS Masking 1 3).
-- `font_list_alias` (function) `src/css.c:3667` `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)` -- Copies the normalized family list `ls` into out, replacing every name that matches a local()-only @font-face of the...
-- `font_list_norm` (function) `src/css.c:3701` `static int font_list_norm(const char *val, char *out, size_t cap)`
-- `writing` (function) `src/css.c:3745` `* Wide keywords claim BOTH slots without writing (inheritance then flows, as
- * the tail does for...`
-- `shorthand` (function) `src/css.c:3787` `* generic bucket keeps the rest of the shorthand (same net effect as the
- * font-family longhand ...`
-- `caller` (function) `src/css.c:3867` `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...`
-- `multiplying` (function) `src/css.c:3884` `* instead of the two multiplying (no page measured needs both on one element).
- * A third (z) com...`
-- `is_inert_prop` (function) `src/css.c:3937` `static int is_inert_prop(const char *prop)` -- Properties that are valid CSS but change nothing in a static, non-interactive render: scrolling affordances...
-- `interpret_prop_dispatch` (function) `src/css.c:3960` `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
-   ...`
-- `slots` (function) `src/css.c:4150` `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...`
-- `sentinel` (function) `src/css.c:4290` `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);`
-- `here` (function) `src/css.c:4503` `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);`
-- `wide_claim` (function) `src/css.c:4763` `static int wide_claim(const char *prop, css_decl *dst, int cap,
-                      char (*urlt...` -- SHORTHAND it applies to every longhand the shorthand expands to.
-- `interpret_prop` (function) `src/css.c:4803` `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
-            ...` -- The two value-level rules that hold for EVERY property, applied once around the dispatch so no per-property branch...
-- `drop_copy_text` (function) `src/css.c:4832` `static void drop_copy_text(char *dst, size_t cap, const char *src)` -- Copies hostile CSS text into a fixed report buffer: bounded, NUL-terminated, truncated with a visible "..." marker...
-- `drop_record` (function) `src/css.c:4851` `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)` -- Records one dropped declaration, coalescing by (property, cause).
-- `raw_add` (function) `src/css.c:4877` `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)` -- Interprets one declaration span s[0,n) into dst (up to cap).
-- `interpret_decls` (function) `src/css.c:4996` `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
-               ...` -- Splits a ';'-separated declaration block into dst (up to cap).
-- `sheet_pools_reserve` (function) `src/css.c:5054` `static void sheet_pools_reserve(css_sheet *sh)`
-- `add_rule` (function) `src/css.c:5060` `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
-                     siz...` -- while (nc - n < CSS_POOL_HEADROOM && nc < hard_cap) nc *= 2; if (nc > hard_cap) nc = hard_cap; char...
-- `skip_at_rule` (function) `src/css.c:5174` `static size_t skip_at_rule(const char *s, size_t i, size_t n)` -- Skips an @-rule starting at s[i] ('@'): to the terminating ';' or past a * brace-balanced block.
-- `block_end` (function) `src/css.c:5190` `static size_t block_end(const char *s, size_t open, size_t n)` -- Index just past the '}' that closes the block whose '{' is at s[open]. n if * unbalanced.
-- `at_is_media` (function) `src/css.c:5212` `static int at_is_media(const char *s, size_t i, size_t n)` -- A media query list s[a,b), evaluated by the Media Queries 4 module against the render width (the only real datum...
-- `at_keyword` (function) `src/css.c:5223` `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` -- True when s[i] ('@') begins the at-keyword kw (lowercase, without '@') followed * by a delimiter.
-- `csel_substr` (function) `src/css.c:5245` `return known && csel_substr(val, "var(", 1);`
-- `supports_selector_ok` (function) `src/css.c:5248` `static int supports_selector_ok(void *ctx, const char *sel)`
-- `supports_matches` (function) `src/css.c:5257` `static int supports_matches(const char *s, size_t a, size_t b)`
-- `cq_register` (function) `src/css.c:5315` `static int cq_register(css_sheet *sh, const char *text, size_t len, int max_w)` -- Records an @container prelude under the condition the parser is inside and returns * its 1-based id, or 0 when it...
-- `cq_holds` (function) `src/css.c:5337` `static int cq_holds(const css_sheet *sheet, int id, const cmq_container *scope)` -- Every @container condition from id outward holds for an element whose ancestor containers are `scope`.
-- `layer_register` (function) `src/css.c:5351` `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,
-                     ...` -- Registers the layer name s[a,b) (trimmed; empty = anonymous) nested under the sheet's current layer, and returns its...
-- `collect_custom_props_scoped` (function) `src/css.c:5394` `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
-                ...` -- Structure-aware custom-property collection (see the block comment above cvr_collect_decls): walks s[start,end) with...
-- `parse_block` (function) `src/css.c:5476` `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
-                 ...` -- Parses rules in s[start,end).
-- `download` (function) `src/css.c:5653` `* the download (spec/webfont.md b3b). An empty src_url
-                     * simply never resolv...`
-- `rem_ident_ch` (function) `src/css.c:5785` `static int rem_ident_ch(char c)` -- True for a character that continues a CSS identifier, so a `rem` glued to one is * part of a name and not a unit.
-- `rem_num_starts_after` (function) `src/css.c:5793` `static int rem_num_starts_after(char prev)` -- True when a number may START at a character preceded by prev -- i.e. prev cannot be part of a longer name or number.
-- `rem_emit_px` (function) `src/css.c:5803` `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` -- Appends the px equivalent of num rem.
-- `len_unit_px` (function) `src/css.c:5833` `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)` -- px per unit for a unit identifier u[0,len) under c, or 0 when c leaves it alone.
-- `len_rebase` (function) `src/css.c:5863` `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)` -- width family) in s[0,n) into `<number x scale>px`.
-- `rem_rebase` (function) `src/css.c:5929` `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
-- `sheet_index` (function) `src/css.c:5937` `static void sheet_index(css_sheet *sh)` -- Rewinds a sheet to empty while keeping every allocation, so the text can be * re-parsed in place.
-- `sheet_rewind` (function) `src/css.c:5942` `static void sheet_rewind(css_sheet *sh)`
-- `sheet_root_font_px` (function) `src/css.c:5989` `static double sheet_root_font_px(const css_sheet *sh)` -- The root element's font-size in px, as the cascade resolves it (16px when the sheet leaves the root alone).
-- `strip_comments` (function) `src/css.c:5997` `static char *strip_comments(const char *text, size_t len, size_t *outlen)` -- Removes C-style block comments into a fresh NUL-terminated buffer (each comment * becomes one space).
-- `var` (function) `src/css.c:6007` `* collected and forty var() declarations -- font sizes, widths, radii, the
-     * whole theme -- ...`
-- `css_parse` (function) `src/css.c:6032` `css_status css_parse(const char *text, size_t len, css_sheet **out)`
-- `css_parse_media` (function) `src/css.c:6036` `css_status css_parse_media(const char *text, size_t len, const css_media *media,
-                ...`
-- `css_parse_scoped` (function) `src/css.c:6041` `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
-               ...`
-- `css_parse_logged` (function) `src/css.c:6046` `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
-               ...`
-- `consumer` (function) `src/css.c:6080` `* consumer (shorthands, calc(), var() values) gets it with no context
-         * threaded through...`
-- `css_free` (function) `src/css.c:6138` `void css_free(css_sheet *s)`
-- `content_attr_of` (function) `src/css.c:6163` `static const char *content_attr_of(const css_element *el, const char *name)` -- Looks up an attribute value on the element being styled (names are stored * lowercased by css_chain; the query is...
-- `apply_decl` (function) `src/css.c:6172` `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
-              ...`
-- `page_view` (function) `src/css.c:6179` `* the generated text reaches page_view (which materialises it as a synthetic * run);`
-- `parent` (function) `src/css.c:6212` `* property from the parent (`inherit`), and an unset non-inherited one
-         * stands at its i...`
-- `css_ua_heading_em` (function) `src/css.c:6667` `double css_ua_heading_em(int level)`
-- `css_computed_font_size_for_tag` (function) `src/css.c:6672` `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)`
-- `computed_font_size` (function) `src/css.c:6680` `static double computed_font_size(const css_style *o, const css_element *el)`
-- `cand_cmp` (function) `src/css.c:6697` `static int cand_cmp(const void *pa, const void *pb)`
-- `apply_var_source` (function) `src/css.c:6762` `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
-        ...` -- Re-resolves one var() source ("prop\0value") against the element's scope and * applies what it interprets to...
-- `apply_rule` (function) `src/css.c:6789` `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
-              ...` -- Applies one matched rule. es == NULL: the page-global meaning of every var() (markers skipped, their spans applied).
-- `fold_font_relative` (function) `src/css.c:6827` `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
-                         ...` -- computed font-size.
-- `css_resolve_el` (function) `src/css.c:6858` `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
-                         ...`
-- `css_resolve_el_ex` (function) `src/css.c:6867` `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
-                      ...`
-- `pseudo_of` (function) `src/css.c:6874` `static int pseudo_of(int which)` -- return css_resolve_el_ex(sheet, el, inline_style, inline_len, NULL); } static css_style resolve_core(const css_sheet...
-- `css_resolve_pseudo` (function) `src/css.c:6883` `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
-- `resolve_core` (function) `src/css.c:6894` `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
-                    ...` -- The cascade. want_pseudo 0 resolves the ELEMENT (a ::before/::after rule only hands it `content`)...
-- `css_resolve` (function) `src/css.c:7156` `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
-                  ...`
-- `NULL` (function) `src/css.c:7180` `* Sheet can be NULL (inline style, no @keyframes). */
-void css_resolve_anim_keyframes(css_style *...`
-- `css_font_face_count` (function) `src/css.c:7212` `size_t css_font_face_count(const css_sheet *sheet)`
-- `css_font_face_at` (function) `src/css.c:7216` `int css_font_face_at(const css_sheet *sheet, size_t i,
-                     char *family, size_t ...`
-- `css_parse_inline` (function) `src/css.c:7226` `css_style css_parse_inline(const char *style, size_t len)`
-- `css_sheet_uses_containers` (function) `src/css.c:7230` `int css_sheet_uses_containers(const css_sheet *sheet)`
-- `css_sheet_uses_counters` (function) `src/css.c:7234` `int css_sheet_uses_counters(const css_sheet *sheet)`
-
-## src/css_atrule.c
-Depends on: `include/css_atrule.h`, `include/css_select.h`
-- `skip_ws` (function) `src/css_atrule.c:17` `static size_t skip_ws(const char *s, size_t i, size_t b)`
-- `keyword_at` (function) `src/css_atrule.c:23` `static int keyword_at(const char *s, size_t i, size_t b, const char *kw)` -- Scratch size for one declaration or selector handed to the caller.
-- `close_paren` (function) `src/css_atrule.c:33` `static size_t close_paren(const char *s, size_t open, size_t b)` -- Index of the ')' matching the '(' at s[open], or b when unbalanced.
-- `copy_trimmed` (function) `src/css_atrule.c:54` `static int copy_trimmed(const char *s, size_t a, size_t b, char *dst, size_t cap, int lower)` -- Copies s[a,b) trimmed into dst (cap bytes, NUL-terminated); 0 if it does not fit * or is empty. lower != 0...
-- `eval_declaration` (function) `src/css_atrule.c:68` `static int eval_declaration(const char *s, size_t a, size_t b, const car_ops *ops, int *ok)` -- True when s[a,b) (inside a pair of parens) is a declaration `prop: value` * rather than a nested condition.
-- `eval_in_parens` (function) `src/css_atrule.c:85` `static int eval_in_parens(const char *s, size_t *i, size_t b, const car_ops *ops,
-               ...` -- while (i < b && (csel_ident_ch(s[i]) || s[i] == '-')) ++i; if (i == n0) { *ok = 0; return 0; } size_t n1 = i; i =...
-- `eval_condition` (function) `src/css_atrule.c:114` `static int eval_condition(const char *s, size_t a, size_t b, const car_ops *ops,
-                ...`
-- `car_supports` (function) `src/css_atrule.c:141` `int car_supports(const char *s, size_t a, size_t b, const car_ops *ops)`
-- `car_layer_rank` (function) `src/css_atrule.c:148` `int car_layer_rank(car_layers *L, const char *name, size_t len)`
-- `car_effective_spec` (function) `src/css_atrule.c:171` `int car_effective_spec(int spec, int layer, int important)`
+- `cx_forms_stacking_context` (function) `src/compositor.c:18` `int cx_forms_stacking_context(const cx_style *s)`
+- `cx_box_layer` (function) `src/compositor.c:36` `cx_layer cx_box_layer(const cx_style *s)`
+- `eff_z` (function) `src/compositor.c:52` `static int eff_z(const cx_item *it)` -- Not a stacking context: a positioned box with z:auto still paints in the * positioned/zero layer (CSS 2.1 App E...
+- `cx_item_compare` (function) `src/compositor.c:56` `int cx_item_compare(const cx_item *a, const cx_item *b)`
+- `cx_sort` (function) `src/compositor.c:72` `void cx_sort(cx_item *items, size_t n)` -- Stable insertion sort: n is bounded by the caller (BT_MAX_POSITIONED), so O(n^2) is fine, and stability keeps...
+- `cx_ink_reach` (function) `src/compositor.c:87` `double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset)`
+- `cx_span_visible` (function) `src/compositor.c:104` `int cx_span_visible(double top, double h, double reach, double view_top, double view_h)`
 
 
 Next: [API_p7.md](API_p7.md)

@@ -70,6 +70,17 @@
   - `main` (function, line 67) `int main(int argc, char **argv)`
   - `_POSIX_C_SOURCE` (macro, line 15) `#define _POSIX_C_SOURCE`
 
+## tools/guiscroll.py
+- Doc: guiscroll -- what one frame costs in the REAL Freedom window while the user scrolls.  guitime...
+- Layer: utility
+- Language: py
+- Symbols:
+  - `phase_ms` (function, line 34) `def phase_ms(line, phase)`
+  - `one_page` (function, line 44) `def one_page(binary, page, env, prof, tmp, notches)`
+  - `main` (function, line 85) `def main()`
+  - `procs_display` (function, line 134) `def procs_display(procs)`
+- Depends on: `tools/guitime.py`
+
 ## tools/guitime.py
 - Doc: guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle".
 - Layer: utility
@@ -78,6 +89,7 @@
   - `start_display` (function, line 34) `def start_display(workdir)`
   - `one_run` (function, line 65) `def one_run(binary, page, env, hosts_dir, tmp)`
   - `main` (function, line 94) `def main()`
+- Imported by: `tools/guiscroll.py`
 
 ## tools/mutate.py
 - Doc: mutate -- compile-time mutation testing for the CMocka suites.

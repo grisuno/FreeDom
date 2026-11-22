@@ -1,12 +1,12 @@
 # `src/text_shape.c`
 
-> Source: [src/text_shape.c:1](../../src/text_shape.c#L1) | language `c` | coverage 47.7% | [API index](../index.md)
+> Source: [src/text_shape.c:1](../../src/text_shape.c#L1) | language `c` | coverage 48.9% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`tsh_entry`](#tsh_entry), [`tsh_web`](#tsh_web), [`tsh_lfam`](#tsh_lfam), [`tsh_llist`](#tsh_llist), [`tsh_fb`](#tsh_fb), [`tsh_fb_cp`](#tsh_fb_cp), [`tsh_cover_ctx`](#tsh_cover_ctx), [`tsh_measure_slot`](#tsh_measure_slot)
 - **Type Aliases:** [`loaded`](#loaded), [`used`](#used), [`name`](#name), [`file`](#file)
-- **Functions:** [`characters`](#characters), [`slice`](#slice), [`blob`](#blob), [`tsh_webfont_register`](#tsh_webfont_register), [`tsh_webfont_clear`](#tsh_webfont_clear), [`tsh_family_is_generic`](#tsh_family_is_generic), [`tsh_pick_from_list`](#tsh_pick_from_list), [`tsh_pick_family`](#tsh_pick_family), [`tsh_local_handle`](#tsh_local_handle), [`tsh_ready`](#tsh_ready), [`tsh_shape`](#tsh_shape), [`tsh_segment`](#tsh_segment), [`tsh_measure`](#tsh_measure), [`tsh_draw`](#tsh_draw), [`tsh_face`](#tsh_face), [`tsh_shutdown`](#tsh_shutdown)
+- **Functions:** [`characters`](#characters), [`slice`](#slice), [`blob`](#blob), [`tsh_face_generation`](#tsh_face_generation), [`tsh_webfont_register`](#tsh_webfont_register), [`tsh_webfont_clear`](#tsh_webfont_clear), [`tsh_family_is_generic`](#tsh_family_is_generic), [`tsh_pick_from_list`](#tsh_pick_from_list), [`tsh_pick_family`](#tsh_pick_family), [`tsh_local_handle`](#tsh_local_handle), [`tsh_ready`](#tsh_ready), [`tsh_shape`](#tsh_shape), [`tsh_segment`](#tsh_segment), [`tsh_measure`](#tsh_measure), [`tsh_draw`](#tsh_draw), [`tsh_face`](#tsh_face), [`tsh_shutdown`](#tsh_shutdown)
 - **Macros:** [`_POSIX_C_SOURCE`](#_posix_c_source), [`TSH_MAX_FONT_BYTES`](#tsh_max_font_bytes), [`TSH_CACHE_SLOTS`](#tsh_cache_slots), [`TSH_WEB_SLOTS`](#tsh_web_slots), [`TSH_WGHT_REGULAR`](#tsh_wght_regular), [`TSH_WGHT_BOLD`](#tsh_wght_bold), [`TSH_VAR_AXES_MAX`](#tsh_var_axes_max), [`TSH_SUBS_MAX`](#tsh_subs_max), [`TSH_BLANK_GLYPH`](#tsh_blank_glyph), [`TSH_FB_SLOTS`](#tsh_fb_slots), [`TSH_FB_BLOCKS`](#tsh_fb_blocks), [`TSH_FB_CP_SLOTS`](#tsh_fb_cp_slots), [`TSH_MAX_RUNS`](#tsh_max_runs), [`TSH_MEASURE_SLOTS`](#tsh_measure_slots), [`TSH_MEASURE_TEXT_MAX`](#tsh_measure_text_max)
 
 ## Type Diagram
@@ -96,7 +96,7 @@ typedef struct tsh_web
 
 ### `tsh_lfam`
 
-`struct` | [src/text_shape.c:586](../../src/text_shape.c#L586)
+`struct` | [src/text_shape.c:588](../../src/text_shape.c#L588)
 
 ```c
 typedef struct tsh_lfam
@@ -108,7 +108,7 @@ typedef struct tsh_lfam
 
 ### `tsh_llist`
 
-`struct` | [src/text_shape.c:592](../../src/text_shape.c#L592)
+`struct` | [src/text_shape.c:594](../../src/text_shape.c#L594)
 
 ```c
 typedef struct tsh_llist
@@ -120,7 +120,7 @@ typedef struct tsh_llist
 
 ### `tsh_fb`
 
-`struct` | [src/text_shape.c:788](../../src/text_shape.c#L788)
+`struct` | [src/text_shape.c:790](../../src/text_shape.c#L790)
 
 ```c
 typedef struct tsh_fb
@@ -132,7 +132,7 @@ typedef struct tsh_fb
 
 ### `tsh_fb_cp`
 
-`struct` | [src/text_shape.c:804](../../src/text_shape.c#L804)
+`struct` | [src/text_shape.c:806](../../src/text_shape.c#L806)
 
 ```c
 typedef struct
@@ -148,7 +148,7 @@ The block cache above only remembers which face a 256-code-point block asked for
 
 ### `tsh_cover_ctx`
 
-`struct` | [src/text_shape.c:932](../../src/text_shape.c#L932)
+`struct` | [src/text_shape.c:934](../../src/text_shape.c#L934)
 
 ```c
 typedef struct tsh_cover_ctx
@@ -160,7 +160,7 @@ typedef struct tsh_cover_ctx
 
 ### `tsh_measure_slot`
 
-`struct` | [src/text_shape.c:1063](../../src/text_shape.c#L1063)
+`struct` | [src/text_shape.c:1065](../../src/text_shape.c#L1065)
 
 ```c
 typedef struct
@@ -208,7 +208,7 @@ Memory only, freed by tsh_webfont_clear (navigation) and tsh_shutdown. Never the
 
 ### `name`
 
-`type_alias` | [src/text_shape.c:585](../../src/text_shape.c#L585)
+`type_alias` | [src/text_shape.c:587](../../src/text_shape.c#L587)
 
 ```c
 typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];
@@ -220,7 +220,7 @@ typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];
 
 ### `file`
 
-`type_alias` | [src/text_shape.c:787](../../src/text_shape.c#L787)
+`type_alias` | [src/text_shape.c:789](../../src/text_shape.c#L789)
 
 ```c
 typedef struct tsh_fb { char file[512];
@@ -297,11 +297,31 @@ The block cache maps (code point >> 8, bold) to a slot + 1, or -1 * for "no inst
 
 ---
 
+<a id="tsh_face_generation"></a>
+
+### `tsh_face_generation`
+
+`function` | [src/text_shape.c:371](../../src/text_shape.c#L371)
+
+```c
+unsigned tsh_face_generation(void)
+```
+
+Advances whenever a face text is measured with may have been added, freed or replaced (a webfont registered or cleared, the local family lists or fallback faces dropped): a measure taken under an older generation may no longer hold.
+
+A cache of anything measured (the window's layout cache, spec/exact_key.md) keys on it. Never 0.
+
+**Returns:** `unsigned`
+
+> **Inherited:** Documentation from [`tsh_face_generation`](#tsh_face_generation) (include/text_shape.h:122).
+
+---
+
 <a id="tsh_webfont_register"></a>
 
 ### `tsh_webfont_register`
 
-`function` | [src/text_shape.c:371](../../src/text_shape.c#L371)
+`function` | [src/text_shape.c:373](../../src/text_shape.c#L373)
 
 ```c
 int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic)
@@ -333,7 +353,7 @@ Re-registering a key replaces it. Returns 0 on success, -1 fail-closed (NULL/emp
 
 ### `tsh_webfont_clear`
 
-`function` | [src/text_shape.c:428](../../src/text_shape.c#L428)
+`function` | [src/text_shape.c:430](../../src/text_shape.c#L430)
 
 ```c
 void tsh_webfont_clear(void)
@@ -343,7 +363,7 @@ Drops every registered webfont (document teardown / navigation).
 
 Idempotent, NULL-safe by construction (no args). tsh_shutdown also clears the table.
 
-> **Inherited:** Documentation from [`tsh_webfont_clear`](#tsh_webfont_clear) (include/text_shape.h:120).
+> **Inherited:** Documentation from [`tsh_webfont_clear`](#tsh_webfont_clear) (include/text_shape.h:126).
 
 *Called by:* [`tsh_shutdown`](#tsh_shutdown)
 
@@ -353,7 +373,7 @@ Idempotent, NULL-safe by construction (no args). tsh_shutdown also clears the ta
 
 ### `tsh_family_is_generic`
 
-`function` | [src/text_shape.c:468](../../src/text_shape.c#L468)
+`function` | [src/text_shape.c:470](../../src/text_shape.c#L470)
 
 ```c
 int tsh_family_is_generic(const char *name)
@@ -381,7 +401,7 @@ Pure.
 
 ### `tsh_pick_from_list`
 
-`function` | [src/text_shape.c:480](../../src/text_shape.c#L480)
+`function` | [src/text_shape.c:482](../../src/text_shape.c#L482)
 
 ```c
 int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx, char *out, size_t cap)
@@ -409,7 +429,7 @@ int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx, c
 
 ### `tsh_pick_family`
 
-`function` `const` | [src/text_shape.c:501](../../src/text_shape.c#L501)
+`function` `const` | [src/text_shape.c:503](../../src/text_shape.c#L503)
 
 ```c
 const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int (*installed)(const char *name, void *ctx), void *ctx)
@@ -440,7 +460,7 @@ Returns the chosen name or NULL. Pure (installed is injected).
 
 ### `tsh_local_handle`
 
-`function` | [src/text_shape.c:621](../../src/text_shape.c#L621)
+`function` | [src/text_shape.c:623](../../src/text_shape.c#L623)
 
 ```c
 int tsh_local_handle(const char *list)
@@ -468,7 +488,7 @@ Trusted side only.
 
 ### `tsh_ready`
 
-`function` | [src/text_shape.c:672](../../src/text_shape.c#L672)
+`function` | [src/text_shape.c:674](../../src/text_shape.c#L674)
 
 ```c
 int tsh_ready(void)
@@ -488,7 +508,7 @@ int tsh_ready(void)
 
 ### `tsh_shape`
 
-`function` | [src/text_shape.c:677](../../src/text_shape.c#L677)
+`function` | [src/text_shape.c:679](../../src/text_shape.c#L679)
 
 ```c
 tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len, cairo_glyph_t *out, size_t cap, size_t *out_n, double *out_adv)
@@ -515,7 +535,7 @@ tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
 
 ### `tsh_segment`
 
-`function` | [src/text_shape.c:759](../../src/text_shape.c#L759)
+`function` | [src/text_shape.c:761](../../src/text_shape.c#L761)
 
 ```c
 int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx, tsh_run *runs, size_t cap)
@@ -542,7 +562,7 @@ int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx, tsh
 
 ### `tsh_measure`
 
-`function` | [src/text_shape.c:1073](../../src/text_shape.c#L1073)
+`function` | [src/text_shape.c:1075](../../src/text_shape.c#L1075)
 
 ```c
 double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)
@@ -571,7 +591,7 @@ Returns < 0.0 on any failure so the caller can fall back to the toy-API measurem
 
 ### `tsh_draw`
 
-`function` | [src/text_shape.c:1108](../../src/text_shape.c#L1108)
+`function` | [src/text_shape.c:1110](../../src/text_shape.c#L1110)
 
 ```c
 tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px, double x, double baseline, const char *text, size_t len)
@@ -597,7 +617,7 @@ tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px, double x, double 
 
 ### `tsh_face`
 
-`function` | [src/text_shape.c:1115](../../src/text_shape.c#L1115)
+`function` | [src/text_shape.c:1117](../../src/text_shape.c#L1117)
 
 ```c
 cairo_font_face_t *tsh_face(const tsh_font *f)
@@ -615,7 +635,7 @@ Borrowed: owned by the cache, valid until tsh_shutdown / tsh_webfont_clear. The 
 
 **Returns:** `cairo_font_face_t *`
 
-> **Inherited:** Documentation from [`tsh_face`](#tsh_face) (include/text_shape.h:127).
+> **Inherited:** Documentation from [`tsh_face`](#tsh_face) (include/text_shape.h:133).
 
 ---
 
@@ -623,7 +643,7 @@ Borrowed: owned by the cache, valid until tsh_shutdown / tsh_webfont_clear. The 
 
 ### `tsh_shutdown`
 
-`function` | [src/text_shape.c:1121](../../src/text_shape.c#L1121)
+`function` | [src/text_shape.c:1123](../../src/text_shape.c#L1123)
 
 ```c
 void tsh_shutdown(void)
@@ -631,7 +651,7 @@ void tsh_shutdown(void)
 
 Releases cached faces / blobs / FreeType library (leak hygiene; tests).
 
-> **Inherited:** Documentation from [`tsh_shutdown`](#tsh_shutdown) (include/text_shape.h:143).
+> **Inherited:** Documentation from [`tsh_shutdown`](#tsh_shutdown) (include/text_shape.h:149).
 
 *Calls:* [`tsh_webfont_clear`](#tsh_webfont_clear)
 
@@ -737,7 +757,7 @@ Weights a variable face is instanced at (spec/webfont.md): the regular and the b
 
 ### `TSH_SUBS_MAX`
 
-`macro` | [src/text_shape.c:528](../../src/text_shape.c#L528)
+`macro` | [src/text_shape.c:530](../../src/text_shape.c#L530)
 
 ```c
 #define TSH_SUBS_MAX
@@ -749,7 +769,7 @@ Weights a variable face is instanced at (spec/webfont.md): the regular and the b
 
 ### `TSH_BLANK_GLYPH`
 
-`macro` | [src/text_shape.c:743](../../src/text_shape.c#L743)
+`macro` | [src/text_shape.c:745](../../src/text_shape.c#L745)
 
 ```c
 #define TSH_BLANK_GLYPH
@@ -761,7 +781,7 @@ Weights a variable face is instanced at (spec/webfont.md): the regular and the b
 
 ### `TSH_FB_SLOTS`
 
-`macro` | [src/text_shape.c:785](../../src/text_shape.c#L785)
+`macro` | [src/text_shape.c:787](../../src/text_shape.c#L787)
 
 ```c
 #define TSH_FB_SLOTS
@@ -777,7 +797,7 @@ The block cache maps (code point >> 8, bold) to a slot + 1, or -1 for "no instal
 
 ### `TSH_FB_BLOCKS`
 
-`macro` | [src/text_shape.c:786](../../src/text_shape.c#L786)
+`macro` | [src/text_shape.c:788](../../src/text_shape.c#L788)
 
 ```c
 #define TSH_FB_BLOCKS
@@ -789,7 +809,7 @@ The block cache maps (code point >> 8, bold) to a slot + 1, or -1 for "no instal
 
 ### `TSH_FB_CP_SLOTS`
 
-`macro` | [src/text_shape.c:803](../../src/text_shape.c#L803)
+`macro` | [src/text_shape.c:805](../../src/text_shape.c#L805)
 
 ```c
 #define TSH_FB_CP_SLOTS
@@ -805,7 +825,7 @@ The block cache above only remembers which face a 256-code-point block asked for
 
 ### `TSH_MAX_RUNS`
 
-`macro` | [src/text_shape.c:988](../../src/text_shape.c#L988)
+`macro` | [src/text_shape.c:990](../../src/text_shape.c#L990)
 
 ```c
 #define TSH_MAX_RUNS
@@ -819,7 +839,7 @@ The block cache above only remembers which face a 256-code-point block asked for
 
 ### `TSH_MEASURE_SLOTS`
 
-`macro` | [src/text_shape.c:1061](../../src/text_shape.c#L1061)
+`macro` | [src/text_shape.c:1063](../../src/text_shape.c#L1063)
 
 ```c
 #define TSH_MEASURE_SLOTS
@@ -835,7 +855,7 @@ A page measures the same words over and over (every line break decision, every f
 
 ### `TSH_MEASURE_TEXT_MAX`
 
-`macro` | [src/text_shape.c:1062](../../src/text_shape.c#L1062)
+`macro` | [src/text_shape.c:1064](../../src/text_shape.c#L1064)
 
 ```c
 #define TSH_MEASURE_TEXT_MAX

@@ -401,6 +401,18 @@ static void test_leading_b...`
   - `main` (function, line 204) `int main(void)`
 - Depends on: `include/download.h`
 
+## tests/test_exact_key.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_same_puts_equal` (function, line 11) `static void test_same_puts_equal(void **state)`
+  - `test_byte_or_length_differs` (function, line 28) `static void test_byte_or_length_differs(void **state)`
+  - `test_growth_across_many_puts` (function, line 48) `static void test_growth_across_many_puts(void **state)`
+  - `test_bad_never_equal` (function, line 67) `static void test_bad_never_equal(void **state)`
+  - `test_swap_and_null_safety` (function, line 94) `static void test_swap_and_null_safety(void **state)`
+  - `main` (function, line 123) `int main(void)`
+- Depends on: `include/exact_key.h`
+
 ## tests/test_fb_cmdline.c
 - Layer: testing
 - Language: c
@@ -431,6 +443,26 @@ static void test_leading_b...`
   - `test_expr_selector_cannot_escape_the_literal` (function, line 144) `static void test_expr_selector_cannot_escape_the_literal(void **state)`
   - `main` (function, line 167) `int main(void)`
 - Depends on: `include/fb_panes.h`
+
+## tests/test_find_text.c
+- Doc: Suite for find_text (spec/find_text.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `run` (function, line 10) `static size_t run(const ft_piece *p, size_t n, const char *q, ft_match *m, size_t cap,
+          ...`
+  - `test_across_gap` (function, line 19) `static void test_across_gap(void **state)`
+  - `test_across_pieces_without_gap` (function, line 31) `static void test_across_pieces_without_gap(void **state)`
+  - `test_diacritics_and_case` (function, line 42) `static void test_diacritics_and_case(void **state)`
+  - `test_whitespace_runs` (function, line 58) `static void test_whitespace_runs(void **state)`
+  - `test_non_overlapping_and_cap` (function, line 71) `static void test_non_overlapping_and_cap(void **state)`
+  - `test_match_never_starts_on_space` (function, line 83) `static void test_match_never_starts_on_space(void **state)`
+  - `test_invalid_utf8_bounded` (function, line 91) `static void test_invalid_utf8_bounded(void **state)`
+  - `test_spans` (function, line 101) `static void test_spans(void **state)`
+  - `test_step` (function, line 120) `static void test_step(void **state)`
+  - `test_rejects_bad_input` (function, line 130) `static void test_rejects_bad_input(void **state)`
+  - `main` (function, line 144) `int main(void)`
+- Depends on: `include/find_text.h`
 
 
 Next: [KB_tests_p4.md](KB_tests_p4.md)

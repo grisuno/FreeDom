@@ -5,8 +5,9 @@
 | `app.py` | Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL... | root | 3 | 0 |
 | `docker-entrypoint.sh` | - | root | 0 | 0 |
 | `docker_run.sh` | Thin wrapper. | root | 0 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 676 | 0 |
-| `gui/browser_ui_internal.h` | ui_theme_mode: ui_rgb button_text; ui_rgb menu_bg; ui_rgb menu_border; ui_rgb menu_text; ui_rgb... | gui | 11 | 3 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 699 | 0 |
+| `gui/browser_ui_internal.h` | bui_chrome_view: ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to a palette... | gui | 22 | 4 |
+| `gui/bui_chrome.c` | tab_path: void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r) {... | gui | 49 | 0 |
 | `gui/bui_mask_img.c` | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | gui | 1 | 0 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -16,9 +17,10 @@
 | `include/box_blur.h` | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | include | 5 | 3 |
 | `include/box_style.h` | bx_edges: anything longer fails closed instead of truncating into a wrong match. #define... | include | 31 | 12 |
 | `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 34 | 5 |
-| `include/browser.h` | browser_free: Zero-initialise or reset a state. | include | 19 | 3 |
+| `include/browser.h` | browser_closed: Transient status line (a toast, e.g. "blocked: insecure http link"). msg is... | include | 26 | 3 |
 | `include/cached_fetch.h` | cf_set_store: Cache-aware GET. | include | 4 | 3 |
-| `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 9 | 4 |
+| `include/chrome_layout.h` | chl_tab_rect: Computes the layout. tab_count >= 1 and 0 <= active < tab_count, else CHL_EINVAL *... | include | 36 | 3 |
+| `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 11 | 4 |
 | `include/css.h` | css_style: A resolved presentation. | include | 148 | 40 |
 | `include/css_atrule.h` | car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both... | include | 10 | 3 |
 | `include/css_box.h` | - | include | 28 | 5 |
@@ -42,15 +44,17 @@
 | `include/dom.h` | dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: *... | include | 32 | 17 |
 | `include/dom_debug.h` | dd_format: Formats doc into out[0..cap) as a NUL-terminated, line-oriented dump (see the spec... | include | 4 | 3 |
 | `include/download.h` | dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media... | include | 9 | 3 |
+| `include/exact_key.h` | exact_key (ek_) -- a cache key built by OBSERVING every input of what is cached, compared | include | 9 | 3 |
 | `include/fb_cmdline.h` | fbc_history_push: #define FBC_BASE_MAX   256    /* bytes of a completion base path #define... | include | 18 | 4 |
 | `include/fb_panes.h` | fbp_tab_label: FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where the JS time went (sampling... | include | 12 | 6 |
+| `include/find_text.h` | ft_piece: One laid-out text piece. gap_before = 1: white space separates it from the previous *... | include | 18 | 3 |
 | `include/flex_layout.h` | fx_item: Upper bound on items per flex line / grid columns. | include | 45 | 11 |
 | `include/form.h` | fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *... | include | 12 | 3 |
 | `include/frame_broker.h` | fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for... | include | 17 | 3 |
 | `include/frame_clock.h` | active: frame_clock (fc_) — pure animation frame scheduler. | include | 7 | 3 |
 | `include/frame_host.h` | fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource... | include | 11 | 4 |
 | `include/freebug.h` | fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated).... | include | 18 | 13 |
-| `include/freedom_config.h` | - | include | 18 | 7 |
+| `include/freedom_config.h` | - | include | 20 | 7 |
 | `include/hls.h` | hls_segment: or variant info. | include | 8 | 4 |
 | `include/host_conf.h` | hcf_search_dirs: Pure. | include | 9 | 4 |
 | `include/hostblock.h` | hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted... | include | 10 | 5 |
@@ -73,6 +77,7 @@
 | `include/lazy_load.h` | - | include | 1 | 2 |
 | `include/link_nav.h` | ln_block_reason: Why a reference was blocked, for a precise user-facing notice and for *... | include | 11 | 5 |
 | `include/local_store.h` | ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and... | include | 11 | 8 |
+| `include/mask_cache.h` | mask_cache (mkc_) -- 8-bit alpha masks retained across frames (spec/mask_cache.md). | include | 11 | 3 |
 | `include/media_decoder.h` | md_cmd: Communicates with the parent over two pipes: out_fd: decoder → parent (frames, stream... | include | 12 | 4 |
 | `include/net_guard.h` | ng_request: #ifndef __STDC_VERSION__ #error "net_guard requires C11" #endif #ifdef __cplusplus... | include | 9 | 3 |
 | `include/net_realm.h` | nr_realm_allows_http: 1 iff plain http:// is acceptable for this realm. | include | 10 | 4 |
@@ -101,7 +106,7 @@
 | `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 55 | 6 |
 | `include/table_layout.h` | table_layout (tl_) -- used column widths of a table (automatic table layout). | include | 8 | 3 |
 | `include/text_case.h` | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | include | 8 | 3 |
-| `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 24 | 6 |
+| `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 25 | 6 |
 | `include/textfield.h` | tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at... | include | 15 | 3 |
 | `include/tls_impersonate.h` | ti_req: Request: parent -> helper. | include | 23 | 4 |
 | `include/ui.h` | ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no... | include | 20 | 6 |
@@ -119,12 +124,13 @@
 | `run_freedom.sh` | Thin wrapper. | root | 0 | 0 |
 | `src/anti_fp.c` | - | src | 23 | 0 |
 | `src/block_flow.c` | block_flow (bf_) -- vertical margin collapsing. | src | 4 | 0 |
-| `src/box_blur.c` | box_line: One box pass of odd width bw over n samples spaced `step` apart, through tmp * (n bytes). | src | 5 | 0 |
+| `src/box_blur.c` | box_recip: floor((sum + bw/2) / bw) without a division: m = floor(2^32 / bw) + 1 makes (n * m)... | src | 9 | 0 |
 | `src/box_style.c` | tag_row: One row of the user-agent sheet. | src | 48 | 0 |
 | `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 25 | 0 |
-| `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 41 | 0 |
+| `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 49 | 0 |
 | `src/cached_fetch.c` | trace: fetcher, and so the same policy, as an uncached request.  #define _POSIX_C_SOURCE 200809L... | src | 14 | 0 |
-| `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 5 | 0 |
+| `src/chrome_layout.c` | chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md | src | 18 | 0 |
+| `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 7 | 0 |
 | `src/css.c` | css_cq: @container conditions (spec/css_mq.md): a rule inside one is kept and gated per element.... | src | 273 | 0 |
 | `src/css_atrule.c` | keyword_at: Scratch size for one declaration or selector handed to the caller. | src | 11 | 0 |
 | `src/css_box.c` | calc_val: bare0: the token was a unitless 0. | src | 53 | 0 |
@@ -147,8 +153,10 @@
 | `src/dom.c` | to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include... | src | 77 | 0 |
 | `src/dom_debug.c` | dd_cursor: Bounded write cursor: `pos` bytes are committed to `out` (always leaving room for the... | src | 24 | 0 |
 | `src/download.c` | lc: download — pure helpers for "save this resource to disk". | src | 12 | 0 |
+| `src/exact_key.c` | - | src | 6 | 0 |
 | `src/fb_cmdline.c` | - | src | 13 | 0 |
 | `src/fb_panes.c` | - | src | 10 | 0 |
+| `src/find_text.c` | find_text (ft_) -- find in page over the rendered text. spec/find_text.md. | src | 12 | 0 |
 | `src/flex_layout.c` | nn: bounded by FX_MAX_ITEMS (no VLAs). | src | 36 | 0 |
 | `src/form.c` | put_char: No I/O, no global state. | src | 8 | 0 |
 | `src/frame_broker.c` | target_admits: int changed = 1;                                  /* fixpoint: slots are reused... | src | 10 | 0 |
@@ -187,6 +195,7 @@
 | `src/js_trusted.c` | ws_payload: } void jt_ws_ops_free(jt_ws_op *ops, size_t n) { if (ops == NULL) return; for... | src | 18 | 0 |
 | `src/link_nav.c` | clean_href: Removes tab/newline/CR anywhere and trims leading/trailing spaces, in place * into out. | src | 10 | 0 |
 | `src/local_store.c` | - | src | 31 | 0 |
+| `src/mask_cache.c` | One retained mask. tick orders recency (larger = more recent); buf NULL = free slot. | src | 14 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
 | `src/net_guard.c` | net_guard -- see include/net_guard.h and spec/net_guard.md. | src | 14 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
@@ -213,7 +222,7 @@
 | `src/tab.c` | tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and... | src | 201 | 0 |
 | `src/table_layout.c` | table_layout (tl_) -- see include/table_layout.h and spec/table_layout.md. | src | 5 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
-| `src/text_shape.c` | tsh_fb_cp: Per-code-point verdicts of fb_entry. | src | 74 | 0 |
+| `src/text_shape.c` | tsh_fb_cp: Per-code-point verdicts of fb_entry. | src | 75 | 0 |
 | `src/textfield.c` | - | src | 12 | 0 |
 | `src/tls_impersonate.c` | get_bytes: \| ((uint32_t)r->p[r->off + 3] << 24); r->off += 4; return v; } static uint64_t... | src | 20 | 0 |
 | `src/ui_layout.c` | - | src | 4 | 0 |
@@ -226,15 +235,16 @@
 | `src/wl_guard.c` | - | src | 6 | 0 |
 | `src/ws_hub.c` | wh_job: One open, owned by its thread until handed over through the pipe. | src | 27 | 0 |
 | `src/zoom.c` | - | src | 7 | 0 |
-| `tests/itest_secure_fetch.c` | - | tests | 2 | 0 |
+| `tests/itest_secure_fetch.c` | - | tests | 3 | 0 |
 | `tests/test_anti_fp.c` | test_origin_key_unlinks_readback: The property that actually matters: the same canvas buffer... | tests | 15 | 0 |
 | `tests/test_block_flow.c` | test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never to their... | tests | 8 | 0 |
-| `tests/test_box_blur.c` | - | tests | 11 | 0 |
+| `tests/test_box_blur.c` | ref_line: put_px(argb, W * 4, 30, 20, 255); int r[4]; assert_int_equal(bb_ink_rect(argb, W, H, W... | tests | 15 | 0 |
 | `tests/test_box_style.c` | dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include... | tests | 49 | 0 |
 | `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 69 | 0 |
-| `tests/test_browser.c` | test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete... | tests | 17 | 0 |
+| `tests/test_browser.c` | nav: #define _POSIX_C_SOURCE 200809L #include <stdarg.h> #include <stddef.h> #include <stdint.h>... | tests | 27 | 0 |
 | `tests/test_cached_fetch.c` | - | tests | 14 | 0 |
-| `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 21 | 0 |
+| `tests/test_chrome_layout.c` | Suite for chrome_layout (spec/chrome_layout.md). | tests | 14 | 0 |
+| `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 23 | 0 |
 | `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 371 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
 | `tests/test_css_box.c` | test_lineheight_abs_vs_scale: line-height (CSS 2.1 10.8.1): a number, a percentage and an em... | tests | 13 | 0 |
@@ -256,8 +266,10 @@
 | `tests/test_dom.c` | setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] = "<!DOCTYPE... | tests | 45 | 0 |
 | `tests/test_dom_debug.c` | build: #include "dom_debug.h" #include "page_view.h" #include "render_doc.h" #include... | tests | 11 | 0 |
 | `tests/test_download.c` | - | tests | 21 | 0 |
+| `tests/test_exact_key.c` | - | tests | 6 | 0 |
 | `tests/test_fb_cmdline.c` | - | tests | 7 | 0 |
 | `tests/test_fb_panes.c` | test_net_pane_shows_timing_and_headers: assert_int_equal(fbp_expr(FBP_CONSOLE, "", 0, out... | tests | 11 | 0 |
+| `tests/test_find_text.c` | Suite for find_text (spec/find_text.md). | tests | 12 | 0 |
 | `tests/test_flex_layout.c` | test_grid_column_count_for_column_flow: Given `grid-auto-flow: column` with no explicit rows... | tests | 72 | 0 |
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_broker.c` | test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router. | tests | 10 | 0 |
@@ -284,6 +296,7 @@
 | `tests/test_js_sandbox.c` | test_limits_default_heap_holds_real_bundles: A real site bundle (YouTube: ~1.2 MB of minified... | tests | 48 | 0 |
 | `tests/test_link_nav.c` | test_resolve_long_bundle_target: Modern bundle URLs exceed the old 4096 target cap (google's xjs... | tests | 22 | 0 |
 | `tests/test_local_store.c` | - | tests | 18 | 0 |
+| `tests/test_mask_cache.c` | - | tests | 10 | 0 |
 | `tests/test_media_decoder.c` | test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and... | tests | 6 | 0 |
 | `tests/test_net_guard.c` | Suite for net_guard (spec/net_guard.md). | tests | 10 | 0 |
 | `tests/test_net_realm.c` | test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state... | tests | 13 | 0 |
@@ -300,7 +313,7 @@
 | `tests/test_render_policy.c` | test_image_allow_data_url: A data: URI embeds its bytes inline: no socket opens, so it skips the... | tests | 21 | 0 |
 | `tests/test_renderer.c` | test_render_binary_does_not_crash_parent: (void)state; rd_result r... | tests | 8 | 0 |
 | `tests/test_request_policy.c` | test_site_of_psl: } static void test_site_of_multi_suffix(void **state) { (void)state; char... | tests | 17 | 0 |
-| `tests/test_secure_fetch.c` | test_default_groups_offer_p384: Some servers (justpaste.it, 2026 Let's Encrypt P-384 chain)... | tests | 58 | 0 |
+| `tests/test_secure_fetch.c` | test_default_groups_offer_p384: Some servers (justpaste.it, 2026 Let's Encrypt P-384 chain)... | tests | 59 | 0 |
 | `tests/test_sha2.c` | test_sha2 -- CMocka suite for the pure SHA-1/256/384/512 (FIPS 180-4 vectors). | tests | 7 | 0 |
 | `tests/test_sheet_cache.c` | Suite for sheet_cache (spec/sheet_cache.md). | tests | 20 | 0 |
 | `tests/test_shm_slots.c` | - | tests | 4 | 0 |
@@ -310,7 +323,7 @@
 | `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 176 | 0 |
 | `tests/test_table_layout.c` | test_table_layout -- automatic table layout (spec/table_layout.md). | tests | 14 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
-| `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 27 | 0 |
+| `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 28 | 0 |
 | `tests/test_textfield.c` | - | tests | 8 | 0 |
 | `tests/test_tls_impersonate.c` | - | tests | 11 | 0 |
 | `tests/test_ui.c` | assert_line: Build: make test   ;   ASan: make asan  #include <stdarg.h> #include <stddef.h>... | tests | 13 | 0 |
@@ -329,7 +342,8 @@
 | `tools/ffshot.py` | ffshot -- full-page Firefox screenshot at a FIXED viewport, for `make parity`/`make wpt`. | tools | 1 | 0 |
 | `tools/fftime.py` | fftime -- Firefox's time from "navigate" to "painted and idle", for `make fbench`. | tools | 1 | 0 |
 | `tools/gen_psl.c` | sort_unique: v->cap = v->cap ? v->cap * 2 : 1024; v->items = (char **)realloc(v->items, v->cap *... | tools | 8 | 0 |
-| `tools/guitime.py` | guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle". | tools | 3 | 0 |
+| `tools/guiscroll.py` | guiscroll -- what one frame costs in the REAL Freedom window while the user scrolls.  guitime... | tools | 4 | 0 |
+| `tools/guitime.py` | guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle". | tools | 3 | 1 |
 | `tools/mutate.py` | mutate -- compile-time mutation testing for the CMocka suites. | tools | 6 | 0 |
 | `tools/pngdiff.c` | pd_reader_open: Opens `path` and normalises whatever colour type it carries into 8-bit RGB, so *... | tools | 14 | 0 |
 | `tools/pngprof.py` | pngprof -- structural ink-profile dump for page screenshots. | tools | 4 | 0 |

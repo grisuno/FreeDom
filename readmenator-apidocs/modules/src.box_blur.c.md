@@ -1,10 +1,11 @@
 # `src/box_blur.c`
 
-> Source: [src/box_blur.c:1](../../src/box_blur.c#L1) | language `c` | coverage 20.0% | [API index](../index.md)
+> Source: [src/box_blur.c:1](../../src/box_blur.c#L1) | language `c` | coverage 33.3% | [API index](../index.md)
 
 ## Contents
 
 - **Functions:** [`bb_box_sizes`](#bb_box_sizes), [`variance`](#variance), [`bb_blur_a8`](#bb_blur_a8), [`bb_ink_rect`](#bb_ink_rect)
+- **Macros:** [`BB_BOX_MAX`](#bb_box_max)
 
 ## Call Graph
 
@@ -25,7 +26,7 @@ flowchart LR
 
 ### `bb_box_sizes`
 
-`function` | [src/box_blur.c:7](../../src/box_blur.c#L7)
+`function` | [src/box_blur.c:8](../../src/box_blur.c#L8)
 
 ```c
 int bb_box_sizes(double sigma, int sizes[3])
@@ -54,7 +55,7 @@ Returns 0 (sizes untouched) when sigma is not finite or <= 0, else 1.
 
 ### `variance`
 
-`function` | [src/box_blur.c:10](../../src/box_blur.c#L10)
+`function` | [src/box_blur.c:11](../../src/box_blur.c#L11)
 
 ```c
 * width w has variance (w^2 - 1) / 12): the ideal common width, rounded down * to an odd wl and up to wu = wl + 2, mixed so the sum lands on sigma^2. */ double wideal = sqrt(12.0 * sigma * sigma / 3.0
@@ -74,7 +75,7 @@ Returns 0 (sizes untouched) when sigma is not finite or <= 0, else 1.
 
 ### `bb_blur_a8`
 
-`function` | [src/box_blur.c:41](../../src/box_blur.c#L41)
+`function` | [src/box_blur.c:82](../../src/box_blur.c#L82)
 
 ```c
 int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)
@@ -100,7 +101,7 @@ int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)
 
 ### `bb_ink_rect`
 
-`function` | [src/box_blur.c:57](../../src/box_blur.c#L57)
+`function` | [src/box_blur.c:102](../../src/box_blur.c#L102)
 
 ```c
 int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])
@@ -120,5 +121,23 @@ int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigm
 **Returns:** `int`
 
 *Calls:* [`bb_box_sizes`](#bb_box_sizes)
+
+---
+
+## Macros
+
+<a id="bb_box_max"></a>
+
+### `BB_BOX_MAX`
+
+`macro` | [src/box_blur.c:31](../../src/box_blur.c#L31)
+
+```c
+#define BB_BOX_MAX
+```
+
+floor((sum + bw/2) / bw) without a division: m = floor(2^32 / bw) + 1 makes (n * m) >> 32 exact for every n < 2^32 / bw (Granlund-Montgomery), and here n <= 256 * bw with bw < BB_BOX_MAX, so 256 * bw^2 < 2^32 holds.
+
+The byte-for-byte test against the division keeps it honest.
 
 ---

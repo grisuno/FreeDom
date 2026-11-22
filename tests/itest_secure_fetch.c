@@ -13,6 +13,8 @@
 
 static int failures = 0;
 
+static int always_cancel(void *ctx) { ++*(int *)ctx; return 1; }
+
 #define CHECK(cond, msg)                                  \
     do {                                                  \
         if (cond) {                                       \
@@ -47,6 +49,20 @@ int main(void) {
           "negotiated a hybrid ML-KEM group");
     CHECK(r.http_code > 0, "received an HTTP status code");
     sf_response_free(&r);
+
+    /* (2b) Stop: a cancel callback that says yes aborts the transfer during
+     *      connect with SF_ERR_CANCELLED, and the allowlist ladder does not retry. */
+    int polls = 0;
+    sf_config cc = sf_config_default();
+    cc.cancel_cb = always_cancel;
+    cc.cancel_ctx = &polls;
+    sf_response rc;
+    int dg = -1;
+    sf_status sc = sf_get_follow_navigable(url, &cc, &rc, &dg, 1);
+    printf("  -> cancelled status=%d polls=%d\n", sc, polls);
+    CHECK(sc == SF_ERR_CANCELLED, "cancel_cb aborts the transfer with SF_ERR_CANCELLED");
+    CHECK(polls == 1, "a cancelled allowlisted request is not retried");
+    sf_response_free(&rc);
 
     /* (3) Force classical-only groups: the browser must refuse the connection
      *     because the negotiated group would not be PQ-hybrid. */

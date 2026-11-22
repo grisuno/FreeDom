@@ -30,9 +30,11 @@ flowchart LR
     n_src_media_decoder_c__media_decoder_run(["media_decoder_run"])
     n_include_util_h__read_full["util.read_full"]
     n_include_util_h__write_full["util.write_full"]
+    n_include_chrome_layout_h__close["chrome_layout.close"]
     n_src_media_decoder_c__media_decoder_spawn --> n_src_media_decoder_c__media_decoder_run
     n_src_media_decoder_c__media_decoder_run -.-> n_include_util_h__read_full
     n_src_media_decoder_c__media_decoder_run -.-> n_include_util_h__write_full
+    n_src_media_decoder_c__media_decoder_spawn -.-> n_include_chrome_layout_h__close
 ```
 
 ## Structs
@@ -177,7 +179,7 @@ On success stores child pid in *pid, the read-end of the child's output pipe in 
 
 > **Inherited:** Documentation from [`media_decoder_spawn`](#media_decoder_spawn) (include/media_decoder.h:104).
 
-*Calls:* [`media_decoder_run`](#media_decoder_run)
+*Calls:* [`close`](include.chrome_layout.h.md#close), [`media_decoder_run`](#media_decoder_run)
 
 ---
 

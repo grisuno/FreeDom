@@ -7,6 +7,17 @@
 - **Functions:** [`write_full`](#write_full), [`rd_render_html`](#rd_render_html), [`rd_result_free`](#rd_result_free)
 - **Macros:** [`_POSIX_C_SOURCE`](#_posix_c_source)
 
+## Call Graph
+
+Solid arrows stay in this module, dashed arrows leave it.
+
+```mermaid
+flowchart LR
+    n_src_renderer_c__rd_render_html(["rd_render_html"])
+    n_include_chrome_layout_h__close["chrome_layout.close"]
+    n_src_renderer_c__rd_render_html -.-> n_include_chrome_layout_h__close
+```
+
 ## Functions
 
 <a id="write_full"></a>
@@ -49,6 +60,8 @@ rd_status rd_render_html(const char *html, size_t len, rd_result *out)
 | `out` | `rd_result *` |  |  |
 
 **Returns:** `rd_status`
+
+*Calls:* [`close`](include.chrome_layout.h.md#close)
 
 ---
 

@@ -1,30 +1,30 @@
 # Second Brain
 
-*Last synthesized: 2026-11-21 | 334 files | 14 concept pages | offline, zero tokens*
+*Last synthesized: 2026-11-22 | 348 files | 15 concept pages | offline, zero tokens*
 
 > Raw sources -> readmenator wiki -> links (Karpathy LLM Wiki Pattern, deterministic).
 > Start here, then open one community page. Prefer grep over full reads.
 
 ## Vault Overview
 
-The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (194 files) across 14 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
+The codebase centres on `browser_ui.c`, `css.h`, `tab.c`. Architecturally it is 6 layers, dominant utility (200 files) across 15 import-based communities. Recorded risk surface: 0 security findings and 1 dependency cycles.
 
-Surprising tissue lives between include: css, src: tab, include: browser_ui: 20 extracted cross-community imports and 0 inferred bridges. Follow `connections.json` sorted by strength before refactoring.
+Surprising tissue lives between src: css, include: browser_ui, src: tab: 20 extracted cross-community imports and 0 inferred bridges. Follow `connections.json` sorted by strength before refactoring.
 
-Open work clusters around documentation (19% file coverage), 0 security findings, 6 taint paths, and 5 suggested exploration questions in `queries.md`.
+Open work clusters around documentation (20% file coverage), 0 security findings, 8 taint paths, and 5 suggested exploration questions in `queries.md`.
 
 ## Stats
 
 | Metric | Value |
 |--------|-------|
-| Files | 334 |
-| Symbols | 8142 |
-| Resolved imports | 636 |
+| Files | 348 |
+| Symbols | 8441 |
+| Resolved imports | 650 |
 | Languages | c, h, py, sh |
-| Communities | 14 |
-| Doc coverage | 19% (62/334 files) |
+| Communities | 15 |
+| Doc coverage | 20% (70/348 files) |
 | Security findings | 0 |
-| Estimated read cost | ~245767 tokens (chars/4, offline so $0) |
+| Estimated read cost | ~253968 tokens (chars/4, offline so $0) |
 | Large files (>256KB, maybe generated) | 4: `browser_ui.c`, `css.c`, `page_view.c`, `test_css.c` |
 
 ## Reading Order
@@ -40,26 +40,27 @@ readmenator query "<question>" --target freedom-0.0.3
 
 ## Concept Wiki
 
-- [include: css (59 files, cohesion 0.70)](./community_0_include_css.md)
-- [src: tab (54 files, cohesion 0.70)](./community_1_src_tab.md)
-- [include: browser_ui (50 files, cohesion 0.53)](./community_2_include_browser_ui.md)
-- [src: text_shape (40 files, cohesion 0.52)](./community_3_src_text_shape.md)
-- [include: page_view (26 files, cohesion 0.46)](./community_4_include_page_view.md)
+- [src: css (64 files, cohesion 0.71)](./community_0_src_css.md)
+- [include: browser_ui (62 files, cohesion 0.58)](./community_1_include_browser_ui.md)
+- [src: tab (53 files, cohesion 0.70)](./community_2_src_tab.md)
+- [src: text_shape (49 files, cohesion 0.56)](./community_3_src_text_shape.md)
+- [include: page_view (27 files, cohesion 0.45)](./community_4_include_page_view.md)
 - [include: secure_fetch (24 files, cohesion 0.60)](./community_5_include_secure_fetch.md)
-- [include: browser (19 files, cohesion 0.55)](./community_6_include_browser.md)
-- [src: http_cache (13 files, cohesion 0.80)](./community_7_src_http_cache.md)
-- [include: svg_render (12 files, cohesion 0.57)](./community_8_include_svg_render.md)
-- [include: tab (7 files, cohesion 0.41)](./community_9_include_tab.md)
-- [include: prefetch (6 files, cohesion 0.56)](./community_10_include_prefetch.md)
+- [src: http_cache (13 files, cohesion 0.80)](./community_6_src_http_cache.md)
+- [include: svg_render (12 files, cohesion 0.57)](./community_7_include_svg_render.md)
+- [include: tab (7 files, cohesion 0.41)](./community_8_include_tab.md)
+- [include: prefetch (6 files, cohesion 0.56)](./community_9_include_prefetch.md)
+- [include: os_sandbox (6 files, cohesion 0.62)](./community_10_include_os_sandbox.md)
 - [include: sha2 (3 files, cohesion 0.67)](./community_11_include_sha2.md)
 - [include: subreq_batch (3 files, cohesion 0.67)](./community_12_include_subreq_batch.md)
-- [orphans (18 files, cohesion 0.00)](./community_13_orphans.md)
+- [tools (2 files, cohesion 1.00)](./community_13_tools.md)
+- [orphans (17 files, cohesion 0.00)](./community_14_orphans.md)
 
 ## God Nodes
 
 | File | Score |
 |------|-------|
-| `gui/browser_ui.c` | 185.6 (large, maybe generated) |
+| `gui/browser_ui.c` | 193.9 (large, maybe generated) |
 | `include/css.h` | 100.8 |
 | `src/tab.c` | 84.1 |
 | `src/page_view.c` | 63.1 (large, maybe generated) |
@@ -67,16 +68,16 @@ readmenator query "<question>" --target freedom-0.0.3
 
 ## Strongest Connections
 
-- 2 -> 6: depends_on (strength 0.9, EXTRACTED)
-- 2 -> 4: depends_on (strength 0.9, EXTRACTED)
-- 2 -> 0: depends_on (strength 0.9, EXTRACTED)
-- 2 -> 8: depends_on (strength 0.9, EXTRACTED)
-- 2 -> 3: depends_on (strength 0.9, EXTRACTED)
-- 2 -> 1: depends_on (strength 0.9, EXTRACTED)
-- 2 -> 5: depends_on (strength 0.9, EXTRACTED)
-- 2 -> 10: depends_on (strength 0.9, EXTRACTED)
-- 2 -> 9: depends_on (strength 0.9, EXTRACTED)
+- 1 -> 4: depends_on (strength 0.9, EXTRACTED)
+- 1 -> 0: depends_on (strength 0.9, EXTRACTED)
+- 1 -> 7: depends_on (strength 0.9, EXTRACTED)
+- 1 -> 3: depends_on (strength 0.9, EXTRACTED)
+- 1 -> 2: depends_on (strength 0.9, EXTRACTED)
+- 1 -> 5: depends_on (strength 0.9, EXTRACTED)
+- 1 -> 9: depends_on (strength 0.9, EXTRACTED)
+- 1 -> 8: depends_on (strength 0.9, EXTRACTED)
 - 0 -> 4: depends_on (strength 0.9, EXTRACTED)
+- 5 -> 6: depends_on (strength 0.9, EXTRACTED)
 
 ## Navigation Tips
 

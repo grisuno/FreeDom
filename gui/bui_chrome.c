@@ -22,6 +22,7 @@
 #define BUI_TAB_PAD       10.0  /* tab title inset from the tab's left edge */
 #define BUI_TAB_FADE      18.0  /* width of the fade-out at the end of a long title */
 #define BUI_SPINNER_R     5.5
+#define BUI_STOP_HALF     5.5   /* half-size of the Stop cross that replaces reload */
 #define BUI_URL_TEXT_PAD  4.0   /* gap between the identity badge and the URL text */
 #define BUI_URL_END_PAD   10.0  /* free space kept after the caret at the pill's end */
 #define BUI_FOCUS_RING    2.0
@@ -437,7 +438,8 @@ static void paint_toolbar(cairo_t *cr, const bui_chrome_view *v) {
     round_button(cr, v, l->fwd, CHL_PART_FWD, v->can_fwd);
     icon_arrow(cr, rcx(l->fwd), rcy(l->fwd), -1);
     round_button(cr, v, l->reload, CHL_PART_RELOAD, 1);
-    icon_reload(cr, rcx(l->reload), rcy(l->reload));
+    if (v->loading) icon_cross(cr, rcx(l->reload), rcy(l->reload), BUI_STOP_HALF);
+    else            icon_reload(cr, rcx(l->reload), rcy(l->reload));
     round_button(cr, v, l->menu, CHL_PART_MENU, 1);
     icon_menu(cr, rcx(l->menu), rcy(l->menu));
     paint_url(cr, v);

@@ -2,49 +2,49 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 237,
-  "entities": 3721,
+  "modules": 247,
+  "entities": 3891,
   "languages": {
-   "c": 111,
-   "h": 110,
-   "py": 12,
+   "c": 116,
+   "h": 114,
+   "py": 13,
    "sh": 4
   },
   "kinds": {
-   "constant": 23,
-   "enum": 163,
-   "function": 2074,
-   "macro": 757,
+   "constant": 27,
+   "enum": 167,
+   "function": 2157,
+   "macro": 799,
    "method": 27,
-   "module": 237,
-   "struct": 284,
-   "type_alias": 149,
+   "module": 247,
+   "struct": 300,
+   "type_alias": 160,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 97,
+  "skipped_files": 101,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1649,
-   "total": 3691,
-   "percent": 44.7
+   "documented": 1742,
+   "total": 3857,
+   "percent": 45.2
   },
   "by_kind": {
    "enum": {
-    "documented": 81,
-    "total": 163,
-    "percent": 49.7
+    "documented": 80,
+    "total": 167,
+    "percent": 47.9
    },
    "function": {
-    "documented": 937,
-    "total": 2074,
-    "percent": 45.2
+    "documented": 994,
+    "total": 2157,
+    "percent": 46.1
    },
    "macro": {
-    "documented": 355,
-    "total": 757,
+    "documented": 375,
+    "total": 799,
     "percent": 46.9
    },
    "method": {
@@ -53,19 +53,19 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 39,
-    "total": 237,
-    "percent": 16.5
+    "documented": 44,
+    "total": 247,
+    "percent": 17.8
    },
    "struct": {
-    "documented": 127,
-    "total": 284,
-    "percent": 44.7
+    "documented": 135,
+    "total": 300,
+    "percent": 45.0
    },
    "type_alias": {
-    "documented": 110,
-    "total": 149,
-    "percent": 73.8
+    "documented": 114,
+    "total": 160,
+    "percent": 71.2
    }
   },
   "by_module": {
@@ -85,14 +85,19 @@
     "percent": 100.0
    },
    "gui/browser_ui.c": {
-    "documented": 86,
+    "documented": 80,
     "total": 259,
-    "percent": 33.2
+    "percent": 30.9
    },
    "gui/browser_ui_internal.h": {
-    "documented": 5,
-    "total": 11,
-    "percent": 45.5
+    "documented": 11,
+    "total": 22,
+    "percent": 50.0
+   },
+   "gui/bui_chrome.c": {
+    "documented": 12,
+    "total": 21,
+    "percent": 57.1
    },
    "gui/bui_mask_img.c": {
     "documented": 1,
@@ -125,9 +130,9 @@
     "percent": 50.0
    },
    "include/box_blur.h": {
-    "documented": 4,
+    "documented": 3,
     "total": 5,
-    "percent": 80.0
+    "percent": 60.0
    },
    "include/box_style.h": {
     "documented": 20,
@@ -140,19 +145,24 @@
     "percent": 38.2
    },
    "include/browser.h": {
-    "documented": 9,
-    "total": 19,
-    "percent": 47.4
+    "documented": 13,
+    "total": 26,
+    "percent": 50.0
    },
    "include/cached_fetch.h": {
     "documented": 2,
     "total": 4,
     "percent": 50.0
    },
+   "include/chrome_layout.h": {
+    "documented": 13,
+    "total": 31,
+    "percent": 41.9
+   },
    "include/compositor.h": {
-    "documented": 8,
-    "total": 9,
-    "percent": 88.9
+    "documented": 10,
+    "total": 11,
+    "percent": 90.9
    },
    "include/css.h": {
     "documented": 106,
@@ -269,6 +279,11 @@
     "total": 9,
     "percent": 11.1
    },
+   "include/exact_key.h": {
+    "documented": 8,
+    "total": 9,
+    "percent": 88.9
+   },
    "include/fb_cmdline.h": {
     "documented": 11,
     "total": 18,
@@ -278,6 +293,11 @@
     "documented": 9,
     "total": 12,
     "percent": 75.0
+   },
+   "include/find_text.h": {
+    "documented": 8,
+    "total": 18,
+    "percent": 44.4
    },
    "include/flex_layout.h": {
     "documented": 25,
@@ -310,9 +330,9 @@
     "percent": 72.2
    },
    "include/freedom_config.h": {
-    "documented": 15,
-    "total": 16,
-    "percent": 93.8
+    "documented": 16,
+    "total": 18,
+    "percent": 88.9
    },
    "include/hls.h": {
     "documented": 5,
@@ -423,6 +443,11 @@
     "documented": 2,
     "total": 11,
     "percent": 18.2
+   },
+   "include/mask_cache.h": {
+    "documented": 9,
+    "total": 11,
+    "percent": 81.8
    },
    "include/media_decoder.h": {
     "documented": 9,
@@ -565,9 +590,9 @@
     "percent": 75.0
    },
    "include/text_shape.h": {
-    "documented": 17,
-    "total": 24,
-    "percent": 70.8
+    "documented": 18,
+    "total": 25,
+    "percent": 72.0
    },
    "include/textfield.h": {
     "documented": 8,
@@ -655,9 +680,9 @@
     "percent": 50.0
    },
    "src/box_blur.c": {
-    "documented": 1,
-    "total": 5,
-    "percent": 20.0
+    "documented": 2,
+    "total": 6,
+    "percent": 33.3
    },
    "src/box_style.c": {
     "documented": 14,
@@ -670,19 +695,24 @@
     "percent": 37.5
    },
    "src/browser.c": {
-    "documented": 8,
-    "total": 31,
-    "percent": 25.8
+    "documented": 10,
+    "total": 36,
+    "percent": 27.8
    },
    "src/cached_fetch.c": {
     "documented": 2,
     "total": 7,
     "percent": 28.6
    },
+   "src/chrome_layout.c": {
+    "documented": 9,
+    "total": 14,
+    "percent": 64.3
+   },
    "src/compositor.c": {
-    "documented": 3,
-    "total": 5,
-    "percent": 60.0
+    "documented": 5,
+    "total": 7,
+    "percent": 71.4
    },
    "src/css.c": {
     "documented": 24,
@@ -794,6 +824,11 @@
     "total": 6,
     "percent": 16.7
    },
+   "src/exact_key.c": {
+    "documented": 6,
+    "total": 7,
+    "percent": 85.7
+   },
    "src/fb_cmdline.c": {
     "documented": 8,
     "total": 12,
@@ -803,6 +838,11 @@
     "documented": 8,
     "total": 9,
     "percent": 88.9
+   },
+   "src/find_text.c": {
+    "documented": 5,
+    "total": 7,
+    "percent": 71.4
    },
    "src/flex_layout.c": {
     "documented": 10,
@@ -994,6 +1034,11 @@
     "total": 26,
     "percent": 19.2
    },
+   "src/mask_cache.c": {
+    "documented": 8,
+    "total": 11,
+    "percent": 72.7
+   },
    "src/media_decoder.c": {
     "documented": 3,
     "total": 10,
@@ -1125,9 +1170,9 @@
     "percent": 50.0
    },
    "src/text_shape.c": {
-    "documented": 21,
-    "total": 44,
-    "percent": 47.7
+    "documented": 22,
+    "total": 45,
+    "percent": 48.9
    },
    "src/textfield.c": {
     "documented": 6,
@@ -1219,6 +1264,11 @@
     "total": 4,
     "percent": 0.0
    },
+   "tools/guiscroll.py": {
+    "documented": 2,
+    "total": 5,
+    "percent": 40.0
+   },
    "tools/guitime.py": {
     "documented": 2,
     "total": 4,
@@ -1280,7 +1330,12 @@
   {
    "uid": "gui/browser_ui_internal.h",
    "path": "modules/gui.browser_ui_internal.h.jsonl",
-   "entities": 11
+   "entities": 22
+  },
+  {
+   "uid": "gui/bui_chrome.c",
+   "path": "modules/gui.bui_chrome.c.jsonl",
+   "entities": 21
   },
   {
    "uid": "gui/bui_mask_img.c",
@@ -1330,7 +1385,7 @@
   {
    "uid": "include/browser.h",
    "path": "modules/include.browser.h.jsonl",
-   "entities": 19
+   "entities": 26
   },
   {
    "uid": "include/cached_fetch.h",
@@ -1338,9 +1393,14 @@
    "entities": 4
   },
   {
+   "uid": "include/chrome_layout.h",
+   "path": "modules/include.chrome_layout.h.jsonl",
+   "entities": 31
+  },
+  {
    "uid": "include/compositor.h",
    "path": "modules/include.compositor.h.jsonl",
-   "entities": 9
+   "entities": 11
   },
   {
    "uid": "include/css.h",
@@ -1458,6 +1518,11 @@
    "entities": 9
   },
   {
+   "uid": "include/exact_key.h",
+   "path": "modules/include.exact_key.h.jsonl",
+   "entities": 9
+  },
+  {
    "uid": "include/fb_cmdline.h",
    "path": "modules/include.fb_cmdline.h.jsonl",
    "entities": 18
@@ -1466,6 +1531,11 @@
    "uid": "include/fb_panes.h",
    "path": "modules/include.fb_panes.h.jsonl",
    "entities": 12
+  },
+  {
+   "uid": "include/find_text.h",
+   "path": "modules/include.find_text.h.jsonl",
+   "entities": 18
   },
   {
    "uid": "include/flex_layout.h",
@@ -1500,7 +1570,7 @@
   {
    "uid": "include/freedom_config.h",
    "path": "modules/include.freedom_config.h.jsonl",
-   "entities": 16
+   "entities": 18
   },
   {
    "uid": "include/hls.h",
@@ -1610,6 +1680,11 @@
   {
    "uid": "include/local_store.h",
    "path": "modules/include.local_store.h.jsonl",
+   "entities": 11
+  },
+  {
+   "uid": "include/mask_cache.h",
+   "path": "modules/include.mask_cache.h.jsonl",
    "entities": 11
   },
   {
@@ -1755,7 +1830,7 @@
   {
    "uid": "include/text_shape.h",
    "path": "modules/include.text_shape.h.jsonl",
-   "entities": 24
+   "entities": 25
   },
   {
    "uid": "include/textfield.h",
@@ -1845,7 +1920,7 @@
   {
    "uid": "src/box_blur.c",
    "path": "modules/src.box_blur.c.jsonl",
-   "entities": 5
+   "entities": 6
   },
   {
    "uid": "src/box_style.c",
@@ -1860,7 +1935,7 @@
   {
    "uid": "src/browser.c",
    "path": "modules/src.browser.c.jsonl",
-   "entities": 31
+   "entities": 36
   },
   {
    "uid": "src/cached_fetch.c",
@@ -1868,9 +1943,14 @@
    "entities": 7
   },
   {
+   "uid": "src/chrome_layout.c",
+   "path": "modules/src.chrome_layout.c.jsonl",
+   "entities": 14
+  },
+  {
    "uid": "src/compositor.c",
    "path": "modules/src.compositor.c.jsonl",
-   "entities": 5
+   "entities": 7
   },
   {
    "uid": "src/css.c",
@@ -1983,6 +2063,11 @@
    "entities": 6
   },
   {
+   "uid": "src/exact_key.c",
+   "path": "modules/src.exact_key.c.jsonl",
+   "entities": 7
+  },
+  {
    "uid": "src/fb_cmdline.c",
    "path": "modules/src.fb_cmdline.c.jsonl",
    "entities": 12
@@ -1991,6 +2076,11 @@
    "uid": "src/fb_panes.c",
    "path": "modules/src.fb_panes.c.jsonl",
    "entities": 9
+  },
+  {
+   "uid": "src/find_text.c",
+   "path": "modules/src.find_text.c.jsonl",
+   "entities": 7
   },
   {
    "uid": "src/flex_layout.c",
@@ -2183,6 +2273,11 @@
    "entities": 26
   },
   {
+   "uid": "src/mask_cache.c",
+   "path": "modules/src.mask_cache.c.jsonl",
+   "entities": 11
+  },
+  {
    "uid": "src/media_decoder.c",
    "path": "modules/src.media_decoder.c.jsonl",
    "entities": 10
@@ -2315,7 +2410,7 @@
   {
    "uid": "src/text_shape.c",
    "path": "modules/src.text_shape.c.jsonl",
-   "entities": 44
+   "entities": 45
   },
   {
    "uid": "src/textfield.c",
@@ -2408,6 +2503,11 @@
    "entities": 4
   },
   {
+   "uid": "tools/guiscroll.py",
+   "path": "modules/tools.guiscroll.py.jsonl",
+   "entities": 9
+  },
+  {
    "uid": "tools/guitime.py",
    "path": "modules/tools.guitime.py.jsonl",
    "entities": 6
@@ -2445,7 +2545,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2043
+  "total": 2116
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

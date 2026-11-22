@@ -1,6 +1,321 @@
 # API (page 7 of 13)
 Previous: [API_p6.md](API_p6.md)
 
+## src/css.c
+Depends on: `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_index.h`, `include/css_length.h`, `include/css_mask.h`, `include/css_mq.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`, `include/css_vars.h`, `include/flex_layout.h`, `include/interp.h`, `include/webfont.h`
+- `emit` (function) `src/css.c:64` `* * It must exceed the most slots ANY single declaration can emit (the widest today * is the `background` shorthand...`
+- `css_decl` (function) `src/css.c:91` `* text and stores the INDEX in the css_decl (int-only, see P_BG_IMAGE_URL);`
+- `parse_num` (function) `src/css.c:188` `static int parse_num(const char *s, double *out, const char **endp)` -- Parses a leading non-negative number (digits + optional fraction).
+- `parse_color` (function) `src/css.c:199` `static int parse_color(const char *v)` -- Delegates to the canonical CSS <number> grammar so a number means the same thing here as in a length, a colour...
+- `interp_color` (function) `src/css.c:203` `static int interp_color(const char *v)`
+- `through` (function) `src/css.c:219` `* at the two SHARED chokepoints every property funnels through (the generic
+ * dispatch tail, and...`
+- `bg_alpha_of` (function) `src/css.c:243` `static int bg_alpha_of(const char *v)` -- Alpha (4th) component of the first rgba()/hsla() call inside v, as a percent 0..100; CSS_LEN_UNSET when there is none.
+- `interp_bg` (function) `src/css.c:247` `static int interp_bg(const char *v)`
+- `expand_bg_image` (function) `src/css.c:255` `static int expand_bg_image(const char *val, css_decl *dst, int cap,
+                           ch...`
+- `expand_bg_position` (function) `src/css.c:260` `static int expand_bg_position(const char *val, css_decl *dst, int cap);`
+- `expand_background` (function) `src/css.c:263` `static int expand_background(const char *val, css_decl *dst, int cap,
+                           ...`
+- `text` (function) `src/css.c:275` `* source text (rem_rebase, see below) rather than by threading a context here.
+ *
+ * Viewport uni...`
+- `expand_box4` (function) `src/css.c:295` `static int expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg,
+            ...`
+- `expand_box2` (function) `src/css.c:300` `static int expand_box2(const char *val, int slot_start, int slot_end,
+                       int ...`
+- `interp_len` (function) `src/css.c:305` `static int interp_len(const char *v, int allow_auto, int *out)`
+- `interp_lp` (function) `src/css.c:309` `static int interp_lp(const char *v, int allow_auto, int allow_pct,
+                     int *out_...`
+- `lp_can_be_nonneg` (function) `src/css.c:314` `static int lp_can_be_nonneg(int px_val, int pct_pm)`
+- `next_ws_token` (function) `src/css.c:318` `static int next_ws_token(const char **p, char *tok, size_t cap)`
+- `interp_align` (function) `src/css.c:322` `static int interp_align(const char *v)`
+- `interp_fontsize_ex` (function) `src/css.c:326` `static int interp_fontsize_ex(const char *v, int *abs_out)`
+- `interp_lineheight` (function) `src/css.c:340` `static int interp_lineheight(const char *v)`
+- `interp_weight` (function) `src/css.c:344` `static int interp_weight(const char *v)`
+- `interp_style` (function) `src/css.c:348` `static int interp_style(const char *v)`
+- `interp_textdeco` (function) `src/css.c:352` `static int interp_textdeco(const char *v)`
+- `interp_display` (function) `src/css.c:356` `static int interp_display(const char *v)`
+- `interp_gap` (function) `src/css.c:360` `static int interp_gap(const char *v)`
+- `interp_justify` (function) `src/css.c:364` `static int interp_justify(const char *v)`
+- `expand_grid_template_cols` (function) `src/css.c:368` `static int expand_grid_template_cols(const char *val, css_decl *dst, int cap)`
+- `interp_fontfamily` (function) `src/css.c:374` `static int interp_fontfamily(const char *v)` -- Text-presentation family lives in css_text.c (single owner).
+- `interp_texttransform` (function) `src/css.c:375` `static int interp_texttransform(const char *v)`
+- `interp_opacity` (function) `src/css.c:376` `static int interp_opacity(const char *v)`
+- `expand_valign` (function) `src/css.c:377` `static int expand_valign(const char *val, css_decl *dst, int cap)`
+- `interp_transition_property` (function) `src/css.c:378` `static int interp_transition_property(const char *v)`
+- `interp_whitespace` (function) `src/css.c:379` `static int interp_whitespace(const char *v)`
+- `interp_tabsize` (function) `src/css.c:380` `static int interp_tabsize(const char *v)`
+- `interp_textdeco_style` (function) `src/css.c:381` `static int interp_textdeco_style(const char *v)`
+- `interp_textdeco_thickness` (function) `src/css.c:382` `static int interp_textdeco_thickness(const char *v)`
+- `interp_aspect_ratio` (function) `src/css.c:383` `static int interp_aspect_ratio(const char *v, int *num, int *den)`
+- `interp_direction` (function) `src/css.c:384` `static int interp_direction(const char *v)`
+- `interp_liststyle` (function) `src/css.c:385` `static int interp_liststyle(const char *v)`
+- `emit_spacing` (function) `src/css.c:386` `static int emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
+- `expand_shadow` (function) `src/css.c:387` `static int expand_shadow(const char *val, css_decl *dst, int cap)`
+- `interp_position` (function) `src/css.c:391` `static int interp_position(const char *v)`
+- `interp_boxsizing` (function) `src/css.c:400` `static int interp_boxsizing(const char *v)`
+- `interp_float` (function) `src/css.c:406` `static int interp_float(const char *v)`
+- `interp_clear` (function) `src/css.c:413` `static int interp_clear(const char *v)`
+- `interp_visibility` (function) `src/css.c:423` `static int interp_visibility(const char *v)`
+- `interp_overflow` (function) `src/css.c:430` `static int interp_overflow(const char *v)`
+- `interp_cursor` (function) `src/css.c:462` `static int interp_cursor(const char *v)`
+- `interp_text_overflow` (function) `src/css.c:494` `static int interp_text_overflow(const char *v)`
+- `interp_word_break` (function) `src/css.c:500` `static int interp_word_break(const char *v)`
+- `interp_overflow_wrap` (function) `src/css.c:508` `static int interp_overflow_wrap(const char *v)`
+- `interp_border_collapse` (function) `src/css.c:516` `static int interp_border_collapse(const char *v)` -- if (csel_ci_eq(v, "break-all"))  return CSS_WB_BREAK;       /* greedy mid-line break if (csel_ci_eq(v...
+- `number` (function) `src/css.c:525` `* number (no unit) as px (common in shorthand context like "10 5"). */
+static int interp_border_s...`
+- `interp_empty_cells` (function) `src/css.c:550` `static int interp_empty_cells(const char *v)` -- if (interp_len(tok, 0, &px) && px >= 0) { if (px > CSS_BORDER_SPACING_MAX) px = CSS_BORDER_SPACING_MAX; return px; }...
+- `interp_caption_side` (function) `src/css.c:557` `static int interp_caption_side(const char *v)` -- px = css_round_clamp(num, 0, CSS_BORDER_SPACING_MAX); return px; } return -1; } /* empty-cells: show/hide. -1...
+- `interp_table_layout` (function) `src/css.c:564` `static int interp_table_layout(const char *v)` -- static int interp_empty_cells(const char *v) { if (csel_ci_eq(v, "show")) return CSS_EC_SHOW; if (csel_ci_eq(v...
+- `interp_font_variant` (function) `src/css.c:571` `static int interp_font_variant(const char *v)` -- static int interp_caption_side(const char *v) { if (csel_ci_eq(v, "top"))    return CSS_CS_TOP; if (csel_ci_eq(v...
+- `interp_hyphens` (function) `src/css.c:579` `static int interp_hyphens(const char *v)` -- if (csel_ci_eq(v, "auto"))  return CSS_TL_AUTO; if (csel_ci_eq(v, "fixed")) return CSS_TL_FIXED; return -1; } /*...
+- `interp_user_select` (function) `src/css.c:587` `static int interp_user_select(const char *v)` -- if (csel_ci_eq(v, "small-caps")) return CSS_FV_SMALL_CAPS; /* all-small-caps, petite-caps, etc: out of scope, fail...
+- `interp_caret_color` (function) `src/css.c:596` `static int interp_caret_color(const char *v)` -- if (csel_ci_eq(v, "auto"))   return CSS_HY_AUTO; return -1; } /* user-select: none/text/all/auto. -1 unknown. static...
+- `interp_appearance` (function) `src/css.c:608` `static int interp_appearance(const char *v)` -- appearance (CSS Basic UI 4 section 6.1).
+- `interp_pointer_events` (function) `src/css.c:626` `static int interp_pointer_events(const char *v)` -- pointer-events.
+- `interp_bg_repeat` (function) `src/css.c:638` `static int interp_bg_repeat(const char *v)` -- of them means "this element is a target" -- the same answer as `auto`.
+- `interp_bg_repeat2` (function) `src/css.c:649` `static int interp_bg_repeat2(const char *v)` -- Two-value background-repeat (CSS Backgrounds 3 3.4): `repeat no-repeat` is * repeat-x, `no-repeat repeat` is...
+- `layer` (function) `src/css.c:670` `* first layer (the one painted) -- so `background: url(x) no-repeat` stops tiling
+ * and a later ...`
+- `expand_background_layer` (function) `src/css.c:679` `static int expand_background_layer(const char *val, css_decl *dst, int cap)`
+- `first_comma_item` (function) `src/css.c:753` `static void first_comma_item(const char *val, char *buf, size_t cap);` -- The mask layer shares the background layer's geometry vocabulary (CSS Masking 1 7.4-7.6 define...
+- `bg_to_mask_slot` (function) `src/css.c:755` `static int bg_to_mask_slot(int prop)`
+- `remap_to_mask` (function) `src/css.c:769` `static int remap_to_mask(css_decl *dst, int n)`
+- `expand_mask_geometry` (function) `src/css.c:778` `static int expand_mask_geometry(const char *prop, const char *val, css_decl *dst, int cap)`
+- `emit_mask_image` (function) `src/css.c:797` `static int emit_mask_image(const char *prop, const char *val, css_decl *dst, int cap,
+           ...` -- mask / mask-image with a url(): the URL into the image pool (gated downstream like a background-image; a data: SVG...
+- `interp_bg_size` (function) `src/css.c:816` `static int interp_bg_size(const char *v)` -- dst[n].prop = P_MASK_URL; dst[n].ival = -1; if (has && urltab != NULL && *nurl < urlcap) { memcpy(urltab[*nurl], u...
+- `interp_bg_clip` (function) `src/css.c:823` `static int interp_bg_clip(const char *v)` -- +n; if (strcmp(prop, "mask") == 0 && !css_wide_keyword(val)) n += remap_to_mask(dst + n...
+- `interp_bg_origin` (function) `src/css.c:831` `static int interp_bg_origin(const char *v)` -- if (csel_ci_eq(v, "auto"))    return CSS_BGS_AUTO; if (csel_ci_eq(v, "cover"))   return CSS_BGS_COVER; if...
+- `interp_bg_attachment` (function) `src/css.c:838` `static int interp_bg_attachment(const char *v)` -- if (csel_ci_eq(v, "border-box"))   return CSS_BGC_BORDER_BOX; if (csel_ci_eq(v, "padding-box"))  return...
+- `interp_isolation` (function) `src/css.c:845` `static int interp_isolation(const char *v)` -- static int interp_bg_origin(const char *v) { if (csel_ci_eq(v, "padding-box"))  return CSS_BGO_PADDING_BOX; if...
+- `interp_contain` (function) `src/css.c:851` `static int interp_contain(const char *v)` -- /* background-attachment: scroll/fixed/local. -1 unknown. static int interp_bg_attachment(const char *v) { if...
+- `interp_content_visibility` (function) `src/css.c:872` `static int interp_content_visibility(const char *v)` -- while (*p == ' ' || *p == '\t') ++p; if (*p == '\0') break; char tok[CSS_TOK_MAX]; size_t k = 0; while (*p != '\0'...
+- `interp_image_rendering` (function) `src/css.c:879` `static int interp_image_rendering(const char *v)` -- else if (csel_ci_eq(tok, "layout")) mask |= CSS_CONTAIN_LAYOUT; else if (csel_ci_eq(tok, "style"))  mask |=...
+- `interp_color_scheme` (function) `src/css.c:886` `static int interp_color_scheme(const char *v)` -- static int interp_content_visibility(const char *v) { if (csel_ci_eq(v, "visible")) return CSS_CV_VISIBLE; if...
+- `interp_accent_color` (function) `src/css.c:904` `static int interp_accent_color(const char *v)` -- const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t') ++p; if (*p == '\0') break; char...
+- `interp_print_color_adjust` (function) `src/css.c:909` `static int interp_print_color_adjust(const char *v)` -- size_t k = 0; while (*p != '\0' && *p != ' ' && *p != '\t' && k + 1 < sizeof tok) tok[k++] = *p++; tok[k] = '\0'; if...
+- `interp_forced_color_adjust` (function) `src/css.c:915` `static int interp_forced_color_adjust(const char *v)` -- return -1; } /* accent-color: auto -> CSS_LEN_AUTO; color -> 0xRRGGBB; -1 unknown. static int...
+- `interp_mix_blend_mode` (function) `src/css.c:922` `static int interp_mix_blend_mode(const char *v)` -- /* print-color-adjust: economy/exact. -1 unknown. static int interp_print_color_adjust(const char *v) { if...
+- `interp_object_pos` (function) `src/css.c:945` `static int interp_object_pos(const char *v)` -- object-position: <position> restricted to keywords and percentages (a length would need the free space at paint...
+- `interp_object_fit` (function) `src/css.c:987` `static int interp_object_fit(const char *v)`
+- `interp_list_style_pos` (function) `src/css.c:996` `static int interp_list_style_pos(const char *v)` -- y = swap ? pm[0] : pm[1]; } return CSS_OBJPOS_PACK(x, y); } static int interp_object_fit(const char *v) { if...
+- `interp_font_kerning` (function) `src/css.c:1002` `static int interp_font_kerning(const char *v)` -- if (csel_ci_eq(v, "fill"))        return CSS_OFI_FILL; if (csel_ci_eq(v, "contain"))     return CSS_OFI_CONTAIN; if...
+- `interp_text_rendering` (function) `src/css.c:1009` `static int interp_text_rendering(const char *v)` -- /* list-style-position: inside/outside. -1 unknown. static int interp_list_style_pos(const char *v) { if...
+- `interp_font_stretch` (function) `src/css.c:1017` `static int interp_font_stretch(const char *v)` -- if (csel_ci_eq(v, "auto"))   return CSS_FK_AUTO; if (csel_ci_eq(v, "normal")) return CSS_FK_NORMAL; if...
+- `interp_resize` (function) `src/css.c:1030` `static int interp_resize(const char *v)` -- /* font-stretch: normal/condensed/expanded/etc. -1 unknown. static int interp_font_stretch(const char *v) { if...
+- `interp_scroll_behavior` (function) `src/css.c:1038` `static int interp_scroll_behavior(const char *v)` -- if (csel_ci_eq(v, "semi-expanded"))      return CSS_FS_SEMI_EXPANDED; if (csel_ci_eq(v, "extra-expanded"))...
+- `interp_overscroll_behavior` (function) `src/css.c:1060` `static int interp_overscroll_behavior(const char *v)` -- all, so every one of them behaves exactly like the default -- the same answer as `auto`.
+- `interp_backface_visibility` (function) `src/css.c:1067` `static int interp_backface_visibility(const char *v)` -- if (csel_ci_eq(v, "pan-x") || csel_ci_eq(v, "pan-y") || csel_ci_eq(v, "pan-left") || csel_ci_eq(v, "pan-right") ||...
+- `interp_border_style` (function) `src/css.c:1090` `static int interp_border_style(const char *v)`
+- `interp_bwidth1` (function) `src/css.c:1116` `static int interp_bwidth1(const char *v)`
+- `interp_time_ms` (function) `src/css.c:1125` `static int interp_time_ms(const char *v)` -- Parses a CSS time: "2s" → 2000, "500ms" → 500, "0s" → 0. * Returns -1 on invalid/missing unit.
+- `emit_radius_corner` (function) `src/css.c:1158` `static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)` -- One corner longhand (border-top-left-radius and friends).
+- `interp_bw_tok` (function) `src/css.c:1166` `static int interp_bw_tok(const char *t, int *o)` -- One corner longhand (border-top-left-radius and friends).
+- `interp_bs_tok` (function) `src/css.c:1167` `static int interp_bs_tok(const char *t, int *o)`
+- `interp_bc_tok` (function) `src/css.c:1168` `static int interp_bc_tok(const char *t, int *o)`
+- `interp_outline_style` (function) `src/css.c:1236` `static int interp_outline_style(const char *v)` -- `outline-style: auto` (CSS UI 4 section 3.3) is the UA focus ring.
+- `expand_outline` (function) `src/css.c:1241` `static int expand_outline(const char *val, css_decl *dst, int cap)`
+- `interp_column_count` (function) `src/css.c:1267` `static int interp_column_count(const char *v)` -- `column-count`: a positive <integer>, or `auto`.
+- `interp_column_width` (function) `src/css.c:1279` `static int interp_column_width(const char *v)` -- layout, for the same reason CSS_LEN_MAX lives on the emitter: it is an * anti-DoS policy of the box model, not a...
+- `expand_columns` (function) `src/css.c:1290` `static int expand_columns(const char *val, css_decl *dst, int cap)` -- `columns` shorthand: <'column-width'> || <'column-count'> in either order, one or two tokens.
+- `expand_flex_flow` (function) `src/css.c:1324` `static int expand_flex_flow(const char *val, css_decl *dst, int cap)` -- `flex-flow` shorthand: the direction and the wrap keyword in either order, one or two tokens.
+- `expand_column_rule` (function) `src/css.c:1346` `static int expand_column_rule(const char *val, css_decl *dst, int cap)` -- `column-rule` shorthand: same <line-width> || <line-style> || <color> grammar * as `border`/`outline`, so it reuses...
+- `interp_filter_pct` (function) `src/css.c:1358` `static int interp_filter_pct(const char *s)` -- Parse a percentage (or 0..1 float) from inside a filter function's parens. * Returns 0..100 (clamped), -1 on error.
+- `interp_filter_deg` (function) `src/css.c:1372` `static int interp_filter_deg(const char *s)` -- Parse a degrees value (e.g. "45deg") from inside a filter function's parens.
+- `filter_paren_body` (function) `src/css.c:1387` `static const char *filter_paren_body(char *tok, const char *fn, size_t fnlen)` -- Helper: extract content inside filter(...) parens.
+- `item` (function) `src/css.c:1400` `* timing list takes its first item (CSS Animations/Transitions 1: with one
+ * transition/animatio...`
+- `easing_steps` (function) `src/css.c:1471` `static int easing_steps(const char *tok)`
+- `anim_easing_iv` (function) `src/css.c:1493` `static int anim_easing_iv(const char *tok)`
+- `is_anim_ident` (function) `src/css.c:1510` `static int is_anim_ident(const char *tok)` -- True when tok is a CSS <custom-ident> (the shape an animation-name takes): starts with a letter, underscore, hyphen...
+- `expand_animation` (function) `src/css.c:1526` `static int expand_animation(const char *val, css_decl *dst, int cap)` -- animation shorthand (CSS Animations 1 6.2): every longhand in any order in the first top-level comma item.
+- `order` (function) `src/css.c:1752` `* declaration order (dx, dy, optional blur >= 0);`
+- `blur` (function) `src/css.c:1787` `* consumes ONLY blur(Npx);`
+- `expand_backdrop_filter` (function) `src/css.c:1790` `static int expand_backdrop_filter(const char *val, css_decl *dst, int cap)` -- backdrop-filter / -webkit-backdrop-filter (2026-07-19, glassmorphism v1): same lax space-separated function-list...
+- `axis` (function) `src/css.c:1824` `* bare center displaces it to the free axis (`center right` = x:right, y:center).
+ * Any other co...`
+- `expand_bg_size` (function) `src/css.c:1940` `static int expand_bg_size(const char *val, css_decl *dst, int cap)` -- background-size (CSS Backgrounds 3 section 3.9): either a keyword (cover/contain) or one-to-two...
+- `emit_content` (function) `src/css.c:1980` `static int emit_content(css_decl *dst, int cap, const char *str,
+                        char (*c...` -- h = (n == 2) ? comp_px[1] : CSS_LEN_AUTO; hp = (n == 2) ? comp_pm[1] : 0; /* The bare keyword keeps its own code; an...
+- `cap` (function) `src/css.c:2056` `* string past the cap (emit_content): a conforming declaration must not * count as a discard just because an icon...`
+- `expand_counter_decls` (function) `src/css.c:2087` `static int expand_counter_decls(const char *prop, const char *val, css_decl *dst, int cap,
+      ...` -- counter-reset / counter-increment: validated here (hostile text), stored VERBATIM in the content pool and re-parsed...
+- `expand_content` (function) `src/css.c:2105` `static int expand_content(const char *val, css_decl *dst, int cap,
+                          char...` -- R8: content property.
+- `empty` (function) `src/css.c:2109` `* the slot with an explicit empty (ival -1) instead of dropping, or a * lower-priority string would leak through and...`
+- `expand_grid_areas` (function) `src/css.c:2156` `static int expand_grid_areas(const char *val, css_decl *dst, int cap,
+                           ...` -- grid-template-areas (CSS Grid 1 7.3): the value is a list of quoted strings, one per grid row.
+- `expand_grid_area_lines` (function) `src/css.c:2184` `static int expand_grid_area_lines(const char *val, css_decl *dst, int cap)` -- grid-area on an ITEM.
+- `expand_grid_line` (function) `src/css.c:2209` `static int expand_grid_line(const char *val, css_decl *dst, int cap, int p_start, int p_end)` -- if (!fx_grid_line_side(part, &side[k])) return 0; if (slash == NULL) break; p = slash + 1; if (k == 3) return 0...
+- `expand_grid_area` (function) `src/css.c:2218` `static int expand_grid_area(const char *val, css_decl *dst, int cap)`
+- `expand_grid_template` (function) `src/css.c:2257` `static int expand_grid_template(const char *val, css_decl *dst, int cap,
+                        ...` -- grid-template: <rows> / <columns>            e.g.
+- `sel_list_comma` (function) `src/css.c:2302` `static size_t sel_list_comma(const char *s, size_t i, size_t end);`
+- `box_shadow_layer` (function) `src/css.c:2309` `static int box_shadow_layer(const char *val, size_t len, int out[6])` -- One box-shadow layer: up to four lengths in order dx, dy, blur, spread, an optional color, and an optional `inset`...
+- `declaration` (function) `src/css.c:2345` `* invalid layer drops the whole declaration (fail closed). `none` is an explicit
+ * no-shadow. ur...`
+- `interp_flex_factor` (function) `src/css.c:2387` `static int interp_flex_factor(const char *v)` -- flex-grow / flex-shrink: a non-negative number stored x100 (0.5 -> 50), clamped to * [0, CSS_FLEX_FACTOR_MAX].
+- `interp_flex_basis` (function) `src/css.c:2397` `static int interp_flex_basis(const char *v, int *out)` -- flex-basis: `auto`/`content` -> CSS_LEN_AUTO; a non-negative length -> px; a percentage as per-mille encoded...
+- `column` (function) `src/css.c:2410` `* column (`flex: 1 1 0%`);`
+- `expand_flex` (function) `src/css.c:2431` `static int expand_flex(const char *val, css_decl *dst, int cap)` -- flex shorthand -> the three contiguous P_FLEX_GROW/SHRINK/BASIS slots.
+- `interp_align_kw` (function) `src/css.c:2476` `static int interp_align_kw(const char *v, int allow_auto, int allow_dist)` -- align-items / align-self / align-content / justify-items keyword. allow_auto is for * align-self; allow_dist...
+- `interp_flex_direction` (function) `src/css.c:2500` `static int interp_flex_direction(const char *v)`
+- `interp_box_orient` (function) `src/css.c:2518` `static int interp_box_orient(const char *v)` -- 2009 flexbox `box-orient` axis names onto `css_flex_direction`.
+- `interp_flex_line_pack` (function) `src/css.c:2545` `static int interp_flex_line_pack(const char *v)` -- `flex-line-pack` (2012 align-content): the `flex-pack` vocabulary plus `stretch`, mapped onto the css_align_kw slots...
+- `interp_flex_wrap` (function) `src/css.c:2555` `static int interp_flex_wrap(const char *v)`
+- `interp_grid_flow` (function) `src/css.c:2563` `static int interp_grid_flow(const char *v)` -- if (csel_ci_eq(v, "justify")) return CSS_AK_SPACE_BETWEEN; if (csel_ci_eq(v, "distribute")) return...
+- `copy_trim` (function) `src/css.c:2581` `static size_t copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` -- Copies s[a,b) into dst (bounded, NUL-terminated), trimming ASCII whitespace from * both ends.
+- `strip_important` (function) `src/css.c:2594` `static int strip_important(char *val)` -- Strips a trailing "!important" (case-insensitive, with optional whitespace before '!' and between '!' and the...
+- `var` (function) `src/css.c:2619` `* cvr_resolve then substitutes var() references when a declaration's value is
+ * interpreted (par...`
+- `has_double_dash` (function) `src/css.c:2641` `static int has_double_dash(const char *p, size_t n)` -- True when the caller's root matcher (css_media.scope_match) says the selector s[a,b) matches the document's <html>...
+- `subject_may_be_root` (function) `src/css.c:2650` `static int subject_may_be_root(const char *s, size_t a, size_t b, const char *root_scope)`
+- `selector_matches_root` (function) `src/css.c:2698` `static int selector_matches_root(const char *s, size_t a, size_t b, const css_media *m,
+         ...`
+- `tr_mul` (function) `src/css.c:2827` `static void tr_mul(double out[6], const double l[6], const double r[6])` -- Right-multiply 2D affine matrices: out = l * r (r applies first).
+- `matrix` (function) `src/css.c:2840` `* * Contract: the matrix() branch's math, shared so the single-function and * list paths cannot disagree. Skew lands...`
+- `tr_decompose` (function) `src/css.c:2847` `static int tr_decompose(const double m[6], int *tx, int *ty, int *rot,
+                        in...` -- QR-decompose an affine matrix into whole px/percent/degree slots.
+- `parse_numlist` (function) `src/css.c:2870` `static int parse_numlist(const char *p, size_t argn, double *m6, int count)` -- Parse matrix(a,b,c,d,e,f): six comma-separated unitless numbers.
+- `parse_matrix6` (function) `src/css.c:2893` `static int parse_matrix6(const char *p, size_t argn, double m6[6])`
+- `split_top_args` (function) `src/css.c:2906` `static int split_top_args(const char *s, size_t n, size_t *starts, size_t *stops,
+               ...` -- Split a top-level comma list honouring paren depth.
+- `LIST` (function) `src/css.c:2929` `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...`
+- `translate3d` (function) `src/css.c:2936` `* translate3d()/translateZ() flatten to their 2D projection (a 2D engine
+ * renders z as nothing,...`
+- `translateX` (function) `src/css.c:3247` `* translateX()/translateY() offsets in px via interp_len (allow_auto=0 -- %, * viewport units and bare non-calc...`
+- `parse_angle_deg` (function) `src/css.c:3251` `* parse_angle_deg (any of deg/grad/rad/turn, fractional allowed, rounded to * whole degrees);`
+- `expand_transform_list` (function) `src/css.c:3254` `* LISTS compose in order through expand_transform_list (CSS Transforms 1 3);`
+- `translateZ` (function) `src/css.c:3256` `* translateZ(), rotateX(0) and rotateY(0) emit the identity (with the stacking * context Firefox builds);`
+- `function` (function) `src/css.c:3258` `* transform function (perspective/rotate3d/...), or unparseable syntax,
+ * rejects the WHOLE decl...`
+- `origin_component` (function) `src/css.c:3459` `static int origin_component(const char *tok, int axis, int *out)` -- One transform-origin component: keyword (axis-checked), a percent, or a bare zero. axis: 0 = x (left/right valid), 1...
+- `expand_transform_origin` (function) `src/css.c:3485` `static int expand_transform_origin(const char *val, css_decl *dst, int cap)` -- transform-origin (M1.2c): 1-2 values; keywords and percents only (px lengths fail closed -- the parser has no box...
+- `expand_gap` (function) `src/css.c:3517` `static int expand_gap(const char *val, css_decl *dst, int cap)` -- gap / grid-gap (2026-07-10): one value keeps the pre-existing semantics (both axes; row-gap stays unset and falls...
+- `shorthand` (function) `src/css.c:3541` `* An uninterpretable token drops the whole shorthand (fail closed). */
+static int expand_place(co...`
+- `property` (function) `src/css.c:3576` `* error drops the whole property (fail closed). */
+static int expand_clip(const char *val, css_de...`
+- `expand_clip_path` (function) `src/css.c:3620` `static int expand_clip_path(const char *val, css_decl *dst, int cap)` -- clip-path (CSS Masking 1 3).
+- `font_list_alias` (function) `src/css.c:3667` `static void font_list_alias(const css_sheet *sheet, const char *ls, char *out, size_t cap)` -- Copies the normalized family list `ls` into out, replacing every name that matches a local()-only @font-face of the...
+- `font_list_norm` (function) `src/css.c:3701` `static int font_list_norm(const char *val, char *out, size_t cap)`
+- `writing` (function) `src/css.c:3745` `* Wide keywords claim BOTH slots without writing (inheritance then flows, as
+ * the tail does for...`
+- `shorthand` (function) `src/css.c:3787` `* generic bucket keeps the rest of the shorthand (same net effect as the
+ * font-family longhand ...`
+- `caller` (function) `src/css.c:3867` `* left to the caller (parse_one_decl stamps it). */ /* `known` (optional) reports whether the property NAME reached...`
+- `multiplying` (function) `src/css.c:3884` `* instead of the two multiplying (no page measured needs both on one element).
+ * A third (z) com...`
+- `is_inert_prop` (function) `src/css.c:3937` `static int is_inert_prop(const char *prop)` -- Properties that are valid CSS but change nothing in a static, non-interactive render: scrolling affordances...
+- `interpret_prop_dispatch` (function) `src/css.c:3960` `static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
+   ...`
+- `slots` (function) `src/css.c:4150` `* expand to several slots (border / box-shadow / outline / flex). */ if (strcmp(prop, "top") == 0) return...`
+- `sentinel` (function) `src/css.c:4290` `* cascade carries as the currentColor sentinel (in `color` the two are the * same thing);`
+- `here` (function) `src/css.c:4503` `* servers have no form here (fail closed). */ int o = csel_ci_eq(val, "none") ? CSS_SVG_PAINT_NONE : interp_color(val);`
+- `wide_claim` (function) `src/css.c:4763` `static int wide_claim(const char *prop, css_decl *dst, int cap,
+                      char (*urlt...` -- SHORTHAND it applies to every longhand the shorthand expands to.
+- `interpret_prop` (function) `src/css.c:4803` `static int interpret_prop(const char *prop, const char *val, css_decl *dst, int cap,
+            ...` -- The two value-level rules that hold for EVERY property, applied once around the dispatch so no per-property branch...
+- `drop_copy_text` (function) `src/css.c:4832` `static void drop_copy_text(char *dst, size_t cap, const char *src)` -- Copies hostile CSS text into a fixed report buffer: bounded, NUL-terminated, truncated with a visible "..." marker...
+- `drop_record` (function) `src/css.c:4851` `static void drop_record(css_drop_log *log, const char *prop, const char *val, int cause)` -- Records one dropped declaration, coalescing by (property, cause).
+- `raw_add` (function) `src/css.c:4877` `static int raw_add(css_sheet *sh, const char *a, size_t al, const char *b, size_t bl)` -- Interprets one declaration span s[0,n) into dst (up to cap).
+- `interpret_decls` (function) `src/css.c:4996` `static size_t interpret_decls(const char *s, size_t n, css_decl *dst, size_t cap,
+               ...` -- Splits a ';'-separated declaration block into dst (up to cap).
+- `sheet_pools_reserve` (function) `src/css.c:5054` `static void sheet_pools_reserve(css_sheet *sh)`
+- `add_rule` (function) `src/css.c:5060` `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,
+                     siz...` -- while (nc - n < CSS_POOL_HEADROOM && nc < hard_cap) nc *= 2; if (nc > hard_cap) nc = hard_cap; char...
+- `skip_at_rule` (function) `src/css.c:5174` `static size_t skip_at_rule(const char *s, size_t i, size_t n)` -- Skips an @-rule starting at s[i] ('@'): to the terminating ';' or past a * brace-balanced block.
+- `block_end` (function) `src/css.c:5190` `static size_t block_end(const char *s, size_t open, size_t n)` -- Index just past the '}' that closes the block whose '{' is at s[open]. n if * unbalanced.
+- `at_is_media` (function) `src/css.c:5212` `static int at_is_media(const char *s, size_t i, size_t n)` -- A media query list s[a,b), evaluated by the Media Queries 4 module against the render width (the only real datum...
+- `at_keyword` (function) `src/css.c:5223` `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` -- True when s[i] ('@') begins the at-keyword kw (lowercase, without '@') followed * by a delimiter.
+- `csel_substr` (function) `src/css.c:5245` `return known && csel_substr(val, "var(", 1);`
+- `supports_selector_ok` (function) `src/css.c:5248` `static int supports_selector_ok(void *ctx, const char *sel)`
+- `supports_matches` (function) `src/css.c:5257` `static int supports_matches(const char *s, size_t a, size_t b)`
+- `cq_register` (function) `src/css.c:5315` `static int cq_register(css_sheet *sh, const char *text, size_t len, int max_w)` -- Records an @container prelude under the condition the parser is inside and returns * its 1-based id, or 0 when it...
+- `cq_holds` (function) `src/css.c:5337` `static int cq_holds(const css_sheet *sheet, int id, const cmq_container *scope)` -- Every @container condition from id outward holds for an element whose ancestor containers are `scope`.
+- `layer_register` (function) `src/css.c:5351` `static int layer_register(css_sheet *sh, const char *s, size_t a, size_t b,
+                     ...` -- Registers the layer name s[a,b) (trimmed; empty = anonymous) nested under the sheet's current layer, and returns its...
+- `collect_custom_props_scoped` (function) `src/css.c:5394` `static void collect_custom_props_scoped(const char *s, size_t start, size_t end,
+                ...` -- Structure-aware custom-property collection (see the block comment above cvr_collect_decls): walks s[start,end) with...
+- `parse_block` (function) `src/css.c:5476` `static void parse_block(css_sheet *sh, const char *s, size_t start, size_t end,
+                 ...` -- Parses rules in s[start,end).
+- `download` (function) `src/css.c:5653` `* the download (spec/webfont.md b3b). An empty src_url
+                     * simply never resolv...`
+- `rem_ident_ch` (function) `src/css.c:5785` `static int rem_ident_ch(char c)` -- True for a character that continues a CSS identifier, so a `rem` glued to one is * part of a name and not a unit.
+- `rem_num_starts_after` (function) `src/css.c:5793` `static int rem_num_starts_after(char prev)` -- True when a number may START at a character preceded by prev -- i.e. prev cannot be part of a longer name or number.
+- `rem_emit_px` (function) `src/css.c:5803` `static int rem_emit_px(char *out, size_t cap, size_t *o, double px)` -- Appends the px equivalent of num rem.
+- `len_unit_px` (function) `src/css.c:5833` `static double len_unit_px(const char *u, size_t len, const len_rebase_ctx *c)` -- px per unit for a unit identifier u[0,len) under c, or 0 when c leaves it alone.
+- `len_rebase` (function) `src/css.c:5863` `static char *len_rebase(const char *s, size_t n, const len_rebase_ctx *c, size_t *outlen)` -- width family) in s[0,n) into `<number x scale>px`.
+- `rem_rebase` (function) `src/css.c:5929` `static char *rem_rebase(const char *s, size_t n, double rem_px, size_t *outlen)`
+- `sheet_index` (function) `src/css.c:5937` `static void sheet_index(css_sheet *sh)` -- Rewinds a sheet to empty while keeping every allocation, so the text can be * re-parsed in place.
+- `sheet_rewind` (function) `src/css.c:5942` `static void sheet_rewind(css_sheet *sh)`
+- `sheet_root_font_px` (function) `src/css.c:5989` `static double sheet_root_font_px(const css_sheet *sh)` -- The root element's font-size in px, as the cascade resolves it (16px when the sheet leaves the root alone).
+- `strip_comments` (function) `src/css.c:5997` `static char *strip_comments(const char *text, size_t len, size_t *outlen)` -- Removes C-style block comments into a fresh NUL-terminated buffer (each comment * becomes one space).
+- `var` (function) `src/css.c:6007` `* collected and forty var() declarations -- font sizes, widths, radii, the
+     * whole theme -- ...`
+- `css_parse` (function) `src/css.c:6032` `css_status css_parse(const char *text, size_t len, css_sheet **out)`
+- `css_parse_media` (function) `src/css.c:6036` `css_status css_parse_media(const char *text, size_t len, const css_media *media,
+                ...`
+- `css_parse_scoped` (function) `src/css.c:6041` `css_status css_parse_scoped(const char *text, size_t len, const css_media *media,
+               ...`
+- `css_parse_logged` (function) `src/css.c:6046` `css_status css_parse_logged(const char *text, size_t len, const css_media *media,
+               ...`
+- `consumer` (function) `src/css.c:6080` `* consumer (shorthands, calc(), var() values) gets it with no context
+         * threaded through...`
+- `css_free` (function) `src/css.c:6138` `void css_free(css_sheet *s)`
+- `content_attr_of` (function) `src/css.c:6163` `static const char *content_attr_of(const css_element *el, const char *name)` -- Looks up an attribute value on the element being styled (names are stored * lowercased by css_chain; the query is...
+- `apply_decl` (function) `src/css.c:6172` `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+              ...`
+- `page_view` (function) `src/css.c:6179` `* the generated text reaches page_view (which materialises it as a synthetic * run);`
+- `parent` (function) `src/css.c:6212` `* property from the parent (`inherit`), and an unset non-inherited one
+         * stands at its i...`
+- `css_ua_heading_em` (function) `src/css.c:6667` `double css_ua_heading_em(int level)`
+- `css_computed_font_size_for_tag` (function) `src/css.c:6672` `double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag)`
+- `computed_font_size` (function) `src/css.c:6680` `static double computed_font_size(const css_style *o, const css_element *el)`
+- `cand_cmp` (function) `src/css.c:6697` `static int cand_cmp(const void *pa, const void *pb)`
+- `apply_var_source` (function) `src/css.c:6762` `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+        ...` -- Re-resolves one var() source ("prop\0value") against the element's scope and * applies what it interprets to...
+- `apply_rule` (function) `src/css.c:6789` `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,
+              ...` -- Applies one matched rule. es == NULL: the page-global meaning of every var() (markers skipped, their spans applied).
+- `fold_font_relative` (function) `src/css.c:6827` `static void fold_font_relative(css_style *o, int *wi, int *ws, int *wo,
+                         ...` -- computed font-size.
+- `css_resolve_el` (function) `src/css.c:6858` `css_style css_resolve_el(const css_sheet *sheet, const css_element *el,
+                         ...`
+- `css_resolve_el_ex` (function) `src/css.c:6867` `css_style css_resolve_el_ex(const css_sheet *sheet, const css_element *el,
+                      ...`
+- `pseudo_of` (function) `src/css.c:6874` `static int pseudo_of(int which)` -- return css_resolve_el_ex(sheet, el, inline_style, inline_len, NULL); } static css_style resolve_core(const css_sheet...
+- `css_resolve_pseudo` (function) `src/css.c:6883` `css_style css_resolve_pseudo(const css_sheet *sheet, const css_element *el, int which)`
+- `resolve_core` (function) `src/css.c:6894` `static css_style resolve_core(const css_sheet *sheet, const css_element *el,
+                    ...` -- The cascade. want_pseudo 0 resolves the ELEMENT (a ::before/::after rule only hands it `content`)...
+- `css_resolve` (function) `src/css.c:7156` `css_style css_resolve(const css_sheet *sheet, const char *tag, const char *id,
+                  ...`
+- `NULL` (function) `src/css.c:7180` `* Sheet can be NULL (inline style, no @keyframes). */
+void css_resolve_anim_keyframes(css_style *...`
+- `css_font_face_count` (function) `src/css.c:7212` `size_t css_font_face_count(const css_sheet *sheet)`
+- `css_font_face_at` (function) `src/css.c:7216` `int css_font_face_at(const css_sheet *sheet, size_t i,
+                     char *family, size_t ...`
+- `css_parse_inline` (function) `src/css.c:7226` `css_style css_parse_inline(const char *style, size_t len)`
+- `css_sheet_uses_containers` (function) `src/css.c:7230` `int css_sheet_uses_containers(const css_sheet *sheet)`
+- `css_sheet_uses_counters` (function) `src/css.c:7234` `int css_sheet_uses_counters(const css_sheet *sheet)`
+
+## src/css_atrule.c
+Depends on: `include/css_atrule.h`, `include/css_select.h`
+- `skip_ws` (function) `src/css_atrule.c:17` `static size_t skip_ws(const char *s, size_t i, size_t b)`
+- `keyword_at` (function) `src/css_atrule.c:23` `static int keyword_at(const char *s, size_t i, size_t b, const char *kw)` -- Scratch size for one declaration or selector handed to the caller.
+- `close_paren` (function) `src/css_atrule.c:33` `static size_t close_paren(const char *s, size_t open, size_t b)` -- Index of the ')' matching the '(' at s[open], or b when unbalanced.
+- `copy_trimmed` (function) `src/css_atrule.c:54` `static int copy_trimmed(const char *s, size_t a, size_t b, char *dst, size_t cap, int lower)` -- Copies s[a,b) trimmed into dst (cap bytes, NUL-terminated); 0 if it does not fit * or is empty. lower != 0...
+- `eval_declaration` (function) `src/css_atrule.c:68` `static int eval_declaration(const char *s, size_t a, size_t b, const car_ops *ops, int *ok)` -- True when s[a,b) (inside a pair of parens) is a declaration `prop: value` * rather than a nested condition.
+- `eval_in_parens` (function) `src/css_atrule.c:85` `static int eval_in_parens(const char *s, size_t *i, size_t b, const car_ops *ops,
+               ...` -- while (i < b && (csel_ident_ch(s[i]) || s[i] == '-')) ++i; if (i == n0) { *ok = 0; return 0; } size_t n1 = i; i =...
+- `eval_condition` (function) `src/css_atrule.c:114` `static int eval_condition(const char *s, size_t a, size_t b, const car_ops *ops,
+                ...`
+- `car_supports` (function) `src/css_atrule.c:141` `int car_supports(const char *s, size_t a, size_t b, const car_ops *ops)`
+- `car_layer_rank` (function) `src/css_atrule.c:148` `int car_layer_rank(car_layers *L, const char *name, size_t len)`
+- `car_effective_spec` (function) `src/css_atrule.c:171` `int car_effective_spec(int spec, int layer, int important)`
+
 ## src/css_box.c
 Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 - `cb_parse_num` (function) `src/css_box.c:13` `static int cb_parse_num(const char *s, double *out, const char **endp)`
@@ -180,275 +495,6 @@ Depends on: `include/css_counter.h`
 - `cnt_leave` (function) `src/css_counter.c:407` `void cnt_leave(cnt_state *s, int depth)`
 - `cnt_resolve` (function) `src/css_counter.c:412` `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx,
          ...`
-
-## src/css_gradient.c
-Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
-- `cg_parse_num` (function) `src/css_gradient.c:13` `static int cg_parse_num(const char *s, double *out, const char **endp)`
-- `cg_wide_keyword` (function) `src/css_gradient.c:18` `static int cg_wide_keyword(const char *v)`
-- `gradient` (function) `src/css_gradient.c:28` `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
- * the whole decl...`
-- `find_gradient_call` (function) `src/css_gradient.c:77` `static int find_gradient_call(const char *v, const char *fn, size_t *start,
-                     ...` -- Locates a gradient function call `fn` (e.g. "linear-gradient(") in v (case-insensitive; an occurrence that is the...
-- `conic_prelude` (function) `src/css_gradient.c:111` `static int conic_prelude(const char *seg, int *angle)` -- conic-gradient prelude: `from <int>deg`, optionally followed by `at <pos>` (position accepted and ignored -- always...
-- `grad_stop_pos` (function) `src/css_gradient.c:153` `static int grad_stop_pos(const char *pp, int conic, const char **endp)` -- One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts `Ndeg` -> the same 0-1000 turn fraction...
-- `CSS_GRAD_STOPS_MAX` (function) `src/css_gradient.c:184` `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
- * the gradient fai...`
-- `emit_gradient` (function) `src/css_gradient.c:291` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
-                         ...` -- Emits the gradient decl group. nstops == 0 emits only the explicit reset * (P_BG_GRAD_N = 0), which is how a...
-- `find_radial_gradient` (function) `src/css_gradient.c:360` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
-                      ...` -- R5c: detects radial-gradient(circle at center, color1, color2).
-- `cg_first_url` (function) `src/css_gradient.c:398` `int cg_first_url(const char *val, char *out, size_t outcap)`
-- `emit_radial_geom` (function) `src/css_gradient.c:405` `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` -- } memcpy(urltab[*nurl], url, strlen(url) + 1); dst[0].ival = (int)*nurl; ++*nurl; return 1; } int cg_first_url(const...
-- `pool` (function) `src/css_gradient.c:418` `* pool (gradient explicitly reset);`
-- `downstream` (function) `src/css_gradient.c:422` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
-int cg_expand_bg_imag...`
-- `declaration` (function) `src/css_gradient.c:483` `* declaration (fail closed);`
-- `bg_layer_tokens_ok` (function) `src/css_gradient.c:490` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
-- `cg_expand_background` (function) `src/css_gradient.c:530` `int cg_expand_background(const char *val, css_decl *dst, int cap,
-                             ch...`
-- `rad_ieq` (function) `src/css_gradient.c:618` `static int rad_ieq(const char *a, const char *b)`
-- `rad_len` (function) `src/css_gradient.c:626` `static int rad_len(const char *tok, int *enc)` -- One <length-percentage> token (`12px`, `40%`, `0`) -> the cg_radial encoding; 1 = ok.
-- `rad_is_len_start` (function) `src/css_gradient.c:647` `static int rad_is_len_start(const char *t)`
-- `rad_pos_kw` (function) `src/css_gradient.c:652` `static int rad_pos_kw(const char *t, int *axis)` -- if (*e == '\0' && v == 0.0) { *enc = 0; return 1; }   /* unitless 0 is a zero length if (rad_ieq(e, "px")) { if (v >...
-- `rad_parse_position` (function) `src/css_gradient.c:661` `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
-- `cg_parse_radial_prelude` (function) `src/css_gradient.c:690` `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
-- `cg_radial_len_px` (function) `src/css_gradient.c:766` `double cg_radial_len_px(int enc, double dim)`
-- `cg_dmin` (function) `src/css_gradient.c:775` `static double cg_dmin(double a, double b)`
-- `cg_dmax` (function) `src/css_gradient.c:776` `static double cg_dmax(double a, double b)`
-- `cg_radial_geometry` (function) `src/css_gradient.c:778` `void cg_radial_geometry(const cg_radial *r, double w, double h,
-                        double *c...`
-- `cg_parse_linear` (function) `src/css_gradient.c:815` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
-
-## src/css_import.c
-Depends on: `include/css_import.h`
-- `is_ws` (function) `src/css_import.c:8` `static int is_ws(char c)`
-- `lower` (function) `src/css_import.c:10` `static char lower(char c)`
-- `kw_at` (function) `src/css_import.c:13` `static int kw_at(const char *s, size_t i, size_t e, const char *kw)` -- css_import -- @import prelude reader (spec/css_import.md).
-- `is_ident_char` (function) `src/css_import.c:21` `static int is_ident_char(char c)`
-- `skip_ws` (function) `src/css_import.c:27` `static size_t skip_ws(const char *s, size_t i, size_t e)` -- static int kw_at(const char *s, size_t i, size_t e, const char *kw) { size_t n = strlen(kw); if (e - i < n) return...
-- `copy_trim` (function) `src/css_import.c:53` `static int copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` -- Past the string that opens at s[i] (a quote), or (size_t)-1 when it does not * terminate before e or a newline (a...
-- `read_string` (function) `src/css_import.c:64` `static size_t read_string(const char *s, size_t a, size_t e, char *dst, size_t cap)` -- Copies the body of the string opening at s[a] (quotes stripped, escapes kept * verbatim except an escaped quote).
-- `match_paren` (function) `src/css_import.c:79` `static size_t match_paren(const char *s, size_t i, size_t e)` -- size_t end = skip_string(s, a, e); if (end == (size_t)-1) return end; size_t n = 0; for (size_t j = a + 1; j + 1 <...
-- `parse_prelude` (function) `src/css_import.c:97` `static int parse_prelude(const char *s, size_t a, size_t b, ci_import *im)` -- Parses one import prelude s[a, b) (after "@import", before ';') into im. * Returns 0, or -1 when the import is...
-- `ci_scan` (function) `src/css_import.c:156` `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap)`
-- `ci_wrap` (function) `src/css_import.c:194` `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap)`
-- `ci_balanced` (function) `src/css_import.c:220` `int ci_balanced(const char *css, size_t len)`
-- `is_ident_ch` (function) `src/css_import.c:243` `static int is_ident_ch(char c)`
-- `has_scheme` (function) `src/css_import.c:250` `static int has_scheme(const char *r)` -- } else if (c == '}') { if (--depth < 0) return 0; } } return depth == 0; } static int is_ident_ch(char c) { unsigned...
-- `url_arg` (function) `src/css_import.c:266` `static int url_arg(const char *s, size_t a, size_t e, char *ref, size_t cap, size_t *end)` -- Reads the argument of the url( whose '(' ends at s[a-1]: the raw reference into ref and the index past ')' into...
-- `abs_ok` (function) `src/css_import.c:297` `static int abs_ok(const char *u)`
-- `ci_rebase_urls` (function) `src/css_import.c:303` `int ci_rebase_urls(const char *css, size_t len, const char *base,
-                   ci_resolve_f...`
-
-## src/css_index.c
-Depends on: `include/css_index.h`
-- `key_of` (function) `src/css_index.c:11` `static uint64_t key_of(int kind, const char *s, size_t n, int lower)` -- FNV-1a over the kind byte then the name; the tag is hashed lowercased because * compound_matches compares it with...
-- `key_of_token` (function) `src/css_index.c:26` `static uint64_t key_of_token(int kind, const char *tok)` -- An element token in the canonical form csel_ident_eq compares against: as-is * when it fits CSS_TOK_MAX, folded...
-- `entry_cmp` (function) `src/css_index.c:34` `static int entry_cmp(const void *a, const void *b)`
-- `cix_free` (function) `src/css_index.c:40` `void cix_free(cix_index *idx)`
-- `build` (function) `src/css_index.c:47` `static void build(const css_sel *arr, css_sel *const *ptrs, size_t n, cix_index *idx)`
-- `lower_bound` (function) `src/css_index.c:86` `static size_t lower_bound(const cix_index *idx, uint64_t k)` -- keyed[nk].key = k; keyed[nk].sel = (uint32_t)i; ++nk; } qsort(keyed, nk, sizeof *keyed, entry_cmp); idx->keyed =...
-- `run_head` (function) `src/css_index.c:104` `static uint32_t run_head(const cix_run *r)`
-- `add_bucket` (function) `src/css_index.c:106` `static void add_bucket(const cix_index *idx, uint64_t k, cix_run *runs, size_t *nr)`
-- `push` (function) `src/css_index.c:114` `static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v)`
-- `cix_candidates` (function) `src/css_index.c:129` `size_t cix_candidates(const cix_index *idx, const css_element *el,
-                      uint32_t...` -- Candidates in ascending selector order without duplicates: a k-way merge of the (already * sorted) universal list...
-- `cix_build` (function) `src/css_index.c:166` `void cix_build(const css_sel *sels, size_t n, cix_index *idx)`
-- `cix_build_ptrs` (function) `src/css_index.c:168` `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx)`
-
-## src/css_length.c
-Depends on: `include/css.h`, `include/css_length.h`
-- `know` (function) `src/css_length.c:7` `* this module cannot know (real font metrics, the viewport) arrives through
- * cl_ctx rather than...`
-- `cl_unit_eq` (function) `src/css_length.c:30` `static int cl_unit_eq(const char *unit, size_t len, const char *lit)` -- ASCII case-insensitive compare of a possibly-unterminated unit slice against a lowercase literal.
-- `cl_font_size` (function) `src/css_length.c:56` `static double cl_font_size(const cl_ctx *ctx)` -- The element's font-size, falling back to the CSS initial value when the caller left it unset.
-- `cl_root_font_size` (function) `src/css_length.c:60` `static double cl_root_font_size(const cl_ctx *ctx)`
-- `cl_metric_or` (function) `src/css_length.c:67` `static double cl_metric_or(double measured, double ratio, const cl_ctx *ctx)` -- A font metric, or the fallback the spec itself names for when that metric is unavailable -- expressed as a ratio of...
-- `cl_viewport_scale` (function) `src/css_length.c:80` `static int cl_viewport_scale(const char *u, size_t len, const cl_ctx *ctx, double *per)` -- Viewport-relative units (section 6.2).
-- `cl_ctx_initial` (function) `src/css_length.c:100` `cl_ctx cl_ctx_initial(void)`
-- `cl_unit_scale` (function) `src/css_length.c:117` `cl_status cl_unit_scale(const char *unit, size_t unit_len,
-                        const cl_ctx *...`
-- `cl_is_length_unit` (function) `src/css_length.c:167` `int cl_is_length_unit(const char *unit, size_t unit_len)`
-- `cl_unit_is_font_relative` (function) `src/css_length.c:174` `int cl_unit_is_font_relative(const char *unit, size_t unit_len)`
-- `cl_em_refit` (function) `src/css_length.c:219` `double cl_em_refit(double px, double em, double from_font_size, double font_size)`
-- `cl_parse_number` (function) `src/css_length.c:233` `static int cl_parse_number(const char **pp, const char *end, double *out)` -- Parses a CSS <number> (CSS Syntax 4.3.12) without strtod -- strtod is locale-dependent, and a locale whose decimal...
-- `cl_number` (function) `src/css_length.c:292` `int cl_number(const char *s, double *out, const char **endp)`
-- `cl_resolve_core` (function) `src/css_length.c:309` `static cl_status cl_resolve_core(const char *value, const cl_ctx *ctx, cl_lp *out)` -- The shared core of cl_resolve and cl_resolve_lp: tokenize <number><unit> and resolve it into the two components of a...
-- `cl_resolve` (function) `src/css_length.c:377` `cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px)`
-- `cl_resolve_lp` (function) `src/css_length.c:391` `cl_status cl_resolve_lp(const char *value, const cl_ctx *ctx, cl_lp *out)`
-- `cl_lp_used` (function) `src/css_length.c:395` `double cl_lp_used(cl_lp lp, double basis)`
-
-## src/css_mask.c
-Depends on: `include/css_gradient.h`, `include/css_mask.h`
-- `ieq` (function) `src/css_mask.c:13` `static int ieq(const char *a, const char *b)`
-- `cm_is_mask_prop` (function) `src/css_mask.c:19` `int cm_is_mask_prop(const char *prop)`
-- `cm_encode_layer` (function) `src/css_mask.c:26` `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)`
-- `cm_decode_layer` (function) `src/css_mask.c:47` `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)`
-- `split` (function) `src/css_mask.c:65` `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)` -- out->kind = 1; out->nst = (meta >> 4) & 0xf; if (out->nst < 2) out->nst = 2; if (out->nst > 4) out->nst = 4...
-- `composite_word` (function) `src/css_mask.c:92` `static int composite_word(const char *t, int webkit)`
-- `clip_word` (function) `src/css_mask.c:106` `static int clip_word(const char *t)`
-- `image_layer` (function) `src/css_mask.c:114` `static int image_layer(const char *tok, cm_layer *l)` -- if (ieq(t, "source-in")) return CM_COMP_INTERSECT; if (ieq(t, "xor")) return CM_COMP_EXCLUDE; } return -1; } static...
-- `emit_layers` (function) `src/css_mask.c:132` `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)`
-- `cm_expand` (function) `src/css_mask.c:201` `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)`
-
-## src/css_mq.c
-Depends on: `include/css_box.h`, `include/css_length.h`, `include/css_mq.h`
-- `lower_ch` (function) `src/css_mq.c:32` `static char lower_ch(char c)`
-- `is_space` (function) `src/css_mq.c:36` `static int is_space(char c)`
-- `is_ident_ch` (function) `src/css_mq.c:40` `static int is_ident_ch(char c)`
-- `skip_ws` (function) `src/css_mq.c:45` `static void skip_ws(mq_cur *c)`
-- `read_word` (function) `src/css_mq.c:50` `static int read_word(mq_cur *c, char *w, size_t cap)` -- static int is_space(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f'; } static int...
-- `peek_word` (function) `src/css_mq.c:62` `static int peek_word(const mq_cur *c, char *w, size_t cap)` -- /* Reads one identifier at the cursor (lowercased into w); 0 if none. static int read_word(mq_cur *c, char *w...
-- `and3` (function) `src/css_mq.c:67` `static int and3(int a, int b)`
-- `or3` (function) `src/css_mq.c:73` `static int or3(int a, int b)`
-- `not3` (function) `src/css_mq.c:79` `static int not3(int a)`
-- `copy_trim_lower` (function) `src/css_mq.c:84` `static int copy_trim_lower(const char *s, size_t a, size_t b, char *dst, size_t cap)` -- return MQ_TRUE; } static int or3(int a, int b) { if (a == MQ_TRUE || b == MQ_TRUE) return MQ_TRUE; if (a ==...
-- `feature_of` (function) `src/css_mq.c:107` `static fval feature_of(const char *name, const cmq_env *env)` -- /* --- feature values --- typedef enum { FV_NONE, FV_NUM, FV_KW } fv_kind; typedef struct fval { fv_kind     kind...
-- `read_num` (function) `src/css_mq.c:163` `static int read_num(const char *t, double *out, const char **end)` -- } else if (strcmp(name, "update") == 0) { v.kind = FV_KW; v.kw = "fast"; } else if (strcmp(name, "overflow-block")...
-- `parse_value` (function) `src/css_mq.c:168` `static int parse_value(const char *t, int unit, double *out)` -- || strcmp(name, "video-dynamic-range") == 0) { v.kind = FV_KW; v.kw = "standard"; } else if (strcmp(name, "scan") ==...
-- `cmp_op` (function) `src/css_mq.c:208` `static int cmp_op(double lhs, int op, double rhs)` -- if (strcmp(e, "dpcm") == 0) { out = n * CMQ_CM_PER_IN / CMQ_DPI_PER_DPPX; return 1; } return 0; } if (*e != '\0')...
-- `flip_op` (function) `src/css_mq.c:220` `static int flip_op(int op)` -- /* op: '<' '<=' '>' '>=' '=' encoded as 1..5.
-- `bool_ctx` (function) `src/css_mq.c:231` `static int bool_ctx(const fval *v)` -- } /* Flips an operator so that `v op name` reads `name op' v`. static int flip_op(int op) { switch (op) { case 1...
-- `eval_plain` (function) `src/css_mq.c:239` `static int eval_plain(const char *name, const char *value, const cmq_env *env)` -- case 4: return 2; default: return op; } } /* Boolean context (MQ4 2.4.2): true unless the value is 0 or `none`....
-- `read_op` (function) `src/css_mq.c:268` `static int read_op(const char **p)` -- fval f = feature_of(base, env); if (f.kind == FV_NONE) return MQ_UNKNOWN; if (f.kind == FV_KW) { if (range != 0)...
-- `eval_range` (function) `src/css_mq.c:282` `static int eval_range(const char *t, const cmq_env *env)` -- static int read_op(const char **p) { const char *q = *p; int op = 0; if (q[0] == '<' && q[1] == '=') { op = 2; q +=...
-- `eval_feature` (function) `src/css_mq.c:330` `static int eval_feature(const char *s, size_t a, size_t b, const cmq_env *env)` -- } /* v1 op name op v2: both operators point the same way (MQ4 grammar). int lt = (ops[0] == 1 || ops[0] == 2) &&...
-- `eval_in_parens` (function) `src/css_mq.c:355` `static int eval_in_parens(mq_cur *c, int depth)` -- if (name[0] == '\0' || value[0] == '\0') return MQ_UNKNOWN; return eval_plain(name, value, env); } if (strpbrk(t...
-- `eval_cond` (function) `src/css_mq.c:382` `static int eval_cond(mq_cur *c, int depth)` -- mq_cur in = { c->s, open + 1, close, c->env }; skip_ws(&in); char w[16]; int nested = (in.i < in.b && in.s[in.i] ==...
-- `eval_query` (function) `src/css_mq.c:406` `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)` -- skip_ws(c); if (c->i >= c->b) break; mq_cur save = *c; if (!read_word(c, w, sizeof w)) { *c = save; break; } int m =...
-- `cmq_matches` (function) `src/css_mq.c:460` `int cmq_matches(const char *s, size_t len, const cmq_env *env)`
-- `has_word` (function) `src/css_mq.c:481` `static int has_word(const char *t, const char *w)` -- while (i < len && !(s[i] == ',' && d == 0)) { if (s[i] == '(') ++d; else if (s[i] == ')') --d; ++i; } if...
-- `cmq_container_surely` (function) `src/css_mq.c:537` `int cmq_container_surely(const char *s, size_t len, int max_width)`
-- `cmq_name_hash` (function) `src/css_mq.c:549` `unsigned cmq_name_hash(const char *s, size_t n)`
-- `cmq_container_holds` (function) `src/css_mq.c:556` `int cmq_container_holds(const char *s, size_t len, const cmq_container *scope, int max_width)`
-- `container_type_kw` (function) `src/css_mq.c:580` `static int container_type_kw(const char *s, size_t n, int *type)`
-- `container_names` (function) `src/css_mq.c:596` `static int container_names(const char *s, size_t n, unsigned names[CMQ_CONTAINER_NAMES])`
-- `cmq_container_decl` (function) `src/css_mq.c:618` `int cmq_container_decl(const char *prop, const char *val, int *type,
-                       unsig...`
-
-## src/css_select.c
-Depends on: `include/css_select.h`
-- `csel_hex_val` (function) `src/css_select.c:25` `int csel_hex_val(char c)` -- CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content values and selector identifiers).
-- `csel_emit_utf8` (function) `src/css_select.c:32` `size_t csel_emit_utf8(unsigned int cp, char *out)`
-- `csel_unescape` (function) `src/css_select.c:54` `void csel_unescape(char *dst, size_t cap, const char *src, size_t n)`
-- `csel_escape_len` (function) `src/css_select.c:93` `size_t csel_escape_len(const char *s, size_t i, size_t b)`
-- `csel_decl_end` (function) `src/css_select.c:106` `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace)`
-- `ident_hash` (function) `src/css_select.c:123` `static unsigned long long ident_hash(const char *s, size_t n)` -- 64-bit FNV-1a of the whole identifier: what makes a folded long name exact up to * a hash collision -- and a...
-- `csel_ident_fold` (function) `src/css_select.c:129` `void csel_ident_fold(const char *src, size_t len, char *dst)`
-- `csel_ident_eq` (function) `src/css_select.c:144` `int csel_ident_eq(const char *stored, const char *tok, size_t tlen)`
-- `csel_read_ident` (function) `src/css_select.c:152` `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower)`
-- `parse_attr_sel` (function) `src/css_select.c:186` `static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am)` -- Parses one attribute selector starting at s[*ip] == '[' (within s[.,b)) into *am.
-- `parse_nth_arg` (function) `src/css_select.c:243` `static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B)` -- Parses the An+B argument of the nth-child family, s[a,b) (surrounding space trimmed here).
-- `take_sub_arg` (function) `src/css_select.c:295` `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
-- `between` (function) `src/css_select.c:384` `* between ( and ) is split on commas (not inside [] or ());`
-- `simple_pseudo_kind` (function) `src/css_select.c:439` `static int simple_pseudo_kind(const char *nm)` -- The PSEUDO_* kind of an argument-less pseudo-class usable inside a * sub-selector, or -1.
-- `parse_sub_compound` (function) `src/css_select.c:460` `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)` -- Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only tag name, .class, #id, or [attr] (no...
-- `parse_compound` (function) `src/css_select.c:525` `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
-                  ...` -- Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space) into *cp. sel holds the sub-selector...
-- `selector` (function) `src/css_select.c:567` `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
- * dropped. Whitespa...`
-- `csel_element_feature_bits` (function) `src/css_select.c:587` `unsigned long long csel_element_feature_bits(const css_element *e)`
-- `compute_anc_req` (function) `src/css_select.c:602` `static unsigned long long compute_anc_req(const css_sel *sel)` -- What the ancestors of the subject must contain: walk left from the subject while the combinator is descendant or...
-- `csel_parse_core` (function) `src/css_select.c:615` `static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel)`
-- `seven` (function) `src/css_select.c:621` `* pay for the other seven (a css_sel is ~12.8 KiB). */ memset(sel, 0, offsetof(css_sel, parts));`
-- `compound_req` (function) `src/css_select.c:709` `static unsigned long long compound_req(const css_compound *c)` -- } else { psel += 10; } } spec += 100 * (sel->parts[k].has_id ?
-- `compute_subj_req` (function) `src/css_select.c:718` `static unsigned long long compute_subj_req(const css_sel *sel)`
-- `csel_compact_size` (function) `src/css_select.c:729` `size_t csel_compact_size(int nparts)`
-- `csel_compact_dup` (function) `src/css_select.c:735` `css_sel *csel_compact_dup(const css_sel *sel)`
-- `csel_parse` (function) `src/css_select.c:744` `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel)`
-- `el_attr_value` (function) `src/css_select.c:755` `static const char *el_attr_value(const css_element *el, const char *name)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
-- `ends_with` (function) `src/css_select.c:765` `static int ends_with(const char *v, const char *suf, int ci)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
-- `has_word` (function) `src/css_select.c:773` `static int has_word(const char *v, const char *w, int ci)` -- True if `v` is a whitespace-separated list containing the word `w` (non-empty), * case-folded when ci (the `~=`...
-- `attr_matches` (function) `src/css_select.c:788` `static int attr_matches(const css_attr_match *am, const css_element *el)` -- size_t wl = strlen(w); if (wl == 0) return 0; const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t'...
-- `nth_matches` (function) `src/css_select.c:808` `static int nth_matches(int A, int B, int idx)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
-- `is_form_control` (function) `src/css_select.c:817` `static int is_form_control(const char *tag)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
-- `pseudo_matches` (function) `src/css_select.c:826` `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...` -- if (A > 0) return d >= 0 && d % A == 0; return d <= 0 && (-d) % (long)(-A) == 0; } /* Form controls for :enabled...
-- `sub_sel_matches` (function) `src/css_select.c:830` `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
-- `compound_matches` (function) `src/css_select.c:1080` `static int compound_matches(const css_compound *c, const css_element *el,
-                       ...` -- True if one compound matches one element (no ancestor context).
-- `built` (function) `src/css_select.c:1115` `* chains the caller built (an element without parent/prev links never matches
- * through that com...`
-- `pseudo_is_local` (function) `src/css_select.c:1160` `static int pseudo_is_local(int kind)` -- case COMB_ADJACENT: return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el...
-- `csel_needs_structure` (function) `src/css_select.c:1173` `int csel_needs_structure(const css_sel *sel)`
-- `csel_matches` (function) `src/css_select.c:1196` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
-              ...`
-
-## src/css_text.c
-Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`
-- `ct_family_of` (function) `src/css_text.c:18` `static int ct_family_of(const char *name)` -- Maps one font-family name (a generic keyword or a common family) to a generic css_font_family bucket; -1 if...
-- `ct_interp_fontfamily` (function) `src/css_text.c:47` `int ct_interp_fontfamily(const char *v)` -- font-family: the first recognised name in the comma-separated stack wins (its * generic bucket).
-- `ct_interp_texttransform` (function) `src/css_text.c:69` `int ct_interp_texttransform(const char *v)`
-- `ct_interp_valign` (function) `src/css_text.c:91` `int ct_interp_valign(const char *v)`
-- `ct_expand_valign` (function) `src/css_text.c:122` `int ct_expand_valign(const char *val, css_decl *dst, int cap)` -- vertical-align (CSS 2.1 section 10.8.1) has two productions: a keyword, and a <length-percentage> baseline SHIFT...
-- `transition_prop_one` (function) `src/css_text.c:139` `static int transition_prop_one(const char *v)`
-- `ct_interp_whitespace` (function) `src/css_text.c:182` `int ct_interp_whitespace(const char *v)`
-- `ct_interp_tabsize` (function) `src/css_text.c:195` `int ct_interp_tabsize(const char *v)` -- break-spaces preserves whitespace and wraps; this engine only models the * wrap/keep distinction, so it collapses to...
-- `ct_interp_textdeco_style` (function) `src/css_text.c:206` `int ct_interp_textdeco_style(const char *v)` -- } /* tab-size: a non-negative integer (number of spaces). -1 if unsupported. int ct_interp_tabsize(const char *v) {...
-- `ct_interp_textdeco_thickness` (function) `src/css_text.c:217` `int ct_interp_textdeco_thickness(const char *v)` -- text-decoration-thickness: `from-font` (keyword -> 0), or a non-negative length * (px -> px, em/rem x16). -1 if...
-- `ct_interp_aspect_ratio` (function) `src/css_text.c:229` `int ct_interp_aspect_ratio(const char *v, int *num, int *den)` -- aspect-ratio: `auto`, a `<ratio>` such as `16/9` or `1.5`, or `auto <ratio>` (auto fallback).
-- `ct_interp_direction` (function) `src/css_text.c:271` `int ct_interp_direction(const char *v)` -- Both halves share ONE scale, so the ratio keeps its shape: clamping each half to * CSS_LEN_MAX on its own turned...
-- `ct_liststyle_kw` (function) `src/css_text.c:277` `static int ct_liststyle_kw(const char *t)`
-- `ct_liststyle_unknown_name` (function) `src/css_text.c:298` `static int ct_liststyle_unknown_name(const char *t)` -- A <counter-style> name this engine has no glyph set for.
-- `ct_interp_liststyle` (function) `src/css_text.c:309` `int ct_interp_liststyle(const char *v)` -- list-style-type, or the type token of the list-style shorthand: the first * recognised keyword wins. url() (a...
-- `ct_emit_spacing` (function) `src/css_text.c:344` `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
-- `ct_expand_shadow` (function) `src/css_text.c:357` `int ct_expand_shadow(const char *val, css_decl *dst, int cap)` -- text-shadow (single layer): collects up to three lengths (dx, dy, blur — blur is ignored) and an optional color, in...
-
-## src/css_values.c
-Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
-- `cv_parse_num` (function) `src/css_values.c:11` `static int cv_parse_num(const char *s, double *out, const char **endp)`
-- `cv_parse_color` (function) `src/css_values.c:16` `int cv_parse_color(const char *v)`
-- `cv_interp_color` (function) `src/css_values.c:36` `int cv_interp_color(const char *v)`
-- `cv_color_ok` (function) `src/css_values.c:41` `int cv_color_ok(int c)`
-- `cv_bg_alpha_of` (function) `src/css_values.c:46` `int cv_bg_alpha_of(const char *v)`
-- `cv_interp_bg` (function) `src/css_values.c:160` `int cv_interp_bg(const char *v)`
-- `cv_parse_color_t7` (function) `src/css_values.c:205` `int cv_parse_color_t7(const char *v)`
-- `cv_text_color` (function) `src/css_values.c:222` `int cv_text_color(const char *v)`
-- `cv_filter_scale` (function) `src/css_values.c:231` `double cv_filter_scale(int pct)`
-
-## src/css_vars.c
-Depends on: `include/css_select.h`, `include/css_vars.h`
-- `name_hash` (function) `src/css_vars.c:12` `static size_t name_hash(const char *s, size_t n)`
-- `dup_n` (function) `src/css_vars.c:21` `static char *dup_n(const char *s, size_t n)`
-- `find_slot` (function) `src/css_vars.c:32` `static size_t find_slot(const cvr_table *t, const char *name, size_t nlen)` -- Index into t->slot where name lives, or the empty slot where it would go. * Requires t->nslot > t->n (the index is...
-- `grow` (function) `src/css_vars.c:45` `static int grow(cvr_table *t)` -- Requires t->nslot > t->n (the index is never full). static size_t find_slot(const cvr_table *t, const char *name...
-- `cvr_set` (function) `src/css_vars.c:67` `int cvr_set(cvr_table *t, const char *name, size_t nlen, const char *value, size_t vlen)`
-- `cvr_get` (function) `src/css_vars.c:94` `const char *cvr_get(const cvr_table *t, const char *name, size_t nlen)`
-- `cvr_count` (function) `src/css_vars.c:100` `size_t cvr_count(const cvr_table *t)`
-- `cvr_reset` (function) `src/css_vars.c:102` `void cvr_reset(cvr_table *t)`
-- `cvr_free` (function) `src/css_vars.c:112` `void cvr_free(cvr_table *t)`
-- `is_ws` (function) `src/css_vars.c:120` `static int is_ws(char c)`
-- `without_important` (function) `src/css_vars.c:124` `static size_t without_important(const char *val, size_t n)` -- Length of val[0,n) once a trailing !important (optional blanks around the '!') * is removed, trailing blanks included.
-- `cvr_collect_decls` (function) `src/css_vars.c:139` `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b)`
-- `scope_get` (function) `src/css_vars.c:164` `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)`
-- `env_value` (function) `src/css_vars.c:182` `static const char *env_value(const char *name, size_t n)` -- The value an env() name resolves to on this device class (CSS Environment Variables 1): a desktop window has no...
-- `resolve_rec` (function) `src/css_vars.c:192` `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
-                  ...`
-- `cvr_resolve` (function) `src/css_vars.c:281` `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
-- `cvr_lookup` (function) `src/css_vars.c:290` `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
-
-## src/data_url.c
-Depends on: `include/data_url.h`
-- `lower` (function) `src/data_url.c:16` `static int lower(char c)`
-- `ci_starts_with` (function) `src/data_url.c:20` `static int ci_starts_with(const char *s, const char *prefix)`
-- `du_is_data_url` (function) `src/data_url.c:28` `int du_is_data_url(const char *url)`
-- `du_base64_payload` (function) `src/data_url.c:32` `du_status du_base64_payload(const char *url, const char **payload, size_t *payload_len)`
-- `du_shape_ok` (function) `src/data_url.c:59` `du_status du_shape_ok(const char *url)`
-- `b64_val` (function) `src/data_url.c:70` `static int b64_val(unsigned char c)` -- 0-63 for a base64 alphabet character, -1 otherwise.
-- `du_base64_decode` (function) `src/data_url.c:79` `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)`
-- `hexval` (function) `src/data_url.c:117` `static int hexval(char c)`
-- `ascii_ws` (function) `src/data_url.c:124` `static int ascii_ws(char c)`
-- `ends_ci` (function) `src/data_url.c:129` `static int ends_ci(const char *s, size_t n, const char *suf)` -- } static int hexval(char c) { if (c >= '0' && c <= '9') return c - '0'; if (c >= 'a' && c <= 'f') return c - 'a' +...
-- `du_decode` (function) `src/data_url.c:140` `du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)`
-
-## src/disk_store.c
-Depends on: `include/disk_store.h`, `include/local_store.h`, `include/util.h`
-- `fsync_dir` (function) `src/disk_store.c:32` `static void fsync_dir(const char *path)` -- Best-effort fsync of the directory holding path, for crash durability of the * rename.
-- `map_ls` (function) `src/disk_store.c:50` `static ds_status map_ls(ls_status s)`
-- `ds_write` (function) `src/disk_store.c:66` `ds_status ds_write(const char *path, const uint8_t key[LS_KEY_LEN], ls_aead aead,
-               ...`
-- `ds_read` (function) `src/disk_store.c:103` `ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN],
-                  uint8_t **ou...`
-- `ds_free` (function) `src/disk_store.c:136` `void ds_free(uint8_t *buf, size_t len)`
 
 
 Next: [API_p8.md](API_p8.md)

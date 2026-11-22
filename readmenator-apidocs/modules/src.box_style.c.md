@@ -311,7 +311,7 @@ Never negative. Pure.
 double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w)
 ```
 
-The used width cap of an element: the tighter of its `width` (w_px, w_pct) and its `max-width` (mw_px, mw_pct), each one <length-percentage> resolved on its own by bx_width_cap; 0 = neither declared.
+The used width cap of an element: the tighter of its [`width`](include.chrome_layout.h.md#width) (w_px, w_pct) and its `max-width` (mw_px, mw_pct), each one <length-percentage> resolved on its own by bx_width_cap; 0 = neither declared.
 
 Pure.
 
@@ -597,7 +597,7 @@ double bx_border_span(double width_cap, int border_box, double pad_l, double pad
 
 The border-inclusive span the painter lays a box out with (its content plus left/right border; padding sits outside it).
 
-CSS 2.1 10.3.3 / CSS Sizing 3 box-sizing: a content-box `width` sizes the CONTENT, so the span is W + bl + br; a border-box `width` already holds padding and border, so the span is W - pl - pr. Without it a content-box box with a border painted its declared width as the border box (300 for `width:300px;border:1px`, Firefox 302) and a border-box one lost its border twice. width_cap <= 0 (no cap) is returned as is. Negative edges count as 0. Pure.
+CSS 2.1 10.3.3 / CSS Sizing 3 box-sizing: a content-box [`width`](include.chrome_layout.h.md#width) sizes the CONTENT, so the span is W + bl + br; a border-box [`width`](include.chrome_layout.h.md#width) already holds padding and border, so the span is W - pl - pr. Without it a content-box box with a border painted its declared width as the border box (300 for `width:300px;border:1px`, Firefox 302) and a border-box one lost its border twice. width_cap <= 0 (no cap) is returned as is. Negative edges count as 0. Pure.
 
 **Parameters**
 

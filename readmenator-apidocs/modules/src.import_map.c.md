@@ -34,11 +34,13 @@ flowchart LR
     n_gui_browser_ui_c__resolve["browser_ui.resolve"]
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
     n_src_import_map_c__im_resolve(["im_resolve"])
+    n_include_find_text_h__ft_span_match["find_text.ft_span.match"]
     n_src_css_color_c__strncmp["css_color.strncmp"]
     n_src_import_map_c__im_parse -.-> n_gui_browser_ui_c__resolve
     n_src_import_map_c__im_parse -.-> n_gui_browser_ui_c__strcmp
     n_src_import_map_c__im_resolve -.-> n_gui_browser_ui_c__resolve
     n_src_import_map_c__im_resolve -.-> n_gui_browser_ui_c__strcmp
+    n_src_import_map_c__im_resolve -.-> n_include_find_text_h__ft_span_match
     n_src_import_map_c__im_resolve -.-> n_src_css_color_c__strncmp
 ```
 
@@ -156,7 +158,7 @@ Resolves specifier as imported from base (the importing module's URL).
 
 > **Inherited:** Documentation from [`im_resolve`](#im_resolve) (include/import_map.h:33).
 
-*Calls:* [`resolve`](gui.browser_ui.c.md#resolve), [`strcmp`](gui.browser_ui.c.md#strcmp), [`strncmp`](src.css_color.c.md#strncmp)
+*Calls:* [`resolve`](gui.browser_ui.c.md#resolve), [`strcmp`](gui.browser_ui.c.md#strcmp), [`ft_span.match`](include.find_text.h.md#ft_span-match), [`strncmp`](src.css_color.c.md#strncmp)
 
 ---
 

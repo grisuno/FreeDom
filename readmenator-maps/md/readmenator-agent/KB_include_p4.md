@@ -1,6 +1,104 @@
 # Subsystem: include (page 4 of 6)
 Previous: [KB_include_p3.md](KB_include_p3.md)
 
+## include/js_native.h
+- Layer: utility
+- Language: h
+- Symbols:
+  - `failure` (function, line 22) `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);`
+  - `FREEDOM_JS_NATIVE_H` (macro, line 12) `#define FREEDOM_JS_NATIVE_H`
+- Depends on: `include/js_sandbox.h`
+- Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_native.c`
+
+## include/js_policy.h
+- Doc: jsp_trusted: Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its...
+- Layer: business_logic
+- Language: h
+- Symbols:
+  - `jsp_mode` (enum, line 27)
+  - `membership` (function, line 16) `* membership (the allowlist itself is matched by the hostblock module, which * already covers subdomains). No I/O...`
+  - `allowlist` (function, line 34) `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode * yields false. */ bool...`
+  - `jsp_trusted` (function, line 45) `bool jsp_trusted(bool js_enabled, int host_allowlisted);`
+  - `jsp_present_trusted` (function, line 54) `bool jsp_present_trusted(int host_allowlisted);`
+  - `jsp_mode_str` (function, line 64) `const char *jsp_mode_str(jsp_mode mode);`
+  - `FREEDOM_JS_POLICY_H` (macro, line 2) `#define FREEDOM_JS_POLICY_H`
+- Imported by: `gui/browser_ui.c`, `include/webcaps.h`, `src/freedom.c`, `src/js_policy.c`, `tests/test_js_policy.c`
+
+## include/js_sandbox.h
+- Doc: js_limits: Per-evaluation resource limits.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `js_limits` (struct, line 39)
+  - `js_result` (struct, line 49)
+  - `js_status` (enum, line 24)
+  - `max_source_bytes` (type_alias, line 39) `typedef struct js_limits { size_t max_source_bytes;`
+  - `js_context` (type_alias, line 47) `typedef struct js_context js_context;`
+  - `status` (type_alias, line 48) `typedef struct js_result { js_status status;`
+  - `js_stack_limit_for` (function, line 75) `size_t js_stack_limit_for(size_t soft_stack);`
+  - `js_prime_stack_limit` (function, line 79) `void js_prime_stack_limit(void);`
+  - `js_context_free` (function, line 96) `void js_context_free(js_context *ctx);`
+  - `loaded` (function, line 124) `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...`
+  - `js_set_module_host` (function, line 129) `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);`
+  - `js_loc_from_stack` (function, line 150) `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);`
+  - `js_set_time_budget` (function, line 158) `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);`
+  - `out` (function, line 163) `* into out (NUL-terminated, truncated at cap);`
+  - `js_profile_enable` (function, line 166) `void js_profile_enable(js_context *ctx);`
+  - `js_profile_report` (function, line 167) `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
+  - `silently` (function, line 171) `* fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows * its real first...`
+  - `js_throws_report` (function, line 176) `size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
+  - `global` (function, line 181) `* Freebug REPL installs: its shim takes them once and deletes them from the global (like * __netLog), because the...`
+  - `js_result_free` (function, line 187) `void js_result_free(js_result *res);`
+  - `js_pump_jobs` (function, line 195) `int js_pump_jobs(js_context *ctx, int max_jobs);`
+  - `handle` (function, line 198) `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
+  - `js_set_current_script` (function, line 207) `void js_set_current_script(js_context *ctx, const char *src, const char *type);`
+  - `FREEDOM_JS_SANDBOX_H` (macro, line 2) `#define FREEDOM_JS_SANDBOX_H`
+  - `JS_LOC_FILE_MAX` (macro, line 64) `#define JS_LOC_FILE_MAX`
+  - `JS_DEFAULT_MAX_SOURCE` (macro, line 66) `#define JS_DEFAULT_MAX_SOURCE`
+  - `JS_DEFAULT_MEM_LIMIT` (macro, line 67) `#define JS_DEFAULT_MEM_LIMIT`
+  - `JS_MIN_STACK_LIMIT` (macro, line 68) `#define JS_MIN_STACK_LIMIT`
+  - `JS_MAX_STACK_LIMIT` (macro, line 69) `#define JS_MAX_STACK_LIMIT`
+  - `JS_DEFAULT_STACK_LIMIT` (macro, line 70) `#define JS_DEFAULT_STACK_LIMIT`
+  - `JS_DEFAULT_TIME_BUDGET` (macro, line 71) `#define JS_DEFAULT_TIME_BUDGET`
+  - `JS_MODULE_MAX` (macro, line 115) `#define JS_MODULE_MAX`
+  - `JS_MODULE_BYTES_MAX` (macro, line 116) `#define JS_MODULE_BYTES_MAX`
+  - `JS_PROFILE_PERIOD_MS` (macro, line 165) `#define JS_PROFILE_PERIOD_MS`
+  - `JS_THROW_SLOTS` (macro, line 174) `#define JS_THROW_SLOTS`
+  - `JS_REALM_MAX` (macro, line 215) `#define JS_REALM_MAX`
+  - `JS_REJECT_MAX` (macro, line 218) `#define JS_REJECT_MAX`
+- Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_intl.h`, `include/js_location.h`, `include/js_native.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_intl.c`, `tests/test_js_native.c`, `tests/test_js_sandbox.c`
+
+## include/js_trusted.h
+- Doc: jt_take_opens: The parent installed a new geometry table (layout or scroll changed)...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `jt_ws_op` (struct, line 61)
+  - `jt_ws_kind` (enum, line 50)
+  - `jt_ws_event_kind` (enum, line 68)
+  - `kind` (type_alias, line 60) `typedef struct jt_ws_op { int kind;`
+  - `null` (function, line 24) `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...`
+  - `jt_take_opens` (function, line 42) `char *jt_take_opens(js_context *ctx);`
+  - `parent` (function, line 80) `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);`
+  - `jt_take_ws` (function, line 86) `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);`
+  - `jt_ws_ops_free` (function, line 87) `void jt_ws_ops_free(jt_ws_op *ops, size_t n);`
+  - `jt_ws_event` (function, line 92) `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);`
+  - `jt_take_storage` (function, line 104) `int jt_take_storage(js_context *ctx, char **out, size_t *len);`
+  - `realm` (function, line 107) `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...`
+  - `FREEDOM_JS_TRUSTED_H` (macro, line 2) `#define FREEDOM_JS_TRUSTED_H`
+  - `JT_WS_MAX` (macro, line 46) `#define JT_WS_MAX`
+  - `JT_WS_MAX_OPS` (macro, line 47) `#define JT_WS_MAX_OPS`
+  - `JT_WS_MAX_BYTES` (macro, line 48) `#define JT_WS_MAX_BYTES`
+- Depends on: `include/js_dom.h`, `include/js_sandbox.h`
+- Imported by: `src/js_trusted.c`, `src/tab.c`, `tests/test_js_dom.c`
+
+## include/lazy_load.h
+- Layer: utility
+- Language: h
+- Symbols:
+  - `FREEDOM_LAZY_LOAD_H` (macro, line 2) `#define FREEDOM_LAZY_LOAD_H`
+- Imported by: `gui/browser_ui.c`, `tests/test_ui.c`
+
 ## include/link_nav.h
 - Doc: ln_block_reason: Why a reference was blocked, for a precise user-facing notice and for *...
 - Layer: utility
@@ -36,6 +134,24 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `LS_OVERHEAD` (macro, line 31) `#define LS_OVERHEAD`
   - `LS_MAX_PLAINTEXT` (macro, line 32) `#define LS_MAX_PLAINTEXT`
 - Imported by: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`, `include/profile.h`, `src/disk_store.c`, `src/local_store.c`, `tests/test_disk_store.c`, `tests/test_local_store.c`
+
+## include/mask_cache.h
+- Doc: mask_cache (mkc_) -- 8-bit alpha masks retained across frames (spec/mask_cache.md).
+- Layer: infrastructure
+- Language: h
+- Symbols:
+  - `mkc_key` (struct, line 17)
+  - `h` (type_alias, line 17) `typedef struct mkc_key { int w, h;`
+  - `mkc_cache` (type_alias, line 24) `typedef struct mkc_cache mkc_cache;`
+  - `mkc_new` (function, line 29) `mkc_cache *mkc_new(size_t byte_budget, size_t max_entries);`
+  - `mkc_free` (function, line 32) `void mkc_free(mkc_cache *c);`
+  - `mkc_clear` (function, line 35) `void mkc_clear(mkc_cache *c);`
+  - `mkc_get` (function, line 39) `const unsigned char *mkc_get(mkc_cache *c, const mkc_key *k, int *stride);`
+  - `mkc_put` (function, line 45) `unsigned char *mkc_put(mkc_cache *c, const mkc_key *k, int stride);`
+  - `mkc_bytes` (function, line 48) `size_t mkc_bytes(const mkc_cache *c);`
+  - `mkc_count` (function, line 49) `size_t mkc_count(const mkc_cache *c);`
+  - `FREEDOM_MASK_CACHE_H` (macro, line 2) `#define FREEDOM_MASK_CACHE_H`
+- Imported by: `gui/browser_ui.c`, `src/mask_cache.c`, `tests/test_mask_cache.c`
 
 ## include/media_decoder.h
 - Doc: md_cmd: Communicates with the parent over two pipes: out_fd: decoder → parent (frames, stream...
@@ -370,102 +486,6 @@ Previous: [KB_include_p3.md](KB_include_p3.md)
   - `PROFILE_PREFS_FILE` (macro, line 33) `#define PROFILE_PREFS_FILE`
 - Depends on: `include/local_store.h`, `include/prefs.h`
 - Imported by: `gui/browser_ui.c`, `src/profile.c`, `tests/test_profile.c`
-
-## include/psl_data.h
-- Layer: data_access
-- Language: h
-- Symbols:
-  - `psl_rules` (variable, line 21) `extern const char *const psl_rules[];`
-  - `psl_rules_n` (variable, line 22) `extern const size_t psl_rules_n;`
-  - `psl_wildcards` (variable, line 23) `extern const char *const psl_wildcards[];`
-  - `psl_wildcards_n` (variable, line 24) `extern const size_t psl_wildcards_n;`
-  - `psl_exceptions` (variable, line 25) `extern const char *const psl_exceptions[];`
-  - `psl_exceptions_n` (variable, line 26) `extern const size_t psl_exceptions_n;`
-  - `FREEDOM_PSL_DATA_H` (macro, line 2) `#define FREEDOM_PSL_DATA_H`
-- Imported by: `src/request_policy.c`
-
-## include/render_doc.h
-- Doc: rd_block: One paint-ready block in document order. text is owned, NUL-terminated and valid...
-- Layer: presentation
-- Language: h
-- Symbols:
-  - `rd_block` (struct, line 64)
-  - `rd_doc` (struct, line 267)
-  - `img_fail_reason` (enum, line 34)
-  - `rd_kind` (enum, line 42)
-  - `rd_status` (enum, line 299)
-  - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
-  - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
-  - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
-  - `form` (function, line 63) `* form (-1 = none);`
-  - `default` (function, line 153) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
-  - `to` (function, line 253) `* belongs to (-1 = none);`
-  - `rdp_images_warning` (function, line 308) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-  - `rd_free` (function, line 318) `void rd_free(rd_doc *d);`
-  - `rd_count` (function, line 321) `size_t rd_count(const rd_doc *d);`
-  - `rd_at` (function, line 322) `const rd_block *rd_at(const rd_doc *d, size_t i);`
-  - `rd_box_count` (function, line 326) `size_t rd_box_count(const rd_doc *d);`
-  - `rd_box_at` (function, line 327) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-  - `rd_cont_count` (function, line 331) `size_t rd_cont_count(const rd_doc *d);`
-  - `rd_cont_at` (function, line 332) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-  - `rd_kind_name` (function, line 336) `const char *rd_kind_name(rd_kind k);`
-  - `rd_block_tag` (function, line 344) `const char *rd_block_tag(const rd_block *b);`
-  - `rd_block_heading_level` (function, line 351) `int rd_block_heading_level(const rd_block *b);`
-  - `decision` (function, line 354) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-  - `IMG_FAIL_OK` (function, line 360) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-  - `rd_input_label` (function, line 365) `const char *rd_input_label(int input_type);`
-  - `rd_input_invisible` (function, line 370) `int rd_input_invisible(int input_type);`
-  - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
-- Depends on: `include/page_view.h`, `include/render_policy.h`
-- Imported by: `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
-
-## include/render_policy.h
-- Doc: rdp_caps: Render capabilities for a page.
-- Layer: presentation
-- Language: h
-- Symbols:
-  - `rdp_caps` (struct, line 32)
-  - `rdp_img_decision` (enum, line 39)
-  - `images` (type_alias, line 32) `typedef struct rdp_caps { bool images;`
-  - `rdp_is_tracking_pixel` (function, line 53) `int rdp_is_tracking_pixel(int w, int h);`
-  - `size` (function, line 56) `* announced size (e.g. <img width height>);`
-  - `rdp_img_reason` (function, line 66) `const char *rdp_img_reason(rdp_img_decision d);`
-  - `rdp_images_warning` (function, line 69) `const char *rdp_images_warning(void);`
-  - `FREEDOM_RENDER_POLICY_H` (macro, line 2) `#define FREEDOM_RENDER_POLICY_H`
-  - `RDP_TRACKER_MAX_DIM` (macro, line 27) `#define RDP_TRACKER_MAX_DIM`
-- Imported by: `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
-
-## include/renderer.h
-- Doc: rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==...
-- Layer: presentation
-- Language: h
-- Symbols:
-  - `rd_result` (struct, line 29)
-  - `rd_status` (enum, line 20)
-  - `status` (type_alias, line 28) `typedef struct rd_result { rd_status status;`
-  - `rd_result_free` (function, line 46) `void rd_result_free(rd_result *out);`
-  - `FREEDOM_RENDERER_H` (macro, line 2) `#define FREEDOM_RENDERER_H`
-  - `RD_MAX_INPUT` (macro, line 37) `#define RD_MAX_INPUT`
-  - `RD_MAX_FIELD` (macro, line 38) `#define RD_MAX_FIELD`
-- Imported by: `src/renderer.c`, `tests/test_renderer.c`
-
-## include/request_policy.h
-- Doc: rp_headers_have: 1 when the sanitized block `lines` carries a header called `name`...
-- Layer: business_logic
-- Language: h
-- Symbols:
-  - `rp_decision` (enum, line 21)
-  - `rp_headers_have` (function, line 61) `static inline int rp_headers_have(const char *lines, const char *name)`
-  - `rp_host_of` (function, line 30) `int rp_host_of(const char *url, char *out, size_t out_size);`
-  - `rp_site_of` (function, line 34) `int rp_site_of(const char *host, char *out, size_t out_size);`
-  - `rp_same_site` (function, line 37) `int rp_same_site(const char *top_level_url, const char *request_url);`
-  - `rp_sanitize_request_headers` (function, line 57) `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);`
-  - `FREEDOM_REQUEST_POLICY_H` (macro, line 2) `#define FREEDOM_REQUEST_POLICY_H`
-  - `RP_HDR_MAX_COUNT` (macro, line 43) `#define RP_HDR_MAX_COUNT`
-  - `RP_HDR_MAX_BYTES` (macro, line 44) `#define RP_HDR_MAX_BYTES`
-  - `RP_HDR_NAME_MAX` (macro, line 45) `#define RP_HDR_NAME_MAX`
-  - `RP_HDR_VALUE_MAX` (macro, line 46) `#define RP_HDR_VALUE_MAX`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/request_policy.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_request_policy.c`
 
 
 Next: [KB_include_p5.md](KB_include_p5.md)

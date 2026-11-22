@@ -1,6 +1,28 @@
 # Subsystem: src (page 5 of 10)
 Previous: [KB_src_p4.md](KB_src_p4.md)
 
+## src/hostedit.c
+- Doc: valid_host: #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `suggest_ctx` (struct, line 136)
+  - `he_lower` (function, line 12) `static char he_lower(char c)`
+  - `is_label_char` (function, line 16) `static int is_label_char(char c)`
+  - `valid_host` (function, line 22) `static int valid_host(const char *host, size_t n)`
+  - `he_make_line` (function, line 41) `he_status he_make_line(const char *host, char *out, size_t cap)`
+  - `is_ip_token` (function, line 67) `static int is_ip_token(const char *ts, const char *te)`
+  - `he_scan` (function, line 80) `static int he_scan(const char *text, int (*fn)(const char *, size_t, void *), void *ctx)`
+  - `has_host_cb` (function, line 105) `static int has_host_cb(const char *ts, size_t tl, void *ctx)`
+  - `he_text_has_host` (function, line 109) `int he_text_has_host(const char *text, const char *host)`
+  - `contains_ci` (function, line 115) `static int contains_ci(const char *hs, size_t hl, const char *needle)`
+  - `starts_with_ci` (function, line 128) `static int starts_with_ci(const char *hs, size_t hl, const char *pfx)`
+  - `suggest_cb` (function, line 144) `static int suggest_cb(const char *ts, size_t tl, void *vctx)`
+  - `he_suggest` (function, line 164) `int he_suggest(const char *text, const char *query,
+               char results[][HE_MAX_HOST + 1...`
+  - `he_cdn_kind` (function, line 173) `he_cdn_kind_t he_cdn_kind(const char *url)`
+- Depends on: `include/hostedit.h`
+
 ## src/html_parse.c
 - Doc: node_next: }; /* --- helpers --- static char *dup_bytes(const lxb_char_t *src, size_t len) { if...
 - Layer: utility
@@ -467,29 +489,6 @@ static int cb_append(char **bu...`
   - `jd_escape_js_str` (function, line 92) `static size_t jd_escape_js_str(const char *src, char *dst, size_t dstsz)`
   - `jd_fire_mouse_event` (function, line 164) `int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
                         const char ...`
-  - `_GNU_SOURCE` (macro, line 6) `#define _GNU_SOURCE`
-- Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`, `src/js_native_internal.h`
-
-## src/js_fetch.c
-- Doc: jd_pack_ptr: Carry the host fetch fn + its ctx as a function's closure data, each split into...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `jd_pack_ptr` (function, line 29) `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)`
-  - `jd_unpack_ptr` (function, line 34) `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)`
-  - `jd_reply_object` (function, line 44) `static JSValue jd_reply_object(JSContext *ctx, int rc, int status, const char *rbody,
-           ...`
-  - `m_host_fetch` (function, line 74) `static JSValue m_host_fetch(JSContext *ctx, JSValueConst this_val,
-                            in...`
-  - `m_host_fetch_async` (function, line 105) `static JSValue m_host_fetch_async(JSContext *ctx, JSValueConst this_val,
-                        ...`
-  - `jd_install_xhr` (function, line 336) `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
-  - `jd_net_deliver` (function, line 340) `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
-     ...`
-  - `jd_install_xhr_ex` (function, line 361) `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
-                   ...`
-  - `send` (function, line 128) `* callbacks fire right after send();`
-  - `task` (function, line 312) `* current task (the page never waits on it);`
   - `_GNU_SOURCE` (macro, line 6) `#define _GNU_SOURCE`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`, `src/js_native_internal.h`
 

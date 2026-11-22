@@ -1,12 +1,12 @@
 # `include/compositor.h`
 
-> Source: [include/compositor.h:1](../../include/compositor.h#L1) | language `h` | coverage 88.9% | [API index](../index.md)
+> Source: [include/compositor.h:1](../../include/compositor.h#L1) | language `h` | coverage 90.9% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cx_style`](#cx_style), [`cx_item`](#cx_item)
 - **Enums:** [`cx_layer`](#cx_layer)
-- **Functions:** [`cx_forms_stacking_context`](#cx_forms_stacking_context), [`cx_item_compare`](#cx_item_compare), [`cx_sort`](#cx_sort)
+- **Functions:** [`cx_forms_stacking_context`](#cx_forms_stacking_context), [`cx_item_compare`](#cx_item_compare), [`cx_sort`](#cx_sort), [`cx_ink_reach`](#cx_ink_reach), [`cx_span_visible`](#cx_span_visible)
 
 ## Type Diagram
 
@@ -180,5 +180,60 @@ Stable: equal keys keep their original relative order. NULL or n == 0 is a no-op
 | `n` | `size_t` |  |  |
 
 *Called by:* [`bt_resolve_positioning_ex`](src.box_tree.c.md#bt_resolve_positioning_ex)
+
+---
+
+<a id="cx_ink_reach"></a>
+
+### `cx_ink_reach`
+
+`function` | [include/compositor.h:91](../../include/compositor.h#L91)
+
+```c
+double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset);
+```
+
+How far (px, >= 0) a box's paint may reach beyond its border box (spec/compositor.md, tanda 95): each outset box-shadow layer {dx, dy, blur, spread, color, inset} with color != -1 reaches max(|dx|,|dy|) + max(spread,0) + ceil(1.5*blur) + 1; an inset layer stays inside; an outline reaches outline_w + max(offset,0) when outline_w > 0.
+
+The max. layers NULL or n <= 0 counts only the outline.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `layers` | `int (* )[6]` |  |  |
+| `n` | `int` |  |  |
+| `outline_w` | `int` |  |  |
+| `outline_offset` | `int` |  |  |
+
+**Returns:** `double`
+
+---
+
+<a id="cx_span_visible"></a>
+
+### `cx_span_visible`
+
+`function` | [include/compositor.h:95](../../include/compositor.h#L95)
+
+```c
+int cx_span_visible(double top, double h, double reach, double view_top, double view_h);
+```
+
+1 when [top - reach, top + h + reach] touches [view_top, view_top + view_h] (edges included), else 0.
+
+Any non-finite input is visible (fail-open: content never vanishes).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `top` | `double` |  |  |
+| `h` | `double` |  |  |
+| `reach` | `double` |  |  |
+| `view_top` | `double` |  |  |
+| `view_h` | `double` |  |  |
+
+**Returns:** `int`
 
 ---

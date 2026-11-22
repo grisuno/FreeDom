@@ -152,6 +152,18 @@ static dom_node_id qs_walk(const dom_inde...`
   - `dl_check_size` (function, line 213) `dl_status dl_check_size(size_t len)`
 - Depends on: `include/download.h`, `include/pdf_export.h`
 
+## src/exact_key.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `ek_init` (function, line 6) `void ek_init(ek_key *k)`
+  - `ek_reset` (function, line 13) `void ek_reset(ek_key *k)`
+  - `ek_put` (function, line 19) `void ek_put(ek_key *k, const void *p, size_t len)`
+  - `ek_equal` (function, line 36) `int ek_equal(const ek_key *a, const ek_key *b)`
+  - `ek_swap` (function, line 41) `void ek_swap(ek_key *a, ek_key *b)`
+  - `ek_free` (function, line 48) `void ek_free(ek_key *k)`
+- Depends on: `include/exact_key.h`
+
 ## src/fb_cmdline.c
 - Layer: utility
 - Language: c
@@ -187,6 +199,28 @@ static dom_node_id qs_walk(const dom_inde...`
   - `fbp_js_quote` (function, line 157) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
   - `fbp_expr` (function, line 186) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
 - Depends on: `include/fb_panes.h`
+
+## src/find_text.c
+- Doc: find_text (ft_) -- find in page over the rendered text. spec/find_text.md.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `ft_fold` (function, line 13) `uint32_t ft_fold(uint32_t cp)`
+  - `is_ws` (function, line 33) `static int is_ws(uint32_t cp)`
+  - `decode` (function, line 40) `static size_t decode(const unsigned char *s, size_t n, uint32_t *cp)`
+  - `ft_compile` (function, line 59) `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap)`
+  - `piece_len` (function, line 78) `static size_t piece_len(const ft_piece *p)`
+  - `settle` (function, line 81) `static int settle(const ft_piece *p, size_t n, ft_pos *pos)`
+  - `peek` (function, line 92) `static uint32_t peek(const ft_piece *p, ft_pos pos, size_t *adv)`
+  - `match_at` (function, line 100) `static int match_at(const ft_piece *p, size_t n, ft_pos s, const uint32_t *q, size_t qn,
+        ...`
+  - `ft_search` (function, line 127) `ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t *q, size_t qn,
+             ...`
+  - `ft_spans` (function, line 158) `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm,
+                f...`
+  - `ft_step` (function, line 180) `long ft_step(long cur, size_t n, int dir)`
+  - `FT_INVALID` (macro, line 4) `#define FT_INVALID`
+- Depends on: `include/find_text.h`
 
 ## src/flex_layout.c
 - Doc: nn: bounded by FX_MAX_ITEMS (no VLAs).
@@ -373,20 +407,20 @@ static dom_node_id qs_walk(const dom_inde...`
   - `first` (function, line 801) `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
   - `sf_reason` (function, line 999) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 1019) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 1082) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `fetch_and_render_one` (function, line 1020) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 1083) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 1108) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 1109) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 1145) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 1182) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1146) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1183) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1293) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1312) `int main(int argc, char **argv)`
+  - `run_dump_video` (function, line 1294) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1313) `int main(int argc, char **argv)`
   - `gets` (function, line 482) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
   - `pool` (function, line 787) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
   - `only` (function, line 873) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 1047) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `BLOCKED` (function, line 1048) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
   - `EXIT_OK` (macro, line 51) `#define EXIT_OK`
@@ -395,7 +429,7 @@ static dom_node_id qs_walk(const dom_inde...`
   - `CSS_DROPS_REPORT_MAX` (macro, line 174) `#define CSS_DROPS_REPORT_MAX`
   - `HL_FONT_MAX_SHEETS` (macro, line 631) `#define HL_FONT_MAX_SHEETS`
   - `HL_FONT_MAX_BYTES` (macro, line 632) `#define HL_FONT_MAX_BYTES`
-  - `HL_JS_NAV_MAX` (macro, line 1015) `#define HL_JS_NAV_MAX`
+  - `HL_JS_NAV_MAX` (macro, line 1016) `#define HL_JS_NAV_MAX`
 - Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 
 ## src/hls.c
@@ -459,28 +493,6 @@ static dom_node_id qs_walk(const dom_inde...`
   - `HB_MAX_HOST` (macro, line 19) `#define HB_MAX_HOST`
   - `HB_INIT_CAP` (macro, line 20) `#define HB_INIT_CAP`
 - Depends on: `include/hostblock.h`, `include/util.h`
-
-## src/hostedit.c
-- Doc: valid_host: #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `suggest_ctx` (struct, line 136)
-  - `he_lower` (function, line 12) `static char he_lower(char c)`
-  - `is_label_char` (function, line 16) `static int is_label_char(char c)`
-  - `valid_host` (function, line 22) `static int valid_host(const char *host, size_t n)`
-  - `he_make_line` (function, line 41) `he_status he_make_line(const char *host, char *out, size_t cap)`
-  - `is_ip_token` (function, line 67) `static int is_ip_token(const char *ts, const char *te)`
-  - `he_scan` (function, line 80) `static int he_scan(const char *text, int (*fn)(const char *, size_t, void *), void *ctx)`
-  - `has_host_cb` (function, line 105) `static int has_host_cb(const char *ts, size_t tl, void *ctx)`
-  - `he_text_has_host` (function, line 109) `int he_text_has_host(const char *text, const char *host)`
-  - `contains_ci` (function, line 115) `static int contains_ci(const char *hs, size_t hl, const char *needle)`
-  - `starts_with_ci` (function, line 128) `static int starts_with_ci(const char *hs, size_t hl, const char *pfx)`
-  - `suggest_cb` (function, line 144) `static int suggest_cb(const char *ts, size_t tl, void *vctx)`
-  - `he_suggest` (function, line 164) `int he_suggest(const char *text, const char *query,
-               char results[][HE_MAX_HOST + 1...`
-  - `he_cdn_kind` (function, line 173) `he_cdn_kind_t he_cdn_kind(const char *url)`
-- Depends on: `include/hostedit.h`
 
 
 Next: [KB_src_p5.md](KB_src_p5.md)

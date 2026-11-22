@@ -6,6 +6,7 @@ Project types nested under the project types they derive from. External bases ar
 
 - [`action`](modules/include.link_nav.h.md#action) type_alias in `include/link_nav.h`
 - [`active`](modules/include.frame_clock.h.md#active) type_alias in `include/frame_clock.h`
+- [`addr`](modules/gui.browser_ui.c.md#addr) type_alias in `gui/browser_ui.c`
 - [`allowlisted`](modules/gui.browser_ui.c.md#allowlisted) type_alias in `gui/browser_ui.c`
 - [`attr_span`](modules/src.prefetch.c.md#attr_span) struct in `src/prefetch.c`
 - [`b`](modules/gui.browser_ui_internal.h.md#b) type_alias in `gui/browser_ui_internal.h`
@@ -16,6 +17,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`body_sink`](modules/src.secure_fetch.c.md#body_sink) struct in `src/secure_fetch.c`
 - [`bottom`](modules/include.flex_layout.h.md#bottom) type_alias in `include/flex_layout.h`
 - [`box_index`](modules/include.box_tree.h.md#box_index) type_alias in `include/box_tree.h`
+- [`browser_closed`](modules/include.browser.h.md#browser_closed) struct in `include/browser.h`
 - [`browser_state`](modules/include.browser.h.md#browser_state) struct in `include/browser.h`
 - [`browser_status`](modules/include.browser.h.md#browser_status) enum in `include/browser.h`
 - [`browser_window`](modules/gui.browser_ui.c.md#browser_window) struct in `gui/browser_ui.c`
@@ -24,6 +26,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`bt_positioned`](modules/include.box_tree.h.md#bt_positioned) struct in `include/box_tree.h`
 - [`bt_status`](modules/include.box_tree.h.md#bt_status) enum in `include/box_tree.h`
 - [`buf`](modules/include.textfield.h.md#buf) type_alias in `include/textfield.h`
+- [`bui_chrome_view`](modules/gui.browser_ui_internal.h.md#bui_chrome_view) struct in `gui/browser_ui_internal.h`
+- [`bui_find_view`](modules/gui.browser_ui_internal.h.md#bui_find_view) struct in `gui/browser_ui_internal.h`
 - [`bui_mask_ctx`](modules/gui.browser_ui.c.md#bui_mask_ctx) struct in `gui/browser_ui.c`
 - [`busy`](modules/include.shm_slots.h.md#busy) type_alias in `include/shm_slots.h`
 - [`bx_bg_layer`](modules/include.box_style.h.md#bx_bg_layer) struct in `include/box_style.h`
@@ -53,6 +57,13 @@ Project types nested under the project types they derive from. External bases ar
 - [`cg_radial_size`](modules/include.css_gradient.h.md#cg_radial_size) enum in `include/css_gradient.h`
 - [`chain`](modules/src.page_view.c.md#chain) type_alias in `src/page_view.c`
 - [`child_state`](modules/src.tab.c.md#child_state) struct in `src/tab.c`
+- [`chl_find_part`](modules/include.chrome_layout.h.md#chl_find_part) enum in `include/chrome_layout.h`
+- [`chl_findbar`](modules/include.chrome_layout.h.md#chl_findbar) struct in `include/chrome_layout.h`
+- [`chl_identity`](modules/include.chrome_layout.h.md#chl_identity) enum in `include/chrome_layout.h`
+- [`chl_layout`](modules/include.chrome_layout.h.md#chl_layout) struct in `include/chrome_layout.h`
+- [`chl_part`](modules/include.chrome_layout.h.md#chl_part) enum in `include/chrome_layout.h`
+- [`chl_rect`](modules/include.chrome_layout.h.md#chl_rect) struct in `include/chrome_layout.h`
+- [`chl_status`](modules/include.chrome_layout.h.md#chl_status) enum in `include/chrome_layout.h`
 - [`ci_import`](modules/include.css_import.h.md#ci_import) struct in `include/css_import.h`
 - [`cid`](modules/gui.browser_ui.c.md#cid) type_alias in `gui/browser_ui.c`
 - [`cix_entry`](modules/include.css_index.h.md#cix_entry) struct in `include/css_index.h`
@@ -61,6 +72,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`cl_ctx`](modules/include.css_length.h.md#cl_ctx) struct in `include/css_length.h`
 - [`cl_lp`](modules/include.css_length.h.md#cl_lp) struct in `include/css_length.h`
 - [`cl_status`](modules/include.css_length.h.md#cl_status) enum in `include/css_length.h`
+- [`close`](modules/include.chrome_layout.h.md#close) type_alias in `include/chrome_layout.h`
 - [`cm_clip`](modules/include.css_mask.h.md#cm_clip) enum in `include/css_mask.h`
 - [`cm_comp`](modules/include.css_mask.h.md#cm_comp) enum in `include/css_mask.h`
 - [`cm_layer`](modules/include.css_mask.h.md#cm_layer) struct in `include/css_mask.h`
@@ -183,6 +195,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`dom_status`](modules/include.dom.h.md#dom_status) enum in `include/dom.h`
 - [`ds_status`](modules/include.disk_store.h.md#ds_status) enum in `include/disk_store.h`
 - [`du_status`](modules/include.data_url.h.md#du_status) enum in `include/data_url.h`
+- [`ek_key`](modules/include.exact_key.h.md#ek_key) struct in `include/exact_key.h`
+- [`end`](modules/include.find_text.h.md#end) type_alias in `include/find_text.h`
 - [`end`](modules/include.text_shape.h.md#end) type_alias in `include/text_shape.h`
 - [`ent`](modules/src.http_cache.c.md#ent) struct in `src/http_cache.c`
 - [`epoch_ms`](modules/include.media_decoder.h.md#epoch_ms) type_alias in `include/media_decoder.h`
@@ -212,6 +226,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`fh_slot`](modules/src.frame_host.c.md#fh_slot) struct in `src/frame_host.c`
 - [`file`](modules/src.text_shape.c.md#file) type_alias in `src/text_shape.c`
 - [`final_url`](modules/include.http_cache.h.md#final_url) type_alias in `include/http_cache.h`
+- [`fip_hit`](modules/gui.browser_ui.c.md#fip_hit) struct in `gui/browser_ui.c`
 - [`fm_block_reason`](modules/include.form.h.md#fm_block_reason) enum in `include/form.h`
 - [`fm_field`](modules/include.form.h.md#fm_field) struct in `include/form.h`
 - [`fm_kind`](modules/include.form.h.md#fm_kind) enum in `include/form.h`
@@ -222,8 +237,14 @@ Project types nested under the project types they derive from. External bases ar
 - [`cl_ctx.font_size`](modules/include.css_length.h.md#cl_ctx-font_size) type_alias in `include/css_length.h`
 - [`form_rec`](modules/src.page_view.c.md#form_rec) struct in `src/page_view.c`
 - [`form_table`](modules/src.page_view.c.md#form_table) struct in `src/page_view.c`
+- [`frame_undo`](modules/gui.browser_ui.c.md#frame_undo) struct in `gui/browser_ui.c`
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) type_alias in `gui/browser_ui.c`
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) struct in `gui/browser_ui.c`
+- [`ft_match`](modules/include.find_text.h.md#ft_match) struct in `include/find_text.h`
+- [`ft_piece`](modules/include.find_text.h.md#ft_piece) struct in `include/find_text.h`
+- [`ft_pos`](modules/include.find_text.h.md#ft_pos) struct in `include/find_text.h`
+- [`ft_span`](modules/include.find_text.h.md#ft_span) struct in `include/find_text.h`
+- [`ft_status`](modules/include.find_text.h.md#ft_status) enum in `include/find_text.h`
 - [`fval`](modules/src.css_mq.c.md#fval) struct in `src/css_mq.c`
 - [`fx_area_map`](modules/include.flex_layout.h.md#fx_area_map) struct in `include/flex_layout.h`
 - [`fx_float_rect`](modules/include.flex_layout.h.md#fx_float_rect) struct in `include/flex_layout.h`
@@ -234,6 +255,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`gif_bits`](modules/src.image_decode.c.md#gif_bits) struct in `src/image_decode.c`
 - [`gif_reader`](modules/src.image_decode.c.md#gif_reader) struct in `src/image_decode.c`
 - [`h`](modules/gui.browser_ui.c.md#h) type_alias in `gui/browser_ui.c`
+- [`h`](modules/include.chrome_layout.h.md#h) type_alias in `include/chrome_layout.h`
+- [`h`](modules/include.mask_cache.h.md#h) type_alias in `include/mask_cache.h`
 - [`hash`](modules/src.webfont_load.c.md#hash) type_alias in `src/webfont_load.c`
 - [`hb_decision`](modules/include.hostblock.h.md#hb_decision) enum in `include/hostblock.h`
 - [`hb_list`](modules/include.hostblock.h.md#hb_list) enum in `include/hostblock.h`
@@ -314,6 +337,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`jt_ws_op`](modules/include.js_trusted.h.md#jt_ws_op) struct in `include/js_trusted.h`
 - [`key`](modules/gui.browser_ui.c.md#key) type_alias in `gui/browser_ui.c`
 - [`key`](modules/include.css_index.h.md#key) type_alias in `include/css_index.h`
+- [`key`](modules/src.mask_cache.c.md#key) type_alias in `src/mask_cache.c`
 - [`key_ref`](modules/src.web_storage.c.md#key_ref) struct in `src/web_storage.c`
 - [`kind`](modules/gui.browser_ui.c.md#kind) type_alias in `gui/browser_ui.c`
 - [`cm_layer.kind`](modules/include.css_mask.h.md#cm_layer-kind) type_alias in `include/css_mask.h`
@@ -340,12 +364,17 @@ Project types nested under the project types they derive from. External bases ar
 - [`loaded`](modules/src.text_shape.c.md#loaded) type_alias in `src/text_shape.c`
 - [`ls_aead`](modules/include.local_store.h.md#ls_aead) enum in `include/local_store.h`
 - [`ls_status`](modules/include.local_store.h.md#ls_status) enum in `include/local_store.h`
+- [`ft_span.match`](modules/include.find_text.h.md#ft_span-match) type_alias in `include/find_text.h`
 - [`max_bytes`](modules/include.html_parse.h.md#max_bytes) type_alias in `include/html_parse.h`
 - [`js_limits.max_source_bytes`](modules/include.js_sandbox.h.md#js_limits-max_source_bytes) type_alias in `include/js_sandbox.h`
 - [`mb`](modules/src.page_view.c.md#mb) type_alias in `src/page_view.c`
 - [`md_cmd`](modules/include.media_decoder.h.md#md_cmd) enum in `include/media_decoder.h`
 - [`md_pacer`](modules/include.media_decoder.h.md#md_pacer) struct in `include/media_decoder.h`
 - [`md_resp`](modules/include.media_decoder.h.md#md_resp) enum in `include/media_decoder.h`
+- [`mkc_cache`](modules/include.mask_cache.h.md#mkc_cache) type_alias in `include/mask_cache.h`
+- [`mkc_cache`](modules/src.mask_cache.c.md#mkc_cache) struct in `src/mask_cache.c`
+- [`mkc_entry`](modules/src.mask_cache.c.md#mkc_entry) struct in `src/mask_cache.c`
+- [`mkc_key`](modules/include.mask_cache.h.md#mkc_key) struct in `include/mask_cache.h`
 - [`mq_cur`](modules/src.css_mq.c.md#mq_cur) struct in `src/css_mq.c`
 - [`item_sides.mr`](modules/gui.browser_ui.c.md#item_sides-mr) type_alias in `gui/browser_ui.c`
 - [`name`](modules/include.css_counter.h.md#name) type_alias in `include/css_counter.h`
@@ -381,6 +410,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`pf_list`](modules/include.prefetch.h.md#pf_list) struct in `include/prefetch.h`
 - [`pf_pool`](modules/include.prefetch.h.md#pf_pool) struct in `include/prefetch.h`
 - [`pf_ref`](modules/include.prefetch.h.md#pf_ref) struct in `include/prefetch.h`
+- [`piece`](modules/include.find_text.h.md#piece) type_alias in `include/find_text.h`
 - [`pl`](modules/gui.browser_ui.c.md#pl) type_alias in `gui/browser_ui.c`
 - [`pm_entry`](modules/src.dom.c.md#pm_entry) struct in `src/dom.c`
 - [`png_flow_ctx`](modules/gui.browser_ui.c.md#png_flow_ctx) struct in `gui/browser_ui.c`
@@ -553,7 +583,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`tsh_status`](modules/include.text_shape.h.md#tsh_status) enum in `include/text_shape.h`
 - [`tsh_web`](modules/src.text_shape.c.md#tsh_web) struct in `src/text_shape.c`
 - [`ui_bg_image`](modules/gui.browser_ui.c.md#ui_bg_image) struct in `gui/browser_ui.c`
-- [`ui_hot`](modules/gui.browser_ui.c.md#ui_hot) enum in `gui/browser_ui.c`
+- [`ui_hot`](modules/gui.browser_ui.c.md#ui_hot) type_alias in `gui/browser_ui.c`
 - [`ui_image`](modules/gui.browser_ui.c.md#ui_image) struct in `gui/browser_ui.c`
 - [`ui_input_state`](modules/gui.browser_ui.c.md#ui_input_state) struct in `gui/browser_ui.c`
 - [`ui_layout`](modules/include.ui.h.md#ui_layout) struct in `include/ui.h`
@@ -589,6 +619,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`wh_hub`](modules/include.ws_hub.h.md#wh_hub) type_alias in `include/ws_hub.h`
 - [`wh_hub`](modules/src.ws_hub.c.md#wh_hub) struct in `src/ws_hub.c`
 - [`wh_job`](modules/src.ws_hub.c.md#wh_job) struct in `src/ws_hub.c`
+- [`width`](modules/include.chrome_layout.h.md#width) type_alias in `include/chrome_layout.h`
 - [`img_pixels.width`](modules/include.image_decode.h.md#img_pixels-width) type_alias in `include/image_decode.h`
 - [`tab_image.width`](modules/include.tab.h.md#tab_image-width) type_alias in `include/tab.h`
 - [`width_px`](modules/include.css_mq.h.md#width_px) type_alias in `include/css_mq.h`

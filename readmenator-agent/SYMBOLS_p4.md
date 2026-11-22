@@ -1,14 +1,171 @@
-# Symbols (page 4 of 17)
+# Symbols (page 4 of 18)
 Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `fbc_history_free` | function | `include/fb_cmdline.h:28` | `void fbc_history_free(fbc_history *h);` |
+| `fbc_history_init` | function | `include/fb_cmdline.h:27` | `void fbc_history_init(fbc_history *h);` |
+| `fbc_history_next` | function | `include/fb_cmdline.h:38` | `const char *fbc_history_next(fbc_history *h);` |
+| `fbc_history_prev` | function | `include/fb_cmdline.h:35` | `const char *fbc_history_prev(fbc_history *h, const char *cur, size_t curlen);` |
+| `fbc_history_push` | function | `include/fb_cmdline.h:31` | `int fbc_history_push(fbc_history *h, const char *text, size_t len);` |
+| `fbc_names_expr` | function | `include/fb_cmdline.h:46` | `size_t fbc_names_expr(const char *base, char *out, size_t cap);` |
+| `FBP_EXPR_MAX` | macro | `include/fb_panes.h:31` | `#define FBP_EXPR_MAX` |
+| `FBP_SELECTOR_MAX` | macro | `include/fb_panes.h:30` | `#define FBP_SELECTOR_MAX` |
+| `FREEDOM_FB_PANES_H` | macro | `include/fb_panes.h:2` | `#define FREEDOM_FB_PANES_H` |
+| `fbp_expr` | function | `include/fb_panes.h:57` | `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` |
+| `fbp_is_pane` | function | `include/fb_panes.h:49` | `int fbp_is_pane(int tab);` |
+| `fbp_js_quote` | function | `include/fb_panes.h:53` | `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` |
+| `fbp_tab` | enum | `include/fb_panes.h:17` | `` |
+| `fbp_tab_at` | function | `include/fb_panes.h:46` | `int fbp_tab_at(double x, double cell_w, double pad_cells);` |
+| `fbp_tab_from_name` | function | `include/fb_panes.h:37` | `int fbp_tab_from_name(const char *name);` |
+| `fbp_tab_label` | function | `include/fb_panes.h:34` | `const char *fbp_tab_label(int tab);` |
+| `fbp_tab_span` | function | `include/fb_panes.h:43` | `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);` |
+| `fbp_tab_wrap` | function | `include/fb_panes.h:40` | `int fbp_tab_wrap(int tab, int dir);` |
+| `FREEDOM_FIND_TEXT_H` | macro | `include/find_text.h:8` | `#define FREEDOM_FIND_TEXT_H` |
+| `FT_MATCH_MAX` | macro | `include/find_text.h:18` | `#define FT_MATCH_MAX` |
+| `FT_QUERY_MAX` | macro | `include/find_text.h:17` | `#define FT_QUERY_MAX` |
+| `end` | type_alias | `include/find_text.h:31` | `typedef struct ft_match { ft_pos start, end;` |
+| `exist` | function | `include/find_text.h:42` | `* cap matches exist (truncated may be NULL). */ ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t...` |
+| `find_text` | function | `include/find_text.h:2` | `* find_text (ft_) -- find in page over the rendered text (spec/find_text.md). * * Pure: no I/O, no global state...` |
+| `ft_compile` | function | `include/find_text.h:39` | `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap);` |
+| `ft_fold` | function | `include/find_text.h:35` | `uint32_t ft_fold(uint32_t cp);` |
+| `ft_match` | struct | `include/find_text.h:31` | `` |
+| `ft_piece` | struct | `include/find_text.h:24` | `` |
+| `ft_pos` | struct | `include/find_text.h:30` | `` |
+| `ft_span` | struct | `include/find_text.h:32` | `` |
+| `ft_spans` | function | `include/find_text.h:48` | `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm, ft_span *out, size_t cap);` |
+| `ft_status` | enum | `include/find_text.h:20` | `` |
+| `ft_step` | function | `include/find_text.h:53` | `long ft_step(long cur, size_t n, int dir);` |
+| `match` | type_alias | `include/find_text.h:32` | `typedef struct ft_span { size_t piece, start, end, match;` |
+| `piece` | type_alias | `include/find_text.h:29` | `typedef struct ft_pos { size_t piece;` |
+| `written` | function | `include/find_text.h:38` | `* number of code points written (<= cap, <= FT_QUERY_MAX);` |
+| `FREEDOM_FLEX_LAYOUT_H` | macro | `include/flex_layout.h:2` | `#define FREEDOM_FLEX_LAYOUT_H` |
+| `FX_AREA_MAX_CELLS` | macro | `include/flex_layout.h:148` | `#define FX_AREA_MAX_CELLS` |
+| `FX_AREA_MAX_COLS` | macro | `include/flex_layout.h:147` | `#define FX_AREA_MAX_COLS` |
+| `FX_AREA_MAX_ROWS` | macro | `include/flex_layout.h:146` | `#define FX_AREA_MAX_ROWS` |
+| `FX_AREA_NAME_MAX` | macro | `include/flex_layout.h:149` | `#define FX_AREA_NAME_MAX` |
+| `FX_ERR_NULL_ARG` | function | `include/flex_layout.h:238` | `* Returns FX_ERR_NULL_ARG (a required pointer NULL with n > 0), FX_ERR_RANGE * (negative h/avail, or n > FX_MAX_ITEMS);` |
+| `FX_FLOAT_MIN_LINE` | macro | `include/flex_layout.h:218` | `#define FX_FLOAT_MIN_LINE` |
+| `FX_GL_AUTO` | macro | `include/flex_layout.h:107` | `#define FX_GL_AUTO` |
+| `FX_GL_LINE_MAX` | macro | `include/flex_layout.h:110` | `#define FX_GL_LINE_MAX` |
+| `FX_GL_SPAN_BASE` | macro | `include/flex_layout.h:108` | `#define FX_GL_SPAN_BASE` |
+| `FX_GL_SPAN_MAX` | macro | `include/flex_layout.h:109` | `#define FX_GL_SPAN_MAX` |
+| `FX_GRID_COLS_MAX` | macro | `include/flex_layout.h:132` | `#define FX_GRID_COLS_MAX` |
+| `FX_MAUTO_BOTTOM` | macro | `include/flex_layout.h:348` | `#define FX_MAUTO_BOTTOM` |
+| `FX_MAUTO_TOP` | macro | `include/flex_layout.h:347` | `#define FX_MAUTO_TOP` |
+| `FX_MAX_COLUMNS` | macro | `include/flex_layout.h:280` | `#define FX_MAX_COLUMNS` |
+| `FX_MAX_ITEMS` | macro | `include/flex_layout.h:28` | `#define FX_MAX_ITEMS` |
+| `basis` | type_alias | `include/flex_layout.h:40` | `typedef struct fx_item { double basis;` |
+| `bottom` | type_alias | `include/flex_layout.h:224` | `typedef struct fx_float_rect { double top, bottom;` |
+| `cols` | type_alias | `include/flex_layout.h:154` | `typedef struct fx_area_map { int rows, cols;` |
+| `fx_area_map` | struct | `include/flex_layout.h:154` | `` |
+| `fx_auto_min_size` | function | `include/flex_layout.h:275` | `double fx_auto_min_size(double min_content, double basis, double author_min, int scroll_container);` |
+| `fx_autofill_count` | function | `include/flex_layout.h:129` | `size_t fx_autofill_count(double avail, double gap, double minw);` |
+| `fx_cross_offset` | function | `include/flex_layout.h:364` | `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r);` |
+| `fx_float_rect` | struct | `include/flex_layout.h:224` | `` |
+| `fx_grid_area_hash` | function | `include/flex_layout.h:163` | `unsigned fx_grid_area_hash(const char *name);` |
+| `fx_grid_cell` | function | `include/flex_layout.h:74` | `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col);` |
+| `fx_grid_column_count` | function | `include/flex_layout.h:139` | `int fx_grid_column_count(int flow, int cols, int rows, size_t items);` |
+| `fx_grid_line_parse` | function | `include/flex_layout.h:117` | `int fx_grid_line_parse(const char *v, int *start, int *end);` |
+| `fx_grid_line_resolve` | function | `include/flex_layout.h:122` | `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span);` |
+| `fx_item` | struct | `include/flex_layout.h:40` | `` |
+| `fx_justify` | enum | `include/flex_layout.h:30` | `` |
+| `fx_justify_name` | function | `include/flex_layout.h:331` | `const char *fx_justify_name(fx_justify j);` |
+| `fx_result` | struct | `include/flex_layout.h:48` | `` |
+| `fx_status` | enum | `include/flex_layout.h:53` | `` |
+| `height` | function | `include/flex_layout.h:337` | `* used height (h_out);` |
+| `it` | function | `include/flex_layout.h:354` | `* children that claim it (spec/flex_layout.md, tanda 44): proportionally to * grow[i] (x100) when any grows, else...` |
+| `number` | function | `include/flex_layout.h:106` | `* line number (negative counts from the end). */ #define FX_GL_AUTO 0 #define FX_GL_SPAN_BASE (1 << 20) #define...` |
+| `offset` | function | `include/flex_layout.h:181` | `* offset (from the content start, clamped to >= 0) to out_x[n]. The band does NOT wrap * (v1): an item that would...` |
+| `out` | function | `include/flex_layout.h:62` | `* fx_result to out (caller-owned). n == 0 is a no-op (out may be NULL). */ fx_status fx_flex_line(const fx_item...` |
+| `pos` | type_alias | `include/flex_layout.h:48` | `typedef struct fx_result { double pos;` |
+| `required` | function | `include/flex_layout.h:194` | `* out_row is required (NULL with n > 0 yields FX_ERR_NULL_ARG);` |
+| `size` | function | `include/flex_layout.h:60` | `* content size (px);` |
+| `space` | function | `include/flex_layout.h:244` | `* line order: positive free space (avail - sizes - gaps) is split equally among every * auto margin...` |
+| `widths` | function | `include/flex_layout.h:204` | `* the OUTER widths (width + ml + mr, clamped >= 0, so a negative margin narrows * the slot and a positive one widens...` |
+| `win` | function | `include/flex_layout.h:362` | `* margins win (both = centre, left only = end);` |
+| `FM_BODY_MAX` | macro | `include/form.h:30` | `#define FM_BODY_MAX` |
+| `FM_CONTENT_TYPE_URLENCODED` | variable | `include/form.h:68` | `extern const char FM_CONTENT_TYPE_URLENCODED[];` |
+| `FM_MAX_FIELDS` | macro | `include/form.h:31` | `#define FM_MAX_FIELDS` |
+| `FM_URL_MAX` | macro | `include/form.h:29` | `#define FM_URL_MAX` |
+| `FREEDOM_FORM_H` | macro | `include/form.h:2` | `#define FREEDOM_FORM_H` |
+| `fm_block_reason` | enum | `include/form.h:45` | `` |
+| `fm_field` | struct | `include/form.h:37` | `` |
+| `fm_kind` | enum | `include/form.h:39` | `` |
+| `fm_method` | enum | `include/form.h:33` | `` |
+| `fm_plan` | struct | `include/form.h:52` | `` |
+| `fm_status` | enum | `include/form.h:61` | `` |
+| `kind` | type_alias | `include/form.h:51` | `typedef struct fm_plan { fm_kind kind;` |
+| `FBK_MAX_DEPTH` | macro | `include/frame_broker.h:17` | `#define FBK_MAX_DEPTH` |
+| `FBK_MAX_FRAMES` | macro | `include/frame_broker.h:16` | `#define FBK_MAX_FRAMES` |
+| `FBK_MAX_MSG` | macro | `include/frame_broker.h:18` | `#define FBK_MAX_MSG` |
+| `FBK_ORIGIN_MAX` | macro | `include/frame_broker.h:19` | `#define FBK_ORIGIN_MAX` |
+| `FBK_URL_MAX` | macro | `include/frame_broker.h:20` | `#define FBK_URL_MAX` |
+| `FREEDOM_FRAME_BROKER_H` | macro | `include/frame_broker.h:2` | `#define FREEDOM_FRAME_BROKER_H` |
+| `f` | type_alias | `include/frame_broker.h:37` | `typedef struct fbk_table { fbk_frame f[FBK_MAX_FRAMES];` |
+| `fbk_add` | function | `include/frame_broker.h:49` | `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id);` |
+| `fbk_frame` | struct | `include/frame_broker.h:31` | `` |
+| `fbk_init` | function | `include/frame_broker.h:45` | `int fbk_init(fbk_table *t, const char *top_url);` |
+| `fbk_origin` | function | `include/frame_broker.h:55` | `const char *fbk_origin(const fbk_table *t, int id);` |
+| `fbk_origin_of` | function | `include/frame_broker.h:42` | `int fbk_origin_of(const char *url, char *out, size_t cap);` |
+| `fbk_rel` | enum | `include/frame_broker.h:22` | `` |
+| `fbk_remove` | function | `include/frame_broker.h:52` | `void fbk_remove(fbk_table *t, int id);` |
+| `fbk_table` | struct | `include/frame_broker.h:38` | `` |
+| `fbk_verdict` | enum | `include/frame_broker.h:24` | `` |
+| `used` | type_alias | `include/frame_broker.h:30` | `typedef struct fbk_frame { int used;` |
+| `FREEDOM_FRAME_CLOCK_H` | macro | `include/frame_clock.h:2` | `#define FREEDOM_FRAME_CLOCK_H` |
+| `active` | type_alias | `include/frame_clock.h:14` | `typedef struct fc_clock { int active;` |
+| `fc_clock` | struct | `include/frame_clock.h:15` | `` |
+| `fc_init` | function | `include/frame_clock.h:20` | `void fc_init(fc_clock *c);` |
+| `fc_interval_ms` | function | `include/frame_clock.h:23` | `int fc_interval_ms(const fc_clock *c);` |
+| `fc_needs_tick` | function | `include/frame_clock.h:22` | `int fc_needs_tick(const fc_clock *c);` |
+| `fc_set_active` | function | `include/frame_clock.h:21` | `void fc_set_active(fc_clock *c, int active);` |
+| `FH_MAX_DEPTH` | macro | `include/frame_host.h:18` | `#define FH_MAX_DEPTH` |
+| `FREEDOM_FRAME_HOST_H` | macro | `include/frame_host.h:2` | `#define FREEDOM_FRAME_HOST_H` |
+| `fh_apply_top` | function | `include/frame_host.h:36` | `void fh_apply_top(fh_host *h, const tab_page *page);` |
+| `fh_count` | function | `include/frame_host.h:43` | `int fh_count(const fh_host *h);` |
+| `fh_frame_view` | function | `include/frame_host.h:49` | `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);` |
+| `fh_free` | function | `include/frame_host.h:32` | `void fh_free(fh_host *h);` |
+| `fh_generation` | function | `include/frame_host.h:52` | `unsigned fh_generation(const fh_host *h);` |
+| `fh_host` | type_alias | `include/frame_host.h:19` | `typedef struct fh_host fh_host;` |
+| `fh_new` | function | `include/frame_host.h:28` | `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` |
+| `fh_tick` | function | `include/frame_host.h:40` | `int fh_tick(fh_host *h, int elapsed_ms);` |
+| `it` | function | `include/frame_host.h:46` | `* confined worker last built it (NULL when no live frame has that URL);` |
+| `FB_MAX_ENTRIES` | macro | `include/freebug.h:56` | `#define FB_MAX_ENTRIES` |
+| `FB_MAX_ENTRY_BYTES` | macro | `include/freebug.h:57` | `#define FB_MAX_ENTRY_BYTES` |
+| `FB_MAX_FILE_BYTES` | macro | `include/freebug.h:62` | `#define FB_MAX_FILE_BYTES` |
+| `FB_MAX_TOTAL_BYTES` | macro | `include/freebug.h:58` | `#define FB_MAX_TOTAL_BYTES` |
+| `FREEDOM_FREEBUG_H` | macro | `include/freebug.h:2` | `#define FREEDOM_FREEBUG_H` |
+| `copied` | function | `include/freebug.h:75` | `* copied (truncated to FB_MAX_FILE_BYTES);` |
+| `fb_buffer` | struct | `include/freebug.h:46` | `` |
+| `fb_buffer_at` | function | `include/freebug.h:92` | `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i);` |
+| `fb_buffer_count` | function | `include/freebug.h:89` | `size_t fb_buffer_count(const fb_buffer *b);` |
+| `fb_buffer_free` | function | `include/freebug.h:86` | `void fb_buffer_free(fb_buffer *b);` |
+| `fb_buffer_init` | function | `include/freebug.h:65` | `void fb_buffer_init(fb_buffer *b);` |
+| `fb_buffer_push_loc` | function | `include/freebug.h:78` | `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len, const char *file, int line, int col);` |
+| `fb_buffer_reset` | function | `include/freebug.h:83` | `void fb_buffer_reset(fb_buffer *b);` |
+| `fb_entry` | struct | `include/freebug.h:36` | `` |
+| `fb_level` | enum | `include/freebug.h:24` | `` |
+| `fb_level_name` | function | `include/freebug.h:96` | `const char *fb_level_name(int level);` |
+| `level` | type_alias | `include/freebug.h:36` | `typedef struct fb_entry { int level;` |
+| `truncated` | function | `include/freebug.h:69` | `* A message longer than FB_MAX_ENTRY_BYTES is stored truncated (not dropped). A * dropped push raises b->overflow...` |
+| `FC_FLEX_MEASURE_W` | macro | `include/freedom_config.h:45` | `#define FC_FLEX_MEASURE_W` |
+| `FC_FLEX_MIN_MEASURE_W` | macro | `include/freedom_config.h:51` | `#define FC_FLEX_MIN_MEASURE_W` |
+| `FC_FONT_CHAIN_MAX` | macro | `include/freedom_config.h:56` | `#define FC_FONT_CHAIN_MAX` |
+| `FC_FONT_FALLBACK_PX` | macro | `include/freedom_config.h:66` | `#define FC_FONT_FALLBACK_PX` |
+| `FC_HEADLESS_VIEW_H` | macro | `include/freedom_config.h:24` | `#define FC_HEADLESS_VIEW_H` |
+| `FC_LAZY_IMAGE_MARGIN_PX` | macro | `include/freedom_config.h:99` | `#define FC_LAZY_IMAGE_MARGIN_PX` |
+| `FC_MASK_CACHE_BYTES` | macro | `include/freedom_config.h:95` | `#define FC_MASK_CACHE_BYTES` |
+| `FC_MASK_CACHE_ENTRIES` | macro | `include/freedom_config.h:96` | `#define FC_MASK_CACHE_ENTRIES` |
+| `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:78` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
+| `FC_MAX_BOXES` | macro | `include/freedom_config.h:61` | `#define FC_MAX_BOXES` |
+| `FC_PNG_MARGIN` | macro | `include/freedom_config.h:34` | `#define FC_PNG_MARGIN` |
 | `FC_PNG_MAX_H` | macro | `include/freedom_config.h:39` | `#define FC_PNG_MAX_H` |
 | `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
 | `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:90` | `#define FC_SHC_MAX_QUERIES` |
 | `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:84` | `#define FC_SHC_MAX_TEXT_BYTES` |
-| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:103` | `#define FC_TABLE_TRACK_MAX_PX` |
-| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:99` | `#define FC_TAB_OP_NET_BUDGET_MS` |
+| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:109` | `#define FC_TABLE_TRACK_MAX_PX` |
+| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:105` | `#define FC_TAB_OP_NET_BUDGET_MS` |
 | `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:30` | `#define FC_TRUSTED_JS_BUDGET_MS` |
 | `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:70` | `#define FC_UI_FONT_SIZE` |
 | `FREEDOM_CONFIG_H` | macro | `include/freedom_config.h:14` | `#define FREEDOM_CONFIG_H` |
@@ -298,6 +455,17 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `ls_aead` | enum | `include/local_store.h:34` | `` |
 | `ls_free` | function | `include/local_store.h:80` | `void ls_free(uint8_t *buf, size_t len);` |
 | `ls_status` | enum | `include/local_store.h:39` | `` |
+| `FREEDOM_MASK_CACHE_H` | macro | `include/mask_cache.h:2` | `#define FREEDOM_MASK_CACHE_H` |
+| `h` | type_alias | `include/mask_cache.h:17` | `typedef struct mkc_key { int w, h;` |
+| `mkc_bytes` | function | `include/mask_cache.h:48` | `size_t mkc_bytes(const mkc_cache *c);` |
+| `mkc_cache` | type_alias | `include/mask_cache.h:24` | `typedef struct mkc_cache mkc_cache;` |
+| `mkc_clear` | function | `include/mask_cache.h:35` | `void mkc_clear(mkc_cache *c);` |
+| `mkc_count` | function | `include/mask_cache.h:49` | `size_t mkc_count(const mkc_cache *c);` |
+| `mkc_free` | function | `include/mask_cache.h:32` | `void mkc_free(mkc_cache *c);` |
+| `mkc_get` | function | `include/mask_cache.h:39` | `const unsigned char *mkc_get(mkc_cache *c, const mkc_key *k, int *stride);` |
+| `mkc_key` | struct | `include/mask_cache.h:17` | `` |
+| `mkc_new` | function | `include/mask_cache.h:29` | `mkc_cache *mkc_new(size_t byte_budget, size_t max_entries);` |
+| `mkc_put` | function | `include/mask_cache.h:45` | `unsigned char *mkc_put(mkc_cache *c, const mkc_key *k, int stride);` |
 | `FREEDOM_MEDIA_DECODER_H` | macro | `include/media_decoder.h:2` | `#define FREEDOM_MEDIA_DECODER_H` |
 | `MD_MAX_CATCHUP_READS` | macro | `include/media_decoder.h:65` | `#define MD_MAX_CATCHUP_READS` |
 | `MD_MAX_SEGMENT_BYTES` | macro | `include/media_decoder.h:46` | `#define MD_MAX_SEGMENT_BYTES` |
@@ -328,173 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `nr_realm_name` | function | `include/net_realm.h:69` | `const char *nr_realm_name(nr_realm r);` |
 | `nr_route` | enum | `include/net_realm.h:35` | `` |
 | `nr_route_name` | function | `include/net_realm.h:70` | `const char *nr_route_name(nr_route r);` |
-| `tor_enabled` | type_alias | `include/net_realm.h:41` | `typedef struct nr_config { int tor_enabled;` |
-| `FREEDOM_OS_SANDBOX_H` | macro | `include/os_sandbox.h:2` | `#define FREEDOM_OS_SANDBOX_H` |
-| `denied` | function | `include/os_sandbox.h:59` | `* request PROT_EXEC are denied (see os_prot_allowed). * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf...` |
-| `flags` | function | `include/os_sandbox.h:39` | `* permission also depends on the protection flags (see os_prot_allowed / W^X). */ int os_policy_allows(long syscall_nr);` |
-| `namespace` | function | `include/os_sandbox.h:75` | `* namespace (the unprivileged enabler), network (the worker never needs the * network -- the parent fetches and...` |
-| `os_fs_access` | enum | `include/os_sandbox.h:102` | `` |
-| `os_fs_rule` | struct | `include/os_sandbox.h:108` | `` |
-| `os_landlock_abi` | function | `include/os_sandbox.h:114` | `int os_landlock_abi(void);` |
-| `os_namespace_flags` | function | `include/os_sandbox.h:81` | `int os_namespace_flags(void);` |
-| `os_policy_size` | function | `include/os_sandbox.h:43` | `size_t os_policy_size(void);` |
-| `os_prot_allowed` | function | `include/os_sandbox.h:52` | `int os_prot_allowed(long syscall_nr, unsigned long prot);` |
-| `os_status` | enum | `include/os_sandbox.h:21` | `` |
-| `os_violation` | enum | `include/os_sandbox.h:30` | `` |
-| `CSS_LEN_UNSET` | function | `include/page_view.h:570` | `* CSS_LEN_UNSET (unset) / CSS_LEN_AUTO. z_index is signed, or CSS_LEN_UNSET. v1 * paints only position:relative (an...` |
-| `FREEDOM_PAGE_VIEW_H` | macro | `include/page_view.h:2` | `#define FREEDOM_PAGE_VIEW_H` |
-| `PV_BG_URL_MAX` | macro | `include/page_view.h:78` | `#define PV_BG_URL_MAX` |
-| `PV_BR_ATOM_SPACE` | macro | `include/page_view.h:1276` | `#define PV_BR_ATOM_SPACE` |
-| `PV_BR_CONT` | macro | `include/page_view.h:1272` | `#define PV_BR_CONT` |
-| `PV_BR_EMPTY` | macro | `include/page_view.h:1271` | `#define PV_BR_EMPTY` |
-| `PV_BSHADOW_LAYERS` | macro | `include/page_view.h:44` | `#define PV_BSHADOW_LAYERS` |
-| `PV_CONT_DEPTH` | macro | `include/page_view.h:72` | `#define PV_CONT_DEPTH` |
-| `PV_CQ_MAX` | macro | `include/page_view.h:942` | `#define PV_CQ_MAX` |
-| `PV_FRAME_SCHEME` | macro | `include/page_view.h:1334` | `#define PV_FRAME_SCHEME` |
-| `PV_GAP_WORD_SPACE` | macro | `include/page_view.h:808` | `#define PV_GAP_WORD_SPACE` |
-| `PV_GRID_TRACKS` | macro | `include/page_view.h:58` | `#define PV_GRID_TRACKS` |
-| `PV_LEN_AUTO` | macro | `include/page_view.h:54` | `#define PV_LEN_AUTO` |
-| `PV_LEN_END` | macro | `include/page_view.h:55` | `#define PV_LEN_END` |
-| `PV_LEN_UNSET` | macro | `include/page_view.h:53` | `#define PV_LEN_UNSET` |
-| `PV_MASK_GEO_N` | macro | `include/page_view.h:79` | `#define PV_MASK_GEO_N` |
-| `PV_MAUTO_BOTTOM` | macro | `include/page_view.h:49` | `#define PV_MAUTO_BOTTOM` |
-| `PV_MAUTO_LEFT` | macro | `include/page_view.h:46` | `#define PV_MAUTO_LEFT` |
-| `PV_MAUTO_RIGHT` | macro | `include/page_view.h:47` | `#define PV_MAUTO_RIGHT` |
-| `PV_MAUTO_TOP` | macro | `include/page_view.h:48` | `#define PV_MAUTO_TOP` |
-| `PV_MAX_CONTAINERS` | macro | `include/page_view.h:65` | `#define PV_MAX_CONTAINERS` |
-| `PV_MAX_FLOATS` | macro | `include/page_view.h:67` | `#define PV_MAX_FLOATS` |
-| `PV_PH_HIDDEN` | macro | `include/page_view.h:1302` | `#define PV_PH_HIDDEN` |
-| `PV_PH_THEME` | macro | `include/page_view.h:1301` | `#define PV_PH_THEME` |
-| `PV_UA_BODY_MARGIN` | macro | `include/page_view.h:881` | `#define PV_UA_BODY_MARGIN` |
-| `ancestors` | function | `include/page_view.h:1147` | `* itself by walking its ancestors (css_visibility, 0 = unset). * * An explicit value on the run WINS over the box...` |
-| `bx_display` | function | `include/page_view.h:243` | `* bx_display (flex/grid);` |
-| `cause` | function | `include/page_view.h:998` | `* cause (spec/css_drops.md). Builds no view and changes nothing -- it exists so * "what is this page's CSS losing?"...` |
-| `container` | function | `include/page_view.h:242` | `* cont_id groups runs of one container (-1 = none);` |
-| `declare` | function | `include/page_view.h:884` | `* margin the author did not declare (px or %), 0 on a declared side (the body's * own box, or nothing for 0, owns...` |
-| `default` | function | `include/page_view.h:1066` | `* structure is carried by default (not gated by caps.css). */ void pv_set_indent(pv_view *v, int indent);` |
-| `form` | function | `include/page_view.h:1029` | `* form (-1 if none);` |
-| `itself` | function | `include/page_view.h:371` | `* by itself (bx_width_cap2);` |
-| `kind` | type_alias | `include/page_view.h:131` | `typedef struct pv_run { pv_kind kind;` |
-| `nonzero` | function | `include/page_view.h:896` | `* when nonzero (JS allowed for this page) the <noscript> subtree is suppressed. */ pv_status pv_build_ex(const...` |
-| `order` | function | `include/page_view.h:307` | `* groups the runs of ONE floated element in document order (-1 = not in a float);` |
-| `parent_id` | type_alias | `include/page_view.h:472` | `typedef struct pv_box_def { int parent_id;` |
-| `parent_id` | type_alias | `include/page_view.h:809` | `typedef struct pv_cont_def { int parent_id;` |
-| `policy` | function | `include/page_view.h:911` | `* TRUSTED parent under full network policy (spec/tab.md §8) -- page_view stays * pure and never fetches. The...` |
-| `pv_at` | function | `include/page_view.h:1324` | `const pv_run *pv_at(const pv_view *v, size_t i);` |
-| `pv_box_at` | function | `include/page_view.h:1329` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i);` |
-| `pv_box_count` | function | `include/page_view.h:1328` | `size_t pv_box_count(const pv_view *v);` |
-| `pv_box_def` | struct | `include/page_view.h:472` | `` |
-| `pv_computed` | type_alias | `include/page_view.h:979` | `typedef struct pv_computed pv_computed;` |
-| `pv_computed_free` | function | `include/page_view.h:994` | `void pv_computed_free(pv_computed *pc);` |
-| `pv_computed_get` | function | `include/page_view.h:991` | `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st, double *font_px, int *inherited_color);` |
-| `pv_computed_new` | function | `include/page_view.h:980` | `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css, size_t extern_len...` |
-| `pv_computed_new_cached` | function | `include/page_view.h:983` | `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark, const char *extern_css, size_t...` |
-| `pv_cont_at` | function | `include/page_view.h:1296` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i);` |
-| `pv_cont_count` | function | `include/page_view.h:1295` | `size_t pv_cont_count(const pv_view *v);` |
-| `pv_cont_def` | struct | `include/page_view.h:810` | `` |
-| `pv_count` | function | `include/page_view.h:1323` | `size_t pv_count(const pv_view *v);` |
-| `pv_cq_src` | struct | `include/page_view.h:943` | `` |
-| `pv_form_method` | enum | `include/page_view.h:117` | `` |
-| `pv_free` | function | `include/page_view.h:1320` | `void pv_free(pv_view *v);` |
-| `pv_input_type` | enum | `include/page_view.h:97` | `` |
-| `pv_kind` | enum | `include/page_view.h:81` | `` |
-| `pv_new` | function | `include/page_view.h:1010` | `pv_view *pv_new(void);` |
-| `pv_node_ids` | struct | `include/page_view.h:963` | `` |
-| `pv_placeholder_color` | function | `include/page_view.h:1313` | `int pv_placeholder_color(const css_style *ph);` |
-| `pv_run` | struct | `include/page_view.h:131` | `` |
-| `pv_set_bgcolor` | function | `include/page_view.h:1076` | `void pv_set_bgcolor(pv_view *v, int bg_rgb);` |
-| `pv_set_block_id` | function | `include/page_view.h:1254` | `void pv_set_block_id(pv_view *v, int block_id);` |
-| `pv_set_block_node` | function | `include/page_view.h:1268` | `void pv_set_block_node(pv_view *v, dom_node_id id);` |
-| `pv_set_box` | function | `include/page_view.h:1233` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w, int box_center, int box_mt, int box_mb);` |
-| `pv_set_box_maxw` | function | `include/page_view.h:1244` | `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct);` |
-| `pv_set_box_pct` | function | `include/page_view.h:1239` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct, int box_mt_pct, int box_mb_pct);` |
-| `pv_set_br_line` | function | `include/page_view.h:1280` | `void pv_set_br_line(pv_view *v, int br_line);` |
-| `pv_set_color` | function | `include/page_view.h:1069` | `void pv_set_color(pv_view *v, int fg_rgb);` |
-| `pv_set_cont_box` | function | `include/page_view.h:1193` | `void pv_set_cont_box(pv_view *v, int cont_box_id);` |
-| `pv_set_cont_item` | function | `include/page_view.h:1209` | `void pv_set_cont_item(pv_view *v, int cont_item);` |
-| `pv_set_emphasis` | function | `include/page_view.h:1061` | `void pv_set_emphasis(pv_view *v, int bold, int italic);` |
-| `pv_set_flex` | function | `include/page_view.h:1202` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis, int flex_order, int flex_direction, int...` |
-| `pv_set_flex_mauto` | function | `include/page_view.h:1205` | `void pv_set_flex_mauto(pv_view *v, int mauto);` |
-| `pv_set_float` | function | `include/page_view.h:1223` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear, int float_ml, int float_ml_pct, int...` |
-| `pv_set_float_w` | function | `include/page_view.h:1220` | `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box, int float_ow, int float_ow_pct, int...` |
-| `pv_set_grad_text` | function | `include/page_view.h:1163` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4);` |
-| `pv_set_grid` | function | `include/page_view.h:1194` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span);` |
-| `pv_set_grid_area` | function | `include/page_view.h:1183` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start);` |
-| `pv_set_grid_rows` | function | `include/page_view.h:1184` | `void pv_set_grid_rows(pv_view *v, int grid_rows);` |
-| `pv_set_input_checked` | function | `include/page_view.h:1300` | `void pv_set_input_checked(pv_view *v, int checked);` |
-| `pv_set_input_placeholder` | function | `include/page_view.h:1304` | `void pv_set_input_placeholder(pv_view *v, int ph_color);` |
-| `pv_set_input_select_opts` | function | `include/page_view.h:1317` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts);` |
-| `pv_set_justify_self` | function | `include/page_view.h:1265` | `void pv_set_justify_self(pv_view *v, int justify_self);` |
-| `pv_set_node_id` | function | `include/page_view.h:1249` | `void pv_set_node_id(pv_view *v, dom_node_id node_id);` |
-| `pv_set_oof` | function | `include/page_view.h:1262` | `void pv_set_oof(pv_view *v, int oof);` |
-| `pv_set_own_box` | function | `include/page_view.h:1258` | `void pv_set_own_box(pv_view *v, int box_id);` |
-| `pv_set_row_span` | function | `include/page_view.h:1179` | `void pv_set_row_span(pv_view *v, int row_span);` |
-| `pv_set_text_ext` | function | `include/page_view.h:1157` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e);` |
-| `pv_set_text_style` | function | `include/page_view.h:1085` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs, int line_scale, int text_decoration);` |
-| `pv_set_ua_tag` | function | `include/page_view.h:1189` | `void pv_set_ua_tag(pv_view *v, int ua_tag);` |
-| `pv_status` | enum | `include/page_view.h:34` | `` |
-| `pv_svg_append_root_attrs` | function | `include/page_view.h:1310` | `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs, size_t *out_len);` |
-| `pv_text_ext` | struct | `include/page_view.h:1101` | `` |
-| `pv_text_ext_reset` | function | `include/page_view.h:1142` | `void pv_text_ext_reset(pv_text_ext *e);` |
-| `pv_view` | struct | `include/page_view.h:860` | `` |
-| `resolved` | function | `include/page_view.h:903` | `* author CSS is still resolved (the presentation layer decides whether to apply it). * pv_build_ex is pv_build_full...` |
-| `run` | function | `include/page_view.h:1166` | `* run (cont_id, the bx_display, the parsed gap/justify/cols, plus flex-wrap/ * row-gap/align-items). No-op on an...` |
-| `scale` | function | `include/page_view.h:645` | `* scale(1)) and rotate in whole degrees (transform_rotate);` |
-| `shc_cache` | struct | `include/page_view.h:932` | `` |
-| `tree` | function | `include/page_view.h:690` | `* box tree (a mask covers its whole subtree);` |
-| `word_spacing` | type_alias | `include/page_view.h:1101` | `typedef struct pv_text_ext { int font_family, text_transform, letter_spacing, word_spacing;` |
-| `FREEDOM_PDF_EXPORT_H` | macro | `include/pdf_export.h:2` | `#define FREEDOM_PDF_EXPORT_H` |
-| `PE_EXT` | macro | `include/pdf_export.h:29` | `#define PE_EXT` |
-| `PE_EXT_PNG` | macro | `include/pdf_export.h:30` | `#define PE_EXT_PNG` |
-| `PE_FALLBACK_NAME` | macro | `include/pdf_export.h:31` | `#define PE_FALLBACK_NAME` |
-| `PE_NAME_MAX` | macro | `include/pdf_export.h:28` | `#define PE_NAME_MAX` |
-| `fallback` | function | `include/pdf_export.h:46` | `* fallback (PE_ERR_OVERFLOW, out left empty). title == NULL is treated as empty. * Does NOT append the extension...` |
-| `literal` | function | `include/pdf_export.h:52` | `* trusted literal (e.g. PE_EXT / PE_EXT_PNG);` |
-| `pe_paginate` | function | `include/pdf_export.h:70` | `size_t pe_paginate(const double *tops, const double *heights, size_t n, double page_h, int *out_page, double...` |
-| `pe_status` | enum | `include/pdf_export.h:33` | `` |
-| `trusted` | function | `include/pdf_export.h:51` | `* dir is trusted (chosen by the app from XDG/$HOME);` |
-| `FREEDOM_PERF_TRACE_H` | macro | `include/perf_trace.h:2` | `#define FREEDOM_PERF_TRACE_H` |
-| `PT_MAX_SAMPLES` | macro | `include/perf_trace.h:32` | `#define PT_MAX_SAMPLES` |
-| `order` | enum | `include/perf_trace.h:71` | `` |
-| `pt_count` | function | `include/perf_trace.h:57` | `size_t pt_count(const pt_trace *t, pt_stage stage);` |
-| `pt_elapsed_us` | function | `include/perf_trace.h:50` | `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us);` |
-| `pt_format` | function | `include/perf_trace.h:76` | `size_t pt_format(const pt_trace *t, char *buf, size_t cap);` |
-| `pt_init` | function | `include/perf_trace.h:46` | `void pt_init(pt_trace *t);` |
-| `pt_last_us` | function | `include/perf_trace.h:60` | `uint64_t pt_last_us(const pt_trace *t, pt_stage stage);` |
-| `pt_max_us` | function | `include/perf_trace.h:64` | `uint64_t pt_max_us(const pt_trace *t, pt_stage stage);` |
-| `pt_median_us` | function | `include/perf_trace.h:65` | `uint64_t pt_median_us(const pt_trace *t, pt_stage stage);` |
-| `pt_min_us` | function | `include/perf_trace.h:63` | `uint64_t pt_min_us(const pt_trace *t, pt_stage stage);` |
-| `pt_record` | function | `include/perf_trace.h:54` | `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us);` |
-| `pt_stage_name` | function | `include/perf_trace.h:69` | `const char *pt_stage_name(pt_stage stage);` |
-| `pt_stage_stats` | struct | `include/perf_trace.h:34` | `` |
-| `pt_trace` | struct | `include/perf_trace.h:41` | `` |
-| `samples` | type_alias | `include/perf_trace.h:33` | `typedef struct pt_stage_stats { uint64_t samples[PT_MAX_SAMPLES];` |
-| `stage` | type_alias | `include/perf_trace.h:40` | `typedef struct pt_trace { pt_stage_stats stage[PT_STAGE_COUNT];` |
-| `FREEDOM_PQ_SEAL_H` | macro | `include/pq_seal.h:2` | `#define FREEDOM_PQ_SEAL_H` |
-| `PQS_CT_LEN` | macro | `include/pq_seal.h:22` | `#define PQS_CT_LEN` |
-| `PQS_MAGIC` | macro | `include/pq_seal.h:20` | `#define PQS_MAGIC` |
-| `PQS_MAGIC_LEN` | macro | `include/pq_seal.h:21` | `#define PQS_MAGIC_LEN` |
-| `pqs_buf_free` | function | `include/pq_seal.h:51` | `void pqs_buf_free(uint8_t *buf, size_t len);` |
-| `pqs_free` | function | `include/pq_seal.h:41` | `void pqs_free(pqs_keys *k);` |
-| `pqs_keys` | type_alias | `include/pq_seal.h:33` | `typedef struct pqs_keys pqs_keys;` |
-| `pqs_status` | enum | `include/pq_seal.h:24` | `` |
-| `FREEDOM_PREFETCH_H` | macro | `include/prefetch.h:2` | `#define FREEDOM_PREFETCH_H` |
-| `PF_MAX_IMPORTS` | macro | `include/prefetch.h:50` | `#define PF_MAX_IMPORTS` |
-| `PF_MAX_JOBS` | macro | `include/prefetch.h:49` | `#define PF_MAX_JOBS` |
-| `PF_MAX_REFS` | macro | `include/prefetch.h:47` | `#define PF_MAX_REFS` |
-| `PF_MAX_THREADS` | macro | `include/prefetch.h:48` | `#define PF_MAX_THREADS` |
-| `PF_SPEC_MAX` | macro | `include/prefetch.h:51` | `#define PF_SPEC_MAX` |
-| `fetch` | function | `include/prefetch.h:132` | `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or * -1 when no thread could start...` |
-| `inner` | type_alias | `include/prefetch.h:159` | `typedef struct pf_gated_fetch { pf_fetch_fn inner;` |
-| `jobs` | type_alias | `include/prefetch.h:89` | `typedef struct pf_pool { pf_job jobs[PF_MAX_JOBS];` |
-| `kind` | type_alias | `include/prefetch.h:42` | `typedef struct pf_ref { pf_kind kind;` |
-| `pf_find_importmap` | function | `include/prefetch.h:115` | `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n);` |
-| `pf_gated_fetch` | struct | `include/prefetch.h:159` | `` |
-| `pf_job` | struct | `include/prefetch.h:80` | `` |
-| `pf_job_state` | enum | `include/prefetch.h:73` | `` |
-| `pf_kind` | enum | `include/prefetch.h:35` | `` |
-| `pf_list` | struct | `include/prefetch.h:53` | `` |
-| `pf_list_free` | function | `include/prefetch.h:63` | `void pf_list_free(pf_list *l);` |
-| `pf_pool` | struct | `include/prefetch.h:90` | `` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

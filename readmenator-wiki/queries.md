@@ -4,7 +4,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 ## Suggested
 
-### Q: What does browser_ui.c depend on, and what depends on it? (59 connections)
+### Q: What does browser_ui.c depend on, and what depends on it? (62 connections)
 
 - Status: unanswered
 
@@ -16,7 +16,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: How are the 59 files in 'include: css' related to each other?
+### Q: How are the 64 files in 'src: css' related to each other?
 
 - Status: unanswered
 

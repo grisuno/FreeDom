@@ -156,6 +156,22 @@ Previous: [KB_tests_p5.md](KB_tests_p5.md)
   - `local_store` (function, line 2) `* TDD suite for local_store (Hito 5 - Zero Knowledge: encrypted local state). * * RED state until src/local_store.c...`
 - Depends on: `include/local_store.h`
 
+## tests/test_mask_cache.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `key_of` (function, line 11) `static mkc_key key_of(int w, int h, double sigma)`
+  - `test_empty_misses` (function, line 16) `static void test_empty_misses(void **state)`
+  - `test_put_then_get_same_buffer` (function, line 28) `static void test_put_then_get_same_buffer(void **state)`
+  - `test_any_field_differs_misses` (function, line 46) `static void test_any_field_differs_misses(void **state)`
+  - `test_lru_eviction_by_bytes` (function, line 65) `static void test_lru_eviction_by_bytes(void **state)`
+  - `test_entry_cap` (function, line 81) `static void test_entry_cap(void **state)`
+  - `test_over_budget_and_invalid_fail_closed` (function, line 97) `static void test_over_budget_and_invalid_fail_closed(void **state)`
+  - `test_replace_keeps_one_entry` (function, line 119) `static void test_replace_keeps_one_entry(void **state)`
+  - `test_clear_and_null_safety` (function, line 133) `static void test_clear_and_null_safety(void **state)`
+  - `main` (function, line 158) `int main(void)`
+- Depends on: `include/mask_cache.h`
+
 ## tests/test_media_decoder.c
 - Doc: test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and...
 - Layer: testing

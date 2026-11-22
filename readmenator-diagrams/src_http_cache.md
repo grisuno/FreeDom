@@ -13,15 +13,15 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (8.1)
+## include (7.1)
 
 include groups 4 files (h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. ds_free: Reads and decrypts path.
 
-## src (8.2)
+## src (7.2)
 
 src groups 5 files (c) around _POSIX_C_SOURCE, fsync_dir, map_ls, ds_write, ds_read. fsync_dir: Best-effort fsync of the directory holding path, for crash durability of...
 
-## tests (8.3)
+## tests (7.3)
 
 tests groups 4 files (c) around _POSIX_C_SOURCE, dir, fixture, setup, teardown.
 

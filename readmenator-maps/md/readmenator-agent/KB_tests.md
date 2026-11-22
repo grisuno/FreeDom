@@ -5,8 +5,9 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
 - Layer: testing
 - Language: c
 - Symbols:
-  - `main` (function, line 26) `int main(void)`
-  - `CHECK` (macro, line 16) `#define CHECK(cond, msg)`
+  - `always_cancel` (function, line 16) `static int always_cancel(void *ctx)`
+  - `main` (function, line 28) `int main(void)`
+  - `CHECK` (macro, line 18) `#define CHECK(cond, msg)`
 - Depends on: `include/secure_fetch.h`
 
 ## tests/test_anti_fp.c
@@ -47,6 +48,7 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
 - Depends on: `include/block_flow.h`
 
 ## tests/test_box_blur.c
+- Doc: ref_line: put_px(argb, W * 4, 30, 20, 255); int r[4]; assert_int_equal(bb_ink_rect(argb, W, H, W...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -60,7 +62,11 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_ink_rect_empty_surface_has_no_ink` (function, line 85) `static void test_ink_rect_empty_surface_has_no_ink(void **state)`
   - `test_ink_rect_grows_by_the_blur_reach_and_clamps` (function, line 93) `static void test_ink_rect_grows_by_the_blur_reach_and_clamps(void **state)`
   - `test_ink_rect_covers_every_pixel_the_blur_can_touch` (function, line 112) `static void test_ink_rect_covers_every_pixel_the_blur_can_touch(void **state)`
-  - `main` (function, line 130) `int main(void)`
+  - `ref_line` (function, line 134) `static void ref_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)`
+  - `ref_blur` (function, line 147) `static void ref_blur(unsigned char *buf, int w, int h, int stride, double sigma)`
+  - `rng_next` (function, line 159) `static unsigned rng_next(unsigned *s)`
+  - `test_blur_matches_reference_byte_for_byte` (function, line 161) `static void test_blur_matches_reference_byte_for_byte(void **state)`
+  - `main` (function, line 181) `int main(void)`
 - Depends on: `include/box_blur.h`
 
 ## tests/test_box_style.c
@@ -197,26 +203,36 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ## tests/test_browser.c
-- Doc: test_url_bar_selection: Omnibar selection model: extend builds a selection, ops replace/delete...
+- Doc: nav: #define _POSIX_C_SOURCE 200809L #include <stdarg.h> #include <stddef.h> #include <stdint.h>...
 - Layer: testing
 - Language: c
 - Symbols:
-  - `test_init` (function, line 20) `static void test_init(void **state)`
-  - `test_navigate_history` (function, line 31) `static void test_navigate_history(void **state)`
-  - `test_navigate_from_middle_discards_future` (function, line 61) `static void test_navigate_from_middle_discards_future(void **state)`
-  - `test_back_forward_bounds` (function, line 79) `static void test_back_forward_bounds(void **state)`
-  - `test_rejects_invalid_url` (function, line 95) `static void test_rejects_invalid_url(void **state)`
-  - `test_accepts_https_and_file` (function, line 108) `static void test_accepts_https_and_file(void **state)`
-  - `test_url_bar_editing` (function, line 122) `static void test_url_bar_editing(void **state)`
-  - `test_url_bar_selection` (function, line 152) `static void test_url_bar_selection(void **state)`
-  - `test_set_page` (function, line 196) `static void test_set_page(void **state)`
-  - `test_set_page_sanitizes_invalid_utf8` (function, line 218) `static void test_set_page_sanitizes_invalid_utf8(void **state)`
-  - `test_exceptions` (function, line 252) `static void test_exceptions(void **state)`
-  - `test_status_toast` (function, line 277) `static void test_status_toast(void **state)`
-  - `test_status_truncates` (function, line 309) `static void test_status_truncates(void **state)`
-  - `test_push_state_same_document` (function, line 328) `static void test_push_state_same_document(void **state)`
-  - `test_push_state_rejects_and_guards` (function, line 361) `static void test_push_state_rejects_and_guards(void **state)`
-  - `main` (function, line 378) `int main(void)`
+  - `nav` (function, line 22) `static browser_status nav(browser_state *bs, const char *url)`
+  - `back` (function, line 27) `static browser_status back(browser_state *bs)`
+  - `fwd` (function, line 32) `static browser_status fwd(browser_state *bs)`
+  - `test_init` (function, line 38) `static void test_init(void **state)`
+  - `test_navigate_history` (function, line 49) `static void test_navigate_history(void **state)`
+  - `test_navigate_from_middle_discards_future` (function, line 79) `static void test_navigate_from_middle_discards_future(void **state)`
+  - `test_back_forward_bounds` (function, line 97) `static void test_back_forward_bounds(void **state)`
+  - `test_rejects_invalid_url` (function, line 113) `static void test_rejects_invalid_url(void **state)`
+  - `test_accepts_https_and_file` (function, line 126) `static void test_accepts_https_and_file(void **state)`
+  - `test_url_bar_editing` (function, line 140) `static void test_url_bar_editing(void **state)`
+  - `test_url_bar_selection` (function, line 170) `static void test_url_bar_selection(void **state)`
+  - `test_set_page` (function, line 214) `static void test_set_page(void **state)`
+  - `test_set_page_sanitizes_invalid_utf8` (function, line 236) `static void test_set_page_sanitizes_invalid_utf8(void **state)`
+  - `test_exceptions` (function, line 270) `static void test_exceptions(void **state)`
+  - `test_status_toast` (function, line 295) `static void test_status_toast(void **state)`
+  - `test_status_truncates` (function, line 327) `static void test_status_truncates(void **state)`
+  - `test_push_state_same_document` (function, line 346) `static void test_push_state_same_document(void **state)`
+  - `test_push_state_rejects_and_guards` (function, line 379) `static void test_push_state_rejects_and_guards(void **state)`
+  - `test_closed_tabs` (function, line 396) `static void test_closed_tabs(void **state)`
+  - `test_stop_restores_history` (function, line 431) `static void test_stop_restores_history(void **state)`
+  - `test_commit_keeps_entry` (function, line 459) `static void test_commit_keeps_entry(void **state)`
+  - `test_navigate_replaces_pending` (function, line 477) `static void test_navigate_replaces_pending(void **state)`
+  - `test_multi_step_back_is_one_pending` (function, line 505) `static void test_multi_step_back_is_one_pending(void **state)`
+  - `test_pending_guards_push_state` (function, line 530) `static void test_pending_guards_push_state(void **state)`
+  - `main` (function, line 557) `int main(void)`
+  - `entry` (function, line 521) `* returns to the COMMITTED entry (c), with its whole history intact. */ assert_int_equal(browser_back(&bs), BROWSER_OK);`
   - `_POSIX_C_SOURCE` (macro, line 8) `#define _POSIX_C_SOURCE`
 - Depends on: `include/browser.h`
 
@@ -239,6 +255,27 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `_GNU_SOURCE` (macro, line 1) `#define _GNU_SOURCE`
   - `NOW` (macro, line 12) `#define NOW`
 - Depends on: `include/cached_fetch.h`
+
+## tests/test_chrome_layout.c
+- Doc: Suite for chrome_layout (spec/chrome_layout.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `overlaps` (function, line 11) `static int overlaps(chl_rect a, chl_rect b)`
+  - `cx` (function, line 16) `static double cx(chl_rect r)`
+  - `cy` (function, line 17) `static double cy(chl_rect r)`
+  - `test_rejects_bad_input` (function, line 19) `static void test_rejects_bad_input(void **state)`
+  - `test_csd_single_tab` (function, line 31) `static void test_csd_single_tab(void **state)`
+  - `test_ssd_has_no_window_buttons` (function, line 48) `static void test_ssd_has_no_window_buttons(void **state)`
+  - `test_many_tabs_keep_minimum_and_drag` (function, line 58) `static void test_many_tabs_keep_minimum_and_drag(void **state)`
+  - `test_close_buttons` (function, line 78) `static void test_close_buttons(void **state)`
+  - `test_toolbar_hits` (function, line 100) `static void test_toolbar_hits(void **state)`
+  - `test_tiny_and_hostile_widths` (function, line 126) `static void test_tiny_and_hostile_widths(void **state)`
+  - `test_identity_table` (function, line 145) `static void test_identity_table(void **state)`
+  - `test_identity_labels` (function, line 175) `static void test_identity_labels(void **state)`
+  - `test_findbar` (function, line 185) `static void test_findbar(void **state)`
+  - `main` (function, line 225) `int main(void)`
+- Depends on: `include/chrome_layout.h`
 
 ## tests/test_compositor.c
 - Doc: test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by...
@@ -265,7 +302,9 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_sort_stability` (function, line 193) `static void test_sort_stability(void **state)`
   - `test_sort_noop_guards` (function, line 207) `static void test_sort_noop_guards(void **state)`
   - `test_sort_matches_zindex_only_ordering` (function, line 218) `static void test_sort_matches_zindex_only_ordering(void **state)`
-  - `main` (function, line 231) `int main(void)`
+  - `test_ink_reach` (function, line 232) `static void test_ink_reach(void **state)`
+  - `test_span_visible` (function, line 251) `static void test_span_visible(void **state)`
+  - `main` (function, line 265) `int main(void)`
 - Depends on: `include/compositor.h`, `include/css.h`
 
 

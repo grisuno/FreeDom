@@ -337,6 +337,19 @@ el salto que la envió viaja como `redirect_from` del nuevo fetch (`nav_redirect
 la rama GUI de la redirección de POST está cableada pero **no ejercitada** de punta a punta
 (necesita un primer salto público).
 
+## 6sexies. Cancelación (`cancel_cb`, Detener, 2026-11-22)
+
+`sf_config.cancel_cb(cancel_ctx)` se consulta desde el hilo de la transferencia mientras corre
+(también durante connect/TLS, vía `CURLOPT_XFERINFOFUNCTION`). Un valor distinto de cero aborta la
+transferencia: `SF_ERR_CANCELLED`, ningún salto de redirección más, y **ningún reintento de la
+escalera de navegabilidad** (`sf_fallback_policy` devuelve 0 para `SF_ERR_CANCELLED`, también en un
+host del allowlist: detener es decisión del usuario, no un fallo criptográfico; sin esto un host
+del allowlist reintentaba con la política relajada). `NULL` = nunca se cancela. Se usa para el botón
+Detener (`spec/browser.md` §3c): la GUI cancela cuando la generación de navegación del trabajo ya no
+es la actual, así que detener corta el tráfico en vez de terminar una descarga que nadie verá.
+Verificado: unitario (`sf_fallback_policy`), `make itest` contra red viva (status 14, un solo
+intento con allowlist) y E2E con servidor TLS local en la ventana real (el servidor ve el cierre).
+
 ## 7. Garantías de memoria
 
 - Sin estado global mutable; reentrante.

@@ -1,10 +1,10 @@
 # `src/compositor.c`
 
-> Source: [src/compositor.c:1](../../src/compositor.c#L1) | language `c` | coverage 60.0% | [API index](../index.md)
+> Source: [src/compositor.c:1](../../src/compositor.c#L1) | language `c` | coverage 71.4% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`cx_forms_stacking_context`](#cx_forms_stacking_context), [`cx_box_layer`](#cx_box_layer), [`cx_item_compare`](#cx_item_compare), [`cx_sort`](#cx_sort)
+- **Functions:** [`cx_forms_stacking_context`](#cx_forms_stacking_context), [`cx_box_layer`](#cx_box_layer), [`cx_item_compare`](#cx_item_compare), [`cx_sort`](#cx_sort), [`cx_ink_reach`](#cx_ink_reach), [`cx_span_visible`](#cx_span_visible)
 
 ## Call Graph
 
@@ -26,7 +26,7 @@ flowchart LR
 
 ### `cx_forms_stacking_context`
 
-`function` | [src/compositor.c:16](../../src/compositor.c#L16)
+`function` | [src/compositor.c:18](../../src/compositor.c#L18)
 
 ```c
 int cx_forms_stacking_context(const cx_style *s)
@@ -54,7 +54,7 @@ Does this box establish a stacking context?
 
 ### `cx_box_layer`
 
-`function` | [src/compositor.c:34](../../src/compositor.c#L34)
+`function` | [src/compositor.c:36](../../src/compositor.c#L36)
 
 ```c
 cx_layer cx_box_layer(const cx_style *s)
@@ -78,7 +78,7 @@ cx_layer cx_box_layer(const cx_style *s)
 
 ### `cx_item_compare`
 
-`function` | [src/compositor.c:54](../../src/compositor.c#L54)
+`function` | [src/compositor.c:56](../../src/compositor.c#L56)
 
 ```c
 int cx_item_compare(const cx_item *a, const cx_item *b)
@@ -107,7 +107,7 @@ Returns <0, 0 or >0 like a qsort comparator. NULL-safe (a NULL operand sorts fir
 
 ### `cx_sort`
 
-`function` | [src/compositor.c:70](../../src/compositor.c#L70)
+`function` | [src/compositor.c:72](../../src/compositor.c#L72)
 
 ```c
 void cx_sort(cx_item *items, size_t n)
@@ -125,5 +125,64 @@ No allocation.
 | `n` | `size_t` |  |  |
 
 *Calls:* [`cx_item_compare`](#cx_item_compare)
+
+---
+
+<a id="cx_ink_reach"></a>
+
+### `cx_ink_reach`
+
+`function` | [src/compositor.c:87](../../src/compositor.c#L87)
+
+```c
+double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset)
+```
+
+How far (px, >= 0) a box's paint may reach beyond its border box (spec/compositor.md, tanda 95): each outset box-shadow layer {dx, dy, blur, spread, color, inset} with color != -1 reaches max(|dx|,|dy|) + max(spread,0) + ceil(1.5*blur) + 1; an inset layer stays inside; an outline reaches outline_w + max(offset,0) when outline_w > 0.
+
+The max. layers NULL or n <= 0 counts only the outline.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `layers` | `int (* )[6]` |  |  |
+| `n` | `int` |  |  |
+| `outline_w` | `int` |  |  |
+| `outline_offset` | `int` |  |  |
+
+**Returns:** `double`
+
+> **Inherited:** Documentation from [`cx_ink_reach`](#cx_ink_reach) (include/compositor.h:91).
+
+---
+
+<a id="cx_span_visible"></a>
+
+### `cx_span_visible`
+
+`function` | [src/compositor.c:104](../../src/compositor.c#L104)
+
+```c
+int cx_span_visible(double top, double h, double reach, double view_top, double view_h)
+```
+
+1 when [top - reach, top + h + reach] touches [view_top, view_top + view_h] (edges included), else 0.
+
+Any non-finite input is visible (fail-open: content never vanishes).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `top` | `double` |  |  |
+| `h` | `double` |  |  |
+| `reach` | `double` |  |  |
+| `view_top` | `double` |  |  |
+| `view_h` | `double` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`cx_span_visible`](#cx_span_visible) (include/compositor.h:95).
 
 ---

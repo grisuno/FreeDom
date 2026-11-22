@@ -1,6 +1,6 @@
 # src: tab
 
-src: tab groups 54 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
+src: tab groups 53 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
 
 ```mermaid
 graph LR
@@ -14,15 +14,15 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## include (2.1)
+## include (3.1)
 
 include groups 15 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
 
-## src (2.2)
+## src (3.2)
 
-src groups 25 files (c, h) around FREEDOM_JS_NATIVE_INTERNAL_H, js_context, js_host_slot, FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install. css_import -- @import prelude reader (spec/css_import.md).
+src groups 24 files (c, h) around FREEDOM_JS_NATIVE_INTERNAL_H, js_context, js_host_slot, FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install. css_import -- @import prelude reader (spec/css_import.md).
 
-## tests (2.3)
+## tests (3.3)
 
 tests groups 14 files (c) around scan, test_plain_url, test_url_forms, test_lobsters_media, assert_string_equal. test_css_import -- @import prelude reader (spec/css_import.md).
 
@@ -44,7 +44,6 @@ tests groups 14 files (c) around scan, test_plain_url, test_url_forms, test_lobs
 - include/url.h
 - include/web_storage.h
 - src/css_import.c
-- src/dom.c
 - src/fb_cmdline.c
 - src/freebug.c
 - src/html_parse.c

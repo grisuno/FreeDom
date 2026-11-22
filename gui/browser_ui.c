@@ -2106,6 +2106,15 @@ static void stream_progress_cb(const uint8_t *body, size_t body_len, void *userd
     (void)wr; /* signal best-effort */
 }
 
+/* Polled by libcurl on the fetch thread: a job whose navigation was superseded (Stop,
+ * a new navigation, a tab switch) stops its transfer instead of finishing a download
+ * nobody will see. Same benign read of net_gen as stream_progress_cb. */
+static int fetch_job_cancelled(void *ctx) {
+    const fetch_job *j = (const fetch_job *)ctx;
+    return j->window != NULL
+        && __atomic_load_n(&j->window->net_gen, __ATOMIC_RELAXED) != j->gen;
+}
+
 /* Worker body: runs the (blocking) policy-enforcing fetch, then posts the job pointer
  * back to the event loop. Pure with respect to the window: it reads/writes only the
  * job and writes one pointer to the pipe. */
@@ -2131,6 +2140,8 @@ static void *fetch_thread(void *arg) {
         cfg.progress_cb = stream_progress_cb;
         cfg.progress_ctx = w;
     }
+    cfg.cancel_cb = fetch_job_cancelled;
+    cfg.cancel_ctx = j;
 
     sf_response resp;
     memset(&resp, 0, sizeof resp);
@@ -2886,6 +2897,9 @@ static void do_load(browser_window *w, const char *url) {
     w->net_gen++;        /* new navigation: supersede any in-flight fetch */
     w->menu_open = 0;
     w->config_page = 0;
+    /* Only a network fetch keeps the history entry provisional (spec/browser.md 3c);
+     * every other load lands before do_load returns. */
+    if (!is_https_url(url) && !is_overlay_http_url(url)) browser_commit_pending(&w->bs);
 
     if (strcmp(url, "about:blank") == 0) {
         clear_doc(w);
@@ -2992,6 +3006,7 @@ static void do_load(browser_window *w, const char *url) {
         sf_config cfg;
         fetch_prep pr;
         if (!prepare_fetch(w, fetch_url, &cfg, &pr)) {
+            browser_commit_pending(&w->bs);   /* the refusal page is this entry's document */
             clear_doc(w);
             w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
             w->loading = 0;
@@ -3001,6 +3016,7 @@ static void do_load(browser_window *w, const char *url) {
         }
         cfg.redirect_from = w->nav_redirect_from;
         if (!fetch_launch(w, fetch_url, &cfg, pr.allowlisted, 0, NULL, 0, NULL)) {
+            browser_commit_pending(&w->bs);
             clear_doc(w);
             w->scroll = 0.0; w->loading = 0;
             set_cache(w, NULL, 0, NULL);
@@ -3123,6 +3139,7 @@ static void tab_switch(browser_window *w, int idx) {
      * work. Clear the spinner now so the parked tab does not show it on return. */
     w->net_gen++;
     w->loading = 0;
+    (void)browser_abort_pending(&w->bs);   /* its fetch is abandoned: no ghost entry */
     drop_repl_worker(w); /* active page changes without a render; rebind on next eval */
     tab_save(w);
     w->active_tab = idx;
@@ -3148,6 +3165,7 @@ static void tab_new(browser_window *w, const char *url) {
     }
     w->loading = 0; /* clear the current tab's spinner before parking it (its fetch,
                      * if any, is abandoned: do_load below bumps the generation) */
+    (void)browser_abort_pending(&w->bs);
     tab_save(w);
     int idx = w->active_tab + 1;
     for (int i = w->tab_count; i > idx; --i) w->tab_slots[i] = w->tab_slots[i - 1];
@@ -17002,6 +17020,7 @@ static void history_step(browser_window *w, int steps) {
         tab_page page;
         memset(&page, 0, sizeof page);
         if (tab_popstate(w->tab_worker, browser_doc_index(&w->bs), &page) == TAB_OK) {
+            browser_commit_pending(&w->bs);   /* same document: nothing to wait for */
             set_page_url(w, browser_current_url(&w->bs));
             (void)apply_click_result(w, &page);
             tab_page_free(&page);
@@ -17326,6 +17345,7 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j) {
     w->loading = 0;
 
     if (j->status != SF_OK) {
+        browser_commit_pending(&w->bs);   /* the error page is this entry's document */
         show_fetch_error(w, j->url, j->status, j->allowlisted);
         w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
         redraw(w);
@@ -17350,10 +17370,13 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j) {
     /* A non-renderable response (PDF, archive, ...) or an explicit attachment is
      * saved to disk rather than parsed as HTML. The current page stays on screen. */
     if (dl_should_download(j->resp_ctype, j->resp_disp)) {
+        /* A download is not a document: no history entry, the page stays (Firefox). */
+        (void)browser_abort_pending(&w->bs);
         save_download(w, j->url, j->html, j->html_len, j->resp_ctype, j->resp_disp);
         return;
     }
 
+    browser_commit_pending(&w->bs);   /* the document landed: its entry is real now */
     clear_doc(w);
     w->scroll = 0.0; w->ua_field_focused = 0; w->focused_input = -1;
 
@@ -17860,6 +17883,7 @@ static void chrome_view_fill(browser_window *w, const chl_layout *l, const char 
     v->phase = (double)(now_ms() % 1000u) / 1000.0;
     v->can_back = browser_can_back(&w->bs);
     v->can_fwd = browser_can_forward(&w->bs);
+    v->loading = w->loading;
     v->maximized = w->maximized;
     v->url = w->bs.url_bar;
     v->url_len = w->bs.url_bar_len;
@@ -19089,6 +19113,21 @@ static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, 
     }
 }
 
+/* Stop (spec/browser.md 3c): the in-flight navigation is superseded -- its transfer
+ * aborts at the next libcurl poll and its result is dropped by the generation check --
+ * and the history returns to the page on screen. Returns 1 if a load was stopped. */
+static int stop_loading(browser_window *w) {
+    if (!w->loading) return 0;
+    gui_quiesce(w);
+    w->net_gen++;
+    w->loading = 0;
+    (void)browser_abort_pending(&w->bs);
+    w->url_bar_focused = 0;
+    w->omni_sugg_n = 0; w->omni_sel = -1;
+    redraw(w);
+    return 1;
+}
+
 static void load_current(browser_window *w) {
     const char *url = browser_current_url(&w->bs);
     if (url != NULL) {
@@ -19269,7 +19308,9 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
     if (w->ptr_y < cl.content_top) {
         switch (part) {
             case CHL_PART_MENU:   w->menu_open = 1; w->menu_hot_row = -1; break;
-            case CHL_PART_RELOAD: load_current(w); break; /* full TLS/PQ policy re-applied (F5/Ctrl+R) */
+            case CHL_PART_RELOAD: /* the button is Stop while loading (Firefox) */
+                if (!stop_loading(w)) load_current(w); /* full TLS/PQ policy re-applied (F5/Ctrl+R) */
+                break;
             case CHL_PART_FWD:    history_step(w, 1); break;
             case CHL_PART_BACK:   history_step(w, -1); break;
             case CHL_PART_IDENTITY:
@@ -20118,6 +20159,10 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
         load_current(w);
         return;
     }
+
+    /* Esc on the page stops a load in flight (Firefox); in the URL bar it still
+     * abandons the edit (below). */
+    if (sym == XKB_KEY_Escape && !w->url_bar_focused && stop_loading(w)) return;
 
     /* Ctrl+Shift+B / A / J add the current host to block.conf / allow.conf / js.conf
      * (hostedit validates fail-closed) and reload the matching filter immediately. */
@@ -21039,6 +21084,7 @@ ui_status ui_run_browser(const char *start_url) {
                 }
                 pthread_mutex_unlock(&w.stream_lock);
                 if (w.cur_html != NULL && w.cur_html_len > 0) {
+                    browser_commit_pending(&w.bs);   /* the new page is on screen */
                     render_current(&w);
                     w.last_stream_render = now;
                 }

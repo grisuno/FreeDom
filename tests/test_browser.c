@@ -18,6 +18,23 @@
 
 #include "browser.h"
 
+/* A navigation whose load landed (the GUI commits on delivery). */
+static browser_status nav(browser_state *bs, const char *url) {
+    browser_status st = browser_navigate(bs, url);
+    if (st == BROWSER_OK) browser_commit_pending(bs);
+    return st;
+}
+static browser_status back(browser_state *bs) {
+    browser_status st = browser_back(bs);
+    if (st == BROWSER_OK) browser_commit_pending(bs);
+    return st;
+}
+static browser_status fwd(browser_state *bs) {
+    browser_status st = browser_forward(bs);
+    if (st == BROWSER_OK) browser_commit_pending(bs);
+    return st;
+}
+
 static void test_init(void **state) {
     (void)state;
     browser_state bs;
@@ -35,25 +52,25 @@ static void test_navigate_history(void **state) {
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
-    assert_int_equal(browser_navigate(&bs, "/a.html"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "/a.html"), BROWSER_OK);
     assert_string_equal(browser_current_url(&bs), "/a.html");
     assert_false(browser_can_back(&bs));
 
-    assert_int_equal(browser_navigate(&bs, "/b.html"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "/b.html"), BROWSER_OK);
     assert_string_equal(browser_current_url(&bs), "/b.html");
     assert_true(browser_can_back(&bs));
 
-    assert_int_equal(browser_navigate(&bs, "/c.html"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "/c.html"), BROWSER_OK);
     assert_string_equal(browser_current_url(&bs), "/c.html");
     assert_true(browser_can_back(&bs));
     assert_false(browser_can_forward(&bs));
 
-    assert_int_equal(browser_back(&bs), BROWSER_OK);
+    assert_int_equal(back(&bs), BROWSER_OK);
     assert_string_equal(browser_current_url(&bs), "/b.html");
     assert_true(browser_can_back(&bs));
     assert_true(browser_can_forward(&bs));
 
-    assert_int_equal(browser_forward(&bs), BROWSER_OK);
+    assert_int_equal(fwd(&bs), BROWSER_OK);
     assert_string_equal(browser_current_url(&bs), "/c.html");
 
     browser_free(&bs);
@@ -65,12 +82,12 @@ static void test_navigate_from_middle_discards_future(void **state) {
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
-    browser_navigate(&bs, "/a.html");
-    browser_navigate(&bs, "/b.html");
-    browser_navigate(&bs, "/c.html");
-    browser_back(&bs); /* now at b */
+    nav(&bs, "/a.html");
+    nav(&bs, "/b.html");
+    nav(&bs, "/c.html");
+    back(&bs); /* now at b */
 
-    assert_int_equal(browser_navigate(&bs, "/d.html"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "/d.html"), BROWSER_OK);
     assert_string_equal(browser_current_url(&bs), "/d.html");
     assert_false(browser_can_forward(&bs));
 
@@ -83,12 +100,12 @@ static void test_back_forward_bounds(void **state) {
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
-    assert_int_equal(browser_back(&bs), BROWSER_ERR_NO_BACK);
-    assert_int_equal(browser_forward(&bs), BROWSER_ERR_NO_FORWARD);
+    assert_int_equal(back(&bs), BROWSER_ERR_NO_BACK);
+    assert_int_equal(fwd(&bs), BROWSER_ERR_NO_FORWARD);
 
-    browser_navigate(&bs, "/x.html");
-    assert_int_equal(browser_forward(&bs), BROWSER_ERR_NO_FORWARD);
-    assert_int_equal(browser_back(&bs), BROWSER_ERR_NO_BACK);
+    nav(&bs, "/x.html");
+    assert_int_equal(fwd(&bs), BROWSER_ERR_NO_FORWARD);
+    assert_int_equal(back(&bs), BROWSER_ERR_NO_BACK);
 
     browser_free(&bs);
 }
@@ -99,9 +116,9 @@ static void test_rejects_invalid_url(void **state) {
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
-    assert_int_equal(browser_navigate(&bs, "http://example.com"), BROWSER_ERR_INVALID_URL);
-    assert_int_equal(browser_navigate(&bs, "javascript:alert(1)"), BROWSER_ERR_INVALID_URL);
-    assert_int_equal(browser_navigate(&bs, ""), BROWSER_ERR_INVALID_URL);
+    assert_int_equal(nav(&bs, "http://example.com"), BROWSER_ERR_INVALID_URL);
+    assert_int_equal(nav(&bs, "javascript:alert(1)"), BROWSER_ERR_INVALID_URL);
+    assert_int_equal(nav(&bs, ""), BROWSER_ERR_INVALID_URL);
 
     browser_free(&bs);
 }
@@ -112,10 +129,10 @@ static void test_accepts_https_and_file(void **state) {
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
-    assert_int_equal(browser_navigate(&bs, "https://example.com"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "https://example.com"), BROWSER_OK);
     assert_string_equal(browser_current_url(&bs), "https://example.com");
-    assert_int_equal(browser_navigate(&bs, "/tmp/page.html"), BROWSER_OK);
-    assert_int_equal(browser_navigate(&bs, "./page.html"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "/tmp/page.html"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "./page.html"), BROWSER_OK);
 
     browser_free(&bs);
 }
@@ -299,7 +316,7 @@ static void test_status_toast(void **state) {
 
     /* A navigation drops a stale toast. */
     assert_int_equal(browser_set_status(&bs, "still here", 0), BROWSER_OK);
-    assert_int_equal(browser_navigate(&bs, "/p.html"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "/p.html"), BROWSER_OK);
     assert_null(browser_status_text(&bs, 0));
 
     assert_int_equal(browser_set_status(NULL, "y", 0), BROWSER_ERR_NULL);
@@ -331,7 +348,7 @@ static void test_push_state_same_document(void **state) {
     browser_state bs;
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
-    assert_int_equal(browser_navigate(&bs, "https://a.test/"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "https://a.test/"), BROWSER_OK);
     int d0 = browser_entry_doc(&bs, bs.history_pos);
     assert_int_equal(browser_doc_index(&bs), 0);
     assert_int_equal(browser_push_state(&bs, "https://a.test/p1"), BROWSER_OK);
@@ -340,7 +357,7 @@ static void test_push_state_same_document(void **state) {
     assert_string_equal(bs.url_bar, "https://a.test/p2");
     assert_int_equal(browser_entry_doc(&bs, bs.history_pos), d0);
     assert_int_equal(browser_doc_index(&bs), 2);
-    assert_int_equal(browser_back(&bs), BROWSER_OK);
+    assert_int_equal(back(&bs), BROWSER_OK);
     assert_int_equal(browser_entry_doc(&bs, bs.history_pos), d0);
     assert_int_equal(browser_doc_index(&bs), 1);
     /* replaceState changes the URL only */
@@ -353,7 +370,7 @@ static void test_push_state_same_document(void **state) {
     assert_int_equal(bs.history_len, 3);
     assert_int_equal(browser_doc_index(&bs), 2);
     /* a real navigation opens a new document */
-    assert_int_equal(browser_navigate(&bs, "https://b.test/"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "https://b.test/"), BROWSER_OK);
     assert_int_not_equal(browser_entry_doc(&bs, bs.history_pos), d0);
     assert_int_equal(browser_doc_index(&bs), 0);
     browser_free(&bs);
@@ -367,7 +384,7 @@ static void test_push_state_rejects_and_guards(void **state) {
     /* nothing to push onto */
     assert_int_equal(browser_push_state(&bs, "https://a.test/"), BROWSER_ERR_NO_BACK);
     assert_int_equal(browser_replace_state(&bs, "https://a.test/"), BROWSER_ERR_NO_BACK);
-    assert_int_equal(browser_navigate(&bs, "https://a.test/"), BROWSER_OK);
+    assert_int_equal(nav(&bs, "https://a.test/"), BROWSER_OK);
     assert_int_equal(browser_push_state(&bs, "javascript:alert(1)"), BROWSER_ERR_INVALID_URL);
     assert_int_equal(browser_replace_state(&bs, "ftp://x/"), BROWSER_ERR_INVALID_URL);
     assert_int_equal(browser_push_state(NULL, "https://a.test/"), BROWSER_ERR_NULL);
@@ -410,6 +427,133 @@ static void test_closed_tabs(void **state) {
     assert_int_equal(browser_closed_pop(&c, out, sizeof out), 0);
 }
 
+
+static void test_stop_restores_history(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    assert_int_equal(browser_has_pending(&bs), 0);
+    assert_int_equal(browser_abort_pending(&bs), 0);
+
+    nav(&bs, "/a.html");
+    nav(&bs, "/b.html");
+    back(&bs);                                   /* at a, b ahead */
+    assert_int_equal(browser_navigate(&bs, "/c.html"), BROWSER_OK);
+    assert_int_equal(browser_has_pending(&bs), 1);
+    assert_string_equal(browser_current_url(&bs), "/c.html");
+    assert_false(browser_can_forward(&bs));
+
+    assert_int_equal(browser_abort_pending(&bs), 1);
+    assert_int_equal(browser_has_pending(&bs), 0);
+    assert_string_equal(browser_current_url(&bs), "/a.html");
+    assert_string_equal(bs.url_bar, "/a.html");
+    assert_int_equal(bs.history_len, 2);
+    assert_true(browser_can_forward(&bs));
+    assert_int_equal(fwd(&bs), BROWSER_OK);
+    assert_string_equal(browser_current_url(&bs), "/b.html");
+    assert_int_equal(browser_entry_doc(&bs, 1) != browser_entry_doc(&bs, 0), 1);
+    browser_free(&bs);
+}
+
+static void test_commit_keeps_entry(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    nav(&bs, "/a.html");
+    nav(&bs, "/b.html");
+    back(&bs);
+    assert_int_equal(browser_navigate(&bs, "/c.html"), BROWSER_OK);
+    browser_commit_pending(&bs);
+    assert_int_equal(browser_has_pending(&bs), 0);
+    assert_int_equal(browser_abort_pending(&bs), 0);
+    assert_int_equal(bs.history_len, 2);
+    assert_string_equal(browser_current_url(&bs), "/c.html");
+    assert_false(browser_can_forward(&bs));
+    browser_free(&bs);
+}
+
+static void test_navigate_replaces_pending(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    nav(&bs, "/a.html");
+    assert_int_equal(browser_navigate(&bs, "/b.html"), BROWSER_OK);
+    assert_int_equal(browser_navigate(&bs, "/c.html"), BROWSER_OK);
+    assert_int_equal(bs.history_len, 2);
+    assert_string_equal(bs.history[0], "/a.html");
+    assert_string_equal(browser_current_url(&bs), "/c.html");
+    assert_int_equal(browser_abort_pending(&bs), 1);
+    assert_int_equal(bs.history_len, 1);
+    assert_string_equal(browser_current_url(&bs), "/a.html");
+
+    /* First ever navigation stopped: back to an empty history. */
+    browser_state e;
+    memset(&e, 0, sizeof e);
+    assert_int_equal(browser_init(&e), BROWSER_OK);
+    assert_int_equal(browser_navigate(&e, "/x.html"), BROWSER_OK);
+    assert_int_equal(browser_abort_pending(&e), 1);
+    assert_int_equal(e.history_len, 0);
+    assert_null(browser_current_url(&e));
+    assert_string_equal(e.url_bar, "about:blank");
+    browser_free(&e);
+    browser_free(&bs);
+}
+
+static void test_multi_step_back_is_one_pending(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    nav(&bs, "/a.html");
+    nav(&bs, "/b.html");
+    nav(&bs, "/c.html");
+    assert_int_equal(browser_back(&bs), BROWSER_OK);
+    assert_int_equal(browser_back(&bs), BROWSER_OK);
+    assert_string_equal(browser_current_url(&bs), "/a.html");
+    assert_int_equal(browser_abort_pending(&bs), 1);
+    assert_string_equal(browser_current_url(&bs), "/c.html");
+    assert_string_equal(bs.url_bar, "/c.html");
+
+    /* A pending back then a new navigation: the new one replaces it and stopping
+     * returns to the COMMITTED entry (c), with its whole history intact. */
+    assert_int_equal(browser_back(&bs), BROWSER_OK);
+    assert_int_equal(browser_navigate(&bs, "/d.html"), BROWSER_OK);
+    assert_int_equal(browser_abort_pending(&bs), 1);
+    assert_int_equal(bs.history_len, 3);
+    assert_string_equal(browser_current_url(&bs), "/c.html");
+    browser_free(&bs);
+}
+
+static void test_pending_guards_push_state(void **state) {
+    (void)state;
+    browser_state bs;
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    nav(&bs, "/a.html");
+    assert_int_equal(browser_navigate(&bs, "/b.html"), BROWSER_OK);
+    assert_int_equal(browser_push_state(&bs, "/a.html#x"), BROWSER_ERR_PENDING);
+    assert_int_equal(browser_replace_state(&bs, "/a.html#y"), BROWSER_ERR_PENDING);
+    assert_int_equal(bs.history_len, 2);
+    assert_string_equal(bs.history[1], "/b.html");
+    browser_free(&bs);   /* frees the stashed/pending state too (ASan) */
+
+    /* free with a stashed forward tail */
+    memset(&bs, 0, sizeof bs);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    nav(&bs, "/a.html");
+    nav(&bs, "/b.html");
+    nav(&bs, "/c.html");
+    back(&bs);
+    back(&bs);
+    assert_int_equal(browser_navigate(&bs, "/d.html"), BROWSER_OK);
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    assert_int_equal(browser_has_pending(&bs), 0);
+    browser_free(&bs);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_init),
@@ -428,6 +572,11 @@ int main(void) {
         cmocka_unit_test(test_status_toast),
         cmocka_unit_test(test_status_truncates),
         cmocka_unit_test(test_closed_tabs),
+        cmocka_unit_test(test_stop_restores_history),
+        cmocka_unit_test(test_commit_keeps_entry),
+        cmocka_unit_test(test_navigate_replaces_pending),
+        cmocka_unit_test(test_multi_step_back_is_one_pending),
+        cmocka_unit_test(test_pending_guards_push_state),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

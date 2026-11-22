@@ -1,59 +1,155 @@
 # Subsystem: include (page 5 of 6)
 Previous: [KB_include_p4.md](KB_include_p4.md)
 
+## include/psl_data.h
+- Layer: data_access
+- Language: h
+- Symbols:
+  - `psl_rules` (variable, line 21) `extern const char *const psl_rules[];`
+  - `psl_rules_n` (variable, line 22) `extern const size_t psl_rules_n;`
+  - `psl_wildcards` (variable, line 23) `extern const char *const psl_wildcards[];`
+  - `psl_wildcards_n` (variable, line 24) `extern const size_t psl_wildcards_n;`
+  - `psl_exceptions` (variable, line 25) `extern const char *const psl_exceptions[];`
+  - `psl_exceptions_n` (variable, line 26) `extern const size_t psl_exceptions_n;`
+  - `FREEDOM_PSL_DATA_H` (macro, line 2) `#define FREEDOM_PSL_DATA_H`
+- Imported by: `src/request_policy.c`
+
+## include/render_doc.h
+- Doc: rd_block: One paint-ready block in document order. text is owned, NUL-terminated and valid...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `rd_block` (struct, line 64)
+  - `rd_doc` (struct, line 267)
+  - `img_fail_reason` (enum, line 34)
+  - `rd_kind` (enum, line 42)
+  - `rd_status` (enum, line 299)
+  - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
+  - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
+  - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
+  - `form` (function, line 63) `* form (-1 = none);`
+  - `default` (function, line 153) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
+  - `to` (function, line 253) `* belongs to (-1 = none);`
+  - `rdp_images_warning` (function, line 308) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+  - `rd_free` (function, line 318) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 321) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 322) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 326) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 327) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 331) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 332) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 336) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 344) `const char *rd_block_tag(const rd_block *b);`
+  - `rd_block_heading_level` (function, line 351) `int rd_block_heading_level(const rd_block *b);`
+  - `decision` (function, line 354) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 360) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 365) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 370) `int rd_input_invisible(int input_type);`
+  - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
+- Depends on: `include/page_view.h`, `include/render_policy.h`
+- Imported by: `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
+
+## include/render_policy.h
+- Doc: rdp_caps: Render capabilities for a page.
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `rdp_caps` (struct, line 32)
+  - `rdp_img_decision` (enum, line 39)
+  - `images` (type_alias, line 32) `typedef struct rdp_caps { bool images;`
+  - `rdp_is_tracking_pixel` (function, line 53) `int rdp_is_tracking_pixel(int w, int h);`
+  - `size` (function, line 56) `* announced size (e.g. <img width height>);`
+  - `rdp_img_reason` (function, line 66) `const char *rdp_img_reason(rdp_img_decision d);`
+  - `rdp_images_warning` (function, line 69) `const char *rdp_images_warning(void);`
+  - `FREEDOM_RENDER_POLICY_H` (macro, line 2) `#define FREEDOM_RENDER_POLICY_H`
+  - `RDP_TRACKER_MAX_DIM` (macro, line 27) `#define RDP_TRACKER_MAX_DIM`
+- Imported by: `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
+
+## include/renderer.h
+- Doc: rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `rd_result` (struct, line 29)
+  - `rd_status` (enum, line 20)
+  - `status` (type_alias, line 28) `typedef struct rd_result { rd_status status;`
+  - `rd_result_free` (function, line 46) `void rd_result_free(rd_result *out);`
+  - `FREEDOM_RENDERER_H` (macro, line 2) `#define FREEDOM_RENDERER_H`
+  - `RD_MAX_INPUT` (macro, line 37) `#define RD_MAX_INPUT`
+  - `RD_MAX_FIELD` (macro, line 38) `#define RD_MAX_FIELD`
+- Imported by: `src/renderer.c`, `tests/test_renderer.c`
+
+## include/request_policy.h
+- Doc: rp_headers_have: 1 when the sanitized block `lines` carries a header called `name`...
+- Layer: business_logic
+- Language: h
+- Symbols:
+  - `rp_decision` (enum, line 21)
+  - `rp_headers_have` (function, line 61) `static inline int rp_headers_have(const char *lines, const char *name)`
+  - `rp_host_of` (function, line 30) `int rp_host_of(const char *url, char *out, size_t out_size);`
+  - `rp_site_of` (function, line 34) `int rp_site_of(const char *host, char *out, size_t out_size);`
+  - `rp_same_site` (function, line 37) `int rp_same_site(const char *top_level_url, const char *request_url);`
+  - `rp_sanitize_request_headers` (function, line 57) `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);`
+  - `FREEDOM_REQUEST_POLICY_H` (macro, line 2) `#define FREEDOM_REQUEST_POLICY_H`
+  - `RP_HDR_MAX_COUNT` (macro, line 43) `#define RP_HDR_MAX_COUNT`
+  - `RP_HDR_MAX_BYTES` (macro, line 44) `#define RP_HDR_MAX_BYTES`
+  - `RP_HDR_NAME_MAX` (macro, line 45) `#define RP_HDR_NAME_MAX`
+  - `RP_HDR_VALUE_MAX` (macro, line 46) `#define RP_HDR_VALUE_MAX`
+- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/render_policy.c`, `src/request_policy.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_request_policy.c`
+
 ## include/secure_fetch.h
 - Doc: sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *...
 - Layer: utility
 - Language: h
 - Symbols:
-  - `sf_chain_info` (struct, line 63)
-  - `sf_config` (struct, line 82)
-  - `sf_response` (struct, line 136)
+  - `sf_chain_info` (struct, line 64)
+  - `sf_config` (struct, line 83)
+  - `sf_response` (struct, line 142)
   - `sf_status` (enum, line 24)
-  - `sf_policy` (enum, line 43)
-  - `sf_proxy_type` (enum, line 72)
-  - `policy` (type_alias, line 81) `typedef struct sf_config { sf_policy policy;`
-  - `status` (type_alias, line 135) `typedef struct sf_response { sf_status status;`
-  - `sf_ws` (type_alias, line 331) `typedef struct sf_ws sf_ws;`
+  - `sf_policy` (enum, line 44)
+  - `sf_proxy_type` (enum, line 73)
+  - `policy` (type_alias, line 82) `typedef struct sf_config { sf_policy policy;`
+  - `status` (type_alias, line 141) `typedef struct sf_response { sf_status status;`
+  - `sf_ws` (type_alias, line 337) `typedef struct sf_ws sf_ws;`
   - `validators` (function, line 18) `* The security logic lives in pure validators (no I/O);`
-  - `rp_sanitize_request_headers` (function, line 111) `* rp_sanitize_request_headers ("Name: value\n" lines);`
-  - `sf_global_init` (function, line 233) `void sf_global_init(void);`
-  - `EXCLUDED` (function, line 239) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
-  - `sf_cookie_put` (function, line 246) `void sf_cookie_put(const char *url, const char *namevalue);`
-  - `sf_cookie_line_matches` (function, line 251) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
-  - `sf_user_agent_or_default` (function, line 260) `const char *sf_user_agent_or_default(const char *ua);`
-  - `sf_accept_language_or_default` (function, line 264) `const char *sf_accept_language_or_default(const char *lang);`
-  - `sf_impersonate_kex_groups` (function, line 268) `const char *sf_impersonate_kex_groups(void);`
-  - `sf_impersonate_tls13_ciphers` (function, line 269) `const char *sf_impersonate_tls13_ciphers(void);`
-  - `skipped` (function, line 289) `* skipped (a classical key exchange is accepted);`
-  - `sf_is_redirect_code` (function, line 300) `int sf_is_redirect_code(long http_code);`
-  - `sf_header_value` (function, line 311) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);`
-  - `bits` (function, line 348) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
-  - `sf_ws_fd` (function, line 355) `int sf_ws_fd(const sf_ws *ws);`
-  - `sf_ws_close` (function, line 358) `void sf_ws_close(sf_ws *ws);`
-  - `connection` (function, line 362) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
-  - `sf_get` (function, line 371) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
-  - `sf_response_free` (function, line 382) `void sf_response_free(sf_response *resp);`
-  - `exhausted` (function, line 393) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
-  - `sf_rcache_put` (function, line 406) `int sf_rcache_put(const char *from, const char *to, time_t now);`
-  - `sf_rcache_get` (function, line 407) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
-  - `sf_rcache_clear` (function, line 408) `void sf_rcache_clear(void);`
-  - `sf_rcache_set_backing` (function, line 417) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
+  - `rp_sanitize_request_headers` (function, line 112) `* rp_sanitize_request_headers ("Name: value\n" lines);`
+  - `sf_global_init` (function, line 239) `void sf_global_init(void);`
+  - `EXCLUDED` (function, line 245) `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...`
+  - `sf_cookie_put` (function, line 252) `void sf_cookie_put(const char *url, const char *namevalue);`
+  - `sf_cookie_line_matches` (function, line 257) `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);`
+  - `sf_user_agent_or_default` (function, line 266) `const char *sf_user_agent_or_default(const char *ua);`
+  - `sf_accept_language_or_default` (function, line 270) `const char *sf_accept_language_or_default(const char *lang);`
+  - `sf_impersonate_kex_groups` (function, line 274) `const char *sf_impersonate_kex_groups(void);`
+  - `sf_impersonate_tls13_ciphers` (function, line 275) `const char *sf_impersonate_tls13_ciphers(void);`
+  - `skipped` (function, line 295) `* skipped (a classical key exchange is accepted);`
+  - `sf_is_redirect_code` (function, line 306) `int sf_is_redirect_code(long http_code);`
+  - `sf_header_value` (function, line 317) `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);`
+  - `bits` (function, line 354) `* *flags receives CURLWS_* bits (text/binary/close/cont);`
+  - `sf_ws_fd` (function, line 361) `int sf_ws_fd(const sf_ws *ws);`
+  - `sf_ws_close` (function, line 364) `void sf_ws_close(sf_ws *ws);`
+  - `connection` (function, line 368) `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...`
+  - `sf_get` (function, line 377) `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...`
+  - `sf_response_free` (function, line 388) `void sf_response_free(sf_response *resp);`
+  - `exhausted` (function, line 399) `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...`
+  - `sf_rcache_put` (function, line 412) `int sf_rcache_put(const char *from, const char *to, time_t now);`
+  - `sf_rcache_get` (function, line 413) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);`
+  - `sf_rcache_clear` (function, line 414) `void sf_rcache_clear(void);`
+  - `sf_rcache_set_backing` (function, line 423) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);`
   - `FREEDOM_SECURE_FETCH_H` (macro, line 2) `#define FREEDOM_SECURE_FETCH_H`
-  - `SF_META_MAX` (macro, line 79) `#define SF_META_MAX`
-  - `SF_RESPONSE_HEADERS_MAX` (macro, line 80) `#define SF_RESPONSE_HEADERS_MAX`
-  - `SF_DEFAULT_KEX_GROUPS` (macro, line 172) `#define SF_DEFAULT_KEX_GROUPS`
-  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 181) `#define SF_IMPERSONATE_KEX_GROUPS`
-  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 182) `#define SF_IMPERSONATE_TLS13_CIPHERS`
-  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 186) `#define SF_IMPERSONATE_TLS12_CIPHERS`
-  - `SF_DEFAULT_USER_AGENT` (macro, line 197) `#define SF_DEFAULT_USER_AGENT`
-  - `SF_DEFAULT_MAX_BODY` (macro, line 198) `#define SF_DEFAULT_MAX_BODY`
-  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 199) `#define SF_DEFAULT_TIMEOUT_MS`
-  - `SF_CONNECT_TIMEOUT_MS` (macro, line 222) `#define SF_CONNECT_TIMEOUT_MS`
-  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 223) `#define SF_SUBRESOURCE_TIMEOUT_MS`
-  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 224) `#define SF_DEFAULT_MAX_REDIRECTS`
-  - `SF_MAX_URL` (macro, line 225) `#define SF_MAX_URL`
-  - `SF_WS_MAX_MESSAGE` (macro, line 330) `#define SF_WS_MAX_MESSAGE`
+  - `SF_META_MAX` (macro, line 80) `#define SF_META_MAX`
+  - `SF_RESPONSE_HEADERS_MAX` (macro, line 81) `#define SF_RESPONSE_HEADERS_MAX`
+  - `SF_DEFAULT_KEX_GROUPS` (macro, line 178) `#define SF_DEFAULT_KEX_GROUPS`
+  - `SF_IMPERSONATE_KEX_GROUPS` (macro, line 187) `#define SF_IMPERSONATE_KEX_GROUPS`
+  - `SF_IMPERSONATE_TLS13_CIPHERS` (macro, line 188) `#define SF_IMPERSONATE_TLS13_CIPHERS`
+  - `SF_IMPERSONATE_TLS12_CIPHERS` (macro, line 192) `#define SF_IMPERSONATE_TLS12_CIPHERS`
+  - `SF_DEFAULT_USER_AGENT` (macro, line 203) `#define SF_DEFAULT_USER_AGENT`
+  - `SF_DEFAULT_MAX_BODY` (macro, line 204) `#define SF_DEFAULT_MAX_BODY`
+  - `SF_DEFAULT_TIMEOUT_MS` (macro, line 205) `#define SF_DEFAULT_TIMEOUT_MS`
+  - `SF_CONNECT_TIMEOUT_MS` (macro, line 228) `#define SF_CONNECT_TIMEOUT_MS`
+  - `SF_SUBRESOURCE_TIMEOUT_MS` (macro, line 229) `#define SF_SUBRESOURCE_TIMEOUT_MS`
+  - `SF_DEFAULT_MAX_REDIRECTS` (macro, line 230) `#define SF_DEFAULT_MAX_REDIRECTS`
+  - `SF_MAX_URL` (macro, line 231) `#define SF_MAX_URL`
+  - `SF_WS_MAX_MESSAGE` (macro, line 336) `#define SF_WS_MAX_MESSAGE`
 - Depends on: `include/anti_fp.h`
 - Imported by: `gui/browser_ui.c`, `include/cached_fetch.h`, `include/ws_hub.h`, `src/freedom.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/itest_secure_fetch.c`, `tests/test_secure_fetch.c`
 
@@ -273,10 +369,10 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
 - Language: h
 - Symbols:
   - `tsh_font` (struct, line 33)
-  - `tsh_run` (struct, line 132)
+  - `tsh_run` (struct, line 138)
   - `tsh_status` (enum, line 80)
   - `family` (type_alias, line 33) `typedef struct tsh_font { int family;`
-  - `end` (type_alias, line 132) `typedef struct tsh_run { size_t start, end;`
+  - `end` (type_alias, line 138) `typedef struct tsh_run { size_t start, end;`
   - `content` (function, line 11) `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`
   - `tsh_family_is_generic` (function, line 52) `int tsh_family_is_generic(const char *name);`
   - `wins` (function, line 58) `* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig...`
@@ -286,10 +382,11 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `origin` (function, line 92) `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...`
   - `tsh_measure` (function, line 101) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);`
   - `tsh_webfont_register` (function, line 114) `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);`
-  - `tsh_webfont_clear` (function, line 120) `void tsh_webfont_clear(void);`
-  - `tsh_face` (function, line 127) `cairo_font_face_t *tsh_face(const tsh_font *f);`
-  - `own` (function, line 136) `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....`
-  - `tsh_shutdown` (function, line 143) `void tsh_shutdown(void);`
+  - `tsh_face_generation` (function, line 122) `unsigned tsh_face_generation(void);`
+  - `tsh_webfont_clear` (function, line 126) `void tsh_webfont_clear(void);`
+  - `tsh_face` (function, line 133) `cairo_font_face_t *tsh_face(const tsh_font *f);`
+  - `own` (function, line 142) `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....`
+  - `tsh_shutdown` (function, line 149) `void tsh_shutdown(void);`
   - `FREEDOM_TEXT_SHAPE_H` (macro, line 19) `#define FREEDOM_TEXT_SHAPE_H`
   - `TSH_LOCAL_LISTS` (macro, line 46) `#define TSH_LOCAL_LISTS`
   - `TSH_LOCAL_FAMILIES` (macro, line 47) `#define TSH_LOCAL_FAMILIES`
@@ -398,103 +495,6 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `URL_MAX_LEN` (macro, line 30) `#define URL_MAX_LEN`
   - `URL_SEARCH_ENDPOINT` (macro, line 76) `#define URL_SEARCH_ENDPOINT`
 - Imported by: `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
-
-## include/util.h
-- Doc: — shared pure helpers (no I/O except where noted).
-- Layer: utility
-- Language: h
-- Symbols:
-  - `write_full` (function, line 15) `static inline int write_full(int fd, const void *buf, size_t n)`
-  - `read_full` (function, line 26) `static inline int read_full(int fd, void *buf, size_t n)`
-  - `mem_contains_ci` (function, line 43) `static inline int mem_contains_ci(const void *hay, size_t hlen, const char *needle)`
-  - `utf8_seq_len` (function, line 57) `static inline size_t utf8_seq_len(unsigned char c)`
-  - `fnv1a` (function, line 67) `static inline uint64_t fnv1a(const char *s, size_t n)`
-  - `UTIL_H` (macro, line 5) `#define UTIL_H`
-- Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
-
-## include/web_storage.h
-- Doc: wst_new: web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing...
-- Layer: data_access
-- Language: h
-- Symbols:
-  - `wst_db` (type_alias, line 21) `typedef struct wst_db wst_db;`
-  - `wst_new` (function, line 25) `wst_db *wst_new(void);`
-  - `wst_free` (function, line 28) `void wst_free(wst_db *db);`
-  - `wst_encode` (function, line 33) `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len);`
-  - `wst_decode_check` (function, line 37) `int wst_decode_check(const char *blob, size_t len);`
-  - `wst_replace` (function, line 42) `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len);`
-  - `full` (function, line 45) `* validating it in full (wst_decode_check). Returns 0, or -1 when invalid (fn is then * never called). The one...`
-  - `wst_origin_bytes` (function, line 59) `size_t wst_origin_bytes(const wst_db *db, const char *origin);`
-  - `FREEDOM_WEB_STORAGE_H` (macro, line 2) `#define FREEDOM_WEB_STORAGE_H`
-  - `WST_MAX_ORIGINS` (macro, line 17) `#define WST_MAX_ORIGINS`
-  - `WST_MAX_KEYS` (macro, line 18) `#define WST_MAX_KEYS`
-  - `WST_QUOTA` (macro, line 19) `#define WST_QUOTA`
-  - `WST_ORIGIN_MAX` (macro, line 20) `#define WST_ORIGIN_MAX`
-- Imported by: `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`, `src/web_storage.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_web_storage.c`
-
-## include/webcaps.h
-- Doc: wc_caps: Full capability table for one page.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `wc_caps` (struct, line 38)
-  - `wc_input` (struct, line 57)
-  - `js` (type_alias, line 38) `typedef struct wc_caps { /* leak-free (global): granted by user toggle or allow.conf presentation-trust. */ bool js;`
-  - `js_mode` (type_alias, line 57) `typedef struct wc_input { jsp_mode js_mode;`
-  - `FREEDOM_WEBCAPS_H` (macro, line 2) `#define FREEDOM_WEBCAPS_H`
-- Depends on: `include/js_policy.h`, `include/render_policy.h`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webcaps.c`, `tests/test_webcaps.c`
-
-## include/webfont.h
-- Doc: wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `wf_ref` (struct, line 31)
-  - `wf_list` (struct, line 46)
-  - `family` (type_alias, line 30) `typedef struct wf_ref { char family[WF_FAMILY_MAX];`
-  - `wf_name_hash` (function, line 69) `static inline unsigned wf_name_hash(const char *s, size_t n)`
-  - `here` (function, line 38) `* set with the decoded bytes owned here (freed by wf_list_free);`
-  - `wf_scan` (function, line 52) `int wf_scan(const char *css, size_t len, wf_list *out);`
-  - `wf_list_free` (function, line 53) `void wf_list_free(wf_list *l);`
-  - `boundaries` (function, line 57) `* boundaries (scan_inline accumulation, loader collection). */ void wf_ref_move(wf_ref *dst, wf_ref *src);`
-  - `wf_supported_format` (function, line 60) `int wf_supported_format(const char *fmt);`
-  - `FREEDOM_WEBFONT_H` (macro, line 2) `#define FREEDOM_WEBFONT_H`
-  - `WF_FAMILY_MAX` (macro, line 20) `#define WF_FAMILY_MAX`
-  - `WF_URL_MAX` (macro, line 21) `#define WF_URL_MAX`
-  - `WF_FORMAT_MAX` (macro, line 22) `#define WF_FORMAT_MAX`
-  - `WF_MAX_REFS` (macro, line 23) `#define WF_MAX_REFS`
-  - `WF_MAX_FACE_BYTES` (macro, line 24) `#define WF_MAX_FACE_BYTES`
-  - `WF_MAX_TOTAL_BYTES` (macro, line 25) `#define WF_MAX_TOTAL_BYTES`
-  - `WF_DATA_URL_MAX` (macro, line 29) `#define WF_DATA_URL_MAX`
-- Imported by: `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
-
-## include/webfont_load.h
-- Doc: wf_sheet: One collected stylesheet: text plus the URL it was fetched from (the * resolution base...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `wf_sheet` (struct, line 24)
-  - `free` (function, line 31) `* free()), *out_status the HTTP status. Nonzero on refusal/error (fail-closed: * the face is skipped, never the...`
-  - `skipped` (function, line 47) `* URLs are skipped (no base). Returns faces registered (>= 0) otherwise. */ int wf_load_document(wf_fetch_fn fetch...`
-  - `FREEDOM_WEBFONT_LOAD_H` (macro, line 2) `#define FREEDOM_WEBFONT_LOAD_H`
-  - `WF_LOAD_TRIES_PER_KEY` (macro, line 52) `#define WF_LOAD_TRIES_PER_KEY`
-  - `WF_LOAD_MAX_KEYS` (macro, line 53) `#define WF_LOAD_MAX_KEYS`
-  - `WF_LOAD_MAX_FETCHES` (macro, line 54) `#define WF_LOAD_MAX_FETCHES`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/webfont_load.c`, `tests/test_webfont_load.c`
-
-## include/wl_display.h
-- Doc: wd_pick: Choose the lowest-numbered "wayland-N" (N = digits only) from names[0..n).
-- Layer: utility
-- Language: h
-- Symbols:
-  - `pure` (function, line 3) `* wd_pick is pure (no I/O);`
-  - `wd_pick` (function, line 16) `int wd_pick(const char *const *names, size_t n, char *out, size_t cap);`
-  - `wd_resolve_env` (function, line 20) `int wd_resolve_env(void);`
-  - `FREEDOM_WL_DISPLAY_H` (macro, line 6) `#define FREEDOM_WL_DISPLAY_H`
-  - `WD_OK` (macro, line 10) `#define WD_OK`
-  - `WD_NONE` (macro, line 11) `#define WD_NONE`
-- Imported by: `src/freedom.c`, `src/wl_display.c`, `tests/test_wl_display.c`
 
 
 Next: [KB_include_p6.md](KB_include_p6.md)

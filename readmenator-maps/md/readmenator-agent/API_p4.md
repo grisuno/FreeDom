@@ -1,6 +1,101 @@
 # API (page 4 of 13)
 Previous: [API_p3.md](API_p3.md)
 
+## include/css_box.h
+Depends on: `include/css_decl.h`
+Imported by: `src/css.c`, `src/css_box.c`, `src/css_mq.c`, `src/css_text.c`, `tests/test_css_box.c`
+- `cb_length_px` (function) `include/css_box.h:15` `int cb_length_px(const char *v, double *px);`
+- `block` (function) `include/css_box.h:19` `* For contexts with no element and no containing block (media query values). */ int cb_math_length_px(const char *v...`
+- `cb_interp_len` (function) `include/css_box.h:21` `int cb_interp_len(const char *v, int allow_auto, int *out);`
+- `cb_emit_len` (function) `include/css_box.h:22` `int cb_emit_len(css_decl *dst, int cap, int slot, const char *val, int allow_auto, int allow_neg);`
+- `cb_expand_box4` (function) `include/css_box.h:24` `int cb_expand_box4(const char *val, int slot_top, int allow_auto, int allow_neg, css_decl *dst, int cap);`
+- `cb_expand_box2` (function) `include/css_box.h:26` `int cb_expand_box2(const char *val, int slot_start, int slot_end, int allow_auto, int allow_neg, css_decl *dst, int...`
+- `cb_interp_lp` (function) `include/css_box.h:28` `int cb_interp_lp(const char *v, int allow_auto, int allow_pct, int *out_px, int *out_pm);`
+- `cb_value_em_milli` (function) `include/css_box.h:30` `int cb_value_em_milli(const char *v);`
+- `rectangle` (function) `include/css_box.h:32` `* rectangle (top, right, bottom, left): px[i] + pm[i]/1000 of the border box (height for * top/bottom, width for...`
+- `cb_lp_can_be_nonneg` (function) `include/css_box.h:36` `int cb_lp_can_be_nonneg(int px_val, int pct_pm);`
+- `cb_next_ws_token` (function) `include/css_box.h:37` `int cb_next_ws_token(const char **p, char *tok, size_t cap);`
+- `cb_interp_align` (function) `include/css_box.h:38` `int cb_interp_align(const char *v);`
+- `cb_interp_fontsize_ex` (function) `include/css_box.h:39` `int cb_interp_fontsize_ex(const char *v, int *abs_out);`
+- `cb_interp_lineheight` (function) `include/css_box.h:40` `int cb_interp_lineheight(const char *v);`
+- `cb_interp_weight` (function) `include/css_box.h:41` `int cb_interp_weight(const char *v);`
+- `cb_interp_style` (function) `include/css_box.h:42` `int cb_interp_style(const char *v);`
+- `cb_interp_textdeco` (function) `include/css_box.h:43` `int cb_interp_textdeco(const char *v);`
+- `cb_interp_display` (function) `include/css_box.h:44` `int cb_interp_display(const char *v);`
+- `cb_interp_gap` (function) `include/css_box.h:45` `int cb_interp_gap(const char *v);`
+- `cb_interp_justify` (function) `include/css_box.h:46` `int cb_interp_justify(const char *v);`
+- `cb_interp_gridcols` (function) `include/css_box.h:47` `int cb_interp_gridcols(const char *v);`
+- `cb_expand_grid_template_cols` (function) `include/css_box.h:48` `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap);`
+- `strings` (function) `include/css_box.h:50` `* Quoted area strings (the grid-template shorthand's row half) are skipped. */ int...`
+
+## include/css_chain.h
+Depends on: `include/css.h`, `include/css_select.h`
+Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`, `tests/test_page_view.c`
+- `cch_path_new` (function) `include/css_chain.h:70` `cch_path *cch_path_new(void);`
+- `cch_path_free` (function) `include/css_chain.h:71` `void cch_path_free(cch_path *pa);`
+- `cch_element_matches` (function) `include/css_chain.h:82` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` -- Nonzero iff the parsed selector *sel matches element `el`, built against the same bounded ancestor/sibling/attribute...
+- `lacks` (function) `include/css_chain.h:86` `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...`
+- `box` (function) `include/css_chain.h:92` `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
+
+## include/css_color.h
+Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/pres_hints.c`, `src/svg_paint.c`, `src/svg_render.c`, `tests/test_css_color.c`
+- `cc_pack` (function) `include/css_color.h:49` `int cc_pack(cc_rgb c);` -- Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color"...
+
+## include/css_computed.h
+Depends on: `include/css.h`
+Imported by: `src/css_computed.c`, `src/tab.c`, `tests/test_css_computed.c`
+- `ccm_get` (function) `include/css_computed.h:29` `size_t ccm_get(const ccm_input *in, const char *prop, char *out, size_t cap);` -- Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL terminated).
+- `ccm_property_count` (function) `include/css_computed.h:32` `size_t ccm_property_count(void);` -- Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL terminated).
+- `ccm_property_name` (function) `include/css_computed.h:33` `const char *ccm_property_name(size_t i);`
+
+## include/css_counter.h
+Imported by: `include/css.h`, `src/css_counter.c`, `tests/test_css_counter.c`
+- `cnt_hash` (function) `include/css_counter.h:34` `unsigned cnt_hash(const char *name, size_t len);` -- FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are * case-sensitive).
+- `written` (function) `include/css_counter.h:37` `* written (0 for `none`) or -1 when invalid. `dflt` is the value of an entry with no * integer: 0 for reset, 1 for...`
+- `cnt_parse_content` (function) `include/css_counter.h:44` `int cnt_parse_content(const char *val, char *out, size_t cap);` -- Parses a `content` value that uses counter()/counters().
+- `cnt_is_marker` (function) `include/css_counter.h:45` `int cnt_is_marker(const char *s);`
+- `cnt_format` (function) `include/css_counter.h:49` `size_t cnt_format(int style, long value, char *out, size_t cap);` -- Formats `value` in `style` (unknown or unrepresentable falls back to decimal). * Returns the length written; always...
+- `cnt_state_new` (function) `include/css_counter.h:52` `cnt_state *cnt_state_new(void);`
+- `cnt_state_free` (function) `include/css_counter.h:53` `void cnt_state_free(cnt_state *s);`
+- `cnt_reset` (function) `include/css_counter.h:56` `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n);` -- Formats `value` in `style` (unknown or unrepresentable falls back to decimal). * Returns the length written; always...
+- `cnt_increment` (function) `include/css_counter.h:57` `void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n);`
+- `cnt_leave` (function) `include/css_counter.h:60` `void cnt_leave(cnt_state *s, int depth);` -- The children of an element have all been walked: drop what they created * (instances created at depth >= `depth`...
+- `cnt_resolve` (function) `include/css_counter.h:67` `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx, char *out, size_t cap);` -- Expands a marker against the live state.
+
+## include/css_decl.h
+Depends on: `include/css.h`, `include/css_select.h`
+Imported by: `include/css_box.h`, `include/css_gradient.h`, `include/css_mask.h`, `include/css_text.h`, `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_box.c`, `tests/test_css_text.c`
+- `order` (function) `include/css_decl.h:50` `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
+- `contiguous` (function) `include/css_decl.h:65` `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
+- `part` (function) `include/css_decl.h:216` `* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM...`
+
+## include/css_gradient.h
+Depends on: `include/css_decl.h`
+Imported by: `gui/browser_ui.c`, `src/css.c`, `src/css_gradient.c`, `src/css_mask.c`, `src/tab.c`, `tests/test_css_gradient.c`
+- `cg_first_url` (function) `include/css_gradient.h:13` `int cg_first_url(const char *val, char *out, size_t outcap);` -- The first url(...) token of val, unquoted and trimmed, into out.
+- `cg_expand_bg_image` (function) `include/css_gradient.h:15` `int cg_expand_bg_image(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
+- `cg_expand_background` (function) `include/css_gradient.h:17` `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...`
+- `width` (function) `include/css_gradient.h:21` `* width (x, rx) or height (y, ry);`
+- `out` (function) `include/css_gradient.h:36` `* Returns 1 and fills *out (defaults first) when seg is a valid prelude, 0 when seg is not * one (it is a colour...`
+- `cg_radial_len_px` (function) `include/css_gradient.h:41` `double cg_radial_len_px(int enc, double dim);` -- The first comma segment of a radial-gradient() argument list, when it is a prelude.
+- `zero` (function) `include/css_gradient.h:45` `* floored at a hair above zero (the spec paints the last colour for a degenerate size) and * never non-finite. Pure....`
+- `cg_parse_linear` (function) `include/css_gradient.h:55` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions);` -- Parses one `linear-gradient(...)` function (the whole text, nothing around it) into its angle (CSS degrees), packed...
+
+## include/css_import.h
+Imported by: `src/css_import.c`, `src/tab.c`, `tests/test_css_import.c`, `tests/test_tab.c`
+- `ci_scan` (function) `include/css_import.h:36` `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap);` -- Reads the leading @import rules of css[0,len) into out (at most cap).
+- `ci_wrap` (function) `include/css_import.h:41` `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap);` -- Builds the wrapper for one import: open = "@layer N {@supports (S) {@media M {" (only the parts present) and close =...
+- `ci_balanced` (function) `include/css_import.h:45` `int ci_balanced(const char *css, size_t len);` -- 1 iff every comment and string in css[0,len) terminates and the braces outside * them never go negative and end at...
+- `url` (function) `include/css_import.h:55` `* rewritten to url("ABS"), ABS = resolve(base, ref) (spec/css_import.md, "Rebase"). * Fragment-only, schemed, empty...`
+
+## include/css_index.h
+Depends on: `include/css_select.h`
+Imported by: `src/css.c`, `src/css_index.c`, `tests/test_css_index.c`
+- `cix_build` (function) `include/css_index.h:34` `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` -- Builds the index over sels[0,n) into *idx, overwriting it (a built index must be * cix_free'd first).
+- `cix_build_ptrs` (function) `include/css_index.h:37` `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);` -- Builds the index over sels[0,n) into *idx, overwriting it (a built index must be * cix_free'd first).
+- `cix_free` (function) `include/css_index.h:40` `void cix_free(cix_index *idx);` -- Builds the index over sels[0,n) into *idx, overwriting it (a built index must be * cix_free'd first).
+- `index` (function) `include/css_index.h:44` `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...`
+
 ## include/css_length.h
 Imported by: `src/css.c`, `src/css_box.c`, `src/css_gradient.c`, `src/css_length.c`, `src/css_mq.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `tests/test_css_length.c`
 - `prelude` (function) `include/css_length.h:106` `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...`
@@ -143,6 +238,15 @@ Imported by: `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 - `DL_ERR_OVERFLOW` (function) `include/download.h:56` `* DL_ERR_OVERFLOW (out left empty). url/content_disposition NULL => absent. */ dl_status dl_pick_name(const char...`
 - `basename` (function) `include/download.h:61` `* sanitized basename (a name still containing '/' is rejected => DL_ERR_OVERFLOW, * so the path can never escape...`
 
+## include/exact_key.h
+Imported by: `gui/browser_ui.c`, `src/exact_key.c`, `tests/test_exact_key.c`
+- `ek_init` (function) `include/exact_key.h:24` `void ek_init(ek_key *k);` -- exact_key (ek_) -- a cache key built by OBSERVING every input of what is cached, compared byte for byte...
+- `ek_reset` (function) `include/exact_key.h:27` `void ek_reset(ek_key *k);` -- /* Largest key (anti-DoS); a bigger one is marked bad and never equals anything. #define EK_MAX_BYTES ((size_t)1 <<...
+- `ek_put` (function) `include/exact_key.h:31` `void ek_put(ek_key *k, const void *p, size_t len);` -- Appends len bytes of p.
+- `ek_equal` (function) `include/exact_key.h:34` `int ek_equal(const ek_key *a, const ek_key *b);` -- Appends len bytes of p.
+- `ek_swap` (function) `include/exact_key.h:37` `void ek_swap(ek_key *a, ek_key *b);` -- Appends len bytes of p.
+- `ek_free` (function) `include/exact_key.h:40` `void ek_free(ek_key *k);` -- Appends len bytes of p.
+
 ## include/fb_cmdline.h
 Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `tests/test_fb_cmdline.c`, `tests/test_js_dom.c`
 - `fbc_history_init` (function) `include/fb_cmdline.h:27` `void fbc_history_init(fbc_history *h);`
@@ -167,6 +271,16 @@ Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `src/fb_panes.c`, `src/free
 - `fbp_is_pane` (function) `include/fb_panes.h:49` `int fbp_is_pane(int tab);` -- /* Tab named `name` (case-insensitive), or -1 when unknown / NULL. int fbp_tab_from_name(const char *name); /* The...
 - `fbp_js_quote` (function) `include/fb_panes.h:53` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);` -- JS string literal for s[0,n) (double-quoted).
 - `fbp_expr` (function) `include/fb_panes.h:57` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);` -- The expression that fills `tab`'s panel for argument sel[0,n); NUL-terminated in out. * Returns its length, or 0 for...
+
+## include/find_text.h
+Imported by: `gui/browser_ui.c`, `src/find_text.c`, `tests/test_find_text.c`
+- `find_text` (function) `include/find_text.h:2` `* find_text (ft_) -- find in page over the rendered text (spec/find_text.md). * * Pure: no I/O, no global state...`
+- `ft_fold` (function) `include/find_text.h:35` `uint32_t ft_fold(uint32_t cp);` -- One laid-out text piece. gap_before = 1: white space separates it from the previous * piece (another line or block...
+- `written` (function) `include/find_text.h:38` `* number of code points written (<= cap, <= FT_QUERY_MAX);`
+- `ft_compile` (function) `include/find_text.h:39` `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap);` -- Folds the query, trims it and collapses white space to one ' ' (U+0020).
+- `exist` (function) `include/find_text.h:42` `* cap matches exist (truncated may be NULL). */ ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t...`
+- `ft_spans` (function) `include/find_text.h:48` `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm, ft_span *out, size_t cap);` -- Splits matches into per-piece spans (one per piece a match touches, empty spans * dropped), in order.
+- `ft_step` (function) `include/find_text.h:53` `long ft_step(long cur, size_t n, int dir);` -- Next (dir > 0) or previous (dir < 0) match index with wrap-around; -1 when n == 0. * A cur outside [0, n) starts at...
 
 ## include/flex_layout.h
 Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
@@ -381,92 +495,6 @@ Imported by: `include/js_dom.h`
 - `jd_take_history` (function) `include/js_location.h:38` `char *jd_take_history(js_context *ctx, int *go);` -- Drains the history operations page JS performed since the last call: an owned string of lines "P <url>\n"...
 - `jd_pop_state` (function) `include/js_location.h:44` `int jd_pop_state(js_context *ctx, int index);` -- Moves the page's history to entry index (the parent went Back/Forward within the same document): updates location...
 - `acting` (function) `include/js_location.h:49` `* The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int...`
-
-## include/js_native.h
-Depends on: `include/js_sandbox.h`
-Imported by: `src/js_native.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_native.c`
-- `failure` (function) `include/js_native.h:22` `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);`
-
-## include/js_policy.h
-Imported by: `gui/browser_ui.c`, `include/webcaps.h`, `src/freedom.c`, `src/js_policy.c`, `tests/test_js_policy.c`
-- `membership` (function) `include/js_policy.h:16` `* membership (the allowlist itself is matched by the hostblock module, which * already covers subdomains). No I/O...`
-- `allowlist` (function) `include/js_policy.h:34` `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode * yields false. */ bool...`
-- `jsp_trusted` (function) `include/js_policy.h:45` `bool jsp_trusted(bool js_enabled, int host_allowlisted);` -- Trusted-host doctrine (Hito 28): a host the user declared trustworthy TWICE -- its JS is enabled (js_enabled, e.g....
-- `jsp_present_trusted` (function) `include/js_policy.h:54` `bool jsp_present_trusted(int host_allowlisted);` -- Presentation-trust (2026-07-11): a host EXPLICITLY on allow.conf (host_allowlisted, e.g. hb_is_allowlisted over...
-- `jsp_mode_str` (function) `include/js_policy.h:64` `const char *jsp_mode_str(jsp_mode mode);` -- Stable lowercase name of a mode ("off"/"allowlist"/"on"); an unknown value * yields "off" (fail closed).
-
-## include/js_sandbox.h
-Imported by: `include/js_dom.h`, `include/js_env.h`, `include/js_intl.h`, `include/js_location.h`, `include/js_native.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_embed.c`, `src/js_env.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_sandbox.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_intl.c`, `tests/test_js_native.c`, `tests/test_js_sandbox.c`
-- `js_stack_limit_for` (function) `include/js_sandbox.h:75` `size_t js_stack_limit_for(size_t soft_stack);` -- Engine stack cap for a process whose soft stack limit is `soft_stack` bytes (0 = unknown): * 75 % of it (the rest is...
-- `js_prime_stack_limit` (function) `include/js_sandbox.h:79` `void js_prime_stack_limit(void);` -- Reads the process stack limit now.
-- `js_context_free` (function) `include/js_sandbox.h:96` `void js_context_free(js_context *ctx);` -- Creates an isolated, hardened sandbox (memory/stack/time limits armed; no I/O modules). lim == NULL =>...
-- `loaded` (function) `include/js_sandbox.h:124` `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...`
-- `js_set_module_host` (function) `include/js_sandbox.h:129` `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` -- Installs the host every static import and dynamic import() goes through. host must * outlive ctx.
-- `js_loc_from_stack` (function) `include/js_sandbox.h:150` `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` -- Pure parser: extracts the throw site (file, line, column) from the FIRST frame of a QuickJS .stack string.
-- `js_set_time_budget` (function) `include/js_sandbox.h:158` `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` -- Adjusts the wall-clock budget armed on each subsequent js_eval.
-- `out` (function) `include/js_sandbox.h:163` `* into out (NUL-terminated, truncated at cap);`
-- `js_profile_enable` (function) `include/js_sandbox.h:166` `void js_profile_enable(js_context *ctx);` -- Sampling profiler (FREEDOM_JS_PROFILE=2).
-- `js_profile_report` (function) `include/js_sandbox.h:167` `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
-- `silently` (function) `include/js_sandbox.h:171` `* fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows * its real first...`
-- `js_throws_report` (function) `include/js_sandbox.h:176` `size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n);`
-- `global` (function) `include/js_sandbox.h:181` `* Freebug REPL installs: its shim takes them once and deletes them from the global (like * __netLog), because the...`
-- `js_result_free` (function) `include/js_sandbox.h:187` `void js_result_free(js_result *res);` -- Devtools for a TRUSTED page. js_devtools_enable turns the profiler and the throw tracer on when the page loads...
-- `js_pump_jobs` (function) `include/js_sandbox.h:195` `int js_pump_jobs(js_context *ctx, int max_jobs);` -- Runs up to max_jobs pending microtasks/jobs (promise reactions queued by the last eval), under the context's current...
-- `handle` (function) `include/js_sandbox.h:198` `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....`
-- `js_set_current_script` (function) `include/js_sandbox.h:207` `void js_set_current_script(js_context *ctx, const char *src, const char *type);` -- Sets document.currentScript on the global object so external scripts can read their own src / type / data-*...
-
-## include/js_trusted.h
-Depends on: `include/js_dom.h`, `include/js_sandbox.h`
-Imported by: `src/js_trusted.c`, `src/tab.c`, `tests/test_js_dom.c`
-- `null` (function) `include/js_trusted.h:24` `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...`
-- `jt_take_opens` (function) `include/js_trusted.h:42` `char *jt_take_opens(js_context *ctx);` -- The parent installed a new geometry table (layout or scroll changed): re-evaluates every observed target and fires a...
-- `parent` (function) `include/js_trusted.h:80` `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);`
-- `jt_take_ws` (function) `include/js_trusted.h:86` `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);` -- Drains up to cap recorded operations into ops (each data owned; release with jt_ws_ops_free).
-- `jt_ws_ops_free` (function) `include/js_trusted.h:87` `void jt_ws_ops_free(jt_ws_op *ops, size_t n);`
-- `jt_ws_event` (function) `include/js_trusted.h:92` `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);` -- Delivers a socket event from the parent: data enters JS as a VALUE (a string for text, an ArrayBuffer for binary...
-- `jt_take_storage` (function) `include/js_trusted.h:104` `int jt_take_storage(js_context *ctx, char **out, size_t *len);` -- When the store changed since the last call, returns 1 with an owned snapshot of * the whole store in *out (length...
-- `realm` (function) `include/js_trusted.h:107` `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...`
-
-## include/link_nav.h
-Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/link_nav.c`, `src/tab.c`, `tests/test_link_nav.c`
-- `dropped` (function) `include/link_nav.h:36` `* A longer fragment is dropped (stored as "");`
-- `ln_block_reason_text` (function) `include/link_nav.h:85` `const char *ln_block_reason_text(ln_block_reason reason);` -- Stable, short English notice for a block reason (e.g. for a UI toast or agent * output).
-
-## include/local_store.h
-Imported by: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`, `include/profile.h`, `src/disk_store.c`, `src/local_store.c`, `tests/test_disk_store.c`, `tests/test_local_store.c`
-- `ls_free` (function) `include/local_store.h:80` `void ls_free(uint8_t *buf, size_t len);` -- Passphrase variant: generates a random salt, derives the key with Argon2id, * and stores the salt in the container...
-
-## include/media_decoder.h
-Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/media_decoder.c`, `tests/test_media_decoder.c`
-- `md_pace_due_ms` (function) `include/media_decoder.h:79` `static inline uint64_t md_pace_due_ms(md_pacer *p, uint64_t now_ms,
-                             ...` -- Returns the wall-clock instant (ms) at which the frame carrying pts_us is due for display.
-- `media_decoder_run` (function) `include/media_decoder.h:99` `void media_decoder_run(int out_fd, int cmd_fd);` -- Entry point for the decoder child process.
-- `media_decoder_spawn` (function) `include/media_decoder.h:104` `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd);` -- Spawns a media decoder child via fork+exec.
-
-## include/net_guard.h
-Imported by: `src/net_guard.c`, `src/secure_fetch.c`, `tests/test_net_guard.c`
-- `ng_addr_is_private` (function) `include/net_guard.h:38` `int ng_addr_is_private(int family, const unsigned char *addr, size_t len);` -- 1 when the address is not globally routable (loopback, RFC 1918, link-local, CGNAT, documentation, multicast...
-- `ng_text_is_private` (function) `include/net_guard.h:42` `int ng_text_is_private(const char *ip_text);` -- As ng_addr_is_private over a textual IPv4/IPv6 address (optionally bracketed).
-- `ng_host_is_ip` (function) `include/net_guard.h:46` `int ng_host_is_ip(const char *host);` -- 1 when host is an IPv4/IPv6 literal (optionally bracketed), 0 for a name or NULL.
-- `ng_host_is_local` (function) `include/net_guard.h:50` `int ng_host_is_local(const char *host);` -- 1 when host names this machine or a private address without resolving anything: * "localhost", any "*.localhost", or...
-
-## include/net_realm.h
-Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/net_realm.c`, `tests/test_net_realm.c`
-- `NR_ROUTE_BLOCKED` (function) `include/net_realm.h:57` `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm * whose proxy is not enabled =>...`
-- `address` (function) `include/net_realm.h:62` `* and encrypts by its address (the I2P destination / onion key), so http over it is * not a downgrade. Currently...`
-- `nr_realm_allows_http` (function) `include/net_realm.h:66` `int nr_realm_allows_http(nr_realm r);` -- 1 iff plain http:// is acceptable for this realm.
-- `nr_realm_name` (function) `include/net_realm.h:69` `const char *nr_realm_name(nr_realm r);` -- 1 iff plain http:// is acceptable for this realm.
-- `nr_route_name` (function) `include/net_realm.h:70` `const char *nr_route_name(nr_route r);`
-
-## include/os_sandbox.h
-Imported by: `src/os_sandbox.c`, `src/renderer.c`, `src/tab.c`, `tests/test_os_sandbox.c`
-- `flags` (function) `include/os_sandbox.h:39` `* permission also depends on the protection flags (see os_prot_allowed / W^X). */ int os_policy_allows(long syscall_nr);`
-- `os_policy_size` (function) `include/os_sandbox.h:43` `size_t os_policy_size(void);` -- Nonzero iff syscall_nr is on the strict allowlist (mirrors the BPF program).
-- `os_prot_allowed` (function) `include/os_sandbox.h:52` `int os_prot_allowed(long syscall_nr, unsigned long prot);` -- Pure mirror of the BPF program's EFFECTIVE decision for memory syscalls (W^X).
-- `denied` (function) `include/os_sandbox.h:59` `* request PROT_EXEC are denied (see os_prot_allowed). * Returns OS_ERR_UNSUPPORTED on platforms without seccomp-bpf...`
-- `namespace` (function) `include/os_sandbox.h:75` `* namespace (the unprivileged enabler), network (the worker never needs the * network -- the parent fetches and...`
-- `os_namespace_flags` (function) `include/os_sandbox.h:81` `int os_namespace_flags(void);` -- The set of CLONE_* namespace flags the worker isolates into: a new user namespace (the unprivileged enabler)...
-- `os_landlock_abi` (function) `include/os_sandbox.h:114` `int os_landlock_abi(void);` -- /* What a Landlock rule permits at/below a path. typedef enum os_fs_access { OS_FS_NONE       = 0, /* no access (not...
 
 
 Next: [API_p5.md](API_p5.md)

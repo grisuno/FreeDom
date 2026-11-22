@@ -1,6 +1,275 @@
 # API (page 8 of 13)
 Previous: [API_p7.md](API_p7.md)
 
+## src/css_gradient.c
+Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
+- `cg_parse_num` (function) `src/css_gradient.c:13` `static int cg_parse_num(const char *s, double *out, const char **endp)`
+- `cg_wide_keyword` (function) `src/css_gradient.c:18` `static int cg_wide_keyword(const char *v)`
+- `gradient` (function) `src/css_gradient.c:28` `* or fewer than 2 stops drop the gradient (and, for the `background` shorthand,
+ * the whole decl...`
+- `find_gradient_call` (function) `src/css_gradient.c:77` `static int find_gradient_call(const char *v, const char *fn, size_t *start,
+                     ...` -- Locates a gradient function call `fn` (e.g. "linear-gradient(") in v (case-insensitive; an occurrence that is the...
+- `conic_prelude` (function) `src/css_gradient.c:111` `static int conic_prelude(const char *seg, int *angle)` -- conic-gradient prelude: `from <int>deg`, optionally followed by `at <pos>` (position accepted and ignored -- always...
+- `grad_stop_pos` (function) `src/css_gradient.c:153` `static int grad_stop_pos(const char *pp, int conic, const char **endp)` -- One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts `Ndeg` -> the same 0-1000 turn fraction...
+- `CSS_GRAD_STOPS_MAX` (function) `src/css_gradient.c:184` `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
+ * the gradient fai...`
+- `emit_gradient` (function) `src/css_gradient.c:291` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
+                         ...` -- Emits the gradient decl group. nstops == 0 emits only the explicit reset * (P_BG_GRAD_N = 0), which is how a...
+- `find_radial_gradient` (function) `src/css_gradient.c:360` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+                      ...` -- R5c: detects radial-gradient(circle at center, color1, color2).
+- `cg_first_url` (function) `src/css_gradient.c:398` `int cg_first_url(const char *val, char *out, size_t outcap)`
+- `emit_radial_geom` (function) `src/css_gradient.c:405` `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` -- } memcpy(urltab[*nurl], url, strlen(url) + 1); dst[0].ival = (int)*nurl; ++*nurl; return 1; } int cg_first_url(const...
+- `pool` (function) `src/css_gradient.c:418` `* pool (gradient explicitly reset);`
+- `downstream` (function) `src/css_gradient.c:422` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+int cg_expand_bg_imag...`
+- `declaration` (function) `src/css_gradient.c:483` `* declaration (fail closed);`
+- `bg_layer_tokens_ok` (function) `src/css_gradient.c:490` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
+- `cg_expand_background` (function) `src/css_gradient.c:530` `int cg_expand_background(const char *val, css_decl *dst, int cap,
+                             ch...`
+- `rad_ieq` (function) `src/css_gradient.c:618` `static int rad_ieq(const char *a, const char *b)`
+- `rad_len` (function) `src/css_gradient.c:626` `static int rad_len(const char *tok, int *enc)` -- One <length-percentage> token (`12px`, `40%`, `0`) -> the cg_radial encoding; 1 = ok.
+- `rad_is_len_start` (function) `src/css_gradient.c:647` `static int rad_is_len_start(const char *t)`
+- `rad_pos_kw` (function) `src/css_gradient.c:652` `static int rad_pos_kw(const char *t, int *axis)` -- if (*e == '\0' && v == 0.0) { *enc = 0; return 1; }   /* unitless 0 is a zero length if (rad_ieq(e, "px")) { if (v >...
+- `rad_parse_position` (function) `src/css_gradient.c:661` `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
+- `cg_parse_radial_prelude` (function) `src/css_gradient.c:690` `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
+- `cg_radial_len_px` (function) `src/css_gradient.c:766` `double cg_radial_len_px(int enc, double dim)`
+- `cg_dmin` (function) `src/css_gradient.c:775` `static double cg_dmin(double a, double b)`
+- `cg_dmax` (function) `src/css_gradient.c:776` `static double cg_dmax(double a, double b)`
+- `cg_radial_geometry` (function) `src/css_gradient.c:778` `void cg_radial_geometry(const cg_radial *r, double w, double h,
+                        double *c...`
+- `cg_parse_linear` (function) `src/css_gradient.c:815` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
+
+## src/css_import.c
+Depends on: `include/css_import.h`
+- `is_ws` (function) `src/css_import.c:8` `static int is_ws(char c)`
+- `lower` (function) `src/css_import.c:10` `static char lower(char c)`
+- `kw_at` (function) `src/css_import.c:13` `static int kw_at(const char *s, size_t i, size_t e, const char *kw)` -- css_import -- @import prelude reader (spec/css_import.md).
+- `is_ident_char` (function) `src/css_import.c:21` `static int is_ident_char(char c)`
+- `skip_ws` (function) `src/css_import.c:27` `static size_t skip_ws(const char *s, size_t i, size_t e)` -- static int kw_at(const char *s, size_t i, size_t e, const char *kw) { size_t n = strlen(kw); if (e - i < n) return...
+- `copy_trim` (function) `src/css_import.c:53` `static int copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` -- Past the string that opens at s[i] (a quote), or (size_t)-1 when it does not * terminate before e or a newline (a...
+- `read_string` (function) `src/css_import.c:64` `static size_t read_string(const char *s, size_t a, size_t e, char *dst, size_t cap)` -- Copies the body of the string opening at s[a] (quotes stripped, escapes kept * verbatim except an escaped quote).
+- `match_paren` (function) `src/css_import.c:79` `static size_t match_paren(const char *s, size_t i, size_t e)` -- size_t end = skip_string(s, a, e); if (end == (size_t)-1) return end; size_t n = 0; for (size_t j = a + 1; j + 1 <...
+- `parse_prelude` (function) `src/css_import.c:97` `static int parse_prelude(const char *s, size_t a, size_t b, ci_import *im)` -- Parses one import prelude s[a, b) (after "@import", before ';') into im. * Returns 0, or -1 when the import is...
+- `ci_scan` (function) `src/css_import.c:156` `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap)`
+- `ci_wrap` (function) `src/css_import.c:194` `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap)`
+- `ci_balanced` (function) `src/css_import.c:220` `int ci_balanced(const char *css, size_t len)`
+- `is_ident_ch` (function) `src/css_import.c:243` `static int is_ident_ch(char c)`
+- `has_scheme` (function) `src/css_import.c:250` `static int has_scheme(const char *r)` -- } else if (c == '}') { if (--depth < 0) return 0; } } return depth == 0; } static int is_ident_ch(char c) { unsigned...
+- `url_arg` (function) `src/css_import.c:266` `static int url_arg(const char *s, size_t a, size_t e, char *ref, size_t cap, size_t *end)` -- Reads the argument of the url( whose '(' ends at s[a-1]: the raw reference into ref and the index past ')' into...
+- `abs_ok` (function) `src/css_import.c:297` `static int abs_ok(const char *u)`
+- `ci_rebase_urls` (function) `src/css_import.c:303` `int ci_rebase_urls(const char *css, size_t len, const char *base,
+                   ci_resolve_f...`
+
+## src/css_index.c
+Depends on: `include/css_index.h`
+- `key_of` (function) `src/css_index.c:11` `static uint64_t key_of(int kind, const char *s, size_t n, int lower)` -- FNV-1a over the kind byte then the name; the tag is hashed lowercased because * compound_matches compares it with...
+- `key_of_token` (function) `src/css_index.c:26` `static uint64_t key_of_token(int kind, const char *tok)` -- An element token in the canonical form csel_ident_eq compares against: as-is * when it fits CSS_TOK_MAX, folded...
+- `entry_cmp` (function) `src/css_index.c:34` `static int entry_cmp(const void *a, const void *b)`
+- `cix_free` (function) `src/css_index.c:40` `void cix_free(cix_index *idx)`
+- `build` (function) `src/css_index.c:47` `static void build(const css_sel *arr, css_sel *const *ptrs, size_t n, cix_index *idx)`
+- `lower_bound` (function) `src/css_index.c:86` `static size_t lower_bound(const cix_index *idx, uint64_t k)` -- keyed[nk].key = k; keyed[nk].sel = (uint32_t)i; ++nk; } qsort(keyed, nk, sizeof *keyed, entry_cmp); idx->keyed =...
+- `run_head` (function) `src/css_index.c:104` `static uint32_t run_head(const cix_run *r)`
+- `add_bucket` (function) `src/css_index.c:106` `static void add_bucket(const cix_index *idx, uint64_t k, cix_run *runs, size_t *nr)`
+- `push` (function) `src/css_index.c:114` `static int push(uint32_t **buf, size_t *cap, size_t *n, uint32_t v)`
+- `cix_candidates` (function) `src/css_index.c:129` `size_t cix_candidates(const cix_index *idx, const css_element *el,
+                      uint32_t...` -- Candidates in ascending selector order without duplicates: a k-way merge of the (already * sorted) universal list...
+- `cix_build` (function) `src/css_index.c:166` `void cix_build(const css_sel *sels, size_t n, cix_index *idx)`
+- `cix_build_ptrs` (function) `src/css_index.c:168` `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx)`
+
+## src/css_length.c
+Depends on: `include/css.h`, `include/css_length.h`
+- `know` (function) `src/css_length.c:7` `* this module cannot know (real font metrics, the viewport) arrives through
+ * cl_ctx rather than...`
+- `cl_unit_eq` (function) `src/css_length.c:30` `static int cl_unit_eq(const char *unit, size_t len, const char *lit)` -- ASCII case-insensitive compare of a possibly-unterminated unit slice against a lowercase literal.
+- `cl_font_size` (function) `src/css_length.c:56` `static double cl_font_size(const cl_ctx *ctx)` -- The element's font-size, falling back to the CSS initial value when the caller left it unset.
+- `cl_root_font_size` (function) `src/css_length.c:60` `static double cl_root_font_size(const cl_ctx *ctx)`
+- `cl_metric_or` (function) `src/css_length.c:67` `static double cl_metric_or(double measured, double ratio, const cl_ctx *ctx)` -- A font metric, or the fallback the spec itself names for when that metric is unavailable -- expressed as a ratio of...
+- `cl_viewport_scale` (function) `src/css_length.c:80` `static int cl_viewport_scale(const char *u, size_t len, const cl_ctx *ctx, double *per)` -- Viewport-relative units (section 6.2).
+- `cl_ctx_initial` (function) `src/css_length.c:100` `cl_ctx cl_ctx_initial(void)`
+- `cl_unit_scale` (function) `src/css_length.c:117` `cl_status cl_unit_scale(const char *unit, size_t unit_len,
+                        const cl_ctx *...`
+- `cl_is_length_unit` (function) `src/css_length.c:167` `int cl_is_length_unit(const char *unit, size_t unit_len)`
+- `cl_unit_is_font_relative` (function) `src/css_length.c:174` `int cl_unit_is_font_relative(const char *unit, size_t unit_len)`
+- `cl_em_refit` (function) `src/css_length.c:219` `double cl_em_refit(double px, double em, double from_font_size, double font_size)`
+- `cl_parse_number` (function) `src/css_length.c:233` `static int cl_parse_number(const char **pp, const char *end, double *out)` -- Parses a CSS <number> (CSS Syntax 4.3.12) without strtod -- strtod is locale-dependent, and a locale whose decimal...
+- `cl_number` (function) `src/css_length.c:292` `int cl_number(const char *s, double *out, const char **endp)`
+- `cl_resolve_core` (function) `src/css_length.c:309` `static cl_status cl_resolve_core(const char *value, const cl_ctx *ctx, cl_lp *out)` -- The shared core of cl_resolve and cl_resolve_lp: tokenize <number><unit> and resolve it into the two components of a...
+- `cl_resolve` (function) `src/css_length.c:377` `cl_status cl_resolve(const char *value, const cl_ctx *ctx, double *out_px)`
+- `cl_resolve_lp` (function) `src/css_length.c:391` `cl_status cl_resolve_lp(const char *value, const cl_ctx *ctx, cl_lp *out)`
+- `cl_lp_used` (function) `src/css_length.c:395` `double cl_lp_used(cl_lp lp, double basis)`
+
+## src/css_mask.c
+Depends on: `include/css_gradient.h`, `include/css_mask.h`
+- `ieq` (function) `src/css_mask.c:13` `static int ieq(const char *a, const char *b)`
+- `cm_is_mask_prop` (function) `src/css_mask.c:19` `int cm_is_mask_prop(const char *prop)`
+- `cm_encode_layer` (function) `src/css_mask.c:26` `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss)`
+- `cm_decode_layer` (function) `src/css_mask.c:47` `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out)`
+- `split` (function) `src/css_mask.c:65` `static int split(const char *s, int comma, char (*out)[CM_TOK_MAX], int max)` -- out->kind = 1; out->nst = (meta >> 4) & 0xf; if (out->nst < 2) out->nst = 2; if (out->nst > 4) out->nst = 4...
+- `composite_word` (function) `src/css_mask.c:92` `static int composite_word(const char *t, int webkit)`
+- `clip_word` (function) `src/css_mask.c:106` `static int clip_word(const char *t)`
+- `image_layer` (function) `src/css_mask.c:114` `static int image_layer(const char *tok, cm_layer *l)` -- if (ieq(t, "source-in")) return CM_COMP_INTERSECT; if (ieq(t, "xor")) return CM_COMP_EXCLUDE; } return -1; } static...
+- `emit_layers` (function) `src/css_mask.c:132` `static int emit_layers(css_decl *dst, int cap, int shorthand, const char *val)`
+- `cm_expand` (function) `src/css_mask.c:201` `int cm_expand(const char *prop, const char *val, css_decl *dst, int cap, int webkit_vocab)`
+
+## src/css_mq.c
+Depends on: `include/css_box.h`, `include/css_length.h`, `include/css_mq.h`
+- `lower_ch` (function) `src/css_mq.c:32` `static char lower_ch(char c)`
+- `is_space` (function) `src/css_mq.c:36` `static int is_space(char c)`
+- `is_ident_ch` (function) `src/css_mq.c:40` `static int is_ident_ch(char c)`
+- `skip_ws` (function) `src/css_mq.c:45` `static void skip_ws(mq_cur *c)`
+- `read_word` (function) `src/css_mq.c:50` `static int read_word(mq_cur *c, char *w, size_t cap)` -- static int is_space(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f'; } static int...
+- `peek_word` (function) `src/css_mq.c:62` `static int peek_word(const mq_cur *c, char *w, size_t cap)` -- /* Reads one identifier at the cursor (lowercased into w); 0 if none. static int read_word(mq_cur *c, char *w...
+- `and3` (function) `src/css_mq.c:67` `static int and3(int a, int b)`
+- `or3` (function) `src/css_mq.c:73` `static int or3(int a, int b)`
+- `not3` (function) `src/css_mq.c:79` `static int not3(int a)`
+- `copy_trim_lower` (function) `src/css_mq.c:84` `static int copy_trim_lower(const char *s, size_t a, size_t b, char *dst, size_t cap)` -- return MQ_TRUE; } static int or3(int a, int b) { if (a == MQ_TRUE || b == MQ_TRUE) return MQ_TRUE; if (a ==...
+- `feature_of` (function) `src/css_mq.c:107` `static fval feature_of(const char *name, const cmq_env *env)` -- /* --- feature values --- typedef enum { FV_NONE, FV_NUM, FV_KW } fv_kind; typedef struct fval { fv_kind     kind...
+- `read_num` (function) `src/css_mq.c:163` `static int read_num(const char *t, double *out, const char **end)` -- } else if (strcmp(name, "update") == 0) { v.kind = FV_KW; v.kw = "fast"; } else if (strcmp(name, "overflow-block")...
+- `parse_value` (function) `src/css_mq.c:168` `static int parse_value(const char *t, int unit, double *out)` -- || strcmp(name, "video-dynamic-range") == 0) { v.kind = FV_KW; v.kw = "standard"; } else if (strcmp(name, "scan") ==...
+- `cmp_op` (function) `src/css_mq.c:208` `static int cmp_op(double lhs, int op, double rhs)` -- if (strcmp(e, "dpcm") == 0) { out = n * CMQ_CM_PER_IN / CMQ_DPI_PER_DPPX; return 1; } return 0; } if (*e != '\0')...
+- `flip_op` (function) `src/css_mq.c:220` `static int flip_op(int op)` -- /* op: '<' '<=' '>' '>=' '=' encoded as 1..5.
+- `bool_ctx` (function) `src/css_mq.c:231` `static int bool_ctx(const fval *v)` -- } /* Flips an operator so that `v op name` reads `name op' v`. static int flip_op(int op) { switch (op) { case 1...
+- `eval_plain` (function) `src/css_mq.c:239` `static int eval_plain(const char *name, const char *value, const cmq_env *env)` -- case 4: return 2; default: return op; } } /* Boolean context (MQ4 2.4.2): true unless the value is 0 or `none`....
+- `read_op` (function) `src/css_mq.c:268` `static int read_op(const char **p)` -- fval f = feature_of(base, env); if (f.kind == FV_NONE) return MQ_UNKNOWN; if (f.kind == FV_KW) { if (range != 0)...
+- `eval_range` (function) `src/css_mq.c:282` `static int eval_range(const char *t, const cmq_env *env)` -- static int read_op(const char **p) { const char *q = *p; int op = 0; if (q[0] == '<' && q[1] == '=') { op = 2; q +=...
+- `eval_feature` (function) `src/css_mq.c:330` `static int eval_feature(const char *s, size_t a, size_t b, const cmq_env *env)` -- } /* v1 op name op v2: both operators point the same way (MQ4 grammar). int lt = (ops[0] == 1 || ops[0] == 2) &&...
+- `eval_in_parens` (function) `src/css_mq.c:355` `static int eval_in_parens(mq_cur *c, int depth)` -- if (name[0] == '\0' || value[0] == '\0') return MQ_UNKNOWN; return eval_plain(name, value, env); } if (strpbrk(t...
+- `eval_cond` (function) `src/css_mq.c:382` `static int eval_cond(mq_cur *c, int depth)` -- mq_cur in = { c->s, open + 1, close, c->env }; skip_ws(&in); char w[16]; int nested = (in.i < in.b && in.s[in.i] ==...
+- `eval_query` (function) `src/css_mq.c:406` `static int eval_query(const char *s, size_t a, size_t b, const cmq_env *env)` -- skip_ws(c); if (c->i >= c->b) break; mq_cur save = *c; if (!read_word(c, w, sizeof w)) { *c = save; break; } int m =...
+- `cmq_matches` (function) `src/css_mq.c:460` `int cmq_matches(const char *s, size_t len, const cmq_env *env)`
+- `has_word` (function) `src/css_mq.c:481` `static int has_word(const char *t, const char *w)` -- while (i < len && !(s[i] == ',' && d == 0)) { if (s[i] == '(') ++d; else if (s[i] == ')') --d; ++i; } if...
+- `cmq_container_surely` (function) `src/css_mq.c:537` `int cmq_container_surely(const char *s, size_t len, int max_width)`
+- `cmq_name_hash` (function) `src/css_mq.c:549` `unsigned cmq_name_hash(const char *s, size_t n)`
+- `cmq_container_holds` (function) `src/css_mq.c:556` `int cmq_container_holds(const char *s, size_t len, const cmq_container *scope, int max_width)`
+- `container_type_kw` (function) `src/css_mq.c:580` `static int container_type_kw(const char *s, size_t n, int *type)`
+- `container_names` (function) `src/css_mq.c:596` `static int container_names(const char *s, size_t n, unsigned names[CMQ_CONTAINER_NAMES])`
+- `cmq_container_decl` (function) `src/css_mq.c:618` `int cmq_container_decl(const char *prop, const char *val, int *type,
+                       unsig...`
+
+## src/css_select.c
+Depends on: `include/css_select.h`
+- `csel_hex_val` (function) `src/css_select.c:25` `int csel_hex_val(char c)` -- CSS Syntax 4.3.7 escape consumption (moved from css.c; shared by quoted content values and selector identifiers).
+- `csel_emit_utf8` (function) `src/css_select.c:32` `size_t csel_emit_utf8(unsigned int cp, char *out)`
+- `csel_unescape` (function) `src/css_select.c:54` `void csel_unescape(char *dst, size_t cap, const char *src, size_t n)`
+- `csel_escape_len` (function) `src/css_select.c:93` `size_t csel_escape_len(const char *s, size_t i, size_t b)`
+- `csel_decl_end` (function) `src/css_select.c:106` `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace)`
+- `ident_hash` (function) `src/css_select.c:123` `static unsigned long long ident_hash(const char *s, size_t n)` -- 64-bit FNV-1a of the whole identifier: what makes a folded long name exact up to * a hash collision -- and a...
+- `csel_ident_fold` (function) `src/css_select.c:129` `void csel_ident_fold(const char *src, size_t len, char *dst)`
+- `csel_ident_eq` (function) `src/css_select.c:144` `int csel_ident_eq(const char *stored, const char *tok, size_t tlen)`
+- `csel_read_ident` (function) `src/css_select.c:152` `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower)`
+- `parse_attr_sel` (function) `src/css_select.c:186` `static int parse_attr_sel(const char *s, size_t *ip, size_t b, css_attr_match *am)` -- Parses one attribute selector starting at s[*ip] == '[' (within s[.,b)) into *am.
+- `parse_nth_arg` (function) `src/css_select.c:243` `static int parse_nth_arg(const char *s, size_t a, size_t b, int *A, int *B)` -- Parses the An+B argument of the nth-child family, s[a,b) (surrounding space trimmed here).
+- `take_sub_arg` (function) `src/css_select.c:295` `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
+- `between` (function) `src/css_select.c:384` `* between ( and ) is split on commas (not inside [] or ());`
+- `simple_pseudo_kind` (function) `src/css_select.c:439` `static int simple_pseudo_kind(const char *nm)` -- The PSEUDO_* kind of an argument-less pseudo-class usable inside a * sub-selector, or -1.
+- `parse_sub_compound` (function) `src/css_select.c:460` `static int parse_sub_compound(const char *s, size_t a, size_t b, css_sub_sel *sub)` -- Parses one SIMPLE sub-selector span s[a,b) for :not()/:is()/:where(): only tag name, .class, #id, or [attr] (no...
+- `parse_compound` (function) `src/css_select.c:525` `static int parse_compound(const char *s, size_t a, size_t b, css_compound *cp,
+                  ...` -- Parses one COMPOUND selector span s[a,b) (no combinators, no surrounding space) into *cp. sel holds the sub-selector...
+- `selector` (function) `src/css_select.c:567` `* the whole selector (fail closed). A chain deeper than CSS_MAX_COMPOUNDS is
+ * dropped. Whitespa...`
+- `csel_element_feature_bits` (function) `src/css_select.c:587` `unsigned long long csel_element_feature_bits(const css_element *e)`
+- `compute_anc_req` (function) `src/css_select.c:602` `static unsigned long long compute_anc_req(const css_sel *sel)` -- What the ancestors of the subject must contain: walk left from the subject while the combinator is descendant or...
+- `csel_parse_core` (function) `src/css_select.c:615` `static int csel_parse_core(const char *s, size_t a, size_t b, css_sel *sel)`
+- `seven` (function) `src/css_select.c:621` `* pay for the other seven (a css_sel is ~12.8 KiB). */ memset(sel, 0, offsetof(css_sel, parts));`
+- `compound_req` (function) `src/css_select.c:709` `static unsigned long long compound_req(const css_compound *c)` -- } else { psel += 10; } } spec += 100 * (sel->parts[k].has_id ?
+- `compute_subj_req` (function) `src/css_select.c:718` `static unsigned long long compute_subj_req(const css_sel *sel)`
+- `csel_compact_size` (function) `src/css_select.c:729` `size_t csel_compact_size(int nparts)`
+- `csel_compact_dup` (function) `src/css_select.c:735` `css_sel *csel_compact_dup(const css_sel *sel)`
+- `csel_parse` (function) `src/css_select.c:744` `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel)`
+- `el_attr_value` (function) `src/css_select.c:755` `static const char *el_attr_value(const css_element *el, const char *name)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
+- `ends_with` (function) `src/css_select.c:765` `static int ends_with(const char *v, const char *suf, int ci)` -- The value of element attribute `name` (case-insensitive name), or NULL if absent. * A present attribute with no...
+- `has_word` (function) `src/css_select.c:773` `static int has_word(const char *v, const char *w, int ci)` -- True if `v` is a whitespace-separated list containing the word `w` (non-empty), * case-folded when ci (the `~=`...
+- `attr_matches` (function) `src/css_select.c:788` `static int attr_matches(const css_attr_match *am, const css_element *el)` -- size_t wl = strlen(w); if (wl == 0) return 0; const char *p = v; while (*p != '\0') { while (*p == ' ' || *p == '\t'...
+- `nth_matches` (function) `src/css_select.c:808` `static int nth_matches(int A, int B, int idx)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
+- `is_form_control` (function) `src/css_select.c:817` `static int is_form_control(const char *tag)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
+- `pseudo_matches` (function) `src/css_select.c:826` `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...` -- if (A > 0) return d >= 0 && d % A == 0; return d <= 0 && (-d) % (long)(-A) == 0; } /* Form controls for :enabled...
+- `sub_sel_matches` (function) `src/css_select.c:830` `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
+- `compound_matches` (function) `src/css_select.c:1080` `static int compound_matches(const css_compound *c, const css_element *el,
+                       ...` -- True if one compound matches one element (no ancestor context).
+- `built` (function) `src/css_select.c:1115` `* chains the caller built (an element without parent/prev links never matches
+ * through that com...`
+- `pseudo_is_local` (function) `src/css_select.c:1160` `static int pseudo_is_local(int kind)` -- case COMB_ADJACENT: return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el...
+- `csel_needs_structure` (function) `src/css_select.c:1173` `int csel_needs_structure(const css_sel *sel)`
+- `csel_matches` (function) `src/css_select.c:1196` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+              ...`
+
+## src/css_text.c
+Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`
+- `ct_family_of` (function) `src/css_text.c:18` `static int ct_family_of(const char *name)` -- Maps one font-family name (a generic keyword or a common family) to a generic css_font_family bucket; -1 if...
+- `ct_interp_fontfamily` (function) `src/css_text.c:47` `int ct_interp_fontfamily(const char *v)` -- font-family: the first recognised name in the comma-separated stack wins (its * generic bucket).
+- `ct_interp_texttransform` (function) `src/css_text.c:69` `int ct_interp_texttransform(const char *v)`
+- `ct_interp_valign` (function) `src/css_text.c:91` `int ct_interp_valign(const char *v)`
+- `ct_expand_valign` (function) `src/css_text.c:122` `int ct_expand_valign(const char *val, css_decl *dst, int cap)` -- vertical-align (CSS 2.1 section 10.8.1) has two productions: a keyword, and a <length-percentage> baseline SHIFT...
+- `transition_prop_one` (function) `src/css_text.c:139` `static int transition_prop_one(const char *v)`
+- `ct_interp_whitespace` (function) `src/css_text.c:182` `int ct_interp_whitespace(const char *v)`
+- `ct_interp_tabsize` (function) `src/css_text.c:195` `int ct_interp_tabsize(const char *v)` -- break-spaces preserves whitespace and wraps; this engine only models the * wrap/keep distinction, so it collapses to...
+- `ct_interp_textdeco_style` (function) `src/css_text.c:206` `int ct_interp_textdeco_style(const char *v)` -- } /* tab-size: a non-negative integer (number of spaces). -1 if unsupported. int ct_interp_tabsize(const char *v) {...
+- `ct_interp_textdeco_thickness` (function) `src/css_text.c:217` `int ct_interp_textdeco_thickness(const char *v)` -- text-decoration-thickness: `from-font` (keyword -> 0), or a non-negative length * (px -> px, em/rem x16). -1 if...
+- `ct_interp_aspect_ratio` (function) `src/css_text.c:229` `int ct_interp_aspect_ratio(const char *v, int *num, int *den)` -- aspect-ratio: `auto`, a `<ratio>` such as `16/9` or `1.5`, or `auto <ratio>` (auto fallback).
+- `ct_interp_direction` (function) `src/css_text.c:271` `int ct_interp_direction(const char *v)` -- Both halves share ONE scale, so the ratio keeps its shape: clamping each half to * CSS_LEN_MAX on its own turned...
+- `ct_liststyle_kw` (function) `src/css_text.c:277` `static int ct_liststyle_kw(const char *t)`
+- `ct_liststyle_unknown_name` (function) `src/css_text.c:298` `static int ct_liststyle_unknown_name(const char *t)` -- A <counter-style> name this engine has no glyph set for.
+- `ct_interp_liststyle` (function) `src/css_text.c:309` `int ct_interp_liststyle(const char *v)` -- list-style-type, or the type token of the list-style shorthand: the first * recognised keyword wins. url() (a...
+- `ct_emit_spacing` (function) `src/css_text.c:344` `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val)`
+- `ct_expand_shadow` (function) `src/css_text.c:357` `int ct_expand_shadow(const char *val, css_decl *dst, int cap)` -- text-shadow (single layer): collects up to three lengths (dx, dy, blur — blur is ignored) and an optional color, in...
+
+## src/css_values.c
+Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
+- `cv_parse_num` (function) `src/css_values.c:11` `static int cv_parse_num(const char *s, double *out, const char **endp)`
+- `cv_parse_color` (function) `src/css_values.c:16` `int cv_parse_color(const char *v)`
+- `cv_interp_color` (function) `src/css_values.c:36` `int cv_interp_color(const char *v)`
+- `cv_color_ok` (function) `src/css_values.c:41` `int cv_color_ok(int c)`
+- `cv_bg_alpha_of` (function) `src/css_values.c:46` `int cv_bg_alpha_of(const char *v)`
+- `cv_interp_bg` (function) `src/css_values.c:160` `int cv_interp_bg(const char *v)`
+- `cv_parse_color_t7` (function) `src/css_values.c:205` `int cv_parse_color_t7(const char *v)`
+- `cv_text_color` (function) `src/css_values.c:222` `int cv_text_color(const char *v)`
+- `cv_filter_scale` (function) `src/css_values.c:231` `double cv_filter_scale(int pct)`
+
+## src/css_vars.c
+Depends on: `include/css_select.h`, `include/css_vars.h`
+- `name_hash` (function) `src/css_vars.c:12` `static size_t name_hash(const char *s, size_t n)`
+- `dup_n` (function) `src/css_vars.c:21` `static char *dup_n(const char *s, size_t n)`
+- `find_slot` (function) `src/css_vars.c:32` `static size_t find_slot(const cvr_table *t, const char *name, size_t nlen)` -- Index into t->slot where name lives, or the empty slot where it would go. * Requires t->nslot > t->n (the index is...
+- `grow` (function) `src/css_vars.c:45` `static int grow(cvr_table *t)` -- Requires t->nslot > t->n (the index is never full). static size_t find_slot(const cvr_table *t, const char *name...
+- `cvr_set` (function) `src/css_vars.c:67` `int cvr_set(cvr_table *t, const char *name, size_t nlen, const char *value, size_t vlen)`
+- `cvr_get` (function) `src/css_vars.c:94` `const char *cvr_get(const cvr_table *t, const char *name, size_t nlen)`
+- `cvr_count` (function) `src/css_vars.c:100` `size_t cvr_count(const cvr_table *t)`
+- `cvr_reset` (function) `src/css_vars.c:102` `void cvr_reset(cvr_table *t)`
+- `cvr_free` (function) `src/css_vars.c:112` `void cvr_free(cvr_table *t)`
+- `is_ws` (function) `src/css_vars.c:120` `static int is_ws(char c)`
+- `without_important` (function) `src/css_vars.c:124` `static size_t without_important(const char *val, size_t n)` -- Length of val[0,n) once a trailing !important (optional blanks around the '!') * is removed, trailing blanks included.
+- `cvr_collect_decls` (function) `src/css_vars.c:139` `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b)`
+- `scope_get` (function) `src/css_vars.c:164` `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)`
+- `env_value` (function) `src/css_vars.c:182` `static const char *env_value(const char *name, size_t n)` -- The value an env() name resolves to on this device class (CSS Environment Variables 1): a desktop window has no...
+- `resolve_rec` (function) `src/css_vars.c:192` `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
+                  ...`
+- `cvr_resolve` (function) `src/css_vars.c:281` `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
+- `cvr_lookup` (function) `src/css_vars.c:290` `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
+
+## src/data_url.c
+Depends on: `include/data_url.h`
+- `lower` (function) `src/data_url.c:16` `static int lower(char c)`
+- `ci_starts_with` (function) `src/data_url.c:20` `static int ci_starts_with(const char *s, const char *prefix)`
+- `du_is_data_url` (function) `src/data_url.c:28` `int du_is_data_url(const char *url)`
+- `du_base64_payload` (function) `src/data_url.c:32` `du_status du_base64_payload(const char *url, const char **payload, size_t *payload_len)`
+- `du_shape_ok` (function) `src/data_url.c:59` `du_status du_shape_ok(const char *url)`
+- `b64_val` (function) `src/data_url.c:70` `static int b64_val(unsigned char c)` -- 0-63 for a base64 alphabet character, -1 otherwise.
+- `du_base64_decode` (function) `src/data_url.c:79` `du_status du_base64_decode(const char *b64, size_t b64_len, uint8_t **out, size_t *out_len)`
+- `hexval` (function) `src/data_url.c:117` `static int hexval(char c)`
+- `ascii_ws` (function) `src/data_url.c:124` `static int ascii_ws(char c)`
+- `ends_ci` (function) `src/data_url.c:129` `static int ends_ci(const char *s, size_t n, const char *suf)` -- } static int hexval(char c) { if (c >= '0' && c <= '9') return c - '0'; if (c >= 'a' && c <= 'f') return c - 'a' +...
+- `du_decode` (function) `src/data_url.c:140` `du_status du_decode(const char *url, char *mime, size_t mime_cap, uint8_t **out, size_t *out_len)`
+
+## src/disk_store.c
+Depends on: `include/disk_store.h`, `include/local_store.h`, `include/util.h`
+- `fsync_dir` (function) `src/disk_store.c:32` `static void fsync_dir(const char *path)` -- Best-effort fsync of the directory holding path, for crash durability of the * rename.
+- `map_ls` (function) `src/disk_store.c:50` `static ds_status map_ls(ls_status s)`
+- `ds_write` (function) `src/disk_store.c:66` `ds_status ds_write(const char *path, const uint8_t key[LS_KEY_LEN], ls_aead aead,
+               ...`
+- `ds_read` (function) `src/disk_store.c:103` `ds_status ds_read(const char *path, const uint8_t key[LS_KEY_LEN],
+                  uint8_t **ou...`
+- `ds_free` (function) `src/disk_store.c:136` `void ds_free(uint8_t *buf, size_t len)`
+
 ## src/dom.c
 Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `include/html_parse.h`, `include/util.h`
 - `to_lower_buf` (function) `src/dom.c:33` `static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap)` -- #include <stdint.h> #include <stdlib.h> #include <string.h> #include <lexbor/dom/dom.h> #include...
@@ -129,6 +398,15 @@ Depends on: `include/download.h`, `include/pdf_export.h`
 - `dl_build_path` (function) `src/download.c:195` `dl_status dl_build_path(const char *dir, const char *name, char *out, size_t outsz)`
 - `dl_check_size` (function) `src/download.c:213` `dl_status dl_check_size(size_t len)`
 
+## src/exact_key.c
+Depends on: `include/exact_key.h`
+- `ek_init` (function) `src/exact_key.c:6` `void ek_init(ek_key *k)`
+- `ek_reset` (function) `src/exact_key.c:13` `void ek_reset(ek_key *k)`
+- `ek_put` (function) `src/exact_key.c:19` `void ek_put(ek_key *k, const void *p, size_t len)`
+- `ek_equal` (function) `src/exact_key.c:36` `int ek_equal(const ek_key *a, const ek_key *b)`
+- `ek_swap` (function) `src/exact_key.c:41` `void ek_swap(ek_key *a, ek_key *b)`
+- `ek_free` (function) `src/exact_key.c:48` `void ek_free(ek_key *k)`
+
 ## src/fb_cmdline.c
 Depends on: `include/fb_cmdline.h`, `include/fb_panes.h`, `include/freebug.h`
 - `dup_n` (function) `src/fb_cmdline.c:10` `static char *dup_n(const char *s, size_t n)`
@@ -159,330 +437,22 @@ Depends on: `include/fb_panes.h`
 - `fbp_js_quote` (function) `src/fb_panes.c:157` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
 - `fbp_expr` (function) `src/fb_panes.c:186` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
 
-## src/flex_layout.c
-Depends on: `include/flex_layout.h`
-- `nn` (function) `src/flex_layout.c:19` `static double nn(double v)` -- bounded by FX_MAX_ITEMS (no VLAs).
-- `fx_flex_line` (function) `src/flex_layout.c:23` `fx_status fx_flex_line(const fx_item *items, size_t n, double avail, double gap,
-                ...`
-- `fx_grid_columns` (function) `src/flex_layout.c:128` `fx_status fx_grid_columns(double avail, size_t ncols, double gap,
-                          doubl...`
-- `fx_grid_column_count` (function) `src/flex_layout.c:133` `int fx_grid_column_count(int flow, int cols, int rows, size_t items)`
-- `fx_autofill_count` (function) `src/flex_layout.c:141` `size_t fx_autofill_count(double avail, double gap, double minw)`
-- `fx_grid_columns_weighted` (function) `src/flex_layout.c:151` `fx_status fx_grid_columns_weighted(double avail, size_t ncols, double gap,
-                      ...`
-- `fx_grid_place_span` (function) `src/flex_layout.c:185` `fx_status fx_grid_place_span(size_t nitems, size_t ncols, const int *span,
-                      ...`
-- `fx_grid_area_hash` (function) `src/flex_layout.c:327` `unsigned fx_grid_area_hash(const char *name)`
-- `area_token_is_null_cell` (function) `src/flex_layout.c:351` `static int area_token_is_null_cell(const char *tok, size_t len)` -- 0 is reserved for "no name" (the null cell token), so a name that hashes to * it is nudged; the alternative is a...
-- `fx_grid_areas_parse` (function) `src/flex_layout.c:357` `fx_status fx_grid_areas_parse(const char *tmpl, fx_area_map *out)`
-- `fx_grid_area_rect` (function) `src/flex_layout.c:432` `fx_status fx_grid_area_rect(const fx_area_map *m, unsigned name,
-                            int ...`
-- `float_pack_impl` (function) `src/flex_layout.c:474` `static fx_status float_pack_impl(const double *width, const int *side, size_t n,
-                ...` -- Shared packer: wrap == 0 is the single-row v1 contract (overflow clamps in place); wrap != 0 starts a new row...
-- `fx_float_insets` (function) `src/flex_layout.c:514` `fx_status fx_float_insets(const fx_float_rect *r, size_t n, double y, double h,
-                 ...`
-- `fx_float_pack` (function) `src/flex_layout.c:554` `fx_status fx_float_pack(const double *width, const int *side, size_t n,
-                        d...`
-- `fx_float_pack_wrap` (function) `src/flex_layout.c:559` `fx_status fx_float_pack_wrap(const double *width, const int *side, size_t n,
-                    ...`
-- `fx_grid_cell` (function) `src/flex_layout.c:601` `void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col)`
-- `fx_auto_margins` (function) `src/flex_layout.c:613` `fx_status fx_auto_margins(fx_result *res, size_t n, const unsigned char *auto_l,
-                ...` -- } void fx_grid_cell(size_t index, size_t ncols, size_t *row, size_t *col) { if (row == NULL || col == NULL) return...
-- `fx_auto_min_size` (function) `src/flex_layout.c:636` `double fx_auto_min_size(double min_content, double basis, double author_min,
-                    ...`
-- `fx_multicol_used` (function) `src/flex_layout.c:653` `fx_status fx_multicol_used(double avail_w, int column_count, double column_width,
-               ...`
-- `fx_multicol_balance` (function) `src/flex_layout.c:690` `fx_status fx_multicol_balance(const double *heights, size_t n, int ncol,
-                        ...`
-- `fx_justify_name` (function) `src/flex_layout.c:721` `const char *fx_justify_name(fx_justify j)`
-- `fx_column_place` (function) `src/flex_layout.c:733` `fx_status fx_column_place(const double *h, const double *grow, size_t n, double gap,
-            ...`
-- `fx_column_place_m` (function) `src/flex_layout.c:740` `fx_status fx_column_place_m(const double *h, const double *grow, const int *mauto,
-              ...`
-- `fx_cross_offset` (function) `src/flex_layout.c:801` `double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r)`
-- `gl_ws` (function) `src/flex_layout.c:813` `static int gl_ws(char c)` -- } double fx_cross_offset(double avail, double w, int align, int mauto_l, int mauto_r) { double room = avail - w; if...
-- `gl_lower` (function) `src/flex_layout.c:817` `static int gl_lower(char c)`
-- `gl_kw` (function) `src/flex_layout.c:820` `static int gl_kw(const char *p, const char *end, const char *kw)` -- if (mauto_r) return 0.0; if (align == 1) return room / 2.0; if (align == 2) return room; return 0.0; } /* ASCII...
-- `gl_int` (function) `src/flex_layout.c:830` `static int gl_int(const char *p, const char *end, long cap, long *out)` -- A CSS <integer> (optional sign, digits only) filling exactly [p, end).
-- `gl_side_range` (function) `src/flex_layout.c:845` `static int gl_side_range(const char *p, const char *end, int *out)` -- int neg = 0; if (p < end && (*p == '+' || *p == '-')) { neg = (*p == '-'); ++p; } if (p >= end) return 0; long v =...
-- `fx_grid_line_side` (function) `src/flex_layout.c:868` `int fx_grid_line_side(const char *s, int *out)`
-- `fx_grid_line_parse` (function) `src/flex_layout.c:876` `int fx_grid_line_parse(const char *v, int *start, int *end)`
-- `gl_is_span` (function) `src/flex_layout.c:893` `static int gl_is_span(int v)`
-- `gl_is_line` (function) `src/flex_layout.c:894` `static int gl_is_line(int v)`
-- `fx_grid_line_resolve` (function) `src/flex_layout.c:896` `void fx_grid_line_resolve(int start, int end, int ntracks, int *pos0, int *span)`
-- `fx_col_free_split` (function) `src/flex_layout.c:938` `fx_status fx_col_free_split(double free_px, const int *grow, const int *mauto, size_t n,
-        ...`
-
-## src/form.c
-Depends on: `include/form.h`
-- `put_char` (function) `src/form.c:17` `static int put_char(char *out, size_t outsz, size_t *pos, char c)` -- No I/O, no global state.
-- `enc_component` (function) `src/form.c:25` `static int enc_component(const char *s, char *out, size_t outsz, size_t *pos)` -- Encodes one component per the WHATWG application/x-www-form-urlencoded byte * serialiser.
-- `fm_encode` (function) `src/form.c:43` `fm_status fm_encode(const fm_field *fields, size_t n,
-                    char *out, size_t outsz...`
-- `copy_fit` (function) `src/form.c:66` `static int copy_fit(char *dst, size_t dstsz, const char *src)` -- if (fields[i].name == NULL) continue; /* a nameless control is not submitted if (!first && put_char(out, outsz...
-- `clean_action` (function) `src/form.c:75` `static int clean_action(const char *action, char *out, size_t outsz)` -- Removes TAB/LF/CR and trims leading/trailing ASCII spaces (WHATWG cleaning of a * URL-bearing attribute).
-- `strip_query` (function) `src/form.c:93` `static void strip_query(char *url)` -- if (c == '\t' || c == '\n' || c == '\r') continue; if (o + 1 >= outsz) return -1; out[o++] = c; } out[o] = '\0'...
-- `resolve_target` (function) `src/form.c:101` `static fm_block_reason resolve_target(const char *base, const char *act,
-                        ...` -- Resolves the cleaned action into a validated absolute https URL R, or returns a * block reason.
-- `fm_build` (function) `src/form.c:120` `fm_status fm_build(const char *base, const char *action, fm_method method,
-                   con...`
-
-## src/frame_broker.c
-Depends on: `include/frame_broker.h`
-- `lc` (function) `src/frame_broker.c:9` `static char lc(char c)`
-- `host_char_ok` (function) `src/frame_broker.c:11` `static int host_char_ok(char c)`
-- `fbk_origin_of` (function) `src/frame_broker.c:15` `int fbk_origin_of(const char *url, char *out, size_t cap)`
-- `fbk_init` (function) `src/frame_broker.c:53` `int fbk_init(fbk_table *t, const char *top_url)`
-- `live` (function) `src/frame_broker.c:62` `static int live(const fbk_table *t, int id)`
-- `fbk_add` (function) `src/frame_broker.c:66` `int fbk_add(fbk_table *t, int parent, const char *url, int *out_id)`
-- `fbk_remove` (function) `src/frame_broker.c:84` `void fbk_remove(fbk_table *t, int id)`
-- `fbk_origin` (function) `src/frame_broker.c:96` `const char *fbk_origin(const fbk_table *t, int id)`
-- `target_admits` (function) `src/frame_broker.c:101` `static int target_admits(const char *target, const char *snd, const char *recv)` -- int changed = 1;                                  /* fixpoint: slots are reused, order is not a tree order while...
-- `fbk_route` (function) `src/frame_broker.c:118` `fbk_verdict fbk_route(const fbk_table *t, int from, fbk_rel rel, int child,
-                     ...`
-
-## src/frame_clock.c
-Depends on: `include/frame_clock.h`
-- `fc_set_active` (function) `src/frame_clock.c:16` `void fc_set_active(fc_clock *c, int active)`
-- `fc_needs_tick` (function) `src/frame_clock.c:21` `int fc_needs_tick(const fc_clock *c)`
-- `fc_interval_ms` (function) `src/frame_clock.c:26` `int fc_interval_ms(const fc_clock *c)`
-
-## src/frame_host.c
-Depends on: `include/frame_broker.h`, `include/frame_host.h`
-- `fh_new` (function) `src/frame_host.c:35` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
-                fh_top_...`
-- `slot_release_view` (function) `src/frame_host.c:47` `static void slot_release_view(fh_slot *sl)`
-- `reap` (function) `src/frame_host.c:55` `static void reap(fh_host *h)` -- h->fetch = fetch; h->fetch_ctx = fetch_ctx; h->top_msg = top_msg; h->top_ctx = top_ctx; for (int i = 0; i <...
-- `fh_free` (function) `src/frame_host.c:67` `void fh_free(fh_host *h)`
-- `fh_count` (function) `src/frame_host.c:76` `int fh_count(const fh_host *h)`
-- `load_frame` (function) `src/frame_host.c:85` `static void load_frame(fh_host *h, int id, const char *url)` -- Loads the document of frame `id` (already registered in the table).
-- `find_child` (function) `src/frame_host.c:130` `static int find_child(const fh_host *h, int parent, int token)`
-- `token_seen_by` (function) `src/frame_host.c:138` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
-- `post_op` (function) `src/frame_host.c:144` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
-- `apply_ops` (function) `src/frame_host.c:199` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
-- `fh_apply_top` (function) `src/frame_host.c:222` `void fh_apply_top(fh_host *h, const tab_page *page)`
-- `fh_tick` (function) `src/frame_host.c:227` `int fh_tick(fh_host *h, int elapsed_ms)`
-- `fh_generation` (function) `src/frame_host.c:251` `unsigned fh_generation(const fh_host *h)`
-- `fh_frame_view` (function) `src/frame_host.c:253` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
-
-## src/freebug.c
-Depends on: `include/freebug.h`
-- `whole` (function) `src/freebug.c:5` `* FB_MAX_TOTAL_BYTES is dropped whole (overflow flag raised, prior entries kept);`
-- `fb_buffer_init` (function) `src/freebug.c:15` `void fb_buffer_init(fb_buffer *b)`
-- `fb_buffer_push` (function) `src/freebug.c:19` `int fb_buffer_push(fb_buffer *b, int level, const char *text, size_t len)`
-- `fb_buffer_push_loc` (function) `src/freebug.c:23` `int fb_buffer_push_loc(fb_buffer *b, int level, const char *text, size_t len,
-                   ...`
-- `fb_buffer_reset` (function) `src/freebug.c:78` `void fb_buffer_reset(fb_buffer *b)`
-- `fb_buffer_free` (function) `src/freebug.c:91` `void fb_buffer_free(fb_buffer *b)`
-- `fb_buffer_count` (function) `src/freebug.c:101` `size_t fb_buffer_count(const fb_buffer *b)`
-- `fb_buffer_at` (function) `src/freebug.c:105` `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i)`
-- `fb_level_name` (function) `src/freebug.c:110` `const char *fb_level_name(int level)`
-
-## src/freedom.c
-Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
-- `print_usage` (function) `src/freedom.c:55` `static void print_usage(FILE *fp, const char *prog)`
-- `is_https_url` (function) `src/freedom.c:84` `static int is_https_url(const char *s)`
-- `is_http_url` (function) `src/freedom.c:88` `static int is_http_url(const char *s)`
-- `is_overlay_http` (function) `src/freedom.c:93` `static int is_overlay_http(const char *s)` -- fprintf(fp, "  --dump-video-url: headless, print the first detected video source URL to stdout (no truncation)\n")...
-- `now_us` (function) `src/freedom.c:149` `static uint64_t now_us(void)`
-- `timings_ensure_init` (function) `src/freedom.c:155` `static void timings_ensure_init(void)`
-- `timings_enabled` (function) `src/freedom.c:159` `static int timings_enabled(void)`
-- `timings_dump` (function) `src/freedom.c:163` `static void timings_dump(void)`
-- `hl_frame_top_msg` (function) `src/freedom.c:215` `static void hl_frame_top_msg(void *ctx, const char *data, size_t len)`
-- `user_impersonate_enabled` (function) `src/freedom.c:236` `static int user_impersonate_enabled(void)`
-- `read_file` (function) `src/freedom.c:243` `static char *read_file(const char *path, size_t *out_len)` -- User opt-in for TLS-impersonation blend: --impersonate or FREEDOM_IMPERSONATE=1.
-- `headless_load_hosts` (function) `src/freedom.c:261` `static void headless_load_hosts(void)`
-- `apply_identity` (function) `src/freedom.c:281` `static void apply_identity(sf_config *cfg)`
-- `apply_as_gui` (function) `src/freedom.c:286` `static void apply_as_gui(const char *top_url, int flag_js, int flag_css, int flag_images)`
-- `is_blank_text` (function) `src/freedom.c:324` `static int is_blank_text(const char *s)` -- .js_mode       = mode, .host_in_js    = host[0] != '\0' && g_js_hosts != NULL && hb_is_allowlisted(g_js_hosts...
-- `print_doc` (function) `src/freedom.c:337` `static void print_doc(const rd_doc *doc)` -- Writes the render document as deterministic, flowing plain text for a terminal and for an AI agent (content as data...
-- `print_console` (function) `src/freedom.c:430` `static void print_console(const fb_buffer *log)` -- Prints the captured Freebug console (the developer-visible JS transcript) to stdout, one entry per line, prefixed...
-- `print_dom` (function) `src/freedom.c:447` `static void print_dom(const rd_doc *doc)` -- Prints the paint-ready render tree (dom_debug) to stdout.
-- `print_dom_css` (function) `src/freedom.c:462` `static void print_dom_css(const rd_doc *doc)` -- Prints the CSS property inspector (dd_format_css) to stdout.
-- `gets` (function) `src/freedom.c:482` `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-- `headless_fetch` (function) `src/freedom.c:486` `static int headless_fetch(void *ctx, const char *method, const char *url,
-                       ...` -- tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script...
-- `foldback_cookies` (function) `src/freedom.c:573` `static void foldback_cookies(const char *url, const char *jar)` -- Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set...
-- `print_css_drops` (function) `src/freedom.c:597` `static void print_css_drops(const char *html, size_t len)` -- Prints the author-CSS drop report for `html`, sorted by occurrence count.
-- `hl_font_stash_free` (function) `src/freedom.c:642` `static void hl_font_stash_free(hl_font_stash *s)`
-- `hl_css_sink` (function) `src/freedom.c:655` `static void hl_css_sink(void *vctx, const char *url,
-                        const char *body, si...` -- tab_css_sink_fn for headless: retains served 2xx CSS bodies (serial and pool paths alike) with an absolute https...
-- `hl_font_fetch` (function) `src/freedom.c:692` `static int hl_font_fetch(void *vctx, const char *url,
-                         int *out_status, c...` -- wf_fetch_fn around the headless policy gate (font bytes download like any * other subresource of this page). data...
-- `render_page` (function) `src/freedom.c:720` `static int render_page(const char *html, size_t len, const char *top_url,
-                       ...`
-- `pool` (function) `src/freedom.c:787` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-- `first` (function) `src/freedom.c:801` `* always cleared first (fetch_and_render may paint several pages per
-     * process). A NULL top_...`
-- `only` (function) `src/freedom.c:873` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-- `sf_reason` (function) `src/freedom.c:999` `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (function) `src/freedom.c:1019` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
-- `BLOCKED` (function) `src/freedom.c:1047` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
-- `elsewhere` (function) `src/freedom.c:1082` `* page whose script immediately forwards elsewhere (e.g. a search engine's
- * JS-capability inter...`
-- `parent` (function) `src/freedom.c:1108` `* gated by the parent (ln_resolve: a local target stays under the document's
- * directory, a remo...`
-- `run_headless` (function) `src/freedom.c:1145` `static int run_headless(const char *target)`
-- `video_fetch_with_fallback` (function) `src/freedom.c:1182` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
-                     ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
-- `run_dump_video` (function) `src/freedom.c:1293` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
-- `main` (function) `src/freedom.c:1312` `int main(int argc, char **argv)`
-
-## src/hls.c
-Depends on: `include/hls.h`
-- `last_char` (function) `src/hls.c:38` `static const char *last_char(const char *s, size_t n, int c)` -- Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not found.
-- `name` (function) `src/hls.c:46` `* attr is the attribute name (e.g. "BANDWIDTH=");`
-- `parse_attr_long` (function) `src/hls.c:48` `static int parse_attr_long(const char *attrs, const char *end,
-                           const c...` -- Extracts a named attribute value from an #EXT-X-STREAM-INF attribute string. attr is the attribute name (e.g....
-- `parse_attr_resolution` (function) `src/hls.c:62` `static void parse_attr_resolution(const char *attrs, const char *end,
-                           ...` -- static int parse_attr_long(const char *attrs, const char *end, const char *attr, long *val) { size_t alen =...
-- `hls_parse` (function) `src/hls.c:80` `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)`
-- `hls_select_variant` (function) `src/hls.c:202` `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h)`
-- `hls_resolve_url` (function) `src/hls.c:223` `size_t hls_resolve_url(const char *base_url, const char *segment_url,
-                       char...`
-- `hls_playlist_free` (function) `src/hls.c:253` `void hls_playlist_free(hls_playlist *pl)`
-
-## src/host_conf.c
-Depends on: `include/host_conf.h`
-- `add_dir` (function) `src/host_conf.c:10` `static void add_dir(hcf_dirs *out, const char *path)`
-- `hcf_search_dirs` (function) `src/host_conf.c:20` `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out)`
-- `hcf_search_dirs_from_env` (function) `src/host_conf.c:32` `void hcf_search_dirs_from_env(hcf_dirs *out)`
-- `read_conf` (function) `src/host_conf.c:37` `static char *read_conf(const char *dir, const char *name)` -- add_dir(out, env); if (home != NULL && home[0] != '\0') { char user[HCF_PATH_MAX]; int n = snprintf(user, sizeof...
-- `load_into` (function) `src/host_conf.c:58` `static void load_into(hb_set *s, const char *dir, const char *name, hb_list list)`
-- `hcf_load_filter` (function) `src/host_conf.c:65` `hb_set *hcf_load_filter(const hcf_dirs *dirs)`
-- `hcf_load_allowlist` (function) `src/host_conf.c:76` `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname)`
-
-## src/hostblock.c
-Depends on: `include/hostblock.h`, `include/util.h`
-- `table_probe` (function) `src/hostblock.c:38` `static size_t table_probe(const hb_table *t, const char *key, size_t klen)` -- Finds the slot for key (length klen) in t, which must have a free slot.
-- `table_grow` (function) `src/hostblock.c:49` `static int table_grow(hb_table *t, size_t newcap)` -- Finds the slot for key (length klen) in t, which must have a free slot.
-- `table_insert` (function) `src/hostblock.c:71` `static int table_insert(hb_table *t, const char *key, size_t klen)` -- Inserts key (length klen) into t, deduping.
-- `table_contains` (function) `src/hostblock.c:92` `static int table_contains(const hb_table *t, const char *key)`
-- `table_free` (function) `src/hostblock.c:98` `static void table_free(hb_table *t)`
-- `lower` (function) `src/hostblock.c:107` `static char lower(char c)`
-- `is_ip_token` (function) `src/hostblock.c:113` `static int is_ip_token(const char *s, size_t n)` -- A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain.
-- `is_domain_char` (function) `src/hostblock.c:122` `static int is_domain_char(char c)` -- A token made only of digits, '.' and ':' is an IP literal (v4 or v6), not a * domain.
-- `hb_new` (function) `src/hostblock.c:144` `hb_set *hb_new(void)`
-- `hb_free` (function) `src/hostblock.c:149` `void hb_free(hb_set *s)`
-- `hb_load` (function) `src/hostblock.c:156` `hb_status hb_load(hb_set *s, const char *text, hb_list list)`
-- `hb_check` (function) `src/hostblock.c:193` `hb_decision hb_check(const hb_set *s, const char *host)`
-- `hb_check_subresource` (function) `src/hostblock.c:218` `hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted)`
-- `hb_is_allowlisted` (function) `src/hostblock.c:223` `int hb_is_allowlisted(const hb_set *s, const char *host)`
-- `hb_count` (function) `src/hostblock.c:243` `size_t hb_count(const hb_set *s, hb_list list)`
-
-## src/hostedit.c
-Depends on: `include/hostedit.h`
-- `he_lower` (function) `src/hostedit.c:12` `static char he_lower(char c)`
-- `is_label_char` (function) `src/hostedit.c:16` `static int is_label_char(char c)`
-- `valid_host` (function) `src/hostedit.c:22` `static int valid_host(const char *host, size_t n)` -- #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c >= 'A' && c <= 'Z') ?
-- `he_make_line` (function) `src/hostedit.c:41` `he_status he_make_line(const char *host, char *out, size_t cap)`
-- `is_ip_token` (function) `src/hostedit.c:67` `static int is_ip_token(const char *ts, const char *te)` -- True if the token looks like an IPv4 dotted-quad / contains only digits and dots * (matches hostblock's is_ip_token...
-- `he_scan` (function) `src/hostedit.c:80` `static int he_scan(const char *text, int (*fn)(const char *, size_t, void *), void *ctx)` -- Visits each domain token (non-comment, non-IP) of a hosts-format text in document order, calling fn(ts, tl, ctx).
-- `has_host_cb` (function) `src/hostedit.c:105` `static int has_host_cb(const char *ts, size_t tl, void *ctx)`
-- `he_text_has_host` (function) `src/hostedit.c:109` `int he_text_has_host(const char *text, const char *host)`
-- `contains_ci` (function) `src/hostedit.c:115` `static int contains_ci(const char *hs, size_t hl, const char *needle)` -- } return 0; } static int has_host_cb(const char *ts, size_t tl, void *ctx) { return token_eq_host(ts, ts + tl...
-- `starts_with_ci` (function) `src/hostedit.c:128` `static int starts_with_ci(const char *hs, size_t hl, const char *pfx)`
-- `suggest_cb` (function) `src/hostedit.c:144` `static int suggest_cb(const char *ts, size_t tl, void *vctx)`
-- `he_suggest` (function) `src/hostedit.c:164` `int he_suggest(const char *text, const char *query,
-               char results[][HE_MAX_HOST + 1...`
-- `he_cdn_kind` (function) `src/hostedit.c:173` `he_cdn_kind_t he_cdn_kind(const char *url)`
-
-## src/html_parse.c
-Depends on: `include/dom.h`, `include/html_parse.h`, `include/util.h`
-- `dup_bytes` (function) `src/html_parse.c:27` `static char *dup_bytes(const lxb_char_t *src, size_t len)`
-- `node_next` (function) `src/html_parse.c:37` `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` -- }; /* --- helpers --- static char *dup_bytes(const lxb_char_t *src, size_t len) { if (len == (size_t)-1) return...
-- `attr_is_event_handler` (function) `src/html_parse.c:47` `static int attr_is_event_handler(const lxb_dom_attr_t *attr)`
-- `node_is_script` (function) `src/html_parse.c:54` `static int node_is_script(const lxb_dom_node_t *node)`
-- `strip_scripts` (function) `src/html_parse.c:60` `static void strip_scripts(lxb_html_document_t *document)`
-- `type_is` (function) `src/html_parse.c:100` `static int type_is(const lxb_char_t *t, size_t len, const char *word)` -- HTML "the script element": type="module" (ASCII case-insensitive, whitespace * stripped) is an ES module; nothing...
-- `type_is_module` (function) `src/html_parse.c:117` `static int type_is_module(const lxb_char_t *t, size_t len)`
-- `script_classify` (function) `src/html_parse.c:121` `static int script_classify(const lxb_dom_node_t *n,
-                           const lxb_char_t *...`
-- `hp_extract_script_list` (function) `src/html_parse.c:164` `hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count)` -- Collects each executable <script> as its own entry, in document order: inline source for classic inline scripts, the...
-- `lxb_dom_element_has_attribute` (function) `src/html_parse.c:230` `&& lxb_dom_element_has_attribute(sel, (const lxb_char_t *)"nomodule", 8);`
-- `hp_free_scripts` (function) `src/html_parse.c:238` `void hp_free_scripts(hp_script *scripts, size_t count)`
-- `attr_has_token_ci` (function) `src/html_parse.c:251` `static int attr_has_token_ci(const lxb_char_t *val, size_t vlen, const char *needle)` -- Whitespace-separated token test over a length-delimited attribute value, ASCII case-insensitive: rel="preload...
-- `link_is_active_stylesheet` (function) `src/html_parse.c:272` `static int link_is_active_stylesheet(lxb_dom_element_t *el,
-                                     ...` -- An applicable stylesheet <link>: rel token "stylesheet" and not "alternate"; a non-empty href; media absent/empty or...
-- `hp_extract_stylesheet_hrefs` (function) `src/html_parse.c:294` `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count)`
-- `hp_free_stylesheet_hrefs` (function) `src/html_parse.c:328` `void hp_free_stylesheet_hrefs(char **hrefs, size_t count)`
-- `strip_event_handlers` (function) `src/html_parse.c:334` `static void strip_event_handlers(lxb_html_document_t *document)`
-- `hp_config_default` (function) `src/html_parse.c:357` `hp_config hp_config_default(void)`
-- `hp_validate_input` (function) `src/html_parse.c:365` `hp_status hp_validate_input(const char *html, size_t len, const hp_config *cfg)`
-- `hp_parse` (function) `src/html_parse.c:375` `hp_status hp_parse(const char *html, size_t len, const hp_config *cfg, hp_document **out)`
-- `hp_element_count` (function) `src/html_parse.c:409` `size_t hp_element_count(const hp_document *doc)`
-- `hp_script_count` (function) `src/html_parse.c:419` `size_t hp_script_count(const hp_document *doc)`
-- `hp_event_handler_count` (function) `src/html_parse.c:429` `size_t hp_event_handler_count(const hp_document *doc)`
-- `hp_extract_text` (function) `src/html_parse.c:445` `char *hp_extract_text(const hp_document *doc, size_t *out_len)`
-- `hp_get_title` (function) `src/html_parse.c:464` `char *hp_get_title(const hp_document *doc, size_t *out_len)`
-- `hp_free` (function) `src/html_parse.c:479` `void hp_free(char *buf)`
-- `hp_document_free` (function) `src/html_parse.c:483` `void hp_document_free(hp_document *doc)`
-- `hp_document_root` (function) `src/html_parse.c:489` `const void *hp_document_root(const hp_document *doc)`
-
-## src/http_cache.c
-Depends on: `include/disk_store.h`, `include/http_cache.h`, `include/pq_seal.h`
-- `days_in_month` (function) `src/http_cache.c:39` `static int days_in_month(int y, int m)`
-- `days_from_civil` (function) `src/http_cache.c:46` `static long days_from_civil(int y, int m, int d)` -- #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY 16u #define HC_MAX_AGE_CAP 31536000L...
-- `hc_parse_http_date` (function) `src/http_cache.c:55` `time_t hc_parse_http_date(const char *s)`
-- `cc_find` (function) `src/http_cache.c:74` `static int cc_find(const char *cc, const char *name, const char **val)` -- char mon[4] = ""; if (sscanf(c + 1, " %d %3s %d %d:%d:%d GMT", &d, mon, &y, &hh, &mm, &ss) != 6) return (time_t)-1...
-- `cc_max_age` (function) `src/http_cache.c:92` `static int cc_max_age(const char *cc, long *out)` -- while (*p == ',' || *p == ' ' || *p == '\t') ++p; const char *e = p; while (*e != '\0' && *e != ',' && *e != '=' &&...
-- `hc_storable` (function) `src/http_cache.c:107` `int hc_storable(long http_code, const hc_meta *m, size_t body_len)`
-- `hc_lifetime` (function) `src/http_cache.c:115` `long hc_lifetime(const hc_meta *m)`
-- `hc_classify` (function) `src/http_cache.c:136` `hc_class hc_classify(const hc_meta *m, time_t now)`
-- `hex_of` (function) `src/http_cache.c:155` `static void hex_of(const uint8_t *b, size_t n, char *out)`
-- `entry_path` (function) `src/http_cache.c:162` `static int entry_path(const hc_store *s, char kind, const char *partition, const char *url,
-     ...` -- uint8_t    wrap[LS_KEY_LEN]; uint8_t    name_key[LS_KEY_LEN]; pqs_keys  *keys; unsigned   puts; pthread_mutex_t...
-- `remove_entries` (function) `src/http_cache.c:180` `static void remove_entries(const char *dir)`
-- `write_atomic` (function) `src/http_cache.c:192` `static int write_atomic(const char *path, const uint8_t *data, size_t len)`
-- `read_file` (function) `src/http_cache.c:208` `static uint8_t *read_file(const char *path, size_t max, size_t *len)`
-- `hc_open` (function) `src/http_cache.c:230` `hc_status hc_open(hc_store **out, const char *dir, const uint8_t wrap[LS_KEY_LEN])`
-- `hc_close` (function) `src/http_cache.c:279` `void hc_close(hc_store *s)`
-- `hc_body_free` (function) `src/http_cache.c:287` `void hc_body_free(uint8_t *body, size_t len)`
-- `has_nl` (function) `src/http_cache.c:293` `static int has_nl(const char *s)`
-- `meta_ok` (function) `src/http_cache.c:295` `static int meta_ok(const hc_meta *m)`
-- `store_entry` (function) `src/http_cache.c:302` `static hc_status store_entry(hc_store *s, const char *path, const hc_meta *m,
-                   ...` -- if (body == NULL) return; OPENSSL_cleanse(body, len); free(body); } static int has_nl(const char *s) { return...
-- `load_entry` (function) `src/http_cache.c:327` `static hc_status load_entry(hc_store *s, const char *path, hc_meta *m, uint8_t **body,
-          ...` -- memcpy(pt, head, (size_t)hn); if (body_len != 0) memcpy(pt + hn, body, body_len); uint8_t *blob = NULL; size_t bl =...
-- `get_locked` (function) `src/http_cache.c:385` `static hc_status get_locked(hc_store *s, const char *partition, const char *url, hc_meta *meta,
- ...`
-- `evict` (function) `src/http_cache.c:396` `static void evict(hc_store *s)` -- return rc; } static hc_status get_locked(hc_store *s, const char *partition, const char *url, hc_meta *meta, uint8_t...
-- `put_locked` (function) `src/http_cache.c:434` `static hc_status put_locked(hc_store *s, const char *partition, const char *url, const hc_meta *m...`
-- `redirect_put_locked` (function) `src/http_cache.c:446` `static hc_status redirect_put_locked(hc_store *s, const char *from, const char *to, time_t now)`
-- `redirect_get_locked` (function) `src/http_cache.c:459` `static hc_status redirect_get_locked(hc_store *s, const char *from, time_t now, char *out, size_t...`
-- `hc_clear` (function) `src/http_cache.c:473` `void hc_clear(hc_store *s)`
-- `hc_get` (function) `src/http_cache.c:480` `hc_status hc_get(hc_store *s, const char *partition, const char *url, hc_meta *meta,
-            ...`
-- `hc_put` (function) `src/http_cache.c:489` `hc_status hc_put(hc_store *s, const char *partition, const char *url, const hc_meta *meta,
-      ...`
-- `hc_redirect_put` (function) `src/http_cache.c:498` `hc_status hc_redirect_put(hc_store *s, const char *from, const char *to, time_t now)`
-- `hc_redirect_get` (function) `src/http_cache.c:506` `hc_status hc_redirect_get(hc_store *s, const char *from, time_t now, char *out, size_t cap)`
-
-## src/identity.c
-Depends on: `include/anti_fp.h`, `include/identity.h`
-- `is_alpha` (function) `src/identity.c:20` `static int is_alpha(char c)`
-- `is_alnum` (function) `src/identity.c:21` `static int is_alnum(char c)`
-- `idn_defaults` (function) `src/identity.c:23` `void idn_defaults(idn_config *c)`
-- `idn_is_default` (function) `src/identity.c:29` `int idn_is_default(const idn_config *c)`
-- `idn_set_user_agent` (function) `src/identity.c:35` `int idn_set_user_agent(idn_config *c, const char *ua)`
-- `tag_valid` (function) `src/identity.c:51` `static int tag_valid(const char *s, size_t n)` -- size_t n = strlen(ua); if (n >= IDN_UA_MAX) return -1; int printable = 0; for (size_t i = 0; i < n; ++i) { unsigned...
-- `idn_set_languages` (function) `src/identity.c:64` `int idn_set_languages(idn_config *c, const char *list)`
-- `idn_set_geo` (function) `src/identity.c:92` `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)`
-- `idn_clear_geo` (function) `src/identity.c:104` `void idn_clear_geo(idn_config *c)`
-- `idn_user_agent` (function) `src/identity.c:110` `const char *idn_user_agent(const idn_config *c)`
-- `idn_accept_language` (function) `src/identity.c:114` `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)`
-- `idn_primary_language` (function) `src/identity.c:144` `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)`
-- `hexval` (function) `src/identity.c:158` `static int hexval(int ch)`
-- `pct_decode` (function) `src/identity.c:167` `static long pct_decode(const char *s, size_t n, char *out, size_t cap, int plus)` -- Decodes %XX (and '+' when plus) from [s, s+n) into out.
-- `append` (function) `src/identity.c:187` `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)`
-- `append_pct` (function) `src/identity.c:198` `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)`
-- `idn_serialize` (function) `src/identity.c:207` `size_t idn_serialize(const idn_config *c, char *out, size_t cap)`
-- `parse_geo` (function) `src/identity.c:228` `static int parse_geo(const char *s, double *lat, double *lon, double *acc)` -- || append(out, &n, cap, "|geo=") != 0) { out[0] = '\0'; return 0; } if (c->geo_mode == IDN_GEO_FIXED && append(out...
-- `idn_parse` (function) `src/identity.c:241` `void idn_parse(idn_config *c, const char *text)`
-- `parse_number` (function) `src/identity.c:275` `static int parse_number(const char *s, double *out)`
-- `idn_apply_query` (function) `src/identity.c:282` `unsigned idn_apply_query(idn_config *c, const char *query)`
-- `esc_append` (function) `src/identity.c:361` `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)`
-- `idn_render_page` (function) `src/identity.c:377` `size_t idn_render_page(const idn_config *c, char *out, size_t cap)`
+## src/find_text.c
+Depends on: `include/find_text.h`
+- `ft_fold` (function) `src/find_text.c:13` `uint32_t ft_fold(uint32_t cp)`
+- `is_ws` (function) `src/find_text.c:33` `static int is_ws(uint32_t cp)`
+- `decode` (function) `src/find_text.c:40` `static size_t decode(const unsigned char *s, size_t n, uint32_t *cp)` -- if (cp >= 0x391u && cp <= 0x3A9u && cp != 0x3A2u) return cp + 0x20u; if (cp == 0x3C2u) return 0x3C3u...
+- `ft_compile` (function) `src/find_text.c:59` `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap)`
+- `piece_len` (function) `src/find_text.c:78` `static size_t piece_len(const ft_piece *p)`
+- `settle` (function) `src/find_text.c:81` `static int settle(const ft_piece *p, size_t n, ft_pos *pos)` -- if (is_ws(cp)) { pending_space = (n > 0); continue; } if (pending_space) { if (n + 1 >= cap) break; out[n++] = ' '...
+- `peek` (function) `src/find_text.c:92` `static uint32_t peek(const ft_piece *p, ft_pos pos, size_t *adv)` -- static size_t piece_len(const ft_piece *p) { return p->text != NULL ? p->len : 0; } /* Moves pos onto a readable byte.
+- `match_at` (function) `src/find_text.c:100` `static int match_at(const ft_piece *p, size_t n, ft_pos s, const uint32_t *q, size_t qn,
+        ...` -- if (pos->piece < n && p[pos->piece].gap_before) gap = 1; } return pos->piece < n ? gap : -1; } /* Reads the code...
+- `ft_search` (function) `src/find_text.c:127` `ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t *q, size_t qn,
+             ...`
+- `ft_spans` (function) `src/find_text.c:158` `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm,
+                f...`
+- `ft_step` (function) `src/find_text.c:180` `long ft_step(long cur, size_t n, int dir)`
 
 
 Next: [API_p9.md](API_p9.md)
