@@ -14,6 +14,8 @@ typedef struct sqb_job {
     size_t     body_len;
     int        refused;
     int        started;
+    int        done;                /* guarded by owner->mu */
+    int        orphan;              /* abandoned: the thread frees the job (guarded by owner->mu) */
     pthread_t  th;
     sqb_res    res;
 } sqb_job;
@@ -23,6 +25,11 @@ struct sqb {
     void      *ctx;
     sem_t      slots;
     int        sem_ok;
+    pthread_mutex_t mu;             /* guards job->done; cv signals each completion */
+    pthread_cond_t  cv;
+    int        sync_ok;
+    int        refs;                /* 1 for the owner + 1 per abandoned running job (mu) */
+    void     (*free_ctx)(void *);
     sqb_job   *jobs[SQB_MAX_JOBS];
     size_t     n;
 };
@@ -48,6 +55,13 @@ static void job_free(sqb_job *j) {
     free(j);
 }
 
+static void batch_destroy(sqb *b) {
+    if (b->free_ctx != NULL) b->free_ctx(b->ctx);
+    if (b->sem_ok) sem_destroy(&b->slots);
+    if (b->sync_ok) { pthread_cond_destroy(&b->cv); pthread_mutex_destroy(&b->mu); }
+    free(b);
+}
+
 static void *job_main(void *arg) {
     sqb_job *j = (sqb_job *)arg;
     sqb *b = j->owner;
@@ -69,10 +83,22 @@ static void *job_main(void *arg) {
     }
     j->res.elapsed_ms = (int)ms;
     sem_post(&b->slots);
+    pthread_mutex_lock(&b->mu);
+    j->done = 1;
+    int orphan = j->orphan, last = 0;
+    if (orphan) last = (--b->refs == 0);
+    pthread_cond_broadcast(&b->cv);
+    pthread_mutex_unlock(&b->mu);
+    if (orphan) job_free(j);
+    if (last) batch_destroy(b);
     return NULL;
 }
 
 sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx) {
+    return sqb_new_owned(max_threads, run, ctx, NULL);
+}
+
+sqb *sqb_new_owned(int max_threads, sqb_run_fn run, void *ctx, void (*free_ctx)(void *)) {
     if (run == NULL || max_threads < 1) return NULL;
     sqb *b = (sqb *)calloc(1, sizeof *b);
     if (b == NULL) return NULL;
@@ -80,6 +106,21 @@ sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx) {
     b->ctx = ctx;
     if (sem_init(&b->slots, 0, (unsigned)max_threads) != 0) { free(b); return NULL; }
     b->sem_ok = 1;
+    if (pthread_mutex_init(&b->mu, NULL) != 0) { sem_destroy(&b->slots); free(b); return NULL; }
+    pthread_condattr_t ca;
+    int cv_rc = pthread_condattr_init(&ca);
+    if (cv_rc == 0) {
+        (void)pthread_condattr_setclock(&ca, CLOCK_MONOTONIC);
+        cv_rc = pthread_cond_init(&b->cv, &ca);
+        pthread_condattr_destroy(&ca);
+    }
+    if (cv_rc != 0) {
+        pthread_mutex_destroy(&b->mu); sem_destroy(&b->slots); free(b);
+        return NULL;
+    }
+    b->sync_ok = 1;
+    b->refs = 1;
+    b->free_ctx = free_ctx;
     return b;
 }
 
@@ -89,6 +130,7 @@ int sqb_submit(sqb *b, int refused, const sqb_req *req) {
     if (j == NULL) return -1;
     j->owner = b;
     j->refused = refused;
+    j->done = refused ? 1 : 0;
     if (!refused) {
         j->method  = dup_n(req->method ? req->method : "", req->method ? strlen(req->method) : 0);
         j->url     = dup_n(req->url ? req->url : "", req->url ? strlen(req->url) : 0);
@@ -119,6 +161,55 @@ void sqb_wait_all(sqb *b) {
     }
 }
 
+static int all_done_locked(const sqb *b) {
+    for (size_t i = 0; i < b->n; ++i) if (!b->jobs[i]->done) return 0;
+    return 1;
+}
+
+size_t sqb_wait_ready(sqb *b, long wait_ms, size_t *idx, size_t cap) {
+    if (b == NULL || idx == NULL) return 0;
+    if (wait_ms < 0) wait_ms = 0;
+    struct timespec dl;
+    clock_gettime(CLOCK_MONOTONIC, &dl);
+    dl.tv_sec  += wait_ms / 1000;
+    dl.tv_nsec += (wait_ms % 1000) * 1000000L;
+    if (dl.tv_nsec >= 1000000000L) { dl.tv_sec += 1; dl.tv_nsec -= 1000000000L; }
+    pthread_mutex_lock(&b->mu);
+    while (wait_ms > 0 && !all_done_locked(b))
+        if (pthread_cond_timedwait(&b->cv, &b->mu, &dl) != 0) break;   /* timed out (or error) */
+    size_t k = 0;
+    for (size_t i = 0; i < b->n && k < cap; ++i) if (b->jobs[i]->done) idx[k++] = i;
+    pthread_mutex_unlock(&b->mu);
+    /* A finished job's thread is about to return: join it so its result is fully published. */
+    for (size_t i = 0; i < k; ++i) {
+        sqb_job *j = b->jobs[idx[i]];
+        if (j->started) { pthread_join(j->th, NULL); j->started = 0; }
+    }
+    return k;
+}
+
+void sqb_remove(sqb *b, const size_t *idx, size_t k) {
+    if (b == NULL || idx == NULL || k == 0) return;
+    int drop[SQB_MAX_JOBS];
+    memset(drop, 0, sizeof drop);
+    pthread_mutex_lock(&b->mu);
+    for (size_t i = 0; i < k; ++i)
+        if (idx[i] < b->n && b->jobs[idx[i]]->done) drop[idx[i]] = 1;
+    pthread_mutex_unlock(&b->mu);
+    size_t w = 0;
+    for (size_t i = 0; i < b->n; ++i) {
+        sqb_job *j = b->jobs[i];
+        if (drop[i]) {
+            if (j->started) { pthread_join(j->th, NULL); j->started = 0; }
+            job_free(j);
+        } else {
+            b->jobs[w++] = j;
+        }
+    }
+    for (size_t i = w; i < b->n; ++i) b->jobs[i] = NULL;
+    b->n = w;
+}
+
 const sqb_res *sqb_result(const sqb *b, size_t i) {
     return (b != NULL && i < b->n) ? &b->jobs[i]->res : NULL;
 }
@@ -130,9 +221,34 @@ void sqb_reset(sqb *b) {
     b->n = 0;
 }
 
+void sqb_abandon(sqb *b) {
+    if (b == NULL) return;
+    pthread_mutex_lock(&b->mu);
+    for (size_t i = 0; i < b->n; ++i) {
+        sqb_job *j = b->jobs[i];
+        if (j->done) continue;
+        j->orphan = 1;              /* its thread frees it; the batch lives until then */
+        b->refs++;
+        pthread_detach(j->th);
+        j->started = 0;
+        b->jobs[i] = NULL;
+    }
+    pthread_mutex_unlock(&b->mu);
+    for (size_t i = 0; i < b->n; ++i) {
+        sqb_job *j = b->jobs[i];
+        if (j == NULL) continue;
+        if (j->started) { pthread_join(j->th, NULL); j->started = 0; }
+        job_free(j);
+        b->jobs[i] = NULL;
+    }
+    b->n = 0;
+}
+
 void sqb_free(sqb *b) {
     if (b == NULL) return;
-    sqb_reset(b);
-    if (b->sem_ok) sem_destroy(&b->slots);
-    free(b);
+    sqb_abandon(b);
+    pthread_mutex_lock(&b->mu);
+    int last = (--b->refs == 0);
+    pthread_mutex_unlock(&b->mu);
+    if (last) batch_destroy(b);
 }

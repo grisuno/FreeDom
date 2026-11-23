@@ -365,6 +365,7 @@ typedef struct browser_window {
     int               gui_eval_done;   /* FREEDOM_GUI_EVAL already ran for this window */
     uint64_t          nav_start_ms;    /* first navigation requested */
     uint64_t          last_paint_ms;   /* last frame committed */
+    uint64_t          first_doc_paint_ms; /* first frame committed with the page's document */
     uint64_t          idle_paint_ms;   /* last_paint_ms when the page was first seen idle */
     uint64_t          idle_seen_ms;
     char              as_host[256];    /* FREEDOM_AS_HOST: policy host for a local file (corpus) */
@@ -579,6 +580,7 @@ typedef struct browser_window {
      * first opened). kbd_focus/ptr_focus track which surface holds input focus, so the
      * shared seat listeners route keys/pointer to the right window. */
     struct tab        *tab_worker; /* forward-declared; tab.h is included further down */
+    struct gui_net_ctx *net_ctx;   /* the live page's deferred-XHR context (owned by tab_worker) */
     fb_buffer          console;
     struct freebug_window *freebug;
     struct wl_surface *kbd_focus;
@@ -602,6 +604,8 @@ typedef struct browser_window {
     int          video_pending;    /* nonzero when a frame may be on the pipe */
     hls_playlist *video_pl;        /* parsed segment list (owned; freed in video_stop after join) */
     char         *video_base_url;  /* m3u8 base URL for segment resolution (owned) */
+    char         *video_host_href; /* freedom-frame: href of the live frame box the playback is
+                                    * painted in (owned; NULL = the <video> row), spec/video_pick.md */
     int           video_eof;       /* feeder thread has sent MD_FLUSH */
     pthread_t     video_thread;    /* feeder thread handle */
     int           video_evfd;      /* eventfd: feeder thread → main thread wake */
@@ -946,15 +950,20 @@ static int list_append_host(const char *filename, const char *host) {
 }
 
 /* Rebuilds the in-memory filter of the list that just changed so it applies on the next fetch. */
+static void net_ctx_lock(browser_window *w);
+static void net_ctx_unlock(browser_window *w);
+
 static void reload_host_list(browser_window *w, int sel) {
+    net_ctx_lock(w);   /* the live page's deferred requests read the lists (gui_async_fetch) */
     if (sel == HOSTLIST_JS) {
         hb_free(w->js_hosts);
         w->js_hosts = build_js_filter();
     } else {
         hb_free(w->hosts);
         w->hosts = build_host_filter();
-        if (sel == HOSTLIST_ALLOW) load_favorites(w);  /* refresh omnibox favorites */
     }
+    net_ctx_unlock(w);
+    if (sel == HOSTLIST_ALLOW) load_favorites(w);  /* refresh omnibox favorites */
 }
 
 /* Commits the queued auto-allow hosts to allow.conf and reloads the filter. GUI thread only, and
@@ -1207,11 +1216,14 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 #include "tab.h"
 #include "ws_hub.h"
 #include "frame_host.h"
+#include "video_pick.h"
 #include "web_storage.h"
 #include "tls_impersonate.h"
 
 /* Video playback functions (defined below; forward declarations for render path). */
 static void video_stop(browser_window *w);
+static int blit_video_frame(cairo_t *cr, const browser_window *w,
+                            double x, double y, double wd, double h);
 static int  video_play(browser_window *w, const char *m3u8_url);
 static void *video_feeder_thread(void *arg);
 /* Audio output helpers (called from video_read_frame and video_stop). */
@@ -1699,29 +1711,32 @@ static void aa_note(browser_window *w, const char *abs, const char *host) {
 
 static int page_trusted(const browser_window *w);
 
-static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
-                                 const char *body, size_t body_len,
-                                 int *out_status, char **out_body, size_t *out_body_len,
-                                 char **out_ctype) {
-    browser_window *w = (browser_window *)vctx;
-    *out_status = 0; *out_body = NULL; *out_body_len = 0; *out_ctype = NULL;
-    if (w == NULL || url == NULL || w->cur_top == NULL) return -1;
+/* Everything a subresource fetch decides from the window, taken BEFORE the network: the
+ * resolved URL, its policy and the cache partition. The page it is asked for (top, trust) is
+ * an input, so a request that outlives its page is still judged as that page's. */
+typedef struct gui_sub_prep {
+    ln_result  ln;                 /* ln.target = absolute URL */
+    sf_config  cfg;
+    int        relaxed;
+    char       part[256];          /* cache partition (page host); "" = uncached */
+} gui_sub_prep;
 
-    ln_result ln;
-    if (ln_resolve(w->cur_top, url, &ln) != LN_OK
-        || ln.action != LN_NAVIGATE || ln.kind != LN_TARGET_HTTPS) return -1;
-    const char *abs = ln.target;
+static int gui_sub_prepare(browser_window *w, const char *top, int trusted, int top_allowed,
+                           const char *url, gui_sub_prep *p) {
+    if (w == NULL || url == NULL || top == NULL) return -1;
+    if (ln_resolve(top, url, &p->ln) != LN_OK
+        || p->ln.action != LN_NAVIGATE || p->ln.kind != LN_TARGET_HTTPS) return -1;
+    const char *abs = p->ln.target;
 
     char host[256];
     if (rp_host_of(abs, host, sizeof host) != 0) return -1;
     /* tracker/host blocklist -- except for a trusted page (allow.conf AND js.conf): its
      * third parties (CDN, captcha, API) load; owner decision 2026-10-26. */
-    if (hb_check_subresource(w->hosts, host, page_trusted(w)) == HB_BLOCK) return -1;
+    if (hb_check_subresource(w->hosts, host, trusted) == HB_BLOCK) return -1;
     aa_note(w, abs, host);
 
     sf_config cfg = sf_config_default();
     apply_operator_override(&cfg);
-    cfg.extra_headers = tab_inflight_request_headers();   /* the page's own XHR/fetch headers */
     /* A subresource is optional by construction: the page renders without it.
      * Letting one stalled stylesheet or script hold the document's full 30 s
      * budget is a guaranteed delay bought for a possible improvement, and a
@@ -1729,7 +1744,7 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     cfg.timeout_ms = SF_SUBRESOURCE_TIMEOUT_MS;
     apply_auth(w, abs, &cfg);
     if (apply_route(w, abs, &cfg) == NR_ROUTE_BLOCKED) return -1;  /* realm fail-closed */
-    int allowlisted = hb_is_allowlisted(w->hosts, host), dg = 0;
+    int allowlisted = hb_is_allowlisted(w->hosts, host);
     /* A subresource a TRUSTED page (allow.conf AND js.conf) asks for -- its CDN, API,
      * fonts -- gets the allowlist's relaxed strength (owner decision 2026-09-30:
      * third parties of a trusted host load, hostblock still applies). Authenticity is
@@ -1737,16 +1752,29 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     /* A page the user put on allow.conf also gets its own subresources (a CSS CDN with an
      * RSA-2048 leaf) at the relaxed strength: without it the page loads unstyled while
      * the user's explicit sovereignty choice says to show it. Authenticity is untouched. */
-    int relaxed = allowlisted || page_trusted(w) || page_host_allowlisted(w);
+    p->relaxed = allowlisted || trusted || top_allowed;
     /* Subrequests to a double-trust + user-flag host share the page's TLS-blend identity. */
     cfg.impersonate = ti_should_impersonate(allowlisted,
         hb_is_allowlisted(w->js_hosts, host), w->impersonate_optin);
+    p->cfg = cfg;
+    if (rp_host_of(top, p->part, sizeof p->part) != 0) p->part[0] = '\0';
+    return 0;
+}
+
+/* The network half: touches no window state (the cache is module-level and locked). */
+static int gui_sub_perform(gui_sub_prep *p, const char *method, const void *body, size_t body_len,
+                           int *out_status, char **out_body, size_t *out_body_len,
+                           char **out_ctype) {
+    const char *abs = p->ln.target;
+    int dg = 0;
+    p->cfg.extra_headers = tab_inflight_request_headers();   /* the page's own XHR/fetch headers */
     sf_response resp; memset(&resp, 0, sizeof resp);
     int is_post = (method != NULL && (strcmp(method, "POST") == 0 || strcmp(method, "post") == 0));
     sf_status s = is_post
-        ? fetch_post_navigable(abs, &cfg, body, body_len,
-                               "application/x-www-form-urlencoded", &resp, &dg, relaxed)
-        : fetch_get_cached(w, abs, &cfg, &resp, &dg, relaxed);
+        ? fetch_post_navigable(abs, &p->cfg, body, body_len,
+                               "application/x-www-form-urlencoded", &resp, &dg, p->relaxed)
+        : (p->part[0] != '\0' ? cf_get(p->part, abs, &p->cfg, &resp, &dg, p->relaxed)
+                              : fetch_follow_navigable(abs, &p->cfg, &resp, &dg, p->relaxed));
     if (getenv("FREEDOM_TRACE_FETCH") != NULL)
         fprintf(stderr, "fetch[gui] %s -> %s\n", abs, s == SF_OK ? "ok" : "FAIL");
     if (s != SF_OK) { sf_response_free(&resp); return -1; }
@@ -1761,6 +1789,79 @@ static int gui_subresource_fetch(void *vctx, const char *method, const char *url
     tab_report_response_headers(resp.headers);   /* what the page's XHR/fetch may read */
     sf_response_free(&resp);
     return 0;
+}
+
+static int gui_subresource_fetch(void *vctx, const char *method, const char *url,
+                                 const char *body, size_t body_len,
+                                 int *out_status, char **out_body, size_t *out_body_len,
+                                 char **out_ctype) {
+    browser_window *w = (browser_window *)vctx;
+    *out_status = 0; *out_body = NULL; *out_body_len = 0; *out_ctype = NULL;
+    if (w == NULL || w->cur_top == NULL) return -1;
+    gui_sub_prep p;
+    memset(&p, 0, sizeof p);
+    if (gui_sub_prepare(w, w->cur_top, page_trusted(w), page_host_allowlisted(w), url, &p) != 0)
+        return -1;
+    return gui_sub_perform(&p, method, body, body_len, out_status, out_body, out_body_len, out_ctype);
+}
+
+/* The page's DEFERRED XHR/fetch (tab_set_async_fetcher, spec/subreq_async.md): one per page,
+ * owned by its tab. It snapshots the page it serves, and once the page is gone (retired) a
+ * request still in flight never touches the window again. `mu` covers the window reads. */
+typedef struct gui_net_ctx {
+    browser_window *w;
+    char           *top;
+    int             trusted, top_allowed;
+    int             alive;
+    pthread_mutex_t mu;
+} gui_net_ctx;
+
+static void gui_net_ctx_free(void *p) {
+    gui_net_ctx *c = (gui_net_ctx *)p;
+    if (c == NULL) return;
+    pthread_mutex_destroy(&c->mu);
+    free(c->top);
+    free(c);
+}
+
+static gui_net_ctx *gui_net_ctx_new(browser_window *w) {
+    if (w == NULL || w->cur_top == NULL) return NULL;
+    gui_net_ctx *c = (gui_net_ctx *)calloc(1, sizeof *c);
+    if (c == NULL) return NULL;
+    c->top = strdup(w->cur_top);
+    if (c->top == NULL || pthread_mutex_init(&c->mu, NULL) != 0) { free(c->top); free(c); return NULL; }
+    c->w = w;
+    c->trusted = page_trusted(w);
+    c->top_allowed = page_host_allowlisted(w);
+    c->alive = 1;
+    return c;
+}
+
+static void net_ctx_lock(browser_window *w)   { if (w->net_ctx != NULL) pthread_mutex_lock(&w->net_ctx->mu); }
+static void net_ctx_unlock(browser_window *w) { if (w->net_ctx != NULL) pthread_mutex_unlock(&w->net_ctx->mu); }
+
+/* GUI thread: the page is leaving; requests still in flight are on their own from now on. */
+static void gui_net_ctx_retire(gui_net_ctx *c) {
+    if (c == NULL) return;
+    pthread_mutex_lock(&c->mu);
+    c->alive = 0;
+    pthread_mutex_unlock(&c->mu);
+}
+
+static int gui_async_fetch(void *vctx, const char *method, const char *url,
+                           const char *body, size_t body_len,
+                           int *out_status, char **out_body, size_t *out_body_len,
+                           char **out_ctype) {
+    gui_net_ctx *c = (gui_net_ctx *)vctx;
+    *out_status = 0; *out_body = NULL; *out_body_len = 0; *out_ctype = NULL;
+    if (c == NULL) return -1;
+    gui_sub_prep p;
+    memset(&p, 0, sizeof p);
+    pthread_mutex_lock(&c->mu);
+    int rc = c->alive ? gui_sub_prepare(c->w, c->top, c->trusted, c->top_allowed, url, &p) : -1;
+    pthread_mutex_unlock(&c->mu);
+    if (rc != 0) return -1;
+    return gui_sub_perform(&p, method, body, body_len, out_status, out_body, out_body_len, out_ctype);
 }
 
 /* @font-face stash bounds (spec/webfont.md b3b, anti-DoS): at most 16 served
@@ -2624,6 +2725,8 @@ static void close_page_worker(browser_window *w) {
     w->frames_due_ms = 0;
     for (size_t i = 0; i < w->frame_qn; ++i) free(w->frame_q[i]);
     w->frame_qn = 0;
+    gui_net_ctx_retire(w->net_ctx);   /* in-flight requests never touch the window again */
+    w->net_ctx = NULL;
     if (w->tab_worker != NULL) { tab_close(w->tab_worker); w->tab_worker = NULL; }
 }
 
@@ -2669,6 +2772,10 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
         browser_set_page(&w->bs, NULL, "Failed to spawn sandboxed tab.", 1);
         return;
     }
+    /* Deferred XHR/fetch run on a per-page context the tab owns, so a reply may land after the
+     * first paint and a hung one never holds the window (spec/subreq_async.md). */
+    gui_net_ctx *nctx = gui_net_ctx_new(w);
+    if (nctx != NULL) tab_set_async_fetcher(t, gui_async_fetch, nctx, gui_net_ctx_free);
     /* A timer tick that left the document untouched sends no view (spec/tab.md): the window
      * keeps its laid-out document instead of rebuilding and repainting it. */
     tab_set_lazy_ticks(t, 1);
@@ -2732,6 +2839,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
 
     if (load_ts != TAB_OK) {
         browser_set_page(&w->bs, NULL, "Failed to render page in sandbox.", 1);
+        gui_net_ctx_retire(nctx);
         tab_close(t);
         font_stash_reset(w);
         return;
@@ -2757,6 +2865,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
             snprintf(target, sizeof target, "%s", page.nav_url);
             w->js_nav_depth++;
             tab_page_free(&page);
+            gui_net_ctx_retire(nctx);
             tab_close(t);
             if (browser_navigate(&w->bs, target) == BROWSER_OK) do_load(w, target);
             return;
@@ -2828,6 +2937,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
     schedule_js_tick(w, page.next_timer_ms);
 
     w->tab_worker = t;
+    w->net_ctx = nctx;
     collect_local_storage(w, &page);
     ws_apply_ops(w, &page);   /* sockets the load scripts opened (needs the live worker) */
     tab_page_free(&page);
@@ -2863,6 +2973,7 @@ static void show_fetch_error(browser_window *w, const char *url, sf_status ss,
         case SF_ERR_CERT_INVALID: reason = "TLS handshake/cert validation failed (site may not support TLS 1.3)"; break;
         case SF_ERR_CERT_NOT_PQ:  reason = "strict PQ signature missing"; break;
         case SF_ERR_NETWORK:      reason = "network error"; break;
+        case SF_ERR_UNREACHABLE:  reason = "host unreachable"; break;
         case SF_ERR_TOO_MANY_REDIRECTS: reason = "too many redirects"; break;
         case SF_ERR_PRIVATE_NET:  reason = "a page tried to reach a private network address"; break;
         default:                  reason = "fetch error"; break;
@@ -11847,6 +11958,9 @@ static void paint_image_row(cairo_t *cr, browser_window *w, const rd_block *blk,
             else if (blk->text_align == CSS_ALIGN_RIGHT) ax = img_slack;
         }
         paint_replaced_frame(cr, w->doc, blk, &ed, left + ox + ax, ry + oy, dw, dh);
+        if (w->video_host_href != NULL && blk->href != NULL
+            && strcmp(blk->href, w->video_host_href) == 0
+            && blit_video_frame(cr, w, left + ox + ax, ry + oy, dw, dh)) return;
         blit_image_box(cr, w, blk, left + ox + ax, ry + oy, dw, dh);
         return;
     }
@@ -12127,6 +12241,8 @@ static void video_stop(browser_window *w) {
     free(w->video_frame);
     hls_playlist_free(w->video_pl);
     free(w->video_base_url);
+    free(w->video_host_href);
+    w->video_host_href = NULL;
     w->decoder_pid = 0;
     w->decoder_cmd_fd = -1;
     w->decoder_out_fd = -1;
@@ -12413,21 +12529,42 @@ static void *video_feeder_thread(void *arg) {
                                     abs_url, sizeof abs_url);
         if (n == 0) { fprintf(stderr, "feeder: seg %zu resolve failed\n", i); continue; }
 
+        /* A segment that is not media (a CDN node's 500 page) never reaches the decoder: one
+         * error body killed avformat_open_input and the whole playback. Retry once, then skip
+         * it like hls.js does (spec/hls.md). */
         sf_response resp;
         memset(&resp, 0, sizeof resp);
-        sf_status fs = video_fetch(abs_url, w, &resp);
-        if (fs != SF_OK || resp.body == NULL || resp.body_len == 0) {
-            fprintf(stderr, "feeder: seg %zu fetch failed status=%d http=%ld\n", i, (int)fs, resp.http_code);
-            sf_response_free(&resp);
-            continue;
+        long off = -1;
+        for (int attempt = 0; attempt < 2 && off < 0 && w->video_active; ++attempt) {
+            if (attempt > 0) sf_response_free(&resp);
+            sf_status fs = video_fetch(abs_url, w, &resp);
+            off = (fs == SF_OK) ? hls_segment_payload(resp.http_code, (const unsigned char *)resp.body,
+                                                      resp.body_len)
+                                : -1;
+            if (off < 0)
+                fprintf(stderr, "feeder: seg %zu rejected status=%d http=%ld len=%zu\n",
+                        i, (int)fs, resp.http_code, resp.body_len);
         }
-        fprintf(stderr, "feeder: seg %zu fetched %zu bytes\n", i, resp.body_len);
+        /* Then the same path on the sibling hosts the playlist itself declared (a dead CDN
+         * node: jkanime's cdn4/cdn6 answer 500 to everything). */
+        for (size_t m = 0; m < HLS_MAX_MIRRORS && off < 0 && w->video_active; ++m) {
+            char mirror[4096];
+            if (hls_mirror_url(w->video_pl, abs_url, m, mirror, sizeof mirror) == 0) break;
+            sf_response_free(&resp);
+            sf_status fs = video_fetch(mirror, w, &resp);
+            off = (fs == SF_OK) ? hls_segment_payload(resp.http_code, (const unsigned char *)resp.body,
+                                                      resp.body_len)
+                                : -1;
+            fprintf(stderr, "feeder: seg %zu mirror %zu http=%ld %s\n", i, m, resp.http_code,
+                    off >= 0 ? "ok" : "rejected");
+        }
+        if (off < 0) { sf_response_free(&resp); continue; }
 
         uint8_t cmd = MD_DECODE;
-        size_t slen = resp.body_len;
+        size_t slen = resp.body_len - (size_t)off;
         v_write(w->decoder_cmd_fd, &cmd, 1);
         v_write(w->decoder_cmd_fd, &slen, sizeof slen);
-        v_write(w->decoder_cmd_fd, resp.body, resp.body_len);
+        v_write(w->decoder_cmd_fd, (const uint8_t *)resp.body + off, slen);
         sf_response_free(&resp);
 
         uint64_t one = 1;
@@ -12446,48 +12583,55 @@ static void *video_feeder_thread(void *arg) {
     return NULL;
 }
 
+/* In fullscreen mode the video occupies the entire viewport (titlebar excluded
+ * when CSD is active); otherwise the rect stays the element's box. */
+static void video_draw_rect(const browser_window *w, double *x, double *y,
+                            double *wd, double *h) {
+    if (!w->fullscreen) return;
+    *x = 0.0;
+    *y = w->use_csd ? CHL_TABBAR_H : 0.0;
+    *wd = (double)w->width - UI_SCROLLBAR_W;
+    *h = (double)w->height - *y;
+}
+
+/* Blits the current decoded frame aspect-fitted and centred in the rect; 0 when
+ * no frame is available yet (the caller paints its placeholder). Shared by the
+ * <video> row and a live frame box hosting the playback (spec/video_pick.md). */
+static int blit_video_frame(cairo_t *cr, const browser_window *w,
+                            double x, double y, double wd, double h) {
+    if (!w->video_active || w->video_frame == NULL || w->video_w <= 0 || w->video_h <= 0
+        || wd <= 0.0 || h <= 0.0) return 0;
+    cairo_surface_t *surf = cairo_image_surface_create_for_data(
+        w->video_frame, CAIRO_FORMAT_ARGB32, w->video_w, w->video_h, w->video_w * 4);
+    if (cairo_surface_status(surf) != CAIRO_STATUS_SUCCESS) {
+        cairo_surface_destroy(surf);
+        return 0;
+    }
+    double sx = wd / (double)w->video_w, sy = h / (double)w->video_h;
+    double scale = (sx < sy) ? sx : sy;
+    double dw = (double)w->video_w * scale, dh = (double)w->video_h * scale;
+    cairo_save(cr);
+    cairo_rectangle(cr, x, y, wd, h);
+    cairo_clip(cr);
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_paint(cr);
+    cairo_translate(cr, x + (wd - dw) / 2.0, y + (h - dh) / 2.0);
+    cairo_scale(cr, scale, scale);
+    cairo_set_source_surface(cr, surf, 0.0, 0.0);
+    cairo_paint(cr);
+    cairo_restore(cr);
+    cairo_surface_destroy(surf);
+    return 1;
+}
+
  static void paint_video_row(cairo_t *cr, browser_window *w, const rd_block *blk,
                                 double left, double ry, double content_w, double row_h) {
      const ui_theme *th = &w->theme;
      double pad = 4.0;
 
-     /* In fullscreen mode the video occupies the entire viewport
-      * (titlebar excluded when CSD is active). */
      double draw_left = left, draw_top = ry, draw_w = content_w, draw_h = row_h;
-     if (w->fullscreen) {
-         draw_left = 0.0;
-         draw_top = w->use_csd ? CHL_TABBAR_H : 0.0;
-         draw_w = (double)w->width - UI_SCROLLBAR_W;
-         draw_h = (double)w->height - draw_top;
-     }
-
-     /* If a decoded frame is available, blit it. */
-     if (w->video_active && w->video_frame != NULL && w->video_w > 0) {
-         cairo_surface_t *surf = cairo_image_surface_create_for_data(
-             w->video_frame, CAIRO_FORMAT_ARGB32,
-             w->video_w, w->video_h,
-             w->video_w * 4);
-         if (cairo_surface_status(surf) == CAIRO_STATUS_SUCCESS) {
-             double scale_x = draw_w / (double)w->video_w;
-             double scale_y = draw_h / (double)w->video_h;
-             double scale = (scale_x < scale_y) ? scale_x : scale_y;
-             double dw = (double)w->video_w * scale;
-             double dh = (double)w->video_h * scale;
-             double ox = draw_left + (draw_w - dw) / 2.0;
-             double oy = draw_top + (draw_h - dh) / 2.0;
-             cairo_save(cr);
-             cairo_rectangle(cr, draw_left, draw_top, draw_w, draw_h);
-             cairo_clip(cr);
-             cairo_translate(cr, ox, oy);
-             cairo_scale(cr, scale, scale);
-             cairo_set_source_surface(cr, surf, 0.0, 0.0);
-             cairo_paint(cr);
-             cairo_restore(cr);
-             cairo_surface_destroy(surf);
-             return;
-         }
-         cairo_surface_destroy(surf);
-     }
+     video_draw_rect(w, &draw_left, &draw_top, &draw_w, &draw_h);
+     if (blit_video_frame(cr, w, draw_left, draw_top, draw_w, draw_h)) return;
 
      /* Poster image: if a poster_src exists and its decoded image is available,
       * draw it as the background, aspect-fitted and centered. Otherwise fall
@@ -16371,20 +16515,27 @@ static cairo_surface_t *render_frame_surface(const pv_view *view, tab *ft, const
 
 #define FRAME_BOX_MAX 4096
 
-static void fill_frame_slot(browser_window *w, const rd_block *b, ui_image *slot,
-                            tab_fetch_fn img_fetch, void *fetch_ctx) {
-    if (w->frames == NULL || w->cur_top == NULL || b->href == NULL) return;
-    char abs[URL_MAX_LEN + 1];
-    const char *raw = b->href + sizeof PV_FRAME_SCHEME - 1;
-    if (url_resolve_https(w->cur_top, raw, abs, sizeof abs) != URL_OK) {
+/* The live frame document a freedom-frame: block names (NULL when none is loaded): its src
+ * resolves against the top document like any subresource. */
+static const pv_view *live_frame_view(const browser_window *w, const char *href, tab **ft,
+                                      char abs[URL_MAX_LEN + 1]) {
+    if (w->frames == NULL || w->cur_top == NULL || !is_frame_href(href)) return NULL;
+    const char *raw = href + sizeof PV_FRAME_SCHEME - 1;
+    if (url_resolve_https(w->cur_top, raw, abs, URL_MAX_LEN + 1) != URL_OK) {
         /* A local (file://) page has no https base to resolve against: an absolute https src is
          * its own resolution, anything else cannot name a frame. */
         size_t rl = strlen(raw);
-        if (strncmp(raw, "https://", 8) != 0 || rl >= sizeof abs) return;
+        if (strncmp(raw, "https://", 8) != 0 || rl > URL_MAX_LEN) return NULL;
         memcpy(abs, raw, rl + 1);
     }
+    return fh_frame_view(w->frames, abs, ft);
+}
+
+static void fill_frame_slot(browser_window *w, const rd_block *b, ui_image *slot,
+                            tab_fetch_fn img_fetch, void *fetch_ctx) {
     tab *ft = NULL;
-    const pv_view *v = fh_frame_view(w->frames, abs, &ft);
+    char abs[URL_MAX_LEN + 1];
+    const pv_view *v = live_frame_view(w, b->href, &ft, abs);
     if (v == NULL) return;
     int bw = b->video_w > 0 ? b->video_w : 300;
     int bh = b->video_h > 0 ? b->video_h : 150;
@@ -16745,7 +16896,25 @@ static const char *link_at_point(browser_window *w, double px, double py) {
  * or NULL. The caller should call video_play with the returned URL. The returned
  * string aliases the currently rendered document (w->doc), valid until the doc
  * is rebuilt or freed. */
-static const char *video_at_point(browser_window *w, double px, double py) {
+/* First <video> of the top document (the iframe scan appends the player's stream there), or
+ * NULL: the fallback for a frame box whose own document has no video (spec/video_pick.md). */
+static const char *doc_first_video(const rd_doc *doc) {
+    size_t n = rd_count(doc);
+    for (size_t i = 0; i < n; ++i) {
+        const rd_block *b = rd_at(doc, i);
+        if (b != NULL && b->kind == RD_VIDEO && vpk_playable(b->href))
+            return b->href;
+    }
+    return NULL;
+}
+
+/* The video a click at (px,py) plays, or NULL: a <video> row under the cursor, or a live
+ * frame box (an embedded player) whose frame -- else the top document -- carries a video.
+ * *host_out is the frame block's href the playback paints in (NULL for a <video> row); both
+ * alias w->doc / the frame host and stay valid until the next rebuild or frame tick. */
+static const char *video_at_point(browser_window *w, double px, double py,
+                                  const char **host_out) {
+    *host_out = NULL;
     if (w->doc == NULL || w->cairo_surface == NULL) return NULL;
 
     double content_top, content_h;
@@ -16766,16 +16935,23 @@ static const char *video_at_point(browser_window *w, double px, double py) {
     if (scroll > max_scroll) scroll = max_scroll;
     double origin = content_top + page_gutter(w) - scroll;
 
-    (void)left;
-    (void)px;
-    (void)content_w;
     const char *hit = NULL;
     for (size_t i = 0; i < L.nrow && hit == NULL; ++i) {
         const rc_row *r = &L.rows[i];
-        if (r->kind != RC_VIDEO || r->blk == NULL) continue;
+        if (r->blk == NULL) continue;
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
-        hit = r->blk->href;
+        if (r->kind == RC_VIDEO) {
+            if (vpk_playable(r->blk->href)) hit = r->blk->href;
+        } else if (r->kind == RC_IMAGE && is_frame_href(r->blk->href)) {
+            double x0 = left + r->x_off;
+            double cw = (r->bg_w > 0.0) ? r->bg_w : content_w;
+            if (px < x0 || px > x0 + cw) continue;
+            char abs[URL_MAX_LEN + 1];
+            hit = vpk_for_frame(live_frame_view(w, r->blk->href, NULL, abs),
+                                doc_first_video(w->doc));
+            if (hit != NULL) *host_out = r->blk->href;
+        }
     }
 
     rc_free(&L);
@@ -17048,6 +17224,7 @@ static void frames_apply(browser_window *w, const tab_page *page) {
     if (w->frames == NULL)
         w->frames = fh_new(w->cur_top, gui_subresource_fetch, w, gui_frame_top_msg, w);
     if (w->frames == NULL) return;
+    fh_set_async(w->frames, 1);   /* iframes load off the GUI thread: the page paints first */
     fh_apply_top(w->frames, page);
     w->frames_last_ms = now_ms();
     w->frames_due_ms = w->frames_last_ms + 50;
@@ -17239,9 +17416,19 @@ static void dispatch_click(browser_window *w, double px, double py) {
      * thread writes to decoder pipes and the event loop reads frames. A
      * second video_play would kill the decoder and restart from scratch. */
     if (w->video_active) { fprintf(stderr, "dispatch_click: already playing\n"); return; }
-    const char *video_url = video_at_point(w, px, py);
+    const char *video_host = NULL;
+    const char *video_url = video_at_point(w, px, py, &video_host);
     if (video_url != NULL) {
-        (void)video_play(w, video_url);
+        /* video_play stops any previous playback (freeing its host) before starting, and does
+         * not touch w->doc, so video_host is still a live alias here. */
+        char *url = strdup(video_url);
+        char *host = (video_host != NULL) ? strdup(video_host) : NULL;
+        if (url != NULL && video_play(w, url) == 0) {
+            w->video_host_href = host;
+            host = NULL;
+        }
+        free(host);
+        free(url);
         return;
     }
 
@@ -18251,6 +18438,20 @@ static void redraw(browser_window *w) {
     ss_committed(&w->ss, w->ss.back);      /* the compositor owns this buffer until `release` */
     wl_display_flush(w->display);  /* drain connection buffer after each paint */
     w->last_paint_ms = now_ms();
+    if (w->first_doc_paint_ms == 0 && w->doc != NULL && w->page_load_mono_ms != 0) {
+        w->first_doc_paint_ms = w->last_paint_ms;
+        /* FREEDOM_GUI_TIMING: the first paint is known now, even on a page that never idles
+         * (the idle line, if it comes, rewrites the file with both numbers). */
+        if (w->timing_path[0] != '\0' && !w->timing_done && w->nav_start_ms != 0
+            && w->first_doc_paint_ms >= w->nav_start_ms) {
+            FILE *fp = fopen(w->timing_path, "w");
+            if (fp != NULL) {
+                fprintf(fp, "{\"first_ms\":%llu}\n",
+                        (unsigned long long)(w->first_doc_paint_ms - w->nav_start_ms));
+                fclose(fp);
+            }
+        }
+    }
 }
 
 /* --- xdg-shell --- */
@@ -20795,7 +20996,10 @@ static int gui_timing_step(browser_window *w, uint64_t now) {
     if (now - w->idle_seen_ms < TIMING_QUIET_MS) return 50;
     FILE *fp = fopen(w->timing_path, "w");
     if (fp != NULL) {
-        fprintf(fp, "{\"ms\":%llu}\n", (unsigned long long)(w->last_paint_ms - w->nav_start_ms));
+        unsigned long long first = (w->first_doc_paint_ms >= w->nav_start_ms && w->first_doc_paint_ms != 0)
+                                   ? (unsigned long long)(w->first_doc_paint_ms - w->nav_start_ms) : 0ull;
+        fprintf(fp, "{\"ms\":%llu,\"first_ms\":%llu}\n",
+                (unsigned long long)(w->last_paint_ms - w->nav_start_ms), first);
         fclose(fp);
     }
     w->timing_done = 1;
@@ -21358,6 +21562,8 @@ ui_status ui_run_browser(const char *start_url) {
 
     destroy_buffer(&w);
     freebug_destroy(&w);                       /* tear down the console window if open */
+    gui_net_ctx_retire(w.net_ctx);   /* abandoned requests never touch the closing window */
+    w.net_ctx = NULL;
     if (w.tab_worker) tab_close(w.tab_worker); /* the kept-alive REPL worker */
     wh_free(w.ws_hub);
     wst_free(w.web_store);

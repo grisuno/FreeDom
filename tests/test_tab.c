@@ -32,6 +32,7 @@
 
 #include "css.h"
 #include "tab.h"
+#include "freedom_config.h"
 #include "css_import.h"
 #include "url.h"
 #include "js_geom.h"
@@ -1951,6 +1952,214 @@ static void test_async_subrequests_run_in_parallel(void **state) {
                    "[n.length, a.length, a.every(function(e){return e.ms>=100&&e.ms<5000;}),"
                    "typeof n[0].reqHeaders, typeof n[0].respHeaders].join()", "6,5,true,string,string");
     tab_close(t);
+}
+
+
+/* "Entrega con plazo" (spec/subreq_async.md): one request to a dead host (3 s here) does not
+ * hold the first view back past FC_NET_LOAD_SETTLE_MS nor the requests issued after it: both fast
+ * replies land at load (completion order, as in a browser), the slow one on a later tick, and the
+ * worker keeps asking for ticks until it does. */
+static int dead_host_fetch(void *ctx, const char *method, const char *url,
+                           const char *body, size_t body_len,
+                           int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx; (void)method; (void)body; (void)body_len;
+    if (strstr(url, "dead") != NULL) usleep(3000 * 1000);
+    *ob = strdup(strstr(url, "dead") != NULL ? "D" : "F"); *ol = 1;
+    *oct = strdup("text/plain"); *st = 200;
+    return (*ob != NULL && *oct != NULL) ? 0 : -1;
+}
+
+static void test_slow_async_request_does_not_hold_first_view(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, dead_host_fetch, NULL);
+    tab_set_async_fetcher(t, dead_host_fetch, NULL, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] =
+        "<!DOCTYPE html><html><head><title>-</title></head><body><script>"
+        "var out=[]; function go(u){ var x=new XMLHttpRequest(); x.open('GET',u);"
+        "  x.onload=function(){ out.push(x.responseText); document.title=out.join(''); }; x.send(); }"
+        "go('https://api.test/fast'); go('https://ads.test/dead'); go('https://api.test/fast2');"
+        "</script></body></html>";
+    struct timespec a, b;
+    clock_gettime(CLOCK_MONOTONIC, &a);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://api.test/", 1, 0, 0, &p), TAB_OK);
+    clock_gettime(CLOCK_MONOTONIC, &b);
+    long ms = (long)((b.tv_sec - a.tv_sec) * 1000L + (b.tv_nsec - a.tv_nsec) / 1000000L);
+    assert_true(ms < FC_NET_LOAD_SETTLE_MS + 1000);
+    assert_string_equal(p.title, "FF");                /* fast2 does not wait behind the dead one */
+    assert_true(p.next_timer_ms >= 0 && p.next_timer_ms <= FC_NET_POLL_MS);
+    int rounds = 0;
+    while (rounds++ < 100) {
+        usleep((useconds_t)p.next_timer_ms * 1000u);
+        tab_page q;
+        assert_int_equal(tab_tick(t, p.next_timer_ms, &q), TAB_OK);
+        tab_page_keep_view(&p, &q);
+        tab_page_free(&p);
+        p = q;
+        if (p.title != NULL && strcmp(p.title, "FFD") == 0) break;
+    }
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "FFD");
+    assert_true(p.next_timer_ms < 0);                  /* nothing pending: ticks stop */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+
+/* Dynamic <script src> (js_dom_ext): the fetch is async. A script from a dead host does not
+ * hold the page's first view nor the scripts after it; async=false scripts keep insertion order
+ * even when the first one is the slower. */
+static int script_host_fetch(void *ctx, const char *method, const char *url,
+                             const char *body, size_t body_len,
+                             int *st, char **ob, size_t *ol, char **oct) {
+    (void)ctx; (void)method; (void)body; (void)body_len;
+    char js[128];
+    if (strstr(url, "dead") != NULL) usleep(3000 * 1000);
+    if (strstr(url, "slow") != NULL) usleep(300 * 1000);
+    const char *name = strrchr(url, '/');
+    int n = snprintf(js, sizeof js, "out.push('%s');document.title=out.join('');", name != NULL ? name + 1 : "?");
+    *ob = strdup(js); *ol = (size_t)n;
+    *oct = strdup("application/javascript"); *st = 200;
+    return (*ob != NULL && *oct != NULL) ? 0 : -1;
+}
+
+static void test_dynamic_script_from_dead_host_does_not_block(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, script_host_fetch, NULL);
+    tab_set_async_fetcher(t, script_host_fetch, NULL, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] =
+        "<!DOCTYPE html><html><head><title>-</title></head><body><script>"
+        "var out=[]; function add(u,ord){ var s=document.createElement('script'); if(ord) s.async=false;"
+        "  s.src=u; document.head.appendChild(s); }"
+        "add('https://ads.test/dead',0); add('https://cdn.test/slowA',1); add('https://cdn.test/B',1);"
+        "</script></body></html>";
+    struct timespec a, b;
+    clock_gettime(CLOCK_MONOTONIC, &a);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://cdn.test/", 1, 0, 0, &p), TAB_OK);
+    clock_gettime(CLOCK_MONOTONIC, &b);
+    long ms = (long)((b.tv_sec - a.tv_sec) * 1000L + (b.tv_nsec - a.tv_nsec) / 1000000L);
+    assert_true(ms < 2500);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "slowAB");            /* ordered pair ran, in order, at load */
+    int rounds = 0;
+    while (rounds++ < 100 && p.next_timer_ms >= 0) {
+        usleep((useconds_t)p.next_timer_ms * 1000u);
+        tab_page q;
+        assert_int_equal(tab_tick(t, p.next_timer_ms, &q), TAB_OK);
+        tab_page_keep_view(&p, &q);
+        tab_page_free(&p);
+        p = q;
+        if (p.title != NULL && strcmp(p.title, "slowABdead") == 0) break;
+    }
+    assert_string_equal(p.title, "slowABdead");        /* the late one still runs when it lands */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+
+/* A parser-inserted <script async src> from a dead host blocks neither the scripts after it nor
+ * the first view, and still runs (and fires `load` on its element) when it lands. */
+static void test_parser_async_script_does_not_block(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, script_host_fetch, NULL);
+    tab_set_async_fetcher(t, script_host_fetch, NULL, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] =
+        "<!DOCTYPE html><html><head><title>-</title><script>var out=[];</script>"
+        "<script async src=\"https://ads.test/dead\" id=\"ad\"></script>"
+        "<script>document.getElementById('ad').addEventListener('load',function(){ out.push('L'); document.title=out.join(''); });</script>"
+        "<script src=\"https://cdn.test/B\"></script></head><body></body></html>";
+    struct timespec a, b;
+    clock_gettime(CLOCK_MONOTONIC, &a);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://cdn.test/", 1, 0, 0, &p), TAB_OK);
+    clock_gettime(CLOCK_MONOTONIC, &b);
+    long ms = (long)((b.tv_sec - a.tv_sec) * 1000L + (b.tv_nsec - a.tv_nsec) / 1000000L);
+    assert_true(ms < 2500);
+    assert_non_null(p.title);
+    assert_string_equal(p.title, "B");
+    int rounds = 0;
+    while (rounds++ < 100 && p.next_timer_ms >= 0) {
+        usleep((useconds_t)p.next_timer_ms * 1000u);
+        tab_page q;
+        assert_int_equal(tab_tick(t, p.next_timer_ms, &q), TAB_OK);
+        tab_page_keep_view(&p, &q);
+        tab_page_free(&p);
+        p = q;
+        if (p.title != NULL && strcmp(p.title, "BdeadL") == 0) break;
+    }
+    assert_string_equal(p.title, "BdeadL");
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+
+/* Without a stable fetcher (headless, frames) every drain waits for every reply, as before:
+ * the export is deterministic and nothing outlives the load's fetcher. */
+static void test_without_async_fetcher_load_waits_for_all(void **state) {
+    (void)state;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, dead_host_fetch, NULL);
+    tab_set_net_allowed(t, 1);
+    static const char H[] =
+        "<!DOCTYPE html><html><head><title>-</title></head><body><script>"
+        "var out=[]; function go(u){ var x=new XMLHttpRequest(); x.open('GET',u);"
+        "  x.onload=function(){ out.push(x.responseText); document.title=out.join(''); }; x.send(); }"
+        "go('https://ads.test/dead'); go('https://api.test/fast');"
+        "</script></body></html>";
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://api.test/", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.title);
+    assert_int_equal((int)strlen(p.title), 2);         /* both landed before the first view */
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* Closing a tab never waits for a hung deferred request; the context the request may still
+ * use is freed exactly once, after it ends (spec/subreq_async.md, "Fetcher estable y abandono"). */
+static int g_netctx_freed;
+static void netctx_free(void *c) { (void)c; g_netctx_freed++; }
+
+static void test_close_abandons_hung_request(void **state) {
+    (void)state;
+    g_netctx_freed = 0;
+    static int ctxmark;
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_fetcher(t, dead_host_fetch, NULL);
+    tab_set_async_fetcher(t, dead_host_fetch, &ctxmark, netctx_free);
+    tab_set_net_allowed(t, 1);
+    static const char H[] =
+        "<!DOCTYPE html><html><head><title>-</title></head><body><script>"
+        "var x=new XMLHttpRequest(); x.open('GET','https://ads.test/dead'); x.send();"
+        "</script></body></html>";
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://api.test/", 1, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    struct timespec a, b;
+    clock_gettime(CLOCK_MONOTONIC, &a);
+    tab_close(t);
+    clock_gettime(CLOCK_MONOTONIC, &b);
+    long ms = (long)((b.tv_sec - a.tv_sec) * 1000L + (b.tv_nsec - a.tv_nsec) / 1000000L);
+    assert_true(ms < 1000);
+    assert_int_equal(g_netctx_freed, 0);
+    for (int i = 0; i < 400 && g_netctx_freed == 0; ++i) usleep(10 * 1000);
+    assert_int_equal(g_netctx_freed, 1);
+    /* a tab that never issued a deferred request frees its context at close */
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_set_async_fetcher(t, dead_host_fetch, &ctxmark, netctx_free);
+    tab_close(t);
+    assert_int_equal(g_netctx_freed, 2);
 }
 
 #define XHR_PAGE(URL) \
@@ -4121,6 +4330,11 @@ int main(int argc, char **argv) {
         cmocka_unit_test_setup_teardown(test_eval_sees_env, setup_loaded, teardown),
         cmocka_unit_test_setup_teardown(test_eval_no_network_or_cross_origin_api, setup_loaded, teardown),
         cmocka_unit_test(test_async_subrequests_run_in_parallel),
+        cmocka_unit_test(test_slow_async_request_does_not_hold_first_view),
+        cmocka_unit_test(test_dynamic_script_from_dead_host_does_not_block),
+        cmocka_unit_test(test_parser_async_script_does_not_block),
+        cmocka_unit_test(test_without_async_fetcher_load_waits_for_all),
+        cmocka_unit_test(test_close_abandons_hung_request),
         cmocka_unit_test(test_xhr_works_when_net_allowed),
         cmocka_unit_test(test_xhr_undefined_when_net_not_allowed),
         cmocka_unit_test(test_xhr_blocked_host_refused_by_parent),

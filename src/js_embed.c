@@ -310,6 +310,11 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
     dom_node_id *iframes = (dom_node_id *)calloc(niframe, sizeof(dom_node_id));
     if (iframes == NULL) return;
     dom_get_by_tag(idx, "iframe", iframes, niframe);
+    /* One fetch per distinct src: a page that opens its player iframe several times (jkanime: 3)
+     * paid one serial round trip per copy, and each copy added another <video>. */
+    enum { SEEN_MAX = 32 };
+    char *seen[SEEN_MAX];
+    size_t nseen = 0;
 
     for (size_t i = 0; i < niframe; ++i) {
         dom_node_id nid = iframes[i];
@@ -330,6 +335,14 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
         /* Track this iframe as processed. */
         if (track->nprocessed < JD_IFRAME_TRACK_MAX)
             track->processed[track->nprocessed++] = nid;
+        int dup = 0;
+        for (size_t k = 0; k < nseen && !dup; ++k)
+            dup = strlen(seen[k]) == slen && memcmp(seen[k], src, slen) == 0;
+        if (dup) continue;
+        if (nseen < SEEN_MAX && slen != (size_t)-1) {
+            char *c = (char *)malloc(slen + 1);
+            if (c != NULL) { memcpy(c, src, slen); c[slen] = '\0'; seen[nseen++] = c; }
+        }
 
         /* Fetch the iframe content. */
         int status = 0;
@@ -375,5 +388,6 @@ void jd_process_iframes(js_context *ctx, dom_index *idx,
 
         free(body);
     }
+    for (size_t k = 0; k < nseen; ++k) free(seen[k]);
     free(iframes);
 }

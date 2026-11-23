@@ -91,6 +91,11 @@ int pf_pooled_fetch(void *vctx, const char *method, const char *url, ...);
   petición del worker).
 - **Dado** un `<script src="b.js">`, **entonces** `{PF_SCRIPT, "b.js"}`; un `<script>`
   inline no emite nada.
+- **Dado** un `<script async src>` clásico (sin `type=module`), **entonces** NO se emite: el worker
+  lo pide por el cargador asíncrono (`spec/subreq_async.md`), nunca por el pool, así que
+  prefetchearlo duplicaría la petición y, peor, `pf_pool_finish` uniría su hilo al cerrar la
+  carga (un host de anuncios caído retenía la ventana 8 s antes de pintar). Un módulo `async`
+  sí se emite (el worker lo pide por la vía bloqueante de módulos).
 - **Dado** un `<link>` cuyo `rel` no es `stylesheet` (icon, preload, dns-prefetch...),
   **entonces** NO se emite (fail-closed: prefetch jamás amplía lo que la página podría
   pedir).

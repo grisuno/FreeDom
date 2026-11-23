@@ -193,7 +193,8 @@ sobre una struct inicializada a cero o liberada dos veces.
 | `SF_ERR_CERT_INVALID` | La verificación de la cadena de certificados falló. |
 | `SF_ERR_CERT_NOT_PQ` | Política `STRICT_PQ`: ningún certificado de la cadena usa firma PQ. |
 | `SF_ERR_TOO_LARGE` | Cuerpo de respuesta superó `max_body_bytes`. |
-| `SF_ERR_NETWORK` | Fallo de transporte (conexión / lectura / timeout). |
+| `SF_ERR_NETWORK` | Fallo de transporte con el TCP ya establecido (lectura / escritura / timeout tras conectar). |
+| `SF_ERR_UNREACHABLE` | No hubo transporte: el nombre no resolvió, la conexión se rehusó o el TCP no llegó a establecerse antes del timeout (§6septies). |
 | `SF_ERR_OOM` | Fallo de asignación de memoria. |
 | `SF_ERR_TOO_MANY_REDIRECTS` | `sf_get_follow` superó `max_redirects` saltos. |
 | `SF_ERR_INTERNAL` | El transporte devolvió un estado inesperado. |
@@ -349,6 +350,23 @@ Detener (`spec/browser.md` §3c): la GUI cancela cuando la generación de navega
 es la actual, así que detener corta el tráfico en vez de terminar una descarga que nadie verá.
 Verificado: unitario (`sf_fallback_policy`), `make itest` contra red viva (status 14, un solo
 intento con allowlist) y E2E con servidor TLS local en la ventana real (el servidor ve el cierre).
+
+## 6septies. Host inalcanzable no se reintenta (2026-11-22)
+
+La escalera de navegabilidad relaja **cripto**; un host al que nunca se llegó por TCP no tiene
+cripto que relajar. `SF_ERR_UNREACHABLE` = resolución fallida, conexión rehusada o timeout **sin**
+TCP establecido (`CURLINFO_CONNECT_TIME_T == 0`); `sf_fallback_policy` devuelve 0 para él, también
+en un host del allowlist o un subrecurso de una página de confianza.
+
+- **Dado** un subrecurso de una página allow∩js cuyo host no responde al `SYN`,
+  **cuando** el intento PQ agota `SF_SUBRESOURCE_TIMEOUT_MS`, **entonces** se devuelve
+  `SF_ERR_UNREACHABLE` y **no** hay un segundo intento con `SF_POLICY_ALLOWLISTED_INSECURE`.
+- **Dado** un servidor que acepta el TCP pero se cuelga en el handshake (p. ej. un middlebox que
+  no digiere el `ClientHello` grande de ML-KEM), **cuando** vence el timeout, **entonces** es
+  `SF_ERR_NETWORK` y la escalera **sí** reintenta: ese es exactamente el caso que la escalera arregla.
+
+Caso real: jkanime pedía un script de `cvt-s2.agl003.com` (red de anuncios con la IPv4 caída) y
+el worker esperaba 8 s + 8 s del reintento, dos veces por carga: 32 de los 37 s de un episodio.
 
 ## 7. Garantías de memoria
 

@@ -231,6 +231,16 @@ typedef void (*tab_css_sink_fn)(void *ctx, const char *url,
                                 const char *ctype);
 void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);
 
+/* The fetcher the page's DEFERRED XHR/fetch run on (spec/subreq_async.md, "Fetcher estable y
+ * abandono"). Contract: fn/ctx outlive every request in flight, the tab included -- a request may
+ * be abandoned (never waited for) when the page navigates or the tab closes. Only with it do
+ * deferred replies arrive past the load and on later ticks; without it (the default) every drain
+ * waits for all of them, exactly as before. Call before the first load. The tab takes ctx:
+ * free_ctx(ctx) (may be NULL) runs once the tab is closed AND its last abandoned request ended,
+ * so the fetcher may use ctx until then. ctx describes ONE page: a tab reused for another page
+ * sets a new one. */
+void tab_set_async_fetcher(tab *t, tab_fetch_fn fn, void *ctx, void (*free_ctx)(void *));
+
 /* Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load. Set it
  * true ONLY when the page's host is in BOTH allow.conf AND js.conf (the sovereignty
  * boundary); false (default) keeps XHR/fetch undefined (Same-Origin-by-construction). */

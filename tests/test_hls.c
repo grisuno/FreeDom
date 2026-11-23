@@ -216,6 +216,124 @@ static void test_handles_windows_line_endings(void **state) {
     hls_playlist_free(pl);
 }
 
+static void fill_ts(unsigned char *b, size_t off, size_t packets) {
+    for (size_t p = 0; p < packets; ++p) {
+        memset(b + off + p * 188, 0x11, 188);
+        b[off + p * 188] = 0x47;
+    }
+}
+
+static void test_segment_error_status_rejected(void **state) {
+    (void)state;
+    unsigned char b[188 * 3];
+    fill_ts(b, 0, 3);
+    assert_int_equal(hls_segment_payload(500, b, sizeof b), -1);
+    assert_int_equal(hls_segment_payload(404, b, sizeof b), -1);
+    assert_int_equal(hls_segment_payload(0, b, sizeof b), -1);
+    assert_int_equal(hls_segment_payload(200, b, sizeof b), 0);
+    assert_int_equal(hls_segment_payload(206, b, sizeof b), 0);
+}
+
+static void test_segment_text_body_rejected(void **state) {
+    (void)state;
+    const char *err = "500 Internal Server Error\n\nServer got itself in trouble";
+    assert_int_equal(hls_segment_payload(200, (const unsigned char *)err, strlen(err)), -1);
+    const char *html = "<html><body>G</body></html>";
+    assert_int_equal(hls_segment_payload(200, (const unsigned char *)html, strlen(html)), -1);
+    const char *gw = "Gateway Timeout";
+    assert_int_equal(hls_segment_payload(200, (const unsigned char *)gw, strlen(gw)), -1);
+    assert_int_equal(hls_segment_payload(200, NULL, 10), -1);
+    assert_int_equal(hls_segment_payload(200, (const unsigned char *)"x", 0), -1);
+}
+
+static void test_segment_ts_behind_fake_png(void **state) {
+    (void)state;
+    static unsigned char b[120 + 188 * 4];
+    memset(b, 0, sizeof b);
+    memcpy(b, "\x89PNG\r\n\x1a\n", 8);
+    b[50] = 0x47;  /* lone sync byte inside the fake image: not a stream */
+    fill_ts(b, 120, 4);
+    assert_int_equal(hls_segment_payload(200, b, sizeof b), 120);
+}
+
+static void test_segment_single_packet_and_bmff(void **state) {
+    (void)state;
+    unsigned char ts[188];
+    fill_ts(ts, 0, 1);
+    assert_int_equal(hls_segment_payload(200, ts, sizeof ts), 0);
+    unsigned char mp4[16] = { 0, 0, 0, 16, 'f', 't', 'y', 'p', 'i', 's', 'o', 'm', 0, 0, 0, 1 };
+    assert_int_equal(hls_segment_payload(200, mp4, sizeof mp4), 0);
+    memcpy(mp4 + 4, "moof", 4);
+    assert_int_equal(hls_segment_payload(200, mp4, sizeof mp4), 0);
+    unsigned char id3[10] = { 'I', 'D', '3', 4, 0, 0, 0, 0, 0, 0 };
+    assert_int_equal(hls_segment_payload(200, id3, sizeof id3), 0);
+}
+
+/* Regression (fuzz-hls): a tag cut at the end of an unterminated buffer was read past it. */
+static void test_unterminated_tag_stays_in_bounds(void **state) {
+    (void)state;
+    static const char src[] = "#EXTM3U\n#E";
+    char *buf = (char *)malloc(sizeof src - 1);
+    assert_non_null(buf);
+    memcpy(buf, src, sizeof src - 1);
+    hls_playlist *pl = NULL;
+    assert_int_equal(hls_parse(buf, sizeof src - 1, &pl), HLS_OK);
+    hls_playlist_free(pl);
+    static const char td[] = "#EXTM3U\n#EXT-X-TARGETDURATION:9";
+    char *b2 = (char *)malloc(sizeof td - 1);
+    assert_non_null(b2);
+    memcpy(b2, td, sizeof td - 1);
+    assert_int_equal(hls_parse(b2, sizeof td - 1, &pl), HLS_OK);
+    assert_true(pl->target_duration > 8.9 && pl->target_duration < 9.1);
+    hls_playlist_free(pl);
+    free(b2);
+    free(buf);
+}
+
+static hls_playlist *mirror_pl(void) {
+    const char *t =
+        "#EXTM3U\n#EXTINF:5,\nhttps://cdn6.x.example/p/20.ts\n"
+        "#EXTINF:5,\nhttps://cdn2.x.example/p/21.ts\n"
+        "#EXTINF:5,\nhttps://evil.example/p/22.ts\n"
+        "#EXTINF:5,\nhttps://cdn2.x.example/p/23.ts\n"
+        "#EXTINF:5,\nhttps://cdn5.x.example:8443/p/24.ts\n"
+        "#EXTINF:5,\nhttp://cdn9.x.example/p/25.ts\n"
+        "#EXTINF:5,\nrel/26.ts\n";
+    hls_playlist *pl = NULL;
+    assert_int_equal(hls_parse(t, strlen(t), &pl), HLS_OK);
+    return pl;
+}
+
+static void test_mirror_uses_declared_sibling_hosts(void **state) {
+    (void)state;
+    hls_playlist *pl = mirror_pl();
+    char out[256];
+    assert_int_equal(hls_mirror_url(pl, "https://cdn6.x.example/p/20.ts?a=1", 0, out, sizeof out),
+                     strlen("https://cdn2.x.example/p/20.ts?a=1"));
+    assert_string_equal(out, "https://cdn2.x.example/p/20.ts?a=1");
+    assert_true(hls_mirror_url(pl, "https://cdn6.x.example/p/20.ts", 1, out, sizeof out) > 0);
+    assert_string_equal(out, "https://cdn5.x.example:8443/p/20.ts");
+    /* no third: evil.example is another site, cdn9 is http, rel/ is relative */
+    assert_int_equal(hls_mirror_url(pl, "https://cdn6.x.example/p/20.ts", 2, out, sizeof out), 0);
+    hls_playlist_free(pl);
+}
+
+static void test_mirror_rejects_bad_inputs(void **state) {
+    (void)state;
+    hls_playlist *pl = mirror_pl();
+    char out[16];
+    assert_int_equal(hls_mirror_url(pl, "https://cdn6.x.example/p/20.ts", 0, out, sizeof out), 0);
+    char big[256];
+    assert_int_equal(hls_mirror_url(pl, "http://cdn6.x.example/p/20.ts", 0, big, sizeof big), 0);
+    assert_int_equal(hls_mirror_url(pl, "https://other.example/p/20.ts", 0, big, sizeof big), 0);
+    assert_int_equal(hls_mirror_url(NULL, "https://cdn6.x.example/p/20.ts", 0, big, sizeof big), 0);
+    assert_int_equal(hls_mirror_url(pl, NULL, 0, big, sizeof big), 0);
+    /* the failing host itself is never its own mirror */
+    assert_true(hls_mirror_url(pl, "https://cdn2.x.example/p/21.ts", 0, big, sizeof big) > 0);
+    assert_string_equal(big, "https://cdn6.x.example/p/21.ts");
+    hls_playlist_free(pl);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_not_m3u8_returns_parse_error),
@@ -233,6 +351,13 @@ int main(void) {
         cmocka_unit_test(test_resolve_url_relative),
         cmocka_unit_test(test_resolve_url_deep_relative),
         cmocka_unit_test(test_handles_windows_line_endings),
+        cmocka_unit_test(test_segment_error_status_rejected),
+        cmocka_unit_test(test_segment_text_body_rejected),
+        cmocka_unit_test(test_segment_ts_behind_fake_png),
+        cmocka_unit_test(test_segment_single_packet_and_bmff),
+        cmocka_unit_test(test_mirror_uses_declared_sibling_hosts),
+        cmocka_unit_test(test_unterminated_tag_stays_in_bounds),
+        cmocka_unit_test(test_mirror_rejects_bad_inputs),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -25,6 +25,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
+
+#include "request_policy.h"
+
+#define HLS_TAG_MAX 1024u
 
 /* Normalised integer comparison: checks if the string `s` starts with `prefix`
  * (case-sensitive). Returns 1 if yes, 0 otherwise. */
@@ -109,11 +114,19 @@ hls_status hls_parse(const char *text, size_t len, hls_playlist **out) {
         }
 
         if (line[0] == '#') {
-            if (starts_with(line, "#EXTINF:")) {
-                const char *val = line + 8;
+            /* The playlist is not NUL-terminated and strtod/strtol/starts_with scan to a NUL:
+             * parse every tag on a bounded, terminated copy of its line (a longer tag keeps
+             * only its first HLS_TAG_MAX bytes). Found by fuzz-hls. */
+            char tag[HLS_TAG_MAX + 1];
+            size_t tl = llen < HLS_TAG_MAX ? llen : HLS_TAG_MAX;
+            memcpy(tag, line, tl);
+            tag[tl] = '\0';
+            const char *tend = tag + tl;
+            if (starts_with(tag, "#EXTINF:")) {
+                const char *val = tag + 8;
                 char *endp = NULL;
                 const char *comma = (const char *)memchr(val, ',',
-                    (size_t)(nl - val));
+                    (size_t)(tend - val));
                 if (comma != NULL) {
                     size_t vallen = (size_t)(comma - val);
                     char dbuf[64];
@@ -127,18 +140,18 @@ hls_status hls_parse(const char *text, size_t len, hls_playlist **out) {
                         }
                     }
                 }
-            } else if (starts_with(line, "#EXT-X-TARGETDURATION:")) {
-                const char *val = line + 22;
+            } else if (starts_with(tag, "#EXT-X-TARGETDURATION:")) {
+                const char *val = tag + 22;
                 char *endp = NULL;
                 double td = strtod(val, &endp);
                 if (endp != val && td > 0)
                     pl->target_duration = td;
-            } else if (starts_with(line, "#EXT-X-STREAM-INF:")) {
+            } else if (starts_with(tag, "#EXT-X-STREAM-INF:")) {
                 pl->is_variant = 1;
                 memset(&current_variant, 0, sizeof current_variant);
-                parse_attr_long(line, (const char *)nl, "BANDWIDTH=",
+                parse_attr_long(tag, tend, "BANDWIDTH=",
                                 &current_variant.bandwidth);
-                parse_attr_resolution(line, (const char *)nl,
+                parse_attr_resolution(tag, tend,
                                        &current_variant.width,
                                        &current_variant.height);
                 have_variant = 1;
@@ -259,4 +272,104 @@ void hls_playlist_free(hls_playlist *pl) {
         free(pl->variants[i].url);
     free(pl->variants);
     free(pl);
+}
+
+#define HLS_TS_PACKET 188u
+#define HLS_TS_PROBE  4096u
+
+/* A sync byte at off that recurs one and two packets later (or where the body ends first). */
+static int ts_sync_at(const unsigned char *b, size_t len, size_t off) {
+    for (size_t k = 0; k < 3; ++k) {
+        size_t at = off + k * HLS_TS_PACKET;
+        if (at >= len) return k > 0;
+        if (b[at] != 0x47) return 0;
+    }
+    return 1;
+}
+
+long hls_segment_payload(long http_code, const unsigned char *body, size_t len) {
+    if (http_code < 200 || http_code > 299 || body == NULL || len == 0) return -1;
+    if (len >= 3 && memcmp(body, "ID3", 3) == 0) return 0;
+    if (len >= 8) {
+        static const char *const boxes[] = { "ftyp", "styp", "moof", "moov", "sidx", "emsg" };
+        for (size_t i = 0; i < sizeof boxes / sizeof boxes[0]; ++i)
+            if (memcmp(body + 4, boxes[i], 4) == 0) return 0;
+    }
+    size_t probe = len < HLS_TS_PROBE ? len : HLS_TS_PROBE;
+    for (size_t off = 0; off < probe; ++off)
+        if (body[off] == 0x47 && off + HLS_TS_PACKET <= len && ts_sync_at(body, len, off))
+            return (long)off;
+    return -1;
+}
+
+#define HLS_HOST_MAX 256u
+
+/* The authority of an https URL ("host[:port]") as [*a, *a + *alen); 0 when the URL is not
+ * https, has userinfo, or names no host. */
+static int https_authority(const char *url, const char **a, size_t *alen) {
+    if (url == NULL || strncmp(url, "https://", 8) != 0) return 0;
+    const char *p = url + 8;
+    size_t n = strcspn(p, "/?#");
+    if (n == 0 || n >= HLS_HOST_MAX || memchr(p, '@', n) != NULL) return 0;
+    *a = p;
+    *alen = n;
+    return 1;
+}
+
+/* Lowercased host (no port), its parent (everything after the first label) and its
+ * registrable domain; 0 when the host has no dot or its site cannot be computed. */
+static int host_parts(const char *a, size_t alen, char host[HLS_HOST_MAX], char site[HLS_HOST_MAX],
+                      const char **parent) {
+    const char *colon = memchr(a, ':', alen);
+    size_t hl = colon != NULL ? (size_t)(colon - a) : alen;
+    if (hl == 0) return 0;
+    for (size_t i = 0; i < hl; ++i) {
+        char c = a[i];
+        host[i] = (c >= 'A' && c <= 'Z') ? (char)(c - 'A' + 'a') : c;
+    }
+    host[hl] = '\0';
+    const char *dot = strchr(host, '.');
+    if (dot == NULL || dot[1] == '\0') return 0;
+    *parent = dot + 1;
+    return rp_site_of(host, site, HLS_HOST_MAX) == 0;
+}
+
+/* 1 when an earlier segment than i already used the same authority. */
+static int authority_seen_before(const hls_playlist *pl, size_t i, const char *a, size_t alen) {
+    for (size_t j = 0; j < i; ++j) {
+        const char *pa;
+        size_t pal;
+        if (https_authority(pl->segments[j].url, &pa, &pal) && pal == alen
+            && strncasecmp(pa, a, alen) == 0) return 1;
+    }
+    return 0;
+}
+
+size_t hls_mirror_url(const hls_playlist *pl, const char *seg_abs, size_t k,
+                      char *out, size_t outsz) {
+    const char *sa, *sparent;
+    size_t sal;
+    char shost[HLS_HOST_MAX], ssite[HLS_HOST_MAX];
+    if (pl == NULL || out == NULL || outsz == 0 || !https_authority(seg_abs, &sa, &sal)
+        || !host_parts(sa, sal, shost, ssite, &sparent)) return 0;
+
+    size_t seen = 0;
+    for (size_t i = 0; i < pl->count; ++i) {
+        const char *ma, *mparent;
+        size_t mal;
+        char mhost[HLS_HOST_MAX], msite[HLS_HOST_MAX];
+        if (!https_authority(pl->segments[i].url, &ma, &mal)
+            || !host_parts(ma, mal, mhost, msite, &mparent)
+            || strcmp(mhost, shost) == 0 || strcmp(mparent, sparent) != 0
+            || strcmp(msite, ssite) != 0 || authority_seen_before(pl, i, ma, mal)) continue;
+        if (seen++ != k) continue;
+        const char *rest = sa + sal;
+        size_t rl = strlen(rest);
+        if (8 + mal + rl >= outsz) return 0;
+        memcpy(out, "https://", 8);
+        memcpy(out + 8, ma, mal);
+        memcpy(out + 8 + mal, rest, rl + 1);
+        return 8 + mal + rl;
+    }
+    return 0;
 }

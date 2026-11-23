@@ -847,14 +847,23 @@ static int sf_guard_prereq(void *clientp, char *conn_primary_ip, char *conn_loca
     return CURL_PREREQFUNC_OK;
 }
 
-static sf_status map_curl_error(CURLcode rc, const body_sink *sink) {
+/* A timeout is UNREACHABLE only when TCP never came up: a handshake that stalls after the
+ * connect (a middlebox choking on the ML-KEM ClientHello) is what the ladder retries. */
+static sf_status map_curl_error(CURLcode rc, const body_sink *sink, CURL *curl) {
     if (sink->overflow == 1) return SF_ERR_TOO_LARGE;
     if (sink->overflow == 2) return SF_ERR_OOM;
     switch (rc) {
-        case CURLE_OPERATION_TIMEDOUT:
         case CURLE_COULDNT_CONNECT:
         case CURLE_COULDNT_RESOLVE_HOST:
         case CURLE_COULDNT_RESOLVE_PROXY:
+            return SF_ERR_UNREACHABLE;
+        case CURLE_OPERATION_TIMEDOUT: {
+            curl_off_t connected_us = 0;
+            if (curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME_T, &connected_us) == CURLE_OK
+                && connected_us == 0)
+                return SF_ERR_UNREACHABLE;
+            return SF_ERR_NETWORK;
+        }
         case CURLE_RECV_ERROR:
         case CURLE_SEND_ERROR:
             return SF_ERR_NETWORK;
@@ -1160,7 +1169,7 @@ static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *
 
     CURLcode rc = curl_easy_perform(curl);
     if (rc != CURLE_OK) {
-        result = ctx.guard_denied ? SF_ERR_PRIVATE_NET : map_curl_error(rc, &ctx.sink);
+        result = ctx.guard_denied ? SF_ERR_PRIVATE_NET : map_curl_error(rc, &ctx.sink, curl);
         goto done;
     }
 
@@ -1501,7 +1510,7 @@ sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out) {
 
     CURLcode rc = curl_easy_perform(ws->curl);
     if (rc != CURLE_OK) {
-        st = ws->ctx->guard_denied ? SF_ERR_PRIVATE_NET : map_curl_error(rc, &ws->ctx->sink);
+        st = ws->ctx->guard_denied ? SF_ERR_PRIVATE_NET : map_curl_error(rc, &ws->ctx->sink, ws->curl);
         ws_free(ws);
         return st;
     }
@@ -1596,6 +1605,8 @@ int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_po
     if (failed == SF_ERR_PRIVATE_NET) return 0;
     /* Stop is the user's decision, not a crypto failure: nothing to retry. */
     if (failed == SF_ERR_CANCELLED) return 0;
+    /* A host never reached over TCP has no crypto to relax (spec 6septies). */
+    if (failed == SF_ERR_UNREACHABLE) return 0;
     if (allowlisted && tried != SF_POLICY_ALLOWLISTED_INSECURE
         && failed != SF_OK) {
         *next = SF_POLICY_ALLOWLISTED_INSECURE;

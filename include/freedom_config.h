@@ -104,6 +104,17 @@
  * that operation's requests fail (status 0) instead of blocking. */
 #define FC_TAB_OP_NET_BUDGET_MS 3000
 
+/* Deferred XHR/fetch delivery (spec/subreq_async.md, "Entrega con plazo"). The first view of a
+ * page waits at most FC_NET_LOAD_SETTLE_MS for its in-flight requests (a dead ad host must not
+ * hold the page back); what is still running is delivered by later ticks, which the worker asks
+ * for at most every FC_NET_POLL_MS while anything is pending (100 ms: an 8 s dead request costs
+ * 80 of the window's 240 ticks per load, not all of them). */
+#define FC_NET_LOAD_SETTLE_MS 1500
+#define FC_NET_POLL_MS        100
+/* A tick or click waits this long for the requests its handlers issued: a typical API answers
+ * in the same operation, as before the plazo existed. */
+#define FC_NET_TICK_SETTLE_MS 250
+
 /* Widest column track (px) a table hands the grid engine: far past any real page, and small
  * enough that TL_MAX_COLS of them sum inside an int. */
 #define FC_TABLE_TRACK_MAX_PX 1000000

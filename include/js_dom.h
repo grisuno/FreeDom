@@ -209,7 +209,7 @@ typedef int (*jd_fetch_fn)(void *ctx, const char *method, const char *url,
 jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx);
 
 /* Deferred variant (spec/subreq_async.md): queues the request with the host and returns 0 AT ONCE
- * (non-zero = refused); the reply is handed back later, in issue order, through jd_net_deliver. */
+ * (non-zero = refused); the reply is handed back later, in completion order, through jd_net_deliver. */
 typedef int (*jd_fetch_async_fn)(void *ctx, const char *method, const char *url,
                                  const char *body, size_t body_len, const char *req_headers);
 
@@ -218,9 +218,11 @@ typedef int (*jd_fetch_async_fn)(void *ctx, const char *method, const char *url,
 jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
                             jd_fetch_async_fn afn, void *afetch_ctx);
 
-/* Hands the OLDEST queued deferred request its reply (rc != 0 = refused/failed, status 0) and runs
- * its callback. `ms` is the parent's measured wall time of the fetch (Freebug's Net panel). The caller drains microtasks afterwards. JD_ERR_INTERNAL when none is queued. */
-jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
+/* Hands the queued deferred request at position `pos` (0 = oldest still queued) its reply (rc != 0
+ * = refused/failed, status 0), removes it from the queue and runs its callback. `ms` is the
+ * parent's measured wall time of the fetch (Freebug's Net panel). The caller drains microtasks
+ * afterwards. JD_ERR_INTERNAL when no request sits at `pos`. */
+jd_status jd_net_deliver(js_context *ctx, int pos, int rc, int status, const char *body, size_t len,
                          const char *ctype, const char *hdrs, int ms);
 
 /* Injects a JS shim that creates <iframe> elements from a page's `video[]` array

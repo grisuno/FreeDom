@@ -151,12 +151,18 @@ int pf_scan(const char *html, size_t len, pf_list *out) {
             const char *cur = p + 7;
             attr_span a;
             const char *src = NULL; size_t srclen = 0;
+            int is_async = 0, is_module = 0;
             while (next_attr(&cur, end, &a)) {
                 if (a.val != NULL && ci_eq_span(a.name, a.nlen, "src")) {
                     src = a.val; srclen = a.vlen;
+                } else if (ci_eq_span(a.name, a.nlen, "async")) {
+                    is_async = 1;
+                } else if (a.val != NULL && ci_eq_span(a.name, a.nlen, "type")) {
+                    is_module = ci_eq_span(a.val, a.vlen, "module");
                 }
             }
-            if (src != NULL) emit(out, PF_SCRIPT, src, srclen);
+            /* A classic async script takes the worker's deferred path, never the pool. */
+            if (src != NULL && !(is_async && !is_module)) emit(out, PF_SCRIPT, src, srclen);
             /* Raw-text element: the content (inline JS) is opaque. A missing
              * closer skips the rest -- fewer prefetches, never a wrong one. */
             const char *closer = ci_find(cur, end, "</script");

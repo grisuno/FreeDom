@@ -560,6 +560,63 @@ static void test_dynamic_script_src_loads_async_and_reports_load_or_error(void *
               "e.onerror=function(){ er=1; }; document.head.appendChild(e); __fireDeferred(); ''+er", "1");
 }
 
+
+/* HTMLSelectElement / HTMLOptionElement (HTML 4.10.7, 4.10.10): jQuery's val() reads options,
+ * selectedIndex and type (jkanime's server picker threw "cannot read property 'length'"). */
+static void test_select_options_selected_index_and_value(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "var s=document.createElement('select');"
+              "s.innerHTML='<option value=\"a\">A</option><option>B b</option><option value=\"c\" selected>C</option>';"
+              "document.body.appendChild(s);"
+              "[s.type,s.options.length,s.length,s.selectedIndex,s.value,s.options[1].value,s.options[1].text,s.options[2].index].join()",
+           "select-one,3,3,2,c,B b,B b,2");
+    EXPECT(f, "s.selectedIndex=0; [s.value,s.options[0].selected,s.options[2].selected,s.selectedOptions.length].join()",
+           "a,true,false,1");
+    EXPECT(f, "s.value='B b'; s.selectedIndex", "1");
+    EXPECT(f, "s.value='zz'; [s.selectedIndex,s.value].join()", "-1,");
+    EXPECT(f, "var t=document.createElement('select'); t.innerHTML='<option>x</option><option>y</option>';"
+              "[t.selectedIndex,t.value,t.options.item(1).text].join()", "0,x,y");
+    EXPECT(f, "var m=document.createElement('select'); m.multiple=true;"
+              "m.innerHTML='<option selected>p</option><option selected>q</option>';"
+              "[m.type,m.selectedIndex,m.selectedOptions.length].join()", "select-multiple,0,2");
+    EXPECT(f, "var e=document.createElement('select'); [e.selectedIndex,e.value,e.options.length].join()", "-1,,0");
+    EXPECT(f, "typeof $ === 'undefined' ? (function(){ var o=s.options; return o.namedItem===undefined?'none':'ok'; })() : ''", "ok");
+}
+
+
+/* jd_process_iframes (video scan): the same src in several <iframe>s is fetched ONCE and yields
+ * one <video> (jkanime opened its player iframe 3 times: 3 serial fetches per URL). */
+static int g_ifr_fetches;
+static int ifr_fetch(void *ctx, const char *method, const char *url, const char *body, size_t bl,
+                     const char *rh, int *st, char **ob, size_t *ol, char **oct, char **oh) {
+    (void)ctx; (void)method; (void)body; (void)bl; (void)rh;
+    if (oh != NULL) *oh = NULL;
+    g_ifr_fetches++;
+    char buf[256];
+    int n = snprintf(buf, sizeof buf, "<script>var f='https://v.test/%s/master.m3u8';</script>",
+                     strstr(url, "b") != NULL ? "b" : "a");
+    *ob = (char *)malloc((size_t)n + 1);
+    *oct = (char *)malloc(10);
+    if (*ob == NULL || *oct == NULL) { free(*ob); free(*oct); return -1; }
+    memcpy(*ob, buf, (size_t)n + 1); memcpy(*oct, "text/html", 10);
+    *ol = (size_t)n; *st = 200;
+    return 0;
+}
+
+static void test_process_iframes_fetches_each_src_once(void **state) {
+    fixture *f = (fixture *)*state;
+    EXPECT(f, "for(var i=0;i<3;i++){ var a=document.createElement('iframe'); a.src='https://p.test/a';"
+              "  document.body.appendChild(a); }"
+              "var b=document.createElement('iframe'); b.src='https://p.test/b'; document.body.appendChild(b);"
+              "document.getElementsByTagName('iframe').length", "4");
+    g_ifr_fetches = 0;
+    jd_process_iframes(f->ctx, f->idx, ifr_fetch, NULL);
+    assert_int_equal(g_ifr_fetches, 2);
+    EXPECT(f, "document.getElementsByTagName('video').length", "2");
+    jd_process_iframes(f->ctx, f->idx, ifr_fetch, NULL);   /* already processed: nothing again */
+    assert_int_equal(g_ifr_fetches, 2);
+}
+
 /* The wrapper's members must survive every way a page reaches them: a custom element (its
  * prototype is replaced by the class prototype), Element.prototype.m.call(el) (what shadow-DOM
  * polyfills do), per-element on* handler slots, and per-element state (style, classList). These
@@ -3851,6 +3908,8 @@ int main(void) {
         cmocka_unit_test_setup_teardown(test_element_members_survive_prototype_swaps_and_detached_calls, setup, teardown),
         cmocka_unit_test_setup_teardown(test_dynamic_inline_script_runs_once_on_insert, setup, teardown),
         cmocka_unit_test_setup_teardown(test_dynamic_script_src_loads_async_and_reports_load_or_error, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_select_options_selected_index_and_value, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_process_iframes_fetches_each_src_once, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_append, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_mirror_inner_html, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shadow_insert_fragment, setup, teardown),

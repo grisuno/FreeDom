@@ -558,26 +558,84 @@ static int child_fetch_async(void *vctx, const char *method, const char *url,
  * the view is derived: whatever the callbacks changed is part of this operation's result. All
  * replies are READ first, then delivered: JS never writes a frame while the parent is still
  * writing replies (no pipe deadlock). */
-static void child_net_drain(child_state *cs) {
+/* Delivers the deferred replies that arrive within settle_ms (all rounds share it; 0 = only
+ * what is already finished). What is still in flight stays pending for a later tick. */
+static void child_net_drain(child_state *cs, int settle_ms) {
     if (cs == NULL || cs->js == NULL || !cs->net_active) return;
+    struct timespec d0;
+    clock_gettime(CLOCK_MONOTONIC, &d0);
     for (int round = 0; cs->async_pending > 0 && round < TAB_MAX_NET_ROUNDS; ++round) {
-        int n = cs->async_pending;
-        cs->async_pending = 0;
+        struct timespec dn;
+        clock_gettime(CLOCK_MONOTONIC, &dn);
+        long spent = (long)((dn.tv_sec - d0.tv_sec) * 1000L + (dn.tv_nsec - d0.tv_nsec) / 1000000L);
+        uint32_t wait_ms = (settle_ms > spent) ? (uint32_t)(settle_ms - spent) : 0u;
         uint8_t tag = TAG_NETWAIT;
-        if (write_full(cs->wfd, &tag, 1) != 0) return;
+        uint32_t k32 = 0;
+        if (write_full(cs->wfd, &tag, 1) != 0 || write_full(cs->wfd, &wait_ms, sizeof wait_ms) != 0
+            || read_full(cs->rfd, &k32, sizeof k32) != 0) { cs->async_pending = 0; return; }
+        if (k32 > (uint32_t)cs->async_pending) { cs->async_pending = 0; return; }   /* desync: fail closed */
+        int n = (int)k32;
+        int queued = cs->async_pending;
+        cs->async_pending -= n;
+        if (n == 0) return;                        /* nothing ready: never spin */
         net_reply *rep = (net_reply *)calloc((size_t)n, sizeof *rep);
-        if (rep == NULL) return;
+        uint32_t *pos = (uint32_t *)calloc((size_t)n, sizeof *pos);
+        if (rep == NULL || pos == NULL) { free(rep); free(pos); cs->async_pending = 0; return; }
         int got = 0;
-        for (; got < n; ++got) if (child_read_reply(cs, &rep[got]) != 0) break;
+        for (; got < n; ++got) {
+            /* pos indexes the queue as it stands once the earlier replies left it. */
+            if (read_full(cs->rfd, &pos[got], sizeof pos[got]) != 0
+                || pos[got] >= (uint32_t)(queued - got)) break;
+            if (child_read_reply(cs, &rep[got]) != 0) break;
+        }
         for (int i = 0; i < got; ++i) {
-            (void)jd_net_deliver(cs->js, rep[i].status != 0 ? 0 : -1, (int)rep[i].status,
+            (void)jd_net_deliver(cs->js, (int)pos[i], rep[i].status != 0 ? 0 : -1, (int)rep[i].status,
                                  rep[i].body, rep[i].body_len, rep[i].ctype, rep[i].hdrs, (int)rep[i].ms);
             net_reply_free(&rep[i]);
         }
         free(rep);
-        if (got < n) return;                       /* pipe broken: the next op fails closed */
+        free(pos);
+        if (got < n) { cs->async_pending = 0; return; }   /* pipe broken / desync: fail closed */
         (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
     }
+}
+
+/* Hands a parser-inserted <script async src> to the page's dynamic-script loader (js_dom_ext
+ * __startParserAsync). The src travels as a JS string literal: every byte outside [A-Za-z0-9] is
+ * escaped (\xHH below 0x80, %HH above, which is what a URL means by it), so no src can close the
+ * literal. 0 = handed over; -1 = not available (the caller fetches it the blocking way). */
+static int child_start_parser_async(child_state *cs, const char *src) {
+    if (cs->js == NULL || src == NULL) return -1;
+    size_t n = strlen(src);
+    if (n > URL_MAX_LEN) return -1;
+    static const char pre[] = "typeof __startParserAsync==='function'?(__startParserAsync(\"";
+    static const char post[] = "\"),1):0";
+    size_t cap = sizeof pre + n * 4 + sizeof post + 1;
+    char *code = (char *)malloc(cap);
+    if (code == NULL) return -1;
+    size_t w = 0;
+    memcpy(code, pre, sizeof pre - 1);
+    w = sizeof pre - 1;
+    static const char hex[] = "0123456789abcdef";
+    for (size_t i = 0; i < n; ++i) {
+        unsigned char c = (unsigned char)src[i];
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+            code[w++] = (char)c;
+        } else if (c < 0x80) {
+            code[w++] = '\\'; code[w++] = 'x'; code[w++] = hex[c >> 4]; code[w++] = hex[c & 15];
+        } else {
+            code[w++] = '%'; code[w++] = hex[c >> 4]; code[w++] = hex[c & 15];
+        }
+    }
+    memcpy(code + w, post, sizeof post - 1);
+    w += sizeof post - 1;
+    js_result r;
+    memset(&r, 0, sizeof r);
+    int ok = js_eval(cs->js, code, w, &r) == JS_OK && r.value != NULL && strcmp(r.value, "1") == 0;
+    js_result_free(&r);
+    free(code);
+    if (ok) (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
+    return ok ? 0 : -1;
 }
 
 /* FREEDOM_JS_PROFILE=1: wall time of each worker load phase, on the worker's stderr. */
@@ -1858,6 +1916,11 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
                         "skipped (host not granted network)", scripts[i].src);
                     continue;
                 }
+                /* <script async src>: never blocks the scripts after it (HTML 4.12.1). It goes
+                 * through the dynamic-script loader -- the same gated deferred fetch as XHR --
+                 * and runs when it lands, before `load` if it lands within the plazo. */
+                if (pass == 1 && cs->net_active && child_start_parser_async(cs, scripts[i].src) == 0)
+                    continue;
                 int st = 0;
                 size_t blen = 0;
                 char *ctype = NULL;
@@ -1945,6 +2008,11 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
         } /* pass loop: sync first, then deferred */
         hp_free_scripts(scripts, nscripts);
         prof_lap("js-run", &ph);
+        /* Async scripts (and the page's own early XHR) that land within the plazo run before
+         * DOMContentLoaded/load, as they mostly would in a browser; both drains share it. */
+        struct timespec settle0;
+        clock_gettime(CLOCK_MONOTONIC, &settle0);
+        child_net_drain(cs, FC_NET_LOAD_SETTLE_MS);
         /* Fire synthetic DOMContentLoaded/load handlers + flush queued timers once
          * (bounded; not a real event loop), so onload-wrapped code runs -- under the
          * same remaining page budget. */
@@ -1958,8 +2026,15 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             js_result_free(&fr);
             (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS); /* drain deferred promise jobs */
         }
-        /* Deferred XHR/fetch: the parent ran them in parallel; settle them before the view. */
-        child_net_drain(cs);
+        /* Deferred XHR/fetch: the parent ran them in parallel; settle what arrives in time
+         * before the first view, the rest lands on later ticks. */
+        {
+            struct timespec settle1;
+            clock_gettime(CLOCK_MONOTONIC, &settle1);
+            long used = (long)((settle1.tv_sec - settle0.tv_sec) * 1000L
+                               + (settle1.tv_nsec - settle0.tv_nsec) / 1000000L);
+            child_net_drain(cs, used < FC_NET_LOAD_SETTLE_MS ? (int)(FC_NET_LOAD_SETTLE_MS - used) : 0);
+        }
         /* Inject the video shim if the page defines `video[]` / `video_data`
          * (e.g. jkanime.net whose video_min.js is 404). It creates <iframe>
          * elements from the array, which the next step fetches and scans. */
@@ -2140,6 +2215,8 @@ static int32_t child_next_timer_ms(child_state *cs) {
     if (js_eval(cs->js, q, sizeof q - 1, &r) != JS_OK) return -1;
     int32_t ms = (r.value != NULL) ? (int32_t)atoi(r.value) : -1;
     js_result_free(&r);
+    /* Replies still in flight need a tick to land (spec/subreq_async.md). */
+    if (cs->async_pending > 0 && (ms < 0 || ms > FC_NET_POLL_MS)) ms = FC_NET_POLL_MS;
     return (ms >= 0) ? ms : -1;
 }
 
@@ -2184,7 +2261,7 @@ static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
         } else {
             (void)jd_fire_click(cs->js, node_id);
         }
-        child_net_drain(cs);
+        child_net_drain(cs, FC_NET_TICK_SETTLE_MS);
         if (cs->js != NULL) jd_flush_custom_elements(cs->js);
         uint64_t gen_now = dom_mutation_count(cs->idx);
         if (lazy && cs->view_gen_ok && gen_now == cs->view_gen) {
@@ -2817,6 +2894,10 @@ struct tab {
     int            job_efd;         /* completion eventfd (lazily created), -1 = none */
     int            in_async;        /* the serving thread is the job (no css sink) */
     int            op_budget_ms;    /* its network time budget (0 = default) */
+    tab_fetch_fn   async_fetcher;   /* stable fetcher for deferred requests (may outlive the tab) */
+    void          *async_fetcher_ctx;
+    void         (*async_fetcher_free)(void *); /* non-NULL while the TAB (not a batch) owns ctx */
+    int            batch_stable;    /* t->batch runs on the stable fetcher (abandonable) */
     int64_t        op_net_us;       /* network time spent in the current operation */
     int            viewport_w;    /* @media render width for the next load (0 => default) */
     int            frame_id;      /* iframe id for the next load (0 => top document) */
@@ -3642,6 +3723,25 @@ void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx) {
     t->fetcher_ctx = ctx;
 }
 
+static void tab_retire_batch(tab *t) {
+    if (t->batch != NULL) {
+        if (!t->batch_stable) sqb_reset(t->batch);   /* runs through t: join before free */
+        sqb_free(t->batch);                          /* a stable one is abandoned, never waited */
+        t->batch = NULL;
+        t->batch_stable = 0;
+    }
+    if (t->async_fetcher_free != NULL) t->async_fetcher_free(t->async_fetcher_ctx);
+    t->async_fetcher_free = NULL;
+}
+
+void tab_set_async_fetcher(tab *t, tab_fetch_fn fn, void *ctx, void (*free_ctx)(void *)) {
+    if (t == NULL) { if (free_ctx != NULL) free_ctx(ctx); return; }
+    tab_retire_batch(t);
+    t->async_fetcher = fn;
+    t->async_fetcher_ctx = ctx;
+    t->async_fetcher_free = free_ctx;
+}
+
 void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx) {
     if (t == NULL) return;
     t->css_sink = fn;
@@ -3763,9 +3863,9 @@ static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t
  * headers are published (thread-local) for the call and the response headers the fetcher reports
  * are captured into *out_hdrs (malloc'd). The worker is untrusted: its header block is re-filtered
  * here. Returns 1 when the fetch succeeded. */
-static int tab_fetch_one(tab *t, const char *method, const char *url, const char *body, size_t blen,
-                         const char *rawh, int *status, char **rbody, size_t *rlen,
-                         char **rctype, char **out_hdrs) {
+static int tab_fetch_with(tab_fetch_fn fn, void *fctx, const char *method, const char *url,
+                          const char *body, size_t blen, const char *rawh, int *status,
+                          char **rbody, size_t *rlen, char **rctype, char **out_hdrs) {
     char hdrs[RP_HDR_MAX_BYTES + 1];
     hdrs[0] = '\0';
     if (rawh != NULL && strlen(rawh) <= RP_HDR_MAX_BYTES)
@@ -3774,13 +3874,20 @@ static int tab_fetch_one(tab *t, const char *method, const char *url, const char
     free(g_inflight_resp);
     g_inflight_resp = NULL;
     g_inflight_active = 1;
-    int ok = (t->fetcher != NULL && url != NULL && url[0] != '\0'
-              && t->fetcher(t->fetcher_ctx, method, url, body, blen, status, rbody, rlen, rctype) == 0);
+    int ok = (fn != NULL && url != NULL && url[0] != '\0'
+              && fn(fctx, method, url, body, blen, status, rbody, rlen, rctype) == 0);
     g_inflight_headers = NULL;
     g_inflight_active = 0;
     *out_hdrs = g_inflight_resp;      /* ownership moves to the caller */
     g_inflight_resp = NULL;
     return ok;
+}
+
+static int tab_fetch_one(tab *t, const char *method, const char *url, const char *body, size_t blen,
+                         const char *rawh, int *status, char **rbody, size_t *rlen,
+                         char **rctype, char **out_hdrs) {
+    return tab_fetch_with(t->fetcher, t->fetcher_ctx, method, url, body, blen, rawh,
+                          status, rbody, rlen, rctype, out_hdrs);
 }
 
 /* Reads the fields of one subrequest frame. */
@@ -3842,15 +3949,59 @@ static int tab_serve_subreq(tab *t, int net_granted, int css_granted) {
 
 /* The fetch of one deferred request, on a batch thread. The thread-local in-flight state of
  * tab_fetch_one is per thread, so overlapping requests never see each other's headers. */
+/* The stable fetcher a batch owns (tab_set_async_fetcher): its requests may outlive the tab. */
+typedef struct tab_net_fn { tab_fetch_fn fn; void *ctx; void (*free_ctx)(void *); } tab_net_fn;
+
+static void tab_net_fn_free(void *p) {
+    tab_net_fn *nf = (tab_net_fn *)p;
+    if (nf == NULL) return;
+    if (nf->free_ctx != NULL) nf->free_ctx(nf->ctx);
+    free(nf);
+}
+
+static int tab_batch_fill(int ok, int status, char *rbody, size_t rlen, char *rctype, char *rhdrs,
+                          sqb_res *out) {
+    out->ok = ok; out->status = status;
+    out->body = rbody; out->body_len = rlen; out->ctype = rctype; out->resp_headers = rhdrs;
+    if (!ok) { free(rbody); free(rctype); free(rhdrs); memset(out, 0, sizeof *out); }
+    return ok ? 0 : -1;
+}
+
+static int tab_batch_run_stable(void *vn, const sqb_req *rq, sqb_res *out) {
+    const tab_net_fn *nf = (const tab_net_fn *)vn;
+    int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL, *rhdrs = NULL;
+    int ok = tab_fetch_with(nf->fn, nf->ctx, rq->method, rq->url, rq->body, rq->body_len,
+                            rq->headers, &status, &rbody, &rlen, &rctype, &rhdrs);
+    return tab_batch_fill(ok, status, rbody, rlen, rctype, rhdrs, out);
+}
+
 static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out) {
     tab *t = (tab *)vt;
     int status = 0; char *rbody = NULL; size_t rlen = 0; char *rctype = NULL, *rhdrs = NULL;
     int ok = tab_fetch_one(t, rq->method, rq->url, rq->body, rq->body_len, rq->headers,
                            &status, &rbody, &rlen, &rctype, &rhdrs);
-    out->ok = ok; out->status = status;
-    out->body = rbody; out->body_len = rlen; out->ctype = rctype; out->resp_headers = rhdrs;
-    if (!ok) { free(rbody); free(rctype); free(rhdrs); memset(out, 0, sizeof *out); }
-    return ok ? 0 : -1;
+    return tab_batch_fill(ok, status, rbody, rlen, rctype, rhdrs, out);
+}
+
+/* The batch, created on first use: with a stable fetcher it owns a copy of the pair and its
+ * requests may be abandoned; without one it runs through the tab and is always joined. */
+static sqb *tab_batch(tab *t) {
+    if (t->batch != NULL) return t->batch;
+    if (t->async_fetcher != NULL) {
+        tab_net_fn *nf = (tab_net_fn *)calloc(1, sizeof *nf);
+        if (nf == NULL) return NULL;
+        nf->fn = t->async_fetcher;
+        nf->ctx = t->async_fetcher_ctx;
+        nf->free_ctx = t->async_fetcher_free;
+        t->batch = sqb_new_owned(TAB_ASYNC_THREADS, tab_batch_run_stable, nf, tab_net_fn_free);
+        if (t->batch == NULL) { free(nf); return NULL; }
+        t->batch_stable = 1;
+        t->async_fetcher_free = NULL;        /* the batch owns ctx now */
+    } else {
+        t->batch = sqb_new(TAB_ASYNC_THREADS, tab_batch_run, t);
+        t->batch_stable = 0;
+    }
+    return t->batch;
 }
 
 /* TAG_SUBREQ_ASYNC: reads and gates the frame like tab_serve_subreq, then starts the fetch on a
@@ -3861,7 +4012,7 @@ static int tab_submit_async(tab *t, int net_granted, int css_granted) {
     size_t blen = 0, hlen = 0;
     char *method, *url, *body, *rawh;
     if (tab_read_subreq_fields(t, &method, &url, &body, &blen, &rawh, &hlen) != 0) return -1;
-    if (t->batch == NULL) t->batch = sqb_new(TAB_ASYNC_THREADS, tab_batch_run, t);
+    (void)tab_batch(t);
     int rc = -1;
     if (t->batch != NULL) {
         int over = t->in_op && t->op_net_us >= tab_op_budget_us(t);
@@ -3877,25 +4028,36 @@ static int tab_submit_async(tab *t, int net_granted, int css_granted) {
     return rc;
 }
 
-/* TAG_NETWAIT: joins the batch and writes one reply per deferred request, in issue order. The
- * operation's network time is the wall time of the join, not the sum of the requests. */
+/* TAG_NETWAIT [wait_ms:uint32]: waits up to wait_ms (everything, without a stable fetcher) and writes [k:uint32] plus, per
+ * FINISHED request, [pos:uint32] + its reply; the rest keeps running (spec/subreq_async.md,
+ * "Entrega con plazo"). The operation's network time is the wall
+ * time of the wait, not the sum of the requests. */
 static int tab_serve_netwait(tab *t) {
     int rc = 0;
-    size_t n = sqb_count(t->batch);
+    uint32_t wait_ms = 0;
+    if (read_full(t->resp_fd, &wait_ms, sizeof wait_ms) != 0) return -1;
+    long wait = (long)(wait_ms > (uint32_t)SF_DEFAULT_TIMEOUT_MS ? (uint32_t)SF_DEFAULT_TIMEOUT_MS : wait_ms);
     struct timespec f0, f1;
+    size_t idx[SQB_MAX_JOBS];
     clock_gettime(CLOCK_MONOTONIC, &f0);
-    sqb_wait_all(t->batch);
+    /* Without a stable fetcher nothing may outlive the load's fetcher: wait for everything. */
+    if (!t->batch_stable) sqb_wait_all(t->batch);
+    size_t n = sqb_wait_ready(t->batch, t->batch_stable ? wait : 0, idx, SQB_MAX_JOBS);
     clock_gettime(CLOCK_MONOTONIC, &f1);
     if (t->in_op) t->op_net_us += (int64_t)(f1.tv_sec - f0.tv_sec) * 1000000
                                 + (f1.tv_nsec - f0.tv_nsec) / 1000;
+    uint32_t k32 = (uint32_t)n;
+    if (write_full(t->req_fd, &k32, sizeof k32) != 0) return -1;
     for (size_t i = 0; i < n && rc == 0; ++i) {
-        const sqb_res *r = sqb_result(t->batch, i);
+        uint32_t pos = (uint32_t)(idx[i] - i);   /* its index once the earlier ones left */
+        if (write_full(t->req_fd, &pos, sizeof pos) != 0) return -1;
+        const sqb_res *r = sqb_result(t->batch, idx[i]);
         int ok = r->ok;
         if (ok && t->batch_bytes + r->body_len > TAB_MAX_BATCH_BYTES) ok = 0;   /* anti-amplification */
         if (ok) t->batch_bytes += r->body_len;
         rc = tab_write_reply(t, ok, r->status, r->body, r->body_len, r->ctype, r->resp_headers, r->elapsed_ms);
     }
-    sqb_reset(t->batch);
+    sqb_remove(t->batch, idx, n);
     return rc;
 }
 
@@ -3910,7 +4072,10 @@ static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted) 
 
 /* A new load abandons whatever the previous page left in flight. */
 static void tab_batch_discard(tab *t) {
-    if (t->batch != NULL) sqb_reset(t->batch);
+    if (t->batch != NULL) {
+        if (t->batch_stable) sqb_abandon(t->batch);   /* a hung request never holds the next load */
+        else sqb_reset(t->batch);                     /* it runs through this tab: join it */
+    }
     t->batch_bytes = 0;
 }
 
@@ -4715,7 +4880,7 @@ void tab_close(tab *t) {
         int st;
         while (waitpid(t->pid, &st, 0) < 0 && errno == EINTR) { /* retry */ }
     }
-    sqb_free(t->batch);
+    tab_retire_batch(t);
     free(t->cookies_in);
     free(t->page_url);
     free(t->storage_in);

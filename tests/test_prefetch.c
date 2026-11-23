@@ -46,6 +46,27 @@ static void test_scan_basic_stylesheet_and_script(void **state) {
     pf_list_free(&l);
 }
 
+
+/* A classic async script never goes through the pool (spec/prefetch.md): the worker fetches it
+ * on the deferred path, and a hung one would hold pf_pool_finish. An async MODULE still does. */
+static void test_scan_skips_classic_async_scripts(void **state) {
+    (void)state;
+    const char *html =
+        "<script async src=\"ad.js\"></script>"
+        "<script ASYNC=\"\" src=ad2.js></script>"
+        "<script src=\"a.js\" async></script>"
+        "<script type=\"module\" async src=\"m.js\"></script>"
+        "<script src=\"sync.js\"></script>"
+        "<script data-async=\"1\" src=\"d.js\"></script>";
+    pf_list l;
+    assert_int_equal(pf_scan(html, strlen(html), &l), 0);
+    assert_int_equal(l.count, 3);
+    assert_string_equal(l.refs[0].url, "m.js");
+    assert_string_equal(l.refs[1].url, "sync.js");
+    assert_string_equal(l.refs[2].url, "d.js");
+    pf_list_free(&l);
+}
+
 /* Attribute order, quote style and tag case must not matter; the raw value is
  * kept verbatim (resolution belongs to the policy-gated fetcher). */
 static void test_scan_attr_order_quotes_case(void **state) {
@@ -396,6 +417,7 @@ int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_scan_null_args),
         cmocka_unit_test(test_scan_basic_stylesheet_and_script),
+        cmocka_unit_test(test_scan_skips_classic_async_scripts),
         cmocka_unit_test(test_scan_attr_order_quotes_case),
         cmocka_unit_test(test_scan_rel_gate_and_inline_script),
         cmocka_unit_test(test_scan_opaque_regions),

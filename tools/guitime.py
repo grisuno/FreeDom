@@ -58,7 +58,9 @@ def start_display(workdir):
             p.kill()
         print("guitime: weston did not come up", file=sys.stderr)
         return None
-    env = dict(os.environ, WAYLAND_DISPLAY=socket_name, XDG_RUNTIME_DIR=runtime)
+    # DISPLAY is the nested Xvfb: anything driven through it (xdotool, import) must never reach
+    # the operator's real desktop. Freedom itself is Wayland-only and ignores it.
+    env = dict(os.environ, WAYLAND_DISPLAY=socket_name, XDG_RUNTIME_DIR=runtime, DISPLAY=disp)
     return env, (ws, xv)
 
 

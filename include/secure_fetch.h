@@ -37,7 +37,10 @@ typedef enum sf_status {
     SF_ERR_INTERNAL,     /* transport library returned an unexpected state */
     SF_ERR_PRIVATE_NET,  /* remote content asked for a private/loopback address
                           * (spec/net_guard.md); appended so earlier codes keep their values */
-    SF_ERR_CANCELLED     /* the caller's cancel_cb asked to stop the transfer (Stop) */
+    SF_ERR_CANCELLED,    /* the caller's cancel_cb asked to stop the transfer (Stop) */
+    SF_ERR_UNREACHABLE   /* no transport: name did not resolve, connection refused, or TCP
+                          * never established before the timeout. Never retried by the
+                          * navigability ladder: there is no crypto to relax. */
 } sf_status;
 
 /* Post-quantum enforcement policy. */

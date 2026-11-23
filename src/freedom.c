@@ -544,12 +544,14 @@ static int headless_fetch(void *ctx, const char *method, const char *url,
             page_allowed = hb_is_allowlisted(g_hosts, ph);
     }
     int relaxed = host_allowed || page_allowed || g_headless_js;
+    uint64_t t_req0 = now_us();
     sf_status s = is_post
         ? sf_post_navigable(url, &cfg, body, body_len, "application/x-www-form-urlencoded",
                             &resp, NULL, relaxed)
         : sf_get_follow_navigable(url, &cfg, &resp, NULL, relaxed);
     if (getenv("FREEDOM_TRACE_FETCH") != NULL)
-        fprintf(stderr, "fetch[headless] %s -> %s (sf_status=%d)\n", url, s == SF_OK ? "ok" : "FAIL", (int)s);
+        fprintf(stderr, "fetch[headless] %s -> %s (sf_status=%d, %.1f ms)\n", url,
+                s == SF_OK ? "ok" : "FAIL", (int)s, (double)(now_us() - t_req0) / 1000.0);
     if (s != SF_OK) { sf_response_free(&resp); return -1; }
 
     if (resp.body_len == (size_t)-1) { sf_response_free(&resp); return -1; }
@@ -1004,6 +1006,7 @@ static const char *sf_reason(sf_status ss) {
         case SF_ERR_CERT_INVALID: return "certificate validation failed";
         case SF_ERR_CERT_NOT_PQ:  return "strict PQ signature missing";
         case SF_ERR_NETWORK:      return "network error";
+        case SF_ERR_UNREACHABLE:  return "host unreachable";
         case SF_ERR_TOO_MANY_REDIRECTS: return "too many redirects";
         case SF_ERR_PRIVATE_NET:  return "private network address refused";
         case SF_ERR_CANCELLED:    return "cancelled";

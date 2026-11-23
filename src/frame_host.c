@@ -5,13 +5,31 @@
  */
 #include "frame_host.h"
 
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "frame_broker.h"
 
+/* One frame load: fetch + confined worker + its first load. Run inline (headless) or on its own
+ * thread (fh_set_async); `done`/`orphan` are guarded by mu. An orphaned job (frame closed or host
+ * freed while it ran) is freed by its own thread. */
+typedef struct fh_job {
+    pthread_mutex_t mu;
+    pthread_t    th;
+    int          threaded, done, orphan;
+    tab_fetch_fn fetch;
+    void        *fetch_ctx;
+    int          id;
+    char        *url;
+    tab         *t;
+    tab_page     pg;
+    int          ok;
+} fh_job;
+
 typedef struct fh_slot {
+    fh_job *job;         /* a background load in flight (async hosts only) */
     tab *t;
     int  token;          /* the token the PARENT document's JS gave this <iframe> */
     int  next_timer_ms;  /* -1 when none */
@@ -27,6 +45,7 @@ struct fh_host {
     fh_top_msg_fn top_msg;
     void         *top_ctx;
     int           depth;
+    int           async; /* fh_set_async: FRAME_OPEN loads on a background thread */
     unsigned      gen;   /* bumped whenever a frame's view changes: the painter's refresh cue */
 };
 
@@ -51,9 +70,68 @@ static void slot_release_view(fh_slot *sl) {
     sl->url = NULL;
 }
 
+static void job_destroy(fh_job *j) {
+    if (j == NULL) return;
+    if (j->t != NULL) tab_close(j->t);
+    tab_page_free(&j->pg);
+    free(j->url);
+    pthread_mutex_destroy(&j->mu);
+    free(j);
+}
+
+/* Fetch the frame document and load it into a fresh confined worker (no host state touched). */
+static void job_run(fh_job *j) {
+    int status = 0;
+    char *body = NULL, *ctype = NULL;
+    size_t blen = 0;
+    j->ok = 0;
+    if (j->fetch(j->fetch_ctx, "GET", j->url, NULL, 0, &status, &body, &blen, &ctype) != 0
+        || status < 200 || status >= 300 || body == NULL || blen == 0 || blen > TAB_MAX_INPUT) {
+        free(body); free(ctype);
+        return;
+    }
+    free(ctype);
+    if (tab_open(&j->t) != TAB_OK) { j->t = NULL; free(body); return; }
+    tab_set_lazy_ticks(j->t, 1);   /* fh_tick keeps the frame's last view when a tick sends none */
+    tab_set_net_allowed(j->t, 1);
+    tab_set_css_allowed(j->t, 1);
+    tab_set_fetcher(j->t, j->fetch, j->fetch_ctx);
+    tab_set_frame_id(j->t, j->id);
+    memset(&j->pg, 0, sizeof j->pg);
+    j->ok = (tab_load_full(j->t, body, blen, j->url, 1, 0, 0, &j->pg) == TAB_OK);
+    free(body);
+}
+
+static void *job_main(void *arg) {
+    fh_job *j = (fh_job *)arg;
+    job_run(j);
+    pthread_mutex_lock(&j->mu);
+    j->done = 1;
+    int orphan = j->orphan;
+    pthread_mutex_unlock(&j->mu);
+    if (orphan) job_destroy(j);
+    return NULL;
+}
+
+/* Owner thread: forget a job; a running one finishes and frees itself. */
+static void job_abandon(fh_job *j) {
+    if (j == NULL) return;
+    if (!j->threaded) { job_destroy(j); return; }
+    pthread_mutex_lock(&j->mu);
+    int done = j->done;
+    if (!done) j->orphan = 1;
+    pthread_mutex_unlock(&j->mu);
+    if (done) { pthread_join(j->th, NULL); job_destroy(j); }
+    else pthread_detach(j->th);
+}
+
 /* Closes the worker of every frame that is no longer in the table. */
 static void reap(fh_host *h) {
     for (int i = 1; i < FBK_MAX_FRAMES; ++i) {
+        if (h->slot[i].job != NULL && fbk_origin(&h->tbl, i) == NULL) {
+            job_abandon(h->slot[i].job);
+            h->slot[i].job = NULL;
+        }
         if (h->slot[i].t != NULL && fbk_origin(&h->tbl, i) == NULL) {
             tab_close(h->slot[i].t);
             h->slot[i].t = NULL;
@@ -67,6 +145,8 @@ static void reap(fh_host *h) {
 void fh_free(fh_host *h) {
     if (h == NULL) return;
     for (int i = 1; i < FBK_MAX_FRAMES; ++i) {
+        job_abandon(h->slot[i].job);
+        h->slot[i].job = NULL;
         if (h->slot[i].t != NULL) tab_close(h->slot[i].t);
         slot_release_view(&h->slot[i]);
     }
@@ -80,51 +160,72 @@ int fh_count(const fh_host *h) {
     return n;
 }
 
-/* Loads the document of frame `id` (already registered in the table). On any failure the frame is
- * removed again: the table never lists a frame without a worker. */
-static void load_frame(fh_host *h, int id, const char *url) {
-    int status = 0;
-    char *body = NULL, *ctype = NULL;
-    size_t blen = 0;
-    tab *t = NULL;
-    if (h->fetch(h->fetch_ctx, "GET", url, NULL, 0, &status, &body, &blen, &ctype) != 0
-        || status < 200 || status >= 300 || body == NULL || blen == 0 || blen > TAB_MAX_INPUT) {
-        free(body); free(ctype);
-        fbk_remove(&h->tbl, id);
-        return;
-    }
-    free(ctype);
-    if (tab_open(&t) != TAB_OK) { free(body); fbk_remove(&h->tbl, id); return; }
-    tab_set_lazy_ticks(t, 1);      /* fh_tick keeps the frame's last view when a tick sends none */
-    tab_set_net_allowed(t, 1);
-    tab_set_css_allowed(t, 1);
-    tab_set_fetcher(t, h->fetch, h->fetch_ctx);
-    tab_set_frame_id(t, id);
-    h->slot[id].t = t;
-    tab_page pg;
-    memset(&pg, 0, sizeof pg);
-    if (tab_load_full(t, body, blen, url, 1, 0, 0, &pg) != TAB_OK) {
-        free(body);
-        tab_page_free(&pg);
-        fbk_remove(&h->tbl, id);
+/* Installs a finished load into slot `id` and processes the ops of its load. A failed load, or a
+ * frame no longer in the table, leaves no frame (fail-closed, no hole in the tree). */
+static void integrate(fh_host *h, fh_job *j) {
+    int id = j->id;
+    if (!j->ok || j->t == NULL || fbk_origin(&h->tbl, id) == NULL) {
+        if (fbk_origin(&h->tbl, id) != NULL) fbk_remove(&h->tbl, id);
+        job_destroy(j);
         reap(h);
         return;
     }
-    free(body);
-    h->slot[id].next_timer_ms = pg.next_timer_ms;
+    h->slot[id].t = j->t;
+    j->t = NULL;
+    h->slot[id].next_timer_ms = j->pg.next_timer_ms;
     /* Keep the document the worker built: the painter renders it into the <iframe> box. */
     slot_release_view(&h->slot[id]);
-    h->slot[id].view = pg.view;
-    pg.view = NULL;
-    {
-        size_t ul = strlen(url);
-        char *u = (ul == (size_t)-1) ? NULL : (char *)malloc(ul + 1);
-        if (u != NULL) { memcpy(u, url, ul); u[ul] = '\0'; }
-        h->slot[id].url = u;
-    }
+    h->slot[id].view = j->pg.view;
+    j->pg.view = NULL;
+    h->slot[id].url = j->url;
+    j->url = NULL;
     h->gen++;
-    if (fbk_origin(&h->tbl, id) != NULL) apply_ops(h, id, pg.ws, pg.nws);
-    tab_page_free(&pg);
+    if (fbk_origin(&h->tbl, id) != NULL) apply_ops(h, id, j->pg.ws, j->pg.nws);
+    job_destroy(j);
+}
+
+/* Loads the document of frame `id` (already registered in the table): inline, or on a thread
+ * that fh_tick collects (fh_set_async). */
+static void load_frame(fh_host *h, int id, const char *url) {
+    fh_job *j = (fh_job *)calloc(1, sizeof *j);
+    size_t ul = strlen(url);
+    if (j == NULL || ul == (size_t)-1 || pthread_mutex_init(&j->mu, NULL) != 0) {
+        free(j); fbk_remove(&h->tbl, id); return;
+    }
+    j->url = (char *)malloc(ul + 1);
+    if (j->url == NULL) { pthread_mutex_destroy(&j->mu); free(j); fbk_remove(&h->tbl, id); return; }
+    memcpy(j->url, url, ul + 1);
+    j->fetch = h->fetch;
+    j->fetch_ctx = h->fetch_ctx;
+    j->id = id;
+    if (h->async) {
+        j->threaded = 1;
+        if (pthread_create(&j->th, NULL, job_main, j) == 0) { h->slot[id].job = j; return; }
+        j->threaded = 0;                              /* no thread: load inline instead */
+    }
+    job_run(j);
+    integrate(h, j);
+}
+
+/* Collects the background loads that finished (owner thread). Returns how many are in flight. */
+static int collect_jobs(fh_host *h) {
+    int pending = 0;
+    for (int i = 1; i < FBK_MAX_FRAMES; ++i) {
+        fh_job *j = h->slot[i].job;
+        if (j == NULL) continue;
+        pthread_mutex_lock(&j->mu);
+        int done = j->done;
+        pthread_mutex_unlock(&j->mu);
+        if (!done) { ++pending; continue; }
+        pthread_join(j->th, NULL);
+        h->slot[i].job = NULL;
+        integrate(h, j);
+    }
+    return pending;
+}
+
+void fh_set_async(fh_host *h, int on) {
+    if (h != NULL) h->async = on ? 1 : 0;
 }
 
 static int find_child(const fh_host *h, int parent, int token) {
@@ -226,7 +327,8 @@ void fh_apply_top(fh_host *h, const tab_page *page) {
 
 int fh_tick(fh_host *h, int elapsed_ms) {
     if (h == NULL) return -1;
-    int next = -1;
+    int pending = collect_jobs(h);
+    int next = pending > 0 ? FH_POLL_MS : -1;
     for (int i = 1; i < FBK_MAX_FRAMES; ++i) {
         if (h->slot[i].t == NULL) continue;
         tab_page pg;

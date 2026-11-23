@@ -35,6 +35,12 @@ typedef int (*sqb_run_fn)(void *ctx, const sqb_req *req, sqb_res *out);
 typedef struct sqb sqb;
 
 sqb  *sqb_new(int max_threads, sqb_run_fn run, void *ctx);
+/* sqb_new whose ctx the batch OWNS: free_ctx(ctx) runs once the batch is freed AND every
+ * abandoned request has finished -- the run callback may use ctx until then. */
+sqb  *sqb_new_owned(int max_threads, sqb_run_fn run, void *ctx, void (*free_ctx)(void *));
+/* Frees every finished job and ABANDONS every running one: its thread is detached, its result
+ * is discarded when it ends, and nothing here waits. The batch is empty and reusable. */
+void  sqb_abandon(sqb *b);
 /* Queues one request. refused != 0 queues a ready-made failure (no thread, no fetch) so the
  * result count always equals the submit count. Returns 0, or -1 when full / out of memory (nothing
  * queued: the caller must answer the worker itself). */
@@ -44,8 +50,17 @@ size_t sqb_count(const sqb *b);
 void  sqb_wait_all(sqb *b);
 /* Valid after sqb_wait_all, for i < sqb_count. */
 const sqb_res *sqb_result(const sqb *b, size_t i);
-/* Joins and frees every job and result; the batch is reusable. */
+/* Waits until every request finished or `wait_ms` elapsed (0 = do not wait), then writes the
+ * indices of EVERY finished request, ascending, into idx (at most cap) and returns how many
+ * (spec/subreq_async.md, "Entrega con plazo"). Those results are valid through sqb_result. */
+size_t sqb_wait_ready(sqb *b, long wait_ms, size_t *idx, size_t cap);
+/* Joins and frees the jobs at the k ascending indices (unfinished or out-of-range ones are
+ * skipped); the others keep running and keep their relative order. */
+void  sqb_remove(sqb *b, const size_t *idx, size_t k);
+/* Joins (waits for) and frees every job and result; the batch is reusable. */
 void  sqb_reset(sqb *b);
+/* Abandons what is still running (sqb_abandon) and releases the batch; the memory goes when the
+ * last abandoned request ends. Never waits. */
 void  sqb_free(sqb *b);
 
 #endif

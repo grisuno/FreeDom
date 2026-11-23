@@ -16,6 +16,7 @@
  */
 
 #define FH_MAX_DEPTH 8     /* nested deliveries handled inside one call; the rest waits for a tick */
+#define FH_POLL_MS   50    /* fh_tick's answer while a background frame load is in flight */
 
 typedef struct fh_host fh_host;
 
@@ -28,7 +29,13 @@ typedef void (*fh_top_msg_fn)(void *ctx, const char *data, size_t len);
 fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
                 fh_top_msg_fn top_msg, void *top_ctx);
 
-/* Closes every frame worker and frees the host. Idempotent on NULL. */
+/* on != 0: each FRAME_OPEN loads its frame on a background thread and fh_tick integrates it
+ * (spec/frame_broker.md section 4); the window turns it on, the headless export keeps loads
+ * synchronous. Set before the first fh_apply_top. */
+void fh_set_async(fh_host *h, int on);
+
+/* Closes every frame worker and frees the host; a frame still loading is abandoned (its thread
+ * closes its own worker when it ends), never waited for. Idempotent on NULL. */
 void fh_free(fh_host *h);
 
 /* Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP document; other

@@ -73,4 +73,20 @@ size_t hls_resolve_url(const char *base_url, const char *segment_url,
 /* Frees a parsed playlist. Safe on NULL. */
 void hls_playlist_free(hls_playlist *pl);
 
+/* Offset where the media starts inside a downloaded segment, or -1 when it is not
+ * media (non-2xx status, HTML/text error body, empty). Recognises MPEG-TS (also
+ * behind a fake image prefix, probed in the first 4 KiB), ISO BMFF and ID3 audio.
+ * A rejected body must never reach the decoder (spec/hls.md). */
+long hls_segment_payload(long http_code, const unsigned char *body, size_t len);
+
+/* Mirrors the feeder may retry a rejected segment on (spec/hls.md). */
+#define HLS_MAX_MIRRORS 3
+
+/* seg_abs (an absolute https segment URL) with its host replaced by the k-th distinct
+ * other host that the playlist's own absolute https URLs use under the same parent
+ * domain (everything after the first label). Writes NUL-terminated into out and
+ * returns the length, or 0 when there is no k-th mirror or it does not fit. */
+size_t hls_mirror_url(const hls_playlist *pl, const char *seg_abs, size_t k,
+                      char *out, size_t outsz);
+
 #endif /* FREEDOM_HLS_H */

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <cmocka.h>
 
@@ -150,6 +151,66 @@ static void test_failed_fetch_leaves_no_frame(void **state) {
     tab_close(top);
 }
 
+
+/* Background loading (spec/frame_broker.md section 4): FRAME_OPEN returns at once, the frame
+ * appears on a later tick, and a host freed while a frame is still loading never waits for it. */
+static void sleep_ms(long ms) {
+    struct timespec ts = { ms / 1000, (ms % 1000) * 1000000L };
+    while (nanosleep(&ts, &ts) != 0) { }
+}
+
+static int slow_stub_fetch(void *ctx, const char *method, const char *url, const char *body, size_t bl,
+                           int *st, char **ob, size_t *ol, char **oct) {
+    sleep_ms(600);
+    return stub_fetch(ctx, method, url, body, bl, st, ob, ol, oct);
+}
+
+static long ms_since(const struct timespec *a) {
+    struct timespec b;
+    clock_gettime(CLOCK_MONOTONIC, &b);
+    return (long)((b.tv_sec - a->tv_sec) * 1000L + (b.tv_nsec - a->tv_nsec) / 1000000L);
+}
+
+static void test_async_frames_load_off_thread(void **state) {
+    (void)state;
+    g_nlog = 0; g_fetches = 0;
+    tab *top = NULL;
+    assert_int_equal(tab_open(&top), TAB_OK);
+    tab_set_net_allowed(top, 1);
+    fh_host *h = fh_new("https://top.test/", slow_stub_fetch, NULL, on_top_msg, NULL);
+    fh_set_async(h, 1);
+    tab_page p;
+    assert_int_equal(tab_load_full(top, TOP_PAGE, sizeof TOP_PAGE - 1, "https://top.test/",
+                                   1, 0, 0, &p), TAB_OK);
+    struct timespec a;
+    clock_gettime(CLOCK_MONOTONIC, &a);
+    fh_apply_top(h, &p);
+    tab_page_free(&p);
+    assert_true(ms_since(&a) < 300);                  /* the GUI thread did not wait */
+    assert_int_equal(fh_count(h), 0);
+    int nx = fh_tick(h, 0);
+    assert_true(nx >= 0 && nx <= FH_POLL_MS);         /* a load in flight keeps the ticks coming */
+    for (int i = 0; i < 200 && fh_count(h) == 0; ++i) { sleep_ms(20); (void)fh_tick(h, 20); }
+    assert_int_equal(fh_count(h), 1);
+    assert_non_null(fh_frame_view(h, "https://rc.test/anchor", NULL));
+    assert_int_equal(g_nlog, 1);                      /* its load ops were routed once integrated */
+    assert_string_equal(g_log[0], "https://rc.test\nc1\n{\"hello\":1}");
+    fh_free(h);
+
+    /* freed while loading: no wait */
+    h = fh_new("https://top.test/", slow_stub_fetch, NULL, on_top_msg, NULL);
+    fh_set_async(h, 1);
+    assert_int_equal(tab_load_full(top, TOP_PAGE, sizeof TOP_PAGE - 1, "https://top.test/",
+                                   1, 0, 0, &p), TAB_OK);
+    fh_apply_top(h, &p);
+    tab_page_free(&p);
+    clock_gettime(CLOCK_MONOTONIC, &a);
+    fh_free(h);
+    assert_true(ms_since(&a) < 300);
+    sleep_ms(1500);                              /* let the abandoned load end (ASan: no leak) */
+    tab_close(top);
+}
+
 static void test_bad_args(void **state) {
     (void)state;
     assert_null(fh_new(NULL, stub_fetch, NULL, on_top_msg, NULL));
@@ -166,6 +227,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_frame_view_is_exposed_for_painting),
         cmocka_unit_test(test_removing_iframe_closes_worker),
         cmocka_unit_test(test_failed_fetch_leaves_no_frame),
+        cmocka_unit_test(test_async_frames_load_off_thread),
         cmocka_unit_test(test_bad_args),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

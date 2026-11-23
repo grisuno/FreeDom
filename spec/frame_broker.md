@@ -43,6 +43,14 @@ Un `fh_host` por documento top trusted. Mantiene un `fbk_table` y **una pestana-
   callback `top_msg`; a un frame por `tab_ws_event(TAB_WSE_FRAME_MSG)`, y sus ops se procesan en
   seguida con un tope de profundidad (`FH_MAX_DEPTH`) contra ping-pong; lo que sobre espera al tick.
 - `fh_tick` avanza el reloj virtual de cada frame y procesa sus ops; devuelve el proximo timer.
+- **Carga en segundo plano (`fh_set_async`, 2026-11-22; solo la ventana).** Un `FRAME_OPEN` no
+  carga el frame en el hilo de la GUI: un hilo propio baja el HTML y hace `tab_load_full`, y
+  `fh_tick` **integra** los terminados (vista, URL, ops de su carga) en el hilo del dueño. Mientras
+  haya cargas en curso `fh_tick` devuelve `<= FH_POLL_MS`. Un frame cerrado (o el host liberado)
+  antes de terminar se **abandona**: el hilo cierra su propia pestaña al acabar; nada espera.
+  Caso real: el episodio de jkanime abría 3 iframes del reproductor y la página quedaba en blanco
+  hasta cargarlos en serie (6,8 → 14,3 s en la ventana). El headless no lo activa: su PNG sigue
+  siendo la página con todos sus frames (determinista).
 - Un frame no se pinta (documento oculto): reCAPTCHA v3 / BotGuard de fondo; el pintado visible es
   un hito aparte.
 

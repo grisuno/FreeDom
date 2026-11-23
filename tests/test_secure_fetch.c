@@ -324,6 +324,12 @@ static void test_fallback_ladder_is_shared_and_ordered(void **state) {
      * allowlist (spec/browser.md 3c). */
     assert_int_equal(sf_fallback_policy(SF_ERR_CANCELLED, SF_POLICY_PQ_HYBRID_KE, 1, &n), 0);
     assert_int_equal(sf_fallback_policy(SF_ERR_CANCELLED, SF_POLICY_ALLOW_CLASSICAL_KE, 1, &n), 0);
+    /* A host never reached over TCP has no crypto to relax (spec 6septies); a handshake
+     * that stalled after TCP connected is exactly what the ladder exists for. */
+    assert_int_equal(sf_fallback_policy(SF_ERR_UNREACHABLE, SF_POLICY_PQ_HYBRID_KE, 1, &n), 0);
+    assert_int_equal(sf_fallback_policy(SF_ERR_UNREACHABLE, SF_POLICY_ALLOW_CLASSICAL_KE, 1, &n), 0);
+    assert_int_equal(sf_fallback_policy(SF_ERR_NETWORK, SF_POLICY_PQ_HYBRID_KE, 1, &n), 1);
+    assert_int_equal(n, SF_POLICY_ALLOWLISTED_INSECURE);
 }
 
 /* A persistent backing remembers permanent redirects across sessions: `save` hears every put,
@@ -683,7 +689,7 @@ static void test_ws_open_rejects_before_any_io(void **state) {
 
 /* spec/net_guard.md, wired in sf_setup_handle. Nothing here leaves the machine: the
  * refusals happen before a socket exists, and the permitted cases hit a closed
- * loopback port (connection refused => SF_ERR_NETWORK), which proves the guard let
+ * loopback port (connection refused => SF_ERR_UNREACHABLE), which proves the guard let
  * them through to the transport. */
 static void test_private_network_guard_judges_by_initiator(void **state) {
     (void)state;
@@ -694,7 +700,7 @@ static void test_private_network_guard_judges_by_initiator(void **state) {
     sf_response out;
 
     /* The user's own navigation may go anywhere. */
-    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_NETWORK);
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_UNREACHABLE);
     sf_response_free(&out);
 
     /* A public page may not reach a private address on the user's behalf. */
@@ -718,10 +724,10 @@ static void test_private_network_guard_judges_by_initiator(void **state) {
 
     /* Local and same-host initiators are the same zone. */
     cfg.referrer_url = "https://localhost/app";
-    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_NETWORK);
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_UNREACHABLE);
     sf_response_free(&out);
     cfg.referrer_url = "https://127.0.0.1:9/index";
-    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_NETWORK);
+    assert_int_equal(sf_get(LOOP, &cfg, &out), SF_ERR_UNREACHABLE);
     sf_response_free(&out);
     /* Two different literals are not one site, whatever their trailing labels. */
     cfg.referrer_url = "https://8.8.0.1/";

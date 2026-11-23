@@ -141,7 +141,7 @@ static const char JD_XHR_SHIM[] =
     "  if(r===null) throw new Error('fetch'); return r; }"
     "Object.defineProperty(__G,'__netLog',{value:function(){return NLOG;},configurable:true,writable:true,enumerable:false});"
     /* Deferred requests: HFA queues one with the host and `cb(reply|null)` fires when the host
-     * hands the batch back (jd_net_deliver, issue order). Without a host hook it is absent and
+     * hands the batch back (jd_net_deliver, completion order). Without a host hook it is absent and
      * XHR/fetch keep the synchronous round trip. */
     "var HFA0=__G.__hostFetchAsync, NQ=[]; try{ delete __G.__hostFetchAsync; }catch(e){}"
     "var HAS_ASYNC=(typeof HFA0==='function');"
@@ -149,7 +149,7 @@ static const char JD_XHR_SHIM[] =
     "  if(q){ NQ.push({cb:cb,m:m,u:u,h:String(h||'')}); return; }"
     "  __G.setTimeout(function(){ cb(null); },0); }"
     "if(HAS_ASYNC) Object.defineProperty(__G,'__netDeliver',{configurable:true,writable:true,enumerable:false,value:function(r){"
-    "  var e=NQ.shift(); if(!e) return;"
+    "  var i=(r&&typeof r.pos==='number')?r.pos:0; if(i<0||i>=NQ.length) return; var e=NQ.splice(i,1)[0];"
     "  if(NLOG.length<512) NLOG.push({method:String(e.m),url:String(e.u),status:r?(r.status|0):0,"
     "    size:r&&r.body?r.body.length:0,type:r&&r.contentType?String(r.contentType):'',ms:r?(r.ms|0):0,"
     "    reqHeaders:e.h,respHeaders:r&&r.headers?String(r.headers):''});"
@@ -337,9 +337,10 @@ jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx) {
     return jd_install_xhr_ex(ctx, fn, fetch_ctx, NULL, NULL);
 }
 
-jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
+jd_status jd_net_deliver(js_context *ctx, int pos, int rc, int status, const char *body, size_t len,
                          const char *ctype, const char *hdrs, int ms) {
     if (ctx == NULL) return JD_ERR_NULL_ARG;
+    if (pos < 0) return JD_ERR_INTERNAL;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return JD_ERR_INTERNAL;
     JSValue global = JS_GetGlobalObject(jsctx);
@@ -348,6 +349,7 @@ jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, 
     if (JS_IsFunction(jsctx, f)) {
         JSValue arg = jd_reply_object(jsctx, rc, status, body, len, ctype, hdrs);
         if (!JS_IsException(arg)) JS_SetPropertyStr(jsctx, arg, "ms", JS_NewInt32(jsctx, ms < 0 ? 0 : ms));
+        if (!JS_IsException(arg)) JS_SetPropertyStr(jsctx, arg, "pos", JS_NewInt32(jsctx, pos));
         JSValue r = JS_Call(jsctx, f, JS_UNDEFINED, 1, &arg);
         JS_FreeValue(jsctx, arg);
         if (!JS_IsException(r)) st = JD_OK; else JS_FreeValue(jsctx, JS_GetException(jsctx));
