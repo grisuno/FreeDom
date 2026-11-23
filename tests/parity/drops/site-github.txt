@@ -1,5 +1,5 @@
 GitHub · Change is constant. GitHub keeps you ahead. · GitHub · GitHub
-CSS drops: 432 declaration(s) dropped, 60 distinct
+CSS drops: 424 declaration(s) dropped, 58 distinct
   count  cause         property                     first value
      25  bad-value     font-stretch                 100%
      24  bad-value     grid-row                     leadingComponent
@@ -34,16 +34,14 @@ CSS drops: 432 declaration(s) dropped, 60 distinct
       4  unknown-prop  -o-border-image              linear-gradient(#191f1b, #191f1b) 1
       4  bad-value     box-shadow                   inset 0 0 0 1px #0000 #1f6feb
       4  bad-value     filter                       0
-      4  bad-value     border-color                 color-mix(in srgb, #0d6731, #000 35%)
-      4  bad-value     stroke                       color-mix(in srgb, #08872b, #000 20%)
       4  unknown-prop  transform-style              preserve-3d
       4  bad-value     font-weight                  1rem
       4  unknown-prop  list-style-image             url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' aria-hidden=...
       4  unknown-prop  font-variation-settings      "ital" 10
       4  unknown-prop  font-synthesis               none
+      3  bad-value     background                   linear-gradient(to top)
       3  unknown-prop  stroke-opacity               1
       3  bad-value     flex                         0 100 max-content
-      3  bad-value     background                   linear-gradient(to top)
       2  bad-value     height                       1.5
       2  bad-value     max-height                   1.5
       2  unknown-prop  font-variant-numeric         lining-nums tabular-nums
@@ -51,13 +49,13 @@ CSS drops: 432 declaration(s) dropped, 60 distinct
       2  bad-value     object-position              "50% 100%"
       2  unknown-prop  transform-box                fill-box
       2  bad-value     grid-template-columns        repeat(auto-fit,160px 160px)
-      1  bad-value     align-items                  top
-      1  bad-value     font-variant                 tabular-nums
-      1  bad-value     grid-auto-columns            max-content
-      1  bad-value     min-height                   2rem 2rem
       1  unknown-prop  stroke-linecap               round
-      1  bad-value     visibility                   none
-      1  unknown-prop  background-blend-mode        normal
-      1  unknown-prop  line-break                   anywhere
-      1  unknown-prop  offset                       2px
+      1  bad-value     font-variant                 tabular-nums
       1  unknown-prop  text-anchor                  end
+      1  bad-value     align-items                  top
+      1  bad-value     grid-auto-columns            max-content
+      1  unknown-prop  offset                       2px
+      1  unknown-prop  background-blend-mode        normal
+      1  bad-value     visibility                   none
+      1  bad-value     min-height                   2rem 2rem
+      1  unknown-prop  line-break                   anywhere

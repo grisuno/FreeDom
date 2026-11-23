@@ -12,6 +12,8 @@
  * what is clicked cannot drift. Contract: spec/chrome_layout.md.
  */
 
+#include <stddef.h>
+
 #define CHL_TABBAR_H        38.0  /* row 1: tabs (+ window buttons under CSD) */
 #define CHL_TOOLBAR_H       42.0  /* row 2: navigation buttons, URL pill, menu */
 #define CHL_PAD             8.0   /* outer horizontal padding of both rows */
@@ -28,6 +30,8 @@
 #define CHL_BTN_GAP         2.0
 #define CHL_URL_H           32.0
 #define CHL_ID_W            30.0  /* identity badge slot at the pill's left */
+#define CHL_STAR_W          30.0  /* bookmark star slot at the pill's right */
+#define CHL_STAR_MIN_URL    160.0 /* narrower pills keep their width for the URL text */
 #define CHL_MORE_W          26.0  /* hidden-tabs indicator at each end of an overflowing strip */
 #define CHL_DRAG_THRESHOLD  6.0   /* px a pressed tab must travel before it is dragged */
 
@@ -52,7 +56,8 @@ typedef enum chl_part {
     CHL_PART_IDENTITY,
     CHL_PART_URL,
     CHL_PART_MENU,
-    CHL_PART_CONTENT
+    CHL_PART_CONTENT,
+    CHL_PART_STAR        /* bookmark star inside the pill (zero-sized when it does not fit) */
 } chl_part;
 
 typedef struct chl_layout {
@@ -71,6 +76,7 @@ typedef struct chl_layout {
     chl_rect new_tab;
     chl_rect win_min, win_max, win_close; /* zero-sized under SSD */
     chl_rect back, fwd, reload, url, identity, menu;
+    chl_rect star;         /* bookmark toggle at the pill's right; zero-sized if too narrow */
 } chl_layout;
 
 /* Computes the layout. tab_count >= 1 and 0 <= active < tab_count, else CHL_EINVAL
@@ -98,6 +104,11 @@ int chl_move_index(int i, int from, int to);
 
 /* Ctrl+<digit>: 1..8 select that tab, 9 the last one (Firefox). -1 when there is none. */
 int chl_tab_for_digit(int digit, int tab_count);
+
+/* A tab label for a page without <title> (Firefox): a file's name for file: URLs and
+ * local paths, otherwise the URL without its "scheme://". Writes "" for NULL/empty.
+ * Truncates on a UTF-8 boundary; out is always NUL-terminated when cap > 0. */
+void chl_tab_fallback_title(const char *url, char *out, size_t cap);
 
 /* --- find bar (spec/find_text.md), docked at the bottom of the window --- */
 

@@ -42,8 +42,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     if (chl_compute(width, tabs & 1, tabs, active, &l) == CHL_OK) {
         if (tabs < 1 || active < 0 || active >= tabs) abort();
         const chl_rect rs[] = { l.new_tab, l.win_min, l.win_max, l.win_close, l.back, l.fwd,
-                                l.reload, l.url, l.identity, l.menu };
+                                l.reload, l.url, l.identity, l.star, l.menu };
         for (size_t i = 0; i < sizeof rs / sizeof rs[0]; ++i) check_rect(rs[i]);
+        /* The star lives inside the pill, right of the badge, or is not there at all. */
+        if (l.star.w > 0.0 && (l.star.x < l.identity.x + l.identity.w ||
+                               l.star.x + l.star.w > l.url.x + l.url.w + 1e-9)) abort();
         for (int i = 0; i < tabs; ++i) {
             chl_rect t;
             if (chl_tab_rect(&l, i, &t)) check_rect(t);
@@ -53,6 +56,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         int ti = -2;
         chl_part part = chl_hit(&l, hx, hy, &ti);
         if ((part == CHL_PART_TAB || part == CHL_PART_TAB_CLOSE) != (ti >= 0)) abort();
+        if (part == CHL_PART_STAR && !chl_rect_has(l.star, hx, hy)) abort();
         if (ti >= 0 && !chl_tab_rect(&l, ti, NULL)) abort();
         /* Hidden-tab indicators: exact counts, live only when they hide something. */
         check_rect(l.more_left);
@@ -104,6 +108,18 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         if (strncasecmp(url, "https://", 8) != 0) abort();
     }
     if (chl_identity_label(id) == NULL) abort();
+    /* Fallback tab label: bounded, NUL-terminated, a suffix-or-whole of the URL that never
+     * splits a UTF-8 sequence it started. */
+    {
+        size_t cap = (size_t)((data[0] >> 2) & 0x3F) + 1u;
+        char lab[64];
+        memset(lab, 'Z', sizeof lab);
+        chl_tab_fallback_title(url, lab, cap);
+        size_t ln = 0;
+        while (ln < cap && lab[ln] != '\0') ++ln;
+        if (ln >= cap) abort();
+        if (ln > 0 && strstr(url, lab) == NULL) abort();
+    }
     free(url);
     return 0;
 }

@@ -104,6 +104,9 @@ chl_status chl_compute(double width, int csd, int tab_count, int active, chl_lay
     double iw = l.url.w - 2.0 * CHL_ID_INSET;
     if (iw > CHL_ID_W) iw = CHL_ID_W;
     l.identity = rect(l.url.x + CHL_ID_INSET, uy + CHL_ID_INSET, iw, CHL_URL_H - 2.0 * CHL_ID_INSET);
+    if (l.url.w >= CHL_STAR_MIN_URL)
+        l.star = rect(l.url.x + l.url.w - CHL_ID_INSET - CHL_STAR_W, uy + CHL_ID_INSET,
+                      CHL_STAR_W, CHL_URL_H - 2.0 * CHL_ID_INSET);
 
     *out = l;
     return CHL_OK;
@@ -157,6 +160,7 @@ chl_part chl_hit(const chl_layout *l, double x, double y, int *tab) {
     if (chl_rect_has(l->fwd, x, y))      return CHL_PART_FWD;
     if (chl_rect_has(l->reload, x, y))   return CHL_PART_RELOAD;
     if (chl_rect_has(l->identity, x, y)) return CHL_PART_IDENTITY;
+    if (chl_rect_has(l->star, x, y))     return CHL_PART_STAR;
     if (chl_rect_has(l->url, x, y))      return CHL_PART_URL;
     if (chl_rect_has(l->menu, x, y))     return CHL_PART_MENU;
     return CHL_PART_NONE;
@@ -311,3 +315,36 @@ chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y) {
     return CHL_FIND_BAR;
 }
 
+
+/* --- tab label for a page without <title> --- */
+
+void chl_tab_fallback_title(const char *url, char *out, size_t cap) {
+    if (out == NULL || cap == 0) return;
+    out[0] = '\0';
+    if (url == NULL) return;
+    const char *s = url;
+    int is_file = (url[0] == '/');
+    if (strncmp(url, "file://", 7) == 0) { is_file = 1; s = url + 7; }
+    if (is_file) {
+        const char *slash = strrchr(s, '/');
+        if (slash != NULL && slash[1] != '\0') s = slash + 1;
+        else s = url;                       /* a directory: keep the whole path */
+    } else {
+        const char *sep = strstr(url, "://");
+        if (sep != NULL) {
+            int scheme_ok = (sep > url);
+            for (const char *p = url; p < sep; ++p)
+                if (!((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
+                      (*p >= '0' && *p <= '9') || *p == '+' || *p == '-' || *p == '.'))
+                    scheme_ok = 0;
+            if (scheme_ok) s = sep + 3;
+        }
+    }
+    size_t n = strlen(s);
+    if (n >= cap) {
+        n = cap - 1;
+        while (n > 0 && ((unsigned char)s[n] & 0xC0u) == 0x80u) --n;  /* UTF-8 boundary */
+    }
+    memcpy(out, s, n);
+    out[n] = '\0';
+}

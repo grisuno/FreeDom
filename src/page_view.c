@@ -1447,6 +1447,8 @@ int pv_content_hidden(int box_hidden, int run_visibility) {
 void pv_text_ext_reset(pv_text_ext *e) {
     if (e == NULL) return;
     e->font_family = 0; e->fontface = 0u; e->font_list[0] = '\0'; e->text_transform = 0;
+    e->family_locked = 0;
+    e->size_from_medium = 0;
     e->letter_spacing = PV_LEN_UNSET; e->word_spacing = PV_LEN_UNSET;
     e->shadow_dx = 0; e->shadow_dy = 0; e->shadow_color = -1;
     e->opacity = -1; e->valign = 0; e->text_indent = PV_LEN_UNSET;
@@ -1473,10 +1475,12 @@ void pv_text_ext_reset(pv_text_ext *e) {
 /* Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field
  * already set is not overwritten — keeps the nearest, matching inheritance). */
 static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs) {
-    if (e->font_family == 0 && cs->font_family != CSS_FF_UNSET) e->font_family = cs->font_family;
-    if (e->fontface == 0u && cs->fontface != 0u) e->fontface = cs->fontface;
-    if (e->font_list[0] == '\0' && cs->font_list[0] != '\0')
-        memcpy(e->font_list, cs->font_list, sizeof e->font_list);
+    if (!e->family_locked) {
+        if (e->font_family == 0 && cs->font_family != CSS_FF_UNSET) e->font_family = cs->font_family;
+        if (e->fontface == 0u && cs->fontface != 0u) e->fontface = cs->fontface;
+        if (e->font_list[0] == '\0' && cs->font_list[0] != '\0')
+            memcpy(e->font_list, cs->font_list, sizeof e->font_list);
+    }
     if (e->text_transform == 0 && cs->text_transform != CSS_TT_UNSET) e->text_transform = cs->text_transform;
     if (e->letter_spacing == PV_LEN_UNSET && cs->letter_spacing != CSS_LEN_UNSET)
         e->letter_spacing = cs->letter_spacing;
@@ -3186,7 +3190,23 @@ static int is_bold_tag(lxb_tag_id_t t) {
         || t == LXB_TAG_H4 || t == LXB_TAG_H5 || t == LXB_TAG_H6;
 }
 static int is_italic_tag(lxb_tag_id_t t) {
-    return t == LXB_TAG_I || t == LXB_TAG_EM;
+    return t == LXB_TAG_I || t == LXB_TAG_EM || t == LXB_TAG_VAR || t == LXB_TAG_CITE ||
+           t == LXB_TAG_DFN;
+}
+/* Tags the UA sheet sets in monospace (HTML 15.3.4; <pre> is handled with its
+ * white-space default). */
+static int is_mono_tag(lxb_tag_id_t t) {
+    return t == LXB_TAG_CODE || t == LXB_TAG_KBD || t == LXB_TAG_SAMP || t == LXB_TAG_TT;
+}
+
+/* A bare generic monospace (the UA family of code/kbd/samp/tt/pre, or an author list that
+ * is exactly `monospace`) whose size still derives from `medium` is scaled to the generic's
+ * own default; the relative product (em, %, the UA heading scale) rides on top of it. */
+static void mono_generic_size(const pv_text_ext *ext, int *font_scale) {
+    if (!ext->size_from_medium || ext->font_family != CSS_FF_MONO) return;
+    if (ext->font_list[0] != '\0' && strcmp(ext->font_list, "monospace") != 0) return;
+    double pct = (*font_scale != 0) ? (double)*font_scale : 100.0;
+    *font_scale = round_pct(pct * FC_MONO_DEFAULT_PX / CL_INITIAL_FONT_SIZE);
 }
 
 /* Resolves the inline context of a text node: nearest <a href>, nearest heading
@@ -3879,6 +3899,13 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 }
                 cs = &cs_own;
             }
+            /* The UA monospace of code/kbd/samp/tt sits below the element's own author
+             * family and above anything it would inherit. */
+            if (is_mono_tag(t) && !ext->family_locked && ext->font_family == 0 &&
+                cs->font_family == CSS_FF_UNSET) {
+                ext->font_family = CSS_FF_MONO;
+                ext->family_locked = 1;
+            }
             pv_text_ext_merge(ext, cs);
 
             if (is_bold_tag(t)) tag_bold = 1;
@@ -4568,6 +4595,7 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
         *font_scale = round_pct(100.0 * fs_rel);
         *font_abs = heading_fs_own;
     }
+    ext->size_from_medium = !got_fs;
 
     *bold = got_css_bold ? css_bold : tag_bold;
     *italic = got_css_italic ? css_italic : tag_italic;
@@ -7328,6 +7356,7 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
             if (ext.font_family == CSS_FF_UNSET)
                 ext.font_family = CSS_FF_MONO;
         }
+        mono_generic_size(&ext, &font_scale);
 
         /* R8: ::before generated content. Emit once per element: check if the
          * text node's parent element has non-empty content_str in its resolved
@@ -7512,6 +7541,9 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                 if (line == NULL) { free(href_dup2); free(collapsed); rc = PV_ERR_OOM; goto cleanup; }
 
                 int line_brk = first ? brk : (brk || !own_oof);
+                /* A source newline is a forced break inside the <pre>, not a new block:
+                 * only the first line opens it (and collapses its margins). */
+                int line_cont = !first && line_brk;
                 first = 0;
                 pv_status st = pv_append(v, href_dup2 != NULL ? PV_LINK : PV_TEXT,
                                          heading, line_brk, line, href_dup2);
@@ -7553,6 +7585,11 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                 pv_set_block_id(v, bdeco);
                 pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
                 pv_set_oof(v, own_oof);
+                /* A blank source line is an empty line box one strut high (9.4.2); the
+                 * empty tail after the last newline is not a line. */
+                if (line_cont || len == 0)
+                    pv_set_br_line(v, (line_cont ? PV_BR_CONT : 0) |
+                                      ((len == 0 && nl != NULL) ? PV_BR_EMPTY : 0));
 
                 if (nl == NULL) break;
                 start = nl + 1;

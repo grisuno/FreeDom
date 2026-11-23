@@ -19,6 +19,12 @@
  * stays 1920 and only this render viewport uses it. */
 #define FC_PNG_PAGE_W 1000.0
 
+/* Default size of the bare generic `monospace` (code/kbd/samp/tt/pre), against 16 px for
+ * every other family. Firefox's pref says 13 (font.size.monospace.x-western) but on Linux
+ * it computes 12 px (getComputedStyle, measured on the parity host, tanda 102): the
+ * reference renderer is what we match. spec/page_view.md "monospace genérica". */
+#define FC_MONO_DEFAULT_PX 12.0
+
 /* Viewport height (px) the headless render reports to a trusted page's JS
  * (window.innerHeight, spec/js_geom.md); the parity harness's reference height. */
 #define FC_HEADLESS_VIEW_H 768

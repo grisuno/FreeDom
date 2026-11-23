@@ -84,3 +84,23 @@ componente, entonces el resultado es idéntico al de la tabla global.
 **Aproximaciones documentadas.** Una `var()` dentro del VALOR de una custom property se
 resuelve donde se USA, no donde se declara (difiere solo si un descendiente redefine el
 nombre referido). `@property inherits:false` todavía hereda.
+
+## Palabras clave CSS-wide como valor de una custom property (2026-11-23)
+
+`--x: initial` no es el texto `initial`: es el valor inicial de la propiedad (Cascade 5 §7.3),
+que para una custom property no registrada es el **valor garantizado-inválido** (Variables 1
+§2.2) y para una registrada con `@property` es su `initial-value`. Una `var(--x, F)` toma
+entonces `F`. Tailwind v4 lo usa en toda utilidad de degradado: su bloque `@layer properties`
+(un `@supports` que solo casa con Firefox) pone `--tw-gradient-via-stops: initial` en `*`, y
+`--tw-gradient-stops: var(--tw-gradient-via-stops, <paradas>)` debe caer en las paradas. Se
+sustituía la palabra literal y el degradado entero se descartaba (tarjetas de Hugging Face).
+
+- `initial`, `revert`, `revert-layer` ⇒ el `initial-value` de `@property` si existe, si no
+  ausente (garantizado-inválido).
+- `inherit`, `unset` ⇒ el valor del siguiente nivel de la búsqueda (ancestros, hoja, inicial):
+  las custom properties no registradas heredan, así que `unset` = `inherit`.
+- Mayúsculas indistintas; se compara el valor ENTERO recortado (`initial foo` es texto).
+
+Dado `--v: initial` sin `@property`, cuando se resuelve `var(--v, a)`, entonces `a`.
+Dado `@property --v {initial-value: 7}` y `--v: initial`, entonces `var(--v, a)` = `7`.
+Dado un padre con `--v: p` y el elemento con `--v: inherit`, entonces `var(--v)` = `p`.

@@ -46,6 +46,29 @@ centred circle of radius min(w,h)/2) and a size written as lengths made the WHOL
 Dado `radial-gradient(141.53% 114.68% at 87.46% 55.27%, #9a7cff 36.75%, #0e0aa200)`, entonces
 rx = 1415 per-mille of the width, ry = 1147 of the height, centre (875, 553), and the stops parse.
 
+## 3b. Color interpolation method (CSS Images 4 §3.1, CSS Color 4 §12) — 2026-11-23
+
+`<color-interpolation-method>` = `in <rectangular-color-space>` | `in <polar-color-space>
+[shorter|longer|increasing|decreasing hue]` may appear in the FIRST argument of a linear,
+radial or conic gradient, before or after the direction/shape/`from` prelude:
+`linear-gradient(to bottom right in oklab, ...)`, `linear-gradient(in oklch, ...)`.
+
+Why: Tailwind v4 writes EVERY `bg-linear-*`/`bg-gradient-*` utility as `--tw-gradient-position:
+to <dir> in oklab`. The parser treated the argument as a broken direction and dropped the whole
+gradient: Hugging Face's Spaces cards (purple/indigo) painted as white text on white.
+
+- Accepted spaces: `srgb`, `srgb-linear`, `display-p3`, `a98-rgb`, `prophoto-rgb`, `rec2020`,
+  `lab`, `oklab`, `xyz`, `xyz-d50`, `xyz-d65` (rectangular); `hsl`, `hwb`, `lch`, `oklch`
+  (polar, optionally followed by a hue method and the word `hue`).
+- An unknown space, a hue method on a rectangular space, or `in` with nothing after it drops the
+  gradient (fail closed, as Firefox).
+- The method is consumed and the stops are interpolated in sRGB, as before. Approximation: an
+  `oklab` ramp between two saturated colors is slightly brighter at its midpoint than sRGB.
+
+Dado `linear-gradient(to bottom right in oklab, red, blue)`, entonces ángulo 135 y 2 paradas.
+Dado `linear-gradient(in oklch longer hue, red, blue)`, entonces ángulo 180 y 2 paradas.
+Dado `linear-gradient(to right in bogus, red, blue)`, entonces se descarta.
+
 ## 4. Security guarantees
 
 - No IO. Bounded `CSS_TOK_MAX`, `CSS_URL_MAX`, `CSS_GRAD_STOPS_MAX`.

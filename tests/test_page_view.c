@@ -845,6 +845,91 @@ static void test_build_svg_css_size(void **state) {
     hp_document_free(doc);
 }
 
+/* HTML 15.3.4 UA sheet: code/kbd/samp/tt are monospace and var/cite/dfn italic, and an
+ * ancestor's family (or @font-face) does not reach inside them -- only one declared on the
+ * element itself or nearer the text wins. */
+static void test_build_ua_mono_and_italic_tags(void **state) {
+    (void)state;
+    static const char CSS[] = "body{font-family:Georgia,serif} .own{font-family:sans-serif}";
+    hp_document *doc = parse(
+        "<body><p>t <code>c1</code> <kbd>k1</kbd> <samp>s1</samp> <tt>t1</tt>"
+        " <var>v1</var> <cite>ci1</cite> <dfn>d1</dfn> <code class='own'>o1</code>"
+        " <code><span class='own'>n1</span></code></p></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const char *mono[] = { "c1", "k1", "s1", "t1" };
+    for (size_t i = 0; i < 4; ++i) {
+        const pv_run *r = find_text(v, mono[i]);
+        assert_non_null(r);
+        assert_int_equal(r->font_family, CSS_FF_MONO);
+    }
+    const char *ital[] = { "v1", "ci1", "d1" };
+    for (size_t i = 0; i < 3; ++i) {
+        const pv_run *r = find_text(v, ital[i]);
+        assert_non_null(r);
+        assert_int_equal(r->italic, 1);
+    }
+    assert_int_equal(find_text(v, "o1")->font_family, CSS_FF_SANS);
+    assert_int_equal(find_text(v, "n1")->font_family, CSS_FF_SANS);
+    assert_int_equal(find_text(v, "t ")->font_family, CSS_FF_SERIF);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* The source newlines of a <pre> are forced line breaks INSIDE one block: the first line
+ * opens the block (its margins), the rest only start a new line (PV_BR_CONT), or the
+ * <pre>'s 1em margins were laid out again between every two lines. */
+static void test_build_pre_lines_are_one_block(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><p>a</p><pre>aaa\nbbb\nccc</pre></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, "", 0, 0, &v), PV_OK);
+    const pv_run *l1 = find_text(v, "aaa"), *l2 = find_text(v, "bbb"), *l3 = find_text(v, "ccc");
+    assert_true(l1->block_break && l2->block_break && l3->block_break);
+    assert_int_equal(l1->br_line & PV_BR_CONT, 0);
+    assert_int_equal(l2->br_line & PV_BR_CONT, PV_BR_CONT);
+    assert_int_equal(l3->br_line & PV_BR_CONT, PV_BR_CONT);
+    pv_free(v);
+    hp_document_free(doc);
+
+    doc = parse("<body><pre>aaa\n\nccc</pre></body>");
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, "", 0, 0, &v), PV_OK);
+    const pv_run *blank = find_text(v, "");
+    assert_non_null(blank);
+    assert_int_equal(blank->br_line & (PV_BR_EMPTY | PV_BR_CONT), PV_BR_EMPTY | PV_BR_CONT);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Generic monospace has its own default size (12 px, FC_MONO_DEFAULT_PX): only when the
+ * size still derives from the initial `medium` and the family is the bare generic. */
+static void test_build_generic_mono_default_size(void **state) {
+    (void)state;
+    static const char CSS[] = ".m{font-family:Menlo,monospace} .g{font-family:monospace}";
+    hp_document *doc = parse(
+        "<body><p>t <code>c1</code> <code class='m'>m1</code> <span class='g'>g1</span></p>"
+        "<pre>p1</pre><h1>h <code>h1c</code></h1></body>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_int_equal(find_text(v, "t ")->font_scale, 0);
+    assert_int_equal(find_text(v, "c1")->font_scale, 75);
+    assert_int_equal(find_text(v, "g1")->font_scale, 75);
+    assert_int_equal(find_text(v, "p1")->font_scale, 75);
+    assert_int_equal(find_text(v, "m1")->font_scale, 0);
+    const pv_run *hc = find_text(v, "h1c");
+    assert_int_equal(hc->font_scale, 75);
+    assert_int_equal(hc->font_abs, 0);
+    pv_free(v);
+    hp_document_free(doc);
+
+    static const char ABS[] = "body{font-size:16px}";
+    doc = parse("<body><p>t <code>c2</code></p></body>");
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, ABS, sizeof ABS - 1, 0, &v), PV_OK);
+    assert_int_equal(find_text(v, "c2")->font_scale, 100);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* `svg{fill:currentColor}` (the octicon idiom) must ride the run as the element's
  * own text colour, not as the CC_COLOR_CURRENT sentinel: the painter would seed both
  * fill and currentColor from it and draw the default black (github's header mark). */
@@ -5916,6 +6001,9 @@ int main(void) {
         cmocka_unit_test(test_build_image_unknown_dims),
         cmocka_unit_test(test_build_image_px_and_tracking_dims),
         cmocka_unit_test(test_build_svg_css_size),
+        cmocka_unit_test(test_build_ua_mono_and_italic_tags),
+        cmocka_unit_test(test_build_generic_mono_default_size),
+        cmocka_unit_test(test_build_pre_lines_are_one_block),
         cmocka_unit_test(test_build_svg_fill_current_color_takes_text_color),
         cmocka_unit_test(test_build_svg_fills_narrow_ancestor),
         cmocka_unit_test(test_build_svg_fills_border_box_ancestor),

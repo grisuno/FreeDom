@@ -58,6 +58,7 @@
 #include "find_text.h"
 #include "site_panel.h"
 #include "nav_token.h"
+#include "doc_title.h"
 #include "webcaps.h"
 #include "host_conf.h"
 #include "css_gradient.h"
@@ -104,6 +105,7 @@
 #define UI_TOOLBAR_H   CHL_TOOLBAR_H
 #define UI_MARGIN      6.0
 #define UI_BTN_LEFT    0x110  /* BTN_LEFT */
+#define UI_BTN_MIDDLE  0x112  /* BTN_MIDDLE */
 /* Left indent (px) per UA-padded list level: the HTML UA sheet gives ul/ol
  * `padding-inline-start: 40px` (HTML rendering 15.3.7). A level whose padding the
  * author declared does not count (page_view), its padding goes through the box model. */
@@ -312,6 +314,7 @@ typedef struct tab_ctx {
     int             loading;
     nt_token       *nav;   /* this tab's network navigation in flight (spec/nav_token.md) */
     struct fetch_job *ready; /* its result, arrived while the tab was parked; shown on return */
+    char            ready_title[256]; /* <title> of `ready` (spec/doc_title.md), "" = none */
     const char     *hover_href; /* aliases doc; moves with it */
     int             hover_cursor; /* css_cursor resolved at the pointer, moves with hover_href */
 } tab_ctx;
@@ -407,6 +410,11 @@ typedef struct browser_window {
     int       reader;      /* distraction-free mode: drop boilerplate + author CSS, wide margins */
     int       loading;   /* a network request is in flight (busy clock shown) */
     ui_hot    hot;       /* chrome part under the pointer, or UI_HOT_NONE */
+    char      tab_labels[UI_MAX_TABS][160]; /* fallback tab titles (chl_tab_fallback_title) */
+    /* Background link opens from one tab line up after it in opening order (Firefox): the
+     * tab they came from, how many so far, and the tab count right after the last one (any
+     * other open/close/switch in between restarts the run). */
+    int       bg_open_from, bg_open_n, bg_open_count;
     int       menu_hot_row; /* options-menu row under the pointer, or -1 */
     rd_doc   *doc;      /* structured render of the current page; NULL => text mode */
     rdp_caps  caps;     /* per-page render capabilities (images off by default) */
@@ -436,6 +444,8 @@ typedef struct browser_window {
 
     int         menu_open;     /* the options (gear) panel is showing */
     const char *hover_href;    /* link target under the pointer (aliases doc), or NULL */
+    double      ls_zone[3];    /* link status strip, left placement (left, top, right) */
+    int         ls_flipped;    /* the last paint put the strip on the right */
     int         hover_cursor;  /* author cursor (css_cursor) resolved at the pointer, or
                                  * CSS_CUR_UNSET; drives the hand-vs-arrow decision alongside
                                  * hover_href/hot */
@@ -1141,6 +1151,14 @@ static void remember_visit(browser_window *w, const char *url) {
         profile_save(&w->profile, &w->prefs);
 }
 
+/* The pill's bookmark star: 0 hidden (nothing to bookmark: start page, about:), 1 the
+ * page is not bookmarked, 2 it is (spec/chrome_layout.md, tanda 102). */
+static int bookmark_star_state(const browser_window *w) {
+    const char *url = browser_current_url(&w->bs);
+    if (url == NULL || url[0] == '\0' || strncmp(url, "about:", 6) == 0) return 0;
+    return (prefs_bookmark_index(&w->prefs, url) >= 0) ? 2 : 1;
+}
+
 /* Ctrl+B / menu: toggles a bookmark for the current page (title from the page). */
 static void bookmark_toggle_current(browser_window *w) {
     const char *url = browser_current_url(&w->bs);
@@ -1375,6 +1393,14 @@ static double repl_edges_y(const repl_edges *e) {
     return e->mt + e->bt + e->pt + e->pb + e->bb + e->mb;
 }
 
+/* Sets a packed author color whose bits 24..30 carry its transparency (cv_parse_color_t7):
+ * an opaque color is exactly set_rgb. */
+static void set_packed_rgba(cairo_t *cr, int col) {
+    ui_rgb c = rgb_from_packed(col & 0xffffff);
+    double a = 1.0 - (double)((col >> 24) & 0x7f) / 127.0;
+    cairo_set_source_rgba(cr, c.r, c.g, c.b, a);
+}
+
 /* Paints a replaced element's own background and solid borders around its
  * content rect (x, y, cw, ch) -- the frame the edges above reserve. */
 static void paint_replaced_frame(cairo_t *cr, const rd_doc *doc, const rd_block *b,
@@ -1399,7 +1425,7 @@ static void paint_replaced_frame(cairo_t *cr, const rd_doc *doc, const rd_block 
     };
     for (int k = 0; k < 4; ++k) {
         if (!(side[k].w > 0.0) || side[k].st < CSS_BST_SOLID) continue;
-        set_rgb(cr, rgb_from_packed(side[k].c >= 0 ? side[k].c : 0));
+        set_packed_rgba(cr, side[k].c >= 0 ? side[k].c : 0);
         cairo_rectangle(cr, side[k].x, side[k].y, side[k].rw, side[k].rh);
         cairo_fill(cr);
     }
@@ -3324,6 +3350,7 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j);
 static void tab_show_ready(browser_window *w) {
     fetch_job *ready = w->tab_slots[w->active_tab].ready;
     w->tab_slots[w->active_tab].ready = NULL;
+    w->tab_slots[w->active_tab].ready_title[0] = '\0';
     if (ready != NULL) deliver_fetch_result(w, ready);
     fetch_job_free(ready);
 }
@@ -3472,9 +3499,18 @@ static void tab_drag_motion(browser_window *w) {
 }
 
 /* Title shown on a tab: the page title, else the URL, else a placeholder. */
-static const char *tab_title(const browser_window *w, int i) {
+static const char *tab_title(const browser_window *w, int i, char *buf, size_t cap) {
     const browser_state *bs = (i == w->active_tab) ? &w->bs : &w->tab_slots[i].bs;
     if (bs->page_title != NULL && bs->page_title[0] != '\0') return bs->page_title;
+    /* Loaded while parked: its title shows before the page is laid out on return. */
+    if (i != w->active_tab && w->tab_slots[i].ready != NULL && w->tab_slots[i].ready_title[0] != '\0')
+        return w->tab_slots[i].ready_title;
+    /* No <title>: the file's name, or the URL without its scheme (Firefox). */
+    const char *u = browser_current_url(bs);
+    if (u != NULL && u[0] != '\0') {
+        chl_tab_fallback_title(u, buf, cap);
+        if (buf[0] != '\0') return buf;
+    }
     if (bs->url_bar[0] != '\0') return bs->url_bar;
     return "New tab";
 }
@@ -3497,9 +3533,14 @@ static double toolbar_top(const browser_window *w) {
 /* The content area rectangle below the toolbar, in surface coordinates. The
  * single source of truth for both painting and click hit-testing so they cannot
  * drift apart. */
+static double page_gutter(const browser_window *w);
+
 static void content_geometry(const browser_window *w, double *top, double *height) {
     double t = toolbar_top(w) + UI_TOOLBAR_H;
-    double h = (double)w->height - t - 2.0 * w->theme.content_margin;
+    /* The viewport reaches the window's bottom edge, as the page is painted there: only the
+     * plain-text viewer keeps the theme's breathing room. Subtracting it for a document left
+     * its last 40 px painted but dead to the pointer and put `bottom:0` 40 px above the edge. */
+    double h = (double)w->height - t - 2.0 * page_gutter(w);
     if (w->fip_open) h -= CHL_FIND_H;      /* the find bar takes the bottom of the viewport */
     if (h < 1.0) h = 1.0;
     *top = t;
@@ -3656,6 +3697,7 @@ static ui_hot chrome_hot_at(const browser_window *w, double px, double py) {
     chl_layout l = chrome_of(w);
     int ti = -1;
     chl_part part = chl_hit(&l, px, py, &ti);
+    if (part == CHL_PART_STAR && !bookmark_star_state(w)) part = CHL_PART_URL; /* hidden star */
     if (part == CHL_PART_CONTENT || part == CHL_PART_DRAG) return UI_HOT_NONE;
     if (w->menu_open && part != CHL_PART_MENU) return UI_HOT_NONE;
     return (ui_hot)(((ti + 1) << 8) | (int)part);
@@ -4535,6 +4577,9 @@ static void close_inline_boxes(rc_layout *L, rc_state *s, double row_top, double
         }
         x1 += ib->pad_r;
         if (x1 <= x0) continue;               /* produced nothing: no box to paint */
+        /* Border edges land on whole pixels, as Firefox snaps them: a 1px border at
+         * x = 47.5 painted as a 2px grey smear beside the text. */
+        x1 = x0 + round(x1 - x0);
         rc_box *bx = rc_add_box(L);
         if (bx == NULL) continue;
         memset(bx, 0, sizeof *bx);
@@ -4679,8 +4724,10 @@ static void flush_line(rc_layout *L, rc_state *s, const ui_theme *th) {
         /* Only a line whose fragments all share one background gets a full-width
          * band; a mixed line (body text with an inline <code>/<mark> highlight)
          * leaves the painting to the per-fragment fills, instead of smearing the
-         * LAST run's colour across the whole line. */
-        r->bg_rgb = (r->count > 0 && s->line_bg_mixed) ? -1 : s->bg_rgb;
+         * LAST run's colour across the whole line. The band is the colour the line's
+         * fragments SHARE, not the current run's: a line closed because an inline
+         * <code> wrapped to the next one took the <code>'s colour across all of it. */
+        r->bg_rgb = (r->count == 0) ? s->bg_rgb : (s->line_bg_mixed ? -1 : s->line_bg);
         r->bg_w = s->bg_w;
         r->x_off = s->indent_px;
         r->align = s->align; r->blk = NULL;
@@ -6604,6 +6651,33 @@ static int empty_atom_continues_line(const rd_doc *doc, size_t run_i, int box_id
         if (block_leaves_flow(doc, nx)) continue;
         return nx->block_break == 0 && nx->kind != RD_IMAGE && nx->kind != RD_SVG &&
                nx->kind != RD_VIDEO;
+    }
+    return 0;
+}
+
+/* An inline-block WITH TEXT that opens a line whose line goes on after it: the badge in
+ * `<span class=badge>972</span> likes`. It is an atom of that line exactly as when text
+ * precedes it (CSS 2.1 9.2.2: inline-level wherever it sits); opened as a block it flushed
+ * the line and the rest of the sentence dropped to the next one. Only an atom made of
+ * plain runs of its own box qualifies -- a structured inline-block (a card with block
+ * children) keeps the block treatment. Bounded scan (RC_ATOM_SCAN runs). */
+#define RC_ATOM_SCAN 64
+static int text_atom_continues_line(const rd_doc *doc, size_t run_i, int box_id) {
+    size_t n = rd_count(doc);
+    if (run_i >= n) return 0;
+    const rd_block *r = rd_at(doc, run_i);
+    if (r->kind != RD_PARAGRAPH || r->block_id != box_id || r->text == NULL ||
+        r->text[0] == '\0')
+        return 0;
+    size_t k = run_i + 1;
+    for (; k < n && rd_at(doc, k)->block_id == box_id; ++k) {
+        const rd_block *in = rd_at(doc, k);
+        if (k - run_i >= RC_ATOM_SCAN || in->kind != RD_PARAGRAPH || in->block_break) return 0;
+    }
+    for (; k < n && k - run_i < 2 * RC_ATOM_SCAN; ++k) {
+        const rd_block *nx = rd_at(doc, k);
+        if (block_leaves_flow(doc, nx)) continue;
+        return nx->block_break == 0 && nx->kind == RD_PARAGRAPH;
     }
     return 0;
 }
@@ -9019,6 +9093,10 @@ static void reconcile_boxes_below(cairo_t *cr, const browser_window *w,
                        s->line_open && L->nfrag > s->line_first);
         int ib_empty = (!ib_atom && d->display == CSS_DISP_INLINE_BLOCK && k == n - 1 &&
                         empty_atom_continues_line(doc, run_i, path[k]));
+        int ib_lead = (!ib_atom && !ib_empty && d->display == CSS_DISP_INLINE_BLOCK &&
+                       k == n - 1 && s->ibx_open == 0 &&
+                       text_atom_continues_line(doc, run_i, path[k]));
+        if (ib_lead) { ib_atom = 1; open_line(L, s); }
         if (s->ibx_open > 0 && !((ib_inline || ib_atom || ib_empty) && s->n_ibx < RC_IBOX_MAX))
             break;
         if ((ib_inline || ib_atom || ib_empty) && s->n_ibx < RC_IBOX_MAX) {
@@ -10777,8 +10855,14 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         int atom_first = 0;
         if (b->block_break && b->block_id >= 0 && s.ibx_open == 0) {
             const pv_box_def *abd = rd_box_at(doc, (size_t)b->block_id);
-            atom_first = (abd != NULL && abd->display == CSS_DISP_INLINE_BLOCK &&
-                          empty_atom_continues_line(doc, i, b->block_id));
+            /* A display:inline box that opens a line (`<p><kbd>Esc</kbd> closes`) opens it in
+             * reconcile too: settled after, its border box materialised on the PREVIOUS
+             * line (a dash at the top, a stray box after the last word). */
+            atom_first = (abd != NULL &&
+                          ((abd->display == CSS_DISP_INLINE_BLOCK &&
+                            (empty_atom_continues_line(doc, i, b->block_id) ||
+                             text_atom_continues_line(doc, i, b->block_id))) ||
+                           (abd->display == CSS_DISP_INLINE_BOX && b->kind == RD_PARAGRAPH)));
         }
         if (atom_first) {
             flush_line(L, &s, th);
@@ -13465,7 +13549,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                 double ir = radius_c[rk] - wa[rk];
                 inner_rc[rk] = ir > 0.0 ? ir : 0.0;
             }
-            set_rgb(cr, rgb_from_packed(bc[first] >= 0 ? bc[first] : 0x333333));
+            set_packed_rgba(cr, bc[first] >= 0 ? bc[first] : 0x333333);
             cairo_new_path(cr);
             box_path4(cr, x, y, w, h, radius_c);
             box_path4(cr, x + bl, y + bt, w - bl - br, h - bt - bb, inner_rc);
@@ -13478,7 +13562,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
     if (uniform) {
         int style = bs[0];
         int col = bc[0] >= 0 ? bc[0] : 0x333333;
-        set_rgb(cr, rgb_from_packed(col));
+        set_packed_rgba(cr, col);
         cairo_set_line_width(cr, bt);
         if (style == CSS_BST_DASHED) {
             double on = 4.0 * bt, off = 2.0 * bt;
@@ -13495,7 +13579,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                      w - bt + third, h - bt + third,
                      inner_rad_outer > 0.0 ? inner_rad_outer : 0.0);
             cairo_stroke(cr);
-            set_rgb(cr, rgb_from_packed(col));
+            set_packed_rgba(cr, col);
             cairo_set_line_width(cr, third);
             box_path(cr, x + bt / 2.0 + third / 2.0, y + bt / 2.0 + third / 2.0,
                      w - bt - third, h - bt - third,
@@ -13537,7 +13621,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                 cairo_set_dash(cr, (double[]){ 0.0, side_w * 2.0 }, 2, 0.0);
             } else if (style == CSS_BST_DOUBLE) {
                 double third = side_w / 3.0;
-                set_rgb(cr, rgb_from_packed(col));
+                set_packed_rgba(cr, col);
                 cairo_set_line_width(cr, third);
                 if (k == 0 || k == 2) {
                     double dy = (k == 0) ? -third : third;
@@ -13570,7 +13654,7 @@ static void paint_box_decoration(cairo_t *cr, const rc_box *bx, double ox, doubl
                 if (nb > 1.0) nb = 1.0;
                 set_rgb(cr, (ui_rgb){ nr, ng, nb });
             } else {
-                set_rgb(cr, rgb_from_packed(col));
+                set_packed_rgba(cr, col);
             }
             cairo_move_to(cr, x1, y1); cairo_line_to(cr, x2, y2); cairo_stroke(cr);
         }
@@ -13702,8 +13786,7 @@ static void paint_deco_line(cairo_t *cr, double x0, double x1, double ly,
 /* Paints one laid-out row at vertical position ry. Shared by the on-screen painter
  * and the PDF exporter so both render identically (same fonts, colours, emphasis,
  * links and backgrounds). band_w is the full-bleed width for notice banners (the
- * window width on screen, the page width in the PDF). show_hover draws the link
- * hover highlight (on screen only; suppressed when exporting). */
+ * window width on screen, the page width in the PDF). */
 static int row_owner_block_id(const rc_layout *L, const rc_row *r);
 
 /* Draws one SVG block into an arbitrary rect. Shared by the row painter and the
@@ -13914,20 +13997,17 @@ static void fip_reveal(browser_window *w, double content_h) {
 
 static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout *L,
                                  const rc_row *r, double left, double ry,
-                                 double content_w, double band_w, int show_hover,
-                                 int mode);
+                                 double content_w, double band_w, int mode);
 
 static void paint_content_row(cairo_t *cr, browser_window *w, const rc_layout *L,
                               const rc_row *r, double left, double ry,
-                              double content_w, double band_w, int show_hover) {
-    paint_content_row_ex(cr, w, L, r, left, ry, content_w, band_w, show_hover,
-                         ROW_PAINT_ALL);
+                              double content_w, double band_w) {
+    paint_content_row_ex(cr, w, L, r, left, ry, content_w, band_w, ROW_PAINT_ALL);
 }
 
 static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout *L,
                                  const rc_row *r, double left, double ry,
-                                 double content_w, double band_w, int show_hover,
-                                 int mode) {
+                                 double content_w, double band_w, int mode) {
     const ui_theme *th = &w->theme;
 
     if (r->hidden) return;  /* visibility:hidden: space stood, nothing paints */
@@ -14046,13 +14126,6 @@ static void paint_content_row_ex(cairo_t *cr, browser_window *w, const rc_layout
             }
             set_rgb(cr, rgb_from_packed(f->bg_rgb));
             cairo_rectangle(cr, fx, ry, bgw, r->height);
-            cairo_fill(cr);
-        }
-        /* Highlight the link under the pointer (all fragments of that link share
-         * its href pointer into the doc). */
-        if (show_hover && f->href != NULL && f->href == w->hover_href) {
-            set_rgb(cr, th->link_hover_bg);
-            cairo_rectangle(cr, fx, ry, f->width, r->height);
             cairo_fill(cr);
         }
         content_font_ex(cr, f->font_size, f->bold, f->italic, f->family, f->webfont,
@@ -14897,8 +14970,9 @@ static void bui_pop_group_composite(cairo_t *cr, const pv_box_def *def, uint64_t
             cairo_surface_t *sh = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, fw, fh);
             if (cairo_surface_status(sh) == CAIRO_STATUS_SUCCESS) {
                 cairo_t *scr = cairo_create(sh);
-                ui_rgb dc = rgb_from_packed(def->filter_drop_color);
-                cairo_set_source_rgb(scr, dc.r, dc.g, dc.b);
+                ui_rgb dc = rgb_from_packed(def->filter_drop_color & 0xffffff);
+                double da = 1.0 - (double)((def->filter_drop_color >> 24) & 0x7f) / 127.0;
+                cairo_set_source_rgba(scr, dc.r, dc.g, dc.b, da);
                 cairo_mask_surface(scr, flt_surf, 0, 0);
                 cairo_destroy(scr);
                 int drad = def->filter_drop_blur;
@@ -15089,7 +15163,7 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
                                       const rc_box *bx, double left, double origin,
                                       double content_w, double page_w,
                                       double content_top, double content_h,
-                                      int show_hover, char *row_done) {
+                                      char *row_done) {
     const pv_box_def *def = (bx->block_id >= 0) ? rd_box_at(w->doc, bx->block_id) : NULL;
     const ui_bg_image *bgimg = (def != NULL) ? find_bg_image(w, def->bg_image_url) : NULL;
     const ui_bg_image *bgimg2 = (def != NULL) ? find_bg_image(w, def->bg_image_url2) : NULL;
@@ -15154,7 +15228,7 @@ static void paint_box_and_direct_rows(cairo_t *cr, browser_window *w, const rc_l
         if (!(ry + cull_ty + r->height < content_top || ry + cull_ty > content_top + content_h)) {
             cairo_save(cr);
             cairo_transform(cr, &m);
-            paint_content_row(cr, w, L, r, left, ry, content_w, page_w, show_hover);
+            paint_content_row(cr, w, L, r, left, ry, content_w, page_w);
             cairo_restore(cr);
         }
         if (row_done != NULL) row_done[j] = 1;
@@ -15236,7 +15310,7 @@ static void paint_oof_sub(cairo_t *cr, browser_window *w, const rc_oof_sub *sub,
             continue;
         }
         paint_box_and_direct_rows(cr, w, Ls, bx, sl, so, sub->w, page_w,
-                                  content_top, content_h, 0, row_done);
+                                  content_top, content_h, row_done);
     }
     int ov_stack[OV_MAX_DEPTH] = {0};
     int ov_depth = 0;
@@ -15247,7 +15321,7 @@ static void paint_oof_sub(cairo_t *cr, browser_window *w, const rc_oof_sub *sub,
         if (ry + r->height < content_top || ry > content_top + content_h) continue;
         ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_owner_block_id(Ls, r), Ls,
                      so, sl);
-        paint_content_row(cr, w, Ls, r, sl, ry, sub->w, page_w, 0);
+        paint_content_row(cr, w, Ls, r, sl, ry, sub->w, page_w);
     }
     while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
     free(row_done);
@@ -15466,7 +15540,7 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
                 ry + cull_ty > content_top + content_h)
                 continue;  /* off-screen row: skip the paint, keep stacking */
             if (needs_group) { cairo_save(cr); cairo_transform(cr, &m); }
-            paint_content_row(cr, w, &mini, &row, left, ry, cw, page_w, 0);
+            paint_content_row(cr, w, &mini, &row, left, ry, cw, page_w);
             if (needs_group) cairo_restore(cr);
         }
     }
@@ -15514,7 +15588,7 @@ static void paint_nested_children(cairo_t *cr, browser_window *w,
             cairo_push_group(cr);
             paint_box_and_direct_rows(cr, w, L, &L->boxes[j], left, origin,
                                        content_w, (double)w->width, content_top,
-                                       content_h, 1, row_done);
+                                       content_h, row_done);
             box_done[j] = 1;
             paint_nested_children(cr, w, L, cbid, left, origin, content_w,
                                   content_top, content_h, box_done, row_done);
@@ -15529,7 +15603,7 @@ static void paint_nested_children(cairo_t *cr, browser_window *w,
             if (cx_span_visible(origin + cb->top, cb->h, box_ink_reach(cb), content_top, content_h))
                 paint_box_and_direct_rows(cr, w, L, cb, left, origin,
                                            content_w, (double)w->width, content_top,
-                                           content_h, 0, row_done);
+                                           content_h, row_done);
             box_done[j] = 1;
         }
     }
@@ -15774,7 +15848,7 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
             cairo_push_group(cr);
             paint_box_and_direct_rows(cr, w, Lp, bx, left, origin, content_w,
                                        (double)w->width, content_top, content_h,
-                                       1, row_done);
+                                       row_done);
             if (box_done != NULL) box_done[i] = 1;
             paint_owned_negz(cr, w, Lp, left, origin, content_top, content_h,
                              (double)w->width, bid);
@@ -15785,7 +15859,7 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
         } else {
             paint_box_and_direct_rows(cr, w, Lp, bx, left, origin, content_w,
                                        (double)w->width, content_top, content_h,
-                                       1, row_done);
+                                       row_done);
         }
     }
     for (int pass = ROW_PAINT_BAND; pass <= ROW_PAINT_CONTENT; ++pass)
@@ -15821,7 +15895,7 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
         double ry = origin + r->top;
         if (ry + r->height < content_top || ry > content_top + content_h)
             continue;
-        paint_content_row_ex(cr, w, Lp, r, left, ry, content_w, (double)w->width, 1, pass);
+        paint_content_row_ex(cr, w, Lp, r, left, ry, content_w, (double)w->width, pass);
     }
     free(row_done);
     free(box_done);
@@ -16352,7 +16426,7 @@ static long write_doc_pdf(browser_window *w, const char *path) {
                 for (size_t i = 0; i < L.nrow; ++i) {
                     if ((size_t)pageof[i] != p) continue;
                     paint_content_row_ex(cr, w, &L, &L.rows[i], PDF_MARGIN,
-                                         PDF_MARGIN + yof[i], content_w, PDF_PAGE_W, 0,
+                                         PDF_MARGIN + yof[i], content_w, PDF_PAGE_W,
                                          pass);
                 }
             /* Stage 2: non-negative z-index PAINTS ABOVE in-flow content
@@ -16477,7 +16551,7 @@ static void paint_png_inflow(const png_flow_ctx *c, int only_root) {
         if (!defer_wants(L, L->boxes[bi].block_id, only_root)) continue;
         paint_box_and_direct_rows(cr, w, L, &L->boxes[bi], c->left, c->margin,
                                   c->content_w, c->page_w, c->no_cull_top, c->no_cull_h,
-                                  0, row_done);
+                                  row_done);
         {
             const pv_box_def *sd = (L->boxes[bi].block_id >= 0)
                 ? rd_box_at(w->doc, (size_t)L->boxes[bi].block_id) : NULL;
@@ -16498,7 +16572,7 @@ static void paint_png_inflow(const png_flow_ctx *c, int only_root) {
             ov_reconcile(cr, ov_stack, &ov_depth, w->doc, row_bid, L,
                          c->margin, c->left);
             paint_content_row_ex(cr, w, L, r, c->left,
-                                 c->margin + r->top, c->content_w, c->page_w, 0, pass);
+                                 c->margin + r->top, c->content_w, c->page_w, pass);
         }
         while (ov_depth > 0) { cairo_restore(cr); ov_depth--; }
     }
@@ -16990,6 +17064,28 @@ ui_status ui_dump_layout(const rd_doc *doc) {
  * triggering a load that frees the document. */
 static int box_pointer_events_none(const rd_doc *doc, int block_id);
 
+/* The layout a pointer hit-test reads: the RETAINED one of the last frame when its inputs are
+ * unchanged (spec/exact_key.md), so a pointer move costs a key comparison instead of a whole
+ * layout_doc (Wikipedia: 46 ms per move). It is the same positioned layout the user sees, so
+ * what is hit is what is painted. *owned = 1 when the retained slot could not be allocated and
+ * `own` was laid out instead; hit_layout_done releases it. */
+static rc_layout *layout_for_frame(cairo_t *cr, browser_window *w, double content_w,
+                                   double content_h);
+
+static const rc_layout *hit_layout(cairo_t *cr, browser_window *w, double content_w,
+                                   double content_h, rc_layout *own, int *owned) {
+    rc_layout *L = layout_for_frame(cr, w, content_w, content_h);
+    if (L != NULL) { *owned = 0; return L; }
+    layout_doc(cr, w, content_w, own);
+    position_doc(cr, w, content_w, content_h, own);
+    *owned = 1;
+    return own;
+}
+
+static void hit_layout_done(rc_layout *own, int owned) {
+    if (owned) rc_free(own);
+}
+
 static const char *link_at_point(browser_window *w, double px, double py) {
     if (w->doc == NULL || w->cairo_surface == NULL) return NULL;
 
@@ -17001,10 +17097,11 @@ static const char *link_at_point(browser_window *w, double px, double py) {
     double content_w = content_width(w);
 
     cairo_t *cr = cairo_create(w->cairo_surface);
-    rc_layout L;
-    layout_doc(cr, w, content_w, &L);
+    rc_layout Lown;
+    int Lowned = 0;
+    const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = L.total_h - content_h;
+    double max_scroll = Lp->total_h - content_h;
     if (max_scroll < 0.0) max_scroll = 0.0;
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
@@ -17012,16 +17109,16 @@ static const char *link_at_point(browser_window *w, double px, double py) {
     double origin = content_top + page_gutter(w) - scroll;
 
     const char *hit = NULL;
-    for (size_t i = 0; i < L.nrow && hit == NULL; ++i) {
-        const rc_row *r = &L.rows[i];
+    for (size_t i = 0; i < Lp->nrow && hit == NULL; ++i) {
+        const rc_row *r = &Lp->rows[i];
         if (r->kind != RC_TEXT) continue;
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
-        double ax = row_align_offset(&L, r, content_w);
-        double jgap = row_justify_gap(&L, r, content_w);
+        double ax = row_align_offset(Lp, r, content_w);
+        double jgap = row_justify_gap(Lp, r, content_w);
         double jdx = 0.0;
-        for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
-            const rc_frag *f = &L.frags[k];
+        for (size_t k = r->first; k < r->first + r->count && k < Lp->nfrag; ++k) {
+            const rc_frag *f = &Lp->frags[k];
             double fx = left + r->x_off + ax + f->x + jdx;
             if (f->href != NULL && !box_pointer_events_none(w->doc, f->block_id)
                 && px >= fx && px <= fx + f->width) { hit = f->href; break; }
@@ -17030,7 +17127,7 @@ static const char *link_at_point(browser_window *w, double px, double py) {
         }
     }
 
-    rc_free(&L);
+    hit_layout_done(&Lown, Lowned);
     cairo_destroy(cr);
     return hit;
 }
@@ -17068,10 +17165,11 @@ static const char *video_at_point(browser_window *w, double px, double py,
     double content_w = content_width(w);
 
     cairo_t *cr = cairo_create(w->cairo_surface);
-    rc_layout L;
-    layout_doc(cr, w, content_w, &L);
+    rc_layout Lown;
+    int Lowned = 0;
+    const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = L.total_h - content_h;
+    double max_scroll = Lp->total_h - content_h;
     if (max_scroll < 0.0) max_scroll = 0.0;
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
@@ -17079,8 +17177,8 @@ static const char *video_at_point(browser_window *w, double px, double py,
     double origin = content_top + page_gutter(w) - scroll;
 
     const char *hit = NULL;
-    for (size_t i = 0; i < L.nrow && hit == NULL; ++i) {
-        const rc_row *r = &L.rows[i];
+    for (size_t i = 0; i < Lp->nrow && hit == NULL; ++i) {
+        const rc_row *r = &Lp->rows[i];
         if (r->blk == NULL) continue;
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
@@ -17097,7 +17195,7 @@ static const char *video_at_point(browser_window *w, double px, double py,
         }
     }
 
-    rc_free(&L);
+    hit_layout_done(&Lown, Lowned);
     cairo_destroy(cr);
     return hit;
 }
@@ -17147,10 +17245,11 @@ static int cursor_at_point(browser_window *w, double px, double py) {
     double content_w = content_width(w);
 
     cairo_t *cr = cairo_create(w->cairo_surface);
-    rc_layout L;
-    layout_doc(cr, w, content_w, &L);
+    rc_layout Lown;
+    int Lowned = 0;
+    const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = L.total_h - content_h;
+    double max_scroll = Lp->total_h - content_h;
     if (max_scroll < 0.0) max_scroll = 0.0;
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
@@ -17158,16 +17257,16 @@ static int cursor_at_point(browser_window *w, double px, double py) {
     double origin = content_top + page_gutter(w) - scroll;
 
     int cur = CSS_CUR_UNSET;
-    for (size_t i = 0; i < L.nrow && cur == CSS_CUR_UNSET; ++i) {
-        const rc_row *r = &L.rows[i];
+    for (size_t i = 0; i < Lp->nrow && cur == CSS_CUR_UNSET; ++i) {
+        const rc_row *r = &Lp->rows[i];
         if (r->kind != RC_TEXT) continue;
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
-        double ax = row_align_offset(&L, r, content_w);
-        double jgap = row_justify_gap(&L, r, content_w);
+        double ax = row_align_offset(Lp, r, content_w);
+        double jgap = row_justify_gap(Lp, r, content_w);
         double jdx = 0.0;
-        for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
-            const rc_frag *f = &L.frags[k];
+        for (size_t k = r->first; k < r->first + r->count && k < Lp->nfrag; ++k) {
+            const rc_frag *f = &Lp->frags[k];
             double fx = left + r->x_off + ax + f->x + jdx;
             if (!box_pointer_events_none(w->doc, f->block_id)
                 && px >= fx && px <= fx + f->width) {
@@ -17179,8 +17278,8 @@ static int cursor_at_point(browser_window *w, double px, double py) {
         }
     }
     if (cur == CSS_CUR_UNSET) {
-        for (size_t bi = L.nbox; bi > 0 && cur == CSS_CUR_UNSET; --bi) {
-            const rc_box *bx = &L.boxes[bi - 1];
+        for (size_t bi = Lp->nbox; bi > 0 && cur == CSS_CUR_UNSET; --bi) {
+            const rc_box *bx = &Lp->boxes[bi - 1];
             double bx0 = left + bx->x;
             double by0 = origin + bx->top;
             if (px >= bx0 && px <= bx0 + bx->w && py >= by0 && py <= by0 + bx->h
@@ -17190,7 +17289,7 @@ static int cursor_at_point(browser_window *w, double px, double py) {
         }
     }
 
-    rc_free(&L);
+    hit_layout_done(&Lown, Lowned);
     cairo_destroy(cr);
     return cur;
 }
@@ -17241,10 +17340,11 @@ static dom_node_id frag_at_point(browser_window *w, double px, double py,
     double content_w = content_width(w);
 
     cairo_t *cr = cairo_create(w->cairo_surface);
-    rc_layout L;
-    layout_doc(cr, w, content_w, &L);
+    rc_layout Lown;
+    int Lowned = 0;
+    const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = L.total_h - content_h;
+    double max_scroll = Lp->total_h - content_h;
     if (max_scroll < 0.0) max_scroll = 0.0;
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
@@ -17252,16 +17352,16 @@ static dom_node_id frag_at_point(browser_window *w, double px, double py,
     double origin = content_top + page_gutter(w) - scroll;
 
     dom_node_id hit = DOM_NODE_NONE;
-    for (size_t i = 0; i < L.nrow && hit == DOM_NODE_NONE; ++i) {
-        const rc_row *r = &L.rows[i];
+    for (size_t i = 0; i < Lp->nrow && hit == DOM_NODE_NONE; ++i) {
+        const rc_row *r = &Lp->rows[i];
         if (r->kind != RC_TEXT) continue;
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
-        double ax = row_align_offset(&L, r, content_w);
-        double jgap = row_justify_gap(&L, r, content_w);
+        double ax = row_align_offset(Lp, r, content_w);
+        double jgap = row_justify_gap(Lp, r, content_w);
         double jdx = 0.0;
-        for (size_t k = r->first; k < r->first + r->count && k < L.nfrag; ++k) {
-            const rc_frag *f = &L.frags[k];
+        for (size_t k = r->first; k < r->first + r->count && k < Lp->nfrag; ++k) {
+            const rc_frag *f = &Lp->frags[k];
             double fx = left + r->x_off + ax + f->x + jdx;
             if (f->node_id != DOM_NODE_NONE && !box_pointer_events_none(w->doc, f->block_id)
                 && px >= fx && px <= fx + f->width) {
@@ -17274,7 +17374,7 @@ static dom_node_id frag_at_point(browser_window *w, double px, double py,
         }
     }
 
-    rc_free(&L);
+    hit_layout_done(&Lown, Lowned);
     cairo_destroy(cr);
     return hit;
 }
@@ -17297,6 +17397,31 @@ static void follow_link(browser_window *w, const char *href) {
     if (res.action != LN_NAVIGATE) return;
     if (browser_navigate(&w->bs, res.target) != BROWSER_OK) return;
     do_load(w, res.target);
+}
+
+/* Middle-click / Ctrl+click on a link (Firefox): the target opens in a new tab next to
+ * this one that loads in the background (spec/nav_token.md) while this tab stays in
+ * front. The target passes the same ln_resolve policy as a plain click; a blocked or
+ * same-document reference opens nothing. href must not alias w->doc (tab_new drops it). */
+static void open_link_background(browser_window *w, const char *href) {
+    ln_result res;
+    if (ln_resolve(browser_current_url(&w->bs), href, &res) != LN_OK) return;
+    if (res.action == LN_BLOCKED) {
+        browser_set_status(&w->bs, ln_block_reason_text(res.reason), now_ms());
+        return;
+    }
+    if (res.action != LN_NAVIGATE || w->tab_count >= UI_MAX_TABS) return;
+    int from = w->active_tab;
+    if (w->bg_open_from != from || w->bg_open_count != w->tab_count) w->bg_open_n = 0;
+    tab_new(w, res.target);
+    if (w->active_tab == from) return;           /* not opened (limit, OOM) */
+    tab_switch(w, from);
+    int to = from + 1 + w->bg_open_n;
+    if (to > w->tab_count - 1) to = w->tab_count - 1;
+    tab_move(w, from + 1, to);
+    w->bg_open_from = w->active_tab;
+    w->bg_open_n++;
+    w->bg_open_count = w->tab_count;
 }
 
 /* Makes url the page's base (link/image resolution) without touching the cached
@@ -17471,6 +17596,8 @@ static rdp_caps page_render_caps(const browser_window *w) {
  * instead, through do_load and ALL network policy, and 1 is returned: the caller must
  * not touch the old document any more. Bounded by JS_NAV_MAX like a load-time
  * redirect, so a timer cannot pin the browser in a loop. Returns 0 otherwise. */
+static void update_hover(browser_window *w);
+
 static int apply_click_result(browser_window *w, tab_page *page) {
     if (page->nav_url != NULL && page->nav_url[0] != '\0') {
         if (w->js_nav_depth < JS_NAV_MAX) {
@@ -17486,7 +17613,8 @@ static int apply_click_result(browser_window *w, tab_page *page) {
      * the hover state and the page title/text all stay exactly as they are. */
     if (!page->unchanged) {
         if (w->doc != NULL) { rd_free(w->doc); set_doc(w, NULL); }
-        w->hover_href = NULL; /* aliased the doc we just freed; recomputed on next hover */
+        int had_hover = (w->hover_href != NULL);
+        w->hover_href = NULL; /* aliased the doc we just freed; re-resolved below */
         w->hover_cursor = CSS_CUR_UNSET;
         rdp_caps eff = page_render_caps(w);
         rd_doc *doc = NULL;
@@ -17495,6 +17623,13 @@ static int apply_click_result(browser_window *w, tab_page *page) {
         }
         rebuild_inputs(w);
         browser_set_page(&w->bs, page->title, page->text, 0);
+        /* The pointer has not moved but what is under it may have: re-resolve now, or the
+         * status strip keeps naming a link of the old document until the next motion (and
+         * the next motion, finding "no link" twice, never repaints it away). */
+        if (had_hover) {
+            update_hover(w);
+            if (w->hover_href == NULL) redraw(w);
+        }
     }
     fb_buffer_free(&w->console);
     w->console = page->console;
@@ -17627,10 +17762,11 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
     double content_w = content_width(w);
 
     cairo_t *cr = cairo_create(w->cairo_surface);
-    rc_layout L;
-    layout_doc(cr, w, content_w, &L);
+    rc_layout Lown;
+    int Lowned = 0;
+    const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = L.total_h - content_h;
+    double max_scroll = Lp->total_h - content_h;
     if (max_scroll < 0.0) max_scroll = 0.0;
     double scroll = w->scroll;
     if (scroll < 0.0) scroll = 0.0;
@@ -17638,13 +17774,13 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
     double origin = content_top + page_gutter(w) - scroll;
 
     const rd_block *hit = NULL;
-    for (size_t i = 0; i < L.nrow && hit == NULL; ++i) {
-        const rc_row *r = &L.rows[i];
+    for (size_t i = 0; i < Lp->nrow && hit == NULL; ++i) {
+        const rc_row *r = &Lp->rows[i];
         double ry = origin + r->top;
         if (py < ry || py > ry + r->height) continue;
         /* A control flowing INSIDE a line: its fragment's own rect. */
-        for (size_t k = r->first; r->kind != RC_INPUT && k < r->first + r->count && k < L.nfrag; ++k) {
-            const rc_frag *f = &L.frags[k];
+        for (size_t k = r->first; r->kind != RC_INPUT && k < r->first + r->count && k < Lp->nfrag; ++k) {
+            const rc_frag *f = &Lp->frags[k];
             if (f->repl == NULL || f->repl->kind != RD_INPUT) continue;
             double fx = left + r->x_off + f->x;
             if (px >= fx && px <= fx + f->repl_w) { hit = f->repl; break; }
@@ -17661,7 +17797,7 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
         if (px >= bx && px <= bx + bw) hit = b;
     }
 
-    rc_free(&L);
+    hit_layout_done(&Lown, Lowned);
     cairo_destroy(cr);
     return hit;
 }
@@ -17871,6 +18007,9 @@ static void drain_fetch_results(browser_window *w) {
                 tab_ctx *c = &w->tab_slots[slot];
                 fetch_job_free(c->ready);
                 c->ready = j;
+                if (j->html == NULL || !dt_scan(j->html, j->html_len, c->ready_title,
+                                                sizeof c->ready_title))
+                    c->ready_title[0] = '\0';
                 c->loading = 0;
                 j = NULL;
                 redraw(w);
@@ -18271,37 +18410,19 @@ static void draw_menu(cairo_t *cr, browser_window *w) {
     cairo_restore(cr);
 }
 
-/* Persistent bottom strip showing the target of the link under the pointer, so
- * the user always knows where a click will go. Returns the strip height (0 when
- * nothing is hovered) so the toast can stack above it. */
+/* Persistent bottom strip showing where a click on the link under the pointer goes:
+ * the destination ln_resolve decides (absolute, escaped, host emphasised), or why the
+ * click is blocked -- never the author's raw href (spec/link_preview.md). Returns the
+ * strip height (0 when nothing is hovered) so the toast can stack above it. */
 static double draw_hover_url(cairo_t *cr, browser_window *w) {
     if (w->hover_href == NULL) return 0.0;
-    const ui_theme *th = &w->theme;
-
-    cairo_select_font_face(cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, th->body_font);
-    cairo_font_extents_t fe;
-    cairo_font_extents(cr, &fe);
-    cairo_text_extents_t te;
-    cairo_text_extents(cr, w->hover_href, &te);
-
-    double bh = fe.height + 2.0 * UI_TOAST_PAD;
-    double bw = te.width + 2.0 * UI_TOAST_PAD;
-    if (bw > (double)w->width) bw = (double)w->width; /* never wider than the window */
-    double by = (double)w->height - bh;
-
-    set_rgb(cr, th->toast_bg);
-    cairo_rectangle(cr, 0.0, by, bw, bh);
-    cairo_fill(cr);
-
-    cairo_save(cr);
-    cairo_rectangle(cr, 0.0, by, bw - UI_TOAST_PAD, bh); /* clip a long URL */
-    cairo_clip(cr);
-    set_rgb(cr, th->toast_text);
-    cairo_move_to(cr, UI_TOAST_PAD, by + UI_TOAST_PAD + fe.ascent);
-    cairo_show_text(cr, w->hover_href);
-    cairo_restore(cr);
-    return bh;
+    lp_preview p;
+    if (lp_describe(browser_current_url(&w->bs), w->hover_href, &p) != LP_OK) return 0.0;
+    double bottom = (double)w->height - (w->fip_open ? CHL_FIND_H : 0.0);
+    double hh = bui_paint_link_status(cr, &w->theme, &p, 0.0, (double)w->width - UI_SCROLLBAR_W,
+                                      bottom, w->ptr_x, w->ptr_y, w->ls_zone);
+    w->ls_flipped = bui_link_status_flips(w->ls_zone, w->ptr_x, w->ptr_y);
+    return hh;
 }
 
 /* Draws the transient status toast (a banner near the bottom of the window),
@@ -18377,7 +18498,7 @@ static void chrome_view_fill(browser_window *w, const chl_layout *l, const char 
                              int *loading, bui_chrome_view *v) {
     memset(v, 0, sizeof *v);
     for (int i = 0; i < l->tab_count && i < UI_MAX_TABS; ++i) {
-        titles[i] = tab_title(w, i);
+        titles[i] = tab_title(w, i, w->tab_labels[i], sizeof w->tab_labels[i]);
         loading[i] = (i == w->active_tab) ? w->loading : w->tab_slots[i].loading;
     }
     v->l = l;
@@ -18401,6 +18522,7 @@ static void chrome_view_fill(browser_window *w, const chl_layout *l, const char 
         v->sel_len = sl;
     }
     v->identity = page_identity(w);
+    v->star = bookmark_star_state(w);
 }
 
 static void paint_chrome(cairo_t *cr, browser_window *w) {
@@ -18713,7 +18835,16 @@ static int pointer_cursor(const browser_window *w, int css_cur, const char *href
     return (href != NULL || hot_actionable(w, hot)) ? CSS_CUR_POINTER : CSS_CUR_DEFAULT;
 }
 
+static void update_hover_inner(browser_window *w);
+
+/* Pointer moved: hit-test what is under it (link, cursor, chrome) and repaint on change. */
 static void update_hover(browser_window *w) {
+    double t0 = gui_prof_now_ms();
+    update_hover_inner(w);
+    gui_prof_log("hover", gui_prof_now_ms() - t0);
+}
+
+static void update_hover_inner(browser_window *w) {
     if (w->menu_open) {
         double mx, my, mw, mh, ih;
         menu_panel_rect(w, &mx, &my, &mw, &mh, &ih);
@@ -18741,6 +18872,9 @@ static void update_hover(browser_window *w) {
     chl_find_part fhot = fip_hot_at(w, w->ptr_x, w->ptr_y);
     if (fhot != CHL_FIND_NONE) { h = NULL; cur = CSS_CUR_UNSET; }
     if (fhot != w->fip_hot) { w->fip_hot = fhot; redraw(w); }
+    if (h != NULL && h == w->hover_href &&
+        bui_link_status_flips(w->ls_zone, w->ptr_x, w->ptr_y) != w->ls_flipped)
+        redraw(w);   /* the status strip moves out from under the pointer */
     if (h == w->hover_href && cur == w->hover_cursor && hot == w->hot) return;
 
     int cursor_kind = pointer_cursor(w, cur, h, hot);
@@ -19727,6 +19861,33 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
         freebug_pointer_button(w, serial, button, state);
         return;
     }
+    /* Middle-click (or Ctrl+click) on a link opens it in a background tab; middle-click
+     * on a tab closes it (Firefox). The page does not see these presses. */
+    if (state == WL_POINTER_BUTTON_STATE_PRESSED && !w->menu_open && !w->site_panel_open &&
+        (button == UI_BTN_MIDDLE ||
+         (button == UI_BTN_LEFT && w->xkb_state != NULL &&
+          xkb_state_mod_name_is_active(w->xkb_state, XKB_MOD_NAME_CTRL,
+                                       XKB_STATE_MODS_EFFECTIVE) > 0))) {
+        chl_layout ml = chrome_of(w);
+        int mtab = -1;
+        chl_part mp = chl_hit(&ml, w->ptr_x, w->ptr_y, &mtab);
+        if (button == UI_BTN_MIDDLE && (mp == CHL_PART_TAB || mp == CHL_PART_TAB_CLOSE) && mtab >= 0) {
+            uitab_close(w, mtab);
+            redraw(w);
+            return;
+        }
+        if (mp == CHL_PART_CONTENT && fip_hot_at(w, w->ptr_x, w->ptr_y) == CHL_FIND_NONE) {
+            const char *h = link_at_point(w, w->ptr_x, w->ptr_y);
+            char *own = (h != NULL) ? strdup(h) : NULL;
+            if (own != NULL) {
+                open_link_background(w, own);
+                free(own);
+                redraw(w);
+                return;
+            }
+        }
+        if (button == UI_BTN_MIDDLE) return;
+    }
     if (button != UI_BTN_LEFT) return;
     if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
         if (w->dragging_scroll) { w->dragging_scroll = 0; redraw(w); }
@@ -19756,6 +19917,7 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
     chl_layout cl = chrome_of(w);
     int hit_tab = -1;
     chl_part part = chl_hit(&cl, w->ptr_x, w->ptr_y, &hit_tab);
+    if (part == CHL_PART_STAR && !bookmark_star_state(w)) part = CHL_PART_URL; /* hidden star */
 
     /* The open site panel captures the click: an action runs, a click inside stays, any
      * click elsewhere (the badge included) only dismisses it, like a Firefox popup. */
@@ -19869,6 +20031,9 @@ static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t 
                 break;
             case CHL_PART_FWD:    history_step(w, 1); break;
             case CHL_PART_BACK:   history_step(w, -1); break;
+            case CHL_PART_STAR:         /* the pill's bookmark toggle (same as Ctrl+B) */
+                bookmark_toggle_current(w);
+                break;
             case CHL_PART_IDENTITY:     /* the site identity panel (spec/site_panel.md) */
                 w->site_panel_open = 1;
                 w->site_panel_hot = -1;
@@ -21230,7 +21395,19 @@ static void startup_abort_release(browser_window *w) {
     profile_close(&w->profile);
 }
 
-ui_status ui_run_browser(const char *start_url) {
+/* A relative local path on the command line becomes its canonical absolute path, as in
+ * Firefox: the URL bar, the link status strip and every relative reference then name a
+ * real location instead of one that only means something in the launch directory. A
+ * URL, or a path realpath cannot resolve, is returned unchanged. */
+static const char *absolute_start(const char *start, char *abs, size_t cap) {
+    if (start == NULL || strstr(start, "://") != NULL || start[0] == '/' || cap < PATH_MAX)
+        return start;
+    return realpath(start, abs) != NULL ? abs : start;
+}
+
+ui_status ui_run_browser(const char *start_url_arg) {
+    char start_abs[PATH_MAX];
+    const char *start_url = absolute_start(start_url_arg, start_abs, sizeof start_abs);
     browser_window w;
     memset(&w, 0, sizeof w);
     /* The worker's fork + exec + sandbox setup (~14 ms) runs while the profile key is derived and

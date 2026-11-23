@@ -147,6 +147,63 @@ static int radial_prelude(const char *seg) {
     return 0;
 }
 
+/* Removes a <color-interpolation-method> (`in <space> [<hue-method> hue]`, CSS Color 4 §12)
+ * from the first gradient argument in place, leaving the direction/shape prelude around it.
+ * 1 = removed, 0 = none present, -1 = malformed (unknown space, hue method on a rectangular
+ * space, dangling `in`): the gradient is dropped, as in Firefox. Stops still interpolate in
+ * sRGB (spec/css_gradient.md §3b). */
+static int strip_interp(char *seg) {
+    static const char *const rect[] = { "srgb", "srgb-linear", "display-p3", "a98-rgb",
+                                        "prophoto-rgb", "rec2020", "lab", "oklab", "xyz",
+                                        "xyz-d50", "xyz-d65" };
+    static const char *const polar[] = { "hsl", "hwb", "lch", "oklch" };
+    static const char *const hue[] = { "shorter", "longer", "increasing", "decreasing" };
+    char tok[8][CSS_TOK_MAX];
+    size_t at[8], end[8];
+    int nt = 0;
+    for (size_t i = 0; seg[i] != '\0';) {
+        while (seg[i] == ' ' || seg[i] == '\t') ++i;
+        if (seg[i] == '\0') break;
+        if (nt == 8) return 0;   /* not a prelude this short: leave it to the stop parser */
+        size_t k = 0;
+        at[nt] = i;
+        while (seg[i] != '\0' && seg[i] != ' ' && seg[i] != '\t') {
+            if (k + 1 < CSS_TOK_MAX) tok[nt][k++] = csel_lower_ch(seg[i]);
+            ++i;
+        }
+        tok[nt][k] = '\0';
+        end[nt++] = i;
+    }
+    int in = -1;
+    for (int t = 0; t < nt; ++t)
+        if (strcmp(tok[t], "in") == 0) { in = t; break; }
+    if (in < 0) return 0;
+    if (in + 1 >= nt) return -1;
+    int last = in + 1, is_polar = 0, known = 0;
+    for (size_t k = 0; k < sizeof rect / sizeof rect[0]; ++k)
+        if (strcmp(tok[in + 1], rect[k]) == 0) known = 1;
+    for (size_t k = 0; k < sizeof polar / sizeof polar[0]; ++k)
+        if (strcmp(tok[in + 1], polar[k]) == 0) known = is_polar = 1;
+    if (!known) return -1;
+    if (in + 2 < nt) {
+        int hm = 0;
+        for (size_t k = 0; k < sizeof hue / sizeof hue[0]; ++k)
+            if (strcmp(tok[in + 2], hue[k]) == 0) hm = 1;
+        if (hm) {
+            if (!is_polar || in + 3 >= nt || strcmp(tok[in + 3], "hue") != 0) return -1;
+            last = in + 3;
+        }
+    }
+    size_t from = at[in], to = end[last];
+    memmove(seg + from, seg + to, strlen(seg + to) + 1);
+    size_t a = 0, b = strlen(seg);
+    while (a < b && (seg[a] == ' ' || seg[a] == '\t')) ++a;
+    while (b > a && (seg[b - 1] == ' ' || seg[b - 1] == '\t')) --b;
+    memmove(seg, seg + a, b - a);
+    seg[b - a] = '\0';
+    return 1;
+}
+
 /* One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts
  * `Ndeg` -> the same 0-1000 turn fraction; legacy bare 0..100 -> x10. Returns
  * the position or -1 (not a position / out of range; *endp untouched then). */
@@ -212,6 +269,9 @@ static int parse_gradient_args(const char *s, size_t n, int kind, int *angle,
 
         if (first) {
             first = 0;
+            int interp = strip_interp(seg);
+            if (interp < 0) return 0;
+            if (interp == 1 && seg[0] == '\0') { i = j + 1; continue; }
             if (kind == 2) {
                 int c = conic_prelude(seg, angle);
                 if (c == 1) { i = j + 1; continue; }
@@ -227,6 +287,7 @@ static int parse_gradient_args(const char *s, size_t n, int kind, int *angle,
                 if (d >= 0) { *angle = d; i = j + 1; continue; }
                 if (d == -2) return 0;
             }
+            if (interp == 1) return 0;   /* `in <space>` next to a color, not a prelude */
         }
         {
             size_t ce = 0;

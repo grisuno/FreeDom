@@ -161,18 +161,40 @@ void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b) {
     }
 }
 
+/* A stored value that is a CSS-wide keyword (Cascade 5 §7.3), compared whole and
+ * case-insensitively: 1 = initial / revert / revert-layer (the registered initial value,
+ * else guaranteed-invalid), 2 = inherit / unset (unregistered custom properties inherit,
+ * so the next level decides), 0 = ordinary text. spec/css_vars.md. */
+static int wide_keyword(const char *v) {
+    static const char *const init[] = { "initial", "revert", "revert-layer" };
+    static const char *const inh[] = { "inherit", "unset" };
+    size_t n = strlen(v);
+    for (size_t k = 0; k < sizeof init / sizeof init[0]; ++k)
+        if (n == strlen(init[k]) && csel_span_eq(v, init[k], n, 1)) return 1;
+    for (size_t k = 0; k < sizeof inh / sizeof inh[0]; ++k)
+        if (n == strlen(inh[k]) && csel_span_eq(v, inh[k], n, 1)) return 2;
+    return 0;
+}
+
 static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen) {
     if (sc == NULL) return NULL;
-    const char *v = cvr_get(sc->first, name, nlen);
-    if (v != NULL) return v;
+    const cvr_table *levels[CVR_CHAIN_MAX + 2];
+    size_t nl = 0;
+    levels[nl++] = sc->first;
     int hops = 0;
     for (const cvr_chain *c = sc->chain; c != NULL && hops < CVR_CHAIN_MAX;
-         c = c->parent, ++hops) {
-        v = cvr_get(c->own, name, nlen);
-        if (v != NULL) return v;
+         c = c->parent, ++hops)
+        levels[nl++] = c->own;
+    levels[nl++] = sc->second;
+    for (size_t k = 0; k < nl; ++k) {
+        const char *v = cvr_get(levels[k], name, nlen);
+        if (v == NULL) continue;
+        int kw = wide_keyword(v);
+        if (kw == 0) return v;
+        if (kw == 1) break;
     }
-    v = cvr_get(sc->second, name, nlen);
-    return v ? v : cvr_get(sc->initial, name, nlen);
+    const char *v = cvr_get(sc->initial, name, nlen);
+    return (v != NULL && wide_keyword(v) == 0) ? v : NULL;
 }
 
 /* The value an env() name resolves to on this device class (CSS Environment

@@ -67,7 +67,7 @@ typedef struct ui_theme {
     ui_rgb url_bg;
     ui_rgb url_border;
     ui_rgb caret;
-    ui_rgb link_hover_bg;   /* highlight behind the link under the pointer */
+    ui_rgb link_hover_bg;   /* highlight behind the hovered omnibox suggestion */
     ui_rgb btn_hover_bg;    /* highlight behind the toolbar button under the pointer */
     ui_rgb input_bg;        /* form text input background */
     ui_rgb input_bg_focused;
@@ -143,6 +143,7 @@ typedef struct bui_chrome_view {
     size_t             url_len, cursor, sel_start, sel_len;
     int                url_focused;
     chl_identity       identity;
+    int                star;         /* bookmark star: 0 hidden, 1 empty, 2 bookmarked */
 } bui_chrome_view;
 
 /* Selects the chrome face at `size` on cr. */
@@ -182,6 +183,17 @@ void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos,
 /* The site identity panel (spec/site_panel.md); hot_action = action under the pointer or -1. */
 void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g,
                           int hot_action);
+
+#include "link_preview.h"
+/* The status strip for the link under the pointer (spec/link_preview.md): bottom-left of the
+ * content area [left, right) ending at `bottom`, flipped right when the pointer is over it.
+ * The host is emphasised; a blocked link is in the "bad" tone. Returns the strip height. */
+double bui_paint_link_status(cairo_t *cr, const ui_theme *th, const lp_preview *p, double left,
+                             double right, double bottom, double ptr_x, double ptr_y,
+                             double zone[3]);
+/* Whether the pointer sits over the strip's left placement `zone` (left, top, right) that the
+ * last paint reported: the strip then paints on the right. */
+int bui_link_status_flips(const double zone[3], double ptr_x, double ptr_y);
 
 /* --- bui_mask_img.c: a mask-image url() layer into a mask surface --- */
 

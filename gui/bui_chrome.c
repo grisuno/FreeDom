@@ -265,6 +265,45 @@ static void paint_identity(cairo_t *cr, const bui_chrome_view *v) {
     }
 }
 
+/* Five-pointed star centred on (cx, cy), outer radius ro (the bookmark toggle). */
+static void star_path(cairo_t *cr, double cx, double cy, double ro) {
+    double ri = ro * 0.45;
+    for (int k = 0; k < 10; ++k) {
+        double a = -BUI_TWO_PI / 4.0 + (double)k * BUI_TWO_PI / 10.0;
+        double r = (k & 1) ? ri : ro;
+        if (k == 0) cairo_move_to(cr, cx + r * cos(a), cy + r * sin(a));
+        else cairo_line_to(cr, cx + r * cos(a), cy + r * sin(a));
+    }
+    cairo_close_path(cr);
+}
+
+static void paint_star(cairo_t *cr, const bui_chrome_view *v) {
+    const ui_theme *th = v->th;
+    chl_rect r = v->l->star;
+    if (r.w <= 0.0 || v->star == 0) return;
+    if (v->hot_part == CHL_PART_STAR) {
+        set_rgb(cr, th->btn_hover_bg);
+        bui_round_rect(cr, r.x, r.y, r.w, r.h, BUI_PILL_RADIUS - 2.0);
+        cairo_fill(cr);
+    }
+    star_path(cr, rcx(r), rcy(r), 7.5);
+    if (v->star == 2) {
+        set_rgb(cr, th->accent);
+        cairo_fill_preserve(cr);
+    } else {
+        set_rgb(cr, th->url_text_dim);
+    }
+    cairo_set_line_width(cr, BUI_ICON_LINE);
+    cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
+    cairo_stroke(cr);
+}
+
+/* Where URL text must end: before the star when it shows, else at the pill's end. */
+static double url_text_end(const bui_chrome_view *v) {
+    const chl_rect url = v->l->url, st = v->l->star;
+    return (v->star != 0 && st.w > 0.0) ? st.x : url.x + url.w;
+}
+
 /* --- text measurement (the toy API never kerns, so a prefix width is the sum of
  * its characters' advances) --- */
 
@@ -294,13 +333,13 @@ static void show_n(cairo_t *cr, const char *s, size_t n) {
 }
 
 double bui_url_text_x(const bui_chrome_view *v, cairo_t *cr, double *shift) {
-    const chl_rect id = v->l->identity, url = v->l->url;
+    const chl_rect id = v->l->identity;
     double x = id.x + id.w + BUI_URL_TEXT_PAD;
     double s = 0.0;
     if (v->url_focused && v->url != NULL) {
         size_t cur = v->cursor < v->url_len ? v->cursor : v->url_len;
         double caret = text_w(cr, v->url, cur);
-        double avail = url.x + url.w - BUI_URL_END_PAD - x;
+        double avail = url_text_end(v) - BUI_URL_END_PAD - x;
         if (caret > avail && avail > 0.0) s = caret - avail;
     }
     if (shift != NULL) *shift = s;
@@ -364,6 +403,7 @@ static void paint_url(cairo_t *cr, const bui_chrome_view *v) {
         cairo_stroke(cr);
     }
     paint_identity(cr, v);
+    paint_star(cr, v);
 
     bui_chrome_font(cr, BUI_URL_FONT_SIZE);
     cairo_font_extents_t fe;
@@ -373,7 +413,7 @@ static void paint_url(cairo_t *cr, const bui_chrome_view *v) {
     double ty = rcy(p) + (fe.ascent - fe.descent) / 2.0;
 
     cairo_save(cr);
-    cairo_rectangle(cr, tx, p.y, p.x + p.w - BUI_URL_TEXT_PAD - tx, p.h);
+    cairo_rectangle(cr, tx, p.y, url_text_end(v) - BUI_URL_TEXT_PAD - tx, p.h);
     cairo_clip(cr);
     tx -= shift;
 
@@ -909,4 +949,75 @@ void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos,
         }
     }
     cairo_restore(cr);
+}
+
+/* --- Link status strip (spec/link_preview.md) --- */
+
+#define BUI_LS_PAD_X    8.0
+#define BUI_LS_PAD_Y    5.0
+#define BUI_LS_RADIUS   6.0
+#define BUI_LS_MAX_FRAC 0.62   /* of the content width, like Firefox's status panel */
+#define BUI_LS_FONT     12.0
+
+int bui_link_status_flips(const double zone[3], double ptr_x, double ptr_y) {
+    return zone[2] > zone[0] && ptr_y >= zone[1] - 4.0 && ptr_x <= zone[2] + 4.0;
+}
+
+double bui_paint_link_status(cairo_t *cr, const ui_theme *th, const lp_preview *p, double left,
+                             double right, double bottom, double ptr_x, double ptr_y,
+                             double zone[3]) {
+    zone[0] = zone[1] = zone[2] = 0.0;
+    if (p == NULL || p->text[0] == '\0' || right - left < 40.0) return 0.0;
+    bui_chrome_font(cr, BUI_LS_FONT);
+    cairo_font_extents_t fe;
+    cairo_font_extents(cr, &fe);
+    size_t n = strlen(p->text);
+    double tw = text_w(cr, p->text, n);
+    double maxw = (right - left) * BUI_LS_MAX_FRAC;
+    double bw = tw + 2.0 * BUI_LS_PAD_X;
+    if (bw > maxw) bw = maxw;
+    double bh = fe.height + 2.0 * BUI_LS_PAD_Y;
+    double x = left, y = bottom - bh;
+    /* Never under the pointer: it would hide the very text the user is reading. The zone is
+     * the LEFT placement whichever side is painted, so the decision cannot oscillate. */
+    zone[0] = left;
+    zone[1] = y;
+    zone[2] = left + bw;
+    if (bui_link_status_flips(zone, ptr_x, ptr_y)) x = right - bw;
+
+    set_rgba(cr, th->menu_border, 0.9);
+    bui_round_rect(cr, x - 0.5, y - 0.5, bw + 1.0, bh + 1.0, BUI_LS_RADIUS);
+    cairo_fill(cr);
+    set_rgb(cr, th->menu_bg);
+    bui_round_rect(cr, x, y, bw, bh, BUI_LS_RADIUS);
+    cairo_fill(cr);
+
+    cairo_save(cr);
+    double clip_w = bw - 2.0 * BUI_LS_PAD_X;
+    int overflow = tw > clip_w;
+    double ell_w = overflow ? text_w(cr, "...", 3) : 0.0;
+    cairo_rectangle(cr, x + BUI_LS_PAD_X, y, clip_w - ell_w, bh);
+    cairo_clip(cr);
+    double base = y + BUI_LS_PAD_Y + fe.ascent;
+    ui_rgb main = p->kind == LP_BLOCKED ? th->id_bad : th->menu_text;
+    ui_rgb dim = mix_rgb(th->menu_text, th->menu_bg, 0.38);
+    cairo_move_to(cr, x + BUI_LS_PAD_X, base);
+    if (p->host_len > 0) {
+        set_rgb(cr, dim);
+        show_n(cr, p->text, p->host_off);
+        set_rgb(cr, main);
+        show_n(cr, p->text + p->host_off, p->host_len);
+        set_rgb(cr, dim);
+        show_n(cr, p->text + p->host_off + p->host_len, n - p->host_off - p->host_len);
+    } else {
+        set_rgb(cr, main);
+        show_n(cr, p->text, n);
+    }
+    cairo_restore(cr);
+    if (overflow) {
+        set_rgb(cr, dim);
+        cairo_move_to(cr, x + bw - BUI_LS_PAD_X - ell_w, base);
+        cairo_show_text(cr, "...");
+    }
+    return bh;
 }

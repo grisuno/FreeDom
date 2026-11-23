@@ -49,6 +49,38 @@ static void test_alpha(void **state)
     assert_int_equal(cv_bg_alpha_of("url(#a0b1) #0000"), 0);
 }
 
+/* Every CSS Color 4/5 function carries its alpha after a slash, and color-mix() mixes the
+ * alphas: Tailwind v4 writes `bg-white/10` as color-mix(in oklab, white 10%, transparent). */
+static void test_alpha_modern_functions(void **state)
+{
+    (void)state;
+    assert_int_equal(cv_bg_alpha_of("oklab(100% 0 0 / .5)"), 50);
+    assert_int_equal(cv_bg_alpha_of("oklch(54.1% .281 293.009 / 25%)"), 25);
+    assert_int_equal(cv_bg_alpha_of("lab(50% 10 10 / 0.3)"), 30);
+    assert_int_equal(cv_bg_alpha_of("lch(50% 10 10 / 0.3)"), 30);
+    assert_int_equal(cv_bg_alpha_of("hwb(0 0% 0% / 40%)"), 40);
+    assert_int_equal(cv_bg_alpha_of("color(srgb 1 1 1 / 0.6)"), 60);
+    assert_int_equal(cv_bg_alpha_of("oklch(54.1% .281 293.009)"), CSS_LEN_UNSET);
+    assert_int_equal(cv_bg_alpha_of("color-mix(in oklab, #fff 10%, transparent)"), 10);
+    assert_int_equal(cv_bg_alpha_of("color-mix(in oklab, oklch(98% .01 0) 40%, transparent)"), 40);
+    assert_int_equal(cv_bg_alpha_of("color-mix(in srgb, transparent, red 25%)"), 25);
+    assert_int_equal(cv_bg_alpha_of("color-mix(in srgb, red, blue)"), CSS_LEN_UNSET);
+    assert_int_equal(cv_bg_alpha_of("color-mix(in srgb, #ff000080, blue)"), 75);
+    assert_int_equal(cv_bg_alpha_of("color-mix(in srgb, red 20%, blue 20%)"), 40);
+    assert_int_equal(cv_bg_alpha_of("color-mix(in srgb, red 0%, blue 0%)"), CSS_LEN_UNSET);
+    assert_int_equal(cv_parse_color("color-mix(in srgb, red, blue)"), 0x800080);
+    assert_int_equal(cv_parse_color("color-mix(in oklab, #fff 10%, transparent)"), 0xffffff);
+    assert_int_equal(cv_parse_color("color-mix(in srgb, red 25%, color-mix(in srgb, blue, blue))"),
+                     0x4000bf);
+    assert_int_equal(cv_parse_color("color-mix(red, blue)"), -1);
+    assert_int_equal(cv_parse_color("color-mix(in srgb, red, junk)"), -1);
+    /* the t7 encoding the border/shadow painters read */
+    int c = cv_parse_color_t7("color-mix(in oklab, #fff 10%, transparent)");
+    assert_true(c >= 0);
+    assert_int_equal(c & 0xffffff, 0xffffff);
+    assert_true(((c >> 24) & 0x7f) > 110);
+}
+
 /* CSS Color 4 slash alpha rides on the rgb()/hsl() names too, not just the
  * legacy rgba()/hsla() aliases. */
 static void test_alpha_slash(void **state)
@@ -86,6 +118,7 @@ int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_parse_named),
+        cmocka_unit_test(test_alpha_modern_functions),
         cmocka_unit_test(test_sentinels_ok),
         cmocka_unit_test(test_junk_fails_closed),
         cmocka_unit_test(test_alpha),

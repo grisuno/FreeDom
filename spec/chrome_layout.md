@@ -103,6 +103,26 @@ insignia de la anterior.
   `chl_tab_for_digit`, también con la barra de URL enfocada.
 - La insignia de identidad abre el **panel del sitio** (`spec/site_panel.md`), no un aviso.
 
+## Estrella de marcador (tanda 102)
+
+Como Firefox, la píldora lleva a la DERECHA una estrella (`star`, `CHL_PART_STAR`) que alterna el
+marcador de la página actual (el mismo `prefs_bookmark_toggle` que `Ctrl+B`). Vacía si la URL no
+está guardada, rellena con el color de acento si lo está; oculta en páginas internas (`about:`),
+donde no hay nada que guardar. El texto de la URL termina antes de la estrella.
+
+- **Dado** una ventana de 1300 px, **entonces** `star` cabe en la píldora, pegada a su borde
+  derecho, sin tocar la insignia, y `chl_hit` sobre ella da `STAR`.
+- **Dado** una píldora de menos de `CHL_STAR_MIN_URL` px, **entonces** `star` mide 0 (no se pinta
+  ni se pulsa) y la píldora entera sigue siendo `URL`.
+- Los marcadores viven cifrados en el perfil (AEAD + Argon2id); la estrella no abre red.
+
+## Título de una pestaña sin `<title>` (tanda 102)
+
+Firefox no muestra la URL cruda: `chl_tab_fallback_title(url, out, cap)` da el nombre del archivo
+para `file:` (`/a/b/mono.html` → `mono.html`), y para el resto la URL sin `esquema://`
+(`https://example.com/x?q` → `example.com/x?q`). Una ruta local sin esquema se trata como
+`file:`. Vacío o `NULL` → `""`. Truncado en límite UTF-8; nunca escribe más de `cap`.
+
 ## Fuera de alcance
 
 Favicons (exigirían un fetch extra por página: se decidirá en su propio hito por su coste de

@@ -193,6 +193,37 @@ static void test_radial_geometry_keywords(void **state)
     assert_true(rx > 0.0 && ry > 0.0);
 }
 
+static void test_interpolation_method(void **state)
+{
+    (void)state;
+    int angle = -1, colors[CSS_GRAD_STOPS_MAX], pos[CSS_GRAD_STOPS_MAX];
+    assert_int_equal(cg_parse_linear("linear-gradient(to bottom right in oklab, red, blue)",
+                                     &angle, colors, pos), 2);
+    assert_int_equal(angle, 135);
+    assert_int_equal(cg_parse_linear("linear-gradient(in oklab to right, red, blue)",
+                                     &angle, colors, pos), 2);
+    assert_int_equal(angle, 90);
+    assert_int_equal(cg_parse_linear("linear-gradient(in oklch longer hue, red, blue)",
+                                     &angle, colors, pos), 2);
+    assert_int_equal(angle, 180);
+    assert_int_equal(cg_parse_linear("linear-gradient(45deg in srgb-linear, red, blue)",
+                                     &angle, colors, pos), 2);
+    assert_int_equal(angle, 45);
+    assert_int_equal(cg_parse_linear("linear-gradient(to right in bogus, red, blue)",
+                                     &angle, colors, pos), 0);
+    assert_int_equal(cg_parse_linear("linear-gradient(in oklab longer hue, red, blue)",
+                                     &angle, colors, pos), 0);
+    assert_int_equal(cg_parse_linear("linear-gradient(to right in, red, blue)",
+                                     &angle, colors, pos), 0);
+    css_decl d[16];
+    char urls[4][CSS_URL_MAX];
+    size_t nurl = 0;
+    assert_true(cg_expand_bg_image("radial-gradient(circle in oklab, red, blue)",
+                                   d, 16, urls, &nurl, 4) > 2);
+    assert_true(cg_expand_bg_image("conic-gradient(from 90deg in hsl, red, blue)",
+                                   d, 16, urls, &nurl, 4) > 2);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -207,6 +238,7 @@ int main(void)
         cmocka_unit_test(test_radial_prelude_px_sizes_and_failures),
         cmocka_unit_test(test_radial_len_resolution),
         cmocka_unit_test(test_radial_geometry_keywords),
+        cmocka_unit_test(test_interpolation_method),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

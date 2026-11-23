@@ -126,11 +126,11 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
                $(BUILD_DIR)/test_css_index $(BUILD_DIR)/test_box_blur \
                $(BUILD_DIR)/test_text_case $(BUILD_DIR)/test_css_computed \
                $(BUILD_DIR)/test_css_counter $(BUILD_DIR)/test_sheet_cache \
-               $(BUILD_DIR)/test_net_guard $(BUILD_DIR)/test_chrome_layout $(BUILD_DIR)/test_site_panel $(BUILD_DIR)/test_nav_token \
+               $(BUILD_DIR)/test_net_guard $(BUILD_DIR)/test_chrome_layout $(BUILD_DIR)/test_site_panel $(BUILD_DIR)/test_link_preview $(BUILD_DIR)/test_doc_title $(BUILD_DIR)/test_nav_token \
                $(BUILD_DIR)/test_mask_cache $(BUILD_DIR)/test_exact_key \
                $(BUILD_DIR)/test_find_text $(BUILD_DIR)/test_video_pick $(BUILD_DIR)/test_video_controls
 
-.PHONY: gscroll fuzz-bt fuzz-vcl fuzz-hls fuzz-nt fuzz-sp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: asan-run gscroll ghover fuzz-dt fuzz-bt fuzz-vcl fuzz-hls fuzz-nt fuzz-sp fuzz-lp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -488,6 +488,14 @@ $(BUILD_DIR)/test_video_controls: $(TEST_DIR)/test_video_controls.c $(BUILD_DIR)
 $(BUILD_DIR)/test_nav_token: $(TEST_DIR)/test_nav_token.c $(BUILD_DIR)/nav_token.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lpthread
 
+# Title of a parked (not yet laid out) document (spec/doc_title.md). Pure, no deps.
+$(BUILD_DIR)/test_doc_title: $(TEST_DIR)/test_doc_title.c $(BUILD_DIR)/doc_title.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
+# Status-strip preview of the link under the pointer (spec/link_preview.md). Pure.
+$(BUILD_DIR)/test_link_preview: $(TEST_DIR)/test_link_preview.c $(BUILD_DIR)/link_preview.o $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 # Site identity panel opened from the badge (spec/site_panel.md). Pure, no deps.
 $(BUILD_DIR)/test_site_panel: $(TEST_DIR)/test_site_panel.c $(BUILD_DIR)/site_panel.o $(BUILD_DIR)/chrome_layout.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
@@ -711,7 +719,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_i
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/pres_hints.o $(BUILD_DIR)/sheet_cache.o $(BUILD_DIR)/css_chain.o $(QJS_OBJ) \
-                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/net_guard.o $(BUILD_DIR)/chrome_layout.o $(BUILD_DIR)/site_panel.o $(BUILD_DIR)/nav_token.o $(BUILD_DIR)/find_text.o $(BUILD_DIR)/video_pick.o $(BUILD_DIR)/video_controls.o $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/url.o \
+                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/net_guard.o $(BUILD_DIR)/chrome_layout.o $(BUILD_DIR)/site_panel.o $(BUILD_DIR)/link_preview.o $(BUILD_DIR)/doc_title.o $(BUILD_DIR)/nav_token.o $(BUILD_DIR)/find_text.o $(BUILD_DIR)/video_pick.o $(BUILD_DIR)/video_controls.o $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/url.o \
                       $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
                       $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
                       $(BUILD_DIR)/request_policy.o \
@@ -767,11 +775,17 @@ $(BUILD_DIR)/itest_secure_fetch: $(TEST_DIR)/itest_secure_fetch.c $(BUILD_DIR)/s
 # -fvisibility=hidden kept here too (asan drops HARDEN): the asan build of `freedom`
 # (pulled in by test_freedom's --download-pdf E2E) links HarfBuzz, so it needs the
 # same symbol hiding to avoid the hb_free preemption crash. See HARDEN above.
-asan: CFLAGS  := $(STD) $(WARN) -g -O1 -Iinclude $(LEXBOR_CFLAGS) -fsanitize=address,undefined -fno-omit-frame-pointer -fvisibility=hidden
-asan: LDFLAGS := -fsanitize=address,undefined
-asan: QJS_OPT := -O1 -g
-asan: QJS_SAN := -fsanitize=address,undefined -fno-omit-frame-pointer
-asan: clean $(TEST_BINS)
+# `clean` runs to completion BEFORE anything compiles: as a prerequisite it raced the object
+# rules under -j and deleted build/ mid-compile. The sanitized build is a sub-make.
+asan:
+	$(MAKE) clean
+	$(MAKE) asan-run
+
+asan-run: CFLAGS  := $(STD) $(WARN) -g -O1 -Iinclude $(LEXBOR_CFLAGS) -fsanitize=address,undefined -fno-omit-frame-pointer -fvisibility=hidden
+asan-run: LDFLAGS := -fsanitize=address,undefined
+asan-run: QJS_OPT := -O1 -g
+asan-run: QJS_SAN := -fsanitize=address,undefined -fno-omit-frame-pointer
+asan-run: $(TEST_BINS)
 	@set -e; for t in $(TEST_BINS); do \
 	  echo "== ASan $$t =="; \
 	  LSAN_OPTIONS=suppressions=tests/asan.supp:detect_leaks=1 $$t; \
@@ -1114,6 +1128,22 @@ fuzz-nt: | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_nav_token.c $(SRC_DIR)/nav_token.c -o $(BUILD_DIR)/fuzz_nav_token
 	./$(BUILD_DIR)/fuzz_nav_token -max_total_time=30 -rss_limit_mb=2048
 
+# Parked-document title (spec/doc_title.md): output always valid bounded UTF-8 with no
+# controls or bidi overrides, never read past len.
+fuzz-dt: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_doc_title.c $(SRC_DIR)/doc_title.c -o $(BUILD_DIR)/fuzz_doc_title
+	mkdir -p $(BUILD_DIR)/corpus_dt
+	./$(BUILD_DIR)/fuzz_doc_title -max_total_time=30 -rss_limit_mb=2048 $(BUILD_DIR)/corpus_dt $(FUZZ_DIR)/seeds/dt
+
+# Link preview (spec/link_preview.md): no hostile byte reaches the status strip unescaped,
+# the text stays bounded, and the preview agrees with the click (ln_resolve).
+fuzz-lp: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_link_preview.c $(SRC_DIR)/link_preview.c $(SRC_DIR)/link_nav.c $(SRC_DIR)/url.c \
+	  -o $(BUILD_DIR)/fuzz_link_preview
+	./$(BUILD_DIR)/fuzz_link_preview -max_total_time=30 -rss_limit_mb=2048
+
 # Site identity panel (spec/site_panel.md): hostile URL/group text never reaches the painter
 # unsanitized, the panel never claims post-quantum without a PQ identity, geometry stays finite.
 fuzz-sp: | $(BUILD_DIR)
@@ -1454,6 +1484,12 @@ fbench:
 GSCROLL_PAGES ?= site-github site-eswikipedia wikipedia hackernews huggingface jkanime
 gscroll: $(BUILD_DIR)/freedom
 	@python3 tools/guiscroll.py --notches $(if $(NOTCHES),$(NOTCHES),20) \
+	  $(addprefix $(PARITY_DIR)/pages/,$(addsuffix .html,$(if $(PAGES),$(PAGES),$(GSCROLL_PAGES))))
+
+# make ghover [PAGES="a b"] [NOTCHES=n]: what moving the pointer over the page costs in the real
+# window (same harness as gscroll; column 5 = median "hover" hit-test ms per pointer move).
+ghover: $(BUILD_DIR)/freedom
+	@python3 tools/guiscroll.py --hover --notches $(if $(NOTCHES),$(NOTCHES),40) \
 	  $(addprefix $(PARITY_DIR)/pages/,$(addsuffix .html,$(if $(PAGES),$(PAGES),$(GSCROLL_PAGES))))
 
 # Freeze the render-to-idle numbers of the last `make fbench` as the baseline later runs diff against.

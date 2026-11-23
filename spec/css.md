@@ -2185,3 +2185,24 @@ un fragmento cero-inicializado significa "sin declarar"). Sonda `underline-offse
   aparece en `--dump-css-drops` (el globo de idioma de telegram, 1 icono por sitio en
   github/discord/huggingface/justpaste). Requiere sacar las URL de los arrays fijos de
   `css_style`/`pv_box_def`/IPC a un pool por documento.
+
+## Tanda 101 (2026-11-23) — alfa de colores modernos, `color-mix()`, UA monoespaciada
+
+- **`color-mix(in <espacio>, c1 [p1], c2 [p2])`** (CSS Color 5 §2) se resuelve en
+  `cv_parse_color`: porcentajes normalizados a 100 (ambos ausentes = 50/50; uno ausente = el
+  complemento), una suma < 100 escala el alfa, mezcla PREMULTIPLICADA (mezclar con
+  `transparent` conserva los canales del otro color). El espacio se acepta y la mezcla se hace
+  en sRGB (aproximación documentada). `currentColor` dentro de la mezcla no se puede resolver en
+  la cascada: la declaración se descarta (queda el color heredado). Tailwind v4 escribe así toda
+  opacidad: `bg-white/10` = `color-mix(in oklab, white 10%, transparent)`.
+- **Alfa** de `oklab()`/`oklch()`/`lab()`/`lch()`/`hwb()`/`color()` tras la barra, y de
+  `color-mix()`, en `cv_bg_alpha_of` (antes solo hex y `rgb()`/`hsl()`: salían opacos).
+- **Color de borde con alfa**: `border*-color` y los shorthands guardan la transparencia en los
+  bits 24..30 (`cv_parse_color_t7`, la codificación de `box-shadow`) y el pintor la aplica
+  (`set_packed_rgba`). `border-white/5` pintaba un marco blanco opaco.
+- **`filter: drop-shadow()`** conserva el alfa de su color (Tailwind `drop-shadow-lg` es
+  `#00000026`: opaco era un halo negro).
+- **Hoja UA**: `code`/`kbd`/`samp`/`tt` en `monospace` por debajo de la familia que declare el
+  propio elemento y por encima de la heredada (`pv_text_ext.family_locked`: ni la familia ni el
+  `@font-face` de un ancestro la atraviesan); `var`/`cite`/`dfn` en cursiva (HTML §15.3.4).
+  Abierto: Firefox da 13 px a la `monospace` genérica (aquí se hereda el tamaño).

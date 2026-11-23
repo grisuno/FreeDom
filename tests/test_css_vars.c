@@ -182,6 +182,40 @@ static void test_resolve_overflow_fails(void **state) {
     cvr_free(&t);
 }
 
+static void test_css_wide_keyword_values(void **state) {
+    (void)state;
+    cvr_table own = { 0 }, parent = { 0 }, sheet = { 0 }, init = { 0 };
+    set(&own, "--via", "initial");
+    set(&own, "--reg", "INITIAL");
+    set(&own, "--inh", "inherit");
+    set(&own, "--uns", "unset");
+    set(&own, "--rev", "revert-layer");
+    set(&own, "--txt", "initial foo");
+    set(&parent, "--inh", "p");
+    set(&parent, "--uns", "q");
+    set(&init, "--reg", "7");
+    const cvr_chain ch = { &parent, NULL };
+    const cvr_scope sc = { &own, &sheet, &ch, &init };
+    char out[64];
+    assert_int_equal(cvr_resolve("var(--via, a b)", out, sizeof out, &sc), 1);
+    assert_string_equal(out, "a b");
+    assert_int_equal(cvr_resolve("var(--via)", out, sizeof out, &sc), 0);
+    assert_int_equal(cvr_resolve("var(--reg, a)", out, sizeof out, &sc), 1);
+    assert_string_equal(out, "7");
+    assert_int_equal(cvr_resolve("var(--inh)", out, sizeof out, &sc), 1);
+    assert_string_equal(out, "p");
+    assert_int_equal(cvr_resolve("var(--uns)", out, sizeof out, &sc), 1);
+    assert_string_equal(out, "q");
+    assert_int_equal(cvr_resolve("var(--rev, z)", out, sizeof out, &sc), 1);
+    assert_string_equal(out, "z");
+    assert_int_equal(cvr_resolve("var(--txt)", out, sizeof out, &sc), 1);
+    assert_string_equal(out, "initial foo");
+    cvr_free(&own);
+    cvr_free(&parent);
+    cvr_free(&sheet);
+    cvr_free(&init);
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_set_get_overwrite),
@@ -195,6 +229,7 @@ int main(void) {
         cmocka_unit_test(test_cycle_takes_fallback),
         cmocka_unit_test(test_fallback_fanout_is_budgeted),
         cmocka_unit_test(test_resolve_overflow_fails),
+        cmocka_unit_test(test_css_wide_keyword_values),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

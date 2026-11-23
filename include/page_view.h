@@ -1109,6 +1109,12 @@ typedef struct pv_text_ext {
      * each style into a reused local). Inherits like font_family: the nearest
      * ancestor that declares one. */
     char font_list[CSS_FONT_LIST_MAX];
+    /* A UA monospace element (code/kbd/samp/tt) settled the family: an ancestor's
+     * family, @font-face or list no longer inherits through it (HTML 15.3.4). */
+    int family_locked;
+    /* The run's font-size still derives from the initial `medium` (no absolute size on
+     * the element or an ancestor): a bare generic monospace then takes 13 px, not 16. */
+    int size_from_medium;
     int shadow_dx, shadow_dy, shadow_color;
     int opacity, valign, text_indent, white_space;
     int text_balance;    /* 1 balance, 0 explicit other, -1 unset (inherits) */

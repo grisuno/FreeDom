@@ -9,7 +9,11 @@ The window runs with FREEDOM_JS_PROFILE=1, so every frame prints its phases on s
 ("gui-profile paint(total) ..." and the layout_doc / position_doc lines). Only the frames
 painted after the first wheel notch are counted.
 
-Usage: guiscroll.py [--bin PATH] [--notches N] <page.html> ...
+With --hover the wheel is replaced by N pointer moves across the content (what a user does
+while reading): each move runs the hover hit-tests ("gui-profile hover") and repaints only
+when what is under the pointer changed. The fifth column is then the median hover ms.
+
+Usage: guiscroll.py [--bin PATH] [--notches N] [--hover] <page.html> ...
 Prints one line per page:  <name>\t<frames>\t<median frame ms>\t<p90 frame ms>\t<median layout ms>
 Exit 0 when every page was measured, 1 on a failed measurement, 2 when the environment is missing.
 """
@@ -41,7 +45,7 @@ def phase_ms(line, phase):
     return None
 
 
-def one_page(binary, page, env, prof, tmp, notches):
+def one_page(binary, page, env, prof, tmp, notches, hover=False):
     errpath = os.path.join(tmp, "err.txt")
     renv = dict(env, FREEDOM_AS_HOST="corpus.test", FREEDOM_JS="off", FREEDOM_HOSTS_DIR=prof,
                 FREEDOM_JS_PROFILE="1")
@@ -53,8 +57,13 @@ def one_page(binary, page, env, prof, tmp, notches):
             subprocess.run(["xdotool", "mousemove", "650", "550"], env=xenv, check=False)
             errf.flush()
             mark = os.path.getsize(errpath)
-            for _ in range(notches):
-                subprocess.run(["xdotool", "click", "5"], env=xenv, check=False)
+            for i in range(notches):
+                if hover:
+                    x = 260 + (i * 97) % 820
+                    y = 220 + (i * 53) % 560
+                    subprocess.run(["xdotool", "mousemove", str(x), str(y)], env=xenv, check=False)
+                else:
+                    subprocess.run(["xdotool", "click", "5"], env=xenv, check=False)
                 time.sleep(WHEEL_GAP_S)
             time.sleep(SETTLE_S)
         finally:
@@ -67,7 +76,8 @@ def one_page(binary, page, env, prof, tmp, notches):
         if "stale hit" in l:
             print("guiscroll: %s" % l.strip(), file=sys.stderr)
     frames = [v for v in (phase_ms(l, "paint(total)") for l in lines) if v is not None]
-    layouts = [v for v in (phase_ms(l, "layout_doc") for l in lines) if v is not None]
+    layouts = [v for v in (phase_ms(l, "hover" if hover else "layout_doc") for l in lines)
+               if v is not None]
     if os.environ.get("GUISCROLL_PHASES"):
         phases = {}
         for l in lines:
@@ -85,10 +95,13 @@ def one_page(binary, page, env, prof, tmp, notches):
 def main():
     args = sys.argv[1:]
     binary, notches, hosts, pages = "./build/freedom", 20, "tests/parity/hosts", []
+    hover = False
     i = 0
     while i < len(args):
         if args[i] == "--bin":
             binary = args[i + 1]; i += 2
+        elif args[i] == "--hover":
+            hover = True; i += 1
         elif args[i] == "--notches":
             notches = int(args[i + 1]); i += 2
         else:
@@ -113,12 +126,14 @@ def main():
                 name = os.path.basename(page)
                 name = name[:-5] if name.endswith(".html") else name
                 frames, layouts = one_page(os.path.abspath(binary), os.path.abspath(page), env,
-                                           prof, tmp, notches)
-                if not frames:
+                                           prof, tmp, notches, hover)
+                if not frames and not (hover and layouts):
                     print("guiscroll: %s: no frame was painted while scrolling" % name, file=sys.stderr)
                     rc = 1
                     continue
                 frames.sort()
+                if not frames:
+                    frames = [0.0]
                 p90 = frames[min(len(frames) - 1, int(len(frames) * 0.9))]
                 lay = statistics.median(layouts) if layouts else 0.0
                 print("%s\t%d\t%.1f\t%.1f\t%.1f\t(%d layouts)" % (name, len(frames),

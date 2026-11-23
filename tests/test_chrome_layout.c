@@ -123,6 +123,50 @@ static void test_toolbar_hits(void **state) {
     assert_true(l.menu.x + l.menu.w <= 1300.0 - CHL_PAD + 1e-9);
 }
 
+static void test_bookmark_star(void **state) {
+    (void)state;
+    chl_layout l;
+    assert_int_equal(chl_compute(1300, 1, 2, 0, &l), CHL_OK);
+    int tab;
+    assert_true(l.star.w > 0.0 && l.star.h > 0.0);
+    assert_true(l.star.x >= l.identity.x + l.identity.w);
+    assert_true(l.star.x + l.star.w <= l.url.x + l.url.w);
+    assert_true(l.url.x + l.url.w - (l.star.x + l.star.w) < 4.0);   /* at the right edge */
+    assert_true(l.star.y >= l.url.y && l.star.y + l.star.h <= l.url.y + l.url.h);
+    assert_int_equal(chl_hit(&l, cx(l.star), cy(l.star), &tab), CHL_PART_STAR);
+    assert_int_equal(chl_hit(&l, l.star.x - 1.0, cy(l.star), &tab), CHL_PART_URL);
+    /* A pill too narrow to hold text and a star keeps only the text. */
+    assert_int_equal(chl_compute(CHL_STAR_MIN_URL + 3.0 * CHL_BTN + 2.0 * CHL_PAD, 1, 1, 0, &l), CHL_OK);
+    assert_true(l.url.w < CHL_STAR_MIN_URL + 40.0);
+    if (l.url.w < CHL_STAR_MIN_URL) {
+        assert_true(l.star.w == 0.0);
+        assert_int_equal(chl_hit(&l, l.url.x + l.url.w - 3.0, cy(l.url), &tab), CHL_PART_URL);
+    }
+    assert_int_equal(chl_compute(200, 1, 1, 0, &l), CHL_OK);
+    assert_true(l.star.w == 0.0 && l.star.h == 0.0);
+}
+
+static void test_tab_fallback_title(void **state) {
+    (void)state;
+    char o[64];
+    chl_tab_fallback_title("https://example.com/x?q=1", o, sizeof o);
+    assert_string_equal(o, "example.com/x?q=1");
+    chl_tab_fallback_title("file:///home/u/docs/mono.html", o, sizeof o);
+    assert_string_equal(o, "mono.html");
+    chl_tab_fallback_title("/tmp/a/b/page.html", o, sizeof o);
+    assert_string_equal(o, "page.html");
+    chl_tab_fallback_title("/tmp/dir/", o, sizeof o);
+    assert_string_equal(o, "/tmp/dir/");
+    chl_tab_fallback_title("about:blank", o, sizeof o);
+    assert_string_equal(o, "about:blank");
+    chl_tab_fallback_title(NULL, o, sizeof o);
+    assert_string_equal(o, "");
+    char t[6];
+    chl_tab_fallback_title("https://\xC3\xB1\xC3\xB1\xC3\xB1.es", t, sizeof t);
+    assert_string_equal(t, "\xC3\xB1\xC3\xB1");
+    chl_tab_fallback_title("https://x", o, 0);   /* no write at all */
+}
+
 static void test_tiny_and_hostile_widths(void **state) {
     (void)state;
     const double ws[] = { -5.0, 0.0, 1.0, 37.0, 120.0, NAN, INFINITY, 1e300 };
@@ -131,7 +175,7 @@ static void test_tiny_and_hostile_widths(void **state) {
         assert_int_equal(chl_compute(ws[k], 1, 5, 2, &l), CHL_OK);
         assert_true(isfinite(l.width) && l.width >= 1.0);
         const chl_rect rs[] = { l.new_tab, l.win_min, l.win_max, l.win_close, l.back,
-                                l.fwd, l.reload, l.url, l.identity, l.menu };
+                                l.fwd, l.reload, l.url, l.identity, l.star, l.menu };
         for (size_t i = 0; i < sizeof rs / sizeof rs[0]; ++i) {
             assert_true(isfinite(rs[i].x) && isfinite(rs[i].w));
             assert_true(rs[i].w >= 0.0 && rs[i].h >= 0.0);
@@ -320,6 +364,8 @@ int main(void) {
         cmocka_unit_test(test_many_tabs_keep_minimum_and_drag),
         cmocka_unit_test(test_close_buttons),
         cmocka_unit_test(test_toolbar_hits),
+        cmocka_unit_test(test_bookmark_star),
+        cmocka_unit_test(test_tab_fallback_title),
         cmocka_unit_test(test_tiny_and_hostile_widths),
         cmocka_unit_test(test_identity_table),
         cmocka_unit_test(test_identity_labels),

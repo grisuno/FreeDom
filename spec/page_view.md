@@ -1407,6 +1407,26 @@ generada existe con el padding porcentual y la miniatura reserva el alto 16:9
 - **`pv_run.justify_self`** / `pv_cont_def.item_justify_self`: `justify-self` del
   ítem (B[66]).
 
+### Un `inline-block` o una caja `inline` que ABRE la línea (2026-11-23)
+
+**Dado** un `inline-block` con texto propio (solo runs de su caja, sin bloques internos) que
+abre una línea, **cuando** el siguiente run en flujo tras sus runs no lleva `block_break`,
+**entonces** es un átomo de esa línea igual que a mitad de frase (`text_atom_continues_line`):
+el badge y su etiqueta (`<span class=badge>972</span> likes`) comparten línea, como en Firefox
+(CSS 2.1 9.2.2). Antes se abría como bloque y la etiqueta bajaba a la línea siguiente. Un
+`inline-block` estructurado o solo en su línea conserva el tratamiento de bloque (botón
+centrado por `text-align`).
+
+**Dado** una caja `display:inline` con borde/fondo que abre la línea de un párrafo
+(`<p><kbd>Esc</kbd> closes`), **entonces** la línea anterior se cierra ANTES de abrirla
+(`atom_first`): abierta primero, su caja se materializaba en la línea previa (un guion arriba
+de la página, una cajita tras la última palabra del párrafo anterior). Su borde derecho cae en
+píxel entero, como en Firefox.
+
+**Dado** una línea que se cierra porque un `<code>` con fondo pasa a la siguiente, **entonces**
+la banda de la fila es el fondo que comparten SUS fragmentos (`line_bg`), no el del run actual:
+antes el color del `<code>` pintaba toda la línea anterior.
+
 ### Cajas de nivel inline: elementos `display:inline` con modelo de caja (2026-10-18)
 
 Padding, borde y margen horizontales **sí aplican** a un elemento en línea (CSS 2.1 8.1,
@@ -1673,3 +1693,23 @@ contenedor es una caja de bloque. La barra lateral fija de jkanime (un `<a displ
 entrada) medía «Inicio Directorio Comunidad» como una línea sin padding: 272 px contra 96 en
 Firefox, y tapaba el reproductor. Mismo efecto en la píldora «Log in» de Discord (46 → 80 px) y
 en la cabecera de Wikipedia (66 px con el logo a +14, = Firefox).
+
+### `monospace` genérica a su propio tamaño (tanda 102, 2026-11-23)
+
+Firefox (y Chrome) dan a la familia genérica `monospace` su propio tamaño por defecto en vez de
+16 px. La preferencia de Firefox dice 13 (`font.size.monospace.x-western`) pero en Linux
+`getComputedStyle` devuelve **12 px** (medido en el host de paridad): `FC_MONO_DEFAULT_PX` = 12. Se aplica solo cuando el tamaño **deriva del `medium`
+inicial** (ningún ancestro ni el propio elemento fija un tamaño absoluto: px/pt/rem/keyword) y la
+familia efectiva es **solo** la genérica: la UA de `code`/`kbd`/`samp`/`tt`/`pre` o un
+`font-family: monospace` declarado. Un tamaño relativo (`em`/`%`, escala UA de encabezado) se
+multiplica sobre esa base: `<h1><code>` = 2 × 12.
+
+- **Dado** `<p>t <code>x</code></p>` sin CSS de tamaño, **cuando** se construye la vista,
+  **entonces** el run de `x` lleva `font_scale` 75 (12/16) y el de `t` 0.
+- **Dado** `body{font-size:16px}`, **entonces** `code` queda en 16 px (no deriva de `medium`).
+- **Dado** `code{font-family:Menlo,monospace}`, **entonces** no se ajusta (la lista no es solo la
+  genérica).
+- **Dado** `<pre>` sin CSS, **entonces** 75; **dado** `<h1><code>`, el run es relativo (75 %) al
+  tamaño UA del encabezado.
+
+Fuera de alcance: los `em` de caja (padding de `code`) siguen midiendo contra la base de 16 px.

@@ -1165,7 +1165,10 @@ static int emit_radius_corner(css_decl *dst, int cap, int slot, const char *val)
 /* token classifiers for the per-category border-{width,style,color} quad expanders. */
 static int interp_bw_tok(const char *t, int *o) { return interp_border_width(t, o); }
 static int interp_bs_tok(const char *t, int *o) { int r = interp_border_style(t); if (r < 0) return 0; *o = r; return 1; }
-static int interp_bc_tok(const char *t, int *o) { int r = interp_color(t); if (!color_ok(r)) return 0; *o = r; return 1; }
+/* A border color keeps its alpha as transparency in bits 24..30 (cv_parse_color_t7), the
+ * encoding box-shadow already uses; the painter reads it (spec/css.md, 2026-11-23). */
+static int interp_border_color(const char *v) { return cv_parse_color_t7(v); }
+static int interp_bc_tok(const char *t, int *o) { int r = interp_border_color(t); if (!color_ok(r)) return 0; *o = r; return 1; }
 
 typedef int (*tok_interp)(const char *tok, int *out);
 
@@ -1208,7 +1211,7 @@ static int classify_box_edge(const char *val, int *w, int *hw, int *s, int *hs,
         int tmp;
         if (!*hw && interp_border_width(tok, &tmp)) { *w = tmp; *hw = 1; }
         else if (!*hs && (tmp = interp_border_style(tok)) >= 0) { *s = tmp; *hs = 1; }
-        else if (!*hc && color_ok(tmp = interp_color(tok))) { *c = tmp; *hc = 1; }
+        else if (!*hc && color_ok(tmp = interp_border_color(tok))) { *c = tmp; *hc = 1; }
         else return 0;   /* unrecognised token: drop the whole shorthand */
     }
     return (*hw || *hs || *hc);
@@ -1762,7 +1765,8 @@ static int expand_filter(const char *val, css_decl *dst, int cap) {
                     if (nl < 3) lens[nl++] = px;
                     else { ok = 0; break; }
                 } else {
-                    int cv = parse_color(arg);
+                    /* The alpha rides in bits 24..30 like box-shadow's (cv_parse_color_t7). */
+                    int cv = cv_parse_color_t7(arg);
                     if (color == -1 && cv >= 0) color = cv;
                     else if (color == -1 && cv == CC_COLOR_CURRENT) color = 0x000000;
                     else { ok = 0; break; }
@@ -4392,10 +4396,10 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     else if (strcmp(prop, "border-right-style") == 0)  { prop_id = P_BS_RIGHT;      ival = interp_border_style(val); }
     else if (strcmp(prop, "border-bottom-style") == 0) { prop_id = P_BS_BOTTOM;     ival = interp_border_style(val); }
     else if (strcmp(prop, "border-left-style") == 0)   { prop_id = P_BS_LEFT;       ival = interp_border_style(val); }
-    else if (strcmp(prop, "border-top-color") == 0)    { prop_id = P_BC_TOP;        ival = interp_color(val); }
-    else if (strcmp(prop, "border-right-color") == 0)  { prop_id = P_BC_RIGHT;      ival = interp_color(val); }
-    else if (strcmp(prop, "border-bottom-color") == 0) { prop_id = P_BC_BOTTOM;     ival = interp_color(val); }
-    else if (strcmp(prop, "border-left-color") == 0)   { prop_id = P_BC_LEFT;       ival = interp_color(val); }
+    else if (strcmp(prop, "border-top-color") == 0)    { prop_id = P_BC_TOP;        ival = interp_border_color(val); }
+    else if (strcmp(prop, "border-right-color") == 0)  { prop_id = P_BC_RIGHT;      ival = interp_border_color(val); }
+    else if (strcmp(prop, "border-bottom-color") == 0) { prop_id = P_BC_BOTTOM;     ival = interp_border_color(val); }
+    else if (strcmp(prop, "border-left-color") == 0)   { prop_id = P_BC_LEFT;       ival = interp_border_color(val); }
     else if (strcmp(prop, "flex-grow") == 0)           { prop_id = P_FLEX_GROW;     ival = interp_flex_factor(val); }
     else if (strcmp(prop, "flex-shrink") == 0)         { prop_id = P_FLEX_SHRINK;   ival = interp_flex_factor(val); }
     else if (strcmp(prop, "align-items") == 0)         { prop_id = P_ALIGN_ITEMS;   ival = interp_align_kw(val, 0, 0); }

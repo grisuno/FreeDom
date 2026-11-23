@@ -4165,6 +4165,36 @@ static void sample_png_pixel(const char *html, const char *extra, const char *ta
     unlink(png);
 }
 
+/* A line closed because an inline <code> wrapped to the NEXT line keeps the background its
+ * own fragments share (none): the <code>'s colour used to become a band across the whole
+ * previous line (animate.style, every docs page with inline code). */
+static void test_png_wrapped_inline_bg_no_band(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;width:390px;font:16px sans-serif;background:#fff}"
+        "code{background:#ff0000}</style></head><body>"
+        "<p style=\"margin:0\">After installing Animate.css, add the class "
+        "<code>animate__animated</code> to an element</p></body></html>";
+    uint8_t r = 0, g = 0, b = 0;
+    sample_png_pixel(html, "--author-css", "wrapband", 385, 10, &r, &g, &b);
+    assert_true(r > 200 && g > 200 && b > 200);   /* end of line 1: page white, not red */
+}
+
+/* An inline-block WITH TEXT that opens a line stays on it when the line goes on (a badge
+ * before its label): one line, so the green block below starts right under it. It used to
+ * be laid out as a block and the label dropped to a second line. */
+static void test_png_leading_inline_block_shares_line(void **state) {
+    (void)state;
+    const char *html =
+        "<html><head><style>body{margin:0;font:16px sans-serif;background:#fff}"
+        ".b{display:inline-block;padding:0 4px;background:#0000ff;color:#fff}"
+        ".g{height:20px;background:#00ff00}</style></head><body>"
+        "<div><span class=\"b\">972</span> likes</div><div class=\"g\"></div></body></html>";
+    uint8_t r = 0, g = 0, b = 0;
+    sample_png_pixel(html, "--author-css", "leadib", 300, 30, &r, &g, &b);
+    assert_true(r < 60 && g > 200 && b < 60);   /* y=30 is already the green block */
+}
+
 /* Firefox parity: a text row inside a box whose background is a GRADIENT (or an
  * image) must not repaint an OUTER ancestor's flat background behind its glyphs.
  *
@@ -4605,6 +4635,8 @@ int main(void) {
         cmocka_unit_test(test_download_png_svg_in_button_stays_in_its_box),
         cmocka_unit_test(test_download_png_overflow_clips_at_padding_box),
         cmocka_unit_test(test_download_png_background_clip_content_and_padding_box),
+        cmocka_unit_test(test_png_wrapped_inline_bg_no_band),
+        cmocka_unit_test(test_png_leading_inline_block_shares_line),
         cmocka_unit_test(test_headless_timer_navigation_followed),
         cmocka_unit_test(test_local_form_renders_inputs),
         cmocka_unit_test(test_missing_file),

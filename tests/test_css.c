@@ -5401,6 +5401,35 @@ static void test_filter_drop_shadow_defaults_and_failclosed(void **state) {
     assert_int_equal(css_parse_inline("color:red", 0).filter_drop_color, -1);
 }
 
+/* A border color keeps its alpha in bits 24..30 like box-shadow's (Tailwind `border-white/5`
+ * is #ffffff0d: painted opaque it drew a white frame Firefox shows as a faint line). */
+static void test_border_color_alpha(void **state) {
+    (void)state;
+    css_style a = css_parse_inline("border:1px solid #ffffff0d", 0);
+    assert_int_equal(a.border_top_color & 0xffffff, 0xffffff);
+    assert_true(((a.border_top_color >> 24) & 0x7f) > 115);
+    css_style b = css_parse_inline("border-color:rgba(0,0,0,.5)", 0);
+    assert_true(((b.border_left_color >> 24) & 0x7f) > 60);
+    css_style c = css_parse_inline("border-top-color:oklch(50% .1 200 / 50%)", 0);
+    assert_true(((c.border_top_color >> 24) & 0x7f) > 60);
+    css_style d = css_parse_inline("border:2px solid red", 0);
+    assert_int_equal(d.border_top_color, 0xff0000);
+}
+
+/* The shadow color keeps its alpha (bits 24..30 = transparency, as box-shadow): Tailwind's
+ * drop-shadow-lg is #00000026, 15 % black, and painted opaque it was a black halo. */
+static void test_filter_drop_shadow_alpha(void **state) {
+    (void)state;
+    css_style h = css_parse_inline("filter: drop-shadow(0 4px 4px #00000026)", 0);
+    int t7 = (h.filter_drop_color >> 24) & 0x7f;
+    assert_true(h.filter_drop_color >= 0);
+    assert_int_equal(h.filter_drop_color & 0xffffff, 0x000000);
+    assert_true(t7 > 100 && t7 < 115);   /* 0x26/255 = 15 % opaque => ~85 % transparent */
+    css_style r = css_parse_inline("filter: drop-shadow(1px 1px rgba(255,0,0,.5))", 0);
+    assert_int_equal(r.filter_drop_color & 0xffffff, 0xff0000);
+    assert_true(((r.filter_drop_color >> 24) & 0x7f) > 60 && ((r.filter_drop_color >> 24) & 0x7f) < 66);
+}
+
 static void test_backdrop_filter_blur(void **state) {
     (void)state;
     assert_int_equal(css_parse_inline("backdrop-filter: blur(8px)", 0).backdrop_blur, 8);
@@ -6319,6 +6348,8 @@ int main(void) {
         cmocka_unit_test(test_linear_gradient_positions_emitted),
         cmocka_unit_test(test_filter_drop_shadow),
         cmocka_unit_test(test_filter_drop_shadow_defaults_and_failclosed),
+        cmocka_unit_test(test_filter_drop_shadow_alpha),
+        cmocka_unit_test(test_border_color_alpha),
         cmocka_unit_test(test_background_rgba_alpha),
         cmocka_unit_test(test_anim_keyframes_resolved_from_sheet),
         cmocka_unit_test(test_keyframes_overflow_skips_block_not_sheet),
