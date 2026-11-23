@@ -1,6 +1,37 @@
 # Subsystem: tests (page 9 of 9)
 Previous: [KB_tests_p8.md](KB_tests_p8.md)
 
+## tests/test_table_layout.c
+- Doc: test_table_layout -- automatic table layout (spec/table_layout.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `assert_near` (function, line 13) `static void assert_near(double got, double want)`
+  - `test_auto_table_takes_max_content` (function, line 18) `static void test_auto_table_takes_max_content(void **state)`
+  - `test_declared_table_width_distributes_surplus` (function, line 32) `static void test_declared_table_width_distributes_surplus(void **state)`
+  - `test_surplus_with_no_auto_column` (function, line 44) `static void test_surplus_with_no_auto_column(void **state)`
+  - `test_span_narrower_is_inert` (function, line 94) `static void test_span_narrower_is_inert(void **state)`
+  - `test_span_over_empty_columns_splits_evenly` (function, line 105) `static void test_span_over_empty_columns_splits_evenly(void **state)`
+  - `test_gap_counts` (function, line 115) `static void test_gap_counts(void **state)`
+  - `test_declared_width_never_below_min` (function, line 130) `static void test_declared_width_never_below_min(void **state)`
+  - `test_declared_cell_width` (function, line 141) `static void test_declared_cell_width(void **state)`
+  - `test_percent_columns` (function, line 155) `static void test_percent_columns(void **state)`
+  - `test_intrinsic` (function, line 191) `static void test_intrinsic(void **state)`
+  - `test_fail_closed` (function, line 204) `static void test_fail_closed(void **state)`
+  - `main` (function, line 235) `int main(void)`
+  - `EPS` (macro, line 11) `#define EPS`
+- Depends on: `include/table_layout.h`
+
+## tests/test_text_case.c
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_upper_lower_ascii_latin` (function, line 10) `static void test_upper_lower_ascii_latin(void **state)`
+  - `test_transform_keeps_length` (function, line 33) `static void test_transform_keeps_length(void **state)`
+  - `test_smallcaps_runs` (function, line 55) `static void test_smallcaps_runs(void **state)`
+  - `main` (function, line 73) `int main(void)`
+- Depends on: `include/css.h`, `include/text_case.h`
+
 ## tests/test_text_shape.c
 - Doc: inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font...
 - Layer: testing

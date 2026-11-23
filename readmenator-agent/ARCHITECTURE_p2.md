@@ -2,6 +2,9 @@
 Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Internal Dependencies (continued)
+- `src/render_doc.c` -> `include/util.h`
+- `src/render_policy.c` -> `include/data_url.h`
+- `src/render_policy.c` -> `include/render_policy.h`
 - `src/render_policy.c` -> `include/request_policy.h`
 - `src/renderer.c` -> `include/html_parse.h`
 - `src/renderer.c` -> `include/os_sandbox.h`
@@ -9,6 +12,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/renderer.c` -> `include/util.h`
 - `src/request_policy.c` -> `include/psl_data.h`
 - `src/request_policy.c` -> `include/request_policy.h`
+- `src/scroll_req.c` -> `include/scroll_req.h`
 - `src/secure_fetch.c` -> `include/anti_fp.h`
 - `src/secure_fetch.c` -> `include/net_guard.h`
 - `src/secure_fetch.c` -> `include/request_policy.h`
@@ -32,6 +36,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/tab.c` -> `include/anti_fp.h`
 - `src/tab.c` -> `include/box_tree.h`
 - `src/tab.c` -> `include/css.h`
+- `src/tab.c` -> `include/css_chain.h`
 - `src/tab.c` -> `include/css_computed.h`
 - `src/tab.c` -> `include/css_gradient.h`
 - `src/tab.c` -> `include/css_import.h`
@@ -53,6 +58,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `src/tab.c` -> `include/os_sandbox.h`
 - `src/tab.c` -> `include/page_view.h`
 - `src/tab.c` -> `include/request_policy.h`
+- `src/tab.c` -> `include/scroll_req.h`
 - `src/tab.c` -> `include/secure_fetch.h`
 - `src/tab.c` -> `include/sheet_cache.h`
 - `src/tab.c` -> `include/subreq_batch.h`
@@ -231,6 +237,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_render_policy.c` -> `include/render_policy.h`
 - `tests/test_renderer.c` -> `include/renderer.h`
 - `tests/test_request_policy.c` -> `include/request_policy.h`
+- `tests/test_scroll_req.c` -> `include/scroll_req.h`
 - `tests/test_secure_fetch.c` -> `include/secure_fetch.h`
 - `tests/test_sha2.c` -> `include/sha2.h`
 - `tests/test_sheet_cache.c` -> `include/freedom_config.h`

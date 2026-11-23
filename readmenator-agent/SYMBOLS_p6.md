@@ -3,6 +3,20 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `rd_status` | enum | `include/render_doc.h:302` | `` |
+| `rdp_images_warning` | function | `include/render_doc.h:311` | `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...` |
+| `to` | function | `include/render_doc.h:253` | `* belongs to (-1 = none);` |
+| `FREEDOM_RENDER_POLICY_H` | macro | `include/render_policy.h:2` | `#define FREEDOM_RENDER_POLICY_H` |
+| `RDP_TRACKER_MAX_DIM` | macro | `include/render_policy.h:27` | `#define RDP_TRACKER_MAX_DIM` |
+| `images` | type_alias | `include/render_policy.h:32` | `typedef struct rdp_caps { bool images;` |
+| `rdp_caps` | struct | `include/render_policy.h:32` | `` |
+| `rdp_images_warning` | function | `include/render_policy.h:69` | `const char *rdp_images_warning(void);` |
+| `rdp_img_decision` | enum | `include/render_policy.h:39` | `` |
+| `rdp_img_reason` | function | `include/render_policy.h:66` | `const char *rdp_img_reason(rdp_img_decision d);` |
+| `rdp_is_tracking_pixel` | function | `include/render_policy.h:53` | `int rdp_is_tracking_pixel(int w, int h);` |
+| `size` | function | `include/render_policy.h:56` | `* announced size (e.g. <img width height>);` |
+| `FREEDOM_RENDERER_H` | macro | `include/renderer.h:2` | `#define FREEDOM_RENDERER_H` |
+| `RD_MAX_FIELD` | macro | `include/renderer.h:38` | `#define RD_MAX_FIELD` |
 | `RD_MAX_INPUT` | macro | `include/renderer.h:37` | `#define RD_MAX_INPUT` |
 | `rd_result` | struct | `include/renderer.h:29` | `` |
 | `rd_result_free` | function | `include/renderer.h:46` | `void rd_result_free(rd_result *out);` |
@@ -19,6 +33,20 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `rp_same_site` | function | `include/request_policy.h:37` | `int rp_same_site(const char *top_level_url, const char *request_url);` |
 | `rp_sanitize_request_headers` | function | `include/request_policy.h:57` | `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);` |
 | `rp_site_of` | function | `include/request_policy.h:34` | `int rp_site_of(const char *host, char *out, size_t out_size);` |
+| `FREEDOM_SCROLL_REQ_H` | macro | `include/scroll_req.h:2` | `#define FREEDOM_SCROLL_REQ_H` |
+| `SRQ_MAX_COORD` | macro | `include/scroll_req.h:21` | `#define SRQ_MAX_COORD` |
+| `SRQ_WIRE_N` | macro | `include/scroll_req.h:22` | `#define SRQ_WIRE_N` |
+| `kind` | type_alias | `include/scroll_req.h:36` | `typedef struct srq_req { int kind;` |
+| `scroll` | type_alias | `include/scroll_req.h:46` | `typedef struct srq_view { double scroll;` |
+| `srq_behavior` | enum | `include/scroll_req.h:31` | `` |
+| `srq_block` | enum | `include/scroll_req.h:33` | `` |
+| `srq_decode` | function | `include/scroll_req.h:64` | `int srq_decode(const int32_t in[SRQ_WIRE_N], size_t max_handles, srq_req *out);` |
+| `srq_encode` | function | `include/scroll_req.h:58` | `void srq_encode(const srq_req *r, int32_t out[SRQ_WIRE_N]);` |
+| `srq_kind` | enum | `include/scroll_req.h:24` | `` |
+| `srq_req` | struct | `include/scroll_req.h:37` | `` |
+| `srq_smooth` | function | `include/scroll_req.h:76` | `int srq_smooth(const srq_req *r, int root_smooth);` |
+| `srq_target` | function | `include/scroll_req.h:71` | `int srq_target(const srq_req *r, const srq_view *v, double el_top, double el_bottom, double *out);` |
+| `srq_view` | struct | `include/scroll_req.h:47` | `` |
 | `EXCLUDED` | function | `include/secure_fetch.h:248` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
 | `FREEDOM_SECURE_FETCH_H` | macro | `include/secure_fetch.h:2` | `#define FREEDOM_SECURE_FETCH_H` |
 | `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:231` | `#define SF_CONNECT_TIMEOUT_MS` |
@@ -146,65 +174,67 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `sv_verb` | enum | `include/svg_render.h:58` | `` |
 | `verb` | type_alias | `include/svg_render.h:64` | `typedef struct sv_seg { int verb;` |
 | `FREEDOM_TAB_H` | macro | `include/tab.h:2` | `#define FREEDOM_TAB_H` |
-| `TAB_MAX_INPUT` | macro | `include/tab.h:160` | `#define TAB_MAX_INPUT` |
-| `bytes` | function | `include/tab.h:226` | `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....` |
-| `decode` | function | `include/tab.h:448` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
-| `exclusively` | function | `include/tab.h:298` | `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...` |
-| `free_ctx` | function | `include/tab.h:242` | `* free_ctx(ctx) (may be NULL) runs once the tab is closed AND its last abandoned request ended, * so the fetcher may...` |
-| `granted` | function | `include/tab.h:404` | `* granted (allow.conf AND js.conf);` |
-| `jar` | function | `include/tab.h:283` | `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...` |
-| `kind` | type_alias | `include/tab.h:71` | `typedef struct tab_ws_op { int kind;` |
-| `kind` | type_alias | `include/tab.h:423` | `typedef struct tab_anchor { int kind;` |
-| `load` | function | `include/tab.h:310` | `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);` |
-| `none` | function | `include/tab.h:254` | `* worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick. * The caller must then...` |
-| `origin` | function | `include/tab.h:290` | `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);` |
-| `out_status` | function | `include/tab.h:201` | `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...` |
-| `popstate` | function | `include/tab.h:411` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
-| `preorder` | function | `include/tab.h:416` | `* preorder (out->nsub handles) followed by the elements after it, at most * ANC_MAX_HANDLES -- live DOM handles, the...` |
-| `replace` | type_alias | `include/tab.h:54` | `typedef struct tab_hist_op { int replace;` |
-| `returned` | function | `include/tab.h:405` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
-| `string` | function | `include/tab.h:355` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
-| `tab` | type_alias | `include/tab.h:46` | `typedef struct tab tab;` |
-| `tab_alive` | function | `include/tab.h:461` | `int tab_alive(const tab *t);` |
-| `tab_anchor` | struct | `include/tab.h:423` | `` |
-| `tab_anchor_free` | function | `include/tab.h:430` | `void tab_anchor_free(tab_anchor *a);` |
-| `tab_async_busy` | function | `include/tab.h:276` | `int tab_async_busy(const tab *t);` |
-| `tab_async_fd` | function | `include/tab.h:270` | `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...` |
-| `tab_child_pid` | function | `include/tab.h:464` | `pid_t tab_child_pid(const tab *t);` |
-| `tab_close` | function | `include/tab.h:467` | `void tab_close(tab *t);` |
-| `tab_eval_result` | struct | `include/tab.h:138` | `` |
-| `tab_eval_result_free` | function | `include/tab.h:471` | `void tab_eval_result_free(tab_eval_result *r);` |
-| `tab_hist_op` | struct | `include/tab.h:54` | `` |
-| `tab_image` | struct | `include/tab.h:151` | `` |
-| `tab_image_free` | function | `include/tab.h:472` | `void tab_image_free(tab_image *img);` |
-| `tab_inflight_request_headers` | function | `include/tab.h:217` | `const char *tab_inflight_request_headers(void);` |
-| `tab_last_subreq_stats` | function | `include/tab.h:322` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` |
-| `tab_open` | function | `include/tab.h:168` | `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...` |
-| `tab_page` | struct | `include/tab.h:79` | `` |
-| `tab_page_free` | function | `include/tab.h:470` | `void tab_page_free(tab_page *p);` |
-| `tab_page_keep_view` | function | `include/tab.h:261` | `void tab_page_keep_view(tab_page *prev, tab_page *next);` |
-| `tab_parse_worker_args` | function | `include/tab.h:175` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` |
-| `tab_prewarm` | function | `include/tab.h:184` | `void tab_prewarm(void);` |
-| `tab_prewarmed` | function | `include/tab.h:187` | `int tab_prewarmed(void);` |
-| `tab_prewarmed_pid` | function | `include/tab.h:190` | `int tab_prewarmed_pid(void);` |
-| `tab_report_response_headers` | function | `include/tab.h:222` | `void tab_report_response_headers(const char *lines);` |
-| `tab_set_cookies` | function | `include/tab.h:287` | `void tab_set_cookies(tab *t, const char *cookies);` |
-| `tab_set_css_sink` | function | `include/tab.h:235` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
-| `tab_set_fetcher` | function | `include/tab.h:212` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` |
-| `tab_set_identity` | function | `include/tab.h:316` | `void tab_set_identity(tab *t, const char *serialized);` |
-| `tab_set_net_allowed` | function | `include/tab.h:250` | `void tab_set_net_allowed(tab *t, int allowed);` |
-| `tab_set_op_net_budget_ms` | function | `include/tab.h:265` | `void tab_set_op_net_budget_ms(tab *t, int ms);` |
-| `tab_set_storage` | function | `include/tab.h:292` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
-| `tab_set_viewport_w` | function | `include/tab.h:306` | `void tab_set_viewport_w(tab *t, int px);` |
-| `tab_shutdown_spare` | function | `include/tab.h:193` | `void tab_shutdown_spare(void);` |
-| `tab_status` | enum | `include/tab.h:31` | `` |
-| `tab_subreq_permitted` | function | `include/tab.h:327` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
-| `tab_worker_dispatch` | function | `include/tab.h:164` | `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...` |
-| `tab_ws_event_kind` | enum | `include/tab.h:67` | `` |
-| `tab_ws_kind` | enum | `include/tab.h:61` | `` |
-| `tab_ws_op` | struct | `include/tab.h:72` | `` |
-| `view` | function | `include/tab.h:335` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
-| `width` | type_alias | `include/tab.h:151` | `typedef struct tab_image { uint32_t width;` |
+| `TAB_ANCHOR_REPLACE` | macro | `include/tab.h:447` | `#define TAB_ANCHOR_REPLACE` |
+| `TAB_MAX_INPUT` | macro | `include/tab.h:172` | `#define TAB_MAX_INPUT` |
+| `bytes` | function | `include/tab.h:238` | `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....` |
+| `decode` | function | `include/tab.h:468` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
+| `exclusively` | function | `include/tab.h:310` | `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...` |
+| `free_ctx` | function | `include/tab.h:254` | `* free_ctx(ctx) (may be NULL) runs once the tab is closed AND its last abandoned request ended, * so the fetcher may...` |
+| `granted` | function | `include/tab.h:416` | `* granted (allow.conf AND js.conf);` |
+| `jar` | function | `include/tab.h:295` | `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...` |
+| `kind` | type_alias | `include/tab.h:72` | `typedef struct tab_ws_op { int kind;` |
+| `kind` | type_alias | `include/tab.h:435` | `typedef struct tab_anchor { int kind;` |
+| `load` | function | `include/tab.h:322` | `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);` |
+| `none` | function | `include/tab.h:266` | `* worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick. * The caller must then...` |
+| `one` | function | `include/tab.h:445` | `* history entry with push_url instead of adding one (location.replace('#x'), a fragment * set while the document...` |
+| `origin` | function | `include/tab.h:302` | `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);` |
+| `out_status` | function | `include/tab.h:213` | `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...` |
+| `popstate` | function | `include/tab.h:423` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
+| `preorder` | function | `include/tab.h:428` | `* preorder (out->nsub handles) followed by the elements after it, at most * ANC_MAX_HANDLES -- live DOM handles, the...` |
+| `replace` | type_alias | `include/tab.h:55` | `typedef struct tab_hist_op { int replace;` |
+| `returned` | function | `include/tab.h:417` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
+| `string` | function | `include/tab.h:367` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
+| `tab` | type_alias | `include/tab.h:47` | `typedef struct tab tab;` |
+| `tab_alive` | function | `include/tab.h:481` | `int tab_alive(const tab *t);` |
+| `tab_anchor` | struct | `include/tab.h:435` | `` |
+| `tab_anchor_free` | function | `include/tab.h:450` | `void tab_anchor_free(tab_anchor *a);` |
+| `tab_async_busy` | function | `include/tab.h:288` | `int tab_async_busy(const tab *t);` |
+| `tab_async_fd` | function | `include/tab.h:282` | `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...` |
+| `tab_child_pid` | function | `include/tab.h:484` | `pid_t tab_child_pid(const tab *t);` |
+| `tab_close` | function | `include/tab.h:487` | `void tab_close(tab *t);` |
+| `tab_eval_result` | struct | `include/tab.h:150` | `` |
+| `tab_eval_result_free` | function | `include/tab.h:491` | `void tab_eval_result_free(tab_eval_result *r);` |
+| `tab_hist_op` | struct | `include/tab.h:55` | `` |
+| `tab_image` | struct | `include/tab.h:163` | `` |
+| `tab_image_free` | function | `include/tab.h:492` | `void tab_image_free(tab_image *img);` |
+| `tab_inflight_request_headers` | function | `include/tab.h:229` | `const char *tab_inflight_request_headers(void);` |
+| `tab_last_subreq_stats` | function | `include/tab.h:334` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` |
+| `tab_open` | function | `include/tab.h:180` | `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...` |
+| `tab_page` | struct | `include/tab.h:80` | `` |
+| `tab_page_free` | function | `include/tab.h:490` | `void tab_page_free(tab_page *p);` |
+| `tab_page_keep_view` | function | `include/tab.h:273` | `void tab_page_keep_view(tab_page *prev, tab_page *next);` |
+| `tab_parse_worker_args` | function | `include/tab.h:187` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` |
+| `tab_prewarm` | function | `include/tab.h:196` | `void tab_prewarm(void);` |
+| `tab_prewarmed` | function | `include/tab.h:199` | `int tab_prewarmed(void);` |
+| `tab_prewarmed_pid` | function | `include/tab.h:202` | `int tab_prewarmed_pid(void);` |
+| `tab_report_response_headers` | function | `include/tab.h:234` | `void tab_report_response_headers(const char *lines);` |
+| `tab_set_cookies` | function | `include/tab.h:299` | `void tab_set_cookies(tab *t, const char *cookies);` |
+| `tab_set_css_sink` | function | `include/tab.h:247` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
+| `tab_set_fetcher` | function | `include/tab.h:224` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` |
+| `tab_set_identity` | function | `include/tab.h:328` | `void tab_set_identity(tab *t, const char *serialized);` |
+| `tab_set_net_allowed` | function | `include/tab.h:262` | `void tab_set_net_allowed(tab *t, int allowed);` |
+| `tab_set_op_net_budget_ms` | function | `include/tab.h:277` | `void tab_set_op_net_budget_ms(tab *t, int ms);` |
+| `tab_set_storage` | function | `include/tab.h:304` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
+| `tab_set_viewport_w` | function | `include/tab.h:318` | `void tab_set_viewport_w(tab *t, int px);` |
+| `tab_shutdown_spare` | function | `include/tab.h:205` | `void tab_shutdown_spare(void);` |
+| `tab_status` | enum | `include/tab.h:32` | `` |
+| `tab_subreq_permitted` | function | `include/tab.h:339` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
+| `tab_worker_dispatch` | function | `include/tab.h:176` | `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...` |
+| `tab_ws_event_kind` | enum | `include/tab.h:68` | `` |
+| `tab_ws_kind` | enum | `include/tab.h:62` | `` |
+| `tab_ws_op` | struct | `include/tab.h:73` | `` |
+| `view` | function | `include/tab.h:347` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
+| `width` | type_alias | `include/tab.h:163` | `typedef struct tab_image { uint32_t width;` |
 | `FREEDOM_TABLE_LAYOUT_H` | macro | `include/table_layout.h:11` | `#define FREEDOM_TABLE_LAYOUT_H` |
 | `TL_MAX_COLS` | macro | `include/table_layout.h:20` | `#define TL_MAX_COLS` |
 | `TL_PER_MILLE` | macro | `include/table_layout.h:26` | `#define TL_PER_MILLE` |
@@ -433,8 +463,9 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `anc_collect` | function | `src/anchor.c:93` | `size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, size_t cap,       ...` |
 | `anc_percent_decode` | function | `src/anchor.c:15` | `size_t anc_percent_decode(const char *in, char *out, size_t cap)` |
 | `anc_resolve` | function | `src/anchor.c:63` | `anc_kind anc_resolve(const dom_index *idx, const char *fragment, dom_node_id *out)` |
-| `anc_scroll_for` | function | `src/anchor.c:131` | `double anc_scroll_for(double top, double max_scroll)` |
-| `anc_target_top` | function | `src/anchor.c:110` | `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,               ...` |
+| `anc_scroll_for` | function | `src/anchor.c:142` | `double anc_scroll_for(double top, double max_scroll)` |
+| `anc_target_box` | function | `src/anchor.c:110` | `int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,               ...` |
+| `anc_target_top` | function | `src/anchor.c:134` | `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,               ...` |
 | `first_named_a` | function | `src/anchor.c:35` | `static dom_node_id first_named_a(const dom_index *idx, const char *name)` |
 | `hex_val` | function | `src/anchor.c:8` | `static int hex_val(int c)` |
 | `is_top` | function | `src/anchor.c:59` | `static int is_top(const char *s)` |
@@ -465,36 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `splitmix64` | function | `src/anti_fp.c:121` | `static uint64_t splitmix64(uint64_t *state)` |
 | `bf_collapse` | function | `src/block_flow.c:30` | `double bf_collapse(double a, double b)` |
 | `bf_collapse_n` | function | `src/block_flow.c:15` | `double bf_collapse_n(const double *m, size_t n)` |
-| `bf_margins_adjoin` | function | `src/block_flow.c:35` | `int bf_margins_adjoin(double border_px, double padding_px)` |
-| `finite_or_zero` | function | `src/block_flow.c:11` | `static double finite_or_zero(double v)` |
-| `BB_BOX_MAX` | macro | `src/box_blur.c:31` | `#define BB_BOX_MAX` |
-| `bb_blur_a8` | function | `src/box_blur.c:82` | `int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)` |
-| `bb_box_sizes` | function | `src/box_blur.c:8` | `int bb_box_sizes(double sigma, int sizes[3])` |
-| `bb_ink_rect` | function | `src/box_blur.c:102` | `int bb_ink_rect(const unsigned char *argb, int w, int h, int stride, double sigma, int rect[4])` |
-| `box_avg` | function | `src/box_blur.c:33` | `static unsigned char box_avg(long sum, int bw, uint64_t m)` |
-| `box_cols` | function | `src/box_blur.c:56` | `static void box_cols(unsigned char *buf, int w, int h, int stride, int bw,                      u...` |
-| `box_line` | function | `src/box_blur.c:39` | `static void box_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)` |
-| `box_recip` | function | `src/box_blur.c:32` | `static uint64_t box_recip(int bw)` |
-| `variance` | function | `src/box_blur.c:11` | `* width w has variance (w^2 - 1) / 12): the ideal common width, rounded down * to an odd wl and up to wu = wl + 2...` |
-| `BLOCK` | macro | `src/box_style.c:67` | `#define BLOCK` |
-| `BX_DISPLAY_MAX` | macro | `src/box_style.c:25` | `#define BX_DISPLAY_MAX` |
-| `BX_TAG_MAX` | macro | `src/box_style.c:24` | `#define BX_TAG_MAX` |
-| `DISP_N` | macro | `src/box_style.c:259` | `#define DISP_N` |
-| `EDG` | macro | `src/box_style.c:72` | `#define EDG(t, r, b, l)` |
-| `IBLOCK` | macro | `src/box_style.c:69` | `#define IBLOCK` |
-| `INLINE` | macro | `src/box_style.c:68` | `#define INLINE` |
-| `LITEM` | macro | `src/box_style.c:70` | `#define LITEM` |
-| `NONE` | macro | `src/box_style.c:71` | `#define NONE` |
-| `TAG_N` | macro | `src/box_style.c:161` | `#define TAG_N` |
-| `T_CAP` | macro | `src/box_style.c:80` | `#define T_CAP` |
-| `T_CELL` | macro | `src/box_style.c:79` | `#define T_CELL` |
-| `T_COL` | macro | `src/box_style.c:81` | `#define T_COL` |
-| `T_GRP` | macro | `src/box_style.c:77` | `#define T_GRP` |
-| `T_NO` | macro | `src/box_style.c:75` | `#define T_NO` |
-| `T_ROW` | macro | `src/box_style.c:78` | `#define T_ROW` |
-| `T_TBL` | macro | `src/box_style.c:76` | `#define T_TBL` |
-| `ZERO` | macro | `src/box_style.c:73` | `#define ZERO` |
-| `bg_size_component` | function | `src/box_style.c:408` | `static double bg_size_component(int px_val, int pct_pm, double area)` |
-| `bx_background_layer` | function | `src/box_style.c:415` | `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,                     ...` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

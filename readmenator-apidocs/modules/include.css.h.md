@@ -111,7 +111,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.container`
 
-`method` | [include/css.h:674](../../include/css.h#L674)
+`method` | [include/css.h:678](../../include/css.h#L678)
 
 ```c
 * container (Display 3 section 2);
@@ -129,7 +129,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.family`
 
-`method` | [include/css.h:719](../../include/css.h#L719)
+`method` | [include/css.h:723](../../include/css.h#L723)
 
 ```c
 * LOCAL family (spec/text_shape.md section 7);
@@ -147,7 +147,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.translate`
 
-`method` | [include/css.h:893](../../include/css.h#L893)
+`method` | [include/css.h:897](../../include/css.h#L897)
 
 ```c
 * translate()/translateX()/translateY();
@@ -161,7 +161,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.scaleY`
 
-`method` | [include/css.h:894](../../include/css.h#L894)
+`method` | [include/css.h:898](../../include/css.h#L898)
 
 ```c
 * scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);
@@ -173,7 +173,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.declared`
 
-`method` | [include/css.h:898](../../include/css.h#L898)
+`method` | [include/css.h:902](../../include/css.h#L902)
 
 ```c
 * function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not supported (the whole declaration * fails closed to unset -- see expand_transform in css.c
@@ -191,7 +191,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.element`
 
-`method` | [include/css.h:903](../../include/css.h#L903)
+`method` | [include/css.h:907](../../include/css.h#L907)
 
 ```c
 * so two different rules matching the same element (e.g. one setting * translate, a more specific one setting rotate) can still combine -- see * expand_transform's comment. A box with any field set (e
@@ -212,7 +212,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.slots`
 
-`method` | [include/css.h:910](../../include/css.h#L910)
+`method` | [include/css.h:914](../../include/css.h#L914)
 
 ```c
 * parse time into ALL seven slots (singular matrices fail closed);
@@ -230,7 +230,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 #### `css_style.CSS_MAX_KF_STOPS`
 
-`macro` | [include/css.h:933](../../include/css.h#L933)
+`macro` | [include/css.h:937](../../include/css.h#L937)
 
 ```c
 #define CSS_MAX_KF_STOPS
@@ -244,7 +244,7 @@ Resolved @keyframes data (Phase R1c): the keyframe stops from the matching @keyf
 
 ### `css_sel`
 
-`struct` | [include/css.h:1025](../../include/css.h#L1025)
+`struct` | [include/css.h:1029](../../include/css.h#L1029)
 
 ```c
 struct css_sel; /* css_select.h */
@@ -263,7 +263,7 @@ Render-time media context for evaluating @media at parse time. width_px is a fix
 
 #### `css_sel.prefers_dark`
 
-`type_alias` | [include/css.h:1026](../../include/css.h#L1026)
+`type_alias` | [include/css.h:1030](../../include/css.h#L1030)
 
 ```c
 typedef struct css_media { int prefers_dark;
@@ -275,7 +275,7 @@ css_select.h
 
 #### `css_sel.css_media`
 
-`struct` | [include/css.h:1027](../../include/css.h#L1027)
+`struct` | [include/css.h:1031](../../include/css.h#L1031)
 
 ```c
 typedef struct css_media
@@ -287,7 +287,7 @@ typedef struct css_media
 
 ### `css_drop`
 
-`struct` | [include/css.h:1099](../../include/css.h#L1099)
+`struct` | [include/css.h:1103](../../include/css.h#L1103)
 
 ```c
 typedef struct css_drop
@@ -307,7 +307,7 @@ One coalesced drop: every occurrence of the same (property, cause) pair folds in
 
 #### `css_drop.prop`
 
-`type_alias` | [include/css.h:1099](../../include/css.h#L1099)
+`type_alias` | [include/css.h:1103](../../include/css.h#L1103)
 
 ```c
 typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];
@@ -323,7 +323,7 @@ One coalesced drop: every occurrence of the same (property, cause) pair folds in
 
 ### `css_drop_log`
 
-`struct` | [include/css.h:1111](../../include/css.h#L1111)
+`struct` | [include/css.h:1115](../../include/css.h#L1115)
 
 ```c
 typedef struct css_drop_log
@@ -339,7 +339,7 @@ Optional write-only sink the parser fills while parsing.
 
 ### `css_attr`
 
-`struct` | [include/css.h:1140](../../include/css.h#L1140)
+`struct` | [include/css.h:1144](../../include/css.h#L1144)
 
 ```c
 typedef struct css_attr
@@ -355,7 +355,7 @@ Both alias caller storage (nothing is copied/owned).
 
 ### `css_element`
 
-`struct` | [include/css.h:1150](../../include/css.h#L1150)
+`struct` | [include/css.h:1154](../../include/css.h#L1154)
 
 ```c
 typedef struct css_element
@@ -371,7 +371,7 @@ Each field aliases caller storage (nothing is copied/owned). parent walks toward
 
 ### `cvr_table`
 
-`struct` | [include/css.h:1222](../../include/css.h#L1222)
+`struct` | [include/css.h:1226](../../include/css.h#L1226)
 
 ```c
 struct cvr_table;
@@ -1309,7 +1309,7 @@ typedef enum css_pct_slot
 
 ### `css_drop_cause`
 
-`enum` | [include/css.h:1086](../../include/css.h#L1086)
+`enum` | [include/css.h:1090](../../include/css.h#L1090)
 
 ```c
 typedef enum css_drop_cause
@@ -1343,7 +1343,7 @@ Each field uses a sentinel for "unset" so the caller can layer inheritance (take
 
 ### `css_sheet`
 
-`type_alias` | [include/css.h:1019](../../include/css.h#L1019)
+`type_alias` | [include/css.h:1023](../../include/css.h#L1023)
 
 ```c
 typedef struct css_sheet css_sheet;
@@ -1397,7 +1397,7 @@ typedef struct css_sheet css_sheet;
 
 ### `css_sheet_uses_counters`
 
-`function` | [include/css.h:1055](../../include/css.h#L1055)
+`function` | [include/css.h:1059](../../include/css.h#L1059)
 
 ```c
 int css_sheet_uses_counters(const css_sheet *sheet);
@@ -1419,7 +1419,7 @@ int css_sheet_uses_counters(const css_sheet *sheet);
 
 ### `css_sheet_uses_containers`
 
-`function` | [include/css.h:1059](../../include/css.h#L1059)
+`function` | [include/css.h:1063](../../include/css.h#L1063)
 
 ```c
 int css_sheet_uses_containers(const css_sheet *sheet);
@@ -1443,7 +1443,7 @@ int css_sheet_uses_containers(const css_sheet *sheet);
 
 ### `palette`
 
-`function` | [include/css.h:1076](../../include/css.h#L1076)
+`function` | [include/css.h:1080](../../include/css.h#L1080)
 
 ```c
 * so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. * css_parse/css_parse_media delegate here with root_scope == NULL. */ css_status css_parse_scoped(
@@ -1463,7 +1463,7 @@ int css_sheet_uses_containers(const css_sheet *sheet);
 
 ### `css_free`
 
-`function` | [include/css.h:1126](../../include/css.h#L1126)
+`function` | [include/css.h:1130](../../include/css.h#L1130)
 
 ```c
 void css_free(css_sheet *s);
@@ -1485,7 +1485,7 @@ Idempotent; NULL-safe.
 
 ### `order`
 
-`function` | [include/css.h:1129](../../include/css.h#L1129)
+`function` | [include/css.h:1133](../../include/css.h#L1133)
 
 ```c
 * cascade order (specificity, then document order), then the element's own * inline_style (which wins). sheet/tag/classes/inline_style may be NULL. Pure, * allocates nothing, reentrant. Inheritance is
@@ -1505,7 +1505,7 @@ Idempotent; NULL-safe.
 
 ### `inherited_px`
 
-`function` | [include/css.h:1246](../../include/css.h#L1246)
+`function` | [include/css.h:1250](../../include/css.h#L1250)
 
 ```c
 * whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that walks the DOM is the one that can supply the * inherited value, and it needs the same
@@ -1525,7 +1525,7 @@ Idempotent; NULL-safe.
 
 ### `css_ua_heading_em`
 
-`function` | [include/css.h:1258](../../include/css.h#L1258)
+`function` | [include/css.h:1262](../../include/css.h#L1262)
 
 ```c
 double css_ua_heading_em(int level);
@@ -1551,7 +1551,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `name`
 
-`function` | [include/css.h:1263](../../include/css.h#L1263)
+`function` | [include/css.h:1267](../../include/css.h#L1267)
 
 ```c
 * name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px, const char *tag);
@@ -1565,7 +1565,7 @@ The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HT
 
 ### `css_font_face_count`
 
-`function` | [include/css.h:1273](../../include/css.h#L1273)
+`function` | [include/css.h:1277](../../include/css.h#L1277)
 
 ```c
 size_t css_font_face_count(const css_sheet *sheet);
@@ -1589,7 +1589,7 @@ Returns 0 on success, -1 if i is out of range.
 
 ### `css_font_face_at`
 
-`function` | [include/css.h:1274](../../include/css.h#L1274)
+`function` | [include/css.h:1278](../../include/css.h#L1278)
 
 ```c
 int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);
@@ -1614,7 +1614,7 @@ int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_
 
 ### `css_resolve_anim_keyframes`
 
-`function` | [include/css.h:1282](../../include/css.h#L1282)
+`function` | [include/css.h:1286](../../include/css.h#L1286)
 
 ```c
 void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);
@@ -2321,7 +2321,7 @@ Bound on the A/B coefficients of :nth-child(An+B) (anti-DoS; larger drops the se
 
 ### `CSS_MEDIA_DEFAULT_WIDTH`
 
-`macro` | [include/css.h:1039](../../include/css.h#L1039)
+`macro` | [include/css.h:1043](../../include/css.h#L1043)
 
 ```c
 #define CSS_MEDIA_DEFAULT_WIDTH
@@ -2333,7 +2333,7 @@ Bound on the A/B coefficients of :nth-child(An+B) (anti-DoS; larger drops the se
 
 ### `CSS_MEDIA_DEFAULT_HEIGHT`
 
-`macro` | [include/css.h:1044](../../include/css.h#L1044)
+`macro` | [include/css.h:1048](../../include/css.h#L1048)
 
 ```c
 #define CSS_MEDIA_DEFAULT_HEIGHT
@@ -2347,7 +2347,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_DROP_PROP_MAX`
 
-`macro` | [include/css.h:1091](../../include/css.h#L1091)
+`macro` | [include/css.h:1095](../../include/css.h#L1095)
 
 ```c
 #define CSS_DROP_PROP_MAX
@@ -2359,7 +2359,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_DROP_VAL_MAX`
 
-`macro` | [include/css.h:1092](../../include/css.h#L1092)
+`macro` | [include/css.h:1096](../../include/css.h#L1096)
 
 ```c
 #define CSS_DROP_VAL_MAX
@@ -2371,7 +2371,7 @@ Normalized viewport height paired with CSS_MEDIA_DEFAULT_WIDTH (16:9 desktop, th
 
 ### `CSS_PSEUDO_BEFORE`
 
-`macro` | [include/css.h:1232](../../include/css.h#L1232)
+`macro` | [include/css.h:1236](../../include/css.h#L1236)
 
 ```c
 #define CSS_PSEUDO_BEFORE
@@ -2385,7 +2385,7 @@ Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1).
 
 ### `CSS_PSEUDO_AFTER`
 
-`macro` | [include/css.h:1233](../../include/css.h#L1233)
+`macro` | [include/css.h:1237](../../include/css.h#L1237)
 
 ```c
 #define CSS_PSEUDO_AFTER
@@ -2397,7 +2397,7 @@ Which generated box css_resolve_pseudo resolves (CSS 2.1 12.1).
 
 ### `CSS_PSEUDO_PLACEHOLDER`
 
-`macro` | [include/css.h:1234](../../include/css.h#L1234)
+`macro` | [include/css.h:1238](../../include/css.h#L1238)
 
 ```c
 #define CSS_PSEUDO_PLACEHOLDER

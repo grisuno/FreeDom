@@ -66,6 +66,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `fuzz/fuzz_prefetch.c` -> `include/prefetch.h`
 - `fuzz/fuzz_prefs.c` -> `include/prefs.h`
 - `fuzz/fuzz_request_headers.c` -> `include/request_policy.h`
+- `fuzz/fuzz_scroll_req.c` -> `include/scroll_req.h`
 - `fuzz/fuzz_smooth_scroll.c` -> `include/smooth_scroll.h`
 - `fuzz/fuzz_svg_render.c` -> `include/svg_render.h`
 - `fuzz/fuzz_table_layout.c` -> `include/pres_hints.h`
@@ -128,6 +129,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/render_doc.h`
 - `gui/browser_ui.c` -> `include/render_policy.h`
 - `gui/browser_ui.c` -> `include/request_policy.h`
+- `gui/browser_ui.c` -> `include/scroll_req.h`
 - `gui/browser_ui.c` -> `include/secure_fetch.h`
 - `gui/browser_ui.c` -> `include/shm_slots.h`
 - `gui/browser_ui.c` -> `include/smooth_scroll.h`
@@ -226,6 +228,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/tab.h` -> `include/freebug.h`
 - `include/tab.h` -> `include/js_geom.h`
 - `include/tab.h` -> `include/page_view.h`
+- `include/tab.h` -> `include/scroll_req.h`
 - `include/ui.h` -> `include/prefs.h`
 - `include/video_controls.h` -> `include/hls.h`
 - `include/video_pick.h` -> `include/page_view.h`
@@ -493,8 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/render_doc.c` -> `include/data_url.h`
 - `src/render_doc.c` -> `include/render_doc.h`
 - `src/render_doc.c` -> `include/url.h`
-- `src/render_doc.c` -> `include/util.h`
-- `src/render_policy.c` -> `include/data_url.h`
-- `src/render_policy.c` -> `include/render_policy.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

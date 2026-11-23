@@ -4,41 +4,43 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 193.90)
-- `include/css.h` (score: 100.80, imported by 40 files)
-- `src/tab.c` (score: 84.10)
-- `src/page_view.c` (score: 63.10)
+- `gui/browser_ui.c` (score: 217.00)
+- `include/css.h` (score: 104.80, imported by 42 files)
+- `src/tab.c` (score: 91.90)
+- `src/page_view.c` (score: 63.40)
 - `src/freedom.c` (score: 63.00)
-- `src/css.c` (score: 61.30)
-- `include/js_sandbox.h` (score: 41.70, imported by 19 files)
+- `src/css.c` (score: 61.60)
+- `include/html_parse.h` (score: 54.40, imported by 26 files)
+- `include/dom.h` (score: 49.30, imported by 22 files)
+- `include/page_view.h` (score: 48.30, imported by 16 files)
 
 ## Blast Radius (change impact)
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css_color.h` -- 14 direct, 52 total dependents
-- `include/css.h` -- 40 direct, 51 total dependents
-- `include/css_counter.h` -- 3 direct, 50 total dependents
-- `include/css_mq.h` -- 4 direct, 50 total dependents
-- `include/html_parse.h` -- 19 direct, 44 total dependents
-- `include/dom.h` -- 17 direct, 40 total dependents
-- `include/css_select.h` -- 15 direct, 31 total dependents
-- `include/url.h` -- 16 direct, 28 total dependents
-- `include/freebug.h` -- 13 direct, 26 total dependents
-- `include/js_geom.h` -- 6 direct, 24 total dependents
+- `include/css.h` -- 42 direct, 52 total dependents
+- `include/css_color.h` -- 14 direct, 51 total dependents
+- `include/css_counter.h` -- 4 direct, 51 total dependents
+- `include/dom.h` -- 22 direct, 51 total dependents
+- `include/css_mq.h` -- 5 direct, 50 total dependents
+- `include/html_parse.h` -- 26 direct, 50 total dependents
+- `include/css_select.h` -- 16 direct, 32 total dependents
+- `include/url.h` -- 19 direct, 31 total dependents
+- `include/js_geom.h` -- 10 direct, 30 total dependents
+- `include/freebug.h` -- 14 direct, 28 total dependents
 
 ## Hotspots (complexity + centrality)
 
 - `gui/browser_ui.c` -- complexity: 1.0, centrality: 1.0, combined: 1.0
 - `src/tab.c` -- complexity: 0.3, centrality: 0.5, combined: 0.4
 - `src/page_view.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
-- `src/css.c` -- complexity: 0.4, centrality: 0.3, combined: 0.3
+- `src/css.c` -- complexity: 0.4, centrality: 0.2, combined: 0.3
 - `src/freedom.c` -- complexity: 0.1, centrality: 0.4, combined: 0.3
 - `include/css.h` -- complexity: 0.2, centrality: 0.3, combined: 0.3
-- `src/js_dom.c` -- complexity: 0.1, centrality: 0.2, combined: 0.1
-- `src/secure_fetch.c` -- complexity: 0.1, centrality: 0.2, combined: 0.1
 - `include/page_view.h` -- complexity: 0.1, centrality: 0.1, combined: 0.1
-- `include/js_dom.h` -- complexity: 0.0, centrality: 0.2, combined: 0.1
+- `src/js_dom.c` -- complexity: 0.1, centrality: 0.2, combined: 0.1
+- `src/secure_fetch.c` -- complexity: 0.1, centrality: 0.1, combined: 0.1
+- `include/dom.h` -- complexity: 0.0, centrality: 0.2, combined: 0.1
 
 ## Dependency Cycles
 
@@ -61,13 +63,13 @@ Circular dependencies. Refactor to break the cycle.
 
 ## Dataflow Issues (INFERRED, review each lead)
 
-- `gui/browser_ui.c:1742` `gui_subresource_fetch` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- `gui/browser_ui.c:1908` `first` [DEAD_STORE] `dg`: `dg` assigned at line 1908 but never read afterwards.
-- `gui/browser_ui.c:4741` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 4741 but never read afterwards.
-- `gui/browser_ui.c:4743` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 4743 but never read afterwards.
-- `gui/browser_ui.c:5815` `table` [DEAD_STORE] `parent`: `parent` assigned at line 5815 but never read afterwards.
-- `gui/browser_ui.c:5816` `table` [DEAD_STORE] `seen`: `seen` assigned at line 5816 but never read afterwards.
-- `gui/browser_ui.c:5818` `table` [DEAD_STORE] `j`: `j` assigned at line 5818 but never read afterwards.
-- `gui/browser_ui.c:5972` `measure_item_w_at` [DEAD_STORE] `atom_line_max`: `atom_line_max` assigned at line 5972 but never read afterwards.
-- `gui/browser_ui.c:5990` `measure_item_w_at` [DEAD_STORE] `rw`: `rw` assigned at line 5990 but never read afterwards.
-- `gui/browser_ui.c:6201` `nested_cont_basis` [DEAD_STORE] `total`: `total` assigned at line 6201 but never read afterwards.
+- `fuzz/fuzz_css_import.c:37` `fz_resolve` [UNCHECKED_ALLOC] `o`: Result of allocator stored in `o` is never checked against NULL.
+- `fuzz/fuzz_fb_cmdline.c:7` `LLVMFuzzerTestOneInput` [UNCHECKED_ALLOC] `cut`: Result of allocator stored in `cut` is never checked against NULL.
+- `fuzz/fuzz_fb_cmdline.c:7` `LLVMFuzzerTestOneInput` [UNCHECKED_ALLOC] `t`: Result of allocator stored in `t` is never checked against NULL.
+- `gui/browser_ui.c:1867` `gui_sub_perform` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- `gui/browser_ui.c:2106` `first` [DEAD_STORE] `dg`: `dg` assigned at line 2106 but never read afterwards.
+- `gui/browser_ui.c:5088` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 5088 but never read afterwards.
+- `gui/browser_ui.c:5090` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 5090 but never read afterwards.
+- `gui/browser_ui.c:6162` `table` [DEAD_STORE] `parent`: `parent` assigned at line 6162 but never read afterwards.
+- `gui/browser_ui.c:6163` `table` [DEAD_STORE] `seen`: `seen` assigned at line 6163 but never read afterwards.
+- `gui/browser_ui.c:6165` `table` [DEAD_STORE] `j`: `j` assigned at line 6165 but never read afterwards.

@@ -1,5 +1,5 @@
-# API (page 1 of 13)
-Pages: [API.md](API.md), [API_p2.md](API_p2.md), [API_p3.md](API_p3.md), [API_p4.md](API_p4.md), [API_p5.md](API_p5.md), [API_p6.md](API_p6.md), [API_p7.md](API_p7.md), [API_p8.md](API_p8.md), [API_p9.md](API_p9.md), [API_p10.md](API_p10.md), [API_p11.md](API_p11.md), [API_p12.md](API_p12.md), [API_p13.md](API_p13.md)
+# API (page 1 of 14)
+Pages: [API.md](API.md), [API_p2.md](API_p2.md), [API_p3.md](API_p3.md), [API_p4.md](API_p4.md), [API_p5.md](API_p5.md), [API_p6.md](API_p6.md), [API_p7.md](API_p7.md), [API_p8.md](API_p8.md), [API_p9.md](API_p9.md), [API_p10.md](API_p10.md), [API_p11.md](API_p11.md), [API_p12.md](API_p12.md), [API_p13.md](API_p13.md), [API_p14.md](API_p14.md)
 
 ## app.py
 - `read_fuzz_stats` (function) `app.py:30` `def read_fuzz_stats()` -- Reads the current status of the active AFL++ fuzzing session.
@@ -154,6 +154,10 @@ Depends on: `include/prefetch.h`
 ## fuzz/fuzz_prefs.c
 Depends on: `include/prefs.h`
 - `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_prefs.c:21` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+
+## fuzz/fuzz_scroll_req.c
+Depends on: `include/scroll_req.h`
+- `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_scroll_req.c:11` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
 ## fuzz/fuzz_site_panel.c
 - `take_double` (function) `fuzz/fuzz_site_panel.c:14` `static double take_double(const uint8_t **p, size_t *n)`

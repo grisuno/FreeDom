@@ -1,11 +1,11 @@
 # `src/css_chain.c`
 
-> Source: [src/css_chain.c:1](../../src/css_chain.c#L1) | language `c` | coverage 40.0% | [API index](../index.md)
+> Source: [src/css_chain.c:1](../../src/css_chain.c#L1) | language `c` | coverage 38.1% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cch_node`](#cch_node), [`cch_path`](#cch_path)
-- **Functions:** [`inputs`](#inputs), [`cch_element_style_vars`](#cch_element_style_vars), [`cch_path_new`](#cch_path_new), [`cch_path_free`](#cch_path_free), [`cch_element_style_path`](#cch_element_style_path), [`cch_pseudo_style`](#cch_pseudo_style), [`cch_element_style`](#cch_element_style), [`cch_element_matches`](#cch_element_matches), [`cch_element_matches_any`](#cch_element_matches_any)
+- **Functions:** [`inputs`](#inputs), [`cch_element_style_vars`](#cch_element_style_vars), [`cch_path_new`](#cch_path_new), [`cch_path_free`](#cch_path_free), [`cch_element_style_path`](#cch_element_style_path), [`cch_pseudo_style`](#cch_pseudo_style), [`cch_element_style`](#cch_element_style), [`cch_element_matches`](#cch_element_matches), [`cch_element_matches_any`](#cch_element_matches_any), [`cch_set_target`](#cch_set_target)
 - **Macros:** [`CCH_TAG_MAX`](#cch_tag_max), [`CCH_ID_MAX`](#cch_id_max), [`CCH_CLASS_BUF`](#cch_class_buf), [`CCH_MAX_CLASSES`](#cch_max_classes), [`CCH_CLASS_SPILL_MAX`](#cch_class_spill_max), [`CCH_MAX_ATTRS`](#cch_max_attrs), [`CCH_ATTR_BUF`](#cch_attr_buf)
 
 ## Type Diagram
@@ -88,7 +88,7 @@ One element's selector inputs (tag/id/classes) plus its css_element view, with b
 
 ### `cch_path`
 
-`struct` | [src/css_chain.c:347](../../src/css_chain.c#L347)
+`struct` | [src/css_chain.c:349](../../src/css_chain.c#L349)
 
 ```c
 struct cch_path
@@ -106,7 +106,7 @@ A cascade walks the document in tree order, so consecutive elements share all bu
 
 ### `inputs`
 
-`function` | [src/css_chain.c:241](../../src/css_chain.c#L241)
+`function` | [src/css_chain.c:243](../../src/css_chain.c#L243)
 
 ```c
 * identical inputs (single source of truth). */ static const css_element *build_chain(lxb_dom_ele...
@@ -128,7 +128,7 @@ A cascade walks the document in tree order, so consecutive elements share all bu
 
 ### `cch_element_style_vars`
 
-`function` | [src/css_chain.c:310](../../src/css_chain.c#L310)
+`function` | [src/css_chain.c:312](../../src/css_chain.c#L312)
 
 ```c
 css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet, double parent_font_size, const struct cvr_chain *inherited, struct cvr_table *own_out)
@@ -156,7 +156,7 @@ css_style cch_element_style_vars(lxb_dom_element_t *el, const css_sheet *sheet, 
 
 ### `cch_path_new`
 
-`function` | [src/css_chain.c:353](../../src/css_chain.c#L353)
+`function` | [src/css_chain.c:355](../../src/css_chain.c#L355)
 
 ```c
 cch_path *cch_path_new(void)
@@ -170,7 +170,7 @@ cch_path *cch_path_new(void)
 
 ### `cch_path_free`
 
-`function` | [src/css_chain.c:365](../../src/css_chain.c#L365)
+`function` | [src/css_chain.c:367](../../src/css_chain.c#L367)
 
 ```c
 void cch_path_free(cch_path *pa)
@@ -188,7 +188,7 @@ void cch_path_free(cch_path *pa)
 
 ### `cch_element_style_path`
 
-`function` | [src/css_chain.c:372](../../src/css_chain.c#L372)
+`function` | [src/css_chain.c:374](../../src/css_chain.c#L374)
 
 ```c
 css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_sheet *sheet, double parent_font_size, const struct cvr_chain *inherited, const struct cmq_container *containers, struct cvr_table *own_out)
@@ -216,7 +216,7 @@ css_style cch_element_style_path(cch_path *pa, lxb_dom_element_t *el, const css_
 
 ### `cch_pseudo_style`
 
-`function` | [src/css_chain.c:442](../../src/css_chain.c#L442)
+`function` | [src/css_chain.c:444](../../src/css_chain.c#L444)
 
 ```c
 css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int which, double font_size, const struct cvr_chain *inherited)
@@ -242,7 +242,7 @@ css_style cch_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet, int wh
 
 ### `cch_element_style`
 
-`function` | [src/css_chain.c:461](../../src/css_chain.c#L461)
+`function` | [src/css_chain.c:463](../../src/css_chain.c#L463)
 
 ```c
 css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
@@ -265,7 +265,7 @@ css_style cch_element_style(lxb_dom_element_t *el, const css_sheet *sheet)
 
 ### `cch_element_matches`
 
-`function` | [src/css_chain.c:465](../../src/css_chain.c#L465)
+`function` | [src/css_chain.c:467](../../src/css_chain.c#L467)
 
 ```c
 int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel)
@@ -296,7 +296,7 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ### `cch_element_matches_any`
 
-`function` | [src/css_chain.c:479](../../src/css_chain.c#L479)
+`function` | [src/css_chain.c:481](../../src/css_chain.c#L481)
 
 ```c
 int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n)
@@ -313,6 +313,29 @@ int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n
 **Returns:** `int`
 
 *Calls:* [`csel_element_feature_bits`](include.css_select.h.md#csel_element_feature_bits), [`cch_element_matches`](#cch_element_matches)
+
+---
+
+<a id="cch_set_target"></a>
+
+### `cch_set_target`
+
+`function` | [src/css_chain.c:494](../../src/css_chain.c#L494)
+
+```c
+int cch_set_target(lxb_dom_node_t *doc_node, lxb_dom_element_t *el)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `doc_node` | `lxb_dom_node_t *` |  |  |
+| `el` | `lxb_dom_element_t *` |  |  |
+
+**Returns:** `int`
+
+*Called by:* [`navigation`](src.tab.c.md#navigation)
 
 ---
 

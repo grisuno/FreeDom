@@ -143,11 +143,13 @@ Previous: [KB_src_p5.md](KB_src_p5.md)
   - `jd_lp_set` (function, line 25) `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
                       const ...`
   - `jl_m_hist_target` (function, line 36) `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `jd_set_location` (function, line 150) `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
-  - `jd_take_nav_request` (function, line 184) `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
-  - `jd_take_history` (function, line 230) `char *jd_take_history(js_context *ctx, int *go)`
-  - `jd_frag_push` (function, line 261) `int jd_frag_push(js_context *ctx, const char *url)`
-  - `jd_pop_state` (function, line 284) `int jd_pop_state(js_context *ctx, int index)`
+  - `jd_set_location` (function, line 160) `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
+  - `jd_take_nav_request` (function, line 194) `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
+  - `jd_take_scroll` (function, line 237) `int jd_take_scroll(js_context *ctx, double out[JD_SCROLL_N])`
+  - `jd_take_history` (function, line 272) `char *jd_take_history(js_context *ctx, int *go)`
+  - `jd_frag_push` (function, line 303) `int jd_frag_push(js_context *ctx, const char *url, int replace)`
+  - `jd_pop_state` (function, line 327) `int jd_pop_state(js_context *ctx, int index)`
+  - `numbers` (function, line 233) `* numbers (never as source);`
 - Depends on: `include/js_dom.h`, `include/url.h`, `src/js_location_internal.h`, `src/js_native_internal.h`
 
 ## src/js_location_internal.h

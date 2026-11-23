@@ -75,10 +75,10 @@
 - Layer: utility
 - Language: py
 - Symbols:
-  - `phase_ms` (function, line 34) `def phase_ms(line, phase)`
-  - `one_page` (function, line 44) `def one_page(binary, page, env, prof, tmp, notches)`
-  - `main` (function, line 85) `def main()`
-  - `procs_display` (function, line 134) `def procs_display(procs)`
+  - `phase_ms` (function, line 38) `def phase_ms(line, phase)`
+  - `one_page` (function, line 48) `def one_page(binary, page, env, prof, tmp, notches, hover)`
+  - `main` (function, line 95) `def main()`
+  - `procs_display` (function, line 149) `def procs_display(procs)`
 - Depends on: `tools/guitime.py`
 
 ## tools/guitime.py
@@ -87,8 +87,8 @@
 - Language: py
 - Symbols:
   - `start_display` (function, line 34) `def start_display(workdir)`
-  - `one_run` (function, line 65) `def one_run(binary, page, env, hosts_dir, tmp)`
-  - `main` (function, line 94) `def main()`
+  - `one_run` (function, line 67) `def one_run(binary, page, env, hosts_dir, tmp)`
+  - `main` (function, line 96) `def main()`
 - Imported by: `tools/guiscroll.py`
 
 ## tools/mutate.py

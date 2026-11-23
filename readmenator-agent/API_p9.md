@@ -1,4 +1,4 @@
-# API (page 9 of 13)
+# API (page 9 of 14)
 Previous: [API_p8.md](API_p8.md)
 
 ## src/find_text.c

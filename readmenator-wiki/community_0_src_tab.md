@@ -12,7 +12,7 @@ This community groups 72 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `src/anchor.c` | c | utility | 10 | yes |
+| `src/anchor.c` | c | utility | 11 | yes |
 | `src/css_import.c` | c | utility | 17 | yes |
 | `src/dom.c` | c | utility | 78 | no |
 | `src/html_parse.c` | c | utility | 29 | no |
@@ -22,7 +22,7 @@ This community groups 72 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `include/anchor.h` | h | utility | 8 | no |
+| `include/anchor.h` | h | utility | 9 | no |
 | `include/css_import.h` | h | utility | 12 | no |
 | `include/dom.h` | h | utility | 33 | no |
 | `include/html_parse.h` | h | utility | 24 | no |
@@ -32,7 +32,7 @@ This community groups 72 file(s) rooted at `src` with dominant language c (cohes
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `tests/test_anchor.c` | c | testing | 15 | yes |
+| `tests/test_anchor.c` | c | testing | 16 | yes |
 | `tests/test_css_import.c` | c | testing | 20 | yes |
 | `tests/test_dom.c` | c | testing | 45 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
@@ -80,14 +80,14 @@ This community groups 72 file(s) rooted at `src` with dominant language c (cohes
 - `fit` (function, `include/anchor.h:35`) `* result does not fit (out is then "" when cap > 0). */ size_t anc_percent_decod`
 - `anc_collect` (function, `include/anchor.h:50`) `size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, s` - Writes target and its element subtree in preorder (*nsub handles), then the elements that follow the
 - `anc_target_top` (function, `include/anchor.h:57`) `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsu` - The document offset of the target from a FINISHED geometry table (jg_finish): the smallest y among t
-- `anc_scroll_for` (function, `include/anchor.h:62`) `double anc_scroll_for(double top, double max_scroll);` - The scroll offset that puts top at the top of the viewport, clamped to * [0, max_scroll]. Non-finite
+- `anc_target_box` (function, `include/anchor.h:63`) `int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsu` - As anc_target_top, plus the target's bottom: the largest y + h among the subtree's rects (= *top whe
+- `anc_scroll_for` (function, `include/anchor.h:68`) `double anc_scroll_for(double top, double max_scroll);` - The scroll offset that puts top at the top of the viewport, clamped to * [0, max_scroll]. Non-finite
 - `FREEDOM_CSS_IMPORT_H` (macro, `include/css_import.h:2`) `#define FREEDOM_CSS_IMPORT_H`
-- `CI_URL_MAX` (macro, `include/css_import.h:19`) `#define CI_URL_MAX`
 
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 163
-- Cross-boundary resolved imports (EXTRACTED): 62
+- Cross-boundary resolved imports (EXTRACTED): 64
 
 ## Connections
 

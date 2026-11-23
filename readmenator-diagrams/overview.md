@@ -1,147 +1,132 @@
 ```mermaid
 graph LR
-    src_css["src: css"]
-    include_browser_ui["include: browser_ui"]
     src_tab["src: tab"]
+    include_browser_ui["include: browser_ui"]
+    include_css["include: css"]
     src_text_shape["src: text_shape"]
     include_page_view["include: page_view"]
+    include_http_cache["include: http_cache"]
     include_secure_fetch["include: secure_fetch"]
-    src_http_cache["src: http_cache"]
+    include_bui_chrome["include: bui_chrome"]
     include_svg_render["include: svg_render"]
-    include_tab["include: tab"]
+    include_fb_cmdline["include: fb_cmdline"]
+    include_download["include: download"]
     include_prefetch["include: prefetch"]
-    include_os_sandbox["include: os_sandbox"]
-    include_sha2["include: sha2"]
-    include_subreq_batch["include: subreq_batch"]
+    include_pres_hints["include: pres_hints"]
     tools["tools"]
-    src_css -- "calls into" --> include_prefetch
-    src_css -- "calls into" --> include_browser_ui
-    src_css -- "calls into" --> src_tab
-    src_css -- "calls into" --> src_text_shape
-    src_css -- "calls into" --> include_page_view
-    src_css -- "calls into" --> include_secure_fetch
-    src_css -- "calls into" --> src_http_cache
-    src_css -- "calls into" --> include_tab
-    include_prefetch -- "calls into" --> src_css
-    include_prefetch -- "calls into" --> include_browser_ui
-    include_prefetch -- "calls into" --> src_tab
-    include_prefetch -- "calls into" --> src_text_shape
-    include_os_sandbox -- "calls into" --> src_css
-    include_os_sandbox -- "calls into" --> src_tab
-    include_os_sandbox -- "calls into" --> src_text_shape
-    include_os_sandbox -- "calls into" --> include_page_view
-    include_sha2 -- "calls into" --> src_tab
-    include_subreq_batch -- "calls into" --> src_tab
-    include_subreq_batch -- "calls into" --> src_text_shape
-    tools -- "calls into" --> src_css
-    tools -- "calls into" --> include_browser_ui
-    tools -- "calls into" --> src_tab
-    tools -- "calls into" --> include_secure_fetch
-    include_browser_ui -- "calls into" --> src_css
-    include_browser_ui -- "calls into" --> include_prefetch
-    include_browser_ui -- "calls into" --> src_tab
-    include_browser_ui -- "calls into" --> src_text_shape
-    include_browser_ui -- "calls into" --> include_page_view
-    include_browser_ui -- "calls into" --> include_secure_fetch
-    include_browser_ui -- "calls into" --> src_http_cache
-    include_browser_ui -- "depends on" --> include_svg_render
-    include_browser_ui -- "calls into" --> include_tab
-    src_tab -- "calls into" --> src_css
+    src_tab -- "calls into" --> include_fb_cmdline
     src_tab -- "calls into" --> include_prefetch
-    src_tab -- "calls into" --> include_os_sandbox
-    src_tab -- "calls into" --> include_sha2
-    src_tab -- "calls into" --> include_subreq_batch
     src_tab -- "calls into" --> include_browser_ui
+    src_tab -- "calls into" --> include_css
     src_tab -- "calls into" --> src_text_shape
     src_tab -- "calls into" --> include_page_view
     src_tab -- "calls into" --> include_secure_fetch
+    src_tab -- "calls into" --> include_bui_chrome
     src_tab -- "calls into" --> include_svg_render
-    src_tab -- "calls into" --> include_tab
-    src_text_shape -- "calls into" --> src_css
+    include_fb_cmdline -- "calls into" --> src_tab
+    include_fb_cmdline -- "calls into" --> include_browser_ui
+    include_fb_cmdline -- "calls into" --> include_css
+    include_fb_cmdline -- "calls into" --> src_text_shape
+    include_download -- "calls into" --> src_tab
+    include_download -- "calls into" --> include_fb_cmdline
+    include_download -- "calls into" --> include_browser_ui
+    include_download -- "calls into" --> include_css
+    include_prefetch -- "calls into" --> src_tab
+    include_prefetch -- "calls into" --> include_fb_cmdline
+    include_prefetch -- "calls into" --> include_browser_ui
+    include_prefetch -- "calls into" --> include_css
+    include_pres_hints -- "calls into" --> include_fb_cmdline
+    include_pres_hints -- "calls into" --> include_browser_ui
+    include_pres_hints -- "calls into" --> include_css
+    include_pres_hints -- "calls into" --> src_text_shape
+    tools -- "calls into" --> src_tab
+    tools -- "calls into" --> include_download
+    tools -- "calls into" --> include_browser_ui
+    tools -- "calls into" --> include_css
+    tools -- "calls into" --> include_secure_fetch
+    include_browser_ui -- "calls into" --> src_tab
+    include_browser_ui -- "calls into" --> include_fb_cmdline
+    include_browser_ui -- "depends on" --> include_download
+    include_browser_ui -- "calls into" --> include_prefetch
+    include_browser_ui -- "calls into" --> include_pres_hints
+    include_browser_ui -- "calls into" --> include_css
+    include_browser_ui -- "calls into" --> src_text_shape
+    include_browser_ui -- "calls into" --> include_page_view
+    include_browser_ui -- "calls into" --> include_http_cache
+    include_browser_ui -- "calls into" --> include_secure_fetch
+    include_browser_ui -- "calls into" --> include_bui_chrome
+    include_browser_ui -- "calls into" --> include_svg_render
+    include_css -- "calls into" --> src_tab
+    include_css -- "calls into" --> include_fb_cmdline
+    include_css -- "calls into" --> include_prefetch
+    include_css -- "calls into" --> include_browser_ui
+    include_css -- "calls into" --> src_text_shape
+    include_css -- "calls into" --> include_page_view
+    include_css -- "calls into" --> include_http_cache
+    include_css -- "calls into" --> include_secure_fetch
+    src_text_shape -- "calls into" --> src_tab
+    src_text_shape -- "calls into" --> include_fb_cmdline
     src_text_shape -- "calls into" --> include_prefetch
     src_text_shape -- "calls into" --> include_browser_ui
-    src_text_shape -- "calls into" --> src_tab
+    src_text_shape -- "calls into" --> include_css
     src_text_shape -- "calls into" --> include_page_view
+    src_text_shape -- "calls into" --> include_http_cache
     src_text_shape -- "calls into" --> include_secure_fetch
-    src_text_shape -- "calls into" --> include_tab
-    include_page_view -- "calls into" --> src_css
-    include_page_view -- "calls into" --> include_prefetch
-    include_page_view -- "calls into" --> include_browser_ui
+    src_text_shape -- "calls into" --> include_bui_chrome
     include_page_view -- "calls into" --> src_tab
+    include_page_view -- "calls into" --> include_fb_cmdline
+    include_page_view -- "calls into" --> include_prefetch
+    include_page_view -- "calls into" --> include_pres_hints
+    include_page_view -- "calls into" --> include_browser_ui
+    include_page_view -- "calls into" --> include_css
     include_page_view -- "calls into" --> src_text_shape
-    include_page_view -- "calls into" --> include_secure_fetch
     include_page_view -- "calls into" --> include_svg_render
-    include_secure_fetch -- "calls into" --> src_css
-    include_secure_fetch -- "calls into" --> include_browser_ui
+    include_http_cache -- "calls into" --> src_tab
+    include_http_cache -- "calls into" --> include_fb_cmdline
+    include_http_cache -- "calls into" --> include_browser_ui
+    include_http_cache -- "calls into" --> include_css
+    include_http_cache -- "calls into" --> src_text_shape
+    include_http_cache -- "depends on" --> include_page_view
+    include_http_cache -- "calls into" --> include_bui_chrome
     include_secure_fetch -- "calls into" --> src_tab
+    include_secure_fetch -- "calls into" --> include_fb_cmdline
+    include_secure_fetch -- "calls into" --> include_browser_ui
+    include_secure_fetch -- "calls into" --> include_css
     include_secure_fetch -- "calls into" --> src_text_shape
-    include_secure_fetch -- "depends on" --> include_page_view
-    include_secure_fetch -- "calls into" --> src_http_cache
-    src_http_cache -- "calls into" --> src_css
-    src_http_cache -- "calls into" --> include_browser_ui
-    src_http_cache -- "calls into" --> src_tab
-    src_http_cache -- "calls into" --> src_text_shape
-    src_http_cache -- "calls into" --> include_page_view
-    include_svg_render -- "calls into" --> src_css
+    include_secure_fetch -- "calls into" --> include_http_cache
+    include_secure_fetch -- "calls into" --> include_bui_chrome
+    include_bui_chrome -- "calls into" --> src_tab
+    include_bui_chrome -- "calls into" --> include_fb_cmdline
+    include_bui_chrome -- "calls into" --> include_browser_ui
+    include_bui_chrome -- "calls into" --> include_css
+    include_bui_chrome -- "calls into" --> src_text_shape
+    include_bui_chrome -- "depends on" --> include_page_view
     include_svg_render -- "calls into" --> src_tab
-    include_svg_render -- "calls into" --> src_text_shape
+    include_svg_render -- "calls into" --> include_fb_cmdline
+    include_svg_render -- "calls into" --> include_css
     include_svg_render -- "calls into" --> include_page_view
-    include_tab -- "calls into" --> src_css
-    include_tab -- "calls into" --> include_browser_ui
-    include_tab -- "calls into" --> src_tab
-    include_tab -- "calls into" --> src_text_shape
-    include_tab -- "depends on" --> include_page_view
-    include_tab -- "calls into" --> include_svg_render
-    click src_css href "./src_css.md" "Details"
-    click include_browser_ui href "./include_browser_ui.md" "Details"
     click src_tab href "./src_tab.md" "Details"
+    click include_browser_ui href "./include_browser_ui.md" "Details"
+    click include_css href "./include_css.md" "Details"
     click src_text_shape href "./src_text_shape.md" "Details"
     click include_page_view href "./include_page_view.md" "Details"
+    click include_http_cache href "./include_http_cache.md" "Details"
     click include_secure_fetch href "./include_secure_fetch.md" "Details"
-    click src_http_cache href "./src_http_cache.md" "Details"
+    click include_bui_chrome href "./include_bui_chrome.md" "Details"
     click include_svg_render href "./include_svg_render.md" "Details"
-    click include_tab href "./include_tab.md" "Details"
+    click include_fb_cmdline href "./include_fb_cmdline.md" "Details"
+    click include_download href "./include_download.md" "Details"
     click include_prefetch href "./include_prefetch.md" "Details"
-    click include_os_sandbox href "./include_os_sandbox.md" "Details"
+    click include_pres_hints href "./include_pres_hints.md" "Details"
 ```
 
 ## Details
 
-Static architecture map of 348 files (c, h, py, sh) in 14 components: src: css, include: browser_ui, src: tab, src: text_shape, include: page_view, include: secure_fetch, src: http_cache, include: svg_render. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 426 files (c, h, py, sh) in 14 components: src: tab, include: browser_ui, include: css, src: text_shape, include: page_view, include: http_cache, include: secure_fetch, include: bui_chrome. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
-### src: css (1)
+### src: tab (1)
 
-src: css groups 64 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. bui_chrome_view: ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to...
-
-**Related Classes/Methods**:
-
-- <a href="../include/css.h#L2-L29">include/css.h::FREEDOM_CSS_H</a>
-- <a href="../include/css.h#L30-L35">include/css.h::css_status</a>
-- <a href="../include/css.h#L36-L43">include/css.h::css_align</a>
-- <a href="../include/css.h#L44-L73">include/css.h::css_display</a>
-- <a href="../include/css.h">include/css.h::CSS_DISP_INLINE_OUTER</a>
-- <a href="../include/css.h#L75-L76">include/css.h::CSS_DISP_INNER_MASK</a>
-- <a href="../include/css.h#L77-L87">include/css.h::css_justify</a>
-- <a href="../include/css.h">include/css.h::CSS_GAP_MAX</a>
-
-### include: browser_ui (2)
-
-include: browser_ui groups 62 files (c, h) around FREEDOM_PREFS_H, PREFS_VERSION, PREFS_MAX_URL, PREFS_MAX_TITLE, PREFS_MAX_BOOKMARKS. ui_input_state: Live editable state for one form text control, aliasing a block of the...
-
-**Related Classes/Methods**:
-
-- <a href="../include/prefs.h#L2-L25">include/prefs.h::FREEDOM_PREFS_H</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_VERSION</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_URL</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_TITLE</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_BOOKMARKS</a>
-- <a href="../include/prefs.h">include/prefs.h::PREFS_MAX_HISTORY</a>
-- <a href="../include/prefs.h#L31-L33">include/prefs.h::PREFS_MAX_TEXT</a>
-- <a href="../include/prefs.h#L34-L35">include/prefs.h::PREFS_PAGE_HISTORY</a>
-
-### src: tab (3)
-
-src: tab groups 53 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
+src: tab groups 72 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. Fuzzer for anchor (spec/anchor.md) and url_split_location: a hostile document x a
 
 **Related Classes/Methods**:
 
@@ -154,24 +139,54 @@ src: tab groups 53 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_byte
 - <a href="../include/html_parse.h">include/html_parse.h::dropped</a>
 - <a href="../include/html_parse.h#L48-L56">include/html_parse.h::HP_MAX_SCRIPTS</a>
 
-### src: text_shape (4)
+### include: browser_ui (2)
 
-src: text_shape groups 49 files (c, h) around FREEDOM_HOSTBLOCK_H, hb_set, hb_list, hb_decision, hb_status. du_is_data_url: 16 MiB of encoded text (~12 MiB decoded) -- generous for any real...
+include: browser_ui groups 69 files (c, h) around FREEDOM_SCROLL_REQ_H, SRQ_MAX_COORD, SRQ_WIRE_N, srq_kind, srq_behavior. libFuzzer harness for box_blur (spec/box_blur.md): a hostile mask, size, stride and sigma
 
 **Related Classes/Methods**:
 
-- <a href="../include/hostblock.h#L2-L28">include/hostblock.h::FREEDOM_HOSTBLOCK_H</a>
-- <a href="../include/hostblock.h#L29-L31">include/hostblock.h::hb_set</a>
-- <a href="../include/hostblock.h#L32-L36">include/hostblock.h::hb_list</a>
-- <a href="../include/hostblock.h#L37-L41">include/hostblock.h::hb_decision</a>
-- <a href="../include/hostblock.h#L42-L48">include/hostblock.h::hb_status</a>
-- <a href="../include/hostblock.h#L49-L51">include/hostblock.h::hb_new</a>
-- <a href="../include/hostblock.h#L52-L64">include/hostblock.h::hb_free</a>
-- <a href="../include/hostblock.h#L65-L74">include/hostblock.h::walked</a>
+- <a href="../include/scroll_req.h#L2-L20">include/scroll_req.h::FREEDOM_SCROLL_REQ_H</a>
+- <a href="../include/scroll_req.h">include/scroll_req.h::SRQ_MAX_COORD</a>
+- <a href="../include/scroll_req.h#L22-L23">include/scroll_req.h::SRQ_WIRE_N</a>
+- <a href="../include/scroll_req.h#L24-L30">include/scroll_req.h::srq_kind</a>
+- <a href="../include/scroll_req.h#L31-L32">include/scroll_req.h::srq_behavior</a>
+- <a href="../include/scroll_req.h#L33-L35">include/scroll_req.h::srq_block</a>
+- <a href="../include/scroll_req.h">include/scroll_req.h::kind</a>
+- <a href="../include/scroll_req.h#L37-L45">include/scroll_req.h::srq_req</a>
+
+### include: css (3)
+
+include: css groups 58 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
+
+**Related Classes/Methods**:
+
+- <a href="../include/css.h#L2-L29">include/css.h::FREEDOM_CSS_H</a>
+- <a href="../include/css.h#L30-L35">include/css.h::css_status</a>
+- <a href="../include/css.h#L36-L43">include/css.h::css_align</a>
+- <a href="../include/css.h#L44-L73">include/css.h::css_display</a>
+- <a href="../include/css.h">include/css.h::CSS_DISP_INLINE_OUTER</a>
+- <a href="../include/css.h#L75-L76">include/css.h::CSS_DISP_INNER_MASK</a>
+- <a href="../include/css.h#L77-L87">include/css.h::css_justify</a>
+- <a href="../include/css.h">include/css.h::CSS_GAP_MAX</a>
+
+### src: text_shape (4)
+
+src: text_shape groups 55 files (c, h) around FREEDOM_HLS_H, hls_status, hls_segment, hls_variant, hls_playlist. libFuzzer harness for hls (spec/hls.md): hostile playlist text, hostile
+
+**Related Classes/Methods**:
+
+- <a href="../include/hls.h#L2-L20">include/hls.h::FREEDOM_HLS_H</a>
+- <a href="../include/hls.h#L21-L28">include/hls.h::hls_status</a>
+- <a href="../include/hls.h#L29-L35">include/hls.h::hls_segment</a>
+- <a href="../include/hls.h#L36-L44">include/hls.h::hls_variant</a>
+- <a href="../include/hls.h#L45-L64">include/hls.h::hls_playlist</a>
+- <a href="../include/hls.h#L65-L67">include/hls.h::hls_select_variant</a>
+- <a href="../include/hls.h#L68-L73">include/hls.h::resolved</a>
+- <a href="../include/hls.h#L74-L76">include/hls.h::hls_playlist_free</a>
 
 ### include: page_view (5)
 
-include: page_view groups 27 files (c, h) around FREEDOM_PAGE_VIEW_H, pv_status, PV_BSHADOW_LAYERS, PV_MAUTO_LEFT, PV_MAUTO_RIGHT. bx_edges: anything longer fails closed instead of truncating into a wrong match....
+include: page_view groups 30 files (c, h) around FREEDOM_PAGE_VIEW_H, pv_status, PV_BSHADOW_LAYERS, PV_MAUTO_LEFT, PV_MAUTO_RIGHT. Hostile box trees (any parent graph, cycles included) through the positioned paint
 
 **Related Classes/Methods**:
 
@@ -184,24 +199,9 @@ include: page_view groups 27 files (c, h) around FREEDOM_PAGE_VIEW_H, pv_status,
 - <a href="../include/page_view.h#L49-L52">include/page_view.h::PV_MAUTO_BOTTOM</a>
 - <a href="../include/page_view.h">include/page_view.h::PV_LEN_UNSET</a>
 
-### include: secure_fetch (6)
+### include: http_cache (6)
 
-include: secure_fetch groups 24 files (c, h) around FREEDOM_ANTI_FP_H, FP_TIMER_RESOLUTION_MS, FP_USER_AGENT, FP_ACCEPT_LANGUAGE, FP_ACCEPT_LANGUAGE_HEADER. fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  "document" #define...
-
-**Related Classes/Methods**:
-
-- <a href="../include/anti_fp.h#L2-L21">include/anti_fp.h::FREEDOM_ANTI_FP_H</a>
-- <a href="../include/anti_fp.h#L22-L30">include/anti_fp.h::FP_TIMER_RESOLUTION_MS</a>
-- <a href="../include/anti_fp.h#L31-L32">include/anti_fp.h::FP_USER_AGENT</a>
-- <a href="../include/anti_fp.h">include/anti_fp.h::FP_ACCEPT_LANGUAGE</a>
-- <a href="../include/anti_fp.h#L34-L39">include/anti_fp.h::FP_ACCEPT_LANGUAGE_HEADER</a>
-- <a href="../include/anti_fp.h#L40-L44">include/anti_fp.h::FP_ACCEPT_HEADER_NAV</a>
-- <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_DEST_NAV</a>
-- <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_MODE_NAV</a>
-
-### src: http_cache (7)
-
-src: http_cache groups 13 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. ds_free: Reads and decrypts path.
+include: http_cache groups 28 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN, LS_SALT_LEN, LS_NONCE_LEN, LS_TAG_LEN. sanitize_utf8_inplace: Rewrites s in place to well-formed UTF-8, replacing any byte...
 
 **Related Classes/Methods**:
 
@@ -214,9 +214,39 @@ src: http_cache groups 13 files (c, h) around FREEDOM_LOCAL_STORE_H, LS_KEY_LEN,
 - <a href="../include/local_store.h">include/local_store.h::LS_OVERHEAD</a>
 - <a href="../include/local_store.h#L32-L33">include/local_store.h::LS_MAX_PLAINTEXT</a>
 
-### include: svg_render (8)
+### include: secure_fetch (7)
 
-include: svg_render groups 12 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. img_pixels: A decoded bitmap that owns its pixel buffer.
+include: secure_fetch groups 24 files (c, h) around FREEDOM_ANTI_FP_H, FP_TIMER_RESOLUTION_MS, FP_USER_AGENT, FP_ACCEPT_LANGUAGE, FP_ACCEPT_LANGUAGE_HEADER. libFuzzer harness for identity (spec/identity.md) and he_cdn_kind (spec/hostedit.md):
+
+**Related Classes/Methods**:
+
+- <a href="../include/anti_fp.h#L2-L21">include/anti_fp.h::FREEDOM_ANTI_FP_H</a>
+- <a href="../include/anti_fp.h#L22-L30">include/anti_fp.h::FP_TIMER_RESOLUTION_MS</a>
+- <a href="../include/anti_fp.h#L31-L32">include/anti_fp.h::FP_USER_AGENT</a>
+- <a href="../include/anti_fp.h">include/anti_fp.h::FP_ACCEPT_LANGUAGE</a>
+- <a href="../include/anti_fp.h#L34-L39">include/anti_fp.h::FP_ACCEPT_LANGUAGE_HEADER</a>
+- <a href="../include/anti_fp.h#L40-L44">include/anti_fp.h::FP_ACCEPT_HEADER_NAV</a>
+- <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_DEST_NAV</a>
+- <a href="../include/anti_fp.h">include/anti_fp.h::FP_SEC_FETCH_MODE_NAV</a>
+
+### include: bui_chrome (8)
+
+include: bui_chrome groups 20 files (c, h) around FREEDOM_VIDEO_CONTROLS_H, VCL_BAR_H, VCL_MIN_W, VCL_MIN_H, VCL_PAD. libFuzzer harness for chrome_layout (spec/chrome_layout.md): a hostile URL (a page
+
+**Related Classes/Methods**:
+
+- <a href="../include/video_controls.h#L2-L17">include/video_controls.h::FREEDOM_VIDEO_CONTROLS_H</a>
+- <a href="../include/video_controls.h">include/video_controls.h::VCL_BAR_H</a>
+- <a href="../include/video_controls.h">include/video_controls.h::VCL_MIN_W</a>
+- <a href="../include/video_controls.h">include/video_controls.h::VCL_MIN_H</a>
+- <a href="../include/video_controls.h">include/video_controls.h::VCL_PAD</a>
+- <a href="../include/video_controls.h">include/video_controls.h::VCL_TEXT_W</a>
+- <a href="../include/video_controls.h">include/video_controls.h::VCL_TRACK_H</a>
+- <a href="../include/video_controls.h">include/video_controls.h::VCL_MAX_SEGMENT_S</a>
+
+### include: svg_render (9)
+
+include: svg_render groups 14 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards, img_format, img_status, img_pixels. poke_and_free: Touch every claimed pixel corner so the sanitizer flags an...
 
 **Related Classes/Methods**:
 
@@ -229,24 +259,39 @@ include: svg_render groups 12 files (c, h) around FREEDOM_IMAGE_DECODE_H, guards
 - <a href="../include/image_decode.h#L67-L70">include/image_decode.h::IMG_MAX_SCALE</a>
 - <a href="../include/image_decode.h">include/image_decode.h::IMG_MAX_DIM</a>
 
-### include: tab (9)
+### include: fb_cmdline (10)
 
-include: tab groups 7 files (c, h) around FREEDOM_FRAME_BROKER_H, FBK_MAX_FRAMES, FBK_MAX_DEPTH, FBK_MAX_MSG, FBK_ORIGIN_MAX. fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for...
+include: fb_cmdline groups 11 files (c, h) around FREEDOM_FREEBUG_H, fb_level, fb_entry, level, fb_buffer. LLVMFuzzerTestOneInput: include <stdint.h> include <stdlib.h> include <string.h>...
 
 **Related Classes/Methods**:
 
-- <a href="../include/frame_broker.h#L2-L15">include/frame_broker.h::FREEDOM_FRAME_BROKER_H</a>
-- <a href="../include/frame_broker.h">include/frame_broker.h::FBK_MAX_FRAMES</a>
-- <a href="../include/frame_broker.h">include/frame_broker.h::FBK_MAX_DEPTH</a>
-- <a href="../include/frame_broker.h">include/frame_broker.h::FBK_MAX_MSG</a>
-- <a href="../include/frame_broker.h">include/frame_broker.h::FBK_ORIGIN_MAX</a>
-- <a href="../include/frame_broker.h#L20-L21">include/frame_broker.h::FBK_URL_MAX</a>
-- <a href="../include/frame_broker.h#L22-L23">include/frame_broker.h::fbk_rel</a>
-- <a href="../include/frame_broker.h#L24-L29">include/frame_broker.h::fbk_verdict</a>
+- <a href="../include/freebug.h#L2-L23">include/freebug.h::FREEDOM_FREEBUG_H</a>
+- <a href="../include/freebug.h#L24-L35">include/freebug.h::fb_level</a>
+- <a href="../include/freebug.h">include/freebug.h::fb_entry</a>
+- <a href="../include/freebug.h#L36-L45">include/freebug.h::level</a>
+- <a href="../include/freebug.h#L46-L55">include/freebug.h::fb_buffer</a>
+- <a href="../include/freebug.h">include/freebug.h::FB_MAX_ENTRIES</a>
+- <a href="../include/freebug.h">include/freebug.h::FB_MAX_ENTRY_BYTES</a>
+- <a href="../include/freebug.h#L58-L61">include/freebug.h::FB_MAX_TOTAL_BYTES</a>
 
-### include: prefetch (10)
+### include: download (11)
 
-include: prefetch groups 6 files (c, h) around FREEDOM_IMPORT_MAP_H, algorithm, IM_MAX_TEXT, IM_MAX_ENTRIES, IM_MAX_SCOPES. im_resolve: Resolves specifier as imported from base (the importing module's URL).
+include: download groups 8 files (c, h) around FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. dl_should_download: 1 if the response should be saved (attachment, or a non-renderable...
+
+**Related Classes/Methods**:
+
+- <a href="../include/pdf_export.h#L2-L27">include/pdf_export.h::FREEDOM_PDF_EXPORT_H</a>
+- <a href="../include/pdf_export.h">include/pdf_export.h::PE_NAME_MAX</a>
+- <a href="../include/pdf_export.h">include/pdf_export.h::PE_EXT</a>
+- <a href="../include/pdf_export.h">include/pdf_export.h::PE_EXT_PNG</a>
+- <a href="../include/pdf_export.h#L31-L32">include/pdf_export.h::PE_FALLBACK_NAME</a>
+- <a href="../include/pdf_export.h#L33-L45">include/pdf_export.h::pe_status</a>
+- <a href="../include/pdf_export.h#L46-L50">include/pdf_export.h::fallback</a>
+- <a href="../include/pdf_export.h">include/pdf_export.h::trusted</a>
+
+### include: prefetch (12)
+
+include: prefetch groups 8 files (c, h) around FREEDOM_IMPORT_MAP_H, algorithm, IM_MAX_TEXT, IM_MAX_ENTRIES, IM_MAX_SCOPES. libFuzzer harness for the prefetch lookahead scanner (Hito 29).
 
 **Related Classes/Methods**:
 
@@ -259,50 +304,20 @@ include: prefetch groups 6 files (c, h) around FREEDOM_IMPORT_MAP_H, algorithm, 
 - <a href="../include/import_map.h#L28-L32">include/import_map.h::map</a>
 - <a href="../include/import_map.h#L33-L36">include/import_map.h::im_resolve</a>
 
-### include: os_sandbox (11)
+### include: pres_hints (13)
 
-include: os_sandbox groups 6 files (c, h) around FREEDOM_OS_SANDBOX_H, os_status, os_violation, flags, os_policy_size. os_violation: function (os_policy_allows) that mirrors the installed BPF program.
-
-**Related Classes/Methods**:
-
-- <a href="../include/os_sandbox.h#L2-L20">include/os_sandbox.h::FREEDOM_OS_SANDBOX_H</a>
-- <a href="../include/os_sandbox.h#L21-L29">include/os_sandbox.h::os_status</a>
-- <a href="../include/os_sandbox.h#L30-L38">include/os_sandbox.h::os_violation</a>
-- <a href="../include/os_sandbox.h#L39-L42">include/os_sandbox.h::flags</a>
-- <a href="../include/os_sandbox.h#L43-L51">include/os_sandbox.h::os_policy_size</a>
-- <a href="../include/os_sandbox.h#L52-L58">include/os_sandbox.h::os_prot_allowed</a>
-- <a href="../include/os_sandbox.h#L59-L74">include/os_sandbox.h::denied</a>
-- <a href="../include/os_sandbox.h#L75-L80">include/os_sandbox.h::namespace</a>
-
-### include: sha2 (12)
-
-include: sha2 groups 3 files (c, h) around FREEDOM_SHA2_H, sha_alg, SHA_MAX_DIGEST, sha_digest_len, sha_alg_from_name. sha_digest_len: sha2 -- one-shot SHA-1 / SHA-256 / SHA-384 / SHA-512 (FIPS 180-4)...
+include: pres_hints groups 7 files (c, h) around FREEDOM_TABLE_LAYOUT_H, TL_MAX_COLS, TL_WIDTH_MAX, TL_PER_MILLE, col. libFuzzer harness for table_layout and pres_hints (spec/table_layout.md...
 
 **Related Classes/Methods**:
 
-- <a href="../include/sha2.h#L2-L15">include/sha2.h::FREEDOM_SHA2_H</a>
-- <a href="../include/sha2.h#L16-L17">include/sha2.h::sha_alg</a>
-- <a href="../include/sha2.h#L18-L20">include/sha2.h::SHA_MAX_DIGEST</a>
-- <a href="../include/sha2.h#L21-L23">include/sha2.h::sha_digest_len</a>
-- <a href="../include/sha2.h#L24-L27">include/sha2.h::sha_alg_from_name</a>
-- <a href="../include/sha2.h#L28-L30">include/sha2.h::sha_digest</a>
-- <a href="../src/sha2.c">src/sha2.c::ROR32</a>
-- <a href="../src/sha2.c">src/sha2.c::ROL32</a>
-
-### include: subreq_batch (13)
-
-include: subreq_batch groups 3 files (c, h) around SUBREQ_BATCH_H, SQB_MAX_JOBS, sqb_req, ok, sqb_res. sqb_res: #ifndef SUBREQ_BATCH_H #define SUBREQ_BATCH_H #include <stddef.h> #define...
-
-**Related Classes/Methods**:
-
-- <a href="../include/subreq_batch.h#L10-L13">include/subreq_batch.h::SUBREQ_BATCH_H</a>
-- <a href="../include/subreq_batch.h#L14-L15">include/subreq_batch.h::SQB_MAX_JOBS</a>
-- <a href="../include/subreq_batch.h#L16-L22">include/subreq_batch.h::sqb_req</a>
-- <a href="../include/subreq_batch.h">include/subreq_batch.h::ok</a>
-- <a href="../include/subreq_batch.h#L23-L33">include/subreq_batch.h::sqb_res</a>
-- <a href="../include/subreq_batch.h#L34-L36">include/subreq_batch.h::sqb</a>
-- <a href="../include/subreq_batch.h#L37-L40">include/subreq_batch.h::sqb_new</a>
-- <a href="../include/subreq_batch.h">include/subreq_batch.h::sqb_submit</a>
+- <a href="../include/table_layout.h#L11-L19">include/table_layout.h::FREEDOM_TABLE_LAYOUT_H</a>
+- <a href="../include/table_layout.h#L20-L22">include/table_layout.h::TL_MAX_COLS</a>
+- <a href="../include/table_layout.h#L23-L25">include/table_layout.h::TL_WIDTH_MAX</a>
+- <a href="../include/table_layout.h">include/table_layout.h::TL_PER_MILLE</a>
+- <a href="../include/table_layout.h">include/table_layout.h::col</a>
+- <a href="../include/table_layout.h#L28-L40">include/table_layout.h::tl_cell</a>
+- <a href="../include/table_layout.h#L41-L52">include/table_layout.h::px</a>
+- <a href="../include/table_layout.h#L53-L56">include/table_layout.h::tl_intrinsic</a>
 
 ### tools (14)
 
@@ -310,10 +325,10 @@ tools groups 2 files (py) around start_display, one_run, main, phase_ms, one_pag
 
 **Related Classes/Methods**:
 
-- <a href="../tools/guitime.py#L34-L64">tools/guitime.py::start_display</a>
-- <a href="../tools/guitime.py#L65-L93">tools/guitime.py::one_run</a>
-- <a href="../tools/guitime.py#L94-L149">tools/guitime.py::main</a>
-- <a href="../tools/guiscroll.py#L34-L43">tools/guiscroll.py::phase_ms</a>
-- <a href="../tools/guiscroll.py#L44-L84">tools/guiscroll.py::one_page</a>
-- <a href="../tools/guiscroll.py#L85-L133">tools/guiscroll.py::main</a>
-- <a href="../tools/guiscroll.py#L134-L141">tools/guiscroll.py::procs_display</a>
+- <a href="../tools/guitime.py#L34-L66">tools/guitime.py::start_display</a>
+- <a href="../tools/guitime.py#L67-L95">tools/guitime.py::one_run</a>
+- <a href="../tools/guitime.py#L96-L151">tools/guitime.py::main</a>
+- <a href="../tools/guiscroll.py#L38-L47">tools/guiscroll.py::phase_ms</a>
+- <a href="../tools/guiscroll.py#L48-L94">tools/guiscroll.py::one_page</a>
+- <a href="../tools/guiscroll.py#L95-L148">tools/guiscroll.py::main</a>
+- <a href="../tools/guiscroll.py#L149-L156">tools/guiscroll.py::procs_display</a>

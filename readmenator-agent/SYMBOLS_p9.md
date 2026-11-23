@@ -3,6 +3,40 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `ptr_hash` | function | `src/dom.c:45` | `static size_t ptr_hash(const void *p)` |
+| `ptrmap` | struct | `src/dom.c:160` | `` |
+| `sm_entry` | struct | `src/dom.c:55` | `` |
+| `sm_entry_append` | function | `src/dom.c:70` | `static int sm_entry_append(sm_entry *e, dom_node_id id)` |
+| `sm_find` | function | `src/dom.c:127` | `static const sm_entry *sm_find(const strmap *m, const char *key, size_t klen)` |
+| `sm_free` | function | `src/dom.c:139` | `static void sm_free(strmap *m)` |
+| `sm_grow` | function | `src/dom.c:82` | `static int sm_grow(strmap *m)` |
+| `sm_put` | function | `src/dom.c:99` | `static int sm_put(strmap *m, const char *key, size_t klen, dom_node_id id)` |
+| `strmap` | struct | `src/dom.c:64` | `` |
+| `to_lower_buf` | function | `src/dom.c:33` | `static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap)` |
+| `valid` | function | `src/dom.c:243` | `static int valid(const dom_index *idx, dom_node_id n)` |
+| `dd_align_name` | function | `src/dom_debug.c:108` | `static const char *dd_align_name(int a)` |
+| `dd_block_line` | function | `src/dom_debug.c:323` | `static void dd_block_line(dd_cursor *c, size_t i, const rd_block *b)` |
+| `dd_border_style_name` | function | `src/dom_debug.c:228` | `static const char *dd_border_style_name(int s)` |
+| `dd_box_line` | function | `src/dom_debug.c:261` | `static void dd_box_line(dd_cursor *c, size_t id, const pv_box_def *b)` |
+| `dd_color` | function | `src/dom_debug.c:83` | `static void dd_color(dd_cursor *c, int rgb)` |
+| `dd_cursor` | struct | `src/dom_debug.c:24` | `` |
+| `dd_cursor_name` | function | `src/dom_debug.c:166` | `static const char *dd_cursor_name(int c)` |
+| `dd_display_name` | function | `src/dom_debug.c:88` | `static const char *dd_display_name(int d)` |
+| `dd_emit` | function | `src/dom_debug.c:36` | `static void dd_emit(dd_cursor *c, const char *s, size_t len)` |
+| `dd_format` | function | `src/dom_debug.c:400` | `size_t dd_format(const rd_doc *doc, char *out, size_t cap)` |
+| `dd_format_css` | function | `src/dom_debug.c:432` | `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap)` |
+| `dd_image_rendering_name` | function | `src/dom_debug.c:219` | `static const char *dd_image_rendering_name(int r)` |
+| `dd_inset` | function | `src/dom_debug.c:204` | `static int dd_inset(int v)` |
+| `dd_justify_name` | function | `src/dom_debug.c:96` | `static const char *dd_justify_name(int j)` |
+| `dd_mix_blend_name` | function | `src/dom_debug.c:137` | `static const char *dd_mix_blend_name(int m)` |
+| `dd_object_fit_name` | function | `src/dom_debug.c:208` | `static const char *dd_object_fit_name(int o)` |
+| `dd_overflow_name` | function | `src/dom_debug.c:157` | `static const char *dd_overflow_name(int o)` |
+| `dd_position_name` | function | `src/dom_debug.c:118` | `static const char *dd_position_name(int p)` |
+| `dd_printf` | function | `src/dom_debug.c:48` | `static void dd_printf(dd_cursor *c, const char *fmt, ...)` |
+| `dd_putc` | function | `src/dom_debug.c:31` | `static void dd_putc(dd_cursor *c, char ch)` |
+| `dd_puts` | function | `src/dom_debug.c:40` | `static void dd_puts(dd_cursor *c, const char *s)` |
+| `dd_text_overflow_name` | function | `src/dom_debug.c:199` | `static const char *dd_text_overflow_name(int t)` |
+| `dd_visibility_name` | function | `src/dom_debug.c:129` | `static const char *dd_visibility_name(int v)` |
 | `dd_w` | function | `src/dom_debug.c:80` | `static int dd_w(int v)` |
 | `ci_find` | function | `src/download.c:19` | `static const char *ci_find(const char *hay, const char *needle)` |
 | `copy_span` | function | `src/download.c:85` | `static void copy_span(const char *src, const char *end, char *buf, size_t bufsz)` |
@@ -430,27 +464,27 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `JD_QSA_INLINE` | macro | `src/js_dom.c:477` | `#define JD_QSA_INLINE` |
 | `_GNU_SOURCE` | macro | `src/js_dom.c:10` | `#define _GNU_SOURCE` |
 | `attrNames` | function | `src/js_dom.c:697` | `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so      * a missing '...` |
-| `empty` | function | `src/js_dom.c:1436` | `* inert: DOM interface constructors are empty (instanceof yields false, harmless);` |
-| `enough` | function | `src/js_dom.c:1088` | `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...` |
-| `fails` | function | `src/js_dom.c:2093` | `* cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...` |
-| `geometry` | function | `src/js_dom.c:1438` | `* constant geometry (zero real leak);` |
-| `jd_flush_custom_elements` | function | `src/js_dom.c:2079` | `void jd_flush_custom_elements(js_context *ctx)` |
+| `empty` | function | `src/js_dom.c:1437` | `* inert: DOM interface constructors are empty (instanceof yields false, harmless);` |
+| `enough` | function | `src/js_dom.c:1089` | `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...` |
+| `fails` | function | `src/js_dom.c:2107` | `* cap is reached or an allocation fails (caller stops), else 0. */ static int cb_append(char **bu...` |
+| `geometry` | function | `src/js_dom.c:1439` | `* constant geometry (zero real leak);` |
+| `jd_flush_custom_elements` | function | `src/js_dom.c:2093` | `void jd_flush_custom_elements(js_context *ctx)` |
 | `jd_freeze_mutators` | function | `src/js_dom.c:611` | `static int jd_freeze_mutators(JSContext *jsctx)` |
-| `jd_get_cookies` | function | `src/js_dom.c:2264` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)` |
+| `jd_get_cookies` | function | `src/js_dom.c:2278` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)` |
 | `jd_handle` | function | `src/js_dom.c:40` | `int jd_handle(JSContext *ctx, JSValueConst v, dom_node_id *out)` |
 | `jd_handle_or_null` | function | `src/js_dom.c:47` | `JSValue jd_handle_or_null(JSContext *ctx, dom_node_id h)` |
 | `jd_idx` | function | `src/js_dom.c:31` | `dom_index *jd_idx(JSContext *ctx)` |
-| `jd_install` | function | `src/js_dom.c:1985` | `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)` |
-| `jd_install_console` | function | `src/js_dom.c:2207` | `jd_status jd_install_console(js_context *ctx, fb_buffer *log)` |
+| `jd_install` | function | `src/js_dom.c:1999` | `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)` |
+| `jd_install_console` | function | `src/js_dom.c:2221` | `jd_status jd_install_console(js_context *ctx, fb_buffer *log)` |
 | `jd_is_mutator` | function | `src/js_dom.c:605` | `static int jd_is_mutator(const char *name)` |
 | `jd_method` | struct | `src/js_dom.c:456` | `` |
 | `jd_opaque_get` | function | `src/js_dom.c:27` | `jd_opaque *jd_opaque_get(JSContext *ctx)` |
 | `jd_query_list` | function | `src/js_dom.c:70` | `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)` |
-| `jd_rebind` | function | `src/js_dom.c:2069` | `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)` |
-| `jd_set_computed` | function | `src/js_dom.c:2287` | `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)` |
-| `jd_set_cookies` | function | `src/js_dom.c:2244` | `jd_status jd_set_cookies(js_context *ctx, const char *cookies)` |
-| `jd_set_geometry` | function | `src/js_dom.c:2298` | `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)` |
-| `js_env` | function | `src/js_dom.c:1444` | `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the  * document shim (uses...` |
+| `jd_rebind` | function | `src/js_dom.c:2083` | `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)` |
+| `jd_set_computed` | function | `src/js_dom.c:2301` | `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)` |
+| `jd_set_cookies` | function | `src/js_dom.c:2258` | `jd_status jd_set_cookies(js_context *ctx, const char *cookies)` |
+| `jd_set_geometry` | function | `src/js_dom.c:2312` | `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)` |
+| `js_env` | function | `src/js_dom.c:1445` | `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the  * document shim (uses...` |
 | `m_append_child` | function | `src/js_dom.c:264` | `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,                             ...` |
 | `m_attr_names` | function | `src/js_dom.c:538` | `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,                             in...` |
 | `m_child_node` | function | `src/js_dom.c:159` | `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
@@ -462,39 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `m_first_child` | function | `src/js_dom.c:143` | `static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,                              ...` |
 | `m_get_attribute` | function | `src/js_dom.c:122` | `static JSValue m_get_attribute(JSContext *ctx, JSValueConst this_val,                            ...` |
 | `m_get_by_class` | function | `src/js_dom.c:106` | `static JSValue m_get_by_class(JSContext *ctx, JSValueConst this_val,                             ...` |
-| `m_get_by_tag` | function | `src/js_dom.c:100` | `static JSValue m_get_by_tag(JSContext *ctx, JSValueConst this_val,                             in...` |
-| `m_get_element_by_id` | function | `src/js_dom.c:59` | `static JSValue m_get_element_by_id(JSContext *ctx, JSValueConst this_val,                        ...` |
-| `m_get_inner_html` | function | `src/js_dom.c:364` | `static JSValue m_get_inner_html(JSContext *ctx, JSValueConst this_val,                           ...` |
-| `m_get_title` | function | `src/js_dom.c:231` | `static JSValue m_get_title(JSContext *ctx, JSValueConst this_val,                            int ...` |
-| `m_insert_before` | function | `src/js_dom.c:299` | `static JSValue m_insert_before(JSContext *ctx, JSValueConst this_val,                            ...` |
-| `m_matches` | function | `src/js_dom.c:514` | `static JSValue m_matches(JSContext *ctx, JSValueConst this_val,                          int argc...` |
-| `m_move_children` | function | `src/js_dom.c:275` | `static JSValue m_move_children(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_next_sibling` | function | `src/js_dom.c:188` | `static JSValue m_next_sibling(JSContext *ctx, JSValueConst this_val,                             ...` |
-| `m_node_count` | function | `src/js_dom.c:53` | `static JSValue m_node_count(JSContext *ctx, JSValueConst this_val,                             in...` |
-| `m_node_kind` | function | `src/js_dom.c:152` | `static JSValue m_node_kind(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_parent` | function | `src/js_dom.c:135` | `static JSValue m_parent(JSContext *ctx, JSValueConst this_val,                         int argc, ...` |
-| `m_precedes` | function | `src/js_dom.c:196` | `static JSValue m_precedes(JSContext *ctx, JSValueConst this_val,                           int ar...` |
-| `m_query_selector` | function | `src/js_dom.c:465` | `static JSValue m_query_selector(JSContext *ctx, JSValueConst this_val,                           ...` |
-| `m_query_selector_all` | function | `src/js_dom.c:480` | `static JSValue m_query_selector_all(JSContext *ctx, JSValueConst this_val,                       ...` |
-| `m_rect` | function | `src/js_dom.c:399` | `static JSValue m_rect(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_remove_attribute` | function | `src/js_dom.c:336` | `static JSValue m_remove_attribute(JSContext *ctx, JSValueConst this_val,                         ...` |
-| `m_remove_child` | function | `src/js_dom.c:311` | `static JSValue m_remove_child(JSContext *ctx, JSValueConst this_val,                             ...` |
-| `m_set_attribute` | function | `src/js_dom.c:320` | `static JSValue m_set_attribute(JSContext *ctx, JSValueConst this_val,                            ...` |
-| `m_set_inner_html` | function | `src/js_dom.c:348` | `static JSValue m_set_inner_html(JSContext *ctx, JSValueConst this_val,                           ...` |
-| `m_set_text` | function | `src/js_dom.c:217` | `static JSValue m_set_text(JSContext *ctx, JSValueConst this_val,                           int ar...` |
-| `m_set_title` | function | `src/js_dom.c:239` | `static JSValue m_set_title(JSContext *ctx, JSValueConst this_val,                            int ...` |
-| `m_sibling_node` | function | `src/js_dom.c:166` | `static JSValue m_sibling_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_tag_name` | function | `src/js_dom.c:112` | `static JSValue m_tag_name(JSContext *ctx, JSValueConst this_val,                           int ar...` |
-| `m_text_content` | function | `src/js_dom.c:207` | `static JSValue m_text_content(JSContext *ctx, JSValueConst this_val,                             ...` |
-| `ms` | function | `src/js_dom.c:1235` | `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);` |
-| `scripts` | function | `src/js_dom.c:915` | `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...` |
-| `size` | function | `src/js_dom.c:1441` | `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);` |
-| `table` | function | `src/js_dom.c:645` | `* a table (dom.viewport() non-null);` |
-| `cancels` | function | `src/js_dom_ext.c:1001` | `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);` |
-| `identity` | function | `src/js_dom_ext.c:105` | `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...` |
-| `jd_install_geolocation` | function | `src/js_dom_ext.c:1459` | `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)` |
-| `jd_install_indexeddb` | function | `src/js_dom_ext.c:1478` | `jd_status jd_install_indexeddb(js_context *ctx)` |
-| `jd_install_repl_api` | function | `src/js_dom_ext.c:1438` | `jd_status jd_install_repl_api(js_context *ctx)` |
-| `jd_set_repl_css` | function | `src/js_dom_ext.c:1446` | `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

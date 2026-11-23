@@ -3,6 +3,57 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `assert_float_equal` | function | `tests/test_interp.c:66` | `assert_float_equal(ip_ease(0.0, &(ip_ease_fn)` |
+| `linear_ease` | function | `tests/test_interp.c:258` | `static ip_ease_fn linear_ease(void)` |
+| `main` | function | `tests/test_interp.c:474` | `int main(void)` |
+| `test_anim_active_linear` | function | `tests/test_interp.c:292` | `static void test_anim_active_linear(void **state)` |
+| `test_anim_alternate` | function | `tests/test_interp.c:393` | `static void test_anim_alternate(void **state)` |
+| `test_anim_alternate_reverse` | function | `tests/test_interp.c:410` | `static void test_anim_alternate_reverse(void **state)` |
+| `test_anim_delay_backwards_fill` | function | `tests/test_interp.c:278` | `static void test_anim_delay_backwards_fill(void **state)` |
+| `test_anim_delay_no_fill` | function | `tests/test_interp.c:263` | `static void test_anim_delay_no_fill(void **state)` |
+| `test_anim_forwards_fill` | function | `tests/test_interp.c:325` | `static void test_anim_forwards_fill(void **state)` |
+| `test_anim_infinite` | function | `tests/test_interp.c:367` | `static void test_anim_infinite(void **state)` |
+| `test_anim_negative_dt` | function | `tests/test_interp.c:448` | `static void test_anim_negative_dt(void **state)` |
+| `test_anim_no_keyframes` | function | `tests/test_interp.c:436` | `static void test_anim_no_keyframes(void **state)` |
+| `test_anim_null_init` | function | `tests/test_interp.c:463` | `static void test_anim_null_init(void **state)` |
+| `test_anim_reverse_direction` | function | `tests/test_interp.c:380` | `static void test_anim_reverse_direction(void **state)` |
+| `test_anim_single_iteration_done` | function | `tests/test_interp.c:310` | `static void test_anim_single_iteration_done(void **state)` |
+| `test_anim_two_iterations` | function | `tests/test_interp.c:338` | `static void test_anim_two_iterations(void **state)` |
+| `test_anim_zero_duration` | function | `tests/test_interp.c:423` | `static void test_anim_zero_duration(void **state)` |
+| `test_ease_clamp` | function | `tests/test_interp.c:78` | `static void test_ease_clamp(void **state)` |
+| `test_ease_ease_in_concave` | function | `tests/test_interp.c:92` | `static void test_ease_ease_in_concave(void **state)` |
+| `test_ease_ease_out_convex` | function | `tests/test_interp.c:99` | `static void test_ease_ease_out_convex(void **state)` |
+| `test_ease_endpoints` | function | `tests/test_interp.c:31` | `static void test_ease_endpoints(void **state)` |
+| `test_ease_monotonic` | function | `tests/test_interp.c:106` | `static void test_ease_monotonic(void **state)` |
+| `test_ease_null_fn` | function | `tests/test_interp.c:85` | `static void test_ease_null_fn(void **state)` |
+| `test_ease_step_start_end_aliases` | function | `tests/test_interp.c:147` | `static void test_ease_step_start_end_aliases(void **state)` |
+| `test_ease_steps_end` | function | `tests/test_interp.c:127` | `static void test_ease_steps_end(void **state)` |
+| `test_ease_steps_start` | function | `tests/test_interp.c:138` | `static void test_ease_steps_start(void **state)` |
+| `test_interp_dispatches` | function | `tests/test_interp.c:192` | `static void test_interp_dispatches(void **state)` |
+| `test_kf_after_last` | function | `tests/test_interp.c:231` | `static void test_kf_after_last(void **state)` |
+| `test_kf_before_first` | function | `tests/test_interp.c:225` | `static void test_kf_before_first(void **state)` |
+| `test_kf_color_interp` | function | `tests/test_interp.c:247` | `static void test_kf_color_interp(void **state)` |
+| `test_kf_exact_match` | function | `tests/test_interp.c:219` | `static void test_kf_exact_match(void **state)` |
+| `test_kf_null_or_empty` | function | `tests/test_interp.c:237` | `static void test_kf_null_or_empty(void **state)` |
+| `test_kf_three_keyframes` | function | `tests/test_interp.c:212` | `static void test_kf_three_keyframes(void **state)` |
+| `test_kf_two_keyframes` | function | `tests/test_interp.c:205` | `static void test_kf_two_keyframes(void **state)` |
+| `test_lerp_color_rgb` | function | `tests/test_interp.c:171` | `static void test_lerp_color_rgb(void **state)` |
+| `test_lerp_scalar` | function | `tests/test_interp.c:163` | `static void test_lerp_scalar(void **state)` |
+| `EXPECT` | macro | `tests/test_js_dom.c:80` | `#define EXPECT(f, src, expected)` |
+| `EXPECT` | function | `tests/test_js_dom.c:296` | `EXPECT(f, "typeof (new MutationObserver(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:583` | `EXPECT(f, "typeof $ === 'undefined' ? (function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:709` | `EXPECT(f, "['setText','appendChild','insertBefore','moveChildren','removeChild','setAttribute'," ...` |
+| `EXPECT` | function | `tests/test_js_dom.c:1086` | `EXPECT(f,         "setTimeout(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2167` | `EXPECT(f, "globalThis.$=function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2227` | `EXPECT(f, "c.addEventListener('click',function(e)` |
+| `EXPECT` | function | `tests/test_js_dom.c:2229` | `EXPECT(f, "function radio()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2320` | `EXPECT(f, "var mk=function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:2487` | `EXPECT(f, "R[2].declarations.concat(R[3].declarations).map(function(x)` |
+| `EXPECT` | function | `tests/test_js_dom.c:2622` | `EXPECT(f, "function onc()` |
+| `EXPECT` | function | `tests/test_js_dom.c:3181` | `EXPECT(f, "['DocumentType','CDATASection','ProcessingInstruction','Window','NamedNodeMap',"      ...` |
+| `EXPECT` | function | `tests/test_js_dom.c:3422` | `EXPECT(f, "function mk(h)` |
+| `EXPECT` | function | `tests/test_js_dom.c:3487` | `EXPECT(f, "(function()` |
+| `EXPECT` | function | `tests/test_js_dom.c:3502` | `EXPECT(f, "(function()` |
 | `EXPECT` | function | `tests/test_js_dom.c:3506` | `EXPECT(f, "(function()` |
 | `EXPECT` | function | `tests/test_js_dom.c:3510` | `EXPECT(f, "(function()` |
 | `EXPECT` | function | `tests/test_js_dom.c:3522` | `EXPECT(f, "(function()` |
@@ -445,56 +496,5 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 | `roundtrip_raw` | function | `tests/test_local_store.c:30` | `static void roundtrip_raw(ls_aead aead)` |
 | `tamper_at` | function | `tests/test_local_store.c:85` | `static void tamper_at(size_t off)` |
 | `test_derive_key` | function | `tests/test_local_store.c:149` | `static void test_derive_key(void **s)` |
-| `test_empty_plaintext` | function | `tests/test_local_store.c:53` | `static void test_empty_plaintext(void **s)` |
-| `test_format_errors` | function | `tests/test_local_store.c:166` | `static void test_format_errors(void **s)` |
-| `test_nondeterministic` | function | `tests/test_local_store.c:107` | `static void test_nondeterministic(void **s)` |
-| `test_null_and_limits` | function | `tests/test_local_store.c:181` | `static void test_null_and_limits(void **s)` |
-| `test_passphrase_roundtrip` | function | `tests/test_local_store.c:121` | `static void test_passphrase_roundtrip(void **s)` |
-| `test_roundtrip_aes` | function | `tests/test_local_store.c:48` | `static void test_roundtrip_aes(void **s)` |
-| `test_roundtrip_chacha` | function | `tests/test_local_store.c:49` | `static void test_roundtrip_chacha(void **s)` |
-| `test_tamper_aead_id` | function | `tests/test_local_store.c:103` | `static void test_tamper_aead_id(void **s)` |
-| `test_tamper_ciphertext` | function | `tests/test_local_store.c:99` | `static void test_tamper_ciphertext(void **s)` |
-| `test_tamper_nonce` | function | `tests/test_local_store.c:101` | `static void test_tamper_nonce(void **s)` |
-| `test_tamper_salt` | function | `tests/test_local_store.c:102` | `static void test_tamper_salt(void **s)` |
-| `test_tamper_tag` | function | `tests/test_local_store.c:100` | `static void test_tamper_tag(void **s)` |
-| `test_wrong_key` | function | `tests/test_local_store.c:67` | `static void test_wrong_key(void **s)` |
-| `key_of` | function | `tests/test_mask_cache.c:11` | `static mkc_key key_of(int w, int h, double sigma)` |
-| `main` | function | `tests/test_mask_cache.c:158` | `int main(void)` |
-| `test_any_field_differs_misses` | function | `tests/test_mask_cache.c:46` | `static void test_any_field_differs_misses(void **state)` |
-| `test_clear_and_null_safety` | function | `tests/test_mask_cache.c:133` | `static void test_clear_and_null_safety(void **state)` |
-| `test_empty_misses` | function | `tests/test_mask_cache.c:16` | `static void test_empty_misses(void **state)` |
-| `test_entry_cap` | function | `tests/test_mask_cache.c:81` | `static void test_entry_cap(void **state)` |
-| `test_lru_eviction_by_bytes` | function | `tests/test_mask_cache.c:65` | `static void test_lru_eviction_by_bytes(void **state)` |
-| `test_over_budget_and_invalid_fail_closed` | function | `tests/test_mask_cache.c:97` | `static void test_over_budget_and_invalid_fail_closed(void **state)` |
-| `test_put_then_get_same_buffer` | function | `tests/test_mask_cache.c:28` | `static void test_put_then_get_same_buffer(void **state)` |
-| `test_replace_keeps_one_entry` | function | `tests/test_mask_cache.c:119` | `static void test_replace_keeps_one_entry(void **state)` |
-| `main` | function | `tests/test_media_decoder.c:89` | `int main(void)` |
-| `test_pacer_backwards_pts_reanchors` | function | `tests/test_media_decoder.c:40` | `static void test_pacer_backwards_pts_reanchors(void **state)` |
-| `test_pacer_hostile_pts_bounded` | function | `tests/test_media_decoder.c:69` | `static void test_pacer_hostile_pts_bounded(void **state)` |
-| `test_pacer_lag_reanchors` | function | `tests/test_media_decoder.c:52` | `static void test_pacer_lag_reanchors(void **state)` |
-| `test_pacer_null_safe` | function | `tests/test_media_decoder.c:84` | `static void test_pacer_null_safe(void **state)` |
-| `test_pacer_paces_by_pts_delta` | function | `tests/test_media_decoder.c:28` | `static void test_pacer_paces_by_pts_delta(void **state)` |
-| `hammer` | function | `tests/test_nav_token.c:75` | `static void *hammer(void *arg)` |
-| `main` | function | `tests/test_nav_token.c:98` | `int main(void)` |
-| `test_concurrent_refcount` | function | `tests/test_nav_token.c:87` | `static void test_concurrent_refcount(void **state)` |
-| `test_new_defaults` | function | `tests/test_nav_token.c:11` | `static void test_new_defaults(void **state)` |
-| `test_null_fails_closed` | function | `tests/test_nav_token.c:28` | `static void test_null_fails_closed(void **state)` |
-| `test_route` | function | `tests/test_nav_token.c:52` | `static void test_route(void **state)` |
-| `test_shared_reference` | function | `tests/test_nav_token.c:39` | `static void test_shared_reference(void **state)` |
-| `expect_private` | function | `tests/test_net_guard.c:10` | `static void expect_private(const char *const *ips, size_t n, int want)` |
-| `main` | function | `tests/test_net_guard.c:150` | `int main(void)` |
-| `test_decide` | function | `tests/test_net_guard.c:124` | `static void test_decide(void **state)` |
-| `test_host_is_ip` | function | `tests/test_net_guard.c:112` | `static void test_host_is_ip(void **state)` |
-| `test_host_is_local` | function | `tests/test_net_guard.c:93` | `static void test_host_is_local(void **state)` |
-| `test_ipv4_embedded_in_ipv6_is_unwrapped` | function | `tests/test_net_guard.c:56` | `static void test_ipv4_embedded_in_ipv6_is_unwrapped(void **state)` |
-| `test_ipv4_private_and_special_ranges` | function | `tests/test_net_guard.c:16` | `static void test_ipv4_private_and_special_ranges(void **state)` |
-| `test_ipv4_public_edges` | function | `tests/test_net_guard.c:29` | `static void test_ipv4_public_edges(void **state)` |
-| `test_ipv6_private_and_special_ranges` | function | `tests/test_net_guard.c:41` | `static void test_ipv6_private_and_special_ranges(void **state)` |
-| `test_unclassifiable_fails_closed` | function | `tests/test_net_guard.c:71` | `static void test_unclassifiable_fails_closed(void **state)` |
-| `main` | function | `tests/test_net_realm.c:140` | `int main(void)` |
-| `test_classify_host_clearnet` | function | `tests/test_net_realm.c:37` | `static void test_classify_host_clearnet(void **state)` |
-| `test_classify_host_edges` | function | `tests/test_net_realm.c:54` | `static void test_classify_host_edges(void **state)` |
-| `test_classify_host_i2p` | function | `tests/test_net_realm.c:30` | `static void test_classify_host_i2p(void **state)` |
-| `test_classify_host_lookalikes` | function | `tests/test_net_realm.c:44` | `static void test_classify_host_lookalikes(void **state)` |
 
 Next: [SYMBOLS_p17.md](SYMBOLS_p17.md)

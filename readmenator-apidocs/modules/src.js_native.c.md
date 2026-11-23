@@ -45,7 +45,7 @@ JSValue jn_host_eval(JSContext *c, const char *src, size_t len, const char *name
 
 **Returns:** `JSValue`
 
-*Called by:* [`jdce_install`](src.js_custom_elements.c.md#jdce_install), [`jd_inject_video_shim`](src.js_embed.c.md#jd_inject_video_shim), [`jd_install_xhr_ex`](src.js_fetch.c.md#jd_install_xhr_ex), [`jd_pop_state`](src.js_location.c.md#jd_pop_state), [`jd_set_location`](src.js_location.c.md#jd_set_location), [`jd_take_history`](src.js_location.c.md#jd_take_history), [`jn_seal`](#jn_seal), [`jt_enable_frames`](src.js_trusted.c.md#jt_enable_frames), [`jt_enable_observers`](src.js_trusted.c.md#jt_enable_observers), [`jt_enable_open`](src.js_trusted.c.md#jt_enable_open), [`jt_enable_storage`](src.js_trusted.c.md#jt_enable_storage), [`jt_enable_worker`](src.js_trusted.c.md#jt_enable_worker) and 4 more
+*Called by:* [`jdce_install`](src.js_custom_elements.c.md#jdce_install), [`jd_inject_video_shim`](src.js_embed.c.md#jd_inject_video_shim), [`jd_install_xhr_ex`](src.js_fetch.c.md#jd_install_xhr_ex), [`jd_pop_state`](src.js_location.c.md#jd_pop_state), [`jd_set_location`](src.js_location.c.md#jd_set_location), [`jd_take_history`](src.js_location.c.md#jd_take_history), [`jd_take_scroll`](src.js_location.c.md#jd_take_scroll), [`jn_seal`](#jn_seal), [`jt_enable_frames`](src.js_trusted.c.md#jt_enable_frames), [`jt_enable_observers`](src.js_trusted.c.md#jt_enable_observers), [`jt_enable_open`](src.js_trusted.c.md#jt_enable_open), [`jt_enable_storage`](src.js_trusted.c.md#jt_enable_storage) and 5 more
 
 ---
 

@@ -3,6 +3,18 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `index` | function | `include/css_index.h:44` | `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...` |
+| `key` | type_alias | `include/css_index.h:17` | `typedef struct cix_entry { uint64_t key;` |
+| `CL_FALLBACK_CAP_RATIO` | macro | `include/css_length.h:65` | `#define CL_FALLBACK_CAP_RATIO` |
+| `CL_FALLBACK_CH_RATIO` | macro | `include/css_length.h:64` | `#define CL_FALLBACK_CH_RATIO` |
+| `CL_FALLBACK_EX_RATIO` | macro | `include/css_length.h:57` | `#define CL_FALLBACK_EX_RATIO` |
+| `CL_FALLBACK_IC_RATIO` | macro | `include/css_length.h:66` | `#define CL_FALLBACK_IC_RATIO` |
+| `CL_INITIAL_FONT_SIZE` | macro | `include/css_length.h:39` | `#define CL_INITIAL_FONT_SIZE` |
+| `CL_MAX_TOKEN` | macro | `include/css_length.h:33` | `#define CL_MAX_TOKEN` |
+| `CL_NORMAL_LINE_RATIO` | macro | `include/css_length.h:45` | `#define CL_NORMAL_LINE_RATIO` |
+| `FREEDOM_CSS_LENGTH_H` | macro | `include/css_length.h:2` | `#define FREEDOM_CSS_LENGTH_H` |
+| `cl_ctx` | struct | `include/css_length.h:91` | `` |
+| `cl_is_length_unit` | function | `include/css_length.h:253` | `int cl_is_length_unit(const char *unit, size_t unit_len);` |
 | `cl_lp` | struct | `include/css_length.h:139` | `` |
 | `cl_number` | function | `include/css_length.h:237` | `int cl_number(const char *s, double *out, const char **endp);` |
 | `cl_status` | enum | `include/css_length.h:68` | `` |
@@ -35,46 +47,46 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `cmq_name_hash` | function | `include/css_mq.h:50` | `unsigned cmq_name_hash(const char *s, size_t n);` |
 | `names` | type_alias | `include/css_mq.h:41` | `typedef struct cmq_container { unsigned names[CMQ_CONTAINER_NAMES];` |
 | `width_px` | type_alias | `include/css_mq.h:18` | `typedef struct cmq_env { int width_px;` |
-| `CSEL_FOLD_MARK` | macro | `include/css_select.h:216` | `#define CSEL_FOLD_MARK` |
-| `CSEL_FOLD_PREFIX` | macro | `include/css_select.h:215` | `#define CSEL_FOLD_PREFIX` |
-| `CSEL_IDENT_SCRATCH` | macro | `include/css_select.h:217` | `#define CSEL_IDENT_SCRATCH` |
+| `CSEL_FOLD_MARK` | macro | `include/css_select.h:217` | `#define CSEL_FOLD_MARK` |
+| `CSEL_FOLD_PREFIX` | macro | `include/css_select.h:216` | `#define CSEL_FOLD_PREFIX` |
+| `CSEL_IDENT_SCRATCH` | macro | `include/css_select.h:218` | `#define CSEL_IDENT_SCRATCH` |
 | `CSS_MAX_CLASSES_PER_SEL` | macro | `include/css_select.h:28` | `#define CSS_MAX_CLASSES_PER_SEL` |
-| `CSS_MAX_SUB_SELS` | macro | `include/css_select.h:83` | `#define CSS_MAX_SUB_SELS` |
-| `CSS_SUB_MAX_ATTRS` | macro | `include/css_select.h:84` | `#define CSS_SUB_MAX_ATTRS` |
-| `CSS_SUB_MAX_PSEUDOS` | macro | `include/css_select.h:85` | `#define CSS_SUB_MAX_PSEUDOS` |
+| `CSS_MAX_SUB_SELS` | macro | `include/css_select.h:84` | `#define CSS_MAX_SUB_SELS` |
+| `CSS_SUB_MAX_ATTRS` | macro | `include/css_select.h:85` | `#define CSS_SUB_MAX_ATTRS` |
+| `CSS_SUB_MAX_PSEUDOS` | macro | `include/css_select.h:86` | `#define CSS_SUB_MAX_PSEUDOS` |
 | `CSS_TOK_MAX` | macro | `include/css_select.h:27` | `#define CSS_TOK_MAX` |
 | `FREEDOM_CSS_SELECT_H` | macro | `include/css_select.h:2` | `#define FREEDOM_CSS_SELECT_H` |
-| `comb` | type_alias | `include/css_select.h:139` | `typedef struct css_sel { int comb[CSS_MAX_COMPOUNDS];` |
-| `conservative` | function | `include/css_select.h:202` | `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...` |
-| `csel_anc_reject` | function | `include/css_select.h:195` | `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)` |
-| `csel_ci_eq` | function | `include/css_select.h:244` | `static inline int csel_ci_eq(const char *a, const char *b)` |
-| `csel_ci_starts` | function | `include/css_select.h:253` | `static inline int csel_ci_starts(const char *a, const char *p)` |
-| `csel_compact_dup` | function | `include/css_select.h:173` | `css_sel *csel_compact_dup(const css_sel *sel);` |
-| `csel_compact_size` | function | `include/css_select.h:168` | `size_t csel_compact_size(int nparts);` |
-| `csel_decl_end` | function | `include/css_select.h:236` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` |
-| `csel_element_feature_bits` | function | `include/css_select.h:194` | `unsigned long long csel_element_feature_bits(const css_element *e);` |
-| `csel_emit_utf8` | function | `include/css_select.h:220` | `size_t csel_emit_utf8(unsigned int cp, char *out);` |
-| `csel_escape_len` | function | `include/css_select.h:224` | `size_t csel_escape_len(const char *s, size_t i, size_t b);` |
-| `csel_ident_ch` | function | `include/css_select.h:281` | `static inline int csel_ident_ch(char c)` |
-| `csel_ident_eq` | function | `include/css_select.h:228` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` |
-| `csel_ident_fold` | function | `include/css_select.h:226` | `void csel_ident_fold(const char *src, size_t len, char *dst);` |
-| `csel_lower_ch` | function | `include/css_select.h:240` | `static inline char csel_lower_ch(char c)` |
-| `csel_matches` | function | `include/css_select.h:186` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` |
-| `csel_parse` | function | `include/css_select.h:177` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` |
-| `csel_read_ident` | function | `include/css_select.h:231` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` |
-| `csel_span_eq` | function | `include/css_select.h:262` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
-| `csel_substr` | function | `include/css_select.h:273` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
-| `csel_unescape` | function | `include/css_select.h:222` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
-| `css_attr_match` | struct | `include/css_select.h:88` | `` |
-| `css_compound` | struct | `include/css_select.h:122` | `` |
-| `css_pseudo_match` | struct | `include/css_select.h:112` | `` |
-| `css_sel` | struct | `include/css_select.h:139` | `` |
-| `css_sub_sel` | struct | `include/css_select.h:95` | `` |
-| `identifier` | function | `include/css_select.h:208` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
-| `kind` | type_alias | `include/css_select.h:112` | `typedef struct css_pseudo_match { int kind;` |
-| `name` | type_alias | `include/css_select.h:88` | `typedef struct css_attr_match { char name[CSS_TOK_MAX];` |
-| `tag` | type_alias | `include/css_select.h:94` | `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];` |
-| `tag` | type_alias | `include/css_select.h:122` | `typedef struct css_compound { char tag[CSS_TOK_MAX];` |
+| `comb` | type_alias | `include/css_select.h:140` | `typedef struct css_sel { int comb[CSS_MAX_COMPOUNDS];` |
+| `conservative` | function | `include/css_select.h:203` | `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...` |
+| `csel_anc_reject` | function | `include/css_select.h:196` | `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)` |
+| `csel_ci_eq` | function | `include/css_select.h:245` | `static inline int csel_ci_eq(const char *a, const char *b)` |
+| `csel_ci_starts` | function | `include/css_select.h:254` | `static inline int csel_ci_starts(const char *a, const char *p)` |
+| `csel_compact_dup` | function | `include/css_select.h:174` | `css_sel *csel_compact_dup(const css_sel *sel);` |
+| `csel_compact_size` | function | `include/css_select.h:169` | `size_t csel_compact_size(int nparts);` |
+| `csel_decl_end` | function | `include/css_select.h:237` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` |
+| `csel_element_feature_bits` | function | `include/css_select.h:195` | `unsigned long long csel_element_feature_bits(const css_element *e);` |
+| `csel_emit_utf8` | function | `include/css_select.h:221` | `size_t csel_emit_utf8(unsigned int cp, char *out);` |
+| `csel_escape_len` | function | `include/css_select.h:225` | `size_t csel_escape_len(const char *s, size_t i, size_t b);` |
+| `csel_ident_ch` | function | `include/css_select.h:282` | `static inline int csel_ident_ch(char c)` |
+| `csel_ident_eq` | function | `include/css_select.h:229` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` |
+| `csel_ident_fold` | function | `include/css_select.h:227` | `void csel_ident_fold(const char *src, size_t len, char *dst);` |
+| `csel_lower_ch` | function | `include/css_select.h:241` | `static inline char csel_lower_ch(char c)` |
+| `csel_matches` | function | `include/css_select.h:187` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` |
+| `csel_parse` | function | `include/css_select.h:178` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` |
+| `csel_read_ident` | function | `include/css_select.h:232` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` |
+| `csel_span_eq` | function | `include/css_select.h:263` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
+| `csel_substr` | function | `include/css_select.h:274` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
+| `csel_unescape` | function | `include/css_select.h:223` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
+| `css_attr_match` | struct | `include/css_select.h:89` | `` |
+| `css_compound` | struct | `include/css_select.h:123` | `` |
+| `css_pseudo_match` | struct | `include/css_select.h:113` | `` |
+| `css_sel` | struct | `include/css_select.h:140` | `` |
+| `css_sub_sel` | struct | `include/css_select.h:96` | `` |
+| `identifier` | function | `include/css_select.h:209` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
+| `kind` | type_alias | `include/css_select.h:113` | `typedef struct css_pseudo_match { int kind;` |
+| `name` | type_alias | `include/css_select.h:89` | `typedef struct css_attr_match { char name[CSS_TOK_MAX];` |
+| `tag` | type_alias | `include/css_select.h:95` | `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];` |
+| `tag` | type_alias | `include/css_select.h:123` | `typedef struct css_compound { char tag[CSS_TOK_MAX];` |
 | `FREEDOM_CSS_TEXT_H` | macro | `include/css_text.h:2` | `#define FREEDOM_CSS_TEXT_H` |
 | `ct_emit_spacing` | function | `include/css_text.h:24` | `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val);` |
 | `ct_expand_shadow` | function | `include/css_text.h:25` | `int ct_expand_shadow(const char *val, css_decl *dst, int cap);` |
@@ -349,34 +361,34 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `level` | type_alias | `include/freebug.h:36` | `typedef struct fb_entry { int level;` |
 | `truncated` | function | `include/freebug.h:69` | `* A message longer than FB_MAX_ENTRY_BYTES is stored truncated (not dropped). A * dropped push raises b->overflow...` |
 | `FC_ANCHOR_HOLD_MS` | macro | `include/freedom_config.h:38` | `#define FC_ANCHOR_HOLD_MS` |
-| `FC_FLEX_MEASURE_W` | macro | `include/freedom_config.h:63` | `#define FC_FLEX_MEASURE_W` |
-| `FC_FLEX_MIN_MEASURE_W` | macro | `include/freedom_config.h:69` | `#define FC_FLEX_MIN_MEASURE_W` |
-| `FC_FONT_CHAIN_MAX` | macro | `include/freedom_config.h:74` | `#define FC_FONT_CHAIN_MAX` |
-| `FC_FONT_FALLBACK_PX` | macro | `include/freedom_config.h:84` | `#define FC_FONT_FALLBACK_PX` |
-| `FC_HEADLESS_VIEW_H` | macro | `include/freedom_config.h:42` | `#define FC_HEADLESS_VIEW_H` |
-| `FC_LAZY_IMAGE_MARGIN_PX` | macro | `include/freedom_config.h:117` | `#define FC_LAZY_IMAGE_MARGIN_PX` |
-| `FC_MASK_CACHE_BYTES` | macro | `include/freedom_config.h:113` | `#define FC_MASK_CACHE_BYTES` |
-| `FC_MASK_CACHE_ENTRIES` | macro | `include/freedom_config.h:114` | `#define FC_MASK_CACHE_ENTRIES` |
-| `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:96` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
-| `FC_MAX_BOXES` | macro | `include/freedom_config.h:79` | `#define FC_MAX_BOXES` |
+| `FC_FLEX_MEASURE_W` | macro | `include/freedom_config.h:66` | `#define FC_FLEX_MEASURE_W` |
+| `FC_FLEX_MIN_MEASURE_W` | macro | `include/freedom_config.h:72` | `#define FC_FLEX_MIN_MEASURE_W` |
+| `FC_FONT_CHAIN_MAX` | macro | `include/freedom_config.h:77` | `#define FC_FONT_CHAIN_MAX` |
+| `FC_FONT_FALLBACK_PX` | macro | `include/freedom_config.h:87` | `#define FC_FONT_FALLBACK_PX` |
+| `FC_HEADLESS_VIEW_H` | macro | `include/freedom_config.h:45` | `#define FC_HEADLESS_VIEW_H` |
+| `FC_JS_FRAGMENT_DEPTH` | macro | `include/freedom_config.h:41` | `#define FC_JS_FRAGMENT_DEPTH` |
+| `FC_LAZY_IMAGE_MARGIN_PX` | macro | `include/freedom_config.h:120` | `#define FC_LAZY_IMAGE_MARGIN_PX` |
+| `FC_MASK_CACHE_BYTES` | macro | `include/freedom_config.h:116` | `#define FC_MASK_CACHE_BYTES` |
+| `FC_MASK_CACHE_ENTRIES` | macro | `include/freedom_config.h:117` | `#define FC_MASK_CACHE_ENTRIES` |
+| `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:99` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
+| `FC_MAX_BOXES` | macro | `include/freedom_config.h:82` | `#define FC_MAX_BOXES` |
 | `FC_MONO_DEFAULT_PX` | macro | `include/freedom_config.h:26` | `#define FC_MONO_DEFAULT_PX` |
-| `FC_NET_LOAD_SETTLE_MS` | macro | `include/freedom_config.h:130` | `#define FC_NET_LOAD_SETTLE_MS` |
-| `FC_NET_POLL_MS` | macro | `include/freedom_config.h:131` | `#define FC_NET_POLL_MS` |
-| `FC_NET_TICK_SETTLE_MS` | macro | `include/freedom_config.h:134` | `#define FC_NET_TICK_SETTLE_MS` |
-| `FC_PNG_MARGIN` | macro | `include/freedom_config.h:52` | `#define FC_PNG_MARGIN` |
-| `FC_PNG_MAX_H` | macro | `include/freedom_config.h:57` | `#define FC_PNG_MAX_H` |
+| `FC_NET_LOAD_SETTLE_MS` | macro | `include/freedom_config.h:133` | `#define FC_NET_LOAD_SETTLE_MS` |
+| `FC_NET_POLL_MS` | macro | `include/freedom_config.h:134` | `#define FC_NET_POLL_MS` |
+| `FC_NET_TICK_SETTLE_MS` | macro | `include/freedom_config.h:137` | `#define FC_NET_TICK_SETTLE_MS` |
+| `FC_PNG_MARGIN` | macro | `include/freedom_config.h:55` | `#define FC_PNG_MARGIN` |
+| `FC_PNG_MAX_H` | macro | `include/freedom_config.h:60` | `#define FC_PNG_MAX_H` |
 | `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
-| `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:108` | `#define FC_SHC_MAX_QUERIES` |
-| `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:102` | `#define FC_SHC_MAX_TEXT_BYTES` |
+| `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:111` | `#define FC_SHC_MAX_QUERIES` |
+| `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:105` | `#define FC_SHC_MAX_TEXT_BYTES` |
 | `FC_SMOOTH_SCROLL_ANCHOR_MS` | macro | `include/freedom_config.h:35` | `#define FC_SMOOTH_SCROLL_ANCHOR_MS` |
 | `FC_SMOOTH_SCROLL_FRAME_MS` | macro | `include/freedom_config.h:32` | `#define FC_SMOOTH_SCROLL_FRAME_MS` |
 | `FC_SMOOTH_SCROLL_MS` | macro | `include/freedom_config.h:31` | `#define FC_SMOOTH_SCROLL_MS` |
-| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:138` | `#define FC_TABLE_TRACK_MAX_PX` |
-| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:123` | `#define FC_TAB_OP_NET_BUDGET_MS` |
-| `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:48` | `#define FC_TRUSTED_JS_BUDGET_MS` |
-| `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:88` | `#define FC_UI_FONT_SIZE` |
+| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:141` | `#define FC_TABLE_TRACK_MAX_PX` |
+| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:126` | `#define FC_TAB_OP_NET_BUDGET_MS` |
+| `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:51` | `#define FC_TRUSTED_JS_BUDGET_MS` |
+| `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:91` | `#define FC_UI_FONT_SIZE` |
 | `FREEDOM_CONFIG_H` | macro | `include/freedom_config.h:14` | `#define FREEDOM_CONFIG_H` |
-| `px` | function | `include/freedom_config.h:24` | `* it computes 12 px (getComputedStyle, measured on the parity host, tanda 102): the * reference renderer is what we...` |
 | `FREEDOM_GROUP_INDEX_H` | macro | `include/group_index.h:2` | `#define FREEDOM_GROUP_INDEX_H` |
 | `gi_build` | function | `include/group_index.h:20` | `size_t gi_build(const int *keys, size_t n, size_t nkeys, size_t *offs, size_t *items);` |
 | `group_index` | function | `include/group_index.h:9` | `* group_index (gi_) -- stable group-by of n items by an integer key, in CSR form, so a * per-group pass visits only...` |
@@ -484,17 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `idn_set_user_agent` | function | `include/identity.h:56` | `int idn_set_user_agent(idn_config *c, const char *ua);` |
 | `idn_user_agent` | function | `include/identity.h:62` | `const char *idn_user_agent(const idn_config *c);` |
 | `user_agent` | type_alias | `include/identity.h:36` | `typedef struct idn_config { char user_agent[IDN_UA_MAX];` |
-| `FREEDOM_IMAGE_DECODE_H` | macro | `include/image_decode.h:2` | `#define FREEDOM_IMAGE_DECODE_H` |
-| `IMG_MAX_DIM` | macro | `include/image_decode.h:71` | `#define IMG_MAX_DIM` |
-| `IMG_MAX_PIXELS` | macro | `include/image_decode.h:72` | `#define IMG_MAX_PIXELS` |
-| `IMG_MAX_SCALE` | macro | `include/image_decode.h:67` | `#define IMG_MAX_SCALE` |
-| `decode` | function | `include/image_decode.h:98` | `* the declared dimensions BEFORE the full decode (anti-bomb), decodes to RGB and * expands to BGRA. Rejects non-JPEG...` |
-| `guards` | function | `include/image_decode.h:25` | `* guards (in-memory source only, longjmp error manager so a bad stream never * calls exit(), dimension caps before...` |
-| `img_dimensions_ok` | function | `include/image_decode.h:84` | `int img_dimensions_ok(uint32_t w, uint32_t h);` |
-| `img_format` | enum | `include/image_decode.h:33` | `` |
-| `img_format_name` | function | `include/image_decode.h:130` | `const char *img_format_name(img_format f);` |
-| `img_pixels` | struct | `include/image_decode.h:56` | `` |
-| `img_pixels_free` | function | `include/image_decode.h:127` | `void img_pixels_free(img_pixels *p);` |
-| `img_status` | enum | `include/image_decode.h:41` | `` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

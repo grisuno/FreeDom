@@ -1,12 +1,12 @@
 # `src/anchor.c`
 
-> Source: [src/anchor.c:1](../../src/anchor.c#L1) | language `c` | coverage 66.7% | [API index](../index.md)
+> Source: [src/anchor.c:1](../../src/anchor.c#L1) | language `c` | coverage 71.4% | [API index](../index.md)
 
 anchor.c — the indicated part of a document and where it sits (spec/anchor.md).
 
 ## Contents
 
-- **Functions:** [`anc_percent_decode`](#anc_percent_decode), [`anc_resolve`](#anc_resolve), [`anc_collect`](#anc_collect), [`anc_target_top`](#anc_target_top), [`anc_scroll_for`](#anc_scroll_for)
+- **Functions:** [`anc_percent_decode`](#anc_percent_decode), [`anc_resolve`](#anc_resolve), [`anc_collect`](#anc_collect), [`anc_target_box`](#anc_target_box), [`anc_target_top`](#anc_target_top), [`anc_scroll_for`](#anc_scroll_for)
 
 ## Call Graph
 
@@ -16,8 +16,11 @@ Solid arrows stay in this module, dashed arrows leave it.
 flowchart LR
     n_src_anchor_c__anc_resolve(["anc_resolve"])
     n_src_anchor_c__anc_percent_decode(["anc_percent_decode"])
+    n_src_anchor_c__anc_target_top(["anc_target_top"])
+    n_src_anchor_c__anc_target_box(["anc_target_box"])
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
     n_src_anchor_c__anc_resolve --> n_src_anchor_c__anc_percent_decode
+    n_src_anchor_c__anc_target_top --> n_src_anchor_c__anc_target_box
     n_src_anchor_c__anc_resolve -.-> n_gui_browser_ui_c__strcmp
 ```
 
@@ -69,7 +72,7 @@ anc_kind anc_resolve(const dom_index *idx, const char *fragment, dom_node_id *ou
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`anc_percent_decode`](#anc_percent_decode)
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_anchor.c.md#llvmfuzzertestoneinput)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_anchor.c.md#llvmfuzzertestoneinput), [`navigation`](src.tab.c.md#navigation)
 
 ---
 
@@ -103,11 +106,44 @@ Returns the count written; 0 (and *nsub = 0) on NULL arguments, cap 0 or an inva
 
 ---
 
+<a id="anc_target_box"></a>
+
+### `anc_target_box`
+
+`function` | [src/anchor.c:110](../../src/anchor.c#L110)
+
+```c
+int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub, double *top, double *bottom)
+```
+
+As anc_target_top, plus the target's bottom: the largest y + h among the subtree's rects (= *top when the position came from a following element: an empty target is a point).
+
+0 and both outputs; -1 (outputs untouched) when nothing painted or on NULL.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `g` | `jg_table *` |  |  |
+| `h` | `dom_node_id *` |  |  |
+| `n` | `size_t` |  |  |
+| `nsub` | `size_t` |  |  |
+| `top` | `double *` |  |  |
+| `bottom` | `double *` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`anc_target_box`](#anc_target_box) (include/anchor.h:63).
+
+*Called by:* [`anc_target_top`](#anc_target_top)
+
+---
+
 <a id="anc_target_top"></a>
 
 ### `anc_target_top`
 
-`function` | [src/anchor.c:110](../../src/anchor.c#L110)
+`function` | [src/anchor.c:134](../../src/anchor.c#L134)
 
 ```c
 int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub, double *top)
@@ -131,13 +167,15 @@ The document offset of the target from a FINISHED geometry table (jg_finish): th
 
 > **Inherited:** Documentation from [`anc_target_top`](#anc_target_top) (include/anchor.h:57).
 
+*Calls:* [`anc_target_box`](#anc_target_box)
+
 ---
 
 <a id="anc_scroll_for"></a>
 
 ### `anc_scroll_for`
 
-`function` | [src/anchor.c:131](../../src/anchor.c#L131)
+`function` | [src/anchor.c:142](../../src/anchor.c#L142)
 
 ```c
 double anc_scroll_for(double top, double max_scroll)
@@ -156,6 +194,6 @@ Non-finite arguments or max_scroll < 0 => 0.
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`anc_scroll_for`](#anc_scroll_for) (include/anchor.h:62).
+> **Inherited:** Documentation from [`anc_scroll_for`](#anc_scroll_for) (include/anchor.h:68).
 
 ---

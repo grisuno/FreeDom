@@ -109,7 +109,7 @@ Previous: [KB_tests_p4.md](KB_tests_p4.md)
 - Language: c
 - Symbols:
   - `fixture` (struct, line 45)
-  - `fake_net` (struct, line 3315)
+  - `fake_net` (struct, line 3372)
   - `setup` (function, line 52) `static int setup(void **state)`
   - `teardown` (function, line 63) `static int teardown(void **state)`
   - `run` (function, line 76) `static js_status run(fixture *f, const char *src, js_result *r)`
@@ -154,247 +154,250 @@ Previous: [KB_tests_p4.md](KB_tests_p4.md)
   - `test_unhandled_rejection_event` (function, line 525) `static void test_unhandled_rejection_event(void **state)`
   - `test_dynamic_inline_script_runs_once_on_insert` (function, line 538) `static void test_dynamic_inline_script_runs_once_on_insert(void **state)`
   - `test_dynamic_script_src_loads_async_and_reports_load_or_error` (function, line 553) `static void test_dynamic_script_src_loads_async_and_reports_load_or_error(void **state)`
-  - `test_element_members_survive_prototype_swaps_and_detached_calls` (function, line 568) `static void test_element_members_survive_prototype_swaps_and_detached_calls(void **state)`
-  - `test_shadow_root_is_event_target_and_observable` (function, line 593) `static void test_shadow_root_is_event_target_and_observable(void **state)`
-  - `test_mutation_observer_reports_attributes` (function, line 604) `static void test_mutation_observer_reports_attributes(void **state)`
-  - `test_mutation_observer_subtree_character_data_and_take_records` (function, line 620) `static void test_mutation_observer_subtree_character_data_and_take_records(void **state)`
-  - `test_dom_mutators_are_sealed_after_install` (function, line 650) `static void test_dom_mutators_are_sealed_after_install(void **state)`
-  - `EXPECT` (function, line 652) `EXPECT(f, "['setText','appendChild','insertBefore','moveChildren','removeChild','setAttribute',"
+  - `EXPECT` (function, line 583) `EXPECT(f, "typeof $ === 'undefined' ? (function()`
+  - `ifr_fetch` (function, line 590) `static int ifr_fetch(void *ctx, const char *method, const char *url, const char *body, size_t bl,...`
+  - `test_process_iframes_fetches_each_src_once` (function, line 606) `static void test_process_iframes_fetches_each_src_once(void **state)`
+  - `test_element_members_survive_prototype_swaps_and_detached_calls` (function, line 625) `static void test_element_members_survive_prototype_swaps_and_detached_calls(void **state)`
+  - `test_shadow_root_is_event_target_and_observable` (function, line 650) `static void test_shadow_root_is_event_target_and_observable(void **state)`
+  - `test_mutation_observer_reports_attributes` (function, line 661) `static void test_mutation_observer_reports_attributes(void **state)`
+  - `test_mutation_observer_subtree_character_data_and_take_records` (function, line 677) `static void test_mutation_observer_subtree_character_data_and_take_records(void **state)`
+  - `test_dom_mutators_are_sealed_after_install` (function, line 707) `static void test_dom_mutators_are_sealed_after_install(void **state)`
+  - `EXPECT` (function, line 709) `EXPECT(f, "['setText','appendChild','insertBefore','moveChildren','removeChild','setAttribute',"
 ...`
-  - `test_shadow_mirror_append` (function, line 660) `static void test_shadow_mirror_append(void **state)`
-  - `test_shadow_mirror_inner_html` (function, line 668) `static void test_shadow_mirror_inner_html(void **state)`
-  - `test_shadow_insert_fragment` (function, line 678) `static void test_shadow_insert_fragment(void **state)`
-  - `test_shadow_insert_upgrades_custom_elements` (function, line 711) `static void test_shadow_insert_upgrades_custom_elements(void **state)`
-  - `test_slot_assigned_nodes` (function, line 724) `static void test_slot_assigned_nodes(void **state)`
-  - `bundle` (function, line 771) `* library bundle (DuckDuckGo's l.js "cannot read property createElement of
+  - `test_shadow_mirror_append` (function, line 717) `static void test_shadow_mirror_append(void **state)`
+  - `test_shadow_mirror_inner_html` (function, line 725) `static void test_shadow_mirror_inner_html(void **state)`
+  - `test_shadow_insert_fragment` (function, line 735) `static void test_shadow_insert_fragment(void **state)`
+  - `test_shadow_insert_upgrades_custom_elements` (function, line 768) `static void test_shadow_insert_upgrades_custom_elements(void **state)`
+  - `test_slot_assigned_nodes` (function, line 781) `static void test_slot_assigned_nodes(void **state)`
+  - `bundle` (function, line 828) `* library bundle (DuckDuckGo's l.js "cannot read property createElement of
  * undefined"). This l...`
-  - `methods` (function, line 787) `* backed by the sealed dom methods (this element's own attributes only). */
+  - `methods` (function, line 844) `* backed by the sealed dom methods (this element's own attributes only). */
 static void test_elem...`
-  - `test_intl_stub_does_not_throw` (function, line 806) `static void test_intl_stub_does_not_throw(void **state)`
-  - `test_url_constructor_parses_components` (function, line 820) `static void test_url_constructor_parses_components(void **state)`
-  - `test_url_static_can_parse` (function, line 843) `static void test_url_static_can_parse(void **state)`
-  - `test_url_search_params` (function, line 857) `static void test_url_search_params(void **state)`
-  - `test_settimeout_chains_across_rounds` (function, line 882) `static void test_settimeout_chains_across_rounds(void **state)`
-  - `test_document_title_set_reflects_in_tree` (function, line 889) `static void test_document_title_set_reflects_in_tree(void **state)`
-  - `test_set_text_content_reflects_in_tree` (function, line 903) `static void test_set_text_content_reflects_in_tree(void **state)`
-  - `test_set_text_content_detach_is_memory_safe` (function, line 914) `static void test_set_text_content_detach_is_memory_safe(void **state)`
-  - `test_document_is_not_io` (function, line 931) `static void test_document_is_not_io(void **state)`
-  - `test_create_append_renders_in_tree` (function, line 940) `static void test_create_append_renders_in_tree(void **state)`
-  - `test_set_attribute_makes_queryable` (function, line 956) `static void test_set_attribute_makes_queryable(void **state)`
-  - `test_element_has_attribute` (function, line 982) `static void test_element_has_attribute(void **state)`
-  - `test_element_remove_attribute` (function, line 988) `static void test_element_remove_attribute(void **state)`
-  - `test_element_src_href_are_strings` (function, line 998) `static void test_element_src_href_are_strings(void **state)`
-  - `test_append_cycle_is_rejected` (function, line 1006) `static void test_append_cycle_is_rejected(void **state)`
-  - `test_onload_runs_and_mutates` (function, line 1014) `static void test_onload_runs_and_mutates(void **state)`
-  - `assert_int_equal` (function, line 1018) `assert_int_equal(run(f,
+  - `test_intl_stub_does_not_throw` (function, line 863) `static void test_intl_stub_does_not_throw(void **state)`
+  - `test_url_constructor_parses_components` (function, line 877) `static void test_url_constructor_parses_components(void **state)`
+  - `test_url_static_can_parse` (function, line 900) `static void test_url_static_can_parse(void **state)`
+  - `test_url_search_params` (function, line 914) `static void test_url_search_params(void **state)`
+  - `test_settimeout_chains_across_rounds` (function, line 939) `static void test_settimeout_chains_across_rounds(void **state)`
+  - `test_document_title_set_reflects_in_tree` (function, line 946) `static void test_document_title_set_reflects_in_tree(void **state)`
+  - `test_set_text_content_reflects_in_tree` (function, line 960) `static void test_set_text_content_reflects_in_tree(void **state)`
+  - `test_set_text_content_detach_is_memory_safe` (function, line 971) `static void test_set_text_content_detach_is_memory_safe(void **state)`
+  - `test_document_is_not_io` (function, line 988) `static void test_document_is_not_io(void **state)`
+  - `test_create_append_renders_in_tree` (function, line 997) `static void test_create_append_renders_in_tree(void **state)`
+  - `test_set_attribute_makes_queryable` (function, line 1013) `static void test_set_attribute_makes_queryable(void **state)`
+  - `test_element_has_attribute` (function, line 1039) `static void test_element_has_attribute(void **state)`
+  - `test_element_remove_attribute` (function, line 1045) `static void test_element_remove_attribute(void **state)`
+  - `test_element_src_href_are_strings` (function, line 1055) `static void test_element_src_href_are_strings(void **state)`
+  - `test_append_cycle_is_rejected` (function, line 1063) `static void test_append_cycle_is_rejected(void **state)`
+  - `test_onload_runs_and_mutates` (function, line 1071) `static void test_onload_runs_and_mutates(void **state)`
+  - `assert_int_equal` (function, line 1075) `assert_int_equal(run(f,
         "window.onload=function()`
-  - `test_settimeout_flushed_by_pump` (function, line 1027) `static void test_settimeout_flushed_by_pump(void **state)`
-  - `EXPECT` (function, line 1029) `EXPECT(f,
+  - `test_settimeout_flushed_by_pump` (function, line 1084) `static void test_settimeout_flushed_by_pump(void **state)`
+  - `EXPECT` (function, line 1086) `EXPECT(f,
         "setTimeout(function()`
-  - `test_inner_html_builds_and_queryable` (function, line 1035) `static void test_inner_html_builds_and_queryable(void **state)`
-  - `test_inner_html_getter_serializes` (function, line 1045) `static void test_inner_html_getter_serializes(void **state)`
-  - `test_storage_is_ephemeral` (function, line 1055) `static void test_storage_is_ephemeral(void **state)`
-  - `test_cookie_and_referrer_leak_nothing` (function, line 1062) `static void test_cookie_and_referrer_leak_nothing(void **state)`
-  - `persisted` (function, line 1076) `* never persisted (process-lifetime only). */
+  - `test_inner_html_builds_and_queryable` (function, line 1092) `static void test_inner_html_builds_and_queryable(void **state)`
+  - `test_inner_html_getter_serializes` (function, line 1102) `static void test_inner_html_getter_serializes(void **state)`
+  - `test_storage_is_ephemeral` (function, line 1112) `static void test_storage_is_ephemeral(void **state)`
+  - `test_cookie_and_referrer_leak_nothing` (function, line 1119) `static void test_cookie_and_referrer_leak_nothing(void **state)`
+  - `persisted` (function, line 1133) `* never persisted (process-lifetime only). */
 static void test_cookie_jar_enabled_for_trusted_hos...`
-  - `test_ambient_apis_do_not_throw` (function, line 1101) `static void test_ambient_apis_do_not_throw(void **state)`
-  - `set_https_location` (function, line 1112) `static void set_https_location(fixture *f, const char *url)`
-  - `test_location_reads_real_components` (function, line 1118) `static void test_location_reads_real_components(void **state)`
-  - `test_location_pathname_defaults_slash` (function, line 1135) `static void test_location_pathname_defaults_slash(void **state)`
-  - `test_location_href_set_captures_raw` (function, line 1143) `static void test_location_href_set_captures_raw(void **state)`
-  - `test_location_replace_sets_replace_flag` (function, line 1157) `static void test_location_replace_sets_replace_flag(void **state)`
-  - `test_location_assign_and_window_last_wins` (function, line 1169) `static void test_location_assign_and_window_last_wins(void **state)`
-  - `test_no_nav_request_when_idle` (function, line 1181) `static void test_no_nav_request_when_idle(void **state)`
-  - `test_local_page_captures_nav` (function, line 1190) `static void test_local_page_captures_nav(void **state)`
-  - `test_set_location_null_ctx` (function, line 1202) `static void test_set_location_null_ctx(void **state)`
-  - `console_fixture` (function, line 1212) `static void console_fixture(hp_document **doc, dom_index **idx, js_context **ctx,
+  - `test_ambient_apis_do_not_throw` (function, line 1158) `static void test_ambient_apis_do_not_throw(void **state)`
+  - `set_https_location` (function, line 1169) `static void set_https_location(fixture *f, const char *url)`
+  - `test_location_reads_real_components` (function, line 1175) `static void test_location_reads_real_components(void **state)`
+  - `test_location_pathname_defaults_slash` (function, line 1192) `static void test_location_pathname_defaults_slash(void **state)`
+  - `test_location_href_set_captures_raw` (function, line 1200) `static void test_location_href_set_captures_raw(void **state)`
+  - `test_location_replace_sets_replace_flag` (function, line 1214) `static void test_location_replace_sets_replace_flag(void **state)`
+  - `test_location_assign_and_window_last_wins` (function, line 1226) `static void test_location_assign_and_window_last_wins(void **state)`
+  - `test_no_nav_request_when_idle` (function, line 1238) `static void test_no_nav_request_when_idle(void **state)`
+  - `test_local_page_captures_nav` (function, line 1247) `static void test_local_page_captures_nav(void **state)`
+  - `test_set_location_null_ctx` (function, line 1259) `static void test_set_location_null_ctx(void **state)`
+  - `console_fixture` (function, line 1269) `static void console_fixture(hp_document **doc, dom_index **idx, js_context **ctx,
                ...`
-  - `console_teardown` (function, line 1225) `static void console_teardown(hp_document *doc, dom_index *idx, js_context *ctx,
+  - `console_teardown` (function, line 1282) `static void console_teardown(hp_document *doc, dom_index *idx, js_context *ctx,
                  ...`
-  - `test_console_formats_errors_and_elements` (function, line 1235) `static void test_console_formats_errors_and_elements(void **state)`
-  - `test_console_captures_levels` (function, line 1251) `static void test_console_captures_levels(void **state)`
-  - `test_console_object_and_throwing_tostring` (function, line 1278) `static void test_console_object_and_throwing_tostring(void **state)`
-  - `test_console_methods_are_writable` (function, line 1302) `static void test_console_methods_are_writable(void **state)`
-  - `test_unhandled_rejection_report_carries_the_message` (function, line 1326) `static void test_unhandled_rejection_report_carries_the_message(void **state)`
-  - `test_console_null_buffer_is_noop` (function, line 1342) `static void test_console_null_buffer_is_noop(void **state)`
-  - `test_console_null_ctx` (function, line 1363) `static void test_console_null_ctx(void **state)`
-  - `test_event_add_event_listener_fires` (function, line 1372) `static void test_event_add_event_listener_fires(void **state)`
-  - `test_event_onkeydown_fires` (function, line 1390) `static void test_event_onkeydown_fires(void **state)`
-  - `test_event_input_handler_fires_with_value` (function, line 1408) `static void test_event_input_handler_fires_with_value(void **state)`
-  - `test_event_prevent_default_suppresses` (function, line 1426) `static void test_event_prevent_default_suppresses(void **state)`
-  - `test_event_no_handler_allows_default` (function, line 1443) `static void test_event_no_handler_allows_default(void **state)`
-  - `test_event_null_args` (function, line 1450) `static void test_event_null_args(void **state)`
-  - `test_focus_add_event_listener_fires` (function, line 1462) `static void test_focus_add_event_listener_fires(void **state)`
-  - `test_blur_onblur_fires` (function, line 1479) `static void test_blur_onblur_fires(void **state)`
-  - `test_scroll_add_event_listener_fires` (function, line 1495) `static void test_scroll_add_event_listener_fires(void **state)`
-  - `test_scroll_onscroll_fires` (function, line 1512) `static void test_scroll_onscroll_fires(void **state)`
-  - `test_focus_blur_scroll_prevent_default` (function, line 1528) `static void test_focus_blur_scroll_prevent_default(void **state)`
-  - `test_focus_blur_scroll_no_handler_allows_default` (function, line 1556) `static void test_focus_blur_scroll_no_handler_allows_default(void **state)`
-  - `test_focus_blur_scroll_null_args` (function, line 1564) `static void test_focus_blur_scroll_null_args(void **state)`
-  - `test_mouse_add_event_listener_fires` (function, line 1574) `static void test_mouse_add_event_listener_fires(void **state)`
-  - `test_mouse_onmouseout_fires` (function, line 1591) `static void test_mouse_onmouseout_fires(void **state)`
-  - `test_mouse_mousemove_sees_coords` (function, line 1607) `static void test_mouse_mousemove_sees_coords(void **state)`
-  - `test_mouse_multi_event_fires` (function, line 1624) `static void test_mouse_multi_event_fires(void **state)`
-  - `test_mouse_prevent_default_suppresses` (function, line 1658) `static void test_mouse_prevent_default_suppresses(void **state)`
-  - `test_mouse_no_handler_allows_default` (function, line 1674) `static void test_mouse_no_handler_allows_default(void **state)`
-  - `test_mouse_null_args` (function, line 1681) `static void test_mouse_null_args(void **state)`
-  - `test_click_install_null_args` (function, line 1690) `static void test_click_install_null_args(void **state)`
-  - `test_click_add_event_listener_fires` (function, line 1696) `static void test_click_add_event_listener_fires(void **state)`
-  - `test_click_onclick_fires` (function, line 1720) `static void test_click_onclick_fires(void **state)`
-  - `test_click_prevent_default` (function, line 1744) `static void test_click_prevent_default(void **state)`
-  - `test_click_no_handler_allows_default` (function, line 1767) `static void test_click_no_handler_allows_default(void **state)`
-  - `test_submit_add_event_listener_fires` (function, line 1781) `static void test_submit_add_event_listener_fires(void **state)`
-  - `test_submit_onsubmit_fires` (function, line 1800) `static void test_submit_onsubmit_fires(void **state)`
-  - `test_submit_prevent_default` (function, line 1819) `static void test_submit_prevent_default(void **state)`
-  - `test_submit_no_handler_allows_default` (function, line 1838) `static void test_submit_no_handler_allows_default(void **state)`
-  - `handle_after` (function, line 1848) `static dom_node_id handle_after(fixture *f, const char *src)`
-  - `test_event_click_bubbles_to_ancestor` (function, line 1859) `static void test_event_click_bubbles_to_ancestor(void **state)`
-  - `test_event_capture_target_bubble_order` (function, line 1871) `static void test_event_capture_target_bubble_order(void **state)`
-  - `test_event_stop_propagation` (function, line 1885) `static void test_event_stop_propagation(void **state)`
-  - `test_event_stop_immediate_propagation` (function, line 1898) `static void test_event_stop_immediate_propagation(void **state)`
-  - `test_event_multiple_click_listeners` (function, line 1910) `static void test_event_multiple_click_listeners(void **state)`
-  - `test_event_remove_listener` (function, line 1923) `static void test_event_remove_listener(void **state)`
-  - `test_event_once` (function, line 1937) `static void test_event_once(void **state)`
-  - `test_event_delegated_prevent_default` (function, line 1949) `static void test_event_delegated_prevent_default(void **state)`
-  - `test_event_submit_bubbles_to_document` (function, line 1959) `static void test_event_submit_bubbles_to_document(void **state)`
-  - `test_event_keydown_bubbles_with_data` (function, line 1970) `static void test_event_keydown_bubbles_with_data(void **state)`
-  - `test_event_focus_does_not_bubble` (function, line 1981) `static void test_event_focus_does_not_bubble(void **state)`
-  - `test_event_handler_property_slot` (function, line 1993) `static void test_event_handler_property_slot(void **state)`
-  - `test_event_script_dispatch_custom_event` (function, line 2007) `static void test_event_script_dispatch_custom_event(void **state)`
-  - `test_event_listener_exception_continues` (function, line 2020) `static void test_event_listener_exception_continues(void **state)`
-  - `test_event_handle_event_object` (function, line 2032) `static void test_event_handle_event_object(void **state)`
-  - `geom_parent` (function, line 2044) `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
-  - `js_handle` (function, line 2048) `static dom_node_id js_handle(fixture *f, const char *expr)`
-  - `test_geom_absent_is_zero` (function, line 2059) `static void test_geom_absent_is_zero(void **state)`
-  - `test_geom_installed_is_real` (function, line 2066) `static void test_geom_installed_is_real(void **state)`
-  - `test_repl_api_is_repl_only_and_nondestructive` (function, line 2107) `static void test_repl_api_is_repl_only_and_nondestructive(void **state)`
-  - `EXPECT` (function, line 2110) `EXPECT(f, "globalThis.$=function()`
-  - `test_platform_dommatrix_and_imagedata` (function, line 2146) `static void test_platform_dommatrix_and_imagedata(void **state)`
-  - `test_platform_click_method` (function, line 2157) `static void test_platform_click_method(void **state)`
-  - `EXPECT` (function, line 2170) `EXPECT(f, "c.addEventListener('click',function(e)`
-  - `EXPECT` (function, line 2172) `EXPECT(f, "function radio()`
-  - `test_platform_form_controls` (function, line 2200) `static void test_platform_form_controls(void **state)`
-  - `test_form_elements_collection` (function, line 2216) `static void test_form_elements_collection(void **state)`
-  - `test_shadow_styles_are_scoped` (function, line 2238) `static void test_shadow_styles_are_scoped(void **state)`
-  - `test_fragment_queries` (function, line 2249) `static void test_fragment_queries(void **state)`
-  - `EXPECT` (function, line 2263) `EXPECT(f, "var mk=function()`
-  - `test_create_html_document_is_detached` (function, line 2277) `static void test_create_html_document_is_detached(void **state)`
-  - `test_url_members_shadowed_on_non_anchor` (function, line 2287) `static void test_url_members_shadowed_on_non_anchor(void **state)`
-  - `test_slotted_nodes_unrendered_when_slot_hidden` (function, line 2295) `static void test_slotted_nodes_unrendered_when_slot_hidden(void **state)`
-  - `test_slotted_nodes_unrendered_through_nested_shadow` (function, line 2305) `static void test_slotted_nodes_unrendered_through_nested_shadow(void **state)`
-  - `test_tree_walker_reverse_navigation` (function, line 2317) `static void test_tree_walker_reverse_navigation(void **state)`
-  - `test_indexeddb_core` (function, line 2333) `static void test_indexeddb_core(void **state)`
-  - `test_geolocation_fixed_coordinates` (function, line 2360) `static void test_geolocation_fixed_coordinates(void **state)`
-  - `test_platform_streams` (function, line 2377) `static void test_platform_streams(void **state)`
-  - `test_platform_element_surface` (function, line 2401) `static void test_platform_element_surface(void **state)`
-  - `test_repl_rules_lists_matching_rules_by_cascade` (function, line 2419) `static void test_repl_rules_lists_matching_rules_by_cascade(void **state)`
-  - `EXPECT` (function, line 2430) `EXPECT(f, "R[2].declarations.concat(R[3].declarations).map(function(x)`
-  - `run_pane` (function, line 2440) `static void run_pane(fixture *f, int tab, const char *arg, js_result *r)`
-  - `test_freebug_html_pane_outlines_the_dom` (function, line 2447) `static void test_freebug_html_pane_outlines_the_dom(void **state)`
-  - `test_freebug_css_pane_lists_rules_computed_and_box` (function, line 2464) `static void test_freebug_css_pane_lists_rules_computed_and_box(void **state)`
-  - `test_freebug_script_pane_lists_and_numbers_source` (function, line 2482) `static void test_freebug_script_pane_lists_and_numbers_source(void **state)`
-  - `test_freebug_dom_and_storage_panes` (function, line 2499) `static void test_freebug_dom_and_storage_panes(void **state)`
-  - `test_freebug_net_pane_empty_and_selector_is_data` (function, line 2547) `static void test_freebug_net_pane_empty_and_selector_is_data(void **state)`
-  - `test_repl_api_inspect_and_event_listeners` (function, line 2560) `static void test_repl_api_inspect_and_event_listeners(void **state)`
-  - `EXPECT` (function, line 2565) `EXPECT(f, "function onc()`
-  - `test_ro_real_reports_size_changes` (function, line 2577) `static void test_ro_real_reports_size_changes(void **state)`
-  - `test_io_real_follows_scroll` (function, line 2611) `static void test_io_real_follows_scroll(void **state)`
-  - `test_io_untrusted_stays_synthetic` (function, line 2652) `static void test_io_untrusted_stays_synthetic(void **state)`
-  - `test_geom_null_ctx` (function, line 2658) `static void test_geom_null_ctx(void **state)`
-  - `set_loc` (function, line 2665) `static void set_loc(fixture *f, const char *href)`
-  - `test_history_push_replace_update_location` (function, line 2671) `static void test_history_push_replace_update_location(void **state)`
-  - `test_history_cross_origin_is_security_error` (function, line 2691) `static void test_history_cross_origin_is_security_error(void **state)`
-  - `test_history_popstate_restores_entry` (function, line 2702) `static void test_history_popstate_restores_entry(void **state)`
-  - `test_history_go_records_delta` (function, line 2717) `static void test_history_go_records_delta(void **state)`
-  - `test_history_is_bounded` (function, line 2727) `static void test_history_is_bounded(void **state)`
-  - `test_ws_absent_until_enabled` (function, line 2743) `static void test_ws_absent_until_enabled(void **state)`
-  - `test_ws_lifecycle_records_ops_and_fires_events` (function, line 2748) `static void test_ws_lifecycle_records_ops_and_fires_events(void **state)`
-  - `test_frames_top_document_parent_is_self` (function, line 2794) `static void test_frames_top_document_parent_is_self(void **state)`
-  - `test_frames_child_document_posts_to_parent_and_top` (function, line 2801) `static void test_frames_child_document_posts_to_parent_and_top(void **state)`
-  - `test_frames_blank_iframe_has_writable_document` (function, line 2818) `static void test_frames_blank_iframe_has_writable_document(void **state)`
-  - `test_frames_blank_iframe_document_and_window_are_event_targets` (function, line 2832) `static void test_frames_blank_iframe_document_and_window_are_event_targets(void **state)`
-  - `test_frames_iframe_discovery_and_child_post` (function, line 2846) `static void test_frames_iframe_discovery_and_child_post(void **state)`
-  - `test_frames_message_delivery_sets_origin_and_source` (function, line 2877) `static void test_frames_message_delivery_sets_origin_and_source(void **state)`
-  - `test_frames_oversize_payload_rejected` (function, line 2892) `static void test_frames_oversize_payload_rejected(void **state)`
-  - `test_ws_rejects_plaintext_and_caps` (function, line 2902) `static void test_ws_rejects_plaintext_and_caps(void **state)`
-  - `test_storage_untrusted_stays_ephemeral` (function, line 2918) `static void test_storage_untrusted_stays_ephemeral(void **state)`
-  - `test_storage_seeded_and_dirty_snapshot` (function, line 2927) `static void test_storage_seeded_and_dirty_snapshot(void **state)`
-  - `test_storage_quota_exceeded` (function, line 2958) `static void test_storage_quota_exceeded(void **state)`
-  - `test_dom_ordered_insertion` (function, line 2968) `static void test_dom_ordered_insertion(void **state)`
-  - `test_dom_childnode_mixins` (function, line 2978) `static void test_dom_childnode_mixins(void **state)`
-  - `test_dom_interface_prototypes` (function, line 2990) `static void test_dom_interface_prototypes(void **state)`
-  - `test_dom_template_content` (function, line 2999) `static void test_dom_template_content(void **state)`
-  - `test_current_script_values_and_methods` (function, line 3012) `static void test_current_script_values_and_methods(void **state)`
-  - `test_current_script_is_the_real_element` (function, line 3026) `static void test_current_script_is_the_real_element(void **state)`
-  - `test_ext_tree_navigation` (function, line 3040) `static void test_ext_tree_navigation(void **state)`
-  - `test_ext_compare_document_position` (function, line 3051) `static void test_ext_compare_document_position(void **state)`
-  - `test_ext_shadow_root` (function, line 3060) `static void test_ext_shadow_root(void **state)`
-  - `test_ext_tree_walker_terminates` (function, line 3071) `static void test_ext_tree_walker_terminates(void **state)`
-  - `test_ext_document_helpers` (function, line 3081) `static void test_ext_document_helpers(void **state)`
-  - `test_shims_survive_globalthis_rebinding` (function, line 3095) `static void test_shims_survive_globalthis_rebinding(void **state)`
-  - `test_interfaces_window_and_canvas` (function, line 3122) `static void test_interfaces_window_and_canvas(void **state)`
-  - `EXPECT` (function, line 3124) `EXPECT(f, "['DocumentType','CDATASection','ProcessingInstruction','Window','NamedNodeMap',"
+  - `test_console_formats_errors_and_elements` (function, line 1292) `static void test_console_formats_errors_and_elements(void **state)`
+  - `test_console_captures_levels` (function, line 1308) `static void test_console_captures_levels(void **state)`
+  - `test_console_object_and_throwing_tostring` (function, line 1335) `static void test_console_object_and_throwing_tostring(void **state)`
+  - `test_console_methods_are_writable` (function, line 1359) `static void test_console_methods_are_writable(void **state)`
+  - `test_unhandled_rejection_report_carries_the_message` (function, line 1383) `static void test_unhandled_rejection_report_carries_the_message(void **state)`
+  - `test_console_null_buffer_is_noop` (function, line 1399) `static void test_console_null_buffer_is_noop(void **state)`
+  - `test_console_null_ctx` (function, line 1420) `static void test_console_null_ctx(void **state)`
+  - `test_event_add_event_listener_fires` (function, line 1429) `static void test_event_add_event_listener_fires(void **state)`
+  - `test_event_onkeydown_fires` (function, line 1447) `static void test_event_onkeydown_fires(void **state)`
+  - `test_event_input_handler_fires_with_value` (function, line 1465) `static void test_event_input_handler_fires_with_value(void **state)`
+  - `test_event_prevent_default_suppresses` (function, line 1483) `static void test_event_prevent_default_suppresses(void **state)`
+  - `test_event_no_handler_allows_default` (function, line 1500) `static void test_event_no_handler_allows_default(void **state)`
+  - `test_event_null_args` (function, line 1507) `static void test_event_null_args(void **state)`
+  - `test_focus_add_event_listener_fires` (function, line 1519) `static void test_focus_add_event_listener_fires(void **state)`
+  - `test_blur_onblur_fires` (function, line 1536) `static void test_blur_onblur_fires(void **state)`
+  - `test_scroll_add_event_listener_fires` (function, line 1552) `static void test_scroll_add_event_listener_fires(void **state)`
+  - `test_scroll_onscroll_fires` (function, line 1569) `static void test_scroll_onscroll_fires(void **state)`
+  - `test_focus_blur_scroll_prevent_default` (function, line 1585) `static void test_focus_blur_scroll_prevent_default(void **state)`
+  - `test_focus_blur_scroll_no_handler_allows_default` (function, line 1613) `static void test_focus_blur_scroll_no_handler_allows_default(void **state)`
+  - `test_focus_blur_scroll_null_args` (function, line 1621) `static void test_focus_blur_scroll_null_args(void **state)`
+  - `test_mouse_add_event_listener_fires` (function, line 1631) `static void test_mouse_add_event_listener_fires(void **state)`
+  - `test_mouse_onmouseout_fires` (function, line 1648) `static void test_mouse_onmouseout_fires(void **state)`
+  - `test_mouse_mousemove_sees_coords` (function, line 1664) `static void test_mouse_mousemove_sees_coords(void **state)`
+  - `test_mouse_multi_event_fires` (function, line 1681) `static void test_mouse_multi_event_fires(void **state)`
+  - `test_mouse_prevent_default_suppresses` (function, line 1715) `static void test_mouse_prevent_default_suppresses(void **state)`
+  - `test_mouse_no_handler_allows_default` (function, line 1731) `static void test_mouse_no_handler_allows_default(void **state)`
+  - `test_mouse_null_args` (function, line 1738) `static void test_mouse_null_args(void **state)`
+  - `test_click_install_null_args` (function, line 1747) `static void test_click_install_null_args(void **state)`
+  - `test_click_add_event_listener_fires` (function, line 1753) `static void test_click_add_event_listener_fires(void **state)`
+  - `test_click_onclick_fires` (function, line 1777) `static void test_click_onclick_fires(void **state)`
+  - `test_click_prevent_default` (function, line 1801) `static void test_click_prevent_default(void **state)`
+  - `test_click_no_handler_allows_default` (function, line 1824) `static void test_click_no_handler_allows_default(void **state)`
+  - `test_submit_add_event_listener_fires` (function, line 1838) `static void test_submit_add_event_listener_fires(void **state)`
+  - `test_submit_onsubmit_fires` (function, line 1857) `static void test_submit_onsubmit_fires(void **state)`
+  - `test_submit_prevent_default` (function, line 1876) `static void test_submit_prevent_default(void **state)`
+  - `test_submit_no_handler_allows_default` (function, line 1895) `static void test_submit_no_handler_allows_default(void **state)`
+  - `handle_after` (function, line 1905) `static dom_node_id handle_after(fixture *f, const char *src)`
+  - `test_event_click_bubbles_to_ancestor` (function, line 1916) `static void test_event_click_bubbles_to_ancestor(void **state)`
+  - `test_event_capture_target_bubble_order` (function, line 1928) `static void test_event_capture_target_bubble_order(void **state)`
+  - `test_event_stop_propagation` (function, line 1942) `static void test_event_stop_propagation(void **state)`
+  - `test_event_stop_immediate_propagation` (function, line 1955) `static void test_event_stop_immediate_propagation(void **state)`
+  - `test_event_multiple_click_listeners` (function, line 1967) `static void test_event_multiple_click_listeners(void **state)`
+  - `test_event_remove_listener` (function, line 1980) `static void test_event_remove_listener(void **state)`
+  - `test_event_once` (function, line 1994) `static void test_event_once(void **state)`
+  - `test_event_delegated_prevent_default` (function, line 2006) `static void test_event_delegated_prevent_default(void **state)`
+  - `test_event_submit_bubbles_to_document` (function, line 2016) `static void test_event_submit_bubbles_to_document(void **state)`
+  - `test_event_keydown_bubbles_with_data` (function, line 2027) `static void test_event_keydown_bubbles_with_data(void **state)`
+  - `test_event_focus_does_not_bubble` (function, line 2038) `static void test_event_focus_does_not_bubble(void **state)`
+  - `test_event_handler_property_slot` (function, line 2050) `static void test_event_handler_property_slot(void **state)`
+  - `test_event_script_dispatch_custom_event` (function, line 2064) `static void test_event_script_dispatch_custom_event(void **state)`
+  - `test_event_listener_exception_continues` (function, line 2077) `static void test_event_listener_exception_continues(void **state)`
+  - `test_event_handle_event_object` (function, line 2089) `static void test_event_handle_event_object(void **state)`
+  - `geom_parent` (function, line 2101) `static dom_node_id geom_parent(void *ctx, dom_node_id n)`
+  - `js_handle` (function, line 2105) `static dom_node_id js_handle(fixture *f, const char *expr)`
+  - `test_geom_absent_is_zero` (function, line 2116) `static void test_geom_absent_is_zero(void **state)`
+  - `test_geom_installed_is_real` (function, line 2123) `static void test_geom_installed_is_real(void **state)`
+  - `test_repl_api_is_repl_only_and_nondestructive` (function, line 2164) `static void test_repl_api_is_repl_only_and_nondestructive(void **state)`
+  - `EXPECT` (function, line 2167) `EXPECT(f, "globalThis.$=function()`
+  - `test_platform_dommatrix_and_imagedata` (function, line 2203) `static void test_platform_dommatrix_and_imagedata(void **state)`
+  - `test_platform_click_method` (function, line 2214) `static void test_platform_click_method(void **state)`
+  - `EXPECT` (function, line 2227) `EXPECT(f, "c.addEventListener('click',function(e)`
+  - `EXPECT` (function, line 2229) `EXPECT(f, "function radio()`
+  - `test_platform_form_controls` (function, line 2257) `static void test_platform_form_controls(void **state)`
+  - `test_form_elements_collection` (function, line 2273) `static void test_form_elements_collection(void **state)`
+  - `test_shadow_styles_are_scoped` (function, line 2295) `static void test_shadow_styles_are_scoped(void **state)`
+  - `test_fragment_queries` (function, line 2306) `static void test_fragment_queries(void **state)`
+  - `EXPECT` (function, line 2320) `EXPECT(f, "var mk=function()`
+  - `test_create_html_document_is_detached` (function, line 2334) `static void test_create_html_document_is_detached(void **state)`
+  - `test_url_members_shadowed_on_non_anchor` (function, line 2344) `static void test_url_members_shadowed_on_non_anchor(void **state)`
+  - `test_slotted_nodes_unrendered_when_slot_hidden` (function, line 2352) `static void test_slotted_nodes_unrendered_when_slot_hidden(void **state)`
+  - `test_slotted_nodes_unrendered_through_nested_shadow` (function, line 2362) `static void test_slotted_nodes_unrendered_through_nested_shadow(void **state)`
+  - `test_tree_walker_reverse_navigation` (function, line 2374) `static void test_tree_walker_reverse_navigation(void **state)`
+  - `test_indexeddb_core` (function, line 2390) `static void test_indexeddb_core(void **state)`
+  - `test_geolocation_fixed_coordinates` (function, line 2417) `static void test_geolocation_fixed_coordinates(void **state)`
+  - `test_platform_streams` (function, line 2434) `static void test_platform_streams(void **state)`
+  - `test_platform_element_surface` (function, line 2458) `static void test_platform_element_surface(void **state)`
+  - `test_repl_rules_lists_matching_rules_by_cascade` (function, line 2476) `static void test_repl_rules_lists_matching_rules_by_cascade(void **state)`
+  - `EXPECT` (function, line 2487) `EXPECT(f, "R[2].declarations.concat(R[3].declarations).map(function(x)`
+  - `run_pane` (function, line 2497) `static void run_pane(fixture *f, int tab, const char *arg, js_result *r)`
+  - `test_freebug_html_pane_outlines_the_dom` (function, line 2504) `static void test_freebug_html_pane_outlines_the_dom(void **state)`
+  - `test_freebug_css_pane_lists_rules_computed_and_box` (function, line 2521) `static void test_freebug_css_pane_lists_rules_computed_and_box(void **state)`
+  - `test_freebug_script_pane_lists_and_numbers_source` (function, line 2539) `static void test_freebug_script_pane_lists_and_numbers_source(void **state)`
+  - `test_freebug_dom_and_storage_panes` (function, line 2556) `static void test_freebug_dom_and_storage_panes(void **state)`
+  - `test_freebug_net_pane_empty_and_selector_is_data` (function, line 2604) `static void test_freebug_net_pane_empty_and_selector_is_data(void **state)`
+  - `test_repl_api_inspect_and_event_listeners` (function, line 2617) `static void test_repl_api_inspect_and_event_listeners(void **state)`
+  - `EXPECT` (function, line 2622) `EXPECT(f, "function onc()`
+  - `test_ro_real_reports_size_changes` (function, line 2634) `static void test_ro_real_reports_size_changes(void **state)`
+  - `test_io_real_follows_scroll` (function, line 2668) `static void test_io_real_follows_scroll(void **state)`
+  - `test_io_untrusted_stays_synthetic` (function, line 2709) `static void test_io_untrusted_stays_synthetic(void **state)`
+  - `test_geom_null_ctx` (function, line 2715) `static void test_geom_null_ctx(void **state)`
+  - `set_loc` (function, line 2722) `static void set_loc(fixture *f, const char *href)`
+  - `test_history_push_replace_update_location` (function, line 2728) `static void test_history_push_replace_update_location(void **state)`
+  - `test_history_cross_origin_is_security_error` (function, line 2748) `static void test_history_cross_origin_is_security_error(void **state)`
+  - `test_history_popstate_restores_entry` (function, line 2759) `static void test_history_popstate_restores_entry(void **state)`
+  - `test_history_go_records_delta` (function, line 2774) `static void test_history_go_records_delta(void **state)`
+  - `test_history_is_bounded` (function, line 2784) `static void test_history_is_bounded(void **state)`
+  - `test_ws_absent_until_enabled` (function, line 2800) `static void test_ws_absent_until_enabled(void **state)`
+  - `test_ws_lifecycle_records_ops_and_fires_events` (function, line 2805) `static void test_ws_lifecycle_records_ops_and_fires_events(void **state)`
+  - `test_frames_top_document_parent_is_self` (function, line 2851) `static void test_frames_top_document_parent_is_self(void **state)`
+  - `test_frames_child_document_posts_to_parent_and_top` (function, line 2858) `static void test_frames_child_document_posts_to_parent_and_top(void **state)`
+  - `test_frames_blank_iframe_has_writable_document` (function, line 2875) `static void test_frames_blank_iframe_has_writable_document(void **state)`
+  - `test_frames_blank_iframe_document_and_window_are_event_targets` (function, line 2889) `static void test_frames_blank_iframe_document_and_window_are_event_targets(void **state)`
+  - `test_frames_iframe_discovery_and_child_post` (function, line 2903) `static void test_frames_iframe_discovery_and_child_post(void **state)`
+  - `test_frames_message_delivery_sets_origin_and_source` (function, line 2934) `static void test_frames_message_delivery_sets_origin_and_source(void **state)`
+  - `test_frames_oversize_payload_rejected` (function, line 2949) `static void test_frames_oversize_payload_rejected(void **state)`
+  - `test_ws_rejects_plaintext_and_caps` (function, line 2959) `static void test_ws_rejects_plaintext_and_caps(void **state)`
+  - `test_storage_untrusted_stays_ephemeral` (function, line 2975) `static void test_storage_untrusted_stays_ephemeral(void **state)`
+  - `test_storage_seeded_and_dirty_snapshot` (function, line 2984) `static void test_storage_seeded_and_dirty_snapshot(void **state)`
+  - `test_storage_quota_exceeded` (function, line 3015) `static void test_storage_quota_exceeded(void **state)`
+  - `test_dom_ordered_insertion` (function, line 3025) `static void test_dom_ordered_insertion(void **state)`
+  - `test_dom_childnode_mixins` (function, line 3035) `static void test_dom_childnode_mixins(void **state)`
+  - `test_dom_interface_prototypes` (function, line 3047) `static void test_dom_interface_prototypes(void **state)`
+  - `test_dom_template_content` (function, line 3056) `static void test_dom_template_content(void **state)`
+  - `test_current_script_values_and_methods` (function, line 3069) `static void test_current_script_values_and_methods(void **state)`
+  - `test_current_script_is_the_real_element` (function, line 3083) `static void test_current_script_is_the_real_element(void **state)`
+  - `test_ext_tree_navigation` (function, line 3097) `static void test_ext_tree_navigation(void **state)`
+  - `test_ext_compare_document_position` (function, line 3108) `static void test_ext_compare_document_position(void **state)`
+  - `test_ext_shadow_root` (function, line 3117) `static void test_ext_shadow_root(void **state)`
+  - `test_ext_tree_walker_terminates` (function, line 3128) `static void test_ext_tree_walker_terminates(void **state)`
+  - `test_ext_document_helpers` (function, line 3138) `static void test_ext_document_helpers(void **state)`
+  - `test_shims_survive_globalthis_rebinding` (function, line 3152) `static void test_shims_survive_globalthis_rebinding(void **state)`
+  - `test_interfaces_window_and_canvas` (function, line 3179) `static void test_interfaces_window_and_canvas(void **state)`
+  - `EXPECT` (function, line 3181) `EXPECT(f, "['DocumentType','CDATASection','ProcessingInstruction','Window','NamedNodeMap',"
      ...`
-  - `test_ext_blob_family` (function, line 3139) `static void test_ext_blob_family(void **state)`
-  - `test_ext_insert_adjacent` (function, line 3158) `static void test_ext_insert_adjacent(void **state)`
-  - `test_ext_prototype_delegation` (function, line 3173) `static void test_ext_prototype_delegation(void **state)`
-  - `test_intl_surface` (function, line 3189) `static void test_intl_surface(void **state)`
-  - `test_lifecycle_listeners_get_event` (function, line 3203) `static void test_lifecycle_listeners_get_event(void **state)`
-  - `test_ready_state_walks_loading_interactive_complete` (function, line 3217) `static void test_ready_state_walks_loading_interactive_complete(void **state)`
-  - `test_custom_element_reactions_through_template_fragment` (function, line 3245) `static void test_custom_element_reactions_through_template_fragment(void **state)`
-  - `test_fragment_proto_swap_native_reentry` (function, line 3262) `static void test_fragment_proto_swap_native_reentry(void **state)`
-  - `test_custom_element_found_in_subtree_with_many_definitions` (function, line 3294) `static void test_custom_element_found_in_subtree_with_many_definitions(void **state)`
-  - `test_anchor_url_decomposition` (function, line 3306) `static void test_anchor_url_decomposition(void **state)`
-  - `fake_fetch` (function, line 3316) `static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,
+  - `test_ext_blob_family` (function, line 3196) `static void test_ext_blob_family(void **state)`
+  - `test_ext_insert_adjacent` (function, line 3215) `static void test_ext_insert_adjacent(void **state)`
+  - `test_ext_prototype_delegation` (function, line 3230) `static void test_ext_prototype_delegation(void **state)`
+  - `test_intl_surface` (function, line 3246) `static void test_intl_surface(void **state)`
+  - `test_lifecycle_listeners_get_event` (function, line 3260) `static void test_lifecycle_listeners_get_event(void **state)`
+  - `test_ready_state_walks_loading_interactive_complete` (function, line 3274) `static void test_ready_state_walks_loading_interactive_complete(void **state)`
+  - `test_custom_element_reactions_through_template_fragment` (function, line 3302) `static void test_custom_element_reactions_through_template_fragment(void **state)`
+  - `test_fragment_proto_swap_native_reentry` (function, line 3319) `static void test_fragment_proto_swap_native_reentry(void **state)`
+  - `test_custom_element_found_in_subtree_with_many_definitions` (function, line 3351) `static void test_custom_element_found_in_subtree_with_many_definitions(void **state)`
+  - `test_anchor_url_decomposition` (function, line 3363) `static void test_anchor_url_decomposition(void **state)`
+  - `fake_fetch` (function, line 3373) `static int fake_fetch(void *ctx, const char *method, const char *url, const char *body,
          ...`
-  - `test_trusted_fetch_request_response` (function, line 3342) `static void test_trusted_fetch_request_response(void **state)`
-  - `test_ext_is_equal_node` (function, line 3363) `static void test_ext_is_equal_node(void **state)`
-  - `EXPECT` (function, line 3365) `EXPECT(f, "function mk(h)`
-  - `test_trusted_send_beacon` (function, line 3404) `static void test_trusted_send_beacon(void **state)`
-  - `test_trusted_send_beacon_can_be_patched` (function, line 3425) `static void test_trusted_send_beacon_can_be_patched(void **state)`
-  - `EXPECT` (function, line 3430) `EXPECT(f, "(function()`
-  - `test_trusted_request_headers_cross_to_host` (function, line 3441) `static void test_trusted_request_headers_cross_to_host(void **state)`
-  - `EXPECT` (function, line 3445) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 3449) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 3453) `EXPECT(f, "(function()`
-  - `test_trusted_xhr_event_target_and_response_headers` (function, line 3461) `static void test_trusted_xhr_event_target_and_response_headers(void **state)`
-  - `EXPECT` (function, line 3465) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 3476) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 3480) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 3483) `EXPECT(f, "(function()`
-  - `test_trusted_fetch_exposes_response_headers` (function, line 3487) `static void test_trusted_fetch_exposes_response_headers(void **state)`
-  - `EXPECT` (function, line 3491) `EXPECT(f, "(function()`
-  - `test_xml_serializer_covers_fragments_and_text` (function, line 3500) `static void test_xml_serializer_covers_fragments_and_text(void **state)`
+  - `test_trusted_fetch_request_response` (function, line 3399) `static void test_trusted_fetch_request_response(void **state)`
+  - `test_ext_is_equal_node` (function, line 3420) `static void test_ext_is_equal_node(void **state)`
+  - `EXPECT` (function, line 3422) `EXPECT(f, "function mk(h)`
+  - `test_trusted_send_beacon` (function, line 3461) `static void test_trusted_send_beacon(void **state)`
+  - `test_trusted_send_beacon_can_be_patched` (function, line 3482) `static void test_trusted_send_beacon_can_be_patched(void **state)`
+  - `EXPECT` (function, line 3487) `EXPECT(f, "(function()`
+  - `test_trusted_request_headers_cross_to_host` (function, line 3498) `static void test_trusted_request_headers_cross_to_host(void **state)`
   - `EXPECT` (function, line 3502) `EXPECT(f, "(function()`
-  - `EXPECT` (function, line 3504) `EXPECT(f, "(function()`
-  - `test_ce_create_runs_constructor` (function, line 3514) `static void test_ce_create_runs_constructor(void **state)`
-  - `EXPECT` (function, line 3516) `EXPECT(f, "(function()`
-  - `test_ce_define_upgrades_existing` (function, line 3524) `static void test_ce_define_upgrades_existing(void **state)`
-  - `EXPECT` (function, line 3526) `EXPECT(f, "(function()`
-  - `test_ce_connected_callbacks` (function, line 3535) `static void test_ce_connected_callbacks(void **state)`
+  - `EXPECT` (function, line 3506) `EXPECT(f, "(function()`
+  - `EXPECT` (function, line 3510) `EXPECT(f, "(function()`
+  - `test_trusted_xhr_event_target_and_response_headers` (function, line 3518) `static void test_trusted_xhr_event_target_and_response_headers(void **state)`
+  - `EXPECT` (function, line 3522) `EXPECT(f, "(function()`
+  - `EXPECT` (function, line 3533) `EXPECT(f, "(function()`
   - `EXPECT` (function, line 3537) `EXPECT(f, "(function()`
-  - `test_ce_attribute_changed` (function, line 3544) `static void test_ce_attribute_changed(void **state)`
-  - `EXPECT` (function, line 3546) `EXPECT(f, "(function()`
-  - `test_ce_sync_on_mutation` (function, line 3557) `static void test_ce_sync_on_mutation(void **state)`
+  - `EXPECT` (function, line 3540) `EXPECT(f, "(function()`
+  - `test_trusted_fetch_exposes_response_headers` (function, line 3544) `static void test_trusted_fetch_exposes_response_headers(void **state)`
+  - `EXPECT` (function, line 3548) `EXPECT(f, "(function()`
+  - `test_xml_serializer_covers_fragments_and_text` (function, line 3557) `static void test_xml_serializer_covers_fragments_and_text(void **state)`
   - `EXPECT` (function, line 3559) `EXPECT(f, "(function()`
-  - `test_ce_define_validation` (function, line 3568) `static void test_ce_define_validation(void **state)`
-  - `EXPECT` (function, line 3570) `EXPECT(f, "(function()`
-  - `pump_ticks` (function, line 3580) `static void pump_ticks(fixture *f, int n)`
-  - `test_trusted_worker` (function, line 3587) `static void test_trusted_worker(void **state)`
-  - `test_video_shim_no_video` (function, line 3620) `static void test_video_shim_no_video(void **state)`
-  - `test_video_shim_uses_index_1` (function, line 3628) `static void test_video_shim_uses_index_1(void **state)`
-  - `test_video_shim_video_data_wins` (function, line 3652) `static void test_video_shim_video_data_wins(void **state)`
-  - `test_video_shim_relative_url_resolved` (function, line 3676) `static void test_video_shim_relative_url_resolved(void **state)`
-  - `test_video_shim_empty_html` (function, line 3694) `static void test_video_shim_empty_html(void **state)`
-  - `test_video_shim_null_ctx` (function, line 3706) `static void test_video_shim_null_ctx(void **state)`
-  - `test_video_from_scripts_video_data_is_variable` (function, line 3738) `static void test_video_from_scripts_video_data_is_variable(void **state)`
-  - `test_video_from_scripts_relative_resolved` (function, line 3753) `static void test_video_from_scripts_relative_resolved(void **state)`
-  - `test_video_from_scripts_video_data_string` (function, line 3771) `static void test_video_from_scripts_video_data_string(void **state)`
-  - `test_video_from_scripts_no_video` (function, line 3788) `static void test_video_from_scripts_no_video(void **state)`
-  - `test_video_from_scripts_null_args` (function, line 3799) `static void test_video_from_scripts_null_args(void **state)`
-  - `main` (function, line 3810) `int main(void)`
-  - `identity` (function, line 738) `* identity (the same one innerWidth and the CSS viewport units use);`
-  - `it` (function, line 925) `* itself no longer finds it (getElementById only answers with attached elements). */ assert_string_equal(r.value...`
+  - `EXPECT` (function, line 3561) `EXPECT(f, "(function()`
+  - `test_ce_create_runs_constructor` (function, line 3571) `static void test_ce_create_runs_constructor(void **state)`
+  - `EXPECT` (function, line 3573) `EXPECT(f, "(function()`
+  - `test_ce_define_upgrades_existing` (function, line 3581) `static void test_ce_define_upgrades_existing(void **state)`
+  - `EXPECT` (function, line 3583) `EXPECT(f, "(function()`
+  - `test_ce_connected_callbacks` (function, line 3592) `static void test_ce_connected_callbacks(void **state)`
+  - `EXPECT` (function, line 3594) `EXPECT(f, "(function()`
+  - `test_ce_attribute_changed` (function, line 3601) `static void test_ce_attribute_changed(void **state)`
+  - `EXPECT` (function, line 3603) `EXPECT(f, "(function()`
+  - `test_ce_sync_on_mutation` (function, line 3614) `static void test_ce_sync_on_mutation(void **state)`
+  - `EXPECT` (function, line 3616) `EXPECT(f, "(function()`
+  - `test_ce_define_validation` (function, line 3625) `static void test_ce_define_validation(void **state)`
+  - `EXPECT` (function, line 3627) `EXPECT(f, "(function()`
+  - `pump_ticks` (function, line 3637) `static void pump_ticks(fixture *f, int n)`
+  - `test_trusted_worker` (function, line 3644) `static void test_trusted_worker(void **state)`
+  - `test_video_shim_no_video` (function, line 3677) `static void test_video_shim_no_video(void **state)`
+  - `test_video_shim_uses_index_1` (function, line 3685) `static void test_video_shim_uses_index_1(void **state)`
+  - `test_video_shim_video_data_wins` (function, line 3709) `static void test_video_shim_video_data_wins(void **state)`
+  - `test_video_shim_relative_url_resolved` (function, line 3733) `static void test_video_shim_relative_url_resolved(void **state)`
+  - `test_video_shim_empty_html` (function, line 3751) `static void test_video_shim_empty_html(void **state)`
+  - `test_video_shim_null_ctx` (function, line 3763) `static void test_video_shim_null_ctx(void **state)`
+  - `test_video_from_scripts_video_data_is_variable` (function, line 3795) `static void test_video_from_scripts_video_data_is_variable(void **state)`
+  - `test_video_from_scripts_relative_resolved` (function, line 3810) `static void test_video_from_scripts_relative_resolved(void **state)`
+  - `test_video_from_scripts_video_data_string` (function, line 3828) `static void test_video_from_scripts_video_data_string(void **state)`
+  - `test_video_from_scripts_no_video` (function, line 3845) `static void test_video_from_scripts_no_video(void **state)`
+  - `test_video_from_scripts_null_args` (function, line 3856) `static void test_video_from_scripts_null_args(void **state)`
+  - `main` (function, line 3867) `int main(void)`
+  - `identity` (function, line 795) `* identity (the same one innerWidth and the CSS viewport units use);`
+  - `it` (function, line 982) `* itself no longer finds it (getElementById only answers with attached elements). */ assert_string_equal(r.value...`
   - `EXPECT` (macro, line 80) `#define EXPECT(f, src, expected)`
 - Depends on: `include/dom.h`, `include/fb_cmdline.h`, `include/fb_panes.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_geom.h`, `include/js_native.h`, `include/js_sandbox.h`, `include/js_trusted.h`, `include/url.h`, `include/web_storage.h`
 

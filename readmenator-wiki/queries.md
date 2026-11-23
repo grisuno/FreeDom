@@ -4,7 +4,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 ## Suggested
 
-### Q: What does browser_ui.c depend on, and what depends on it? (69 connections)
+### Q: What does browser_ui.c depend on, and what depends on it? (70 connections)
 
 - Status: unanswered
 
@@ -12,7 +12,7 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 - Status: unanswered
 
-### Q: What does tab.c depend on, and what depends on it? (33 connections)
+### Q: What does tab.c depend on, and what depends on it? (35 connections)
 
 - Status: unanswered
 

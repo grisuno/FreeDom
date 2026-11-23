@@ -438,7 +438,7 @@ The returned pointer is owned by doc and valid only while doc is alive. The dom 
 
 **Returns:** `void *`
 
-*Called by:* [`dom_build`](src.dom.c.md#dom_build), [`pv_build_live`](src.page_view.c.md#pv_build_live)
+*Called by:* [`dom_build`](src.dom.c.md#dom_build), [`pv_build_live`](src.page_view.c.md#pv_build_live), [`navigation`](src.tab.c.md#navigation)
 
 ---
 

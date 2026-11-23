@@ -63,7 +63,7 @@ int os_namespac...`
   - `form_rec` (struct, line 5017)
   - `form_table` (struct, line 5023)
   - `pv_flow_reg` (struct, line 5376)
-  - `pv_computed` (struct, line 7823)
+  - `pv_computed` (struct, line 7827)
   - `pv_def_h` (struct, line 2401)
   - `pv_cnt_attr_ctx` (struct, line 5947)
   - `cols` (type_alias, line 1284) `typedef struct pv_cont_info { int id, display, gap, justify, cols;`
@@ -370,19 +370,19 @@ static int root_els_match(void *ctx,...`
                       i...`
   - `pv_build_live` (function, line 6057) `pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                      ...`
-  - `px` (function, line 6660) `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
+  - `px` (function, line 6664) `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
                 if (iw <...`
-  - `engine` (function, line 7626) `* layout engine (contiguous item gather) drops every cell onto its own row and
+  - `engine` (function, line 7630) `* layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-col...`
-  - `pv_css_drops` (function, line 7794) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+  - `pv_css_drops` (function, line 7798) `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...`
-  - `pv_computed_new` (function, line 7828) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
+  - `pv_computed_new` (function, line 7832) `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
   ...`
-  - `pv_computed_new_cached` (function, line 7833) `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,
+  - `pv_computed_new_cached` (function, line 7837) `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,
                    ...`
-  - `pv_computed_get` (function, line 7847) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
+  - `pv_computed_get` (function, line 7851) `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
                     do...`
-  - `pv_computed_free` (function, line 7869) `void pv_computed_free(pv_computed *pc)`
+  - `pv_computed_free` (function, line 7873) `void pv_computed_free(pv_computed *pc)`
   - `positions` (function, line 145) `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);`
   - `content` (function, line 1213) `* a <noscript> ancestor also suppresses content (the script would run, so the * fallback is hidden);`
   - `address` (function, line 1274) `* registry accepts must be one the solver can address (include/box_tree.h). */ _Static_assert(PV_MAX_BOXES <=...`
@@ -397,15 +397,15 @@ static int root_els_match(void *ctx,...`
   - `table_cell_pos` (function, line 3746) `static int table_cell_pos(struct pv_flow_reg *fr, const lxb_dom_node_t *table, const lxb_dom_node_t *cell, int *row...`
   - `outermost` (function, line 4044) `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
   - `url` (function, line 6082) `* fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css * module, so OOM here degrades to...`
-  - `inside` (function, line 6169) `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
-  - `control` (function, line 6479) `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
-  - `band` (function, line 6726) `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...`
-  - `height` (function, line 6753) `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-  - `block_id` (function, line 6911) `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
-  - `URL` (function, line 7052) `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-  - `block` (function, line 7329) `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
-  - `flow` (function, line 7509) `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
-  - `line` (function, line 7635) `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
+  - `inside` (function, line 6173) `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
+  - `control` (function, line 6483) `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
+  - `band` (function, line 6730) `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...`
+  - `height` (function, line 6757) `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+  - `block_id` (function, line 6915) `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
+  - `URL` (function, line 7056) `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+  - `block` (function, line 7333) `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
+  - `flow` (function, line 7513) `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
+  - `line` (function, line 7639) `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
   - `_POSIX_C_SOURCE` (macro, line 10) `#define _POSIX_C_SOURCE`
   - `PV_MAX_DIM` (macro, line 57) `#define PV_MAX_DIM`
   - `PV_FONT_REL_MIN` (macro, line 62) `#define PV_FONT_REL_MIN`

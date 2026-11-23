@@ -1,14 +1,14 @@
 # include: browser_ui
 
-*Community 1 | 65 files | cohesion 0.52*
+*Community 1 | 69 files | cohesion 0.53*
 
 ## Definition
 
-This community groups 65 file(s) rooted at `include` with dominant language c (cohesion 0.52). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_BOX_MAX`, `BB_MAX_PIXELS`, `BROWSER_CLOSED_MAX`, `BROWSER_STATUS_DURATION_MS`. Core file: `gui/browser_ui.c` (761 symbols). Documented purpose: libFuzzer harness for box_blur (spec/box_blur.md): a hostile mask, size, stride and sigma.
+This community groups 69 file(s) rooted at `include` with dominant language c (cohesion 0.53). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_BOX_MAX`, `BB_MAX_PIXELS`, `BROWSER_CLOSED_MAX`, `BROWSER_STATUS_DURATION_MS`. Core file: `gui/browser_ui.c` (770 symbols). Documented purpose: libFuzzer harness for box_blur (spec/box_blur.md): a hostile mask, size, stride and sigma.
 
 ## Files
 
-### `include` (19 files)
+### `include` (20 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -18,7 +18,7 @@ This community groups 65 file(s) rooted at `include` with dominant language c (c
 | `include/doc_title.h` | h | utility | 3 | yes |
 | `include/exact_key.h` | h | utility | 9 | yes |
 
-### `tests` (18 files)
+### `tests` (19 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -28,7 +28,7 @@ This community groups 65 file(s) rooted at `include` with dominant language c (c
 | `tests/test_doc_title.c` | c | testing | 7 | yes |
 | `tests/test_exact_key.c` | c | testing | 6 | no |
 
-### `src` (17 files)
+### `src` (18 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -38,7 +38,7 @@ This community groups 65 file(s) rooted at `include` with dominant language c (c
 | `src/doc_title.c` | c | utility | 12 | yes |
 | `src/exact_key.c` | c | utility | 6 | no |
 
-### `fuzz` (10 files)
+### `fuzz` (11 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -51,9 +51,9 @@ This community groups 65 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 761 | no |
+| `gui/browser_ui.c` | c | presentation | 770 | no |
 
-*... and 45 more files in this community.*
+*... and 49 more files in this community.*
 
 
 ## Key Symbols
@@ -79,20 +79,20 @@ This community groups 65 file(s) rooted at `include` with dominant language c (c
 - `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_mask_cache.c:21`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - `POOL` (macro, `fuzz/fuzz_nav_token.c:11`) `#define POOL`
 - `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_nav_token.c:13`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_scroll_req.c:11`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - `take` (function, `fuzz/fuzz_smooth_scroll.c:11`) `static double take(const uint8_t **d, size_t *n)`
 - `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_smooth_scroll.c:18`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - `_GNU_SOURCE` (macro, `gui/browser_ui.c:12`) `#define _GNU_SOURCE`
-- `UI_TOOLBAR_H` (macro, `gui/browser_ui.c:108`) `#define UI_TOOLBAR_H`
-- `UI_MARGIN` (macro, `gui/browser_ui.c:109`) `#define UI_MARGIN`
-- `UI_BTN_LEFT` (macro, `gui/browser_ui.c:110`) `#define UI_BTN_LEFT`
-- `UI_BTN_MIDDLE` (macro, `gui/browser_ui.c:111`) `#define UI_BTN_MIDDLE`
-- `UI_LIST_INDENT` (macro, `gui/browser_ui.c:115`) `#define UI_LIST_INDENT`
-- `UI_SCROLLBAR_W` (macro, `gui/browser_ui.c:120`) `#define UI_SCROLLBAR_W`
+- `UI_TOOLBAR_H` (macro, `gui/browser_ui.c:109`) `#define UI_TOOLBAR_H`
+- `UI_MARGIN` (macro, `gui/browser_ui.c:110`) `#define UI_MARGIN`
+- `UI_BTN_LEFT` (macro, `gui/browser_ui.c:111`) `#define UI_BTN_LEFT`
+- `UI_BTN_MIDDLE` (macro, `gui/browser_ui.c:112`) `#define UI_BTN_MIDDLE`
+- `UI_LIST_INDENT` (macro, `gui/browser_ui.c:116`) `#define UI_LIST_INDENT`
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 66
-- Cross-boundary resolved imports (EXTRACTED): 62
+- Internal resolved imports (EXTRACTED): 71
+- Cross-boundary resolved imports (EXTRACTED): 63
 
 ## Connections
 
@@ -111,25 +111,25 @@ This community groups 65 file(s) rooted at `include` with dominant language c (c
 
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
-- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1842` `gui_sub_perform` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:2081` `first` `dg`: `dg` assigned at line 2081 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5045` `flow_text` `space_w`: `space_w` assigned at line 5045 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5047` `flow_text` `i`: `i` assigned at line 5047 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6119` `table` `parent`: `parent` assigned at line 6119 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6120` `table` `seen`: `seen` assigned at line 6120 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6122` `table` `j`: `j` assigned at line 6122 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6295` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 6295 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6316` `measure_item_w_at` `rw`: `rw` assigned at line 6316 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6527` `nested_cont_basis` `total`: `total` assigned at line 6527 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6528` `nested_cont_basis` `n_items`: `n_items` assigned at line 6528 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:7802` `descriptor` `sb`: `sb` assigned at line 7802 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:7803` `descriptor` `sr`: `sr` assigned at line 7803 but never read afterwards.
+- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1867` `gui_sub_perform` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:2106` `first` `dg`: `dg` assigned at line 2106 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5088` `flow_text` `space_w`: `space_w` assigned at line 5088 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5090` `flow_text` `i`: `i` assigned at line 5090 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6162` `table` `parent`: `parent` assigned at line 6162 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6163` `table` `seen`: `seen` assigned at line 6163 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6165` `table` `j`: `j` assigned at line 6165 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6338` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 6338 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6359` `measure_item_w_at` `rw`: `rw` assigned at line 6359 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6570` `nested_cont_basis` `total`: `total` assigned at line 6570 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6571` `nested_cont_basis` `n_items`: `n_items` assigned at line 6571 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:7845` `descriptor` `sb`: `sb` assigned at line 7845 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:7846` `descriptor` `sr`: `sr` assigned at line 7846 but never read afterwards.
 
 ## Open Questions
 
-- Why do 39 file(s) lack file-level docs (e.g. `fuzz/fuzz_browser.c`)? What purpose do they serve?
+- Why do 41 file(s) lack file-level docs (e.g. `fuzz/fuzz_browser.c`)? What purpose do they serve?
 - What would break if the most connected file in include: browser_ui changed?
-- Should include: browser_ui be split, given cohesion 0.52?
+- Should include: browser_ui be split, given cohesion 0.53?
 
 ## Sources
 
@@ -142,6 +142,7 @@ This community groups 65 file(s) rooted at `include` with dominant language c (c
 - `fuzz/fuzz_group_index.c`
 - `fuzz/fuzz_mask_cache.c`
 - `fuzz/fuzz_nav_token.c`
+- `fuzz/fuzz_scroll_req.c`
 - `fuzz/fuzz_smooth_scroll.c`
 - `gui/browser_ui.c`
 - `include/block_flow.h`
@@ -152,5 +153,4 @@ This community groups 65 file(s) rooted at `include` with dominant language c (c
 - `include/find_text.h`
 - `include/form.h`
 - `include/frame_broker.h`
-- `include/frame_clock.h`
-- *... and 45 more*
+- *... and 49 more*

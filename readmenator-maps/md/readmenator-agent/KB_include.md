@@ -1,6 +1,23 @@
 # Subsystem: include (page 1 of 6)
 Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB_include_p3.md](KB_include_p3.md), [KB_include_p4.md](KB_include_p4.md), [KB_include_p5.md](KB_include_p5.md), [KB_include_p6.md](KB_include_p6.md)
 
+## include/anchor.h
+- Doc: anc_collect: Writes target and its element subtree in preorder (*nsub handles), then the...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `anc_kind` (enum, line 26)
+  - `fit` (function, line 35) `* result does not fit (out is then "" when cap > 0). */ size_t anc_percent_decode(const char *in, char *out, size_t...`
+  - `anc_collect` (function, line 50) `size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, size_t cap, size_t *nsub);`
+  - `anc_target_top` (function, line 57) `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub, double *top);`
+  - `anc_target_box` (function, line 63) `int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub, double *top, double *bottom);`
+  - `anc_scroll_for` (function, line 68) `double anc_scroll_for(double top, double max_scroll);`
+  - `FREEDOM_ANCHOR_H` (macro, line 2) `#define FREEDOM_ANCHOR_H`
+  - `ANC_MAX_FRAGMENT` (macro, line 23) `#define ANC_MAX_FRAGMENT`
+  - `ANC_MAX_HANDLES` (macro, line 24) `#define ANC_MAX_HANDLES`
+- Depends on: `include/dom.h`, `include/js_geom.h`
+- Imported by: `fuzz/fuzz_anchor.c`, `gui/browser_ui.c`, `src/anchor.c`, `src/tab.c`, `tests/test_anchor.c`, `tests/test_tab.c`
+
 ## include/anti_fp.h
 - Doc: fp_accept_language_header: #define FP_SEC_FETCH_DEST_NAV  "document" #define...
 - Layer: utility
@@ -64,7 +81,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `alpha` (function, line 27) `* no pixel has alpha (nothing to blur), 1 otherwise. Everything outside rect stays 0 after the blur, * so blurring...`
   - `FREEDOM_BOX_BLUR_H` (macro, line 2) `#define FREEDOM_BOX_BLUR_H`
   - `BB_MAX_PIXELS` (macro, line 12) `#define BB_MAX_PIXELS`
-- Imported by: `gui/browser_ui.c`, `src/box_blur.c`, `tests/test_box_blur.c`
+- Imported by: `fuzz/fuzz_box_blur.c`, `gui/browser_ui.c`, `src/box_blur.c`, `tests/test_box_blur.c`
 
 ## include/box_style.h
 - Doc: bx_edges: anything longer fails closed instead of truncating into a wrong match. #define...
@@ -145,7 +162,7 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `BT_MAUTO_LEFT` (macro, line 64) `#define BT_MAUTO_LEFT`
   - `BT_MAUTO_RIGHT` (macro, line 65) `#define BT_MAUTO_RIGHT`
 - Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
-- Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
+- Imported by: `fuzz/fuzz_box_tree.c`, `gui/browser_ui.c`, `src/box_tree.c`, `src/page_view.c`, `src/tab.c`, `tests/test_box_tree.c`
 
 ## include/browser.h
 - Doc: browser_closed: Transient status line (a toast, e.g. "blocked: insecure http link"). msg is...
@@ -153,32 +170,34 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Language: h
 - Symbols:
   - `browser_state` (struct, line 27)
-  - `browser_closed` (struct, line 177)
-  - `browser_status` (enum, line 63)
-  - `state` (function, line 74) `* state (frees old history and page buffers). */ browser_status browser_init(browser_state *bs);`
-  - `browser_free` (function, line 78) `void browser_free(browser_state *bs);`
-  - `browser_set_page` (function, line 83) `* browser_set_page() with the result. */ browser_status browser_navigate(browser_state *bs, const char *url);`
-  - `one` (function, line 102) `* A navigate while pending first aborts the pending one (the new one replaces it);`
-  - `browser_commit_pending` (function, line 105) `void browser_commit_pending(browser_state *bs);`
-  - `browser_abort_pending` (function, line 106) `int browser_abort_pending(browser_state *bs);`
-  - `browser_has_pending` (function, line 107) `int browser_has_pending(const browser_state *bs);`
-  - `browser_entry_doc` (function, line 110) `int browser_entry_doc(const browser_state *bs, size_t pos);`
-  - `browser_doc_index` (function, line 114) `int browser_doc_index(const browser_state *bs);`
-  - `browser_can_back` (function, line 117) `int browser_can_back(const browser_state *bs);`
-  - `browser_can_forward` (function, line 118) `int browser_can_forward(const browser_state *bs);`
-  - `browser_current_url` (function, line 119) `const char *browser_current_url(const browser_state *bs);`
-  - `browser_is_exception` (function, line 122) `int browser_is_exception(const browser_state *bs, const char *host);`
-  - `browser_url_bar_selection` (function, line 154) `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len);`
-  - `browser_url_bar_delete_selection` (function, line 158) `int browser_url_bar_delete_selection(browser_state *bs);`
-  - `copied` (function, line 166) `* copied (truncated to fit) and shown until now_ms reaches the expiry * (now_ms + BROWSER_STATUS_DURATION_MS). A...`
-  - `browser_status_text` (function, line 173) `const char *browser_status_text(const browser_state *bs, uint64_t now_ms);`
-  - `browser_closed_pop` (function, line 188) `int browser_closed_pop(browser_closed *c, char *out, size_t cap);`
+  - `browser_closed` (struct, line 186)
+  - `browser_status` (enum, line 65)
+  - `state` (function, line 76) `* state (frees old history and page buffers). */ browser_status browser_init(browser_state *bs);`
+  - `browser_free` (function, line 80) `void browser_free(browser_state *bs);`
+  - `browser_set_page` (function, line 85) `* browser_set_page() with the result. */ browser_status browser_navigate(browser_state *bs, const char *url);`
+  - `one` (function, line 104) `* A navigate while pending first aborts the pending one (the new one replaces it);`
+  - `browser_commit_pending` (function, line 107) `void browser_commit_pending(browser_state *bs);`
+  - `browser_abort_pending` (function, line 108) `int browser_abort_pending(browser_state *bs);`
+  - `browser_has_pending` (function, line 109) `int browser_has_pending(const browser_state *bs);`
+  - `browser_entry_doc` (function, line 112) `int browser_entry_doc(const browser_state *bs, size_t pos);`
+  - `browser_doc_index` (function, line 116) `int browser_doc_index(const browser_state *bs);`
+  - `browser_set_entry_scroll` (function, line 122) `void browser_set_entry_scroll(browser_state *bs, double scroll);`
+  - `browser_entry_scroll` (function, line 123) `double browser_entry_scroll(const browser_state *bs);`
+  - `browser_can_back` (function, line 126) `int browser_can_back(const browser_state *bs);`
+  - `browser_can_forward` (function, line 127) `int browser_can_forward(const browser_state *bs);`
+  - `browser_current_url` (function, line 128) `const char *browser_current_url(const browser_state *bs);`
+  - `browser_is_exception` (function, line 131) `int browser_is_exception(const browser_state *bs, const char *host);`
+  - `browser_url_bar_selection` (function, line 163) `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len);`
+  - `browser_url_bar_delete_selection` (function, line 167) `int browser_url_bar_delete_selection(browser_state *bs);`
+  - `copied` (function, line 175) `* copied (truncated to fit) and shown until now_ms reaches the expiry * (now_ms + BROWSER_STATUS_DURATION_MS). A...`
+  - `browser_status_text` (function, line 182) `const char *browser_status_text(const browser_state *bs, uint64_t now_ms);`
+  - `browser_closed_pop` (function, line 197) `int browser_closed_pop(browser_closed *c, char *out, size_t cap);`
   - `FREEDOM_BROWSER_H` (macro, line 2) `#define FREEDOM_BROWSER_H`
   - `BROWSER_URL_MAX` (macro, line 21) `#define BROWSER_URL_MAX`
   - `BROWSER_STATUS_MAX` (macro, line 24) `#define BROWSER_STATUS_MAX`
   - `BROWSER_STATUS_DURATION_MS` (macro, line 25) `#define BROWSER_STATUS_DURATION_MS`
-  - `BROWSER_CLOSED_MAX` (macro, line 176) `#define BROWSER_CLOSED_MAX`
-- Imported by: `gui/browser_ui.c`, `src/browser.c`, `tests/test_browser.c`
+  - `BROWSER_CLOSED_MAX` (macro, line 185) `#define BROWSER_CLOSED_MAX`
+- Imported by: `fuzz/fuzz_browser.c`, `gui/browser_ui.c`, `src/browser.c`, `tests/test_browser.c`
 
 ## include/cached_fetch.h
 - Doc: cf_set_store: Cache-aware GET.
@@ -197,43 +216,51 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Layer: presentation
 - Language: h
 - Symbols:
-  - `chl_rect` (struct, line 34)
-  - `chl_layout` (struct, line 54)
-  - `chl_findbar` (struct, line 101)
-  - `chl_status` (enum, line 32)
-  - `chl_part` (enum, line 36)
-  - `chl_find_part` (enum, line 92)
-  - `chl_identity` (enum, line 114)
-  - `h` (type_alias, line 33) `typedef struct chl_rect { double x, y, w, h;`
-  - `width` (type_alias, line 53) `typedef struct chl_layout { double width;`
-  - `close` (type_alias, line 100) `typedef struct chl_findbar { chl_rect bar, field, prev, next, count, close;`
-  - `chl_tab_rect` (function, line 74) `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r);`
-  - `chl_tab_close_rect` (function, line 75) `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r);`
-  - `chl_rect_has` (function, line 78) `int chl_rect_has(chl_rect r, double x, double y);`
-  - `chl_identity_label` (function, line 133) `const char *chl_identity_label(chl_identity id);`
+  - `chl_rect` (struct, line 40)
+  - `chl_layout` (struct, line 63)
+  - `chl_findbar` (struct, line 130)
+  - `chl_status` (enum, line 38)
+  - `chl_part` (enum, line 42)
+  - `chl_find_part` (enum, line 121)
+  - `chl_identity` (enum, line 143)
+  - `h` (type_alias, line 39) `typedef struct chl_rect { double x, y, w, h;`
+  - `width` (type_alias, line 62) `typedef struct chl_layout { double width;`
+  - `close` (type_alias, line 129) `typedef struct chl_findbar { chl_rect bar, field, prev, next, count, close;`
+  - `chl_tab_rect` (function, line 87) `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r);`
+  - `chl_tab_close_rect` (function, line 88) `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r);`
+  - `chl_rect_has` (function, line 91) `int chl_rect_has(chl_rect r, double x, double y);`
+  - `chl_tab_drop_index` (function, line 99) `int chl_tab_drop_index(const chl_layout *l, double x);`
+  - `chl_move_index` (function, line 103) `int chl_move_index(int i, int from, int to);`
+  - `chl_tab_for_digit` (function, line 106) `int chl_tab_for_digit(int digit, int tab_count);`
+  - `chl_tab_fallback_title` (function, line 111) `void chl_tab_fallback_title(const char *url, char *out, size_t cap);`
+  - `chl_identity_label` (function, line 162) `const char *chl_identity_label(chl_identity id);`
   - `FREEDOM_CHROME_LAYOUT_H` (macro, line 2) `#define FREEDOM_CHROME_LAYOUT_H`
-  - `CHL_TABBAR_H` (macro, line 15) `#define CHL_TABBAR_H`
-  - `CHL_TOOLBAR_H` (macro, line 16) `#define CHL_TOOLBAR_H`
-  - `CHL_PAD` (macro, line 17) `#define CHL_PAD`
-  - `CHL_TAB_TOP_GAP` (macro, line 18) `#define CHL_TAB_TOP_GAP`
-  - `CHL_TAB_MIN_W` (macro, line 19) `#define CHL_TAB_MIN_W`
-  - `CHL_TAB_MAX_W` (macro, line 20) `#define CHL_TAB_MAX_W`
-  - `CHL_TAB_GAP` (macro, line 21) `#define CHL_TAB_GAP`
-  - `CHL_TAB_CLOSE` (macro, line 22) `#define CHL_TAB_CLOSE`
-  - `CHL_TAB_CLOSE_MIN_W` (macro, line 23) `#define CHL_TAB_CLOSE_MIN_W`
-  - `CHL_NEWTAB_W` (macro, line 24) `#define CHL_NEWTAB_W`
-  - `CHL_WIN_BTN_W` (macro, line 25) `#define CHL_WIN_BTN_W`
-  - `CHL_DRAG_MIN` (macro, line 26) `#define CHL_DRAG_MIN`
-  - `CHL_BTN` (macro, line 27) `#define CHL_BTN`
-  - `CHL_BTN_GAP` (macro, line 28) `#define CHL_BTN_GAP`
-  - `CHL_URL_H` (macro, line 29) `#define CHL_URL_H`
-  - `CHL_ID_W` (macro, line 30) `#define CHL_ID_W`
-  - `CHL_FIND_H` (macro, line 86) `#define CHL_FIND_H`
-  - `CHL_FIND_FIELD_W` (macro, line 87) `#define CHL_FIND_FIELD_W`
-  - `CHL_FIND_FIELD_H` (macro, line 88) `#define CHL_FIND_FIELD_H`
-  - `CHL_FIND_BTN` (macro, line 89) `#define CHL_FIND_BTN`
-  - `CHL_FIND_COUNT_W` (macro, line 90) `#define CHL_FIND_COUNT_W`
-- Imported by: `gui/browser_ui_internal.h`, `src/chrome_layout.c`, `tests/test_chrome_layout.c`
+  - `CHL_TABBAR_H` (macro, line 17) `#define CHL_TABBAR_H`
+  - `CHL_TOOLBAR_H` (macro, line 18) `#define CHL_TOOLBAR_H`
+  - `CHL_PAD` (macro, line 19) `#define CHL_PAD`
+  - `CHL_TAB_TOP_GAP` (macro, line 20) `#define CHL_TAB_TOP_GAP`
+  - `CHL_TAB_MIN_W` (macro, line 21) `#define CHL_TAB_MIN_W`
+  - `CHL_TAB_MAX_W` (macro, line 22) `#define CHL_TAB_MAX_W`
+  - `CHL_TAB_GAP` (macro, line 23) `#define CHL_TAB_GAP`
+  - `CHL_TAB_CLOSE` (macro, line 24) `#define CHL_TAB_CLOSE`
+  - `CHL_TAB_CLOSE_MIN_W` (macro, line 25) `#define CHL_TAB_CLOSE_MIN_W`
+  - `CHL_NEWTAB_W` (macro, line 26) `#define CHL_NEWTAB_W`
+  - `CHL_WIN_BTN_W` (macro, line 27) `#define CHL_WIN_BTN_W`
+  - `CHL_DRAG_MIN` (macro, line 28) `#define CHL_DRAG_MIN`
+  - `CHL_BTN` (macro, line 29) `#define CHL_BTN`
+  - `CHL_BTN_GAP` (macro, line 30) `#define CHL_BTN_GAP`
+  - `CHL_URL_H` (macro, line 31) `#define CHL_URL_H`
+  - `CHL_ID_W` (macro, line 32) `#define CHL_ID_W`
+  - `CHL_STAR_W` (macro, line 33) `#define CHL_STAR_W`
+  - `CHL_STAR_MIN_URL` (macro, line 34) `#define CHL_STAR_MIN_URL`
+  - `CHL_MORE_W` (macro, line 35) `#define CHL_MORE_W`
+  - `CHL_DRAG_THRESHOLD` (macro, line 36) `#define CHL_DRAG_THRESHOLD`
+  - `CHL_FIND_H` (macro, line 115) `#define CHL_FIND_H`
+  - `CHL_FIND_FIELD_W` (macro, line 116) `#define CHL_FIND_FIELD_W`
+  - `CHL_FIND_FIELD_H` (macro, line 117) `#define CHL_FIND_FIELD_H`
+  - `CHL_FIND_BTN` (macro, line 118) `#define CHL_FIND_BTN`
+  - `CHL_FIND_COUNT_W` (macro, line 119) `#define CHL_FIND_COUNT_W`
+- Imported by: `fuzz/fuzz_chrome_layout.c`, `gui/browser_ui_internal.h`, `src/chrome_layout.c`, `tests/test_chrome_layout.c`
 
 ## include/compositor.h
 - Doc: cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position...
@@ -259,13 +286,13 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Language: h
 - Symbols:
   - `css_style` (struct, line 606)
-  - `css_sel` (struct, line 1025)
-  - `css_media` (struct, line 1027)
-  - `css_drop` (struct, line 1099)
-  - `css_drop_log` (struct, line 1111)
-  - `css_attr` (struct, line 1140)
-  - `css_element` (struct, line 1150)
-  - `cvr_table` (struct, line 1222)
+  - `css_sel` (struct, line 1029)
+  - `css_media` (struct, line 1031)
+  - `css_drop` (struct, line 1103)
+  - `css_drop_log` (struct, line 1115)
+  - `css_attr` (struct, line 1144)
+  - `css_element` (struct, line 1154)
+  - `cvr_table` (struct, line 1226)
   - `css_status` (enum, line 30)
   - `css_align` (enum, line 36)
   - `css_display` (enum, line 44)
@@ -325,31 +352,31 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `css_column_span` (enum, line 453)
   - `css_backface` (enum, line 457)
   - `css_pct_slot` (enum, line 534)
-  - `css_drop_cause` (enum, line 1086)
+  - `css_drop_cause` (enum, line 1090)
   - `color` (type_alias, line 606) `typedef struct css_style { int color;`
-  - `css_sheet` (type_alias, line 1019) `typedef struct css_sheet css_sheet;`
-  - `prefers_dark` (type_alias, line 1026) `typedef struct css_media { int prefers_dark;`
-  - `prop` (type_alias, line 1099) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
+  - `css_sheet` (type_alias, line 1023) `typedef struct css_sheet css_sheet;`
+  - `prefers_dark` (type_alias, line 1030) `typedef struct css_media { int prefers_dark;`
+  - `prop` (type_alias, line 1103) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
   - `verbatim` (function, line 92) `* the quoted row strings verbatim (flex_layout parses them);`
   - `POINTER` (function, line 235) `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
-  - `container` (function, line 674) `* container (Display 3 section 2);`
-  - `family` (function, line 719) `* LOCAL family (spec/text_shape.md section 7);`
-  - `translate` (function, line 893) `* translate()/translateX()/translateY();`
-  - `scaleY` (function, line 894) `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
-  - `declared` (function, line 898) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
-  - `element` (function, line 903) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
-  - `slots` (function, line 910) `* parse time into ALL seven slots (singular matrices fail closed);`
-  - `css_sheet_uses_counters` (function, line 1055) `int css_sheet_uses_counters(const css_sheet *sheet);`
-  - `css_sheet_uses_containers` (function, line 1059) `int css_sheet_uses_containers(const css_sheet *sheet);`
-  - `palette` (function, line 1076) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
-  - `css_free` (function, line 1126) `void css_free(css_sheet *s);`
-  - `order` (function, line 1129) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
-  - `inherited_px` (function, line 1246) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
-  - `css_ua_heading_em` (function, line 1258) `double css_ua_heading_em(int level);`
-  - `name` (function, line 1263) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
-  - `css_font_face_count` (function, line 1273) `size_t css_font_face_count(const css_sheet *sheet);`
-  - `css_font_face_at` (function, line 1274) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
-  - `css_resolve_anim_keyframes` (function, line 1282) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
+  - `container` (function, line 678) `* container (Display 3 section 2);`
+  - `family` (function, line 723) `* LOCAL family (spec/text_shape.md section 7);`
+  - `translate` (function, line 897) `* translate()/translateX()/translateY();`
+  - `scaleY` (function, line 898) `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
+  - `declared` (function, line 902) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
+  - `element` (function, line 907) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
+  - `slots` (function, line 914) `* parse time into ALL seven slots (singular matrices fail closed);`
+  - `css_sheet_uses_counters` (function, line 1059) `int css_sheet_uses_counters(const css_sheet *sheet);`
+  - `css_sheet_uses_containers` (function, line 1063) `int css_sheet_uses_containers(const css_sheet *sheet);`
+  - `palette` (function, line 1080) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
+  - `css_free` (function, line 1130) `void css_free(css_sheet *s);`
+  - `order` (function, line 1133) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
+  - `inherited_px` (function, line 1250) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
+  - `css_ua_heading_em` (function, line 1262) `double css_ua_heading_em(int level);`
+  - `name` (function, line 1267) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
+  - `css_font_face_count` (function, line 1277) `size_t css_font_face_count(const css_sheet *sheet);`
+  - `css_font_face_at` (function, line 1278) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+  - `css_resolve_anim_keyframes` (function, line 1286) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
   - `FREEDOM_CSS_H` (macro, line 2) `#define FREEDOM_CSS_H`
   - `CSS_DISP_INLINE_OUTER` (macro, line 74) `#define CSS_DISP_INLINE_OUTER`
   - `CSS_DISP_INNER_MASK` (macro, line 75) `#define CSS_DISP_INNER_MASK`
@@ -398,16 +425,16 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CSS_MAX_ATTR_SEL` (macro, line 591) `#define CSS_MAX_ATTR_SEL`
   - `CSS_MAX_PSEUDO_SEL` (macro, line 595) `#define CSS_MAX_PSEUDO_SEL`
   - `CSS_NTH_MAX` (macro, line 599) `#define CSS_NTH_MAX`
-  - `CSS_MAX_KF_STOPS` (macro, line 933) `#define CSS_MAX_KF_STOPS`
-  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 1039) `#define CSS_MEDIA_DEFAULT_WIDTH`
-  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 1044) `#define CSS_MEDIA_DEFAULT_HEIGHT`
-  - `CSS_DROP_PROP_MAX` (macro, line 1091) `#define CSS_DROP_PROP_MAX`
-  - `CSS_DROP_VAL_MAX` (macro, line 1092) `#define CSS_DROP_VAL_MAX`
-  - `CSS_PSEUDO_BEFORE` (macro, line 1232) `#define CSS_PSEUDO_BEFORE`
-  - `CSS_PSEUDO_AFTER` (macro, line 1233) `#define CSS_PSEUDO_AFTER`
-  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1234) `#define CSS_PSEUDO_PLACEHOLDER`
+  - `CSS_MAX_KF_STOPS` (macro, line 937) `#define CSS_MAX_KF_STOPS`
+  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 1043) `#define CSS_MEDIA_DEFAULT_WIDTH`
+  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 1048) `#define CSS_MEDIA_DEFAULT_HEIGHT`
+  - `CSS_DROP_PROP_MAX` (macro, line 1095) `#define CSS_DROP_PROP_MAX`
+  - `CSS_DROP_VAL_MAX` (macro, line 1096) `#define CSS_DROP_VAL_MAX`
+  - `CSS_PSEUDO_BEFORE` (macro, line 1236) `#define CSS_PSEUDO_BEFORE`
+  - `CSS_PSEUDO_AFTER` (macro, line 1237) `#define CSS_PSEUDO_AFTER`
+  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1238) `#define CSS_PSEUDO_PLACEHOLDER`
 - Depends on: `include/css_color.h`, `include/css_counter.h`, `include/css_mq.h`
-- Imported by: `gui/browser_ui.c`, `gui/bui_mask_img.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `include/pres_hints.h`, `include/sheet_cache.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/js_native.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
+- Imported by: `fuzz/fuzz_css.c`, `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `gui/bui_mask_img.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `include/pres_hints.h`, `include/sheet_cache.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/js_native.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 
 ## include/css_atrule.h
 - Doc: car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both...
@@ -460,40 +487,6 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CB_AUTO_RESET_NONE` (macro, line 13) `#define CB_AUTO_RESET_NONE`
 - Depends on: `include/css_decl.h`
 - Imported by: `src/css.c`, `src/css_box.c`, `src/css_mq.c`, `src/css_text.c`, `tests/test_css_box.c`
-
-## include/css_chain.h
-- Doc: cch_element_matches: Nonzero iff the parsed selector *sel matches element `el`, built against...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `cvr_chain` (struct, line 51)
-  - `cvr_table` (struct, line 52)
-  - `cch_path` (type_alias, line 69) `typedef struct cch_path cch_path;`
-  - `cch_path_new` (function, line 70) `cch_path *cch_path_new(void);`
-  - `cch_path_free` (function, line 71) `void cch_path_free(cch_path *pa);`
-  - `cch_element_matches` (function, line 82) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);`
-  - `lacks` (function, line 86) `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...`
-  - `box` (function, line 92) `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
-  - `FREEDOM_CSS_CHAIN_H` (macro, line 2) `#define FREEDOM_CSS_CHAIN_H`
-  - `CCH_CHAIN_MAX` (macro, line 26) `#define CCH_CHAIN_MAX`
-  - `CCH_SIB_MAX` (macro, line 27) `#define CCH_SIB_MAX`
-  - `CCH_NTH_MAX` (macro, line 28) `#define CCH_NTH_MAX`
-- Depends on: `include/css.h`, `include/css_select.h`
-- Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`, `tests/test_page_view.c`
-
-## include/css_color.h
-- Doc: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `cc_rgb` (struct, line 27)
-  - `cc_status` (enum, line 31)
-  - `b` (type_alias, line 26) `typedef struct cc_rgb { unsigned char r, g, b;`
-  - `cc_pack` (function, line 49) `int cc_pack(cc_rgb c);`
-  - `FREEDOM_CSS_COLOR_H` (macro, line 2) `#define FREEDOM_CSS_COLOR_H`
-  - `CC_COLOR_CURRENT` (macro, line 59) `#define CC_COLOR_CURRENT`
-  - `CC_COLOR_TRANSPARENT` (macro, line 60) `#define CC_COLOR_TRANSPARENT`
-- Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/pres_hints.c`, `src/svg_paint.c`, `src/svg_render.c`, `tests/test_css_color.c`
 
 
 Next: [KB_include_p2.md](KB_include_p2.md)

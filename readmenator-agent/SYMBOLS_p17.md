@@ -3,6 +3,57 @@ Previous: [SYMBOLS_p16.md](SYMBOLS_p16.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_empty_plaintext` | function | `tests/test_local_store.c:53` | `static void test_empty_plaintext(void **s)` |
+| `test_format_errors` | function | `tests/test_local_store.c:166` | `static void test_format_errors(void **s)` |
+| `test_nondeterministic` | function | `tests/test_local_store.c:107` | `static void test_nondeterministic(void **s)` |
+| `test_null_and_limits` | function | `tests/test_local_store.c:181` | `static void test_null_and_limits(void **s)` |
+| `test_passphrase_roundtrip` | function | `tests/test_local_store.c:121` | `static void test_passphrase_roundtrip(void **s)` |
+| `test_roundtrip_aes` | function | `tests/test_local_store.c:48` | `static void test_roundtrip_aes(void **s)` |
+| `test_roundtrip_chacha` | function | `tests/test_local_store.c:49` | `static void test_roundtrip_chacha(void **s)` |
+| `test_tamper_aead_id` | function | `tests/test_local_store.c:103` | `static void test_tamper_aead_id(void **s)` |
+| `test_tamper_ciphertext` | function | `tests/test_local_store.c:99` | `static void test_tamper_ciphertext(void **s)` |
+| `test_tamper_nonce` | function | `tests/test_local_store.c:101` | `static void test_tamper_nonce(void **s)` |
+| `test_tamper_salt` | function | `tests/test_local_store.c:102` | `static void test_tamper_salt(void **s)` |
+| `test_tamper_tag` | function | `tests/test_local_store.c:100` | `static void test_tamper_tag(void **s)` |
+| `test_wrong_key` | function | `tests/test_local_store.c:67` | `static void test_wrong_key(void **s)` |
+| `key_of` | function | `tests/test_mask_cache.c:11` | `static mkc_key key_of(int w, int h, double sigma)` |
+| `main` | function | `tests/test_mask_cache.c:158` | `int main(void)` |
+| `test_any_field_differs_misses` | function | `tests/test_mask_cache.c:46` | `static void test_any_field_differs_misses(void **state)` |
+| `test_clear_and_null_safety` | function | `tests/test_mask_cache.c:133` | `static void test_clear_and_null_safety(void **state)` |
+| `test_empty_misses` | function | `tests/test_mask_cache.c:16` | `static void test_empty_misses(void **state)` |
+| `test_entry_cap` | function | `tests/test_mask_cache.c:81` | `static void test_entry_cap(void **state)` |
+| `test_lru_eviction_by_bytes` | function | `tests/test_mask_cache.c:65` | `static void test_lru_eviction_by_bytes(void **state)` |
+| `test_over_budget_and_invalid_fail_closed` | function | `tests/test_mask_cache.c:97` | `static void test_over_budget_and_invalid_fail_closed(void **state)` |
+| `test_put_then_get_same_buffer` | function | `tests/test_mask_cache.c:28` | `static void test_put_then_get_same_buffer(void **state)` |
+| `test_replace_keeps_one_entry` | function | `tests/test_mask_cache.c:119` | `static void test_replace_keeps_one_entry(void **state)` |
+| `main` | function | `tests/test_media_decoder.c:89` | `int main(void)` |
+| `test_pacer_backwards_pts_reanchors` | function | `tests/test_media_decoder.c:40` | `static void test_pacer_backwards_pts_reanchors(void **state)` |
+| `test_pacer_hostile_pts_bounded` | function | `tests/test_media_decoder.c:69` | `static void test_pacer_hostile_pts_bounded(void **state)` |
+| `test_pacer_lag_reanchors` | function | `tests/test_media_decoder.c:52` | `static void test_pacer_lag_reanchors(void **state)` |
+| `test_pacer_null_safe` | function | `tests/test_media_decoder.c:84` | `static void test_pacer_null_safe(void **state)` |
+| `test_pacer_paces_by_pts_delta` | function | `tests/test_media_decoder.c:28` | `static void test_pacer_paces_by_pts_delta(void **state)` |
+| `hammer` | function | `tests/test_nav_token.c:75` | `static void *hammer(void *arg)` |
+| `main` | function | `tests/test_nav_token.c:98` | `int main(void)` |
+| `test_concurrent_refcount` | function | `tests/test_nav_token.c:87` | `static void test_concurrent_refcount(void **state)` |
+| `test_new_defaults` | function | `tests/test_nav_token.c:11` | `static void test_new_defaults(void **state)` |
+| `test_null_fails_closed` | function | `tests/test_nav_token.c:28` | `static void test_null_fails_closed(void **state)` |
+| `test_route` | function | `tests/test_nav_token.c:52` | `static void test_route(void **state)` |
+| `test_shared_reference` | function | `tests/test_nav_token.c:39` | `static void test_shared_reference(void **state)` |
+| `expect_private` | function | `tests/test_net_guard.c:10` | `static void expect_private(const char *const *ips, size_t n, int want)` |
+| `main` | function | `tests/test_net_guard.c:150` | `int main(void)` |
+| `test_decide` | function | `tests/test_net_guard.c:124` | `static void test_decide(void **state)` |
+| `test_host_is_ip` | function | `tests/test_net_guard.c:112` | `static void test_host_is_ip(void **state)` |
+| `test_host_is_local` | function | `tests/test_net_guard.c:93` | `static void test_host_is_local(void **state)` |
+| `test_ipv4_embedded_in_ipv6_is_unwrapped` | function | `tests/test_net_guard.c:56` | `static void test_ipv4_embedded_in_ipv6_is_unwrapped(void **state)` |
+| `test_ipv4_private_and_special_ranges` | function | `tests/test_net_guard.c:16` | `static void test_ipv4_private_and_special_ranges(void **state)` |
+| `test_ipv4_public_edges` | function | `tests/test_net_guard.c:29` | `static void test_ipv4_public_edges(void **state)` |
+| `test_ipv6_private_and_special_ranges` | function | `tests/test_net_guard.c:41` | `static void test_ipv6_private_and_special_ranges(void **state)` |
+| `test_unclassifiable_fails_closed` | function | `tests/test_net_guard.c:71` | `static void test_unclassifiable_fails_closed(void **state)` |
+| `main` | function | `tests/test_net_realm.c:140` | `int main(void)` |
+| `test_classify_host_clearnet` | function | `tests/test_net_realm.c:37` | `static void test_classify_host_clearnet(void **state)` |
+| `test_classify_host_edges` | function | `tests/test_net_realm.c:54` | `static void test_classify_host_edges(void **state)` |
+| `test_classify_host_i2p` | function | `tests/test_net_realm.c:30` | `static void test_classify_host_i2p(void **state)` |
+| `test_classify_host_lookalikes` | function | `tests/test_net_realm.c:44` | `static void test_classify_host_lookalikes(void **state)` |
 | `test_classify_host_onion` | function | `tests/test_net_realm.c:22` | `static void test_classify_host_onion(void **state)` |
 | `test_classify_url` | function | `tests/test_net_realm.c:67` | `static void test_classify_url(void **state)` |
 | `test_names` | function | `tests/test_net_realm.c:126` | `static void test_names(void **state)` |
@@ -445,56 +496,5 @@ Previous: [SYMBOLS_p16.md](SYMBOLS_p16.md)
 | `test_evaluate_allow_same_site` | function | `tests/test_request_policy.c:106` | `static void test_evaluate_allow_same_site(void **state)` |
 | `test_evaluate_block_invalid` | function | `tests/test_request_policy.c:129` | `static void test_evaluate_block_invalid(void **state)` |
 | `test_evaluate_block_scheme` | function | `tests/test_request_policy.c:121` | `static void test_evaluate_block_scheme(void **state)` |
-| `test_evaluate_block_third_party` | function | `tests/test_request_policy.c:113` | `static void test_evaluate_block_third_party(void **state)` |
-| `test_hdr_caps_and_args` | function | `tests/test_request_policy.c:191` | `static void test_hdr_caps_and_args(void **state)` |
-| `test_hdr_drops_forbidden_and_identity` | function | `tests/test_request_policy.c:157` | `static void test_hdr_drops_forbidden_and_identity(void **state)` |
-| `test_hdr_first_duplicate_wins` | function | `tests/test_request_policy.c:184` | `static void test_hdr_first_duplicate_wins(void **state)` |
-| `test_hdr_keeps_application_headers` | function | `tests/test_request_policy.c:142` | `static void test_hdr_keeps_application_headers(void **state)` |
-| `test_hdr_rejects_malformed` | function | `tests/test_request_policy.c:171` | `static void test_hdr_rejects_malformed(void **state)` |
-| `test_host_of_basic` | function | `tests/test_request_policy.c:19` | `static void test_host_of_basic(void **state)` |
-| `test_host_of_invalid` | function | `tests/test_request_policy.c:30` | `static void test_host_of_invalid(void **state)` |
-| `test_host_of_overflow` | function | `tests/test_request_policy.c:38` | `static void test_host_of_overflow(void **state)` |
-| `test_same_site` | function | `tests/test_request_policy.c:92` | `static void test_same_site(void **state)` |
-| `test_site_of` | function | `tests/test_request_policy.c:46` | `static void test_site_of(void **state)` |
-| `test_site_of_multi_suffix` | function | `tests/test_request_policy.c:59` | `static void test_site_of_multi_suffix(void **state)` |
-| `test_site_of_psl` | function | `tests/test_request_policy.c:71` | `static void test_site_of_psl(void **state)` |
-| `allowlist` | function | `tests/test_secure_fetch.c:324` | `* allowlist (spec/browser.md 3c). */ assert_int_equal(sf_fallback_policy(SF_ERR_CANCELLED, SF_POLICY_PQ_HYBRID_KE...` |
-| `bk_load` | function | `tests/test_secure_fetch.c:345` | `static int bk_load(void *c, const char *from, time_t now, char *out, size_t cap)` |
-| `bk_save` | function | `tests/test_secure_fetch.c:339` | `static void bk_save(void *c, const char *from, const char *to, time_t now)` |
-| `main` | function | `tests/test_secure_fetch.c:748` | `int main(void)` |
-| `test_chain_hybrid_allows_classical` | function | `tests/test_secure_fetch.c:173` | `static void test_chain_hybrid_allows_classical(void **state)` |
-| `test_chain_permissive_allows_weak_certs` | function | `tests/test_secure_fetch.c:190` | `static void test_chain_permissive_allows_weak_certs(void **state)` |
-| `test_chain_rejects_null` | function | `tests/test_secure_fetch.c:211` | `static void test_chain_rejects_null(void **state)` |
-| `test_chain_rejects_sha1_in_any_policy` | function | `tests/test_secure_fetch.c:181` | `static void test_chain_rejects_sha1_in_any_policy(void **state)` |
-| `test_chain_rejects_weak_rsa` | function | `tests/test_secure_fetch.c:203` | `static void test_chain_rejects_weak_rsa(void **state)` |
-| `test_chain_strict_accepts_pq` | function | `tests/test_secure_fetch.c:165` | `static void test_chain_strict_accepts_pq(void **state)` |
-| `test_chain_strict_rejects_classical` | function | `tests/test_secure_fetch.c:156` | `static void test_chain_strict_rejects_classical(void **state)` |
-| `test_config_blend_fields_default_null` | function | `tests/test_secure_fetch.c:43` | `static void test_config_blend_fields_default_null(void **state)` |
-| `test_cookie_jar_put_and_header` | function | `tests/test_secure_fetch.c:644` | `static void test_cookie_jar_put_and_header(void **state)` |
-| `test_cookie_line_matches_pure` | function | `tests/test_secure_fetch.c:608` | `static void test_cookie_line_matches_pure(void **state)` |
-| `test_default_groups_offer_p384` | function | `tests/test_secure_fetch.c:37` | `static void test_default_groups_offer_p384(void **state)` |
-| `test_enforce_all_good_hybrid` | function | `tests/test_secure_fetch.c:225` | `static void test_enforce_all_good_hybrid(void **state)` |
-| `test_enforce_allow_classical_ke` | function | `tests/test_secure_fetch.c:268` | `static void test_enforce_allow_classical_ke(void **state)` |
-| `test_enforce_allowlisted_insecure` | function | `tests/test_secure_fetch.c:287` | `static void test_enforce_allowlisted_insecure(void **state)` |
-| `test_enforce_checks_group_after_version` | function | `tests/test_secure_fetch.c:240` | `static void test_enforce_checks_group_after_version(void **state)` |
-| `test_enforce_checks_version_first` | function | `tests/test_secure_fetch.c:231` | `static void test_enforce_checks_version_first(void **state)` |
-| `test_enforce_fails_closed_on_null_chain` | function | `tests/test_secure_fetch.c:248` | `static void test_enforce_fails_closed_on_null_chain(void **state)` |
-| `test_enforce_strict_requires_pq_chain` | function | `tests/test_secure_fetch.c:255` | `static void test_enforce_strict_requires_pq_chain(void **state)` |
-| `test_fallback_ladder_is_shared_and_ordered` | function | `tests/test_secure_fetch.c:309` | `static void test_fallback_ladder_is_shared_and_ordered(void **state)` |
-| `test_get_follow_null_args` | function | `tests/test_secure_fetch.c:564` | `static void test_get_follow_null_args(void **state)` |
-| `test_get_null_args` | function | `tests/test_secure_fetch.c:573` | `static void test_get_null_args(void **state)` |
-| `test_group_accepts_hybrid` | function | `tests/test_secure_fetch.c:147` | `static void test_group_accepts_hybrid(void **state)` |
-| `test_group_rejects_classical` | function | `tests/test_secure_fetch.c:133` | `static void test_group_rejects_classical(void **state)` |
-| `test_group_rejects_pure_pq` | function | `tests/test_secure_fetch.c:140` | `static void test_group_rejects_pure_pq(void **state)` |
-| `test_header_value_reads_named_header` | function | `tests/test_secure_fetch.c:409` | `static void test_header_value_reads_named_header(void **state)` |
-| `test_header_value_rejects_other_empty_and_oversize` | function | `tests/test_secure_fetch.c:420` | `static void test_header_value_rejects_other_empty_and_oversize(void **state)` |
-| `test_location_is_case_insensitive_and_trims` | function | `tests/test_secure_fetch.c:441` | `static void test_location_is_case_insensitive_and_trims(void **state)` |
-| `test_location_parses_value` | function | `tests/test_secure_fetch.c:433` | `static void test_location_parses_value(void **state)` |
-| `test_location_rejects_non_location_and_empty` | function | `tests/test_secure_fetch.c:451` | `static void test_location_rejects_non_location_and_empty(void **state)` |
-| `test_location_rejects_overflow` | function | `tests/test_secure_fetch.c:463` | `static void test_location_rejects_overflow(void **state)` |
-| `test_post_null_args` | function | `tests/test_secure_fetch.c:582` | `static void test_post_null_args(void **state)` |
-| `test_rcache_backing_persists_and_serves_after_ram_loss` | function | `tests/test_secure_fetch.c:352` | `static void test_rcache_backing_persists_and_serves_after_ram_loss(void **state)` |
-| `test_rcache_remembers_permanent_redirects` | function | `tests/test_secure_fetch.c:370` | `static void test_rcache_remembers_permanent_redirects(void **state)` |
-| `test_redirect_code_recognizes_3xx` | function | `tests/test_secure_fetch.c:389` | `static void test_redirect_code_recognizes_3xx(void **state)` |
 
 Next: [SYMBOLS_p18.md](SYMBOLS_p18.md)

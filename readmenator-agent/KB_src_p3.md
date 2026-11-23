@@ -367,19 +367,19 @@ int cg_expand_bg_imag...`
   - `nth_matches` (function, line 808) `static int nth_matches(int A, int B, int idx)`
   - `is_form_control` (function, line 817) `static int is_form_control(const char *tag)`
   - `sub_sel_matches` (function, line 830) `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
-  - `compound_matches` (function, line 1080) `static int compound_matches(const css_compound *c, const css_element *el,
+  - `compound_matches` (function, line 1081) `static int compound_matches(const css_compound *c, const css_element *el,
                        ...`
-  - `built` (function, line 1115) `* chains the caller built (an element without parent/prev links never matches
+  - `built` (function, line 1116) `* chains the caller built (an element without parent/prev links never matches
  * through that com...`
-  - `pseudo_is_local` (function, line 1160) `static int pseudo_is_local(int kind)`
-  - `csel_needs_structure` (function, line 1173) `int csel_needs_structure(const css_sel *sel)`
-  - `csel_matches` (function, line 1196) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+  - `pseudo_is_local` (function, line 1161) `static int pseudo_is_local(int kind)`
+  - `csel_needs_structure` (function, line 1174) `int csel_needs_structure(const css_sel *sel)`
+  - `csel_matches` (function, line 1197) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
   - `take_sub_arg` (function, line 295) `static int take_sub_arg(const char *s, size_t a, size_t b, css_sel *sel, int strict);`
   - `between` (function, line 384) `* between ( and ) is split on commas (not inside [] or ());`
   - `seven` (function, line 621) `* pay for the other seven (a css_sel is ~12.8 KiB). */ memset(sel, 0, offsetof(css_sel, parts));`
   - `pseudo_matches` (function, line 826) `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...`
-  - `HAS_MAX_DEPTH` (macro, line 939) `#define HAS_MAX_DEPTH`
+  - `HAS_MAX_DEPTH` (macro, line 940) `#define HAS_MAX_DEPTH`
 - Depends on: `include/css_select.h`
 
 ## src/css_text.c

@@ -205,7 +205,6 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
 - Layer: infrastructure
 - Language: h
 - Symbols:
-  - `px` (function, line 24) `* it computes 12 px (getComputedStyle, measured on the parity host, tanda 102): the * reference renderer is what we...`
   - `FREEDOM_CONFIG_H` (macro, line 14) `#define FREEDOM_CONFIG_H`
   - `FC_PNG_PAGE_W` (macro, line 20) `#define FC_PNG_PAGE_W`
   - `FC_MONO_DEFAULT_PX` (macro, line 26) `#define FC_MONO_DEFAULT_PX`
@@ -213,27 +212,28 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FC_SMOOTH_SCROLL_FRAME_MS` (macro, line 32) `#define FC_SMOOTH_SCROLL_FRAME_MS`
   - `FC_SMOOTH_SCROLL_ANCHOR_MS` (macro, line 35) `#define FC_SMOOTH_SCROLL_ANCHOR_MS`
   - `FC_ANCHOR_HOLD_MS` (macro, line 38) `#define FC_ANCHOR_HOLD_MS`
-  - `FC_HEADLESS_VIEW_H` (macro, line 42) `#define FC_HEADLESS_VIEW_H`
-  - `FC_TRUSTED_JS_BUDGET_MS` (macro, line 48) `#define FC_TRUSTED_JS_BUDGET_MS`
-  - `FC_PNG_MARGIN` (macro, line 52) `#define FC_PNG_MARGIN`
-  - `FC_PNG_MAX_H` (macro, line 57) `#define FC_PNG_MAX_H`
-  - `FC_FLEX_MEASURE_W` (macro, line 63) `#define FC_FLEX_MEASURE_W`
-  - `FC_FLEX_MIN_MEASURE_W` (macro, line 69) `#define FC_FLEX_MIN_MEASURE_W`
-  - `FC_FONT_CHAIN_MAX` (macro, line 74) `#define FC_FONT_CHAIN_MAX`
-  - `FC_MAX_BOXES` (macro, line 79) `#define FC_MAX_BOXES`
-  - `FC_FONT_FALLBACK_PX` (macro, line 84) `#define FC_FONT_FALLBACK_PX`
-  - `FC_UI_FONT_SIZE` (macro, line 88) `#define FC_UI_FONT_SIZE`
-  - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 96) `#define FC_MAX_AUTHOR_CSS_BYTES`
-  - `FC_SHC_MAX_TEXT_BYTES` (macro, line 102) `#define FC_SHC_MAX_TEXT_BYTES`
-  - `FC_SHC_MAX_QUERIES` (macro, line 108) `#define FC_SHC_MAX_QUERIES`
-  - `FC_MASK_CACHE_BYTES` (macro, line 113) `#define FC_MASK_CACHE_BYTES`
-  - `FC_MASK_CACHE_ENTRIES` (macro, line 114) `#define FC_MASK_CACHE_ENTRIES`
-  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 117) `#define FC_LAZY_IMAGE_MARGIN_PX`
-  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 123) `#define FC_TAB_OP_NET_BUDGET_MS`
-  - `FC_NET_LOAD_SETTLE_MS` (macro, line 130) `#define FC_NET_LOAD_SETTLE_MS`
-  - `FC_NET_POLL_MS` (macro, line 131) `#define FC_NET_POLL_MS`
-  - `FC_NET_TICK_SETTLE_MS` (macro, line 134) `#define FC_NET_TICK_SETTLE_MS`
-  - `FC_TABLE_TRACK_MAX_PX` (macro, line 138) `#define FC_TABLE_TRACK_MAX_PX`
+  - `FC_JS_FRAGMENT_DEPTH` (macro, line 41) `#define FC_JS_FRAGMENT_DEPTH`
+  - `FC_HEADLESS_VIEW_H` (macro, line 45) `#define FC_HEADLESS_VIEW_H`
+  - `FC_TRUSTED_JS_BUDGET_MS` (macro, line 51) `#define FC_TRUSTED_JS_BUDGET_MS`
+  - `FC_PNG_MARGIN` (macro, line 55) `#define FC_PNG_MARGIN`
+  - `FC_PNG_MAX_H` (macro, line 60) `#define FC_PNG_MAX_H`
+  - `FC_FLEX_MEASURE_W` (macro, line 66) `#define FC_FLEX_MEASURE_W`
+  - `FC_FLEX_MIN_MEASURE_W` (macro, line 72) `#define FC_FLEX_MIN_MEASURE_W`
+  - `FC_FONT_CHAIN_MAX` (macro, line 77) `#define FC_FONT_CHAIN_MAX`
+  - `FC_MAX_BOXES` (macro, line 82) `#define FC_MAX_BOXES`
+  - `FC_FONT_FALLBACK_PX` (macro, line 87) `#define FC_FONT_FALLBACK_PX`
+  - `FC_UI_FONT_SIZE` (macro, line 91) `#define FC_UI_FONT_SIZE`
+  - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 99) `#define FC_MAX_AUTHOR_CSS_BYTES`
+  - `FC_SHC_MAX_TEXT_BYTES` (macro, line 105) `#define FC_SHC_MAX_TEXT_BYTES`
+  - `FC_SHC_MAX_QUERIES` (macro, line 111) `#define FC_SHC_MAX_QUERIES`
+  - `FC_MASK_CACHE_BYTES` (macro, line 116) `#define FC_MASK_CACHE_BYTES`
+  - `FC_MASK_CACHE_ENTRIES` (macro, line 117) `#define FC_MASK_CACHE_ENTRIES`
+  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 120) `#define FC_LAZY_IMAGE_MARGIN_PX`
+  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 126) `#define FC_TAB_OP_NET_BUDGET_MS`
+  - `FC_NET_LOAD_SETTLE_MS` (macro, line 133) `#define FC_NET_LOAD_SETTLE_MS`
+  - `FC_NET_POLL_MS` (macro, line 134) `#define FC_NET_POLL_MS`
+  - `FC_NET_TICK_SETTLE_MS` (macro, line 137) `#define FC_NET_TICK_SETTLE_MS`
+  - `FC_TABLE_TRACK_MAX_PX` (macro, line 141) `#define FC_TABLE_TRACK_MAX_PX`
 - Imported by: `fuzz/fuzz_page_view.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/svg_paint.c`, `src/tab.c`, `tests/test_sheet_cache.c`, `tests/test_tab.c`
 
 ## include/group_index.h

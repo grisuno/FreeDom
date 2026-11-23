@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 58 file(s) rooted at `include` with dominant language c (cohesion 0.69). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (373 symbols). Documented purpose: libFuzzer harness for css_counter (spec/css_counter.md): hostile `content` and counter.
+This community groups 58 file(s) rooted at `include` with dominant language c (cohesion 0.69). Central symbols: `AUTO_REJECT`, `AUTO_RESET`, `AUTO_RESET_NONE`, `AUTO_VALUE`, `CAR_INLINE_SPEC`, `CAR_LAYER_NAME_MAX`, `CAR_MAX_DEPTH`, `CAR_MAX_LAYERS`. Core file: `tests/test_css.c` (374 symbols). Documented purpose: libFuzzer harness for css_counter (spec/css_counter.md): hostile `content` and counter.
 
 ## Files
 
@@ -16,7 +16,7 @@ This community groups 58 file(s) rooted at `include` with dominant language c (c
 | `include/css.h` | h | utility | 148 | no |
 | `include/css_atrule.h` | h | utility | 10 | no |
 | `include/css_box.h` | h | utility | 28 | no |
-| `include/css_chain.h` | h | utility | 12 | no |
+| `include/css_chain.h` | h | utility | 13 | no |
 | `include/css_color.h` | h | utility | 7 | no |
 
 ### `src` (19 files)
@@ -24,10 +24,10 @@ This community groups 58 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/compositor.c` | c | utility | 7 | no |
-| `src/css.c` | c | utility | 274 | no |
+| `src/css.c` | c | utility | 276 | no |
 | `src/css_atrule.c` | c | utility | 11 | no |
 | `src/css_box.c` | c | utility | 53 | no |
-| `src/css_chain.c` | c | utility | 26 | no |
+| `src/css_chain.c` | c | utility | 27 | no |
 | `src/css_color.c` | c | utility | 36 | no |
 
 ### `tests` (17 files)
@@ -35,7 +35,7 @@ This community groups 58 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_compositor.c` | c | testing | 23 | no |
-| `tests/test_css.c` | c | testing | 373 | no |
+| `tests/test_css.c` | c | testing | 374 | no |
 | `tests/test_css_atrule.c` | c | testing | 10 | yes |
 | `tests/test_css_box.c` | c | testing | 13 | no |
 | `tests/test_css_color.c` | c | testing | 37 | no |
@@ -87,7 +87,7 @@ This community groups 58 file(s) rooted at `include` with dominant language c (c
 ## Internal vs External Edges
 
 - Internal resolved imports (EXTRACTED): 111
-- Cross-boundary resolved imports (EXTRACTED): 50
+- Cross-boundary resolved imports (EXTRACTED): 51
 
 ## Connections
 

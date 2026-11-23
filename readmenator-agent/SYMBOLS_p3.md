@@ -3,12 +3,23 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `registry_remove` | function | `gui/ui_render.c:401` | `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)` |
+| `sanitize_utf8_inplace` | function | `gui/ui_render.c:39` | `static void sanitize_utf8_inplace(char *s)` |
+| `seat_caps` | function | `gui/ui_render.c:367` | `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` |
+| `seat_name` | function | `gui/ui_render.c:376` | `static void seat_name(void *d, struct wl_seat *s, const char *name)` |
+| `toplevel_close` | function | `gui/ui_render.c:283` | `static void toplevel_close(void *data, struct xdg_toplevel *t)` |
+| `toplevel_configure` | function | `gui/ui_render.c:274` | `static void toplevel_configure(void *data, struct xdg_toplevel *t,                               ...` |
+| `ui_run_text_view` | function | `gui/ui_render.c:410` | `ui_status ui_run_text_view(const char *title, const char *text, size_t text_len)` |
+| `ui_window` | struct | `gui/ui_render.c:67` | `` |
+| `wm_base_ping` | function | `gui/ui_render.c:260` | `static void wm_base_ping(void *data, struct xdg_wm_base *b, uint32_t serial)` |
+| `xdg_surface_configure` | function | `gui/ui_render.c:266` | `static void xdg_surface_configure(void *data, struct xdg_surface *s, uint32_t serial)` |
 | `ANC_MAX_FRAGMENT` | macro | `include/anchor.h:23` | `#define ANC_MAX_FRAGMENT` |
 | `ANC_MAX_HANDLES` | macro | `include/anchor.h:24` | `#define ANC_MAX_HANDLES` |
 | `FREEDOM_ANCHOR_H` | macro | `include/anchor.h:2` | `#define FREEDOM_ANCHOR_H` |
 | `anc_collect` | function | `include/anchor.h:50` | `size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, size_t cap, size_t *nsub);` |
 | `anc_kind` | enum | `include/anchor.h:26` | `` |
-| `anc_scroll_for` | function | `include/anchor.h:62` | `double anc_scroll_for(double top, double max_scroll);` |
+| `anc_scroll_for` | function | `include/anchor.h:68` | `double anc_scroll_for(double top, double max_scroll);` |
+| `anc_target_box` | function | `include/anchor.h:63` | `int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub, double *top, double *bottom);` |
 | `anc_target_top` | function | `include/anchor.h:57` | `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub, double *top);` |
 | `fit` | function | `include/anchor.h:35` | `* result does not fit (out is then "" when cap > 0). */ size_t anc_percent_decode(const char *in, char *out, size_t...` |
 | `FP_ACCEPT_HEADER_NAV` | macro | `include/anti_fp.h:40` | `#define FP_ACCEPT_HEADER_NAV` |
@@ -220,8 +231,8 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CSS_DECO_UNDERLINE` | macro | `include/css.h:120` | `#define CSS_DECO_UNDERLINE` |
 | `CSS_DISP_INLINE_OUTER` | macro | `include/css.h:74` | `#define CSS_DISP_INLINE_OUTER` |
 | `CSS_DISP_INNER_MASK` | macro | `include/css.h:75` | `#define CSS_DISP_INNER_MASK` |
-| `CSS_DROP_PROP_MAX` | macro | `include/css.h:1091` | `#define CSS_DROP_PROP_MAX` |
-| `CSS_DROP_VAL_MAX` | macro | `include/css.h:1092` | `#define CSS_DROP_VAL_MAX` |
+| `CSS_DROP_PROP_MAX` | macro | `include/css.h:1095` | `#define CSS_DROP_PROP_MAX` |
+| `CSS_DROP_VAL_MAX` | macro | `include/css.h:1096` | `#define CSS_DROP_VAL_MAX` |
 | `CSS_EM_MILLI_MAX` | macro | `include/css.h:522` | `#define CSS_EM_MILLI_MAX` |
 | `CSS_FLEX_FACTOR_MAX` | macro | `include/css.h:466` | `#define CSS_FLEX_FACTOR_MAX` |
 | `CSS_FONT_LIST_MAX` | macro | `include/css.h:107` | `#define CSS_FONT_LIST_MAX` |
@@ -246,18 +257,18 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CSS_LINE_MIN` | macro | `include/css.h:98` | `#define CSS_LINE_MIN` |
 | `CSS_MAX_ATTR_SEL` | macro | `include/css.h:591` | `#define CSS_MAX_ATTR_SEL` |
 | `CSS_MAX_COMPOUNDS` | macro | `include/css.h:587` | `#define CSS_MAX_COMPOUNDS` |
-| `CSS_MAX_KF_STOPS` | macro | `include/css.h:933` | `#define CSS_MAX_KF_STOPS` |
+| `CSS_MAX_KF_STOPS` | macro | `include/css.h:937` | `#define CSS_MAX_KF_STOPS` |
 | `CSS_MAX_PSEUDO_SEL` | macro | `include/css.h:595` | `#define CSS_MAX_PSEUDO_SEL` |
-| `CSS_MEDIA_DEFAULT_HEIGHT` | macro | `include/css.h:1044` | `#define CSS_MEDIA_DEFAULT_HEIGHT` |
-| `CSS_MEDIA_DEFAULT_WIDTH` | macro | `include/css.h:1039` | `#define CSS_MEDIA_DEFAULT_WIDTH` |
+| `CSS_MEDIA_DEFAULT_HEIGHT` | macro | `include/css.h:1048` | `#define CSS_MEDIA_DEFAULT_HEIGHT` |
+| `CSS_MEDIA_DEFAULT_WIDTH` | macro | `include/css.h:1043` | `#define CSS_MEDIA_DEFAULT_WIDTH` |
 | `CSS_NTH_MAX` | macro | `include/css.h:599` | `#define CSS_NTH_MAX` |
 | `CSS_OBJPOS_PACK` | macro | `include/css.h:408` | `#define CSS_OBJPOS_PACK(x_pm, y_pm)` |
 | `CSS_OBJPOS_X` | macro | `include/css.h:409` | `#define CSS_OBJPOS_X(p)` |
 | `CSS_OBJPOS_Y` | macro | `include/css.h:410` | `#define CSS_OBJPOS_Y(p)` |
 | `CSS_PCT_MAX` | macro | `include/css.h:516` | `#define CSS_PCT_MAX` |
-| `CSS_PSEUDO_AFTER` | macro | `include/css.h:1233` | `#define CSS_PSEUDO_AFTER` |
-| `CSS_PSEUDO_BEFORE` | macro | `include/css.h:1232` | `#define CSS_PSEUDO_BEFORE` |
-| `CSS_PSEUDO_PLACEHOLDER` | macro | `include/css.h:1234` | `#define CSS_PSEUDO_PLACEHOLDER` |
+| `CSS_PSEUDO_AFTER` | macro | `include/css.h:1237` | `#define CSS_PSEUDO_AFTER` |
+| `CSS_PSEUDO_BEFORE` | macro | `include/css.h:1236` | `#define CSS_PSEUDO_BEFORE` |
+| `CSS_PSEUDO_PLACEHOLDER` | macro | `include/css.h:1238` | `#define CSS_PSEUDO_PLACEHOLDER` |
 | `CSS_SHADOW_MAX` | macro | `include/css.h:472` | `#define CSS_SHADOW_MAX` |
 | `CSS_SPACING_MAX` | macro | `include/css.h:471` | `#define CSS_SPACING_MAX` |
 | `CSS_SVG_PAINT_NONE` | macro | `include/css.h:106` | `#define CSS_SVG_PAINT_NONE` |
@@ -265,11 +276,11 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `FREEDOM_CSS_H` | macro | `include/css.h:2` | `#define FREEDOM_CSS_H` |
 | `POINTER` | function | `include/css.h:235` | `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);` |
 | `color` | type_alias | `include/css.h:606` | `typedef struct css_style { int color;` |
-| `container` | function | `include/css.h:674` | `* container (Display 3 section 2);` |
+| `container` | function | `include/css.h:678` | `* container (Display 3 section 2);` |
 | `css_align` | enum | `include/css.h:36` | `` |
 | `css_align_kw` | enum | `include/css.h:194` | `` |
 | `css_appearance` | enum | `include/css.h:329` | `` |
-| `css_attr` | struct | `include/css.h:1140` | `` |
+| `css_attr` | struct | `include/css.h:1144` | `` |
 | `css_backface` | enum | `include/css.h:457` | `` |
 | `css_bg_attachment` | enum | `include/css.h:358` | `` |
 | `css_bg_clip` | enum | `include/css.h:349` | `` |
@@ -288,22 +299,22 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `css_cursor` | enum | `include/css.h:240` | `` |
 | `css_direction` | enum | `include/css.h:281` | `` |
 | `css_display` | enum | `include/css.h:44` | `` |
-| `css_drop` | struct | `include/css.h:1099` | `` |
-| `css_drop_cause` | enum | `include/css.h:1086` | `` |
-| `css_drop_log` | struct | `include/css.h:1111` | `` |
-| `css_element` | struct | `include/css.h:1150` | `` |
+| `css_drop` | struct | `include/css.h:1103` | `` |
+| `css_drop_cause` | enum | `include/css.h:1090` | `` |
+| `css_drop_log` | struct | `include/css.h:1115` | `` |
+| `css_element` | struct | `include/css.h:1154` | `` |
 | `css_empty_cells` | enum | `include/css.h:293` | `` |
 | `css_flex_direction` | enum | `include/css.h:182` | `` |
 | `css_flex_wrap` | enum | `include/css.h:188` | `` |
 | `css_float` | enum | `include/css.h:207` | `` |
-| `css_font_face_at` | function | `include/css.h:1274` | `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);` |
-| `css_font_face_count` | function | `include/css.h:1273` | `size_t css_font_face_count(const css_sheet *sheet);` |
+| `css_font_face_at` | function | `include/css.h:1278` | `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);` |
+| `css_font_face_count` | function | `include/css.h:1277` | `size_t css_font_face_count(const css_sheet *sheet);` |
 | `css_font_family` | enum | `include/css.h:126` | `` |
 | `css_font_kerning` | enum | `include/css.h:416` | `` |
 | `css_font_stretch` | enum | `include/css.h:425` | `` |
 | `css_font_variant` | enum | `include/css.h:311` | `` |
 | `css_forced_color_adjust` | enum | `include/css.h:387` | `` |
-| `css_free` | function | `include/css.h:1126` | `void css_free(css_sheet *s);` |
+| `css_free` | function | `include/css.h:1130` | `void css_free(css_sheet *s);` |
 | `css_grid_flow` | enum | `include/css.h:201` | `` |
 | `css_hyphens` | enum | `include/css.h:317` | `` |
 | `css_image_rendering` | enum | `include/css.h:375` | `` |
@@ -311,7 +322,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `css_justify` | enum | `include/css.h:77` | `` |
 | `css_list_pos` | enum | `include/css.h:412` | `` |
 | `css_list_style` | enum | `include/css.h:149` | `` |
-| `css_media` | struct | `include/css.h:1027` | `` |
+| `css_media` | struct | `include/css.h:1031` | `` |
 | `css_mix_blend` | enum | `include/css.h:392` | `` |
 | `css_object_fit` | enum | `include/css.h:400` | `` |
 | `css_overflow` | enum | `include/css.h:230` | `` |
@@ -321,12 +332,12 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `css_position` | enum | `include/css.h:161` | `` |
 | `css_print_color_adjust` | enum | `include/css.h:383` | `` |
 | `css_resize` | enum | `include/css.h:431` | `` |
-| `css_resolve_anim_keyframes` | function | `include/css.h:1282` | `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);` |
+| `css_resolve_anim_keyframes` | function | `include/css.h:1286` | `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);` |
 | `css_scroll_behavior` | enum | `include/css.h:435` | `` |
-| `css_sel` | struct | `include/css.h:1025` | `` |
-| `css_sheet` | type_alias | `include/css.h:1019` | `typedef struct css_sheet css_sheet;` |
-| `css_sheet_uses_containers` | function | `include/css.h:1059` | `int css_sheet_uses_containers(const css_sheet *sheet);` |
-| `css_sheet_uses_counters` | function | `include/css.h:1055` | `int css_sheet_uses_counters(const css_sheet *sheet);` |
+| `css_sel` | struct | `include/css.h:1029` | `` |
+| `css_sheet` | type_alias | `include/css.h:1023` | `typedef struct css_sheet css_sheet;` |
+| `css_sheet_uses_containers` | function | `include/css.h:1063` | `int css_sheet_uses_containers(const css_sheet *sheet);` |
+| `css_sheet_uses_counters` | function | `include/css.h:1059` | `int css_sheet_uses_counters(const css_sheet *sheet);` |
 | `css_status` | enum | `include/css.h:30` | `` |
 | `css_style` | struct | `include/css.h:606` | `` |
 | `css_table_layout` | enum | `include/css.h:305` | `` |
@@ -335,25 +346,25 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `css_text_rendering` | enum | `include/css.h:420` | `` |
 | `css_text_transform` | enum | `include/css.h:132` | `` |
 | `css_touch_action` | enum | `include/css.h:439` | `` |
-| `css_ua_heading_em` | function | `include/css.h:1258` | `double css_ua_heading_em(int level);` |
+| `css_ua_heading_em` | function | `include/css.h:1262` | `double css_ua_heading_em(int level);` |
 | `css_user_select` | enum | `include/css.h:323` | `` |
 | `css_valign` | enum | `include/css.h:137` | `` |
 | `css_visibility` | enum | `include/css.h:221` | `` |
 | `css_white_space` | enum | `include/css.h:143` | `` |
 | `css_word_break` | enum | `include/css.h:267` | `` |
-| `cvr_table` | struct | `include/css.h:1222` | `` |
-| `declared` | function | `include/css.h:898` | `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...` |
-| `element` | function | `include/css.h:903` | `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...` |
-| `family` | function | `include/css.h:719` | `* LOCAL family (spec/text_shape.md section 7);` |
-| `inherited_px` | function | `include/css.h:1246` | `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...` |
-| `name` | function | `include/css.h:1263` | `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...` |
-| `order` | function | `include/css.h:1129` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
-| `palette` | function | `include/css.h:1076` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
-| `prefers_dark` | type_alias | `include/css.h:1026` | `typedef struct css_media { int prefers_dark;` |
-| `prop` | type_alias | `include/css.h:1099` | `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];` |
-| `scaleY` | function | `include/css.h:894` | `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);` |
-| `slots` | function | `include/css.h:910` | `* parse time into ALL seven slots (singular matrices fail closed);` |
-| `translate` | function | `include/css.h:893` | `* translate()/translateX()/translateY();` |
+| `cvr_table` | struct | `include/css.h:1226` | `` |
+| `declared` | function | `include/css.h:902` | `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...` |
+| `element` | function | `include/css.h:907` | `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...` |
+| `family` | function | `include/css.h:723` | `* LOCAL family (spec/text_shape.md section 7);` |
+| `inherited_px` | function | `include/css.h:1250` | `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...` |
+| `name` | function | `include/css.h:1267` | `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...` |
+| `order` | function | `include/css.h:1133` | `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....` |
+| `palette` | function | `include/css.h:1080` | `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...` |
+| `prefers_dark` | type_alias | `include/css.h:1030` | `typedef struct css_media { int prefers_dark;` |
+| `prop` | type_alias | `include/css.h:1103` | `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];` |
+| `scaleY` | function | `include/css.h:898` | `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);` |
+| `slots` | function | `include/css.h:914` | `* parse time into ALL seven slots (singular matrices fail closed);` |
+| `translate` | function | `include/css.h:897` | `* translate()/translateX()/translateY();` |
 | `verbatim` | function | `include/css.h:92` | `* the quoted row strings verbatim (flex_layout parses them);` |
 | `CAR_INLINE_SPEC` | macro | `include/css_atrule.h:18` | `#define CAR_INLINE_SPEC` |
 | `CAR_LAYER_NAME_MAX` | macro | `include/css_atrule.h:17` | `#define CAR_LAYER_NAME_MAX` |
@@ -396,8 +407,9 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CCH_CHAIN_MAX` | macro | `include/css_chain.h:26` | `#define CCH_CHAIN_MAX` |
 | `CCH_NTH_MAX` | macro | `include/css_chain.h:28` | `#define CCH_NTH_MAX` |
 | `CCH_SIB_MAX` | macro | `include/css_chain.h:27` | `#define CCH_SIB_MAX` |
+| `COMPARED` | function | `include/css_chain.h:94` | `* pointer is only ever COMPARED (a detached element is never freed while the document * lives). Returns 1 when the...` |
 | `FREEDOM_CSS_CHAIN_H` | macro | `include/css_chain.h:2` | `#define FREEDOM_CSS_CHAIN_H` |
-| `box` | function | `include/css_chain.h:92` | `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...` |
+| `box` | function | `include/css_chain.h:99` | `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...` |
 | `cch_element_matches` | function | `include/css_chain.h:82` | `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` |
 | `cch_path` | type_alias | `include/css_chain.h:69` | `typedef struct cch_path cch_path;` |
 | `cch_path_free` | function | `include/css_chain.h:71` | `void cch_path_free(cch_path *pa);` |
@@ -448,10 +460,10 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CSS_WIDE_PROBE_DECLS` | macro | `include/css_decl.h:35` | `#define CSS_WIDE_PROBE_DECLS` |
 | `FREEDOM_CSS_DECL_H` | macro | `include/css_decl.h:2` | `#define FREEDOM_CSS_DECL_H` |
 | `contiguous` | function | `include/css_decl.h:65` | `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...` |
-| `css_decl` | struct | `include/css_decl.h:241` | `` |
+| `css_decl` | struct | `include/css_decl.h:243` | `` |
 | `order` | function | `include/css_decl.h:50` | `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);` |
 | `part` | function | `include/css_decl.h:216` | `* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM...` |
-| `prop` | type_alias | `include/css_decl.h:240` | `typedef struct css_decl { int prop;` |
+| `prop` | type_alias | `include/css_decl.h:242` | `typedef struct css_decl { int prop;` |
 | `CG_LEN_UNSET` | macro | `include/css_gradient.h:22` | `#define CG_LEN_UNSET` |
 | `FREEDOM_CSS_GRADIENT_H` | macro | `include/css_gradient.h:2` | `#define FREEDOM_CSS_GRADIENT_H` |
 | `cg_expand_background` | function | `include/css_gradient.h:17` | `int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t...` |
@@ -484,17 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `cix_entry` | struct | `include/css_index.h:18` | `` |
 | `cix_free` | function | `include/css_index.h:40` | `void cix_free(cix_index *idx);` |
 | `cix_index` | struct | `include/css_index.h:23` | `` |
-| `index` | function | `include/css_index.h:44` | `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...` |
-| `key` | type_alias | `include/css_index.h:17` | `typedef struct cix_entry { uint64_t key;` |
-| `CL_FALLBACK_CAP_RATIO` | macro | `include/css_length.h:65` | `#define CL_FALLBACK_CAP_RATIO` |
-| `CL_FALLBACK_CH_RATIO` | macro | `include/css_length.h:64` | `#define CL_FALLBACK_CH_RATIO` |
-| `CL_FALLBACK_EX_RATIO` | macro | `include/css_length.h:57` | `#define CL_FALLBACK_EX_RATIO` |
-| `CL_FALLBACK_IC_RATIO` | macro | `include/css_length.h:66` | `#define CL_FALLBACK_IC_RATIO` |
-| `CL_INITIAL_FONT_SIZE` | macro | `include/css_length.h:39` | `#define CL_INITIAL_FONT_SIZE` |
-| `CL_MAX_TOKEN` | macro | `include/css_length.h:33` | `#define CL_MAX_TOKEN` |
-| `CL_NORMAL_LINE_RATIO` | macro | `include/css_length.h:45` | `#define CL_NORMAL_LINE_RATIO` |
-| `FREEDOM_CSS_LENGTH_H` | macro | `include/css_length.h:2` | `#define FREEDOM_CSS_LENGTH_H` |
-| `cl_ctx` | struct | `include/css_length.h:91` | `` |
-| `cl_is_length_unit` | function | `include/css_length.h:253` | `int cl_is_length_unit(const char *unit, size_t unit_len);` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

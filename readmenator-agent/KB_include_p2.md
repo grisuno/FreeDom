@@ -13,13 +13,14 @@ Previous: [KB_include.md](KB_include.md)
   - `cch_path_free` (function, line 71) `void cch_path_free(cch_path *pa);`
   - `cch_element_matches` (function, line 82) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);`
   - `lacks` (function, line 86) `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...`
-  - `box` (function, line 92) `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
+  - `COMPARED` (function, line 94) `* pointer is only ever COMPARED (a detached element is never freed while the document * lives). Returns 1 when the...`
+  - `box` (function, line 99) `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
   - `FREEDOM_CSS_CHAIN_H` (macro, line 2) `#define FREEDOM_CSS_CHAIN_H`
   - `CCH_CHAIN_MAX` (macro, line 26) `#define CCH_CHAIN_MAX`
   - `CCH_SIB_MAX` (macro, line 27) `#define CCH_SIB_MAX`
   - `CCH_NTH_MAX` (macro, line 28) `#define CCH_NTH_MAX`
 - Depends on: `include/css.h`, `include/css_select.h`
-- Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`, `tests/test_page_view.c`
+- Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_page_view.c`
 
 ## include/css_color.h
 - Doc: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for...
@@ -80,8 +81,8 @@ Previous: [KB_include.md](KB_include.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_decl` (struct, line 241)
-  - `prop` (type_alias, line 240) `typedef struct css_decl { int prop;`
+  - `css_decl` (struct, line 243)
+  - `prop` (type_alias, line 242) `typedef struct css_decl { int prop;`
   - `order` (function, line 50) `* The four margin slots are contiguous in CSS shorthand order (top,right,bottom, * left);`
   - `contiguous` (function, line 65) `* contiguous (dx,dy,color) so expand_shadow writes them as a group. */ P_FONTFAMILY, P_TEXTTRANSFORM...`
   - `part` (function, line 216) `* each P_CLIP_* edge adds to its px part (the other half of a <length-percentage>). */ P_CLIP_TOP_PM...`
@@ -224,46 +225,46 @@ Previous: [KB_include.md](KB_include.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `css_attr_match` (struct, line 88)
-  - `css_sub_sel` (struct, line 95)
-  - `css_pseudo_match` (struct, line 112)
-  - `css_compound` (struct, line 122)
-  - `css_sel` (struct, line 139)
-  - `name` (type_alias, line 88) `typedef struct css_attr_match { char name[CSS_TOK_MAX];`
-  - `tag` (type_alias, line 94) `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];`
-  - `kind` (type_alias, line 112) `typedef struct css_pseudo_match { int kind;`
-  - `tag` (type_alias, line 122) `typedef struct css_compound { char tag[CSS_TOK_MAX];`
-  - `comb` (type_alias, line 139) `typedef struct css_sel { int comb[CSS_MAX_COMPOUNDS];`
-  - `csel_anc_reject` (function, line 195) `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
-  - `csel_lower_ch` (function, line 240) `static inline char csel_lower_ch(char c)`
-  - `csel_ci_eq` (function, line 244) `static inline int csel_ci_eq(const char *a, const char *b)`
-  - `csel_ci_starts` (function, line 253) `static inline int csel_ci_starts(const char *a, const char *p)`
-  - `csel_span_eq` (function, line 262) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
-  - `csel_substr` (function, line 273) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
-  - `csel_ident_ch` (function, line 281) `static inline int csel_ident_ch(char c)`
-  - `csel_compact_size` (function, line 168) `size_t csel_compact_size(int nparts);`
-  - `csel_compact_dup` (function, line 173) `css_sel *csel_compact_dup(const css_sel *sel);`
-  - `csel_parse` (function, line 177) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);`
-  - `csel_matches` (function, line 186) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...`
-  - `csel_element_feature_bits` (function, line 194) `unsigned long long csel_element_feature_bits(const css_element *e);`
-  - `conservative` (function, line 202) `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
-  - `identifier` (function, line 208) `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
-  - `csel_emit_utf8` (function, line 220) `size_t csel_emit_utf8(unsigned int cp, char *out);`
-  - `csel_unescape` (function, line 222) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);`
-  - `csel_escape_len` (function, line 224) `size_t csel_escape_len(const char *s, size_t i, size_t b);`
-  - `csel_ident_fold` (function, line 226) `void csel_ident_fold(const char *src, size_t len, char *dst);`
-  - `csel_ident_eq` (function, line 228) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);`
-  - `csel_read_ident` (function, line 231) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);`
-  - `csel_decl_end` (function, line 236) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);`
+  - `css_attr_match` (struct, line 89)
+  - `css_sub_sel` (struct, line 96)
+  - `css_pseudo_match` (struct, line 113)
+  - `css_compound` (struct, line 123)
+  - `css_sel` (struct, line 140)
+  - `name` (type_alias, line 89) `typedef struct css_attr_match { char name[CSS_TOK_MAX];`
+  - `tag` (type_alias, line 95) `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];`
+  - `kind` (type_alias, line 113) `typedef struct css_pseudo_match { int kind;`
+  - `tag` (type_alias, line 123) `typedef struct css_compound { char tag[CSS_TOK_MAX];`
+  - `comb` (type_alias, line 140) `typedef struct css_sel { int comb[CSS_MAX_COMPOUNDS];`
+  - `csel_anc_reject` (function, line 196) `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
+  - `csel_lower_ch` (function, line 241) `static inline char csel_lower_ch(char c)`
+  - `csel_ci_eq` (function, line 245) `static inline int csel_ci_eq(const char *a, const char *b)`
+  - `csel_ci_starts` (function, line 254) `static inline int csel_ci_starts(const char *a, const char *p)`
+  - `csel_span_eq` (function, line 263) `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)`
+  - `csel_substr` (function, line 274) `static inline int csel_substr(const char *hay, const char *needle, int ci)`
+  - `csel_ident_ch` (function, line 282) `static inline int csel_ident_ch(char c)`
+  - `csel_compact_size` (function, line 169) `size_t csel_compact_size(int nparts);`
+  - `csel_compact_dup` (function, line 174) `css_sel *csel_compact_dup(const css_sel *sel);`
+  - `csel_parse` (function, line 178) `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);`
+  - `csel_matches` (function, line 187) `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...`
+  - `csel_element_feature_bits` (function, line 195) `unsigned long long csel_element_feature_bits(const css_element *e);`
+  - `conservative` (function, line 203) `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
+  - `identifier` (function, line 209) `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
+  - `csel_emit_utf8` (function, line 221) `size_t csel_emit_utf8(unsigned int cp, char *out);`
+  - `csel_unescape` (function, line 223) `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);`
+  - `csel_escape_len` (function, line 225) `size_t csel_escape_len(const char *s, size_t i, size_t b);`
+  - `csel_ident_fold` (function, line 227) `void csel_ident_fold(const char *src, size_t len, char *dst);`
+  - `csel_ident_eq` (function, line 229) `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);`
+  - `csel_read_ident` (function, line 232) `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);`
+  - `csel_decl_end` (function, line 237) `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);`
   - `FREEDOM_CSS_SELECT_H` (macro, line 2) `#define FREEDOM_CSS_SELECT_H`
   - `CSS_TOK_MAX` (macro, line 27) `#define CSS_TOK_MAX`
   - `CSS_MAX_CLASSES_PER_SEL` (macro, line 28) `#define CSS_MAX_CLASSES_PER_SEL`
-  - `CSS_MAX_SUB_SELS` (macro, line 83) `#define CSS_MAX_SUB_SELS`
-  - `CSS_SUB_MAX_ATTRS` (macro, line 84) `#define CSS_SUB_MAX_ATTRS`
-  - `CSS_SUB_MAX_PSEUDOS` (macro, line 85) `#define CSS_SUB_MAX_PSEUDOS`
-  - `CSEL_FOLD_PREFIX` (macro, line 215) `#define CSEL_FOLD_PREFIX`
-  - `CSEL_FOLD_MARK` (macro, line 216) `#define CSEL_FOLD_MARK`
-  - `CSEL_IDENT_SCRATCH` (macro, line 217) `#define CSEL_IDENT_SCRATCH`
+  - `CSS_MAX_SUB_SELS` (macro, line 84) `#define CSS_MAX_SUB_SELS`
+  - `CSS_SUB_MAX_ATTRS` (macro, line 85) `#define CSS_SUB_MAX_ATTRS`
+  - `CSS_SUB_MAX_PSEUDOS` (macro, line 86) `#define CSS_SUB_MAX_PSEUDOS`
+  - `CSEL_FOLD_PREFIX` (macro, line 216) `#define CSEL_FOLD_PREFIX`
+  - `CSEL_FOLD_MARK` (macro, line 217) `#define CSEL_FOLD_MARK`
+  - `CSEL_IDENT_SCRATCH` (macro, line 218) `#define CSEL_IDENT_SCRATCH`
 - Depends on: `include/css.h`
 - Imported by: `fuzz/fuzz_css.c`, `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `src/sheet_cache.c`, `tests/test_css.c`
 

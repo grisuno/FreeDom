@@ -140,14 +140,18 @@ static void test_float_pack_m_holy_grail_pull_u...`
 - Layer: testing
 - Language: c
 - Symbols:
-  - `on_top_msg` (function, line 38) `static void on_top_msg(void *ctx, const char *data, size_t len)`
-  - `stub_fetch` (function, line 43) `static int stub_fetch(void *ctx, const char *method, const char *url, const char *body, size_t bl...`
-  - `test_open_route_both_ways_and_drop_mismatch` (function, line 56) `static void test_open_route_both_ways_and_drop_mismatch(void **state)`
-  - `test_frame_view_is_exposed_for_painting` (function, line 90) `static void test_frame_view_is_exposed_for_painting(void **state)`
-  - `test_removing_iframe_closes_worker` (function, line 112) `static void test_removing_iframe_closes_worker(void **state)`
-  - `test_failed_fetch_leaves_no_frame` (function, line 137) `static void test_failed_fetch_leaves_no_frame(void **state)`
-  - `test_bad_args` (function, line 153) `static void test_bad_args(void **state)`
-  - `main` (function, line 162) `int main(int argc, char **argv)`
+  - `on_top_msg` (function, line 39) `static void on_top_msg(void *ctx, const char *data, size_t len)`
+  - `stub_fetch` (function, line 44) `static int stub_fetch(void *ctx, const char *method, const char *url, const char *body, size_t bl...`
+  - `test_open_route_both_ways_and_drop_mismatch` (function, line 57) `static void test_open_route_both_ways_and_drop_mismatch(void **state)`
+  - `test_frame_view_is_exposed_for_painting` (function, line 91) `static void test_frame_view_is_exposed_for_painting(void **state)`
+  - `test_removing_iframe_closes_worker` (function, line 113) `static void test_removing_iframe_closes_worker(void **state)`
+  - `test_failed_fetch_leaves_no_frame` (function, line 138) `static void test_failed_fetch_leaves_no_frame(void **state)`
+  - `sleep_ms` (function, line 157) `static void sleep_ms(long ms)`
+  - `slow_stub_fetch` (function, line 162) `static int slow_stub_fetch(void *ctx, const char *method, const char *url, const char *body, size...`
+  - `ms_since` (function, line 168) `static long ms_since(const struct timespec *a)`
+  - `test_async_frames_load_off_thread` (function, line 174) `static void test_async_frames_load_off_thread(void **state)`
+  - `test_bad_args` (function, line 214) `static void test_bad_args(void **state)`
+  - `main` (function, line 223) `int main(int argc, char **argv)`
   - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
 - Depends on: `include/frame_host.h`, `include/tab.h`
 
@@ -281,20 +285,21 @@ static void test_dump_layout_c...`
   - `test_rejects_http_url` (function, line 4018) `static void test_rejects_http_url(void **state)`
   - `white` (function, line 4080) `* and not white (the old behaviour where only text rows got background fills). */
 static void tes...`
-  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 4176) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
-  - `test_download_png_flex_container_paints_one_band` (function, line 4201) `static void test_download_png_flex_container_paints_one_band(void **state)`
-  - `test_download_png_inline_block_shrinks_and_centers` (function, line 4221) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
-  - `test_download_png_inline_svg_path_and_drops_image` (function, line 4265) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
-  - `test_dump_timings_prints_stages` (function, line 4281) `static void test_dump_timings_prints_stages(void **state)`
-  - `test_dump_layout_shrink_pill_nested_container` (function, line 4311) `static void test_dump_layout_shrink_pill_nested_container(void **state)`
-  - `test_dump_layout_inline_input_shares_line` (function, line 4348) `static void test_dump_layout_inline_input_shares_line(void **state)`
-  - `test_dump_layout_oof_label_does_not_widen_nested_container` (function, line 4394) `static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state)`
-  - `test_dump_layout_br_after_block_is_a_line` (function, line 4429) `static void test_dump_layout_br_after_block_is_a_line(void **state)`
-  - `test_dump_layout_flex_item_contains_block_margins` (function, line 4449) `static void test_dump_layout_flex_item_contains_block_margins(void **state)`
-  - `test_dump_layout_flex_definite_height_centres_item` (function, line 4474) `static void test_dump_layout_flex_definite_height_centres_item(void **state)`
-  - `test_download_png_text_color_alpha_blends` (function, line 4498) `static void test_download_png_text_color_alpha_blends(void **state)`
-  - `test_dump_layout_ua_margin_scales_with_font_size` (function, line 4535) `static void test_dump_layout_ua_margin_scales_with_font_size(void **state)`
-  - `main` (function, line 4581) `int main(void)`
+  - `test_png_leading_inline_block_shares_line` (function, line 4186) `static void test_png_leading_inline_block_shares_line(void **state)`
+  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 4206) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
+  - `test_download_png_flex_container_paints_one_band` (function, line 4231) `static void test_download_png_flex_container_paints_one_band(void **state)`
+  - `test_download_png_inline_block_shrinks_and_centers` (function, line 4251) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
+  - `test_download_png_inline_svg_path_and_drops_image` (function, line 4295) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
+  - `test_dump_timings_prints_stages` (function, line 4311) `static void test_dump_timings_prints_stages(void **state)`
+  - `test_dump_layout_shrink_pill_nested_container` (function, line 4341) `static void test_dump_layout_shrink_pill_nested_container(void **state)`
+  - `test_dump_layout_inline_input_shares_line` (function, line 4378) `static void test_dump_layout_inline_input_shares_line(void **state)`
+  - `test_dump_layout_oof_label_does_not_widen_nested_container` (function, line 4424) `static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state)`
+  - `test_dump_layout_br_after_block_is_a_line` (function, line 4459) `static void test_dump_layout_br_after_block_is_a_line(void **state)`
+  - `test_dump_layout_flex_item_contains_block_margins` (function, line 4479) `static void test_dump_layout_flex_item_contains_block_margins(void **state)`
+  - `test_dump_layout_flex_definite_height_centres_item` (function, line 4504) `static void test_dump_layout_flex_definite_height_centres_item(void **state)`
+  - `test_download_png_text_color_alpha_blends` (function, line 4528) `static void test_download_png_text_color_alpha_blends(void **state)`
+  - `test_dump_layout_ua_margin_scales_with_font_size` (function, line 4565) `static void test_dump_layout_ua_margin_scales_with_font_size(void **state)`
+  - `main` (function, line 4611) `int main(void)`
   - `rows` (function, line 1602) `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);`
   - `bottom` (function, line 3539) `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...`
   - `_DEFAULT_SOURCE` (macro, line 1) `#define _DEFAULT_SOURCE`
@@ -306,7 +311,20 @@ static void tes...`
   - `NAV_CSS` (macro, line 2758) `#define NAV_CSS`
 - Depends on: `include/image_decode.h`
 
+## tests/test_group_index.c
+- Doc: Tests for group_index (spec/group_index.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_groups_stable_and_excludes_out_of_range` (function, line 10) `static void test_groups_stable_and_excludes_out_of_range(void **state)`
+  - `test_empty_input` (function, line 24) `static void test_empty_input(void **state)`
+  - `test_no_keys` (function, line 31) `static void test_no_keys(void **state)`
+  - `test_invalid_arguments` (function, line 40) `static void test_invalid_arguments(void **state)`
+  - `main` (function, line 50) `int main(void)`
+- Depends on: `include/group_index.h`
+
 ## tests/test_hls.c
+- Doc: test_unterminated_tag_stays_in_bounds: static void test_segment_single_packet_and_bmff(void...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -325,7 +343,16 @@ static void tes...`
   - `test_resolve_url_relative` (function, line 190) `static void test_resolve_url_relative(void **state)`
   - `test_resolve_url_deep_relative` (function, line 200) `static void test_resolve_url_deep_relative(void **state)`
   - `test_handles_windows_line_endings` (function, line 209) `static void test_handles_windows_line_endings(void **state)`
-  - `main` (function, line 219) `int main(void)`
+  - `fill_ts` (function, line 219) `static void fill_ts(unsigned char *b, size_t off, size_t packets)`
+  - `test_segment_error_status_rejected` (function, line 226) `static void test_segment_error_status_rejected(void **state)`
+  - `test_segment_text_body_rejected` (function, line 237) `static void test_segment_text_body_rejected(void **state)`
+  - `test_segment_ts_behind_fake_png` (function, line 249) `static void test_segment_ts_behind_fake_png(void **state)`
+  - `test_segment_single_packet_and_bmff` (function, line 259) `static void test_segment_single_packet_and_bmff(void **state)`
+  - `test_unterminated_tag_stays_in_bounds` (function, line 273) `static void test_unterminated_tag_stays_in_bounds(void **state)`
+  - `mirror_pl` (function, line 293) `static hls_playlist *mirror_pl(void)`
+  - `test_mirror_uses_declared_sibling_hosts` (function, line 307) `static void test_mirror_uses_declared_sibling_hosts(void **state)`
+  - `test_mirror_rejects_bad_inputs` (function, line 321) `static void test_mirror_rejects_bad_inputs(void **state)`
+  - `main` (function, line 337) `int main(void)`
 - Depends on: `include/hls.h`
 
 ## tests/test_host_conf.c

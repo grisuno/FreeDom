@@ -1,5 +1,22 @@
-# API (page 9 of 13)
+# API (page 9 of 14)
 Previous: [API_p8.md](API_p8.md)
+
+## src/find_text.c
+Depends on: `include/find_text.h`
+- `ft_fold` (function) `src/find_text.c:13` `uint32_t ft_fold(uint32_t cp)`
+- `is_ws` (function) `src/find_text.c:33` `static int is_ws(uint32_t cp)`
+- `decode` (function) `src/find_text.c:40` `static size_t decode(const unsigned char *s, size_t n, uint32_t *cp)` -- if (cp >= 0x391u && cp <= 0x3A9u && cp != 0x3A2u) return cp + 0x20u; if (cp == 0x3C2u) return 0x3C3u...
+- `ft_compile` (function) `src/find_text.c:59` `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap)`
+- `piece_len` (function) `src/find_text.c:78` `static size_t piece_len(const ft_piece *p)`
+- `settle` (function) `src/find_text.c:81` `static int settle(const ft_piece *p, size_t n, ft_pos *pos)` -- if (is_ws(cp)) { pending_space = (n > 0); continue; } if (pending_space) { if (n + 1 >= cap) break; out[n++] = ' '...
+- `peek` (function) `src/find_text.c:92` `static uint32_t peek(const ft_piece *p, ft_pos pos, size_t *adv)` -- static size_t piece_len(const ft_piece *p) { return p->text != NULL ? p->len : 0; } /* Moves pos onto a readable byte.
+- `match_at` (function) `src/find_text.c:100` `static int match_at(const ft_piece *p, size_t n, ft_pos s, const uint32_t *q, size_t qn,
+        ...` -- if (pos->piece < n && p[pos->piece].gap_before) gap = 1; } return pos->piece < n ? gap : -1; } /* Reads the code...
+- `ft_search` (function) `src/find_text.c:127` `ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t *q, size_t qn,
+             ...`
+- `ft_spans` (function) `src/find_text.c:158` `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm,
+                f...`
+- `ft_step` (function) `src/find_text.c:180` `long ft_step(long cur, size_t n, int dir)`
 
 ## src/flex_layout.c
 Depends on: `include/flex_layout.h`
@@ -91,21 +108,28 @@ Depends on: `include/frame_clock.h`
 
 ## src/frame_host.c
 Depends on: `include/frame_broker.h`, `include/frame_host.h`
-- `fh_new` (function) `src/frame_host.c:35` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
+- `thread` (function) `src/frame_host.c:16` `* thread (fh_set_async);`
+- `fh_new` (function) `src/frame_host.c:54` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
                 fh_top_...`
-- `slot_release_view` (function) `src/frame_host.c:47` `static void slot_release_view(fh_slot *sl)`
-- `reap` (function) `src/frame_host.c:55` `static void reap(fh_host *h)` -- h->fetch = fetch; h->fetch_ctx = fetch_ctx; h->top_msg = top_msg; h->top_ctx = top_ctx; for (int i = 0; i <...
-- `fh_free` (function) `src/frame_host.c:67` `void fh_free(fh_host *h)`
-- `fh_count` (function) `src/frame_host.c:76` `int fh_count(const fh_host *h)`
-- `load_frame` (function) `src/frame_host.c:85` `static void load_frame(fh_host *h, int id, const char *url)` -- Loads the document of frame `id` (already registered in the table).
-- `find_child` (function) `src/frame_host.c:130` `static int find_child(const fh_host *h, int parent, int token)`
-- `token_seen_by` (function) `src/frame_host.c:138` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
-- `post_op` (function) `src/frame_host.c:144` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
-- `apply_ops` (function) `src/frame_host.c:199` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
-- `fh_apply_top` (function) `src/frame_host.c:222` `void fh_apply_top(fh_host *h, const tab_page *page)`
-- `fh_tick` (function) `src/frame_host.c:227` `int fh_tick(fh_host *h, int elapsed_ms)`
-- `fh_generation` (function) `src/frame_host.c:251` `unsigned fh_generation(const fh_host *h)`
-- `fh_frame_view` (function) `src/frame_host.c:253` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
+- `slot_release_view` (function) `src/frame_host.c:66` `static void slot_release_view(fh_slot *sl)`
+- `job_destroy` (function) `src/frame_host.c:73` `static void job_destroy(fh_job *j)`
+- `job_run` (function) `src/frame_host.c:83` `static void job_run(fh_job *j)` -- free(sl->url); sl->url = NULL; } static void job_destroy(fh_job *j) { if (j == NULL) return; if (j->t != NULL)...
+- `job_main` (function) `src/frame_host.c:105` `static void *job_main(void *arg)`
+- `job_abandon` (function) `src/frame_host.c:117` `static void job_abandon(fh_job *j)` -- } static void *job_main(void *arg) { fh_job *j = (fh_job *)arg; job_run(j); pthread_mutex_lock(&j->mu); j->done = 1...
+- `reap` (function) `src/frame_host.c:129` `static void reap(fh_host *h)` -- /* Owner thread: forget a job; a running one finishes and frees itself. static void job_abandon(fh_job *j) { if (j...
+- `fh_free` (function) `src/frame_host.c:145` `void fh_free(fh_host *h)`
+- `fh_count` (function) `src/frame_host.c:156` `int fh_count(const fh_host *h)`
+- `integrate` (function) `src/frame_host.c:165` `static void integrate(fh_host *h, fh_job *j)` -- Installs a finished load into slot `id` and processes the ops of its load.
+- `collect_jobs` (function) `src/frame_host.c:211` `static int collect_jobs(fh_host *h)` -- memcpy(j->url, url, ul + 1); j->fetch = h->fetch; j->fetch_ctx = h->fetch_ctx; j->id = id; if (h->async) {...
+- `fh_set_async` (function) `src/frame_host.c:227` `void fh_set_async(fh_host *h, int on)`
+- `find_child` (function) `src/frame_host.c:231` `static int find_child(const fh_host *h, int parent, int token)`
+- `token_seen_by` (function) `src/frame_host.c:239` `static int token_seen_by(const fh_host *h, int dest, int from)` -- Token a receiving frame knows `from` by: from's own token when it is a direct child, otherwise * that of the...
+- `post_op` (function) `src/frame_host.c:245` `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
+- `apply_ops` (function) `src/frame_host.c:300` `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
+- `fh_apply_top` (function) `src/frame_host.c:323` `void fh_apply_top(fh_host *h, const tab_page *page)`
+- `fh_tick` (function) `src/frame_host.c:328` `int fh_tick(fh_host *h, int elapsed_ms)`
+- `fh_generation` (function) `src/frame_host.c:353` `unsigned fh_generation(const fh_host *h)`
+- `fh_frame_view` (function) `src/frame_host.c:355` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
 
 ## src/freebug.c
 Depends on: `include/freebug.h`
@@ -144,45 +168,57 @@ Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`,
 - `gets` (function) `src/freedom.c:482` `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
 - `headless_fetch` (function) `src/freedom.c:486` `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...` -- tab_fetch_fn for the headless renderer: a policy-checked subresource fetch for page XHR/fetch and external <script...
-- `foldback_cookies` (function) `src/freedom.c:573` `static void foldback_cookies(const char *url, const char *jar)` -- Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set...
-- `print_css_drops` (function) `src/freedom.c:597` `static void print_css_drops(const char *html, size_t len)` -- Prints the author-CSS drop report for `html`, sorted by occurrence count.
-- `hl_font_stash_free` (function) `src/freedom.c:642` `static void hl_font_stash_free(hl_font_stash *s)`
-- `hl_css_sink` (function) `src/freedom.c:655` `static void hl_css_sink(void *vctx, const char *url,
+- `foldback_cookies` (function) `src/freedom.c:575` `static void foldback_cookies(const char *url, const char *jar)` -- Folds a page's document.cookie jar ("a=1; b=2") back into the ephemeral network * jar, one pair at a time, so JS-set...
+- `print_css_drops` (function) `src/freedom.c:599` `static void print_css_drops(const char *html, size_t len)` -- Prints the author-CSS drop report for `html`, sorted by occurrence count.
+- `hl_font_stash_free` (function) `src/freedom.c:644` `static void hl_font_stash_free(hl_font_stash *s)`
+- `hl_css_sink` (function) `src/freedom.c:657` `static void hl_css_sink(void *vctx, const char *url,
                         const char *body, si...` -- tab_css_sink_fn for headless: retains served 2xx CSS bodies (serial and pool paths alike) with an absolute https...
-- `hl_font_fetch` (function) `src/freedom.c:692` `static int hl_font_fetch(void *vctx, const char *url,
+- `hl_font_fetch` (function) `src/freedom.c:694` `static int hl_font_fetch(void *vctx, const char *url,
                          int *out_status, c...` -- wf_fetch_fn around the headless policy gate (font bytes download like any * other subresource of this page). data...
-- `render_page` (function) `src/freedom.c:720` `static int render_page(const char *html, size_t len, const char *top_url,
+- `render_page` (function) `src/freedom.c:722` `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-- `pool` (function) `src/freedom.c:787` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-- `first` (function) `src/freedom.c:801` `* always cleared first (fetch_and_render may paint several pages per
+- `pool` (function) `src/freedom.c:789` `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+- `first` (function) `src/freedom.c:803` `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-- `only` (function) `src/freedom.c:873` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-- `sf_reason` (function) `src/freedom.c:999` `static const char *sf_reason(sf_status ss)`
-- `fetch_and_render_one` (function) `src/freedom.c:1020` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
-- `BLOCKED` (function) `src/freedom.c:1048` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
-- `elsewhere` (function) `src/freedom.c:1083` `* page whose script immediately forwards elsewhere (e.g. a search engine's
+- `only` (function) `src/freedom.c:875` `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+- `sf_reason` (function) `src/freedom.c:1001` `static const char *sf_reason(sf_status ss)`
+- `fetch_and_render_one` (function) `src/freedom.c:1023` `static int fetch_and_render_one(const char *url, char **out_nav)` -- Fetches one url with secure_fetch and renders the result.
+- `BLOCKED` (function) `src/freedom.c:1051` `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+- `elsewhere` (function) `src/freedom.c:1086` `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-- `parent` (function) `src/freedom.c:1109` `* gated by the parent (ln_resolve: a local target stays under the document's
+- `parent` (function) `src/freedom.c:1112` `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-- `run_headless` (function) `src/freedom.c:1146` `static int run_headless(const char *target)`
-- `video_fetch_with_fallback` (function) `src/freedom.c:1183` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+- `run_headless` (function) `src/freedom.c:1149` `static int run_headless(const char *target)`
+- `video_fetch_with_fallback` (function) `src/freedom.c:1186` `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
-- `run_dump_video` (function) `src/freedom.c:1294` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
-- `main` (function) `src/freedom.c:1313` `int main(int argc, char **argv)`
+- `run_dump_video` (function) `src/freedom.c:1297` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
+- `main` (function) `src/freedom.c:1316` `int main(int argc, char **argv)`
+
+## src/group_index.c
+Depends on: `include/group_index.h`
+- `key_ok` (function) `src/group_index.c:6` `static int key_ok(int k, size_t nkeys)`
+- `gi_build` (function) `src/group_index.c:10` `size_t gi_build(const int *keys, size_t n, size_t nkeys, size_t *offs, size_t *items)`
 
 ## src/hls.c
-Depends on: `include/hls.h`
-- `last_char` (function) `src/hls.c:38` `static const char *last_char(const char *s, size_t n, int c)` -- Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not found.
-- `name` (function) `src/hls.c:46` `* attr is the attribute name (e.g. "BANDWIDTH=");`
-- `parse_attr_long` (function) `src/hls.c:48` `static int parse_attr_long(const char *attrs, const char *end,
+Depends on: `include/hls.h`, `include/request_policy.h`
+- `last_char` (function) `src/hls.c:43` `static const char *last_char(const char *s, size_t n, int c)` -- Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not found.
+- `name` (function) `src/hls.c:51` `* attr is the attribute name (e.g. "BANDWIDTH=");`
+- `parse_attr_long` (function) `src/hls.c:53` `static int parse_attr_long(const char *attrs, const char *end,
                            const c...` -- Extracts a named attribute value from an #EXT-X-STREAM-INF attribute string. attr is the attribute name (e.g....
-- `parse_attr_resolution` (function) `src/hls.c:62` `static void parse_attr_resolution(const char *attrs, const char *end,
+- `parse_attr_resolution` (function) `src/hls.c:67` `static void parse_attr_resolution(const char *attrs, const char *end,
                            ...` -- static int parse_attr_long(const char *attrs, const char *end, const char *attr, long *val) { size_t alen =...
-- `hls_parse` (function) `src/hls.c:80` `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)`
-- `hls_select_variant` (function) `src/hls.c:202` `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h)`
-- `hls_resolve_url` (function) `src/hls.c:223` `size_t hls_resolve_url(const char *base_url, const char *segment_url,
+- `hls_parse` (function) `src/hls.c:85` `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)`
+- `hls_select_variant` (function) `src/hls.c:215` `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h)`
+- `hls_resolve_url` (function) `src/hls.c:236` `size_t hls_resolve_url(const char *base_url, const char *segment_url,
                        char...`
-- `hls_playlist_free` (function) `src/hls.c:253` `void hls_playlist_free(hls_playlist *pl)`
+- `hls_playlist_free` (function) `src/hls.c:266` `void hls_playlist_free(hls_playlist *pl)`
+- `ts_sync_at` (function) `src/hls.c:281` `static int ts_sync_at(const unsigned char *b, size_t len, size_t off)` -- if (pl == NULL) return; for (size_t i = 0; i < pl->count; ++i) free(pl->segments[i].url); free(pl->segments); for...
+- `hls_segment_payload` (function) `src/hls.c:290` `long hls_segment_payload(long http_code, const unsigned char *body, size_t len)`
+- `https_authority` (function) `src/hls.c:309` `static int https_authority(const char *url, const char **a, size_t *alen)` -- The authority of an https URL ("host[:port]") as [*a, *a + *alen); 0 when the URL is not * https, has userinfo, or...
+- `host_parts` (function) `src/hls.c:321` `static int host_parts(const char *a, size_t alen, char host[HLS_HOST_MAX], char site[HLS_HOST_MAX...` -- Lowercased host (no port), its parent (everything after the first label) and its * registrable domain; 0 when the...
+- `authority_seen_before` (function) `src/hls.c:338` `static int authority_seen_before(const hls_playlist *pl, size_t i, const char *a, size_t alen)` -- size_t hl = colon != NULL ?
+- `hls_mirror_url` (function) `src/hls.c:348` `size_t hls_mirror_url(const hls_playlist *pl, const char *seg_abs, size_t k,
+                    ...`
 
 ## src/host_conf.c
 Depends on: `include/host_conf.h`

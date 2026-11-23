@@ -34,6 +34,8 @@
 - [`anc_resolve`](modules/src.anchor.c.md#anc_resolve) function in `src/anchor.c`
 - [`anc_scroll_for`](modules/include.anchor.h.md#anc_scroll_for) function in `include/anchor.h`
 - [`anc_scroll_for`](modules/src.anchor.c.md#anc_scroll_for) function in `src/anchor.c`
+- [`anc_target_box`](modules/include.anchor.h.md#anc_target_box) function in `include/anchor.h`
+- [`anc_target_box`](modules/src.anchor.c.md#anc_target_box) function in `src/anchor.c`
 - [`anc_target_top`](modules/include.anchor.h.md#anc_target_top) function in `include/anchor.h`
 - [`anc_target_top`](modules/src.anchor.c.md#anc_target_top) function in `src/anchor.c`
 - [`ancestors`](modules/include.page_view.h.md#ancestors) function in `include/page_view.h`
@@ -440,6 +442,7 @@
 - [`cch_path_new`](modules/include.css_chain.h.md#cch_path_new) function in `include/css_chain.h`
 - [`cch_path_new`](modules/src.css_chain.c.md#cch_path_new) function in `src/css_chain.c`
 - [`cch_pseudo_style`](modules/src.css_chain.c.md#cch_pseudo_style) function in `src/css_chain.c`
+- [`cch_set_target`](modules/src.css_chain.c.md#cch_set_target) function in `src/css_chain.c`
 - [`CCH_SIB_MAX`](modules/include.css_chain.h.md#cch_sib_max) macro in `include/css_chain.h`
 - [`CCH_TAG_MAX`](modules/src.css_chain.c.md#cch_tag_max) macro in `src/css_chain.c`
 - [`ccm_get`](modules/include.css_computed.h.md#ccm_get) function in `include/css_computed.h`
@@ -669,6 +672,7 @@
 - [`column`](modules/src.tab.c.md#column) function in `src/tab.c`
 - [`columns`](modules/gui.browser_ui.c.md#columns) function in `gui/browser_ui.c`
 - [`comb`](modules/include.css_select.h.md#comb) type_alias in `include/css_select.h`
+- [`COMPARED`](modules/include.css_chain.h.md#compared) function in `include/css_chain.h`
 - [`compositing`](modules/gui.browser_ui.c.md#compositing) function in `gui/browser_ui.c`
 - [`connection`](modules/include.secure_fetch.h.md#connection) function in `include/secure_fetch.h`
 - [`conservative`](modules/include.css_select.h.md#conservative) function in `include/css_select.h`
@@ -1328,6 +1332,7 @@
 - [`fc_init`](modules/include.frame_clock.h.md#fc_init) function in `include/frame_clock.h`
 - [`fc_interval_ms`](modules/include.frame_clock.h.md#fc_interval_ms) function in `include/frame_clock.h`
 - [`fc_interval_ms`](modules/src.frame_clock.c.md#fc_interval_ms) function in `src/frame_clock.c`
+- [`FC_JS_FRAGMENT_DEPTH`](modules/include.freedom_config.h.md#fc_js_fragment_depth) macro in `include/freedom_config.h`
 - [`FC_LAZY_IMAGE_MARGIN_PX`](modules/include.freedom_config.h.md#fc_lazy_image_margin_px) macro in `include/freedom_config.h`
 - [`FC_MASK_CACHE_BYTES`](modules/include.freedom_config.h.md#fc_mask_cache_bytes) macro in `include/freedom_config.h`
 - [`FC_MASK_CACHE_ENTRIES`](modules/include.freedom_config.h.md#fc_mask_cache_entries) macro in `include/freedom_config.h`
@@ -1973,6 +1978,7 @@
 - [`JD_QSA_INLINE`](modules/src.js_dom.c.md#jd_qsa_inline) macro in `src/js_dom.c`
 - [`jd_rebind`](modules/src.js_dom.c.md#jd_rebind) function in `src/js_dom.c`
 - [`JD_REPL_CSS_MAX`](modules/include.js_dom.h.md#jd_repl_css_max) macro in `include/js_dom.h`
+- [`JD_SCROLL_N`](modules/include.js_location.h.md#jd_scroll_n) macro in `include/js_location.h`
 - [`jd_set_computed`](modules/src.js_dom.c.md#jd_set_computed) function in `src/js_dom.c`
 - [`jd_set_cookies`](modules/src.js_dom.c.md#jd_set_cookies) function in `src/js_dom.c`
 - [`jd_set_geometry`](modules/src.js_dom.c.md#jd_set_geometry) function in `src/js_dom.c`
@@ -1982,6 +1988,7 @@
 - [`jd_take_history`](modules/include.js_location.h.md#jd_take_history) function in `include/js_location.h`
 - [`jd_take_history`](modules/src.js_location.c.md#jd_take_history) function in `src/js_location.c`
 - [`jd_take_nav_request`](modules/src.js_location.c.md#jd_take_nav_request) function in `src/js_location.c`
+- [`jd_take_scroll`](modules/src.js_location.c.md#jd_take_scroll) function in `src/js_location.c`
 - [`jd_video_from_scripts`](modules/include.js_dom.h.md#jd_video_from_scripts) function in `include/js_dom.h`
 - [`jd_video_from_scripts`](modules/src.js_embed.c.md#jd_video_from_scripts) function in `src/js_embed.c`
 - [`jdce_install`](modules/src.js_custom_elements.c.md#jdce_install) function in `src/js_custom_elements.c`
@@ -2150,11 +2157,13 @@
 - [`kind`](modules/gui.browser_ui.c.md#kind) type_alias in `gui/browser_ui.c`
 - [`kind`](modules/include.form.h.md#kind) type_alias in `include/form.h`
 - [`kind`](modules/include.interp.h.md#kind) type_alias in `include/interp.h`
+- [`kind`](modules/include.js_location.h.md#kind) function in `include/js_location.h`
 - [`kind`](modules/include.js_trusted.h.md#kind) type_alias in `include/js_trusted.h`
 - [`kind`](modules/include.link_preview.h.md#kind) type_alias in `include/link_preview.h`
 - [`kind`](modules/include.page_view.h.md#kind) type_alias in `include/page_view.h`
 - [`kind`](modules/include.prefetch.h.md#kind) type_alias in `include/prefetch.h`
 - [`kind`](modules/include.render_doc.h.md#kind) type_alias in `include/render_doc.h`
+- [`kind`](modules/include.scroll_req.h.md#kind) type_alias in `include/scroll_req.h`
 - [`kind`](modules/include.svg_render.h.md#kind) type_alias in `include/svg_render.h`
 - [`kind`](modules/include.tab.h.md#kind) type_alias in `include/tab.h`
 - [`kind`](modules/include.tab.h.md#kind) type_alias in `include/tab.h`
@@ -2222,6 +2231,7 @@
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_pdf_export.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_pdf_export.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_prefetch.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_prefetch.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_prefs.c`
+- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_scroll_req.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_scroll_req.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_site_panel.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_site_panel.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_smooth_scroll.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_smooth_scroll.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_svg_render.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_svg_render.c`
@@ -2385,6 +2395,7 @@
 - [`names`](modules/include.css_mq.h.md#cmq_container-names) type_alias of `cmq_container` in `include/css_mq.h`
 - [`namespace`](modules/include.os_sandbox.h.md#namespace) function in `include/os_sandbox.h`
 - [`nat_h`](modules/include.box_style.h.md#bx_bg_layer-nat_h) type_alias of `bx_bg_layer` in `include/box_style.h`
+- [`navigation`](modules/src.tab.c.md#navigation) function in `src/tab.c`
 - [`net_reply`](modules/src.tab.c.md#net_reply) struct in `src/tab.c`
 - [`ng_addr_is_private`](modules/include.net_guard.h.md#ng_addr_is_private) function in `include/net_guard.h`
 - [`ng_addr_is_private`](modules/src.net_guard.c.md#ng_addr_is_private) function in `src/net_guard.c`
@@ -2447,6 +2458,7 @@
 - [`number`](modules/include.flex_layout.h.md#number) function in `include/flex_layout.h`
 - [`number`](modules/src.css.c.md#number) function in `src/css.c`
 - [`number`](modules/src.os_sandbox.c.md#number) function in `src/os_sandbox.c`
+- [`numbers`](modules/src.js_location.c.md#numbers) function in `src/js_location.c`
 
 <a id="o"></a>
 
@@ -2468,6 +2480,7 @@
 - [`one`](modules/include.box_tree.h.md#bt_node-one) method of `bt_node` in `include/box_tree.h`
 - [`one`](modules/gui.browser_ui.c.md#one) function in `gui/browser_ui.c`
 - [`one`](modules/include.browser.h.md#one) function in `include/browser.h`
+- [`one`](modules/include.tab.h.md#one) function in `include/tab.h`
 - [`one_page`](modules/tools.guiscroll.py.md#one_page) function in `tools.guiscroll`
 - [`one_run`](modules/tools.guitime.py.md#one_run) function in `tools.guitime`
 - [`only`](modules/gui.browser_ui.c.md#only) function in `gui/browser_ui.c`
@@ -2965,7 +2978,6 @@
 - [`pv_view`](modules/include.page_view.h.md#pv_view) struct in `include/page_view.h`
 - [`px`](modules/src.css_box.c.md#calc_val-px) type_alias of `calc_val` in `src/css_box.c`
 - [`px`](modules/include.css_length.h.md#cl_lp-px) type_alias of `cl_lp` in `include/css_length.h`
-- [`px`](modules/include.freedom_config.h.md#px) function in `include/freedom_config.h`
 - [`px`](modules/include.table_layout.h.md#px) function in `include/table_layout.h`
 - [`px`](modules/src.page_view.c.md#px) function in `src/page_view.c`
 
@@ -3132,6 +3144,7 @@
 - [`scope`](modules/src.import_map.c.md#scope) type_alias in `src/import_map.c`
 - [`screen_flow_ctx`](modules/gui.browser_ui.c.md#screen_flow_ctx) struct in `gui/browser_ui.c`
 - [`scripts`](modules/src.js_dom.c.md#scripts) function in `src/js_dom.c`
+- [`scroll`](modules/include.scroll_req.h.md#scroll) type_alias in `include/scroll_req.h`
 - [`secure_fetch`](modules/gui.browser_ui.c.md#secure_fetch) function in `gui/browser_ui.c`
 - [`selector`](modules/src.css_select.c.md#selector) function in `src/css_select.c`
 - [`send`](modules/src.js_fetch.c.md#send) function in `src/js_fetch.c`
@@ -3329,6 +3342,22 @@
 - [`SR_SNIFF_MAX`](modules/include.svg_raster.h.md#sr_sniff_max) macro in `include/svg_raster.h`
 - [`src`](modules/include.html_parse.h.md#src) function in `include/html_parse.h`
 - [`sRGB`](modules/src.css_gradient.c.md#srgb) function in `src/css_gradient.c`
+- [`srq_behavior`](modules/include.scroll_req.h.md#srq_behavior) enum in `include/scroll_req.h`
+- [`srq_block`](modules/include.scroll_req.h.md#srq_block) enum in `include/scroll_req.h`
+- [`srq_decode`](modules/include.scroll_req.h.md#srq_decode) function in `include/scroll_req.h`
+- [`srq_decode`](modules/src.scroll_req.c.md#srq_decode) function in `src/scroll_req.c`
+- [`srq_encode`](modules/include.scroll_req.h.md#srq_encode) function in `include/scroll_req.h`
+- [`srq_encode`](modules/src.scroll_req.c.md#srq_encode) function in `src/scroll_req.c`
+- [`srq_kind`](modules/include.scroll_req.h.md#srq_kind) enum in `include/scroll_req.h`
+- [`SRQ_MAX_COORD`](modules/include.scroll_req.h.md#srq_max_coord) macro in `include/scroll_req.h`
+- [`srq_req`](modules/include.scroll_req.h.md#srq_req) struct in `include/scroll_req.h`
+- [`SRQ_SMOOTH`](modules/gui.browser_ui.c.md#srq_smooth) function in `gui/browser_ui.c`
+- [`srq_smooth`](modules/include.scroll_req.h.md#srq_smooth) function in `include/scroll_req.h`
+- [`srq_smooth`](modules/src.scroll_req.c.md#srq_smooth) function in `src/scroll_req.c`
+- [`srq_target`](modules/include.scroll_req.h.md#srq_target) function in `include/scroll_req.h`
+- [`srq_target`](modules/src.scroll_req.c.md#srq_target) function in `src/scroll_req.c`
+- [`srq_view`](modules/include.scroll_req.h.md#srq_view) struct in `include/scroll_req.h`
+- [`SRQ_WIRE_N`](modules/include.scroll_req.h.md#srq_wire_n) macro in `include/scroll_req.h`
 - [`ss_committed`](modules/include.shm_slots.h.md#ss_committed) function in `include/shm_slots.h`
 - [`SS_COUNT`](modules/include.shm_slots.h.md#ss_count) macro in `include/shm_slots.h`
 - [`ss_init`](modules/include.shm_slots.h.md#ss_init) function in `include/shm_slots.h`
@@ -3340,6 +3369,7 @@
 - [`start`](modules/include.video_controls.h.md#start) function in `include/video_controls.h`
 - [`START_ATTEMPTS`](modules/tools.guitime.py.md#start_attempts) constant in `tools.guitime`
 - [`start_display`](modules/tools.guitime.py.md#start_display) function in `tools.guitime`
+- [`started`](modules/gui.browser_ui.c.md#started) function in `gui/browser_ui.c`
 - [`started`](modules/include.prefetch.h.md#started) function in `include/prefetch.h`
 - [`state`](modules/include.browser.h.md#state) function in `include/browser.h`
 - [`status`](modules/src.tab.c.md#net_reply-status) type_alias of `net_reply` in `src/tab.c`
@@ -3405,6 +3435,8 @@
 - [`tab_anchor_free`](modules/include.tab.h.md#tab_anchor_free) function in `include/tab.h`
 - [`tab_anchor_free`](modules/src.tab.c.md#tab_anchor_free) function in `src/tab.c`
 - [`tab_anchor_query`](modules/src.tab.c.md#tab_anchor_query) function in `src/tab.c`
+- [`tab_anchor_query_ex`](modules/src.tab.c.md#tab_anchor_query_ex) function in `src/tab.c`
+- [`TAB_ANCHOR_REPLACE`](modules/include.tab.h.md#tab_anchor_replace) macro in `include/tab.h`
 - [`tab_async_busy`](modules/include.tab.h.md#tab_async_busy) function in `include/tab.h`
 - [`tab_async_busy`](modules/src.tab.c.md#tab_async_busy) function in `src/tab.c`
 - [`tab_async_fd`](modules/include.tab.h.md#tab_async_fd) function in `include/tab.h`
@@ -3971,6 +4003,7 @@
 - [`writing`](modules/src.css.c.md#writing) function in `src/css.c`
 - [`written`](modules/include.css_counter.h.md#written) function in `include/css_counter.h`
 - [`written`](modules/include.find_text.h.md#written) function in `include/find_text.h`
+- [`written`](modules/src.css.c.md#written) function in `src/css.c`
 - [`wst_db`](modules/include.web_storage.h.md#wst_db) type_alias in `include/web_storage.h`
 - [`wst_db`](modules/src.web_storage.c.md#wst_db) struct in `src/web_storage.c`
 - [`wst_decode_check`](modules/include.web_storage.h.md#wst_decode_check) function in `include/web_storage.h`

@@ -93,7 +93,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps, const char *top_level_url
 
 ### `unset`
 
-`function` | [src/render_doc.c:707](../../src/render_doc.c#L707)
+`function` | [src/render_doc.c:709](../../src/render_doc.c#L709)
 
 ```c
 * background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not content * with alt text, matching real-browser behaviour. */ gate_box_image_url(caps,
@@ -115,7 +115,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps, const char *top_level_url
 
 ### `rd_free`
 
-`function` | [src/render_doc.c:745](../../src/render_doc.c#L745)
+`function` | [src/render_doc.c:747](../../src/render_doc.c#L747)
 
 ```c
 void rd_free(rd_doc *d)
@@ -129,7 +129,7 @@ Idempotent; safe on NULL and safe to call twice.
 |---|---|---|---|
 | `d` | `rd_doc *` |  |  |
 
-> **Inherited:** Documentation from [`rd_free`](#rd_free) (include/render_doc.h:319).
+> **Inherited:** Documentation from [`rd_free`](#rd_free) (include/render_doc.h:321).
 
 *Called by:* [`rd_build`](#rd_build)
 
@@ -139,7 +139,7 @@ Idempotent; safe on NULL and safe to call twice.
 
 ### `rd_count`
 
-`function` | [src/render_doc.c:762](../../src/render_doc.c#L762)
+`function` | [src/render_doc.c:764](../../src/render_doc.c#L764)
 
 ```c
 size_t rd_count(const rd_doc *d)
@@ -157,7 +157,7 @@ NULL-safe.
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`rd_count`](#rd_count) (include/render_doc.h:322).
+> **Inherited:** Documentation from [`rd_count`](#rd_count) (include/render_doc.h:324).
 
 ---
 
@@ -165,7 +165,7 @@ NULL-safe.
 
 ### `rd_at`
 
-`function` `const` | [src/render_doc.c:766](../../src/render_doc.c#L766)
+`function` `const` | [src/render_doc.c:768](../../src/render_doc.c#L768)
 
 ```c
 const rd_block *rd_at(const rd_doc *d, size_t i)
@@ -186,7 +186,7 @@ const rd_block *rd_at(const rd_doc *d, size_t i)
 
 ### `rd_box_count`
 
-`function` | [src/render_doc.c:771](../../src/render_doc.c#L771)
+`function` | [src/render_doc.c:773](../../src/render_doc.c#L773)
 
 ```c
 size_t rd_box_count(const rd_doc *d)
@@ -202,7 +202,7 @@ Box tree accessors (Step D). rd_box_count is the number of box definitions (0 wh
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`rd_box_count`](#rd_box_count) (include/render_doc.h:327).
+> **Inherited:** Documentation from [`rd_box_count`](#rd_box_count) (include/render_doc.h:329).
 
 ---
 
@@ -210,7 +210,7 @@ Box tree accessors (Step D). rd_box_count is the number of box definitions (0 wh
 
 ### `rd_box_at`
 
-`function` `const` | [src/render_doc.c:775](../../src/render_doc.c#L775)
+`function` `const` | [src/render_doc.c:777](../../src/render_doc.c#L777)
 
 ```c
 const pv_box_def *rd_box_at(const rd_doc *d, size_t i)
@@ -231,7 +231,7 @@ const pv_box_def *rd_box_at(const rd_doc *d, size_t i)
 
 ### `rd_cont_count`
 
-`function` | [src/render_doc.c:780](../../src/render_doc.c#L780)
+`function` | [src/render_doc.c:782](../../src/render_doc.c#L782)
 
 ```c
 size_t rd_cont_count(const rd_doc *d)
@@ -247,7 +247,7 @@ Container table accessors. rd_cont_count is the number of containers; rd_cont_at
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`rd_cont_count`](#rd_cont_count) (include/render_doc.h:332).
+> **Inherited:** Documentation from [`rd_cont_count`](#rd_cont_count) (include/render_doc.h:334).
 
 ---
 
@@ -255,7 +255,7 @@ Container table accessors. rd_cont_count is the number of containers; rd_cont_at
 
 ### `rd_cont_at`
 
-`function` `const` | [src/render_doc.c:784](../../src/render_doc.c#L784)
+`function` `const` | [src/render_doc.c:786](../../src/render_doc.c#L786)
 
 ```c
 const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)
@@ -276,7 +276,7 @@ const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)
 
 ### `rd_kind_name`
 
-`function` `const` | [src/render_doc.c:789](../../src/render_doc.c#L789)
+`function` `const` | [src/render_doc.c:791](../../src/render_doc.c#L791)
 
 ```c
 const char *rd_kind_name(rd_kind k)
@@ -294,7 +294,7 @@ Never NULL; an unknown enum value yields "block".
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`rd_kind_name`](#rd_kind_name) (include/render_doc.h:337).
+> **Inherited:** Documentation from [`rd_kind_name`](#rd_kind_name) (include/render_doc.h:339).
 
 ---
 
@@ -302,7 +302,7 @@ Never NULL; an unknown enum value yields "block".
 
 ### `rd_block_heading_level`
 
-`function` | [src/render_doc.c:803](../../src/render_doc.c#L803)
+`function` | [src/render_doc.c:805](../../src/render_doc.c#L805)
 
 ```c
 int rd_block_heading_level(const rd_block *b)
@@ -320,7 +320,7 @@ RD_HEADING yields its heading_level clamped to 1..6; an RD_LINK carrying heading
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`rd_block_heading_level`](#rd_block_heading_level) (include/render_doc.h:352).
+> **Inherited:** Documentation from [`rd_block_heading_level`](#rd_block_heading_level) (include/render_doc.h:354).
 
 ---
 
@@ -328,7 +328,7 @@ RD_HEADING yields its heading_level clamped to 1..6; an RD_LINK carrying heading
 
 ### `rd_block_tag`
 
-`function` `const` | [src/render_doc.c:814](../../src/render_doc.c#L814)
+`function` `const` | [src/render_doc.c:816](../../src/render_doc.c#L816)
 
 ```c
 const char *rd_block_tag(const rd_block *b)
@@ -346,7 +346,7 @@ RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH -> "p", R
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`rd_block_tag`](#rd_block_tag) (include/render_doc.h:345).
+> **Inherited:** Documentation from [`rd_block_tag`](#rd_block_tag) (include/render_doc.h:347).
 
 ---
 
@@ -354,7 +354,7 @@ RD_HEADING -> "h1".."h6" (heading_level clamped to 1..6), RD_PARAGRAPH -> "p", R
 
 ### `rd_input_label`
 
-`function` `const` | [src/render_doc.c:845](../../src/render_doc.c#L845)
+`function` `const` | [src/render_doc.c:847](../../src/render_doc.c#L847)
 
 ```c
 const char *rd_input_label(int input_type)
@@ -372,7 +372,7 @@ Stable, short English name of a form control type (a pv_input_type value), e.g.
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`rd_input_label`](#rd_input_label) (include/render_doc.h:366).
+> **Inherited:** Documentation from [`rd_input_label`](#rd_input_label) (include/render_doc.h:368).
 
 ---
 
@@ -380,7 +380,7 @@ Stable, short English name of a form control type (a pv_input_type value), e.g.
 
 ### `rd_input_invisible`
 
-`function` | [src/render_doc.c:865](../../src/render_doc.c#L865)
+`function` | [src/render_doc.c:867](../../src/render_doc.c#L867)
 
 ```c
 int rd_input_invisible(int input_type)
@@ -398,7 +398,7 @@ Its data still takes part in form submission.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`rd_input_invisible`](#rd_input_invisible) (include/render_doc.h:371).
+> **Inherited:** Documentation from [`rd_input_invisible`](#rd_input_invisible) (include/render_doc.h:373).
 
 ---
 
@@ -406,7 +406,7 @@ Its data still takes part in form submission.
 
 ### `rd_image_label`
 
-`function` `const` | [src/render_doc.c:869](../../src/render_doc.c#L869)
+`function` `const` | [src/render_doc.c:871](../../src/render_doc.c#L871)
 
 ```c
 const char *rd_image_label(rdp_img_decision d)
@@ -426,7 +426,7 @@ const char *rd_image_label(rdp_img_decision d)
 
 ### `rd_image_fail_label`
 
-`function` `const` | [src/render_doc.c:880](../../src/render_doc.c#L880)
+`function` `const` | [src/render_doc.c:882](../../src/render_doc.c#L882)
 
 ```c
 const char *rd_image_fail_label(img_fail_reason reason)

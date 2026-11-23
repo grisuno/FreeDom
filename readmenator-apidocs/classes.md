@@ -362,6 +362,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`kind`](modules/include.page_view.h.md#kind) type_alias in `include/page_view.h`
 - [`kind`](modules/include.prefetch.h.md#kind) type_alias in `include/prefetch.h`
 - [`kind`](modules/include.render_doc.h.md#kind) type_alias in `include/render_doc.h`
+- [`kind`](modules/include.scroll_req.h.md#kind) type_alias in `include/scroll_req.h`
 - [`kind`](modules/include.svg_render.h.md#kind) type_alias in `include/svg_render.h`
 - [`kind`](modules/include.tab.h.md#kind) type_alias in `include/tab.h`
 - [`kind`](modules/include.tab.h.md#kind) type_alias in `include/tab.h`
@@ -521,6 +522,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`sc_chain`](modules/src.box_tree.c.md#sc_chain) struct in `src/box_tree.c`
 - [`scope`](modules/src.import_map.c.md#scope) type_alias in `src/import_map.c`
 - [`screen_flow_ctx`](modules/gui.browser_ui.c.md#screen_flow_ctx) struct in `gui/browser_ui.c`
+- [`scroll`](modules/include.scroll_req.h.md#scroll) type_alias in `include/scroll_req.h`
 - [`sf_chain_info`](modules/include.secure_fetch.h.md#sf_chain_info) struct in `include/secure_fetch.h`
 - [`sf_config`](modules/include.secure_fetch.h.md#sf_config) struct in `include/secure_fetch.h`
 - [`sf_policy`](modules/include.secure_fetch.h.md#sf_policy) enum in `include/secure_fetch.h`
@@ -551,6 +553,11 @@ Project types nested under the project types they derive from. External bases ar
 - [`sqb_job`](modules/src.subreq_batch.c.md#sqb_job) struct in `src/subreq_batch.c`
 - [`sqb_req`](modules/include.subreq_batch.h.md#sqb_req) struct in `include/subreq_batch.h`
 - [`sqb_res`](modules/include.subreq_batch.h.md#sqb_res) struct in `include/subreq_batch.h`
+- [`srq_behavior`](modules/include.scroll_req.h.md#srq_behavior) enum in `include/scroll_req.h`
+- [`srq_block`](modules/include.scroll_req.h.md#srq_block) enum in `include/scroll_req.h`
+- [`srq_kind`](modules/include.scroll_req.h.md#srq_kind) enum in `include/scroll_req.h`
+- [`srq_req`](modules/include.scroll_req.h.md#srq_req) struct in `include/scroll_req.h`
+- [`srq_view`](modules/include.scroll_req.h.md#srq_view) struct in `include/scroll_req.h`
 - [`ss_state`](modules/include.shm_slots.h.md#ss_state) struct in `include/shm_slots.h`
 - [`stage`](modules/include.perf_trace.h.md#stage) type_alias in `include/perf_trace.h`
 - [`status`](modules/include.js_sandbox.h.md#status) type_alias in `include/js_sandbox.h`

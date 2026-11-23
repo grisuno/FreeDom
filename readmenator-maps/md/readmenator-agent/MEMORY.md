@@ -2,20 +2,20 @@
 
 > Cross-session context for agents. Sections 1-6 are regenerated from the source tree with zero LLM tokens: declared rules are quoted verbatim with `file:line`, measured baselines come from the scan. Section 7 is written by agents and humans and is preserved across rebuilds.
 
-Generated from 348 files at commit `78e17774985b`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
+Generated from 426 files at commit `a55d43120e2f`. Read this first, then `readmenator-wiki/index.md`, then `readmenator . ask "<question>"` for anything specific.
 
 ## 1. Purpose and domain
 
 - What it is: From the creators of the LazyOwn Redteam Framework: a free, open-source web browser (`README.md:5`)
-- Domain vocabulary (term, files): `null` (187), `max` (157), `one` (150), `include` (148), `not` (146), `size` (144), `out` (139), `freedom` (135), `char` (132), `const` (128), `free` (126), `its` (116), `css` (114), `spec` (112), `void` (110)
-- Subsystem `src: css`: 64 files, core `src/css.c`: css_cq: @container conditions (spec/css_mq.md): a rule inside one is kept and gated per element....
-- Subsystem `include: browser_ui`: 62 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
-- Subsystem `src: tab`: 53 files, core `src/tab.c`: tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and...
-- Subsystem `src: text_shape`: 49 files, core `src/text_shape.c`: tsh_fb_cp: Per-code-point verdicts of fb_entry.
-- Subsystem `include: page_view`: 27 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
+- Domain vocabulary (term, files): `null` (200), `one` (200), `max` (168), `include` (159), `spec` (156), `out` (155), `not` (155), `size` (152), `freedom` (144), `char` (138), `const` (134), `free` (131), `its` (127), `text` (119), `css` (117)
+- Subsystem `src: tab`: 72 files, core `src/tab.c`: tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and...
+- Subsystem `include: browser_ui`: 69 files, core `gui/browser_ui.c`: ui_input_state: Live editable state for one form text control, aliasing a block of the current...
+- Subsystem `include: css`: 58 files, core `src/css.c`: css_cq: @container conditions (spec/css_mq.md): a rule inside one is kept and gated per element....
+- Subsystem `src: text_shape`: 55 files, core `src/text_shape.c`: tsh_fb_cp: Per-code-point verdicts of fb_entry.
+- Subsystem `include: page_view`: 30 files, core `src/page_view.c`: pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box...
+- Subsystem `include: http_cache`: 28 files, core `src/http_cache.c`: days_from_civil: #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY...
 - Subsystem `include: secure_fetch`: 24 files, core `src/secure_fetch.c`: tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a...
-- Subsystem `src: http_cache`: 13 files, core `src/http_cache.c`: days_from_civil: #define HC_MAGIC      "FHC1\n" #define HC_NAME_HEX   64u #define HC_EVICT_EVERY...
-- Subsystem `include: svg_render`: 12 files, core `src/svg_render.c`: svg_render — inline <svg> markup -> a bounded list of geometric shapes.
+- Subsystem `include: bui_chrome`: 20 files, core `gui/bui_chrome.c`: tab_path: void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r) {...
 - Business rules that the code cannot show live in section 7: record them there.
 
 ## 2. Workflow
@@ -30,9 +30,9 @@ Detected commands:
 - `make fuzz-ek` (Makefile)
 - `make itest` (Makefile)
 - `make asan` (Makefile)
+- `make asan-run` (Makefile)
 - `make fuzz` (Makefile)
 - `make fuzz-js` (Makefile)
-- `make fuzz-imap` (Makefile)
 
 Session protocol:
 1. Start: read this file, then `readmenator . fresh` (exit 1 means run `readmenator . --rebuild`).
@@ -68,11 +68,11 @@ Declared:
 - none declared in instruction files (add them to AGENTS.md or record them in section 7)
 
 Measured baseline:
-- c: 217 files, 6550 symbols; docstrings on 29% of symbols; functions snake_case (99%); types PascalCase (1%); median file 234 lines, max 21230.
-- h: 114 files, 1837 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 70 lines, max 1336.
+- c: 285 files, 7031 symbols; docstrings on 28% of symbols; functions snake_case (98%); types PascalCase (1%); median file 190 lines, max 22574.
+- h: 123 files, 1965 symbols; docstrings on 38% of symbols; functions snake_case (98%); types PascalCase (0%); median file 69 lines, max 1350.
 - py: 13 files, 54 symbols; docstrings on 22% of symbols; functions snake_case (100%); median file 123 lines, max 345.
-- sh: 4 files, 0 symbols; median file 39 lines, max 90.
-- Tests: 101 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
+- sh: 5 files, 0 symbols; median file 11 lines, max 90.
+- Tests: 111 files under tests; follow the existing naming (e.g. `itest_secure_fetch.c`).
 
 ## 5. Minimum deliverables
 
@@ -81,7 +81,7 @@ Declared:
 
 Measured baseline:
 - Tests pass: `python -m pytest -q`.
-- Docstring coverage stays at or above 31%.
+- Docstring coverage stays at or above 30%.
 - No new security findings at medium or above (current: 0).
 - No new dependency cycles (current: 1).
 - Files stay under 300 lines where possible (`readmenator . lint`).

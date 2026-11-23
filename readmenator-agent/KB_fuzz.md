@@ -303,6 +303,14 @@
 - Language: c
 - Depends on: `include/request_policy.h`
 
+## fuzz/fuzz_scroll_req.c
+- Doc: fuzz_scroll_req -- spec/scroll_req.md: a hostile wire record either decodes to an
+- Layer: utility
+- Language: c
+- Symbols:
+  - `LLVMFuzzerTestOneInput` (function, line 11) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- Depends on: `include/scroll_req.h`
+
 ## fuzz/fuzz_site_panel.c
 - Doc: libFuzzer harness for site_panel (spec/site_panel.md): a hostile URL and KE-group text
 - Layer: utility

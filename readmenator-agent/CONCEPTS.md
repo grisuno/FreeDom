@@ -2,56 +2,56 @@
 
 Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 
-- `null` | files=198 | mentions=1359 | `fuzz/fuzz_css_import.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anchor.h`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/chrome_layout.h`
-- `one` | files=198 | mentions=766 | `fuzz/fuzz_anchor.c`, `fuzz/fuzz_box_blur.c`, `fuzz/fuzz_browser.c`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_css.c`, `fuzz/fuzz_css_counter.c`, `fuzz/fuzz_css_import.c`, `fuzz/fuzz_doc_title.c`, `fuzz/fuzz_dom.c`, `fuzz/fuzz_download.c`
-- `max` | files=167 | mentions=819 | `fuzz/fuzz_box_tree.c`, `fuzz/fuzz_browser.c`, `fuzz/fuzz_js_dom.c`, `gui/browser_ui.c`, `gui/bui_chrome.c`, `include/anchor.h`, `include/anti_fp.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`
-- `include` | files=158 | mentions=306 | `fuzz/fuzz_fb_cmdline.c`, `fuzz/fuzz_js_geom.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anchor.h`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`
-- `not` | files=154 | mentions=733 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/css.h`
-- `spec` | files=154 | mentions=355 | `fuzz/fuzz_anchor.c`, `fuzz/fuzz_box_blur.c`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_css_counter.c`, `fuzz/fuzz_doc_title.c`, `fuzz/fuzz_exact_key.c`, `fuzz/fuzz_find_text.c`, `fuzz/fuzz_group_index.c`, `fuzz/fuzz_hls.c`, `fuzz/fuzz_identity.c`
-- `out` | files=153 | mentions=808 | `fuzz/fuzz_css_import.c`, `fuzz/fuzz_group_index.c`, `fuzz/fuzz_image_decode.c`, `gui/browser_ui.c`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`
-- `size` | files=152 | mentions=826 | `fuzz/fuzz_box_blur.c`, `fuzz/fuzz_js_geom.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`
-- `when` | files=151 | mentions=570 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `include/anchor.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`
-- `freedom` | files=143 | mentions=207 | `app.py`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/freedom_view.c`, `gui/ui_render.c`, `include/anchor.h`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`
-- `int` | files=141 | mentions=1281 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/chrome_layout.h`, `include/css.h`
-- `char` | files=138 | mentions=715 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_atrule.h`, `include/css_computed.h`
-- `const` | files=134 | mentions=730 | `fuzz/fuzz_js_geom.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/chrome_layout.h`, `include/css.h`
-- `returns` | files=133 | mentions=363 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anchor.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`
-- `free` | files=131 | mentions=541 | `app.py`, `fuzz/fuzz_browser.c`, `fuzz/fuzz_image_decode.c`, `gui/browser_ui.c`, `include/browser.h`, `include/css.h`, `include/css_chain.h`, `include/css_counter.h`, `include/css_index.h`, `include/css_select.h`
-- `its` | files=126 | mentions=738 | `gui/browser_ui.c`, `gui/bui_chrome.c`, `include/anchor.h`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/compositor.h`, `include/css.h`
-- `never` | files=126 | mentions=394 | `fuzz.sh`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/compositor.h`, `include/css.h`
-- `text` | files=119 | mentions=832 | `fuzz/fuzz_css_import.c`, `fuzz/fuzz_find_text.c`, `fuzz/fuzz_hls.c`, `fuzz/fuzz_link_preview.c`, `fuzz/fuzz_net_guard.c`, `fuzz/fuzz_site_panel.c`, `fuzz/fuzz_text_case.c`, `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`
-- `only` | files=118 | mentions=446 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`
-- `css` | files=117 | mentions=2195 | `fuzz/fuzz_css.c`, `fuzz/fuzz_css_counter.c`, `fuzz/fuzz_css_import.c`, `gui/browser_ui.c`, `gui/bui_theme.c`, `include/block_flow.h`, `include/box_style.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`
-- `every` | files=113 | mentions=380 | `fuzz/fuzz_image_decode.c`, `fuzz/fuzz_js_sandbox.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/chrome_layout.h`, `include/css.h`
-- `url` | files=112 | mentions=679 | `fuzz/fuzz_anchor.c`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_data_url.c`, `fuzz/fuzz_site_panel.c`, `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/bui_mask_img.c`, `include/browser.h`
-- `void` | files=110 | mentions=706 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css_atrule.h`, `include/css_counter.h`, `include/css_index.h`
-- `static` | files=110 | mentions=475 | `gui/browser_ui.c`, `gui/bui_chrome.c`, `gui/ui_render.c`, `include/box_tree.h`, `include/chrome_layout.h`, `include/compositor.h`, `include/css.h`, `include/css_select.h`, `include/form.h`, `include/js_dom.h`
-- `empty` | files=110 | mentions=306 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/browser.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_import.h`, `include/css_mq.h`, `include/css_select.h`, `include/css_vars.h`, `include/doc_title.h`
+- `null` | files=200 | mentions=1374 | `fuzz/fuzz_css_import.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anchor.h`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/cached_fetch.h`, `include/chrome_layout.h`
+- `one` | files=200 | mentions=770 | `fuzz/fuzz_anchor.c`, `fuzz/fuzz_box_blur.c`, `fuzz/fuzz_browser.c`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_css.c`, `fuzz/fuzz_css_counter.c`, `fuzz/fuzz_css_import.c`, `fuzz/fuzz_doc_title.c`, `fuzz/fuzz_dom.c`, `fuzz/fuzz_download.c`
+- `max` | files=168 | mentions=826 | `fuzz/fuzz_box_tree.c`, `fuzz/fuzz_browser.c`, `fuzz/fuzz_js_dom.c`, `gui/browser_ui.c`, `gui/bui_chrome.c`, `include/anchor.h`, `include/anti_fp.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`
+- `include` | files=159 | mentions=307 | `fuzz/fuzz_fb_cmdline.c`, `fuzz/fuzz_js_geom.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anchor.h`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`
+- `spec` | files=156 | mentions=370 | `fuzz/fuzz_anchor.c`, `fuzz/fuzz_box_blur.c`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_css_counter.c`, `fuzz/fuzz_doc_title.c`, `fuzz/fuzz_exact_key.c`, `fuzz/fuzz_find_text.c`, `fuzz/fuzz_group_index.c`, `fuzz/fuzz_hls.c`, `fuzz/fuzz_identity.c`
+- `out` | files=155 | mentions=833 | `fuzz/fuzz_css_import.c`, `fuzz/fuzz_group_index.c`, `fuzz/fuzz_image_decode.c`, `gui/browser_ui.c`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`
+- `not` | files=155 | mentions=737 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/css.h`
+- `size` | files=152 | mentions=824 | `fuzz/fuzz_box_blur.c`, `fuzz/fuzz_js_geom.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`
+- `when` | files=152 | mentions=577 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `include/anchor.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`
+- `freedom` | files=144 | mentions=208 | `app.py`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/freedom_view.c`, `gui/ui_render.c`, `include/anchor.h`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`
+- `int` | files=143 | mentions=1306 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/chrome_layout.h`, `include/css.h`
+- `char` | files=138 | mentions=716 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_atrule.h`, `include/css_computed.h`
+- `const` | files=134 | mentions=732 | `fuzz/fuzz_js_geom.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/chrome_layout.h`, `include/css.h`
+- `returns` | files=134 | mentions=365 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anchor.h`, `include/block_flow.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`
+- `free` | files=131 | mentions=553 | `app.py`, `fuzz/fuzz_browser.c`, `fuzz/fuzz_image_decode.c`, `gui/browser_ui.c`, `include/browser.h`, `include/css.h`, `include/css_chain.h`, `include/css_counter.h`, `include/css_index.h`, `include/css_select.h`
+- `its` | files=127 | mentions=743 | `gui/browser_ui.c`, `gui/bui_chrome.c`, `include/anchor.h`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/compositor.h`, `include/css.h`
+- `never` | files=127 | mentions=396 | `fuzz.sh`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/compositor.h`, `include/css.h`
+- `text` | files=119 | mentions=837 | `fuzz/fuzz_css_import.c`, `fuzz/fuzz_find_text.c`, `fuzz/fuzz_hls.c`, `fuzz/fuzz_link_preview.c`, `fuzz/fuzz_net_guard.c`, `fuzz/fuzz_site_panel.c`, `fuzz/fuzz_text_case.c`, `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`
+- `only` | files=119 | mentions=451 | `gui/browser_ui.c`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`
+- `css` | files=117 | mentions=2197 | `fuzz/fuzz_css.c`, `fuzz/fuzz_css_counter.c`, `fuzz/fuzz_css_import.c`, `gui/browser_ui.c`, `gui/bui_theme.c`, `include/block_flow.h`, `include/box_style.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`
+- `every` | files=114 | mentions=385 | `fuzz/fuzz_image_decode.c`, `fuzz/fuzz_js_sandbox.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/chrome_layout.h`, `include/css.h`
+- `url` | files=112 | mentions=682 | `fuzz/fuzz_anchor.c`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_data_url.c`, `fuzz/fuzz_site_panel.c`, `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/bui_mask_img.c`, `include/browser.h`
+- `empty` | files=111 | mentions=307 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anchor.h`, `include/browser.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_import.h`, `include/css_mq.h`, `include/css_select.h`, `include/css_vars.h`
+- `void` | files=110 | mentions=709 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/browser.h`, `include/cached_fetch.h`, `include/css_atrule.h`, `include/css_counter.h`, `include/css_index.h`
+- `static` | files=110 | mentions=478 | `gui/browser_ui.c`, `gui/bui_chrome.c`, `gui/ui_render.c`, `include/box_tree.h`, `include/chrome_layout.h`, `include/compositor.h`, `include/css.h`, `include/css_select.h`, `include/form.h`, `include/js_dom.h`
 - `name` | files=109 | mentions=420 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_atrule.h`, `include/css_computed.h`, `include/css_counter.h`, `include/css_import.h`
-- `page` | files=98 | mentions=615 | `fuzz.sh`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_page_view.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/ui_render.c`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`
-- `len` | files=98 | mentions=439 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_counter.h`, `include/css_gradient.h`
+- `page` | files=98 | mentions=622 | `fuzz.sh`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_page_view.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/ui_render.c`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`
 - `cap` | files=98 | mentions=279 | `fuzz/fuzz_text_shape.c`, `gui/browser_ui.c`, `include/anchor.h`, `include/box_style.h`, `include/browser.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_computed.h`, `include/css_counter.h`, `include/css_import.h`
-- `return` | files=97 | mentions=955 | `fuzz/fuzz_css_import.c`, `gui/browser_ui.c`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `include/box_blur.h`, `include/box_tree.h`, `include/browser.h`, `include/css_chain.h`, `include/css_select.h`, `include/prefetch.h`
+- `return` | files=97 | mentions=953 | `fuzz/fuzz_css_import.c`, `gui/browser_ui.c`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `include/box_blur.h`, `include/box_tree.h`, `include/browser.h`, `include/css_chain.h`, `include/css_select.h`, `include/prefetch.h`
+- `len` | files=97 | mentions=438 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_counter.h`, `include/css_gradient.h`
 - `closed` | files=96 | mentions=210 | `gui/browser_ui.c`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_chain.h`, `include/css_color.h`, `include/css_mq.h`, `include/css_select.h`
 - `first` | files=94 | mentions=281 | `gui/browser_ui.c`, `gui/ui_render.c`, `include/anchor.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_gradient.h`, `include/css_import.h`
 - `per` | files=94 | mentions=254 | `fuzz/fuzz_group_index.c`, `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_blur.h`, `include/box_style.h`, `include/box_tree.h`, `include/chrome_layout.h`, `include/compositor.h`, `include/css.h`, `include/css_color.h`
 - `bytes` | files=91 | mentions=243 | `fuzz/fuzz_js_geom.c`, `gui/browser_ui.c`, `include/anti_fp.h`, `include/css.h`, `include/css_computed.h`, `include/css_counter.h`, `include/css_mq.h`, `include/css_select.h`, `include/dom_debug.h`, `include/download.h`
-- `value` | files=90 | mentions=359 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anti_fp.h`, `include/box_style.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_computed.h`
-- `non` | files=88 | mentions=237 | `gui/browser_ui.c`, `include/anchor.h`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/compositor.h`, `include/css.h`
-- `input` | files=87 | mentions=229 | `app.py`, `fuzz/fuzz_anchor.c`, `fuzz/fuzz_box_blur.c`, `fuzz/fuzz_browser.c`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_css.c`, `fuzz/fuzz_css_counter.c`, `fuzz/fuzz_css_import.c`, `fuzz/fuzz_doc_title.c`, `fuzz/fuzz_dom.c`
+- `value` | files=90 | mentions=362 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `include/anti_fp.h`, `include/box_style.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_box.h`, `include/css_computed.h`
+- `non` | files=90 | mentions=244 | `gui/browser_ui.c`, `include/anchor.h`, `include/anti_fp.h`, `include/block_flow.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/compositor.h`, `include/css.h`
+- `input` | files=89 | mentions=231 | `app.py`, `fuzz/fuzz_anchor.c`, `fuzz/fuzz_box_blur.c`, `fuzz/fuzz_browser.c`, `fuzz/fuzz_chrome_layout.c`, `fuzz/fuzz_css.c`, `fuzz/fuzz_css_counter.c`, `fuzz/fuzz_css_import.c`, `fuzz/fuzz_doc_title.c`, `fuzz/fuzz_dom.c`
+- `count` | files=86 | mentions=272 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `include/anchor.h`, `include/box_style.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_select.h`
+- `set` | files=85 | mentions=405 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/box_style.h`, `include/browser.h`, `include/cached_fetch.h`, `include/compositor.h`, `include/css_color.h`
 - `source` | files=85 | mentions=176 | `docker_run.sh`, `fuzz.sh`, `fuzz/fuzz_browser.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `include/box_style.h`
-- `set` | files=84 | mentions=401 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `gui/ui_render.c`, `include/box_style.h`, `include/browser.h`, `include/cached_fetch.h`, `include/compositor.h`, `include/css_color.h`
-- `count` | files=84 | mentions=269 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `include/anchor.h`, `include/box_style.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_computed.h`, `include/css_gradient.h`, `include/css_select.h`
-- `same` | files=82 | mentions=293 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_chain.h`, `include/css_import.h`, `include/css_index.h`
-- `none` | files=81 | mentions=408 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anchor.h`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/compositor.h`
+- `none` | files=83 | mentions=418 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/anchor.h`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/chrome_layout.h`, `include/compositor.h`
+- `same` | files=82 | mentions=301 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_chain.h`, `include/css_import.h`, `include/css_index.h`
 - `fail` | files=79 | mentions=156 | `fuzz/fuzz_css_import.c`, `gui/browser_ui.c`, `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`, `include/css_chain.h`, `include/css_mq.h`, `include/css_select.h`, `include/dom_debug.h`
-- `state` | files=78 | mentions=452 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/browser.h`, `include/css.h`, `include/css_counter.h`, `include/css_import.h`, `include/css_length.h`, `include/dom.h`, `include/exact_key.h`
+- `state` | files=78 | mentions=451 | `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_theme.c`, `include/browser.h`, `include/css.h`, `include/css_counter.h`, `include/css_import.h`, `include/css_length.h`, `include/dom.h`, `include/exact_key.h`
 - `case` | files=77 | mentions=186 | `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `gui/bui_chrome.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/browser.h`, `include/css_computed.h`, `include/css_counter.h`, `include/css_length.h`, `include/css_mq.h`
-- `without` | files=77 | mentions=163 | `gui/browser_ui.c`, `include/box_style.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_length.h`, `include/css_mq.h`, `include/dom.h`, `include/exact_key.h`, `include/image_decode.h`, `include/import_map.h`
-- `any` | files=76 | mentions=147 | `fuzz/fuzz_box_tree.c`, `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_length.h`, `include/css_select.h`
+- `without` | files=77 | mentions=165 | `gui/browser_ui.c`, `include/box_style.h`, `include/chrome_layout.h`, `include/css.h`, `include/css_length.h`, `include/css_mq.h`, `include/dom.h`, `include/exact_key.h`, `include/image_decode.h`, `include/import_map.h`
+- `any` | files=76 | mentions=149 | `fuzz/fuzz_box_tree.c`, `gui/browser_ui.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_length.h`, `include/css_select.h`
 - `line` | files=74 | mentions=395 | `fuzz/fuzz_box_blur.c`, `gui/browser_ui.c`, `gui/bui_chrome.c`, `gui/ui_render.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_length.h`
-- `caller` | files=74 | mentions=191 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_color.h`, `include/css_gradient.h`
-- `define` | files=73 | mentions=243 | `fuzz/fuzz_browser.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `gui/bui_chrome.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/css.h`, `include/css_counter.h`
+- `string` | files=74 | mentions=203 | `fuzz/fuzz_fb_cmdline.c`, `fuzz/fuzz_js_geom.c`, `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/css_counter.h`, `include/css_decl.h`, `include/css_import.h`, `include/css_vars.h`, `include/fb_panes.h`
+- `caller` | files=74 | mentions=190 | `gui/browser_ui.c`, `include/anti_fp.h`, `include/box_style.h`, `include/box_tree.h`, `include/browser.h`, `include/compositor.h`, `include/css.h`, `include/css_atrule.h`, `include/css_color.h`, `include/css_gradient.h`
 
 ## Verb Edges
 
@@ -59,62 +59,62 @@ Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges 
 - `one` --depends_on--> `include` (strength 1.00)
 - `null` --depends_on--> `freedom` (strength 0.95)
 - `null` --depends_on--> `include` (strength 0.95)
-- `not` --depends_on--> `freedom` (strength 0.87)
 - `not` --depends_on--> `include` (strength 0.87)
-- `char` --depends_on--> `freedom` (strength 0.84)
+- `not` --depends_on--> `freedom` (strength 0.86)
+- `int` --depends_on--> `freedom` (strength 0.85)
+- `int` --depends_on--> `include` (strength 0.85)
 - `char` --depends_on--> `include` (strength 0.84)
 - `css` --depends_on--> `freedom` (strength 0.84)
-- `css` --depends_on--> `include` (strength 0.84)
-- `int` --depends_on--> `freedom` (strength 0.84)
-- `int` --depends_on--> `include` (strength 0.84)
+- `char` --depends_on--> `freedom` (strength 0.83)
+- `css` --depends_on--> `include` (strength 0.83)
 - `out` --depends_on--> `include` (strength 0.83)
-- `static` --depends_on--> `freedom` (strength 0.83)
 - `static` --depends_on--> `include` (strength 0.83)
 - `when` --depends_on--> `freedom` (strength 0.83)
 - `free` --depends_on--> `include` (strength 0.82)
-- `max` --depends_on--> `freedom` (strength 0.82)
 - `max` --depends_on--> `include` (strength 0.82)
 - `out` --depends_on--> `freedom` (strength 0.82)
+- `static` --depends_on--> `freedom` (strength 0.82)
 - `when` --depends_on--> `include` (strength 0.82)
-- `const` --depends_on--> `freedom` (strength 0.81)
 - `const` --depends_on--> `include` (strength 0.81)
-- `free` --depends_on--> `freedom` (strength 0.81)
+- `max` --depends_on--> `freedom` (strength 0.81)
 - `one` --depends_on--> `max` (strength 0.81)
+- `const` --depends_on--> `freedom` (strength 0.80)
+- `free` --depends_on--> `freedom` (strength 0.80)
 - `return` --depends_on--> `freedom` (strength 0.80)
 - `return` --depends_on--> `include` (strength 0.80)
-- `its` --depends_on--> `freedom` (strength 0.79)
 - `its` --depends_on--> `include` (strength 0.79)
-- `only` --depends_on--> `include` (strength 0.79)
+- `never` --depends_on--> `include` (strength 0.79)
 - `returns` --depends_on--> `freedom` (strength 0.79)
 - `returns` --depends_on--> `include` (strength 0.79)
-- `size` --depends_on--> `include` (strength 0.79)
-- `text` --depends_on--> `include` (strength 0.79)
 - `url` --depends_on--> `freedom` (strength 0.79)
 - `url` --depends_on--> `include` (strength 0.79)
+- `its` --depends_on--> `freedom` (strength 0.78)
 - `never` --depends_on--> `freedom` (strength 0.78)
-- `never` --depends_on--> `include` (strength 0.78)
 - `only` --depends_on--> `freedom` (strength 0.78)
+- `only` --depends_on--> `include` (strength 0.78)
 - `size` --depends_on--> `freedom` (strength 0.78)
+- `size` --depends_on--> `include` (strength 0.78)
 - `spec` --depends_on--> `freedom` (strength 0.78)
 - `spec` --depends_on--> `include` (strength 0.78)
 - `text` --depends_on--> `freedom` (strength 0.78)
-- `null` --depends_on--> `max` (strength 0.76)
+- `text` --depends_on--> `include` (strength 0.78)
+- `null` --depends_on--> `max` (strength 0.77)
 - `one` --depends_on--> `null` (strength 0.76)
-- `source` --depends_on--> `include` (strength 0.75)
 - `source` --depends_on--> `freedom` (strength 0.74)
-- `first` --depends_on--> `freedom` (strength 0.71)
+- `source` --depends_on--> `include` (strength 0.74)
+- `empty` --depends_on--> `freedom` (strength 0.71)
+- `empty` --depends_on--> `include` (strength 0.71)
 - `first` --depends_on--> `include` (strength 0.71)
-- `one` --depends_on--> `when` (strength 0.71)
 
 ## Dialectic
 
 - Thesis: `any` centralizes 76 files; Antithesis: `caller` pulls 74 files with 36 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
 - Thesis: `any` centralizes 76 files; Antithesis: `first` pulls 94 files with 41 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 76 files; Antithesis: `its` pulls 126 files with 49 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 76 files; Antithesis: `never` pulls 126 files with 47 shared (Jaccard 0.30); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 76 files; Antithesis: `not` pulls 154 files with 55 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 76 files; Antithesis: `only` pulls 118 files with 50 shared (Jaccard 0.35); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `any` centralizes 76 files; Antithesis: `its` pulls 127 files with 49 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `any` centralizes 76 files; Antithesis: `never` pulls 127 files with 47 shared (Jaccard 0.30); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `any` centralizes 76 files; Antithesis: `not` pulls 155 files with 55 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `any` centralizes 76 files; Antithesis: `only` pulls 119 files with 50 shared (Jaccard 0.34); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
 - Thesis: `any` centralizes 76 files; Antithesis: `per` pulls 94 files with 47 shared (Jaccard 0.38); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
 - Thesis: `any` centralizes 76 files; Antithesis: `same` pulls 82 files with 39 shared (Jaccard 0.33); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
-- Thesis: `any` centralizes 76 files; Antithesis: `set` pulls 84 files with 39 shared (Jaccard 0.32); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
+- Thesis: `any` centralizes 76 files; Antithesis: `set` pulls 85 files with 40 shared (Jaccard 0.33); Synthesis: should they merge, split by layer, or keep `bridges` explicit?
 - Thesis: `bytes` centralizes 91 files; Antithesis: `cap` pulls 98 files with 45 shared (Jaccard 0.31); Synthesis: should they merge, split by layer, or keep `bridges` explicit?

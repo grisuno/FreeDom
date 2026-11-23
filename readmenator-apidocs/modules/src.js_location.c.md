@@ -1,10 +1,10 @@
 # `src/js_location.c`
 
-> Source: [src/js_location.c:1](../../src/js_location.c#L1) | language `c` | coverage 42.9% | [API index](../index.md)
+> Source: [src/js_location.c:1](../../src/js_location.c#L1) | language `c` | coverage 33.3% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`jl_m_hist_target`](#jl_m_hist_target), [`jd_set_location`](#jd_set_location), [`jd_take_nav_request`](#jd_take_nav_request), [`jd_take_history`](#jd_take_history), [`jd_frag_push`](#jd_frag_push), [`jd_pop_state`](#jd_pop_state)
+- **Functions:** [`jl_m_hist_target`](#jl_m_hist_target), [`jd_set_location`](#jd_set_location), [`jd_take_nav_request`](#jd_take_nav_request), [`numbers`](#numbers), [`jd_take_scroll`](#jd_take_scroll), [`jd_take_history`](#jd_take_history), [`jd_frag_push`](#jd_frag_push), [`jd_pop_state`](#jd_pop_state)
 
 ## Call Graph
 
@@ -19,6 +19,7 @@ flowchart LR
     n_src_js_native_c__jn_host_eval["js_native.jn_host_eval"]
     n_src_js_sandbox_c__js_context_raw["js_sandbox.js_context_raw"]
     n_src_js_location_c__jd_take_nav_request(["jd_take_nav_request"])
+    n_src_js_location_c__jd_take_scroll(["jd_take_scroll"])
     n_src_js_location_c__jd_take_history(["jd_take_history"])
     n_src_js_location_c__jd_frag_push(["jd_frag_push"])
     n_src_js_location_c__jd_pop_state(["jd_pop_state"])
@@ -27,6 +28,8 @@ flowchart LR
     n_src_js_location_c__jd_set_location -.-> n_src_js_native_c__jn_host_eval
     n_src_js_location_c__jd_set_location -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_location_c__jd_take_nav_request -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_location_c__jd_take_scroll -.-> n_src_js_native_c__jn_host_eval
+    n_src_js_location_c__jd_take_scroll -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_location_c__jd_take_history -.-> n_src_js_native_c__jn_host_eval
     n_src_js_location_c__jd_take_history -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_location_c__jd_frag_push -.-> n_src_js_sandbox_c__js_context_raw
@@ -69,7 +72,7 @@ A file:// target yields {href} only, like the location it replaces.
 
 ### `jd_set_location`
 
-`function` | [src/js_location.c:150](../../src/js_location.c#L150)
+`function` | [src/js_location.c:160](../../src/js_location.c#L160)
 
 ```c
 jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)
@@ -95,7 +98,7 @@ jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *pa
 
 ### `jd_take_nav_request`
 
-`function` | [src/js_location.c:184](../../src/js_location.c#L184)
+`function` | [src/js_location.c:194](../../src/js_location.c#L194)
 
 ```c
 int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)
@@ -116,11 +119,54 @@ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)
 
 ---
 
+<a id="numbers"></a>
+
+### `numbers`
+
+`function` | [src/js_location.c:233](../../src/js_location.c#L233)
+
+```c
+* numbers (never as source);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `source` | `never as` |  |  |
+
+**Returns:** `*`
+
+---
+
+<a id="jd_take_scroll"></a>
+
+### `jd_take_scroll`
+
+`function` | [src/js_location.c:237](../../src/js_location.c#L237)
+
+```c
+int jd_take_scroll(js_context *ctx, double out[JD_SCROLL_N])
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `ctx` | `js_context *` |  |  |
+| `JD_SCROLL_N` | `double out[ ]` |  |  |
+
+**Returns:** `int`
+
+*Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+
+---
+
 <a id="jd_take_history"></a>
 
 ### `jd_take_history`
 
-`function` | [src/js_location.c:230](../../src/js_location.c#L230)
+`function` | [src/js_location.c:272](../../src/js_location.c#L272)
 
 ```c
 char *jd_take_history(js_context *ctx, int *go)
@@ -147,10 +193,10 @@ Drains the history operations page JS performed since the last call: an owned st
 
 ### `jd_frag_push`
 
-`function` | [src/js_location.c:261](../../src/js_location.c#L261)
+`function` | [src/js_location.c:303](../../src/js_location.c#L303)
 
 ```c
-int jd_frag_push(js_context *ctx, const char *url)
+int jd_frag_push(js_context *ctx, const char *url, int replace)
 ```
 
 **Parameters**
@@ -159,10 +205,13 @@ int jd_frag_push(js_context *ctx, const char *url)
 |---|---|---|---|
 | `ctx` | `js_context *` |  |  |
 | `url` | `char *` |  |  |
+| `replace` | `int` |  |  |
 
 **Returns:** `int`
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+
+*Called by:* [`navigation`](src.tab.c.md#navigation)
 
 ---
 
@@ -170,7 +219,7 @@ int jd_frag_push(js_context *ctx, const char *url)
 
 ### `jd_pop_state`
 
-`function` | [src/js_location.c:284](../../src/js_location.c#L284)
+`function` | [src/js_location.c:327](../../src/js_location.c#L327)
 
 ```c
 int jd_pop_state(js_context *ctx, int index)

@@ -40,6 +40,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `fuzz/fuzz_prefetch.c` -> stddef.h, stdint.h, string.h
 - `fuzz/fuzz_prefs.c` -> stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `fuzz/fuzz_request_headers.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_scroll_req.c` -> math.h, stdint.h, stdlib.h, string.h
 - `fuzz/fuzz_site_panel.c` -> math.h, site_panel.h, stddef.h, stdint.h, stdlib.h, string.h
 - `fuzz/fuzz_smooth_scroll.c` -> math.h, stdint.h, stdlib.h, string.h
 - `fuzz/fuzz_svg_render.c` -> math.h, stdint.h, stdlib.h, string.h
@@ -130,6 +131,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `include/render_policy.h` -> stdbool.h
 - `include/renderer.h` -> stddef.h
 - `include/request_policy.h` -> stddef.h
+- `include/scroll_req.h` -> stddef.h, stdint.h
 - `include/secure_fetch.h` -> stddef.h, stdint.h, time.h
 - `include/sha2.h` -> stddef.h, stdint.h
 - `include/sheet_cache.h` -> stddef.h
@@ -243,6 +245,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `src/render_doc.c` -> stdlib.h, string.h
 - `src/renderer.c` -> errno.h, stdint.h, stdlib.h, string.h, sys/wait.h, unistd.h
 - `src/request_policy.c` -> stdlib.h, string.h
+- `src/scroll_req.c` -> math.h, string.h
 - `src/secure_fetch.c` -> curl/curl.h, inttypes.h, netinet/in.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdio.h, stdlib.h, string.h, strings.h, sys/socket.h, time.h
 - `src/sha2.c` -> string.h
 - `src/sheet_cache.c` -> stdint.h, stdlib.h, string.h
@@ -251,7 +254,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `src/svg_paint.c` -> math.h, string.h
 - `src/svg_raster.c` -> cairo.h, math.h, stdlib.h, string.h
 - `src/svg_render.c` -> math.h, stddef.h, string.h
-- `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, pthread.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/random.h, sys/wait.h, time.h, unistd.h
+- `src/tab.c` -> errno.h, fcntl.h, linux/close_range.h, math.h, pthread.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/random.h, sys/wait.h, time.h, unistd.h
 - `src/table_layout.c` -> math.h
 - `src/text_shape.c` -> cairo/cairo-ft.h, fontconfig/fontconfig.h, ft2build.h, harfbuzz/hb.h, hb-ft.h, hb-ot.h, stdint.h, stdio.h, stdlib.h, string.h
 - `src/textfield.c` -> string.h
@@ -349,6 +352,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `tests/test_render_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_renderer.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_request_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, string.h
+- `tests/test_scroll_req.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_secure_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_sha2.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_sheet_cache.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h

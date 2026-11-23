@@ -2,50 +2,50 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 312,
-  "entities": 4212,
+  "modules": 315,
+  "entities": 4248,
   "languages": {
-   "c": 172,
-   "h": 122,
+   "c": 174,
+   "h": 123,
    "py": 13,
    "sh": 5
   },
   "kinds": {
    "constant": 27,
-   "enum": 172,
-   "function": 2324,
-   "macro": 853,
+   "enum": 175,
+   "function": 2345,
+   "macro": 858,
    "method": 28,
-   "module": 312,
-   "struct": 318,
-   "type_alias": 171,
+   "module": 315,
+   "struct": 320,
+   "type_alias": 173,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 110,
+  "skipped_files": 111,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1880,
-   "total": 4178,
+   "documented": 1895,
+   "total": 4214,
    "percent": 45.0
   },
   "by_kind": {
    "enum": {
     "documented": 80,
-    "total": 172,
-    "percent": 46.5
+    "total": 175,
+    "percent": 45.7
    },
    "function": {
-    "documented": 1057,
-    "total": 2324,
+    "documented": 1067,
+    "total": 2345,
     "percent": 45.5
    },
    "macro": {
-    "documented": 402,
-    "total": 853,
-    "percent": 47.1
+    "documented": 406,
+    "total": 858,
+    "percent": 47.3
    },
    "method": {
     "documented": 0,
@@ -53,19 +53,19 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 76,
-    "total": 312,
+    "documented": 77,
+    "total": 315,
     "percent": 24.4
    },
    "struct": {
     "documented": 142,
-    "total": 318,
-    "percent": 44.7
+    "total": 320,
+    "percent": 44.4
    },
    "type_alias": {
     "documented": 123,
-    "total": 171,
-    "percent": 71.9
+    "total": 173,
+    "percent": 71.1
    }
   },
   "by_module": {
@@ -269,6 +269,11 @@
     "total": 1,
     "percent": 0.0
    },
+   "fuzz/fuzz_scroll_req.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
    "fuzz/fuzz_site_panel.c": {
     "documented": 1,
     "total": 2,
@@ -331,8 +336,8 @@
    },
    "gui/browser_ui.c": {
     "documented": 86,
-    "total": 271,
-    "percent": 31.7
+    "total": 273,
+    "percent": 31.5
    },
    "gui/browser_ui_internal.h": {
     "documented": 15,
@@ -365,9 +370,9 @@
     "percent": 37.5
    },
    "include/anchor.h": {
-    "documented": 4,
-    "total": 8,
-    "percent": 50.0
+    "documented": 5,
+    "total": 9,
+    "percent": 55.6
    },
    "include/anti_fp.h": {
     "documented": 21,
@@ -431,8 +436,8 @@
    },
    "include/css_chain.h": {
     "documented": 3,
-    "total": 12,
-    "percent": 25.0
+    "total": 13,
+    "percent": 23.1
    },
    "include/css_color.h": {
     "documented": 3,
@@ -585,9 +590,9 @@
     "percent": 72.2
    },
    "include/freedom_config.h": {
-    "documented": 22,
+    "documented": 23,
     "total": 27,
-    "percent": 81.5
+    "percent": 85.2
    },
    "include/group_index.h": {
     "documented": 1,
@@ -665,9 +670,9 @@
     "percent": 50.0
    },
    "include/js_location.h": {
-    "documented": 3,
-    "total": 7,
-    "percent": 42.9
+    "documented": 4,
+    "total": 9,
+    "percent": 44.4
    },
    "include/js_native.h": {
     "documented": 0,
@@ -804,6 +809,11 @@
     "total": 11,
     "percent": 54.5
    },
+   "include/scroll_req.h": {
+    "documented": 5,
+    "total": 14,
+    "percent": 35.7
+   },
    "include/secure_fetch.h": {
     "documented": 25,
     "total": 48,
@@ -850,8 +860,8 @@
     "percent": 38.9
    },
    "include/tab.h": {
-    "documented": 30,
-    "total": 60,
+    "documented": 31,
+    "total": 62,
     "percent": 50.0
    },
    "include/table_layout.h": {
@@ -955,9 +965,9 @@
     "percent": 100.0
    },
    "src/anchor.c": {
-    "documented": 4,
-    "total": 6,
-    "percent": 66.7
+    "documented": 5,
+    "total": 7,
+    "percent": 71.4
    },
    "src/anti_fp.c": {
     "documented": 17,
@@ -1006,8 +1016,8 @@
    },
    "src/css.c": {
     "documented": 24,
-    "total": 87,
-    "percent": 27.6
+    "total": 88,
+    "percent": 27.3
    },
    "src/css_atrule.c": {
     "documented": 4,
@@ -1021,8 +1031,8 @@
    },
    "src/css_chain.c": {
     "documented": 8,
-    "total": 20,
-    "percent": 40.0
+    "total": 21,
+    "percent": 38.1
    },
    "src/css_color.c": {
     "documented": 7,
@@ -1291,8 +1301,8 @@
    },
    "src/js_location.c": {
     "documented": 3,
-    "total": 7,
-    "percent": 42.9
+    "total": 9,
+    "percent": 33.3
    },
    "src/js_location_internal.h": {
     "documented": 1,
@@ -1429,6 +1439,11 @@
     "total": 8,
     "percent": 62.5
    },
+   "src/scroll_req.c": {
+    "documented": 4,
+    "total": 5,
+    "percent": 80.0
+   },
    "src/secure_fetch.c": {
     "documented": 15,
     "total": 52,
@@ -1471,8 +1486,8 @@
    },
    "src/tab.c": {
     "documented": 50,
-    "total": 113,
-    "percent": 44.2
+    "total": 115,
+    "percent": 43.5
    },
    "src/table_layout.c": {
     "documented": 2,
@@ -1833,6 +1848,11 @@
    "entities": 1
   },
   {
+   "uid": "fuzz/fuzz_scroll_req.c",
+   "path": "modules/fuzz.fuzz_scroll_req.c.jsonl",
+   "entities": 2
+  },
+  {
    "uid": "fuzz/fuzz_site_panel.c",
    "path": "modules/fuzz.fuzz_site_panel.c.jsonl",
    "entities": 2
@@ -1895,7 +1915,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 271
+   "entities": 273
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1930,7 +1950,7 @@
   {
    "uid": "include/anchor.h",
    "path": "modules/include.anchor.h.jsonl",
-   "entities": 8
+   "entities": 9
   },
   {
    "uid": "include/anti_fp.h",
@@ -1995,7 +2015,7 @@
   {
    "uid": "include/css_chain.h",
    "path": "modules/include.css_chain.h.jsonl",
-   "entities": 12
+   "entities": 13
   },
   {
    "uid": "include/css_color.h",
@@ -2230,7 +2250,7 @@
   {
    "uid": "include/js_location.h",
    "path": "modules/include.js_location.h.jsonl",
-   "entities": 7
+   "entities": 9
   },
   {
    "uid": "include/js_native.h",
@@ -2368,6 +2388,11 @@
    "entities": 11
   },
   {
+   "uid": "include/scroll_req.h",
+   "path": "modules/include.scroll_req.h.jsonl",
+   "entities": 14
+  },
+  {
    "uid": "include/secure_fetch.h",
    "path": "modules/include.secure_fetch.h.jsonl",
    "entities": 48
@@ -2415,7 +2440,7 @@
   {
    "uid": "include/tab.h",
    "path": "modules/include.tab.h.jsonl",
-   "entities": 60
+   "entities": 62
   },
   {
    "uid": "include/table_layout.h",
@@ -2520,7 +2545,7 @@
   {
    "uid": "src/anchor.c",
    "path": "modules/src.anchor.c.jsonl",
-   "entities": 6
+   "entities": 7
   },
   {
    "uid": "src/anti_fp.c",
@@ -2570,7 +2595,7 @@
   {
    "uid": "src/css.c",
    "path": "modules/src.css.c.jsonl",
-   "entities": 87
+   "entities": 88
   },
   {
    "uid": "src/css_atrule.c",
@@ -2585,7 +2610,7 @@
   {
    "uid": "src/css_chain.c",
    "path": "modules/src.css_chain.c.jsonl",
-   "entities": 20
+   "entities": 21
   },
   {
    "uid": "src/css_color.c",
@@ -2855,7 +2880,7 @@
   {
    "uid": "src/js_location.c",
    "path": "modules/src.js_location.c.jsonl",
-   "entities": 7
+   "entities": 9
   },
   {
    "uid": "src/js_location_internal.h",
@@ -2993,6 +3018,11 @@
    "entities": 8
   },
   {
+   "uid": "src/scroll_req.c",
+   "path": "modules/src.scroll_req.c.jsonl",
+   "entities": 5
+  },
+  {
    "uid": "src/secure_fetch.c",
    "path": "modules/src.secure_fetch.c.jsonl",
    "entities": 52
@@ -3035,7 +3065,7 @@
   {
    "uid": "src/tab.c",
    "path": "modules/src.tab.c.jsonl",
-   "entities": 113
+   "entities": 115
   },
   {
    "uid": "src/table_layout.c",
@@ -3195,7 +3225,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2299
+  "total": 2320
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

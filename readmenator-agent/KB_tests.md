@@ -27,9 +27,10 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_resolve_decoded` (function, line 97) `static void test_resolve_decoded(void **state)`
   - `test_resolve_rejects_detached_and_bad_args` (function, line 112) `static void test_resolve_rejects_detached_and_bad_args(void **state)`
   - `test_collect_subtree_then_following` (function, line 134) `static void test_collect_subtree_then_following(void **state)`
-  - `test_target_top` (function, line 162) `static void test_target_top(void **state)`
-  - `test_scroll_for` (function, line 188) `static void test_scroll_for(void **state)`
-  - `main` (function, line 198) `int main(void)`
+  - `test_target_box` (function, line 163) `static void test_target_box(void **state)`
+  - `test_target_top` (function, line 186) `static void test_target_top(void **state)`
+  - `test_scroll_for` (function, line 212) `static void test_scroll_for(void **state)`
+  - `main` (function, line 222) `int main(void)`
 - Depends on: `include/anchor.h`, `include/dom.h`, `include/html_parse.h`, `include/js_geom.h`
 
 ## tests/test_anti_fp.c

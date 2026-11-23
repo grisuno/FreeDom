@@ -1,11 +1,11 @@
 # `include/anchor.h`
 
-> Source: [include/anchor.h:1](../../include/anchor.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
+> Source: [include/anchor.h:1](../../include/anchor.h#L1) | language `h` | coverage 55.6% | [API index](../index.md)
 
 ## Contents
 
 - **Enums:** [`anc_kind`](#anc_kind)
-- **Functions:** [`fit`](#fit), [`anc_collect`](#anc_collect), [`anc_target_top`](#anc_target_top), [`anc_scroll_for`](#anc_scroll_for)
+- **Functions:** [`fit`](#fit), [`anc_collect`](#anc_collect), [`anc_target_top`](#anc_target_top), [`anc_target_box`](#anc_target_box), [`anc_scroll_for`](#anc_scroll_for)
 - **Macros:** [`ANC_MAX_FRAGMENT`](#anc_max_fragment), [`ANC_MAX_HANDLES`](#anc_max_handles)
 
 ## Enums
@@ -72,7 +72,7 @@ Returns the count written; 0 (and *nsub = 0) on NULL arguments, cap 0 or an inva
 
 **Returns:** `size_t`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_anchor.c.md#llvmfuzzertestoneinput)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_anchor.c.md#llvmfuzzertestoneinput), [`navigation`](src.tab.c.md#navigation)
 
 ---
 
@@ -104,11 +104,40 @@ The document offset of the target from a FINISHED geometry table (jg_finish): th
 
 ---
 
+<a id="anc_target_box"></a>
+
+### `anc_target_box`
+
+`function` | [include/anchor.h:63](../../include/anchor.h#L63)
+
+```c
+int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub, double *top, double *bottom);
+```
+
+As anc_target_top, plus the target's bottom: the largest y + h among the subtree's rects (= *top when the position came from a following element: an empty target is a point).
+
+0 and both outputs; -1 (outputs untouched) when nothing painted or on NULL.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `g` | `jg_table *` |  |  |
+| `h` | `dom_node_id *` |  |  |
+| `n` | `size_t` |  |  |
+| `nsub` | `size_t` |  |  |
+| `top` | `double *` |  |  |
+| `bottom` | `double *` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="anc_scroll_for"></a>
 
 ### `anc_scroll_for`
 
-`function` | [include/anchor.h:62](../../include/anchor.h#L62)
+`function` | [include/anchor.h:68](../../include/anchor.h#L68)
 
 ```c
 double anc_scroll_for(double top, double max_scroll);

@@ -462,7 +462,7 @@ Job exceptions (rejected promises with no handler, etc.) are swallowed -- a job 
 
 **Returns:** `int`
 
-*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput), [`navigation`](src.tab.c.md#navigation)
 
 ---
 

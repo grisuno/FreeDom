@@ -10,7 +10,8 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `fit` (function, line 35) `* result does not fit (out is then "" when cap > 0). */ size_t anc_percent_decode(const char *in, char *out, size_t...`
   - `anc_collect` (function, line 50) `size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, size_t cap, size_t *nsub);`
   - `anc_target_top` (function, line 57) `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub, double *top);`
-  - `anc_scroll_for` (function, line 62) `double anc_scroll_for(double top, double max_scroll);`
+  - `anc_target_box` (function, line 63) `int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub, double *top, double *bottom);`
+  - `anc_scroll_for` (function, line 68) `double anc_scroll_for(double top, double max_scroll);`
   - `FREEDOM_ANCHOR_H` (macro, line 2) `#define FREEDOM_ANCHOR_H`
   - `ANC_MAX_FRAGMENT` (macro, line 23) `#define ANC_MAX_FRAGMENT`
   - `ANC_MAX_HANDLES` (macro, line 24) `#define ANC_MAX_HANDLES`
@@ -285,13 +286,13 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Language: h
 - Symbols:
   - `css_style` (struct, line 606)
-  - `css_sel` (struct, line 1025)
-  - `css_media` (struct, line 1027)
-  - `css_drop` (struct, line 1099)
-  - `css_drop_log` (struct, line 1111)
-  - `css_attr` (struct, line 1140)
-  - `css_element` (struct, line 1150)
-  - `cvr_table` (struct, line 1222)
+  - `css_sel` (struct, line 1029)
+  - `css_media` (struct, line 1031)
+  - `css_drop` (struct, line 1103)
+  - `css_drop_log` (struct, line 1115)
+  - `css_attr` (struct, line 1144)
+  - `css_element` (struct, line 1154)
+  - `cvr_table` (struct, line 1226)
   - `css_status` (enum, line 30)
   - `css_align` (enum, line 36)
   - `css_display` (enum, line 44)
@@ -351,31 +352,31 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `css_column_span` (enum, line 453)
   - `css_backface` (enum, line 457)
   - `css_pct_slot` (enum, line 534)
-  - `css_drop_cause` (enum, line 1086)
+  - `css_drop_cause` (enum, line 1090)
   - `color` (type_alias, line 606) `typedef struct css_style { int color;`
-  - `css_sheet` (type_alias, line 1019) `typedef struct css_sheet css_sheet;`
-  - `prefers_dark` (type_alias, line 1026) `typedef struct css_media { int prefers_dark;`
-  - `prop` (type_alias, line 1099) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
+  - `css_sheet` (type_alias, line 1023) `typedef struct css_sheet css_sheet;`
+  - `prefers_dark` (type_alias, line 1030) `typedef struct css_media { int prefers_dark;`
+  - `prop` (type_alias, line 1103) `typedef struct css_drop { char prop[CSS_DROP_PROP_MAX];`
   - `verbatim` (function, line 92) `* the quoted row strings verbatim (flex_layout parses them);`
   - `POINTER` (function, line 235) `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
-  - `container` (function, line 674) `* container (Display 3 section 2);`
-  - `family` (function, line 719) `* LOCAL family (spec/text_shape.md section 7);`
-  - `translate` (function, line 893) `* translate()/translateX()/translateY();`
-  - `scaleY` (function, line 894) `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
-  - `declared` (function, line 898) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
-  - `element` (function, line 903) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
-  - `slots` (function, line 910) `* parse time into ALL seven slots (singular matrices fail closed);`
-  - `css_sheet_uses_counters` (function, line 1055) `int css_sheet_uses_counters(const css_sheet *sheet);`
-  - `css_sheet_uses_containers` (function, line 1059) `int css_sheet_uses_containers(const css_sheet *sheet);`
-  - `palette` (function, line 1076) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
-  - `css_free` (function, line 1126) `void css_free(css_sheet *s);`
-  - `order` (function, line 1129) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
-  - `inherited_px` (function, line 1246) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
-  - `css_ua_heading_em` (function, line 1258) `double css_ua_heading_em(int level);`
-  - `name` (function, line 1263) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
-  - `css_font_face_count` (function, line 1273) `size_t css_font_face_count(const css_sheet *sheet);`
-  - `css_font_face_at` (function, line 1274) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
-  - `css_resolve_anim_keyframes` (function, line 1282) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
+  - `container` (function, line 678) `* container (Display 3 section 2);`
+  - `family` (function, line 723) `* LOCAL family (spec/text_shape.md section 7);`
+  - `translate` (function, line 897) `* translate()/translateX()/translateY();`
+  - `scaleY` (function, line 898) `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
+  - `declared` (function, line 902) `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
+  - `element` (function, line 907) `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
+  - `slots` (function, line 914) `* parse time into ALL seven slots (singular matrices fail closed);`
+  - `css_sheet_uses_counters` (function, line 1059) `int css_sheet_uses_counters(const css_sheet *sheet);`
+  - `css_sheet_uses_containers` (function, line 1063) `int css_sheet_uses_containers(const css_sheet *sheet);`
+  - `palette` (function, line 1080) `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
+  - `css_free` (function, line 1130) `void css_free(css_sheet *s);`
+  - `order` (function, line 1133) `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
+  - `inherited_px` (function, line 1250) `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
+  - `css_ua_heading_em` (function, line 1262) `double css_ua_heading_em(int level);`
+  - `name` (function, line 1267) `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
+  - `css_font_face_count` (function, line 1277) `size_t css_font_face_count(const css_sheet *sheet);`
+  - `css_font_face_at` (function, line 1278) `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+  - `css_resolve_anim_keyframes` (function, line 1286) `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);`
   - `FREEDOM_CSS_H` (macro, line 2) `#define FREEDOM_CSS_H`
   - `CSS_DISP_INLINE_OUTER` (macro, line 74) `#define CSS_DISP_INLINE_OUTER`
   - `CSS_DISP_INNER_MASK` (macro, line 75) `#define CSS_DISP_INNER_MASK`
@@ -424,14 +425,14 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CSS_MAX_ATTR_SEL` (macro, line 591) `#define CSS_MAX_ATTR_SEL`
   - `CSS_MAX_PSEUDO_SEL` (macro, line 595) `#define CSS_MAX_PSEUDO_SEL`
   - `CSS_NTH_MAX` (macro, line 599) `#define CSS_NTH_MAX`
-  - `CSS_MAX_KF_STOPS` (macro, line 933) `#define CSS_MAX_KF_STOPS`
-  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 1039) `#define CSS_MEDIA_DEFAULT_WIDTH`
-  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 1044) `#define CSS_MEDIA_DEFAULT_HEIGHT`
-  - `CSS_DROP_PROP_MAX` (macro, line 1091) `#define CSS_DROP_PROP_MAX`
-  - `CSS_DROP_VAL_MAX` (macro, line 1092) `#define CSS_DROP_VAL_MAX`
-  - `CSS_PSEUDO_BEFORE` (macro, line 1232) `#define CSS_PSEUDO_BEFORE`
-  - `CSS_PSEUDO_AFTER` (macro, line 1233) `#define CSS_PSEUDO_AFTER`
-  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1234) `#define CSS_PSEUDO_PLACEHOLDER`
+  - `CSS_MAX_KF_STOPS` (macro, line 937) `#define CSS_MAX_KF_STOPS`
+  - `CSS_MEDIA_DEFAULT_WIDTH` (macro, line 1043) `#define CSS_MEDIA_DEFAULT_WIDTH`
+  - `CSS_MEDIA_DEFAULT_HEIGHT` (macro, line 1048) `#define CSS_MEDIA_DEFAULT_HEIGHT`
+  - `CSS_DROP_PROP_MAX` (macro, line 1095) `#define CSS_DROP_PROP_MAX`
+  - `CSS_DROP_VAL_MAX` (macro, line 1096) `#define CSS_DROP_VAL_MAX`
+  - `CSS_PSEUDO_BEFORE` (macro, line 1236) `#define CSS_PSEUDO_BEFORE`
+  - `CSS_PSEUDO_AFTER` (macro, line 1237) `#define CSS_PSEUDO_AFTER`
+  - `CSS_PSEUDO_PLACEHOLDER` (macro, line 1238) `#define CSS_PSEUDO_PLACEHOLDER`
 - Depends on: `include/css_color.h`, `include/css_counter.h`, `include/css_mq.h`
 - Imported by: `fuzz/fuzz_css.c`, `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `gui/bui_mask_img.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `include/pres_hints.h`, `include/sheet_cache.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/js_native.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 

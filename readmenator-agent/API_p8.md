@@ -1,4 +1,4 @@
-# API (page 8 of 13)
+# API (page 8 of 14)
 Previous: [API_p7.md](API_p7.md)
 
 ## src/css_counter.c
@@ -216,13 +216,13 @@ Depends on: `include/css_select.h`
 - `is_form_control` (function) `src/css_select.c:817` `static int is_form_control(const char *tag)` -- True if the 1-based index idx satisfies idx = A*m + B for some integer m >= 0. * idx <= 0 means "unknown sibling...
 - `pseudo_matches` (function) `src/css_select.c:826` `static int pseudo_matches(const css_pseudo_match *pm, const css_element *el, const css_sel *sel, const char...` -- if (A > 0) return d >= 0 && d % A == 0; return d <= 0 && (-d) % (long)(-A) == 0; } /* Form controls for :enabled...
 - `sub_sel_matches` (function) `src/css_select.c:830` `static int sub_sel_matches(const css_sub_sel *sub, const css_element *el)`
-- `compound_matches` (function) `src/css_select.c:1080` `static int compound_matches(const css_compound *c, const css_element *el,
+- `compound_matches` (function) `src/css_select.c:1081` `static int compound_matches(const css_compound *c, const css_element *el,
                        ...` -- True if one compound matches one element (no ancestor context).
-- `built` (function) `src/css_select.c:1115` `* chains the caller built (an element without parent/prev links never matches
+- `built` (function) `src/css_select.c:1116` `* chains the caller built (an element without parent/prev links never matches
  * through that com...`
-- `pseudo_is_local` (function) `src/css_select.c:1160` `static int pseudo_is_local(int kind)` -- case COMB_ADJACENT: return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el...
-- `csel_needs_structure` (function) `src/css_select.c:1173` `int csel_needs_structure(const css_sel *sel)`
-- `csel_matches` (function) `src/css_select.c:1196` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
+- `pseudo_is_local` (function) `src/css_select.c:1161` `static int pseudo_is_local(int kind)` -- case COMB_ADJACENT: return (el->prev != NULL) && complex_matches(sel, k - 1, el->prev, target_id, allow_pseudo_el...
+- `csel_needs_structure` (function) `src/css_select.c:1174` `int csel_needs_structure(const css_sel *sel)`
+- `csel_matches` (function) `src/css_select.c:1197` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id,
               ...`
 
 ## src/css_text.c

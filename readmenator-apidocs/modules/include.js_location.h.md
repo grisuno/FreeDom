@@ -1,11 +1,11 @@
 # `include/js_location.h`
 
-> Source: [include/js_location.h:1](../../include/js_location.h#L1) | language `h` | coverage 42.9% | [API index](../index.md)
+> Source: [include/js_location.h:1](../../include/js_location.h#L1) | language `h` | coverage 44.4% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`reads`](#reads), [`jd_take_history`](#jd_take_history), [`jd_pop_state`](#jd_pop_state), [`url`](#url), [`acting`](#acting)
-- **Macros:** [`JD_HIST_MAX`](#jd_hist_max)
+- **Functions:** [`reads`](#reads), [`jd_take_history`](#jd_take_history), [`jd_pop_state`](#jd_pop_state), [`kind`](#kind), [`url`](#url), [`acting`](#acting)
+- **Macros:** [`JD_HIST_MAX`](#jd_hist_max), [`JD_SCROLL_N`](#jd_scroll_n)
 
 ## Functions
 
@@ -78,14 +78,28 @@ Returns 1 when applied, 0 when index is out of range or no location is installed
 
 ---
 
+<a id="kind"></a>
+
+### `kind`
+
+`function` | [include/js_location.h:48](../../include/js_location.h#L48)
+
+```c
+* kind (srq_kind), y, behavior (srq_behavior), block (srq_block), element handle. Returns * 1 when one was pending, 0 otherwise (out then all 0). The values are UNVALIDATED page * data: the caller ran
+```
+
+**Returns:** `*`
+
+---
+
 <a id="url"></a>
 
 ### `url`
 
-`function` | [include/js_location.h:47](../../include/js_location.h#L47)
+`function` | [include/js_location.h:55](../../include/js_location.h#L55)
 
 ```c
-* pushes url (resolved by the page's own same-origin check, dom.histTarget) as a new * entry of the page's history, moves location and dispatches hashchange when the URL * changed. url is passed as a
+* pushes url (resolved by the page's own same-origin check, dom.histTarget) as a new * entry of the page's history, moves location and dispatches hashchange when the URL * changed. replace != 0 replac
 ```
 
 **Parameters**
@@ -102,7 +116,7 @@ Returns 1 when applied, 0 when index is out of range or no location is installed
 
 ### `acting`
 
-`function` | [include/js_location.h:56](../../include/js_location.h#L56)
+`function` | [include/js_location.h:66](../../include/js_location.h#L66)
 
 ```c
 * The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);
@@ -133,5 +147,21 @@ Returns 1 when applied, 0 when index is out of range or no location is installed
 Bound on a document's history entries and on the operations one response carries (spec/js_dom.md 7e).
 
 Past it pushState behaves as replaceState.
+
+---
+
+<a id="jd_scroll_n"></a>
+
+### `JD_SCROLL_N`
+
+`macro` | [include/js_location.h:51](../../include/js_location.h#L51)
+
+```c
+#define JD_SCROLL_N
+```
+
+Takes and CLEARS the page's pending scroll request (window.scrollTo/scrollBy, Element.scrollIntoView, root scrollTop=; spec/scroll_req.md) as JD_SCROLL_N numbers: kind (srq_kind), y, behavior (srq_behavior), block (srq_block), element handle.
+
+Returns 1 when one was pending, 0 otherwise (out then all 0). The values are UNVALIDATED page data: the caller range-checks them before use.
 
 ---

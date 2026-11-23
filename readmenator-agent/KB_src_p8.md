@@ -132,22 +132,22 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
 static void gate_box_image_...`
   - `rd_build` (function, line 293) `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-  - `rd_free` (function, line 745) `void rd_free(rd_doc *d)`
-  - `rd_count` (function, line 762) `size_t rd_count(const rd_doc *d)`
-  - `rd_at` (function, line 766) `const rd_block *rd_at(const rd_doc *d, size_t i)`
-  - `rd_box_count` (function, line 771) `size_t rd_box_count(const rd_doc *d)`
-  - `rd_box_at` (function, line 775) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-  - `rd_cont_count` (function, line 780) `size_t rd_cont_count(const rd_doc *d)`
-  - `rd_cont_at` (function, line 784) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
-  - `rd_kind_name` (function, line 789) `const char *rd_kind_name(rd_kind k)`
-  - `rd_block_heading_level` (function, line 803) `int rd_block_heading_level(const rd_block *b)`
-  - `rd_block_tag` (function, line 814) `const char *rd_block_tag(const rd_block *b)`
-  - `rd_input_label` (function, line 845) `const char *rd_input_label(int input_type)`
-  - `rd_input_invisible` (function, line 865) `int rd_input_invisible(int input_type)`
-  - `rd_image_label` (function, line 869) `const char *rd_image_label(rdp_img_decision d)`
-  - `rd_image_fail_label` (function, line 880) `const char *rd_image_fail_label(img_fail_reason reason)`
+  - `rd_free` (function, line 747) `void rd_free(rd_doc *d)`
+  - `rd_count` (function, line 764) `size_t rd_count(const rd_doc *d)`
+  - `rd_at` (function, line 768) `const rd_block *rd_at(const rd_doc *d, size_t i)`
+  - `rd_box_count` (function, line 773) `size_t rd_box_count(const rd_doc *d)`
+  - `rd_box_at` (function, line 777) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
+  - `rd_cont_count` (function, line 782) `size_t rd_cont_count(const rd_doc *d)`
+  - `rd_cont_at` (function, line 786) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
+  - `rd_kind_name` (function, line 791) `const char *rd_kind_name(rd_kind k)`
+  - `rd_block_heading_level` (function, line 805) `int rd_block_heading_level(const rd_block *b)`
+  - `rd_block_tag` (function, line 816) `const char *rd_block_tag(const rd_block *b)`
+  - `rd_input_label` (function, line 847) `const char *rd_input_label(int input_type)`
+  - `rd_input_invisible` (function, line 867) `int rd_input_invisible(int input_type)`
+  - `rd_image_label` (function, line 871) `const char *rd_image_label(rdp_img_decision d)`
+  - `rd_image_fail_label` (function, line 882) `const char *rd_image_fail_label(img_fail_reason reason)`
   - `place` (function, line 240) `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...`
-  - `unset` (function, line 707) `* background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not...`
+  - `unset` (function, line 709) `* background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not...`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ## src/render_policy.c
@@ -197,6 +197,23 @@ static void gate_box_image_...`
   - `RP_MAX_HOST` (macro, line 17) `#define RP_MAX_HOST`
   - `RP_MAX_LABELS` (macro, line 18) `#define RP_MAX_LABELS`
 - Depends on: `include/psl_data.h`, `include/request_policy.h`
+
+## src/scroll_req.c
+- Doc: element_scroll: The element's scroll for one block alignment inside the optimal viewing region *...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `clamp_coord` (function, line 10) `static int32_t clamp_coord(double v)`
+  - `clamp_count` (function, line 17) `static int32_t clamp_count(size_t n)`
+  - `srq_encode` (function, line 21) `void srq_encode(const srq_req *r, int32_t out[SRQ_WIRE_N])`
+  - `coord_ok` (function, line 33) `static int coord_ok(int32_t v)`
+  - `srq_decode` (function, line 37) `int srq_decode(const int32_t in[SRQ_WIRE_N], size_t max_handles, srq_req *out)`
+  - `element_scroll` (function, line 60) `static double element_scroll(int block, double cur, double h, double pt, double pb,
+             ...`
+  - `srq_target` (function, line 80) `int srq_target(const srq_req *r, const srq_view *v, double el_top, double el_bottom,
+            ...`
+  - `srq_smooth` (function, line 110) `int srq_smooth(const srq_req *r, int root_smooth)`
+- Depends on: `include/scroll_req.h`
 
 ## src/secure_fetch.c
 - Doc: tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a...

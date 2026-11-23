@@ -411,25 +411,25 @@ Previous: [KB_src_p4.md](KB_src_p4.md)
   - `jd_freeze_mutators` (function, line 611) `static int jd_freeze_mutators(JSContext *jsctx)`
   - `attrNames` (function, line 697) `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
      * a missing '...`
-  - `js_env` (function, line 1444) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+  - `js_env` (function, line 1445) `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-  - `jd_install` (function, line 1985) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-  - `jd_rebind` (function, line 2069) `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)`
-  - `jd_flush_custom_elements` (function, line 2079) `void jd_flush_custom_elements(js_context *ctx)`
-  - `fails` (function, line 2093) `* cap is reached or an allocation fails (caller stops), else 0. */
+  - `jd_install` (function, line 1999) `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+  - `jd_rebind` (function, line 2083) `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)`
+  - `jd_flush_custom_elements` (function, line 2093) `void jd_flush_custom_elements(js_context *ctx)`
+  - `fails` (function, line 2107) `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-  - `jd_install_console` (function, line 2207) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-  - `jd_set_cookies` (function, line 2244) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-  - `jd_get_cookies` (function, line 2264) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-  - `jd_set_computed` (function, line 2287) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-  - `jd_set_geometry` (function, line 2298) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+  - `jd_install_console` (function, line 2221) `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+  - `jd_set_cookies` (function, line 2258) `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+  - `jd_get_cookies` (function, line 2278) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+  - `jd_set_computed` (function, line 2301) `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+  - `jd_set_geometry` (function, line 2312) `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
   - `table` (function, line 645) `* a table (dom.viewport() non-null);`
-  - `scripts` (function, line 915) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-  - `enough` (function, line 1088) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-  - `ms` (function, line 1235) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-  - `empty` (function, line 1436) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-  - `geometry` (function, line 1438) `* constant geometry (zero real leak);`
-  - `size` (function, line 1441) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+  - `scripts` (function, line 916) `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+  - `enough` (function, line 1089) `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+  - `ms` (function, line 1236) `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+  - `empty` (function, line 1437) `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+  - `geometry` (function, line 1439) `* constant geometry (zero real leak);`
+  - `size` (function, line 1442) `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
   - `_GNU_SOURCE` (macro, line 10) `#define _GNU_SOURCE`
   - `JD_COMPUTED_VALUE_MAX` (macro, line 414) `#define JD_COMPUTED_VALUE_MAX`
   - `JD_QSA_INLINE` (macro, line 477) `#define JD_QSA_INLINE`
@@ -441,14 +441,14 @@ static int cb_append(char **bu...`
 - Symbols:
   - `registration` (function, line 482) `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
  * observer...`
-  - `run` (function, line 1348) `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-  - `order` (function, line 1363) `* run in insertion order (HTML's "list of scripts that will execute in order as soon as
+  - `run` (function, line 1350) `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+  - `order` (function, line 1365) `* run in insertion order (HTML's "list of scripts that will execute in order as soon as
  * possib...`
-  - `jdx_install` (function, line 1429) `int jdx_install(JSContext *ctx)`
-  - `jd_install_repl_api` (function, line 1438) `jd_status jd_install_repl_api(js_context *ctx)`
-  - `jd_set_repl_css` (function, line 1446) `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
-  - `jd_install_geolocation` (function, line 1459) `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
-  - `jd_install_indexeddb` (function, line 1478) `jd_status jd_install_indexeddb(js_context *ctx)`
+  - `jdx_install` (function, line 1431) `int jdx_install(JSContext *ctx)`
+  - `jd_install_repl_api` (function, line 1440) `jd_status jd_install_repl_api(js_context *ctx)`
+  - `jd_set_repl_css` (function, line 1448) `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+  - `jd_install_geolocation` (function, line 1461) `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+  - `jd_install_indexeddb` (function, line 1480) `jd_status jd_install_indexeddb(js_context *ctx)`
   - `identity` (function, line 105) `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
   - `cancels` (function, line 1001) `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);`
 - Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`, `src/js_native_internal.h`

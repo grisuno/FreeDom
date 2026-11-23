@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 312 modules, 4212 documented entities, documentation coverage 45.0% (1880/4178 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 315 modules, 4248 documented entities, documentation coverage 45.0% (1895/4214 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (172), h (122), py (13), sh (5)
+Languages: c (174), h (123), py (13), sh (5)
 
 ## Modules
 
@@ -59,6 +59,7 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`fuzz/fuzz_prefetch.c`](modules/fuzz.fuzz_prefetch.c.md) | libFuzzer harness for the prefetch lookahead scanner (Hito 29). | 0 | 1 | 50.0% |
 | [`fuzz/fuzz_prefs.c`](modules/fuzz.fuzz_prefs.c.md) |  | 0 | 1 | 0.0% |
 | [`fuzz/fuzz_request_headers.c`](modules/fuzz.fuzz_request_headers.c.md) |  | 0 | 0 | 0.0% |
+| [`fuzz/fuzz_scroll_req.c`](modules/fuzz.fuzz_scroll_req.c.md) | fuzz_scroll_req -- spec/scroll_req.md: a hostile wire record either decodes to an | 0 | 1 | 50.0% |
 | [`fuzz/fuzz_site_panel.c`](modules/fuzz.fuzz_site_panel.c.md) | libFuzzer harness for site_panel (spec/site_panel.md): a hostile URL and KE-group text | 0 | 1 | 50.0% |
 | [`fuzz/fuzz_smooth_scroll.c`](modules/fuzz.fuzz_smooth_scroll.c.md) | libFuzzer harness for smooth_scroll (spec/smooth_scroll.md): drives random sequences of | 0 | 1 | 50.0% |
 | [`fuzz/fuzz_svg_render.c`](modules/fuzz.fuzz_svg_render.c.md) |  | 0 | 1 | 0.0% |
@@ -76,7 +77,7 @@ Languages: c (172), h (122), py (13), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 50 | 220 | 31.7% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 50 | 222 | 31.5% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 7 | 18 | 57.7% |
 | [`gui/bui_chrome.c`](modules/gui.bui_chrome.c.md) |  | 0 | 35 | 52.8% |
 | [`gui/bui_mask_img.c`](modules/gui.bui_mask_img.c.md) | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | 0 | 1 | 50.0% |
@@ -88,7 +89,7 @@ Languages: c (172), h (122), py (13), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`include/anchor.h`](modules/include.anchor.h.md) |  | 1 | 6 | 50.0% |
+| [`include/anchor.h`](modules/include.anchor.h.md) |  | 1 | 7 | 55.6% |
 | [`include/anti_fp.h`](modules/include.anti_fp.h.md) |  | 0 | 34 | 60.0% |
 | [`include/block_flow.h`](modules/include.block_flow.h.md) | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | 0 | 3 | 50.0% |
 | [`include/box_blur.h`](modules/include.box_blur.h.md) | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | 0 | 4 | 60.0% |
@@ -101,7 +102,7 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`include/css.h`](modules/include.css.h.md) |  | 72 | 75 | 71.6% |
 | [`include/css_atrule.h`](modules/include.css_atrule.h.md) |  | 2 | 7 | 70.0% |
 | [`include/css_box.h`](modules/include.css_box.h.md) |  | 0 | 27 | 0.0% |
-| [`include/css_chain.h`](modules/include.css_chain.h.md) |  | 3 | 8 | 25.0% |
+| [`include/css_chain.h`](modules/include.css_chain.h.md) |  | 3 | 9 | 23.1% |
 | [`include/css_color.h`](modules/include.css_color.h.md) |  | 3 | 3 | 42.9% |
 | [`include/css_computed.h`](modules/include.css_computed.h.md) |  | 1 | 4 | 33.3% |
 | [`include/css_counter.h`](modules/include.css_counter.h.md) |  | 4 | 14 | 36.8% |
@@ -132,7 +133,7 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`include/frame_clock.h`](modules/include.frame_clock.h.md) |  | 2 | 4 | 14.3% |
 | [`include/frame_host.h`](modules/include.frame_host.h.md) |  | 1 | 11 | 76.9% |
 | [`include/freebug.h`](modules/include.freebug.h.md) |  | 4 | 13 | 72.2% |
-| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 26 | 81.5% |
+| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 26 | 85.2% |
 | [`include/group_index.h`](modules/include.group_index.h.md) |  | 0 | 2 | 33.3% |
 | [`include/hls.h`](modules/include.hls.h.md) |  | 4 | 6 | 54.5% |
 | [`include/host_conf.h`](modules/include.host_conf.h.md) |  | 1 | 7 | 55.6% |
@@ -148,7 +149,7 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`include/js_env.h`](modules/include.js_env.h.md) |  | 1 | 2 | 25.0% |
 | [`include/js_geom.h`](modules/include.js_geom.h.md) |  | 3 | 15 | 78.9% |
 | [`include/js_intl.h`](modules/include.js_intl.h.md) |  | 0 | 1 | 50.0% |
-| [`include/js_location.h`](modules/include.js_location.h.md) |  | 0 | 6 | 42.9% |
+| [`include/js_location.h`](modules/include.js_location.h.md) |  | 0 | 8 | 44.4% |
 | [`include/js_native.h`](modules/include.js_native.h.md) |  | 0 | 1 | 0.0% |
 | [`include/js_policy.h`](modules/include.js_policy.h.md) |  | 1 | 5 | 42.9% |
 | [`include/js_sandbox.h`](modules/include.js_sandbox.h.md) |  | 6 | 30 | 54.1% |
@@ -176,6 +177,7 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`include/render_policy.h`](modules/include.render_policy.h.md) |  | 3 | 5 | 77.8% |
 | [`include/renderer.h`](modules/include.renderer.h.md) |  | 3 | 3 | 14.3% |
 | [`include/request_policy.h`](modules/include.request_policy.h.md) |  | 1 | 9 | 54.5% |
+| [`include/scroll_req.h`](modules/include.scroll_req.h.md) |  | 7 | 6 | 35.7% |
 | [`include/secure_fetch.h`](modules/include.secure_fetch.h.md) |  | 9 | 38 | 52.1% |
 | [`include/sha2.h`](modules/include.sha2.h.md) |  | 1 | 4 | 50.0% |
 | [`include/sheet_cache.h`](modules/include.sheet_cache.h.md) |  | 5 | 6 | 66.7% |
@@ -185,7 +187,7 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`include/svg_paint.h`](modules/include.svg_paint.h.md) |  | 0 | 2 | 33.3% |
 | [`include/svg_raster.h`](modules/include.svg_raster.h.md) |  | 0 | 4 | 60.0% |
 | [`include/svg_render.h`](modules/include.svg_render.h.md) |  | 9 | 8 | 38.9% |
-| [`include/tab.h`](modules/include.tab.h.md) |  | 14 | 45 | 50.0% |
+| [`include/tab.h`](modules/include.tab.h.md) |  | 14 | 47 | 50.0% |
 | [`include/table_layout.h`](modules/include.table_layout.h.md) | table_layout (tl_) -- used column widths of a table (automatic table layout). | 2 | 5 | 75.0% |
 | [`include/text_case.h`](modules/include.text_case.h.md) | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | 1 | 6 | 75.0% |
 | [`include/text_shape.h`](modules/include.text_shape.h.md) |  | 5 | 19 | 72.0% |
@@ -209,7 +211,7 @@ Languages: c (172), h (122), py (13), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`src/anchor.c`](modules/src.anchor.c.md) | anchor.c — the indicated part of a document and where it sits (spec/anchor.md). | 0 | 5 | 66.7% |
+| [`src/anchor.c`](modules/src.anchor.c.md) | anchor.c — the indicated part of a document and where it sits (spec/anchor.md). | 0 | 6 | 71.4% |
 | [`src/anti_fp.c`](modules/src.anti_fp.c.md) |  | 0 | 22 | 73.9% |
 | [`src/block_flow.c`](modules/src.block_flow.c.md) | block_flow (bf_) -- vertical margin collapsing. | 0 | 3 | 50.0% |
 | [`src/box_blur.c`](modules/src.box_blur.c.md) |  | 0 | 5 | 33.3% |
@@ -219,10 +221,10 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`src/cached_fetch.c`](modules/src.cached_fetch.c.md) |  | 0 | 6 | 28.6% |
 | [`src/chrome_layout.c`](modules/src.chrome_layout.c.md) | chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md | 0 | 17 | 72.2% |
 | [`src/compositor.c`](modules/src.compositor.c.md) |  | 0 | 6 | 71.4% |
-| [`src/css.c`](modules/src.css.c.md) |  | 9 | 77 | 27.6% |
+| [`src/css.c`](modules/src.css.c.md) |  | 9 | 78 | 27.3% |
 | [`src/css_atrule.c`](modules/src.css_atrule.c.md) |  | 0 | 4 | 80.0% |
 | [`src/css_box.c`](modules/src.css_box.c.md) |  | 3 | 30 | 44.1% |
-| [`src/css_chain.c`](modules/src.css_chain.c.md) |  | 3 | 16 | 40.0% |
+| [`src/css_chain.c`](modules/src.css_chain.c.md) |  | 3 | 17 | 38.1% |
 | [`src/css_color.c`](modules/src.css_color.c.md) |  | 4 | 12 | 41.2% |
 | [`src/css_computed.c`](modules/src.css_computed.c.md) |  | 1 | 5 | 28.6% |
 | [`src/css_counter.c`](modules/src.css_counter.c.md) |  | 3 | 16 | 30.0% |
@@ -276,7 +278,7 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`src/js_fetch.c`](modules/src.js_fetch.c.md) |  | 0 | 6 | 14.3% |
 | [`src/js_geom.c`](modules/src.js_geom.c.md) |  | 0 | 12 | 84.6% |
 | [`src/js_intl.c`](modules/src.js_intl.c.md) |  | 0 | 1 | 50.0% |
-| [`src/js_location.c`](modules/src.js_location.c.md) |  | 0 | 6 | 42.9% |
+| [`src/js_location.c`](modules/src.js_location.c.md) |  | 0 | 8 | 33.3% |
 | [`src/js_location_internal.h`](modules/src.js_location_internal.h.md) | Private to js_dom.c / js_location.c: the dom.histTarget native lives with the | 0 | 1 | 50.0% |
 | [`src/js_native.c`](modules/src.js_native.c.md) |  | 0 | 3 | 25.0% |
 | [`src/js_native_internal.h`](modules/src.js_native_internal.h.md) |  | 1 | 1 | 33.3% |
@@ -304,6 +306,7 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`src/render_policy.c`](modules/src.render_policy.c.md) |  | 0 | 5 | 50.0% |
 | [`src/renderer.c`](modules/src.renderer.c.md) |  | 0 | 4 | 20.0% |
 | [`src/request_policy.c`](modules/src.request_policy.c.md) |  | 0 | 7 | 62.5% |
+| [`src/scroll_req.c`](modules/src.scroll_req.c.md) |  | 0 | 4 | 80.0% |
 | [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 45 | 28.8% |
 | [`src/sha2.c`](modules/src.sha2.c.md) |  | 0 | 6 | 42.9% |
 | [`src/sheet_cache.c`](modules/src.sheet_cache.c.md) | sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md. | 4 | 6 | 81.8% |
@@ -312,7 +315,7 @@ Languages: c (172), h (122), py (13), sh (5)
 | [`src/svg_paint.c`](modules/src.svg_paint.c.md) | svg_paint — Cairo back end for the shapes svg_render extracted. | 0 | 2 | 66.7% |
 | [`src/svg_raster.c`](modules/src.svg_raster.c.md) | svg_raster -- SVG served as an image, rasterized inside the confined worker. spec/svg_raster.md. | 0 | 2 | 66.7% |
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
-| [`src/tab.c`](modules/src.tab.c.md) |  | 10 | 102 | 44.2% |
+| [`src/tab.c`](modules/src.tab.c.md) |  | 10 | 104 | 43.5% |
 | [`src/table_layout.c`](modules/src.table_layout.c.md) | table_layout (tl_) -- see include/table_layout.h and spec/table_layout.md. | 0 | 2 | 66.7% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |
 | [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 12 | 32 | 48.9% |

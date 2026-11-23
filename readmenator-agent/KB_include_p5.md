@@ -158,28 +158,28 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `rd_doc` (struct, line 267)
   - `img_fail_reason` (enum, line 34)
   - `rd_kind` (enum, line 42)
-  - `rd_status` (enum, line 300)
+  - `rd_status` (enum, line 302)
   - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
   - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
   - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
   - `form` (function, line 63) `* form (-1 = none);`
   - `default` (function, line 153) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
   - `to` (function, line 253) `* belongs to (-1 = none);`
-  - `rdp_images_warning` (function, line 309) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-  - `rd_free` (function, line 319) `void rd_free(rd_doc *d);`
-  - `rd_count` (function, line 322) `size_t rd_count(const rd_doc *d);`
-  - `rd_at` (function, line 323) `const rd_block *rd_at(const rd_doc *d, size_t i);`
-  - `rd_box_count` (function, line 327) `size_t rd_box_count(const rd_doc *d);`
-  - `rd_box_at` (function, line 328) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-  - `rd_cont_count` (function, line 332) `size_t rd_cont_count(const rd_doc *d);`
-  - `rd_cont_at` (function, line 333) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-  - `rd_kind_name` (function, line 337) `const char *rd_kind_name(rd_kind k);`
-  - `rd_block_tag` (function, line 345) `const char *rd_block_tag(const rd_block *b);`
-  - `rd_block_heading_level` (function, line 352) `int rd_block_heading_level(const rd_block *b);`
-  - `decision` (function, line 355) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-  - `IMG_FAIL_OK` (function, line 361) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-  - `rd_input_label` (function, line 366) `const char *rd_input_label(int input_type);`
-  - `rd_input_invisible` (function, line 371) `int rd_input_invisible(int input_type);`
+  - `rdp_images_warning` (function, line 311) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+  - `rd_free` (function, line 321) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 324) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 325) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 329) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 330) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 334) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 335) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 339) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 347) `const char *rd_block_tag(const rd_block *b);`
+  - `rd_block_heading_level` (function, line 354) `int rd_block_heading_level(const rd_block *b);`
+  - `decision` (function, line 357) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 363) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 368) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 373) `int rd_input_invisible(int input_type);`
   - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
 - Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
@@ -231,6 +231,27 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `RP_HDR_NAME_MAX` (macro, line 45) `#define RP_HDR_NAME_MAX`
   - `RP_HDR_VALUE_MAX` (macro, line 46) `#define RP_HDR_VALUE_MAX`
 - Imported by: `fuzz/fuzz_hls.c`, `fuzz/fuzz_request_headers.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/hls.c`, `src/render_policy.c`, `src/request_policy.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_request_policy.c`
+
+## include/scroll_req.h
+- Doc: srq_encode: Writes r as SRQ_WIRE_N int32: kind, behavior, block, y, margin_top, margin_bottom...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `srq_req` (struct, line 37)
+  - `srq_view` (struct, line 47)
+  - `srq_kind` (enum, line 24)
+  - `srq_behavior` (enum, line 31)
+  - `srq_block` (enum, line 33)
+  - `kind` (type_alias, line 36) `typedef struct srq_req { int kind;`
+  - `scroll` (type_alias, line 46) `typedef struct srq_view { double scroll;`
+  - `srq_encode` (function, line 58) `void srq_encode(const srq_req *r, int32_t out[SRQ_WIRE_N]);`
+  - `srq_decode` (function, line 64) `int srq_decode(const int32_t in[SRQ_WIRE_N], size_t max_handles, srq_req *out);`
+  - `srq_target` (function, line 71) `int srq_target(const srq_req *r, const srq_view *v, double el_top, double el_bottom, double *out);`
+  - `srq_smooth` (function, line 76) `int srq_smooth(const srq_req *r, int root_smooth);`
+  - `FREEDOM_SCROLL_REQ_H` (macro, line 2) `#define FREEDOM_SCROLL_REQ_H`
+  - `SRQ_MAX_COORD` (macro, line 21) `#define SRQ_MAX_COORD`
+  - `SRQ_WIRE_N` (macro, line 22) `#define SRQ_WIRE_N`
+- Imported by: `fuzz/fuzz_scroll_req.c`, `gui/browser_ui.c`, `include/tab.h`, `src/scroll_req.c`, `src/tab.c`, `tests/test_scroll_req.c`
 
 ## include/secure_fetch.h
 - Doc: sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *...
@@ -424,74 +445,6 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `SV_DEFAULT_W` (macro, line 41) `#define SV_DEFAULT_W`
   - `SV_DEFAULT_H` (macro, line 42) `#define SV_DEFAULT_H`
 - Imported by: `fuzz/fuzz_svg_render.c`, `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_raster.c`, `src/svg_render.c`, `tests/test_svg_render.c`
-
-## include/tab.h
-- Doc: tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `tab_hist_op` (struct, line 54)
-  - `tab_ws_op` (struct, line 72)
-  - `tab_page` (struct, line 79)
-  - `tab_eval_result` (struct, line 138)
-  - `tab_image` (struct, line 151)
-  - `tab_anchor` (struct, line 423)
-  - `tab_status` (enum, line 31)
-  - `tab_ws_kind` (enum, line 61)
-  - `tab_ws_event_kind` (enum, line 67)
-  - `tab` (type_alias, line 46) `typedef struct tab tab;`
-  - `replace` (type_alias, line 54) `typedef struct tab_hist_op { int replace;`
-  - `kind` (type_alias, line 71) `typedef struct tab_ws_op { int kind;`
-  - `width` (type_alias, line 151) `typedef struct tab_image { uint32_t width;`
-  - `kind` (type_alias, line 423) `typedef struct tab_anchor { int kind;`
-  - `tab_worker_dispatch` (function, line 164) `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
-  - `tab_open` (function, line 168) `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
-  - `tab_parse_worker_args` (function, line 175) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
-  - `tab_prewarm` (function, line 184) `void tab_prewarm(void);`
-  - `tab_prewarmed` (function, line 187) `int tab_prewarmed(void);`
-  - `tab_prewarmed_pid` (function, line 190) `int tab_prewarmed_pid(void);`
-  - `tab_shutdown_spare` (function, line 193) `void tab_shutdown_spare(void);`
-  - `out_status` (function, line 201) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
-  - `tab_set_fetcher` (function, line 212) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
-  - `tab_inflight_request_headers` (function, line 217) `const char *tab_inflight_request_headers(void);`
-  - `tab_report_response_headers` (function, line 222) `void tab_report_response_headers(const char *lines);`
-  - `bytes` (function, line 226) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
-  - `tab_set_css_sink` (function, line 235) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
-  - `free_ctx` (function, line 242) `* free_ctx(ctx) (may be NULL) runs once the tab is closed AND its last abandoned request ended, * so the fetcher may...`
-  - `tab_set_net_allowed` (function, line 250) `void tab_set_net_allowed(tab *t, int allowed);`
-  - `none` (function, line 254) `* worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick. * The caller must then...`
-  - `tab_page_keep_view` (function, line 261) `void tab_page_keep_view(tab_page *prev, tab_page *next);`
-  - `tab_set_op_net_budget_ms` (function, line 265) `void tab_set_op_net_budget_ms(tab *t, int ms);`
-  - `tab_async_fd` (function, line 270) `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
-  - `tab_async_busy` (function, line 276) `int tab_async_busy(const tab *t);`
-  - `jar` (function, line 283) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
-  - `tab_set_cookies` (function, line 287) `void tab_set_cookies(tab *t, const char *cookies);`
-  - `origin` (function, line 290) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
-  - `tab_set_storage` (function, line 292) `void tab_set_storage(tab *t, const char *blob, size_t len);`
-  - `exclusively` (function, line 298) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
-  - `tab_set_viewport_w` (function, line 306) `void tab_set_viewport_w(tab *t, int px);`
-  - `load` (function, line 310) `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);`
-  - `tab_set_identity` (function, line 316) `void tab_set_identity(tab *t, const char *serialized);`
-  - `tab_last_subreq_stats` (function, line 322) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
-  - `tab_subreq_permitted` (function, line 327) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
-  - `view` (function, line 335) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-  - `string` (function, line 355) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-  - `granted` (function, line 404) `* granted (allow.conf AND js.conf);`
-  - `returned` (function, line 405) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-  - `popstate` (function, line 411) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-  - `preorder` (function, line 416) `* preorder (out->nsub handles) followed by the elements after it, at most * ANC_MAX_HANDLES -- live DOM handles, the...`
-  - `tab_anchor_free` (function, line 430) `void tab_anchor_free(tab_anchor *a);`
-  - `decode` (function, line 448) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-  - `tab_alive` (function, line 461) `int tab_alive(const tab *t);`
-  - `tab_child_pid` (function, line 464) `pid_t tab_child_pid(const tab *t);`
-  - `tab_close` (function, line 467) `void tab_close(tab *t);`
-  - `tab_page_free` (function, line 470) `void tab_page_free(tab_page *p);`
-  - `tab_eval_result_free` (function, line 471) `void tab_eval_result_free(tab_eval_result *r);`
-  - `tab_image_free` (function, line 472) `void tab_image_free(tab_image *img);`
-  - `FREEDOM_TAB_H` (macro, line 2) `#define FREEDOM_TAB_H`
-  - `TAB_MAX_INPUT` (macro, line 160) `#define TAB_MAX_INPUT`
-- Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
-- Imported by: `gui/browser_ui.c`, `include/frame_host.h`, `src/freedom.c`, `src/tab.c`, `tests/test_frame_host.c`, `tests/test_tab.c`
 
 
 Next: [KB_include_p6.md](KB_include_p6.md)

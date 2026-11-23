@@ -1,15 +1,15 @@
-# src: css
+# include: css
 
-src: css groups 64 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. bui_chrome_view: ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to...
+include: css groups 58 files (c, h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
 
 ```mermaid
 graph LR
-    gui["gui"]
+    fuzz["fuzz"]
     include["include"]
     src["src"]
     tests["tests"]
-    gui -- "depends on" --> include
-    gui -- "calls into" --> src
+    fuzz -- "calls into" --> include
+    fuzz -- "calls into" --> src
     include -- "calls into" --> src
     src -- "calls into" --> include
     src -- "calls into" --> tests
@@ -17,33 +17,32 @@ graph LR
     tests -- "calls into" --> src
 ```
 
-## gui (1.1)
+## fuzz (3.1)
 
-gui groups 4 files (c, h) around FREEDOM_BROWSER_UI_INTERNAL_H, UI_FONT_SIZE, UI_TEXT_MARGIN, UI_HEADING_LEVELS, b. bui_chrome_view: ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to...
+fuzz groups 3 files (c) around fuzz_root_match, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput, LLVMFuzzerTestOneInput. fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed...
 
-## include (1.2)
+## include (3.2)
 
-include groups 20 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. chl_tab_rect: Computes the layout. tab_count >= 1 and 0 <= active < tab_count, else...
+include groups 19 files (h) around FREEDOM_CSS_H, css_status, css_align, css_display, CSS_DISP_INLINE_OUTER. cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses...
 
-## src (1.3)
+## src (3.3)
 
-src groups 21 files (c) around CHL_TAB_CLOSE_INSET, CHL_URL_GAP, CHL_ID_INSET, CHL_WIDTH_MAX, rect. chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md
+src groups 19 files (c) around cx_forms_stacking_context, cx_box_layer, eff_z, cx_item_compare, cx_sort. eff_z: Not a stacking context: a positioned box with z:auto still paints in the *...
 
-## tests (1.4)
+## tests (3.4)
 
-tests groups 19 files (c) around overlaps, cx, cy, test_rejects_bad_input, test_csd_single_tab. Suite for chrome_layout (spec/chrome_layout.md).
+tests groups 17 files (c) around test_sc_opacity, test_sc_mix_blend, test_sc_isolation, test_sc_transform, test_sc_positioned_z. test_sort_matches_zindex_only_ordering: The positioned subset the painter already...
 
 **Files**:
 
-- gui/browser_ui_internal.h
-- gui/bui_chrome.c
-- gui/bui_mask_img.c
-- gui/bui_theme.c
-- include/chrome_layout.h
+- fuzz/fuzz_css.c
+- fuzz/fuzz_css_counter.c
+- fuzz/fuzz_text_case.c
 - include/compositor.h
 - include/css.h
 - include/css_atrule.h
 - include/css_box.h
+- include/css_chain.h
 - include/css_color.h
 - include/css_computed.h
 - include/css_counter.h
@@ -57,9 +56,7 @@ tests groups 19 files (c) around overlaps, cx, cy, test_rejects_bad_input, test_
 - include/css_text.h
 - include/css_values.h
 - include/css_vars.h
-- include/pres_hints.h
 - include/text_case.h
-- src/chrome_layout.c
 - src/compositor.c
 - src/css.c
 - src/css_atrule.c
@@ -78,9 +75,7 @@ tests groups 19 files (c) around overlaps, cx, cy, test_rejects_bad_input, test_
 - src/css_values.c
 - src/css_vars.c
 - src/js_native.c
-- src/pres_hints.c
 - src/text_case.c
-- tests/test_chrome_layout.c
 - tests/test_compositor.c
 - tests/test_css.c
 - tests/test_css_atrule.c
@@ -97,5 +92,4 @@ tests groups 19 files (c) around overlaps, cx, cy, test_rejects_bad_input, test_
 - tests/test_css_text.c
 - tests/test_css_values.c
 - tests/test_css_vars.c
-- tests/test_pres_hints.c
 - tests/test_text_case.c

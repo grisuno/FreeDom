@@ -1,12 +1,12 @@
 # `include/css_chain.h`
 
-> Source: [include/css_chain.h:1](../../include/css_chain.h#L1) | language `h` | coverage 25.0% | [API index](../index.md)
+> Source: [include/css_chain.h:1](../../include/css_chain.h#L1) | language `h` | coverage 23.1% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`cvr_chain`](#cvr_chain), [`cvr_table`](#cvr_table)
 - **Type Aliases:** [`cch_path`](#cch_path)
-- **Functions:** [`cch_path_new`](#cch_path_new), [`cch_path_free`](#cch_path_free), [`cch_element_matches`](#cch_element_matches), [`lacks`](#lacks), [`box`](#box)
+- **Functions:** [`cch_path_new`](#cch_path_new), [`cch_path_free`](#cch_path_free), [`cch_element_matches`](#cch_element_matches), [`lacks`](#lacks), [`COMPARED`](#compared), [`box`](#box)
 - **Macros:** [`CCH_CHAIN_MAX`](#cch_chain_max), [`CCH_SIB_MAX`](#cch_sib_max), [`CCH_NTH_MAX`](#cch_nth_max)
 
 ## Type Diagram
@@ -151,11 +151,31 @@ This is the single source of truth for selector matching: the DOM's querySelecto
 
 ---
 
+<a id="compared"></a>
+
+### `COMPARED`
+
+`function` | [include/css_chain.h:94](../../include/css_chain.h#L94)
+
+```c
+* pointer is only ever COMPARED (a detached element is never freed while the document * lives). Returns 1 when the target changed, 0 when it was already el or doc_node is NULL. */ int cch_set_target(l
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `lives` | `a detached element is never freed while the document *` |  |  |
+
+**Returns:** `* pointer is only ever`
+
+---
+
 <a id="box"></a>
 
 ### `box`
 
-`function` | [include/css_chain.h:92](../../include/css_chain.h#L92)
+`function` | [include/css_chain.h:99](../../include/css_chain.h#L99)
 
 ```c
 * generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size (the pseudo inherits it) and * inherited el's own custom-property chain (NULL = none).

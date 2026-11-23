@@ -1,4 +1,4 @@
-# API (page 10 of 13)
+# API (page 10 of 14)
 Previous: [API_p9.md](API_p9.md)
 
 ## src/js_dom.c
@@ -75,37 +75,39 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `table` (function) `src/js_dom.c:645` `* a table (dom.viewport() non-null);`
 - `attrNames` (function) `src/js_dom.c:697` `* native attrNames(). jQuery's feature detection reads attrs[name].expando, so
      * a missing '...`
-- `scripts` (function) `src/js_dom.c:915` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
-- `enough` (function) `src/js_dom.c:1088` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
-- `ms` (function) `src/js_dom.c:1235` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
-- `empty` (function) `src/js_dom.c:1436` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
-- `geometry` (function) `src/js_dom.c:1438` `* constant geometry (zero real leak);`
-- `size` (function) `src/js_dom.c:1441` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
-- `js_env` (function) `src/js_dom.c:1444` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
+- `scripts` (function) `src/js_dom.c:916` `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...`
+- `enough` (function) `src/js_dom.c:1089` `* enough (cloneNode/lastChild/removeChild/insertBefore) that library feature * detection does not throw: jQuery...`
+- `ms` (function) `src/js_dom.c:1236` `* due is the remaining virtual ms (the trusted parent advances the clock via * OP_TICK -> __tickTimers(elapsed);`
+- `empty` (function) `src/js_dom.c:1437` `* inert: DOM interface constructors are empty (instanceof yields false, harmless);`
+- `geometry` (function) `src/js_dom.c:1439` `* constant geometry (zero real leak);`
+- `size` (function) `src/js_dom.c:1442` `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);`
+- `js_env` (function) `src/js_dom.c:1445` `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the
  * document shim (uses...`
-- `jd_install` (function) `src/js_dom.c:1985` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
-- `jd_rebind` (function) `src/js_dom.c:2069` `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)`
-- `jd_flush_custom_elements` (function) `src/js_dom.c:2079` `void jd_flush_custom_elements(js_context *ctx)`
-- `fails` (function) `src/js_dom.c:2093` `* cap is reached or an allocation fails (caller stops), else 0. */
+- `jd_install` (function) `src/js_dom.c:1999` `jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)`
+- `jd_rebind` (function) `src/js_dom.c:2083` `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)`
+- `jd_flush_custom_elements` (function) `src/js_dom.c:2093` `void jd_flush_custom_elements(js_context *ctx)`
+- `fails` (function) `src/js_dom.c:2107` `* cap is reached or an allocation fails (caller stops), else 0. */
 static int cb_append(char **bu...`
-- `jd_install_console` (function) `src/js_dom.c:2207` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
-- `jd_set_cookies` (function) `src/js_dom.c:2244` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
-- `jd_get_cookies` (function) `src/js_dom.c:2264` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
-- `jd_set_computed` (function) `src/js_dom.c:2287` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
-- `jd_set_geometry` (function) `src/js_dom.c:2298` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
+- `jd_install_console` (function) `src/js_dom.c:2221` `jd_status jd_install_console(js_context *ctx, fb_buffer *log)`
+- `jd_set_cookies` (function) `src/js_dom.c:2258` `jd_status jd_set_cookies(js_context *ctx, const char *cookies)`
+- `jd_get_cookies` (function) `src/js_dom.c:2278` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz)`
+- `jd_set_computed` (function) `src/js_dom.c:2301` `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)`
+- `jd_set_geometry` (function) `src/js_dom.c:2312` `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)`
 
 ## src/js_dom_ext.c
 Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`, `src/js_native_internal.h`
 - `identity` (function) `src/js_dom_ext.c:105` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
 - `registration` (function) `src/js_dom_ext.c:482` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
  * observer...`
-- `cancels` (function) `src/js_dom_ext.c:954` `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);`
-- `run` (function) `src/js_dom_ext.c:1301` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-- `jdx_install` (function) `src/js_dom_ext.c:1366` `int jdx_install(JSContext *ctx)`
-- `jd_install_repl_api` (function) `src/js_dom_ext.c:1375` `jd_status jd_install_repl_api(js_context *ctx)`
-- `jd_set_repl_css` (function) `src/js_dom_ext.c:1383` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
-- `jd_install_geolocation` (function) `src/js_dom_ext.c:1396` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
-- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1415` `jd_status jd_install_indexeddb(js_context *ctx)`
+- `cancels` (function) `src/js_dom_ext.c:1001` `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);`
+- `run` (function) `src/js_dom_ext.c:1350` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+- `order` (function) `src/js_dom_ext.c:1365` `* run in insertion order (HTML's "list of scripts that will execute in order as soon as
+ * possib...`
+- `jdx_install` (function) `src/js_dom_ext.c:1431` `int jdx_install(JSContext *ctx)`
+- `jd_install_repl_api` (function) `src/js_dom_ext.c:1440` `jd_status jd_install_repl_api(js_context *ctx)`
+- `jd_set_repl_css` (function) `src/js_dom_ext.c:1448` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+- `jd_install_geolocation` (function) `src/js_dom_ext.c:1461` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1480` `jd_status jd_install_indexeddb(js_context *ctx)`
 
 ## src/js_dom_ext.h
 Imported by: `src/js_dom.c`, `src/js_dom_ext.c`
@@ -207,9 +209,8 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `send` (function) `src/js_fetch.c:128` `* callbacks fire right after send();`
 - `task` (function) `src/js_fetch.c:312` `* current task (the page never waits on it);`
 - `jd_install_xhr` (function) `src/js_fetch.c:336` `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
-- `jd_net_deliver` (function) `src/js_fetch.c:340` `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
-     ...`
-- `jd_install_xhr_ex` (function) `src/js_fetch.c:361` `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
+- `jd_net_deliver` (function) `src/js_fetch.c:340` `jd_status jd_net_deliver(js_context *ctx, int pos, int rc, int status, const char *body, size_t l...`
+- `jd_install_xhr_ex` (function) `src/js_fetch.c:363` `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
                    ...`
 
 ## src/js_geom.c
@@ -244,10 +245,13 @@ Depends on: `include/js_dom.h`, `include/url.h`, `src/js_location_internal.h`, `
 - `jd_lp_set` (function) `src/js_location.c:25` `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
                       const ...` -- Defines a string property on the __locParts data object from a (ptr,len) span. * The span is copied into an engine...
 - `jl_m_hist_target` (function) `src/js_location.c:36` `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.histTarget(base, ref): the same-origin target of history.pushState/replaceState (url_history_target) as a...
-- `jd_set_location` (function) `src/js_location.c:140` `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
-- `jd_take_nav_request` (function) `src/js_location.c:174` `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
-- `jd_take_history` (function) `src/js_location.c:220` `char *jd_take_history(js_context *ctx, int *go)`
-- `jd_pop_state` (function) `src/js_location.c:251` `int jd_pop_state(js_context *ctx, int index)`
+- `jd_set_location` (function) `src/js_location.c:160` `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
+- `jd_take_nav_request` (function) `src/js_location.c:194` `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
+- `numbers` (function) `src/js_location.c:233` `* numbers (never as source);`
+- `jd_take_scroll` (function) `src/js_location.c:237` `int jd_take_scroll(js_context *ctx, double out[JD_SCROLL_N])`
+- `jd_take_history` (function) `src/js_location.c:272` `char *jd_take_history(js_context *ctx, int *go)`
+- `jd_frag_push` (function) `src/js_location.c:303` `int jd_frag_push(js_context *ctx, const char *url, int replace)`
+- `jd_pop_state` (function) `src/js_location.c:327` `int jd_pop_state(js_context *ctx, int index)`
 
 ## src/js_location_internal.h
 Imported by: `src/js_dom.c`, `src/js_location.c`
@@ -373,6 +377,15 @@ Depends on: `include/link_nav.h`, `include/url.h`
 - `ln_resolve` (function) `src/link_nav.c:172` `ln_status ln_resolve(const char *base, const char *href, ln_result *out)`
 - `ln_block_reason_text` (function) `src/link_nav.c:241` `const char *ln_block_reason_text(ln_block_reason reason)`
 
+## src/link_preview.c
+Depends on: `include/link_nav.h`, `include/link_preview.h`
+- `put_raw` (function) `src/link_preview.c:17` `static void put_raw(lp_sink *s, const char *src, size_t n)`
+- `put_escaped` (function) `src/link_preview.c:22` `static void put_escaped(lp_sink *s, const char *src, size_t n)`
+- `host_span` (function) `src/link_preview.c:37` `static void host_span(const char *s, size_t n, size_t *off, size_t *len)` -- static const char hex[] = "0123456789ABCDEF"; for (size_t i = 0; i < n; ++i) { unsigned char c = (unsigned...
+- `fit` (function) `src/link_preview.c:64` `static void fit(const char *s, size_t n, size_t hoff, size_t hlen, lp_preview *out)` -- Copies s[0..n) into out->text, eliding the middle of the path when it does not fit * and keeping scheme + host (+...
+- `frag_free_len` (function) `src/link_preview.c:100` `static size_t frag_free_len(const char *base)`
+- `lp_describe` (function) `src/link_preview.c:105` `lp_status lp_describe(const char *base, const char *href, lp_preview *out)`
+
 ## src/local_store.c
 Depends on: `include/local_store.h`
 - `cipher_for` (function) `src/local_store.c:69` `static const EVP_CIPHER *cipher_for(ls_aead aead)`
@@ -429,6 +442,19 @@ Depends on: `include/media_decoder.h`, `include/util.h`
 - `media_decoder_spawn` (function) `src/media_decoder.c:449` `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)`
 - `fd` (function) `src/media_decoder.c:469` `* prevent the Wayland display fd (inherited from the parent) from * surviving the exec. An inherited Wayland fd...`
 
+## src/nav_token.c
+Depends on: `include/nav_token.h`
+- `nt_new` (function) `src/nav_token.c:16` `nt_token *nt_new(void)`
+- `nt_ref` (function) `src/nav_token.c:26` `nt_token *nt_ref(nt_token *t)`
+- `nt_unref` (function) `src/nav_token.c:31` `void nt_unref(nt_token **tp)`
+- `nt_cancel` (function) `src/nav_token.c:38` `void nt_cancel(nt_token *t)`
+- `nt_cancelled` (function) `src/nav_token.c:42` `int nt_cancelled(const nt_token *t)`
+- `nt_set_foreground` (function) `src/nav_token.c:47` `void nt_set_foreground(nt_token *t, int on)`
+- `nt_foreground` (function) `src/nav_token.c:51` `int nt_foreground(const nt_token *t)`
+- `nt_id` (function) `src/nav_token.c:56` `uint64_t nt_id(const nt_token *t)`
+- `nt_route` (function) `src/nav_token.c:58` `nt_route_kind nt_route(const nt_token *job, const nt_token *active, nt_token *const *parked,
+    ...`
+
 ## src/net_guard.c
 Depends on: `include/net_guard.h`
 - `ng_v4_is_private` (function) `src/net_guard.c:12` `static int ng_v4_is_private(const unsigned char o[NG_V4_LEN])`
@@ -454,38 +480,6 @@ Depends on: `include/net_realm.h`
 - `nr_realm_allows_http` (function) `src/net_realm.c:88` `int nr_realm_allows_http(nr_realm r)`
 - `nr_realm_name` (function) `src/net_realm.c:94` `const char *nr_realm_name(nr_realm r)`
 - `nr_route_name` (function) `src/net_realm.c:103` `const char *nr_route_name(nr_route r)`
-
-## src/os_sandbox.c
-Depends on: `include/os_sandbox.h`
-- `os_policy_allows` (function) `src/os_sandbox.c:52` `int os_policy_allows(long syscall_nr)`
-- `os_policy_size` (function) `src/os_sandbox.c:59` `size_t os_policy_size(void)`
-- `os_prot_allowed` (function) `src/os_sandbox.c:65` `int os_prot_allowed(long syscall_nr, unsigned long prot)` -- W^X mirror: mmap/mprotect keep their membership but lose any request that asks * for executable memory.
-- `os_no_dump` (function) `src/os_sandbox.c:75` `os_status os_no_dump(void)` -- Anti-dump defense in depth: undumpable + no core file, so neither a crash nor a foreign ptrace can exfiltrate worker...
-- `excluded` (function) `src/os_sandbox.c:89` `* intentionally excluded (they need /proc remounting and a post-unshare fork). */
-int os_namespac...`
-- `os_isolate_namespaces` (function) `src/os_sandbox.c:94` `os_status os_isolate_namespaces(void)`
-- `os_policy_allows` (function) `src/os_sandbox.c:106` `int os_policy_allows(long syscall_nr)`
-- `os_policy_size` (function) `src/os_sandbox.c:107` `size_t os_policy_size(void)`
-- `os_prot_allowed` (function) `src/os_sandbox.c:108` `int os_prot_allowed(long syscall_nr, unsigned long prot)`
-- `os_no_dump` (function) `src/os_sandbox.c:111` `os_status os_no_dump(void)`
-- `os_harden` (function) `src/os_sandbox.c:113` `os_status os_harden(os_violation action)`
-- `os_namespace_flags` (function) `src/os_sandbox.c:115` `int os_namespace_flags(void)`
-- `os_isolate_namespaces` (function) `src/os_sandbox.c:116` `os_status os_isolate_namespaces(void)`
-- `os_harden` (function) `src/os_sandbox.c:145` `os_status os_harden(os_violation action)`
-- `number` (function) `src/os_sandbox.c:157` `* number (x32/i386 on x86_64, AArch32 on aarch64). */ prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W |...`
-- `headroom` (function) `src/os_sandbox.c:203` `* wide headroom (room for ~125 allowed syscalls). */ prog[at_mmap].jt = (unsigned char)(prot_check - (at_mmap + 1));`
-- `ll_create_ruleset` (function) `src/os_sandbox.c:239` `static long ll_create_ruleset(const struct landlock_ruleset_attr *attr,
-                         ...`
-- `ll_add_rule` (function) `src/os_sandbox.c:244` `static long ll_add_rule(int fd, enum landlock_rule_type type,
-                        const void ...`
-- `ll_restrict_self` (function) `src/os_sandbox.c:249` `static long ll_restrict_self(int fd, uint32_t flags)`
-- `ll_handled` (function) `src/os_sandbox.c:265` `static uint64_t ll_handled(int abi)` -- The set of FS rights the ruleset handles, masked to what this ABI supports so * landlock_create_ruleset does not...
-- `ll_read_access` (function) `src/os_sandbox.c:279` `static uint64_t ll_read_access(uint64_t handled)`
-- `os_landlock_abi` (function) `src/os_sandbox.c:285` `int os_landlock_abi(void)`
-- `os_landlock_restrict` (function) `src/os_sandbox.c:291` `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
-- `fields` (function) `src/os_sandbox.c:303` `* long as the unknown trailing fields (net/scoped) are zero, which they are. */ int rfd =...`
-- `os_landlock_abi` (function) `src/os_sandbox.c:331` `int os_landlock_abi(void)`
-- `os_landlock_restrict` (function) `src/os_sandbox.c:332` `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
 
 
 Next: [API_p11.md](API_p11.md)

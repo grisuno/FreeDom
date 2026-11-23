@@ -1,6 +1,25 @@
 # Subsystem: src (page 4 of 10)
 Previous: [KB_src_p3.md](KB_src_p3.md)
 
+## src/doc_title.c
+- Doc: doc_title -- the <title> of a received document that has not been laid out yet.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `dt_writer` (struct, line 12)
+  - `is_ascii_space` (function, line 19) `static int is_ascii_space(unsigned c)`
+  - `is_bidi_control` (function, line 23) `static int is_bidi_control(uint32_t cp)`
+  - `lower` (function, line 28) `static unsigned lower(unsigned c)`
+  - `utf8_next` (function, line 62) `static size_t utf8_next(const unsigned char *s, size_t n, uint32_t *cp)`
+  - `char_ref` (function, line 83) `static size_t char_ref(const unsigned char *s, size_t n, uint32_t *cp)`
+  - `at_end_tag` (function, line 116) `static int at_end_tag(const unsigned char *s, size_t i, size_t n, const char *name)`
+  - `find_end_tag` (function, line 125) `static size_t find_end_tag(const unsigned char *s, size_t i, size_t n, const char *name)`
+  - `dt_scan` (function, line 131) `int dt_scan(const char *html, size_t len, char *out, size_t cap)`
+  - `DT_REPLACEMENT` (macro, line 8) `#define DT_REPLACEMENT`
+  - `DT_MAX_CP` (macro, line 9) `#define DT_MAX_CP`
+  - `DT_REF_DIGITS` (macro, line 10) `#define DT_REF_DIGITS`
+- Depends on: `include/doc_title.h`
+
 ## src/dom.c
 - Doc: to_lower_buf: #include <stdint.h> #include <stdlib.h> #include <string.h> #include...
 - Layer: utility
@@ -11,8 +30,8 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `pm_entry` (struct, line 154)
   - `ptrmap` (struct, line 160)
   - `dom_index` (struct, line 220)
-  - `ih_block` (struct, line 862)
-  - `ih_acc` (struct, line 867)
+  - `ih_block` (struct, line 866)
+  - `ih_acc` (struct, line 871)
   - `to_lower_buf` (function, line 33) `static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap)`
   - `ptr_hash` (function, line 45) `static size_t ptr_hash(const void *p)`
   - `sm_entry_append` (function, line 70) `static int sm_entry_append(sm_entry *e, dom_node_id id)`
@@ -33,72 +52,73 @@ Previous: [KB_src_p3.md](KB_src_p3.md)
   - `dom_node_count` (function, line 349) `size_t dom_node_count(const dom_index *idx)`
   - `node_in_document` (function, line 357) `static int node_in_document(const lxb_dom_node_t *node)`
   - `dom_get_element_by_id` (function, line 363) `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)`
-  - `dom_get_connected_by_id` (function, line 369) `dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id)`
-  - `copy_ids` (function, line 392) `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
-  - `dom_get_by_tag` (function, line 399) `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
+  - `dom_is_connected` (function, line 369) `int dom_is_connected(const dom_index *idx, dom_node_id node)`
+  - `dom_get_connected_by_id` (function, line 373) `dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id)`
+  - `copy_ids` (function, line 396) `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
+  - `dom_get_by_tag` (function, line 403) `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
                       dom_node_id *o...`
-  - `dom_get_by_class` (function, line 408) `size_t dom_get_by_class(const dom_index *idx, const char *cls,
+  - `dom_get_by_class` (function, line 412) `size_t dom_get_by_class(const dom_index *idx, const char *cls,
                         dom_node_i...`
-  - `id_of` (function, line 421) `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)`
-  - `parse_selector_list` (function, line 431) `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)`
-  - `node_matches_any` (function, line 464) `static int node_matches_any(const lxb_dom_node_t *cn,
+  - `id_of` (function, line 425) `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)`
+  - `parse_selector_list` (function, line 435) `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)`
+  - `node_matches_any` (function, line 468) `static int node_matches_any(const lxb_dom_node_t *cn,
                             const css_sel *...`
-  - `count` (function, line 472) `* count (may exceed cap), and returns DOM_NODE_NONE. */
+  - `count` (function, line 476) `* count (may exceed cap), and returns DOM_NODE_NONE. */
 static dom_node_id qs_walk(const dom_inde...`
-  - `dom_query_selector` (function, line 502) `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
+  - `dom_query_selector` (function, line 506) `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
                           ...`
-  - `dom_query_selector_all` (function, line 511) `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
+  - `dom_query_selector_all` (function, line 515) `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
                            ...`
-  - `dom_matches` (function, line 522) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
-  - `dom_closest` (function, line 531) `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
+  - `dom_matches` (function, line 526) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
+  - `dom_closest` (function, line 535) `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
                         const cha...`
-  - `dom_document_position` (function, line 547) `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
-  - `dom_precedes` (function, line 552) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
-  - `dom_node_at` (function, line 557) `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
-  - `dom_parent` (function, line 562) `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
-  - `dom_first_child` (function, line 572) `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
-  - `dom_next_sibling` (function, line 580) `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
-  - `dom_tag_name` (function, line 588) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
-  - `dom_get_attribute` (function, line 599) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
+  - `dom_document_position` (function, line 551) `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
+  - `dom_precedes` (function, line 556) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
+  - `dom_node_at` (function, line 561) `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
+  - `dom_parent` (function, line 566) `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
+  - `dom_first_child` (function, line 576) `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
+  - `dom_next_sibling` (function, line 584) `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
+  - `dom_tag_name` (function, line 592) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
+  - `dom_get_attribute` (function, line 603) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
                            ...`
-  - `dom_attribute_names` (function, line 621) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
+  - `dom_attribute_names` (function, line 625) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
                            con...`
-  - `dom_text_content` (function, line 639) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
-  - `dom_document_title` (function, line 649) `const char *dom_document_title(const dom_index *idx, size_t *len)`
-  - `dom_set_text_content` (function, line 662) `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
+  - `dom_text_content` (function, line 643) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
+  - `dom_document_title` (function, line 653) `const char *dom_document_title(const dom_index *idx, size_t *len)`
+  - `dom_set_text_content` (function, line 666) `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
                                ...`
-  - `dom_set_document_title` (function, line 697) `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
-  - `idx_push` (function, line 709) `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)`
-  - `dom_create_element` (function, line 727) `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
-  - `dom_append_child` (function, line 747) `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-  - `dom_remove_child` (function, line 762) `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-  - `dom_set_attribute` (function, line 771) `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
+  - `dom_set_document_title` (function, line 701) `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
+  - `idx_push` (function, line 713) `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)`
+  - `dom_create_element` (function, line 731) `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
+  - `dom_append_child` (function, line 751) `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
+  - `dom_remove_child` (function, line 766) `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
+  - `dom_set_attribute` (function, line 775) `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
                              const...`
-  - `dom_remove_attribute` (function, line 801) `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
-  - `index_subtree` (function, line 811) `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)`
-  - `dom_set_inner_html` (function, line 821) `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
+  - `dom_remove_attribute` (function, line 805) `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
+  - `index_subtree` (function, line 815) `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)`
+  - `dom_set_inner_html` (function, line 825) `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
                               con...`
-  - `ih_append` (function, line 875) `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
-  - `ih_free` (function, line 902) `static void ih_free(ih_acc *a)`
-  - `dom_get_inner_html` (function, line 929) `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
+  - `ih_append` (function, line 879) `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
+  - `ih_free` (function, line 906) `static void ih_free(ih_acc *a)`
+  - `dom_get_inner_html` (function, line 933) `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
                            ...`
-  - `dom_insert_before` (function, line 959) `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
+  - `dom_insert_before` (function, line 963) `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
              ...`
-  - `dom_clone_node` (function, line 977) `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)`
-  - `dom_move_children` (function, line 991) `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
+  - `dom_clone_node` (function, line 981) `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)`
+  - `dom_move_children` (function, line 995) `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
                ...`
-  - `char_kind` (function, line 1025) `static int char_kind(const lxb_dom_node_t *n)`
-  - `handle_of` (function, line 1036) `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)`
-  - `dom_node_kind` (function, line 1044) `int dom_node_kind(const dom_index *idx, dom_node_id node)`
-  - `dom_child_node` (function, line 1048) `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)`
-  - `dom_sibling_node` (function, line 1055) `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
-  - `dom_create_char_node` (function, line 1062) `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
+  - `char_kind` (function, line 1029) `static int char_kind(const lxb_dom_node_t *n)`
+  - `handle_of` (function, line 1040) `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)`
+  - `dom_node_kind` (function, line 1048) `int dom_node_kind(const dom_index *idx, dom_node_id node)`
+  - `dom_child_node` (function, line 1052) `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)`
+  - `dom_sibling_node` (function, line 1059) `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
+  - `dom_create_char_node` (function, line 1066) `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
          ...`
-  - `dom_handle_of_native` (function, line 1076) `dom_node_id dom_handle_of_native(dom_index *idx, const void *native)`
-  - `dom_native_node` (function, line 1082) `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
+  - `dom_handle_of_native` (function, line 1080) `dom_node_id dom_handle_of_native(dom_index *idx, const void *native)`
+  - `dom_native_node` (function, line 1086) `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
   - `_POSIX_C_SOURCE` (macro, line 11) `#define _POSIX_C_SOURCE`
-  - `DOM_QS_MAX_SELECTORS` (macro, line 418) `#define DOM_QS_MAX_SELECTORS`
-  - `IH_BLOCK_SIZE` (macro, line 860) `#define IH_BLOCK_SIZE`
+  - `DOM_QS_MAX_SELECTORS` (macro, line 422) `#define DOM_QS_MAX_SELECTORS`
+  - `IH_BLOCK_SIZE` (macro, line 864) `#define IH_BLOCK_SIZE`
 - Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `include/html_parse.h`, `include/util.h`
 
 ## src/dom_debug.c
@@ -328,27 +348,36 @@ static dom_node_id qs_walk(const dom_inde...`
 - Depends on: `include/frame_clock.h`
 
 ## src/frame_host.c
-- Doc: reap: h->fetch = fetch; h->fetch_ctx = fetch_ctx; h->top_msg = top_msg; h->top_ctx = top_ctx...
+- Doc: fh_job: One frame load: fetch + confined worker + its first load.
 - Layer: utility
 - Language: c
 - Symbols:
-  - `fh_slot` (struct, line 14)
-  - `fh_host` (struct, line 22)
-  - `fh_new` (function, line 35) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
+  - `fh_job` (struct, line 18)
+  - `fh_slot` (struct, line 31)
+  - `fh_host` (struct, line 40)
+  - `mu` (type_alias, line 18) `typedef struct fh_job { pthread_mutex_t mu;`
+  - `fh_new` (function, line 54) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx,
                 fh_top_...`
-  - `slot_release_view` (function, line 47) `static void slot_release_view(fh_slot *sl)`
-  - `reap` (function, line 55) `static void reap(fh_host *h)`
-  - `fh_free` (function, line 67) `void fh_free(fh_host *h)`
-  - `fh_count` (function, line 76) `int fh_count(const fh_host *h)`
-  - `load_frame` (function, line 85) `static void load_frame(fh_host *h, int id, const char *url)`
-  - `find_child` (function, line 130) `static int find_child(const fh_host *h, int parent, int token)`
-  - `token_seen_by` (function, line 138) `static int token_seen_by(const fh_host *h, int dest, int from)`
-  - `post_op` (function, line 144) `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
-  - `apply_ops` (function, line 199) `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
-  - `fh_apply_top` (function, line 222) `void fh_apply_top(fh_host *h, const tab_page *page)`
-  - `fh_tick` (function, line 227) `int fh_tick(fh_host *h, int elapsed_ms)`
-  - `fh_generation` (function, line 251) `unsigned fh_generation(const fh_host *h)`
-  - `fh_frame_view` (function, line 253) `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
+  - `slot_release_view` (function, line 66) `static void slot_release_view(fh_slot *sl)`
+  - `job_destroy` (function, line 73) `static void job_destroy(fh_job *j)`
+  - `job_run` (function, line 83) `static void job_run(fh_job *j)`
+  - `job_main` (function, line 105) `static void *job_main(void *arg)`
+  - `job_abandon` (function, line 117) `static void job_abandon(fh_job *j)`
+  - `reap` (function, line 129) `static void reap(fh_host *h)`
+  - `fh_free` (function, line 145) `void fh_free(fh_host *h)`
+  - `fh_count` (function, line 156) `int fh_count(const fh_host *h)`
+  - `integrate` (function, line 165) `static void integrate(fh_host *h, fh_job *j)`
+  - `collect_jobs` (function, line 211) `static int collect_jobs(fh_host *h)`
+  - `fh_set_async` (function, line 227) `void fh_set_async(fh_host *h, int on)`
+  - `find_child` (function, line 231) `static int find_child(const fh_host *h, int parent, int token)`
+  - `token_seen_by` (function, line 239) `static int token_seen_by(const fh_host *h, int dest, int from)`
+  - `post_op` (function, line 245) `static void post_op(fh_host *h, int from, const tab_ws_op *op)`
+  - `apply_ops` (function, line 300) `static void apply_ops(fh_host *h, int from, const tab_ws_op *ops, size_t n)`
+  - `fh_apply_top` (function, line 323) `void fh_apply_top(fh_host *h, const tab_page *page)`
+  - `fh_tick` (function, line 328) `int fh_tick(fh_host *h, int elapsed_ms)`
+  - `fh_generation` (function, line 353) `unsigned fh_generation(const fh_host *h)`
+  - `fh_frame_view` (function, line 355) `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)`
+  - `thread` (function, line 16) `* thread (fh_set_async);`
 - Depends on: `include/frame_broker.h`, `include/frame_host.h`
 
 ## src/freebug.c
@@ -373,7 +402,7 @@ static dom_node_id qs_walk(const dom_inde...`
 - Language: c
 - Symbols:
   - `hl_frames` (struct, line 210)
-  - `hl_font_stash` (struct, line 634)
+  - `hl_font_stash` (struct, line 636)
   - `print_usage` (function, line 55) `static void print_usage(FILE *fp, const char *prog)`
   - `is_https_url` (function, line 84) `static int is_https_url(const char *s)`
   - `is_http_url` (function, line 88) `static int is_http_url(const char *s)`
@@ -395,104 +424,51 @@ static dom_node_id qs_walk(const dom_inde...`
   - `print_dom_css` (function, line 462) `static void print_dom_css(const rd_doc *doc)`
   - `headless_fetch` (function, line 486) `static int headless_fetch(void *ctx, const char *method, const char *url,
                        ...`
-  - `foldback_cookies` (function, line 573) `static void foldback_cookies(const char *url, const char *jar)`
-  - `print_css_drops` (function, line 597) `static void print_css_drops(const char *html, size_t len)`
-  - `hl_font_stash_free` (function, line 642) `static void hl_font_stash_free(hl_font_stash *s)`
-  - `hl_css_sink` (function, line 655) `static void hl_css_sink(void *vctx, const char *url,
+  - `foldback_cookies` (function, line 575) `static void foldback_cookies(const char *url, const char *jar)`
+  - `print_css_drops` (function, line 599) `static void print_css_drops(const char *html, size_t len)`
+  - `hl_font_stash_free` (function, line 644) `static void hl_font_stash_free(hl_font_stash *s)`
+  - `hl_css_sink` (function, line 657) `static void hl_css_sink(void *vctx, const char *url,
                         const char *body, si...`
-  - `hl_font_fetch` (function, line 692) `static int hl_font_fetch(void *vctx, const char *url,
+  - `hl_font_fetch` (function, line 694) `static int hl_font_fetch(void *vctx, const char *url,
                          int *out_status, c...`
-  - `render_page` (function, line 720) `static int render_page(const char *html, size_t len, const char *top_url,
+  - `render_page` (function, line 722) `static int render_page(const char *html, size_t len, const char *top_url,
                        ...`
-  - `first` (function, line 801) `* always cleared first (fetch_and_render may paint several pages per
+  - `first` (function, line 803) `* always cleared first (fetch_and_render may paint several pages per
      * process). A NULL top_...`
-  - `sf_reason` (function, line 999) `static const char *sf_reason(sf_status ss)`
-  - `fetch_and_render_one` (function, line 1020) `static int fetch_and_render_one(const char *url, char **out_nav)`
-  - `elsewhere` (function, line 1083) `* page whose script immediately forwards elsewhere (e.g. a search engine's
+  - `sf_reason` (function, line 1001) `static const char *sf_reason(sf_status ss)`
+  - `fetch_and_render_one` (function, line 1023) `static int fetch_and_render_one(const char *url, char **out_nav)`
+  - `elsewhere` (function, line 1086) `* page whose script immediately forwards elsewhere (e.g. a search engine's
  * JS-capability inter...`
-  - `parent` (function, line 1109) `* gated by the parent (ln_resolve: a local target stays under the document's
+  - `parent` (function, line 1112) `* gated by the parent (ln_resolve: a local target stays under the document's
  * directory, a remo...`
-  - `run_headless` (function, line 1146) `static int run_headless(const char *target)`
-  - `video_fetch_with_fallback` (function, line 1183) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
+  - `run_headless` (function, line 1149) `static int run_headless(const char *target)`
+  - `video_fetch_with_fallback` (function, line 1186) `static sf_status video_fetch_with_fallback(const char *url, sf_config *cfg,
                      ...`
-  - `run_dump_video` (function, line 1294) `static int run_dump_video(const char *url)`
-  - `main` (function, line 1313) `int main(int argc, char **argv)`
+  - `run_dump_video` (function, line 1297) `static int run_dump_video(const char *url)`
+  - `main` (function, line 1316) `int main(int argc, char **argv)`
   - `gets` (function, line 482) `* gate a click gets (https-only, no downgrade, no foreign scheme), so relative * subresources work. Realm-routed...`
-  - `pool` (function, line 787) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
-  - `only` (function, line 873) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
-  - `BLOCKED` (function, line 1048) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
+  - `pool` (function, line 789) `* the pool (unconsumed results freed, in-flight fetches joined). */ tab_set_fetcher(t, headless_fetch, (void...`
+  - `only` (function, line 875) `* styling for the local render only (no network). --images enables image loading * AND rendering, including remote...`
+  - `BLOCKED` (function, line 1051) `* is BLOCKED (fail closed), never leaked over the clearnet. */ nr_route route = nr_route_for(url, global_net);`
   - `_POSIX_C_SOURCE` (macro, line 9) `#define _POSIX_C_SOURCE`
   - `_DEFAULT_SOURCE` (macro, line 10) `#define _DEFAULT_SOURCE`
   - `EXIT_OK` (macro, line 51) `#define EXIT_OK`
   - `EXIT_ERROR` (macro, line 52) `#define EXIT_ERROR`
   - `EXIT_USAGE` (macro, line 53) `#define EXIT_USAGE`
   - `CSS_DROPS_REPORT_MAX` (macro, line 174) `#define CSS_DROPS_REPORT_MAX`
-  - `HL_FONT_MAX_SHEETS` (macro, line 631) `#define HL_FONT_MAX_SHEETS`
-  - `HL_FONT_MAX_BYTES` (macro, line 632) `#define HL_FONT_MAX_BYTES`
-  - `HL_JS_NAV_MAX` (macro, line 1016) `#define HL_JS_NAV_MAX`
+  - `HL_FONT_MAX_SHEETS` (macro, line 633) `#define HL_FONT_MAX_SHEETS`
+  - `HL_FONT_MAX_BYTES` (macro, line 634) `#define HL_FONT_MAX_BYTES`
+  - `HL_JS_NAV_MAX` (macro, line 1019) `#define HL_JS_NAV_MAX`
 - Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`, `include/freebug.h`, `include/hls.h`, `include/host_conf.h`, `include/hostblock.h`, `include/html_parse.h`, `include/identity.h`, `include/js_policy.h`, `include/link_nav.h`, `include/media_decoder.h`, `include/net_realm.h`, `include/page_view.h`, `include/perf_trace.h`, `include/prefetch.h`, `include/render_doc.h`, `include/render_policy.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/tab.h`, `include/text_shape.h`, `include/tls_impersonate.h`, `include/ui.h`, `include/url.h`, `include/webcaps.h`, `include/webfont.h`, `include/webfont_load.h`, `include/wl_display.h`
 
-## src/hls.c
-- Doc: last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not...
+## src/group_index.c
+- Doc: group_index (gi_) -- spec/group_index.md.
 - Layer: utility
 - Language: c
 - Symbols:
-  - `last_char` (function, line 38) `static const char *last_char(const char *s, size_t n, int c)`
-  - `parse_attr_long` (function, line 48) `static int parse_attr_long(const char *attrs, const char *end,
-                           const c...`
-  - `parse_attr_resolution` (function, line 62) `static void parse_attr_resolution(const char *attrs, const char *end,
-                           ...`
-  - `hls_parse` (function, line 80) `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)`
-  - `hls_select_variant` (function, line 202) `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h)`
-  - `hls_resolve_url` (function, line 223) `size_t hls_resolve_url(const char *base_url, const char *segment_url,
-                       char...`
-  - `hls_playlist_free` (function, line 253) `void hls_playlist_free(hls_playlist *pl)`
-  - `name` (function, line 46) `* attr is the attribute name (e.g. "BANDWIDTH=");`
-  - `_GNU_SOURCE` (macro, line 21) `#define _GNU_SOURCE`
-  - `_POSIX_C_SOURCE` (macro, line 22) `#define _POSIX_C_SOURCE`
-- Depends on: `include/hls.h`
-
-## src/host_conf.c
-- Doc: read_conf: add_dir(out, env); if (home != NULL && home[0] != '\0') { char user[HCF_PATH_MAX]...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `add_dir` (function, line 10) `static void add_dir(hcf_dirs *out, const char *path)`
-  - `hcf_search_dirs` (function, line 20) `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out)`
-  - `hcf_search_dirs_from_env` (function, line 32) `void hcf_search_dirs_from_env(hcf_dirs *out)`
-  - `read_conf` (function, line 37) `static char *read_conf(const char *dir, const char *name)`
-  - `load_into` (function, line 58) `static void load_into(hb_set *s, const char *dir, const char *name, hb_list list)`
-  - `hcf_load_filter` (function, line 65) `hb_set *hcf_load_filter(const hcf_dirs *dirs)`
-  - `hcf_load_allowlist` (function, line 76) `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname)`
-  - `HCF_USER_SUBDIR` (macro, line 7) `#define HCF_USER_SUBDIR`
-  - `HCF_REPO_DIR` (macro, line 8) `#define HCF_REPO_DIR`
-- Depends on: `include/host_conf.h`
-
-## src/hostblock.c
-- Doc: table_probe: Finds the slot for key (length klen) in t, which must have a free slot.
-- Layer: utility
-- Language: c
-- Symbols:
-  - `hb_table` (struct, line 24)
-  - `hb_set` (struct, line 30)
-  - `table_probe` (function, line 38) `static size_t table_probe(const hb_table *t, const char *key, size_t klen)`
-  - `table_grow` (function, line 49) `static int table_grow(hb_table *t, size_t newcap)`
-  - `table_insert` (function, line 71) `static int table_insert(hb_table *t, const char *key, size_t klen)`
-  - `table_contains` (function, line 92) `static int table_contains(const hb_table *t, const char *key)`
-  - `table_free` (function, line 98) `static void table_free(hb_table *t)`
-  - `lower` (function, line 107) `static char lower(char c)`
-  - `is_ip_token` (function, line 113) `static int is_ip_token(const char *s, size_t n)`
-  - `is_domain_char` (function, line 122) `static int is_domain_char(char c)`
-  - `hb_new` (function, line 144) `hb_set *hb_new(void)`
-  - `hb_free` (function, line 149) `void hb_free(hb_set *s)`
-  - `hb_load` (function, line 156) `hb_status hb_load(hb_set *s, const char *text, hb_list list)`
-  - `hb_check` (function, line 193) `hb_decision hb_check(const hb_set *s, const char *host)`
-  - `hb_check_subresource` (function, line 218) `hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted)`
-  - `hb_is_allowlisted` (function, line 223) `int hb_is_allowlisted(const hb_set *s, const char *host)`
-  - `hb_count` (function, line 243) `size_t hb_count(const hb_set *s, hb_list list)`
-  - `HB_MAX_HOST` (macro, line 19) `#define HB_MAX_HOST`
-  - `HB_INIT_CAP` (macro, line 20) `#define HB_INIT_CAP`
-- Depends on: `include/hostblock.h`, `include/util.h`
+  - `key_ok` (function, line 6) `static int key_ok(int k, size_t nkeys)`
+  - `gi_build` (function, line 10) `size_t gi_build(const int *keys, size_t n, size_t nkeys, size_t *offs, size_t *items)`
+- Depends on: `include/group_index.h`
 
 
 Next: [KB_src_p5.md](KB_src_p5.md)

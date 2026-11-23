@@ -1,6 +1,24 @@
 # Subsystem: src (page 10 of 10)
 Previous: [KB_src_p9.md](KB_src_p9.md)
 
+## src/video_controls.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `finite4` (function, line 7) `static int finite4(double a, double b, double c, double d)`
+  - `in_rect` (function, line 11) `static int in_rect(const vcl_rect *r, double px, double py)`
+  - `vcl_layout` (function, line 15) `int vcl_layout(double x, double y, double w, double h, vcl_geom *g)`
+  - `vcl_clamp_frac` (function, line 34) `double vcl_clamp_frac(double f)`
+  - `vcl_hit` (function, line 39) `vcl_hit_kind vcl_hit(const vcl_geom *g, const vcl_rect *video, double px, double py,
+            ...`
+  - `vcl_seg_duration` (function, line 54) `double vcl_seg_duration(double d)`
+  - `vcl_total` (function, line 59) `double vcl_total(const hls_playlist *pl)`
+  - `vcl_segment_at` (function, line 66) `size_t vcl_segment_at(const hls_playlist *pl, double t, double *start)`
+  - `vcl_segment_start` (function, line 82) `double vcl_segment_start(const hls_playlist *pl, size_t idx)`
+  - `vcl_position` (function, line 90) `double vcl_position(double base_s, int64_t pts0_us, int64_t pts_us, double total)`
+  - `vcl_format_time` (function, line 99) `size_t vcl_format_time(double seconds, char *buf, size_t cap)`
+- Depends on: `include/video_controls.h`
+
 ## src/video_pick.c
 - Doc: Only an absolute http(s) URL names a stream the decoder can fetch; anything else a script stored...
 - Layer: utility

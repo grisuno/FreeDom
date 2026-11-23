@@ -1,18 +1,427 @@
-# Symbols (page 11 of 18)
+# Symbols (page 11 of 19)
 Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `sf_ws_url_check` | function | `src/secure_fetch.c:1448` | `sf_status sf_ws_url_check(const char *url)` |
+| `is_italic_tag` | function | `src/page_view.c:3192` | `static int is_italic_tag(lxb_tag_id_t t)` |
+| `is_layout_container` | function | `src/page_view.c:3480` | `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,                    ...` |
+| `is_mono_tag` | function | `src/page_view.c:3198` | `static int is_mono_tag(lxb_tag_id_t t)` |
+| `is_plain_wrapper` | function | `src/page_view.c:3682` | `static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs)` |
+| `is_skipped_tag` | function | `src/page_view.c:1187` | `static int is_skipped_tag(lxb_tag_id_t t)` |
+| `it` | function | `src/page_view.c:3329` | `* without it (minified markup) keeps the row gapless -- the mixed case is a known limit. */ stati...` |
+| `item_ordinal` | function | `src/page_view.c:1396` | `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` |
+| `item_sizes_itself` | function | `src/page_view.c:3535` | `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,                      ...` |
+| `item_space_before` | function | `src/page_view.c:1381` | `static int item_space_before(const lxb_dom_node_t *item)` |
+| `li_is_list_item` | function | `src/page_view.c:3551` | `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,                     ...` |
+| `li_ordinal` | function | `src/page_view.c:5300` | `static int li_ordinal(const lxb_dom_node_t *li)` |
+| `line` | function | `src/page_view.c:7639` | `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);` |
+| `list_marker` | function | `src/page_view.c:5351` | `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,                   ...` |
+| `margins` | function | `src/page_view.c:4193` | `* margins (boxdef_from_style) and the painter applies them when                          * it ope...` |
+| `mb` | type_alias | `src/page_view.c:1420` | `typedef struct pv_box_info { int l, r, w, center, mt, mb;` |
+| `media_has_source` | function | `src/page_view.c:3720` | `static int media_has_source(const lxb_dom_node_t *n)` |
+| `mono_generic_size` | function | `src/page_view.c:3205` | `static void mono_generic_size(const pv_text_ext *ext, int *font_scale)` |
+| `nearest_table` | function | `src/page_view.c:5414` | `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,  ...` |
+| `next_skip` | function | `src/page_view.c:5499` | `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` |
+| `node_next` | function | `src/page_view.c:1010` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
+| `node_table_role` | function | `src/page_view.c:5396` | `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
+| `node_tag` | function | `src/page_view.c:1208` | `static lxb_tag_id_t node_tag(const lxb_dom_node_t *n)` |
+| `none` | function | `src/page_view.c:3019` | `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...` |
+| `opens` | function | `src/page_view.c:4101` | `* painter applies it when the box opens (band/shared context) — seeding              * it onto ru...` |
+| `outermost` | function | `src/page_view.c:4044` | `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);` |
+| `paints` | function | `src/page_view.c:1128` | `* for it so its box reserves space and paints (spec/page_view.md §4 "Cajas  * vacías"). Comment a...` |
+| `parent_is_author_container` | function | `src/page_view.c:3005` | `static int parent_is_author_container(const lxb_dom_node_t *node, const css_sheet *sheet,        ...` |
+| `parent_is_table_internal` | function | `src/page_view.c:5453` | `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` |
+| `parse_dim` | function | `src/page_view.c:4709` | `static int parse_dim(const lxb_char_t *s, size_t len)` |
+| `positions` | function | `src/page_view.c:145` | `* positions (cp == 0) keep the legacy '?' fallback. */ unsigned int cp = cp1252_to_ucs(c);` |
+| `present` | function | `src/page_view.c:4726` | `* when no width descriptors are present (density-only or bare URLs). */ static void srcset_best_u...` |
+| `pseudo_box_reg` | function | `src/page_view.c:2329` | `static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,                    ...` |
+| `pseudo_generates_box` | function | `src/page_view.c:2350` | `static int pseudo_generates_box(const css_style *ps)` |
+| `pseudo_is_block` | function | `src/page_view.c:2367` | `static int pseudo_is_block(const css_style *ps)` |
+| `pseudo_is_oof` | function | `src/page_view.c:2363` | `static int pseudo_is_oof(const css_style *ps)` |
+| `pseudo_key` | function | `src/page_view.c:2373` | `static const void *pseudo_key(const lxb_dom_node_t *el, int which)` |
+| `pv_add_box_def` | function | `src/page_view.c:958` | `pv_status pv_add_box_def(pv_view *v, const pv_box_def *d)` |
+| `pv_add_cont_def` | function | `src/page_view.c:936` | `pv_status pv_add_cont_def(pv_view *v, const pv_cont_def *d)` |
+| `pv_after_pending` | struct | `src/page_view.c:1959` | `` |
+| `pv_append` | function | `src/page_view.c:441` | `pv_status pv_append(pv_view *v, pv_kind kind, int heading, int block_break,                     c...` |
+| `pv_append_image` | function | `src/page_view.c:476` | `pv_status pv_append_image(pv_view *v, int heading, int block_break,                           con...` |
+| `pv_append_input` | function | `src/page_view.c:506` | `pv_status pv_append_input(pv_view *v, int heading, int block_break,                           pv_...` |
+| `pv_append_svg` | function | `src/page_view.c:582` | `pv_status pv_append_svg(pv_view *v, int heading, int block_break,                         const c...` |
+| `pv_append_video` | function | `src/page_view.c:546` | `pv_status pv_append_video(pv_view *v, int heading, int block_break,                           con...` |
+| `pv_apply_pres_hints` | function | `src/page_view.c:2725` | `static void pv_apply_pres_hints(lxb_dom_element_t *el, css_style *cs)` |
+| `pv_at` | function | `src/page_view.c:993` | `const pv_run *pv_at(const pv_view *v, size_t i)` |
+| `pv_box_at` | function | `src/page_view.c:1002` | `const pv_box_def *pv_box_at(const pv_view *v, size_t i)` |
+| `pv_box_count` | function | `src/page_view.c:998` | `size_t pv_box_count(const pv_view *v)` |
+| `pv_box_info` | struct | `src/page_view.c:1420` | `` |
+| `pv_box_reg` | struct | `src/page_view.c:2001` | `` |
+| `pv_build` | function | `src/page_view.c:5795` | `pv_status pv_build(const hp_document *doc, pv_view **out)` |
+| `pv_build_cached` | function | `src/page_view.c:6043` | `pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,                    ...` |
+| `pv_build_cq` | function | `src/page_view.c:6050` | `pv_status pv_build_cq(const hp_document *doc, int js_enabled, int reader,                       i...` |
+| `pv_build_ex` | function | `src/page_view.c:5799` | `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)` |
+| `pv_build_full` | function | `src/page_view.c:5803` | `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,                      ...` |
+| `pv_build_live` | function | `src/page_view.c:6057` | `pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,                      ...` |
+| `pv_build_styled` | function | `src/page_view.c:6036` | `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,                    ...` |
+| `pv_cache_find` | function | `src/page_view.c:2549` | `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
+| `pv_cache_put` | function | `src/page_view.c:2569` | `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,                      ...` |
+| `pv_cache_reindex` | function | `src/page_view.c:2467` | `static void pv_cache_reindex(pv_style_cache *c)` |
+| `pv_cached_font_px` | function | `src/page_view.c:2564` | `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` |
+| `pv_cell_table` | function | `src/page_view.c:2709` | `static lxb_dom_element_t *pv_cell_table(lxb_dom_element_t *el)` |
+| `pv_cnt_attr` | function | `src/page_view.c:5952` | `static const char *pv_cnt_attr(void *ctx, const char *name)` |
+| `pv_cnt_attr_ctx` | struct | `src/page_view.c:5947` | `` |
+| `pv_cnt_enter` | function | `src/page_view.c:5976` | `static int pv_cnt_enter(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,     ...` |
+| `pv_cnt_exit` | function | `src/page_view.c:6000` | `static void pv_cnt_exit(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,     ...` |
+| `pv_cnt_resolve_field` | function | `src/page_view.c:5965` | `static void pv_cnt_resolve_field(const cnt_state *st, lxb_dom_element_t *el, char *field)` |
+| `pv_computed` | struct | `src/page_view.c:7827` | `` |
+| `pv_computed_free` | function | `src/page_view.c:7873` | `void pv_computed_free(pv_computed *pc)` |
+| `pv_computed_get` | function | `src/page_view.c:7851` | `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,                     do...` |
+| `pv_computed_new` | function | `src/page_view.c:7832` | `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,   ...` |
+| `pv_computed_new_cached` | function | `src/page_view.c:7837` | `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,                    ...` |
+| `pv_cont_at` | function | `src/page_view.c:953` | `const pv_cont_def *pv_cont_at(const pv_view *v, size_t i)` |
+| `pv_cont_count` | function | `src/page_view.c:949` | `size_t pv_cont_count(const pv_view *v)` |
+| `pv_cont_info` | struct | `src/page_view.c:1284` | `` |
+| `pv_container_reg` | struct | `src/page_view.c:1783` | `` |
+| `pv_content_hidden` | function | `src/page_view.c:1441` | `int pv_content_hidden(int box_hidden, int run_visibility)` |
+| `pv_control_frame_cleared` | function | `src/page_view.c:1631` | `static int pv_control_frame_cleared(const css_style *cs)` |
+| `pv_count` | function | `src/page_view.c:989` | `size_t pv_count(const pv_view *v)` |
+| `pv_counters_pass` | function | `src/page_view.c:6012` | `static void pv_counters_pass(lxb_dom_node_t *root, const css_sheet *sheet, pv_style_cache *cache)` |
+| `pv_cq_push` | function | `src/page_view.c:2642` | `static const cmq_container *pv_cq_push(pv_style_cache *cache, const lxb_dom_node_t *node,        ...` |
+| `pv_css_drops` | function | `src/page_view.c:7798` | `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,                        const cha...` |
+| `pv_def_h` | struct | `src/page_view.c:2401` | `` |
+| `pv_element_has_before` | function | `src/page_view.c:3628` | `static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,                      ...` |
+| `pv_flow_reg` | struct | `src/page_view.c:3739` | `` |
+| `pv_flow_reg` | struct | `src/page_view.c:5376` | `` |
+| `pv_frame_marked` | function | `src/page_view.c:4700` | `static int pv_frame_marked(const lxb_dom_node_t *n)` |
+| `pv_free` | function | `src/page_view.c:971` | `void pv_free(pv_view *v)` |
+| `pv_hint_attr` | function | `src/page_view.c:2688` | `static const char *pv_hint_attr(void *ctx, const char *name, size_t *len)` |
+| `pv_item_track` | struct | `src/page_view.c:1367` | `` |
+| `pv_mauto_of` | function | `src/page_view.c:1558` | `static int pv_mauto_of(const css_style *cs)` |
+| `pv_new` | function | `src/page_view.c:437` | `pv_view *pv_new(void)` |
+| `pv_node_map` | struct | `src/page_view.c:356` | `` |
+| `pv_node_map_build` | function | `src/page_view.c:426` | `static int pv_node_map_build(pv_node_map *m, const lxb_dom_node_t *root,                         ...` |
+| `pv_node_map_free` | function | `src/page_view.c:374` | `static void pv_node_map_free(pv_node_map *m)` |
+| `pv_node_map_init` | function | `src/page_view.c:364` | `static int pv_node_map_init(pv_node_map *m)` |
+| `pv_parent_element` | function | `src/page_view.c:2681` | `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` |
+| `pv_placeholder_color` | function | `src/page_view.c:920` | `int pv_placeholder_color(const css_style *ph)` |
+| `pv_ptr_hash` | function | `src/page_view.c:2459` | `static size_t pv_ptr_hash(const void *p)` |
+| `pv_ptrmap` | struct | `src/page_view.c:302` | `` |
+| `pv_ptrmap_free` | function | `src/page_view.c:348` | `static void pv_ptrmap_free(pv_ptrmap *m)` |
+| `pv_ptrmap_get` | function | `src/page_view.c:318` | `static int pv_ptrmap_get(const pv_ptrmap *m, const void *k, int *out)` |
+| `pv_ptrmap_put` | function | `src/page_view.c:326` | `static void pv_ptrmap_put(pv_ptrmap *m, const void *k, int v)` |
+| `pv_ptrmap_slot` | function | `src/page_view.c:308` | `static size_t pv_ptrmap_slot(const pv_ptrmap *m, const void *k)` |
+| `pv_root_els` | struct | `src/page_view.c:4908` | `` |
+| `pv_root_insets` | function | `src/page_view.c:5900` | `void pv_root_insets(const css_style *body, int out[4])` |
+| `pv_set_bgcolor` | function | `src/page_view.c:628` | `void pv_set_bgcolor(pv_view *v, int bg_rgb)` |
+| `pv_set_block_id` | function | `src/page_view.c:851` | `void pv_set_block_id(pv_view *v, int block_id)` |
+| `pv_set_block_node` | function | `src/page_view.c:871` | `void pv_set_block_node(pv_view *v, dom_node_id id)` |
+| `pv_set_box` | function | `src/page_view.c:810` | `void pv_set_box(pv_view *v, int box_l, int box_r, int box_w,                 int box_center, int ...` |
+| `pv_set_box_maxw` | function | `src/page_view.c:833` | `void pv_set_box_maxw(pv_view *v, int box_mw, int box_mw_pct)` |
+| `pv_set_box_pct` | function | `src/page_view.c:822` | `void pv_set_box_pct(pv_view *v, int box_w_pct, int box_l_pct, int box_r_pct,                     ...` |
+| `pv_set_br_line` | function | `src/page_view.c:876` | `void pv_set_br_line(pv_view *v, int br_line)` |
+| `pv_set_color` | function | `src/page_view.c:623` | `void pv_set_color(pv_view *v, int fg_rgb)` |
+| `pv_set_cont_box` | function | `src/page_view.c:750` | `void pv_set_cont_box(pv_view *v, int cont_box_id)` |
+| `pv_set_cont_item` | function | `src/page_view.c:772` | `void pv_set_cont_item(pv_view *v, int cont_item)` |
+| `pv_set_container` | function | `src/page_view.c:710` | `void pv_set_container(pv_view *v, int cont_id, int cont_display,                       int cont_g...` |
+| `pv_set_emphasis` | function | `src/page_view.c:611` | `void pv_set_emphasis(pv_view *v, int bold, int italic)` |
+| `pv_set_flex` | function | `src/page_view.c:754` | `void pv_set_flex(pv_view *v, int flex_grow, int flex_shrink, int flex_basis,                  int...` |
+| `pv_set_flex_mauto` | function | `src/page_view.c:766` | `void pv_set_flex_mauto(pv_view *v, int mauto)` |
+| `pv_set_float` | function | `src/page_view.c:788` | `void pv_set_float(pv_view *v, int float_side, int float_id, int float_clear,                 int ...` |
+| `pv_set_float_w` | function | `src/page_view.c:777` | `void pv_set_float_w(pv_view *v, int float_w, int float_w_pct, int float_box,                     ...` |
+| `pv_set_grad_text` | function | `src/page_view.c:644` | `void pv_set_grad_text(pv_view *v, int n, int angle, const int *c4)` |
+| `pv_set_grid` | function | `src/page_view.c:736` | `void pv_set_grid(pv_view *v, const int *col_w, int n, int col_span)` |
+| `pv_set_grid_area` | function | `src/page_view.c:729` | `void pv_set_grid_area(pv_view *v, int row_start, int col_start)` |
+| `pv_set_grid_rows` | function | `src/page_view.c:746` | `void pv_set_grid_rows(pv_view *v, int grid_rows)` |
+| `pv_set_indent` | function | `src/page_view.c:618` | `void pv_set_indent(pv_view *v, int indent)` |
+| `pv_set_input_checked` | function | `src/page_view.c:881` | `void pv_set_input_checked(pv_view *v, int checked)` |
+| `pv_set_input_placeholder` | function | `src/page_view.c:886` | `void pv_set_input_placeholder(pv_view *v, int ph_color)` |
+| `pv_set_input_select_opts` | function | `src/page_view.c:928` | `void pv_set_input_select_opts(pv_view *v, const char *select_opts)` |
+| `pv_set_justify_self` | function | `src/page_view.c:866` | `void pv_set_justify_self(pv_view *v, int justify_self)` |
+| `pv_set_node_id` | function | `src/page_view.c:846` | `void pv_set_node_id(pv_view *v, dom_node_id node_id)` |
+| `pv_set_oof` | function | `src/page_view.c:861` | `void pv_set_oof(pv_view *v, int oof)` |
+| `pv_set_own_box` | function | `src/page_view.c:856` | `void pv_set_own_box(pv_view *v, int box_id)` |
+| `pv_set_row_span` | function | `src/page_view.c:725` | `void pv_set_row_span(pv_view *v, int row_span)` |
+| `pv_set_text_ext` | function | `src/page_view.c:652` | `void pv_set_text_ext(pv_view *v, const pv_text_ext *e)` |
+| `pv_set_text_style` | function | `src/page_view.c:633` | `void pv_set_text_style(pv_view *v, int text_align, int font_scale, int font_abs,                 ...` |
+| `pv_set_ua_tag` | function | `src/page_view.c:840` | `void pv_set_ua_tag(pv_view *v, int ua_tag)` |
+| `pv_style_cache` | struct | `src/page_view.c:2415` | `` |
+| `pv_style_cache_free` | function | `src/page_view.c:2503` | `static void pv_style_cache_free(pv_style_cache *c)` |
+| `pv_style_cache_reserve` | function | `src/page_view.c:2524` | `static void pv_style_cache_reserve(pv_style_cache *c, size_t n)` |
+| `pv_svg_append_root_attrs` | function | `src/page_view.c:891` | `char *pv_svg_append_root_attrs(const char *markup, size_t len, const char *attrs,                ...` |
+| `pv_text_ext_merge` | function | `src/page_view.c:1477` | `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` |
+| `pv_text_ext_reset` | function | `src/page_view.c:1447` | `void pv_text_ext_reset(pv_text_ext *e)` |
+| `pv_var_node` | struct | `src/page_view.c:2392` | `` |
+| `pv_var_push` | function | `src/page_view.c:2619` | `static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,                       ...` |
+| `px` | function | `src/page_view.c:6664` | `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */                 if (iw <...` |
+| `resolve_context` | function | `src/page_view.c:3751` | `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                 ...` |
+| `resolves` | function | `src/page_view.c:1074` | `* box_tree already resolves (R4/R8) had nothing to place -- every badge/close  * button/tooltip w...` |
+| `roman_marker` | function | `src/page_view.c:5326` | `static void roman_marker(int n, int upper, char *out, size_t cap)` |
+| `row_lone_float_side` | function | `src/page_view.c:3282` | `static int row_lone_float_side(const lxb_dom_node_t *p, const css_sheet *sheet,                  ...` |
+| `run_init_common` | function | `src/page_view.c:170` | `static void run_init_common(pv_run *r)` |
+| `serialize_subtree` | function | `src/page_view.c:4651` | `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)` |
+| `size` | function | `src/page_view.c:3112` | `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */ static void app...` |
+| `srcset_slot_width` | function | `src/page_view.c:4821` | `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,                               ...` |
+| `string` | function | `src/page_view.c:4937` | `* Returns a heap string (caller frees) or NULL when neither carries a class —  * NULL simply mean...` |
+| `subtree_has_own_text` | function | `src/page_view.c:3660` | `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,             ...` |
+| `subtree_is_oof` | function | `src/page_view.c:3092` | `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,                      ...` |
+| `sz_count` | function | `src/page_view.c:4629` | `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` |
+| `sz_fill` | struct | `src/page_view.c:4637` | `` |
+| `sz_write` | function | `src/page_view.c:4643` | `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)` |
+| `table_cell_pos` | function | `src/page_view.c:3746` | `static int table_cell_pos(struct pv_flow_reg *fr, const lxb_dom_node_t *table, const lxb_dom_node_t *cell, int *row...` |
+| `table_columns` | function | `src/page_view.c:5650` | `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
+| `table_columns_scan` | function | `src/page_view.c:5659` | `static int table_columns_scan(const lxb_dom_node_t *table, const pv_flow_reg *fr)` |
+| `table_next_row` | function | `src/page_view.c:5522` | `static const lxb_dom_node_t *table_next_row(const lxb_dom_node_t *table,                         ...` |
+| `text_node_is_blank` | function | `src/page_view.c:1380` | `static int text_node_is_blank(const lxb_dom_node_t *c);` |
+| `them` | function | `src/page_view.c:1371` | `* them (PV_BR_ATOM_SPACE);` |
+| `trying` | function | `src/page_view.c:2011` | `* a real page passes without trying (slashdot's front page saturates it), and past  * it box_reg_...` |
+| `ua_field_background` | function | `src/page_view.c:1643` | `static void ua_field_background(pv_box_def *d, int frame_cleared)` |
+| `ua_tag_of` | function | `src/page_view.c:1153` | `static bx_ua_tag ua_tag_of(lxb_tag_id_t t)` |
+| `under_unrendered` | function | `src/page_view.c:5092` | `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` |
+| `url` | function | `src/page_view.c:6082` | `* fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css * module, so OOM here degrades to...` |
+| `utf8_encode` | function | `src/page_view.c:109` | `static size_t utf8_encode(unsigned int cp, char *out)` |
+| `utf8_sanitized_dup` | function | `src/page_view.c:122` | `static char *utf8_sanitized_dup(const char *s)` |
+| `walk` | function | `src/page_view.c:4441` | `* far on this walk (they are all inside this element). */                          /* The innermo...` |
+| `pe_build_path` | function | `src/pdf_export.c:91` | `pe_status pe_build_path(const char *dir, const char *title, char *out, size_t outsz)` |
+| `pe_build_path_ext` | function | `src/pdf_export.c:66` | `pe_status pe_build_path_ext(const char *dir, const char *title, const char *ext,                 ...` |
+| `pe_paginate` | function | `src/pdf_export.c:95` | `size_t pe_paginate(const double *tops, const double *heights, size_t n,                    double...` |
+| `pe_safe_basename` | function | `src/pdf_export.c:25` | `pe_status pe_safe_basename(const char *title, char *out, size_t outsz)` |
+| `PT_LINE_CAP` | macro | `src/perf_trace.c:107` | `#define PT_LINE_CAP` |
+| `cmp_u64` | function | `src/perf_trace.c:71` | `static int cmp_u64(const void *a, const void *b)` |
+| `pt_count` | function | `src/perf_trace.c:35` | `size_t pt_count(const pt_trace *t, pt_stage stage)` |
+| `pt_elapsed_us` | function | `src/perf_trace.c:21` | `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us)` |
+| `pt_format` | function | `src/perf_trace.c:109` | `size_t pt_format(const pt_trace *t, char *buf, size_t cap)` |
+| `pt_init` | function | `src/perf_trace.c:16` | `void pt_init(pt_trace *t)` |
+| `pt_last_us` | function | `src/perf_trace.c:40` | `uint64_t pt_last_us(const pt_trace *t, pt_stage stage)` |
+| `pt_max_us` | function | `src/perf_trace.c:60` | `uint64_t pt_max_us(const pt_trace *t, pt_stage stage)` |
+| `pt_median_us` | function | `src/perf_trace.c:79` | `uint64_t pt_median_us(const pt_trace *t, pt_stage stage)` |
+| `pt_min_us` | function | `src/perf_trace.c:49` | `uint64_t pt_min_us(const pt_trace *t, pt_stage stage)` |
+| `pt_record` | function | `src/perf_trace.c:26` | `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us)` |
+| `pt_stage_name` | function | `src/perf_trace.c:89` | `const char *pt_stage_name(pt_stage stage)` |
+| `PQS_SS_LEN` | macro | `src/pq_seal.c:17` | `#define PQS_SS_LEN` |
+| `derive_key` | function | `src/pq_seal.c:81` | `static int derive_key(const uint8_t ss[PQS_SS_LEN], const uint8_t wrap[LS_KEY_LEN],              ...` |
+| `keys_wrap` | function | `src/pq_seal.c:35` | `static pqs_keys *keys_wrap(EVP_PKEY *pkey)` |
+| `pqs_buf_free` | function | `src/pq_seal.c:23` | `void pqs_buf_free(uint8_t *buf, size_t len)` |
+| `pqs_export` | function | `src/pq_seal.c:55` | `pqs_status pqs_export(const pqs_keys *k, uint8_t **der, size_t *len)` |
+| `pqs_free` | function | `src/pq_seal.c:29` | `void pqs_free(pqs_keys *k)` |
+| `pqs_generate` | function | `src/pq_seal.c:42` | `pqs_status pqs_generate(pqs_keys **out)` |
+| `pqs_import` | function | `src/pq_seal.c:68` | `pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out)` |
+| `pqs_keys` | struct | `src/pq_seal.c:19` | `` |
+| `pqs_open` | function | `src/pq_seal.c:147` | `pqs_status pqs_open(const pqs_keys *k, const uint8_t wrap[LS_KEY_LEN],                     const ...` |
+| `pqs_seal` | function | `src/pq_seal.c:106` | `pqs_status pqs_seal(const pqs_keys *k, const uint8_t wrap[LS_KEY_LEN],                     const ...` |
+| `PF_MAX_URL` | macro | `src/prefetch.c:24` | `#define PF_MAX_URL` |
+| `_POSIX_C_SOURCE` | macro | `src/prefetch.c:12` | `#define _POSIX_C_SOURCE` |
+| `attr_span` | struct | `src/prefetch.c:65` | `` |
+| `ci_eq_span` | function | `src/prefetch.c:58` | `static int ci_eq_span(const char *s, size_t n, const char *kw)` |
+| `ci_find` | function | `src/prefetch.c:49` | `static const char *ci_find(const char *p, const char *end, const char *kw)` |
+| `ci_starts` | function | `src/prefetch.c:40` | `static int ci_starts(const char *p, const char *end, const char *kw)` |
+| `emit` | function | `src/prefetch.c:120` | `static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen)` |
+| `is_name_char` | function | `src/prefetch.c:30` | `static int is_name_char(char c)` |
+| `is_ws` | function | `src/prefetch.c:26` | `static int is_ws(char c)` |
+| `js_ident_ch` | function | `src/prefetch.c:213` | `static int js_ident_ch(char c)` |
+| `js_skip_string` | function | `src/prefetch.c:225` | `static size_t js_skip_string(const char *s, size_t i, size_t n)` |
+| `js_skip_ws` | function | `src/prefetch.c:218` | `static size_t js_skip_ws(const char *s, size_t i, size_t n)` |
+| `js_take_spec` | function | `src/prefetch.c:232` | `static void js_take_spec(const char *s, size_t i, size_t n,                          char (*out)[...` |
+| `lower` | function | `src/prefetch.c:35` | `static int lower(int c)` |
+| `pf_find_importmap` | function | `src/prefetch.c:489` | `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n)` |
+| `pf_follow_imports` | function | `src/prefetch.c:339` | `static void pf_follow_imports(pf_pool *p, const char *base, const char *body, size_t len)` |
+| `pf_is_js` | function | `src/prefetch.c:317` | `static int pf_is_js(const char *url, const char *ctype)` |
+| `pf_list_free` | function | `src/prefetch.c:202` | `void pf_list_free(pf_list *l)` |
+| `pf_pool_add` | function | `src/prefetch.c:294` | `int pf_pool_add(pf_pool *p, const char *url)` |
+| `pf_pool_finish` | function | `src/prefetch.c:546` | `void pf_pool_finish(pf_pool *p)` |
+| `pf_pool_start` | function | `src/prefetch.c:393` | `int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls,                   pf_fetch_f...` |
+| `pf_pool_start_page` | function | `src/prefetch.c:510` | `int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *page_url,           ...` |
+| `pf_pool_take` | function | `src/prefetch.c:450` | `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status,                  char **body,...` |
+| `pf_pooled_fetch` | function | `src/prefetch.c:567` | `int pf_pooled_fetch(void *vctx, const char *method, const char *url,                     const ch...` |
+| `pf_scan` | function | `src/prefetch.c:133` | `int pf_scan(const char *html, size_t len, pf_list *out)` |
+| `pf_scan_imports` | function | `src/prefetch.c:247` | `size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], size_t cap)` |
+| `pf_url_cb` | function | `src/prefetch.c:325` | `static int pf_url_cb(void *ctx, const char *base, const char *ref, char *out, size_t outsz)` |
+| `pf_url_shaped` | function | `src/prefetch.c:330` | `static int pf_url_shaped(const char *sp)` |
+| `pf_worker` | function | `src/prefetch.c:355` | `static void *pf_worker(void *arg)` |
+| `pool_start` | function | `src/prefetch.c:400` | `static int pool_start(pf_pool *p, const char *const *urls, size_t nurls,                       pf...` |
+| `PREFS_MAGIC` | macro | `src/prefs.c:20` | `#define PREFS_MAGIC` |
+| `_POSIX_C_SOURCE` | macro | `src/prefs.c:11` | `#define _POSIX_C_SOURCE` |
+| `apply_kv` | function | `src/prefs.c:231` | `static void apply_kv(prefs_state *out, const char *key, long val)` |
+| `bookmark_push` | function | `src/prefs.c:91` | `static prefs_status bookmark_push(prefs_state *p, const char *url, const char *title)` |
+| `ci_contains` | function | `src/prefs.c:327` | `static int ci_contains(const char *s, const char *q)` |
+| `ci_eq` | function | `src/prefs.c:313` | `static int ci_eq(char a, char b)` |
+| `ci_starts` | function | `src/prefs.c:319` | `static int ci_starts(const char *s, const char *q)` |
+| `history_push_back` | function | `src/prefs.c:109` | `static prefs_status history_push_back(prefs_state *p, const char *url)` |
+| `prefs_bookmark_index` | function | `src/prefs.c:125` | `int prefs_bookmark_index(const prefs_state *p, const char *url)` |
+| `prefs_bookmark_toggle` | function | `src/prefs.c:132` | `prefs_status prefs_bookmark_toggle(prefs_state *p, const char *url,                              ...` |
+| `prefs_bookmarks_page` | function | `src/prefs.c:421` | `prefs_status prefs_bookmarks_page(const prefs_state *p, char **out, size_t *out_len)` |
+| `prefs_format` | function | `src/prefs.c:183` | `prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len)` |
+| `prefs_free` | function | `src/prefs.c:74` | `void prefs_free(prefs_state *p)` |
+| `prefs_history_add` | function | `src/prefs.c:152` | `prefs_status prefs_history_add(prefs_state *p, const char *url)` |
+| `prefs_init` | function | `src/prefs.c:66` | `void prefs_init(prefs_state *p)` |
+| `prefs_parse` | function | `src/prefs.c:247` | `prefs_status prefs_parse(const char *text, size_t len, prefs_state *out)` |
+| `prefs_suggest` | function | `src/prefs.c:357` | `int prefs_suggest(const prefs_state *p, const char *query,                   char *out, size_t ro...` |
+| `sb_esc` | function | `src/prefs.c:400` | `static void sb_esc(sbuf *b, const char *s)` |
+| `sb_link_item` | function | `src/prefs.c:413` | `static void sb_link_item(sbuf *b, const char *url, const char *label)` |
+| `sb_put` | function | `src/prefs.c:382` | `static void sb_put(sbuf *b, const char *s, size_t n)` |
+| `sb_str` | function | `src/prefs.c:397` | `static void sb_str(sbuf *b, const char *s)` |
+| `sbuf` | struct | `src/prefs.c:380` | `` |
+| `sugg_push` | function | `src/prefs.c:348` | `static void sugg_push(char *out, size_t row_len, int max_rows, int *n,                       cons...` |
+| `title_clean` | function | `src/prefs.c:39` | `static char *title_clean(const char *src)` |
+| `url_prefix_match` | function | `src/prefs.c:336` | `static int url_prefix_match(const char *url, const char *q)` |
+| `url_valid` | function | `src/prefs.c:26` | `static int url_valid(const char *url)` |
+| `PH_PER_MILLE_MAX` | macro | `src/pres_hints.c:8` | `#define PH_PER_MILLE_MAX` |
+| `ph_align` | function | `src/pres_hints.c:53` | `static css_align ph_align(ph_attr_fn get, void *ctx)` |
+| `ph_apply` | function | `src/pres_hints.c:93` | `void ph_apply(const char *tag, ph_attr_fn get, void *ctx, unsigned flags, css_style *cs)` |
+| `ph_bgcolor` | function | `src/pres_hints.c:81` | `static void ph_bgcolor(ph_attr_fn get, void *ctx, css_style *cs)` |
+| `ph_cell_padding` | function | `src/pres_hints.c:164` | `void ph_cell_padding(int cellpad, css_style *cs)` |
+| `ph_ci_eq` | function | `src/pres_hints.c:42` | `static int ph_ci_eq(const char *s, size_t len, const char *word)` |
+| `ph_is_heading` | function | `src/pres_hints.c:76` | `static int ph_is_heading(const char *tag)` |
+| `ph_is_space` | function | `src/pres_hints.c:10` | `static int ph_is_space(char c)` |
+| `ph_parse_dimension` | function | `src/pres_hints.c:14` | `int ph_parse_dimension(const char *s, size_t len, int *px, int *per_mille)` |
+| `ph_parse_nonneg` | function | `src/pres_hints.c:140` | `int ph_parse_nonneg(const char *s, size_t len, int *out)` |
+| `ph_table_cellpadding` | function | `src/pres_hints.c:156` | `int ph_table_cellpadding(ph_attr_fn get, void *ctx)` |
+| `ph_width` | function | `src/pres_hints.c:64` | `static void ph_width(ph_attr_fn get, void *ctx, css_style *cs)` |
+| `PROFILE_KEYFILE_LEN` | macro | `src/profile.c:27` | `#define PROFILE_KEYFILE_LEN` |
+| `_POSIX_C_SOURCE` | macro | `src/profile.c:11` | `#define _POSIX_C_SOURCE` |
+| `join_path` | function | `src/profile.c:29` | `static int join_path(const profile_ctx *ctx, const char *name,                      char *out, si...` |
+| `keyfile_create` | function | `src/profile.c:36` | `static profile_status keyfile_create(const char *dir, const char *path,                          ...` |
+| `map_ds` | function | `src/profile.c:98` | `static profile_status map_ds(ds_status ds)` |
+| `profile_close` | function | `src/profile.c:149` | `void profile_close(profile_ctx *ctx)` |
+| `profile_load` | function | `src/profile.c:112` | `profile_status profile_load(const profile_ctx *ctx, prefs_state *out)` |
+| `profile_open` | function | `src/profile.c:59` | `profile_status profile_open(profile_ctx *ctx, const char *dir)` |
+| `profile_save` | function | `src/profile.c:133` | `profile_status profile_save(const profile_ctx *ctx, const prefs_state *p)` |
+| `place` | function | `src/render_doc.c:240` | `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...` |
+| `rd_at` | function | `src/render_doc.c:768` | `const rd_block *rd_at(const rd_doc *d, size_t i)` |
+| `rd_block_heading_level` | function | `src/render_doc.c:805` | `int rd_block_heading_level(const rd_block *b)` |
+| `rd_block_tag` | function | `src/render_doc.c:816` | `const char *rd_block_tag(const rd_block *b)` |
+| `rd_box_at` | function | `src/render_doc.c:777` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)` |
+| `rd_box_count` | function | `src/render_doc.c:773` | `size_t rd_box_count(const rd_doc *d)` |
+| `rd_build` | function | `src/render_doc.c:293` | `rd_status rd_build(const pv_view *view, rdp_caps caps,                    const char *top_level_u...` |
+| `rd_cont_at` | function | `src/render_doc.c:786` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)` |
+| `rd_cont_count` | function | `src/render_doc.c:782` | `size_t rd_cont_count(const rd_doc *d)` |
+| `rd_count` | function | `src/render_doc.c:764` | `size_t rd_count(const rd_doc *d)` |
+| `rd_free` | function | `src/render_doc.c:747` | `void rd_free(rd_doc *d)` |
+| `rd_image_fail_label` | function | `src/render_doc.c:882` | `const char *rd_image_fail_label(img_fail_reason reason)` |
+| `rd_image_label` | function | `src/render_doc.c:871` | `const char *rd_image_label(rdp_img_decision d)` |
+| `rd_input_invisible` | function | `src/render_doc.c:867` | `int rd_input_invisible(int input_type)` |
+| `rd_input_label` | function | `src/render_doc.c:847` | `const char *rd_input_label(int input_type)` |
+| `rd_kind_name` | function | `src/render_doc.c:791` | `const char *rd_kind_name(rd_kind k)` |
+| `rd_push` | function | `src/render_doc.c:60` | `static int rd_push(rd_doc *d, rd_kind kind, int heading_level, int block_break,                  ...` |
+| `rd_push_input` | function | `src/render_doc.c:214` | `static int rd_push_input(rd_doc *d, int block_break, const pv_run *r)` |
+| `resolve_image_decision` | function | `src/render_doc.c:250` | `static rdp_img_decision resolve_image_decision(rdp_caps caps, const char *top_level_url,         ...` |
+| `too` | function | `src/render_doc.c:281` | `* that would not fit is cleared too (never truncated-and-fetched). */ static void gate_box_image_...` |
+| `unset` | function | `src/render_doc.c:709` | `* background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not...` |
+| `utf8_sanitized_dup` | function | `src/render_doc.c:28` | `static char *utf8_sanitized_dup(const char *s)` |
+| `rdp_caps_safe` | function | `src/render_policy.c:17` | `rdp_caps rdp_caps_safe(void)` |
+| `rdp_image_decision` | function | `src/render_policy.c:28` | `rdp_img_decision rdp_image_decision(rdp_caps caps,                                     const char...` |
+| `rdp_images_warning` | function | `src/render_policy.c:71` | `const char *rdp_images_warning(void)` |
+| `rdp_img_reason` | function | `src/render_policy.c:60` | `const char *rdp_img_reason(rdp_img_decision d)` |
+| `rdp_is_tracking_pixel` | function | `src/render_policy.c:22` | `int rdp_is_tracking_pixel(int w, int h)` |
+| `_POSIX_C_SOURCE` | macro | `src/renderer.c:7` | `#define _POSIX_C_SOURCE` |
+| `child_render` | function | `src/renderer.c:25` | `static void child_render(int wfd, const char *html, size_t len)` |
+| `rd_render_html` | function | `src/renderer.c:70` | `rd_status rd_render_html(const char *html, size_t len, rd_result *out)` |
+| `rd_result_free` | function | `src/renderer.c:120` | `void rd_result_free(rd_result *out)` |
+| `read_field` | function | `src/renderer.c:53` | `static int read_field(int fd, char **out, size_t *out_len)` |
+| `write_full` | function | `src/renderer.c:40` | `&& write_full(wfd, &tl, sizeof tl) == 0 && (tl == 0 \|\| write_full(wfd, title, tl) == 0) && write_full(wfd, &xl...` |
+| `RP_MAX_HOST` | macro | `src/request_policy.c:17` | `#define RP_MAX_HOST` |
+| `RP_MAX_LABELS` | macro | `src/request_policy.c:18` | `#define RP_MAX_LABELS` |
+| `ci_starts_with` | function | `src/request_policy.c:26` | `static int ci_starts_with(const char *s, const char *prefix)` |
+| `hdr_forbidden` | function | `src/request_policy.c:184` | `static int hdr_forbidden(const char *n, size_t len)` |
+| `hdr_lower` | function | `src/request_policy.c:162` | `static int hdr_lower(int c)` |
+| `hdr_name_has_prefix` | function | `src/request_policy.c:171` | `static int hdr_name_has_prefix(const char *a, size_t alen, const char *lit)` |
+| `hdr_name_ieq` | function | `src/request_policy.c:164` | `static int hdr_name_ieq(const char *a, size_t alen, const char *lit)` |
+| `hdr_token_char` | function | `src/request_policy.c:178` | `static int hdr_token_char(unsigned char c)` |
+| `lower` | function | `src/request_policy.c:22` | `static char lower(char c)` |
+| `psl_cmp` | function | `src/request_policy.c:36` | `static int psl_cmp(const void *key, const void *elem)` |
+| `psl_in` | function | `src/request_policy.c:40` | `static int psl_in(const char *const *arr, size_t n, const char *key)` |
+| `public_suffix_labels` | function | `src/request_policy.c:48` | `static size_t public_suffix_labels(const char *host, const size_t *off, size_t n)` |
+| `rp_evaluate` | function | `src/request_policy.c:143` | `rp_decision rp_evaluate(const char *top_level_url, const char *request_url)` |
+| `rp_host_of` | function | `src/request_policy.c:76` | `int rp_host_of(const char *url, char *out, size_t out_size)` |
+| `rp_same_site` | function | `src/request_policy.c:134` | `int rp_same_site(const char *top_level_url, const char *request_url)` |
+| `rp_sanitize_request_headers` | function | `src/request_policy.c:197` | `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap)` |
+| `rp_site_of` | function | `src/request_policy.c:102` | `int rp_site_of(const char *host, char *out, size_t out_size)` |
+| `clamp_coord` | function | `src/scroll_req.c:10` | `static int32_t clamp_coord(double v)` |
+| `clamp_count` | function | `src/scroll_req.c:17` | `static int32_t clamp_count(size_t n)` |
+| `coord_ok` | function | `src/scroll_req.c:33` | `static int coord_ok(int32_t v)` |
+| `element_scroll` | function | `src/scroll_req.c:60` | `static double element_scroll(int block, double cur, double h, double pt, double pb,              ...` |
+| `srq_decode` | function | `src/scroll_req.c:37` | `int srq_decode(const int32_t in[SRQ_WIRE_N], size_t max_handles, srq_req *out)` |
+| `srq_encode` | function | `src/scroll_req.c:21` | `void srq_encode(const srq_req *r, int32_t out[SRQ_WIRE_N])` |
+| `srq_smooth` | function | `src/scroll_req.c:110` | `int srq_smooth(const srq_req *r, int root_smooth)` |
+| `srq_target` | function | `src/scroll_req.c:80` | `int srq_target(const srq_req *r, const srq_view *v, double el_top, double el_bottom,             ...` |
+| `SF_GUARD_HOST_MAX` | macro | `src/secure_fetch.c:522` | `#define SF_GUARD_HOST_MAX` |
+| `SF_RCACHE_SLOTS` | macro | `src/secure_fetch.c:1273` | `#define SF_RCACHE_SLOTS` |
+| `SF_RCACHE_TTL_S` | macro | `src/secure_fetch.c:1274` | `#define SF_RCACHE_TTL_S` |
+| `_POSIX_C_SOURCE` | macro | `src/secure_fetch.c:12` | `#define _POSIX_C_SOURCE` |
+| `add_header` | function | `src/secure_fetch.c:903` | `static int add_header(struct curl_slist **h, const char *line)` |
+| `body_sink` | struct | `src/secure_fetch.c:499` | `` |
+| `ci_index` | function | `src/secure_fetch.c:61` | `static long ci_index(const char *haystack, const char *needle)` |
+| `ci_starts_with` | function | `src/secure_fetch.c:49` | `static int ci_starts_with(const char *haystack, const char *prefix)` |
+| `copy_bounded` | function | `src/secure_fetch.c:548` | `static void copy_bounded(char *dst, size_t dstsz, const char *src)` |
+| `copy_checked` | function | `src/secure_fetch.c:361` | `static int copy_checked(char *dst, size_t dstsz, const char *src)` |
+| `database` | function | `src/secure_fetch.c:563` | `* NID in the OBJ database (OBJ_sn2nid returns 0 on OpenSSL 3.6), so the * NID path below reports every PQ-hybrid...` |
+| `fetch_ctx` | struct | `src/secure_fetch.c:524` | `` |
+| `get_negotiated_group_name` | function | `src/secure_fetch.c:559` | `static const char *get_negotiated_group_name(SSL *ssl)` |
+| `group` | function | `src/secure_fetch.c:577` | `* group (for both TLS 1.2 ECDHE and TLS 1.3). */ nid = SSL_get_shared_group(ssl, 0);` |
+| `header_cb` | function | `src/secure_fetch.c:628` | `static size_t header_cb(char *buffer, size_t size, size_t nitems, void *userdata)` |
+| `header_value_clean` | function | `src/secure_fetch.c:267` | `static int header_value_clean(const char *s)` |
+| `inspect_chain` | function | `src/secure_fetch.c:727` | `static int inspect_chain(SSL *ssl, sf_chain_info *info, char *sigbuf, size_t sigbuf_len)` |
+| `module` | function | `src/secure_fetch.c:422` | `* pure url module (DRY);` |
+| `name_is_pq_sig` | function | `src/secure_fetch.c:717` | `static int name_is_pq_sig(int pknid)` |
+| `progress` | function | `src/secure_fetch.c:508` | `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);` |
+| `rcache_put_ram` | function | `src/secure_fetch.c:1306` | `static int rcache_put_ram(const char *from, const char *to, time_t now)` |
+| `redirect` | function | `src/secure_fetch.c:999` | `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a      * different orig...` |
+| `refused` | function | `src/secure_fetch.c:785` | `* a private peer is then refused (fail closed). */ static void sf_guard_init(fetch_ctx *ctx, cons...` |
+| `sf_accept_language_or_default` | function | `src/secure_fetch.c:277` | `const char *sf_accept_language_or_default(const char *lang)` |
+| `sf_attempt_get` | function | `src/secure_fetch.c:1627` | `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,         ...` |
+| `sf_attempt_post` | function | `src/secure_fetch.c:1633` | `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,        ...` |
+| `sf_check_chain_policy` | function | `src/secure_fetch.c:320` | `sf_status sf_check_chain_policy(const sf_chain_info *chain, sf_policy policy)` |
+| `sf_check_group_is_pq` | function | `src/secure_fetch.c:311` | `sf_status sf_check_group_is_pq(const char *negotiated_group)` |
+| `sf_check_tls_version` | function | `src/secure_fetch.c:306` | `sf_status sf_check_tls_version(const char *negotiated_version)` |
+| `sf_ci_prefix` | function | `src/secure_fetch.c:429` | `static int sf_ci_prefix(const char *s, const char *p)` |
+| `sf_config_default` | function | `src/secure_fetch.c:238` | `sf_config sf_config_default(void)` |
+| `sf_cookie_header_for` | function | `src/secure_fetch.c:188` | `size_t sf_cookie_header_for(const char *url, char *out, size_t outsz)` |
+| `sf_cookie_line_matches` | function | `src/secure_fetch.c:118` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path,                 ...` |
+| `sf_cookie_put` | function | `src/secure_fetch.c:217` | `void sf_cookie_put(const char *url, const char *namevalue)` |
+| `sf_downgrade_of` | function | `src/secure_fetch.c:1618` | `static int sf_downgrade_of(sf_policy p)` |
+| `sf_enforce_policy` | function | `src/secure_fetch.c:330` | `sf_status sf_enforce_policy(const char *tls_version, const char *group,                          ...` |
+| `sf_fallback_policy` | function | `src/secure_fetch.c:1597` | `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)` |
+| `sf_get` | function | `src/secure_fetch.c:1253` | `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)` |
+| `sf_get_follow` | function | `src/secure_fetch.c:1364` | `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,                 ...` |
+| `sf_get_follow_navigable` | function | `src/secure_fetch.c:1658` | `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,             ...` |
+| `sf_global_init` | function | `src/secure_fetch.c:90` | `void sf_global_init(void)` |
+| `sf_guard_opensocket` | function | `src/secure_fetch.c:812` | `static curl_socket_t sf_guard_opensocket(void *clientp, curlsocktype purpose,                    ...` |
+| `sf_guard_prereq` | function | `src/secure_fetch.c:839` | `static int sf_guard_prereq(void *clientp, char *conn_primary_ip, char *conn_local_ip,            ...` |
+| `sf_header_value` | function | `src/secure_fetch.c:377` | `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz)` |
+| `sf_impersonate_kex_groups` | function | `src/secure_fetch.c:281` | `const char *sf_impersonate_kex_groups(void)` |
+| `sf_impersonate_tls13_ciphers` | function | `src/secure_fetch.c:282` | `const char *sf_impersonate_tls13_ciphers(void)` |
+| `sf_is_redirect_code` | function | `src/secure_fetch.c:370` | `int sf_is_redirect_code(long http_code)` |
+| `sf_navigable` | function | `src/secure_fetch.c:1638` | `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,            ...` |
+| `sf_parse_location_header` | function | `src/secure_fetch.c:399` | `sf_status sf_parse_location_header(const char *header_line, char *out, size_t outsz)` |
+| `sf_perform` | function | `src/secure_fetch.c:1091` | `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,             ...` |
+| `sf_post` | function | `src/secure_fetch.c:1257` | `sf_status sf_post(const char *url, const sf_config *cfg,                   const void *body, size...` |
+| `sf_post_navigable` | function | `src/secure_fetch.c:1663` | `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,                   ...` |
+| `sf_rcache_clear` | function | `src/secure_fetch.c:1287` | `void sf_rcache_clear(void)` |
+| `sf_rcache_entry` | struct | `src/secure_fetch.c:1276` | `` |
+| `sf_rcache_get` | function | `src/secure_fetch.c:1335` | `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)` |
+| `sf_rcache_put` | function | `src/secure_fetch.c:1325` | `int sf_rcache_put(const char *from, const char *to, time_t now)` |
+| `sf_rcache_set_backing` | function | `src/secure_fetch.c:1298` | `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx)` |
+| `sf_resolve_redirect` | function | `src/secure_fetch.c:417` | `sf_status sf_resolve_redirect(const char *base_url, const char *location,                        ...` |
+| `sf_response_free` | function | `src/secure_fetch.c:469` | `void sf_response_free(sf_response *resp)` |
+| `sf_setup_handle` | function | `src/secure_fetch.c:917` | `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,            ...` |
+| `sf_share_lock` | function | `src/secure_fetch.c:77` | `static void sf_share_lock(CURL *handle, curl_lock_data data,                           curl_lock_...` |
+| `sf_share_unlock` | function | `src/secure_fetch.c:83` | `static void sf_share_unlock(CURL *handle, curl_lock_data data, void *userptr)` |
+| `sf_url_host_path` | function | `src/secure_fetch.c:173` | `static int sf_url_host_path(const char *url, char *host, size_t hostsz,                          ...` |
+| `sf_url_is_http` | function | `src/secure_fetch.c:294` | `static int sf_url_is_http(const char *url)` |
+| `sf_user_agent_or_default` | function | `src/secure_fetch.c:273` | `const char *sf_user_agent_or_default(const char *ua)` |
+| `sf_validate_url` | function | `src/secure_fetch.c:286` | `sf_status sf_validate_url(const char *url)` |
+| `sf_ws` | struct | `src/secure_fetch.c:1450` | `` |
+| `sf_ws_close` | function | `src/secure_fetch.c:1586` | `void sf_ws_close(sf_ws *ws)` |
+| `sf_ws_fd` | function | `src/secure_fetch.c:1579` | `int sf_ws_fd(const sf_ws *ws)` |
+| `sf_ws_open` | function | `src/secure_fetch.c:1478` | `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)` |
+| `sf_ws_recv` | function | `src/secure_fetch.c:1557` | `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)` |
+| `sf_ws_send` | function | `src/secure_fetch.c:1534` | `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)` |
+| `sf_ws_url_check` | function | `src/secure_fetch.c:1457` | `sf_status sf_ws_url_check(const char *url)` |
 | `sink` | type_alias | `src/secure_fetch.c:523` | `typedef struct fetch_ctx { body_sink sink;` |
 | `this` | function | `src/secure_fetch.c:609` | `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...` |
 | `tls_capture` | struct | `src/secure_fetch.c:512` | `` |
 | `tls_capture_from_ssl` | function | `src/secure_fetch.c:602` | `static void tls_capture_from_ssl(tls_capture *cap, SSL *ssl)` |
 | `tls_capture_try` | function | `src/secure_fetch.c:592` | `static void tls_capture_try(tls_capture *cap)` |
 | `write_cb` | function | `src/secure_fetch.c:685` | `static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)` |
-| `ws_free` | function | `src/secure_fetch.c:1460` | `static void ws_free(sf_ws *ws)` |
-| `ws_ssl_ctx_cb` | function | `src/secure_fetch.c:1434` | `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)` |
-| `ws_ssl_info_cb` | function | `src/secure_fetch.c:1427` | `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` |
+| `ws_free` | function | `src/secure_fetch.c:1469` | `static void ws_free(sf_ws *ws)` |
+| `ws_ssl_ctx_cb` | function | `src/secure_fetch.c:1443` | `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)` |
+| `ws_ssl_info_cb` | function | `src/secure_fetch.c:1436` | `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)` |
 | `ROL32` | macro | `src/sha2.c:9` | `#define ROL32(x, n)` |
 | `ROR32` | macro | `src/sha2.c:8` | `#define ROR32(x, n)` |
 | `ROR64` | macro | `src/sha2.c:10` | `#define ROR64(x, n)` |
@@ -44,20 +453,32 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `shc_sheet` | struct | `src/sheet_cache.c:17` | `` |
 | `shc_sheet_destroy` | function | `src/sheet_cache.c:81` | `static void shc_sheet_destroy(shc_sheet *s)` |
 | `shc_stats_get` | function | `src/sheet_cache.c:111` | `void shc_stats_get(const shc_cache *c, shc_stats *out)` |
+| `sms_active` | function | `src/smooth_scroll.c:64` | `int sms_active(const sms_state *s)` |
+| `sms_goal` | function | `src/smooth_scroll.c:59` | `double sms_goal(const sms_state *s)` |
+| `sms_init` | function | `src/smooth_scroll.c:7` | `void sms_init(sms_state *s, double pos)` |
+| `sms_jump` | function | `src/smooth_scroll.c:15` | `void sms_jump(sms_state *s, double pos)` |
+| `sms_retarget` | function | `src/smooth_scroll.c:21` | `void sms_retarget(sms_state *s, double target, double now_ms, double dur_ms)` |
+| `sms_sample` | function | `src/smooth_scroll.c:35` | `double sms_sample(sms_state *s, double now_ms)` |
 | `_GNU_SOURCE` | macro | `src/subreq_batch.c:2` | `#define _GNU_SOURCE` |
-| `dup_n` | function | `src/subreq_batch.c:30` | `static char *dup_n(const char *s, size_t n)` |
-| `job_free` | function | `src/subreq_batch.c:44` | `static void job_free(sqb_job *j)` |
-| `job_main` | function | `src/subreq_batch.c:51` | `static void *job_main(void *arg)` |
-| `res_clear` | function | `src/subreq_batch.c:39` | `static void res_clear(sqb_res *r)` |
-| `sqb` | struct | `src/subreq_batch.c:21` | `` |
-| `sqb_count` | function | `src/subreq_batch.c:112` | `size_t sqb_count(const sqb *b)` |
-| `sqb_free` | function | `src/subreq_batch.c:133` | `void sqb_free(sqb *b)` |
+| `all_done_locked` | function | `src/subreq_batch.c:164` | `static int all_done_locked(const sqb *b)` |
+| `batch_destroy` | function | `src/subreq_batch.c:58` | `static void batch_destroy(sqb *b)` |
+| `dup_n` | function | `src/subreq_batch.c:37` | `static char *dup_n(const char *s, size_t n)` |
+| `job_free` | function | `src/subreq_batch.c:51` | `static void job_free(sqb_job *j)` |
+| `job_main` | function | `src/subreq_batch.c:65` | `static void *job_main(void *arg)` |
+| `res_clear` | function | `src/subreq_batch.c:46` | `static void res_clear(sqb_res *r)` |
+| `sqb` | struct | `src/subreq_batch.c:23` | `` |
+| `sqb_abandon` | function | `src/subreq_batch.c:224` | `void sqb_abandon(sqb *b)` |
+| `sqb_count` | function | `src/subreq_batch.c:154` | `size_t sqb_count(const sqb *b)` |
+| `sqb_free` | function | `src/subreq_batch.c:247` | `void sqb_free(sqb *b)` |
 | `sqb_job` | struct | `src/subreq_batch.c:11` | `` |
-| `sqb_new` | function | `src/subreq_batch.c:75` | `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx)` |
-| `sqb_reset` | function | `src/subreq_batch.c:126` | `void sqb_reset(sqb *b)` |
-| `sqb_result` | function | `src/subreq_batch.c:122` | `const sqb_res *sqb_result(const sqb *b, size_t i)` |
-| `sqb_submit` | function | `src/subreq_batch.c:86` | `int sqb_submit(sqb *b, int refused, const sqb_req *req)` |
-| `sqb_wait_all` | function | `src/subreq_batch.c:114` | `void sqb_wait_all(sqb *b)` |
+| `sqb_new` | function | `src/subreq_batch.c:97` | `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx)` |
+| `sqb_new_owned` | function | `src/subreq_batch.c:101` | `sqb *sqb_new_owned(int max_threads, sqb_run_fn run, void *ctx, void (*free_ctx)(void *))` |
+| `sqb_remove` | function | `src/subreq_batch.c:191` | `void sqb_remove(sqb *b, const size_t *idx, size_t k)` |
+| `sqb_reset` | function | `src/subreq_batch.c:217` | `void sqb_reset(sqb *b)` |
+| `sqb_result` | function | `src/subreq_batch.c:213` | `const sqb_res *sqb_result(const sqb *b, size_t i)` |
+| `sqb_submit` | function | `src/subreq_batch.c:127` | `int sqb_submit(sqb *b, int refused, const sqb_req *req)` |
+| `sqb_wait_all` | function | `src/subreq_batch.c:156` | `void sqb_wait_all(sqb *b)` |
+| `sqb_wait_ready` | function | `src/subreq_batch.c:169` | `size_t sqb_wait_ready(sqb *b, long wait_ms, size_t *idx, size_t cap)` |
 | `svp_alpha` | function | `src/svg_paint.c:31` | `static double svp_alpha(int opacity, int paint_opacity)` |
 | `svp_draw` | function | `src/svg_paint.c:139` | `void svp_draw(cairo_t *cr, const sv_image *img,               double x, double y, double w, doubl...` |
 | `svp_draw_ex` | function | `src/svg_paint.c:144` | `void svp_draw_ex(cairo_t *cr, const sv_image *img,                  double x, double y, double w,...` |
@@ -75,426 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `sv_arc_to_cubics` | function | `src/svg_render.c:399` | `static int sv_arc_to_cubics(sv_image *im, sv_shape *sh,                             double x0, do...` |
 | `sv_attr` | struct | `src/svg_render.c:91` | `` |
 | `sv_attr_get` | function | `src/svg_render.c:99` | `static const char *sv_attr_get(const sv_attr *at, size_t nat, const char *name, size_t *len)` |
-| `sv_attr_num` | function | `src/svg_render.c:108` | `static double sv_attr_num(const sv_attr *at, size_t nat, const char *name, double dflt)` |
-| `sv_collect_text` | function | `src/svg_render.c:736` | `static void sv_collect_text(const char *s, size_t n, size_t *i, char *dst, size_t cap)` |
-| `sv_ctx` | struct | `src/svg_render.c:151` | `` |
-| `sv_ctx_from_attrs` | function | `src/svg_render.c:307` | `static void sv_ctx_from_attrs(sv_ctx *ctx, const sv_attr *at, size_t nat)` |
-| `sv_fit` | function | `src/svg_render.c:754` | `void sv_fit(const sv_image *img, double dw, double dh,             double *scale, double *off_x, ...` |
-| `sv_flag` | function | `src/svg_render.c:477` | `static int sv_flag(const char *s, size_t n, size_t *i, double *out)` |
-| `sv_is_digit` | function | `src/svg_render.c:25` | `static int sv_is_digit(char c)` |
-| `sv_is_dropped_element` | function | `src/svg_render.c:646` | `static int sv_is_dropped_element(const char *name, size_t n)` |
-| `sv_is_space` | function | `src/svg_render.c:21` | `static int sv_is_space(char c)` |
-| `sv_lower` | function | `src/svg_render.c:27` | `static char sv_lower(char c)` |
-| `sv_mat_identity` | function | `src/svg_render.c:161` | `static void sv_mat_identity(double *m)` |
-| `sv_mat_mul` | function | `src/svg_render.c:166` | `static void sv_mat_mul(const double *a, const double *b, double *out)` |
-| `sv_new_seg` | function | `src/svg_render.c:363` | `static sv_seg *sv_new_seg(sv_image *im, sv_shape *sh)` |
-| `sv_new_shape` | function | `src/svg_render.c:324` | `static sv_shape *sv_new_shape(sv_image *im, int kind, const sv_ctx *ctx)` |
-| `sv_parse` | function | `src/svg_render.c:774` | `sv_status sv_parse(const char *markup, size_t len, sv_image *out)` |
-| `sv_parse_ex` | function | `src/svg_render.c:778` | `sv_status sv_parse_ex(const char *markup, size_t len, sv_image *out, int root_fill)` |
-| `sv_parse_path` | function | `src/svg_render.c:488` | `static void sv_parse_path(sv_image *im, sv_shape *sh, const char *s, size_t n)` |
-| `sv_parse_points` | function | `src/svg_render.c:343` | `static void sv_parse_points(sv_image *im, sv_shape *sh, const char *s, size_t n)` |
-| `sv_parse_transform` | function | `src/svg_render.c:179` | `static void sv_parse_transform(const char *s, size_t n, double *m)` |
-| `sv_scan_attrs` | function | `src/svg_render.c:658` | `static void sv_scan_attrs(const char *s, size_t n, size_t *i,                           sv_attr *...` |
-| `sv_seg_cubic` | function | `src/svg_render.c:385` | `static int sv_seg_cubic(sv_image *im, sv_shape *sh,                         double x1, double y1,...` |
-| `sv_seg_line` | function | `src/svg_render.c:378` | `static int sv_seg_line(sv_image *im, sv_shape *sh, double x, double y)` |
-| `sv_seg_move` | function | `src/svg_render.c:371` | `static int sv_seg_move(sv_image *im, sv_shape *sh, double x, double y)` |
-| `sv_sep` | function | `src/svg_render.c:82` | `static void sv_sep(const char *s, size_t n, size_t *i)` |
-| `sv_skip_subtree` | function | `src/svg_render.c:704` | `static void sv_skip_subtree(const char *s, size_t n, size_t *i, const char *name, size_t nlen)` |
-| `sv_span_eq` | function | `src/svg_render.c:32` | `static int sv_span_eq(const char *s, size_t n, const char *lit)` |
-| `sv_style_next` | function | `src/svg_render.c:238` | `static int sv_style_next(const char *s, size_t n, size_t *i,                          const char ...` |
-| `EPIPE` | function | `src/tab.c:2526` | `* surfaces as EPIPE (graceful loop exit), not a signal. */ ignore_sigpipe();` |
-| `FB_MAX_FILE_BYTES` | function | `src/tab.c:1222` | `* FB_MAX_FILE_BYTES (the buffer enforces all), so a hostile worker cannot amplify  * the stream. ...` |
-| `PV_MAX_CONTAINERS_WIRE` | macro | `src/tab.c:168` | `#define PV_MAX_CONTAINERS_WIRE` |
-| `TAB_ASYNC_THREADS` | macro | `src/tab.c:214` | `#define TAB_ASYNC_THREADS` |
-| `TAB_CQ_REDERIVE_MAX` | macro | `src/tab.c:294` | `#define TAB_CQ_REDERIVE_MAX` |
-| `TAB_IOBUF_BYTES` | macro | `src/tab.c:60` | `#define TAB_IOBUF_BYTES` |
-| `TAB_MAX_ASYNC_PENDING` | macro | `src/tab.c:212` | `#define TAB_MAX_ASYNC_PENDING` |
-| `TAB_MAX_BATCH_BYTES` | macro | `src/tab.c:215` | `#define TAB_MAX_BATCH_BYTES` |
-| `TAB_MAX_EXTERN_CSS` | macro | `src/tab.c:1295` | `#define TAB_MAX_EXTERN_CSS` |
-| `TAB_MAX_GEOM_WORDS` | macro | `src/tab.c:200` | `#define TAB_MAX_GEOM_WORDS` |
-| `TAB_MAX_HIST_BYTES` | macro | `src/tab.c:194` | `#define TAB_MAX_HIST_BYTES` |
-| `TAB_MAX_HIST_OPS` | macro | `src/tab.c:193` | `#define TAB_MAX_HIST_OPS` |
-| `TAB_MAX_JS_JOBS` | macro | `src/tab.c:221` | `#define TAB_MAX_JS_JOBS` |
-| `TAB_MAX_NET_ROUNDS` | macro | `src/tab.c:213` | `#define TAB_MAX_NET_ROUNDS` |
-| `TAB_MAX_OPENS` | macro | `src/tab.c:196` | `#define TAB_MAX_OPENS` |
-| `TAB_MAX_OPEN_BYTES` | macro | `src/tab.c:197` | `#define TAB_MAX_OPEN_BYTES` |
-| `TAB_MAX_RUNS` | macro | `src/tab.c:164` | `#define TAB_MAX_RUNS` |
-| `TAB_MAX_STORAGE` | macro | `src/tab.c:189` | `#define TAB_MAX_STORAGE` |
-| `TAB_MAX_SUBREQ` | macro | `src/tab.c:219` | `#define TAB_MAX_SUBREQ` |
-| `TAB_MAX_SUBRESOURCE` | macro | `src/tab.c:220` | `#define TAB_MAX_SUBRESOURCE` |
-| `TAB_MAX_URL` | macro | `src/tab.c:171` | `#define TAB_MAX_URL` |
-| `TAB_MAX_WS_MSG` | macro | `src/tab.c:185` | `#define TAB_MAX_WS_MSG` |
-| `TAB_SCREEN_H` | macro | `src/tab.c:137` | `#define TAB_SCREEN_H` |
-| `TAB_SCREEN_W` | macro | `src/tab.c:136` | `#define TAB_SCREEN_W` |
-| `TAB_WIRE_A_N` | macro | `src/tab.c:142` | `#define TAB_WIRE_A_N` |
-| `TAB_WIRE_BOX_F_N` | macro | `src/tab.c:144` | `#define TAB_WIRE_BOX_F_N` |
-| `TAB_WIRE_B_N` | macro | `src/tab.c:143` | `#define TAB_WIRE_B_N` |
-| `TAB_WIRE_GRID_N` | macro | `src/tab.c:145` | `#define TAB_WIRE_GRID_N` |
-| `TAB_WIRE_HEAD_N` | macro | `src/tab.c:141` | `#define TAB_WIRE_HEAD_N` |
-| `WHERE` | function | `src/tab.c:1921` | `* the console still says WHERE (a module's URL, "inline #n", a src). */ if (es != JS_OK && r.is_exception && r.value...` |
-| `_GNU_SOURCE` | macro | `src/tab.c:14` | `#define _GNU_SOURCE` |
-| `adopt_worker` | function | `src/tab.c:3565` | `static tab_status adopt_worker(const tab_spawned *sp, tab **out)` |
-| `blocks` | function | `src/tab.c:770` | `* * The scalar fields are marshalled as bulk int32 blocks (head[6], block A[36], the * grid array, block B[26])...` |
-| `budget_remaining_ms` | function | `src/tab.c:1252` | `static uint64_t budget_remaining_ms(const struct timespec *start, uint64_t budget_ms)` |
-| `buffer` | function | `src/tab.c:700` | `* the buffer (stable child_state member) is wired into the new context's runtime * opaque. Installed regardless of...` |
-| `child_cq` | function | `src/tab.c:312` | `static pv_cq_src *child_cq(child_state *cs)` |
-| `child_cq_width` | function | `src/tab.c:298` | `static int child_cq_width(void *ctx, dom_node_id node)` |
-| `child_fetch` | function | `src/tab.c:531` | `static int child_fetch(void *vctx, const char *method, const char *url,                        co...` |
-| `child_fetch_async` | function | `src/tab.c:547` | `static int child_fetch_async(void *vctx, const char *method, const char *url,                    ...` |
-| `child_handle_click` | function | `src/tab.c:2259` | `static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id)` |
-| `child_handle_decode_image` | function | `src/tab.c:2457` | `static void child_handle_decode_image(int wfd, const char *bytes, size_t len)` |
-| `child_handle_decode_image_data` | function | `src/tab.c:2484` | `static void child_handle_decode_image_data(int wfd, const char *url, size_t len)` |
-| `child_handle_eval` | function | `src/tab.c:2416` | `static void child_handle_eval(int wfd, child_state *cs, const char *js, size_t len)` |
-| `child_handle_event` | function | `src/tab.c:2269` | `static void child_handle_event(int wfd, child_state *cs)` |
-| `child_handle_geom` | function | `src/tab.c:2355` | `static void child_handle_geom(int wfd, child_state *cs, const int32_t *words, size_t n)` |
-| `child_handle_load` | function | `src/tab.c:1647` | `static void child_handle_load(int wfd, child_state *cs, const char *html, size_t len,            ...` |
-| `child_handle_mouse` | function | `src/tab.c:2317` | `static void child_handle_mouse(int wfd, child_state *cs)` |
-| `child_handle_mutation` | function | `src/tab.c:2153` | `static void child_handle_mutation(int wfd, child_state *cs, int is_tick,                         ...` |
-| `child_handle_mutation_ex` | function | `src/tab.c:2160` | `static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,                      ...` |
-| `child_handle_submit` | function | `src/tab.c:2382` | `static void child_handle_submit(int wfd, child_state *cs, dom_node_id node_id)` |
-| `child_load` | function | `src/tab.c:632` | `static int child_load(child_state *cs, const char *html, size_t len, int run_js,                 ...` |
-| `child_next_timer_ms` | function | `src/tab.c:2136` | `static int32_t child_next_timer_ms(child_state *cs)` |
-| `child_prescript_view` | function | `src/tab.c:1617` | `static pv_view *child_prescript_view(child_state *cs, const char *html, size_t len,              ...` |
-| `child_read_reply` | function | `src/tab.c:503` | `static int child_read_reply(child_state *cs, net_reply *out)` |
-| `child_reset_page` | function | `src/tab.c:343` | `static void child_reset_page(child_state *cs)` |
-| `child_sheets` | function | `src/tab.c:338` | `static shc_cache *child_sheets(child_state *cs)` |
-| `child_state` | struct | `src/tab.c:232` | `` |
-| `child_write_subreq` | function | `src/tab.c:478` | `static int child_write_subreq(child_state *cs, uint8_t tag, const char *method, const char *url, ...` |
-| `clip_pm_ok` | function | `src/tab.c:149` | `static int clip_pm_ok(int32_t v)` |
-| `column` | function | `src/tab.c:3091` | `* a narrow column (jkanime's player). Mirrors the emission side, where a * control now carries the same annotation...` |
-| `computed_signature` | function | `src/tab.c:373` | `static uint64_t computed_signature(const dom_index *idx)` |
-| `content` | function | `src/tab.c:1986` | `* content (same-origin fetches through the trusted parent), scan for * video URLs (.m3u8), and create <video>...` |
-| `css_text` | struct | `src/tab.c:1426` | `` |
-| `css_text_emit` | function | `src/tab.c:1449` | `static int css_text_emit(void *ctx, const char *s, size_t n)` |
-| `css_text_put` | function | `src/tab.c:1432` | `static int css_text_put(css_text *t, const char *s, size_t n)` |
-| `ctype_is_css` | function | `src/tab.c:1275` | `static int ctype_is_css(const char *ctype)` |
-| `ctype_is_javascript` | function | `src/tab.c:1266` | `static int ctype_is_javascript(const char *ctype)` |
-| `depth` | function | `src/tab.c:2556` | `* defense in depth (seccomp already excludes open/socket/exec);` |
-| `does` | function | `src/tab.c:1739` | `* native browser does (spec/js_native.md). Best effort -- an unsealed page still runs. */ (void)jn_seal(cs->js);` |
-| `exec_worker_child` | function | `src/tab.c:3494` | `static void exec_worker_child(int rfd, int wfd)` |
-| `fd` | type_alias | `src/tab.c:61` | `typedef struct tab_iobuf { int fd;` |
-| `frames` | function | `src/tab.c:4463` | `* TAG_SUBREQ frames (XHR/fetch/import()/script src) on the way: the same gated fetcher as the * load, net grant of...` |
-| `gate_js_nav` | function | `src/tab.c:4108` | `static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom)` |
-| `gen_session_key` | function | `src/tab.c:2504` | `static uint64_t gen_session_key(void)` |
-| `geom_parent` | function | `src/tab.c:2347` | `static dom_node_id geom_parent(void *ctx, dom_node_id n)` |
-| `geometry_encode` | function | `src/tab.c:4794` | `static int32_t *geometry_encode(const jg_table *g, size_t *words_out)` |
-| `hist_ops_free` | function | `src/tab.c:3917` | `static void hist_ops_free(tab_hist_op *ops, size_t n)` |
-| `ignore_sigpipe` | function | `src/tab.c:2841` | `static void ignore_sigpipe(void)` |
-| `io_failure` | function | `src/tab.c:3486` | `static tab_status io_failure(tab *t)` |
-| `is_activation_event` | function | `src/tab.c:3982` | `static int is_activation_event(const char *type)` |
-| `job_discard` | function | `src/tab.c:4818` | `static void job_discard(tab *t)` |
-| `job_main` | function | `src/tab.c:4841` | `static void *job_main(void *arg)` |
-| `job_start` | function | `src/tab.c:4870` | `static tab_status job_start(tab *t)` |
-| `layout` | function | `src/tab.c:3080` | `* only at layout (bx_lp_px): setting one without the other would make * the pair disagree about the same property....` |
-| `libraries` | function | `src/tab.c:1756` | `* load heavier libraries (jQuery, Bootstrap, etc.) that need more time. * Untrusted hosts get the default budget...` |
-| `load` | function | `src/tab.c:2797` | `* subresource requests this load (set per page: host in allow.conf AND js.conf);` |
-| `log_external_skip` | function | `src/tab.c:1283` | `static void log_external_skip(fb_buffer *log, const char *kind, const char *why,                 ...` |
-| `net_reply` | struct | `src/tab.c:467` | `` |
-| `net_reply_free` | function | `src/tab.c:475` | `static void net_reply_free(net_reply *r)` |
-| `once` | function | `src/tab.c:2039` | `* ensures the preserved view gets the video only once (initial load). */ inject_video_into_view(cs, &view);` |
-| `open_urls_free` | function | `src/tab.c:3991` | `static void open_urls_free(char **u, size_t n)` |
-| `parse_worker_fd` | function | `src/tab.c:2758` | `static int parse_worker_fd(const char *s, int *out)` |
-| `prof_lap` | function | `src/tab.c:594` | `static void prof_lap(const char *what, double *t0)` |
-| `prof_now_ms` | function | `src/tab.c:584` | `static double prof_now_ms(void)` |
-| `prof_on` | function | `src/tab.c:589` | `static int prof_on(void)` |
-| `rad_len_ok` | function | `src/tab.c:155` | `static int rad_len_ok(int32_t v, int dflt)` |
-| `read_console` | function | `src/tab.c:3439` | `static int read_console(int fd, fb_buffer *out)` |
-| `read_field` | function | `src/tab.c:2867` | `static int read_field(int fd, char **out, size_t *out_len)` |
-| `read_full` | macro | `src/tab.c:115` | `#define read_full(fd, buf, n)` |
-| `read_opens` | function | `src/tab.c:4001` | `static tab_status read_opens(tab *t, const char *page_url, int gesture,                          ...` |
-| `read_view` | function | `src/tab.c:2884` | `static int read_view(int fd, pv_view **out)` |
-| `read_view_raw` | function | `src/tab.c:2892` | `static int read_view_raw(int fd, pv_view **out)` |
-| `read_ws` | function | `src/tab.c:4039` | `static tab_status read_ws(tab *t, tab_ws_op **out, size_t *nout)` |
-| `reap_spawned` | function | `src/tab.c:3556` | `static void reap_spawned(const tab_spawned *sp, int kill_it)` |
-| `replies` | function | `src/tab.c:560` | `* writing replies (no pipe deadlock). */ static void child_net_drain(child_state *cs)` |
-| `run` | function | `src/tab.c:1301` | `* already contains a PV_VIDEO run (avoids duplicates on repeated injection).  * Call after every ...` |
-| `run_js` | function | `src/tab.c:605` | `* regardless of run_js (a no-JS load simply never records a request). */ /* Installs the page-ind...` |
-| `send_request` | function | `src/tab.c:3476` | `static tab_status send_request(tab *t, uint8_t op, const char *payload, size_t len)` |
-| `sheet_expand` | function | `src/tab.c:1487` | `static int sheet_expand(child_state *cs, const char *base, const char *body, size_t blen,        ...` |
-| `sheets` | function | `src/tab.c:1564` | `* sheets (their own text is read from the DOM by page_view). Every failure is  * fail-open for th...` |
-| `sig_mix` | function | `src/tab.c:365` | `static uint64_t sig_mix(uint64_t h, const char *s, size_t n)` |
-| `spawn_worker` | function | `src/tab.c:3526` | `static tab_status spawn_worker(tab_spawned *sp)` |
-| `status` | type_alias | `src/tab.c:467` | `typedef struct net_reply { int32_t status;` |
-| `swap` | function | `src/tab.c:2048` | `* display:none hiding an element via class swap (CSS, not      * DOM removal). */     if (ok && v...` |
-| `tab` | struct | `src/tab.c:2790` | `` |
-| `tab_alive` | function | `src/tab.c:4697` | `int tab_alive(const tab *t)` |
-| `tab_async_busy` | function | `src/tab.c:4866` | `int tab_async_busy(const tab *t)` |
-| `tab_async_fd` | function | `src/tab.c:4857` | `int tab_async_fd(tab *t)` |
-| `tab_async_finish` | function | `src/tab.c:4908` | `tab_status tab_async_finish(tab *t, tab_page *out, tab_status *job_status, int *was_tick)` |
-| `tab_async_sync` | function | `src/tab.c:4831` | `static void tab_async_sync(tab *t)` |
-| `tab_await_result` | function | `src/tab.c:4466` | `static tab_status tab_await_result(tab *t)` |
-| `tab_await_result_inner` | function | `src/tab.c:4474` | `static tab_status tab_await_result_inner(tab *t)` |
-| `tab_batch_discard` | function | `src/tab.c:3912` | `static void tab_batch_discard(tab *t)` |
-| `tab_batch_run` | function | `src/tab.c:3845` | `static int tab_batch_run(void *vt, const sqb_req *rq, sqb_res *out)` |
-| `tab_child_pid` | function | `src/tab.c:4703` | `pid_t tab_child_pid(const tab *t)` |
-| `tab_click` | function | `src/tab.c:4331` | `tab_status tab_click(tab *t, dom_node_id node_id, tab_page *out)` |
-| `tab_close` | function | `src/tab.c:4707` | `void tab_close(tab *t)` |
-| `tab_decode_image` | function | `src/tab.c:4676` | `tab_status tab_decode_image(tab *t, const uint8_t *bytes, size_t len, tab_image *out)` |
-| `tab_decode_image_data_url` | function | `src/tab.c:4683` | `tab_status tab_decode_image_data_url(tab *t, const char *data_url, tab_image *out)` |
-| `tab_decode_image_op` | function | `src/tab.c:4629` | `static tab_status tab_decode_image_op(tab *t, uint8_t op, const char *bytes, size_t len,         ...` |
-| `tab_eval` | function | `src/tab.c:4588` | `tab_status tab_eval(tab *t, const char *js, size_t len, tab_eval_result *out)` |
-| `tab_eval_result_free` | function | `src/tab.c:4755` | `void tab_eval_result_free(tab_eval_result *r)` |
-| `tab_geometry_async` | function | `src/tab.c:4893` | `tab_status tab_geometry_async(tab *t, const jg_table *g)` |
-| `tab_geometry_send` | function | `src/tab.c:4776` | `static tab_status tab_geometry_send(tab *t, const int32_t *buf, size_t words)` |
-| `tab_image_free` | function | `src/tab.c:4764` | `void tab_image_free(tab_image *img)` |
-| `tab_inflight_request_headers` | function | `src/tab.c:3736` | `const char *tab_inflight_request_headers(void)` |
-| `tab_iobuf` | struct | `src/tab.c:61` | `` |
-| `tab_last_subreq_stats` | function | `src/tab.c:3681` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us)` |
-| `tab_load` | function | `src/tab.c:4118` | `tab_status tab_load(tab *t, const char *html, size_t len, tab_page *out)` |
-| `tab_load_ex` | function | `src/tab.c:4122` | `tab_status tab_load_ex(tab *t, const char *html, size_t len, int run_js, tab_page *out)` |
-| `tab_load_full` | function | `src/tab.c:4126` | `tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_url,             ...` |
-| `tab_mod_fetch` | function | `src/tab.c:1389` | `static char *tab_mod_fetch(void *host, const char *url, size_t *len)` |
-| `tab_mod_resolve` | function | `src/tab.c:1359` | `static int tab_mod_resolve(void *host, const char *base, const char *spec,                       ...` |
-| `tab_note_css_served` | function | `src/tab.c:3802` | `static void tab_note_css_served(tab *t, int ok, int status, const char *url, const char *rbody,  ...` |
-| `tab_op_budget_us` | function | `src/tab.c:3798` | `static int64_t tab_op_budget_us(const tab *t)` |
-| `tab_open` | function | `src/tab.c:3616` | `tab_status tab_open(tab **out)` |
-| `tab_page_free` | function | `src/tab.c:4725` | `void tab_page_free(tab_page *p)` |
-| `tab_page_keep_view` | function | `src/tab.c:3665` | `void tab_page_keep_view(tab_page *prev, tab_page *next)` |
-| `tab_parse_worker_args` | function | `src/tab.c:2770` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd)` |
-| `tab_popstate` | function | `src/tab.c:4930` | `tab_status tab_popstate(tab *t, int index, tab_page *out)` |
-| `tab_prewarm` | function | `src/tab.c:3587` | `void tab_prewarm(void)` |
-| `tab_prewarmed` | function | `src/tab.c:3593` | `int tab_prewarmed(void)` |
-| `tab_prewarmed_pid` | function | `src/tab.c:3600` | `int tab_prewarmed_pid(void)` |
-| `tab_read_full` | function | `src/tab.c:89` | `static int tab_read_full(int fd, void *buf, size_t n)` |
-| `tab_read_subreq_fields` | function | `src/tab.c:3787` | `static int tab_read_subreq_fields(tab *t, char **method, char **url, char **body, size_t *blen,  ...` |
-| `tab_read_view` | function | `src/tab.c:4457` | `tab_status tab_read_view(tab *t, tab_page *out)` |
-| `tab_read_view_ex` | function | `src/tab.c:4483` | `static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture)` |
-| `tab_refresh_alive` | function | `src/tab.c:2848` | `static void tab_refresh_alive(tab *t)` |
-| `tab_report_response_headers` | function | `src/tab.c:3724` | `void tab_report_response_headers(const char *lines)` |
-| `tab_serve_netwait` | function | `src/tab.c:3882` | `static int tab_serve_netwait(tab *t)` |
-| `tab_serve_subreq` | function | `src/tab.c:3818` | `static int tab_serve_subreq(tab *t, int net_granted, int css_granted)` |
-| `tab_serve_tag` | function | `src/tab.c:3904` | `static int tab_serve_tag(tab *t, uint8_t tag, int net_granted, int css_granted)` |
-| `tab_set_cookies` | function | `src/tab.c:3704` | `void tab_set_cookies(tab *t, const char *cookies)` |
-| `tab_set_css_allowed` | function | `src/tab.c:3676` | `void tab_set_css_allowed(tab *t, int allowed)` |
-| `tab_set_css_sink` | function | `src/tab.c:3645` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx)` |
-| `tab_set_fetcher` | function | `src/tab.c:3639` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx)` |
-| `tab_set_frame_id` | function | `src/tab.c:3694` | `void tab_set_frame_id(tab *t, int id)` |
-| `tab_set_geometry` | function | `src/tab.c:4804` | `tab_status tab_set_geometry(tab *t, const jg_table *g)` |
-| `tab_set_identity` | function | `src/tab.c:3686` | `void tab_set_identity(tab *t, const char *serialized)` |
-| `tab_set_lazy_ticks` | function | `src/tab.c:3660` | `void tab_set_lazy_ticks(tab *t, int on)` |
-| `tab_set_net_allowed` | function | `src/tab.c:3655` | `void tab_set_net_allowed(tab *t, int allowed)` |
-| `tab_set_op_net_budget_ms` | function | `src/tab.c:3651` | `void tab_set_op_net_budget_ms(tab *t, int ms)` |
-| `tab_set_storage` | function | `src/tab.c:4957` | `void tab_set_storage(tab *t, const char *blob, size_t len)` |
-| `tab_set_viewport_w` | function | `src/tab.c:3699` | `void tab_set_viewport_w(tab *t, int px)` |
-| `tab_shutdown_spare` | function | `src/tab.c:3607` | `void tab_shutdown_spare(void)` |
-| `tab_spawned` | struct | `src/tab.c:3514` | `` |
-| `tab_submit` | function | `src/tab.c:4349` | `tab_status tab_submit(tab *t, dom_node_id node_id, int *prevented)` |
-| `tab_submit_async` | function | `src/tab.c:3860` | `static int tab_submit_async(tab *t, int net_granted, int css_granted)` |
-| `tab_subreq_permitted` | function | `src/tab.c:3710` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method)` |
-| `tab_tick` | function | `src/tab.c:4339` | `tab_status tab_tick(tab *t, int elapsed_ms, tab_page *out)` |
-| `tab_tick_async` | function | `src/tab.c:4883` | `tab_status tab_tick_async(tab *t, int elapsed_ms)` |
-| `tab_url_resolve` | function | `src/tab.c:1350` | `static int tab_url_resolve(void *ctx, const char *base, const char *ref,                         ...` |
-| `tab_wflush` | function | `src/tab.c:70` | `static int tab_wflush(void)` |
-| `tab_worker_dispatch` | function | `src/tab.c:2780` | `void tab_worker_dispatch(int argc, char **argv)` |
-| `tab_worker_run` | function | `src/tab.c:2524` | `static void tab_worker_run(int rfd, int wfd)` |
-| `tab_write_full` | function | `src/tab.c:77` | `static int tab_write_full(int fd, const void *buf, size_t n)` |
-| `tab_write_reply` | function | `src/tab.c:3742` | `static int tab_write_reply(tab *t, int ok, int status, const char *rbody, size_t rlen,           ...` |
-| `tab_ws_event` | function | `src/tab.c:4937` | `tab_status tab_ws_event(tab *t, int id, int kind, int code, const char *data, size_t len,        ...` |
-| `tests` | function | `src/tab.c:2967` | `* here lost the reserved box in the real browser while the page_view * tests (which never cross the pipe) stayed...` |
-| `tzset` | function | `src/tab.c:2542` | `* tzset() caches it while syscalls are still unrestricted. */ setenv("TZ", "UTC0", 1);` |
-| `unchanged` | function | `src/tab.c:271` | `* is unchanged (spec/sheet_cache.md);` |
-| `write_field` | function | `src/tab.c:736` | `static int write_field(int fd, const char *s)` |
-| `write_full` | macro | `src/tab.c:114` | `#define write_full(fd, buf, n)` |
-| `write_full` | function | `src/tab.c:2069` | `&& write_full(wfd, &xl, sizeof xl) == 0 && (xl == 0 \|\| write_full(wfd, text, xl) == 0) && write_view(wfd...` |
-| `write_history` | function | `src/tab.c:1411` | `static int write_history(int wfd, child_state *cs)` |
-| `write_opens` | function | `src/tab.c:2124` | `static int write_opens(int wfd, child_state *cs)` |
-| `write_storage` | function | `src/tab.c:2110` | `static int write_storage(int wfd, child_state *cs)` |
-| `write_view` | function | `src/tab.c:778` | `static int write_view(int wfd, const pv_view *v)` |
-| `write_view_raw` | function | `src/tab.c:789` | `static int write_view_raw(int wfd, const pv_view *v)` |
-| `write_ws` | function | `src/tab.c:2093` | `static int write_ws(int wfd, child_state *cs)` |
-| `ws_ops_free` | function | `src/tab.c:4030` | `static void ws_ops_free(tab_ws_op *ops, size_t n)` |
-| `tl_columns` | function | `src/table_layout.c:134` | `double tl_columns(const tl_cell *cells, size_t n, size_t ncols, double gap,                   dou...` |
-| `tl_distribute` | function | `src/table_layout.c:98` | `static void tl_distribute(const double *minw, const double *maxw, const int *sized,              ...` |
-| `tl_intrinsic` | function | `src/table_layout.c:78` | `void tl_intrinsic(const tl_cell *cells, size_t n, size_t ncols, double gap,                   dou...` |
-| `tl_measure` | function | `src/table_layout.c:23` | `static void tl_measure(const tl_cell *cells, size_t n, size_t ncols, double gap,                 ...` |
-| `tl_spread` | function | `src/table_layout.c:14` | `static void tl_spread(double *w, const double *weight, size_t c0, size_t c1, double extra)` |
-| `pair_parity` | function | `src/text_case.c:8` | `static int pair_parity(uint32_t cp)` |
-| `tc_is_lower` | function | `src/text_case.c:54` | `int tc_is_lower(uint32_t cp)` |
-| `tc_lower` | function | `src/text_case.c:37` | `uint32_t tc_lower(uint32_t cp)` |
-| `tc_smallcaps_runs` | function | `src/text_case.c:117` | `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap)` |
-| `tc_transform` | function | `src/text_case.c:95` | `size_t tc_transform(const char *s, size_t n, int transform, int word_start,                     c...` |
-| `tc_upper` | function | `src/text_case.c:18` | `uint32_t tc_upper(uint32_t cp)` |
-| `utf8_decode` | function | `src/text_case.c:61` | `static size_t utf8_decode(const unsigned char *s, size_t n, uint32_t *cp)` |
-| `utf8_len_of` | function | `src/text_case.c:91` | `static size_t utf8_len_of(uint32_t cp)` |
-| `utf8_put` | function | `src/text_case.c:79` | `static void utf8_put(uint32_t cp, size_t len, unsigned char *out)` |
-| `TSH_BLANK_GLYPH` | macro | `src/text_shape.c:745` | `#define TSH_BLANK_GLYPH` |
-| `TSH_CACHE_SLOTS` | macro | `src/text_shape.c:37` | `#define TSH_CACHE_SLOTS` |
-| `TSH_FB_BLOCKS` | macro | `src/text_shape.c:788` | `#define TSH_FB_BLOCKS` |
-| `TSH_FB_CP_SLOTS` | macro | `src/text_shape.c:805` | `#define TSH_FB_CP_SLOTS` |
-| `TSH_FB_SLOTS` | macro | `src/text_shape.c:787` | `#define TSH_FB_SLOTS` |
-| `TSH_MAX_FONT_BYTES` | macro | `src/text_shape.c:33` | `#define TSH_MAX_FONT_BYTES` |
-| `TSH_MAX_RUNS` | macro | `src/text_shape.c:990` | `#define TSH_MAX_RUNS` |
-| `TSH_MEASURE_SLOTS` | macro | `src/text_shape.c:1063` | `#define TSH_MEASURE_SLOTS` |
-| `TSH_MEASURE_TEXT_MAX` | macro | `src/text_shape.c:1064` | `#define TSH_MEASURE_TEXT_MAX` |
-| `TSH_SUBS_MAX` | macro | `src/text_shape.c:530` | `#define TSH_SUBS_MAX` |
-| `TSH_VAR_AXES_MAX` | macro | `src/text_shape.c:269` | `#define TSH_VAR_AXES_MAX` |
-| `TSH_WEB_SLOTS` | macro | `src/text_shape.c:227` | `#define TSH_WEB_SLOTS` |
-| `TSH_WGHT_BOLD` | macro | `src/text_shape.c:268` | `#define TSH_WGHT_BOLD` |
-| `TSH_WGHT_REGULAR` | macro | `src/text_shape.c:267` | `#define TSH_WGHT_REGULAR` |
-| `_POSIX_C_SOURCE` | macro | `src/text_shape.c:12` | `#define _POSIX_C_SOURCE` |
-| `ascii_ieq` | function | `src/text_shape.c:461` | `static int ascii_ieq(const char *a, const char *b)` |
-| `backend_init` | function | `src/text_shape.c:103` | `static int backend_init(void)` |
-| `blob` | function | `src/text_shape.c:333` | `* blob (it shaped every character to .notdef): its face is built over the tables * FreeType already decoded. A bare...` |
-| `characters` | function | `src/text_shape.c:138` | `* hold characters ('-', ':') that the pattern syntax treats specially. */ static int load_entry_file(tsh_entry *e...` |
-| `cover_cp` | function | `src/text_shape.c:943` | `static int cover_cp(unsigned cp, void *vctx)` |
-| `entry_apply_size` | function | `src/text_shape.c:66` | `static void entry_apply_size(tsh_entry *e, double px)` |
-| `entry_free` | function | `src/text_shape.c:448` | `static void entry_free(tsh_entry *e)` |
-| `entry_opsz_for` | function | `src/text_shape.c:57` | `static int entry_opsz_for(const tsh_entry *e, double px)` |
-| `fb_clear` | function | `src/text_shape.c:814` | `static void fb_clear(void)` |
-| `fb_entry` | function | `src/text_shape.c:856` | `static tsh_entry *fb_entry(unsigned cp, int bold)` |
-| `fb_entry_uncached` | function | `src/text_shape.c:873` | `static tsh_entry *fb_entry_uncached(unsigned cp, int bold)` |
-| `fb_match_covering` | function | `src/text_shape.c:834` | `static FcPattern *fb_match_covering(FcPattern *pat, FcCharSet *cs)` |
-| `fc_installed` | function | `src/text_shape.c:516` | `static int fc_installed(const char *name, void *ctx)` |
-| `fc_resolve` | function | `src/text_shape.c:559` | `static int fc_resolve(const char *name, char *out, size_t cap, void *ctx)` |
-| `file` | type_alias | `src/text_shape.c:789` | `typedef struct tsh_fb { char file[512];` |
-| `generic_name` | function | `src/text_shape.c:93` | `static const char *generic_name(int family)` |
-| `get_entry` | function | `src/text_shape.c:211` | `static tsh_entry *get_entry(int family, int bold, int italic)` |
-| `get_entry_ex` | function | `src/text_shape.c:662` | `static tsh_entry *get_entry_ex(const tsh_font *f)` |
-| `is_private_use` | function | `src/text_shape.c:748` | `static int is_private_use(unsigned cp)` |
-| `lfam_index` | function | `src/text_shape.c:615` | `static int lfam_index(const char *fam)` |
-| `load_entry` | function | `src/text_shape.c:207` | `static int load_entry(tsh_entry *e, int family, int bold, int italic)` |
-| `load_entry_file` | function | `src/text_shape.c:171` | `static int load_entry_file(tsh_entry *e, const char *path, int index)` |
-| `load_entry_named` | function | `src/text_shape.c:141` | `static int load_entry_named(tsh_entry *e, const char *fam, int bold, int italic)` |
-| `loaded` | type_alias | `src/text_shape.c:38` | `typedef struct tsh_entry { int loaded;` |
-| `local_clear` | function | `src/text_shape.c:604` | `static void local_clear(void)` |
-| `local_entry` | function | `src/text_shape.c:642` | `static tsh_entry *local_entry(int handle, int bold, int italic)` |
-| `name` | type_alias | `src/text_shape.c:587` | `typedef struct tsh_lfam { char name[TSH_FAMILY_MAX];` |
-| `read_font_file` | function | `src/text_shape.c:120` | `static unsigned char *read_font_file(const char *path, long *out_n)` |
-| `rides_previous` | function | `src/text_shape.c:753` | `static int rides_previous(unsigned cp)` |
-| `shape_entry` | function | `src/text_shape.c:957` | `static tsh_status shape_entry(tsh_entry *e, double px, const char *text, size_t len,             ...` |
-| `shape_runs` | function | `src/text_shape.c:994` | `static tsh_status shape_runs(cairo_t *cr, const tsh_font *f, double px, double x,                ...` |
-| `slice` | function | `src/text_shape.c:251` | `* woff2 slice (spec/webfont.md);` |
-| `tsh_cover_ctx` | struct | `src/text_shape.c:934` | `` |
-| `tsh_draw` | function | `src/text_shape.c:1110` | `tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px,                     double x, doub...` |
-| `tsh_entry` | struct | `src/text_shape.c:39` | `` |
-| `tsh_face` | function | `src/text_shape.c:1117` | `cairo_font_face_t *tsh_face(const tsh_font *f)` |
-| `tsh_face_generation` | function | `src/text_shape.c:371` | `unsigned tsh_face_generation(void)` |
-| `tsh_family_is_generic` | function | `src/text_shape.c:470` | `int tsh_family_is_generic(const char *name)` |
-| `tsh_fb` | struct | `src/text_shape.c:790` | `` |
-| `tsh_fb_cp` | struct | `src/text_shape.c:806` | `` |
-| `tsh_lfam` | struct | `src/text_shape.c:588` | `` |
-| `tsh_llist` | struct | `src/text_shape.c:594` | `` |
-| `tsh_local_handle` | function | `src/text_shape.c:623` | `int tsh_local_handle(const char *list)` |
-| `tsh_measure` | function | `src/text_shape.c:1075` | `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len)` |
-| `tsh_measure_slot` | struct | `src/text_shape.c:1065` | `` |
-| `tsh_pick_family` | function | `src/text_shape.c:503` | `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong,         ...` |
-| `tsh_pick_from_list` | function | `src/text_shape.c:482` | `int tsh_pick_from_list(const char *list, tsh_name_resolver resolve, void *ctx,                   ...` |
-| `tsh_ready` | function | `src/text_shape.c:674` | `int tsh_ready(void)` |
-| `tsh_segment` | function | `src/text_shape.c:761` | `int tsh_segment(const char *text, size_t len, tsh_cover_fn cover, void *ctx,                 tsh_...` |
-| `tsh_shape` | function | `src/text_shape.c:679` | `tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,                 ...` |
-| `tsh_shutdown` | function | `src/text_shape.c:1123` | `void tsh_shutdown(void)` |
-| `tsh_web` | struct | `src/text_shape.c:229` | `` |
-| `tsh_webfont_clear` | function | `src/text_shape.c:430` | `void tsh_webfont_clear(void)` |
-| `tsh_webfont_register` | function | `src/text_shape.c:373` | `int tsh_webfont_register(const char *name,                          const unsigned char *bytes, s...` |
-| `used` | type_alias | `src/text_shape.c:228` | `typedef struct tsh_web { int used;` |
-| `utf8_next` | function | `src/text_shape.c:729` | `static unsigned utf8_next(const char *s, size_t n, size_t *len)` |
-| `web_entry_free` | function | `src/text_shape.c:239` | `static void web_entry_free(tsh_web *w)` |
-| `web_find` | function | `src/text_shape.c:436` | `static tsh_entry *web_find(unsigned h, int bold, int italic)` |
-| `web_magic_ok` | function | `src/text_shape.c:252` | `static int web_magic_ok(const unsigned char *b, size_t n)` |
-| `web_make_entry` | function | `src/text_shape.c:309` | `static int web_make_entry(tsh_entry *e, const unsigned char *bytes, size_t nbytes, int bold,     ...` |
-| `tf_backspace` | function | `src/textfield.c:47` | `void tf_backspace(tf_field *f)` |
-| `tf_clear` | function | `src/textfield.c:20` | `void tf_clear(tf_field *f)` |
-| `tf_cursor` | function | `src/textfield.c:91` | `size_t tf_cursor(const tf_field *f)` |
-| `tf_delete` | function | `src/textfield.c:55` | `void tf_delete(tf_field *f)` |
-| `tf_end` | function | `src/textfield.c:78` | `void tf_end(tf_field *f)` |
-| `tf_home` | function | `src/textfield.c:73` | `void tf_home(tf_field *f)` |
-| `tf_insert` | function | `src/textfield.c:35` | `tf_status tf_insert(tf_field *f, char c)` |
-| `tf_len` | function | `src/textfield.c:87` | `size_t tf_len(const tf_field *f)` |
-| `tf_move` | function | `src/textfield.c:62` | `void tf_move(tf_field *f, long delta)` |
-| `tf_set` | function | `src/textfield.c:24` | `tf_status tf_set(tf_field *f, const char *s)` |
-| `tf_text` | function | `src/textfield.c:83` | `const char *tf_text(const tf_field *f)` |
-| `whole` | function | `src/textfield.c:6` | `* the buffer is rejected whole (fail closed), never applied partially.  */  #include "textfield.h...` |
-| `bounded_len` | function | `src/tls_impersonate.c:25` | `static size_t bounded_len(const char *s, size_t max)` |
-| `get_bytes` | function | `src/tls_impersonate.c:89` | `static void get_bytes(ti_rd *r, size_t cap, uint8_t **out, size_t *out_len)` |
-| `get_str` | function | `src/tls_impersonate.c:103` | `static char *get_str(ti_rd *r, size_t cap)` |
-| `get_u32` | function | `src/tls_impersonate.c:70` | `static uint32_t get_u32(ti_rd *r)` |
-| `get_u64` | function | `src/tls_impersonate.c:80` | `static uint64_t get_u64(ti_rd *r)` |
-| `get_u8` | function | `src/tls_impersonate.c:65` | `static uint8_t get_u8(ti_rd *r)` |
-| `put_blob` | function | `src/tls_impersonate.c:53` | `static void put_blob(ti_wr *w, const uint8_t *b, size_t n)` |
-| `put_u32` | function | `src/tls_impersonate.c:40` | `static void put_u32(ti_wr *w, uint32_t v)` |
-| `put_u64` | function | `src/tls_impersonate.c:48` | `static void put_u64(ti_wr *w, uint64_t v)` |
-| `put_u8` | function | `src/tls_impersonate.c:35` | `static void put_u8(ti_wr *w, uint8_t v)` |
-| `ti_decode_req` | function | `src/tls_impersonate.c:140` | `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out)` |
-| `ti_decode_resp` | function | `src/tls_impersonate.c:196` | `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out)` |
-| `ti_encode_req` | function | `src/tls_impersonate.c:122` | `size_t ti_encode_req(const ti_req *r, uint8_t *out, size_t out_cap)` |
-| `ti_encode_resp` | function | `src/tls_impersonate.c:177` | `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap)` |
-| `ti_rd` | struct | `src/tls_impersonate.c:63` | `` |
-| `ti_req_free` | function | `src/tls_impersonate.c:166` | `void ti_req_free(ti_req *r)` |
-| `ti_resp_free` | function | `src/tls_impersonate.c:230` | `void ti_resp_free(ti_resp *r)` |
-| `ti_should_impersonate` | function | `src/tls_impersonate.c:18` | `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled,                           i...` |
-| `ti_wr` | struct | `src/tls_impersonate.c:33` | `` |
-| `valid_profile` | function | `src/tls_impersonate.c:116` | `static int valid_profile(int p)` |
-| `layout_push` | function | `src/ui_layout.c:13` | `static int layout_push(ui_layout *lay, size_t offset, size_t len)` |
-| `ui_clamp_scroll` | function | `src/ui_layout.c:99` | `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines)` |
-| `ui_layout_free` | function | `src/ui_layout.c:91` | `void ui_layout_free(ui_layout *lay)` |
-| `ui_wrap_text` | function | `src/ui_layout.c:27` | `ui_status ui_wrap_text(const char *text, size_t len, size_t max_cols, ui_layout *out)` |
-| `_POSIX_C_SOURCE` | macro | `src/url.c:9` | `#define _POSIX_C_SOURCE` |
-| `append_query_encoded` | function | `src/url.c:229` | `static int append_query_encoded(char *out, size_t outsz, const char *src)` |
-| `assumed` | function | `src/url.c:254` | `* assumed (the caller already routed whitespace to search). */ static int looks_like_host(const c...` |
-| `build_search` | function | `src/url.c:303` | `static url_status build_search(const char *query, char *out, size_t outsz)` |
-| `cat_checked` | function | `src/url.c:40` | `static int cat_checked(char *out, size_t outsz, const char *src)` |
-| `ci_prefix` | function | `src/url.c:20` | `static int ci_prefix(const char *haystack, const char *prefix)` |
-| `copy_bounded` | function | `src/url.c:645` | `static url_status copy_bounded(char *out, size_t outsz, const char *a, size_t alen,              ...` |
-| `copy_checked` | function | `src/url.c:32` | `static int copy_checked(char *out, size_t outsz, const char *src)` |
-| `dir_len` | function | `src/url.c:159` | `static size_t dir_len(const char *base)` |
-| `host_equals` | function | `src/url.c:378` | `static int host_equals(const url_parts *p, const char *want)` |
-| `is_space` | function | `src/url.c:218` | `static int is_space(int c)` |
-| `is_unreserved` | function | `src/url.c:222` | `static int is_unreserved(int c)` |
-| `ncat_checked` | function | `src/url.c:49` | `static int ncat_checked(char *out, size_t outsz, const char *src, size_t n)` |
-| `out_pop_segment` | function | `src/url.c:102` | `static void out_pop_segment(char *out, size_t *olen)` |
-| `query_find_q` | function | `src/url.c:393` | `static const char *query_find_q(const char *search, size_t len, size_t *vlen)` |
-| `url_authority_len` | function | `src/url.c:91` | `size_t url_authority_len(const char *url)` |
-| `url_extract_userinfo` | function | `src/url.c:431` | `url_status url_extract_userinfo(const char *url, char *out, size_t outsz,                        ...` |
-| `url_file_path` | function | `src/url.c:531` | `const char *url_file_path(const char *s)` |
-| `url_has_scheme` | function | `src/url.c:59` | `int url_has_scheme(const char *s)` |
-| `url_history_target` | function | `src/url.c:654` | `url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz)` |
-| `url_is_file` | function | `src/url.c:525` | `int url_is_file(const char *s)` |
-| `url_is_https` | function | `src/url.c:73` | `int url_is_https(const char *s)` |
-| `url_omnibox` | function | `src/url.c:309` | `url_status url_omnibox(const char *input, url_omni_kind *kind, char *out, size_t outsz)` |
-| `url_remove_dot_segments` | function | `src/url.c:109` | `url_status url_remove_dot_segments(const char *path, char *out, size_t outsz)` |
-| `url_resolve_file` | function | `src/url.c:535` | `url_status url_resolve_file(const char *base, const char *ref, char *out, size_t outsz)` |
-| `url_resolve_https` | function | `src/url.c:170` | `url_status url_resolve_https(const char *base, const char *ref,                              char...` |
-| `url_search_rewrite` | function | `src/url.c:411` | `url_status url_search_rewrite(const char *url, char *out, size_t outsz)` |
-| `url_split` | function | `src/url.c:584` | `url_status url_split(const char *url, url_parts *out)` |
-| `url_validate_https` | function | `src/url.c:80` | `url_status url_validate_https(const char *url)` |
-| `check` | function | `src/web_storage.c:65` | `static int check(const char *blob, size_t len, size_t *bytes_out)` |
-| `find` | function | `src/web_storage.c:118` | `static wst_origin *find(const wst_db *db, const char *origin)` |
-| `get_u32` | function | `src/web_storage.c:25` | `static uint32_t get_u32(const unsigned char *p)` |
-| `key_cmp` | function | `src/web_storage.c:56` | `static int key_cmp(const void *a, const void *b)` |
-| `key_ref` | struct | `src/web_storage.c:54` | `` |
-| `put_u32` | function | `src/web_storage.c:201` | `static void put_u32(char *b, uint32_t v)` |
-| `utf8_ok` | function | `src/web_storage.c:32` | `static int utf8_ok(const unsigned char *s, size_t n)` |
-| `wst_db` | struct | `src/web_storage.c:20` | `` |
-| `wst_decode_check` | function | `src/web_storage.c:101` | `int wst_decode_check(const char *blob, size_t len)` |
-| `wst_encode` | function | `src/web_storage.c:125` | `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len)` |
-| `wst_foreach` | function | `src/web_storage.c:181` | `int wst_foreach(const char *blob, size_t len,                 void (*fn)(void *ctx, const char *k...` |
-| `wst_free` | function | `src/web_storage.c:109` | `void wst_free(wst_db *db)` |
-| `wst_new` | function | `src/web_storage.c:105` | `wst_db *wst_new(void)` |
-| `wst_origin` | struct | `src/web_storage.c:12` | `` |
-| `wst_origin_bytes` | function | `src/web_storage.c:175` | `size_t wst_origin_bytes(const wst_db *db, const char *origin)` |
-| `wst_pack` | function | `src/web_storage.c:206` | `int wst_pack(const char *const *keys, const size_t *klens,              const char *const *vals, ...` |
-| `wst_replace` | function | `src/web_storage.c:140` | `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len)` |
-| `wc_derive` | function | `src/webcaps.c:15` | `wc_caps wc_derive(wc_input in)` |
-| `wc_from_flags` | function | `src/webcaps.c:35` | `wc_caps wc_from_flags(bool js, bool css, bool images)` |
-| `wc_render_caps` | function | `src/webcaps.c:46` | `rdp_caps wc_render_caps(wc_caps c)` |
-| `wc_safe` | function | `src/webcaps.c:10` | `wc_caps wc_safe(void)` |
-| `candidates` | function | `src/webfont.c:7` | `* understanding just far enough to find candidates (family + first url() per * src entry + weight/style descriptors);` |
-| `ci_eq_span` | function | `src/webfont.c:28` | `static int ci_eq_span(const char *s, size_t n, const char *kw)` |
-| `emit` | function | `src/webfont.c:129` | `static void emit(wf_list *out, const char *family,                  const char *url, size_t ulen,...` |
-| `emit_data` | function | `src/webfont.c:145` | `static void emit_data(wf_list *out, const char *family,                       const char *span, s...` |
-| `emit_family_format` | function | `src/webfont.c:101` | `static void emit_family_format(wf_ref *r, const char *family, const char *format)` |
-| `emit_slot` | function | `src/webfont.c:86` | `static wf_ref *emit_slot(wf_list *out)` |
-| `is_ws` | function | `src/webfont.c:19` | `static int is_ws(char c)` |
-| `lower_ch` | function | `src/webfont.c:23` | `static int lower_ch(char c)` |
-| `lower_ch` | function | `src/webfont.c:313` | `&& lower_ch(s[k]) == 's' && k + 3 < bend                 && lower_ch(s[k + 1]) == 'r' && lower_ch...` |
-| `scan_face_block` | function | `src/webfont.c:182` | `static void scan_face_block(const char *s, size_t bstart, size_t bend,                           ...` |
-| `span_is_data` | function | `src/webfont.c:117` | `static int span_is_data(const char *span, size_t slen)` |
-| `wf_list_free` | function | `src/webfont.c:49` | `void wf_list_free(wf_list *l)` |
-| `wf_ref_move` | function | `src/webfont.c:64` | `void wf_ref_move(wf_ref *dst, wf_ref *src)` |
-| `wf_scan` | function | `src/webfont.c:429` | `int wf_scan(const char *css, size_t len, wf_list *out)` |
-| `wf_supported_format` | function | `src/webfont.c:74` | `int wf_supported_format(const char *fmt)` |
-| `WF_DATA_URL_MAX` | macro | `src/webfont_load.c:91` | `#define WF_DATA_URL_MAX` |
-| `ctype_ok` | function | `src/webfont_load.c:24` | `static int ctype_ok(const char *ct)` |
-| `fetch` | type_alias | `src/webfont_load.c:56` | `typedef struct wf_cursor { wf_fetch_fn fetch;` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

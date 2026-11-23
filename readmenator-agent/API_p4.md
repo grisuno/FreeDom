@@ -1,5 +1,26 @@
-# API (page 4 of 13)
+# API (page 4 of 14)
 Previous: [API_p3.md](API_p3.md)
+
+## include/box_style.h
+Depends on: `include/css.h`
+Imported by: `gui/browser_ui.c`, `gui/bui_mask_img.c`, `include/box_tree.h`, `src/box_style.c`, `src/box_tree.c`, `src/dom_debug.c`, `src/page_view.c`, `src/render_doc.c`, `tests/test_box_style.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+- `box` (function) `include/box_style.h:115` `* in_list nonzero when the block sits inside a list item: it then takes * the <li> box (zero margin), keeping items...`
+- `BX_TROLE_NONE` (function) `include/box_style.h:144` `* BX_TROLE_NONE (an unrecognised element joins no table -- fail closed). */ bx_table_role bx_table_role_of(const...`
+- `bx_display_name` (function) `include/box_style.h:156` `const char *bx_display_name(bx_display d);` -- Stable, short English name of a display type for structured/agent output.
+- `bx_width_cap` (function) `include/box_style.h:182` `double bx_width_cap(int w_px, int w_pct, double avail_w);` -- Effective width cap combining the px cap (w_px, 0 = none) with a symbolic per-mille cap (w_pct, 0 = none; Hito 32)...
+- `bx_width_cap2` (function) `include/box_style.h:187` `double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w);` -- The used width cap of an element: the tighter of its `width` (w_px, w_pct) and its `max-width` (mw_px, mw_pct), each...
+- `bx_replaced_box` (function) `include/box_style.h:206` `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den, double avail_w, double *out_w, double *out_h);` -- CSS Sizing 4 section 4: when one axis is definite and an aspect-ratio is present, the ratio supplies the other.
+- `bx_border_box_h` (function) `include/box_style.h:220` `double bx_border_box_h(double declared_h, int border_box, double pad_t, double pad_b, double bord_t, double bord_b);` -- Border-box height for a DECLARED height under box-sizing (CSS 2.1 10.6.3, CSS Box Sizing 3 section 4).
+- `block` (function) `include/box_style.h:226` `* indefinite containing block (cb_h < 0) the value behaves as auto: -1. * Without a percentage it is px_val...`
+- `bx_line_height_px` (function) `include/box_style.h:239` `double bx_line_height_px(int line_scale, double font_px);` -- The used line-height in px of text at font_px for a css line_scale value (spec/box_style.md 4c): 0 = normal (returns...
+- `bx_definite_content_h` (function) `include/box_style.h:241` `double bx_definite_content_h(double h, double min_h, double max_h, int border_box, double v_edges);`
+- `page` (function) `include/box_style.h:245` `* instead of letting it extend the page (CSS 2.1 section 10.7 + 11.1.1). That * is the case unless BOTH overflow...`
+- `bx_lp_px` (function) `include/box_style.h:267` `double bx_lp_px(int px_val, int pct_pm, double basis);` -- half plus pct_pm per-mille of `basis`.
+- `bx_content_cap` (function) `include/box_style.h:275` `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` -- Content-width cap adjusted for box-sizing (2026-07-11).
+- `bx_border_span` (function) `include/box_style.h:286` `double bx_border_span(double width_cap, int border_box, double pad_l, double pad_r, double bord_l, double bord_r);` -- The border-inclusive span the painter lays a box out with (its content plus left/right border; padding sits outside it).
+- `bx_flex_max_clamp` (function) `include/box_style.h:292` `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, double pad_bord_h, double margin_h);` -- Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size). mw_cap <= 0 =...
+- `bx_flex_min_clamp` (function) `include/box_style.h:298` `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, double pad_bord_h, double margin_h);` -- The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (converted to the...
+- `bx_background_layer` (function) `include/box_style.h:331` `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h, double *out_x, double *out_y);`
 
 ## include/box_tree.h
 Depends on: `include/box_style.h`, `include/flex_layout.h`, `include/page_view.h`
@@ -73,24 +94,24 @@ Depends on: `include/css_color.h`, `include/css_counter.h`, `include/css_mq.h`
 Imported by: `fuzz/fuzz_css.c`, `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `gui/bui_mask_img.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `include/pres_hints.h`, `include/sheet_cache.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/js_native.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
 - `verbatim` (function) `include/css.h:92` `* the quoted row strings verbatim (flex_layout parses them);`
 - `POINTER` (function) `include/css.h:235` `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
-- `container` (function) `include/css.h:674` `* container (Display 3 section 2);`
-- `family` (function) `include/css.h:719` `* LOCAL family (spec/text_shape.md section 7);`
-- `translate` (function) `include/css.h:893` `* translate()/translateX()/translateY();`
-- `scaleY` (function) `include/css.h:894` `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
-- `declared` (function) `include/css.h:898` `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
-- `element` (function) `include/css.h:903` `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
-- `slots` (function) `include/css.h:910` `* parse time into ALL seven slots (singular matrices fail closed);`
-- `css_sheet_uses_counters` (function) `include/css.h:1055` `int css_sheet_uses_counters(const css_sheet *sheet);` -- 1 when any rule of the sheet declares counter-reset / counter-increment. page_view * runs its document-order counter...
-- `css_sheet_uses_containers` (function) `include/css.h:1059` `int css_sheet_uses_containers(const css_sheet *sheet);` -- 1 when the sheet holds any rule gated by an @container condition: only then does * the engine need to track query...
-- `palette` (function) `include/css.h:1076` `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
-- `css_free` (function) `include/css.h:1126` `void css_free(css_sheet *s);` -- As css_parse_scoped, plus the drop sink. log == NULL is exactly css_parse_scoped: same path, same sheet, same cost.
-- `order` (function) `include/css.h:1129` `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
-- `inherited_px` (function) `include/css.h:1246` `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
-- `css_ua_heading_em` (function) `include/css.h:1258` `double css_ua_heading_em(int level);` -- The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HTML Rendering 15.3.6: 2em, 1.5em...
-- `name` (function) `include/css.h:1263` `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
-- `css_font_face_count` (function) `include/css.h:1273` `size_t css_font_face_count(const css_sheet *sheet);` -- Web font access: returns the number of @font-face declarations parsed into the sheet, and copies the i-th...
-- `css_font_face_at` (function) `include/css.h:1274` `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
-- `css_resolve_anim_keyframes` (function) `include/css.h:1282` `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);` -- Resolve @keyframes: scans sheet->keyframes[] for a name matching s->anim_name (first-char match).
+- `container` (function) `include/css.h:678` `* container (Display 3 section 2);`
+- `family` (function) `include/css.h:723` `* LOCAL family (spec/text_shape.md section 7);`
+- `translate` (function) `include/css.h:897` `* translate()/translateX()/translateY();`
+- `scaleY` (function) `include/css.h:898` `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
+- `declared` (function) `include/css.h:902` `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
+- `element` (function) `include/css.h:907` `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
+- `slots` (function) `include/css.h:914` `* parse time into ALL seven slots (singular matrices fail closed);`
+- `css_sheet_uses_counters` (function) `include/css.h:1059` `int css_sheet_uses_counters(const css_sheet *sheet);` -- 1 when any rule of the sheet declares counter-reset / counter-increment. page_view * runs its document-order counter...
+- `css_sheet_uses_containers` (function) `include/css.h:1063` `int css_sheet_uses_containers(const css_sheet *sheet);` -- 1 when the sheet holds any rule gated by an @container condition: only then does * the engine need to track query...
+- `palette` (function) `include/css.h:1080` `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
+- `css_free` (function) `include/css.h:1130` `void css_free(css_sheet *s);` -- As css_parse_scoped, plus the drop sink. log == NULL is exactly css_parse_scoped: same path, same sheet, same cost.
+- `order` (function) `include/css.h:1133` `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
+- `inherited_px` (function) `include/css.h:1250` `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
+- `css_ua_heading_em` (function) `include/css.h:1262` `double css_ua_heading_em(int level);` -- The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HTML Rendering 15.3.6: 2em, 1.5em...
+- `name` (function) `include/css.h:1267` `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
+- `css_font_face_count` (function) `include/css.h:1277` `size_t css_font_face_count(const css_sheet *sheet);` -- Web font access: returns the number of @font-face declarations parsed into the sheet, and copies the i-th...
+- `css_font_face_at` (function) `include/css.h:1278` `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+- `css_resolve_anim_keyframes` (function) `include/css.h:1286` `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);` -- Resolve @keyframes: scans sheet->keyframes[] for a name matching s->anim_name (first-char match).
 
 ## include/css_atrule.h
 Imported by: `src/css.c`, `src/css_atrule.c`, `tests/test_css_atrule.c`
@@ -127,12 +148,13 @@ Imported by: `src/css.c`, `src/css_box.c`, `src/css_mq.c`, `src/css_text.c`, `te
 
 ## include/css_chain.h
 Depends on: `include/css.h`, `include/css_select.h`
-Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`, `tests/test_page_view.c`
+Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`, `src/tab.c`, `tests/test_page_view.c`
 - `cch_path_new` (function) `include/css_chain.h:70` `cch_path *cch_path_new(void);`
 - `cch_path_free` (function) `include/css_chain.h:71` `void cch_path_free(cch_path *pa);`
 - `cch_element_matches` (function) `include/css_chain.h:82` `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);` -- Nonzero iff the parsed selector *sel matches element `el`, built against the same bounded ancestor/sibling/attribute...
 - `lacks` (function) `include/css_chain.h:86` `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...`
-- `box` (function) `include/css_chain.h:92` `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
+- `COMPARED` (function) `include/css_chain.h:94` `* pointer is only ever COMPARED (a detached element is never freed while the document * lives). Returns 1 when the...`
+- `box` (function) `include/css_chain.h:99` `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
 
 ## include/css_color.h
 Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/pres_hints.c`, `src/svg_paint.c`, `src/svg_render.c`, `tests/test_css_color.c`
@@ -221,27 +243,27 @@ Imported by: `fuzz/fuzz_css.c`, `include/css.h`, `src/css.c`, `src/css_mq.c`, `t
 ## include/css_select.h
 Depends on: `include/css.h`
 Imported by: `fuzz/fuzz_css.c`, `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `src/sheet_cache.c`, `tests/test_css.c`
-- `csel_compact_size` (function) `include/css_select.h:168` `size_t csel_compact_size(int nparts);` -- Bytes a selector with `nparts` compounds needs: the header plus the compounds it uses.
-- `csel_compact_dup` (function) `include/css_select.h:173` `css_sel *csel_compact_dup(const css_sel *sel);` -- Heap copy of *sel holding only the compounds in use (free()d by the caller); NULL on OOM or a selector with nparts...
-- `csel_parse` (function) `include/css_select.h:177` `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` -- Parses the complex selector s[a,b) into *sel (spec computed; order/rule left to * the caller).
-- `csel_matches` (function) `include/css_select.h:186` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` -- True if *sel matches element *el against its ancestor chain. target_id (optional) is the URL fragment for :target...
-- `csel_element_feature_bits` (function) `include/css_select.h:194` `unsigned long long csel_element_feature_bits(const css_element *e);` -- Ancestor filter. csel_element_feature_bits: the bits of one element's tag, id and classes (two bits per feature...
-- `csel_anc_reject` (function) `include/css_select.h:195` `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
-- `conservative` (function) `include/css_select.h:202` `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
-- `identifier` (function) `include/css_select.h:208` `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
-- `csel_emit_utf8` (function) `include/css_select.h:220` `size_t csel_emit_utf8(unsigned int cp, char *out);`
-- `csel_unescape` (function) `include/css_select.h:222` `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` -- A selector identifier (tag, .class, #id) is read with CSS escapes decoded (`.md\:flex` is the class "md:flex") and...
-- `csel_escape_len` (function) `include/css_select.h:224` `size_t csel_escape_len(const char *s, size_t i, size_t b);` -- does not fit is FOLDED: its first CSEL_FOLD_PREFIX bytes, CSEL_FOLD_MARK (a byte no identifier contains) and 16 hex...
-- `csel_ident_fold` (function) `include/css_select.h:226` `void csel_ident_fold(const char *src, size_t len, char *dst);` -- csel_ident_eq folds the element's token the same way, so a CSS Modules name such as...
-- `csel_ident_eq` (function) `include/css_select.h:228` `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` -- instead of being truncated and never matching. #define CSEL_FOLD_PREFIX   40u #define CSEL_FOLD_MARK     '\x1f'...
-- `csel_read_ident` (function) `include/css_select.h:231` `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` -- Reads an identifier at s[*ip] (escapes decoded, non-ASCII kept, lowercased when * lower != 0) into dst (CSS_TOK_MAX).
-- `csel_decl_end` (function) `include/css_select.h:236` `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` -- Index of the ';' ending the declaration that starts at s[i] (or of a '}' when stop_brace), or b: separators inside...
-- `csel_lower_ch` (function) `include/css_select.h:240` `static inline char csel_lower_ch(char c)`
-- `csel_ci_eq` (function) `include/css_select.h:244` `static inline int csel_ci_eq(const char *a, const char *b)`
-- `csel_ci_starts` (function) `include/css_select.h:253` `static inline int csel_ci_starts(const char *a, const char *p)` -- static inline char csel_lower_ch(char c) { return (c >= 'A' && c <= 'Z') ?
-- `csel_span_eq` (function) `include/css_select.h:262` `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` -- } return *a == '\0' && *b == '\0'; } /* True if a starts with the (lowercase) prefix p, case-insensitively. static...
-- `csel_substr` (function) `include/css_select.h:273` `static inline int csel_substr(const char *hay, const char *needle, int ci)` -- Substring test (used both to drop any value carrying url() — always ci — and by * the attribute `*=` operator).
-- `csel_ident_ch` (function) `include/css_select.h:281` `static inline int csel_ident_ch(char c)`
+- `csel_compact_size` (function) `include/css_select.h:169` `size_t csel_compact_size(int nparts);` -- Bytes a selector with `nparts` compounds needs: the header plus the compounds it uses.
+- `csel_compact_dup` (function) `include/css_select.h:174` `css_sel *csel_compact_dup(const css_sel *sel);` -- Heap copy of *sel holding only the compounds in use (free()d by the caller); NULL on OOM or a selector with nparts...
+- `csel_parse` (function) `include/css_select.h:178` `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` -- Parses the complex selector s[a,b) into *sel (spec computed; order/rule left to * the caller).
+- `csel_matches` (function) `include/css_select.h:187` `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` -- True if *sel matches element *el against its ancestor chain. target_id (optional) is the URL fragment for :target...
+- `csel_element_feature_bits` (function) `include/css_select.h:195` `unsigned long long csel_element_feature_bits(const css_element *e);` -- Ancestor filter. csel_element_feature_bits: the bits of one element's tag, id and classes (two bits per feature...
+- `csel_anc_reject` (function) `include/css_select.h:196` `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)`
+- `conservative` (function) `include/css_select.h:203` `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...`
+- `identifier` (function) `include/css_select.h:209` `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...`
+- `csel_emit_utf8` (function) `include/css_select.h:221` `size_t csel_emit_utf8(unsigned int cp, char *out);`
+- `csel_unescape` (function) `include/css_select.h:223` `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` -- A selector identifier (tag, .class, #id) is read with CSS escapes decoded (`.md\:flex` is the class "md:flex") and...
+- `csel_escape_len` (function) `include/css_select.h:225` `size_t csel_escape_len(const char *s, size_t i, size_t b);` -- does not fit is FOLDED: its first CSEL_FOLD_PREFIX bytes, CSEL_FOLD_MARK (a byte no identifier contains) and 16 hex...
+- `csel_ident_fold` (function) `include/css_select.h:227` `void csel_ident_fold(const char *src, size_t len, char *dst);` -- csel_ident_eq folds the element's token the same way, so a CSS Modules name such as...
+- `csel_ident_eq` (function) `include/css_select.h:229` `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` -- instead of being truncated and never matching. #define CSEL_FOLD_PREFIX   40u #define CSEL_FOLD_MARK     '\x1f'...
+- `csel_read_ident` (function) `include/css_select.h:232` `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` -- Reads an identifier at s[*ip] (escapes decoded, non-ASCII kept, lowercased when * lower != 0) into dst (CSS_TOK_MAX).
+- `csel_decl_end` (function) `include/css_select.h:237` `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` -- Index of the ';' ending the declaration that starts at s[i] (or of a '}' when stop_brace), or b: separators inside...
+- `csel_lower_ch` (function) `include/css_select.h:241` `static inline char csel_lower_ch(char c)`
+- `csel_ci_eq` (function) `include/css_select.h:245` `static inline int csel_ci_eq(const char *a, const char *b)`
+- `csel_ci_starts` (function) `include/css_select.h:254` `static inline int csel_ci_starts(const char *a, const char *p)` -- static inline char csel_lower_ch(char c) { return (c >= 'A' && c <= 'Z') ?
+- `csel_span_eq` (function) `include/css_select.h:263` `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` -- } return *a == '\0' && *b == '\0'; } /* True if a starts with the (lowercase) prefix p, case-insensitively. static...
+- `csel_substr` (function) `include/css_select.h:274` `static inline int csel_substr(const char *hay, const char *needle, int ci)` -- Substring test (used both to drop any value carrying url() — always ci — and by * the attribute `*=` operator).
+- `csel_ident_ch` (function) `include/css_select.h:282` `static inline int csel_ident_ch(char c)`
 
 ## include/css_text.h
 Depends on: `include/css_decl.h`
@@ -447,10 +469,6 @@ Imported by: `fuzz/fuzz_freebug.c`, `gui/browser_ui.c`, `include/js_dom.h`, `inc
 - `fb_buffer_at` (function) `include/freebug.h:92` `const fb_entry *fb_buffer_at(const fb_buffer *b, size_t i);` -- Frees every entry's text; resets count/total_bytes/overflow to 0 but KEEPS the * entry array allocation for reuse.
 - `fb_level_name` (function) `include/freebug.h:96` `const char *fb_level_name(int level);` -- A stable lowercase level name ("log"/"info"/"warn"/"error"/"debug"); an * out-of-range level clamps to "log".
 
-## include/freedom_config.h
-Imported by: `fuzz/fuzz_page_view.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/svg_paint.c`, `src/tab.c`, `tests/test_sheet_cache.c`, `tests/test_tab.c`
-- `px` (function) `include/freedom_config.h:24` `* it computes 12 px (getComputedStyle, measured on the parity host, tanda 102): the * reference renderer is what we...`
-
 ## include/group_index.h
 Imported by: `fuzz/fuzz_group_index.c`, `gui/browser_ui.c`, `src/group_index.c`, `tests/test_group_index.c`
 - `group_index` (function) `include/group_index.h:9` `* group_index (gi_) -- stable group-by of n items by an integer key, in CSR form, so a * per-group pass visits only...`
@@ -471,20 +489,6 @@ Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/host_conf.c`, `tests/test
 - `hcf_search_dirs_from_env` (function) `include/host_conf.h:31` `void hcf_search_dirs_from_env(hcf_dirs *out);` -- Pure.
 - `hcf_load_filter` (function) `include/host_conf.h:35` `hb_set *hcf_load_filter(const hcf_dirs *dirs);` -- block.conf (BLOCK) + allow.conf (ALLOW) from every directory, cumulative.
 - `hcf_load_allowlist` (function) `include/host_conf.h:39` `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname);` -- One file (js.conf, allow.conf, ...) from every directory as an ALLOW list.
-
-## include/hostblock.h
-Imported by: `gui/browser_ui.c`, `include/host_conf.h`, `src/freedom.c`, `src/hostblock.c`, `tests/test_hostblock.c`
-- `hb_new` (function) `include/hostblock.h:49` `hb_set *hb_new(void);` -- } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted HB_BLOCK       /* the host is on...
-- `hb_free` (function) `include/hostblock.h:52` `void hb_free(hb_set *s);` -- HB_ALLOW = 0,  /* the host may be contacted HB_BLOCK       /* the host is on the blocklist (and not re-enabled) }...
-- `walked` (function) `include/hostblock.h:65` `* walked (the host, then without its first label, ...): any suffix on the allowlist * => HB_ALLOW (allow wins...`
-- `hb_is_allowlisted` (function) `include/hostblock.h:75` `int hb_is_allowlisted(const hb_set *s, const char *host);` -- 1 iff a domain suffix of host is explicitly on the allowlist (covers subdomains), else 0.
-- `hb_count` (function) `include/hostblock.h:85` `size_t hb_count(const hb_set *s, hb_list list);` -- Number of unique domains on the given list (for tests/diagnostics).
-
-## include/hostedit.h
-Imported by: `fuzz/fuzz_identity.c`, `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
-- `he_text_has_host` (function) `include/hostedit.h:46` `int he_text_has_host(const char *text, const char *host);` -- Returns 1 if text (the body of a hosts-format file) already lists host as a domain token on a non-comment line...
-- `he_suggest` (function) `include/hostedit.h:55` `int he_suggest(const char *text, const char *query, char results[][HE_MAX_HOST + 1], int max);` -- Omnibar autocomplete: treats allow.conf (a hosts-format text) as a favorites list.
-- `he_cdn_kind` (function) `include/hostedit.h:62` `he_cdn_kind_t he_cdn_kind(const char *url);`
 
 
 Next: [API_p5.md](API_p5.md)

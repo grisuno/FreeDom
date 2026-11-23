@@ -16,9 +16,11 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
        ...`
   - `anc_collect` (function, line 93) `size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, size_t cap,
       ...`
-  - `anc_target_top` (function, line 110) `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
+  - `anc_target_box` (function, line 110) `int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
               ...`
-  - `anc_scroll_for` (function, line 131) `double anc_scroll_for(double top, double max_scroll)`
+  - `anc_target_top` (function, line 134) `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
+              ...`
+  - `anc_scroll_for` (function, line 142) `double anc_scroll_for(double top, double max_scroll)`
 - Depends on: `include/anchor.h`
 
 ## src/anti_fp.c

@@ -1213,6 +1213,8 @@ const void *dom_native_node(const dom_index *idx, dom_node_id node)
 
 **Returns:** `void *`
 
+*Called by:* [`navigation`](src.tab.c.md#navigation)
+
 ---
 
 ## Macros

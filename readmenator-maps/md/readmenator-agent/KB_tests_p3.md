@@ -74,7 +74,8 @@ static void test_leading_b...`
   - `test_radial_len_resolution` (function, line 148) `static void test_radial_len_resolution(void **state)`
   - `near_d` (function, line 157) `static int near_d(double a, double b)`
   - `test_radial_geometry_keywords` (function, line 159) `static void test_radial_geometry_keywords(void **state)`
-  - `main` (function, line 196) `int main(void)`
+  - `test_interpolation_method` (function, line 196) `static void test_interpolation_method(void **state)`
+  - `main` (function, line 227) `int main(void)`
 - Depends on: `include/css.h`, `include/css_gradient.h`
 
 ## tests/test_css_import.c
@@ -212,6 +213,7 @@ static void test_leading_b...`
 - Depends on: `include/css.h`, `include/css_decl.h`, `include/css_text.h`
 
 ## tests/test_css_values.c
+- Doc: test_alpha_modern_functions: Every CSS Color 4/5 function carries its alpha after a slash, and...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -219,9 +221,10 @@ static void test_leading_b...`
   - `test_sentinels_ok` (function, line 16) `static void test_sentinels_ok(void **state)`
   - `test_junk_fails_closed` (function, line 24) `static void test_junk_fails_closed(void **state)`
   - `test_alpha` (function, line 33) `static void test_alpha(void **state)`
-  - `test_bg_skips_url` (function, line 65) `static void test_bg_skips_url(void **state)`
-  - `test_filter_scale_neutral_when_undeclared` (function, line 72) `static void test_filter_scale_neutral_when_undeclared(void **state)`
-  - `main` (function, line 85) `int main(void)`
+  - `test_alpha_modern_functions` (function, line 54) `static void test_alpha_modern_functions(void **state)`
+  - `test_bg_skips_url` (function, line 97) `static void test_bg_skips_url(void **state)`
+  - `test_filter_scale_neutral_when_undeclared` (function, line 104) `static void test_filter_scale_neutral_when_undeclared(void **state)`
+  - `main` (function, line 117) `int main(void)`
   - `digit` (function, line 43) `* digit(s) -- the minifier writes `transparent` as #0000. */ assert_int_equal(cv_bg_alpha_of("#0000"), 0);`
 - Depends on: `include/css.h`, `include/css_values.h`
 
@@ -243,7 +246,8 @@ static void test_leading_b...`
   - `test_cycle_takes_fallback` (function, line 149) `static void test_cycle_takes_fallback(void **state)`
   - `test_fallback_fanout_is_budgeted` (function, line 162) `static void test_fallback_fanout_is_budgeted(void **state)`
   - `test_resolve_overflow_fails` (function, line 174) `static void test_resolve_overflow_fails(void **state)`
-  - `main` (function, line 185) `int main(void)`
+  - `test_css_wide_keyword_values` (function, line 185) `static void test_css_wide_keyword_values(void **state)`
+  - `main` (function, line 219) `int main(void)`
 - Depends on: `include/css_vars.h`
 
 ## tests/test_data_url.c
@@ -299,6 +303,20 @@ static void test_leading_b...`
   - `main` (function, line 181) `int main(void)`
   - `_POSIX_C_SOURCE` (macro, line 8) `#define _POSIX_C_SOURCE`
 - Depends on: `include/disk_store.h`, `include/local_store.h`
+
+## tests/test_doc_title.c
+- Doc: Tests for doc_title (spec/doc_title.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `scan` (function, line 11) `static const char *scan(const char *html, size_t cap)`
+  - `test_entities` (function, line 19) `static void test_entities(void **state)`
+  - `test_skips_raw_text_and_comments` (function, line 27) `static void test_skips_raw_text_and_comments(void **state)`
+  - `test_absent_or_empty` (function, line 36) `static void test_absent_or_empty(void **state)`
+  - `test_utf8_sanitized` (function, line 50) `static void test_utf8_sanitized(void **state)`
+  - `test_scan_bound` (function, line 59) `static void test_scan_bound(void **state)`
+  - `main` (function, line 68) `int main(void)`
+- Depends on: `include/doc_title.h`
 
 ## tests/test_dom.c
 - Doc: setup_doc: #include "dom.h" #include "html_parse.h" static const char HTML[] = "<!DOCTYPE...

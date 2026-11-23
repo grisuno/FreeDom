@@ -40,6 +40,23 @@ Previous: [KB_tests_p7.md](KB_tests_p7.md)
   - `main` (function, line 212) `int main(void)`
 - Depends on: `include/request_policy.h`
 
+## tests/test_scroll_req.c
+- Doc: test_scroll_req -- spec/scroll_req.md (tanda 104).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `view` (function, line 12) `static srq_view view(double scroll, double max, double h)`
+  - `test_to_and_by_clamped` (function, line 16) `static void test_to_and_by_clamped(void **state)`
+  - `test_element_blocks` (function, line 37) `static void test_element_blocks(void **state)`
+  - `test_element_nearest` (function, line 53) `static void test_element_nearest(void **state)`
+  - `test_padding_and_margin` (function, line 71) `static void test_padding_and_margin(void **state)`
+  - `test_target_rejects` (function, line 100) `static void test_target_rejects(void **state)`
+  - `test_encode_decode_roundtrip` (function, line 125) `static void test_encode_decode_roundtrip(void **state)`
+  - `test_decode_rejects` (function, line 152) `static void test_decode_rejects(void **state)`
+  - `test_smooth` (function, line 176) `static void test_smooth(void **state)`
+  - `main` (function, line 188) `int main(void)`
+- Depends on: `include/scroll_req.h`
+
 ## tests/test_secure_fetch.c
 - Doc: test_default_groups_offer_p384: Some servers (justpaste.it, 2026 Let's Encrypt P-384 chain)...
 - Layer: testing
@@ -257,8 +274,8 @@ Previous: [KB_tests_p7.md](KB_tests_p7.md)
 - Language: c
 - Symbols:
   - `fixture` (struct, line 50)
-  - `sink_cap` (struct, line 2569)
-  - `n` (type_alias, line 2569) `typedef struct sink_cap { int n;`
+  - `sink_cap` (struct, line 2578)
+  - `n` (type_alias, line 2578) `typedef struct sink_cap { int n;`
   - `setup_loaded` (function, line 52) `static int setup_loaded(void **state)`
   - `teardown` (function, line 63) `static int teardown(void **state)`
   - `expect_eval` (function, line 73) `static void expect_eval(tab *t, const char *js, const char *expected)`
@@ -314,179 +331,157 @@ static void test_loa...`
   - `test_eval_captures_console_output` (function, line 1689) `static void test_eval_captures_console_output(void **state)`
   - `test_load_full_location_is_real` (function, line 1718) `static void test_load_full_location_is_real(void **state)`
   - `test_js_navigation_relative_resolved` (function, line 1755) `static void test_js_navigation_relative_resolved(void **state)`
-  - `test_js_navigation_unsafe_is_blocked` (function, line 1774) `static void test_js_navigation_unsafe_is_blocked(void **state)`
-  - `test_no_js_no_navigation` (function, line 1796) `static void test_no_js_no_navigation(void **state)`
-  - `test_load_null_and_too_large` (function, line 1810) `static void test_load_null_and_too_large(void **state)`
-  - `test_eval_sees_dom` (function, line 1835) `static void test_eval_sees_dom(void **state)`
-  - `test_worker_deep_recursion_and_runaway` (function, line 1846) `static void test_worker_deep_recursion_and_runaway(void **state)`
-  - `expect_eval` (function, line 1848) `expect_eval(f->t, "var fr=function(n)`
-  - `expect_eval` (function, line 1849) `expect_eval(f->t, "var gr=function()`
-  - `test_eval_sees_env` (function, line 1856) `static void test_eval_sees_env(void **state)`
-  - `test_eval_no_network_or_cross_origin_api` (function, line 1873) `static void test_eval_no_network_or_cross_origin_api(void **state)`
-  - `stub_fetch` (function, line 1892) `static int stub_fetch(void *ctx, const char *method, const char *url,
+  - `test_js_navigation_unsafe_is_blocked` (function, line 1775) `static void test_js_navigation_unsafe_is_blocked(void **state)`
+  - `test_no_js_no_navigation` (function, line 1805) `static void test_no_js_no_navigation(void **state)`
+  - `test_load_null_and_too_large` (function, line 1819) `static void test_load_null_and_too_large(void **state)`
+  - `test_eval_sees_dom` (function, line 1844) `static void test_eval_sees_dom(void **state)`
+  - `test_worker_deep_recursion_and_runaway` (function, line 1855) `static void test_worker_deep_recursion_and_runaway(void **state)`
+  - `expect_eval` (function, line 1857) `expect_eval(f->t, "var fr=function(n)`
+  - `expect_eval` (function, line 1858) `expect_eval(f->t, "var gr=function()`
+  - `test_eval_sees_env` (function, line 1865) `static void test_eval_sees_env(void **state)`
+  - `test_eval_no_network_or_cross_origin_api` (function, line 1882) `static void test_eval_no_network_or_cross_origin_api(void **state)`
+  - `stub_fetch` (function, line 1901) `static int stub_fetch(void *ctx, const char *method, const char *url,
                       const...`
-  - `slow_fetch` (function, line 1908) `static int slow_fetch(void *ctx, const char *method, const char *url,
+  - `slow_fetch` (function, line 1917) `static int slow_fetch(void *ctx, const char *method, const char *url,
                       const...`
-  - `test_async_subrequests_run_in_parallel` (function, line 1927) `static void test_async_subrequests_run_in_parallel(void **state)`
-  - `expect_eval` (function, line 1952) `expect_eval(t, "var n=net(), a=n.filter(function(e)`
-  - `test_slow_async_request_does_not_hold_first_view` (function, line 1973) `static void test_slow_async_request_does_not_hold_first_view(void **state)`
-  - `script_host_fetch` (function, line 2016) `static int script_host_fetch(void *ctx, const char *method, const char *url,
+  - `test_async_subrequests_run_in_parallel` (function, line 1936) `static void test_async_subrequests_run_in_parallel(void **state)`
+  - `expect_eval` (function, line 1961) `expect_eval(t, "var n=net(), a=n.filter(function(e)`
+  - `test_slow_async_request_does_not_hold_first_view` (function, line 1982) `static void test_slow_async_request_does_not_hold_first_view(void **state)`
+  - `script_host_fetch` (function, line 2025) `static int script_host_fetch(void *ctx, const char *method, const char *url,
                     ...`
-  - `test_dynamic_script_from_dead_host_does_not_block` (function, line 2030) `static void test_dynamic_script_from_dead_host_does_not_block(void **state)`
-  - `test_parser_async_script_does_not_block` (function, line 2070) `static void test_parser_async_script_does_not_block(void **state)`
-  - `test_without_async_fetcher_load_waits_for_all` (function, line 2109) `static void test_without_async_fetcher_load_waits_for_all(void **state)`
-  - `netctx_free` (function, line 2132) `static void netctx_free(void *c)`
-  - `test_close_abandons_hung_request` (function, line 2134) `static void test_close_abandons_hung_request(void **state)`
-  - `test_xhr_works_when_net_allowed` (function, line 2173) `static void test_xhr_works_when_net_allowed(void **state)`
-  - `test_xhr_undefined_when_net_not_allowed` (function, line 2201) `static void test_xhr_undefined_when_net_not_allowed(void **state)`
-  - `stub_script_fetch` (function, line 2241) `static int stub_script_fetch(void *ctx, const char *method, const char *url,
+  - `test_dynamic_script_from_dead_host_does_not_block` (function, line 2039) `static void test_dynamic_script_from_dead_host_does_not_block(void **state)`
+  - `test_parser_async_script_does_not_block` (function, line 2079) `static void test_parser_async_script_does_not_block(void **state)`
+  - `test_without_async_fetcher_load_waits_for_all` (function, line 2118) `static void test_without_async_fetcher_load_waits_for_all(void **state)`
+  - `netctx_free` (function, line 2141) `static void netctx_free(void *c)`
+  - `test_close_abandons_hung_request` (function, line 2143) `static void test_close_abandons_hung_request(void **state)`
+  - `test_xhr_works_when_net_allowed` (function, line 2182) `static void test_xhr_works_when_net_allowed(void **state)`
+  - `test_xhr_undefined_when_net_not_allowed` (function, line 2210) `static void test_xhr_undefined_when_net_not_allowed(void **state)`
+  - `stub_script_fetch` (function, line 2250) `static int stub_script_fetch(void *ctx, const char *method, const char *url,
                     ...`
-  - `test_external_script_executes_when_net_allowed` (function, line 2271) `static void test_external_script_executes_when_net_allowed(void **state)`
-  - `test_external_script_document_order` (function, line 2288) `static void test_external_script_document_order(void **state)`
-  - `test_external_script_skipped_without_net` (function, line 2311) `static void test_external_script_skipped_without_net(void **state)`
-  - `test_external_script_bad_ctype_not_executed` (function, line 2335) `static void test_external_script_bad_ctype_not_executed(void **state)`
-  - `test_external_script_blocked_host_refused` (function, line 2352) `static void test_external_script_blocked_host_refused(void **state)`
-  - `stub_css_fetch` (function, line 2375) `static int stub_css_fetch(void *ctx, const char *method, const char *url,
+  - `test_external_script_executes_when_net_allowed` (function, line 2280) `static void test_external_script_executes_when_net_allowed(void **state)`
+  - `test_external_script_document_order` (function, line 2297) `static void test_external_script_document_order(void **state)`
+  - `test_external_script_skipped_without_net` (function, line 2320) `static void test_external_script_skipped_without_net(void **state)`
+  - `test_external_script_bad_ctype_not_executed` (function, line 2344) `static void test_external_script_bad_ctype_not_executed(void **state)`
+  - `test_external_script_blocked_host_refused` (function, line 2361) `static void test_external_script_blocked_host_refused(void **state)`
+  - `stub_css_fetch` (function, line 2384) `static int stub_css_fetch(void *ctx, const char *method, const char *url,
                        ...`
-  - `view_find_text` (function, line 2397) `static const pv_run *view_find_text(const pv_view *v, const char *needle)`
-  - `test_external_css_applied_when_allowed` (function, line 2408) `static void test_external_css_applied_when_allowed(void **state)`
-  - `stub_import_fetch` (function, line 2431) `static int stub_import_fetch(void *ctx, const char *method, const char *url,
+  - `view_find_text` (function, line 2406) `static const pv_run *view_find_text(const pv_view *v, const char *needle)`
+  - `test_external_css_applied_when_allowed` (function, line 2417) `static void test_external_css_applied_when_allowed(void **state)`
+  - `stub_import_fetch` (function, line 2440) `static int stub_import_fetch(void *ctx, const char *method, const char *url,
                     ...`
-  - `import_align` (function, line 2465) `static int import_align(const char *html, int prefers_dark)`
-  - `test_import_resolved_against_sheet` (function, line 2484) `static void test_import_resolved_against_sheet(void **state)`
-  - `test_import_media_gated` (function, line 2492) `static void test_import_media_gated(void **state)`
-  - `test_import_cycle_bounded` (function, line 2499) `static void test_import_cycle_bounded(void **state)`
-  - `test_import_unbalanced_dropped` (function, line 2507) `static void test_import_unbalanced_dropped(void **state)`
-  - `test_import_from_inline_style` (function, line 2514) `static void test_import_from_inline_style(void **state)`
-  - `view_has_bg` (function, line 2524) `static int view_has_bg(const pv_view *v, const char *url)`
-  - `test_sheet_url_resolved_against_sheet` (function, line 2532) `static void test_sheet_url_resolved_against_sheet(void **state)`
-  - `test_import_needs_css_grant` (function, line 2551) `static void test_import_needs_css_grant(void **state)`
-  - `sink_capture` (function, line 2571) `static void sink_capture(void *ctx, const char *url,
+  - `import_align` (function, line 2474) `static int import_align(const char *html, int prefers_dark)`
+  - `test_import_resolved_against_sheet` (function, line 2493) `static void test_import_resolved_against_sheet(void **state)`
+  - `test_import_media_gated` (function, line 2501) `static void test_import_media_gated(void **state)`
+  - `test_import_cycle_bounded` (function, line 2508) `static void test_import_cycle_bounded(void **state)`
+  - `test_import_unbalanced_dropped` (function, line 2516) `static void test_import_unbalanced_dropped(void **state)`
+  - `test_import_from_inline_style` (function, line 2523) `static void test_import_from_inline_style(void **state)`
+  - `view_has_bg` (function, line 2533) `static int view_has_bg(const pv_view *v, const char *url)`
+  - `test_sheet_url_resolved_against_sheet` (function, line 2541) `static void test_sheet_url_resolved_against_sheet(void **state)`
+  - `test_import_needs_css_grant` (function, line 2560) `static void test_import_needs_css_grant(void **state)`
+  - `sink_capture` (function, line 2580) `static void sink_capture(void *ctx, const char *url,
                          const char *body, s...`
-  - `test_css_sink_observes_served_stylesheet` (function, line 2586) `static void test_css_sink_observes_served_stylesheet(void **state)`
-  - `test_css_sink_ignores_non_css_body` (function, line 2612) `static void test_css_sink_ignores_non_css_body(void **state)`
-  - `test_external_css_skipped_without_grant` (function, line 2632) `static void test_external_css_skipped_without_grant(void **state)`
-  - `test_external_css_bad_ctype_not_parsed` (function, line 2651) `static void test_external_css_bad_ctype_not_parsed(void **state)`
-  - `test_external_css_blocked_host_refused` (function, line 2669) `static void test_external_css_blocked_host_refused(void **state)`
-  - `test_click_bubbles_to_delegated_document_listener` (function, line 2691) `static void test_click_bubbles_to_delegated_document_listener(void **state)`
-  - `test_boxdef_node_id_crosses_codec` (function, line 2719) `static void test_boxdef_node_id_crosses_codec(void **state)`
-  - `geom_load_and_measure` (function, line 2748) `static int geom_load_and_measure(int net, char *out, size_t outsz)`
-  - `test_view_ids_survive_script_insertion` (function, line 2789) `static void test_view_ids_survive_script_insertion(void **state)`
-  - `test_geometry_reaches_trusted_page` (function, line 2826) `static void test_geometry_reaches_trusted_page(void **state)`
-  - `test_geometry_never_reaches_untrusted_page` (function, line 2834) `static void test_geometry_never_reaches_untrusted_page(void **state)`
-  - `cs_eval` (function, line 2848) `static void cs_eval(tab *t, const char *js, char *out, size_t outsz)`
-  - `cs_open` (function, line 2856) `static void cs_open(tab **t, int net)`
-  - `test_computed_style_reads_the_cascade_for_trusted_host` (function, line 2864) `static void test_computed_style_reads_the_cascade_for_trusted_host(void **state)`
-  - `test_computed_style_follows_dom_mutation` (function, line 2883) `static void test_computed_style_follows_dom_mutation(void **state)`
-  - `test_computed_style_is_inline_only_for_untrusted_host` (function, line 2902) `static void test_computed_style_is_inline_only_for_untrusted_host(void **state)`
-  - `test_repl_net_lists_page_requests` (function, line 2917) `static void test_repl_net_lists_page_requests(void **state)`
-  - `test_repl_panels_tree_styles_box` (function, line 2937) `static void test_repl_panels_tree_styles_box(void **state)`
-  - `load_js_page` (function, line 2958) `static void load_js_page(tab **out_t, const char *html, tab_page *p)`
-  - `test_click_handler_navigation_reaches_parent` (function, line 2964) `static void test_click_handler_navigation_reaches_parent(void **state)`
-  - `test_timer_navigation_reaches_parent` (function, line 2985) `static void test_timer_navigation_reaches_parent(void **state)`
-  - `test_event_navigation_is_policy_gated` (function, line 3007) `static void test_event_navigation_is_policy_gated(void **state)`
-  - `test_history_ops_reach_parent_and_popstate_returns` (function, line 3035) `static void test_history_ops_reach_parent_and_popstate_returns(void **state)`
-  - `open_page` (function, line 3086) `static void open_page(int net, tab **t, tab_page *p)`
-  - `test_window_open_on_gesture_for_trusted_host` (function, line 3093) `static void test_window_open_on_gesture_for_trusted_host(void **state)`
-  - `test_window_open_absent_for_untrusted_host` (function, line 3114) `static void test_window_open_absent_for_untrusted_host(void **state)`
-  - `test_self_postmessage_and_document_domain_trusted` (function, line 3143) `static void test_self_postmessage_and_document_domain_trusted(void **state)`
-  - `test_postmessage_absent_for_untrusted_host` (function, line 3186) `static void test_postmessage_absent_for_untrusted_host(void **state)`
-  - `test_websocket_ops_and_events_cross_the_worker` (function, line 3211) `static void test_websocket_ops_and_events_cross_the_worker(void **state)`
-  - `test_websocket_absent_for_untrusted_host` (function, line 3238) `static void test_websocket_absent_for_untrusted_host(void **state)`
-  - `test_frames_cross_the_worker` (function, line 3271) `static void test_frames_cross_the_worker(void **state)`
-  - `test_frames_absent_for_untrusted_host` (function, line 3308) `static void test_frames_absent_for_untrusted_host(void **state)`
-  - `ls_load` (function, line 3334) `static void ls_load(int net, tab **t, tab_page *p)`
-  - `test_local_storage_seeded_and_collected_for_trusted` (function, line 3348) `static void test_local_storage_seeded_and_collected_for_trusted(void **state)`
-  - `test_local_storage_never_seeded_for_untrusted` (function, line 3370) `static void test_local_storage_never_seeded_for_untrusted(void **state)`
-  - `stub_module_fetch` (function, line 3382) `static int stub_module_fetch(void *ctx, const char *method, const char *url,
+  - `test_css_sink_observes_served_stylesheet` (function, line 2595) `static void test_css_sink_observes_served_stylesheet(void **state)`
+  - `test_css_sink_ignores_non_css_body` (function, line 2621) `static void test_css_sink_ignores_non_css_body(void **state)`
+  - `test_external_css_skipped_without_grant` (function, line 2641) `static void test_external_css_skipped_without_grant(void **state)`
+  - `test_external_css_bad_ctype_not_parsed` (function, line 2660) `static void test_external_css_bad_ctype_not_parsed(void **state)`
+  - `test_external_css_blocked_host_refused` (function, line 2678) `static void test_external_css_blocked_host_refused(void **state)`
+  - `test_click_bubbles_to_delegated_document_listener` (function, line 2700) `static void test_click_bubbles_to_delegated_document_listener(void **state)`
+  - `test_boxdef_node_id_crosses_codec` (function, line 2728) `static void test_boxdef_node_id_crosses_codec(void **state)`
+  - `geom_load_and_measure` (function, line 2757) `static int geom_load_and_measure(int net, char *out, size_t outsz)`
+  - `test_view_ids_survive_script_insertion` (function, line 2798) `static void test_view_ids_survive_script_insertion(void **state)`
+  - `test_geometry_reaches_trusted_page` (function, line 2835) `static void test_geometry_reaches_trusted_page(void **state)`
+  - `test_geometry_never_reaches_untrusted_page` (function, line 2843) `static void test_geometry_never_reaches_untrusted_page(void **state)`
+  - `cs_eval` (function, line 2857) `static void cs_eval(tab *t, const char *js, char *out, size_t outsz)`
+  - `cs_open` (function, line 2865) `static void cs_open(tab **t, int net)`
+  - `test_computed_style_reads_the_cascade_for_trusted_host` (function, line 2873) `static void test_computed_style_reads_the_cascade_for_trusted_host(void **state)`
+  - `test_computed_style_follows_dom_mutation` (function, line 2892) `static void test_computed_style_follows_dom_mutation(void **state)`
+  - `test_computed_style_is_inline_only_for_untrusted_host` (function, line 2911) `static void test_computed_style_is_inline_only_for_untrusted_host(void **state)`
+  - `test_repl_net_lists_page_requests` (function, line 2926) `static void test_repl_net_lists_page_requests(void **state)`
+  - `test_repl_panels_tree_styles_box` (function, line 2946) `static void test_repl_panels_tree_styles_box(void **state)`
+  - `load_js_page` (function, line 2967) `static void load_js_page(tab **out_t, const char *html, tab_page *p)`
+  - `test_click_handler_navigation_reaches_parent` (function, line 2973) `static void test_click_handler_navigation_reaches_parent(void **state)`
+  - `test_timer_navigation_reaches_parent` (function, line 2994) `static void test_timer_navigation_reaches_parent(void **state)`
+  - `test_event_navigation_is_policy_gated` (function, line 3016) `static void test_event_navigation_is_policy_gated(void **state)`
+  - `test_history_ops_reach_parent_and_popstate_returns` (function, line 3044) `static void test_history_ops_reach_parent_and_popstate_returns(void **state)`
+  - `open_page` (function, line 3095) `static void open_page(int net, tab **t, tab_page *p)`
+  - `test_window_open_on_gesture_for_trusted_host` (function, line 3102) `static void test_window_open_on_gesture_for_trusted_host(void **state)`
+  - `test_window_open_absent_for_untrusted_host` (function, line 3123) `static void test_window_open_absent_for_untrusted_host(void **state)`
+  - `test_self_postmessage_and_document_domain_trusted` (function, line 3152) `static void test_self_postmessage_and_document_domain_trusted(void **state)`
+  - `test_postmessage_absent_for_untrusted_host` (function, line 3195) `static void test_postmessage_absent_for_untrusted_host(void **state)`
+  - `test_websocket_ops_and_events_cross_the_worker` (function, line 3220) `static void test_websocket_ops_and_events_cross_the_worker(void **state)`
+  - `test_websocket_absent_for_untrusted_host` (function, line 3247) `static void test_websocket_absent_for_untrusted_host(void **state)`
+  - `test_frames_cross_the_worker` (function, line 3280) `static void test_frames_cross_the_worker(void **state)`
+  - `test_frames_absent_for_untrusted_host` (function, line 3317) `static void test_frames_absent_for_untrusted_host(void **state)`
+  - `ls_load` (function, line 3343) `static void ls_load(int net, tab **t, tab_page *p)`
+  - `test_local_storage_seeded_and_collected_for_trusted` (function, line 3357) `static void test_local_storage_seeded_and_collected_for_trusted(void **state)`
+  - `test_local_storage_never_seeded_for_untrusted` (function, line 3379) `static void test_local_storage_never_seeded_for_untrusted(void **state)`
+  - `stub_module_fetch` (function, line 3391) `static int stub_module_fetch(void *ctx, const char *method, const char *url,
                     ...`
-  - `module_page` (function, line 3420) `static const pv_run *module_page(int net, tab **t, tab_page *p, const char *needle)`
-  - `test_module_scripts_run_for_trusted_host` (function, line 3429) `static void test_module_scripts_run_for_trusted_host(void **state)`
-  - `test_nomodule_fallback_for_untrusted_host` (function, line 3438) `static void test_nomodule_fallback_for_untrusted_host(void **state)`
-  - `test_dynamic_import_from_classic_script_uses_document_base` (function, line 3451) `static void test_dynamic_import_from_classic_script_uses_document_base(void **state)`
-  - `tick_page` (function, line 3471) `static const pv_run *tick_page(const char *html, size_t len, tab **t, tab_page *p2,
+  - `module_page` (function, line 3429) `static const pv_run *module_page(int net, tab **t, tab_page *p, const char *needle)`
+  - `test_module_scripts_run_for_trusted_host` (function, line 3438) `static void test_module_scripts_run_for_trusted_host(void **state)`
+  - `test_nomodule_fallback_for_untrusted_host` (function, line 3447) `static void test_nomodule_fallback_for_untrusted_host(void **state)`
+  - `test_dynamic_import_from_classic_script_uses_document_base` (function, line 3460) `static void test_dynamic_import_from_classic_script_uses_document_base(void **state)`
+  - `tick_page` (function, line 3480) `static const pv_run *tick_page(const char *html, size_t len, tab **t, tab_page *p2,
              ...`
-  - `test_ajax_after_load_reaches_the_gated_fetcher` (function, line 3483) `static void test_ajax_after_load_reaches_the_gated_fetcher(void **state)`
-  - `test_lazy_script_src_and_import_after_load` (function, line 3494) `static void test_lazy_script_src_and_import_after_load(void **state)`
-  - `stub_slow_fetch` (function, line 3514) `static int stub_slow_fetch(void *ctx, const char *method, const char *url, const char *body,
+  - `test_ajax_after_load_reaches_the_gated_fetcher` (function, line 3492) `static void test_ajax_after_load_reaches_the_gated_fetcher(void **state)`
+  - `test_lazy_script_src_and_import_after_load` (function, line 3503) `static void test_lazy_script_src_and_import_after_load(void **state)`
+  - `stub_slow_fetch` (function, line 3523) `static int stub_slow_fetch(void *ctx, const char *method, const char *url, const char *body,
     ...`
-  - `test_post_load_network_time_is_bounded_per_operation` (function, line 3523) `static void test_post_load_network_time_is_bounded_per_operation(void **state)`
-  - `slow_tab` (function, line 3556) `static tab *slow_tab(void)`
-  - `ms_since` (function, line 3567) `static long ms_since(const struct timespec *a)`
-  - `test_async_tick_returns_at_once_and_delivers_through_eventfd` (function, line 3573) `static void test_async_tick_returns_at_once_and_delivers_through_eventfd(void **state)`
-  - `test_other_worker_calls_wait_for_the_job_and_discard_its_view` (function, line 3598) `static void test_other_worker_calls_wait_for_the_job_and_discard_its_view(void **state)`
-  - `test_import_map_resolves_bare_specifier` (function, line 3615) `static void test_import_map_resolves_bare_specifier(void **state)`
-  - `test_data_url_classic_script_runs_without_network` (function, line 3636) `static void test_data_url_classic_script_runs_without_network(void **state)`
-  - `test_long_data_module_runs_whole` (function, line 3656) `static void test_long_data_module_runs_whole(void **state)`
-  - `test_module_src_is_a_url_and_data_modules_run` (function, line 3681) `static void test_module_src_is_a_url_and_data_modules_run(void **state)`
-  - `test_data_module_imports_absolute_https` (function, line 3706) `static void test_data_module_imports_absolute_https(void **state)`
-  - `test_external_css_survives_click_rederive` (function, line 3727) `static void test_external_css_survives_click_rederive(void **state)`
-  - `test_subreq_permitted_pure` (function, line 3755) `static void test_subreq_permitted_pure(void **state)`
-  - `read` (function, line 3776) `* vector no page may read (Zero Knowledge). Google's real JS hit exactly this. */
+  - `test_post_load_network_time_is_bounded_per_operation` (function, line 3532) `static void test_post_load_network_time_is_bounded_per_operation(void **state)`
+  - `slow_tab` (function, line 3565) `static tab *slow_tab(void)`
+  - `ms_since` (function, line 3576) `static long ms_since(const struct timespec *a)`
+  - `test_async_tick_returns_at_once_and_delivers_through_eventfd` (function, line 3582) `static void test_async_tick_returns_at_once_and_delivers_through_eventfd(void **state)`
+  - `test_other_worker_calls_wait_for_the_job_and_discard_its_view` (function, line 3607) `static void test_other_worker_calls_wait_for_the_job_and_discard_its_view(void **state)`
+  - `test_import_map_resolves_bare_specifier` (function, line 3624) `static void test_import_map_resolves_bare_specifier(void **state)`
+  - `test_data_url_classic_script_runs_without_network` (function, line 3645) `static void test_data_url_classic_script_runs_without_network(void **state)`
+  - `test_long_data_module_runs_whole` (function, line 3665) `static void test_long_data_module_runs_whole(void **state)`
+  - `test_module_src_is_a_url_and_data_modules_run` (function, line 3690) `static void test_module_src_is_a_url_and_data_modules_run(void **state)`
+  - `test_data_module_imports_absolute_https` (function, line 3715) `static void test_data_module_imports_absolute_https(void **state)`
+  - `test_external_css_survives_click_rederive` (function, line 3736) `static void test_external_css_survives_click_rederive(void **state)`
+  - `test_subreq_permitted_pure` (function, line 3764) `static void test_subreq_permitted_pure(void **state)`
+  - `read` (function, line 3785) `* vector no page may read (Zero Knowledge). Google's real JS hit exactly this. */
 static void tes...`
-  - `test_eval_exception` (function, line 3797) `static void test_eval_exception(void **state)`
-  - `test_eval_persistent_state` (function, line 3809) `static void test_eval_persistent_state(void **state)`
-  - `test_reload_replaces_page` (function, line 3818) `static void test_reload_replaces_page(void **state)`
-  - `test_eval_without_load` (function, line 3842) `static void test_eval_without_load(void **state)`
-  - `test_binary_does_not_crash_parent` (function, line 3854) `static void test_binary_does_not_crash_parent(void **state)`
-  - `test_child_death_survived` (function, line 3869) `static void test_child_death_survived(void **state)`
-  - `test_free_null_and_double` (function, line 3895) `static void test_free_null_and_double(void **state)`
-  - `test_decode_image_in_sandbox` (function, line 3929) `static void test_decode_image_in_sandbox(void **state)`
-  - `test_decode_image_rejects_junk` (function, line 3951) `static void test_decode_image_rejects_junk(void **state)`
-  - `test_decode_image_null_args` (function, line 3966) `static void test_decode_image_null_args(void **state)`
-  - `test_decode_image_data_url_in_sandbox` (function, line 3985) `static void test_decode_image_data_url_in_sandbox(void **state)`
-  - `test_decode_svg_image_in_sandbox` (function, line 4030) `static void test_decode_svg_image_in_sandbox(void **state)`
-  - `test_decode_image_data_url_null_args` (function, line 4058) `static void test_decode_image_data_url_null_args(void **state)`
-  - `test_worker_args_valid` (function, line 4071) `static void test_worker_args_valid(void **state)`
-  - `test_worker_args_not_worker` (function, line 4080) `static void test_worker_args_not_worker(void **state)`
-  - `test_worker_args_malformed` (function, line 4087) `static void test_worker_args_malformed(void **state)`
-  - `test_worker_args_null_safe` (function, line 4102) `static void test_worker_args_null_safe(void **state)`
-  - `test_load_view_codec_full_roundtrip` (function, line 4118) `static void test_load_view_codec_full_roundtrip(void **state)`
-  - `node_of_text` (function, line 4270) `static dom_node_id node_of_text(const pv_view *v, const char *text)`
-  - `test_click_reports_default_prevented` (function, line 4278) `static void test_click_reports_default_prevented(void **state)`
-  - `test_anchor_query_resolves` (function, line 4304) `static void test_anchor_query_resolves(void **state)`
-  - `test_anchor_query_push_fires_hashchange` (function, line 4351) `static void test_anchor_query_push_fires_hashchange(void **state)`
-  - `main` (function, line 4387) `int main(int argc, char **argv)`
-  - `document` (function, line 2688) `* listener is on document (the React/jQuery-delegation shape);`
-  - `load` (function, line 2738) `* table only for a trusted load (net granted: allow.conf AND js.conf);`
+  - `test_eval_exception` (function, line 3806) `static void test_eval_exception(void **state)`
+  - `test_eval_persistent_state` (function, line 3818) `static void test_eval_persistent_state(void **state)`
+  - `test_reload_replaces_page` (function, line 3827) `static void test_reload_replaces_page(void **state)`
+  - `test_eval_without_load` (function, line 3851) `static void test_eval_without_load(void **state)`
+  - `test_binary_does_not_crash_parent` (function, line 3863) `static void test_binary_does_not_crash_parent(void **state)`
+  - `test_child_death_survived` (function, line 3878) `static void test_child_death_survived(void **state)`
+  - `test_free_null_and_double` (function, line 3904) `static void test_free_null_and_double(void **state)`
+  - `test_decode_image_in_sandbox` (function, line 3938) `static void test_decode_image_in_sandbox(void **state)`
+  - `test_decode_image_rejects_junk` (function, line 3960) `static void test_decode_image_rejects_junk(void **state)`
+  - `test_decode_image_null_args` (function, line 3975) `static void test_decode_image_null_args(void **state)`
+  - `test_decode_image_data_url_in_sandbox` (function, line 3994) `static void test_decode_image_data_url_in_sandbox(void **state)`
+  - `test_decode_svg_image_in_sandbox` (function, line 4039) `static void test_decode_svg_image_in_sandbox(void **state)`
+  - `test_decode_image_data_url_null_args` (function, line 4067) `static void test_decode_image_data_url_null_args(void **state)`
+  - `test_worker_args_valid` (function, line 4080) `static void test_worker_args_valid(void **state)`
+  - `test_worker_args_not_worker` (function, line 4089) `static void test_worker_args_not_worker(void **state)`
+  - `test_worker_args_malformed` (function, line 4096) `static void test_worker_args_malformed(void **state)`
+  - `test_worker_args_null_safe` (function, line 4111) `static void test_worker_args_null_safe(void **state)`
+  - `test_load_view_codec_full_roundtrip` (function, line 4127) `static void test_load_view_codec_full_roundtrip(void **state)`
+  - `node_of_text` (function, line 4279) `static dom_node_id node_of_text(const pv_view *v, const char *text)`
+  - `test_click_reports_default_prevented` (function, line 4287) `static void test_click_reports_default_prevented(void **state)`
+  - `test_anchor_query_resolves` (function, line 4313) `static void test_anchor_query_resolves(void **state)`
+  - `test_anchor_query_push_fires_hashchange` (function, line 4360) `static void test_anchor_query_push_fires_hashchange(void **state)`
+  - `test_js_hash_set_is_fragment_nav` (function, line 4398) `static void test_js_hash_set_is_fragment_nav(void **state)`
+  - `test_js_fragment_nav_variants` (function, line 4419) `static void test_js_fragment_nav_variants(void **state)`
+  - `test_js_hash_replace_keeps_length` (function, line 4490) `static void test_js_hash_replace_keeps_length(void **state)`
+  - `test_scroll_requests_travel` (function, line 4519) `static void test_scroll_requests_travel(void **state)`
+  - `test_scroll_request_hostile_values` (function, line 4580) `static void test_scroll_request_hostile_values(void **state)`
+  - `test_anchor_scroll_margin_padding` (function, line 4606) `static void test_anchor_scroll_margin_padding(void **state)`
+  - `fg_of_text` (function, line 4630) `static int fg_of_text(const pv_view *v, const char *text)`
+  - `test_anchor_target_pseudo` (function, line 4640) `static void test_anchor_target_pseudo(void **state)`
+  - `test_anchor_target_js` (function, line 4678) `static void test_anchor_target_js(void **state)`
+  - `main` (function, line 4700) `int main(int argc, char **argv)`
+  - `document` (function, line 2697) `* listener is on document (the React/jQuery-delegation shape);`
+  - `load` (function, line 2747) `* table only for a trusted load (net granted: allow.conf AND js.conf);`
   - `_DEFAULT_SOURCE` (macro, line 1) `#define _DEFAULT_SOURCE`
   - `_POSIX_C_SOURCE` (macro, line 15) `#define _POSIX_C_SOURCE`
   - `LAZY_PAGE` (macro, line 834) `#define LAZY_PAGE(body_script)`
-  - `XHR_PAGE` (macro, line 2166) `#define XHR_PAGE(URL)`
-  - `EXT_PAGE` (macro, line 2265) `#define EXT_PAGE(SRC)`
-  - `CSS_PAGE` (macro, line 2392) `#define CSS_PAGE(HREF)`
+  - `XHR_PAGE` (macro, line 2175) `#define XHR_PAGE(URL)`
+  - `EXT_PAGE` (macro, line 2274) `#define EXT_PAGE(SRC)`
+  - `CSS_PAGE` (macro, line 2401) `#define CSS_PAGE(HREF)`
 - Depends on: `include/anchor.h`, `include/css.h`, `include/css_import.h`, `include/freedom_config.h`, `include/js_geom.h`, `include/tab.h`, `include/url.h`, `include/web_storage.h`
-
-## tests/test_table_layout.c
-- Doc: test_table_layout -- automatic table layout (spec/table_layout.md).
-- Layer: testing
-- Language: c
-- Symbols:
-  - `assert_near` (function, line 13) `static void assert_near(double got, double want)`
-  - `test_auto_table_takes_max_content` (function, line 18) `static void test_auto_table_takes_max_content(void **state)`
-  - `test_declared_table_width_distributes_surplus` (function, line 32) `static void test_declared_table_width_distributes_surplus(void **state)`
-  - `test_surplus_with_no_auto_column` (function, line 44) `static void test_surplus_with_no_auto_column(void **state)`
-  - `test_span_narrower_is_inert` (function, line 94) `static void test_span_narrower_is_inert(void **state)`
-  - `test_span_over_empty_columns_splits_evenly` (function, line 105) `static void test_span_over_empty_columns_splits_evenly(void **state)`
-  - `test_gap_counts` (function, line 115) `static void test_gap_counts(void **state)`
-  - `test_declared_width_never_below_min` (function, line 130) `static void test_declared_width_never_below_min(void **state)`
-  - `test_declared_cell_width` (function, line 141) `static void test_declared_cell_width(void **state)`
-  - `test_percent_columns` (function, line 155) `static void test_percent_columns(void **state)`
-  - `test_intrinsic` (function, line 191) `static void test_intrinsic(void **state)`
-  - `test_fail_closed` (function, line 204) `static void test_fail_closed(void **state)`
-  - `main` (function, line 235) `int main(void)`
-  - `EPS` (macro, line 11) `#define EPS`
-- Depends on: `include/table_layout.h`
-
-## tests/test_text_case.c
-- Layer: testing
-- Language: c
-- Symbols:
-  - `test_upper_lower_ascii_latin` (function, line 10) `static void test_upper_lower_ascii_latin(void **state)`
-  - `test_transform_keeps_length` (function, line 33) `static void test_transform_keeps_length(void **state)`
-  - `test_smallcaps_runs` (function, line 55) `static void test_smallcaps_runs(void **state)`
-  - `main` (function, line 73) `int main(void)`
-- Depends on: `include/css.h`, `include/text_case.h`
 
 
 Next: [KB_tests_p9.md](KB_tests_p9.md)

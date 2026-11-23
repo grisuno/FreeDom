@@ -1,37 +1,52 @@
 # src: tab
 
-src: tab groups 53 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
+src: tab groups 72 files (c, h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. Fuzzer for anchor (spec/anchor.md) and url_split_location: a hostile document x a
 
 ```mermaid
 graph LR
+    fuzz["fuzz"]
     include["include"]
     src["src"]
     tests["tests"]
+    fuzz -- "calls into" --> include
+    fuzz -- "calls into" --> src
     include -- "calls into" --> src
+    include -- "calls into" --> tests
     src -- "calls into" --> include
     src -- "calls into" --> tests
     tests -- "calls into" --> include
     tests -- "calls into" --> src
 ```
 
-## include (3.1)
+## fuzz (1.1)
 
-include groups 15 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. ci_scan: Reads the leading @import rules of css[0,len) into out (at most cap).
+fuzz groups 8 files (c) around check_decode, check_location, LLVMFuzzerTestOneInput, fz_out, fz_emit. Fuzzer for anchor (spec/anchor.md) and url_split_location: a hostile document x a
 
-## src (3.2)
+## include (1.2)
 
-src groups 24 files (c, h) around FREEDOM_JS_NATIVE_INTERNAL_H, js_context, js_host_slot, FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install. css_import -- @import prelude reader (spec/css_import.md).
+include groups 19 files (h) around FREEDOM_HTML_PARSE_H, hp_status, max_bytes, hp_config, hp_document. anc_collect: Writes target and its element subtree in preorder (*nsub handles), then...
 
-## tests (3.3)
+## src (1.3)
 
-tests groups 14 files (c) around scan, test_plain_url, test_url_forms, test_lobsters_media, assert_string_equal. test_css_import -- @import prelude reader (spec/css_import.md).
+src groups 28 files (c, h) around FREEDOM_JS_NATIVE_INTERNAL_H, js_context, js_host_slot, FREEDOM_JS_CUSTOM_ELEMENTS_H, jdce_install. — the indicated part of a document and where it sits (spec/anchor.md).
+
+## tests (1.4)
+
+tests groups 17 files (c) around fixture, load, unload, tag, attr. — CMocka suite for the anchor module (spec/anchor.md).
 
 **Files**:
 
+- fuzz/fuzz_anchor.c
+- fuzz/fuzz_css_import.c
+- fuzz/fuzz_dom.c
+- fuzz/fuzz_html_parse.c
+- fuzz/fuzz_js_dom.c
+- fuzz/fuzz_js_geom.c
+- fuzz/fuzz_js_sandbox.c
+- fuzz/fuzz_web_storage.c
+- include/anchor.h
 - include/css_import.h
 - include/dom.h
-- include/fb_cmdline.h
-- include/freebug.h
 - include/html_parse.h
 - include/js_dom.h
 - include/js_env.h
@@ -41,11 +56,16 @@ tests groups 14 files (c) around scan, test_plain_url, test_url_forms, test_lobs
 - include/js_native.h
 - include/js_sandbox.h
 - include/js_trusted.h
+- include/os_sandbox.h
+- include/renderer.h
+- include/sha2.h
+- include/subreq_batch.h
 - include/url.h
+- include/util.h
 - include/web_storage.h
+- src/anchor.c
 - src/css_import.c
-- src/fb_cmdline.c
-- src/freebug.c
+- src/dom.c
 - src/html_parse.c
 - src/js_custom_elements.c
 - src/js_custom_elements.h
@@ -64,13 +84,16 @@ tests groups 14 files (c) around scan, test_plain_url, test_url_forms, test_lobs
 - src/js_native_internal.h
 - src/js_sandbox.c
 - src/js_trusted.c
+- src/os_sandbox.c
+- src/renderer.c
+- src/sha2.c
+- src/subreq_batch.c
 - src/tab.c
 - src/url.c
 - src/web_storage.c
+- tests/test_anchor.c
 - tests/test_css_import.c
 - tests/test_dom.c
-- tests/test_fb_cmdline.c
-- tests/test_freebug.c
 - tests/test_html_parse.c
 - tests/test_js_dom.c
 - tests/test_js_env.c
@@ -78,6 +101,10 @@ tests groups 14 files (c) around scan, test_plain_url, test_url_forms, test_lobs
 - tests/test_js_intl.c
 - tests/test_js_native.c
 - tests/test_js_sandbox.c
+- tests/test_os_sandbox.c
+- tests/test_renderer.c
+- tests/test_sha2.c
+- tests/test_subreq_batch.c
 - tests/test_tab.c
 - tests/test_url.c
 - tests/test_web_storage.c

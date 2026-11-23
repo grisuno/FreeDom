@@ -66,7 +66,7 @@
 
 ### `order`
 
-`function` | [src/js_dom_ext.c:1363](../../src/js_dom_ext.c#L1363)
+`function` | [src/js_dom_ext.c:1365](../../src/js_dom_ext.c#L1365)
 
 ```c
 * run in insertion order (HTML's "list of scripts that will execute in order as soon as * possible"). Modules go through import(). A throw is reported like any uncaught * error and never propagates into the inserting script. Bounds: 4096 started scripts. */ static const char JDX_DYNSCRIPT_SHIM[] = "(function()
@@ -86,7 +86,7 @@
 
 ### `jdx_install`
 
-`function` | [src/js_dom_ext.c:1429](../../src/js_dom_ext.c#L1429)
+`function` | [src/js_dom_ext.c:1431](../../src/js_dom_ext.c#L1431)
 
 ```c
 int jdx_install(JSContext *ctx)
@@ -106,7 +106,7 @@ int jdx_install(JSContext *ctx)
 
 ### `jd_install_repl_api`
 
-`function` | [src/js_dom_ext.c:1438](../../src/js_dom_ext.c#L1438)
+`function` | [src/js_dom_ext.c:1440](../../src/js_dom_ext.c#L1440)
 
 ```c
 jd_status jd_install_repl_api(js_context *ctx)
@@ -126,7 +126,7 @@ jd_status jd_install_repl_api(js_context *ctx)
 
 ### `jd_set_repl_css`
 
-`function` | [src/js_dom_ext.c:1446](../../src/js_dom_ext.c#L1446)
+`function` | [src/js_dom_ext.c:1448](../../src/js_dom_ext.c#L1448)
 
 ```c
 jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
@@ -148,7 +148,7 @@ jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
 
 ### `jd_install_geolocation`
 
-`function` | [src/js_dom_ext.c:1459](../../src/js_dom_ext.c#L1459)
+`function` | [src/js_dom_ext.c:1461](../../src/js_dom_ext.c#L1461)
 
 ```c
 jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)
@@ -171,7 +171,7 @@ jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double
 
 ### `jd_install_indexeddb`
 
-`function` | [src/js_dom_ext.c:1478](../../src/js_dom_ext.c#L1478)
+`function` | [src/js_dom_ext.c:1480](../../src/js_dom_ext.c#L1480)
 
 ```c
 jd_status jd_install_indexeddb(js_context *ctx)
