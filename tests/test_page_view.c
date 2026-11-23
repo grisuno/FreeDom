@@ -2374,6 +2374,52 @@ static void test_build_input_bare_chrome(void **state) {
     hp_document_free(doc);
 }
 
+/* `float` does not apply to a flex item (Flexbox 1 section 4): jkanime's floated switch
+ * inside a `.row` stays on the row's line instead of founding a float band. */
+static void test_build_float_ignored_in_flex_item(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>.r{display:flex}.f{float:left;width:63px}</style></head><body>"
+        "<div class=\"r\"><div class=\"f\">sw</div><div>field</div></div>"
+        "<div><div class=\"f\">real</div></div></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *sw = find_text(v, "sw");
+    const pv_run *re = find_text(v, "real");
+    assert_non_null(sw); assert_non_null(re);
+    assert_int_equal(sw->float_side, 0);
+    assert_int_equal(sw->float_id, -1);
+    assert_int_equal(re->float_side, CSS_FLOAT_LEFT);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* A text field whose author frame replaces the native one keeps the UA Field background
+ * unless the author set one; an author background and a button are left alone. */
+static void test_build_input_keeps_ua_field_background(void **state) {
+    (void)state;
+    hp_document *doc = parse(
+        "<html><head><style>.a{border:0;border-radius:25px}.b{border-radius:4px;"
+        "background:#123456}.c{border:0;background:transparent}</style></head><body>"
+        "<p><input class=\"a\" placeholder=\"ra\"></p>"
+        "<p><input class=\"b\" placeholder=\"rb\"></p>"
+        "<p><input class=\"c\" placeholder=\"rc\"></p></body></html>");
+    pv_view *v = NULL;
+    assert_int_equal(pv_build(doc, &v), PV_OK);
+    const pv_run *a = find_text(v, "ra");
+    const pv_run *b = find_text(v, "rb");
+    const pv_run *c = find_text(v, "rc");
+    assert_non_null(a); assert_non_null(b); assert_non_null(c);
+    assert_true(a->own_box_id >= 0);
+    assert_int_equal(pv_box_at(v, (size_t)a->own_box_id)->bg_rgb, PV_UA_FIELD_BG);
+    assert_true(b->own_box_id >= 0);
+    assert_int_equal(pv_box_at(v, (size_t)b->own_box_id)->bg_rgb, 0x123456);
+    if (c->own_box_id >= 0)
+        assert_int_not_equal(pv_box_at(v, (size_t)c->own_box_id)->bg_rgb, PV_UA_FIELD_BG);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* A styled text field records its own box and its ::placeholder style. */
 static void test_build_input_own_box_and_placeholder(void **state) {
     (void)state;
@@ -5931,6 +5977,8 @@ int main(void) {
         cmocka_unit_test(test_root_insets),
         cmocka_unit_test(test_build_inline_block_row_alignment),
         cmocka_unit_test(test_build_input_own_box_and_placeholder),
+        cmocka_unit_test(test_build_float_ignored_in_flex_item),
+        cmocka_unit_test(test_build_input_keeps_ua_field_background),
         cmocka_unit_test(test_build_input_bare_chrome),
         cmocka_unit_test(test_build_img_loading_lazy_is_recorded),
         cmocka_unit_test(test_build_inline_block_row_ignores_oof_child),

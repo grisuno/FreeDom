@@ -1644,3 +1644,32 @@ entonces se pintan las dos cajas, como en Firefox (sonda `nested-inline-pills`).
 UA de bloque) con `width` px declarado aporta ese ancho de contenido a la medida del ítem que lo
 contiene (Sizing 3 §5.1), haya texto o no; el padding lo suma `item_inner_inset`. Un `%` es cíclico
 (= auto). Sonda `flex-sized-block-item`.
+
+### `float` no se aplica a un ítem flex/grid (tanda 100, 2026-11-23)
+
+Flexbox 1 §4 / Grid 1 §6.1: un hijo de un contenedor flex o grid es un ítem y su `float` no tiene
+efecto. El paseo de contexto fundaba una banda de flotante igual: el interruptor de modo oscuro de
+jkanime (`.switchBtn{float:left}` dentro de un `.row` de Bootstrap) abría una banda y el buscador
+bajaba a la línea siguiente, con la píldora pintada como una franja negra de 530 px. Ahora el
+fundador se descarta si el padre del elemento es un contenedor de autor
+(`parent_is_author_container`). `test_build_float_ignored_in_flex_item`.
+
+### Un campo de texto conserva el fondo UA `Field` (tanda 100)
+
+Un `<input>`/`<textarea>` de texto cuyo marco de autor reemplaza el nativo (marco anulado, un
+borde o un radio: el pintor deja de dibujar el campo propio) sigue teniendo el
+`background-color: Field` del UA salvo que el autor declare uno (HTML Rendering §15.5.15). Se
+pinta blanco (`PV_UA_FIELD_BG`) en la caja propia; `transparent` (−3) y un color de autor se
+respetan; botones, casillas y `<select>` no se tocan. Antes el buscador redondeado de jkanime
+(`border:0;border-radius:25px`) era transparente. `test_build_input_keeps_ua_field_background`.
+
+### Ancho encogido de una caja fuera de flujo (tanda 100)
+
+Una caja `absolute`/`fixed` con `width:auto` mide su max-content (CSS 2.2 §10.3.7) con la misma
+función que todo shrink-to-fit (`box_shrink_width`), que suma el padding/borde de las cajas entre
+el texto y la caja. Y en la medida (`measure_item_w_at`) dos runs bajo **distintos** contenedores
+flex/grid de nivel bloque (el más externo, no una fila anónima) van en líneas distintas: cada
+contenedor es una caja de bloque. La barra lateral fija de jkanime (un `<a display:flex>` por
+entrada) medía «Inicio Directorio Comunidad» como una línea sin padding: 272 px contra 96 en
+Firefox, y tapaba el reproductor. Mismo efecto en la píldora «Log in» de Discord (46 → 80 px) y
+en la cabecera de Wikipedia (66 px con el logo a +14, = Firefox).

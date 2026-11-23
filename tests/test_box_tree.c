@@ -1077,6 +1077,94 @@ static pv_box_def dbox(int parent, int position, int z) {
     return b;
 }
 
+/* CSS 2.1 App E: a positioned descendant paints INSIDE its ancestor's stacking context.
+ * jkanime: the dark-mode pill (absolute, z auto) inside a z-index:101 fixed header was
+ * sorted by its own z (0) and painted BELOW the header, which covered it. */
+static void test_positioned_nests_in_ancestor_context(void **state) {
+    (void)state;
+    pv_box_def bx[6] = {
+        dbox(-1, BT_POS_FIXED, 101),           /* 0 header */
+        dbox(0, 0, PV_LEN_UNSET),              /* 1 static wrapper */
+        dbox(1, BT_POS_RELATIVE, 5),           /* 2 switch label, own context */
+        dbox(2, BT_POS_ABSOLUTE, PV_LEN_UNSET),/* 3 pill inside the label */
+        dbox(-1, BT_POS_ABSOLUTE, 0),          /* 4 later root, z 0 */
+        dbox(-1, BT_POS_ABSOLUTE, 200),        /* 5 later root, z 200 */
+    };
+    for (size_t i = 0; i < 6; ++i) bx[i].opacity = -1;
+    double gx[6] = {0}, gy[6] = {0}, gw[6] = {10, 10, 10, 10, 10, 10}, gh[6] = {10, 10, 10, 10, 10, 10};
+    char placed[6] = {1, 1, 1, 1, 1, 1};
+    bt_positioned out[8];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(bx, 6, gx, gy, gw, gh, NULL, NULL, placed,
+                                               800, 600, out, 8, &cnt), BT_OK);
+    assert_int_equal(cnt, 5);
+    /* Both nest in the fixed header; the relative label does not capture (in flow). */
+    const size_t want[5] = { 4, 0, 3, 2, 5 };
+    for (size_t i = 0; i < 5; ++i) assert_int_equal(out[i].box_index, want[i]);
+}
+
+/* Inside an out-of-flow context its children keep their own z order; a negative-z box
+ * stays in the flat prefix painted behind the flow (owned-negz, tanda 47). */
+static void test_nested_context_orders_its_children(void **state) {
+    (void)state;
+    pv_box_def bx[5] = {
+        dbox(-1, BT_POS_ABSOLUTE, 3),          /* 0 context */
+        dbox(0, BT_POS_ABSOLUTE, 2),           /* 1 */
+        dbox(0, BT_POS_ABSOLUTE, PV_LEN_UNSET),/* 2 */
+        dbox(-1, BT_POS_ABSOLUTE, 2),          /* 3 root, z 2: below the z 3 context */
+        dbox(0, BT_POS_ABSOLUTE, -1),          /* 4 negative: flat prefix */
+    };
+    for (size_t i = 0; i < 5; ++i) bx[i].opacity = -1;
+    double g0[5] = {0}, g1[5] = {10, 10, 10, 10, 10};
+    char placed[5] = {1, 1, 1, 1, 1};
+    bt_positioned out[5];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(bx, 5, g0, g0, g1, g1, NULL, NULL, placed,
+                                               800, 600, out, 5, &cnt), BT_OK);
+    assert_int_equal(cnt, 5);
+    const size_t want[5] = { 4, 3, 0, 2, 1 };
+    for (size_t i = 0; i < 5; ++i) assert_int_equal(out[i].box_index, want[i]);
+}
+
+/* fuzz-bt: a box inside a negative-z context is rooted at that context (which stays in
+ * the root-level negative prefix), never before it. */
+static void test_child_of_negative_context_follows_it(void **state) {
+    (void)state;
+    pv_box_def bx[3] = {
+        dbox(2, BT_POS_ABSOLUTE, -10),         /* 0: negative, inside 2 */
+        dbox(0, BT_POS_ABSOLUTE, 0),           /* 1: child of 0 */
+        dbox(-1, BT_POS_ABSOLUTE, -46),        /* 2: root negative */
+    };
+    for (size_t i = 0; i < 3; ++i) bx[i].opacity = -1;
+    double g0[3] = {0}, g1[3] = {10, 10, 10};
+    char placed[3] = {1, 1, 1};
+    bt_positioned out[3];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(bx, 3, g0, g0, g1, g1, NULL, NULL, placed,
+                                               800, 600, out, 3, &cnt), BT_OK);
+    const size_t want[3] = { 2, 0, 1 };
+    for (size_t i = 0; i < 3; ++i) assert_int_equal(out[i].box_index, want[i]);
+}
+
+/* A relative (in-flow) context does not capture: its subtree is deferred by the painter. */
+static void test_relative_context_does_not_capture(void **state) {
+    (void)state;
+    pv_box_def bx[3] = {
+        dbox(-1, BT_POS_RELATIVE, 5),          /* 0 */
+        dbox(0, BT_POS_ABSOLUTE, PV_LEN_UNSET),/* 1 */
+        dbox(-1, BT_POS_ABSOLUTE, 1),          /* 2 */
+    };
+    for (size_t i = 0; i < 3; ++i) bx[i].opacity = -1;
+    double g0[3] = {0}, g1[3] = {10, 10, 10};
+    char placed[3] = {1, 1, 1};
+    bt_positioned out[3];
+    size_t cnt = 0;
+    assert_int_equal(bt_resolve_positioning_ex(bx, 3, g0, g0, g1, g1, NULL, NULL, placed,
+                                               800, 600, out, 3, &cnt), BT_OK);
+    const size_t want[3] = { 1, 2, 0 };
+    for (size_t i = 0; i < 3; ++i) assert_int_equal(out[i].box_index, want[i]);
+}
+
 static void test_defer_relative_after_abs(void **state) {
     (void)state;
     /* 0: abs backdrop, 1: wrapper (static), 2: relative section, 3: card inside it. */
@@ -1264,6 +1352,10 @@ int main(void) {
         cmocka_unit_test(test_defer_nested_higher_z_keeps_own_turn),
         cmocka_unit_test(test_defer_uses_tree_order_not_index),
         cmocka_unit_test(test_defer_fails_open),
+        cmocka_unit_test(test_positioned_nests_in_ancestor_context),
+        cmocka_unit_test(test_nested_context_orders_its_children),
+        cmocka_unit_test(test_relative_context_does_not_capture),
+        cmocka_unit_test(test_child_of_negative_context_follows_it),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

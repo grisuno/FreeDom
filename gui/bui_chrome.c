@@ -854,3 +854,59 @@ void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, co
     }
     cairo_restore(cr);
 }
+
+#define BUI_VBAR_ALPHA   0.55  /* bar background over the picture */
+#define BUI_VTRACK_ALPHA 0.35  /* unplayed part of the track */
+#define BUI_VKNOB_R      6.0
+#define BUI_VTEXT_SIZE   12.0
+
+void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos, double total) {
+    if (cr == NULL || g == NULL || g->bar.w <= 0.0) return;
+    cairo_save(cr);
+    cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, BUI_VBAR_ALPHA);
+    cairo_rectangle(cr, g->bar.x, g->bar.y, g->bar.w, g->bar.h);
+    cairo_fill(cr);
+
+    /* Play when paused, pause bars while playing: the button shows what a click does. */
+    double cx = g->play.x + g->play.w / 2.0, cy = g->play.y + g->play.h / 2.0;
+    double s = g->play.h * 0.32;
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    if (paused) {
+        cairo_move_to(cr, cx - s * 0.8, cy - s);
+        cairo_line_to(cr, cx - s * 0.8, cy + s);
+        cairo_line_to(cr, cx + s, cy);
+        cairo_close_path(cr);
+    } else {
+        cairo_rectangle(cr, cx - s * 0.8, cy - s, s * 0.55, 2.0 * s);
+        cairo_rectangle(cr, cx + s * 0.25, cy - s, s * 0.55, 2.0 * s);
+    }
+    cairo_fill(cr);
+
+    double frac = (total > 0.0) ? vcl_clamp_frac(pos / total) : 0.0;
+    cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, BUI_VTRACK_ALPHA);
+    bui_round_rect(cr, g->track.x, g->track.y, g->track.w, g->track.h, g->track.h / 2.0);
+    cairo_fill(cr);
+    if (total > 0.0) {
+        double px = g->track.x + g->track.w * frac;
+        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+        bui_round_rect(cr, g->track.x, g->track.y, px - g->track.x, g->track.h, g->track.h / 2.0);
+        cairo_fill(cr);
+        cairo_arc(cr, px, g->track.y + g->track.h / 2.0, BUI_VKNOB_R, 0.0, BUI_TWO_PI);
+        cairo_fill(cr);
+    }
+
+    if (g->text_x + VCL_TEXT_W <= g->bar.x + g->bar.w + 0.5) {
+        char a[16], b[16], line[40];
+        vcl_format_time(pos, a, sizeof a);
+        vcl_format_time(total, b, sizeof b);
+        int n = (total > 0.0) ? snprintf(line, sizeof line, "%s / %s", a, b)
+                              : snprintf(line, sizeof line, "%s", a);
+        if (n > 0 && (size_t)n < sizeof line) {
+            bui_chrome_font(cr, BUI_VTEXT_SIZE);
+            cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+            cairo_move_to(cr, g->text_x, g->text_y);
+            cairo_show_text(cr, line);
+        }
+    }
+    cairo_restore(cr);
+}

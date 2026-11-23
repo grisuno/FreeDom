@@ -262,3 +262,32 @@ int    cx_span_visible(double top, double h, double reach, double view_top, doub
 En el pintor, un hijo de contexto fuera de pantalla no pinta su decoración ni sus filas
 directas, pero se marca hecho igual que antes y su subárbol se sigue recorriendo con las mismas
 reglas (un nieto puede estar en pantalla aunque su padre no).
+
+## Anidado de contextos en el orden posicionado (tanda 100)
+
+`bt_resolve_positioning_ex` ordenaba la lista posicionada en plano por (capa, z, orden de
+árbol). Una caja `z-index:auto` dentro de un `position:fixed; z-index:101` (la píldora del modo
+oscuro de jkanime, dentro de su cabecera) quedaba con z 0 **debajo** de la cabecera que la
+contiene, y la cabecera la tapaba. CSS 2.1 App. E pinta a un descendiente dentro del contexto de
+su ancestro.
+
+- **Dado** una caja posicionada con ancestros **fuera de flujo** (absolute/fixed) que forman
+  contexto, **cuando** se ordena, **entonces** su clave es la cadena de claves de esos ancestros
+  (el más externo primero) más la suya; se comparan nivel a nivel y un prefijo va antes. Así el
+  subárbol de un contexto queda junto, justo después del contexto, y en su propio
+  (capa, z, orden) dentro de él.
+- Un ancestro `relative` (en flujo) **no** captura: su subárbol lo pinta la pasada diferida
+  (`bt_defer_roots`) o la sub-maquetación del ancestro fuera de flujo.
+- Una caja con z negativo conserva su lugar plano: el prefijo inicial z<0 es lo que el pintor
+  dibuja detrás del flujo (con su dueño, `negz_owner_box`). El subárbol de un contexto negativo se
+  enraíza en él (no en los ancestros de ese contexto), o un hijo se ordenaría antes que su propio
+  contexto (hallado por `fuzz-bt`).
+- El pintor salta solo el **prefijo** z<0 en la pasada posicionada; un hijo negativo que quedó
+  dentro de un contexto positivo se pinta en su lugar.
+- Profundidad de la cadena acotada (`BT_SC_DEPTH` 16, se conservan los niveles externos);
+  sin memoria, queda el orden plano (falla abierto: el comportamiento anterior).
+
+Pruebas: `test_positioned_nests_in_ancestor_context`, `test_nested_context_orders_its_children`,
+`test_relative_context_does_not_capture`, `test_child_of_negative_context_follows_it`
+(`tests/test_box_tree.c`); `make fuzz-bt` (árboles hostiles con ciclos: la salida es una
+permutación y toda caja sigue a sus contextos fuera de flujo).

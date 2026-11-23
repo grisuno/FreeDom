@@ -147,3 +147,14 @@ Dado-Cuando-Entonces:
 Fuera de alcance: unidades `cqw`/`cqi`, `style()`, consultas de alto, `::before`/`::after`
 dentro de `@container` con contenedor conocido (siguen con la cota), custom properties
 declaradas dentro de `@container` (cota), hosts no confiables.
+
+## Ancho del viewport en la ventana (tanda 100)
+
+`width` de una media query es el del viewport **incluida** la barra de desplazamiento (Media
+Queries 4 §4.1), y las unidades `vw` miden el bloque contenedor inicial suponiendo que no hay
+barras (CSS Values 4 §6.1.2). La ventana restaba su canal de barra (12 px): a 1012 px de ventana
+las consultas veían 1000, así que jkanime aplicaba sus reglas `max-width:1000px` (menú de móvil,
+"Buscar" en la barra lateral) y GitHub no llegaba a su `min-width:1012px`; Firefox ve 1012. La
+ventana pasa ahora `gui_viewport_w` = ancho de la ventana; el ancho de pintado sigue siendo
+`content_width()`. El headless no cambia: su lienzo ES el viewport, sin canal (como el Firefox
+headless del arnés de paridad).

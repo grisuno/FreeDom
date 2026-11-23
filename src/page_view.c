@@ -1632,6 +1632,17 @@ static int pv_control_frame_cleared(const css_style *cs) {
            border_side_cleared(cs->border_left_width, cs->border_left_style);
 }
 
+/* A text field whose author frame replaces the native chrome (frame cleared, a border
+ * or a radius: the painter then draws no field of its own) still has the UA's
+ * `background-color: Field` unless the author set one (HTML Rendering 15.5.15): Firefox
+ * paints jkanime's `border:0;border-radius:25px` search box white, not see-through. */
+static void ua_field_background(pv_box_def *d, int frame_cleared) {
+    if (d == NULL || d->bg_rgb != -1 || d->grad_n > 0 || d->bg_image_url[0] != '\0') return;
+    int framed = frame_cleared || d->border_radius > 0 || d->bord_tw > 0 || d->bord_rw > 0
+              || d->bord_bw > 0 || d->bord_lw > 0;
+    if (framed) d->bg_rgb = PV_UA_FIELD_BG;
+}
+
 static int css_has_boxdeco(const css_style *cs) {
     /* A ZERO-valued edge is not decoration: `padding: 0` / `border: 0` (the
      * universal reset half the web ships) paints nothing and insets nothing, and
@@ -3987,8 +3998,13 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * the painter groups the runs of one floated element into one column. A run
              * inside an out-of-flow (absolute/fixed) subtree is excluded: it is placed
              * by the positioner, not the float column. */
+            /* `float` does not apply to a flex/grid item (Flexbox 1 section 4, Grid 1
+             * section 6.1): the item stays in its container's line. jkanime's dark-mode
+             * switch (`float:left` inside a Bootstrap `.row`) became a float band and
+             * pushed the search field to the next line. */
             if (!oof_seen && float_reg != NULL && is_block_like_style(t, cs) &&
                 (cs->float_side == CSS_FLOAT_LEFT || cs->float_side == CSS_FLOAT_RIGHT) &&
+                !parent_is_author_container(p, sheet, style_cache) &&
                 /* ...unless it is the lone item of its parent's anonymous row, which
                  * places it (see is_float_container_style). */
                 !(is_float_container_style(cs) && p->parent != NULL &&
@@ -6450,6 +6466,9 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                     pv_set_input_placeholder(v, pv_placeholder_color(&ph));
                     v->runs[v->count - 1].ctl_bare = pv_control_frame_cleared(
                         cached_element_style_ref(el, sheet, &cache));
+                    if ((itype == PV_IN_TEXT || itype == PV_IN_PASSWORD || itype == PV_IN_TEXTAREA)
+                        && v->runs[v->count - 1].own_box_id == bdeco && bdeco >= 0)
+                        ua_field_background(&box_reg.def[bdeco], v->runs[v->count - 1].ctl_bare);
                 }
                 pv_set_node_id(v, pv_node_map_id(&node_map, n));
                 continue;

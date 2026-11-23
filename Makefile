@@ -128,9 +128,9 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
                $(BUILD_DIR)/test_css_counter $(BUILD_DIR)/test_sheet_cache \
                $(BUILD_DIR)/test_net_guard $(BUILD_DIR)/test_chrome_layout $(BUILD_DIR)/test_site_panel $(BUILD_DIR)/test_nav_token \
                $(BUILD_DIR)/test_mask_cache $(BUILD_DIR)/test_exact_key \
-               $(BUILD_DIR)/test_find_text $(BUILD_DIR)/test_video_pick
+               $(BUILD_DIR)/test_find_text $(BUILD_DIR)/test_video_pick $(BUILD_DIR)/test_video_controls
 
-.PHONY: gscroll fuzz-hls fuzz-nt fuzz-sp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: gscroll fuzz-bt fuzz-vcl fuzz-hls fuzz-nt fuzz-sp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -480,6 +480,10 @@ $(BUILD_DIR)/test_find_text: $(TEST_DIR)/test_find_text.c $(BUILD_DIR)/find_text
 $(BUILD_DIR)/test_chrome_layout: $(TEST_DIR)/test_chrome_layout.c $(BUILD_DIR)/chrome_layout.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
 
+# Browser player bar geometry + time math (spec/video_controls.md). Pure.
+$(BUILD_DIR)/test_video_controls: $(TEST_DIR)/test_video_controls.c $(BUILD_DIR)/video_controls.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
+
 # Per-tab navigation identity shared with the fetch threads (spec/nav_token.md).
 $(BUILD_DIR)/test_nav_token: $(TEST_DIR)/test_nav_token.c $(BUILD_DIR)/nav_token.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lpthread
@@ -707,7 +711,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_i
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/pres_hints.o $(BUILD_DIR)/sheet_cache.o $(BUILD_DIR)/css_chain.o $(QJS_OBJ) \
-                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/net_guard.o $(BUILD_DIR)/chrome_layout.o $(BUILD_DIR)/site_panel.o $(BUILD_DIR)/nav_token.o $(BUILD_DIR)/find_text.o $(BUILD_DIR)/video_pick.o $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/url.o \
+                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/net_guard.o $(BUILD_DIR)/chrome_layout.o $(BUILD_DIR)/site_panel.o $(BUILD_DIR)/nav_token.o $(BUILD_DIR)/find_text.o $(BUILD_DIR)/video_pick.o $(BUILD_DIR)/video_controls.o $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/url.o \
                       $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
                       $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
                       $(BUILD_DIR)/request_policy.o \
@@ -1067,6 +1071,22 @@ fuzz-hls: $(PSL_OBJ) | $(BUILD_DIR)
 	  $(FUZZ_DIR)/fuzz_hls.c $(SRC_DIR)/hls.c $(SRC_DIR)/request_policy.c $(PSL_OBJ) \
 	  -o $(BUILD_DIR)/fuzz_hls
 	./$(BUILD_DIR)/fuzz_hls -max_total_time=30 -rss_limit_mb=2048
+
+# Positioned paint order (spec/compositor.md "Anidado"): hostile box trees, cycles
+# included; a permutation, every box after its out-of-flow stacking contexts.
+fuzz-bt: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_box_tree.c $(SRC_DIR)/box_tree.c $(SRC_DIR)/compositor.c $(SRC_DIR)/box_style.c \
+	  $(SRC_DIR)/flex_layout.c $(SRC_DIR)/block_flow.c -lm -o $(BUILD_DIR)/fuzz_box_tree
+	./$(BUILD_DIR)/fuzz_box_tree -max_total_time=30 -rss_limit_mb=2048
+
+# Player bar (spec/video_controls.md): hostile playlist durations, rects, pointers and
+# PTS; every output finite and in range.
+fuzz-vcl: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_video_controls.c $(SRC_DIR)/video_controls.c -lm \
+	  -o $(BUILD_DIR)/fuzz_video_controls
+	./$(BUILD_DIR)/fuzz_video_controls -max_total_time=30 -rss_limit_mb=2048
 
 # Video pick (spec/video_pick.md) is pure selection over views already fuzzed by
 # fuzz-pv; covered by its unit suite.

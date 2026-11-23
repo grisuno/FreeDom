@@ -317,6 +317,7 @@ typedef struct tab_ctx {
 } tab_ctx;
 
 #include "hls.h"
+#include "video_controls.h"
 
 typedef struct browser_window {
     struct wl_display    *display;
@@ -613,6 +614,16 @@ typedef struct browser_window {
     uint64_t      video_due_ms;    /* when the last-read frame is due on screen */
     uint64_t      video_last_paint_ms; /* paint rate limiter: last video repaint */
     uint64_t      video_paint_cost_ms; /* measured cost of that repaint */
+    /* Browser player bar (spec/video_controls.md). */
+    int           video_paused;    /* nonzero: the decoder fd leaves the poll set */
+    size_t        video_start_seg; /* segment the feeder (re)started from */
+    double        video_base_s;    /* start time of that segment */
+    double        video_total_s;   /* sanitised playlist duration */
+    int64_t       video_pts0_us;   /* PTS of the first frame since (re)start */
+    int64_t       video_pts_us;    /* PTS of the frame on screen */
+    int           video_pts0_set;
+    vcl_rect      video_rect;      /* last painted video rect, window coordinates */
+    int           video_rect_ok;   /* nonzero once painted this playback */
     /* Audio output: aplay subprocess for PCM S16LE playback. Spawned on first
      * audio frame, killed on video_stop. */
     pid_t         audio_pid;       /* audio sink child PID, 0 = not running */
@@ -1222,10 +1233,12 @@ static int host_from_url(const char *url, char *out, size_t outsz) {
 
 /* Video playback functions (defined below; forward declarations for render path). */
 static void video_stop(browser_window *w);
-static int blit_video_frame(cairo_t *cr, const browser_window *w,
+static int blit_video_frame(cairo_t *cr, browser_window *w,
                             double x, double y, double wd, double h);
 static int  video_play(browser_window *w, const char *m3u8_url);
 static void *video_feeder_thread(void *arg);
+static int  video_pipeline_up(browser_window *w, size_t start_seg);
+static void video_pipeline_down(browser_window *w);
 /* Audio output helpers (called from video_read_frame and video_stop). */
 static void audio_stop(browser_window *w);
 /* Fullscreen toggle: ALT+ENTER switches the window between windowed and
@@ -2742,6 +2755,15 @@ static void drop_repl_worker(browser_window *w) {
  * a few seconds of animation, plenty for progressive-render patterns. */
 #define JS_TICKS_PER_LOAD 240
 
+/* The viewport width @media and the viewport units see: the WINDOW width, scrollbar
+ * gutter included (Media Queries 4 §4.1 "including the size of a rendered scroll bar";
+ * CSS Values 4 §6.1.2: scrollbars are assumed not to exist). Firefox at a 1012 px window
+ * matches min-width:1012px and never max-width:1000px; subtracting our gutter put jkanime
+ * and GitHub on their narrow breakpoint. The paint width is still content_width(). */
+static int gui_viewport_w(const browser_window *w) {
+    return (w->width > 0) ? w->width : 0;
+}
+
 /* Schedules the next JS timer tick from the worker's reported smallest pending
  * delay (tab_page.next_timer_ms; < 0 = nothing pending). The event loop fires it
  * through the poll timeout; a 16 ms floor keeps a 0 ms chain from busy-spinning. */
@@ -2825,9 +2847,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * theme makes the author's @media(prefers-color-scheme:dark) rules apply (auto
      * dark mode). Reader forces a clean view, so it never reports a dark preference. */
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
-    /* @media width queries evaluate against the paint width, so a responsive page picks
-     * the same breakpoint it would in another browser at this window size. */
-    tab_set_viewport_w(t, (int)w->width - (int)UI_SCROLLBAR_W);
+    tab_set_viewport_w(t, gui_viewport_w(w));
     tab_status load_ts = tab_load_full(t, w->cur_html, w->cur_html_len, w->cur_top,
                                        w->caps.js, w->reader, prefers_dark, &page);
 
@@ -6171,6 +6191,25 @@ static double sized_block_content_w(const rd_doc *doc, const rd_block *bk) {
     return (cw > 0.0) ? cw : 0.0;
 }
 
+/* The outermost flex/grid container run bk belongs to, when that container is
+ * block-level (not an anonymous inline-block row), or -1. Two runs under DIFFERENT such
+ * containers sit on different lines of their block flow: each container is a block box,
+ * whatever its own items do inside (jkanime's fixed nav: one `<a display:flex>` per
+ * entry, measured as one line "Inicio Directorio Comunidad" and three times too wide). */
+static int top_block_cont(const rd_doc *doc, const rd_block *bk) {
+    int top = -1;
+    size_t nc = rd_cont_count(doc);
+    for (int c = bk->cont_id, n = 0; c >= 0 && (size_t)c < nc && n <= PV_CONT_DEPTH; ++n) {
+        const pv_cont_def *cd = rd_cont_at(doc, (size_t)c);
+        if (cd == NULL) break;
+        top = c;
+        c = cd->parent_id;
+    }
+    if (top < 0) return -1;
+    const pv_cont_def *td = rd_cont_at(doc, (size_t)top);
+    return (td != NULL && !td->anon_row) ? top : -1;
+}
+
 static double measure_item_w_at(cairo_t *cr, const browser_window *w,
                                 const ui_theme *th, const rd_doc *doc,
                                 size_t b0, size_t b1, double measure_w) {
@@ -6191,7 +6230,10 @@ static double measure_item_w_at(cairo_t *cr, const browser_window *w,
         if (bk->kind == RD_INPUT && rd_input_invisible(bk->input_type)) continue;
         if (block_leaves_flow(doc, bk)
             && bt_oof_anchor(doc->boxes, nbx, bk->block_id) != anchor0) continue;
-        if (k > b0 && bk->block_break) flush_line(&M, &si, th);
+        if (k > b0) {
+            int tc = top_block_cont(doc, bk), pc = top_block_cont(doc, rd_at(doc, k - 1));
+            if (bk->block_break || (tc != pc && (tc >= 0 || pc >= 0))) flush_line(&M, &si, th);
+        }
         si.bg_rgb = -1;
         /* A replaced element contributes its own intrinsic box, not the width of its
          * markup/alt flowed as text. An inline-level one is an atom of its line, so
@@ -11305,7 +11347,11 @@ static void position_boxes(cairo_t *cr, const browser_window *w, double content_
             } else if (b->kind == RD_INPUT) {
                 bw = input_box_width(content_w);
             } else {
-                bw = measure_item_content_w(cr, w, th, doc, i, bend) + edges;
+                /* The same max-content measure as any shrink-to-fit box: it also counts
+                 * the padding of the boxes between the text and this one (a padded
+                 * `<a display:flex>` entry is as wide as its label PLUS its padding). */
+                double sw = box_shrink_width(cr, w, th, doc, i, anchor);
+                bw = ((sw > 0.0) ? sw : measure_item_content_w(cr, w, th, doc, i, bend)) + edges;
             }
             if (bw > content_w) bw = content_w;
             /* max-width still bounds a shrink-to-fit box (CSS 2.1 10.4). */
@@ -12208,56 +12254,60 @@ static void audio_stop(browser_window *w) {
     w->audio_ch = 0;
 }
 
-static void video_stop(browser_window *w) {
-    if (w == NULL) return;
-
+/* Tears the decoder + feeder pipeline down, keeping the playlist, base URL and host frame
+ * (a seek restarts from them). The decoder dies FIRST: a feeder blocked writing a segment
+ * into a decoder that is itself blocked on its full output pipe (paused, or the held frame
+ * not yet due) would never return, and the join would hang the event loop. With the reader
+ * gone the write fails with EPIPE (SIGPIPE is ignored) and the thread exits. */
+static void video_pipeline_down(browser_window *w) {
     audio_stop(w);
-
-    /* Tell the feeder thread to exit, then wait for it. */
     w->video_active = 0;
+    if (w->decoder_pid > 0) {
+        kill(w->decoder_pid, SIGKILL);
+        waitpid(w->decoder_pid, NULL, 0);
+    }
     if (w->video_thread != 0) {
-        /* Wake the eventfd so the thread doesn't deadlock waiting for a pipe
-         * that the main thread already polled. The thread checks video_active
-         * before writing and will see 0 and exit. */
         uint64_t one = 1;
         ssize_t wr = write(w->video_evfd, &one, sizeof one);
         (void)wr;
         pthread_join(w->video_thread, NULL);
         w->video_thread = 0;
     }
+    if (w->decoder_cmd_fd >= 0) close(w->decoder_cmd_fd);
+    if (w->decoder_out_fd >= 0) close(w->decoder_out_fd);
+    if (w->video_evfd >= 0) close(w->video_evfd);
+    w->video_evfd = -1;
+    w->decoder_pid = 0;
+    w->decoder_cmd_fd = -1;
+    w->decoder_out_fd = -1;
+    w->video_pending = 0;
+    w->video_eof = 0;
+    w->video_paused = 0;
+    w->video_pts0_set = 0;
+    memset(&w->video_pacer, 0, sizeof w->video_pacer);
+    w->video_due_ms = 0;
+    w->video_last_paint_ms = 0;
+    w->video_paint_cost_ms = 0;
+}
 
-    if (w->decoder_pid > 0) {
-        uint8_t q = MD_QUIT;
-        (void)v_write(w->decoder_cmd_fd, &q, 1);
-        int st;
-        waitpid(w->decoder_pid, &st, WNOHANG);
-        close(w->decoder_cmd_fd);
-        close(w->decoder_out_fd);
-    }
-    if (w->video_evfd >= 0) {
-        close(w->video_evfd);
-        w->video_evfd = -1;
-    }
+static void video_stop(browser_window *w) {
+    if (w == NULL) return;
+    video_pipeline_down(w);
     free(w->video_frame);
     hls_playlist_free(w->video_pl);
     free(w->video_base_url);
     free(w->video_host_href);
     w->video_host_href = NULL;
-    w->decoder_pid = 0;
-    w->decoder_cmd_fd = -1;
-    w->decoder_out_fd = -1;
     w->video_frame = NULL;
     w->video_w = 0;
     w->video_h = 0;
-    w->video_active = 0;
-    w->video_pending = 0;
     w->video_pl = NULL;
     w->video_base_url = NULL;
-    w->video_eof = 0;
-    memset(&w->video_pacer, 0, sizeof w->video_pacer);
-    w->video_due_ms = 0;
-    w->video_last_paint_ms = 0;
-    w->video_paint_cost_ms = 0;
+    w->video_start_seg = 0;
+    w->video_base_s = 0.0;
+    w->video_total_s = 0.0;
+    w->video_pts_us = 0;
+    w->video_rect_ok = 0;
 }
 
 /* Reads one decoder message from the pipe. Returns 2 when a video frame was
@@ -12315,6 +12365,11 @@ static int video_read_frame(browser_window *w) {
             w->video_w = (int)w32;
             w->video_h = (int)h32;
         }
+        if (!w->video_pts0_set) {
+            w->video_pts0_us = pts_us;
+            w->video_pts0_set = 1;
+        }
+        w->video_pts_us = pts_us;
         /* Pace: schedule this frame's display against the wall clock. */
         w->video_due_ms = md_pace_due_ms(&w->video_pacer, now_ms(), pts_us);
         return 2;
@@ -12389,15 +12444,29 @@ static int video_build_fetch_config(browser_window *w, const char *url, sf_confi
 /* Fetches a single resource (m3u8 or TS segment) under the full policy gates:
  * impersonation, routing, auth, navigability fallbacks. Returns 0 on success;
  * *resp is populated and must be freed with sf_response_free. */
-static sf_status video_fetch(const char *url, browser_window *w,
-                              sf_response *resp) {
+static int video_feed_cancelled(void *ctx) {
+    return !((const browser_window *)ctx)->video_active;
+}
+
+/* cancellable: the feeder's fetches stop as soon as the pipeline is torn down (seek, stop),
+ * so the join never waits out a 10 s segment timeout. */
+static sf_status video_fetch_ex(const char *url, browser_window *w, sf_response *resp,
+                                int cancellable) {
     memset(resp, 0, sizeof *resp);
     sf_config cfg;
     int allowlisted = 0;
     if (!video_build_fetch_config(w, url, &cfg, &allowlisted))
         return SF_ERR_NETWORK;
+    if (cancellable) {
+        cfg.cancel_cb = video_feed_cancelled;
+        cfg.cancel_ctx = w;
+    }
     int dg = 0;
     return fetch_follow_navigable(url, &cfg, resp, &dg, allowlisted);
+}
+
+static sf_status video_fetch(const char *url, browser_window *w, sf_response *resp) {
+    return video_fetch_ex(url, w, resp, 0);
 }
 
 /* Starts video playback from an m3u8 playlist URL. Fetches the playlist,
@@ -12468,21 +12537,37 @@ static int video_play(browser_window *w, const char *m3u8_url) {
     }
     fprintf(stderr, "video_play: pl ok count=%zu\n", pl->count);
 
-    int out_fd = -1, cmd_fd = -1;
-    pid_t pid = 0;
-    if (media_decoder_spawn(&pid, &out_fd, &cmd_fd) != 0) {
-        fprintf(stderr, "video_play: decoder spawn fail\n");
-        hls_playlist_free(pl); free(w->video_base_url); w->video_base_url = NULL;
+    w->video_pl = pl;
+    w->video_total_s = vcl_total(pl);
+    if (video_pipeline_up(w, 0) != 0) {
+        video_stop(w);
         return -1;
     }
-    fprintf(stderr, "video_play: decoder spawned pid=%d\n", (int)pid);
+    return 0;
+}
+
+/* Spawns the decoder and the feeder thread starting at segment start_seg of the
+ * playlist already held in w->video_pl (spec/video_controls.md: a seek re-enters here).
+ * Returns 0, or -1 with the pipeline down (playlist kept: the caller decides). */
+static int video_pipeline_up(browser_window *w, size_t start_seg) {
+    int out_fd = -1, cmd_fd = -1;
+    pid_t pid = 0;
+    if (w->video_pl == NULL || w->video_pl->count == 0) return -1;
+    if (start_seg >= w->video_pl->count) start_seg = w->video_pl->count - 1;
+    if (media_decoder_spawn(&pid, &out_fd, &cmd_fd) != 0) {
+        fprintf(stderr, "video_play: decoder spawn fail\n");
+        return -1;
+    }
     w->decoder_pid = pid;
     w->decoder_out_fd = out_fd;
     w->decoder_cmd_fd = cmd_fd;
     w->video_active = 1;
     w->video_pending = 1;
-    w->video_pl = pl;
     w->video_eof = 0;
+    w->video_paused = 0;
+    w->video_pts0_set = 0;
+    w->video_start_seg = start_seg;
+    w->video_base_s = vcl_segment_start(w->video_pl, start_seg);
 
     /* decoder_out_fd is BLOCKING only for the frame DATA read below; the tag
      * byte and header are read with a temporary restore of non-blocking so
@@ -12492,16 +12577,41 @@ static int video_play(browser_window *w, const char *m3u8_url) {
     if (flags >= 0) fcntl(out_fd, F_SETFL, flags | O_NONBLOCK);
 
     w->video_evfd = eventfd(0, EFD_NONBLOCK);
-    if (w->video_evfd < 0) {
-        video_stop(w);
-        return -1;
-    }
-
-    if (pthread_create(&w->video_thread, NULL, video_feeder_thread, w) != 0) {
-        video_stop(w);
+    if (w->video_evfd < 0
+        || pthread_create(&w->video_thread, NULL, video_feeder_thread, w) != 0) {
+        w->video_thread = 0;
+        video_pipeline_down(w);
         return -1;
     }
     return 0;
+}
+
+/* Seeks to t seconds: the segment containing t is where the feeder restarts (segment
+ * granularity, spec/video_controls.md). The last frame stays on screen meanwhile. */
+static void video_seek_to(browser_window *w, double t) {
+    if (w == NULL || w->video_pl == NULL || w->video_total_s <= 0.0) return;
+    size_t seg = vcl_segment_at(w->video_pl, t, NULL);
+    video_pipeline_down(w);
+    if (video_pipeline_up(w, seg) != 0) video_stop(w);
+}
+
+/* Current playback position, seconds. */
+static double video_position_s(const browser_window *w) {
+    if (!w->video_pts0_set) return w->video_base_s;
+    return vcl_position(w->video_base_s, w->video_pts0_us, w->video_pts_us, w->video_total_s);
+}
+
+/* Pause stops reading the decoder (backpressure stalls decoder and feeder) and drops the
+ * audio sink; resume re-anchors the pacer so the next frame is due now, not "late". */
+static void video_toggle_pause(browser_window *w) {
+    if (w == NULL || !w->video_active) return;
+    w->video_paused = !w->video_paused;
+    if (w->video_paused) {
+        audio_stop(w);
+    } else {
+        memset(&w->video_pacer, 0, sizeof w->video_pacer);
+        w->video_due_ms = 0;
+    }
 }
 
 /* Feeder thread: downloads every TS segment and writes them to the decoder
@@ -12520,7 +12630,7 @@ static void *video_feeder_thread(void *arg) {
     size_t total = w->video_pl->count;
 
     fprintf(stderr, "feeder: starting total=%zu base=%s\n", total, w->video_base_url ? w->video_base_url : "NULL");
-    for (size_t i = 0; i < total; i++) {
+    for (size_t i = w->video_start_seg; i < total; i++) {
         if (!w->video_active) { fprintf(stderr, "feeder: cancelled at seg %zu\n", i); break; }
 
         char abs_url[4096];
@@ -12537,7 +12647,7 @@ static void *video_feeder_thread(void *arg) {
         long off = -1;
         for (int attempt = 0; attempt < 2 && off < 0 && w->video_active; ++attempt) {
             if (attempt > 0) sf_response_free(&resp);
-            sf_status fs = video_fetch(abs_url, w, &resp);
+            sf_status fs = video_fetch_ex(abs_url, w, &resp, 1);
             off = (fs == SF_OK) ? hls_segment_payload(resp.http_code, (const unsigned char *)resp.body,
                                                       resp.body_len)
                                 : -1;
@@ -12551,7 +12661,7 @@ static void *video_feeder_thread(void *arg) {
             char mirror[4096];
             if (hls_mirror_url(w->video_pl, abs_url, m, mirror, sizeof mirror) == 0) break;
             sf_response_free(&resp);
-            sf_status fs = video_fetch(mirror, w, &resp);
+            sf_status fs = video_fetch_ex(mirror, w, &resp, 1);
             off = (fs == SF_OK) ? hls_segment_payload(resp.http_code, (const unsigned char *)resp.body,
                                                       resp.body_len)
                                 : -1;
@@ -12597,7 +12707,34 @@ static void video_draw_rect(const browser_window *w, double *x, double *y,
 /* Blits the current decoded frame aspect-fitted and centred in the rect; 0 when
  * no frame is available yet (the caller paints its placeholder). Shared by the
  * <video> row and a live frame box hosting the playback (spec/video_pick.md). */
-static int blit_video_frame(cairo_t *cr, const browser_window *w,
+/* Records the painted video rect in window coordinates (the space the pointer reports)
+ * and draws the player bar there: always while paused, under the pointer while playing.
+ * Painting in device space keeps the bar the size the hit-test computes at any zoom. */
+static void paint_video_controls(cairo_t *cr, browser_window *w,
+                                 double x, double y, double wd, double h) {
+    /* Only the VISIBLE part of the box: an ancestor's overflow clip can hide its left
+     * edge, and a bar under that clip would have no reachable button. */
+    double cx0, cy0, cx1, cy1;
+    cairo_clip_extents(cr, &cx0, &cy0, &cx1, &cy1);
+    double x0 = fmax(x, cx0), y0 = fmax(y, cy0), x1 = fmin(x + wd, cx1), y1 = fmin(y + h, cy1);
+    if (x1 <= x0 || y1 <= y0) return;
+    cairo_user_to_device(cr, &x0, &y0);
+    cairo_user_to_device(cr, &x1, &y1);
+    w->video_rect = (vcl_rect){ fmin(x0, x1), fmin(y0, y1), fabs(x1 - x0), fabs(y1 - y0) };
+    w->video_rect_ok = 1;
+    int hover = vcl_hit(NULL, &w->video_rect, w->ptr_x, w->ptr_y, NULL) != VCL_HIT_NONE;
+    if (!w->video_paused && !hover) return;
+    vcl_geom g;
+    if (!vcl_layout(w->video_rect.x, w->video_rect.y, w->video_rect.w, w->video_rect.h, &g))
+        return;
+    cairo_save(cr);
+    cairo_identity_matrix(cr);
+    cairo_reset_clip(cr);
+    bui_paint_video_bar(cr, &g, w->video_paused, video_position_s(w), w->video_total_s);
+    cairo_restore(cr);
+}
+
+static int blit_video_frame(cairo_t *cr, browser_window *w,
                             double x, double y, double wd, double h) {
     if (!w->video_active || w->video_frame == NULL || w->video_w <= 0 || w->video_h <= 0
         || wd <= 0.0 || h <= 0.0) return 0;
@@ -12621,6 +12758,7 @@ static int blit_video_frame(cairo_t *cr, const browser_window *w,
     cairo_paint(cr);
     cairo_restore(cr);
     cairo_surface_destroy(surf);
+    paint_video_controls(cr, w, x, y, wd, h);
     return 1;
 }
 
@@ -15520,9 +15658,13 @@ static void paint_positioned_layer(cairo_t *cr, browser_window *w, const ui_them
      * layer -- the in-flow bar of Slashdot's story header then painted OVER its own
      * absolutely positioned byline. */
     char *painted = (paint_deferred != NULL && L->ndefer > 0) ? (char *)calloc(L->ndefer, 1) : NULL;
-    for (size_t i = 0; i < L->npositioned; ++i) {
+    /* Only the leading z<0 run was painted behind the flow: a negative child nested in a
+     * positive context sorts after that context (bt_resolve_positioning_ex) and paints
+     * here, inside it. */
+    size_t neg_prefix = 0;
+    while (neg_prefix < L->npositioned && L->positioned[neg_prefix].z_index < 0) ++neg_prefix;
+    for (size_t i = neg_prefix; i < L->npositioned; ++i) {
         const bt_positioned *pb = &L->positioned[i];
-        if (pb->z_index < 0) continue;  /* already painted behind, above */
         while (painted != NULL) {
             size_t best = (size_t)-1;
             for (size_t q = 0; q < L->ndefer; ++q) {
@@ -16221,9 +16363,10 @@ static long write_doc_pdf(browser_window *w, const char *path) {
              * with a fresh clip stack, so per-page reconciliation is safe. */
             int pdf_pos_ov_stack[OV_MAX_DEPTH] = {0};
             int pdf_pos_ov_depth = 0;
-            for (size_t pi = 0; pi < L.npositioned; ++pi) {
+            size_t pdf_neg = 0;
+            while (pdf_neg < L.npositioned && L.positioned[pdf_neg].z_index < 0) ++pdf_neg;
+            for (size_t pi = pdf_neg; pi < L.npositioned; ++pi) {
                 const bt_positioned *pb = &L.positioned[pi];
-                if (pb->z_index < 0) continue;
                 paint_positioned_one(cr, w, th, pb, PDF_MARGIN, PDF_MARGIN,
                                      -1e9, 2e9, PDF_PAGE_W,
                                      pdf_pos_ov_stack, &pdf_pos_ov_depth, &L);
@@ -17415,9 +17558,25 @@ static void dispatch_click(browser_window *w, double px, double py) {
     /* Prevent re-entrant clicks while video is already playing: the feeder
      * thread writes to decoder pipes and the event loop reads frames. A
      * second video_play would kill the decoder and restart from scratch. */
-    if (w->video_active) { fprintf(stderr, "dispatch_click: already playing\n"); return; }
+    /* While playing, the painted video rect belongs to the browser's player bar
+     * (spec/video_controls.md): it toggles or seeks and never reaches the page; a
+     * click elsewhere is an ordinary page click. */
+    if (w->video_active) {
+        vcl_geom g;
+        int has_bar = w->video_rect_ok
+            && vcl_layout(w->video_rect.x, w->video_rect.y, w->video_rect.w, w->video_rect.h, &g);
+        double frac = 0.0;
+        vcl_hit_kind k = w->video_rect_ok
+            ? vcl_hit(has_bar ? &g : NULL, &w->video_rect, px, py, &frac) : VCL_HIT_NONE;
+        if (k == VCL_HIT_TOGGLE) video_toggle_pause(w);
+        else if (k == VCL_HIT_SEEK) video_seek_to(w, frac * w->video_total_s);
+        if (k != VCL_HIT_NONE) {
+            redraw(w);
+            return;
+        }
+    }
     const char *video_host = NULL;
-    const char *video_url = video_at_point(w, px, py, &video_host);
+    const char *video_url = w->video_active ? NULL : video_at_point(w, px, py, &video_host);
     if (video_url != NULL) {
         /* video_play stops any previous playback (freeing its host) before starting, and does
          * not touch w->doc, so video_host is still a live alias here. */
@@ -19139,7 +19298,7 @@ static tab *freebug_repl_worker(browser_window *w) {
     tab_set_css_allowed(t, wc.css);
     seed_session_cookies(t, wc.cookies, w->cur_top); /* REPL worker sees the same cookies */
     seed_local_storage(w, t, wc.cookies);
-    tab_set_viewport_w(t, (int)w->width - (int)UI_SCROLLBAR_W);
+    tab_set_viewport_w(t, gui_viewport_w(w));
     int prefers_dark = (!w->reader && w->theme_mode == UI_THEME_DARK);
     tab_page page;
     memset(&page, 0, sizeof page);
@@ -20722,6 +20881,19 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
         return;
     }
 
+    /* Player keys while the pointer is over a playing video (spec/video_controls.md):
+     * they win over page scrolling only there, as in Firefox with a focused <video>. */
+    if (!w->url_bar_focused && !ctrl && w->video_active && w->video_rect_ok
+        && vcl_hit(NULL, &w->video_rect, w->ptr_x, w->ptr_y, NULL) != VCL_HIT_NONE) {
+        if (sym == XKB_KEY_space || sym == XKB_KEY_k) { video_toggle_pause(w); redraw(w); return; }
+        if (sym == XKB_KEY_Left || sym == XKB_KEY_Right) {
+            double step = (sym == XKB_KEY_Left) ? -VCL_SEEK_STEP_S : VCL_SEEK_STEP_S;
+            video_seek_to(w, video_position_s(w) + step);
+            redraw(w);
+            return;
+        }
+    }
+
     if (!w->url_bar_focused) {
         /* Page scroll plus vim-style keys: j/k by line, space/b by page, gg to the
          * top, G to the bottom. pending_g remembers a lone 'g' for the gg sequence. */
@@ -21350,7 +21522,7 @@ ui_status ui_run_browser(const char *start_url) {
         /* While video is playing, wake at ~30 fps to check for new frames —
          * or sooner if the already-read frame comes due before that (PTS
          * pacing: the consumer is the regulator, see spec/media_decoder.md). */
-        if (w.video_active && w.decoder_out_fd >= 0) {
+        if (w.video_active && !w.video_paused && w.decoder_out_fd >= 0) {
             int vt = 33;
             if (w.video_due_ms > t && w.video_due_ms - t < 33u)
                 vt = (int)(w.video_due_ms - t);
@@ -21393,7 +21565,7 @@ ui_status ui_run_browser(const char *start_url) {
         /* The decoder fd only enters the poll set once the frame already read
          * is due on screen: not reading is what throttles the pipeline (pipe
          * backpressure blocks the decoder, which blocks the feeder). */
-        if (w.decoder_out_fd >= 0 && w.video_active && t >= w.video_due_ms) {
+        if (w.decoder_out_fd >= 0 && w.video_active && !w.video_paused && t >= w.video_due_ms) {
             pfds[nfds].fd = w.decoder_out_fd; pfds[nfds].events = POLLIN; pfds[nfds].revents = 0;
             video_idx = nfds++;
         }

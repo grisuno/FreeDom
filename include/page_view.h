@@ -879,6 +879,8 @@ typedef struct pv_view {
 
 /* The UA stylesheet's body margin (HTML Rendering 15.3.1). */
 #define PV_UA_BODY_MARGIN 8
+/* UA `background-color: Field` of a text control (Firefox light: white). */
+#define PV_UA_FIELD_BG 0xFFFFFF
 
 /* Root insets for the resolved <body> style: PV_UA_BODY_MARGIN on each side whose
  * margin the author did not declare (px or %), 0 on a declared side (the body's

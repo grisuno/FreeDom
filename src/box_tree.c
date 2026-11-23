@@ -24,6 +24,9 @@
 #include "box_style.h"  /* bx_lp_px: the one place a percentage becomes pixels */
 
 #include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* Inset sentinels. PV_LEN_UNSET comes from page_view.h (= INT_MIN). CSS_LEN_AUTO
  * is INT_MIN + 1 in css.h; we define it locally to keep box_tree.c free of the
@@ -593,6 +596,113 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                                      out, out_cap, out_count);
 }
 
+/* Stacking-context nesting (CSS 2.1 App E): a positioned box paints inside the context of
+ * its nearest positioned ancestor that forms one, so its paint key is the chain of those
+ * ancestors' keys (outermost first) followed by its own. Comparing chains level by level
+ * keeps every context's descendants together, right after the context itself and in
+ * their own (layer, z, tree order) inside it. A flat (z, tree order) sort painted a
+ * z-index:auto pill BELOW the z-index:101 header that contains it.
+ *
+ * `order` arrives flat-sorted; it is re-sorted in place. Ancestors deeper than
+ * BT_SC_DEPTH keep their outermost levels. On allocation failure the flat order stays
+ * (fail-open: the old behaviour). */
+#define BT_SC_DEPTH 16
+
+typedef struct sc_chain {
+    uint16_t len;
+    uint16_t lvl[BT_SC_DEPTH];   /* indices into `order` (by ref), outermost first */
+} sc_chain;
+
+static int sc_forms(const pv_box_def *b) {
+    int has_tf = b->transform_tx != PV_LEN_UNSET || b->transform_ty != PV_LEN_UNSET ||
+                 b->transform_sx != PV_LEN_UNSET || b->transform_sy != PV_LEN_UNSET ||
+                 b->transform_rotate != PV_LEN_UNSET || b->transform_skx != PV_LEN_UNSET ||
+                 b->transform_sky != PV_LEN_UNSET;
+    cx_style st = { .position = b->position,
+                    .z_index = (b->z_index == PV_LEN_UNSET) ? 0 : b->z_index,
+                    .z_auto = (b->z_index == PV_LEN_UNSET), .opacity = b->opacity,
+                    .mix_blend = b->mix_blend, .isolation = b->isolation,
+                    .has_transform = has_tf };
+    return cx_forms_stacking_context(&st);
+}
+
+static int sc_chain_compare(const sc_chain *a, const sc_chain *b, const cx_item *by_ref) {
+    size_t n = (a->len < b->len) ? a->len : b->len;
+    for (size_t k = 0; k < n; ++k) {
+        if (a->lvl[k] == b->lvl[k]) continue;
+        return cx_item_compare(&by_ref[a->lvl[k]], &by_ref[b->lvl[k]]);
+    }
+    return (a->len < b->len) ? -1 : (a->len > b->len) ? 1 : 0;
+}
+
+static void nest_in_contexts(const pv_box_def *boxes, size_t nbox, const bt_positioned *tmp,
+                             cx_item *order, size_t n) {
+    if (n < 2) return;
+    int *ref_of_box = (int *)calloc(nbox, sizeof *ref_of_box);
+    cx_item *by_ref = (cx_item *)calloc(n, sizeof *by_ref);
+    sc_chain *ch = (sc_chain *)calloc(n, sizeof *ch);
+    cx_item *buf = (cx_item *)calloc(n, sizeof *buf);
+    sc_chain *cbuf = (sc_chain *)calloc(n, sizeof *cbuf);
+    if (ref_of_box == NULL || by_ref == NULL || ch == NULL || buf == NULL || cbuf == NULL)
+        goto out;
+    for (size_t i = 0; i < nbox; ++i) ref_of_box[i] = -1;
+    for (size_t i = 0; i < n; ++i) {
+        by_ref[order[i].ref] = order[i];
+        ref_of_box[tmp[order[i].ref].box_index] = (int)order[i].ref;
+    }
+    /* order[] is re-sorted below; chains are built per position in it. */
+    for (size_t i = 0; i < n; ++i) {
+        size_t self = order[i].ref;
+        uint16_t up[BT_SC_DEPTH * 4];
+        size_t nup = 0;
+        int id = boxes[tmp[self].box_index].parent_id;
+        /* A negative-z box keeps its flat place: the leading z<0 run is what the painter
+         * draws behind the flow, each one with its owning context (owned-negz). */
+        if (order[i].z_index < 0 && !order[i].z_auto) id = -1;
+        for (size_t steps = 0; id >= 0 && (size_t)id < nbox && steps <= nbox; ++steps) {
+            int r = ref_of_box[id];
+            /* Only an OUT-OF-FLOW context captures: an in-flow relative one is painted
+             * with its subtree by the deferral pass (bt_defer_roots). */
+            int oof = boxes[id].position == BT_POS_ABSOLUTE || boxes[id].position == BT_POS_FIXED;
+            if (r >= 0 && oof && sc_forms(&boxes[id]) && nup < sizeof up / sizeof up[0]) {
+                up[nup++] = (uint16_t)r;
+                /* A negative-z context stays at root level (above), so its subtree is
+                 * rooted there too: chaining through ITS ancestors would sort a child
+                 * before the context it belongs to (found by fuzz-bt). */
+                if (by_ref[r].z_index < 0 && !by_ref[r].z_auto) break;
+            }
+            id = boxes[id].parent_id;
+        }
+        size_t keep = (nup < BT_SC_DEPTH - 1) ? nup : BT_SC_DEPTH - 1;
+        sc_chain c = { 0, {0} };
+        for (size_t k = 0; k < keep; ++k) c.lvl[c.len++] = up[nup - 1 - k];
+        c.lvl[c.len++] = (uint16_t)self;
+        ch[i] = c;
+    }
+    /* Stable bottom-up merge sort on (order, ch) together. */
+    for (size_t width = 1; width < n; width *= 2) {
+        for (size_t lo = 0; lo < n; lo += 2 * width) {
+            size_t mid = (lo + width < n) ? lo + width : n;
+            size_t hi = (lo + 2 * width < n) ? lo + 2 * width : n;
+            size_t a = lo, b = mid, o = lo;
+            while (a < mid && b < hi) {
+                if (sc_chain_compare(&ch[b], &ch[a], by_ref) < 0) { buf[o] = order[b]; cbuf[o++] = ch[b++]; }
+                else { buf[o] = order[a]; cbuf[o++] = ch[a++]; }
+            }
+            while (a < mid) { buf[o] = order[a]; cbuf[o++] = ch[a++]; }
+            while (b < hi)  { buf[o] = order[b]; cbuf[o++] = ch[b++]; }
+        }
+        memcpy(order, buf, n * sizeof *order);
+        memcpy(ch, cbuf, n * sizeof *ch);
+    }
+out:
+    free(ref_of_box);
+    free(by_ref);
+    free(ch);
+    free(buf);
+    free(cbuf);
+}
+
 bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                                     const double *box_x, const double *box_y,
                                     const double *box_w, const double *box_h,
@@ -734,6 +844,7 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
         order[i].ref = i;
     }
     cx_sort(order, tmp_count);
+    nest_in_contexts(boxes, nbox, tmp, order, tmp_count);
 
     bt_positioned sorted[BT_MAX_POSITIONED];
     for (size_t i = 0; i < tmp_count; ++i) sorted[i] = tmp[order[i].ref];
