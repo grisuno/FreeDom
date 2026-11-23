@@ -197,20 +197,23 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
 - Layer: presentation
 - Language: h
 - Symbols:
-  - `chl_rect` (struct, line 34)
-  - `chl_layout` (struct, line 54)
-  - `chl_findbar` (struct, line 101)
-  - `chl_status` (enum, line 32)
-  - `chl_part` (enum, line 36)
-  - `chl_find_part` (enum, line 92)
-  - `chl_identity` (enum, line 114)
-  - `h` (type_alias, line 33) `typedef struct chl_rect { double x, y, w, h;`
-  - `width` (type_alias, line 53) `typedef struct chl_layout { double width;`
-  - `close` (type_alias, line 100) `typedef struct chl_findbar { chl_rect bar, field, prev, next, count, close;`
-  - `chl_tab_rect` (function, line 74) `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r);`
-  - `chl_tab_close_rect` (function, line 75) `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r);`
-  - `chl_rect_has` (function, line 78) `int chl_rect_has(chl_rect r, double x, double y);`
-  - `chl_identity_label` (function, line 133) `const char *chl_identity_label(chl_identity id);`
+  - `chl_rect` (struct, line 36)
+  - `chl_layout` (struct, line 58)
+  - `chl_findbar` (struct, line 119)
+  - `chl_status` (enum, line 34)
+  - `chl_part` (enum, line 38)
+  - `chl_find_part` (enum, line 110)
+  - `chl_identity` (enum, line 132)
+  - `h` (type_alias, line 35) `typedef struct chl_rect { double x, y, w, h;`
+  - `width` (type_alias, line 57) `typedef struct chl_layout { double width;`
+  - `close` (type_alias, line 118) `typedef struct chl_findbar { chl_rect bar, field, prev, next, count, close;`
+  - `chl_tab_rect` (function, line 81) `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r);`
+  - `chl_tab_close_rect` (function, line 82) `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r);`
+  - `chl_rect_has` (function, line 85) `int chl_rect_has(chl_rect r, double x, double y);`
+  - `chl_tab_drop_index` (function, line 93) `int chl_tab_drop_index(const chl_layout *l, double x);`
+  - `chl_move_index` (function, line 97) `int chl_move_index(int i, int from, int to);`
+  - `chl_tab_for_digit` (function, line 100) `int chl_tab_for_digit(int digit, int tab_count);`
+  - `chl_identity_label` (function, line 151) `const char *chl_identity_label(chl_identity id);`
   - `FREEDOM_CHROME_LAYOUT_H` (macro, line 2) `#define FREEDOM_CHROME_LAYOUT_H`
   - `CHL_TABBAR_H` (macro, line 15) `#define CHL_TABBAR_H`
   - `CHL_TOOLBAR_H` (macro, line 16) `#define CHL_TOOLBAR_H`
@@ -228,11 +231,13 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CHL_BTN_GAP` (macro, line 28) `#define CHL_BTN_GAP`
   - `CHL_URL_H` (macro, line 29) `#define CHL_URL_H`
   - `CHL_ID_W` (macro, line 30) `#define CHL_ID_W`
-  - `CHL_FIND_H` (macro, line 86) `#define CHL_FIND_H`
-  - `CHL_FIND_FIELD_W` (macro, line 87) `#define CHL_FIND_FIELD_W`
-  - `CHL_FIND_FIELD_H` (macro, line 88) `#define CHL_FIND_FIELD_H`
-  - `CHL_FIND_BTN` (macro, line 89) `#define CHL_FIND_BTN`
-  - `CHL_FIND_COUNT_W` (macro, line 90) `#define CHL_FIND_COUNT_W`
+  - `CHL_MORE_W` (macro, line 31) `#define CHL_MORE_W`
+  - `CHL_DRAG_THRESHOLD` (macro, line 32) `#define CHL_DRAG_THRESHOLD`
+  - `CHL_FIND_H` (macro, line 104) `#define CHL_FIND_H`
+  - `CHL_FIND_FIELD_W` (macro, line 105) `#define CHL_FIND_FIELD_W`
+  - `CHL_FIND_FIELD_H` (macro, line 106) `#define CHL_FIND_FIELD_H`
+  - `CHL_FIND_BTN` (macro, line 107) `#define CHL_FIND_BTN`
+  - `CHL_FIND_COUNT_W` (macro, line 108) `#define CHL_FIND_COUNT_W`
 - Imported by: `gui/browser_ui_internal.h`, `src/chrome_layout.c`, `tests/test_chrome_layout.c`
 
 ## include/compositor.h
@@ -480,20 +485,6 @@ Pages: [KB_include.md](KB_include.md), [KB_include_p2.md](KB_include_p2.md), [KB
   - `CCH_NTH_MAX` (macro, line 28) `#define CCH_NTH_MAX`
 - Depends on: `include/css.h`, `include/css_select.h`
 - Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`, `tests/test_page_view.c`
-
-## include/css_color.h
-- Doc: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `cc_rgb` (struct, line 27)
-  - `cc_status` (enum, line 31)
-  - `b` (type_alias, line 26) `typedef struct cc_rgb { unsigned char r, g, b;`
-  - `cc_pack` (function, line 49) `int cc_pack(cc_rgb c);`
-  - `FREEDOM_CSS_COLOR_H` (macro, line 2) `#define FREEDOM_CSS_COLOR_H`
-  - `CC_COLOR_CURRENT` (macro, line 59) `#define CC_COLOR_CURRENT`
-  - `CC_COLOR_TRANSPARENT` (macro, line 60) `#define CC_COLOR_TRANSPARENT`
-- Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/pres_hints.c`, `src/svg_paint.c`, `src/svg_render.c`, `tests/test_css_color.c`
 
 
 Next: [KB_include_p2.md](KB_include_p2.md)

@@ -87,8 +87,8 @@
 - Language: py
 - Symbols:
   - `start_display` (function, line 34) `def start_display(workdir)`
-  - `one_run` (function, line 65) `def one_run(binary, page, env, hosts_dir, tmp)`
-  - `main` (function, line 94) `def main()`
+  - `one_run` (function, line 67) `def one_run(binary, page, env, hosts_dir, tmp)`
+  - `main` (function, line 96) `def main()`
 - Imported by: `tools/guiscroll.py`
 
 ## tools/mutate.py

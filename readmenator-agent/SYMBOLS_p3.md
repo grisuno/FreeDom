@@ -3,6 +3,59 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `browser_state` | struct | `include/browser.h:27` | `` |
+| `browser_status` | enum | `include/browser.h:63` | `` |
+| `browser_status_text` | function | `include/browser.h:173` | `const char *browser_status_text(const browser_state *bs, uint64_t now_ms);` |
+| `browser_url_bar_delete_selection` | function | `include/browser.h:158` | `int browser_url_bar_delete_selection(browser_state *bs);` |
+| `browser_url_bar_selection` | function | `include/browser.h:154` | `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len);` |
+| `copied` | function | `include/browser.h:166` | `* copied (truncated to fit) and shown until now_ms reaches the expiry * (now_ms + BROWSER_STATUS_DURATION_MS). A...` |
+| `one` | function | `include/browser.h:102` | `* A navigate while pending first aborts the pending one (the new one replaces it);` |
+| `state` | function | `include/browser.h:74` | `* state (frees old history and page buffers). */ browser_status browser_init(browser_state *bs);` |
+| `FREEDOM_CACHED_FETCH_H` | macro | `include/cached_fetch.h:2` | `#define FREEDOM_CACHED_FETCH_H` |
+| `cf_attach_redirect_memory` | function | `include/cached_fetch.h:38` | `void cf_attach_redirect_memory(hc_store *store);` |
+| `cf_set_store` | function | `include/cached_fetch.h:30` | `void cf_set_store(hc_store *store);` |
+| `cf_store` | function | `include/cached_fetch.h:31` | `hc_store *cf_store(void);` |
+| `CHL_BTN` | macro | `include/chrome_layout.h:27` | `#define CHL_BTN` |
+| `CHL_BTN_GAP` | macro | `include/chrome_layout.h:28` | `#define CHL_BTN_GAP` |
+| `CHL_DRAG_MIN` | macro | `include/chrome_layout.h:26` | `#define CHL_DRAG_MIN` |
+| `CHL_DRAG_THRESHOLD` | macro | `include/chrome_layout.h:32` | `#define CHL_DRAG_THRESHOLD` |
+| `CHL_FIND_BTN` | macro | `include/chrome_layout.h:107` | `#define CHL_FIND_BTN` |
+| `CHL_FIND_COUNT_W` | macro | `include/chrome_layout.h:108` | `#define CHL_FIND_COUNT_W` |
+| `CHL_FIND_FIELD_H` | macro | `include/chrome_layout.h:106` | `#define CHL_FIND_FIELD_H` |
+| `CHL_FIND_FIELD_W` | macro | `include/chrome_layout.h:105` | `#define CHL_FIND_FIELD_W` |
+| `CHL_FIND_H` | macro | `include/chrome_layout.h:104` | `#define CHL_FIND_H` |
+| `CHL_ID_W` | macro | `include/chrome_layout.h:30` | `#define CHL_ID_W` |
+| `CHL_MORE_W` | macro | `include/chrome_layout.h:31` | `#define CHL_MORE_W` |
+| `CHL_NEWTAB_W` | macro | `include/chrome_layout.h:24` | `#define CHL_NEWTAB_W` |
+| `CHL_PAD` | macro | `include/chrome_layout.h:17` | `#define CHL_PAD` |
+| `CHL_TABBAR_H` | macro | `include/chrome_layout.h:15` | `#define CHL_TABBAR_H` |
+| `CHL_TAB_CLOSE` | macro | `include/chrome_layout.h:22` | `#define CHL_TAB_CLOSE` |
+| `CHL_TAB_CLOSE_MIN_W` | macro | `include/chrome_layout.h:23` | `#define CHL_TAB_CLOSE_MIN_W` |
+| `CHL_TAB_GAP` | macro | `include/chrome_layout.h:21` | `#define CHL_TAB_GAP` |
+| `CHL_TAB_MAX_W` | macro | `include/chrome_layout.h:20` | `#define CHL_TAB_MAX_W` |
+| `CHL_TAB_MIN_W` | macro | `include/chrome_layout.h:19` | `#define CHL_TAB_MIN_W` |
+| `CHL_TAB_TOP_GAP` | macro | `include/chrome_layout.h:18` | `#define CHL_TAB_TOP_GAP` |
+| `CHL_TOOLBAR_H` | macro | `include/chrome_layout.h:16` | `#define CHL_TOOLBAR_H` |
+| `CHL_URL_H` | macro | `include/chrome_layout.h:29` | `#define CHL_URL_H` |
+| `CHL_WIN_BTN_W` | macro | `include/chrome_layout.h:25` | `#define CHL_WIN_BTN_W` |
+| `FREEDOM_CHROME_LAYOUT_H` | macro | `include/chrome_layout.h:2` | `#define FREEDOM_CHROME_LAYOUT_H` |
+| `chl_find_part` | enum | `include/chrome_layout.h:110` | `` |
+| `chl_findbar` | struct | `include/chrome_layout.h:119` | `` |
+| `chl_identity` | enum | `include/chrome_layout.h:132` | `` |
+| `chl_identity_label` | function | `include/chrome_layout.h:151` | `const char *chl_identity_label(chl_identity id);` |
+| `chl_layout` | struct | `include/chrome_layout.h:58` | `` |
+| `chl_move_index` | function | `include/chrome_layout.h:97` | `int chl_move_index(int i, int from, int to);` |
+| `chl_part` | enum | `include/chrome_layout.h:38` | `` |
+| `chl_rect` | struct | `include/chrome_layout.h:36` | `` |
+| `chl_rect_has` | function | `include/chrome_layout.h:85` | `int chl_rect_has(chl_rect r, double x, double y);` |
+| `chl_status` | enum | `include/chrome_layout.h:34` | `` |
+| `chl_tab_close_rect` | function | `include/chrome_layout.h:82` | `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r);` |
+| `chl_tab_drop_index` | function | `include/chrome_layout.h:93` | `int chl_tab_drop_index(const chl_layout *l, double x);` |
+| `chl_tab_for_digit` | function | `include/chrome_layout.h:100` | `int chl_tab_for_digit(int digit, int tab_count);` |
+| `chl_tab_rect` | function | `include/chrome_layout.h:81` | `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r);` |
+| `close` | type_alias | `include/chrome_layout.h:118` | `typedef struct chl_findbar { chl_rect bar, field, prev, next, count, close;` |
+| `h` | type_alias | `include/chrome_layout.h:35` | `typedef struct chl_rect { double x, y, w, h;` |
+| `width` | type_alias | `include/chrome_layout.h:57` | `typedef struct chl_layout { double width;` |
 | `FREEDOM_COMPOSITOR_H` | macro | `include/compositor.h:2` | `#define FREEDOM_COMPOSITOR_H` |
 | `cx_forms_stacking_context` | function | `include/compositor.h:60` | `int cx_forms_stacking_context(const cx_style *s);` |
 | `cx_ink_reach` | function | `include/compositor.h:91` | `double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset);` |
@@ -443,58 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `dom_document_position` | function | `include/dom.h:106` | `size_t dom_document_position(const dom_index *idx, dom_node_id node);` |
 | `dom_document_title` | function | `include/dom.h:141` | `const char *dom_document_title(const dom_index *idx, size_t *len);` |
 | `dom_free` | function | `include/dom.h:48` | `void dom_free(dom_index *idx);` |
-| `dom_get_attribute` | function | `include/dom.h:126` | `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);` |
-| `dom_get_by_class` | function | `include/dom.h:67` | `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);` |
-| `dom_index` | type_alias | `include/dom.h:40` | `typedef struct dom_index dom_index;` |
-| `dom_matches` | function | `include/dom.h:96` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);` |
-| `dom_node_count` | function | `include/dom.h:51` | `size_t dom_node_count(const dom_index *idx);` |
-| `dom_node_id` | type_alias | `include/dom.h:34` | `typedef uint32_t dom_node_id;` |
-| `dom_node_kind` | function | `include/dom.h:219` | `int dom_node_kind(const dom_index *idx, dom_node_id node);` |
-| `dom_place` | enum | `include/dom.h:194` | `` |
-| `dom_precedes` | function | `include/dom.h:109` | `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);` |
-| `dom_status` | enum | `include/dom.h:26` | `` |
-| `dom_tag_name` | function | `include/dom.h:123` | `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);` |
-| `dom_text_content` | function | `include/dom.h:138` | `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);` |
-| `index` | function | `include/dom.h:235` | `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...` |
-| `length` | function | `include/dom.h:260` | `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...` |
-| `parent` | function | `include/dom.h:203` | `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...` |
-| `process` | function | `include/dom.h:267` | `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...` |
-| `sight` | function | `include/dom.h:272` | `* first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change...` |
-| `tree` | function | `include/dom.h:59` | `* tree (the index only grows, so a node a script removed is still registered and must not be * found);` |
-| `valid` | function | `include/dom.h:146` | `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...` |
-| `DD_FIELD_MAX` | macro | `include/dom_debug.h:28` | `#define DD_FIELD_MAX` |
-| `FREEDOM_DOM_DEBUG_H` | macro | `include/dom_debug.h:2` | `#define FREEDOM_DOM_DEBUG_H` |
-| `dd_format` | function | `include/dom_debug.h:36` | `size_t dd_format(const rd_doc *doc, char *out, size_t cap);` |
-| `dd_format_css` | function | `include/dom_debug.h:41` | `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap);` |
-| `DL_ERR_OVERFLOW` | function | `include/download.h:56` | `* DL_ERR_OVERFLOW (out left empty). url/content_disposition NULL => absent. */ dl_status dl_pick_name(const char...` |
-| `DL_FALLBACK_NAME` | macro | `include/download.h:30` | `#define DL_FALLBACK_NAME` |
-| `DL_MAX_BYTES` | macro | `include/download.h:31` | `#define DL_MAX_BYTES` |
-| `DL_NAME_MAX` | macro | `include/download.h:29` | `#define DL_NAME_MAX` |
-| `FREEDOM_DOWNLOAD_H` | macro | `include/download.h:2` | `#define FREEDOM_DOWNLOAD_H` |
-| `basename` | function | `include/download.h:61` | `* sanitized basename (a name still containing '/' is rejected => DL_ERR_OVERFLOW, * so the path can never escape...` |
-| `dl_should_download` | function | `include/download.h:43` | `int dl_should_download(const char *content_type, const char *content_disposition);` |
-| `dl_status` | enum | `include/download.h:33` | `` |
-| `literal` | function | `include/download.h:47` | `* a static string literal (never freed). */ const char *dl_ext_for_type(const char *content_type);` |
-| `EK_MAX_BYTES` | macro | `include/exact_key.h:15` | `#define EK_MAX_BYTES` |
-| `FREEDOM_EXACT_KEY_H` | macro | `include/exact_key.h:2` | `#define FREEDOM_EXACT_KEY_H` |
-| `ek_equal` | function | `include/exact_key.h:34` | `int ek_equal(const ek_key *a, const ek_key *b);` |
-| `ek_free` | function | `include/exact_key.h:40` | `void ek_free(ek_key *k);` |
-| `ek_init` | function | `include/exact_key.h:24` | `void ek_init(ek_key *k);` |
-| `ek_key` | struct | `include/exact_key.h:17` | `` |
-| `ek_put` | function | `include/exact_key.h:31` | `void ek_put(ek_key *k, const void *p, size_t len);` |
-| `ek_reset` | function | `include/exact_key.h:27` | `void ek_reset(ek_key *k);` |
-| `ek_swap` | function | `include/exact_key.h:37` | `void ek_swap(ek_key *a, ek_key *b);` |
-| `FBC_BASE_MAX` | macro | `include/fb_cmdline.h:17` | `#define FBC_BASE_MAX` |
-| `FBC_ENTRY_MAX` | macro | `include/fb_cmdline.h:16` | `#define FBC_ENTRY_MAX` |
-| `FBC_HIST_MAX` | macro | `include/fb_cmdline.h:15` | `#define FBC_HIST_MAX` |
-| `FBC_LIST_NAMES` | macro | `include/fb_cmdline.h:18` | `#define FBC_LIST_NAMES` |
-| `FREEDOM_FB_CMDLINE_H` | macro | `include/fb_cmdline.h:2` | `#define FREEDOM_FB_CMDLINE_H` |
-| `fbc_complete_pick` | function | `include/fb_cmdline.h:51` | `size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen, char *ins, size_t ins_cap, char *list...` |
-| `fbc_complete_split` | function | `include/fb_cmdline.h:42` | `long fbc_complete_split(const char *text, size_t n, char *base, size_t cap, size_t *prefix_off);` |
-| `fbc_filter` | enum | `include/fb_cmdline.h:54` | `` |
-| `fbc_filter_label` | function | `include/fb_cmdline.h:64` | `const char *fbc_filter_label(int filter);` |
-| `fbc_filter_next` | function | `include/fb_cmdline.h:63` | `int fbc_filter_next(int filter);` |
-| `fbc_filter_passes` | function | `include/fb_cmdline.h:62` | `int fbc_filter_passes(int filter, int level);` |
-| `fbc_history` | struct | `include/fb_cmdline.h:20` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

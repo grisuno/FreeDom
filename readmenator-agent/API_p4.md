@@ -1,6 +1,54 @@
 # API (page 4 of 13)
 Previous: [API_p3.md](API_p3.md)
 
+## include/chrome_layout.h
+Imported by: `gui/browser_ui_internal.h`, `src/chrome_layout.c`, `tests/test_chrome_layout.c`
+- `chl_tab_rect` (function) `include/chrome_layout.h:81` `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r);` -- Computes the layout. tab_count >= 1 and 0 <= active < tab_count, else CHL_EINVAL * (out untouched).
+- `chl_tab_close_rect` (function) `include/chrome_layout.h:82` `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r);`
+- `chl_rect_has` (function) `include/chrome_layout.h:85` `int chl_rect_has(chl_rect r, double x, double y);` -- Computes the layout. tab_count >= 1 and 0 <= active < tab_count, else CHL_EINVAL * (out untouched).
+- `chl_tab_drop_index` (function) `include/chrome_layout.h:93` `int chl_tab_drop_index(const chl_layout *l, double x);` -- Absolute index of the visible tab slot under x (clamped to the visible tabs): where a * dragged tab dropped at x...
+- `chl_move_index` (function) `include/chrome_layout.h:97` `int chl_move_index(int i, int from, int to);` -- Where element i ends up after the element at `from` moves to `to` (the others shift to * close the gap and open the...
+- `chl_tab_for_digit` (function) `include/chrome_layout.h:100` `int chl_tab_for_digit(int digit, int tab_count);` -- Where element i ends up after the element at `from` moves to `to` (the others shift to * close the gap and open the...
+- `chl_identity_label` (function) `include/chrome_layout.h:151` `const char *chl_identity_label(chl_identity id);` -- CHL_ID_CLASSICAL,   /* https, TLS 1.3 classical key exchange CHL_ID_WEAK,        /* https under the per-host...
+
+## include/compositor.h
+Imported by: `gui/browser_ui.c`, `src/box_tree.c`, `src/compositor.c`, `tests/test_compositor.c`
+- `cx_forms_stacking_context` (function) `include/compositor.h:60` `int cx_forms_stacking_context(const cx_style *s);` -- Does this box establish a stacking context?
+- `cx_item_compare` (function) `include/compositor.h:80` `int cx_item_compare(const cx_item *a, const cx_item *b);` -- Total paint order: layer ascending, then z-index ascending (auto == 0), then document order ascending.
+- `cx_sort` (function) `include/compositor.h:84` `void cx_sort(cx_item *items, size_t n);` -- Stable in-place sort of `items` into paint order (uses cx_item_compare).
+- `cx_ink_reach` (function) `include/compositor.h:91` `double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset);` -- How far (px, >= 0) a box's paint may reach beyond its border box (spec/compositor.md, tanda 95): each outset...
+- `cx_span_visible` (function) `include/compositor.h:95` `int cx_span_visible(double top, double h, double reach, double view_top, double view_h);` -- 1 when [top - reach, top + h + reach] touches [view_top, view_top + view_h] (edges * included), else 0.
+
+## include/css.h
+Depends on: `include/css_color.h`, `include/css_counter.h`, `include/css_mq.h`
+Imported by: `gui/browser_ui.c`, `gui/bui_mask_img.c`, `gui/bui_theme.c`, `include/box_style.h`, `include/css_chain.h`, `include/css_computed.h`, `include/css_decl.h`, `include/css_select.h`, `include/page_view.h`, `include/pres_hints.h`, `include/sheet_cache.h`, `src/box_tree.c`, `src/compositor.c`, `src/css.c`, `src/css_box.c`, `src/css_length.c`, `src/css_text.c`, `src/css_values.c`, `src/dom_debug.c`, `src/js_native.c`, `src/page_view.c`, `src/render_doc.c`, `src/tab.c`, `src/text_case.c`, `src/text_shape.c`, `tests/test_box_tree.c`, `tests/test_compositor.c`, `tests/test_css.c`, `tests/test_css_drops.c`, `tests/test_css_gradient.c`, `tests/test_css_length.c`, `tests/test_css_text.c`, `tests/test_css_values.c`, `tests/test_dom_debug.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`, `tests/test_tab.c`, `tests/test_text_case.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
+- `verbatim` (function) `include/css.h:92` `* the quoted row strings verbatim (flex_layout parses them);`
+- `POINTER` (function) `include/css.h:235` `* POINTER (shows the hand cursor already used for links) from every other value * (shows the default arrow);`
+- `container` (function) `include/css.h:674` `* container (Display 3 section 2);`
+- `family` (function) `include/css.h:719` `* LOCAL family (spec/text_shape.md section 7);`
+- `translate` (function) `include/css.h:893` `* translate()/translateX()/translateY();`
+- `scaleY` (function) `include/css.h:894` `* scaleY() as a PERCENT of identity (100 = scale(1), matching font_scale's * convention);`
+- `declared` (function) `include/css.h:898` `* function was not declared (identity: 0 offset / 100% scale / 0deg). * Percentage translate arguments are not...`
+- `element` (function) `include/css.h:903` `* so two different rules matching the same element (e.g. one setting * translate, a more specific one setting...`
+- `slots` (function) `include/css.h:910` `* parse time into ALL seven slots (singular matrices fail closed);`
+- `css_sheet_uses_counters` (function) `include/css.h:1055` `int css_sheet_uses_counters(const css_sheet *sheet);` -- 1 when any rule of the sheet declares counter-reset / counter-increment. page_view * runs its document-order counter...
+- `css_sheet_uses_containers` (function) `include/css.h:1059` `int css_sheet_uses_containers(const css_sheet *sheet);` -- 1 when the sheet holds any rule gated by an @container condition: only then does * the engine need to track query...
+- `palette` (function) `include/css.h:1076` `* so an inactive theme * palette (a dark palette in a light render) can never clobber the active one. *...`
+- `css_free` (function) `include/css.h:1126` `void css_free(css_sheet *s);` -- As css_parse_scoped, plus the drop sink. log == NULL is exactly css_parse_scoped: same path, same sheet, same cost.
+- `order` (function) `include/css.h:1129` `* cascade order (specificity, then document order), then the element's own * inline_style (which wins)....`
+- `inherited_px` (function) `include/css.h:1246` `* whose PARENT computes to inherited_px (<= 0 = unknown -> the CSS initial). * * Exported because the caller that...`
+- `css_ua_heading_em` (function) `include/css.h:1258` `double css_ua_heading_em(int level);` -- The user-agent sheet's font-size of <h1>..<h6> as a multiple of the parent's (HTML Rendering 15.3.6: 2em, 1.5em...
+- `name` (function) `include/css.h:1263` `* name (NULL = not a heading). */ double css_computed_font_size_for_tag(const css_style *o, double inherited_px...`
+- `css_font_face_count` (function) `include/css.h:1273` `size_t css_font_face_count(const css_sheet *sheet);` -- Web font access: returns the number of @font-face declarations parsed into the sheet, and copies the i-th...
+- `css_font_face_at` (function) `include/css.h:1274` `int css_font_face_at(const css_sheet *sheet, size_t i, char *family, size_t fam_cap, char *src_url, size_t url_cap);`
+- `css_resolve_anim_keyframes` (function) `include/css.h:1282` `void css_resolve_anim_keyframes(css_style *s, const css_sheet *sheet);` -- Resolve @keyframes: scans sheet->keyframes[] for a name matching s->anim_name (first-char match).
+
+## include/css_atrule.h
+Imported by: `src/css.c`, `src/css_atrule.c`, `tests/test_css_atrule.c`
+- `car_supports` (function) `include/css_atrule.h:29` `int car_supports(const char *s, size_t a, size_t b, const car_ops *ops);` -- The questions @supports asks the caller's own engine. prop is lowercased and * both strings are trimmed and...
+- `car_layer_rank` (function) `include/css_atrule.h:40` `int car_layer_rank(car_layers *L, const char *name, size_t len);` -- Rank (1..CAR_MAX_LAYERS) of the layer whose full dotted name is name[0,len), registering it on first sight. len == 0...
+- `car_effective_spec` (function) `include/css_atrule.h:44` `int car_effective_spec(int spec, int layer, int important);` -- Folds layer rank and specificity into one comparable value (layer first). layer * 0 = unlayered.
+
 ## include/css_box.h
 Depends on: `include/css_decl.h`
 Imported by: `src/css.c`, `src/css_box.c`, `src/css_mq.c`, `src/css_text.c`, `tests/test_css_box.c`
@@ -323,14 +371,15 @@ Imported by: `gui/browser_ui.c`, `src/frame_clock.c`, `tests/test_frame_clock.c`
 ## include/frame_host.h
 Depends on: `include/page_view.h`, `include/tab.h`
 Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `src/freedom.c`, `tests/test_frame_host.c`
-- `fh_new` (function) `include/frame_host.h:28` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` -- top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame...
-- `fh_free` (function) `include/frame_host.h:32` `void fh_free(fh_host *h);` -- top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame...
-- `fh_apply_top` (function) `include/frame_host.h:36` `void fh_apply_top(fh_host *h, const tab_page *page);` -- Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP document; other * kinds are ignored.
-- `fh_tick` (function) `include/frame_host.h:40` `int fh_tick(fh_host *h, int elapsed_ms);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
-- `fh_count` (function) `include/frame_host.h:43` `int fh_count(const fh_host *h);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
-- `it` (function) `include/frame_host.h:46` `* confined worker last built it (NULL when no live frame has that URL);`
-- `fh_frame_view` (function) `include/frame_host.h:49` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);` -- Painting (spec/frame_broker.md section 5).
-- `fh_generation` (function) `include/frame_host.h:52` `unsigned fh_generation(const fh_host *h);` -- Painting (spec/frame_broker.md section 5).
+- `fh_new` (function) `include/frame_host.h:29` `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` -- top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource fetcher (used for the frame...
+- `fh_set_async` (function) `include/frame_host.h:35` `void fh_set_async(fh_host *h, int on);` -- on != 0: each FRAME_OPEN loads its frame on a background thread and fh_tick integrates it (spec/frame_broker.md...
+- `fh_free` (function) `include/frame_host.h:39` `void fh_free(fh_host *h);` -- Closes every frame worker and frees the host; a frame still loading is abandoned (its thread * closes its own worker...
+- `fh_apply_top` (function) `include/frame_host.h:43` `void fh_apply_top(fh_host *h, const tab_page *page);` -- Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP document; other * kinds are ignored.
+- `fh_tick` (function) `include/frame_host.h:47` `int fh_tick(fh_host *h, int elapsed_ms);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
+- `fh_count` (function) `include/frame_host.h:50` `int fh_count(const fh_host *h);` -- Advances every frame's virtual clock by elapsed_ms and processes what they posted.
+- `it` (function) `include/frame_host.h:53` `* confined worker last built it (NULL when no live frame has that URL);`
+- `fh_frame_view` (function) `include/frame_host.h:56` `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);` -- Painting (spec/frame_broker.md section 5).
+- `fh_generation` (function) `include/frame_host.h:59` `unsigned fh_generation(const fh_host *h);` -- Painting (spec/frame_broker.md section 5).
 
 ## include/freebug.h
 Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/fb_cmdline.c`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_fb_cmdline.c`, `tests/test_freebug.c`
@@ -345,10 +394,12 @@ Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/fb_cm
 - `fb_level_name` (function) `include/freebug.h:96` `const char *fb_level_name(int level);` -- A stable lowercase level name ("log"/"info"/"warn"/"error"/"debug"); an * out-of-range level clamps to "log".
 
 ## include/hls.h
-Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
+Imported by: `gui/browser_ui.c`, `include/video_controls.h`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
 - `hls_select_variant` (function) `include/hls.h:65` `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);` -- Selects the best variant from a multi-variant playlist.
 - `resolved` (function) `include/hls.h:68` `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the * written length, or 0 on failure. */...`
 - `hls_playlist_free` (function) `include/hls.h:74` `void hls_playlist_free(hls_playlist *pl);` -- Resolves a (possibly relative) segment URL against the playlist base URL.
+- `media` (function) `include/hls.h:77` `* media (non-2xx status, HTML/text error body, empty). Recognises MPEG-TS (also * behind a fake image prefix, probed...`
+- `domain` (function) `include/hls.h:87` `* domain (everything after the first label). Writes NUL-terminated into out and * returns the length, or 0 when...`
 
 ## include/host_conf.h
 Depends on: `include/hostblock.h`
@@ -444,57 +495,6 @@ Imported by: `gui/browser_ui.c`, `src/css.c`, `src/interp.c`, `tests/test_interp
 - `ip_anim_tick` (function) `include/interp.h:128` `int ip_anim_tick(ip_anim *a, double dt_ms);` -- Advance time by dt_ms.
 - `ip_anim_current` (function) `include/interp.h:131` `double ip_anim_current(const ip_anim *a);` -- Advance time by dt_ms.
 - `ip_anim_done` (function) `include/interp.h:134` `int ip_anim_done(const ip_anim *a);` -- Advance time by dt_ms.
-
-## include/js_dom.h
-Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/url.h`
-Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`
-- `opaque` (function) `include/js_dom.h:73` `* the engine runtime opaque (unreachable from script);`
-- `global` (function) `include/js_dom.h:80` `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...`
-- `jd_install_repl_api` (function) `include/js_dom.h:89` `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...`
-- `place` (function) `include/js_dom.h:94` `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...`
-- `getComputedStyle` (function) `include/js_dom.h:115` `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...`
-- `jd_click_state_free` (function) `include/js_dom.h:125` `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
-- `run` (function) `include/js_dom.h:134` `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
-- `preventDefault` (function) `include/js_dom.h:141` `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
-- `host` (function) `include/js_dom.h:170` `* for a trusted host (allow.conf AND js.conf);`
-- `jd_get_cookies` (function) `include/js_dom.h:181` `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` -- Serialises the page's current cookie jar ("name=value; ...") into buf (bounded, NUL-terminated) and returns its...
-- `out_status` (function) `include/js_dom.h:189` `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-- `jd_process_iframes` (function) `include/js_dom.h:229` `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-- `URLs` (function) `include/js_dom.h:236` `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-- `jd_video_from_scripts` (function) `include/js_dom.h:250` `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` -- Creates <iframe> elements in the DOM from video data (`video[N]` / `video_data`) found in inline script text...
-- `jd_flush_custom_elements` (function) `include/js_dom.h:261` `void jd_flush_custom_elements(js_context *ctx);` -- Reconciles Custom Elements (spec/js_custom_elements.md): upgrades the elements whose tag was just defined and fires...
-
-## include/js_env.h
-Depends on: `include/js_sandbox.h`
-Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`, `tests/test_js_native.c`
-- `poisoned` (function) `include/js_env.h:49` `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...`
-
-## include/js_geom.h
-Depends on: `include/dom.h`
-Imported by: `include/js_dom.h`, `include/tab.h`, `src/js_geom.c`, `tests/test_js_dom.c`, `tests/test_js_geom.c`, `tests/test_tab.c`
-- `jg_init` (function) `include/js_geom.h:44` `void jg_init(jg_table *t);` -- typedef struct jg_rect { dom_node_id node; int32_t     x, y, w, h;       /* document coordinates, px } jg_rect...
-- `jg_free` (function) `include/js_geom.h:47` `void jg_free(jg_table *t);` -- } jg_rect; typedef struct jg_table { jg_rect *r; size_t   n, cap; int32_t  scroll_x, scroll_y;  /* document scroll...
-- `jg_add` (function) `include/js_geom.h:52` `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h);` -- Appends one rect.
-- `jg_finish` (function) `include/js_geom.h:56` `int jg_finish(jg_table *t);` -- Sorts by node and merges rects of the same node into their bounding box. * Returns 0, or -1 on NULL.
-- `jg_find` (function) `include/js_geom.h:59` `const jg_rect *jg_find(const jg_table *t, dom_node_id node);` -- Sorts by node and merges rects of the same node into their bounding box. * Returns 0, or -1 on NULL. int...
-- `jg_aggregate` (function) `include/js_geom.h:65` `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx);` -- Unions every rect into each of its ancestors (parent(ctx, n) until DOM_NODE_NONE, at most JG_MAX_DEPTH steps, so a...
-- `jg_wire_len` (function) `include/js_geom.h:68` `size_t jg_wire_len(const jg_table *t);` -- Unions every rect into each of its ancestors (parent(ctx, n) until DOM_NODE_NONE, at most JG_MAX_DEPTH steps, so a...
-- `jg_encode` (function) `include/js_geom.h:71` `int jg_encode(const jg_table *t, int32_t *out, size_t cap);` -- Unions every rect into each of its ancestors (parent(ctx, n) until DOM_NODE_NONE, at most JG_MAX_DEPTH steps, so a...
-- `jg_decode` (function) `include/js_geom.h:77` `int jg_decode(const int32_t *in, size_t n, jg_table *out);` -- Parses a wire array into out (which must be jg_init'ed or empty; previous contents are freed).
-- `jg_hash` (function) `include/js_geom.h:80` `uint64_t jg_hash(const jg_table *t);` -- Parses a wire array into out (which must be jg_init'ed or empty; previous contents are freed).
-
-## include/js_intl.h
-Depends on: `include/js_sandbox.h`
-Imported by: `src/js_dom.c`, `src/js_intl.c`, `tests/test_js_intl.c`
-- `ji_install` (function) `include/js_intl.h:16` `int ji_install(js_context *ctx);` -- Installs `Intl` and the Number/BigInt/Date toLocale* methods that delegate to it. * Returns 0, or -1 on a NULL...
-
-## include/js_location.h
-Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `include/url.h`
-Imported by: `include/js_dom.h`
-- `reads` (function) `include/js_location.h:25` `* reads (NULL => only href is known, the rest fall back to stub defaults). Call after * jd_install, on the page's...`
-- `jd_take_history` (function) `include/js_location.h:38` `char *jd_take_history(js_context *ctx, int *go);` -- Drains the history operations page JS performed since the last call: an owned string of lines "P <url>\n"...
-- `jd_pop_state` (function) `include/js_location.h:44` `int jd_pop_state(js_context *ctx, int index);` -- Moves the page's history to entry index (the parent went Back/Forward within the same document): updates location...
-- `acting` (function) `include/js_location.h:49` `* The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int...`
 
 
 Next: [API_p5.md](API_p5.md)

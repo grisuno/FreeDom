@@ -3,6 +3,59 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `dom_get_attribute` | function | `include/dom.h:126` | `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);` |
+| `dom_get_by_class` | function | `include/dom.h:67` | `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);` |
+| `dom_index` | type_alias | `include/dom.h:40` | `typedef struct dom_index dom_index;` |
+| `dom_matches` | function | `include/dom.h:96` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);` |
+| `dom_node_count` | function | `include/dom.h:51` | `size_t dom_node_count(const dom_index *idx);` |
+| `dom_node_id` | type_alias | `include/dom.h:34` | `typedef uint32_t dom_node_id;` |
+| `dom_node_kind` | function | `include/dom.h:219` | `int dom_node_kind(const dom_index *idx, dom_node_id node);` |
+| `dom_place` | enum | `include/dom.h:194` | `` |
+| `dom_precedes` | function | `include/dom.h:109` | `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);` |
+| `dom_status` | enum | `include/dom.h:26` | `` |
+| `dom_tag_name` | function | `include/dom.h:123` | `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);` |
+| `dom_text_content` | function | `include/dom.h:138` | `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);` |
+| `index` | function | `include/dom.h:235` | `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...` |
+| `length` | function | `include/dom.h:260` | `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...` |
+| `parent` | function | `include/dom.h:203` | `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...` |
+| `process` | function | `include/dom.h:267` | `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...` |
+| `sight` | function | `include/dom.h:272` | `* first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change...` |
+| `tree` | function | `include/dom.h:59` | `* tree (the index only grows, so a node a script removed is still registered and must not be * found);` |
+| `valid` | function | `include/dom.h:146` | `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...` |
+| `DD_FIELD_MAX` | macro | `include/dom_debug.h:28` | `#define DD_FIELD_MAX` |
+| `FREEDOM_DOM_DEBUG_H` | macro | `include/dom_debug.h:2` | `#define FREEDOM_DOM_DEBUG_H` |
+| `dd_format` | function | `include/dom_debug.h:36` | `size_t dd_format(const rd_doc *doc, char *out, size_t cap);` |
+| `dd_format_css` | function | `include/dom_debug.h:41` | `size_t dd_format_css(const rd_doc *doc, char *out, size_t cap);` |
+| `DL_ERR_OVERFLOW` | function | `include/download.h:56` | `* DL_ERR_OVERFLOW (out left empty). url/content_disposition NULL => absent. */ dl_status dl_pick_name(const char...` |
+| `DL_FALLBACK_NAME` | macro | `include/download.h:30` | `#define DL_FALLBACK_NAME` |
+| `DL_MAX_BYTES` | macro | `include/download.h:31` | `#define DL_MAX_BYTES` |
+| `DL_NAME_MAX` | macro | `include/download.h:29` | `#define DL_NAME_MAX` |
+| `FREEDOM_DOWNLOAD_H` | macro | `include/download.h:2` | `#define FREEDOM_DOWNLOAD_H` |
+| `basename` | function | `include/download.h:61` | `* sanitized basename (a name still containing '/' is rejected => DL_ERR_OVERFLOW, * so the path can never escape...` |
+| `dl_should_download` | function | `include/download.h:43` | `int dl_should_download(const char *content_type, const char *content_disposition);` |
+| `dl_status` | enum | `include/download.h:33` | `` |
+| `literal` | function | `include/download.h:47` | `* a static string literal (never freed). */ const char *dl_ext_for_type(const char *content_type);` |
+| `EK_MAX_BYTES` | macro | `include/exact_key.h:15` | `#define EK_MAX_BYTES` |
+| `FREEDOM_EXACT_KEY_H` | macro | `include/exact_key.h:2` | `#define FREEDOM_EXACT_KEY_H` |
+| `ek_equal` | function | `include/exact_key.h:34` | `int ek_equal(const ek_key *a, const ek_key *b);` |
+| `ek_free` | function | `include/exact_key.h:40` | `void ek_free(ek_key *k);` |
+| `ek_init` | function | `include/exact_key.h:24` | `void ek_init(ek_key *k);` |
+| `ek_key` | struct | `include/exact_key.h:17` | `` |
+| `ek_put` | function | `include/exact_key.h:31` | `void ek_put(ek_key *k, const void *p, size_t len);` |
+| `ek_reset` | function | `include/exact_key.h:27` | `void ek_reset(ek_key *k);` |
+| `ek_swap` | function | `include/exact_key.h:37` | `void ek_swap(ek_key *a, ek_key *b);` |
+| `FBC_BASE_MAX` | macro | `include/fb_cmdline.h:17` | `#define FBC_BASE_MAX` |
+| `FBC_ENTRY_MAX` | macro | `include/fb_cmdline.h:16` | `#define FBC_ENTRY_MAX` |
+| `FBC_HIST_MAX` | macro | `include/fb_cmdline.h:15` | `#define FBC_HIST_MAX` |
+| `FBC_LIST_NAMES` | macro | `include/fb_cmdline.h:18` | `#define FBC_LIST_NAMES` |
+| `FREEDOM_FB_CMDLINE_H` | macro | `include/fb_cmdline.h:2` | `#define FREEDOM_FB_CMDLINE_H` |
+| `fbc_complete_pick` | function | `include/fb_cmdline.h:51` | `size_t fbc_complete_pick(const char *names, const char *prefix, size_t plen, char *ins, size_t ins_cap, char *list...` |
+| `fbc_complete_split` | function | `include/fb_cmdline.h:42` | `long fbc_complete_split(const char *text, size_t n, char *base, size_t cap, size_t *prefix_off);` |
+| `fbc_filter` | enum | `include/fb_cmdline.h:54` | `` |
+| `fbc_filter_label` | function | `include/fb_cmdline.h:64` | `const char *fbc_filter_label(int filter);` |
+| `fbc_filter_next` | function | `include/fb_cmdline.h:63` | `int fbc_filter_next(int filter);` |
+| `fbc_filter_passes` | function | `include/fb_cmdline.h:62` | `int fbc_filter_passes(int filter, int level);` |
+| `fbc_history` | struct | `include/fb_cmdline.h:20` | `` |
 | `fbc_history_free` | function | `include/fb_cmdline.h:28` | `void fbc_history_free(fbc_history *h);` |
 | `fbc_history_init` | function | `include/fb_cmdline.h:27` | `void fbc_history_init(fbc_history *h);` |
 | `fbc_history_next` | function | `include/fb_cmdline.h:38` | `const char *fbc_history_next(fbc_history *h);` |
@@ -121,16 +174,18 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `fc_needs_tick` | function | `include/frame_clock.h:22` | `int fc_needs_tick(const fc_clock *c);` |
 | `fc_set_active` | function | `include/frame_clock.h:21` | `void fc_set_active(fc_clock *c, int active);` |
 | `FH_MAX_DEPTH` | macro | `include/frame_host.h:18` | `#define FH_MAX_DEPTH` |
+| `FH_POLL_MS` | macro | `include/frame_host.h:19` | `#define FH_POLL_MS` |
 | `FREEDOM_FRAME_HOST_H` | macro | `include/frame_host.h:2` | `#define FREEDOM_FRAME_HOST_H` |
-| `fh_apply_top` | function | `include/frame_host.h:36` | `void fh_apply_top(fh_host *h, const tab_page *page);` |
-| `fh_count` | function | `include/frame_host.h:43` | `int fh_count(const fh_host *h);` |
-| `fh_frame_view` | function | `include/frame_host.h:49` | `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);` |
-| `fh_free` | function | `include/frame_host.h:32` | `void fh_free(fh_host *h);` |
-| `fh_generation` | function | `include/frame_host.h:52` | `unsigned fh_generation(const fh_host *h);` |
-| `fh_host` | type_alias | `include/frame_host.h:19` | `typedef struct fh_host fh_host;` |
-| `fh_new` | function | `include/frame_host.h:28` | `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` |
-| `fh_tick` | function | `include/frame_host.h:40` | `int fh_tick(fh_host *h, int elapsed_ms);` |
-| `it` | function | `include/frame_host.h:46` | `* confined worker last built it (NULL when no live frame has that URL);` |
+| `fh_apply_top` | function | `include/frame_host.h:43` | `void fh_apply_top(fh_host *h, const tab_page *page);` |
+| `fh_count` | function | `include/frame_host.h:50` | `int fh_count(const fh_host *h);` |
+| `fh_frame_view` | function | `include/frame_host.h:56` | `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);` |
+| `fh_free` | function | `include/frame_host.h:39` | `void fh_free(fh_host *h);` |
+| `fh_generation` | function | `include/frame_host.h:59` | `unsigned fh_generation(const fh_host *h);` |
+| `fh_host` | type_alias | `include/frame_host.h:20` | `typedef struct fh_host fh_host;` |
+| `fh_new` | function | `include/frame_host.h:29` | `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);` |
+| `fh_set_async` | function | `include/frame_host.h:35` | `void fh_set_async(fh_host *h, int on);` |
+| `fh_tick` | function | `include/frame_host.h:47` | `int fh_tick(fh_host *h, int elapsed_ms);` |
+| `it` | function | `include/frame_host.h:53` | `* confined worker last built it (NULL when no live frame has that URL);` |
 | `FB_MAX_ENTRIES` | macro | `include/freebug.h:56` | `#define FB_MAX_ENTRIES` |
 | `FB_MAX_ENTRY_BYTES` | macro | `include/freebug.h:57` | `#define FB_MAX_ENTRY_BYTES` |
 | `FB_MAX_FILE_BYTES` | macro | `include/freebug.h:62` | `#define FB_MAX_FILE_BYTES` |
@@ -159,23 +214,29 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `FC_MASK_CACHE_ENTRIES` | macro | `include/freedom_config.h:96` | `#define FC_MASK_CACHE_ENTRIES` |
 | `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:78` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
 | `FC_MAX_BOXES` | macro | `include/freedom_config.h:61` | `#define FC_MAX_BOXES` |
+| `FC_NET_LOAD_SETTLE_MS` | macro | `include/freedom_config.h:112` | `#define FC_NET_LOAD_SETTLE_MS` |
+| `FC_NET_POLL_MS` | macro | `include/freedom_config.h:113` | `#define FC_NET_POLL_MS` |
+| `FC_NET_TICK_SETTLE_MS` | macro | `include/freedom_config.h:116` | `#define FC_NET_TICK_SETTLE_MS` |
 | `FC_PNG_MARGIN` | macro | `include/freedom_config.h:34` | `#define FC_PNG_MARGIN` |
 | `FC_PNG_MAX_H` | macro | `include/freedom_config.h:39` | `#define FC_PNG_MAX_H` |
 | `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
 | `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:90` | `#define FC_SHC_MAX_QUERIES` |
 | `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:84` | `#define FC_SHC_MAX_TEXT_BYTES` |
-| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:109` | `#define FC_TABLE_TRACK_MAX_PX` |
+| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:120` | `#define FC_TABLE_TRACK_MAX_PX` |
 | `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:105` | `#define FC_TAB_OP_NET_BUDGET_MS` |
 | `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:30` | `#define FC_TRUSTED_JS_BUDGET_MS` |
 | `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:70` | `#define FC_UI_FONT_SIZE` |
 | `FREEDOM_CONFIG_H` | macro | `include/freedom_config.h:14` | `#define FREEDOM_CONFIG_H` |
 | `FREEDOM_HLS_H` | macro | `include/hls.h:2` | `#define FREEDOM_HLS_H` |
+| `HLS_MAX_MIRRORS` | macro | `include/hls.h:83` | `#define HLS_MAX_MIRRORS` |
+| `domain` | function | `include/hls.h:87` | `* domain (everything after the first label). Writes NUL-terminated into out and * returns the length, or 0 when...` |
 | `hls_playlist` | struct | `include/hls.h:45` | `` |
 | `hls_playlist_free` | function | `include/hls.h:74` | `void hls_playlist_free(hls_playlist *pl);` |
 | `hls_segment` | struct | `include/hls.h:29` | `` |
 | `hls_select_variant` | function | `include/hls.h:65` | `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);` |
 | `hls_status` | enum | `include/hls.h:21` | `` |
 | `hls_variant` | struct | `include/hls.h:36` | `` |
+| `media` | function | `include/hls.h:77` | `* media (non-2xx status, HTML/text error body, empty). Recognises MPEG-TS (also * behind a fake image prefix, probed...` |
 | `resolved` | function | `include/hls.h:68` | `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the * written length, or 0 on failure. */...` |
 | `FREEDOM_HOST_CONF_H` | macro | `include/host_conf.h:2` | `#define FREEDOM_HOST_CONF_H` |
 | `HCF_MAX_DIRS` | macro | `include/host_conf.h:15` | `#define HCF_MAX_DIRS` |
@@ -319,20 +380,20 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `FREEDOM_JS_DOM_H` | macro | `include/js_dom.h:2` | `#define FREEDOM_JS_DOM_H` |
 | `JD_IFRAME_TRACK_MAX` | macro | `include/js_dom.h:40` | `#define JD_IFRAME_TRACK_MAX` |
 | `JD_REPL_CSS_MAX` | macro | `include/js_dom.h:86` | `#define JD_REPL_CSS_MAX` |
-| `URLs` | function | `include/js_dom.h:236` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
+| `URLs` | function | `include/js_dom.h:238` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
 | `getComputedStyle` | function | `include/js_dom.h:115` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
 | `global` | function | `include/js_dom.h:80` | `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...` |
 | `host` | function | `include/js_dom.h:170` | `* for a trusted host (allow.conf AND js.conf);` |
 | `jd_click_state` | type_alias | `include/js_dom.h:35` | `typedef struct jd_click_state jd_click_state;` |
 | `jd_click_state_free` | function | `include/js_dom.h:125` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
-| `jd_flush_custom_elements` | function | `include/js_dom.h:261` | `void jd_flush_custom_elements(js_context *ctx);` |
+| `jd_flush_custom_elements` | function | `include/js_dom.h:263` | `void jd_flush_custom_elements(js_context *ctx);` |
 | `jd_get_cookies` | function | `include/js_dom.h:181` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
 | `jd_iframe_track` | struct | `include/js_dom.h:41` | `` |
 | `jd_install_repl_api` | function | `include/js_dom.h:89` | `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...` |
 | `jd_opaque` | struct | `include/js_dom.h:46` | `` |
-| `jd_process_iframes` | function | `include/js_dom.h:229` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
+| `jd_process_iframes` | function | `include/js_dom.h:231` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
 | `jd_status` | enum | `include/js_dom.h:25` | `` |
-| `jd_video_from_scripts` | function | `include/js_dom.h:250` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
+| `jd_video_from_scripts` | function | `include/js_dom.h:252` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
 | `opaque` | function | `include/js_dom.h:73` | `* the engine runtime opaque (unreachable from script);` |
 | `out_status` | function | `include/js_dom.h:189` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
 | `place` | function | `include/js_dom.h:94` | `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...` |
@@ -435,66 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `FREEDOM_LAZY_LOAD_H` | macro | `include/lazy_load.h:2` | `#define FREEDOM_LAZY_LOAD_H` |
 | `FREEDOM_LINK_NAV_H` | macro | `include/link_nav.h:2` | `#define FREEDOM_LINK_NAV_H` |
 | `LN_MAX_FRAGMENT` | macro | `include/link_nav.h:38` | `#define LN_MAX_FRAGMENT` |
-| `LN_MAX_TARGET` | macro | `include/link_nav.h:33` | `#define LN_MAX_TARGET` |
-| `action` | type_alias | `include/link_nav.h:61` | `typedef struct ln_result { ln_action action;` |
-| `dropped` | function | `include/link_nav.h:36` | `* A longer fragment is dropped (stored as "");` |
-| `ln_action` | enum | `include/link_nav.h:40` | `` |
-| `ln_block_reason` | enum | `include/link_nav.h:54` | `` |
-| `ln_block_reason_text` | function | `include/link_nav.h:85` | `const char *ln_block_reason_text(ln_block_reason reason);` |
-| `ln_result` | struct | `include/link_nav.h:62` | `` |
-| `ln_status` | enum | `include/link_nav.h:70` | `` |
-| `ln_target_kind` | enum | `include/link_nav.h:46` | `` |
-| `FREEDOM_LOCAL_STORE_H` | macro | `include/local_store.h:2` | `#define FREEDOM_LOCAL_STORE_H` |
-| `LS_HEADER_LEN` | macro | `include/local_store.h:30` | `#define LS_HEADER_LEN` |
-| `LS_KEY_LEN` | macro | `include/local_store.h:26` | `#define LS_KEY_LEN` |
-| `LS_MAX_PLAINTEXT` | macro | `include/local_store.h:32` | `#define LS_MAX_PLAINTEXT` |
-| `LS_NONCE_LEN` | macro | `include/local_store.h:28` | `#define LS_NONCE_LEN` |
-| `LS_OVERHEAD` | macro | `include/local_store.h:31` | `#define LS_OVERHEAD` |
-| `LS_SALT_LEN` | macro | `include/local_store.h:27` | `#define LS_SALT_LEN` |
-| `LS_TAG_LEN` | macro | `include/local_store.h:29` | `#define LS_TAG_LEN` |
-| `ls_aead` | enum | `include/local_store.h:34` | `` |
-| `ls_free` | function | `include/local_store.h:80` | `void ls_free(uint8_t *buf, size_t len);` |
-| `ls_status` | enum | `include/local_store.h:39` | `` |
-| `FREEDOM_MASK_CACHE_H` | macro | `include/mask_cache.h:2` | `#define FREEDOM_MASK_CACHE_H` |
-| `h` | type_alias | `include/mask_cache.h:17` | `typedef struct mkc_key { int w, h;` |
-| `mkc_bytes` | function | `include/mask_cache.h:48` | `size_t mkc_bytes(const mkc_cache *c);` |
-| `mkc_cache` | type_alias | `include/mask_cache.h:24` | `typedef struct mkc_cache mkc_cache;` |
-| `mkc_clear` | function | `include/mask_cache.h:35` | `void mkc_clear(mkc_cache *c);` |
-| `mkc_count` | function | `include/mask_cache.h:49` | `size_t mkc_count(const mkc_cache *c);` |
-| `mkc_free` | function | `include/mask_cache.h:32` | `void mkc_free(mkc_cache *c);` |
-| `mkc_get` | function | `include/mask_cache.h:39` | `const unsigned char *mkc_get(mkc_cache *c, const mkc_key *k, int *stride);` |
-| `mkc_key` | struct | `include/mask_cache.h:17` | `` |
-| `mkc_new` | function | `include/mask_cache.h:29` | `mkc_cache *mkc_new(size_t byte_budget, size_t max_entries);` |
-| `mkc_put` | function | `include/mask_cache.h:45` | `unsigned char *mkc_put(mkc_cache *c, const mkc_key *k, int stride);` |
-| `FREEDOM_MEDIA_DECODER_H` | macro | `include/media_decoder.h:2` | `#define FREEDOM_MEDIA_DECODER_H` |
-| `MD_MAX_CATCHUP_READS` | macro | `include/media_decoder.h:65` | `#define MD_MAX_CATCHUP_READS` |
-| `MD_MAX_SEGMENT_BYTES` | macro | `include/media_decoder.h:46` | `#define MD_MAX_SEGMENT_BYTES` |
-| `MD_PACE_MAX_LAG_MS` | macro | `include/media_decoder.h:58` | `#define MD_PACE_MAX_LAG_MS` |
-| `MD_PACE_MAX_STEP_MS` | macro | `include/media_decoder.h:62` | `#define MD_PACE_MAX_STEP_MS` |
-| `epoch_ms` | type_alias | `include/media_decoder.h:66` | `typedef struct md_pacer { uint64_t epoch_ms;` |
-| `md_cmd` | enum | `include/media_decoder.h:29` | `` |
-| `md_pace_due_ms` | function | `include/media_decoder.h:79` | `static inline uint64_t md_pace_due_ms(md_pacer *p, uint64_t now_ms,                              ...` |
-| `md_pacer` | struct | `include/media_decoder.h:67` | `` |
-| `md_resp` | enum | `include/media_decoder.h:38` | `` |
-| `media_decoder_run` | function | `include/media_decoder.h:99` | `void media_decoder_run(int out_fd, int cmd_fd);` |
-| `media_decoder_spawn` | function | `include/media_decoder.h:104` | `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd);` |
-| `FREEDOM_NET_GUARD_H` | macro | `include/net_guard.h:9` | `#define FREEDOM_NET_GUARD_H` |
-| `NG_FAMILY_V4` | macro | `include/net_guard.h:22` | `#define NG_FAMILY_V4` |
-| `NG_FAMILY_V6` | macro | `include/net_guard.h:23` | `#define NG_FAMILY_V6` |
-| `ng_addr_is_private` | function | `include/net_guard.h:38` | `int ng_addr_is_private(int family, const unsigned char *addr, size_t len);` |
-| `ng_host_is_ip` | function | `include/net_guard.h:46` | `int ng_host_is_ip(const char *host);` |
-| `ng_host_is_local` | function | `include/net_guard.h:50` | `int ng_host_is_local(const char *host);` |
-| `ng_request` | struct | `include/net_guard.h:26` | `` |
-| `ng_text_is_private` | function | `include/net_guard.h:42` | `int ng_text_is_private(const char *ip_text);` |
-| `ng_verdict` | enum | `include/net_guard.h:20` | `` |
-| `FREEDOM_NET_REALM_H` | macro | `include/net_realm.h:2` | `#define FREEDOM_NET_REALM_H` |
-| `NR_ROUTE_BLOCKED` | function | `include/net_realm.h:57` | `* NR_ROUTE_BLOCKED (fail closed: never route what cannot be classified). A realm * whose proxy is not enabled =>...` |
-| `address` | function | `include/net_realm.h:62` | `* and encrypts by its address (the I2P destination / onion key), so http over it is * not a downgrade. Currently...` |
-| `nr_config` | struct | `include/net_realm.h:42` | `` |
-| `nr_realm` | enum | `include/net_realm.h:29` | `` |
-| `nr_realm_allows_http` | function | `include/net_realm.h:66` | `int nr_realm_allows_http(nr_realm r);` |
-| `nr_realm_name` | function | `include/net_realm.h:69` | `const char *nr_realm_name(nr_realm r);` |
-| `nr_route` | enum | `include/net_realm.h:35` | `` |
-| `nr_route_name` | function | `include/net_realm.h:70` | `const char *nr_route_name(nr_route r);` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

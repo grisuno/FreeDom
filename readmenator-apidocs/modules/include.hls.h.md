@@ -1,12 +1,13 @@
 # `include/hls.h`
 
-> Source: [include/hls.h:1](../../include/hls.h#L1) | language `h` | coverage 62.5% | [API index](../index.md)
+> Source: [include/hls.h:1](../../include/hls.h#L1) | language `h` | coverage 54.5% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`hls_segment`](#hls_segment), [`hls_variant`](#hls_variant), [`hls_playlist`](#hls_playlist)
 - **Enums:** [`hls_status`](#hls_status)
-- **Functions:** [`hls_select_variant`](#hls_select_variant), [`resolved`](#resolved), [`hls_playlist_free`](#hls_playlist_free)
+- **Functions:** [`hls_select_variant`](#hls_select_variant), [`resolved`](#resolved), [`hls_playlist_free`](#hls_playlist_free), [`media`](#media), [`domain`](#domain)
+- **Macros:** [`HLS_MAX_MIRRORS`](#hls_max_mirrors)
 
 ## Type Diagram
 
@@ -148,5 +149,64 @@ Safe on NULL.
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `pl` | `hls_playlist *` |  |  |
+
+---
+
+<a id="media"></a>
+
+### `media`
+
+`function` | [include/hls.h:77](../../include/hls.h#L77)
+
+```c
+* media (non-2xx status, HTML/text error body, empty). Recognises MPEG-TS (also * behind a fake image prefix, probed in the first 4 KiB), ISO BMFF and ID3 audio. * A rejected body must never reach the
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `status` | `non-2xx` |  |  |
+| `body` | `HTML/text error` |  |  |
+
+**Returns:** `*`
+
+---
+
+<a id="domain"></a>
+
+### `domain`
+
+`function` | [include/hls.h:87](../../include/hls.h#L87)
+
+```c
+* domain (everything after the first label). Writes NUL-terminated into out and * returns the length, or 0 when there is no k-th mirror or it does not fit. */ size_t hls_mirror_url(const hls_playlist
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `label` | `everything after the first` |  |  |
+
+**Returns:** `*`
+
+*Called by:* [`proceed`](gui.browser_ui.c.md#proceed)
+
+---
+
+## Macros
+
+<a id="hls_max_mirrors"></a>
+
+### `HLS_MAX_MIRRORS`
+
+`macro` | [include/hls.h:83](../../include/hls.h#L83)
+
+```c
+#define HLS_MAX_MIRRORS
+```
+
+Mirrors the feeder may retry a rejected segment on (spec/hls.md).
 
 ---

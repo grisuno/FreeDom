@@ -20,6 +20,17 @@ classDiagram
     <<struct>> key_ref
 ```
 
+## Call Graph
+
+Solid arrows stay in this module, dashed arrows leave it.
+
+```mermaid
+flowchart LR
+    n_src_web_storage_c__wst_foreach(["wst_foreach"])
+    n_src_tab_c__fn["tab.fn"]
+    n_src_web_storage_c__wst_foreach -.-> n_src_tab_c__fn
+```
+
 ## Structs
 
 <a id="wst_origin"></a>
@@ -229,6 +240,8 @@ int wst_foreach(const char *blob, size_t len, void (*fn)(void *ctx, const char *
 | `k` | `void (*fn)(void *ctx, const char * ...` |  |  |
 
 **Returns:** `int`
+
+*Calls:* [`fn`](src.tab.c.md#fn)
 
 *Called by:* [`jt_enable_storage`](src.js_trusted.c.md#jt_enable_storage)
 

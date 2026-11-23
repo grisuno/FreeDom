@@ -1,6 +1,95 @@
 # API (page 6 of 13)
 Previous: [API_p5.md](API_p5.md)
 
+## include/textfield.h
+Imported by: `gui/browser_ui.c`, `src/textfield.c`, `tests/test_textfield.c`
+- `tf_init` (function) `include/textfield.h:38` `void tf_init(tf_field *f);` -- typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at [len] size_t len;         /*...
+- `tf_clear` (function) `include/textfield.h:45` `void tf_clear(tf_field *f);` -- Replaces the whole content and places the cursor at the end. s == NULL => * TF_ERR_NULL_ARG. strlen(s) >= TF_CAP =>...
+- `tf_backspace` (function) `include/textfield.h:53` `void tf_backspace(tf_field *f);` -- Inserts one byte at the cursor, shifting the tail right; the cursor advances by one.
+- `tf_delete` (function) `include/textfield.h:56` `void tf_delete(tf_field *f);` -- Inserts one byte at the cursor, shifting the tail right; the cursor advances by one.
+- `tf_move` (function) `include/textfield.h:59` `void tf_move(tf_field *f, long delta);` -- Inserts one byte at the cursor, shifting the tail right; the cursor advances by one.
+- `tf_home` (function) `include/textfield.h:62` `void tf_home(tf_field *f);` -- one.
+- `tf_end` (function) `include/textfield.h:63` `void tf_end(tf_field *f);`
+- `tf_text` (function) `include/textfield.h:66` `const char *tf_text(const tf_field *f);` -- /* Deletes the byte before the cursor (no-op at the start).
+- `tf_len` (function) `include/textfield.h:67` `size_t tf_len(const tf_field *f);`
+- `tf_cursor` (function) `include/textfield.h:68` `size_t tf_cursor(const tf_field *f);`
+
+## include/tls_impersonate.h
+Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
+- `path` (function) `include/tls_impersonate.h:26` `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed...`
+- `chain` (function) `include/tls_impersonate.h:32` `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT...`
+- `ti_should_impersonate` (function) `include/tls_impersonate.h:56` `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);` -- The double opt-in + user-flag gate (pure).
+- `success` (function) `include/tls_impersonate.h:97` `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out...`
+- `ti_decode_req` (function) `include/tls_impersonate.h:101` `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
+- `ti_req_free` (function) `include/tls_impersonate.h:102` `void ti_req_free(ti_req *r);`
+- `ti_encode_resp` (function) `include/tls_impersonate.h:104` `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
+- `ti_decode_resp` (function) `include/tls_impersonate.h:105` `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
+- `ti_resp_free` (function) `include/tls_impersonate.h:106` `void ti_resp_free(ti_resp *r);`
+
+## include/ui.h
+Depends on: `include/prefs.h`
+Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`
+- `space` (function) `include/ui.h:44` `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
+- `ui_layout_free` (function) `include/ui.h:52` `void ui_layout_free(ui_layout *lay);` -- Word-wraps text into lines of at most max_cols columns (monospace model).
+- `ui_clamp_scroll` (function) `include/ui.h:55` `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);` -- Word-wraps text into lines of at most max_cols columns (monospace model).
+- `shortcut` (function) `include/ui.h:71` `* from a keyboard shortcut (Ctrl+Shift+E only relaxes a weak-but-valid certificate). */ void...`
+- `available` (function) `include/ui.h:91` `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
+- `out` (function) `include/ui.h:103` `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
+- `placeholders` (function) `include/ui.h:113` `* above always draw image placeholders (no worker to decode hostile bytes);`
+- `disk` (function) `include/ui.h:118` `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
+- `images` (function) `include/ui.h:120` `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
+- `ui_render_viewport_w` (function) `include/ui.h:156` `int ui_render_viewport_w(void);` -- The fixed canvas width (px) every headless render (ui_render_png/pdf, ui_dump_layout) lays out at.
+- `ui_persisted_prefs` (function) `include/ui.h:161` `int ui_persisted_prefs(prefs_state *out);` -- The GUI's persisted choices (JS mode, images/CSS toggles, reader) from the encrypted profile, so `--as-gui` shows...
+
+## include/url.h
+Imported by: `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
+- `url_is_https` (function) `include/url.h:42` `int url_is_https(const char *s);` -- Nonzero iff s begins (case-insensitively) with "https://" and the host is * neither empty nor a leading '/'.
+- `url_has_scheme` (function) `include/url.h:46` `int url_has_scheme(const char *s);` -- Nonzero iff s begins with "<scheme>:" per RFC 3986 * (ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) ":").
+- `url_authority_len` (function) `include/url.h:51` `size_t url_authority_len(const char *url);` -- Length of "https://host[:port]" within a validated absolute https URL: the index of the first '/', '?' or '#' after...
+- `URL_ERR_NOT_HTTPS` (function) `include/url.h:109` `* URL_ERR_NOT_HTTPS (out untouched);`
+- `path` (function) `include/url.h:115` `* absolute path ("file:///..."). NULL => 0. */ int url_is_file(const char *s);`
+- `url_file_path` (function) `include/url.h:121` `const char *url_file_path(const char *s);` -- Returns the absolute filesystem path inside a "file:///path" URL (i.e. the "/path" part), or NULL when s is not a...
+- `url` (function) `include/url.h:126` `* Every field ALIASES the input url (not owned, valid while url is alive);`
+- `password` (function) `include/url.h:152` `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When...`
+
+## include/util.h
+Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
+- `write_full` (function) `include/util.h:15` `static inline int write_full(int fd, const void *buf, size_t n)`
+- `read_full` (function) `include/util.h:26` `static inline int read_full(int fd, void *buf, size_t n)`
+- `mem_contains_ci` (function) `include/util.h:43` `static inline int mem_contains_ci(const void *hay, size_t hlen, const char *needle)` -- Returns 1 when the trusted lowercase-ASCII needle (letters/digits) occurs in the hostile, length-delimited haystack...
+- `utf8_seq_len` (function) `include/util.h:57` `static inline size_t utf8_seq_len(unsigned char c)`
+- `fnv1a` (function) `include/util.h:67` `static inline uint64_t fnv1a(const char *s, size_t n)`
+
+## include/video_controls.h
+Depends on: `include/hls.h`
+Imported by: `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `src/video_controls.c`, `tests/test_video_controls.c`
+- `vcl_layout` (function) `include/video_controls.h:47` `int vcl_layout(double x, double y, double w, double h, vcl_geom *g);` -- Lays out the bar inside the video rect (x,y,w,h).
+- `frac` (function) `include/video_controls.h:50` `* *frac (may be NULL) receives the track position for VCL_HIT_SEEK, else 0. */ vcl_hit_kind vcl_hit(const vcl_geom...`
+- `vcl_seg_duration` (function) `include/video_controls.h:55` `double vcl_seg_duration(double d);` -- Classifies a pointer at (px,py). g may be NULL (no bar: the surface toggles). * *frac (may be NULL) receives the...
+- `vcl_total` (function) `include/video_controls.h:58` `double vcl_total(const hls_playlist *pl);` -- Classifies a pointer at (px,py). g may be NULL (no bar: the surface toggles). * *frac (may be NULL) receives the...
+- `start` (function) `include/video_controls.h:61` `* in *start (may be NULL). NULL/empty playlist => 0 and *start = 0. */ size_t vcl_segment_at(const hls_playlist *pl...`
+- `vcl_segment_start` (function) `include/video_controls.h:65` `double vcl_segment_start(const hls_playlist *pl, size_t idx);` -- Index of the segment containing t (clamped to the playlist) and its start time * in *start (may be NULL).
+- `vcl_position` (function) `include/video_controls.h:68` `double vcl_position(double base_s, int64_t pts0_us, int64_t pts_us, double total);` -- Index of the segment containing t (clamped to the playlist) and its start time * in *start (may be NULL).
+- `vcl_clamp_frac` (function) `include/video_controls.h:71` `double vcl_clamp_frac(double f);` -- Index of the segment containing t (clamped to the playlist) and its start time * in *start (may be NULL).
+- `vcl_format_time` (function) `include/video_controls.h:75` `size_t vcl_format_time(double seconds, char *buf, size_t cap);` -- Writes "m:ss" (or "h:mm:ss" from one hour) into buf; returns the length, or 0 * when buf is NULL/too small (buf then...
+
+## include/video_pick.h
+Depends on: `include/page_view.h`
+Imported by: `gui/browser_ui.c`, `src/video_pick.c`, `tests/test_video_pick.c`
+- `vpk_playable` (function) `include/video_pick.h:15` `int vpk_playable(const char *src);` -- 1 when src is an absolute http(s) URL with something after the scheme (the only * kind the decoder can fetch); 0 for...
+- `vpk_first_video` (function) `include/video_pick.h:18` `const char *vpk_first_video(const pv_view *v);` -- 1 when src is an absolute http(s) URL with something after the scheme (the only * kind the decoder can fetch); 0 for...
+- `vpk_for_frame` (function) `include/video_pick.h:23` `const char *vpk_for_frame(const pv_view *frame_view, const char *top_video);` -- Video for a click on a live frame's box: the frame's own first video, else top_video (the top document's first...
+
+## include/web_storage.h
+Imported by: `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`, `src/web_storage.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_web_storage.c`
+- `wst_new` (function) `include/web_storage.h:25` `wst_db *wst_new(void);` -- web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing persists to disk).
+- `wst_free` (function) `include/web_storage.h:28` `void wst_free(wst_db *db);` -- before it may touch the database.
+- `wst_encode` (function) `include/web_storage.h:33` `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len);` -- Snapshot of origin's pairs ([n:u32]([klen:u32][key][vlen:u32][val])*, little-endian) into an owned *out of *len bytes.
+- `wst_decode_check` (function) `include/web_storage.h:37` `int wst_decode_check(const char *blob, size_t len);` -- Pure validation of a snapshot: 0 when it is complete and well-formed (counts and * lengths fit, total <= WST_QUOTA...
+- `wst_replace` (function) `include/web_storage.h:42` `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len);` -- Replaces origin's contents with the snapshot after wst_decode_check.
+- `full` (function) `include/web_storage.h:45` `* validating it in full (wst_decode_check). Returns 0, or -1 when invalid (fn is then * never called). The one...`
+- `wst_origin_bytes` (function) `include/web_storage.h:59` `size_t wst_origin_bytes(const wst_db *db, const char *origin);` -- Builds a snapshot from n pairs into an owned *out.
+
 ## include/webfont.h
 Imported by: `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
 - `here` (function) `include/webfont.h:38` `* set with the decoded bytes owned here (freed by wf_list_free);`
@@ -138,40 +227,44 @@ Depends on: `include/box_style.h`
 
 ## src/box_tree.c
 Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
-- `layout_block` (function) `src/box_tree.c:37` `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,
+- `layout_block` (function) `src/box_tree.c:40` `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,
                    ...` -- Block container: stack non-none children vertically, collapsing each child's top * margin with the previous child's...
-- `bt_nn` (function) `src/box_tree.c:58` `static double bt_nn(double v)` -- if (cavail < 0.0) cavail = 0.0; bt_status r = layout_node(c, cavail, depth + 1); if (r != BT_OK) return r; double...
-- `height` (function) `src/box_tree.c:78` `* exactly that height (Flexbox 9.4 step 15).
+- `bt_nn` (function) `src/box_tree.c:61` `static double bt_nn(double v)` -- if (cavail < 0.0) cavail = 0.0; bt_status r = layout_node(c, cavail, depth + 1); if (r != BT_OK) return r; double...
+- `height` (function) `src/box_tree.c:81` `* exactly that height (Flexbox 9.4 step 15).
  *
  * wrap_reverse (node->wrap_reverse): when node->...`
-- `layout_flex` (function) `src/box_tree.c:98` `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
+- `layout_flex` (function) `src/box_tree.c:101` `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                     ...`
-- `layout_grid` (function) `src/box_tree.c:280` `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
+- `layout_grid` (function) `src/box_tree.c:283` `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
                     ...`
-- `sized` (function) `src/box_tree.c:350` `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
-- `layout_node` (function) `src/box_tree.c:420` `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
-- `bt_layout` (function) `src/box_tree.c:465` `bt_status bt_layout(bt_node *root, double avail_w)`
-- `assign_doc_order` (function) `src/box_tree.c:505` `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
+- `sized` (function) `src/box_tree.c:353` `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
+- `layout_node` (function) `src/box_tree.c:423` `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
+- `bt_layout` (function) `src/box_tree.c:468` `bt_status bt_layout(bt_node *root, double avail_w)`
+- `assign_doc_order` (function) `src/box_tree.c:508` `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
                   ...` -- Recursive doc_order assignment.
-- `find_positioned_ancestor` (function) `src/box_tree.c:522` `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
+- `find_positioned_ancestor` (function) `src/box_tree.c:525` `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
                        ...` -- Walk the parent_id chain from `start` to find the nearest ancestor with position != STATIC.
-- `resolve_inset` (function) `src/box_tree.c:542` `static double resolve_inset(int v, int pct_pm, double basis)` -- Resolves an inset <length-percentage>: PV_LEN_UNSET or BT_LEN_AUTO with no percentage half → 0 (anchor at the...
-- `inset_unset` (function) `src/box_tree.c:551` `static int inset_unset(int v, int pct_pm)` -- Stage 2b: an inset axis the author left undeclared (UNSET) or `auto`.
-- `bt_containing_block` (function) `src/box_tree.c:555` `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
+- `resolve_inset` (function) `src/box_tree.c:545` `static double resolve_inset(int v, int pct_pm, double basis)` -- Resolves an inset <length-percentage>: PV_LEN_UNSET or BT_LEN_AUTO with no percentage half → 0 (anchor at the...
+- `inset_unset` (function) `src/box_tree.c:554` `static int inset_unset(int v, int pct_pm)` -- Stage 2b: an inset axis the author left undeclared (UNSET) or `auto`.
+- `bt_containing_block` (function) `src/box_tree.c:558` `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
                         ...`
-- `block` (function) `src/box_tree.c:566` `* true block (same flow neighbourhood), strictly better than zeros. NULL
+- `block` (function) `src/box_tree.c:569` `* true block (same flow neighbourhood), strictly better than zeros. NULL
      * placed keeps lega...`
-- `bt_resolve_positioning` (function) `src/box_tree.c:585` `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
+- `bt_resolve_positioning` (function) `src/box_tree.c:588` `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                           ...`
-- `bt_resolve_positioning_ex` (function) `src/box_tree.c:596` `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
+- `sc_forms` (function) `src/box_tree.c:616` `static int sc_forms(const pv_box_def *b)`
+- `sc_chain_compare` (function) `src/box_tree.c:629` `static int sc_chain_compare(const sc_chain *a, const sc_chain *b, const cx_item *by_ref)`
+- `nest_in_contexts` (function) `src/box_tree.c:638` `static void nest_in_contexts(const pv_box_def *boxes, size_t nbox, const bt_positioned *tmp,
+    ...`
+- `bt_resolve_positioning_ex` (function) `src/box_tree.c:706` `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                        ...`
-- `oof_walk` (function) `src/box_tree.c:751` `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` -- Shared walk for the Stage 2d classifiers: nearest==1 stops at the first * ABSOLUTE/FIXED box, nearest==0 remembers...
-- `bt_oof_anchor` (function) `src/box_tree.c:768` `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
-- `bt_oof_root` (function) `src/box_tree.c:772` `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
-- `bt_box_hidden` (function) `src/box_tree.c:776` `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
-- `bt_in_subtree` (function) `src/box_tree.c:789` `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)`
-- `bt_oof_avail` (function) `src/box_tree.c:800` `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
-- `bt_defer_roots` (function) `src/box_tree.c:808` `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
+- `oof_walk` (function) `src/box_tree.c:862` `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` -- Shared walk for the Stage 2d classifiers: nearest==1 stops at the first * ABSOLUTE/FIXED box, nearest==0 remembers...
+- `bt_oof_anchor` (function) `src/box_tree.c:879` `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
+- `bt_oof_root` (function) `src/box_tree.c:883` `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
+- `bt_box_hidden` (function) `src/box_tree.c:887` `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
+- `bt_in_subtree` (function) `src/box_tree.c:900` `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)`
+- `bt_oof_avail` (function) `src/box_tree.c:911` `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
+- `bt_defer_roots` (function) `src/box_tree.c:919` `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
                       const bt_positi...`
 
 ## src/browser.c
@@ -249,18 +342,21 @@ Depends on: `include/chrome_layout.h`
 - `rect` (function) `src/chrome_layout.c:17` `static chl_rect rect(double x, double y, double w, double h)`
 - `chl_rect_has` (function) `src/chrome_layout.c:26` `int chl_rect_has(chl_rect r, double x, double y)`
 - `chl_compute` (function) `src/chrome_layout.c:30` `chl_status chl_compute(double width, int csd, int tab_count, int active, chl_layout *out)`
-- `chl_tab_rect` (function) `src/chrome_layout.c:96` `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)`
-- `chl_tab_close_rect` (function) `src/chrome_layout.c:106` `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)`
-- `chl_hit` (function) `src/chrome_layout.c:116` `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)`
-- `lower` (function) `src/chrome_layout.c:147` `static int lower(int c)`
-- `has_prefix_ci` (function) `src/chrome_layout.c:150` `static int has_prefix_ci(const char *s, const char *prefix)` -- if (chl_rect_has(l->back, x, y))     return CHL_PART_BACK; if (chl_rect_has(l->fwd, x, y))      return CHL_PART_FWD...
-- `host_ends_with` (function) `src/chrome_layout.c:157` `static int host_ends_with(const char *h, size_t n, const char *suffix)` -- } /* --- identity badge --- static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* 1 if...
-- `url_host` (function) `src/chrome_layout.c:167` `static size_t url_host(const char *rest, const char **out)` -- Host of an authority-bearing URL after "scheme://": userinfo, port and one trailing * dot removed.
-- `chl_identity_of` (function) `src/chrome_layout.c:185` `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,
+- `chl_tab_rect` (function) `src/chrome_layout.c:112` `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)`
+- `chl_tab_close_rect` (function) `src/chrome_layout.c:122` `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)`
+- `chl_hit` (function) `src/chrome_layout.c:132` `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)`
+- `chl_tab_drop_index` (function) `src/chrome_layout.c:165` `int chl_tab_drop_index(const chl_layout *l, double x)`
+- `chl_move_index` (function) `src/chrome_layout.c:175` `int chl_move_index(int i, int from, int to)`
+- `chl_tab_for_digit` (function) `src/chrome_layout.c:182` `int chl_tab_for_digit(int digit, int tab_count)`
+- `lower` (function) `src/chrome_layout.c:190` `static int lower(int c)`
+- `has_prefix_ci` (function) `src/chrome_layout.c:193` `static int has_prefix_ci(const char *s, const char *prefix)` -- return i; } int chl_tab_for_digit(int digit, int tab_count) { if (tab_count < 1 || digit < 1 || digit > 9) return...
+- `host_ends_with` (function) `src/chrome_layout.c:200` `static int host_ends_with(const char *h, size_t n, const char *suffix)` -- } /* --- identity badge --- static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* 1 if...
+- `url_host` (function) `src/chrome_layout.c:210` `static size_t url_host(const char *rest, const char **out)` -- Host of an authority-bearing URL after "scheme://": userinfo, port and one trailing * dot removed.
+- `chl_identity_of` (function) `src/chrome_layout.c:228` `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,
                ...`
-- `chl_identity_label` (function) `src/chrome_layout.c:209` `const char *chl_identity_label(chl_identity id)`
-- `chl_findbar_compute` (function) `src/chrome_layout.c:226` `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)` -- Find bar: the field at the left, prev/next right after it, the match count, and the * close button at the right edge.
-- `chl_findbar_hit` (function) `src/chrome_layout.c:262` `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)`
+- `chl_identity_label` (function) `src/chrome_layout.c:252` `const char *chl_identity_label(chl_identity id)`
+- `chl_findbar_compute` (function) `src/chrome_layout.c:269` `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)` -- Find bar: the field at the left, prev/next right after it, the match count, and the * close button at the right edge.
+- `chl_findbar_hit` (function) `src/chrome_layout.c:305` `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)`
 
 ## src/compositor.c
 Depends on: `include/compositor.h`, `include/css.h`

@@ -116,17 +116,19 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
 - Layer: utility
 - Language: h
 - Symbols:
-  - `fh_host` (type_alias, line 19) `typedef struct fh_host fh_host;`
-  - `fh_new` (function, line 28) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);`
-  - `fh_free` (function, line 32) `void fh_free(fh_host *h);`
-  - `fh_apply_top` (function, line 36) `void fh_apply_top(fh_host *h, const tab_page *page);`
-  - `fh_tick` (function, line 40) `int fh_tick(fh_host *h, int elapsed_ms);`
-  - `fh_count` (function, line 43) `int fh_count(const fh_host *h);`
-  - `it` (function, line 46) `* confined worker last built it (NULL when no live frame has that URL);`
-  - `fh_frame_view` (function, line 49) `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);`
-  - `fh_generation` (function, line 52) `unsigned fh_generation(const fh_host *h);`
+  - `fh_host` (type_alias, line 20) `typedef struct fh_host fh_host;`
+  - `fh_new` (function, line 29) `fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);`
+  - `fh_set_async` (function, line 35) `void fh_set_async(fh_host *h, int on);`
+  - `fh_free` (function, line 39) `void fh_free(fh_host *h);`
+  - `fh_apply_top` (function, line 43) `void fh_apply_top(fh_host *h, const tab_page *page);`
+  - `fh_tick` (function, line 47) `int fh_tick(fh_host *h, int elapsed_ms);`
+  - `fh_count` (function, line 50) `int fh_count(const fh_host *h);`
+  - `it` (function, line 53) `* confined worker last built it (NULL when no live frame has that URL);`
+  - `fh_frame_view` (function, line 56) `const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);`
+  - `fh_generation` (function, line 59) `unsigned fh_generation(const fh_host *h);`
   - `FREEDOM_FRAME_HOST_H` (macro, line 2) `#define FREEDOM_FRAME_HOST_H`
   - `FH_MAX_DEPTH` (macro, line 18) `#define FH_MAX_DEPTH`
+  - `FH_POLL_MS` (macro, line 19) `#define FH_POLL_MS`
 - Depends on: `include/page_view.h`, `include/tab.h`
 - Imported by: `gui/browser_ui.c`, `src/frame_host.c`, `src/freedom.c`, `tests/test_frame_host.c`
 
@@ -178,8 +180,11 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FC_MASK_CACHE_ENTRIES` (macro, line 96) `#define FC_MASK_CACHE_ENTRIES`
   - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 99) `#define FC_LAZY_IMAGE_MARGIN_PX`
   - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 105) `#define FC_TAB_OP_NET_BUDGET_MS`
-  - `FC_TABLE_TRACK_MAX_PX` (macro, line 109) `#define FC_TABLE_TRACK_MAX_PX`
-- Imported by: `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/svg_paint.c`, `src/tab.c`, `tests/test_sheet_cache.c`
+  - `FC_NET_LOAD_SETTLE_MS` (macro, line 112) `#define FC_NET_LOAD_SETTLE_MS`
+  - `FC_NET_POLL_MS` (macro, line 113) `#define FC_NET_POLL_MS`
+  - `FC_NET_TICK_SETTLE_MS` (macro, line 116) `#define FC_NET_TICK_SETTLE_MS`
+  - `FC_TABLE_TRACK_MAX_PX` (macro, line 120) `#define FC_TABLE_TRACK_MAX_PX`
+- Imported by: `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/svg_paint.c`, `src/tab.c`, `tests/test_sheet_cache.c`, `tests/test_tab.c`
 
 ## include/hls.h
 - Doc: hls_segment: or variant info.
@@ -193,8 +198,11 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `hls_select_variant` (function, line 65) `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h);`
   - `resolved` (function, line 68) `* Writes the absolute URL into resolved (bounded by resolved_sz). Returns the * written length, or 0 on failure. */...`
   - `hls_playlist_free` (function, line 74) `void hls_playlist_free(hls_playlist *pl);`
+  - `media` (function, line 77) `* media (non-2xx status, HTML/text error body, empty). Recognises MPEG-TS (also * behind a fake image prefix, probed...`
+  - `domain` (function, line 87) `* domain (everything after the first label). Writes NUL-terminated into out and * returns the length, or 0 when...`
   - `FREEDOM_HLS_H` (macro, line 2) `#define FREEDOM_HLS_H`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
+  - `HLS_MAX_MIRRORS` (macro, line 83) `#define HLS_MAX_MIRRORS`
+- Imported by: `gui/browser_ui.c`, `include/video_controls.h`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
 
 ## include/host_conf.h
 - Doc: hcf_search_dirs: Pure.
@@ -421,10 +429,10 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `host` (function, line 170) `* for a trusted host (allow.conf AND js.conf);`
   - `jd_get_cookies` (function, line 181) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
   - `out_status` (function, line 189) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-  - `jd_process_iframes` (function, line 229) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-  - `URLs` (function, line 236) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-  - `jd_video_from_scripts` (function, line 250) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
-  - `jd_flush_custom_elements` (function, line 261) `void jd_flush_custom_elements(js_context *ctx);`
+  - `jd_process_iframes` (function, line 231) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
+  - `URLs` (function, line 238) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
+  - `jd_video_from_scripts` (function, line 252) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
+  - `jd_flush_custom_elements` (function, line 263) `void jd_flush_custom_elements(js_context *ctx);`
   - `FREEDOM_JS_DOM_H` (macro, line 2) `#define FREEDOM_JS_DOM_H`
   - `JD_IFRAME_TRACK_MAX` (macro, line 40) `#define JD_IFRAME_TRACK_MAX`
   - `JD_REPL_CSS_MAX` (macro, line 86) `#define JD_REPL_CSS_MAX`
@@ -478,20 +486,6 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FREEDOM_JS_INTL_H` (macro, line 6) `#define FREEDOM_JS_INTL_H`
 - Depends on: `include/js_sandbox.h`
 - Imported by: `src/js_dom.c`, `src/js_intl.c`, `tests/test_js_intl.c`
-
-## include/js_location.h
-- Doc: jd_take_history: Drains the history operations page JS performed since the last call: an owned...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `reads` (function, line 25) `* reads (NULL => only href is known, the rest fall back to stub defaults). Call after * jd_install, on the page's...`
-  - `jd_take_history` (function, line 38) `char *jd_take_history(js_context *ctx, int *go);`
-  - `jd_pop_state` (function, line 44) `int jd_pop_state(js_context *ctx, int index);`
-  - `acting` (function, line 49) `* The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int...`
-  - `FREEDOM_JS_LOCATION_H` (macro, line 2) `#define FREEDOM_JS_LOCATION_H`
-  - `JD_HIST_MAX` (macro, line 31) `#define JD_HIST_MAX`
-- Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `include/url.h`
-- Imported by: `include/js_dom.h`
 
 
 Next: [KB_include_p4.md](KB_include_p4.md)

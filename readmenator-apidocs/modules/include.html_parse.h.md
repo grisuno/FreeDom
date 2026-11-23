@@ -53,7 +53,7 @@ typedef struct hp_script
 
 One executable <script>.
 
-Inline: text is a NUL-terminated buffer of `len` bytes (the NUL is not counted in len) and src == NULL. External: src is the RAW, unresolved value of the src attribute (hostile input; the parser never fetches) and text == NULL. Both buffers are owned by the hp_script array.
+Inline: text is a NUL-terminated buffer of [`len`](src.box_tree.c.md#len) bytes (the NUL is not counted in len) and src == NULL. External: src is the RAW, unresolved value of the src attribute (hostile input; the parser never fetches) and text == NULL. Both buffers are owned by the hp_script array.
 
 ---
 

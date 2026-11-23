@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 247 modules, 3891 documented entities, documentation coverage 45.2% (1742/3857 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 253 modules, 4010 documented entities, documentation coverage 45.5% (1810/3976 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (116), h (114), py (13), sh (4)
+Languages: c (119), h (117), py (13), sh (4)
 
 ## Modules
 
@@ -22,9 +22,9 @@ Languages: c (116), h (114), py (13), sh (4)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 47 | 211 | 30.9% |
-| [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 7 | 14 | 50.0% |
-| [`gui/bui_chrome.c`](modules/gui.bui_chrome.c.md) |  | 0 | 20 | 57.1% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 50 | 215 | 31.6% |
+| [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 7 | 16 | 54.2% |
+| [`gui/bui_chrome.c`](modules/gui.bui_chrome.c.md) |  | 0 | 28 | 55.2% |
 | [`gui/bui_mask_img.c`](modules/gui.bui_mask_img.c.md) | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | 0 | 1 | 50.0% |
 | [`gui/bui_theme.c`](modules/gui.bui_theme.c.md) |  | 0 | 6 | 85.7% |
 | [`gui/freedom_view.c`](modules/gui.freedom_view.c.md) |  | 0 | 2 | 0.0% |
@@ -41,7 +41,7 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`include/box_tree.h`](modules/include.box_tree.h.md) |  | 5 | 28 | 38.2% |
 | [`include/browser.h`](modules/include.browser.h.md) |  | 3 | 22 | 50.0% |
 | [`include/cached_fetch.h`](modules/include.cached_fetch.h.md) |  | 0 | 3 | 50.0% |
-| [`include/chrome_layout.h`](modules/include.chrome_layout.h.md) |  | 10 | 20 | 41.9% |
+| [`include/chrome_layout.h`](modules/include.chrome_layout.h.md) |  | 10 | 25 | 50.0% |
 | [`include/compositor.h`](modules/include.compositor.h.md) |  | 5 | 5 | 90.9% |
 | [`include/css.h`](modules/include.css.h.md) |  | 72 | 75 | 71.6% |
 | [`include/css_atrule.h`](modules/include.css_atrule.h.md) |  | 2 | 7 | 70.0% |
@@ -74,10 +74,10 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`include/form.h`](modules/include.form.h.md) |  | 7 | 3 | 27.3% |
 | [`include/frame_broker.h`](modules/include.frame_broker.h.md) |  | 6 | 10 | 29.4% |
 | [`include/frame_clock.h`](modules/include.frame_clock.h.md) |  | 2 | 4 | 14.3% |
-| [`include/frame_host.h`](modules/include.frame_host.h.md) |  | 1 | 9 | 72.7% |
+| [`include/frame_host.h`](modules/include.frame_host.h.md) |  | 1 | 11 | 76.9% |
 | [`include/freebug.h`](modules/include.freebug.h.md) |  | 4 | 13 | 72.2% |
-| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 17 | 88.9% |
-| [`include/hls.h`](modules/include.hls.h.md) |  | 4 | 3 | 62.5% |
+| [`include/freedom_config.h`](modules/include.freedom_config.h.md) |  | 0 | 20 | 85.7% |
+| [`include/hls.h`](modules/include.hls.h.md) |  | 4 | 6 | 54.5% |
 | [`include/host_conf.h`](modules/include.host_conf.h.md) |  | 1 | 7 | 55.6% |
 | [`include/hostblock.h`](modules/include.hostblock.h.md) |  | 4 | 5 | 50.0% |
 | [`include/hostedit.h`](modules/include.hostedit.h.md) |  | 2 | 4 | 57.1% |
@@ -101,10 +101,11 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`include/local_store.h`](modules/include.local_store.h.md) |  | 2 | 8 | 18.2% |
 | [`include/mask_cache.h`](modules/include.mask_cache.h.md) | mask_cache (mkc_) -- 8-bit alpha masks retained across frames (spec/mask_cache.md). | 3 | 7 | 81.8% |
 | [`include/media_decoder.h`](modules/include.media_decoder.h.md) |  | 4 | 7 | 75.0% |
+| [`include/nav_token.h`](modules/include.nav_token.h.md) |  | 2 | 8 | 9.1% |
 | [`include/net_guard.h`](modules/include.net_guard.h.md) |  | 2 | 6 | 55.6% |
 | [`include/net_realm.h`](modules/include.net_realm.h.md) |  | 4 | 5 | 20.0% |
 | [`include/os_sandbox.h`](modules/include.os_sandbox.h.md) |  | 4 | 7 | 50.0% |
-| [`include/page_view.h`](modules/include.page_view.h.md) |  | 17 | 84 | 61.8% |
+| [`include/page_view.h`](modules/include.page_view.h.md) |  | 17 | 85 | 62.1% |
 | [`include/pdf_export.h`](modules/include.pdf_export.h.md) |  | 1 | 8 | 30.0% |
 | [`include/perf_trace.h`](modules/include.perf_trace.h.md) |  | 5 | 11 | 52.9% |
 | [`include/pq_seal.h`](modules/include.pq_seal.h.md) |  | 2 | 5 | 12.5% |
@@ -121,11 +122,11 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`include/sha2.h`](modules/include.sha2.h.md) |  | 1 | 4 | 50.0% |
 | [`include/sheet_cache.h`](modules/include.sheet_cache.h.md) |  | 5 | 6 | 66.7% |
 | [`include/shm_slots.h`](modules/include.shm_slots.h.md) |  | 2 | 4 | 42.9% |
-| [`include/subreq_batch.h`](modules/include.subreq_batch.h.md) |  | 4 | 8 | 46.2% |
+| [`include/subreq_batch.h`](modules/include.subreq_batch.h.md) |  | 4 | 12 | 64.7% |
 | [`include/svg_paint.h`](modules/include.svg_paint.h.md) |  | 0 | 2 | 33.3% |
 | [`include/svg_raster.h`](modules/include.svg_raster.h.md) |  | 0 | 4 | 60.0% |
 | [`include/svg_render.h`](modules/include.svg_render.h.md) |  | 9 | 8 | 38.9% |
-| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 42 | 50.9% |
+| [`include/tab.h`](modules/include.tab.h.md) |  | 12 | 43 | 50.0% |
 | [`include/table_layout.h`](modules/include.table_layout.h.md) | table_layout (tl_) -- used column widths of a table (automatic table layout). | 2 | 5 | 75.0% |
 | [`include/text_case.h`](modules/include.text_case.h.md) | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | 1 | 6 | 75.0% |
 | [`include/text_shape.h`](modules/include.text_shape.h.md) |  | 5 | 19 | 72.0% |
@@ -134,6 +135,8 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`include/ui.h`](modules/include.ui.h.md) |  | 8 | 11 | 35.0% |
 | [`include/url.h`](modules/include.url.h.md) |  | 3 | 10 | 50.0% |
 | [`include/util.h`](modules/include.util.h.md) | util.h — shared pure helpers (no I/O except where noted). | 0 | 5 | 33.3% |
+| [`include/video_controls.h`](modules/include.video_controls.h.md) |  | 5 | 14 | 55.0% |
+| [`include/video_pick.h`](modules/include.video_pick.h.md) | Which video a click plays (spec/video_pick.md). | 0 | 3 | 100.0% |
 | [`include/web_storage.h`](modules/include.web_storage.h.md) |  | 1 | 11 | 61.5% |
 | [`include/webcaps.h`](modules/include.webcaps.h.md) |  | 4 | 0 | 80.0% |
 | [`include/webfont.h`](modules/include.webfont.h.md) |  | 3 | 13 | 17.6% |
@@ -151,10 +154,10 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`src/block_flow.c`](modules/src.block_flow.c.md) | block_flow (bf_) -- vertical margin collapsing. | 0 | 3 | 50.0% |
 | [`src/box_blur.c`](modules/src.box_blur.c.md) |  | 0 | 5 | 33.3% |
 | [`src/box_style.c`](modules/src.box_style.c.md) |  | 2 | 42 | 31.1% |
-| [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 0 | 15 | 37.5% |
+| [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 2 | 16 | 42.1% |
 | [`src/browser.c`](modules/src.browser.c.md) |  | 0 | 35 | 27.8% |
 | [`src/cached_fetch.c`](modules/src.cached_fetch.c.md) |  | 0 | 6 | 28.6% |
-| [`src/chrome_layout.c`](modules/src.chrome_layout.c.md) | chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md | 0 | 13 | 64.3% |
+| [`src/chrome_layout.c`](modules/src.chrome_layout.c.md) | chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md | 0 | 16 | 70.6% |
 | [`src/compositor.c`](modules/src.compositor.c.md) |  | 0 | 6 | 71.4% |
 | [`src/css.c`](modules/src.css.c.md) |  | 9 | 77 | 27.6% |
 | [`src/css_atrule.c`](modules/src.css_atrule.c.md) |  | 0 | 4 | 80.0% |
@@ -186,10 +189,10 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`src/form.c`](modules/src.form.c.md) |  | 0 | 2 | 0.0% |
 | [`src/frame_broker.c`](modules/src.frame_broker.c.md) |  | 0 | 6 | 71.4% |
 | [`src/frame_clock.c`](modules/src.frame_clock.c.md) |  | 0 | 4 | 0.0% |
-| [`src/frame_host.c`](modules/src.frame_host.c.md) |  | 2 | 7 | 70.0% |
+| [`src/frame_host.c`](modules/src.frame_host.c.md) |  | 4 | 9 | 71.4% |
 | [`src/freebug.c`](modules/src.freebug.c.md) |  | 0 | 9 | 70.0% |
 | [`src/freedom.c`](modules/src.freedom.c.md) |  | 2 | 17 | 20.0% |
-| [`src/hls.c`](modules/src.hls.c.md) |  | 0 | 7 | 25.0% |
+| [`src/hls.c`](modules/src.hls.c.md) |  | 0 | 13 | 14.3% |
 | [`src/host_conf.c`](modules/src.host_conf.c.md) |  | 0 | 6 | 57.1% |
 | [`src/hostblock.c`](modules/src.hostblock.c.md) |  | 2 | 9 | 41.7% |
 | [`src/hostedit.c`](modules/src.hostedit.c.md) |  | 1 | 4 | 33.3% |
@@ -202,7 +205,7 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`src/js_custom_elements.c`](modules/src.js_custom_elements.c.md) |  | 0 | 1 | 0.0% |
 | [`src/js_custom_elements.h`](modules/src.js_custom_elements.h.md) | Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the document facade. | 0 | 1 | 50.0% |
 | [`src/js_dom.c`](modules/src.js_dom.c.md) |  | 1 | 25 | 11.1% |
-| [`src/js_dom_ext.c`](modules/src.js_dom_ext.c.md) |  | 0 | 8 | 0.0% |
+| [`src/js_dom_ext.c`](modules/src.js_dom_ext.c.md) |  | 0 | 9 | 0.0% |
 | [`src/js_dom_ext.h`](modules/src.js_dom_ext.h.md) | Private to js_dom.c / js_dom_ext.c: installs the DOM Standard extras (tree | 0 | 1 | 50.0% |
 | [`src/js_dom_internal.h`](modules/src.js_dom_internal.h.md) | Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): the context accessors every native needs. | 0 | 3 | 50.0% |
 | [`src/js_embed.c`](modules/src.js_embed.c.md) |  | 0 | 4 | 40.0% |
@@ -222,6 +225,7 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`src/local_store.c`](modules/src.local_store.c.md) |  | 0 | 25 | 19.2% |
 | [`src/mask_cache.c`](modules/src.mask_cache.c.md) |  | 3 | 7 | 72.7% |
 | [`src/media_decoder.c`](modules/src.media_decoder.c.md) |  | 2 | 7 | 30.0% |
+| [`src/nav_token.c`](modules/src.nav_token.c.md) | nav_token -- per-tab navigation identity shared with fetch threads. spec/nav_token.md | 1 | 9 | 9.1% |
 | [`src/net_guard.c`](modules/src.net_guard.c.md) | net_guard -- see include/net_guard.h and spec/net_guard.md. | 0 | 9 | 50.0% |
 | [`src/net_realm.c`](modules/src.net_realm.c.md) |  | 0 | 7 | 25.0% |
 | [`src/os_sandbox.c`](modules/src.os_sandbox.c.md) |  | 0 | 26 | 33.3% |
@@ -240,11 +244,11 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`src/secure_fetch.c`](modules/src.secure_fetch.c.md) |  | 6 | 45 | 28.8% |
 | [`src/sha2.c`](modules/src.sha2.c.md) |  | 0 | 6 | 42.9% |
 | [`src/sheet_cache.c`](modules/src.sheet_cache.c.md) | sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md. | 4 | 6 | 81.8% |
-| [`src/subreq_batch.c`](modules/src.subreq_batch.c.md) |  | 2 | 8 | 45.5% |
+| [`src/subreq_batch.c`](modules/src.subreq_batch.c.md) |  | 2 | 12 | 66.7% |
 | [`src/svg_paint.c`](modules/src.svg_paint.c.md) | svg_paint — Cairo back end for the shapes svg_render extracted. | 0 | 2 | 66.7% |
 | [`src/svg_raster.c`](modules/src.svg_raster.c.md) | svg_raster -- SVG served as an image, rasterized inside the confined worker. spec/svg_raster.md. | 0 | 2 | 66.7% |
 | [`src/svg_render.c`](modules/src.svg_render.c.md) | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | 3 | 5 | 55.6% |
-| [`src/tab.c`](modules/src.tab.c.md) |  | 8 | 99 | 44.4% |
+| [`src/tab.c`](modules/src.tab.c.md) |  | 10 | 100 | 45.0% |
 | [`src/table_layout.c`](modules/src.table_layout.c.md) | table_layout (tl_) -- see include/table_layout.h and spec/table_layout.md. | 0 | 2 | 66.7% |
 | [`src/text_case.c`](modules/src.text_case.c.md) |  | 0 | 5 | 50.0% |
 | [`src/text_shape.c`](modules/src.text_shape.c.md) |  | 12 | 32 | 48.9% |
@@ -252,6 +256,8 @@ Languages: c (116), h (114), py (13), sh (4)
 | [`src/tls_impersonate.c`](modules/src.tls_impersonate.c.md) |  | 2 | 7 | 10.0% |
 | [`src/ui_layout.c`](modules/src.ui_layout.c.md) |  | 0 | 3 | 50.0% |
 | [`src/url.c`](modules/src.url.c.md) |  | 0 | 16 | 23.5% |
+| [`src/video_controls.c`](modules/src.video_controls.c.md) |  | 0 | 9 | 70.0% |
+| [`src/video_pick.c`](modules/src.video_pick.c.md) | Only an absolute http(s) URL names a stream the decoder can fetch; anything else a script stored in src ("[object Object]", blob:, javascript:) is not a video. | 0 | 2 | 100.0% |
 | [`src/web_storage.c`](modules/src.web_storage.c.md) |  | 3 | 8 | 50.0% |
 | [`src/webcaps.c`](modules/src.webcaps.c.md) |  | 0 | 4 | 0.0% |
 | [`src/webfont.c`](modules/src.webfont.c.md) |  | 0 | 6 | 0.0% |

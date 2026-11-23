@@ -1,11 +1,24 @@
 # `src/box_tree.c`
 
-> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 37.5% | [API index](../index.md)
+> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 42.1% | [API index](../index.md)
 
 ## Contents
 
+- **Structs:** [`sc_chain`](#sc_chain)
+- **Type Aliases:** [`len`](#len)
 - **Functions:** [`height`](#height), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_in_subtree`](#bt_in_subtree), [`bt_oof_avail`](#bt_oof_avail), [`bt_defer_roots`](#bt_defer_roots)
-- **Macros:** [`BT_LEN_AUTO`](#bt_len_auto), [`BT_WRAP_EPS`](#bt_wrap_eps)
+- **Macros:** [`BT_LEN_AUTO`](#bt_len_auto), [`BT_WRAP_EPS`](#bt_wrap_eps), [`BT_SC_DEPTH`](#bt_sc_depth)
+
+## Type Diagram
+
+```mermaid
+classDiagram
+    direction LR
+    class len
+    <<type_alias>> len
+    class sc_chain
+    <<struct>> sc_chain
+```
 
 ## Call Graph
 
@@ -30,13 +43,45 @@ flowchart LR
     n_src_box_tree_c__bt_resolve_positioning_ex -.-> n_src_compositor_c__cx_box_layer
 ```
 
+## Structs
+
+<a id="sc_chain"></a>
+
+### `sc_chain`
+
+`struct` | [src/box_tree.c:611](../../src/box_tree.c#L611)
+
+```c
+typedef struct sc_chain
+```
+
+---
+
+## Type Aliases
+
+<a id="len"></a>
+
+### `len`
+
+`type_alias` | [src/box_tree.c:610](../../src/box_tree.c#L610)
+
+```c
+typedef struct sc_chain { uint16_t len;
+```
+
+Stacking-context nesting (CSS 2.1 App E): a positioned box paints inside the context of its nearest positioned ancestor that forms one, so its paint key is the chain of those ancestors' keys (outermost first) followed by its own.
+
+Comparing chains level by level keeps every context's descendants together, right after the context itself and in their own (layer, z, tree order) inside it. A flat (z, tree order) sort painted a z-index:auto pill BELOW the z-index:101 header that contains it.  [`order`](include.perf_trace.h.md#order) arrives flat-sorted; it is re-sorted in place. Ancestors deeper than BT_SC_DEPTH keep their outermost levels. On allocation failure the flat order stays * (fail-open: the old behaviour). define BT_SC_DEPTH 16
+
+---
+
 ## Functions
 
 <a id="height"></a>
 
 ### `height`
 
-`function` | [src/box_tree.c:78](../../src/box_tree.c#L78)
+`function` | [src/box_tree.c:81](../../src/box_tree.c#L81)
 
 ```c
 * exactly that height (Flexbox 9.4 step 15). * * wrap_reverse (node->wrap_reverse): when node->...
@@ -58,7 +103,7 @@ flowchart LR
 
 ### `sized`
 
-`function` | [src/box_tree.c:350](../../src/box_tree.c#L350)
+`function` | [src/box_tree.c:353](../../src/box_tree.c#L353)
 
 ```c
 * the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);
@@ -79,7 +124,7 @@ flowchart LR
 
 ### `bt_layout`
 
-`function` | [src/box_tree.c:465](../../src/box_tree.c#L465)
+`function` | [src/box_tree.c:468](../../src/box_tree.c#L468)
 
 ```c
 bt_status bt_layout(bt_node *root, double avail_w)
@@ -100,7 +145,7 @@ bt_status bt_layout(bt_node *root, double avail_w)
 
 ### `bt_containing_block`
 
-`function` | [src/box_tree.c:555](../../src/box_tree.c#L555)
+`function` | [src/box_tree.c:558](../../src/box_tree.c#L558)
 
 ```c
 void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y, const double *box_w, const double *box_h, const char *placed, double viewport_w, double viewport_h, double *cb_x, double *cb_y, double *cb_w, double *cb_h)
@@ -139,7 +184,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 
 ### `block`
 
-`function` | [src/box_tree.c:566](../../src/box_tree.c#L566)
+`function` | [src/box_tree.c:569](../../src/box_tree.c#L569)
 
 ```c
 * true block (same flow neighbourhood), strictly better than zeros. NULL * placed keeps lega...
@@ -159,7 +204,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 
 ### `bt_resolve_positioning`
 
-`function` | [src/box_tree.c:585](../../src/box_tree.c#L585)
+`function` | [src/box_tree.c:588](../../src/box_tree.c#L588)
 
 ```c
 bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox, const double *box_x, const double *box_y, const double *box_w, const double *box_h, double viewport_w, double viewport_h, bt_positioned *out, size_t out_cap, size_t *out_count)
@@ -191,7 +236,7 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox, const dou
 
 ### `bt_resolve_positioning_ex`
 
-`function` | [src/box_tree.c:596](../../src/box_tree.c#L596)
+`function` | [src/box_tree.c:706](../../src/box_tree.c#L706)
 
 ```c
 bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const double *box_x, const double *box_y, const double *box_w, const double *box_h, const double *static_x, const double *static_y, const char *placed, double viewport_w, double viewport_h, bt_positioned *out, size_t out_cap, size_t *out_count)
@@ -228,7 +273,7 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const 
 
 ### `bt_oof_anchor`
 
-`function` | [src/box_tree.c:768](../../src/box_tree.c#L768)
+`function` | [src/box_tree.c:879](../../src/box_tree.c#L879)
 
 ```c
 int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)
@@ -256,7 +301,7 @@ Both walk the parent_id chain from `bid` (self first) looking for a box whose po
 
 ### `bt_oof_root`
 
-`function` | [src/box_tree.c:772](../../src/box_tree.c#L772)
+`function` | [src/box_tree.c:883](../../src/box_tree.c#L883)
 
 ```c
 int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)
@@ -280,7 +325,7 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)
 
 ### `bt_box_hidden`
 
-`function` | [src/box_tree.c:776](../../src/box_tree.c#L776)
+`function` | [src/box_tree.c:887](../../src/box_tree.c#L887)
 
 ```c
 int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)
@@ -308,7 +353,7 @@ The walk is bounded by nbox links and fails closed (returns 1, hidden) on NULL b
 
 ### `bt_in_subtree`
 
-`function` | [src/box_tree.c:789](../../src/box_tree.c#L789)
+`function` | [src/box_tree.c:900](../../src/box_tree.c#L900)
 
 ```c
 int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)
@@ -337,7 +382,7 @@ The walk is bounded by nbox links. An out-of-flow sub-layout owns its anchor's s
 
 ### `bt_oof_avail`
 
-`function` | [src/box_tree.c:800](../../src/box_tree.c#L800)
+`function` | [src/box_tree.c:911](../../src/box_tree.c#L911)
 
 ```c
 double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)
@@ -362,7 +407,7 @@ double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)
 
 ### `bt_defer_roots`
 
-`function` | [src/box_tree.c:808](../../src/box_tree.c#L808)
+`function` | [src/box_tree.c:919](../../src/box_tree.c#L919)
 
 ```c
 size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char *in_flow, int *root_of, size_t *order_of)
@@ -409,7 +454,7 @@ malformed input fails OPEN: every entry -1, nothing deferred (normal paint).
 
 ### `BT_LEN_AUTO`
 
-`macro` | [src/box_tree.c:31](../../src/box_tree.c#L31)
+`macro` | [src/box_tree.c:34](../../src/box_tree.c#L34)
 
 ```c
 #define BT_LEN_AUTO
@@ -425,10 +470,30 @@ PV_LEN_UNSET comes from page_view.h (= INT_MIN). CSS_LEN_AUTO is INT_MIN + 1 in 
 
 ### `BT_WRAP_EPS`
 
-`macro` | [src/box_tree.c:62](../../src/box_tree.c#L62)
+`macro` | [src/box_tree.c:65](../../src/box_tree.c#L65)
 
 ```c
 #define BT_WRAP_EPS
 ```
+
+---
+
+<a id="bt_sc_depth"></a>
+
+### `BT_SC_DEPTH`
+
+`macro` | [src/box_tree.c:609](../../src/box_tree.c#L609)
+
+```c
+#define BT_SC_DEPTH
+```
+
+Stacking-context nesting (CSS 2.1 App E): a positioned box paints inside the context of its nearest positioned ancestor that forms one, so its paint key is the chain of those ancestors' keys (outermost first) followed by its own.
+
+Comparing chains level by level keeps every context's descendants together, right after the context itself and in their own (layer, z, tree order) inside it. A flat (z, tree order) sort painted a z-index:auto pill BELOW the z-index:101 header that contains it.
+
+[`order`](include.perf_trace.h.md#order) arrives flat-sorted; it is re-sorted in place. Ancestors deeper than
+BT_SC_DEPTH keep their outermost levels. On allocation failure the flat order stays
+(fail-open: the old behaviour).
 
 ---

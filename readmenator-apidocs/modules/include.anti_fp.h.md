@@ -406,8 +406,6 @@ Same (buf,key) => same output; different key => different output. NULL/len 0 = n
 
 **Returns:** `* registrable`
 
-*Called by:* [`proceed`](gui.browser_ui.c.md#proceed)
-
 ---
 
 <a id="probability"></a>

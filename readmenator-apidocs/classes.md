@@ -11,6 +11,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`attr_span`](modules/src.prefetch.c.md#attr_span) struct in `src/prefetch.c`
 - [`b`](modules/gui.browser_ui_internal.h.md#b) type_alias in `gui/browser_ui_internal.h`
 - [`b`](modules/include.css_color.h.md#b) type_alias in `include/css_color.h`
+- [`bar`](modules/include.video_controls.h.md#bar) type_alias in `include/video_controls.h`
 - [`basis`](modules/include.flex_layout.h.md#basis) type_alias in `include/flex_layout.h`
 - [`block_id`](modules/gui.browser_ui.c.md#block_id) type_alias in `gui/browser_ui.c`
 - [`body_font`](modules/gui.browser_ui_internal.h.md#body_font) type_alias in `gui/browser_ui_internal.h`
@@ -223,6 +224,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`fh_host`](modules/include.frame_host.h.md#fh_host) type_alias in `include/frame_host.h`
 - [`fh_host`](modules/include.ui.h.md#fh_host) struct in `include/ui.h`
 - [`fh_host`](modules/src.frame_host.c.md#fh_host) struct in `src/frame_host.c`
+- [`fh_job`](modules/src.frame_host.c.md#fh_job) struct in `src/frame_host.c`
 - [`fh_slot`](modules/src.frame_host.c.md#fh_slot) struct in `src/frame_host.c`
 - [`file`](modules/src.text_shape.c.md#file) type_alias in `src/text_shape.c`
 - [`final_url`](modules/include.http_cache.h.md#final_url) type_alias in `include/http_cache.h`
@@ -233,6 +235,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`fm_method`](modules/include.form.h.md#fm_method) enum in `include/form.h`
 - [`fm_plan`](modules/include.form.h.md#fm_plan) struct in `include/form.h`
 - [`fm_status`](modules/include.form.h.md#fm_status) enum in `include/form.h`
+- [`fn`](modules/src.tab.c.md#fn) type_alias in `src/tab.c`
 - [`font_size`](modules/gui.browser_ui.c.md#font_size) type_alias in `gui/browser_ui.c`
 - [`cl_ctx.font_size`](modules/include.css_length.h.md#cl_ctx-font_size) type_alias in `include/css_length.h`
 - [`form_rec`](modules/src.page_view.c.md#form_rec) struct in `src/page_view.c`
@@ -254,9 +257,12 @@ Project types nested under the project types they derive from. External bases ar
 - [`fx_status`](modules/include.flex_layout.h.md#fx_status) enum in `include/flex_layout.h`
 - [`gif_bits`](modules/src.image_decode.c.md#gif_bits) struct in `src/image_decode.c`
 - [`gif_reader`](modules/src.image_decode.c.md#gif_reader) struct in `src/image_decode.c`
+- [`gui_net_ctx`](modules/gui.browser_ui.c.md#gui_net_ctx) struct in `gui/browser_ui.c`
+- [`gui_sub_prep`](modules/gui.browser_ui.c.md#gui_sub_prep) struct in `gui/browser_ui.c`
 - [`h`](modules/gui.browser_ui.c.md#h) type_alias in `gui/browser_ui.c`
 - [`h`](modules/include.chrome_layout.h.md#h) type_alias in `include/chrome_layout.h`
 - [`h`](modules/include.mask_cache.h.md#h) type_alias in `include/mask_cache.h`
+- [`h`](modules/include.video_controls.h.md#h) type_alias in `include/video_controls.h`
 - [`hash`](modules/src.webfont_load.c.md#hash) type_alias in `src/webfont_load.c`
 - [`hb_decision`](modules/include.hostblock.h.md#hb_decision) enum in `include/hostblock.h`
 - [`hb_list`](modules/include.hostblock.h.md#hb_list) enum in `include/hostblock.h`
@@ -353,9 +359,11 @@ Project types nested under the project types they derive from. External bases ar
 - [`kind`](modules/src.css_mq.c.md#kind) type_alias in `src/css_mq.c`
 - [`cx_item.layer`](modules/include.compositor.h.md#cx_item-layer) type_alias in `include/compositor.h`
 - [`bx_edges.left`](modules/include.box_style.h.md#bx_edges-left) type_alias in `include/box_style.h`
+- [`len`](modules/src.box_tree.c.md#len) type_alias in `src/box_tree.c`
 - [`len_rebase_ctx`](modules/src.css.c.md#len_rebase_ctx) struct in `src/css.c`
 - [`fb_entry.level`](modules/include.freebug.h.md#fb_entry-level) type_alias in `include/freebug.h`
 - [`js_mem_state.limit`](modules/src.js_sandbox.c.md#js_mem_state-limit) type_alias in `src/js_sandbox.c`
+- [`gui_sub_prep.ln`](modules/gui.browser_ui.c.md#gui_sub_prep-ln) type_alias in `gui/browser_ui.c`
 - [`ln_action`](modules/include.link_nav.h.md#ln_action) enum in `include/link_nav.h`
 - [`ln_block_reason`](modules/include.link_nav.h.md#ln_block_reason) enum in `include/link_nav.h`
 - [`ln_result`](modules/include.link_nav.h.md#ln_result) struct in `include/link_nav.h`
@@ -377,6 +385,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`mkc_key`](modules/include.mask_cache.h.md#mkc_key) struct in `include/mask_cache.h`
 - [`mq_cur`](modules/src.css_mq.c.md#mq_cur) struct in `src/css_mq.c`
 - [`item_sides.mr`](modules/gui.browser_ui.c.md#item_sides-mr) type_alias in `gui/browser_ui.c`
+- [`fh_job.mu`](modules/src.frame_host.c.md#fh_job-mu) type_alias in `src/frame_host.c`
 - [`name`](modules/include.css_counter.h.md#name) type_alias in `include/css_counter.h`
 - [`css_attr_match.name`](modules/include.css_select.h.md#css_attr_match-name) type_alias in `include/css_select.h`
 - [`name`](modules/src.text_shape.c.md#name) type_alias in `src/text_shape.c`
@@ -389,6 +398,9 @@ Project types nested under the project types they derive from. External bases ar
 - [`nr_config`](modules/include.net_realm.h.md#nr_config) struct in `include/net_realm.h`
 - [`nr_realm`](modules/include.net_realm.h.md#nr_realm) enum in `include/net_realm.h`
 - [`nr_route`](modules/include.net_realm.h.md#nr_route) enum in `include/net_realm.h`
+- [`nt_route_kind`](modules/include.nav_token.h.md#nt_route_kind) enum in `include/nav_token.h`
+- [`nt_token`](modules/include.nav_token.h.md#nt_token) type_alias in `include/nav_token.h`
+- [`nt_token`](modules/src.nav_token.c.md#nt_token) struct in `src/nav_token.c`
 - [`offset`](modules/include.ui.h.md#offset) type_alias in `include/ui.h`
 - [`ok`](modules/include.subreq_batch.h.md#ok) type_alias in `include/subreq_batch.h`
 - [`order`](modules/include.perf_trace.h.md#order) enum in `include/perf_trace.h`
@@ -492,6 +504,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`rp_decision`](modules/include.request_policy.h.md#rp_decision) enum in `include/request_policy.h`
 - [`samples`](modules/include.perf_trace.h.md#samples) type_alias in `include/perf_trace.h`
 - [`sbuf`](modules/src.prefs.c.md#sbuf) struct in `src/prefs.c`
+- [`sc_chain`](modules/src.box_tree.c.md#sc_chain) struct in `src/box_tree.c`
 - [`scope`](modules/src.import_map.c.md#scope) type_alias in `src/import_map.c`
 - [`screen_flow_ctx`](modules/gui.browser_ui.c.md#screen_flow_ctx) struct in `gui/browser_ui.c`
 - [`sf_chain_info`](modules/include.secure_fetch.h.md#sf_chain_info) struct in `include/secure_fetch.h`
@@ -549,6 +562,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`tab_hist_op`](modules/include.tab.h.md#tab_hist_op) struct in `include/tab.h`
 - [`tab_image`](modules/include.tab.h.md#tab_image) struct in `include/tab.h`
 - [`tab_iobuf`](modules/src.tab.c.md#tab_iobuf) struct in `src/tab.c`
+- [`tab_net_fn`](modules/src.tab.c.md#tab_net_fn) struct in `src/tab.c`
 - [`tab_page`](modules/include.tab.h.md#tab_page) struct in `include/tab.h`
 - [`tab_spawned`](modules/src.tab.c.md#tab_spawned) struct in `src/tab.c`
 - [`tab_status`](modules/include.tab.h.md#tab_status) enum in `include/tab.h`
@@ -605,6 +619,9 @@ Project types nested under the project types they derive from. External bases ar
 - [`user_agent`](modules/include.identity.h.md#user_agent) type_alias in `include/identity.h`
 - [`v`](modules/src.css_color.c.md#v) type_alias in `src/css_color.c`
 - [`val_kind`](modules/include.interp.h.md#val_kind) type_alias in `include/interp.h`
+- [`vcl_geom`](modules/include.video_controls.h.md#vcl_geom) struct in `include/video_controls.h`
+- [`vcl_hit_kind`](modules/include.video_controls.h.md#vcl_hit_kind) enum in `include/video_controls.h`
+- [`vcl_rect`](modules/include.video_controls.h.md#vcl_rect) struct in `include/video_controls.h`
 - [`vec`](modules/tools.gen_psl.c.md#vec) struct in `tools/gen_psl.c`
 - [`verb`](modules/include.svg_render.h.md#verb) type_alias in `include/svg_render.h`
 - [`wc_caps`](modules/include.webcaps.h.md#wc_caps) struct in `include/webcaps.h`

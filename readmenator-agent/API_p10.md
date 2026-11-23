@@ -99,13 +99,15 @@ Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`, `src
 - `identity` (function) `src/js_dom_ext.c:105` `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
 - `registration` (function) `src/js_dom_ext.c:482` `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
  * observer...`
-- `cancels` (function) `src/js_dom_ext.c:954` `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);`
-- `run` (function) `src/js_dom_ext.c:1301` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-- `jdx_install` (function) `src/js_dom_ext.c:1366` `int jdx_install(JSContext *ctx)`
-- `jd_install_repl_api` (function) `src/js_dom_ext.c:1375` `jd_status jd_install_repl_api(js_context *ctx)`
-- `jd_set_repl_css` (function) `src/js_dom_ext.c:1383` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
-- `jd_install_geolocation` (function) `src/js_dom_ext.c:1396` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
-- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1415` `jd_status jd_install_indexeddb(js_context *ctx)`
+- `cancels` (function) `src/js_dom_ext.c:1001` `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);`
+- `run` (function) `src/js_dom_ext.c:1348` `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+- `order` (function) `src/js_dom_ext.c:1363` `* run in insertion order (HTML's "list of scripts that will execute in order as soon as
+ * possib...`
+- `jdx_install` (function) `src/js_dom_ext.c:1429` `int jdx_install(JSContext *ctx)`
+- `jd_install_repl_api` (function) `src/js_dom_ext.c:1438` `jd_status jd_install_repl_api(js_context *ctx)`
+- `jd_set_repl_css` (function) `src/js_dom_ext.c:1446` `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+- `jd_install_geolocation` (function) `src/js_dom_ext.c:1459` `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+- `jd_install_indexeddb` (function) `src/js_dom_ext.c:1478` `jd_status jd_install_indexeddb(js_context *ctx)`
 
 ## src/js_dom_ext.h
 Imported by: `src/js_dom.c`, `src/js_dom_ext.c`
@@ -207,9 +209,8 @@ Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `inclu
 - `send` (function) `src/js_fetch.c:128` `* callbacks fire right after send();`
 - `task` (function) `src/js_fetch.c:312` `* current task (the page never waits on it);`
 - `jd_install_xhr` (function) `src/js_fetch.c:336` `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
-- `jd_net_deliver` (function) `src/js_fetch.c:340` `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
-     ...`
-- `jd_install_xhr_ex` (function) `src/js_fetch.c:361` `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
+- `jd_net_deliver` (function) `src/js_fetch.c:340` `jd_status jd_net_deliver(js_context *ctx, int pos, int rc, int status, const char *body, size_t l...`
+- `jd_install_xhr_ex` (function) `src/js_fetch.c:363` `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
                    ...`
 
 ## src/js_geom.c
@@ -429,6 +430,19 @@ Depends on: `include/media_decoder.h`, `include/util.h`
 - `media_decoder_spawn` (function) `src/media_decoder.c:449` `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)`
 - `fd` (function) `src/media_decoder.c:469` `* prevent the Wayland display fd (inherited from the parent) from * surviving the exec. An inherited Wayland fd...`
 
+## src/nav_token.c
+Depends on: `include/nav_token.h`
+- `nt_new` (function) `src/nav_token.c:16` `nt_token *nt_new(void)`
+- `nt_ref` (function) `src/nav_token.c:26` `nt_token *nt_ref(nt_token *t)`
+- `nt_unref` (function) `src/nav_token.c:31` `void nt_unref(nt_token **tp)`
+- `nt_cancel` (function) `src/nav_token.c:38` `void nt_cancel(nt_token *t)`
+- `nt_cancelled` (function) `src/nav_token.c:42` `int nt_cancelled(const nt_token *t)`
+- `nt_set_foreground` (function) `src/nav_token.c:47` `void nt_set_foreground(nt_token *t, int on)`
+- `nt_foreground` (function) `src/nav_token.c:51` `int nt_foreground(const nt_token *t)`
+- `nt_id` (function) `src/nav_token.c:56` `uint64_t nt_id(const nt_token *t)`
+- `nt_route` (function) `src/nav_token.c:58` `nt_route_kind nt_route(const nt_token *job, const nt_token *active, nt_token *const *parked,
+    ...`
+
 ## src/net_guard.c
 Depends on: `include/net_guard.h`
 - `ng_v4_is_private` (function) `src/net_guard.c:12` `static int ng_v4_is_private(const unsigned char o[NG_V4_LEN])`
@@ -454,38 +468,6 @@ Depends on: `include/net_realm.h`
 - `nr_realm_allows_http` (function) `src/net_realm.c:88` `int nr_realm_allows_http(nr_realm r)`
 - `nr_realm_name` (function) `src/net_realm.c:94` `const char *nr_realm_name(nr_realm r)`
 - `nr_route_name` (function) `src/net_realm.c:103` `const char *nr_route_name(nr_route r)`
-
-## src/os_sandbox.c
-Depends on: `include/os_sandbox.h`
-- `os_policy_allows` (function) `src/os_sandbox.c:52` `int os_policy_allows(long syscall_nr)`
-- `os_policy_size` (function) `src/os_sandbox.c:59` `size_t os_policy_size(void)`
-- `os_prot_allowed` (function) `src/os_sandbox.c:65` `int os_prot_allowed(long syscall_nr, unsigned long prot)` -- W^X mirror: mmap/mprotect keep their membership but lose any request that asks * for executable memory.
-- `os_no_dump` (function) `src/os_sandbox.c:75` `os_status os_no_dump(void)` -- Anti-dump defense in depth: undumpable + no core file, so neither a crash nor a foreign ptrace can exfiltrate worker...
-- `excluded` (function) `src/os_sandbox.c:89` `* intentionally excluded (they need /proc remounting and a post-unshare fork). */
-int os_namespac...`
-- `os_isolate_namespaces` (function) `src/os_sandbox.c:94` `os_status os_isolate_namespaces(void)`
-- `os_policy_allows` (function) `src/os_sandbox.c:106` `int os_policy_allows(long syscall_nr)`
-- `os_policy_size` (function) `src/os_sandbox.c:107` `size_t os_policy_size(void)`
-- `os_prot_allowed` (function) `src/os_sandbox.c:108` `int os_prot_allowed(long syscall_nr, unsigned long prot)`
-- `os_no_dump` (function) `src/os_sandbox.c:111` `os_status os_no_dump(void)`
-- `os_harden` (function) `src/os_sandbox.c:113` `os_status os_harden(os_violation action)`
-- `os_namespace_flags` (function) `src/os_sandbox.c:115` `int os_namespace_flags(void)`
-- `os_isolate_namespaces` (function) `src/os_sandbox.c:116` `os_status os_isolate_namespaces(void)`
-- `os_harden` (function) `src/os_sandbox.c:145` `os_status os_harden(os_violation action)`
-- `number` (function) `src/os_sandbox.c:157` `* number (x32/i386 on x86_64, AArch32 on aarch64). */ prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W |...`
-- `headroom` (function) `src/os_sandbox.c:203` `* wide headroom (room for ~125 allowed syscalls). */ prog[at_mmap].jt = (unsigned char)(prot_check - (at_mmap + 1));`
-- `ll_create_ruleset` (function) `src/os_sandbox.c:239` `static long ll_create_ruleset(const struct landlock_ruleset_attr *attr,
-                         ...`
-- `ll_add_rule` (function) `src/os_sandbox.c:244` `static long ll_add_rule(int fd, enum landlock_rule_type type,
-                        const void ...`
-- `ll_restrict_self` (function) `src/os_sandbox.c:249` `static long ll_restrict_self(int fd, uint32_t flags)`
-- `ll_handled` (function) `src/os_sandbox.c:265` `static uint64_t ll_handled(int abi)` -- The set of FS rights the ruleset handles, masked to what this ABI supports so * landlock_create_ruleset does not...
-- `ll_read_access` (function) `src/os_sandbox.c:279` `static uint64_t ll_read_access(uint64_t handled)`
-- `os_landlock_abi` (function) `src/os_sandbox.c:285` `int os_landlock_abi(void)`
-- `os_landlock_restrict` (function) `src/os_sandbox.c:291` `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
-- `fields` (function) `src/os_sandbox.c:303` `* long as the unknown trailing fields (net/scoped) are zero, which they are. */ int rfd =...`
-- `os_landlock_abi` (function) `src/os_sandbox.c:331` `int os_landlock_abi(void)`
-- `os_landlock_restrict` (function) `src/os_sandbox.c:332` `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
 
 
 Next: [API_p11.md](API_p11.md)

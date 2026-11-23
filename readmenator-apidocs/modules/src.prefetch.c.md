@@ -91,7 +91,7 @@ Fills out (owns the URLs; free with pf_list_free). Comment, <script> and <style>
 
 ### `pf_list_free`
 
-`function` | [src/prefetch.c:196](../../src/prefetch.c#L196)
+`function` | [src/prefetch.c:202](../../src/prefetch.c#L202)
 
 ```c
 void pf_list_free(pf_list *l)
@@ -111,7 +111,7 @@ void pf_list_free(pf_list *l)
 
 ### `pf_scan_imports`
 
-`function` | [src/prefetch.c:241](../../src/prefetch.c#L241)
+`function` | [src/prefetch.c:247](../../src/prefetch.c#L247)
 
 ```c
 size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], size_t cap)
@@ -134,7 +134,7 @@ size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], siz
 
 ### `pf_pool_add`
 
-`function` | [src/prefetch.c:288](../../src/prefetch.c#L288)
+`function` | [src/prefetch.c:294](../../src/prefetch.c#L294)
 
 ```c
 int pf_pool_add(pf_pool *p, const char *url)
@@ -163,7 +163,7 @@ Returns 1 when added, 0 when already known, full, or the pool is not running.
 
 ### `pf_pool_start`
 
-`function` | [src/prefetch.c:387](../../src/prefetch.c#L387)
+`function` | [src/prefetch.c:393](../../src/prefetch.c#L393)
 
 ```c
 int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls, pf_fetch_fn fetch, void *ctx)
@@ -187,7 +187,7 @@ int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls, pf_fetch_fn
 
 ### `pf_pool_take`
 
-`function` | [src/prefetch.c:444](../../src/prefetch.c#L444)
+`function` | [src/prefetch.c:450](../../src/prefetch.c#L450)
 
 ```c
 int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype)
@@ -223,7 +223,7 @@ On a hit (url matches an unconsumed job) WAITS for that job and MOVES the result
 
 ### `pf_find_importmap`
 
-`function` | [src/prefetch.c:483](../../src/prefetch.c#L483)
+`function` | [src/prefetch.c:489](../../src/prefetch.c#L489)
 
 ```c
 int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n)
@@ -252,7 +252,7 @@ Span of the first <script type=importmap> body in html (pure, bounded): 1 with [
 
 ### `pf_pool_start_page`
 
-`function` | [src/prefetch.c:504](../../src/prefetch.c#L504)
+`function` | [src/prefetch.c:510](../../src/prefetch.c#L510)
 
 ```c
 int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *page_url, int css_grant, int js_grant, pf_fetch_fn fetch, void *ctx)
@@ -281,7 +281,7 @@ int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *pag
 
 ### `pf_pool_finish`
 
-`function` | [src/prefetch.c:540](../../src/prefetch.c#L540)
+`function` | [src/prefetch.c:546](../../src/prefetch.c#L546)
 
 ```c
 void pf_pool_finish(pf_pool *p)
@@ -307,7 +307,7 @@ Blocks until in-flight fetches end (bounded by the fetcher's timeouts). Idempote
 
 ### `pf_pooled_fetch`
 
-`function` | [src/prefetch.c:561](../../src/prefetch.c#L561)
+`function` | [src/prefetch.c:567](../../src/prefetch.c#L567)
 
 ```c
 int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int *out_status, char **out_body, size_t *out_len, char **out_ctype)

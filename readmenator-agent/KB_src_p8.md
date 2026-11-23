@@ -1,6 +1,49 @@
 # Subsystem: src (page 8 of 10)
 Previous: [KB_src_p7.md](KB_src_p7.md)
 
+## src/prefetch.c
+- Doc: ci_starts: static int is_ws(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' ||...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `attr_span` (struct, line 65)
+  - `is_ws` (function, line 26) `static int is_ws(char c)`
+  - `is_name_char` (function, line 30) `static int is_name_char(char c)`
+  - `lower` (function, line 35) `static int lower(int c)`
+  - `ci_starts` (function, line 40) `static int ci_starts(const char *p, const char *end, const char *kw)`
+  - `ci_find` (function, line 49) `static const char *ci_find(const char *p, const char *end, const char *kw)`
+  - `ci_eq_span` (function, line 58) `static int ci_eq_span(const char *s, size_t n, const char *kw)`
+  - `emit` (function, line 120) `static void emit(pf_list *out, pf_kind kind, const char *val, size_t vlen)`
+  - `pf_scan` (function, line 133) `int pf_scan(const char *html, size_t len, pf_list *out)`
+  - `pf_list_free` (function, line 202) `void pf_list_free(pf_list *l)`
+  - `js_ident_ch` (function, line 213) `static int js_ident_ch(char c)`
+  - `js_skip_ws` (function, line 218) `static size_t js_skip_ws(const char *s, size_t i, size_t n)`
+  - `js_skip_string` (function, line 225) `static size_t js_skip_string(const char *s, size_t i, size_t n)`
+  - `js_take_spec` (function, line 232) `static void js_take_spec(const char *s, size_t i, size_t n,
+                         char (*out)[...`
+  - `pf_scan_imports` (function, line 247) `size_t pf_scan_imports(const char *js, size_t len, char (*out)[PF_SPEC_MAX], size_t cap)`
+  - `pf_pool_add` (function, line 294) `int pf_pool_add(pf_pool *p, const char *url)`
+  - `pf_is_js` (function, line 317) `static int pf_is_js(const char *url, const char *ctype)`
+  - `pf_url_cb` (function, line 325) `static int pf_url_cb(void *ctx, const char *base, const char *ref, char *out, size_t outsz)`
+  - `pf_url_shaped` (function, line 330) `static int pf_url_shaped(const char *sp)`
+  - `pf_follow_imports` (function, line 339) `static void pf_follow_imports(pf_pool *p, const char *base, const char *body, size_t len)`
+  - `pf_worker` (function, line 355) `static void *pf_worker(void *arg)`
+  - `pf_pool_start` (function, line 393) `int pf_pool_start(pf_pool *p, const char *const *urls, size_t nurls,
+                  pf_fetch_f...`
+  - `pool_start` (function, line 400) `static int pool_start(pf_pool *p, const char *const *urls, size_t nurls,
+                      pf...`
+  - `pf_pool_take` (function, line 450) `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status,
+                 char **body,...`
+  - `pf_find_importmap` (function, line 489) `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n)`
+  - `pf_pool_start_page` (function, line 510) `int pf_pool_start_page(pf_pool *p, const char *html, size_t len, const char *page_url,
+          ...`
+  - `pf_pool_finish` (function, line 546) `void pf_pool_finish(pf_pool *p)`
+  - `pf_pooled_fetch` (function, line 567) `int pf_pooled_fetch(void *vctx, const char *method, const char *url,
+                    const ch...`
+  - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
+  - `PF_MAX_URL` (macro, line 24) `#define PF_MAX_URL`
+- Depends on: `include/import_map.h`, `include/prefetch.h`, `include/url.h`
+
 ## src/prefs.c
 - Doc: url_valid: A representable URL: 1..PREFS_MAX_URL-1 bytes, no control bytes, no DEL. * Space is...
 - Layer: utility
@@ -163,8 +206,8 @@ static void gate_box_image_...`
   - `body_sink` (struct, line 499)
   - `tls_capture` (struct, line 512)
   - `fetch_ctx` (struct, line 524)
-  - `sf_ws` (struct, line 1441)
-  - `sf_rcache_entry` (struct, line 1267)
+  - `sf_ws` (struct, line 1450)
+  - `sf_rcache_entry` (struct, line 1276)
   - `sink` (type_alias, line 523) `typedef struct fetch_ctx { body_sink sink;`
   - `ci_starts_with` (function, line 49) `static int ci_starts_with(const char *haystack, const char *prefix)`
   - `ci_index` (function, line 61) `static long ci_index(const char *haystack, const char *needle)`
@@ -213,44 +256,43 @@ static void sf_guard_init(fetch_ctx *ctx, cons...`
                    ...`
   - `sf_guard_prereq` (function, line 839) `static int sf_guard_prereq(void *clientp, char *conn_primary_ip, char *conn_local_ip,
            ...`
-  - `map_curl_error` (function, line 850) `static sf_status map_curl_error(CURLcode rc, const body_sink *sink)`
-  - `add_header` (function, line 894) `static int add_header(struct curl_slist **h, const char *line)`
-  - `sf_setup_handle` (function, line 908) `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
+  - `add_header` (function, line 903) `static int add_header(struct curl_slist **h, const char *line)`
+  - `sf_setup_handle` (function, line 917) `static sf_status sf_setup_handle(CURL *curl, const char *url, const sf_config *local,
            ...`
-  - `redirect` (function, line 990) `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
+  - `redirect` (function, line 999) `* redirect (CURLOPT_UNRESTRICTED_AUTH is 0), so credentials never leak to a
      * different orig...`
-  - `sf_perform` (function, line 1082) `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
+  - `sf_perform` (function, line 1091) `static sf_status sf_perform(const char *url, const sf_config *cfg, sf_response *out,
             ...`
-  - `sf_get` (function, line 1244) `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
-  - `sf_post` (function, line 1248) `sf_status sf_post(const char *url, const sf_config *cfg,
+  - `sf_get` (function, line 1253) `sf_status sf_get(const char *url, const sf_config *cfg, sf_response *out)`
+  - `sf_post` (function, line 1257) `sf_status sf_post(const char *url, const sf_config *cfg,
                   const void *body, size...`
-  - `sf_rcache_clear` (function, line 1278) `void sf_rcache_clear(void)`
-  - `sf_rcache_set_backing` (function, line 1289) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx)`
-  - `rcache_put_ram` (function, line 1297) `static int rcache_put_ram(const char *from, const char *to, time_t now)`
-  - `sf_rcache_put` (function, line 1316) `int sf_rcache_put(const char *from, const char *to, time_t now)`
-  - `sf_rcache_get` (function, line 1326) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)`
-  - `sf_get_follow` (function, line 1355) `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
+  - `sf_rcache_clear` (function, line 1287) `void sf_rcache_clear(void)`
+  - `sf_rcache_set_backing` (function, line 1298) `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx)`
+  - `rcache_put_ram` (function, line 1306) `static int rcache_put_ram(const char *from, const char *to, time_t now)`
+  - `sf_rcache_put` (function, line 1325) `int sf_rcache_put(const char *from, const char *to, time_t now)`
+  - `sf_rcache_get` (function, line 1335) `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap)`
+  - `sf_get_follow` (function, line 1364) `sf_status sf_get_follow(const char *url, const sf_config *cfg, sf_response *out,
                 ...`
-  - `ws_ssl_info_cb` (function, line 1427) `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)`
-  - `ws_ssl_ctx_cb` (function, line 1434) `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
-  - `sf_ws_url_check` (function, line 1448) `sf_status sf_ws_url_check(const char *url)`
-  - `ws_free` (function, line 1460) `static void ws_free(sf_ws *ws)`
-  - `sf_ws_open` (function, line 1469) `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
-  - `sf_ws_send` (function, line 1525) `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
-  - `sf_ws_recv` (function, line 1548) `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
-  - `sf_ws_fd` (function, line 1570) `int sf_ws_fd(const sf_ws *ws)`
-  - `sf_ws_close` (function, line 1577) `void sf_ws_close(sf_ws *ws)`
-  - `sf_fallback_policy` (function, line 1588) `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)`
-  - `sf_downgrade_of` (function, line 1607) `static int sf_downgrade_of(sf_policy p)`
-  - `sf_attempt_get` (function, line 1616) `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
+  - `ws_ssl_info_cb` (function, line 1436) `static void ws_ssl_info_cb(const SSL *ssl, int where, int ret)`
+  - `ws_ssl_ctx_cb` (function, line 1443) `static CURLcode ws_ssl_ctx_cb(CURL *curl, void *sslctx, void *userdata)`
+  - `sf_ws_url_check` (function, line 1457) `sf_status sf_ws_url_check(const char *url)`
+  - `ws_free` (function, line 1469) `static void ws_free(sf_ws *ws)`
+  - `sf_ws_open` (function, line 1478) `sf_status sf_ws_open(const char *url, const sf_config *cfg, sf_ws **out)`
+  - `sf_ws_send` (function, line 1534) `sf_status sf_ws_send(sf_ws *ws, const void *data, size_t len, int binary)`
+  - `sf_ws_recv` (function, line 1557) `sf_status sf_ws_recv(sf_ws *ws, void *buf, size_t cap, size_t *got, int *flags, size_t *left)`
+  - `sf_ws_fd` (function, line 1579) `int sf_ws_fd(const sf_ws *ws)`
+  - `sf_ws_close` (function, line 1586) `void sf_ws_close(sf_ws *ws)`
+  - `sf_fallback_policy` (function, line 1597) `int sf_fallback_policy(sf_status failed, sf_policy tried, int allowlisted, sf_policy *next)`
+  - `sf_downgrade_of` (function, line 1618) `static int sf_downgrade_of(sf_policy p)`
+  - `sf_attempt_get` (function, line 1627) `static sf_status sf_attempt_get(const char *url, const sf_config *cfg, sf_response *out,
         ...`
-  - `sf_attempt_post` (function, line 1622) `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
+  - `sf_attempt_post` (function, line 1633) `static sf_status sf_attempt_post(const char *url, const sf_config *cfg, sf_response *out,
        ...`
-  - `sf_navigable` (function, line 1627) `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
+  - `sf_navigable` (function, line 1638) `static sf_status sf_navigable(sf_attempt_fn attempt, const char *url, sf_config *cfg,
            ...`
-  - `sf_get_follow_navigable` (function, line 1647) `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
+  - `sf_get_follow_navigable` (function, line 1658) `sf_status sf_get_follow_navigable(const char *url, sf_config *cfg, sf_response *out,
             ...`
-  - `sf_post_navigable` (function, line 1652) `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
+  - `sf_post_navigable` (function, line 1663) `sf_status sf_post_navigable(const char *url, sf_config *cfg, const void *body,
                   ...`
   - `module` (function, line 422) `* pure url module (DRY);`
   - `progress` (function, line 508) `* transfer is in progress (via CURLINFO_TLS_SSL_PTR);`
@@ -259,8 +301,8 @@ static void sf_guard_init(fetch_ctx *ctx, cons...`
   - `this` (function, line 609) `* We must NOT hardcode this (e.g., to "X25519"), as it breaks the checks. * PQ for groups that are not X25519 and...`
   - `_POSIX_C_SOURCE` (macro, line 12) `#define _POSIX_C_SOURCE`
   - `SF_GUARD_HOST_MAX` (macro, line 522) `#define SF_GUARD_HOST_MAX`
-  - `SF_RCACHE_SLOTS` (macro, line 1264) `#define SF_RCACHE_SLOTS`
-  - `SF_RCACHE_TTL_S` (macro, line 1265) `#define SF_RCACHE_TTL_S`
+  - `SF_RCACHE_SLOTS` (macro, line 1273) `#define SF_RCACHE_SLOTS`
+  - `SF_RCACHE_TTL_S` (macro, line 1274) `#define SF_RCACHE_TTL_S`
 - Depends on: `include/anti_fp.h`, `include/net_guard.h`, `include/request_policy.h`, `include/secure_fetch.h`, `include/url.h`
 
 ## src/sha2.c
@@ -315,18 +357,24 @@ static void sf_guard_init(fetch_ctx *ctx, cons...`
 - Language: c
 - Symbols:
   - `sqb_job` (struct, line 11)
-  - `sqb` (struct, line 21)
-  - `dup_n` (function, line 30) `static char *dup_n(const char *s, size_t n)`
-  - `res_clear` (function, line 39) `static void res_clear(sqb_res *r)`
-  - `job_free` (function, line 44) `static void job_free(sqb_job *j)`
-  - `job_main` (function, line 51) `static void *job_main(void *arg)`
-  - `sqb_new` (function, line 75) `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx)`
-  - `sqb_submit` (function, line 86) `int sqb_submit(sqb *b, int refused, const sqb_req *req)`
-  - `sqb_count` (function, line 112) `size_t sqb_count(const sqb *b)`
-  - `sqb_wait_all` (function, line 114) `void sqb_wait_all(sqb *b)`
-  - `sqb_result` (function, line 122) `const sqb_res *sqb_result(const sqb *b, size_t i)`
-  - `sqb_reset` (function, line 126) `void sqb_reset(sqb *b)`
-  - `sqb_free` (function, line 133) `void sqb_free(sqb *b)`
+  - `sqb` (struct, line 23)
+  - `dup_n` (function, line 37) `static char *dup_n(const char *s, size_t n)`
+  - `res_clear` (function, line 46) `static void res_clear(sqb_res *r)`
+  - `job_free` (function, line 51) `static void job_free(sqb_job *j)`
+  - `batch_destroy` (function, line 58) `static void batch_destroy(sqb *b)`
+  - `job_main` (function, line 65) `static void *job_main(void *arg)`
+  - `sqb_new` (function, line 97) `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx)`
+  - `sqb_new_owned` (function, line 101) `sqb *sqb_new_owned(int max_threads, sqb_run_fn run, void *ctx, void (*free_ctx)(void *))`
+  - `sqb_submit` (function, line 127) `int sqb_submit(sqb *b, int refused, const sqb_req *req)`
+  - `sqb_count` (function, line 154) `size_t sqb_count(const sqb *b)`
+  - `sqb_wait_all` (function, line 156) `void sqb_wait_all(sqb *b)`
+  - `all_done_locked` (function, line 164) `static int all_done_locked(const sqb *b)`
+  - `sqb_wait_ready` (function, line 169) `size_t sqb_wait_ready(sqb *b, long wait_ms, size_t *idx, size_t cap)`
+  - `sqb_remove` (function, line 191) `void sqb_remove(sqb *b, const size_t *idx, size_t k)`
+  - `sqb_result` (function, line 213) `const sqb_res *sqb_result(const sqb *b, size_t i)`
+  - `sqb_reset` (function, line 217) `void sqb_reset(sqb *b)`
+  - `sqb_abandon` (function, line 224) `void sqb_abandon(sqb *b)`
+  - `sqb_free` (function, line 247) `void sqb_free(sqb *b)`
   - `_GNU_SOURCE` (macro, line 2) `#define _GNU_SOURCE`
 - Depends on: `include/subreq_batch.h`
 

@@ -93,7 +93,7 @@ typedef struct cnt_state cnt_state;
 unsigned cnt_hash(const char *name, size_t len);
 ```
 
-FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are case-sensitive).
+FNV-1a over [`len`](src.box_tree.c.md#len) bytes of an identifier, ASCII case preserved (identifiers are case-sensitive).
 
 Never 0.
 

@@ -1,6 +1,82 @@
 # Subsystem: src (page 6 of 10)
 Previous: [KB_src_p5.md](KB_src_p5.md)
 
+## src/js_env.c
+- Doc: m_perf_now: performance.now: coarsened elapsed since the origin bound at install time, so * it...
+- Layer: infrastructure
+- Language: c
+- Symbols:
+  - `wall_clock_ms` (function, line 37) `static uint64_t wall_clock_ms(void)`
+  - `monotonic_ms` (function, line 43) `static double monotonic_ms(void)`
+  - `m_date_now` (function, line 51) `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+  - `m_perf_now` (function, line 59) `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,
+                          int ar...`
+  - `m_date_now_exact` (function, line 73) `static JSValue m_date_now_exact(JSContext *ctx, JSValueConst this_val,
+                          ...`
+  - `m_perf_now_exact` (function, line 79) `static JSValue m_perf_now_exact(JSContext *ctx, JSValueConst this_val,
+                          ...`
+  - `m_empty_array` (function, line 99) `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
+                             ...`
+  - `m_get_random_values` (function, line 117) `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
+                       ...`
+  - `m_random_uuid` (function, line 147) `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
+                             ...`
+  - `m_subtle_null` (function, line 164) `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,
+                             ...`
+  - `reject_named` (function, line 173) `static JSValue reject_named(JSContext *ctx, const char *name, const char *msg)`
+  - `m_subtle_digest` (function, line 190) `static JSValue m_subtle_digest(JSContext *ctx, JSValueConst this_val,
+                           ...`
+  - `def_val` (function, line 243) `static int def_val(JSContext *ctx, JSValueConst obj, const char *name, JSValue v)`
+  - `def_str` (function, line 249) `static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const char *s)`
+  - `def_int` (function, line 253) `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)`
+  - `def_fn` (function, line 257) `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
+                  JSCFuncti...`
+  - `build_languages` (function, line 264) `static JSValue build_languages(JSContext *ctx, const char *langs)`
+  - `m_captured` (function, line 299) `static JSValue m_captured(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv,
+  ...`
+  - `promote_to_getters` (function, line 307) `static int promote_to_getters(JSContext *ctx, JSValueConst vals, JSValueConst proto)`
+  - `build_navigator` (function, line 332) `static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,
+        ...`
+  - `build_screen` (function, line 424) `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)`
+  - `build_crypto` (function, line 468) `static int build_crypto(JSContext *ctx, JSValueConst global)`
+  - `build_perf_timing` (function, line 496) `static int build_perf_timing(JSContext *ctx, JSValueConst perf)`
+  - `build_perf_navigation` (function, line 510) `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)`
+  - `build_performance` (function, line 522) `static int build_performance(JSContext *ctx, JSValueConst global, int exact)`
+  - `override_date_now` (function, line 554) `static int override_date_now(JSContext *ctx, JSValueConst global, int exact)`
+  - `make_readback` (function, line 598) `static JSValue make_readback(JSContext *ctx, uint64_t key)`
+  - `build_readback_obj` (function, line 606) `static int build_readback_obj(JSContext *ctx, JSValueConst global,
+                              ...`
+  - `je_install` (function, line 619) `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
+  - `je_install_identity` (function, line 623) `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
+                      ...`
+  - `je_install_identity_trusted` (function, line 628) `je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_h,
+              ...`
+  - `je_install_canvas` (function, line 649) `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
+  - `primitives` (function, line 6) `* the pure anti_fp primitives (one audited source of normalized constants);`
+  - `_POSIX_C_SOURCE` (macro, line 17) `#define _POSIX_C_SOURCE`
+  - `PERF_ORIGIN_EPOCH` (macro, line 466) `#define PERF_ORIGIN_EPOCH`
+- Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/sha2.h`, `src/js_native_internal.h`
+
+## src/js_events.c
+- Doc: jd_eval_default_action: Runs one engine event-dispatch expression and maps its result to the C...
+- Layer: infrastructure
+- Language: c
+- Symbols:
+  - `jd_click_state` (struct, line 26)
+  - `jd_click_state_new` (function, line 30) `jd_click_state *jd_click_state_new(void)`
+  - `jd_click_state_free` (function, line 35) `void jd_click_state_free(jd_click_state *s)`
+  - `jd_install_events` (function, line 39) `jd_status jd_install_events(js_context *ctx, jd_click_state *state)`
+  - `jd_eval_default_action` (function, line 53) `static int jd_eval_default_action(JSContext *jsctx, const char *src, size_t n,
+                  ...`
+  - `jd_fire_click` (function, line 67) `int jd_fire_click(js_context *ctx, dom_node_id node_id)`
+  - `jd_fire_submit` (function, line 79) `int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)`
+  - `jd_escape_js_str` (function, line 92) `static size_t jd_escape_js_str(const char *src, char *dst, size_t dstsz)`
+  - `jd_fire_mouse_event` (function, line 164) `int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
+                        const char ...`
+  - `_GNU_SOURCE` (macro, line 6) `#define _GNU_SOURCE`
+- Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`, `src/js_native_internal.h`
+
 ## src/js_fetch.c
 - Doc: jd_pack_ptr: Carry the host fetch fn + its ctx as a function's closure data, each split into...
 - Layer: utility
@@ -15,9 +91,8 @@ Previous: [KB_src_p5.md](KB_src_p5.md)
   - `m_host_fetch_async` (function, line 105) `static JSValue m_host_fetch_async(JSContext *ctx, JSValueConst this_val,
                         ...`
   - `jd_install_xhr` (function, line 336) `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)`
-  - `jd_net_deliver` (function, line 340) `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,
-     ...`
-  - `jd_install_xhr_ex` (function, line 361) `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
+  - `jd_net_deliver` (function, line 340) `jd_status jd_net_deliver(js_context *ctx, int pos, int rc, int status, const char *body, size_t l...`
+  - `jd_install_xhr_ex` (function, line 363) `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,
                    ...`
   - `send` (function, line 128) `* callbacks fire right after send();`
   - `task` (function, line 312) `* current task (the page never waits on it);`
@@ -331,6 +406,24 @@ static const char JT_W...`
   - `_POSIX_C_SOURCE` (macro, line 23) `#define _POSIX_C_SOURCE`
 - Depends on: `include/media_decoder.h`, `include/util.h`
 
+## src/nav_token.c
+- Doc: nav_token -- per-tab navigation identity shared with fetch threads. spec/nav_token.md
+- Layer: utility
+- Language: c
+- Symbols:
+  - `nt_token` (struct, line 7)
+  - `nt_new` (function, line 16) `nt_token *nt_new(void)`
+  - `nt_ref` (function, line 26) `nt_token *nt_ref(nt_token *t)`
+  - `nt_unref` (function, line 31) `void nt_unref(nt_token **tp)`
+  - `nt_cancel` (function, line 38) `void nt_cancel(nt_token *t)`
+  - `nt_cancelled` (function, line 42) `int nt_cancelled(const nt_token *t)`
+  - `nt_set_foreground` (function, line 47) `void nt_set_foreground(nt_token *t, int on)`
+  - `nt_foreground` (function, line 51) `int nt_foreground(const nt_token *t)`
+  - `nt_id` (function, line 56) `uint64_t nt_id(const nt_token *t)`
+  - `nt_route` (function, line 58) `nt_route_kind nt_route(const nt_token *job, const nt_token *active, nt_token *const *parked,
+    ...`
+- Depends on: `include/nav_token.h`
+
 ## src/net_guard.c
 - Doc: net_guard -- see include/net_guard.h and spec/net_guard.md.
 - Layer: utility
@@ -368,47 +461,6 @@ static const char JT_W...`
   - `nr_route_name` (function, line 103) `const char *nr_route_name(nr_route r)`
   - `NR_MAX_HOST` (macro, line 15) `#define NR_MAX_HOST`
 - Depends on: `include/net_realm.h`
-
-## src/os_sandbox.c
-- Doc: os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks...
-- Layer: utility
-- Language: c
-- Symbols:
-  - `os_policy_allows` (function, line 52) `int os_policy_allows(long syscall_nr)`
-  - `os_policy_size` (function, line 59) `size_t os_policy_size(void)`
-  - `os_prot_allowed` (function, line 65) `int os_prot_allowed(long syscall_nr, unsigned long prot)`
-  - `os_no_dump` (function, line 75) `os_status os_no_dump(void)`
-  - `excluded` (function, line 89) `* intentionally excluded (they need /proc remounting and a post-unshare fork). */
-int os_namespac...`
-  - `os_isolate_namespaces` (function, line 94) `os_status os_isolate_namespaces(void)`
-  - `os_policy_allows` (function, line 106) `int os_policy_allows(long syscall_nr)`
-  - `os_policy_size` (function, line 107) `size_t os_policy_size(void)`
-  - `os_prot_allowed` (function, line 108) `int os_prot_allowed(long syscall_nr, unsigned long prot)`
-  - `os_no_dump` (function, line 111) `os_status os_no_dump(void)`
-  - `os_harden` (function, line 113) `os_status os_harden(os_violation action)`
-  - `os_namespace_flags` (function, line 115) `int os_namespace_flags(void)`
-  - `os_isolate_namespaces` (function, line 116) `os_status os_isolate_namespaces(void)`
-  - `os_harden` (function, line 145) `os_status os_harden(os_violation action)`
-  - `ll_create_ruleset` (function, line 239) `static long ll_create_ruleset(const struct landlock_ruleset_attr *attr,
-                         ...`
-  - `ll_add_rule` (function, line 244) `static long ll_add_rule(int fd, enum landlock_rule_type type,
-                        const void ...`
-  - `ll_restrict_self` (function, line 249) `static long ll_restrict_self(int fd, uint32_t flags)`
-  - `ll_handled` (function, line 265) `static uint64_t ll_handled(int abi)`
-  - `ll_read_access` (function, line 279) `static uint64_t ll_read_access(uint64_t handled)`
-  - `os_landlock_abi` (function, line 285) `int os_landlock_abi(void)`
-  - `os_landlock_restrict` (function, line 291) `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
-  - `os_landlock_abi` (function, line 331) `int os_landlock_abi(void)`
-  - `os_landlock_restrict` (function, line 332) `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)`
-  - `number` (function, line 157) `* number (x32/i386 on x86_64, AArch32 on aarch64). */ prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD | BPF_W |...`
-  - `headroom` (function, line 203) `* wide headroom (room for ~125 allowed syscalls). */ prog[at_mmap].jt = (unsigned char)(prot_check - (at_mmap + 1));`
-  - `fields` (function, line 303) `* long as the unknown trailing fields (net/scoped) are zero, which they are. */ int rfd =...`
-  - `_GNU_SOURCE` (macro, line 13) `#define _GNU_SOURCE`
-  - `OS_ALLOWED_N` (macro, line 50) `#define OS_ALLOWED_N`
-  - `OS_SECCOMP_ARCH` (macro, line 140) `#  define OS_SECCOMP_ARCH`
-  - `OS_SECCOMP_ARCH` (macro, line 142) `#  define OS_SECCOMP_ARCH`
-  - `LL_FS_BASE` (macro, line 254) `#define LL_FS_BASE`
-- Depends on: `include/os_sandbox.h`
 
 
 Next: [KB_src_p7.md](KB_src_p7.md)

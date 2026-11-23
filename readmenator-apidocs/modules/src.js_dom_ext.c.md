@@ -4,7 +4,7 @@
 
 ## Contents
 
-- **Functions:** [`identity`](#identity), [`registration`](#registration), [`cancels`](#cancels), [`jdx_install`](#jdx_install), [`jd_install_repl_api`](#jd_install_repl_api), [`jd_set_repl_css`](#jd_set_repl_css), [`jd_install_geolocation`](#jd_install_geolocation), [`jd_install_indexeddb`](#jd_install_indexeddb)
+- **Functions:** [`identity`](#identity), [`registration`](#registration), [`cancels`](#cancels), [`order`](#order), [`jdx_install`](#jdx_install), [`jd_install_repl_api`](#jd_install_repl_api), [`jd_set_repl_css`](#jd_set_repl_css), [`jd_install_geolocation`](#jd_install_geolocation), [`jd_install_indexeddb`](#jd_install_indexeddb)
 
 ## Functions
 
@@ -46,7 +46,7 @@
 
 ### `cancels`
 
-`function` | [src/js_dom_ext.c:954](../../src/js_dom_ext.c#L954)
+`function` | [src/js_dom_ext.c:1001](../../src/js_dom_ext.c#L1001)
 
 ```c
 * toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);
@@ -62,11 +62,31 @@
 
 ---
 
+<a id="order"></a>
+
+### `order`
+
+`function` | [src/js_dom_ext.c:1363](../../src/js_dom_ext.c#L1363)
+
+```c
+* run in insertion order (HTML's "list of scripts that will execute in order as soon as * possible"). Modules go through import(). A throw is reported like any uncaught * error and never propagates into the inserting script. Bounds: 4096 started scripts. */ static const char JDX_DYNSCRIPT_SHIM[] = "(function()
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `possible` | `HTML's "list of scripts that will execute in order as soon as * "` |  |  |
+
+**Returns:** `* run in insertion`
+
+---
+
 <a id="jdx_install"></a>
 
 ### `jdx_install`
 
-`function` | [src/js_dom_ext.c:1366](../../src/js_dom_ext.c#L1366)
+`function` | [src/js_dom_ext.c:1429](../../src/js_dom_ext.c#L1429)
 
 ```c
 int jdx_install(JSContext *ctx)
@@ -86,7 +106,7 @@ int jdx_install(JSContext *ctx)
 
 ### `jd_install_repl_api`
 
-`function` | [src/js_dom_ext.c:1375](../../src/js_dom_ext.c#L1375)
+`function` | [src/js_dom_ext.c:1438](../../src/js_dom_ext.c#L1438)
 
 ```c
 jd_status jd_install_repl_api(js_context *ctx)
@@ -106,7 +126,7 @@ jd_status jd_install_repl_api(js_context *ctx)
 
 ### `jd_set_repl_css`
 
-`function` | [src/js_dom_ext.c:1383](../../src/js_dom_ext.c#L1383)
+`function` | [src/js_dom_ext.c:1446](../../src/js_dom_ext.c#L1446)
 
 ```c
 jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
@@ -128,7 +148,7 @@ jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)
 
 ### `jd_install_geolocation`
 
-`function` | [src/js_dom_ext.c:1396](../../src/js_dom_ext.c#L1396)
+`function` | [src/js_dom_ext.c:1459](../../src/js_dom_ext.c#L1459)
 
 ```c
 jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)
@@ -151,7 +171,7 @@ jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double
 
 ### `jd_install_indexeddb`
 
-`function` | [src/js_dom_ext.c:1415](../../src/js_dom_ext.c#L1415)
+`function` | [src/js_dom_ext.c:1478](../../src/js_dom_ext.c#L1478)
 
 ```c
 jd_status jd_install_indexeddb(js_context *ctx)

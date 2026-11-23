@@ -3,6 +3,139 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `host_parts` | function | `src/hls.c:321` | `static int host_parts(const char *a, size_t alen, char host[HLS_HOST_MAX], char site[HLS_HOST_MAX...` |
+| `https_authority` | function | `src/hls.c:309` | `static int https_authority(const char *url, const char **a, size_t *alen)` |
+| `last_char` | function | `src/hls.c:43` | `static const char *last_char(const char *s, size_t n, int c)` |
+| `name` | function | `src/hls.c:51` | `* attr is the attribute name (e.g. "BANDWIDTH=");` |
+| `parse_attr_long` | function | `src/hls.c:53` | `static int parse_attr_long(const char *attrs, const char *end,                            const c...` |
+| `parse_attr_resolution` | function | `src/hls.c:67` | `static void parse_attr_resolution(const char *attrs, const char *end,                            ...` |
+| `ts_sync_at` | function | `src/hls.c:281` | `static int ts_sync_at(const unsigned char *b, size_t len, size_t off)` |
+| `HCF_REPO_DIR` | macro | `src/host_conf.c:8` | `#define HCF_REPO_DIR` |
+| `HCF_USER_SUBDIR` | macro | `src/host_conf.c:7` | `#define HCF_USER_SUBDIR` |
+| `add_dir` | function | `src/host_conf.c:10` | `static void add_dir(hcf_dirs *out, const char *path)` |
+| `hcf_load_allowlist` | function | `src/host_conf.c:76` | `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname)` |
+| `hcf_load_filter` | function | `src/host_conf.c:65` | `hb_set *hcf_load_filter(const hcf_dirs *dirs)` |
+| `hcf_search_dirs` | function | `src/host_conf.c:20` | `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out)` |
+| `hcf_search_dirs_from_env` | function | `src/host_conf.c:32` | `void hcf_search_dirs_from_env(hcf_dirs *out)` |
+| `load_into` | function | `src/host_conf.c:58` | `static void load_into(hb_set *s, const char *dir, const char *name, hb_list list)` |
+| `read_conf` | function | `src/host_conf.c:37` | `static char *read_conf(const char *dir, const char *name)` |
+| `HB_INIT_CAP` | macro | `src/hostblock.c:20` | `#define HB_INIT_CAP` |
+| `HB_MAX_HOST` | macro | `src/hostblock.c:19` | `#define HB_MAX_HOST` |
+| `hb_check` | function | `src/hostblock.c:193` | `hb_decision hb_check(const hb_set *s, const char *host)` |
+| `hb_check_subresource` | function | `src/hostblock.c:218` | `hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted)` |
+| `hb_count` | function | `src/hostblock.c:243` | `size_t hb_count(const hb_set *s, hb_list list)` |
+| `hb_free` | function | `src/hostblock.c:149` | `void hb_free(hb_set *s)` |
+| `hb_is_allowlisted` | function | `src/hostblock.c:223` | `int hb_is_allowlisted(const hb_set *s, const char *host)` |
+| `hb_load` | function | `src/hostblock.c:156` | `hb_status hb_load(hb_set *s, const char *text, hb_list list)` |
+| `hb_new` | function | `src/hostblock.c:144` | `hb_set *hb_new(void)` |
+| `hb_set` | struct | `src/hostblock.c:30` | `` |
+| `hb_table` | struct | `src/hostblock.c:24` | `` |
+| `is_domain_char` | function | `src/hostblock.c:122` | `static int is_domain_char(char c)` |
+| `is_ip_token` | function | `src/hostblock.c:113` | `static int is_ip_token(const char *s, size_t n)` |
+| `lower` | function | `src/hostblock.c:107` | `static char lower(char c)` |
+| `table_contains` | function | `src/hostblock.c:92` | `static int table_contains(const hb_table *t, const char *key)` |
+| `table_free` | function | `src/hostblock.c:98` | `static void table_free(hb_table *t)` |
+| `table_grow` | function | `src/hostblock.c:49` | `static int table_grow(hb_table *t, size_t newcap)` |
+| `table_insert` | function | `src/hostblock.c:71` | `static int table_insert(hb_table *t, const char *key, size_t klen)` |
+| `table_probe` | function | `src/hostblock.c:38` | `static size_t table_probe(const hb_table *t, const char *key, size_t klen)` |
+| `contains_ci` | function | `src/hostedit.c:115` | `static int contains_ci(const char *hs, size_t hl, const char *needle)` |
+| `has_host_cb` | function | `src/hostedit.c:105` | `static int has_host_cb(const char *ts, size_t tl, void *ctx)` |
+| `he_cdn_kind` | function | `src/hostedit.c:173` | `he_cdn_kind_t he_cdn_kind(const char *url)` |
+| `he_lower` | function | `src/hostedit.c:12` | `static char he_lower(char c)` |
+| `he_make_line` | function | `src/hostedit.c:41` | `he_status he_make_line(const char *host, char *out, size_t cap)` |
+| `he_scan` | function | `src/hostedit.c:80` | `static int he_scan(const char *text, int (*fn)(const char *, size_t, void *), void *ctx)` |
+| `he_suggest` | function | `src/hostedit.c:164` | `int he_suggest(const char *text, const char *query,                char results[][HE_MAX_HOST + 1...` |
+| `he_text_has_host` | function | `src/hostedit.c:109` | `int he_text_has_host(const char *text, const char *host)` |
+| `is_ip_token` | function | `src/hostedit.c:67` | `static int is_ip_token(const char *ts, const char *te)` |
+| `is_label_char` | function | `src/hostedit.c:16` | `static int is_label_char(char c)` |
+| `starts_with_ci` | function | `src/hostedit.c:128` | `static int starts_with_ci(const char *hs, size_t hl, const char *pfx)` |
+| `suggest_cb` | function | `src/hostedit.c:144` | `static int suggest_cb(const char *ts, size_t tl, void *vctx)` |
+| `suggest_ctx` | struct | `src/hostedit.c:136` | `` |
+| `valid_host` | function | `src/hostedit.c:22` | `static int valid_host(const char *host, size_t n)` |
+| `_POSIX_C_SOURCE` | macro | `src/html_parse.c:9` | `#define _POSIX_C_SOURCE` |
+| `attr_has_token_ci` | function | `src/html_parse.c:251` | `static int attr_has_token_ci(const lxb_char_t *val, size_t vlen, const char *needle)` |
+| `attr_is_event_handler` | function | `src/html_parse.c:47` | `static int attr_is_event_handler(const lxb_dom_attr_t *attr)` |
+| `dup_bytes` | function | `src/html_parse.c:27` | `static char *dup_bytes(const lxb_char_t *src, size_t len)` |
+| `hp_config_default` | function | `src/html_parse.c:357` | `hp_config hp_config_default(void)` |
+| `hp_document` | struct | `src/html_parse.c:21` | `` |
+| `hp_document_free` | function | `src/html_parse.c:483` | `void hp_document_free(hp_document *doc)` |
+| `hp_document_root` | function | `src/html_parse.c:489` | `const void *hp_document_root(const hp_document *doc)` |
+| `hp_element_count` | function | `src/html_parse.c:409` | `size_t hp_element_count(const hp_document *doc)` |
+| `hp_event_handler_count` | function | `src/html_parse.c:429` | `size_t hp_event_handler_count(const hp_document *doc)` |
+| `hp_extract_script_list` | function | `src/html_parse.c:164` | `hp_script *hp_extract_script_list(const hp_document *doc, size_t *out_count)` |
+| `hp_extract_stylesheet_hrefs` | function | `src/html_parse.c:294` | `char **hp_extract_stylesheet_hrefs(const hp_document *doc, size_t *out_count)` |
+| `hp_extract_text` | function | `src/html_parse.c:445` | `char *hp_extract_text(const hp_document *doc, size_t *out_len)` |
+| `hp_free` | function | `src/html_parse.c:479` | `void hp_free(char *buf)` |
+| `hp_free_scripts` | function | `src/html_parse.c:238` | `void hp_free_scripts(hp_script *scripts, size_t count)` |
+| `hp_free_stylesheet_hrefs` | function | `src/html_parse.c:328` | `void hp_free_stylesheet_hrefs(char **hrefs, size_t count)` |
+| `hp_get_title` | function | `src/html_parse.c:464` | `char *hp_get_title(const hp_document *doc, size_t *out_len)` |
+| `hp_parse` | function | `src/html_parse.c:375` | `hp_status hp_parse(const char *html, size_t len, const hp_config *cfg, hp_document **out)` |
+| `hp_script_count` | function | `src/html_parse.c:419` | `size_t hp_script_count(const hp_document *doc)` |
+| `hp_validate_input` | function | `src/html_parse.c:365` | `hp_status hp_validate_input(const char *html, size_t len, const hp_config *cfg)` |
+| `link_is_active_stylesheet` | function | `src/html_parse.c:272` | `static int link_is_active_stylesheet(lxb_dom_element_t *el,                                      ...` |
+| `lxb_dom_element_has_attribute` | function | `src/html_parse.c:230` | `&& lxb_dom_element_has_attribute(sel, (const lxb_char_t *)"nomodule", 8);` |
+| `node_is_script` | function | `src/html_parse.c:54` | `static int node_is_script(const lxb_dom_node_t *node)` |
+| `node_next` | function | `src/html_parse.c:37` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
+| `script_classify` | function | `src/html_parse.c:121` | `static int script_classify(const lxb_dom_node_t *n,                            const lxb_char_t *...` |
+| `strip_event_handlers` | function | `src/html_parse.c:334` | `static void strip_event_handlers(lxb_html_document_t *document)` |
+| `strip_scripts` | function | `src/html_parse.c:60` | `static void strip_scripts(lxb_html_document_t *document)` |
+| `type_is` | function | `src/html_parse.c:100` | `static int type_is(const lxb_char_t *t, size_t len, const char *word)` |
+| `type_is_module` | function | `src/html_parse.c:117` | `static int type_is_module(const lxb_char_t *t, size_t len)` |
+| `HC_EVICT_EVERY` | macro | `src/http_cache.c:34` | `#define HC_EVICT_EVERY` |
+| `HC_KEY_FILE` | macro | `src/http_cache.c:31` | `#define HC_KEY_FILE` |
+| `HC_MAGIC` | macro | `src/http_cache.c:32` | `#define HC_MAGIC` |
+| `HC_MAX_AGE_CAP` | macro | `src/http_cache.c:35` | `#define HC_MAX_AGE_CAP` |
+| `HC_NAME_HEX` | macro | `src/http_cache.c:33` | `#define HC_NAME_HEX` |
+| `_POSIX_C_SOURCE` | macro | `src/http_cache.c:7` | `#define _POSIX_C_SOURCE` |
+| `cc_find` | function | `src/http_cache.c:74` | `static int cc_find(const char *cc, const char *name, const char **val)` |
+| `cc_max_age` | function | `src/http_cache.c:92` | `static int cc_max_age(const char *cc, long *out)` |
+| `days_from_civil` | function | `src/http_cache.c:46` | `static long days_from_civil(int y, int m, int d)` |
+| `days_in_month` | function | `src/http_cache.c:39` | `static int days_in_month(int y, int m)` |
+| `ent` | struct | `src/http_cache.c:397` | `` |
+| `entry_path` | function | `src/http_cache.c:162` | `static int entry_path(const hc_store *s, char kind, const char *partition, const char *url,      ...` |
+| `evict` | function | `src/http_cache.c:396` | `static void evict(hc_store *s)` |
+| `get_locked` | function | `src/http_cache.c:385` | `static hc_status get_locked(hc_store *s, const char *partition, const char *url, hc_meta *meta,  ...` |
+| `has_nl` | function | `src/http_cache.c:293` | `static int has_nl(const char *s)` |
+| `hc_body_free` | function | `src/http_cache.c:287` | `void hc_body_free(uint8_t *body, size_t len)` |
+| `hc_classify` | function | `src/http_cache.c:136` | `hc_class hc_classify(const hc_meta *m, time_t now)` |
+| `hc_clear` | function | `src/http_cache.c:473` | `void hc_clear(hc_store *s)` |
+| `hc_close` | function | `src/http_cache.c:279` | `void hc_close(hc_store *s)` |
+| `hc_get` | function | `src/http_cache.c:480` | `hc_status hc_get(hc_store *s, const char *partition, const char *url, hc_meta *meta,             ...` |
+| `hc_lifetime` | function | `src/http_cache.c:115` | `long hc_lifetime(const hc_meta *m)` |
+| `hc_open` | function | `src/http_cache.c:230` | `hc_status hc_open(hc_store **out, const char *dir, const uint8_t wrap[LS_KEY_LEN])` |
+| `hc_parse_http_date` | function | `src/http_cache.c:55` | `time_t hc_parse_http_date(const char *s)` |
+| `hc_put` | function | `src/http_cache.c:489` | `hc_status hc_put(hc_store *s, const char *partition, const char *url, const hc_meta *meta,       ...` |
+| `hc_redirect_get` | function | `src/http_cache.c:506` | `hc_status hc_redirect_get(hc_store *s, const char *from, time_t now, char *out, size_t cap)` |
+| `hc_redirect_put` | function | `src/http_cache.c:498` | `hc_status hc_redirect_put(hc_store *s, const char *from, const char *to, time_t now)` |
+| `hc_storable` | function | `src/http_cache.c:107` | `int hc_storable(long http_code, const hc_meta *m, size_t body_len)` |
+| `hc_store` | struct | `src/http_cache.c:146` | `` |
+| `hex_of` | function | `src/http_cache.c:155` | `static void hex_of(const uint8_t *b, size_t n, char *out)` |
+| `load_entry` | function | `src/http_cache.c:327` | `static hc_status load_entry(hc_store *s, const char *path, hc_meta *m, uint8_t **body,           ...` |
+| `meta_ok` | function | `src/http_cache.c:295` | `static int meta_ok(const hc_meta *m)` |
+| `put_locked` | function | `src/http_cache.c:434` | `static hc_status put_locked(hc_store *s, const char *partition, const char *url, const hc_meta *m...` |
+| `read_file` | function | `src/http_cache.c:208` | `static uint8_t *read_file(const char *path, size_t max, size_t *len)` |
+| `redirect_get_locked` | function | `src/http_cache.c:459` | `static hc_status redirect_get_locked(hc_store *s, const char *from, time_t now, char *out, size_t...` |
+| `redirect_put_locked` | function | `src/http_cache.c:446` | `static hc_status redirect_put_locked(hc_store *s, const char *from, const char *to, time_t now)` |
+| `remove_entries` | function | `src/http_cache.c:180` | `static void remove_entries(const char *dir)` |
+| `store_entry` | function | `src/http_cache.c:302` | `static hc_status store_entry(hc_store *s, const char *path, const hc_meta *m,                    ...` |
+| `write_atomic` | function | `src/http_cache.c:192` | `static int write_atomic(const char *path, const uint8_t *data, size_t len)` |
+| `IDN_QUERY_FIELD_MAX` | macro | `src/identity.c:18` | `#define IDN_QUERY_FIELD_MAX` |
+| `_GNU_SOURCE` | macro | `src/identity.c:7` | `#define _GNU_SOURCE` |
+| `append` | function | `src/identity.c:187` | `static int append(char *buf, size_t *n, size_t cap, const char *fmt, ...)` |
+| `append_pct` | function | `src/identity.c:198` | `static int append_pct(char *buf, size_t *n, size_t cap, const char *s)` |
+| `esc_append` | function | `src/identity.c:361` | `static int esc_append(char *buf, size_t *n, size_t cap, const char *s)` |
+| `hexval` | function | `src/identity.c:158` | `static int hexval(int ch)` |
+| `idn_accept_language` | function | `src/identity.c:114` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap)` |
+| `idn_apply_query` | function | `src/identity.c:282` | `unsigned idn_apply_query(idn_config *c, const char *query)` |
+| `idn_clear_geo` | function | `src/identity.c:104` | `void idn_clear_geo(idn_config *c)` |
+| `idn_defaults` | function | `src/identity.c:23` | `void idn_defaults(idn_config *c)` |
+| `idn_is_default` | function | `src/identity.c:29` | `int idn_is_default(const idn_config *c)` |
+| `idn_parse` | function | `src/identity.c:241` | `void idn_parse(idn_config *c, const char *text)` |
+| `idn_primary_language` | function | `src/identity.c:144` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap)` |
+| `idn_render_page` | function | `src/identity.c:377` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap)` |
+| `idn_serialize` | function | `src/identity.c:207` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap)` |
+| `idn_set_geo` | function | `src/identity.c:92` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m)` |
+| `idn_set_languages` | function | `src/identity.c:64` | `int idn_set_languages(idn_config *c, const char *list)` |
 | `idn_set_user_agent` | function | `src/identity.c:35` | `int idn_set_user_agent(idn_config *c, const char *ua)` |
 | `idn_user_agent` | function | `src/identity.c:110` | `const char *idn_user_agent(const idn_config *c)` |
 | `is_alnum` | function | `src/identity.c:21` | `static int is_alnum(char c)` |
@@ -146,15 +279,16 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `scripts` | function | `src/js_dom.c:915` | `* player scripts (canPlayType feature-detection, play/pause, muted/loop * reflection, buffered ranges) run without...` |
 | `size` | function | `src/js_dom.c:1441` | `* the viewport reads a fixed normalized size (matches the 1920 width * anti_fp uses for @media, not the real window);` |
 | `table` | function | `src/js_dom.c:645` | `* a table (dom.viewport() non-null);` |
-| `cancels` | function | `src/js_dom_ext.c:954` | `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);` |
+| `cancels` | function | `src/js_dom_ext.c:1001` | `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);` |
 | `identity` | function | `src/js_dom_ext.c:105` | `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...` |
-| `jd_install_geolocation` | function | `src/js_dom_ext.c:1396` | `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)` |
-| `jd_install_indexeddb` | function | `src/js_dom_ext.c:1415` | `jd_status jd_install_indexeddb(js_context *ctx)` |
-| `jd_install_repl_api` | function | `src/js_dom_ext.c:1375` | `jd_status jd_install_repl_api(js_context *ctx)` |
-| `jd_set_repl_css` | function | `src/js_dom_ext.c:1383` | `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)` |
-| `jdx_install` | function | `src/js_dom_ext.c:1366` | `int jdx_install(JSContext *ctx)` |
+| `jd_install_geolocation` | function | `src/js_dom_ext.c:1459` | `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)` |
+| `jd_install_indexeddb` | function | `src/js_dom_ext.c:1478` | `jd_status jd_install_indexeddb(js_context *ctx)` |
+| `jd_install_repl_api` | function | `src/js_dom_ext.c:1438` | `jd_status jd_install_repl_api(js_context *ctx)` |
+| `jd_set_repl_css` | function | `src/js_dom_ext.c:1446` | `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)` |
+| `jdx_install` | function | `src/js_dom_ext.c:1429` | `int jdx_install(JSContext *ctx)` |
+| `order` | function | `src/js_dom_ext.c:1363` | `* run in insertion order (HTML's "list of scripts that will execute in order as soon as  * possib...` |
 | `registration` | function | `src/js_dom_ext.c:482` | `* registration (options, attributeFilter, subtree) and delivered in one microtask. An  * observer...` |
-| `run` | function | `src/js_dom_ext.c:1301` | `static int run(JSContext *ctx, const char *src, size_t len, const char *name)` |
+| `run` | function | `src/js_dom_ext.c:1348` | `static int run(JSContext *ctx, const char *src, size_t len, const char *name)` |
 | `FREEDOM_JS_DOM_EXT_H` | macro | `src/js_dom_ext.h:2` | `#define FREEDOM_JS_DOM_EXT_H` |
 | `jdx_install` | function | `src/js_dom_ext.h:10` | `int jdx_install(JSContext *ctx);` |
 | `FREEDOM_JS_DOM_INTERNAL_H` | macro | `src/js_dom_internal.h:2` | `#define FREEDOM_JS_DOM_INTERNAL_H` |
@@ -214,8 +348,8 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `jd_install_events` | function | `src/js_events.c:39` | `jd_status jd_install_events(js_context *ctx, jd_click_state *state)` |
 | `_GNU_SOURCE` | macro | `src/js_fetch.c:6` | `#define _GNU_SOURCE` |
 | `jd_install_xhr` | function | `src/js_fetch.c:336` | `jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)` |
-| `jd_install_xhr_ex` | function | `src/js_fetch.c:361` | `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,                    ...` |
-| `jd_net_deliver` | function | `src/js_fetch.c:340` | `jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len,      ...` |
+| `jd_install_xhr_ex` | function | `src/js_fetch.c:363` | `jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx,                    ...` |
+| `jd_net_deliver` | function | `src/js_fetch.c:340` | `jd_status jd_net_deliver(js_context *ctx, int pos, int rc, int status, const char *body, size_t l...` |
 | `jd_pack_ptr` | function | `src/js_fetch.c:29` | `static void jd_pack_ptr(JSContext *ctx, JSValue *out2, const void *p)` |
 | `jd_reply_object` | function | `src/js_fetch.c:44` | `static JSValue jd_reply_object(JSContext *ctx, int rc, int status, const char *rbody,            ...` |
 | `jd_unpack_ptr` | function | `src/js_fetch.c:34` | `static void *jd_unpack_ptr(JSContext *ctx, JSValueConst lo, JSValueConst hi)` |
@@ -362,139 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `LS_KDF_ARGON2ID` | macro | `src/local_store.c:50` | `#define LS_KDF_ARGON2ID` |
 | `LS_KDF_NONE` | macro | `src/local_store.c:49` | `#define LS_KDF_NONE` |
 | `LS_VERSION` | macro | `src/local_store.c:48` | `#define LS_VERSION` |
-| `OFF_AEAD` | macro | `src/local_store.c:60` | `#define OFF_AEAD` |
-| `OFF_KDF` | macro | `src/local_store.c:61` | `#define OFF_KDF` |
-| `OFF_MAGIC` | macro | `src/local_store.c:58` | `#define OFF_MAGIC` |
-| `OFF_NONCE` | macro | `src/local_store.c:63` | `#define OFF_NONCE` |
-| `OFF_SALT` | macro | `src/local_store.c:62` | `#define OFF_SALT` |
-| `OFF_VERSION` | macro | `src/local_store.c:59` | `#define OFF_VERSION` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:25` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_LANES` | macro | `src/local_store.c:39` | `#define OSSL_KDF_PARAM_ARGON2_LANES` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:28` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_ARGON2_MEMCOST` | macro | `src/local_store.c:42` | `#define OSSL_KDF_PARAM_ARGON2_MEMCOST` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:31` | `#define OSSL_KDF_PARAM_THREADS` |
-| `OSSL_KDF_PARAM_THREADS` | macro | `src/local_store.c:45` | `#define OSSL_KDF_PARAM_THREADS` |
-| `_GNU_SOURCE` | macro | `src/local_store.c:13` | `#define _GNU_SOURCE` |
-| `aead_decrypt` | function | `src/local_store.c:143` | `static ls_status aead_decrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
-| `aead_encrypt` | function | `src/local_store.c:117` | `static ls_status aead_encrypt(const EVP_CIPHER *cipher, const uint8_t *key,                      ...` |
-| `argon2id_derive` | function | `src/local_store.c:79` | `static ls_status argon2id_derive(const uint8_t *pass, size_t pass_len,                           ...` |
-| `cipher_for` | function | `src/local_store.c:69` | `static const EVP_CIPHER *cipher_for(ls_aead aead)` |
-| `decrypt_blob` | function | `src/local_store.c:208` | `static ls_status decrypt_blob(const uint8_t *key, const uint8_t *blob, size_t blob_len,          ...` |
-| `ls_derive_key` | function | `src/local_store.c:108` | `ls_status ls_derive_key(const uint8_t *passphrase, size_t pass_len,                         const...` |
-| `ls_free` | function | `src/local_store.c:304` | `void ls_free(uint8_t *buf, size_t len)` |
-| `ls_open` | function | `src/local_store.c:252` | `ls_status ls_open(const uint8_t key[LS_KEY_LEN],                   const uint8_t *blob, size_t bl...` |
-| `ls_open_passphrase` | function | `src/local_store.c:284` | `ls_status ls_open_passphrase(const uint8_t *passphrase, size_t pass_len,                         ...` |
-| `ls_seal` | function | `src/local_store.c:239` | `ls_status ls_seal(const uint8_t key[LS_KEY_LEN], ls_aead aead,                   const uint8_t *p...` |
-| `ls_seal_passphrase` | function | `src/local_store.c:263` | `ls_status ls_seal_passphrase(const uint8_t *passphrase, size_t pass_len, ls_aead aead,           ...` |
-| `seal_core` | function | `src/local_store.c:171` | `static ls_status seal_core(const uint8_t *key, ls_aead aead, uint8_t kdf_id,                     ...` |
-| `drop` | function | `src/mask_cache.c:28` | `static void drop(mkc_cache *c, mkc_entry *e)` |
-| `find` | function | `src/mask_cache.c:36` | `static mkc_entry *find(mkc_cache *c, const mkc_key *k)` |
-| `key` | type_alias | `src/mask_cache.c:7` | `typedef struct mkc_entry { mkc_key key;` |
-| `key_eq` | function | `src/mask_cache.c:22` | `static int key_eq(const mkc_key *a, const mkc_key *b)` |
-| `mkc_bytes` | function | `src/mask_cache.c:111` | `size_t mkc_bytes(const mkc_cache *c)` |
-| `mkc_cache` | struct | `src/mask_cache.c:15` | `` |
-| `mkc_clear` | function | `src/mask_cache.c:60` | `void mkc_clear(mkc_cache *c)` |
-| `mkc_count` | function | `src/mask_cache.c:113` | `size_t mkc_count(const mkc_cache *c)` |
-| `mkc_entry` | struct | `src/mask_cache.c:7` | `` |
-| `mkc_free` | function | `src/mask_cache.c:65` | `void mkc_free(mkc_cache *c)` |
-| `mkc_get` | function | `src/mask_cache.c:72` | `const unsigned char *mkc_get(mkc_cache *c, const mkc_key *k, int *stride)` |
-| `mkc_new` | function | `src/mask_cache.c:49` | `mkc_cache *mkc_new(size_t byte_budget, size_t max_entries)` |
-| `mkc_put` | function | `src/mask_cache.c:81` | `unsigned char *mkc_put(mkc_cache *c, const mkc_key *k, int stride)` |
-| `oldest` | function | `src/mask_cache.c:42` | `static mkc_entry *oldest(mkc_cache *c)` |
-| `_POSIX_C_SOURCE` | macro | `src/media_decoder.c:23` | `#define _POSIX_C_SOURCE` |
-| `av_rescale_q` | function | `src/media_decoder.c:217` | `return av_rescale_q(f->pts, tb, (AVRational)` |
-| `decode_segment` | function | `src/media_decoder.c:276` | `static int decode_segment(decoder_ctx *dc, const uint8_t *data, size_t len)` |
-| `decoder_close` | function | `src/media_decoder.c:78` | `static void decoder_close(decoder_ctx *dc)` |
-| `decoder_ctx` | struct | `src/media_decoder.c:54` | `` |
-| `decoder_init` | function | `src/media_decoder.c:96` | `static int decoder_init(decoder_ctx *dc, const uint8_t *data, size_t len)` |
-| `dropped` | function | `src/media_decoder.c:369` | `* the codec in permanent EOF state: every segment after the first decoded * one was silently dropped ("plays a...` |
-| `fd` | function | `src/media_decoder.c:469` | `* prevent the Wayland display fd (inherited from the parent) from * surviving the exec. An inherited Wayland fd...` |
-| `frame_pts_us` | function | `src/media_decoder.c:215` | `static int64_t frame_pts_us(const AVFrame *f, AVRational tb, int64_t fallback)` |
-| `media_decoder_run` | function | `src/media_decoder.c:379` | `void media_decoder_run(int out_fd, int cmd_fd)` |
-| `media_decoder_spawn` | function | `src/media_decoder.c:449` | `int media_decoder_spawn(pid_t *pid, int *out_fd, int *cmd_fd)` |
-| `open` | function | `src/media_decoder.c:18` | `*  * Sandbox: the decoder needs open() for shared libraries (.so loading) and  * brk/mmap for FFm...` |
-| `out_fd` | type_alias | `src/media_decoder.c:53` | `typedef struct decoder_ctx { int out_fd;` |
-| `send_audio_frame` | function | `src/media_decoder.c:242` | `static void send_audio_frame(decoder_ctx *dc, int64_t pts_us)` |
-| `send_video_frame` | function | `src/media_decoder.c:222` | `static void send_video_frame(decoder_ctx *dc, int64_t pts_us)` |
-| `NG_TEXT_MAX` | macro | `src/net_guard.c:10` | `#define NG_TEXT_MAX` |
-| `NG_V4_LEN` | macro | `src/net_guard.c:8` | `#define NG_V4_LEN` |
-| `NG_V6_LEN` | macro | `src/net_guard.c:9` | `#define NG_V6_LEN` |
-| `decides` | function | `src/net_guard.c:40` | `* IPv4 decides (:: and ::1 embed 0.0.0.0 and 0.0.0.1, both in 0/8). */ if (head_zero && (s[5] == 0 \|\| s[5] ==...` |
-| `ng_addr_is_private` | function | `src/net_guard.c:63` | `int ng_addr_is_private(int family, const unsigned char *addr, size_t len)` |
-| `ng_ci_eq` | function | `src/net_guard.c:97` | `static int ng_ci_eq(const char *a, const char *b, size_t n)` |
-| `ng_decide` | function | `src/net_guard.c:121` | `ng_verdict ng_decide(const ng_request *r, int peer_private)` |
-| `ng_host_is_ip` | function | `src/net_guard.c:91` | `int ng_host_is_ip(const char *host)` |
-| `ng_host_is_local` | function | `src/net_guard.c:107` | `int ng_host_is_local(const char *host)` |
-| `ng_parse` | function | `src/net_guard.c:71` | `static int ng_parse(const char *text, int *family, unsigned char out[NG_V6_LEN])` |
-| `ng_seg` | function | `src/net_guard.c:29` | `static unsigned ng_seg(const unsigned char a[NG_V6_LEN], int i)` |
-| `ng_text_is_private` | function | `src/net_guard.c:84` | `int ng_text_is_private(const char *ip_text)` |
-| `ng_v4_is_private` | function | `src/net_guard.c:12` | `static int ng_v4_is_private(const unsigned char o[NG_V4_LEN])` |
-| `ng_v6_is_private` | function | `src/net_guard.c:33` | `static int ng_v6_is_private(const unsigned char a[NG_V6_LEN])` |
-| `NR_MAX_HOST` | macro | `src/net_realm.c:15` | `#define NR_MAX_HOST` |
-| `ends_with_realm` | function | `src/net_realm.c:23` | `static int ends_with_realm(const char *host, size_t n, const char *suffix)` |
-| `host_of` | function | `src/net_realm.c:52` | `static int host_of(const char *url, char *out, size_t out_size)` |
-| `lower` | function | `src/net_realm.c:17` | `static char lower(char c)` |
-| `nr_classify_host` | function | `src/net_realm.c:34` | `nr_realm nr_classify_host(const char *host)` |
-| `nr_classify_url` | function | `src/net_realm.c:68` | `nr_realm nr_classify_url(const char *url)` |
-| `nr_realm_allows_http` | function | `src/net_realm.c:88` | `int nr_realm_allows_http(nr_realm r)` |
-| `nr_realm_name` | function | `src/net_realm.c:94` | `const char *nr_realm_name(nr_realm r)` |
-| `nr_route_for` | function | `src/net_realm.c:74` | `nr_route nr_route_for(const char *url, nr_config cfg)` |
-| `nr_route_name` | function | `src/net_realm.c:103` | `const char *nr_route_name(nr_route r)` |
-| `LL_FS_BASE` | macro | `src/os_sandbox.c:254` | `#define LL_FS_BASE` |
-| `OS_ALLOWED_N` | macro | `src/os_sandbox.c:50` | `#define OS_ALLOWED_N` |
-| `OS_SECCOMP_ARCH` | macro | `src/os_sandbox.c:140` | `#  define OS_SECCOMP_ARCH` |
-| `OS_SECCOMP_ARCH` | macro | `src/os_sandbox.c:142` | `#  define OS_SECCOMP_ARCH` |
-| `_GNU_SOURCE` | macro | `src/os_sandbox.c:13` | `#define _GNU_SOURCE` |
-| `excluded` | function | `src/os_sandbox.c:89` | `* intentionally excluded (they need /proc remounting and a post-unshare fork). */ int os_namespac...` |
-| `fields` | function | `src/os_sandbox.c:303` | `* long as the unknown trailing fields (net/scoped) are zero, which they are. */ int rfd =...` |
-| `headroom` | function | `src/os_sandbox.c:203` | `* wide headroom (room for ~125 allowed syscalls). */ prog[at_mmap].jt = (unsigned char)(prot_check - (at_mmap + 1));` |
-| `ll_add_rule` | function | `src/os_sandbox.c:244` | `static long ll_add_rule(int fd, enum landlock_rule_type type,                         const void ...` |
-| `ll_create_ruleset` | function | `src/os_sandbox.c:239` | `static long ll_create_ruleset(const struct landlock_ruleset_attr *attr,                          ...` |
-| `ll_handled` | function | `src/os_sandbox.c:265` | `static uint64_t ll_handled(int abi)` |
-| `ll_read_access` | function | `src/os_sandbox.c:279` | `static uint64_t ll_read_access(uint64_t handled)` |
-| `ll_restrict_self` | function | `src/os_sandbox.c:249` | `static long ll_restrict_self(int fd, uint32_t flags)` |
-| `number` | function | `src/os_sandbox.c:157` | `* number (x32/i386 on x86_64, AArch32 on aarch64). */ prog[n++] = (struct sock_filter)BPF_STMT(BPF_LD \| BPF_W \|...` |
-| `os_harden` | function | `src/os_sandbox.c:113` | `os_status os_harden(os_violation action)` |
-| `os_harden` | function | `src/os_sandbox.c:145` | `os_status os_harden(os_violation action)` |
-| `os_isolate_namespaces` | function | `src/os_sandbox.c:94` | `os_status os_isolate_namespaces(void)` |
-| `os_isolate_namespaces` | function | `src/os_sandbox.c:116` | `os_status os_isolate_namespaces(void)` |
-| `os_landlock_abi` | function | `src/os_sandbox.c:285` | `int os_landlock_abi(void)` |
-| `os_landlock_abi` | function | `src/os_sandbox.c:331` | `int os_landlock_abi(void)` |
-| `os_landlock_restrict` | function | `src/os_sandbox.c:291` | `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)` |
-| `os_landlock_restrict` | function | `src/os_sandbox.c:332` | `os_status os_landlock_restrict(const os_fs_rule *rules, size_t n)` |
-| `os_namespace_flags` | function | `src/os_sandbox.c:115` | `int os_namespace_flags(void)` |
-| `os_no_dump` | function | `src/os_sandbox.c:75` | `os_status os_no_dump(void)` |
-| `os_no_dump` | function | `src/os_sandbox.c:111` | `os_status os_no_dump(void)` |
-| `os_policy_allows` | function | `src/os_sandbox.c:52` | `int os_policy_allows(long syscall_nr)` |
-| `os_policy_allows` | function | `src/os_sandbox.c:106` | `int os_policy_allows(long syscall_nr)` |
-| `os_policy_size` | function | `src/os_sandbox.c:59` | `size_t os_policy_size(void)` |
-| `os_policy_size` | function | `src/os_sandbox.c:107` | `size_t os_policy_size(void)` |
-| `os_prot_allowed` | function | `src/os_sandbox.c:65` | `int os_prot_allowed(long syscall_nr, unsigned long prot)` |
-| `os_prot_allowed` | function | `src/os_sandbox.c:108` | `int os_prot_allowed(long syscall_nr, unsigned long prot)` |
-| `PV_ATOM_SPACE_MAX` | macro | `src/page_view.c:1376` | `#define PV_ATOM_SPACE_MAX` |
-| `PV_CELL_NESTED` | macro | `src/page_view.c:5562` | `#define PV_CELL_NESTED` |
-| `PV_CELL_RICH` | macro | `src/page_view.c:5563` | `#define PV_CELL_RICH` |
-| `PV_COLOR_TOKEN_MAX` | macro | `src/page_view.c:1231` | `#define PV_COLOR_TOKEN_MAX` |
-| `PV_CQ_NODES_MAX` | macro | `src/page_view.c:2442` | `#define PV_CQ_NODES_MAX` |
-| `PV_FONT_CHAIN_MAX` | macro | `src/page_view.c:69` | `#define PV_FONT_CHAIN_MAX` |
-| `PV_FONT_PCT_MAX` | macro | `src/page_view.c:71` | `#define PV_FONT_PCT_MAX` |
-| `PV_FONT_PCT_MIN` | macro | `src/page_view.c:70` | `#define PV_FONT_PCT_MIN` |
-| `PV_FONT_REL_MAX` | macro | `src/page_view.c:63` | `#define PV_FONT_REL_MAX` |
-| `PV_FONT_REL_MIN` | macro | `src/page_view.c:62` | `#define PV_FONT_REL_MIN` |
-| `PV_FRAME_DEF_H` | macro | `src/page_view.c:4653` | `#define PV_FRAME_DEF_H` |
-| `PV_FRAME_DEF_W` | macro | `src/page_view.c:4652` | `#define PV_FRAME_DEF_W` |
-| `PV_FRAME_URL_MAX` | macro | `src/page_view.c:4654` | `#define PV_FRAME_URL_MAX` |
-| `PV_MAX_BOXES` | macro | `src/page_view.c:1271` | `#define PV_MAX_BOXES` |
-| `PV_MAX_DIM` | macro | `src/page_view.c:57` | `#define PV_MAX_DIM` |
-| `PV_MAX_GRID_COLS` | macro | `src/page_view.c:1263` | `#define PV_MAX_GRID_COLS` |
-| `PV_MAX_INLINE_ROW_ITEMS` | macro | `src/page_view.c:3210` | `#define PV_MAX_INLINE_ROW_ITEMS` |
-| `PV_MAX_STYLE_BYTES` | macro | `src/page_view.c:5642` | `#define PV_MAX_STYLE_BYTES` |
-| `PV_NODE_MAP_INIT_CAP` | macro | `src/page_view.c:354` | `#define PV_NODE_MAP_INIT_CAP` |
-| `PV_STYLE_RESERVE_MAX` | macro | `src/page_view.c:2464` | `#define PV_STYLE_RESERVE_MAX` |
-| `PV_STYLE_RETIRE_MAX` | macro | `src/page_view.c:2398` | `#define PV_STYLE_RETIRE_MAX` |
-| `PV_TEXTLESS_DEPTH_MAX` | macro | `src/page_view.c:3612` | `#define PV_TEXTLESS_DEPTH_MAX` |
-| `URL` | function | `src/page_view.c:7003` | `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);` |
-| `_POSIX_C_SOURCE` | macro | `src/page_view.c:10` | `#define _POSIX_C_SOURCE` |
-| `acquire_page_sheet` | function | `src/page_view.c:4932` | `static shc_sheet *acquire_page_sheet(lxb_dom_node_t *root, const char *extern_css,               ...` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

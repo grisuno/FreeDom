@@ -1,12 +1,12 @@
 # `src/chrome_layout.c`
 
-> Source: [src/chrome_layout.c:1](../../src/chrome_layout.c#L1) | language `c` | coverage 64.3% | [API index](../index.md)
+> Source: [src/chrome_layout.c:1](../../src/chrome_layout.c#L1) | language `c` | coverage 70.6% | [API index](../index.md)
 
 chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md
 
 ## Contents
 
-- **Functions:** [`chl_rect_has`](#chl_rect_has), [`chl_compute`](#chl_compute), [`chl_tab_rect`](#chl_tab_rect), [`chl_tab_close_rect`](#chl_tab_close_rect), [`chl_hit`](#chl_hit), [`chl_identity_of`](#chl_identity_of), [`chl_identity_label`](#chl_identity_label), [`chl_findbar_compute`](#chl_findbar_compute), [`chl_findbar_hit`](#chl_findbar_hit)
+- **Functions:** [`chl_rect_has`](#chl_rect_has), [`chl_compute`](#chl_compute), [`chl_tab_rect`](#chl_tab_rect), [`chl_tab_close_rect`](#chl_tab_close_rect), [`chl_hit`](#chl_hit), [`chl_tab_drop_index`](#chl_tab_drop_index), [`chl_move_index`](#chl_move_index), [`chl_tab_for_digit`](#chl_tab_for_digit), [`chl_identity_of`](#chl_identity_of), [`chl_identity_label`](#chl_identity_label), [`chl_findbar_compute`](#chl_findbar_compute), [`chl_findbar_hit`](#chl_findbar_hit)
 - **Macros:** [`CHL_TAB_CLOSE_INSET`](#chl_tab_close_inset), [`CHL_URL_GAP`](#chl_url_gap), [`CHL_ID_INSET`](#chl_id_inset), [`CHL_WIDTH_MAX`](#chl_width_max)
 
 ## Call Graph
@@ -63,7 +63,7 @@ int chl_rect_has(chl_rect r, double x, double y)
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`chl_rect_has`](#chl_rect_has) (include/chrome_layout.h:78).
+> **Inherited:** Documentation from [`chl_rect_has`](#chl_rect_has) (include/chrome_layout.h:85).
 
 *Called by:* [`chl_findbar_hit`](#chl_findbar_hit), [`chl_hit`](#chl_hit)
 
@@ -99,7 +99,7 @@ chl_status chl_compute(double width, int csd, int tab_count, int active, chl_lay
 
 ### `chl_tab_rect`
 
-`function` | [src/chrome_layout.c:96](../../src/chrome_layout.c#L96)
+`function` | [src/chrome_layout.c:112](../../src/chrome_layout.c#L112)
 
 ```c
 int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)
@@ -119,7 +119,7 @@ Tab i's rectangle / its close button.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`chl_tab_rect`](#chl_tab_rect) (include/chrome_layout.h:74).
+> **Inherited:** Documentation from [`chl_tab_rect`](#chl_tab_rect) (include/chrome_layout.h:81).
 
 *Called by:* [`chl_hit`](#chl_hit), [`chl_tab_close_rect`](#chl_tab_close_rect)
 
@@ -129,7 +129,7 @@ Tab i's rectangle / its close button.
 
 ### `chl_tab_close_rect`
 
-`function` | [src/chrome_layout.c:106](../../src/chrome_layout.c#L106)
+`function` | [src/chrome_layout.c:122](../../src/chrome_layout.c#L122)
 
 ```c
 int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)
@@ -155,7 +155,7 @@ int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)
 
 ### `chl_hit`
 
-`function` | [src/chrome_layout.c:116](../../src/chrome_layout.c#L116)
+`function` | [src/chrome_layout.c:132](../../src/chrome_layout.c#L132)
 
 ```c
 chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)
@@ -176,11 +176,89 @@ chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)
 
 ---
 
+<a id="chl_tab_drop_index"></a>
+
+### `chl_tab_drop_index`
+
+`function` | [src/chrome_layout.c:165](../../src/chrome_layout.c#L165)
+
+```c
+int chl_tab_drop_index(const chl_layout *l, double x)
+```
+
+Absolute index of the visible tab slot under x (clamped to the visible tabs): where a dragged tab dropped at x lands. -1 if l is NULL or no tab is visible.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `l` | `chl_layout *` |  |  |
+| `x` | `double` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`chl_tab_drop_index`](#chl_tab_drop_index) (include/chrome_layout.h:93).
+
+---
+
+<a id="chl_move_index"></a>
+
+### `chl_move_index`
+
+`function` | [src/chrome_layout.c:175](../../src/chrome_layout.c#L175)
+
+```c
+int chl_move_index(int i, int from, int to)
+```
+
+Where element i ends up after the element at `from` moves to [`to`](include.render_doc.h.md#rd_block-to) (the others shift to close the gap and open the slot).
+
+The single remapping for every index the GUI keeps.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `i` | `int` |  |  |
+| `from` | `int` |  |  |
+| `to` | `int` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`chl_move_index`](#chl_move_index) (include/chrome_layout.h:97).
+
+---
+
+<a id="chl_tab_for_digit"></a>
+
+### `chl_tab_for_digit`
+
+`function` | [src/chrome_layout.c:182](../../src/chrome_layout.c#L182)
+
+```c
+int chl_tab_for_digit(int digit, int tab_count)
+```
+
+Ctrl+<digit>: 1..8 select that tab, 9 the last one (Firefox). -1 when there is none.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `digit` | `int` |  |  |
+| `tab_count` | `int` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`chl_tab_for_digit`](#chl_tab_for_digit) (include/chrome_layout.h:100).
+
+---
+
 <a id="chl_identity_of"></a>
 
 ### `chl_identity_of`
 
-`function` | [src/chrome_layout.c:185](../../src/chrome_layout.c#L185)
+`function` | [src/chrome_layout.c:228](../../src/chrome_layout.c#L228)
 
 ```c
 chl_identity chl_identity_of(const char *url, int transport_known, int downgrade, int operator_insecure)
@@ -203,7 +281,7 @@ chl_identity chl_identity_of(const char *url, int transport_known, int downgrade
 
 ### `chl_identity_label`
 
-`function` `const` | [src/chrome_layout.c:209](../../src/chrome_layout.c#L209)
+`function` `const` | [src/chrome_layout.c:252](../../src/chrome_layout.c#L252)
 
 ```c
 const char *chl_identity_label(chl_identity id)
@@ -219,7 +297,7 @@ Short English label for the badge (static, never NULL).
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`chl_identity_label`](#chl_identity_label) (include/chrome_layout.h:133).
+> **Inherited:** Documentation from [`chl_identity_label`](#chl_identity_label) (include/chrome_layout.h:151).
 
 *Calls:* [`allowlist`](include.js_policy.h.md#allowlist), [`file`](src.text_shape.c.md#file)
 
@@ -229,7 +307,7 @@ Short English label for the badge (static, never NULL).
 
 ### `chl_findbar_compute`
 
-`function` | [src/chrome_layout.c:226](../../src/chrome_layout.c#L226)
+`function` | [src/chrome_layout.c:269](../../src/chrome_layout.c#L269)
 
 ```c
 chl_status chl_findbar_compute(double width, double height, chl_findbar *out)
@@ -257,7 +335,7 @@ A narrow window shrinks the count, then the field.
 
 ### `chl_findbar_hit`
 
-`function` | [src/chrome_layout.c:262](../../src/chrome_layout.c#L262)
+`function` | [src/chrome_layout.c:305](../../src/chrome_layout.c#L305)
 
 ```c
 chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)

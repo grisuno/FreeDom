@@ -1,6 +1,19 @@
 # API (page 13 of 13)
 Previous: [API_p12.md](API_p12.md)
 
+## src/text_case.c
+Depends on: `include/css.h`, `include/text_case.h`
+- `pair_parity` (function) `src/text_case.c:8` `static int pair_parity(uint32_t cp)` -- Latin Extended-A and the Cyrillic historic block pair letters on adjacent code points, uppercase first.
+- `tc_upper` (function) `src/text_case.c:18` `uint32_t tc_upper(uint32_t cp)`
+- `tc_lower` (function) `src/text_case.c:37` `uint32_t tc_lower(uint32_t cp)`
+- `tc_is_lower` (function) `src/text_case.c:54` `int tc_is_lower(uint32_t cp)`
+- `utf8_decode` (function) `src/text_case.c:61` `static size_t utf8_decode(const unsigned char *s, size_t n, uint32_t *cp)` -- Decodes one UTF-8 code point of s[0,n) into *cp.
+- `utf8_put` (function) `src/text_case.c:79` `static void utf8_put(uint32_t cp, size_t len, unsigned char *out)` -- if ((c >> 5) == 0x6) { if (n < 2 || (s[1] & 0xC0) != 0x80) return 0; cp = ((c & 0x1Fu) << 6) | (s[1] & 0x3Fu)...
+- `utf8_len_of` (function) `src/text_case.c:91` `static size_t utf8_len_of(uint32_t cp)`
+- `tc_transform` (function) `src/text_case.c:95` `size_t tc_transform(const char *s, size_t n, int transform, int word_start,
+                    c...`
+- `tc_smallcaps_runs` (function) `src/text_case.c:117` `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap)`
+
 ## src/text_shape.c
 Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
 - `entry_opsz_for` (function) `src/text_shape.c:57` `static int entry_opsz_for(const tsh_entry *e, double px)` -- The optical size a face is set at for a font size of px (CSS Fonts 4 section 8.1, * font-optical-sizing:auto): the...
@@ -142,6 +155,26 @@ static int looks_like_host(const c...`
 - `copy_bounded` (function) `src/url.c:645` `static url_status copy_bounded(char *out, size_t outsz, const char *a, size_t alen,
              ...`
 - `url_history_target` (function) `src/url.c:654` `url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz)`
+
+## src/video_controls.c
+Depends on: `include/video_controls.h`
+- `finite4` (function) `src/video_controls.c:7` `static int finite4(double a, double b, double c, double d)`
+- `in_rect` (function) `src/video_controls.c:11` `static int in_rect(const vcl_rect *r, double px, double py)`
+- `vcl_layout` (function) `src/video_controls.c:15` `int vcl_layout(double x, double y, double w, double h, vcl_geom *g)`
+- `vcl_clamp_frac` (function) `src/video_controls.c:34` `double vcl_clamp_frac(double f)`
+- `vcl_hit` (function) `src/video_controls.c:39` `vcl_hit_kind vcl_hit(const vcl_geom *g, const vcl_rect *video, double px, double py,
+            ...`
+- `vcl_seg_duration` (function) `src/video_controls.c:54` `double vcl_seg_duration(double d)`
+- `vcl_total` (function) `src/video_controls.c:59` `double vcl_total(const hls_playlist *pl)`
+- `vcl_segment_at` (function) `src/video_controls.c:66` `size_t vcl_segment_at(const hls_playlist *pl, double t, double *start)`
+- `vcl_segment_start` (function) `src/video_controls.c:82` `double vcl_segment_start(const hls_playlist *pl, size_t idx)`
+- `vcl_position` (function) `src/video_controls.c:90` `double vcl_position(double base_s, int64_t pts0_us, int64_t pts_us, double total)`
+- `vcl_format_time` (function) `src/video_controls.c:99` `size_t vcl_format_time(double seconds, char *buf, size_t cap)`
+
+## src/video_pick.c
+Depends on: `include/video_pick.h`
+- `vpk_first_video` (function) `src/video_pick.c:15` `const char *vpk_first_video(const pv_view *v)`
+- `vpk_for_frame` (function) `src/video_pick.c:26` `const char *vpk_for_frame(const pv_view *frame_view, const char *top_video)`
 
 ## src/web_storage.c
 Depends on: `include/web_storage.h`
@@ -297,8 +330,8 @@ Depends on: `tools/guitime.py`
 ## tools/guitime.py
 Imported by: `tools/guiscroll.py`
 - `start_display` (function) `tools/guitime.py:34` `def start_display(workdir)` -- Starts Xvfb and a nested weston; returns (env, processes) or None when unavailable.
-- `one_run` (function) `tools/guitime.py:65` `def one_run(binary, page, env, hosts_dir, tmp)`
-- `main` (function) `tools/guitime.py:94` `def main()`
+- `one_run` (function) `tools/guitime.py:67` `def one_run(binary, page, env, hosts_dir, tmp)`
+- `main` (function) `tools/guitime.py:96` `def main()`
 
 ## tools/mutate.py
 - `line_sites` (function) `tools/mutate.py:41` `def line_sites(text)`

@@ -63,12 +63,11 @@ This community groups 12 file(s) rooted at `include` with dominant language c (c
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
+- [EXTRACTED] depends_on community 0 <-> 7 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.
 
 ## Risks
 
 - [layer strict] `tests/test_svg_render.c` (testing) -> `include/svg_render.h` (presentation)
-- [dataflow DEAD_STORE] `src/image_decode.c:224` `img_decode_jpeg` `dst`: `dst` assigned at line 224 but never read afterwards.
 
 ## Open Questions
 

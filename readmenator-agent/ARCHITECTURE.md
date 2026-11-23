@@ -1,5 +1,5 @@
-# Architecture (page 1 of 2)
-Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
+# Architecture (page 1 of 3)
+Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md), [ARCHITECTURE_p3.md](ARCHITECTURE_p3.md)
 
 ## Internal Dependencies
 
@@ -38,6 +38,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/link_nav.h`
 - `gui/browser_ui.c` -> `include/mask_cache.h`
 - `gui/browser_ui.c` -> `include/media_decoder.h`
+- `gui/browser_ui.c` -> `include/nav_token.h`
 - `gui/browser_ui.c` -> `include/net_realm.h`
 - `gui/browser_ui.c` -> `include/pdf_export.h`
 - `gui/browser_ui.c` -> `include/prefetch.h`
@@ -58,6 +59,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/tls_impersonate.h`
 - `gui/browser_ui.c` -> `include/ui.h`
 - `gui/browser_ui.c` -> `include/url.h`
+- `gui/browser_ui.c` -> `include/video_controls.h`
+- `gui/browser_ui.c` -> `include/video_pick.h`
 - `gui/browser_ui.c` -> `include/web_storage.h`
 - `gui/browser_ui.c` -> `include/webcaps.h`
 - `gui/browser_ui.c` -> `include/webfont.h`
@@ -67,6 +70,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `gui/browser_ui.c` -> `include/zoom.h`
 - `gui/browser_ui_internal.h` -> `include/chrome_layout.h`
 - `gui/browser_ui_internal.h` -> `include/freedom_config.h`
+- `gui/browser_ui_internal.h` -> `include/video_controls.h`
 - `gui/bui_chrome.c` -> `gui/browser_ui_internal.h`
 - `gui/bui_mask_img.c` -> `gui/browser_ui_internal.h`
 - `gui/bui_mask_img.c` -> `include/box_style.h`
@@ -138,6 +142,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `include/tab.h` -> `include/js_geom.h`
 - `include/tab.h` -> `include/page_view.h`
 - `include/ui.h` -> `include/prefs.h`
+- `include/video_controls.h` -> `include/hls.h`
+- `include/video_pick.h` -> `include/page_view.h`
 - `include/webcaps.h` -> `include/js_policy.h`
 - `include/webcaps.h` -> `include/render_policy.h`
 - `include/ws_hub.h` -> `include/secure_fetch.h`
@@ -277,6 +283,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/freedom.c` -> `include/webfont_load.h`
 - `src/freedom.c` -> `include/wl_display.h`
 - `src/hls.c` -> `include/hls.h`
+- `src/hls.c` -> `include/request_policy.h`
 - `src/host_conf.c` -> `include/host_conf.h`
 - `src/hostblock.c` -> `include/hostblock.h`
 - `src/hostblock.c` -> `include/util.h`
@@ -358,6 +365,7 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/mask_cache.c` -> `include/mask_cache.h`
 - `src/media_decoder.c` -> `include/media_decoder.h`
 - `src/media_decoder.c` -> `include/util.h`
+- `src/nav_token.c` -> `include/nav_token.h`
 - `src/net_guard.c` -> `include/net_guard.h`
 - `src/net_realm.c` -> `include/net_realm.h`
 - `src/os_sandbox.c` -> `include/os_sandbox.h`
@@ -465,6 +473,8 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `src/tls_impersonate.c` -> `include/tls_impersonate.h`
 - `src/ui_layout.c` -> `include/ui.h`
 - `src/url.c` -> `include/url.h`
+- `src/video_controls.c` -> `include/video_controls.h`
+- `src/video_pick.c` -> `include/video_pick.h`
 - `src/web_storage.c` -> `include/web_storage.h`
 - `src/webcaps.c` -> `include/webcaps.h`
 - `src/webfont.c` -> `include/data_url.h`
@@ -486,15 +496,5 @@ Pages: [ARCHITECTURE.md](ARCHITECTURE.md), [ARCHITECTURE_p2.md](ARCHITECTURE_p2.
 - `tests/test_box_tree.c` -> `include/box_tree.h`
 - `tests/test_box_tree.c` -> `include/css.h`
 - `tests/test_box_tree.c` -> `include/page_view.h`
-- `tests/test_browser.c` -> `include/browser.h`
-- `tests/test_cached_fetch.c` -> `include/cached_fetch.h`
-- `tests/test_chrome_layout.c` -> `include/chrome_layout.h`
-- `tests/test_compositor.c` -> `include/compositor.h`
-- `tests/test_compositor.c` -> `include/css.h`
-- `tests/test_css.c` -> `include/css.h`
-- `tests/test_css.c` -> `include/css_select.h`
-- `tests/test_css.c` -> `include/css_vars.h`
-- `tests/test_css.c` -> `include/flex_layout.h`
-- `tests/test_css.c` -> `include/webfont.h`
 
 Next: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)

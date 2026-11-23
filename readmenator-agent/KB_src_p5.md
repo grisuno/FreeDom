@@ -1,6 +1,32 @@
 # Subsystem: src (page 5 of 10)
 Previous: [KB_src_p4.md](KB_src_p4.md)
 
+## src/hostblock.c
+- Doc: table_probe: Finds the slot for key (length klen) in t, which must have a free slot.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `hb_table` (struct, line 24)
+  - `hb_set` (struct, line 30)
+  - `table_probe` (function, line 38) `static size_t table_probe(const hb_table *t, const char *key, size_t klen)`
+  - `table_grow` (function, line 49) `static int table_grow(hb_table *t, size_t newcap)`
+  - `table_insert` (function, line 71) `static int table_insert(hb_table *t, const char *key, size_t klen)`
+  - `table_contains` (function, line 92) `static int table_contains(const hb_table *t, const char *key)`
+  - `table_free` (function, line 98) `static void table_free(hb_table *t)`
+  - `lower` (function, line 107) `static char lower(char c)`
+  - `is_ip_token` (function, line 113) `static int is_ip_token(const char *s, size_t n)`
+  - `is_domain_char` (function, line 122) `static int is_domain_char(char c)`
+  - `hb_new` (function, line 144) `hb_set *hb_new(void)`
+  - `hb_free` (function, line 149) `void hb_free(hb_set *s)`
+  - `hb_load` (function, line 156) `hb_status hb_load(hb_set *s, const char *text, hb_list list)`
+  - `hb_check` (function, line 193) `hb_decision hb_check(const hb_set *s, const char *host)`
+  - `hb_check_subresource` (function, line 218) `hb_decision hb_check_subresource(const hb_set *s, const char *host, int page_trusted)`
+  - `hb_is_allowlisted` (function, line 223) `int hb_is_allowlisted(const hb_set *s, const char *host)`
+  - `hb_count` (function, line 243) `size_t hb_count(const hb_set *s, hb_list list)`
+  - `HB_MAX_HOST` (macro, line 19) `#define HB_MAX_HOST`
+  - `HB_INIT_CAP` (macro, line 20) `#define HB_INIT_CAP`
+- Depends on: `include/hostblock.h`, `include/util.h`
+
 ## src/hostedit.c
 - Doc: valid_host: #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c...
 - Layer: utility
@@ -368,14 +394,16 @@ static int cb_append(char **bu...`
 - Symbols:
   - `registration` (function, line 482) `* registration (options, attributeFilter, subtree) and delivered in one microtask. An
  * observer...`
-  - `run` (function, line 1301) `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
-  - `jdx_install` (function, line 1366) `int jdx_install(JSContext *ctx)`
-  - `jd_install_repl_api` (function, line 1375) `jd_status jd_install_repl_api(js_context *ctx)`
-  - `jd_set_repl_css` (function, line 1383) `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
-  - `jd_install_geolocation` (function, line 1396) `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
-  - `jd_install_indexeddb` (function, line 1415) `jd_status jd_install_indexeddb(js_context *ctx)`
+  - `run` (function, line 1348) `static int run(JSContext *ctx, const char *src, size_t len, const char *name)`
+  - `order` (function, line 1363) `* run in insertion order (HTML's "list of scripts that will execute in order as soon as
+ * possib...`
+  - `jdx_install` (function, line 1429) `int jdx_install(JSContext *ctx)`
+  - `jd_install_repl_api` (function, line 1438) `jd_status jd_install_repl_api(js_context *ctx)`
+  - `jd_set_repl_css` (function, line 1446) `jd_status jd_set_repl_css(js_context *ctx, const char *css, size_t len)`
+  - `jd_install_geolocation` (function, line 1459) `jd_status jd_install_geolocation(js_context *ctx, double lat, double lon, double accuracy_m)`
+  - `jd_install_indexeddb` (function, line 1478) `jd_status jd_install_indexeddb(js_context *ctx)`
   - `identity` (function, line 105) `* identity (host/shadowRoot/mode preserved) but every mutation ALSO mirrors * into the host's light DOM via dom.*...`
-  - `cancels` (function, line 954) `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);`
+  - `cancels` (function, line 1001) `* toggled BEFORE the dispatch and restored when a listener cancels (legacy pre-activation);`
 - Depends on: `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_ext.h`, `src/js_native_internal.h`
 
 ## src/js_dom_ext.h
@@ -413,82 +441,6 @@ static int cb_append(char **bu...`
                            char *out, si...`
   - `jd_process_iframes` (function, line 295) `void jd_process_iframes(js_context *ctx, dom_index *idx,
                         jd_fetch_fn fn, ...`
-  - `_GNU_SOURCE` (macro, line 6) `#define _GNU_SOURCE`
-- Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`, `src/js_native_internal.h`
-
-## src/js_env.c
-- Doc: m_perf_now: performance.now: coarsened elapsed since the origin bound at install time, so * it...
-- Layer: infrastructure
-- Language: c
-- Symbols:
-  - `wall_clock_ms` (function, line 37) `static uint64_t wall_clock_ms(void)`
-  - `monotonic_ms` (function, line 43) `static double monotonic_ms(void)`
-  - `m_date_now` (function, line 51) `static JSValue m_date_now(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-  - `m_perf_now` (function, line 59) `static JSValue m_perf_now(JSContext *ctx, JSValueConst this_val,
-                          int ar...`
-  - `m_date_now_exact` (function, line 73) `static JSValue m_date_now_exact(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_perf_now_exact` (function, line 79) `static JSValue m_perf_now_exact(JSContext *ctx, JSValueConst this_val,
-                          ...`
-  - `m_empty_array` (function, line 99) `static JSValue m_empty_array(JSContext *ctx, JSValueConst this_val,
-                             ...`
-  - `m_get_random_values` (function, line 117) `static JSValue m_get_random_values(JSContext *ctx, JSValueConst this_val,
-                       ...`
-  - `m_random_uuid` (function, line 147) `static JSValue m_random_uuid(JSContext *ctx, JSValueConst this_val,
-                             ...`
-  - `m_subtle_null` (function, line 164) `static JSValue m_subtle_null(JSContext *ctx, JSValueConst this_val,
-                             ...`
-  - `reject_named` (function, line 173) `static JSValue reject_named(JSContext *ctx, const char *name, const char *msg)`
-  - `m_subtle_digest` (function, line 190) `static JSValue m_subtle_digest(JSContext *ctx, JSValueConst this_val,
-                           ...`
-  - `def_val` (function, line 243) `static int def_val(JSContext *ctx, JSValueConst obj, const char *name, JSValue v)`
-  - `def_str` (function, line 249) `static int def_str(JSContext *ctx, JSValueConst obj, const char *name, const char *s)`
-  - `def_int` (function, line 253) `static int def_int(JSContext *ctx, JSValueConst obj, const char *name, int32_t n)`
-  - `def_fn` (function, line 257) `static int def_fn(JSContext *ctx, JSValueConst obj, const char *name,
-                  JSCFuncti...`
-  - `build_languages` (function, line 264) `static JSValue build_languages(JSContext *ctx, const char *langs)`
-  - `m_captured` (function, line 299) `static JSValue m_captured(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv,
-  ...`
-  - `promote_to_getters` (function, line 307) `static int promote_to_getters(JSContext *ctx, JSValueConst vals, JSValueConst proto)`
-  - `build_navigator` (function, line 332) `static int build_navigator(JSContext *ctx, JSValueConst global, const char *ua_override,
-        ...`
-  - `build_screen` (function, line 424) `static int build_screen(JSContext *ctx, JSValueConst global, int w, int h)`
-  - `build_crypto` (function, line 468) `static int build_crypto(JSContext *ctx, JSValueConst global)`
-  - `build_perf_timing` (function, line 496) `static int build_perf_timing(JSContext *ctx, JSValueConst perf)`
-  - `build_perf_navigation` (function, line 510) `static int build_perf_navigation(JSContext *ctx, JSValueConst perf)`
-  - `build_performance` (function, line 522) `static int build_performance(JSContext *ctx, JSValueConst global, int exact)`
-  - `override_date_now` (function, line 554) `static int override_date_now(JSContext *ctx, JSValueConst global, int exact)`
-  - `make_readback` (function, line 598) `static JSValue make_readback(JSContext *ctx, uint64_t key)`
-  - `build_readback_obj` (function, line 606) `static int build_readback_obj(JSContext *ctx, JSValueConst global,
-                              ...`
-  - `je_install` (function, line 619) `je_status je_install(js_context *ctx, int screen_w, int screen_h)`
-  - `je_install_identity` (function, line 623) `je_status je_install_identity(js_context *ctx, int screen_w, int screen_h,
-                      ...`
-  - `je_install_identity_trusted` (function, line 628) `je_status je_install_identity_trusted(js_context *ctx, int screen_w, int screen_h,
-              ...`
-  - `je_install_canvas` (function, line 649) `je_status je_install_canvas(js_context *ctx, uint64_t readback_key)`
-  - `primitives` (function, line 6) `* the pure anti_fp primitives (one audited source of normalized constants);`
-  - `_POSIX_C_SOURCE` (macro, line 17) `#define _POSIX_C_SOURCE`
-  - `PERF_ORIGIN_EPOCH` (macro, line 466) `#define PERF_ORIGIN_EPOCH`
-- Depends on: `include/anti_fp.h`, `include/js_env.h`, `include/js_sandbox.h`, `include/sha2.h`, `src/js_native_internal.h`
-
-## src/js_events.c
-- Doc: jd_eval_default_action: Runs one engine event-dispatch expression and maps its result to the C...
-- Layer: infrastructure
-- Language: c
-- Symbols:
-  - `jd_click_state` (struct, line 26)
-  - `jd_click_state_new` (function, line 30) `jd_click_state *jd_click_state_new(void)`
-  - `jd_click_state_free` (function, line 35) `void jd_click_state_free(jd_click_state *s)`
-  - `jd_install_events` (function, line 39) `jd_status jd_install_events(js_context *ctx, jd_click_state *state)`
-  - `jd_eval_default_action` (function, line 53) `static int jd_eval_default_action(JSContext *jsctx, const char *src, size_t n,
-                  ...`
-  - `jd_fire_click` (function, line 67) `int jd_fire_click(js_context *ctx, dom_node_id node_id)`
-  - `jd_fire_submit` (function, line 79) `int jd_fire_submit(js_context *ctx, dom_node_id form_node_id)`
-  - `jd_escape_js_str` (function, line 92) `static size_t jd_escape_js_str(const char *src, char *dst, size_t dstsz)`
-  - `jd_fire_mouse_event` (function, line 164) `int jd_fire_mouse_event(js_context *ctx, dom_node_id node_id,
-                        const char ...`
   - `_GNU_SOURCE` (macro, line 6) `#define _GNU_SOURCE`
 - Depends on: `include/dom.h`, `include/freebug.h`, `include/html_parse.h`, `include/js_dom.h`, `include/js_sandbox.h`, `src/js_dom_internal.h`, `src/js_native_internal.h`
 

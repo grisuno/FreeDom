@@ -1,14 +1,14 @@
 # `include/chrome_layout.h`
 
-> Source: [include/chrome_layout.h:1](../../include/chrome_layout.h#L1) | language `h` | coverage 41.9% | [API index](../index.md)
+> Source: [include/chrome_layout.h:1](../../include/chrome_layout.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`chl_rect`](#chl_rect), [`chl_layout`](#chl_layout), [`chl_findbar`](#chl_findbar)
 - **Enums:** [`chl_status`](#chl_status), [`chl_part`](#chl_part), [`chl_find_part`](#chl_find_part), [`chl_identity`](#chl_identity)
 - **Type Aliases:** [`h`](#h), [`width`](#width), [`close`](#close)
-- **Functions:** [`chl_tab_rect`](#chl_tab_rect), [`chl_tab_close_rect`](#chl_tab_close_rect), [`chl_rect_has`](#chl_rect_has), [`chl_identity_label`](#chl_identity_label)
-- **Macros:** [`CHL_PAD`](#chl_pad), [`CHL_TAB_TOP_GAP`](#chl_tab_top_gap), [`CHL_TAB_MIN_W`](#chl_tab_min_w), [`CHL_TAB_MAX_W`](#chl_tab_max_w), [`CHL_TAB_GAP`](#chl_tab_gap), [`CHL_TAB_CLOSE`](#chl_tab_close), [`CHL_TAB_CLOSE_MIN_W`](#chl_tab_close_min_w), [`CHL_NEWTAB_W`](#chl_newtab_w), [`CHL_WIN_BTN_W`](#chl_win_btn_w), [`CHL_DRAG_MIN`](#chl_drag_min), [`CHL_BTN`](#chl_btn), [`CHL_BTN_GAP`](#chl_btn_gap), [`CHL_ID_W`](#chl_id_w), [`CHL_FIND_FIELD_W`](#chl_find_field_w), [`CHL_FIND_BTN`](#chl_find_btn), [`CHL_FIND_COUNT_W`](#chl_find_count_w)
+- **Functions:** [`chl_tab_rect`](#chl_tab_rect), [`chl_tab_close_rect`](#chl_tab_close_rect), [`chl_rect_has`](#chl_rect_has), [`chl_tab_drop_index`](#chl_tab_drop_index), [`chl_move_index`](#chl_move_index), [`chl_tab_for_digit`](#chl_tab_for_digit), [`chl_identity_label`](#chl_identity_label)
+- **Macros:** [`CHL_PAD`](#chl_pad), [`CHL_TAB_TOP_GAP`](#chl_tab_top_gap), [`CHL_TAB_MIN_W`](#chl_tab_min_w), [`CHL_TAB_MAX_W`](#chl_tab_max_w), [`CHL_TAB_GAP`](#chl_tab_gap), [`CHL_TAB_CLOSE`](#chl_tab_close), [`CHL_TAB_CLOSE_MIN_W`](#chl_tab_close_min_w), [`CHL_NEWTAB_W`](#chl_newtab_w), [`CHL_WIN_BTN_W`](#chl_win_btn_w), [`CHL_DRAG_MIN`](#chl_drag_min), [`CHL_BTN`](#chl_btn), [`CHL_BTN_GAP`](#chl_btn_gap), [`CHL_ID_W`](#chl_id_w), [`CHL_MORE_W`](#chl_more_w), [`CHL_DRAG_THRESHOLD`](#chl_drag_threshold), [`CHL_FIND_FIELD_W`](#chl_find_field_w), [`CHL_FIND_BTN`](#chl_find_btn), [`CHL_FIND_COUNT_W`](#chl_find_count_w)
 
 ## Type Diagram
 
@@ -43,7 +43,7 @@ classDiagram
 
 ### `chl_rect`
 
-`struct` | [include/chrome_layout.h:34](../../include/chrome_layout.h#L34)
+`struct` | [include/chrome_layout.h:36](../../include/chrome_layout.h#L36)
 
 ```c
 typedef struct chl_rect { double x, y, w, h; } chl_rect;
@@ -55,7 +55,7 @@ typedef struct chl_rect { double x, y, w, h; } chl_rect;
 
 ### `chl_layout`
 
-`struct` | [include/chrome_layout.h:54](../../include/chrome_layout.h#L54)
+`struct` | [include/chrome_layout.h:58](../../include/chrome_layout.h#L58)
 
 ```c
 typedef struct chl_layout
@@ -67,7 +67,7 @@ typedef struct chl_layout
 
 ### `chl_findbar`
 
-`struct` | [include/chrome_layout.h:101](../../include/chrome_layout.h#L101)
+`struct` | [include/chrome_layout.h:119](../../include/chrome_layout.h#L119)
 
 ```c
 typedef struct chl_findbar
@@ -81,7 +81,7 @@ typedef struct chl_findbar
 
 ### `chl_status`
 
-`enum` | [include/chrome_layout.h:32](../../include/chrome_layout.h#L32)
+`enum` | [include/chrome_layout.h:34](../../include/chrome_layout.h#L34)
 
 ```c
 typedef enum chl_status { CHL_OK = 0, CHL_EINVAL = -1 } chl_status;
@@ -93,7 +93,7 @@ typedef enum chl_status { CHL_OK = 0, CHL_EINVAL = -1 } chl_status;
 
 ### `chl_part`
 
-`enum` | [include/chrome_layout.h:36](../../include/chrome_layout.h#L36)
+`enum` | [include/chrome_layout.h:38](../../include/chrome_layout.h#L38)
 
 ```c
 typedef enum chl_part
@@ -105,7 +105,7 @@ typedef enum chl_part
 
 ### `chl_find_part`
 
-`enum` | [include/chrome_layout.h:92](../../include/chrome_layout.h#L92)
+`enum` | [include/chrome_layout.h:110](../../include/chrome_layout.h#L110)
 
 ```c
 typedef enum chl_find_part
@@ -117,7 +117,7 @@ typedef enum chl_find_part
 
 ### `chl_identity`
 
-`enum` | [include/chrome_layout.h:114](../../include/chrome_layout.h#L114)
+`enum` | [include/chrome_layout.h:132](../../include/chrome_layout.h#L132)
 
 ```c
 typedef enum chl_identity
@@ -131,7 +131,7 @@ typedef enum chl_identity
 
 ### `h`
 
-`type_alias` | [include/chrome_layout.h:33](../../include/chrome_layout.h#L33)
+`type_alias` | [include/chrome_layout.h:35](../../include/chrome_layout.h#L35)
 
 ```c
 typedef struct chl_rect { double x, y, w, h;
@@ -143,7 +143,7 @@ typedef struct chl_rect { double x, y, w, h;
 
 ### `width`
 
-`type_alias` | [include/chrome_layout.h:53](../../include/chrome_layout.h#L53)
+`type_alias` | [include/chrome_layout.h:57](../../include/chrome_layout.h#L57)
 
 ```c
 typedef struct chl_layout { double width;
@@ -155,7 +155,7 @@ typedef struct chl_layout { double width;
 
 ### `close`
 
-`type_alias` | [include/chrome_layout.h:100](../../include/chrome_layout.h#L100)
+`type_alias` | [include/chrome_layout.h:118](../../include/chrome_layout.h#L118)
 
 ```c
 typedef struct chl_findbar { chl_rect bar, field, prev, next, count, close;
@@ -169,7 +169,7 @@ typedef struct chl_findbar { chl_rect bar, field, prev, next, count, close;
 
 ### `chl_tab_rect`
 
-`function` | [include/chrome_layout.h:74](../../include/chrome_layout.h#L74)
+`function` | [include/chrome_layout.h:81](../../include/chrome_layout.h#L81)
 
 ```c
 int chl_tab_rect(const chl_layout *l, int i, chl_rect *r);
@@ -195,7 +195,7 @@ Tab i's rectangle / its close button.
 
 ### `chl_tab_close_rect`
 
-`function` | [include/chrome_layout.h:75](../../include/chrome_layout.h#L75)
+`function` | [include/chrome_layout.h:82](../../include/chrome_layout.h#L82)
 
 ```c
 int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r);
@@ -217,7 +217,7 @@ int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r);
 
 ### `chl_rect_has`
 
-`function` | [include/chrome_layout.h:78](../../include/chrome_layout.h#L78)
+`function` | [include/chrome_layout.h:85](../../include/chrome_layout.h#L85)
 
 ```c
 int chl_rect_has(chl_rect r, double x, double y);
@@ -237,11 +237,83 @@ int chl_rect_has(chl_rect r, double x, double y);
 
 ---
 
+<a id="chl_tab_drop_index"></a>
+
+### `chl_tab_drop_index`
+
+`function` | [include/chrome_layout.h:93](../../include/chrome_layout.h#L93)
+
+```c
+int chl_tab_drop_index(const chl_layout *l, double x);
+```
+
+Absolute index of the visible tab slot under x (clamped to the visible tabs): where a dragged tab dropped at x lands. -1 if l is NULL or no tab is visible.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `l` | `chl_layout *` |  |  |
+| `x` | `double` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="chl_move_index"></a>
+
+### `chl_move_index`
+
+`function` | [include/chrome_layout.h:97](../../include/chrome_layout.h#L97)
+
+```c
+int chl_move_index(int i, int from, int to);
+```
+
+Where element i ends up after the element at `from` moves to [`to`](include.render_doc.h.md#rd_block-to) (the others shift to close the gap and open the slot).
+
+The single remapping for every index the GUI keeps.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `i` | `int` |  |  |
+| `from` | `int` |  |  |
+| `to` | `int` |  |  |
+
+**Returns:** `int`
+
+---
+
+<a id="chl_tab_for_digit"></a>
+
+### `chl_tab_for_digit`
+
+`function` | [include/chrome_layout.h:100](../../include/chrome_layout.h#L100)
+
+```c
+int chl_tab_for_digit(int digit, int tab_count);
+```
+
+Ctrl+<digit>: 1..8 select that tab, 9 the last one (Firefox). -1 when there is none.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `digit` | `int` |  |  |
+| `tab_count` | `int` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="chl_identity_label"></a>
 
 ### `chl_identity_label`
 
-`function` `const` | [include/chrome_layout.h:133](../../include/chrome_layout.h#L133)
+`function` `const` | [include/chrome_layout.h:151](../../include/chrome_layout.h#L151)
 
 ```c
 const char *chl_identity_label(chl_identity id);
@@ -433,11 +505,39 @@ round toolbar button diameter
 
 ---
 
+<a id="chl_more_w"></a>
+
+### `CHL_MORE_W`
+
+`macro` | [include/chrome_layout.h:31](../../include/chrome_layout.h#L31)
+
+```c
+#define CHL_MORE_W
+```
+
+identity badge slot at the pill's left
+
+---
+
+<a id="chl_drag_threshold"></a>
+
+### `CHL_DRAG_THRESHOLD`
+
+`macro` | [include/chrome_layout.h:32](../../include/chrome_layout.h#L32)
+
+```c
+#define CHL_DRAG_THRESHOLD
+```
+
+hidden-tabs indicator at each end of an overflowing strip
+
+---
+
 <a id="chl_find_field_w"></a>
 
 ### `CHL_FIND_FIELD_W`
 
-`macro` | [include/chrome_layout.h:87](../../include/chrome_layout.h#L87)
+`macro` | [include/chrome_layout.h:105](../../include/chrome_layout.h#L105)
 
 ```c
 #define CHL_FIND_FIELD_W
@@ -451,7 +551,7 @@ bar height
 
 ### `CHL_FIND_BTN`
 
-`macro` | [include/chrome_layout.h:89](../../include/chrome_layout.h#L89)
+`macro` | [include/chrome_layout.h:107](../../include/chrome_layout.h#L107)
 
 ```c
 #define CHL_FIND_BTN
@@ -463,7 +563,7 @@ bar height
 
 ### `CHL_FIND_COUNT_W`
 
-`macro` | [include/chrome_layout.h:90](../../include/chrome_layout.h#L90)
+`macro` | [include/chrome_layout.h:108](../../include/chrome_layout.h#L108)
 
 ```c
 #define CHL_FIND_COUNT_W

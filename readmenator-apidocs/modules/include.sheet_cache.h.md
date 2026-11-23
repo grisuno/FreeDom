@@ -39,7 +39,7 @@ typedef struct shc_key
 
 Every input of the parse.
 
-`media` carries the @media gate and the optional root matcher, a callback into the live DOM. The module records each question the parse asks that matcher and the answer; a later acquire is a hit only when the static inputs are byte-identical AND the matcher passed in *that* key still gives every recorded answer. So the matcher must be a deterministic function of the selector and the caller's current DOM, free of side effects. All pointers are borrowed.
+[`media`](include.hls.h.md#media) carries the @media gate and the optional root matcher, a callback into the live DOM. The module records each question the parse asks that matcher and the answer; a later acquire is a hit only when the static inputs are byte-identical AND the matcher passed in *that* key still gives every recorded answer. So the matcher must be a deterministic function of the selector and the caller's current DOM, free of side effects. All pointers are borrowed.
 
 ---
 

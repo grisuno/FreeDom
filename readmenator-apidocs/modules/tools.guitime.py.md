@@ -65,7 +65,7 @@ Starts Xvfb and a nested weston; returns (env, processes) or None when unavailab
 
 ### `one_run`
 
-`function` | [tools/guitime.py:65](../../tools/guitime.py#L65)
+`function` | [tools/guitime.py:67](../../tools/guitime.py#L67)
 
 ```python
 def one_run(binary, page, env, hosts_dir, tmp)
@@ -89,7 +89,7 @@ def one_run(binary, page, env, hosts_dir, tmp)
 
 ### `main`
 
-`function` | [tools/guitime.py:94](../../tools/guitime.py#L94)
+`function` | [tools/guitime.py:96](../../tools/guitime.py#L96)
 
 ```python
 def main()

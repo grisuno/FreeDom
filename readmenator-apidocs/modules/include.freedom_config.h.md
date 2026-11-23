@@ -1,10 +1,10 @@
 # `include/freedom_config.h`
 
-> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 88.9% | [API index](../index.md)
+> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 85.7% | [API index](../index.md)
 
 ## Contents
 
-- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes), [`FC_SHC_MAX_TEXT_BYTES`](#fc_shc_max_text_bytes), [`FC_SHC_MAX_QUERIES`](#fc_shc_max_queries), [`FC_MASK_CACHE_BYTES`](#fc_mask_cache_bytes), [`FC_MASK_CACHE_ENTRIES`](#fc_mask_cache_entries), [`FC_LAZY_IMAGE_MARGIN_PX`](#fc_lazy_image_margin_px), [`FC_TAB_OP_NET_BUDGET_MS`](#fc_tab_op_net_budget_ms), [`FC_TABLE_TRACK_MAX_PX`](#fc_table_track_max_px)
+- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes), [`FC_SHC_MAX_TEXT_BYTES`](#fc_shc_max_text_bytes), [`FC_SHC_MAX_QUERIES`](#fc_shc_max_queries), [`FC_MASK_CACHE_BYTES`](#fc_mask_cache_bytes), [`FC_MASK_CACHE_ENTRIES`](#fc_mask_cache_entries), [`FC_LAZY_IMAGE_MARGIN_PX`](#fc_lazy_image_margin_px), [`FC_TAB_OP_NET_BUDGET_MS`](#fc_tab_op_net_budget_ms), [`FC_NET_LOAD_SETTLE_MS`](#fc_net_load_settle_ms), [`FC_NET_POLL_MS`](#fc_net_poll_ms), [`FC_NET_TICK_SETTLE_MS`](#fc_net_tick_settle_ms), [`FC_TABLE_TRACK_MAX_PX`](#fc_table_track_max_px)
 
 ## Macros
 
@@ -258,11 +258,53 @@ The fetch is synchronous in the GUI thread, so this bounds how long a slow serve
 
 ---
 
+<a id="fc_net_load_settle_ms"></a>
+
+### `FC_NET_LOAD_SETTLE_MS`
+
+`macro` | [include/freedom_config.h:112](../../include/freedom_config.h#L112)
+
+```c
+#define FC_NET_LOAD_SETTLE_MS
+```
+
+Deferred XHR/fetch delivery (spec/subreq_async.md, "Entrega con plazo").
+
+The first view of a page waits at most FC_NET_LOAD_SETTLE_MS for its in-flight requests (a dead ad host must not hold the page back); what is still running is delivered by later ticks, which the worker asks for at most every FC_NET_POLL_MS while anything is pending (100 ms: an 8 s dead request costs 80 of the window's 240 ticks per load, not all of them).
+
+---
+
+<a id="fc_net_poll_ms"></a>
+
+### `FC_NET_POLL_MS`
+
+`macro` | [include/freedom_config.h:113](../../include/freedom_config.h#L113)
+
+```c
+#define FC_NET_POLL_MS
+```
+
+---
+
+<a id="fc_net_tick_settle_ms"></a>
+
+### `FC_NET_TICK_SETTLE_MS`
+
+`macro` | [include/freedom_config.h:116](../../include/freedom_config.h#L116)
+
+```c
+#define FC_NET_TICK_SETTLE_MS
+```
+
+A tick or click waits this long for the requests its handlers issued: a typical API answers in the same operation, as before the plazo existed.
+
+---
+
 <a id="fc_table_track_max_px"></a>
 
 ### `FC_TABLE_TRACK_MAX_PX`
 
-`macro` | [include/freedom_config.h:109](../../include/freedom_config.h#L109)
+`macro` | [include/freedom_config.h:120](../../include/freedom_config.h#L120)
 
 ```c
 #define FC_TABLE_TRACK_MAX_PX

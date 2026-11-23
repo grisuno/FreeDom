@@ -91,7 +91,7 @@ jd_status jd_install_xhr(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx)
 `function` | [src/js_fetch.c:340](../../src/js_fetch.c#L340)
 
 ```c
-jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, size_t len, const char *ctype, const char *hdrs, int ms)
+jd_status jd_net_deliver(js_context *ctx, int pos, int rc, int status, const char *body, size_t len, const char *ctype, const char *hdrs, int ms)
 ```
 
 **Parameters**
@@ -99,6 +99,7 @@ jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, 
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `ctx` | `js_context *` |  |  |
+| `pos` | `int` |  |  |
 | `rc` | `int` |  |  |
 | `status` | `int` |  |  |
 | `body` | `char *` |  |  |
@@ -111,15 +112,13 @@ jd_status jd_net_deliver(js_context *ctx, int rc, int status, const char *body, 
 
 *Calls:* [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`replies`](src.tab.c.md#replies)
-
 ---
 
 <a id="jd_install_xhr_ex"></a>
 
 ### `jd_install_xhr_ex`
 
-`function` | [src/js_fetch.c:361](../../src/js_fetch.c#L361)
+`function` | [src/js_fetch.c:363](../../src/js_fetch.c#L363)
 
 ```c
 jd_status jd_install_xhr_ex(js_context *ctx, jd_fetch_fn fn, void *fetch_ctx, jd_fetch_async_fn afn, void *afetch_ctx)

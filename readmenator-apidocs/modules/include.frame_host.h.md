@@ -1,12 +1,12 @@
 # `include/frame_host.h`
 
-> Source: [include/frame_host.h:1](../../include/frame_host.h#L1) | language `h` | coverage 72.7% | [API index](../index.md)
+> Source: [include/frame_host.h:1](../../include/frame_host.h#L1) | language `h` | coverage 76.9% | [API index](../index.md)
 
 ## Contents
 
 - **Type Aliases:** [`fh_host`](#fh_host)
-- **Functions:** [`fh_new`](#fh_new), [`fh_free`](#fh_free), [`fh_apply_top`](#fh_apply_top), [`fh_tick`](#fh_tick), [`fh_count`](#fh_count), [`it`](#it), [`fh_frame_view`](#fh_frame_view), [`fh_generation`](#fh_generation)
-- **Macros:** [`FH_MAX_DEPTH`](#fh_max_depth)
+- **Functions:** [`fh_new`](#fh_new), [`fh_set_async`](#fh_set_async), [`fh_free`](#fh_free), [`fh_apply_top`](#fh_apply_top), [`fh_tick`](#fh_tick), [`fh_count`](#fh_count), [`it`](#it), [`fh_frame_view`](#fh_frame_view), [`fh_generation`](#fh_generation)
+- **Macros:** [`FH_MAX_DEPTH`](#fh_max_depth), [`FH_POLL_MS`](#fh_poll_ms)
 
 ## Type Aliases
 
@@ -14,13 +14,13 @@
 
 ### `fh_host`
 
-`type_alias` | [include/frame_host.h:19](../../include/frame_host.h#L19)
+`type_alias` | [include/frame_host.h:20](../../include/frame_host.h#L20)
 
 ```c
 typedef struct fh_host fh_host;
 ```
 
-nested deliveries handled inside one call; the rest waits for a tick
+fh_tick's answer while a background frame load is in flight
 
 ---
 
@@ -30,7 +30,7 @@ nested deliveries handled inside one call; the rest waits for a tick
 
 ### `fh_new`
 
-`function` | [include/frame_host.h:28](../../include/frame_host.h#L28)
+`function` | [include/frame_host.h:29](../../include/frame_host.h#L29)
 
 ```c
 fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx);
@@ -54,17 +54,40 @@ NULL on OOM or bad args.
 
 ---
 
+<a id="fh_set_async"></a>
+
+### `fh_set_async`
+
+`function` | [include/frame_host.h:35](../../include/frame_host.h#L35)
+
+```c
+void fh_set_async(fh_host *h, int on);
+```
+
+on != 0: each FRAME_OPEN loads its frame on a background thread and fh_tick integrates it (spec/frame_broker.md section 4); the window turns it on, the headless export keeps loads synchronous.
+
+Set before the first fh_apply_top.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `h` | `fh_host *` |  |  |
+| `on` | `int` |  |  |
+
+---
+
 <a id="fh_free"></a>
 
 ### `fh_free`
 
-`function` | [include/frame_host.h:32](../../include/frame_host.h#L32)
+`function` | [include/frame_host.h:39](../../include/frame_host.h#L39)
 
 ```c
 void fh_free(fh_host *h);
 ```
 
-Closes every frame worker and frees the host.
+Closes every frame worker and frees the host; a frame still loading is abandoned (its thread closes its own worker when it ends), never waited for.
 
 Idempotent on NULL.
 
@@ -80,7 +103,7 @@ Idempotent on NULL.
 
 ### `fh_apply_top`
 
-`function` | [include/frame_host.h:36](../../include/frame_host.h#L36)
+`function` | [include/frame_host.h:43](../../include/frame_host.h#L43)
 
 ```c
 void fh_apply_top(fh_host *h, const tab_page *page);
@@ -101,7 +124,7 @@ Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP 
 
 ### `fh_tick`
 
-`function` | [include/frame_host.h:40](../../include/frame_host.h#L40)
+`function` | [include/frame_host.h:47](../../include/frame_host.h#L47)
 
 ```c
 int fh_tick(fh_host *h, int elapsed_ms);
@@ -126,7 +149,7 @@ Returns the smallest pending frame timer in ms, or -1 when none.
 
 ### `fh_count`
 
-`function` | [include/frame_host.h:43](../../include/frame_host.h#L43)
+`function` | [include/frame_host.h:50](../../include/frame_host.h#L50)
 
 ```c
 int fh_count(const fh_host *h);
@@ -148,7 +171,7 @@ Number of live frame workers (excludes the top).
 
 ### `it`
 
-`function` | [include/frame_host.h:46](../../include/frame_host.h#L46)
+`function` | [include/frame_host.h:53](../../include/frame_host.h#L53)
 
 ```c
 * confined worker last built it (NULL when no live frame has that URL);
@@ -168,7 +191,7 @@ Number of live frame workers (excludes the top).
 
 ### `fh_frame_view`
 
-`function` `const` | [include/frame_host.h:49](../../include/frame_host.h#L49)
+`function` `const` | [include/frame_host.h:56](../../include/frame_host.h#L56)
 
 ```c
 const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out);
@@ -194,7 +217,7 @@ The document of the frame loaded from [`url`](include.css_import.h.md#url), as i
 
 ### `fh_generation`
 
-`function` | [include/frame_host.h:52](../../include/frame_host.h#L52)
+`function` | [include/frame_host.h:59](../../include/frame_host.h#L59)
 
 ```c
 unsigned fh_generation(const fh_host *h);
@@ -223,5 +246,19 @@ Changes whenever any frame view appears, is replaced or goes away: repaint the f
 ```c
 #define FH_MAX_DEPTH
 ```
+
+---
+
+<a id="fh_poll_ms"></a>
+
+### `FH_POLL_MS`
+
+`macro` | [include/frame_host.h:19](../../include/frame_host.h#L19)
+
+```c
+#define FH_POLL_MS
+```
+
+nested deliveries handled inside one call; the rest waits for a tick
 
 ---

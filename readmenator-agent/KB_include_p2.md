@@ -1,6 +1,20 @@
 # Subsystem: include (page 2 of 6)
 Previous: [KB_include.md](KB_include.md)
 
+## include/css_color.h
+- Doc: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `cc_rgb` (struct, line 27)
+  - `cc_status` (enum, line 31)
+  - `b` (type_alias, line 26) `typedef struct cc_rgb { unsigned char r, g, b;`
+  - `cc_pack` (function, line 49) `int cc_pack(cc_rgb c);`
+  - `FREEDOM_CSS_COLOR_H` (macro, line 2) `#define FREEDOM_CSS_COLOR_H`
+  - `CC_COLOR_CURRENT` (macro, line 59) `#define CC_COLOR_CURRENT`
+  - `CC_COLOR_TRANSPARENT` (macro, line 60) `#define CC_COLOR_TRANSPARENT`
+- Imported by: `gui/browser_ui.c`, `gui/bui_theme.c`, `include/css.h`, `src/css.c`, `src/css_box.c`, `src/css_color.c`, `src/css_gradient.c`, `src/css_text.c`, `src/css_values.c`, `src/page_view.c`, `src/pres_hints.c`, `src/svg_paint.c`, `src/svg_render.c`, `tests/test_css_color.c`
+
 ## include/css_computed.h
 - Doc: ccm_get: Writes the computed value of the kebab-case property `prop` into out (cap bytes, NUL...
 - Layer: utility

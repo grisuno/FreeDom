@@ -6,7 +6,7 @@
 
 16 components stacked in 6 dependency tiers (weighted Eades-Lin-Smyth ordering: arrows point from dependent to dependency, top to bottom). Labels are import counts, thick arrows the top quartile; 16 transitively implied edges are omitted. Dashed red arrows are upward dependencies: the smallest set of imports that closes every cycle and breaks the layering. Cyan components hold entry points. Interactive version: `readmenator-apidocs/index.html#/flows`.
 
-Upward dependencies to fix first: `src: tab` -> `include: page_view` (7 imports); `src: css` -> `include: page_view` (4 imports); `src: tab` -> `src: text_shape` (3 imports); `src: css` -> `src: tab` (2 imports); `include: tab` -> `src: tab` (2 imports); `include: tab` -> `include: page_view` (2 imports); `src: css` -> `include: browser_ui` (1 imports); `src: css` -> `src: text_shape` (1 imports); `include: os_sandbox` -> `src: tab` (1 imports); `include: os_sandbox` -> `include: page_view` (1 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `include: secure_fetch` -> `include: page_view` (1 imports); `src: http_cache` -> `include: browser_ui` (1 imports); `src: http_cache` -> `include: page_view` (1 imports); `include: svg_render` -> `include: page_view` (1 imports); `include: prefetch` -> `src: tab` (1 imports)
+Upward dependencies to fix first: `src: tab` -> `include: page_view` (7 imports); `src: css` -> `include: page_view` (4 imports); `src: tab` -> `src: text_shape` (3 imports); `src: css` -> `src: tab` (2 imports); `src: css` -> `src: text_shape` (2 imports); `include: tab` -> `src: tab` (2 imports); `include: tab` -> `include: page_view` (2 imports); `src: css` -> `include: browser_ui` (1 imports); `include: os_sandbox` -> `src: tab` (1 imports); `include: os_sandbox` -> `include: page_view` (1 imports); `src: text_shape` -> `include: browser_ui` (1 imports); `include: page_view` -> `src: text_shape` (1 imports); `include: secure_fetch` -> `src: tab` (1 imports); `include: secure_fetch` -> `src: text_shape` (1 imports); `src: http_cache` -> `include: browser_ui` (1 imports); `src: http_cache` -> `include: page_view` (1 imports); `include: svg_render` -> `include: page_view` (1 imports); `include: prefetch` -> `src: tab` (1 imports)
 
 ```mermaid
 flowchart TB
@@ -15,75 +15,74 @@ flowchart TB
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     subgraph lane_0["Tier 1 - entry / orchestration"]
         direction LR
-        n_c1["include: browser_ui<br/>42 files, 1178 symbols<br/>Core / utility"]:::cycle
+        n_c0["include: browser_ui<br/>44 files, 1233 symbols<br/>Core / utility"]:::cycle
         n_d_tools["tools<br/>12 files, 66 symbols<br/>Core / utility"]:::default
         n_d__root_["(root)<br/>5 files, 3 symbols<br/>Core / utility"]:::entry
         n_c13["tools<br/>2 files, 7 symbols<br/>Core / utility"]:::default
     end
     subgraph lane_1["Tier 2"]
         direction LR
-        n_c3["src: text_shape<br/>33 files, 481 symbols<br/>Core / utility"]:::cycle
+        n_c3["src: text_shape<br/>37 files, 546 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_2["Tier 3"]
         direction LR
-        n_c4["include: page_view<br/>19 files, 841 symbols<br/>Core / utility"]:::cycle
+        n_c4["include: page_view<br/>21 files, 858 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_3["Tier 4"]
         direction LR
-        n_c2["src: tab<br/>39 files, 812 symbols<br/>Core / utility"]:::cycle
+        n_c2["src: tab<br/>41 files, 846 symbols<br/>Core / utility"]:::cycle
     end
     subgraph lane_4["Tier 5"]
         direction LR
         n_c9["include: prefetch<br/>4 files, 90 symbols<br/>Core / utility"]:::cycle
-        n_c8["include: tab<br/>5 files, 109 symbols<br/>Core / utility"]:::cycle
+        n_c8["include: tab<br/>5 files, 121 symbols<br/>Core / utility"]:::cycle
         n_c7["include: svg_render<br/>8 files, 112 symbols<br/>Core / utility"]:::cycle
-        n_c5["include: secure_fetch<br/>16 files, 361 symbols<br/>Core / utility"]:::cycle
+        n_c5["include: secure_fetch<br/>12 files, 320 symbols<br/>Core / utility"]:::cycle
         n_c10["include: os_sandbox<br/>4 files, 56 symbols<br/>Presentation / entry"]:::cycle
-        n_c12["include: subreq_batch<br/>2 files, 27 symbols<br/>Core / utility"]:::default
+        n_c12["include: subreq_batch<br/>2 files, 37 symbols<br/>Core / utility"]:::default
         n_c11["include: sha2<br/>2 files, 21 symbols<br/>Core / utility"]:::default
     end
     subgraph lane_5["Tier 6 - foundation"]
         direction LR
-        n_c0["src: css<br/>45 files, 1252 symbols<br/>Core / utility"]:::cycle
+        n_c1["src: css<br/>45 files, 1274 symbols<br/>Core / utility"]:::cycle
         n_c6["src: http_cache<br/>9 files, 136 symbols<br/>Data access"]:::cycle
     end
-    n_c1 ==>|"14"| n_c3
+    n_c0 ==>|"15"| n_c3
     n_c2 -->|"1"| n_c10
     n_c2 -->|"1"| n_c11
     n_c2 -->|"1"| n_c12
-    n_c2 ==>|"5"| n_c5
+    n_c2 ==>|"4"| n_c5
     n_c2 -->|"2"| n_c7
     n_c2 -->|"1"| n_c8
     n_c2 -->|"1"| n_c9
-    n_c3 ==>|"7"| n_c4
+    n_c3 ==>|"8"| n_c4
     n_c4 ==>|"8"| n_c2
     n_c5 -->|"1"| n_c6
-    n_c7 -->|"2"| n_c0
-    n_c1 <-.-|"1 upward"| n_c0
-    n_c2 <-.-|"2 upward"| n_c0
-    n_c3 <-.-|"1 upward"| n_c0
-    n_c4 <-.-|"4 upward"| n_c0
+    n_c7 -->|"2"| n_c1
+    n_c0 <-.-|"1 upward"| n_c1
+    n_c2 <-.-|"2 upward"| n_c1
+    n_c3 <-.-|"2 upward"| n_c1
+    n_c4 <-.-|"4 upward"| n_c1
     n_c2 <-.-|"1 upward"| n_c10
     n_c4 <-.-|"1 upward"| n_c10
     n_c3 <-.-|"3 upward"| n_c2
     n_c4 <-.-|"7 upward"| n_c2
-    n_c1 <-.-|"1 upward"| n_c3
+    n_c0 <-.-|"1 upward"| n_c3
     n_c3 <-.-|"1 upward"| n_c4
     n_c2 <-.-|"1 upward"| n_c5
     n_c3 <-.-|"1 upward"| n_c5
-    n_c4 <-.-|"1 upward"| n_c5
-    n_c1 <-.-|"1 upward"| n_c6
+    n_c0 <-.-|"1 upward"| n_c6
     n_c4 <-.-|"1 upward"| n_c6
     n_c4 <-.-|"1 upward"| n_c7
     n_c2 <-.-|"2 upward"| n_c8
     n_c4 <-.-|"2 upward"| n_c8
     n_c2 <-.-|"1 upward"| n_c9
-    linkStyle 12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30 stroke:#f87171,stroke-width:2px;
-    n_c1 ~~~ n_c3
+    linkStyle 12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29 stroke:#f87171,stroke-width:2px;
+    n_c0 ~~~ n_c3
     n_c3 ~~~ n_c4
     n_c4 ~~~ n_c2
     n_c2 ~~~ n_c9
-    n_c9 ~~~ n_c0
+    n_c9 ~~~ n_c1
 ```
 
 ---
@@ -94,7 +93,7 @@ Entry points are scored from `__main__` guards, `main` functions, entry-style na
 
 ### `browser_ui.main`
 
-`gui/browser_ui.c:582`, score 11: `main` in a compiled-language file; entry-style name `main`.
+`gui/browser_ui.c:594`, score 11: `main` in a compiled-language file; entry-style name `main`.
 
 Call tree:
 
@@ -102,8 +101,8 @@ Call tree:
 flowchart LR
     classDef default fill:#111827,stroke:#38bdf8,color:#e5e7eb;
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
-    n_gui_browser_ui_c__main["browser_ui.main<br/>browser_ui.c:582"]:::entry
-    n_gui_browser_ui_c__now_ms["browser_ui.now_ms<br/>Largest text slice measured/drawn at once (on...<br/>browser_ui.c:168"]:::default
+    n_gui_browser_ui_c__main["browser_ui.main<br/>browser_ui.c:594"]:::entry
+    n_gui_browser_ui_c__now_ms["browser_ui.now_ms<br/>Largest text slice measured/drawn at once (on...<br/>browser_ui.c:170"]:::default
     n_gui_browser_ui_c__main -->|"1"| n_gui_browser_ui_c__now_ms
 ```
 
@@ -178,7 +177,7 @@ sequenceDiagram
 
 ### `freedom.main`
 
-`src/freedom.c:1313`, score 11: `main` in a compiled-language file; entry-style name `main`.
+`src/freedom.c:1316`, score 11: `main` in a compiled-language file; entry-style name `main`.
 
 Call tree:
 
@@ -186,8 +185,8 @@ Call tree:
 flowchart LR
     classDef entry fill:#0e7490,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
     classDef external fill:#1a1530,stroke:#a78bfa,color:#ede9fe;
-    n_src_freedom_c__main["freedom.main<br/>freedom.c:1313"]:::entry
-    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:2996"]:::external
+    n_src_freedom_c__main["freedom.main<br/>freedom.c:1316"]:::entry
+    n_gui_browser_ui_c__strcmp["browser_ui.strcmp<br/>browser_ui.c:3171"]:::external
     n_include_prefs_h__free["prefs.free<br/>prefs.h:72"]:::external
     n_src_prefs_c__prefs_format["prefs.prefs_format<br/>prefs.c:183"]:::external
     n_src_prefs_c__prefs_parse["prefs.prefs_parse<br/>prefs.c:247"]:::external
@@ -197,13 +196,14 @@ flowchart LR
     n_src_prefs_c__bookmark_push["prefs.bookmark_push<br/>Appends a cleaned bookmark.<br/>prefs.c:91"]:::external
     n_src_prefs_c__history_push_back["prefs.history_push_back<br/>Appends a history entry at the BACK preservin...<br/>prefs.c:109"]:::external
     n_src_prefs_c__apply_kv["prefs.apply_kv<br/>} for (size_t i = 0#59; i #lt; p-#gt;history_len#59; ++i)...<br/>prefs.c:231"]:::external
-    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:1961"]:::external
-    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1171"]:::external
-    n_gui_browser_ui_c__is_https_url["browser_ui.is_https_url<br/>browser_ui.c:1156"]:::external
+    n_gui_browser_ui_c__prepare_fetch["browser_ui.prepare_fetch<br/>Builds cfg for url and applies the pre-fetch...<br/>browser_ui.c:2093"]:::external
+    n_gui_browser_ui_c__host_from_url["browser_ui.host_from_url<br/>A plain-http URL whose realm self-authenticat...<br/>browser_ui.c:1208"]:::external
+    n_gui_browser_ui_c__is_https_url["browser_ui.is_https_url<br/>browser_ui.c:1193"]:::external
     n_src_hostblock_c__hb_check["hostblock.hb_check<br/>hostblock.c:193"]:::external
     n_src_hostblock_c__lower["hostblock.lower<br/>hostblock.c:107"]:::external
     n_src_hostblock_c__table_contains["hostblock.table_contains<br/>hostblock.c:92"]:::external
-    n_include_anti_fp_h__domain["anti_fp.domain<br/>anti_fp.h:91"]:::external
+    n_include_hls_h__domain["hls.domain<br/>hls.h:87"]:::external
+    n_src_hls_c__hls_mirror_url["hls.hls_mirror_url<br/>hls.c:348"]:::external
     n_include_browser_h__browser_is_exception["browser.browser_is_exception<br/>Index of the current entry within its documen...<br/>browser.h:122"]:::external
     n_src_browser_c__browser_add_exception["browser.browser_add_exception<br/>browser.c:543"]:::external
     n_src_browser_c__browser_set_url_bar["browser.browser_set_url_bar<br/>browser.c:215"]:::external
@@ -216,9 +216,8 @@ flowchart LR
     n_src_browser_c__browser_url_bar_extend_cursor["browser.browser_url_bar_extend_cursor<br/>browser.c:447"]:::external
     n_src_browser_c__browser_url_bar_set_cursor["browser.browser_url_bar_set_cursor<br/>browser.c:456"]:::external
     n_src_browser_c__browser_url_bar_select_all["browser.browser_url_bar_select_all<br/>browser.c:464"]:::external
-    n_gui_browser_ui_c__apply_operator_override["browser_ui.apply_operator_override<br/>browser_ui.c:1638"]:::external
-    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:1911"]:::external
-    n_gui_browser_ui_c__aa_note["browser_ui.aa_note<br/>A fetch thread asks: should #96;host#96; (pulled by...<br/>browser_ui.c:1655"]:::external
+    n_gui_browser_ui_c__apply_operator_override["browser_ui.apply_operator_override<br/>browser_ui.c:1681"]:::external
+    n_gui_browser_ui_c__hb_is_allowlisted["browser_ui.hb_is_allowlisted<br/>browser_ui.c:2043"]:::external
     n_src_freedom_c__main -.->|"recursion"| n_src_freedom_c__main
     n_src_freedom_c__main -->|"1"| n_gui_browser_ui_c__strcmp
     n_gui_browser_ui_c__strcmp -.->|"recursion"| n_gui_browser_ui_c__strcmp
@@ -241,7 +240,8 @@ flowchart LR
     n_src_hostblock_c__hb_check -.->|"recursion"| n_src_hostblock_c__hb_check
     n_src_hostblock_c__hb_check -->|"1"| n_src_hostblock_c__lower
     n_src_hostblock_c__hb_check -->|"2"| n_src_hostblock_c__table_contains
-    n_gui_browser_ui_c__prepare_fetch -->|"3"| n_include_anti_fp_h__domain
+    n_gui_browser_ui_c__prepare_fetch -->|"3"| n_include_hls_h__domain
+    n_include_hls_h__domain -->|"1"| n_src_hls_c__hls_mirror_url
     n_gui_browser_ui_c__prepare_fetch -->|"4"| n_include_browser_h__browser_is_exception
     n_include_browser_h__browser_is_exception -.->|"recursion"| n_include_browser_h__browser_is_exception
     n_include_browser_h__browser_is_exception -->|"1"| n_src_browser_c__browser_add_exception
@@ -258,8 +258,7 @@ flowchart LR
     n_gui_browser_ui_c__prepare_fetch -->|"5"| n_gui_browser_ui_c__apply_operator_override
     n_gui_browser_ui_c__prepare_fetch -->|"6"| n_gui_browser_ui_c__hb_is_allowlisted
     n_gui_browser_ui_c__hb_is_allowlisted -.->|"recursion"| n_gui_browser_ui_c__hb_is_allowlisted
-    n_gui_browser_ui_c__hb_is_allowlisted -->|"1"| n_gui_browser_ui_c__aa_note
-    linkStyle 0,2,5,6,8,19,24,38 stroke:#f87171,stroke-width:2px;
+    linkStyle 0,2,5,6,8,19,25,39 stroke:#f87171,stroke-width:2px;
 ```
 
 Cross-file sequence:
@@ -272,7 +271,8 @@ sequenceDiagram
     participant p_include_prefs_h as prefs.h
     participant p_src_prefs_c as prefs.c
     participant p_src_hostblock_c as hostblock.c
-    participant p_include_anti_fp_h as anti_fp.h
+    participant p_include_hls_h as hls.h
+    participant p_src_hls_c as hls.c
     participant p_include_browser_h as browser.h
     participant p_src_browser_c as browser.c
     p_src_freedom_c->>p_gui_browser_ui_c: strcmp()
@@ -281,7 +281,8 @@ sequenceDiagram
     p_src_prefs_c->>p_include_prefs_h: free()
     p_include_prefs_h->>p_src_prefs_c: prefs_parse()
     p_gui_browser_ui_c->>p_src_hostblock_c: hb_check()
-    p_gui_browser_ui_c->>p_include_anti_fp_h: domain()
+    p_gui_browser_ui_c->>p_include_hls_h: domain()
+    p_include_hls_h->>p_src_hls_c: hls_mirror_url()
     p_gui_browser_ui_c->>p_include_browser_h: browser_is_exception()
     p_include_browser_h->>p_src_browser_c: browser_add_exception()
     p_include_browser_h->>p_src_browser_c: browser_set_url_bar()

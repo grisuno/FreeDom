@@ -15,7 +15,7 @@ This community groups 6 file(s) rooted at `include` with dominant language c (co
 | `src/import_map.c` | c | utility | 22 | no |
 | `src/prefetch.c` | c | utility | 30 | no |
 | `tests/test_import_map.c` | c | testing | 8 | no |
-| `tests/test_prefetch.c` | c | testing | 18 | yes |
+| `tests/test_prefetch.c` | c | testing | 19 | yes |
 
 ## Key Symbols
 
@@ -57,7 +57,7 @@ This community groups 6 file(s) rooted at `include` with dominant language c (co
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
+- [EXTRACTED] depends_on community 0 <-> 9 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.
 - [EXTRACTED] depends_on community 3 <-> 9 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
 
 ## Risks

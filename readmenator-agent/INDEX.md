@@ -5,9 +5,9 @@
 | `app.py` | Author: Gris Iscomeback Email: grisun0[at]proton[dot]me Creation Date: 06/18/2026 License: GPL... | root | 3 | 0 |
 | `docker-entrypoint.sh` | - | root | 0 | 0 |
 | `docker_run.sh` | Thin wrapper. | root | 0 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 699 | 0 |
-| `gui/browser_ui_internal.h` | bui_chrome_view: ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to a palette... | gui | 22 | 4 |
-| `gui/bui_chrome.c` | tab_path: void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r) {... | gui | 49 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 733 | 0 |
+| `gui/browser_ui_internal.h` | bui_chrome_view: ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to a palette... | gui | 24 | 4 |
+| `gui/bui_chrome.c` | tab_path: void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r) {... | gui | 61 | 0 |
 | `gui/bui_mask_img.c` | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | gui | 1 | 0 |
 | `gui/bui_theme.c` | ui_theme_default: bui_theme — presentation palettes for the Wayland/Cairo GUI. | gui | 6 | 0 |
 | `gui/freedom_view.c` | - | gui | 2 | 0 |
@@ -19,7 +19,7 @@
 | `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 34 | 5 |
 | `include/browser.h` | browser_closed: Transient status line (a toast, e.g. "blocked: insecure http link"). msg is... | include | 26 | 3 |
 | `include/cached_fetch.h` | cf_set_store: Cache-aware GET. | include | 4 | 3 |
-| `include/chrome_layout.h` | chl_tab_rect: Computes the layout. tab_count >= 1 and 0 <= active < tab_count, else CHL_EINVAL *... | include | 36 | 3 |
+| `include/chrome_layout.h` | chl_tab_rect: Computes the layout. tab_count >= 1 and 0 <= active < tab_count, else CHL_EINVAL *... | include | 41 | 3 |
 | `include/compositor.h` | cx_style: A box's resolved style, in the SAME value-spaces as css.h: position uses css_position... | include | 11 | 4 |
 | `include/css.h` | css_style: A resolved presentation. | include | 148 | 40 |
 | `include/css_atrule.h` | car_ops: The questions @supports asks the caller's own engine. prop is lowercased and * both... | include | 10 | 3 |
@@ -52,10 +52,10 @@
 | `include/form.h` | fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *... | include | 12 | 3 |
 | `include/frame_broker.h` | fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for... | include | 17 | 3 |
 | `include/frame_clock.h` | active: frame_clock (fc_) — pure animation frame scheduler. | include | 7 | 3 |
-| `include/frame_host.h` | fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource... | include | 11 | 4 |
+| `include/frame_host.h` | fh_new: top_url: the trusted top document; fetch/fetch_ctx: the page's policy-gated subresource... | include | 13 | 4 |
 | `include/freebug.h` | fb_entry: One captured console message. text and file are owned by the buffer (NUL-terminated).... | include | 18 | 13 |
-| `include/freedom_config.h` | - | include | 20 | 7 |
-| `include/hls.h` | hls_segment: or variant info. | include | 8 | 4 |
+| `include/freedom_config.h` | - | include | 23 | 8 |
+| `include/hls.h` | hls_segment: or variant info. | include | 11 | 5 |
 | `include/host_conf.h` | hcf_search_dirs: Pure. | include | 9 | 4 |
 | `include/hostblock.h` | hb_new: } hb_list; typedef enum hb_decision { HB_ALLOW = 0,  /* the host may be contacted... | include | 10 | 5 |
 | `include/hostedit.h` | he_cdn_kind_t: Which auto-allow switch (config page) a subresource falls under, decided from the... | include | 7 | 3 |
@@ -79,10 +79,11 @@
 | `include/local_store.h` | ls_free: Passphrase variant: generates a random salt, derives the key with Argon2id, * and... | include | 11 | 8 |
 | `include/mask_cache.h` | mask_cache (mkc_) -- 8-bit alpha masks retained across frames (spec/mask_cache.md). | include | 11 | 3 |
 | `include/media_decoder.h` | md_cmd: Communicates with the parent over two pipes: out_fd: decoder → parent (frames, stream... | include | 12 | 4 |
+| `include/nav_token.h` | nt_token: include <stdint.h> | include | 11 | 3 |
 | `include/net_guard.h` | ng_request: #ifndef __STDC_VERSION__ #error "net_guard requires C11" #endif #ifdef __cplusplus... | include | 9 | 3 |
 | `include/net_realm.h` | nr_realm_allows_http: 1 iff plain http:// is acceptable for this realm. | include | 10 | 4 |
 | `include/os_sandbox.h` | os_violation: function (os_policy_allows) that mirrors the installed BPF program. | include | 12 | 4 |
-| `include/page_view.h` | pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt... | include | 102 | 12 |
+| `include/page_view.h` | pv_run: One inline run in document order. text is owned, NUL-terminated, valid UTF-8 (the alt... | include | 103 | 13 |
 | `include/pdf_export.h` | pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order)... | include | 10 | 4 |
 | `include/perf_trace.h` | pt_init: #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t... | include | 17 | 3 |
 | `include/pq_seal.h` | pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der... | include | 8 | 3 |
@@ -94,16 +95,16 @@
 | `include/render_doc.h` | rd_block: One paint-ready block in document order. text is owned, NUL-terminated and valid... | include | 27 | 6 |
 | `include/render_policy.h` | rdp_caps: Render capabilities for a page. | include | 9 | 8 |
 | `include/renderer.h` | rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==... | include | 7 | 2 |
-| `include/request_policy.h` | rp_headers_have: 1 when the sanitized block `lines` carries a header called `name`... | include | 11 | 7 |
+| `include/request_policy.h` | rp_headers_have: 1 when the sanitized block `lines` carries a header called `name`... | include | 11 | 8 |
 | `include/secure_fetch.h` | sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *... | include | 48 | 8 |
 | `include/sha2.h` | sha_digest_len: sha2 -- one-shot SHA-1 / SHA-256 / SHA-384 / SHA-512 (FIPS 180-4), pure and... | include | 6 | 3 |
 | `include/sheet_cache.h` | shc_key: Every input of the parse. | include | 12 | 5 |
 | `include/shm_slots.h` | ss_committed: Chooses the slot to paint into: the current one if free, else the other free one. | include | 7 | 2 |
-| `include/subreq_batch.h` | sqb_res: #ifndef SUBREQ_BATCH_H #define SUBREQ_BATCH_H #include <stddef.h> #define SQB_MAX_JOBS... | include | 13 | 3 |
+| `include/subreq_batch.h` | sqb_res: #ifndef SUBREQ_BATCH_H #define SUBREQ_BATCH_H #include <stddef.h> #define SQB_MAX_JOBS... | include | 17 | 3 |
 | `include/svg_paint.h` | svp_draw: Paints `img` into the rect [x, y, w, h] of `cr`, scaled uniformly and centred... | include | 3 | 3 |
 | `include/svg_raster.h` | sr_sniff: 1 when the first element of the document (after BOM, whitespace, the XML *... | include | 5 | 3 |
 | `include/svg_render.h` | sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>... | include | 19 | 6 |
-| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 55 | 6 |
+| `include/tab.h` | tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState... | include | 56 | 6 |
 | `include/table_layout.h` | table_layout (tl_) -- used column widths of a table (automatic table layout). | include | 8 | 3 |
 | `include/text_case.h` | Case mapping for text-transform and synthesized small caps (spec/text_case.md). | include | 8 | 3 |
 | `include/text_shape.h` | tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags. | include | 25 | 6 |
@@ -112,6 +113,8 @@
 | `include/ui.h` | ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no... | include | 20 | 6 |
 | `include/url.h` | url_parts: Components of a validated absolute https URL, sliced for a JS location object. | include | 14 | 16 |
 | `include/util.h` | — shared pure helpers (no I/O except where noted). | include | 6 | 10 |
+| `include/video_controls.h` | vcl_layout: Lays out the bar inside the video rect (x,y,w,h). | include | 23 | 4 |
+| `include/video_pick.h` | Which video a click plays (spec/video_pick.md). | include | 4 | 3 |
 | `include/web_storage.h` | wst_new: web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing... | include | 13 | 8 |
 | `include/webcaps.h` | wc_caps: Full capability table for one page. | include | 5 | 4 |
 | `include/webfont.h` | wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names. | include | 17 | 11 |
@@ -126,10 +129,10 @@
 | `src/block_flow.c` | block_flow (bf_) -- vertical margin collapsing. | src | 4 | 0 |
 | `src/box_blur.c` | box_recip: floor((sum + bw/2) / bw) without a division: m = floor(2^32 / bw) + 1 makes (n * m)... | src | 9 | 0 |
 | `src/box_style.c` | tag_row: One row of the user-agent sheet. | src | 48 | 0 |
-| `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 25 | 0 |
+| `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 31 | 0 |
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {... | src | 49 | 0 |
 | `src/cached_fetch.c` | trace: fetcher, and so the same policy, as an uncached request.  #define _POSIX_C_SOURCE 200809L... | src | 14 | 0 |
-| `src/chrome_layout.c` | chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md | src | 18 | 0 |
+| `src/chrome_layout.c` | chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md | src | 21 | 0 |
 | `src/compositor.c` | eff_z: Not a stacking context: a positioned box with z:auto still paints in the *... | src | 7 | 0 |
 | `src/css.c` | css_cq: @container conditions (spec/css_mq.md): a rule inside one is kept and gated per element.... | src | 273 | 0 |
 | `src/css_atrule.c` | keyword_at: Scratch size for one declaration or selector handed to the caller. | src | 11 | 0 |
@@ -161,10 +164,10 @@
 | `src/form.c` | put_char: No I/O, no global state. | src | 8 | 0 |
 | `src/frame_broker.c` | target_admits: int changed = 1;                                  /* fixpoint: slots are reused... | src | 10 | 0 |
 | `src/frame_clock.c` | - | src | 4 | 0 |
-| `src/frame_host.c` | reap: h->fetch = fetch; h->fetch_ctx = fetch_ctx; h->top_msg = top_msg; h->top_ctx = top_ctx... | src | 16 | 0 |
+| `src/frame_host.c` | fh_job: One frame load: fetch + confined worker + its first load. | src | 25 | 0 |
 | `src/freebug.c` | - | src | 9 | 0 |
 | `src/freedom.c` | hl_frames: Frames of a trusted page, headless: the same frame_host the window drives, so the... | src | 50 | 0 |
-| `src/hls.c` | last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not... | src | 10 | 0 |
+| `src/hls.c` | last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not... | src | 20 | 0 |
 | `src/host_conf.c` | read_conf: add_dir(out, env); if (home != NULL && home[0] != '\0') { char user[HCF_PATH_MAX]... | src | 9 | 0 |
 | `src/hostblock.c` | table_probe: Finds the slot for key (length klen) in t, which must have a free slot. | src | 19 | 0 |
 | `src/hostedit.c` | valid_host: #include "hostedit.h" #include <string.h> static char he_lower(char c) { return (c... | src | 14 | 0 |
@@ -177,7 +180,7 @@
 | `src/js_custom_elements.c` | - | src | 1 | 0 |
 | `src/js_custom_elements.h` | Private to js_dom.c: installs Custom Elements v1 (spec/js_custom_elements.md) on top of the... | src | 2 | 2 |
 | `src/js_dom.c` | jd_handle: Coerces a JS argument to a node handle. | src | 64 | 0 |
-| `src/js_dom_ext.c` | - | src | 9 | 0 |
+| `src/js_dom_ext.c` | - | src | 10 | 0 |
 | `src/js_dom_ext.h` | Private to js_dom.c / js_dom_ext.c: installs the DOM Standard extras (tree | src | 2 | 2 |
 | `src/js_dom_internal.h` | Private to the js_dom family (js_dom.c, js_fetch.c, js_events.c, js_embed.c): the context... | src | 4 | 4 |
 | `src/js_embed.c` | try_create_iframe_from_script: Scans an inline script body for `video[N]` or `video_data`... | src | 6 | 0 |
@@ -197,10 +200,11 @@
 | `src/local_store.c` | - | src | 31 | 0 |
 | `src/mask_cache.c` | One retained mask. tick orders recency (larger = more recent); buf NULL = free slot. | src | 14 | 0 |
 | `src/media_decoder.c` | decoder_close: AVFrame         *frame;  /* decoded frame (YUV) AVFrame         *rgb;    /*... | src | 15 | 0 |
+| `src/nav_token.c` | nav_token -- per-tab navigation identity shared with fetch threads. spec/nav_token.md | src | 10 | 0 |
 | `src/net_guard.c` | net_guard -- see include/net_guard.h and spec/net_guard.md. | src | 14 | 0 |
 | `src/net_realm.c` | ends_with_realm: True if the lowercased host (length n) ends with ".suffix" AND has at least one... | src | 10 | 0 |
 | `src/os_sandbox.c` | os_prot_allowed: W^X mirror: mmap/mprotect keep their membership but lose any request that asks... | src | 31 | 0 |
-| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 291 | 0 |
+| `src/page_view.c` | pv_ptrmap: A small open-addressed map pointer -> int: the per-element verdict on a generated box... | src | 292 | 0 |
 | `src/pdf_export.c` | - | src | 4 | 0 |
 | `src/perf_trace.c` | - | src | 12 | 0 |
 | `src/pq_seal.c` | derive_key: pqs_status pqs_import(const uint8_t *der, size_t len, pqs_keys **out) { if (der ==... | src | 11 | 0 |
@@ -212,14 +216,14 @@
 | `src/render_policy.c` | - | src | 5 | 0 |
 | `src/renderer.c` | - | src | 6 | 0 |
 | `src/request_policy.c` | public_suffix_labels: Number of labels of the public suffix (eTLD) of a lowercased host... | src | 17 | 0 |
-| `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 83 | 0 |
+| `src/secure_fetch.c` | tls_capture: Snapshot of the negotiated TLS state. curl exposes the live SSL* only while a... | src | 82 | 0 |
 | `src/sha2.c` | pad_tail: Pads the tail of a message into at most two blocks of `bs` bytes with a... | src | 15 | 0 |
 | `src/sheet_cache.c` | sheet_cache -- see include/sheet_cache.h and spec/sheet_cache.md. | src | 16 | 0 |
-| `src/subreq_batch.c` | subreq_batch -- see include/subreq_batch.h and spec/subreq_async.md. | src | 14 | 0 |
+| `src/subreq_batch.c` | subreq_batch -- see include/subreq_batch.h and spec/subreq_async.md. | src | 20 | 0 |
 | `src/svg_paint.c` | svg_paint — Cairo back end for the shapes svg_render extracted. | src | 6 | 0 |
 | `src/svg_raster.c` | svg_raster -- SVG served as an image, rasterized inside the confined worker. spec/svg_raster.md. | src | 4 | 0 |
 | `src/svg_render.c` | svg_render — inline <svg> markup -> a bounded list of geometric shapes. | src | 34 | 0 |
-| `src/tab.c` | tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and... | src | 201 | 0 |
+| `src/tab.c` | tab_iobuf: Batched pipe I/O for the view codec. write_view/read_view move one int32 block and... | src | 212 | 0 |
 | `src/table_layout.c` | table_layout (tl_) -- see include/table_layout.h and spec/table_layout.md. | src | 5 | 0 |
 | `src/text_case.c` | Latin Extended-A and the Cyrillic historic block pair letters on adjacent code | src | 9 | 0 |
 | `src/text_shape.c` | tsh_fb_cp: Per-code-point verdicts of fb_entry. | src | 75 | 0 |
@@ -227,6 +231,8 @@
 | `src/tls_impersonate.c` | get_bytes: \| ((uint32_t)r->p[r->off + 3] << 24); r->off += 4; return v; } static uint64_t... | src | 20 | 0 |
 | `src/ui_layout.c` | - | src | 4 | 0 |
 | `src/url.c` | ci_prefix: produced; every assembly is bounded and reports overflow rather than truncate.... | src | 29 | 0 |
+| `src/video_controls.c` | - | src | 11 | 0 |
+| `src/video_pick.c` | Only an absolute http(s) URL names a stream the decoder can fetch; anything else a script stored... | src | 2 | 0 |
 | `src/web_storage.c` | utf8_ok: Well-formed UTF-8, allowing encoded surrogates (WTF-8): a JS string may hold a lone... | src | 17 | 0 |
 | `src/webcaps.c` | - | src | 4 | 0 |
 | `src/webfont.c` | ci_eq_span: #include <stdint.h> #include <stdlib.h> #include <string.h> static int is_ws(char c)... | src | 15 | 0 |
@@ -240,10 +246,10 @@
 | `tests/test_block_flow.c` | test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never to their... | tests | 8 | 0 |
 | `tests/test_box_blur.c` | ref_line: put_px(argb, W * 4, 30, 20, 255); int r[4]; assert_int_equal(bb_ink_rect(argb, W, H, W... | tests | 15 | 0 |
 | `tests/test_box_style.c` | dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include... | tests | 49 | 0 |
-| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 69 | 0 |
+| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 71 | 0 |
 | `tests/test_browser.c` | nav: #define _POSIX_C_SOURCE 200809L #include <stdarg.h> #include <stddef.h> #include <stdint.h>... | tests | 27 | 0 |
 | `tests/test_cached_fetch.c` | - | tests | 14 | 0 |
-| `tests/test_chrome_layout.c` | Suite for chrome_layout (spec/chrome_layout.md). | tests | 14 | 0 |
+| `tests/test_chrome_layout.c` | Suite for chrome_layout (spec/chrome_layout.md). | tests | 18 | 0 |
 | `tests/test_compositor.c` | test_sort_matches_zindex_only_ordering: The positioned subset the painter already orders by... | tests | 23 | 0 |
 | `tests/test_css.c` | test_inline_font_size_absolute_flag: 2026-07-31: a font-size carries whether its percent is OF... | tests | 371 | 0 |
 | `tests/test_css_atrule.c` | test_css_atrule -- @supports evaluation and @layer ranks (spec/css_atrule.md). | tests | 10 | 0 |
@@ -274,10 +280,10 @@
 | `tests/test_form.c` | - | tests | 20 | 0 |
 | `tests/test_frame_broker.c` | test_frame_broker -- CMocka suite for the pure iframe tree + postMessage router. | tests | 10 | 0 |
 | `tests/test_frame_clock.c` | - | tests | 4 | 0 |
-| `tests/test_frame_host.c` | test_frame_view_is_exposed_for_painting: The painter asks the host for the document of the frame... | tests | 9 | 0 |
+| `tests/test_frame_host.c` | test_frame_view_is_exposed_for_painting: The painter asks the host for the document of the frame... | tests | 13 | 0 |
 | `tests/test_freebug.c` | - | tests | 13 | 0 |
 | `tests/test_freedom.c` | run_freedom_raw: Runs the binary with a raw argument string (no implicit --headless), capturing... | tests | 120 | 0 |
-| `tests/test_hls.c` | - | tests | 16 | 0 |
+| `tests/test_hls.c` | test_unterminated_tag_stays_in_bounds: static void test_segment_single_packet_and_bmff(void... | tests | 25 | 0 |
 | `tests/test_host_conf.c` | - | tests | 8 | 0 |
 | `tests/test_hostblock.c` | test_tld_entry_blocks_every_host_under_it: A bare top-level label blocks the whole TLD (.cyou is... | tests | 24 | 0 |
 | `tests/test_hostedit.c` | test_cdn_kind_from_url_path: Which auto-allow switch a subresource falls under, from its URL... | tests | 12 | 0 |
@@ -287,7 +293,7 @@
 | `tests/test_image_decode.c` | - | tests | 37 | 0 |
 | `tests/test_import_map.c` | tres: Test URL resolver: absolute https passes, "/x" is origin-relative, "./x" and "../x" * are... | tests | 8 | 0 |
 | `tests/test_interp.c` | assert_float_equal: ip_ease_fn fns_0to0[] = { { .kind = IP_EASE_LINEAR }, { .kind = IP_EASE_EASE... | tests | 37 | 0 |
-| `tests/test_js_dom.c` | fake_net: HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and... | tests | 277 | 0 |
+| `tests/test_js_dom.c` | fake_net: HTMLAnchorElement URL decomposition (HTML 4.6.3): YouTube routes on a.pathname and... | tests | 280 | 0 |
 | `tests/test_js_env.c` | test_install_identity_override: /* --- install --- static void test_install_null_args(void... | tests | 32 | 0 |
 | `tests/test_js_geom.c` | test_same_node_unions: assert_int_equal(jg_add(&t, 2, 0, 0, 5, 5), 0)... | tests | 11 | 0 |
 | `tests/test_js_intl.c` | - | tests | 15 | 0 |
@@ -298,14 +304,15 @@
 | `tests/test_local_store.c` | - | tests | 18 | 0 |
 | `tests/test_mask_cache.c` | - | tests | 10 | 0 |
 | `tests/test_media_decoder.c` | test_pacer_paces_by_pts_delta: #include "media_decoder.h" /* First frame anchors the epoch and... | tests | 6 | 0 |
+| `tests/test_nav_token.c` | Suite for nav_token (spec/nav_token.md). | tests | 7 | 0 |
 | `tests/test_net_guard.c` | Suite for net_guard (spec/net_guard.md). | tests | 10 | 0 |
 | `tests/test_net_realm.c` | test_classify_host_lookalikes: static void test_classify_host_i2p(void **state) { (void)state... | tests | 13 | 0 |
 | `tests/test_os_sandbox.c` | test_policy_denies_io_uring: io_uring is a seccomp-bypass primitive (its IORING_OP_* operations... | tests | 19 | 0 |
-| `tests/test_page_view.c` | ids_probe: spec/page_view.md "Los ids de la vista son handles del DOM vivo": with a resolver the... | tests | 227 | 0 |
+| `tests/test_page_view.c` | ids_probe: spec/page_view.md "Los ids de la vista son handles del DOM vivo": with a resolver the... | tests | 229 | 0 |
 | `tests/test_pdf_export.c` | - | tests | 30 | 0 |
 | `tests/test_perf_trace.c` | - | tests | 12 | 0 |
 | `tests/test_pq_seal.c` | test_requires_both_secrets_and_detects_tamper: static void test_each_seal_is_fresh(void **state)... | tests | 7 | 0 |
-| `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 18 | 0 |
+| `tests/test_prefetch.c` | Tests for prefetch (Hito 29): pure lookahead scanner + parallel download pool. | tests | 19 | 0 |
 | `tests/test_prefs.c` | - | tests | 15 | 0 |
 | `tests/test_pres_hints.c` | test_pres_hints -- HTML presentational attributes (spec/pres_hints.md). | tests | 14 | 0 |
 | `tests/test_profile.c` | dir: include "prefs.h" include "profile.h" | tests | 17 | 0 |
@@ -317,10 +324,11 @@
 | `tests/test_sha2.c` | test_sha2 -- CMocka suite for the pure SHA-1/256/384/512 (FIPS 180-4 vectors). | tests | 7 | 0 |
 | `tests/test_sheet_cache.c` | Suite for sheet_cache (spec/sheet_cache.md). | tests | 20 | 0 |
 | `tests/test_shm_slots.c` | - | tests | 4 | 0 |
-| `tests/test_subreq_batch.c` | subreq_batch (spec/subreq_async.md): parallelism, issue order, refusals, reuse. | tests | 9 | 0 |
+| `tests/test_site_panel.c` | Suite for site_panel (spec/site_panel.md). | tests | 13 | 0 |
+| `tests/test_subreq_batch.c` | subreq_batch (spec/subreq_async.md): parallelism, issue order, refusals, reuse. | tests | 13 | 0 |
 | `tests/test_svg_raster.c` | tests/test_svg_raster.c -- CMocka suite for SVG-as-image rasterization (sr_). spec/svg_raster.md... | tests | 10 | 0 |
 | `tests/test_svg_render.c` | tests/test_svg_render.c — CMocka suite for the pure inline-SVG parser (sv_). | tests | 17 | 0 |
-| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 176 | 0 |
+| `tests/test_tab.c` | sink_cap: Served-stylesheet sink (spec/webfont.md b3b): the parent observes each served 2xx CSS... | tests | 183 | 0 |
 | `tests/test_table_layout.c` | test_table_layout -- automatic table layout (spec/table_layout.md). | tests | 14 | 0 |
 | `tests/test_text_case.c` | - | tests | 4 | 0 |
 | `tests/test_text_shape.c` | inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font... | tests | 28 | 0 |
@@ -328,6 +336,8 @@
 | `tests/test_tls_impersonate.c` | - | tests | 11 | 0 |
 | `tests/test_ui.c` | assert_line: Build: make test   ;   ASan: make asan  #include <stdarg.h> #include <stddef.h>... | tests | 13 | 0 |
 | `tests/test_url.c` | test_validate_long_bundle_url: Modern bundle URLs exceed 2048 bytes (google.com's xjs script URL... | tests | 49 | 0 |
+| `tests/test_video_controls.c` | - | tests | 8 | 0 |
+| `tests/test_video_pick.c` | - | tests | 8 | 0 |
 | `tests/test_web_storage.c` | - | tests | 9 | 0 |
 | `tests/test_webcaps.c` | mk: projection, and the headless operator-flag path.  #include <setjmp.h> #include <stdarg.h>... | tests | 11 | 0 |
 | `tests/test_webfont.c` | - | tests | 13 | 0 |

@@ -1,6 +1,42 @@
 # Subsystem: src (page 10 of 10)
 Previous: [KB_src_p9.md](KB_src_p9.md)
 
+## src/web_storage.c
+- Doc: utf8_ok: Well-formed UTF-8, allowing encoded surrogates (WTF-8): a JS string may hold a lone...
+- Layer: data_access
+- Language: c
+- Symbols:
+  - `wst_origin` (struct, line 12)
+  - `wst_db` (struct, line 20)
+  - `key_ref` (struct, line 54)
+  - `get_u32` (function, line 25) `static uint32_t get_u32(const unsigned char *p)`
+  - `utf8_ok` (function, line 32) `static int utf8_ok(const unsigned char *s, size_t n)`
+  - `key_cmp` (function, line 56) `static int key_cmp(const void *a, const void *b)`
+  - `check` (function, line 65) `static int check(const char *blob, size_t len, size_t *bytes_out)`
+  - `wst_decode_check` (function, line 101) `int wst_decode_check(const char *blob, size_t len)`
+  - `wst_new` (function, line 105) `wst_db *wst_new(void)`
+  - `wst_free` (function, line 109) `void wst_free(wst_db *db)`
+  - `find` (function, line 118) `static wst_origin *find(const wst_db *db, const char *origin)`
+  - `wst_encode` (function, line 125) `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len)`
+  - `wst_replace` (function, line 140) `int wst_replace(wst_db *db, const char *origin, const char *blob, size_t len)`
+  - `wst_origin_bytes` (function, line 175) `size_t wst_origin_bytes(const wst_db *db, const char *origin)`
+  - `wst_foreach` (function, line 181) `int wst_foreach(const char *blob, size_t len,
+                void (*fn)(void *ctx, const char *k...`
+  - `put_u32` (function, line 201) `static void put_u32(char *b, uint32_t v)`
+  - `wst_pack` (function, line 206) `int wst_pack(const char *const *keys, const size_t *klens,
+             const char *const *vals, ...`
+- Depends on: `include/web_storage.h`
+
+## src/webcaps.c
+- Layer: utility
+- Language: c
+- Symbols:
+  - `wc_safe` (function, line 10) `wc_caps wc_safe(void)`
+  - `wc_derive` (function, line 15) `wc_caps wc_derive(wc_input in)`
+  - `wc_from_flags` (function, line 35) `wc_caps wc_from_flags(bool js, bool css, bool images)`
+  - `wc_render_caps` (function, line 46) `rdp_caps wc_render_caps(wc_caps c)`
+- Depends on: `include/webcaps.h`
+
 ## src/webfont.c
 - Doc: ci_eq_span: #include <stdint.h> #include <stdlib.h> #include <string.h> static int is_ws(char c)...
 - Layer: utility

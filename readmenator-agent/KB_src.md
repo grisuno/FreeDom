@@ -128,43 +128,50 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
 - Layer: utility
 - Language: c
 - Symbols:
-  - `layout_block` (function, line 37) `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,
+  - `sc_chain` (struct, line 611)
+  - `len` (type_alias, line 610) `typedef struct sc_chain { uint16_t len;`
+  - `layout_block` (function, line 40) `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,
                    ...`
-  - `bt_nn` (function, line 58) `static double bt_nn(double v)`
-  - `height` (function, line 78) `* exactly that height (Flexbox 9.4 step 15).
+  - `bt_nn` (function, line 61) `static double bt_nn(double v)`
+  - `height` (function, line 81) `* exactly that height (Flexbox 9.4 step 15).
  *
  * wrap_reverse (node->wrap_reverse): when node->...`
-  - `layout_flex` (function, line 98) `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
+  - `layout_flex` (function, line 101) `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,
                     ...`
-  - `layout_grid` (function, line 280) `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
+  - `layout_grid` (function, line 283) `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,
                     ...`
-  - `layout_node` (function, line 420) `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
-  - `bt_layout` (function, line 465) `bt_status bt_layout(bt_node *root, double avail_w)`
-  - `assign_doc_order` (function, line 505) `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
+  - `layout_node` (function, line 423) `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)`
+  - `bt_layout` (function, line 468) `bt_status bt_layout(bt_node *root, double avail_w)`
+  - `assign_doc_order` (function, line 508) `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,
                   ...`
-  - `find_positioned_ancestor` (function, line 522) `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
+  - `find_positioned_ancestor` (function, line 525) `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,
                        ...`
-  - `resolve_inset` (function, line 542) `static double resolve_inset(int v, int pct_pm, double basis)`
-  - `inset_unset` (function, line 551) `static int inset_unset(int v, int pct_pm)`
-  - `bt_containing_block` (function, line 555) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
+  - `resolve_inset` (function, line 545) `static double resolve_inset(int v, int pct_pm, double basis)`
+  - `inset_unset` (function, line 554) `static int inset_unset(int v, int pct_pm)`
+  - `bt_containing_block` (function, line 558) `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,
                         ...`
-  - `block` (function, line 566) `* true block (same flow neighbourhood), strictly better than zeros. NULL
+  - `block` (function, line 569) `* true block (same flow neighbourhood), strictly better than zeros. NULL
      * placed keeps lega...`
-  - `bt_resolve_positioning` (function, line 585) `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
+  - `bt_resolve_positioning` (function, line 588) `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                           ...`
-  - `bt_resolve_positioning_ex` (function, line 596) `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
+  - `sc_forms` (function, line 616) `static int sc_forms(const pv_box_def *b)`
+  - `sc_chain_compare` (function, line 629) `static int sc_chain_compare(const sc_chain *a, const sc_chain *b, const cx_item *by_ref)`
+  - `nest_in_contexts` (function, line 638) `static void nest_in_contexts(const pv_box_def *boxes, size_t nbox, const bt_positioned *tmp,
+    ...`
+  - `bt_resolve_positioning_ex` (function, line 706) `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                        ...`
-  - `oof_walk` (function, line 751) `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)`
-  - `bt_oof_anchor` (function, line 768) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
-  - `bt_oof_root` (function, line 772) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
-  - `bt_box_hidden` (function, line 776) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
-  - `bt_in_subtree` (function, line 789) `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)`
-  - `bt_oof_avail` (function, line 800) `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
-  - `bt_defer_roots` (function, line 808) `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
+  - `oof_walk` (function, line 862) `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)`
+  - `bt_oof_anchor` (function, line 879) `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
+  - `bt_oof_root` (function, line 883) `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
+  - `bt_box_hidden` (function, line 887) `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
+  - `bt_in_subtree` (function, line 900) `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)`
+  - `bt_oof_avail` (function, line 911) `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
+  - `bt_defer_roots` (function, line 919) `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
                       const bt_positi...`
-  - `sized` (function, line 350) `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
-  - `BT_LEN_AUTO` (macro, line 31) `#define BT_LEN_AUTO`
-  - `BT_WRAP_EPS` (macro, line 62) `#define BT_WRAP_EPS`
+  - `sized` (function, line 353) `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);`
+  - `BT_LEN_AUTO` (macro, line 34) `#define BT_LEN_AUTO`
+  - `BT_WRAP_EPS` (macro, line 65) `#define BT_WRAP_EPS`
+  - `BT_SC_DEPTH` (macro, line 609) `#define BT_SC_DEPTH`
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ## src/browser.c
@@ -255,18 +262,21 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
   - `rect` (function, line 17) `static chl_rect rect(double x, double y, double w, double h)`
   - `chl_rect_has` (function, line 26) `int chl_rect_has(chl_rect r, double x, double y)`
   - `chl_compute` (function, line 30) `chl_status chl_compute(double width, int csd, int tab_count, int active, chl_layout *out)`
-  - `chl_tab_rect` (function, line 96) `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)`
-  - `chl_tab_close_rect` (function, line 106) `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)`
-  - `chl_hit` (function, line 116) `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)`
-  - `lower` (function, line 147) `static int lower(int c)`
-  - `has_prefix_ci` (function, line 150) `static int has_prefix_ci(const char *s, const char *prefix)`
-  - `host_ends_with` (function, line 157) `static int host_ends_with(const char *h, size_t n, const char *suffix)`
-  - `url_host` (function, line 167) `static size_t url_host(const char *rest, const char **out)`
-  - `chl_identity_of` (function, line 185) `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,
+  - `chl_tab_rect` (function, line 112) `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)`
+  - `chl_tab_close_rect` (function, line 122) `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)`
+  - `chl_hit` (function, line 132) `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)`
+  - `chl_tab_drop_index` (function, line 165) `int chl_tab_drop_index(const chl_layout *l, double x)`
+  - `chl_move_index` (function, line 175) `int chl_move_index(int i, int from, int to)`
+  - `chl_tab_for_digit` (function, line 182) `int chl_tab_for_digit(int digit, int tab_count)`
+  - `lower` (function, line 190) `static int lower(int c)`
+  - `has_prefix_ci` (function, line 193) `static int has_prefix_ci(const char *s, const char *prefix)`
+  - `host_ends_with` (function, line 200) `static int host_ends_with(const char *h, size_t n, const char *suffix)`
+  - `url_host` (function, line 210) `static size_t url_host(const char *rest, const char **out)`
+  - `chl_identity_of` (function, line 228) `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,
                ...`
-  - `chl_identity_label` (function, line 209) `const char *chl_identity_label(chl_identity id)`
-  - `chl_findbar_compute` (function, line 226) `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)`
-  - `chl_findbar_hit` (function, line 262) `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)`
+  - `chl_identity_label` (function, line 252) `const char *chl_identity_label(chl_identity id)`
+  - `chl_findbar_compute` (function, line 269) `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)`
+  - `chl_findbar_hit` (function, line 305) `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)`
   - `CHL_TAB_CLOSE_INSET` (macro, line 9) `#define CHL_TAB_CLOSE_INSET`
   - `CHL_URL_GAP` (macro, line 11) `#define CHL_URL_GAP`
   - `CHL_ID_INSET` (macro, line 13) `#define CHL_ID_INSET`

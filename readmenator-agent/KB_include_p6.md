@@ -1,6 +1,55 @@
 # Subsystem: include (page 6 of 6)
 Previous: [KB_include_p5.md](KB_include_p5.md)
 
+## include/ui.h
+- Doc: ui_line: A laid-out line is a contiguous slice [offset, offset+len) of the source * text (no...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `ui_line` (struct, line 30)
+  - `ui_layout` (struct, line 35)
+  - `rd_doc` (struct, line 74)
+  - `jg_table` (struct, line 100)
+  - `tab` (struct, line 110)
+  - `fh_host` (struct, line 130)
+  - `ui_status` (enum, line 20)
+  - `offset` (type_alias, line 30) `typedef struct ui_line { size_t offset;`
+  - `space` (function, line 44) `* Breaks at the last fitting space (the break space is consumed), hard-breaks * words longer than max_cols, and...`
+  - `ui_layout_free` (function, line 52) `void ui_layout_free(ui_layout *lay);`
+  - `ui_clamp_scroll` (function, line 55) `size_t ui_clamp_scroll(size_t desired, size_t total_lines, size_t viewport_lines);`
+  - `shortcut` (function, line 71) `* from a keyboard shortcut (Ctrl+Shift+E only relaxes a weak-but-valid certificate). */ void...`
+  - `available` (function, line 91) `* cheapest artifact to inspect a render where no display is available (CI, an AI * agent): export, then read the PNG...`
+  - `out` (function, line 103) `* ui_render_png does and fills *out (jg_init'ed by the caller) with one rect per * element in document coordinates...`
+  - `placeholders` (function, line 113) `* above always draw image placeholders (no worker to decode hostile bytes);`
+  - `disk` (function, line 118) `* images are read from disk (confined to the document directory by render_doc). * top_url is the page origin (https...`
+  - `images` (function, line 120) `* fetcher loads no images (placeholders, as before). Any image that fails falls back * to its placeholder...`
+  - `ui_render_viewport_w` (function, line 156) `int ui_render_viewport_w(void);`
+  - `ui_persisted_prefs` (function, line 161) `int ui_persisted_prefs(prefs_state *out);`
+  - `FREEDOM_UI_H` (macro, line 2) `#define FREEDOM_UI_H`
+- Depends on: `include/prefs.h`
+- Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/freedom.c`, `src/ui_layout.c`, `tests/test_ui.c`
+
+## include/url.h
+- Doc: url_parts: Components of a validated absolute https URL, sliced for a JS location object.
+- Layer: utility
+- Language: h
+- Symbols:
+  - `url_parts` (struct, line 129)
+  - `url_status` (enum, line 32)
+  - `url_omni_kind` (enum, line 78)
+  - `url_is_https` (function, line 42) `int url_is_https(const char *s);`
+  - `url_has_scheme` (function, line 46) `int url_has_scheme(const char *s);`
+  - `url_authority_len` (function, line 51) `size_t url_authority_len(const char *url);`
+  - `URL_ERR_NOT_HTTPS` (function, line 109) `* URL_ERR_NOT_HTTPS (out untouched);`
+  - `path` (function, line 115) `* absolute path ("file:///..."). NULL => 0. */ int url_is_file(const char *s);`
+  - `url_file_path` (function, line 121) `const char *url_file_path(const char *s);`
+  - `url` (function, line 126) `* Every field ALIASES the input url (not owned, valid while url is alive);`
+  - `password` (function, line 152) `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When...`
+  - `FREEDOM_URL_H` (macro, line 2) `#define FREEDOM_URL_H`
+  - `URL_MAX_LEN` (macro, line 30) `#define URL_MAX_LEN`
+  - `URL_SEARCH_ENDPOINT` (macro, line 76) `#define URL_SEARCH_ENDPOINT`
+- Imported by: `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
+
 ## include/util.h
 - Doc: — shared pure helpers (no I/O except where noted).
 - Layer: utility
@@ -13,6 +62,49 @@ Previous: [KB_include_p5.md](KB_include_p5.md)
   - `fnv1a` (function, line 67) `static inline uint64_t fnv1a(const char *s, size_t n)`
   - `UTIL_H` (macro, line 5) `#define UTIL_H`
 - Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
+
+## include/video_controls.h
+- Doc: vcl_layout: Lays out the bar inside the video rect (x,y,w,h).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `vcl_rect` (struct, line 27)
+  - `vcl_geom` (struct, line 29)
+  - `vcl_hit_kind` (enum, line 38)
+  - `h` (type_alias, line 26) `typedef struct vcl_rect { double x, y, w, h;`
+  - `bar` (type_alias, line 28) `typedef struct vcl_geom { vcl_rect bar;`
+  - `vcl_layout` (function, line 47) `int vcl_layout(double x, double y, double w, double h, vcl_geom *g);`
+  - `frac` (function, line 50) `* *frac (may be NULL) receives the track position for VCL_HIT_SEEK, else 0. */ vcl_hit_kind vcl_hit(const vcl_geom...`
+  - `vcl_seg_duration` (function, line 55) `double vcl_seg_duration(double d);`
+  - `vcl_total` (function, line 58) `double vcl_total(const hls_playlist *pl);`
+  - `start` (function, line 61) `* in *start (may be NULL). NULL/empty playlist => 0 and *start = 0. */ size_t vcl_segment_at(const hls_playlist *pl...`
+  - `vcl_segment_start` (function, line 65) `double vcl_segment_start(const hls_playlist *pl, size_t idx);`
+  - `vcl_position` (function, line 68) `double vcl_position(double base_s, int64_t pts0_us, int64_t pts_us, double total);`
+  - `vcl_clamp_frac` (function, line 71) `double vcl_clamp_frac(double f);`
+  - `vcl_format_time` (function, line 75) `size_t vcl_format_time(double seconds, char *buf, size_t cap);`
+  - `FREEDOM_VIDEO_CONTROLS_H` (macro, line 2) `#define FREEDOM_VIDEO_CONTROLS_H`
+  - `VCL_BAR_H` (macro, line 18) `#define VCL_BAR_H`
+  - `VCL_MIN_W` (macro, line 19) `#define VCL_MIN_W`
+  - `VCL_MIN_H` (macro, line 20) `#define VCL_MIN_H`
+  - `VCL_PAD` (macro, line 21) `#define VCL_PAD`
+  - `VCL_TEXT_W` (macro, line 22) `#define VCL_TEXT_W`
+  - `VCL_TRACK_H` (macro, line 23) `#define VCL_TRACK_H`
+  - `VCL_MAX_SEGMENT_S` (macro, line 24) `#define VCL_MAX_SEGMENT_S`
+  - `VCL_SEEK_STEP_S` (macro, line 25) `#define VCL_SEEK_STEP_S`
+- Depends on: `include/hls.h`
+- Imported by: `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `src/video_controls.c`, `tests/test_video_controls.c`
+
+## include/video_pick.h
+- Doc: Which video a click plays (spec/video_pick.md).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `vpk_playable` (function, line 15) `int vpk_playable(const char *src);`
+  - `vpk_first_video` (function, line 18) `const char *vpk_first_video(const pv_view *v);`
+  - `vpk_for_frame` (function, line 23) `const char *vpk_for_frame(const pv_view *frame_view, const char *top_video);`
+  - `FREEDOM_VIDEO_PICK_H` (macro, line 2) `#define FREEDOM_VIDEO_PICK_H`
+- Depends on: `include/page_view.h`
+- Imported by: `gui/browser_ui.c`, `src/video_pick.c`, `tests/test_video_pick.c`
 
 ## include/web_storage.h
 - Doc: wst_new: web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing...

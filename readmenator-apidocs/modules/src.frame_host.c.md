@@ -1,17 +1,21 @@
 # `src/frame_host.c`
 
-> Source: [src/frame_host.c:1](../../src/frame_host.c#L1) | language `c` | coverage 70.0% | [API index](../index.md)
+> Source: [src/frame_host.c:1](../../src/frame_host.c#L1) | language `c` | coverage 71.4% | [API index](../index.md)
 
 ## Contents
 
-- **Structs:** [`fh_slot`](#fh_slot), [`fh_host`](#fh_host)
-- **Functions:** [`fh_new`](#fh_new), [`fh_free`](#fh_free), [`fh_count`](#fh_count), [`fh_apply_top`](#fh_apply_top), [`fh_tick`](#fh_tick), [`fh_generation`](#fh_generation), [`fh_frame_view`](#fh_frame_view)
+- **Structs:** [`fh_job`](#fh_job), [`fh_slot`](#fh_slot), [`fh_host`](#fh_host)
+- **Functions:** [`thread`](#thread), [`fh_new`](#fh_new), [`fh_free`](#fh_free), [`fh_count`](#fh_count), [`fh_set_async`](#fh_set_async), [`fh_apply_top`](#fh_apply_top), [`fh_tick`](#fh_tick), [`fh_generation`](#fh_generation), [`fh_frame_view`](#fh_frame_view)
 
 ## Type Diagram
 
 ```mermaid
 classDiagram
     direction LR
+    class fh_job
+    <<struct>> fh_job
+    class fh_job_mu
+    <<type_alias>> fh_job_mu
     class fh_slot
     <<struct>> fh_slot
     class fh_host
@@ -39,11 +43,47 @@ flowchart LR
 
 ## Structs
 
+<a id="fh_job"></a>
+
+### `fh_job`
+
+`struct` | [src/frame_host.c:18](../../src/frame_host.c#L18)
+
+```c
+typedef struct fh_job
+```
+
+One frame load: fetch + confined worker + its first load.
+
+Run inline (headless) or on its own thread (fh_set_async); `done`/`orphan` are guarded by mu. An orphaned job (frame closed or host freed while it ran) is freed by its own thread.
+
+**Members**
+
+| Member | Kind | Summary |
+|---|---|---|
+| [`mu`](#fh_job-mu) | type_alias | One frame load: fetch + confined worker + its first load. |
+
+<a id="fh_job-mu"></a>
+
+#### `fh_job.mu`
+
+`type_alias` | [src/frame_host.c:18](../../src/frame_host.c#L18)
+
+```c
+typedef struct fh_job { pthread_mutex_t mu;
+```
+
+One frame load: fetch + confined worker + its first load.
+
+Run inline (headless) or on its own thread (fh_set_async); `done`/`orphan` are guarded by mu. An orphaned job (frame closed or host freed while it ran) is freed by its own thread.
+
+---
+
 <a id="fh_slot"></a>
 
 ### `fh_slot`
 
-`struct` | [src/frame_host.c:14](../../src/frame_host.c#L14)
+`struct` | [src/frame_host.c:31](../../src/frame_host.c#L31)
 
 ```c
 typedef struct fh_slot
@@ -55,7 +95,7 @@ typedef struct fh_slot
 
 ### `fh_host`
 
-`struct` | [src/frame_host.c:22](../../src/frame_host.c#L22)
+`struct` | [src/frame_host.c:40](../../src/frame_host.c#L40)
 
 ```c
 struct fh_host
@@ -65,11 +105,25 @@ struct fh_host
 
 ## Functions
 
+<a id="thread"></a>
+
+### `thread`
+
+`function` | [src/frame_host.c:16](../../src/frame_host.c#L16)
+
+```c
+* thread (fh_set_async);
+```
+
+**Returns:** `*`
+
+---
+
 <a id="fh_new"></a>
 
 ### `fh_new`
 
-`function` | [src/frame_host.c:35](../../src/frame_host.c#L35)
+`function` | [src/frame_host.c:54](../../src/frame_host.c#L54)
 
 ```c
 fh_host *fh_new(const char *top_url, tab_fetch_fn fetch, void *fetch_ctx, fh_top_msg_fn top_msg, void *top_ctx)
@@ -91,7 +145,7 @@ NULL on OOM or bad args.
 
 **Returns:** `fh_host *`
 
-> **Inherited:** Documentation from [`fh_new`](#fh_new) (include/frame_host.h:28).
+> **Inherited:** Documentation from [`fh_new`](#fh_new) (include/frame_host.h:29).
 
 *Calls:* [`fbk_init`](include.frame_broker.h.md#fbk_init)
 
@@ -101,13 +155,13 @@ NULL on OOM or bad args.
 
 ### `fh_free`
 
-`function` | [src/frame_host.c:67](../../src/frame_host.c#L67)
+`function` | [src/frame_host.c:145](../../src/frame_host.c#L145)
 
 ```c
 void fh_free(fh_host *h)
 ```
 
-Closes every frame worker and frees the host.
+Closes every frame worker and frees the host; a frame still loading is abandoned (its thread closes its own worker when it ends), never waited for.
 
 Idempotent on NULL.
 
@@ -117,7 +171,7 @@ Idempotent on NULL.
 |---|---|---|---|
 | `h` | `fh_host *` |  |  |
 
-> **Inherited:** Documentation from [`fh_free`](#fh_free) (include/frame_host.h:32).
+> **Inherited:** Documentation from [`fh_free`](#fh_free) (include/frame_host.h:39).
 
 ---
 
@@ -125,7 +179,7 @@ Idempotent on NULL.
 
 ### `fh_count`
 
-`function` | [src/frame_host.c:76](../../src/frame_host.c#L76)
+`function` | [src/frame_host.c:156](../../src/frame_host.c#L156)
 
 ```c
 int fh_count(const fh_host *h)
@@ -141,7 +195,32 @@ Number of live frame workers (excludes the top).
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`fh_count`](#fh_count) (include/frame_host.h:43).
+> **Inherited:** Documentation from [`fh_count`](#fh_count) (include/frame_host.h:50).
+
+---
+
+<a id="fh_set_async"></a>
+
+### `fh_set_async`
+
+`function` | [src/frame_host.c:227](../../src/frame_host.c#L227)
+
+```c
+void fh_set_async(fh_host *h, int on)
+```
+
+on != 0: each FRAME_OPEN loads its frame on a background thread and fh_tick integrates it (spec/frame_broker.md section 4); the window turns it on, the headless export keeps loads synchronous.
+
+Set before the first fh_apply_top.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `h` | `fh_host *` |  |  |
+| `on` | `int` |  |  |
+
+> **Inherited:** Documentation from [`fh_set_async`](#fh_set_async) (include/frame_host.h:35).
 
 ---
 
@@ -149,7 +228,7 @@ Number of live frame workers (excludes the top).
 
 ### `fh_apply_top`
 
-`function` | [src/frame_host.c:222](../../src/frame_host.c#L222)
+`function` | [src/frame_host.c:323](../../src/frame_host.c#L323)
 
 ```c
 void fh_apply_top(fh_host *h, const tab_page *page)
@@ -164,7 +243,7 @@ Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP 
 | `h` | `fh_host *` |  |  |
 | `page` | `tab_page *` |  |  |
 
-> **Inherited:** Documentation from [`fh_apply_top`](#fh_apply_top) (include/frame_host.h:36).
+> **Inherited:** Documentation from [`fh_apply_top`](#fh_apply_top) (include/frame_host.h:43).
 
 ---
 
@@ -172,7 +251,7 @@ Processes the frame ops (kinds FRAME_OPEN/CLOSE/POST) among page->ws of the TOP 
 
 ### `fh_tick`
 
-`function` | [src/frame_host.c:227](../../src/frame_host.c#L227)
+`function` | [src/frame_host.c:328](../../src/frame_host.c#L328)
 
 ```c
 int fh_tick(fh_host *h, int elapsed_ms)
@@ -191,7 +270,7 @@ Returns the smallest pending frame timer in ms, or -1 when none.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`fh_tick`](#fh_tick) (include/frame_host.h:40).
+> **Inherited:** Documentation from [`fh_tick`](#fh_tick) (include/frame_host.h:47).
 
 *Calls:* [`fbk_origin`](include.frame_broker.h.md#fbk_origin), [`tab_tick`](src.tab.c.md#tab_tick)
 
@@ -201,7 +280,7 @@ Returns the smallest pending frame timer in ms, or -1 when none.
 
 ### `fh_generation`
 
-`function` | [src/frame_host.c:251](../../src/frame_host.c#L251)
+`function` | [src/frame_host.c:353](../../src/frame_host.c#L353)
 
 ```c
 unsigned fh_generation(const fh_host *h)
@@ -217,7 +296,7 @@ Changes whenever any frame view appears, is replaced or goes away: repaint the f
 
 **Returns:** `unsigned`
 
-> **Inherited:** Documentation from [`fh_generation`](#fh_generation) (include/frame_host.h:52).
+> **Inherited:** Documentation from [`fh_generation`](#fh_generation) (include/frame_host.h:59).
 
 ---
 
@@ -225,7 +304,7 @@ Changes whenever any frame view appears, is replaced or goes away: repaint the f
 
 ### `fh_frame_view`
 
-`function` `const` | [src/frame_host.c:253](../../src/frame_host.c#L253)
+`function` `const` | [src/frame_host.c:355](../../src/frame_host.c#L355)
 
 ```c
 const pv_view *fh_frame_view(const fh_host *h, const char *url, tab **t_out)
@@ -245,7 +324,7 @@ The document of the frame loaded from [`url`](include.css_import.h.md#url), as i
 
 **Returns:** `pv_view *`
 
-> **Inherited:** Documentation from [`fh_frame_view`](#fh_frame_view) (include/frame_host.h:49).
+> **Inherited:** Documentation from [`fh_frame_view`](#fh_frame_view) (include/frame_host.h:56).
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 

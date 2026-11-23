@@ -190,14 +190,16 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_flex_single_line_definite_height` (function, line 1018) `static void test_flex_single_line_definite_height(void **state)`
   - `test_grid_justify_self` (function, line 1045) `static void test_grid_justify_self(void **state)`
   - `dbox` (function, line 1071) `static pv_box_def dbox(int parent, int position, int z)`
-  - `test_defer_relative_after_abs` (function, line 1080) `static void test_defer_relative_after_abs(void **state)`
-  - `test_defer_relative_before_abs_is_not_deferred` (function, line 1097) `static void test_defer_relative_before_abs_is_not_deferred(void **state)`
-  - `test_defer_respects_z_order` (function, line 1109) `static void test_defer_respects_z_order(void **state)`
-  - `test_defer_outermost_root_and_negative_z` (function, line 1124) `static void test_defer_outermost_root_and_negative_z(void **state)`
-  - `test_defer_nested_higher_z_keeps_own_turn` (function, line 1148) `static void test_defer_nested_higher_z_keeps_own_turn(void **state)`
-  - `test_defer_uses_tree_order_not_index` (function, line 1170) `static void test_defer_uses_tree_order_not_index(void **state)`
-  - `test_defer_fails_open` (function, line 1186) `static void test_defer_fails_open(void **state)`
-  - `main` (function, line 1200) `int main(void)`
+  - `test_child_of_negative_context_follows_it` (function, line 1131) `static void test_child_of_negative_context_follows_it(void **state)`
+  - `test_relative_context_does_not_capture` (function, line 1150) `static void test_relative_context_does_not_capture(void **state)`
+  - `test_defer_relative_after_abs` (function, line 1168) `static void test_defer_relative_after_abs(void **state)`
+  - `test_defer_relative_before_abs_is_not_deferred` (function, line 1185) `static void test_defer_relative_before_abs_is_not_deferred(void **state)`
+  - `test_defer_respects_z_order` (function, line 1197) `static void test_defer_respects_z_order(void **state)`
+  - `test_defer_outermost_root_and_negative_z` (function, line 1212) `static void test_defer_outermost_root_and_negative_z(void **state)`
+  - `test_defer_nested_higher_z_keeps_own_turn` (function, line 1236) `static void test_defer_nested_higher_z_keeps_own_turn(void **state)`
+  - `test_defer_uses_tree_order_not_index` (function, line 1258) `static void test_defer_uses_tree_order_not_index(void **state)`
+  - `test_defer_fails_open` (function, line 1274) `static void test_defer_fails_open(void **state)`
+  - `main` (function, line 1288) `int main(void)`
   - `card` (function, line 769) `* containing block climbs the unplaced card(1) → placed ancestor(0, x=100). */ assert_true(dbl_eq(out[2].x, 100));`
   - `UNSET4` (macro, line 630) `#define UNSET4`
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
@@ -274,7 +276,11 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_identity_table` (function, line 145) `static void test_identity_table(void **state)`
   - `test_identity_labels` (function, line 175) `static void test_identity_labels(void **state)`
   - `test_findbar` (function, line 185) `static void test_findbar(void **state)`
-  - `main` (function, line 225) `int main(void)`
+  - `test_hidden_tab_indicators` (function, line 226) `static void test_hidden_tab_indicators(void **state)`
+  - `test_tab_drop_index` (function, line 264) `static void test_tab_drop_index(void **state)`
+  - `test_tab_for_digit` (function, line 285) `static void test_tab_for_digit(void **state)`
+  - `test_move_index` (function, line 298) `static void test_move_index(void **state)`
+  - `main` (function, line 315) `int main(void)`
 - Depends on: `include/chrome_layout.h`
 
 ## tests/test_compositor.c

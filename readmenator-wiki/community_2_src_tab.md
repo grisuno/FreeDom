@@ -1,49 +1,49 @@
 # src: tab
 
-*Community 2 | 53 files | cohesion 0.70*
+*Community 2 | 56 files | cohesion 0.70*
 
 ## Definition
 
-This community groups 53 file(s) rooted at `src` with dominant language c (cohesion 0.70). Central symbols: `CI_COND_MAX`, `CI_MAX_DEPTH`, `CI_MAX_PER_PAGE`, `CI_MAX_PER_SHEET`, `CI_URL_MAX`, `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`. Core file: `tests/test_js_dom.c` (277 symbols). Documented purpose: css_import -- @import prelude reader (spec/css_import.md). Pure: no I/O, no allocation, no global state. Every read is bounded by len..
+This community groups 56 file(s) rooted at `src` with dominant language c (cohesion 0.70). Central symbols: `CI_COND_MAX`, `CI_MAX_DEPTH`, `CI_MAX_PER_PAGE`, `CI_MAX_PER_SHEET`, `CI_URL_MAX`, `CSS_PAGE`, `DOC`, `DOM_KIND_COMMENT`. Core file: `tests/test_js_dom.c` (280 symbols). Documented purpose: css_import -- @import prelude reader (spec/css_import.md). Pure: no I/O, no allocation, no global state. Every read is bounded by len..
 
 ## Files
 
-### `src` (24 files)
+### `src` (25 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/css_import.c` | c | utility | 17 | yes |
 | `src/fb_cmdline.c` | c | utility | 13 | no |
+| `src/fb_panes.c` | c | utility | 10 | no |
 | `src/freebug.c` | c | utility | 9 | no |
 | `src/html_parse.c` | c | utility | 29 | no |
 | `src/js_custom_elements.c` | c | utility | 1 | no |
 | `src/js_custom_elements.h` | h | utility | 2 | yes |
-| `src/js_dom.c` | c | utility | 64 | no |
 
-### `include` (15 files)
+### `include` (16 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/css_import.h` | h | utility | 12 | no |
 | `include/dom.h` | h | utility | 32 | no |
 | `include/fb_cmdline.h` | h | utility | 18 | no |
+| `include/fb_panes.h` | h | utility | 12 | no |
 | `include/freebug.h` | h | utility | 18 | no |
 | `include/html_parse.h` | h | utility | 24 | no |
 | `include/js_dom.h` | h | utility | 23 | no |
-| `include/js_env.h` | h | infrastructure | 4 | no |
 
-### `tests` (14 files)
+### `tests` (15 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_css_import.c` | c | testing | 20 | yes |
 | `tests/test_dom.c` | c | testing | 45 | no |
 | `tests/test_fb_cmdline.c` | c | testing | 7 | no |
+| `tests/test_fb_panes.c` | c | testing | 11 | no |
 | `tests/test_freebug.c` | c | testing | 13 | no |
 | `tests/test_html_parse.c` | c | testing | 24 | no |
-| `tests/test_js_dom.c` | c | testing | 277 | no |
 
-*... and 33 more files in this community.*
+*... and 36 more files in this community.*
 
 
 ## Key Symbols
@@ -81,25 +81,24 @@ This community groups 53 file(s) rooted at `src` with dominant language c (cohes
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 127
-- Cross-boundary resolved imports (EXTRACTED): 56
+- Internal resolved imports (EXTRACTED): 131
+- Cross-boundary resolved imports (EXTRACTED): 57
 
 ## Connections
 
-- [EXTRACTED] depends_on community 1 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
+- [EXTRACTED] depends_on community 0 <-> 2 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.
 - [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
 - [EXTRACTED] depends_on community 8 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/tab.h imports include/freebug.h.
-- [EXTRACTED] depends_on community 2 <-> 3 (strength 0.9): Extracted import edge crosses communities: src/fb_cmdline.c imports include/fb_panes.h.
+- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
 
 ## Risks
 
 - [cycle] `include/js_dom.h` -> `include/js_location.h` -> `include/js_dom.h`
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
-- [dataflow UNCHECKED_ALLOC] `src/js_events.c:31` `jd_click_state_new` `s`: Result of allocator stored in `s` is never checked against NULL.
 
 ## Open Questions
 
-- Why do 47 file(s) lack file-level docs (e.g. `include/css_import.h`)? What purpose do they serve?
+- Why do 50 file(s) lack file-level docs (e.g. `include/css_import.h`)? What purpose do they serve?
 - Can the cycle `include/js_dom.h` -> `include/js_location.h` be broken with an interface?
 - What would break if the most connected file in src: tab changed?
 - Should src: tab be split, given cohesion 0.70?
@@ -109,6 +108,7 @@ This community groups 53 file(s) rooted at `src` with dominant language c (cohes
 - `include/css_import.h`
 - `include/dom.h`
 - `include/fb_cmdline.h`
+- `include/fb_panes.h`
 - `include/freebug.h`
 - `include/html_parse.h`
 - `include/js_dom.h`
@@ -123,7 +123,6 @@ This community groups 53 file(s) rooted at `src` with dominant language c (cohes
 - `include/web_storage.h`
 - `src/css_import.c`
 - `src/fb_cmdline.c`
+- `src/fb_panes.c`
 - `src/freebug.c`
-- `src/html_parse.c`
-- `src/js_custom_elements.c`
-- *... and 33 more*
+- *... and 36 more*

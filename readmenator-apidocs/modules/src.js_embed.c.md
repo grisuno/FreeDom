@@ -25,6 +25,7 @@ flowchart LR
     n_src_dom_c__dom_get_by_tag["dom.dom_get_by_tag"]
     n_src_dom_c__dom_next_sibling["dom.dom_next_sibling"]
     n_src_dom_c__dom_set_attribute["dom.dom_set_attribute"]
+    n_src_tab_c__fn["tab.fn"]
     n_src_js_embed_c__jd_inject_video_shim -.-> n_src_js_native_c__jn_host_eval
     n_src_js_embed_c__jd_inject_video_shim -.-> n_src_js_sandbox_c__js_context_raw
     n_src_js_embed_c__jd_process_iframes -.-> n_include_dom_h__dom_get_attribute
@@ -36,6 +37,7 @@ flowchart LR
     n_src_js_embed_c__jd_process_iframes -.-> n_src_dom_c__dom_next_sibling
     n_src_js_embed_c__jd_process_iframes -.-> n_src_dom_c__dom_set_attribute
     n_src_js_embed_c__jd_process_iframes -.-> n_src_js_sandbox_c__js_context_raw
+    n_src_js_embed_c__jd_process_iframes -.-> n_src_tab_c__fn
 ```
 
 ## Functions
@@ -66,7 +68,7 @@ Runs before the pre-script preserve_view snapshot so video elements survive jQue
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`jd_video_from_scripts`](#jd_video_from_scripts) (include/js_dom.h:250).
+> **Inherited:** Documentation from [`jd_video_from_scripts`](#jd_video_from_scripts) (include/js_dom.h:252).
 
 ---
 
@@ -111,7 +113,7 @@ void jd_process_iframes(js_context *ctx, dom_index *idx, jd_fetch_fn fn, void *f
 | `fn` | `jd_fetch_fn` |  |  |
 | `fetch_ctx` | `void *` |  |  |
 
-*Calls:* [`dom_get_attribute`](include.dom.h.md#dom_get_attribute), [`dom_tag_name`](include.dom.h.md#dom_tag_name), [`dom_append_child`](src.dom.c.md#dom_append_child), [`dom_create_element`](src.dom.c.md#dom_create_element), [`dom_first_child`](src.dom.c.md#dom_first_child), [`dom_get_by_tag`](src.dom.c.md#dom_get_by_tag), [`dom_next_sibling`](src.dom.c.md#dom_next_sibling), [`dom_set_attribute`](src.dom.c.md#dom_set_attribute), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+*Calls:* [`dom_get_attribute`](include.dom.h.md#dom_get_attribute), [`dom_tag_name`](include.dom.h.md#dom_tag_name), [`dom_append_child`](src.dom.c.md#dom_append_child), [`dom_create_element`](src.dom.c.md#dom_create_element), [`dom_first_child`](src.dom.c.md#dom_first_child), [`dom_get_by_tag`](src.dom.c.md#dom_get_by_tag), [`dom_next_sibling`](src.dom.c.md#dom_next_sibling), [`dom_set_attribute`](src.dom.c.md#dom_set_attribute), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`fn`](src.tab.c.md#fn)
 
 ---
 

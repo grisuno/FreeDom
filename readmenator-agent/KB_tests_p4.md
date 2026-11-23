@@ -140,14 +140,18 @@ static void test_float_pack_m_holy_grail_pull_u...`
 - Layer: testing
 - Language: c
 - Symbols:
-  - `on_top_msg` (function, line 38) `static void on_top_msg(void *ctx, const char *data, size_t len)`
-  - `stub_fetch` (function, line 43) `static int stub_fetch(void *ctx, const char *method, const char *url, const char *body, size_t bl...`
-  - `test_open_route_both_ways_and_drop_mismatch` (function, line 56) `static void test_open_route_both_ways_and_drop_mismatch(void **state)`
-  - `test_frame_view_is_exposed_for_painting` (function, line 90) `static void test_frame_view_is_exposed_for_painting(void **state)`
-  - `test_removing_iframe_closes_worker` (function, line 112) `static void test_removing_iframe_closes_worker(void **state)`
-  - `test_failed_fetch_leaves_no_frame` (function, line 137) `static void test_failed_fetch_leaves_no_frame(void **state)`
-  - `test_bad_args` (function, line 153) `static void test_bad_args(void **state)`
-  - `main` (function, line 162) `int main(int argc, char **argv)`
+  - `on_top_msg` (function, line 39) `static void on_top_msg(void *ctx, const char *data, size_t len)`
+  - `stub_fetch` (function, line 44) `static int stub_fetch(void *ctx, const char *method, const char *url, const char *body, size_t bl...`
+  - `test_open_route_both_ways_and_drop_mismatch` (function, line 57) `static void test_open_route_both_ways_and_drop_mismatch(void **state)`
+  - `test_frame_view_is_exposed_for_painting` (function, line 91) `static void test_frame_view_is_exposed_for_painting(void **state)`
+  - `test_removing_iframe_closes_worker` (function, line 113) `static void test_removing_iframe_closes_worker(void **state)`
+  - `test_failed_fetch_leaves_no_frame` (function, line 138) `static void test_failed_fetch_leaves_no_frame(void **state)`
+  - `sleep_ms` (function, line 157) `static void sleep_ms(long ms)`
+  - `slow_stub_fetch` (function, line 162) `static int slow_stub_fetch(void *ctx, const char *method, const char *url, const char *body, size...`
+  - `ms_since` (function, line 168) `static long ms_since(const struct timespec *a)`
+  - `test_async_frames_load_off_thread` (function, line 174) `static void test_async_frames_load_off_thread(void **state)`
+  - `test_bad_args` (function, line 214) `static void test_bad_args(void **state)`
+  - `main` (function, line 223) `int main(int argc, char **argv)`
   - `_POSIX_C_SOURCE` (macro, line 1) `#define _POSIX_C_SOURCE`
 - Depends on: `include/frame_host.h`, `include/tab.h`
 
@@ -307,6 +311,7 @@ static void tes...`
 - Depends on: `include/image_decode.h`
 
 ## tests/test_hls.c
+- Doc: test_unterminated_tag_stays_in_bounds: static void test_segment_single_packet_and_bmff(void...
 - Layer: testing
 - Language: c
 - Symbols:
@@ -325,7 +330,16 @@ static void tes...`
   - `test_resolve_url_relative` (function, line 190) `static void test_resolve_url_relative(void **state)`
   - `test_resolve_url_deep_relative` (function, line 200) `static void test_resolve_url_deep_relative(void **state)`
   - `test_handles_windows_line_endings` (function, line 209) `static void test_handles_windows_line_endings(void **state)`
-  - `main` (function, line 219) `int main(void)`
+  - `fill_ts` (function, line 219) `static void fill_ts(unsigned char *b, size_t off, size_t packets)`
+  - `test_segment_error_status_rejected` (function, line 226) `static void test_segment_error_status_rejected(void **state)`
+  - `test_segment_text_body_rejected` (function, line 237) `static void test_segment_text_body_rejected(void **state)`
+  - `test_segment_ts_behind_fake_png` (function, line 249) `static void test_segment_ts_behind_fake_png(void **state)`
+  - `test_segment_single_packet_and_bmff` (function, line 259) `static void test_segment_single_packet_and_bmff(void **state)`
+  - `test_unterminated_tag_stays_in_bounds` (function, line 273) `static void test_unterminated_tag_stays_in_bounds(void **state)`
+  - `mirror_pl` (function, line 293) `static hls_playlist *mirror_pl(void)`
+  - `test_mirror_uses_declared_sibling_hosts` (function, line 307) `static void test_mirror_uses_declared_sibling_hosts(void **state)`
+  - `test_mirror_rejects_bad_inputs` (function, line 321) `static void test_mirror_rejects_bad_inputs(void **state)`
+  - `main` (function, line 337) `int main(void)`
 - Depends on: `include/hls.h`
 
 ## tests/test_host_conf.c

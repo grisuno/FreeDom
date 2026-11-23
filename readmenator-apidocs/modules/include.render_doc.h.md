@@ -329,7 +329,7 @@ const rd_block *rd_at(const rd_doc *d, size_t i);
 
 **Returns:** `rd_block *`
 
-*Called by:* [`inlines`](gui.browser_ui.c.md#inlines), [`them`](gui.browser_ui.c.md#them)
+*Called by:* [`inlines`](gui.browser_ui.c.md#inlines)
 
 ---
 

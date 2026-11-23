@@ -1,13 +1,13 @@
 # `gui/browser_ui_internal.h`
 
-> Source: [gui/browser_ui_internal.h:1](../../gui/browser_ui_internal.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
+> Source: [gui/browser_ui_internal.h:1](../../gui/browser_ui_internal.h#L1) | language `h` | coverage 54.2% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`ui_rgb`](#ui_rgb), [`ui_theme`](#ui_theme), [`bui_chrome_view`](#bui_chrome_view), [`bui_find_view`](#bui_find_view)
 - **Enums:** [`ui_theme_mode`](#ui_theme_mode)
 - **Type Aliases:** [`b`](#b), [`body_font`](#body_font)
-- **Functions:** [`set_rgb`](#set_rgb), [`bui_paint_findbar`](#bui_paint_findbar), [`bui_chrome_font`](#bui_chrome_font), [`bui_paint_chrome`](#bui_paint_chrome), [`bui_url_text_x`](#bui_url_text_x), [`bui_url_index_at`](#bui_url_index_at), [`bui_round_rect`](#bui_round_rect), [`area`](#area)
+- **Functions:** [`set_rgb`](#set_rgb), [`bui_paint_findbar`](#bui_paint_findbar), [`bui_chrome_font`](#bui_chrome_font), [`bui_paint_chrome`](#bui_paint_chrome), [`bui_url_text_x`](#bui_url_text_x), [`bui_url_index_at`](#bui_url_index_at), [`bui_round_rect`](#bui_round_rect), [`bui_paint_video_bar`](#bui_paint_video_bar), [`bui_paint_site_panel`](#bui_paint_site_panel), [`area`](#area)
 - **Macros:** [`UI_FONT_SIZE`](#ui_font_size), [`UI_TEXT_MARGIN`](#ui_text_margin), [`UI_HEADING_LEVELS`](#ui_heading_levels), [`BUI_CHROME_FONT`](#bui_chrome_font), [`BUI_CHROME_FONT_SIZE`](#bui_chrome_font_size), [`BUI_URL_FONT_SIZE`](#bui_url_font_size)
 
 ## Type Diagram
@@ -157,7 +157,7 @@ void set_rgb(cairo_t *cr, ui_rgb c);
 | `cr` | `cairo_t *` |  |  |
 | `c` | `ui_rgb` |  |  |
 
-*Called by:* [`bui_paint_findbar`](gui.bui_chrome.c.md#bui_paint_findbar)
+*Called by:* [`bui_paint_findbar`](gui.bui_chrome.c.md#bui_paint_findbar), [`bui_paint_site_panel`](gui.bui_chrome.c.md#bui_paint_site_panel)
 
 ---
 
@@ -293,11 +293,59 @@ Rounded rectangle path.
 
 ---
 
+<a id="bui_paint_video_bar"></a>
+
+### `bui_paint_video_bar`
+
+`function` | [gui/browser_ui_internal.h:179](../../gui/browser_ui_internal.h#L179)
+
+```c
+void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos, double total);
+```
+
+The browser's player bar over a playing video (spec/video_controls.md), drawn in the geometry g the pointer hit-tests; pos/total in seconds (total 0 = no seek track fill).
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `cr` | `cairo_t *` |  |  |
+| `g` | `vcl_geom *` |  |  |
+| `paused` | `int` |  |  |
+| `pos` | `double` |  |  |
+| `total` | `double` |  |  |
+
+---
+
+<a id="bui_paint_site_panel"></a>
+
+### `bui_paint_site_panel`
+
+`function` | [gui/browser_ui_internal.h:183](../../gui/browser_ui_internal.h#L183)
+
+```c
+void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g, int hot_action);
+```
+
+The site identity panel (spec/site_panel.md); hot_action = action under the pointer or -1.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `cr` | `cairo_t *` |  |  |
+| `th` | `ui_theme *` |  |  |
+| `p` | `sp_panel *` |  |  |
+| `g` | `sp_geom *` |  |  |
+| `hot_action` | `int` |  |  |
+
+---
+
 <a id="area"></a>
 
 ### `area`
 
-`function` | [gui/browser_ui_internal.h:179](../../gui/browser_ui_internal.h#L179)
+`function` | [gui/browser_ui_internal.h:189](../../gui/browser_ui_internal.h#L189)
 
 ```c
 * tiled over the mask area (ax, ay, aw, ah) by the layer geometry `geo` (css.h CSS_MG_*, * resolved by bx_background_layer). 1 = painted, 0 = nothing usable. */ int bui_paint_mask_image(cairo_t *c, ca
