@@ -1,10 +1,10 @@
 # `src/url.c`
 
-> Source: [src/url.c:1](../../src/url.c#L1) | language `c` | coverage 23.5% | [API index](../index.md)
+> Source: [src/url.c:1](../../src/url.c#L1) | language `c` | coverage 22.2% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`url_has_scheme`](#url_has_scheme), [`url_is_https`](#url_is_https), [`url_validate_https`](#url_validate_https), [`url_authority_len`](#url_authority_len), [`url_remove_dot_segments`](#url_remove_dot_segments), [`url_resolve_https`](#url_resolve_https), [`assumed`](#assumed), [`url_omnibox`](#url_omnibox), [`url_search_rewrite`](#url_search_rewrite), [`url_extract_userinfo`](#url_extract_userinfo), [`url_is_file`](#url_is_file), [`url_file_path`](#url_file_path), [`url_resolve_file`](#url_resolve_file), [`url_split`](#url_split), [`url_history_target`](#url_history_target)
+- **Functions:** [`url_has_scheme`](#url_has_scheme), [`url_is_https`](#url_is_https), [`url_validate_https`](#url_validate_https), [`url_authority_len`](#url_authority_len), [`url_remove_dot_segments`](#url_remove_dot_segments), [`url_resolve_https`](#url_resolve_https), [`assumed`](#assumed), [`url_omnibox`](#url_omnibox), [`url_search_rewrite`](#url_search_rewrite), [`url_extract_userinfo`](#url_extract_userinfo), [`url_is_file`](#url_is_file), [`url_file_path`](#url_file_path), [`url_resolve_file`](#url_resolve_file), [`url_split`](#url_split), [`url_history_target`](#url_history_target), [`url_split_location`](#url_split_location)
 - **Macros:** [`_POSIX_C_SOURCE`](#_posix_c_source)
 
 ## Call Graph
@@ -27,6 +27,7 @@ flowchart LR
     n_src_url_c__url_is_file(["url_is_file"])
     n_src_url_c__url_resolve_file(["url_resolve_file"])
     n_src_url_c__url_history_target(["url_history_target"])
+    n_src_url_c__url_split_location(["url_split_location"])
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
     n_src_css_color_c__strncmp["css_color.strncmp"]
     n_include_js_dom_h__host["js_dom.host"]
@@ -48,10 +49,12 @@ flowchart LR
     n_src_url_c__url_history_target --> n_src_url_c__url_resolve_https
     n_src_url_c__url_history_target --> n_src_url_c__url_split
     n_src_url_c__url_history_target --> n_src_url_c__url_validate_https
+    n_src_url_c__url_split_location --> n_src_url_c__url_split
     n_src_url_c__url_remove_dot_segments -.-> n_gui_browser_ui_c__strcmp
     n_src_url_c__url_remove_dot_segments -.-> n_src_css_color_c__strncmp
     n_src_url_c__url_extract_userinfo -.-> n_include_js_dom_h__host
     n_src_url_c__url_resolve_file -.-> n_src_css_color_c__strncmp
+    n_src_url_c__url_history_target -.-> n_src_css_color_c__strncmp
 ```
 
 ## Functions
@@ -132,7 +135,7 @@ url_status url_validate_https(const char *url)
 
 *Calls:* [`url_is_https`](#url_is_https)
 
-*Called by:* [`fm_build`](src.form.c.md#fm_build), [`sf_validate_url`](src.secure_fetch.c.md#sf_validate_url), [`url_history_target`](#url_history_target), [`url_omnibox`](#url_omnibox), [`url_resolve_https`](#url_resolve_https)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`fm_build`](src.form.c.md#fm_build), [`sf_validate_url`](src.secure_fetch.c.md#sf_validate_url), [`url_history_target`](#url_history_target), [`url_omnibox`](#url_omnibox), [`url_resolve_https`](#url_resolve_https)
 
 ---
 
@@ -334,7 +337,7 @@ int url_is_file(const char *s)
 
 **Returns:** `int`
 
-*Called by:* [`arrives`](gui.browser_ui.c.md#arrives), [`url_file_path`](#url_file_path), [`url_history_target`](#url_history_target), [`url_resolve_file`](#url_resolve_file)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`arrives`](gui.browser_ui.c.md#arrives), [`url_file_path`](#url_file_path), [`url_history_target`](#url_history_target), [`url_resolve_file`](#url_resolve_file)
 
 ---
 
@@ -412,7 +415,7 @@ url_status url_split(const char *url, url_parts *out)
 
 *Calls:* [`url_authority_len`](#url_authority_len), [`url_is_https`](#url_is_https)
 
-*Called by:* [`jl_m_hist_target`](src.js_location.c.md#jl_m_hist_target), [`url_history_target`](#url_history_target), [`url_search_rewrite`](#url_search_rewrite)
+*Called by:* [`url_history_target`](#url_history_target), [`url_search_rewrite`](#url_search_rewrite), [`url_split_location`](#url_split_location)
 
 ---
 
@@ -437,7 +440,32 @@ url_status url_history_target(const char *base, const char *ref, char *out, size
 
 **Returns:** `url_status`
 
-*Calls:* [`url_is_file`](#url_is_file), [`url_resolve_https`](#url_resolve_https), [`url_split`](#url_split), [`url_validate_https`](#url_validate_https)
+*Calls:* [`strncmp`](src.css_color.c.md#strncmp), [`url_is_file`](#url_is_file), [`url_resolve_https`](#url_resolve_https), [`url_split`](#url_split), [`url_validate_https`](#url_validate_https)
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`jl_m_hist_target`](src.js_location.c.md#jl_m_hist_target)
+
+---
+
+<a id="url_split_location"></a>
+
+### `url_split_location`
+
+`function` | [src/url.c:688](../../src/url.c#L688)
+
+```c
+url_status url_split_location(const char *url, url_parts *out)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `url` | `char *` |  |  |
+| `out` | `url_parts *` |  |  |
+
+**Returns:** `url_status`
+
+*Calls:* [`strncmp`](src.css_color.c.md#strncmp), [`url_split`](#url_split)
 
 *Called by:* [`jl_m_hist_target`](src.js_location.c.md#jl_m_hist_target)
 

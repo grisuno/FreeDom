@@ -101,6 +101,8 @@ NULL-safe.
 |---|---|---|---|
 | `p` | `prefs_state *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="prefs_free"></a>
@@ -123,6 +125,8 @@ Idempotent; NULL-safe.
 |---|---|---|---|
 | `p` | `prefs_state *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="free"></a>
@@ -137,7 +141,7 @@ Idempotent; NULL-safe.
 
 **Returns:** `*`
 
-*Called by:* [`FONT_STASH_MAX_BYTES`](gui.browser_ui.c.md#font_stash_max_bytes), [`arrives`](gui.browser_ui.c.md#arrives), [`first`](gui.browser_ui.c.md#first), [`offset`](gui.browser_ui.c.md#offset), [`only`](gui.browser_ui.c.md#only), [`strcmp`](gui.browser_ui.c.md#strcmp), [`prefs_bookmark_toggle`](src.prefs.c.md#prefs_bookmark_toggle), [`prefs_bookmarks_page`](src.prefs.c.md#prefs_bookmarks_page), [`prefs_format`](src.prefs.c.md#prefs_format), [`prefs_free`](src.prefs.c.md#prefs_free), [`prefs_history_add`](src.prefs.c.md#prefs_history_add)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput), [`FONT_STASH_MAX_BYTES`](gui.browser_ui.c.md#font_stash_max_bytes), [`arrives`](gui.browser_ui.c.md#arrives), [`first`](gui.browser_ui.c.md#first), [`offset`](gui.browser_ui.c.md#offset), [`only`](gui.browser_ui.c.md#only), [`strcmp`](gui.browser_ui.c.md#strcmp), [`prefs_bookmark_toggle`](src.prefs.c.md#prefs_bookmark_toggle), [`prefs_bookmarks_page`](src.prefs.c.md#prefs_bookmarks_page), [`prefs_format`](src.prefs.c.md#prefs_format), [`prefs_free`](src.prefs.c.md#prefs_free), [`prefs_history_add`](src.prefs.c.md#prefs_history_add)
 
 ---
 
@@ -191,6 +195,8 @@ Priority: bookmark-prefix, history-prefix, bookmark-substring (URL or title), hi
 | `max_rows` | `int` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefs.c.md#llvmfuzzertestoneinput)
 
 ---
 

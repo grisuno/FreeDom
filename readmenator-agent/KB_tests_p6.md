@@ -132,6 +132,26 @@ Previous: [KB_tests_p5.md](KB_tests_p5.md)
   - `main` (function, line 273) `int main(void)`
 - Depends on: `include/link_nav.h`
 
+## tests/test_link_preview.c
+- Doc: Suite for link_preview (spec/link_preview.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `assert_clean` (function, line 11) `static void assert_clean(const lp_preview *p)`
+  - `host_is` (function, line 21) `static void host_is(const lp_preview *p, const char *host)`
+  - `test_null_out` (function, line 26) `static void test_null_out(void **state)`
+  - `test_relative_resolves_to_absolute` (function, line 31) `static void test_relative_resolves_to_absolute(void **state)`
+  - `test_userinfo_and_port_not_host` (function, line 42) `static void test_userinfo_and_port_not_host(void **state)`
+  - `test_javascript_blocked` (function, line 52) `static void test_javascript_blocked(void **state)`
+  - `test_downgrade_blocked` (function, line 63) `static void test_downgrade_blocked(void **state)`
+  - `test_bidi_and_controls_escaped` (function, line 71) `static void test_bidi_and_controls_escaped(void **state)`
+  - `test_fragment_same_document` (function, line 84) `static void test_fragment_same_document(void **state)`
+  - `test_local_file` (function, line 97) `static void test_local_file(void **state)`
+  - `test_long_path_keeps_host` (function, line 106) `static void test_long_path_keeps_host(void **state)`
+  - `test_long_blocked_bounded` (function, line 124) `static void test_long_blocked_bounded(void **state)`
+  - `main` (function, line 139) `int main(void)`
+- Depends on: `include/link_preview.h`
+
 ## tests/test_local_store.c
 - Layer: testing
 - Language: c

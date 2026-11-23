@@ -143,10 +143,11 @@ Previous: [KB_src_p5.md](KB_src_p5.md)
   - `jd_lp_set` (function, line 25) `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
                       const ...`
   - `jl_m_hist_target` (function, line 36) `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)`
-  - `jd_set_location` (function, line 140) `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
-  - `jd_take_nav_request` (function, line 174) `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
-  - `jd_take_history` (function, line 220) `char *jd_take_history(js_context *ctx, int *go)`
-  - `jd_pop_state` (function, line 251) `int jd_pop_state(js_context *ctx, int index)`
+  - `jd_set_location` (function, line 150) `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
+  - `jd_take_nav_request` (function, line 184) `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
+  - `jd_take_history` (function, line 230) `char *jd_take_history(js_context *ctx, int *go)`
+  - `jd_frag_push` (function, line 261) `int jd_frag_push(js_context *ctx, const char *url)`
+  - `jd_pop_state` (function, line 284) `int jd_pop_state(js_context *ctx, int index)`
 - Depends on: `include/js_dom.h`, `include/url.h`, `src/js_location_internal.h`, `src/js_native_internal.h`
 
 ## src/js_location_internal.h
@@ -313,6 +314,20 @@ static const char JT_W...`
   - `ln_resolve` (function, line 172) `ln_status ln_resolve(const char *base, const char *href, ln_result *out)`
   - `ln_block_reason_text` (function, line 241) `const char *ln_block_reason_text(ln_block_reason reason)`
 - Depends on: `include/link_nav.h`, `include/url.h`
+
+## src/link_preview.c
+- Doc: link_preview -- the status-strip description of a hovered link (spec/link_preview.md).
+- Layer: utility
+- Language: c
+- Symbols:
+  - `lp_sink` (struct, line 12)
+  - `put_raw` (function, line 17) `static void put_raw(lp_sink *s, const char *src, size_t n)`
+  - `put_escaped` (function, line 22) `static void put_escaped(lp_sink *s, const char *src, size_t n)`
+  - `host_span` (function, line 37) `static void host_span(const char *s, size_t n, size_t *off, size_t *len)`
+  - `fit` (function, line 64) `static void fit(const char *s, size_t n, size_t hoff, size_t hlen, lp_preview *out)`
+  - `frag_free_len` (function, line 100) `static size_t frag_free_len(const char *base)`
+  - `lp_describe` (function, line 105) `lp_status lp_describe(const char *base, const char *href, lp_preview *out)`
+- Depends on: `include/link_nav.h`, `include/link_preview.h`
 
 ## src/local_store.c
 - Layer: data_access

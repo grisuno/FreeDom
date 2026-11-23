@@ -75,10 +75,10 @@
 - Layer: utility
 - Language: py
 - Symbols:
-  - `phase_ms` (function, line 34) `def phase_ms(line, phase)`
-  - `one_page` (function, line 44) `def one_page(binary, page, env, prof, tmp, notches)`
-  - `main` (function, line 85) `def main()`
-  - `procs_display` (function, line 134) `def procs_display(procs)`
+  - `phase_ms` (function, line 38) `def phase_ms(line, phase)`
+  - `one_page` (function, line 48) `def one_page(binary, page, env, prof, tmp, notches, hover)`
+  - `main` (function, line 95) `def main()`
+  - `procs_display` (function, line 149) `def procs_display(procs)`
 - Depends on: `tools/guitime.py`
 
 ## tools/guitime.py

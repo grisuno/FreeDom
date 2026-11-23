@@ -93,6 +93,8 @@ jd_status jt_enable_open(js_context *ctx)
 
 *Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="jt_enable_observers"></a>
@@ -184,6 +186,8 @@ jd_status jt_enable_ws(js_context *ctx)
 **Returns:** `jd_status`
 
 *Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -314,6 +318,8 @@ jd_status jt_enable_storage(js_context *ctx, const char *blob, size_t len)
 
 *Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`wst_foreach`](src.web_storage.c.md#wst_foreach)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="jt_take_storage"></a>
@@ -384,6 +390,8 @@ jd_status jt_enable_worker(js_context *ctx)
 **Returns:** `jd_status`
 
 *Calls:* [`jn_host_eval`](src.js_native.c.md#jn_host_eval), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw), [`js_install_realms`](src.js_sandbox.c.md#js_install_realms)
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 

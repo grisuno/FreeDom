@@ -4,17 +4,67 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 ## External Imports
 
 - `app.py` -> logging, mcp.server.fastmcp, os, subprocess, sys
+- `fuzz/fuzz_anchor.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_box_blur.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_box_tree.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_browser.c` -> stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `fuzz/fuzz_chrome_layout.c` -> math.h, stddef.h, stdint.h, stdlib.h, string.h, strings.h
+- `fuzz/fuzz_css.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_css_counter.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_css_import.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_data_url.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_doc_title.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_dom.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_dom_debug.c` -> stddef.h, stdint.h, string.h
+- `fuzz/fuzz_download.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_exact_key.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_fb_cmdline.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_find_text.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_frame_broker.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_freebug.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_group_index.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_hls.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_html_parse.c` -> stddef.h, stdint.h
+- `fuzz/fuzz_identity.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_image_decode.c` -> stddef.h, stdint.h
+- `fuzz/fuzz_import_map.c` -> stdint.h, stdio.h, stdlib.h, string.h
+- `fuzz/fuzz_js_dom.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_js_geom.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_js_sandbox.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_link_preview.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_mask_cache.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_nav_token.c` -> stddef.h, stdint.h, stdlib.h
+- `fuzz/fuzz_net_guard.c` -> arpa/inet.h, stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_page_view.c` -> stddef.h, stdint.h
+- `fuzz/fuzz_pdf_export.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_prefetch.c` -> stddef.h, stdint.h, string.h
+- `fuzz/fuzz_prefs.c` -> stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `fuzz/fuzz_request_headers.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_site_panel.c` -> math.h, site_panel.h, stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_smooth_scroll.c` -> math.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_svg_render.c` -> math.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_table_layout.c` -> math.h, stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_text_case.c` -> stddef.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_text_shape.c` -> stddef.h, stdint.h, stdlib.h
+- `fuzz/fuzz_tls_impersonate.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_url.c` -> stdint.h, stdlib.h, string.h, strings.h
+- `fuzz/fuzz_video_controls.c` -> math.h, stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_web_storage.c` -> stdint.h, stdlib.h, string.h
+- `fuzz/fuzz_webfont.c` -> stddef.h, stdint.h
+- `fuzz/fuzz_webfont_register.c` -> stddef.h, stdint.h, stdlib.h
 - `gui/browser_ui.c` -> cairo/cairo-pdf.h, cairo/cairo.h, errno.h, fcntl.h, fontconfig/fontconfig.h, limits.h, math.h, poll.h, pthread.h, signal.h, site_panel.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/eventfd.h, sys/mman.h, sys/stat.h, sys/timerfd.h, sys/wait.h, time.h, unistd.h, wayland-client.h, wayland-cursor.h, xdg-decoration-client-protocol.h, xdg-shell-client-protocol.h, xkbcommon/xkbcommon.h
 - `gui/browser_ui_internal.h` -> cairo/cairo.h, site_panel.h, stddef.h
 - `gui/bui_chrome.c` -> math.h, stdio.h, string.h
 - `gui/bui_mask_img.c` -> cairo.h
 - `gui/freedom_view.c` -> stdio.h, stdlib.h, string.h
 - `gui/ui_render.c` -> cairo/cairo.h, stdio.h, stdlib.h, string.h, sys/mman.h, unistd.h, wayland-client.h, xdg-decoration-client-protocol.h, xdg-shell-client-protocol.h
+- `include/anchor.h` -> stddef.h
 - `include/anti_fp.h` -> stddef.h, stdint.h
 - `include/block_flow.h` -> stddef.h
 - `include/box_tree.h` -> stddef.h
 - `include/browser.h` -> stddef.h, stdint.h
 - `include/cached_fetch.h` -> time.h
+- `include/chrome_layout.h` -> stddef.h
 - `include/compositor.h` -> stddef.h
 - `include/css.h` -> stddef.h
 - `include/css_atrule.h` -> stddef.h
@@ -30,6 +80,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `include/css_vars.h` -> stddef.h
 - `include/data_url.h` -> stddef.h, stdint.h
 - `include/disk_store.h` -> stddef.h, stdint.h
+- `include/doc_title.h` -> stddef.h
 - `include/dom.h` -> stddef.h, stdint.h
 - `include/dom_debug.h` -> stddef.h
 - `include/download.h` -> stddef.h
@@ -42,6 +93,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `include/frame_broker.h` -> stddef.h
 - `include/frame_host.h` -> stddef.h
 - `include/freebug.h` -> stddef.h
+- `include/group_index.h` -> stddef.h
 - `include/hls.h` -> stddef.h
 - `include/host_conf.h` -> stddef.h
 - `include/hostblock.h` -> stddef.h
@@ -58,6 +110,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `include/js_sandbox.h` -> stddef.h, stdint.h
 - `include/js_trusted.h` -> stddef.h
 - `include/link_nav.h` -> stddef.h
+- `include/link_preview.h` -> stddef.h
 - `include/local_store.h` -> stddef.h, stdint.h
 - `include/mask_cache.h` -> stddef.h
 - `include/media_decoder.h` -> stddef.h, stdint.h, sys/types.h
@@ -100,11 +153,12 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `include/webfont_load.h` -> stddef.h
 - `include/wl_display.h` -> stddef.h
 - `include/ws_hub.h` -> poll.h, stddef.h
+- `src/anchor.c` -> math.h, stdlib.h, string.h
 - `src/block_flow.c` -> math.h
 - `src/box_blur.c` -> math.h, stdint.h, stdlib.h, string.h
 - `src/box_style.c` -> math.h, stddef.h, stdlib.h, string.h
 - `src/box_tree.c` -> stddef.h, stdint.h, stdlib.h, string.h
-- `src/browser.c` -> stdlib.h, string.h
+- `src/browser.c` -> math.h, stdlib.h, string.h
 - `src/cached_fetch.c` -> stdio.h, stdlib.h, string.h
 - `src/chrome_layout.c` -> math.h, stddef.h, string.h
 - `src/compositor.c` -> math.h
@@ -127,6 +181,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `src/css_vars.c` -> stdint.h, stdlib.h, string.h
 - `src/data_url.c` -> stdlib.h, string.h
 - `src/disk_store.c` -> errno.h, fcntl.h, stdint.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
+- `src/doc_title.c` -> stdint.h, string.h
 - `src/dom.c` -> lexbor/html/html.h, stdint.h, stdlib.h, string.h
 - `src/dom_debug.c` -> stdarg.h, stddef.h, stdio.h
 - `src/download.c` -> ctype.h, string.h
@@ -139,6 +194,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `src/frame_host.c` -> pthread.h, stdio.h, stdlib.h, string.h
 - `src/freebug.c` -> stdlib.h, string.h
 - `src/freedom.c` -> limits.h, stdio.h, stdlib.h, string.h, time.h, unistd.h
+- `src/group_index.c` -> stdint.h
 - `src/hls.c` -> stdlib.h, string.h, strings.h
 - `src/host_conf.c` -> stdio.h, stdlib.h, string.h
 - `src/hostblock.c` -> stdint.h, stdlib.h, string.h
@@ -168,6 +224,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `src/js_sandbox.c` -> malloc.h, quickjs.h, stdlib.h, string.h, sys/resource.h, time.h
 - `src/js_trusted.c` -> quickjs.h, stdint.h, stdlib.h, string.h
 - `src/link_nav.c` -> string.h
+- `src/link_preview.c` -> stdint.h, stdlib.h, string.h
 - `src/local_store.c` -> openssl/core_names.h, openssl/crypto.h, openssl/evp.h, openssl/kdf.h, openssl/params.h, openssl/rand.h, stdlib.h, string.h
 - `src/mask_cache.c` -> stdint.h, stdlib.h
 - `src/media_decoder.c` -> errno.h, libavcodec/avcodec.h, libavformat/avformat.h, libavutil/avutil.h, libavutil/imgutils.h, libswscale/swscale.h, signal.h, stdint.h, stdio.h, stdlib.h, string.h, unistd.h
@@ -189,6 +246,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `src/secure_fetch.c` -> curl/curl.h, inttypes.h, netinet/in.h, openssl/objects.h, openssl/ssl.h, openssl/x509.h, pthread.h, stdio.h, stdlib.h, string.h, strings.h, sys/socket.h, time.h
 - `src/sha2.c` -> string.h
 - `src/sheet_cache.c` -> stdint.h, stdlib.h, string.h
+- `src/smooth_scroll.c` -> math.h, stddef.h
 - `src/subreq_batch.c` -> pthread.h, semaphore.h, stdlib.h, string.h, time.h
 - `src/svg_paint.c` -> math.h, string.h
 - `src/svg_raster.c` -> cairo.h, math.h, stdlib.h, string.h
@@ -209,12 +267,13 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `src/wl_guard.c` -> poll.h, pthread.h, stdatomic.h, stdlib.h, unistd.h, wayland-client.h
 - `src/ws_hub.c` -> curl/curl.h, errno.h, fcntl.h, pthread.h, stdint.h, stdlib.h, string.h, sys/socket.h, unistd.h
 - `tests/itest_secure_fetch.c` -> stdio.h, string.h
+- `tests/test_anchor.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_anti_fp.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_block_flow.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_box_blur.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_box_style.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_box_tree.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
-- `tests/test_browser.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
+- `tests/test_browser.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_cached_fetch.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h
 - `tests/test_chrome_layout.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, string.h
 - `tests/test_compositor.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
@@ -236,6 +295,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `tests/test_css_vars.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_data_url.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_disk_store.c` -> cmocka.h, dirent.h, fcntl.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/stat.h, unistd.h
+- `tests/test_doc_title.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_dom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, time.h
 - `tests/test_dom_debug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_download.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
@@ -250,6 +310,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `tests/test_frame_host.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, time.h
 - `tests/test_freebug.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_freedom.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, sys/wait.h, unistd.h
+- `tests/test_group_index.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_hls.c` -> cmocka.h, setjmp.h, stddef.h, stdlib.h, string.h
 - `tests/test_host_conf.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h, unistd.h
 - `tests/test_hostblock.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
@@ -268,6 +329,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `tests/test_js_policy.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_js_sandbox.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_link_nav.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
+- `tests/test_link_preview.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdlib.h, string.h
 - `tests/test_local_store.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdlib.h, string.h
 - `tests/test_mask_cache.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_media_decoder.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h
@@ -292,6 +354,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `tests/test_sheet_cache.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h
 - `tests/test_shm_slots.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h
 - `tests/test_site_panel.c` -> cmocka.h, math.h, setjmp.h, site_panel.h, stdarg.h, stddef.h, string.h
+- `tests/test_smooth_scroll.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h
 - `tests/test_subreq_batch.c` -> cmocka.h, pthread.h, setjmp.h, stdarg.h, stddef.h, stdio.h, stdlib.h, string.h, time.h, unistd.h
 - `tests/test_svg_raster.c` -> cmocka.h, setjmp.h, stdarg.h, stddef.h, stdint.h, string.h
 - `tests/test_svg_render.c` -> cmocka.h, math.h, setjmp.h, stdarg.h, stddef.h, stdint.h, stdio.h, stdlib.h, string.h

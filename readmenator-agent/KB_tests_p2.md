@@ -356,37 +356,39 @@ static void test_backg...`
   - `test_linear_gradient_positions_emitted` (function, line 5360) `static void test_linear_gradient_positions_emitted(void **state)`
   - `test_filter_drop_shadow` (function, line 5377) `static void test_filter_drop_shadow(void **state)`
   - `test_filter_drop_shadow_defaults_and_failclosed` (function, line 5390) `static void test_filter_drop_shadow_defaults_and_failclosed(void **state)`
-  - `test_backdrop_filter_blur` (function, line 5404) `static void test_backdrop_filter_blur(void **state)`
-  - `test_filter_blur_and_grayscale` (function, line 5416) `static void test_filter_blur_and_grayscale(void **state)`
-  - `test_anim_keyframes_resolved_from_sheet` (function, line 5444) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
-  - `test_anim_transform_keyframes_from_sheet` (function, line 5477) `static void test_anim_transform_keyframes_from_sheet(void **state)`
-  - `test_keyframes_overflow_skips_block_not_sheet` (function, line 5548) `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
-  - `test_vw_resolves_against_render_width` (function, line 5579) `static void test_vw_resolves_against_render_width(void **state)`
-  - `assert_int_equal` (function, line 5615) `assert_int_equal(css_resolve(sh, "div", NULL, (const char *[])`
-  - `test_rem_rebased_on_root_font_size` (function, line 5620) `static void test_rem_rebased_on_root_font_size(void **state)`
-  - `test_rem_rebase_applies_to_box_lengths` (function, line 5632) `static void test_rem_rebase_applies_to_box_lengths(void **state)`
-  - `test_rem_rebase_absent_root_declaration_is_byte_identical` (function, line 5646) `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
-  - `test_rem_rebase_honours_root_pseudo_class` (function, line 5658) `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
-  - `test_rem_rebase_skips_at_rule_prelude` (function, line 5668) `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
-  - `test_rem_rebase_leaves_quoted_text_alone` (function, line 5691) `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
-  - `test_rem_rebase_ignores_identifier_lookalikes` (function, line 5702) `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
-  - `test_rem_rebase_62_5_percent_idiom` (function, line 5717) `static void test_rem_rebase_62_5_percent_idiom(void **state)`
-  - `test_media_query_length_honours_its_unit` (function, line 5732) `static void test_media_query_length_honours_its_unit(void **state)`
-  - `assert_int_equal` (function, line 5739) `assert_int_equal(css_parse("@media (min-width: 200em)`
-  - `assert_int_equal` (function, line 5745) `assert_int_equal(css_parse("@media (min-width: 40em)`
-  - `test_clip_rect` (function, line 5753) `static void test_clip_rect(void **state)`
-  - `test_clip_auto` (function, line 5763) `static void test_clip_auto(void **state)`
-  - `grammar` (function, line 5780) `* grammar (spec/css.md), so they parse instead of dropping. */
+  - `test_border_color_alpha` (function, line 5406) `static void test_border_color_alpha(void **state)`
+  - `test_filter_drop_shadow_alpha` (function, line 5421) `static void test_filter_drop_shadow_alpha(void **state)`
+  - `test_backdrop_filter_blur` (function, line 5433) `static void test_backdrop_filter_blur(void **state)`
+  - `test_filter_blur_and_grayscale` (function, line 5445) `static void test_filter_blur_and_grayscale(void **state)`
+  - `test_anim_keyframes_resolved_from_sheet` (function, line 5473) `static void test_anim_keyframes_resolved_from_sheet(void **state)`
+  - `test_anim_transform_keyframes_from_sheet` (function, line 5506) `static void test_anim_transform_keyframes_from_sheet(void **state)`
+  - `test_keyframes_overflow_skips_block_not_sheet` (function, line 5577) `static void test_keyframes_overflow_skips_block_not_sheet(void **state)`
+  - `test_vw_resolves_against_render_width` (function, line 5608) `static void test_vw_resolves_against_render_width(void **state)`
+  - `assert_int_equal` (function, line 5644) `assert_int_equal(css_resolve(sh, "div", NULL, (const char *[])`
+  - `test_rem_rebased_on_root_font_size` (function, line 5649) `static void test_rem_rebased_on_root_font_size(void **state)`
+  - `test_rem_rebase_applies_to_box_lengths` (function, line 5661) `static void test_rem_rebase_applies_to_box_lengths(void **state)`
+  - `test_rem_rebase_absent_root_declaration_is_byte_identical` (function, line 5675) `static void test_rem_rebase_absent_root_declaration_is_byte_identical(void **state)`
+  - `test_rem_rebase_honours_root_pseudo_class` (function, line 5687) `static void test_rem_rebase_honours_root_pseudo_class(void **state)`
+  - `test_rem_rebase_skips_at_rule_prelude` (function, line 5697) `static void test_rem_rebase_skips_at_rule_prelude(void **state)`
+  - `test_rem_rebase_leaves_quoted_text_alone` (function, line 5720) `static void test_rem_rebase_leaves_quoted_text_alone(void **state)`
+  - `test_rem_rebase_ignores_identifier_lookalikes` (function, line 5731) `static void test_rem_rebase_ignores_identifier_lookalikes(void **state)`
+  - `test_rem_rebase_62_5_percent_idiom` (function, line 5746) `static void test_rem_rebase_62_5_percent_idiom(void **state)`
+  - `test_media_query_length_honours_its_unit` (function, line 5761) `static void test_media_query_length_honours_its_unit(void **state)`
+  - `assert_int_equal` (function, line 5768) `assert_int_equal(css_parse("@media (min-width: 200em)`
+  - `assert_int_equal` (function, line 5774) `assert_int_equal(css_parse("@media (min-width: 40em)`
+  - `test_clip_rect` (function, line 5782) `static void test_clip_rect(void **state)`
+  - `test_clip_auto` (function, line 5792) `static void test_clip_auto(void **state)`
+  - `grammar` (function, line 5809) `* grammar (spec/css.md), so they parse instead of dropping. */
 static void test_vendor_prefixes(v...`
-  - `test_fontface_local_only_is_alias` (function, line 5820) `static void test_fontface_local_only_is_alias(void **state)`
-  - `test_fontface_local_then_url_keeps_url` (function, line 5838) `static void test_fontface_local_then_url_keeps_url(void **state)`
-  - `test_box_shadow_layers_and_alpha` (function, line 5856) `static void test_box_shadow_layers_and_alpha(void **state)`
-  - `test_grid_template_rows_tracks` (function, line 5881) `static void test_grid_template_rows_tracks(void **state)`
-  - `test_inline_line_height_calc` (function, line 5900) `static void test_inline_line_height_calc(void **state)`
-  - `test_inline_outline_auto` (function, line 5915) `static void test_inline_outline_auto(void **state)`
-  - `test_anim_iterations_huge_is_infinite` (function, line 5929) `static void test_anim_iterations_huge_is_infinite(void **state)`
-  - `test_container_query_real_width` (function, line 5938) `static void test_container_query_real_width(void **state)`
-  - `main` (function, line 5988) `int main(void)`
+  - `test_fontface_local_only_is_alias` (function, line 5849) `static void test_fontface_local_only_is_alias(void **state)`
+  - `test_fontface_local_then_url_keeps_url` (function, line 5867) `static void test_fontface_local_then_url_keeps_url(void **state)`
+  - `test_box_shadow_layers_and_alpha` (function, line 5885) `static void test_box_shadow_layers_and_alpha(void **state)`
+  - `test_grid_template_rows_tracks` (function, line 5910) `static void test_grid_template_rows_tracks(void **state)`
+  - `test_inline_line_height_calc` (function, line 5929) `static void test_inline_line_height_calc(void **state)`
+  - `test_inline_outline_auto` (function, line 5944) `static void test_inline_outline_auto(void **state)`
+  - `test_anim_iterations_huge_is_infinite` (function, line 5958) `static void test_anim_iterations_huge_is_infinite(void **state)`
+  - `test_container_query_real_width` (function, line 5967) `static void test_container_query_real_width(void **state)`
+  - `main` (function, line 6017) `int main(void)`
   - `box` (function, line 234) `* box (CSS 2.1 section 10.8.1). With one line box per line and no separate * parent content edge, they land on the...`
   - `downstream` (function, line 663) `* and deciding whether to fetch happens downstream (render_doc.c) */ assert_string_equal(css_parse_inline(...`
   - `invalid` (function, line 765) `* invalid (fail closed), not silently coerced into some default. */ css_style s = css_parse_inline("color...`

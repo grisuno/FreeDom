@@ -245,10 +245,11 @@ Depends on: `include/js_dom.h`, `include/url.h`, `src/js_location_internal.h`, `
 - `jd_lp_set` (function) `src/js_location.c:25` `static void jd_lp_set(JSContext *ctx, JSValue obj, const char *name,
                       const ...` -- Defines a string property on the __locParts data object from a (ptr,len) span. * The span is copied into an engine...
 - `jl_m_hist_target` (function) `src/js_location.c:36` `JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` -- dom.histTarget(base, ref): the same-origin target of history.pushState/replaceState (url_history_target) as a...
-- `jd_set_location` (function) `src/js_location.c:140` `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
-- `jd_take_nav_request` (function) `src/js_location.c:174` `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
-- `jd_take_history` (function) `src/js_location.c:220` `char *jd_take_history(js_context *ctx, int *go)`
-- `jd_pop_state` (function) `src/js_location.c:251` `int jd_pop_state(js_context *ctx, int index)`
+- `jd_set_location` (function) `src/js_location.c:150` `jd_status jd_set_location(js_context *ctx, const char *href, const url_parts *parts)`
+- `jd_take_nav_request` (function) `src/js_location.c:184` `int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace)`
+- `jd_take_history` (function) `src/js_location.c:230` `char *jd_take_history(js_context *ctx, int *go)`
+- `jd_frag_push` (function) `src/js_location.c:261` `int jd_frag_push(js_context *ctx, const char *url)`
+- `jd_pop_state` (function) `src/js_location.c:284` `int jd_pop_state(js_context *ctx, int index)`
 
 ## src/js_location_internal.h
 Imported by: `src/js_dom.c`, `src/js_location.c`
@@ -373,6 +374,15 @@ Depends on: `include/link_nav.h`, `include/url.h`
 - `resolve_file` (function) `src/link_nav.c:149` `static int resolve_file(const char *base, const char *ref, char *out, size_t outsz)` -- Resolves a local file reference (relative or absolute path) against base into * out.
 - `ln_resolve` (function) `src/link_nav.c:172` `ln_status ln_resolve(const char *base, const char *href, ln_result *out)`
 - `ln_block_reason_text` (function) `src/link_nav.c:241` `const char *ln_block_reason_text(ln_block_reason reason)`
+
+## src/link_preview.c
+Depends on: `include/link_nav.h`, `include/link_preview.h`
+- `put_raw` (function) `src/link_preview.c:17` `static void put_raw(lp_sink *s, const char *src, size_t n)`
+- `put_escaped` (function) `src/link_preview.c:22` `static void put_escaped(lp_sink *s, const char *src, size_t n)`
+- `host_span` (function) `src/link_preview.c:37` `static void host_span(const char *s, size_t n, size_t *off, size_t *len)` -- static const char hex[] = "0123456789ABCDEF"; for (size_t i = 0; i < n; ++i) { unsigned char c = (unsigned...
+- `fit` (function) `src/link_preview.c:64` `static void fit(const char *s, size_t n, size_t hoff, size_t hlen, lp_preview *out)` -- Copies s[0..n) into out->text, eliding the middle of the path when it does not fit * and keeping scheme + host (+...
+- `frag_free_len` (function) `src/link_preview.c:100` `static size_t frag_free_len(const char *base)`
+- `lp_describe` (function) `src/link_preview.c:105` `lp_status lp_describe(const char *base, const char *href, lp_preview *out)`
 
 ## src/local_store.c
 Depends on: `include/local_store.h`

@@ -1,10 +1,10 @@
 # `src/css_gradient.c`
 
-> Source: [src/css_gradient.c:1](../../src/css_gradient.c#L1) | language `c` | coverage 23.5% | [API index](../index.md)
+> Source: [src/css_gradient.c:1](../../src/css_gradient.c#L1) | language `c` | coverage 22.2% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`gradient`](#gradient), [`CSS_GRAD_STOPS_MAX`](#css_grad_stops_max), [`cg_first_url`](#cg_first_url), [`pool`](#pool), [`downstream`](#downstream), [`declaration`](#declaration), [`cg_expand_background`](#cg_expand_background), [`cg_parse_radial_prelude`](#cg_parse_radial_prelude), [`cg_radial_len_px`](#cg_radial_len_px), [`cg_radial_geometry`](#cg_radial_geometry), [`cg_parse_linear`](#cg_parse_linear)
+- **Functions:** [`gradient`](#gradient), [`sRGB`](#srgb), [`CSS_GRAD_STOPS_MAX`](#css_grad_stops_max), [`cg_first_url`](#cg_first_url), [`pool`](#pool), [`downstream`](#downstream), [`declaration`](#declaration), [`cg_expand_background`](#cg_expand_background), [`cg_parse_radial_prelude`](#cg_parse_radial_prelude), [`cg_radial_len_px`](#cg_radial_len_px), [`cg_radial_geometry`](#cg_radial_geometry), [`cg_parse_linear`](#cg_parse_linear)
 - **Macros:** [`CG_RAD_TOKENS`](#cg_rad_tokens), [`CG_RAD_PM_MAX`](#cg_rad_pm_max), [`CG_RAD_PX_MAX`](#cg_rad_px_max), [`CG_RAD_FLOOR`](#cg_rad_floor), [`CG_SQRT2`](#cg_sqrt2)
 
 ## Call Graph
@@ -24,6 +24,7 @@ flowchart LR
     n_gui_browser_ui_c__strcmp["browser_ui.strcmp"]
     n_include_css_select_h__csel_ci_eq["css_select.csel_ci_eq"]
     n_include_css_select_h__csel_lower_ch["css_select.csel_lower_ch"]
+    n_src_css_gradient_c__sRGB(["sRGB"])
     n_include_css_values_h__cv_parse_color_t7["css_values.cv_parse_color_t7"]
     n_include_css_gradient_h__cg_expand_bg_image["css_gradient.cg_expand_bg_image"]
     n_src_css_gradient_c__declaration(["declaration"])
@@ -39,6 +40,8 @@ flowchart LR
     n_src_css_gradient_c__gradient -.-> n_gui_browser_ui_c__strcmp
     n_src_css_gradient_c__gradient -.-> n_include_css_select_h__csel_ci_eq
     n_src_css_gradient_c__gradient -.-> n_include_css_select_h__csel_lower_ch
+    n_src_css_gradient_c__sRGB -.-> n_gui_browser_ui_c__strcmp
+    n_src_css_gradient_c__sRGB -.-> n_include_css_select_h__csel_lower_ch
     n_src_css_gradient_c__CSS_GRAD_STOPS_MAX -.-> n_include_css_values_h__cv_parse_color_t7
     n_src_css_gradient_c__downstream -.-> n_include_css_gradient_h__cg_expand_bg_image
     n_src_css_gradient_c__declaration -.-> n_include_css_select_h__csel_ci_eq
@@ -76,11 +79,33 @@ flowchart LR
 
 ---
 
+<a id="srgb"></a>
+
+### `sRGB`
+
+`function` | [src/css_gradient.c:154](../../src/css_gradient.c#L154)
+
+```c
+* sRGB (spec/css_gradient.md §3b). */ static int strip_interp(char *seg)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `b` | `spec/css_gradient.md §3` |  |  |
+
+**Returns:** `*`
+
+*Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`csel_lower_ch`](include.css_select.h.md#csel_lower_ch)
+
+---
+
 <a id="css_grad_stops_max"></a>
 
 ### `CSS_GRAD_STOPS_MAX`
 
-`function` | [src/css_gradient.c:184](../../src/css_gradient.c#L184)
+`function` | [src/css_gradient.c:241](../../src/css_gradient.c#L241)
 
 ```c
 * CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when * the gradient fai...
@@ -102,7 +127,7 @@ flowchart LR
 
 ### `cg_first_url`
 
-`function` | [src/css_gradient.c:398](../../src/css_gradient.c#L398)
+`function` | [src/css_gradient.c:459](../../src/css_gradient.c#L459)
 
 ```c
 int cg_first_url(const char *val, char *out, size_t outcap)
@@ -130,7 +155,7 @@ The first url(...) token of val, unquoted and trimmed, into out.
 
 ### `pool`
 
-`function` | [src/css_gradient.c:418](../../src/css_gradient.c#L418)
+`function` | [src/css_gradient.c:479](../../src/css_gradient.c#L479)
 
 ```c
 * pool (gradient explicitly reset);
@@ -150,7 +175,7 @@ The first url(...) token of val, unquoted and trimmed, into out.
 
 ### `downstream`
 
-`function` | [src/css_gradient.c:422](../../src/css_gradient.c#L422)
+`function` | [src/css_gradient.c:483](../../src/css_gradient.c#L483)
 
 ```c
 * happens downstream (render_doc.c), gated by caps.images like an <img>. */ int cg_expand_bg_imag...
@@ -172,7 +197,7 @@ The first url(...) token of val, unquoted and trimmed, into out.
 
 ### `declaration`
 
-`function` | [src/css_gradient.c:483](../../src/css_gradient.c#L483)
+`function` | [src/css_gradient.c:544](../../src/css_gradient.c#L544)
 
 ```c
 * declaration (fail closed);
@@ -194,7 +219,7 @@ The first url(...) token of val, unquoted and trimmed, into out.
 
 ### `cg_expand_background`
 
-`function` | [src/css_gradient.c:530](../../src/css_gradient.c#L530)
+`function` | [src/css_gradient.c:591](../../src/css_gradient.c#L591)
 
 ```c
 int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap)
@@ -221,7 +246,7 @@ int cg_expand_background(const char *val, css_decl *dst, int cap, char (*urltab)
 
 ### `cg_parse_radial_prelude`
 
-`function` | [src/css_gradient.c:690](../../src/css_gradient.c#L690)
+`function` | [src/css_gradient.c:751](../../src/css_gradient.c#L751)
 
 ```c
 int cg_parse_radial_prelude(const char *seg, cg_radial *out)
@@ -244,7 +269,7 @@ int cg_parse_radial_prelude(const char *seg, cg_radial *out)
 
 ### `cg_radial_len_px`
 
-`function` | [src/css_gradient.c:766](../../src/css_gradient.c#L766)
+`function` | [src/css_gradient.c:827](../../src/css_gradient.c#L827)
 
 ```c
 double cg_radial_len_px(int enc, double dim)
@@ -271,7 +296,7 @@ A radial length resolved against a box dimension in px.
 
 ### `cg_radial_geometry`
 
-`function` | [src/css_gradient.c:778](../../src/css_gradient.c#L778)
+`function` | [src/css_gradient.c:839](../../src/css_gradient.c#L839)
 
 ```c
 void cg_radial_geometry(const cg_radial *r, double w, double h, double *cx, double *cy, double *rx, double *ry)
@@ -297,7 +322,7 @@ void cg_radial_geometry(const cg_radial *r, double w, double h, double *cx, doub
 
 ### `cg_parse_linear`
 
-`function` | [src/css_gradient.c:815](../../src/css_gradient.c#L815)
+`function` | [src/css_gradient.c:876](../../src/css_gradient.c#L876)
 
 ```c
 int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)
@@ -330,7 +355,7 @@ Parses one `linear-gradient(...)` function (the whole text, nothing around it) i
 
 ### `CG_RAD_TOKENS`
 
-`macro` | [src/css_gradient.c:614](../../src/css_gradient.c#L614)
+`macro` | [src/css_gradient.c:675](../../src/css_gradient.c#L675)
 
 ```c
 #define CG_RAD_TOKENS
@@ -342,7 +367,7 @@ Parses one `linear-gradient(...)` function (the whole text, nothing around it) i
 
 ### `CG_RAD_PM_MAX`
 
-`macro` | [src/css_gradient.c:615](../../src/css_gradient.c#L615)
+`macro` | [src/css_gradient.c:676](../../src/css_gradient.c#L676)
 
 ```c
 #define CG_RAD_PM_MAX
@@ -354,7 +379,7 @@ Parses one `linear-gradient(...)` function (the whole text, nothing around it) i
 
 ### `CG_RAD_PX_MAX`
 
-`macro` | [src/css_gradient.c:616](../../src/css_gradient.c#L616)
+`macro` | [src/css_gradient.c:677](../../src/css_gradient.c#L677)
 
 ```c
 #define CG_RAD_PX_MAX
@@ -370,7 +395,7 @@ per-mille cap: 1000x the box (anti-DoS, never reached)
 
 ### `CG_RAD_FLOOR`
 
-`macro` | [src/css_gradient.c:772](../../src/css_gradient.c#L772)
+`macro` | [src/css_gradient.c:833](../../src/css_gradient.c#L833)
 
 ```c
 #define CG_RAD_FLOOR
@@ -382,7 +407,7 @@ per-mille cap: 1000x the box (anti-DoS, never reached)
 
 ### `CG_SQRT2`
 
-`macro` | [src/css_gradient.c:773](../../src/css_gradient.c#L773)
+`macro` | [src/css_gradient.c:834](../../src/css_gradient.c#L834)
 
 ```c
 #define CG_SQRT2

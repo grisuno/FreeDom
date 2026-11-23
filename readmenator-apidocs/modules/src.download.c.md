@@ -76,7 +76,7 @@ const char *dl_ext_for_type(const char *content_type)
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
-*Called by:* [`dl_pick_name`](#dl_pick_name)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_download.c.md#llvmfuzzertestoneinput), [`dl_pick_name`](#dl_pick_name)
 
 ---
 
@@ -104,6 +104,8 @@ dl_status dl_pick_name(const char *url, const char *content_disposition, const c
 
 *Calls:* [`dl_ext_for_type`](#dl_ext_for_type), [`pe_safe_basename`](src.pdf_export.c.md#pe_safe_basename)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_download.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="dl_build_path"></a>
@@ -126,6 +128,8 @@ dl_status dl_build_path(const char *dir, const char *name, char *out, size_t out
 | `outsz` | `size_t` |  |  |
 
 **Returns:** `dl_status`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_download.c.md#llvmfuzzertestoneinput)
 
 ---
 

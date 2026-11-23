@@ -32,6 +32,8 @@ Pure.
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_image_decode.c.md#llvmfuzzertestoneinput)
+
 ---
 
 ## Macros

@@ -1,13 +1,13 @@
 # `gui/browser_ui_internal.h`
 
-> Source: [gui/browser_ui_internal.h:1](../../gui/browser_ui_internal.h#L1) | language `h` | coverage 54.2% | [API index](../index.md)
+> Source: [gui/browser_ui_internal.h:1](../../gui/browser_ui_internal.h#L1) | language `h` | coverage 57.7% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`ui_rgb`](#ui_rgb), [`ui_theme`](#ui_theme), [`bui_chrome_view`](#bui_chrome_view), [`bui_find_view`](#bui_find_view)
 - **Enums:** [`ui_theme_mode`](#ui_theme_mode)
 - **Type Aliases:** [`b`](#b), [`body_font`](#body_font)
-- **Functions:** [`set_rgb`](#set_rgb), [`bui_paint_findbar`](#bui_paint_findbar), [`bui_chrome_font`](#bui_chrome_font), [`bui_paint_chrome`](#bui_paint_chrome), [`bui_url_text_x`](#bui_url_text_x), [`bui_url_index_at`](#bui_url_index_at), [`bui_round_rect`](#bui_round_rect), [`bui_paint_video_bar`](#bui_paint_video_bar), [`bui_paint_site_panel`](#bui_paint_site_panel), [`area`](#area)
+- **Functions:** [`set_rgb`](#set_rgb), [`bui_paint_findbar`](#bui_paint_findbar), [`bui_chrome_font`](#bui_chrome_font), [`bui_paint_chrome`](#bui_paint_chrome), [`bui_url_text_x`](#bui_url_text_x), [`bui_url_index_at`](#bui_url_index_at), [`bui_round_rect`](#bui_round_rect), [`bui_paint_video_bar`](#bui_paint_video_bar), [`bui_paint_site_panel`](#bui_paint_site_panel), [`bui_paint_link_status`](#bui_paint_link_status), [`bui_link_status_flips`](#bui_link_status_flips), [`area`](#area)
 - **Macros:** [`UI_FONT_SIZE`](#ui_font_size), [`UI_TEXT_MARGIN`](#ui_text_margin), [`UI_HEADING_LEVELS`](#ui_heading_levels), [`BUI_CHROME_FONT`](#bui_chrome_font), [`BUI_CHROME_FONT_SIZE`](#bui_chrome_font_size), [`BUI_URL_FONT_SIZE`](#bui_url_font_size)
 
 ## Type Diagram
@@ -77,7 +77,7 @@ Borrowed.
 
 ### `bui_find_view`
 
-`struct` | [gui/browser_ui_internal.h:150](../../gui/browser_ui_internal.h#L150)
+`struct` | [gui/browser_ui_internal.h:151](../../gui/browser_ui_internal.h#L151)
 
 ```c
 typedef struct bui_find_view
@@ -157,7 +157,7 @@ void set_rgb(cairo_t *cr, ui_rgb c);
 | `cr` | `cairo_t *` |  |  |
 | `c` | `ui_rgb` |  |  |
 
-*Called by:* [`bui_paint_findbar`](gui.bui_chrome.c.md#bui_paint_findbar), [`bui_paint_site_panel`](gui.bui_chrome.c.md#bui_paint_site_panel)
+*Called by:* [`bui_paint_findbar`](gui.bui_chrome.c.md#bui_paint_findbar), [`bui_paint_link_status`](gui.bui_chrome.c.md#bui_paint_link_status), [`bui_paint_site_panel`](gui.bui_chrome.c.md#bui_paint_site_panel)
 
 ---
 
@@ -165,7 +165,7 @@ void set_rgb(cairo_t *cr, ui_rgb c);
 
 ### `bui_paint_findbar`
 
-`function` | [gui/browser_ui_internal.h:163](../../gui/browser_ui_internal.h#L163)
+`function` | [gui/browser_ui_internal.h:164](../../gui/browser_ui_internal.h#L164)
 
 ```c
 void bui_paint_findbar(cairo_t *cr, const bui_find_view *v);
@@ -184,7 +184,7 @@ void bui_paint_findbar(cairo_t *cr, const bui_find_view *v);
 
 ### `bui_chrome_font`
 
-`function` | [gui/browser_ui_internal.h:165](../../gui/browser_ui_internal.h#L165)
+`function` | [gui/browser_ui_internal.h:166](../../gui/browser_ui_internal.h#L166)
 
 ```c
 void bui_chrome_font(cairo_t *cr, double size);
@@ -203,7 +203,7 @@ void bui_chrome_font(cairo_t *cr, double size);
 
 ### `bui_paint_chrome`
 
-`function` | [gui/browser_ui_internal.h:167](../../gui/browser_ui_internal.h#L167)
+`function` | [gui/browser_ui_internal.h:168](../../gui/browser_ui_internal.h#L168)
 
 ```c
 void bui_paint_chrome(cairo_t *cr, const bui_chrome_view *v);
@@ -224,7 +224,7 @@ Paints both chrome rows.
 
 ### `bui_url_text_x`
 
-`function` | [gui/browser_ui_internal.h:170](../../gui/browser_ui_internal.h#L170)
+`function` | [gui/browser_ui_internal.h:171](../../gui/browser_ui_internal.h#L171)
 
 ```c
 double bui_url_text_x(const bui_chrome_view *v, cairo_t *cr, double *shift);
@@ -248,7 +248,7 @@ X where URL text starts and the horizontal shift keeping the caret visible: the 
 
 ### `bui_url_index_at`
 
-`function` | [gui/browser_ui_internal.h:172](../../gui/browser_ui_internal.h#L172)
+`function` | [gui/browser_ui_internal.h:173](../../gui/browser_ui_internal.h#L173)
 
 ```c
 size_t bui_url_index_at(cairo_t *cr, const bui_chrome_view *v, double x);
@@ -272,7 +272,7 @@ Byte index of the URL caret for a click at surface x (UTF-8 boundary).
 
 ### `bui_round_rect`
 
-`function` | [gui/browser_ui_internal.h:174](../../gui/browser_ui_internal.h#L174)
+`function` | [gui/browser_ui_internal.h:175](../../gui/browser_ui_internal.h#L175)
 
 ```c
 void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r);
@@ -297,7 +297,7 @@ Rounded rectangle path.
 
 ### `bui_paint_video_bar`
 
-`function` | [gui/browser_ui_internal.h:179](../../gui/browser_ui_internal.h#L179)
+`function` | [gui/browser_ui_internal.h:180](../../gui/browser_ui_internal.h#L180)
 
 ```c
 void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos, double total);
@@ -321,7 +321,7 @@ The browser's player bar over a playing video (spec/video_controls.md), drawn in
 
 ### `bui_paint_site_panel`
 
-`function` | [gui/browser_ui_internal.h:183](../../gui/browser_ui_internal.h#L183)
+`function` | [gui/browser_ui_internal.h:184](../../gui/browser_ui_internal.h#L184)
 
 ```c
 void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g, int hot_action);
@@ -341,11 +341,67 @@ The site identity panel (spec/site_panel.md); hot_action = action under the poin
 
 ---
 
+<a id="bui_paint_link_status"></a>
+
+### `bui_paint_link_status`
+
+`function` | [gui/browser_ui_internal.h:191](../../gui/browser_ui_internal.h#L191)
+
+```c
+double bui_paint_link_status(cairo_t *cr, const ui_theme *th, const lp_preview *p, double left, double right, double bottom, double ptr_x, double ptr_y, double zone[3]);
+```
+
+The status strip for the link under the pointer (spec/link_preview.md): bottom-left of the content area [left, right) ending at [`bottom`](include.flex_layout.h.md#bottom), flipped right when the pointer is over it.
+
+The host is emphasised; a blocked link is in the "bad" tone. Returns the strip height.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `cr` | `cairo_t *` |  |  |
+| `th` | `ui_theme *` |  |  |
+| `p` | `lp_preview *` |  |  |
+| `left` | `double` |  |  |
+| `right` | `double` |  |  |
+| `bottom` | `double` |  |  |
+| `ptr_x` | `double` |  |  |
+| `ptr_y` | `double` |  |  |
+| `zone` | `double [3]` |  |  |
+
+**Returns:** `double`
+
+---
+
+<a id="bui_link_status_flips"></a>
+
+### `bui_link_status_flips`
+
+`function` | [gui/browser_ui_internal.h:196](../../gui/browser_ui_internal.h#L196)
+
+```c
+int bui_link_status_flips(const double zone[3], double ptr_x, double ptr_y);
+```
+
+Whether the pointer sits over the strip's left placement `zone` (left, top, right) that the last paint reported: the strip then paints on the right.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `zone` | `double [3]` |  |  |
+| `ptr_x` | `double` |  |  |
+| `ptr_y` | `double` |  |  |
+
+**Returns:** `int`
+
+---
+
 <a id="area"></a>
 
 ### `area`
 
-`function` | [gui/browser_ui_internal.h:189](../../gui/browser_ui_internal.h#L189)
+`function` | [gui/browser_ui_internal.h:201](../../gui/browser_ui_internal.h#L201)
 
 ```c
 * tiled over the mask area (ax, ay, aw, ah) by the layer geometry `geo` (css.h CSS_MG_*, * resolved by bx_background_layer). 1 = painted, 0 = nothing usable. */ int bui_paint_mask_image(cairo_t *c, ca

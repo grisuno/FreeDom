@@ -48,7 +48,7 @@ Returns 0 on success, -1 if no host can be parsed or it does not fit in out.
 
 **Returns:** `int`
 
-*Called by:* [`arrives`](gui.browser_ui.c.md#arrives), [`HL_JS_NAV_MAX`](src.freedom.c.md#hl_js_nav_max), [`gets`](src.freedom.c.md#gets)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_hls.c.md#llvmfuzzertestoneinput), [`arrives`](gui.browser_ui.c.md#arrives), [`HL_JS_NAV_MAX`](src.freedom.c.md#hl_js_nav_max), [`gets`](src.freedom.c.md#gets)
 
 ---
 
@@ -75,6 +75,8 @@ Returns 0 on success, -1 on empty host or insufficient buffer.
 | `out_size` | `size_t` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_hls.c.md#llvmfuzzertestoneinput)
 
 ---
 

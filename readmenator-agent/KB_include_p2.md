@@ -1,6 +1,26 @@
 # Subsystem: include (page 2 of 6)
 Previous: [KB_include.md](KB_include.md)
 
+## include/css_chain.h
+- Doc: cch_element_matches: Nonzero iff the parsed selector *sel matches element `el`, built against...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `cvr_chain` (struct, line 51)
+  - `cvr_table` (struct, line 52)
+  - `cch_path` (type_alias, line 69) `typedef struct cch_path cch_path;`
+  - `cch_path_new` (function, line 70) `cch_path *cch_path_new(void);`
+  - `cch_path_free` (function, line 71) `void cch_path_free(cch_path *pa);`
+  - `cch_element_matches` (function, line 82) `int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);`
+  - `lacks` (function, line 86) `* the element lacks (csel's subj_req) is rejected before the ancestor chain is built: on a * query that scans a...`
+  - `box` (function, line 92) `* generated box (css_resolve_pseudo) against the same element context. * font_size is el's own COMPUTED font-size...`
+  - `FREEDOM_CSS_CHAIN_H` (macro, line 2) `#define FREEDOM_CSS_CHAIN_H`
+  - `CCH_CHAIN_MAX` (macro, line 26) `#define CCH_CHAIN_MAX`
+  - `CCH_SIB_MAX` (macro, line 27) `#define CCH_SIB_MAX`
+  - `CCH_NTH_MAX` (macro, line 28) `#define CCH_NTH_MAX`
+- Depends on: `include/css.h`, `include/css_select.h`
+- Imported by: `src/css_chain.c`, `src/dom.c`, `src/page_view.c`, `tests/test_page_view.c`
+
 ## include/css_color.h
 - Doc: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for...
 - Layer: utility
@@ -53,7 +73,7 @@ Previous: [KB_include.md](KB_include.md)
   - `CNT_MAX_DECL` (macro, line 17) `#define CNT_MAX_DECL`
   - `CNT_MAX_INSTANCES` (macro, line 18) `#define CNT_MAX_INSTANCES`
   - `CNT_NAME_MAX` (macro, line 19) `#define CNT_NAME_MAX`
-- Imported by: `include/css.h`, `src/css_counter.c`, `tests/test_css_counter.c`
+- Imported by: `fuzz/fuzz_css_counter.c`, `include/css.h`, `src/css_counter.c`, `tests/test_css_counter.c`
 
 ## include/css_decl.h
 - Doc: The sheet's two string pools -- background url()s, and the ::before/::after
@@ -117,7 +137,7 @@ Previous: [KB_include.md](KB_include.md)
   - `CI_MAX_DEPTH` (macro, line 21) `#define CI_MAX_DEPTH`
   - `CI_MAX_PER_PAGE` (macro, line 22) `#define CI_MAX_PER_PAGE`
   - `CI_MAX_PER_SHEET` (macro, line 23) `#define CI_MAX_PER_SHEET`
-- Imported by: `src/css_import.c`, `src/tab.c`, `tests/test_css_import.c`, `tests/test_tab.c`
+- Imported by: `fuzz/fuzz_css_import.c`, `src/css_import.c`, `src/tab.c`, `tests/test_css_import.c`, `tests/test_tab.c`
 
 ## include/css_index.h
 - Doc: cix_build: Builds the index over sels[0,n) into *idx, overwriting it (a built index must be *...
@@ -197,7 +217,7 @@ Previous: [KB_include.md](KB_include.md)
   - `CMQ_MAX_DEPTH` (macro, line 16) `#define CMQ_MAX_DEPTH`
   - `CMQ_TOK_MAX` (macro, line 17) `#define CMQ_TOK_MAX`
   - `CMQ_CONTAINER_NAMES` (macro, line 37) `#define CMQ_CONTAINER_NAMES`
-- Imported by: `include/css.h`, `src/css.c`, `src/css_mq.c`, `tests/test_css_mq.c`
+- Imported by: `fuzz/fuzz_css.c`, `include/css.h`, `src/css.c`, `src/css_mq.c`, `tests/test_css_mq.c`
 
 ## include/css_select.h
 - Doc: css_attr_match: Sub-selector for :not()/:is()/:where(): a simple compound with only...
@@ -245,7 +265,7 @@ Previous: [KB_include.md](KB_include.md)
   - `CSEL_FOLD_MARK` (macro, line 216) `#define CSEL_FOLD_MARK`
   - `CSEL_IDENT_SCRATCH` (macro, line 217) `#define CSEL_IDENT_SCRATCH`
 - Depends on: `include/css.h`
-- Imported by: `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `src/sheet_cache.c`, `tests/test_css.c`
+- Imported by: `fuzz/fuzz_css.c`, `include/css_chain.h`, `include/css_decl.h`, `include/css_index.h`, `src/css.c`, `src/css_atrule.c`, `src/css_box.c`, `src/css_chain.c`, `src/css_gradient.c`, `src/css_select.c`, `src/css_text.c`, `src/css_values.c`, `src/css_vars.c`, `src/dom.c`, `src/sheet_cache.c`, `tests/test_css.c`
 
 ## include/css_text.h
 - Layer: utility
@@ -325,7 +345,7 @@ Previous: [KB_include.md](KB_include.md)
   - `closed` (function, line 65) `* 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/out/out_len == NULL (with b64_len !=...`
   - `FREEDOM_DATA_URL_H` (macro, line 2) `#define FREEDOM_DATA_URL_H`
   - `DU_MAX_ENCODED_LEN` (macro, line 43) `#define DU_MAX_ENCODED_LEN`
-- Imported by: `gui/browser_ui.c`, `src/data_url.c`, `src/render_doc.c`, `src/render_policy.c`, `src/tab.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_data_url.c`
+- Imported by: `fuzz/fuzz_data_url.c`, `gui/browser_ui.c`, `src/data_url.c`, `src/render_doc.c`, `src/render_policy.c`, `src/tab.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_data_url.c`
 
 ## include/disk_store.h
 - Doc: ds_free: Reads and decrypts path.
@@ -338,45 +358,56 @@ Previous: [KB_include.md](KB_include.md)
 - Depends on: `include/local_store.h`
 - Imported by: `src/disk_store.c`, `src/http_cache.c`, `src/profile.c`, `tests/test_disk_store.c`
 
+## include/doc_title.h
+- Doc: doc_title -- the <title> of a received document that has not been laid out yet
+- Layer: utility
+- Language: h
+- Symbols:
+  - `dt_scan` (function, line 20) `int dt_scan(const char *html, size_t len, char *out, size_t cap);`
+  - `FREEDOM_DOC_TITLE_H` (macro, line 5) `#define FREEDOM_DOC_TITLE_H`
+  - `DT_SCAN_MAX` (macro, line 14) `#define DT_SCAN_MAX`
+- Imported by: `fuzz/fuzz_doc_title.c`, `gui/browser_ui.c`, `src/doc_title.c`, `tests/test_doc_title.c`
+
 ## include/dom.h
 - Doc: dom_place: Where dom_move_children places the moved nodes (insertAdjacent* needs all four: *...
 - Layer: utility
 - Language: h
 - Symbols:
   - `dom_status` (enum, line 26)
-  - `dom_place` (enum, line 194)
+  - `dom_place` (enum, line 198)
   - `dom_node_id` (type_alias, line 34) `typedef uint32_t dom_node_id;`
   - `dom_index` (type_alias, line 40) `typedef struct dom_index dom_index;`
   - `dom_free` (function, line 48) `void dom_free(dom_index *idx);`
   - `dom_node_count` (function, line 51) `size_t dom_node_count(const dom_index *idx);`
   - `tree` (function, line 59) `* tree (the index only grows, so a node a script removed is still registered and must not be * found);`
-  - `count` (function, line 64) `* match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index...`
-  - `dom_get_by_class` (function, line 67) `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);`
-  - `dom_matches` (function, line 96) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);`
-  - `dom_document_position` (function, line 106) `size_t dom_document_position(const dom_index *idx, dom_node_id node);`
-  - `dom_precedes` (function, line 109) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);`
-  - `dom_tag_name` (function, line 123) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);`
-  - `dom_get_attribute` (function, line 126) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);`
-  - `dom_attribute_names` (function, line 133) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);`
-  - `dom_text_content` (function, line 138) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);`
-  - `dom_document_title` (function, line 141) `const char *dom_document_title(const dom_index *idx, size_t *len);`
-  - `valid` (function, line 146) `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...`
-  - `cycle` (function, line 176) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...`
-  - `parent` (function, line 203) `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...`
-  - `dom_node_kind` (function, line 219) `int dom_node_kind(const dom_index *idx, dom_node_id node);`
-  - `index` (function, line 235) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
-  - `length` (function, line 260) `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
-  - `process` (function, line 267) `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
-  - `sight` (function, line 272) `* first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change...`
+  - `dom_is_connected` (function, line 65) `int dom_is_connected(const dom_index *idx, dom_node_id node);`
+  - `count` (function, line 68) `* match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index...`
+  - `dom_get_by_class` (function, line 71) `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);`
+  - `dom_matches` (function, line 100) `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);`
+  - `dom_document_position` (function, line 110) `size_t dom_document_position(const dom_index *idx, dom_node_id node);`
+  - `dom_precedes` (function, line 113) `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);`
+  - `dom_tag_name` (function, line 127) `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);`
+  - `dom_get_attribute` (function, line 130) `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);`
+  - `dom_attribute_names` (function, line 137) `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);`
+  - `dom_text_content` (function, line 142) `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);`
+  - `dom_document_title` (function, line 145) `const char *dom_document_title(const dom_index *idx, size_t *len);`
+  - `valid` (function, line 150) `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...`
+  - `cycle` (function, line 180) `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...`
+  - `parent` (function, line 207) `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...`
+  - `dom_node_kind` (function, line 223) `int dom_node_kind(const dom_index *idx, dom_node_id node);`
+  - `index` (function, line 239) `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...`
+  - `length` (function, line 264) `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...`
+  - `process` (function, line 271) `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...`
+  - `sight` (function, line 276) `* first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change...`
   - `FREEDOM_DOM_H` (macro, line 2) `#define FREEDOM_DOM_H`
   - `DOM_NODE_NONE` (macro, line 37) `#define DOM_NODE_NONE`
-  - `DOM_KIND_NONE` (macro, line 210) `#define DOM_KIND_NONE`
-  - `DOM_KIND_ELEMENT` (macro, line 211) `#define DOM_KIND_ELEMENT`
-  - `DOM_KIND_TEXT` (macro, line 212) `#define DOM_KIND_TEXT`
-  - `DOM_KIND_COMMENT` (macro, line 213) `#define DOM_KIND_COMMENT`
-  - `DOM_MAX_HANDLES` (macro, line 216) `#define DOM_MAX_HANDLES`
+  - `DOM_KIND_NONE` (macro, line 214) `#define DOM_KIND_NONE`
+  - `DOM_KIND_ELEMENT` (macro, line 215) `#define DOM_KIND_ELEMENT`
+  - `DOM_KIND_TEXT` (macro, line 216) `#define DOM_KIND_TEXT`
+  - `DOM_KIND_COMMENT` (macro, line 217) `#define DOM_KIND_COMMENT`
+  - `DOM_MAX_HANDLES` (macro, line 220) `#define DOM_MAX_HANDLES`
 - Depends on: `include/html_parse.h`
-- Imported by: `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`, `tests/test_page_view.c`
+- Imported by: `fuzz/fuzz_anchor.c`, `fuzz/fuzz_dom.c`, `fuzz/fuzz_js_dom.c`, `include/anchor.h`, `include/js_dom.h`, `include/js_geom.h`, `include/page_view.h`, `src/dom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/tab.c`, `tests/test_anchor.c`, `tests/test_dom.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`, `tests/test_page_view.c`
 
 ## include/dom_debug.h
 - Doc: dd_format: Formats doc into out[0..cap) as a NUL-terminated, line-oriented dump (see the spec...
@@ -388,7 +419,7 @@ Previous: [KB_include.md](KB_include.md)
   - `FREEDOM_DOM_DEBUG_H` (macro, line 2) `#define FREEDOM_DOM_DEBUG_H`
   - `DD_FIELD_MAX` (macro, line 28) `#define DD_FIELD_MAX`
 - Depends on: `include/render_doc.h`
-- Imported by: `src/dom_debug.c`, `src/freedom.c`, `tests/test_dom_debug.c`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `src/dom_debug.c`, `src/freedom.c`, `tests/test_dom_debug.c`
 
 ## include/download.h
 - Doc: dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media...
@@ -404,7 +435,7 @@ Previous: [KB_include.md](KB_include.md)
   - `DL_NAME_MAX` (macro, line 29) `#define DL_NAME_MAX`
   - `DL_FALLBACK_NAME` (macro, line 30) `#define DL_FALLBACK_NAME`
   - `DL_MAX_BYTES` (macro, line 31) `#define DL_MAX_BYTES`
-- Imported by: `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
+- Imported by: `fuzz/fuzz_download.c`, `gui/browser_ui.c`, `src/download.c`, `tests/test_download.c`
 
 ## include/exact_key.h
 - Doc: exact_key (ek_) -- a cache key built by OBSERVING every input of what is cached, compared
@@ -420,7 +451,7 @@ Previous: [KB_include.md](KB_include.md)
   - `ek_free` (function, line 40) `void ek_free(ek_key *k);`
   - `FREEDOM_EXACT_KEY_H` (macro, line 2) `#define FREEDOM_EXACT_KEY_H`
   - `EK_MAX_BYTES` (macro, line 15) `#define EK_MAX_BYTES`
-- Imported by: `gui/browser_ui.c`, `src/exact_key.c`, `tests/test_exact_key.c`
+- Imported by: `fuzz/fuzz_exact_key.c`, `gui/browser_ui.c`, `src/exact_key.c`, `tests/test_exact_key.c`
 
 ## include/fb_cmdline.h
 - Doc: fbc_history_push: #define FBC_BASE_MAX   256    /* bytes of a completion base path #define...
@@ -445,51 +476,7 @@ Previous: [KB_include.md](KB_include.md)
   - `FBC_ENTRY_MAX` (macro, line 16) `#define FBC_ENTRY_MAX`
   - `FBC_BASE_MAX` (macro, line 17) `#define FBC_BASE_MAX`
   - `FBC_LIST_NAMES` (macro, line 18) `#define FBC_LIST_NAMES`
-- Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `tests/test_fb_cmdline.c`, `tests/test_js_dom.c`
-
-## include/fb_panes.h
-- Doc: fbp_tab_label: FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where the JS time went (sampling...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `fbp_tab` (enum, line 17)
-  - `fbp_tab_label` (function, line 34) `const char *fbp_tab_label(int tab);`
-  - `fbp_tab_from_name` (function, line 37) `int fbp_tab_from_name(const char *name);`
-  - `fbp_tab_wrap` (function, line 40) `int fbp_tab_wrap(int tab, int dir);`
-  - `fbp_tab_span` (function, line 43) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);`
-  - `fbp_tab_at` (function, line 46) `int fbp_tab_at(double x, double cell_w, double pad_cells);`
-  - `fbp_is_pane` (function, line 49) `int fbp_is_pane(int tab);`
-  - `fbp_js_quote` (function, line 53) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);`
-  - `fbp_expr` (function, line 57) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);`
-  - `FREEDOM_FB_PANES_H` (macro, line 2) `#define FREEDOM_FB_PANES_H`
-  - `FBP_SELECTOR_MAX` (macro, line 30) `#define FBP_SELECTOR_MAX`
-  - `FBP_EXPR_MAX` (macro, line 31) `#define FBP_EXPR_MAX`
-- Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
-
-## include/find_text.h
-- Doc: ft_piece: One laid-out text piece. gap_before = 1: white space separates it from the previous *...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `ft_piece` (struct, line 24)
-  - `ft_pos` (struct, line 30)
-  - `ft_match` (struct, line 31)
-  - `ft_span` (struct, line 32)
-  - `ft_status` (enum, line 20)
-  - `piece` (type_alias, line 29) `typedef struct ft_pos { size_t piece;`
-  - `end` (type_alias, line 31) `typedef struct ft_match { ft_pos start, end;`
-  - `match` (type_alias, line 32) `typedef struct ft_span { size_t piece, start, end, match;`
-  - `find_text` (function, line 2) `* find_text (ft_) -- find in page over the rendered text (spec/find_text.md). * * Pure: no I/O, no global state...`
-  - `ft_fold` (function, line 35) `uint32_t ft_fold(uint32_t cp);`
-  - `written` (function, line 38) `* number of code points written (<= cap, <= FT_QUERY_MAX);`
-  - `ft_compile` (function, line 39) `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap);`
-  - `exist` (function, line 42) `* cap matches exist (truncated may be NULL). */ ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t...`
-  - `ft_spans` (function, line 48) `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm, ft_span *out, size_t cap);`
-  - `ft_step` (function, line 53) `long ft_step(long cur, size_t n, int dir);`
-  - `FREEDOM_FIND_TEXT_H` (macro, line 8) `#define FREEDOM_FIND_TEXT_H`
-  - `FT_QUERY_MAX` (macro, line 17) `#define FT_QUERY_MAX`
-  - `FT_MATCH_MAX` (macro, line 18) `#define FT_MATCH_MAX`
-- Imported by: `gui/browser_ui.c`, `src/find_text.c`, `tests/test_find_text.c`
+- Imported by: `fuzz/fuzz_fb_cmdline.c`, `gui/browser_ui.c`, `src/fb_cmdline.c`, `tests/test_fb_cmdline.c`, `tests/test_js_dom.c`
 
 
 Next: [KB_include_p3.md](KB_include_p3.md)

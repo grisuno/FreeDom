@@ -18,17 +18,11 @@ flowchart LR
     n_src_css_values_c__cv_parse_color_t7(["cv_parse_color_t7"])
     n_src_css_values_c__cv_bg_alpha_of(["cv_bg_alpha_of"])
     n_src_css_values_c__cv_text_color(["cv_text_color"])
-    n_include_css_color_h__cc_pack["css_color.cc_pack"]
-    n_src_css_color_c__cc_parse["css_color.cc_parse"]
-    n_include_css_select_h__csel_lower_ch["css_select.csel_lower_ch"]
     n_src_css_values_c__cv_interp_color --> n_src_css_values_c__cv_parse_color
     n_src_css_values_c__cv_interp_bg --> n_src_css_values_c__cv_parse_color
     n_src_css_values_c__cv_parse_color_t7 --> n_src_css_values_c__cv_bg_alpha_of
     n_src_css_values_c__cv_parse_color_t7 --> n_src_css_values_c__cv_parse_color
     n_src_css_values_c__cv_text_color --> n_src_css_values_c__cv_parse_color_t7
-    n_src_css_values_c__cv_parse_color -.-> n_include_css_color_h__cc_pack
-    n_src_css_values_c__cv_parse_color -.-> n_src_css_color_c__cc_parse
-    n_src_css_values_c__cv_bg_alpha_of -.-> n_include_css_select_h__csel_lower_ch
 ```
 
 ## Functions
@@ -37,7 +31,7 @@ flowchart LR
 
 ### `cv_parse_color`
 
-`function` | [src/css_values.c:16](../../src/css_values.c#L16)
+`function` | [src/css_values.c:42](../../src/css_values.c#L42)
 
 ```c
 int cv_parse_color(const char *v)
@@ -51,8 +45,6 @@ int cv_parse_color(const char *v)
 
 **Returns:** `int`
 
-*Calls:* [`cc_pack`](include.css_color.h.md#cc_pack), [`cc_parse`](src.css_color.c.md#cc_parse)
-
 *Called by:* [`cv_interp_bg`](#cv_interp_bg), [`cv_interp_color`](#cv_interp_color), [`cv_parse_color_t7`](#cv_parse_color_t7)
 
 ---
@@ -61,7 +53,7 @@ int cv_parse_color(const char *v)
 
 ### `cv_interp_color`
 
-`function` | [src/css_values.c:36](../../src/css_values.c#L36)
+`function` | [src/css_values.c:47](../../src/css_values.c#L47)
 
 ```c
 int cv_interp_color(const char *v)
@@ -83,7 +75,7 @@ int cv_interp_color(const char *v)
 
 ### `cv_color_ok`
 
-`function` | [src/css_values.c:41](../../src/css_values.c#L41)
+`function` | [src/css_values.c:52](../../src/css_values.c#L52)
 
 ```c
 int cv_color_ok(int c)
@@ -103,7 +95,7 @@ int cv_color_ok(int c)
 
 ### `cv_bg_alpha_of`
 
-`function` | [src/css_values.c:46](../../src/css_values.c#L46)
+`function` | [src/css_values.c:199](../../src/css_values.c#L199)
 
 ```c
 int cv_bg_alpha_of(const char *v)
@@ -117,8 +109,6 @@ int cv_bg_alpha_of(const char *v)
 
 **Returns:** `int`
 
-*Calls:* [`csel_lower_ch`](include.css_select.h.md#csel_lower_ch)
-
 *Called by:* [`cv_parse_color_t7`](#cv_parse_color_t7)
 
 ---
@@ -127,7 +117,7 @@ int cv_bg_alpha_of(const char *v)
 
 ### `cv_interp_bg`
 
-`function` | [src/css_values.c:160](../../src/css_values.c#L160)
+`function` | [src/css_values.c:324](../../src/css_values.c#L324)
 
 ```c
 int cv_interp_bg(const char *v)
@@ -149,7 +139,7 @@ int cv_interp_bg(const char *v)
 
 ### `cv_parse_color_t7`
 
-`function` | [src/css_values.c:205](../../src/css_values.c#L205)
+`function` | [src/css_values.c:369](../../src/css_values.c#L369)
 
 ```c
 int cv_parse_color_t7(const char *v)
@@ -179,7 +169,7 @@ Sentinels (-1 invalid, CC_COLOR_CURRENT, CC_COLOR_TRANSPARENT) pass through unch
 
 ### `cv_text_color`
 
-`function` | [src/css_values.c:222](../../src/css_values.c#L222)
+`function` | [src/css_values.c:386](../../src/css_values.c#L386)
 
 ```c
 int cv_text_color(const char *v)
@@ -201,7 +191,7 @@ int cv_text_color(const char *v)
 
 ### `cv_filter_scale`
 
-`function` | [src/css_values.c:231](../../src/css_values.c#L231)
+`function` | [src/css_values.c:395](../../src/css_values.c#L395)
 
 ```c
 double cv_filter_scale(int pct)

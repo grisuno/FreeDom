@@ -1,6 +1,18 @@
 # API (page 13 of 13)
 Previous: [API_p12.md](API_p12.md)
 
+## src/table_layout.c
+Depends on: `include/table_layout.h`
+- `tl_spread` (function) `src/table_layout.c:14` `static void tl_spread(double *w, const double *weight, size_t c0, size_t c1, double extra)` -- A width from the caller: non-finite or negative reads as 0, and anything past TL_WIDTH_MAX * is capped so sums over...
+- `tl_measure` (function) `src/table_layout.c:23` `static void tl_measure(const tl_cell *cells, size_t n, size_t ncols, double gap,
+                ...` -- if (!isfinite(v) || v <= 0.0) return 0.0; return (v > TL_WIDTH_MAX) ?
+- `tl_intrinsic` (function) `src/table_layout.c:78` `void tl_intrinsic(const tl_cell *cells, size_t n, size_t ncols, double gap,
+                  dou...`
+- `tl_distribute` (function) `src/table_layout.c:98` `static void tl_distribute(const double *minw, const double *maxw, const int *sized,
+             ...` -- Shares `used` px among the columns with take[c] != 0 (CSS 2.1 17.5.2.2, css-tables-3 3.9): above the sum of their...
+- `tl_columns` (function) `src/table_layout.c:134` `double tl_columns(const tl_cell *cells, size_t n, size_t ncols, double gap,
+                  dou...`
+
 ## src/text_case.c
 Depends on: `include/css.h`, `include/text_case.h`
 - `pair_parity` (function) `src/text_case.c:8` `static int pair_parity(uint32_t cp)` -- Latin Extended-A and the Cyrillic historic block pair letters on adjacent code points, uppercase first.
@@ -155,6 +167,7 @@ static int looks_like_host(const c...`
 - `copy_bounded` (function) `src/url.c:645` `static url_status copy_bounded(char *out, size_t outsz, const char *a, size_t alen,
              ...`
 - `url_history_target` (function) `src/url.c:654` `url_status url_history_target(const char *base, const char *ref, char *out, size_t outsz)`
+- `url_split_location` (function) `src/url.c:688` `url_status url_split_location(const char *url, url_parts *out)`
 
 ## src/video_controls.c
 Depends on: `include/video_controls.h`
@@ -322,10 +335,10 @@ Depends on: `include/zoom.h`
 
 ## tools/guiscroll.py
 Depends on: `tools/guitime.py`
-- `phase_ms` (function) `tools/guiscroll.py:34` `def phase_ms(line, phase)`
-- `one_page` (function) `tools/guiscroll.py:44` `def one_page(binary, page, env, prof, tmp, notches)`
-- `main` (function) `tools/guiscroll.py:85` `def main()`
-- `procs_display` (function) `tools/guiscroll.py:134` `def procs_display(procs)` -- The X display guitime.start_display put Xvfb on (it is the second process's argv).
+- `phase_ms` (function) `tools/guiscroll.py:38` `def phase_ms(line, phase)`
+- `one_page` (function) `tools/guiscroll.py:48` `def one_page(binary, page, env, prof, tmp, notches, hover)`
+- `main` (function) `tools/guiscroll.py:95` `def main()`
+- `procs_display` (function) `tools/guiscroll.py:149` `def procs_display(procs)` -- The X display guitime.start_display put Xvfb on (it is the second process's argv).
 
 ## tools/guitime.py
 Imported by: `tools/guiscroll.py`

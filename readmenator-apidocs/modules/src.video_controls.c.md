@@ -97,6 +97,8 @@ vcl_hit_kind vcl_hit(const vcl_geom *g, const vcl_rect *video, double px, double
 | `py` | `double` |  |  |
 | `frac` | `double *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_video_controls.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="vcl_seg_duration"></a>
@@ -174,6 +176,8 @@ size_t vcl_segment_at(const hls_playlist *pl, double t, double *start)
 **Returns:** `size_t`
 
 *Calls:* [`vcl_seg_duration`](#vcl_seg_duration)
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_video_controls.c.md#llvmfuzzertestoneinput)
 
 ---
 

@@ -2,69 +2,69 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 253,
-  "entities": 4010,
+  "modules": 312,
+  "entities": 4212,
   "languages": {
-   "c": 119,
-   "h": 117,
+   "c": 172,
+   "h": 122,
    "py": 13,
-   "sh": 4
+   "sh": 5
   },
   "kinds": {
    "constant": 27,
-   "enum": 169,
-   "function": 2229,
-   "macro": 823,
-   "method": 27,
-   "module": 253,
-   "struct": 308,
-   "type_alias": 167,
+   "enum": 172,
+   "function": 2324,
+   "macro": 853,
+   "method": 28,
+   "module": 312,
+   "struct": 318,
+   "type_alias": 171,
    "variable": 7
   },
   "truncated": false,
-  "skipped_files": 105,
+  "skipped_files": 110,
   "privacy_mode": false
  },
  "coverage": {
   "overall": {
-   "documented": 1810,
-   "total": 3976,
-   "percent": 45.5
+   "documented": 1880,
+   "total": 4178,
+   "percent": 45.0
   },
   "by_kind": {
    "enum": {
     "documented": 80,
-    "total": 169,
-    "percent": 47.3
-   },
-   "function": {
-    "documented": 1036,
-    "total": 2229,
+    "total": 172,
     "percent": 46.5
    },
+   "function": {
+    "documented": 1057,
+    "total": 2324,
+    "percent": 45.5
+   },
    "macro": {
-    "documented": 388,
-    "total": 823,
+    "documented": 402,
+    "total": 853,
     "percent": 47.1
    },
    "method": {
     "documented": 0,
-    "total": 27,
+    "total": 28,
     "percent": 0.0
    },
    "module": {
-    "documented": 47,
-    "total": 253,
-    "percent": 18.6
+    "documented": 76,
+    "total": 312,
+    "percent": 24.4
    },
    "struct": {
-    "documented": 139,
-    "total": 308,
-    "percent": 45.1
+    "documented": 142,
+    "total": 318,
+    "percent": 44.7
    },
    "type_alias": {
-    "documented": 120,
-    "total": 167,
+    "documented": 123,
+    "total": 171,
     "percent": 71.9
    }
   },
@@ -84,20 +84,265 @@
     "total": 1,
     "percent": 100.0
    },
+   "fuzz.sh": {
+    "documented": 1,
+    "total": 1,
+    "percent": 100.0
+   },
+   "fuzz/fuzz_anchor.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_box_blur.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_box_tree.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_browser.c": {
+    "documented": 2,
+    "total": 6,
+    "percent": 33.3
+   },
+   "fuzz/fuzz_chrome_layout.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_css.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_css_counter.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_css_import.c": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
+   "fuzz/fuzz_data_url.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_doc_title.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_dom.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_dom_debug.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_download.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_exact_key.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_fb_cmdline.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_find_text.c": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
+   "fuzz/fuzz_frame_broker.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_freebug.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_group_index.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_hls.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_html_parse.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_identity.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_image_decode.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_import_map.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_js_dom.c": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
+   "fuzz/fuzz_js_geom.c": {
+    "documented": 0,
+    "total": 3,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_js_sandbox.c": {
+    "documented": 1,
+    "total": 4,
+    "percent": 25.0
+   },
+   "fuzz/fuzz_link_preview.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_mask_cache.c": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
+   "fuzz/fuzz_nav_token.c": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
+   "fuzz/fuzz_net_guard.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_page_view.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_pdf_export.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_prefetch.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_prefs.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_request_headers.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_site_panel.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_smooth_scroll.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_svg_render.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_table_layout.c": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
+   "fuzz/fuzz_text_case.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_text_shape.c": {
+    "documented": 0,
+    "total": 5,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_tls_impersonate.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_url.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_video_controls.c": {
+    "documented": 0,
+    "total": 2,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_web_storage.c": {
+    "documented": 0,
+    "total": 1,
+    "percent": 0.0
+   },
+   "fuzz/fuzz_webfont.c": {
+    "documented": 1,
+    "total": 2,
+    "percent": 50.0
+   },
+   "fuzz/fuzz_webfont_register.c": {
+    "documented": 0,
+    "total": 3,
+    "percent": 0.0
+   },
    "gui/browser_ui.c": {
-    "documented": 84,
-    "total": 266,
-    "percent": 31.6
+    "documented": 86,
+    "total": 271,
+    "percent": 31.7
    },
    "gui/browser_ui_internal.h": {
-    "documented": 13,
-    "total": 24,
-    "percent": 54.2
+    "documented": 15,
+    "total": 26,
+    "percent": 57.7
    },
    "gui/bui_chrome.c": {
-    "documented": 16,
-    "total": 29,
-    "percent": 55.2
+    "documented": 19,
+    "total": 36,
+    "percent": 52.8
    },
    "gui/bui_mask_img.c": {
     "documented": 1,
@@ -118,6 +363,11 @@
     "documented": 3,
     "total": 8,
     "percent": 37.5
+   },
+   "include/anchor.h": {
+    "documented": 4,
+    "total": 8,
+    "percent": 50.0
    },
    "include/anti_fp.h": {
     "documented": 21,
@@ -145,8 +395,8 @@
     "percent": 38.2
    },
    "include/browser.h": {
-    "documented": 13,
-    "total": 26,
+    "documented": 14,
+    "total": 28,
     "percent": 50.0
    },
    "include/cached_fetch.h": {
@@ -155,9 +405,9 @@
     "percent": 50.0
    },
    "include/chrome_layout.h": {
-    "documented": 18,
-    "total": 36,
-    "percent": 50.0
+    "documented": 21,
+    "total": 39,
+    "percent": 53.8
    },
    "include/compositor.h": {
     "documented": 10,
@@ -264,10 +514,15 @@
     "total": 3,
     "percent": 33.3
    },
+   "include/doc_title.h": {
+    "documented": 3,
+    "total": 3,
+    "percent": 100.0
+   },
    "include/dom.h": {
-    "documented": 18,
-    "total": 32,
-    "percent": 56.2
+    "documented": 19,
+    "total": 33,
+    "percent": 57.6
    },
    "include/dom_debug.h": {
     "documented": 3,
@@ -330,9 +585,14 @@
     "percent": 72.2
    },
    "include/freedom_config.h": {
-    "documented": 18,
-    "total": 21,
-    "percent": 85.7
+    "documented": 22,
+    "total": 27,
+    "percent": 81.5
+   },
+   "include/group_index.h": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
    },
    "include/hls.h": {
     "documented": 6,
@@ -406,8 +666,8 @@
    },
    "include/js_location.h": {
     "documented": 3,
-    "total": 6,
-    "percent": 50.0
+    "total": 7,
+    "percent": 42.9
    },
    "include/js_native.h": {
     "documented": 0,
@@ -438,6 +698,11 @@
     "documented": 4,
     "total": 11,
     "percent": 36.4
+   },
+   "include/link_preview.h": {
+    "documented": 1,
+    "total": 6,
+    "percent": 16.7
    },
    "include/local_store.h": {
     "documented": 2,
@@ -559,6 +824,11 @@
     "total": 7,
     "percent": 42.9
    },
+   "include/smooth_scroll.h": {
+    "documented": 1,
+    "total": 9,
+    "percent": 11.1
+   },
    "include/subreq_batch.h": {
     "documented": 11,
     "total": 17,
@@ -580,8 +850,8 @@
     "percent": 38.9
    },
    "include/tab.h": {
-    "documented": 28,
-    "total": 56,
+    "documented": 30,
+    "total": 60,
     "percent": 50.0
    },
    "include/table_layout.h": {
@@ -616,8 +886,8 @@
    },
    "include/url.h": {
     "documented": 7,
-    "total": 14,
-    "percent": 50.0
+    "total": 15,
+    "percent": 46.7
    },
    "include/util.h": {
     "documented": 2,
@@ -684,6 +954,11 @@
     "total": 1,
     "percent": 100.0
    },
+   "src/anchor.c": {
+    "documented": 4,
+    "total": 6,
+    "percent": 66.7
+   },
    "src/anti_fp.c": {
     "documented": 17,
     "total": 23,
@@ -710,9 +985,9 @@
     "percent": 42.1
    },
    "src/browser.c": {
-    "documented": 10,
-    "total": 36,
-    "percent": 27.8
+    "documented": 11,
+    "total": 38,
+    "percent": 28.9
    },
    "src/cached_fetch.c": {
     "documented": 2,
@@ -720,9 +995,9 @@
     "percent": 28.6
    },
    "src/chrome_layout.c": {
-    "documented": 12,
-    "total": 17,
-    "percent": 70.6
+    "documented": 13,
+    "total": 18,
+    "percent": 72.2
    },
    "src/compositor.c": {
     "documented": 5,
@@ -766,8 +1041,8 @@
    },
    "src/css_gradient.c": {
     "documented": 4,
-    "total": 17,
-    "percent": 23.5
+    "total": 18,
+    "percent": 22.2
    },
    "src/css_import.c": {
     "documented": 4,
@@ -824,10 +1099,15 @@
     "total": 5,
     "percent": 20.0
    },
+   "src/doc_title.c": {
+    "documented": 2,
+    "total": 6,
+    "percent": 33.3
+   },
    "src/dom.c": {
-    "documented": 13,
-    "total": 53,
-    "percent": 24.5
+    "documented": 14,
+    "total": 54,
+    "percent": 25.9
    },
    "src/dom_debug.c": {
     "documented": 3,
@@ -893,6 +1173,11 @@
     "documented": 4,
     "total": 20,
     "percent": 20.0
+   },
+   "src/group_index.c": {
+    "documented": 2,
+    "total": 2,
+    "percent": 100.0
    },
    "src/hls.c": {
     "documented": 2,
@@ -1006,8 +1291,8 @@
    },
    "src/js_location.c": {
     "documented": 3,
-    "total": 6,
-    "percent": 50.0
+    "total": 7,
+    "percent": 42.9
    },
    "src/js_location_internal.h": {
     "documented": 1,
@@ -1043,6 +1328,11 @@
     "documented": 1,
     "total": 3,
     "percent": 33.3
+   },
+   "src/link_preview.c": {
+    "documented": 2,
+    "total": 3,
+    "percent": 66.7
    },
    "src/local_store.c": {
     "documented": 5,
@@ -1154,6 +1444,11 @@
     "total": 11,
     "percent": 81.8
    },
+   "src/smooth_scroll.c": {
+    "documented": 1,
+    "total": 7,
+    "percent": 14.3
+   },
    "src/subreq_batch.c": {
     "documented": 10,
     "total": 15,
@@ -1176,8 +1471,8 @@
    },
    "src/tab.c": {
     "documented": 50,
-    "total": 111,
-    "percent": 45.0
+    "total": 113,
+    "percent": 44.2
    },
    "src/table_layout.c": {
     "documented": 2,
@@ -1211,8 +1506,8 @@
    },
    "src/url.c": {
     "documented": 4,
-    "total": 17,
-    "percent": 23.5
+    "total": 18,
+    "percent": 22.2
    },
    "src/video_controls.c": {
     "documented": 7,
@@ -1353,19 +1648,264 @@
    "entities": 1
   },
   {
+   "uid": "fuzz.sh",
+   "path": "modules/fuzz.sh.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_anchor.c",
+   "path": "modules/fuzz.fuzz_anchor.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_box_blur.c",
+   "path": "modules/fuzz.fuzz_box_blur.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_box_tree.c",
+   "path": "modules/fuzz.fuzz_box_tree.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_browser.c",
+   "path": "modules/fuzz.fuzz_browser.c.jsonl",
+   "entities": 6
+  },
+  {
+   "uid": "fuzz/fuzz_chrome_layout.c",
+   "path": "modules/fuzz.fuzz_chrome_layout.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_css.c",
+   "path": "modules/fuzz.fuzz_css.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_css_counter.c",
+   "path": "modules/fuzz.fuzz_css_counter.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_css_import.c",
+   "path": "modules/fuzz.fuzz_css_import.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_data_url.c",
+   "path": "modules/fuzz.fuzz_data_url.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_doc_title.c",
+   "path": "modules/fuzz.fuzz_doc_title.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_dom.c",
+   "path": "modules/fuzz.fuzz_dom.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_dom_debug.c",
+   "path": "modules/fuzz.fuzz_dom_debug.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_download.c",
+   "path": "modules/fuzz.fuzz_download.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_exact_key.c",
+   "path": "modules/fuzz.fuzz_exact_key.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_fb_cmdline.c",
+   "path": "modules/fuzz.fuzz_fb_cmdline.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_find_text.c",
+   "path": "modules/fuzz.fuzz_find_text.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_frame_broker.c",
+   "path": "modules/fuzz.fuzz_frame_broker.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_freebug.c",
+   "path": "modules/fuzz.fuzz_freebug.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_group_index.c",
+   "path": "modules/fuzz.fuzz_group_index.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_hls.c",
+   "path": "modules/fuzz.fuzz_hls.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_html_parse.c",
+   "path": "modules/fuzz.fuzz_html_parse.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_identity.c",
+   "path": "modules/fuzz.fuzz_identity.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_image_decode.c",
+   "path": "modules/fuzz.fuzz_image_decode.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_import_map.c",
+   "path": "modules/fuzz.fuzz_import_map.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_js_dom.c",
+   "path": "modules/fuzz.fuzz_js_dom.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_js_geom.c",
+   "path": "modules/fuzz.fuzz_js_geom.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_js_sandbox.c",
+   "path": "modules/fuzz.fuzz_js_sandbox.c.jsonl",
+   "entities": 4
+  },
+  {
+   "uid": "fuzz/fuzz_link_preview.c",
+   "path": "modules/fuzz.fuzz_link_preview.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_mask_cache.c",
+   "path": "modules/fuzz.fuzz_mask_cache.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_nav_token.c",
+   "path": "modules/fuzz.fuzz_nav_token.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_net_guard.c",
+   "path": "modules/fuzz.fuzz_net_guard.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_page_view.c",
+   "path": "modules/fuzz.fuzz_page_view.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_pdf_export.c",
+   "path": "modules/fuzz.fuzz_pdf_export.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_prefetch.c",
+   "path": "modules/fuzz.fuzz_prefetch.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_prefs.c",
+   "path": "modules/fuzz.fuzz_prefs.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_request_headers.c",
+   "path": "modules/fuzz.fuzz_request_headers.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_site_panel.c",
+   "path": "modules/fuzz.fuzz_site_panel.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_smooth_scroll.c",
+   "path": "modules/fuzz.fuzz_smooth_scroll.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_svg_render.c",
+   "path": "modules/fuzz.fuzz_svg_render.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_table_layout.c",
+   "path": "modules/fuzz.fuzz_table_layout.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "fuzz/fuzz_text_case.c",
+   "path": "modules/fuzz.fuzz_text_case.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_text_shape.c",
+   "path": "modules/fuzz.fuzz_text_shape.c.jsonl",
+   "entities": 5
+  },
+  {
+   "uid": "fuzz/fuzz_tls_impersonate.c",
+   "path": "modules/fuzz.fuzz_tls_impersonate.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_url.c",
+   "path": "modules/fuzz.fuzz_url.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_video_controls.c",
+   "path": "modules/fuzz.fuzz_video_controls.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_web_storage.c",
+   "path": "modules/fuzz.fuzz_web_storage.c.jsonl",
+   "entities": 1
+  },
+  {
+   "uid": "fuzz/fuzz_webfont.c",
+   "path": "modules/fuzz.fuzz_webfont.c.jsonl",
+   "entities": 2
+  },
+  {
+   "uid": "fuzz/fuzz_webfont_register.c",
+   "path": "modules/fuzz.fuzz_webfont_register.c.jsonl",
+   "entities": 3
+  },
+  {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 266
+   "entities": 271
   },
   {
    "uid": "gui/browser_ui_internal.h",
    "path": "modules/gui.browser_ui_internal.h.jsonl",
-   "entities": 24
+   "entities": 26
   },
   {
    "uid": "gui/bui_chrome.c",
    "path": "modules/gui.bui_chrome.c.jsonl",
-   "entities": 29
+   "entities": 36
   },
   {
    "uid": "gui/bui_mask_img.c",
@@ -1385,6 +1925,11 @@
   {
    "uid": "gui/ui_render.c",
    "path": "modules/gui.ui_render.c.jsonl",
+   "entities": 8
+  },
+  {
+   "uid": "include/anchor.h",
+   "path": "modules/include.anchor.h.jsonl",
    "entities": 8
   },
   {
@@ -1415,7 +1960,7 @@
   {
    "uid": "include/browser.h",
    "path": "modules/include.browser.h.jsonl",
-   "entities": 26
+   "entities": 28
   },
   {
    "uid": "include/cached_fetch.h",
@@ -1425,7 +1970,7 @@
   {
    "uid": "include/chrome_layout.h",
    "path": "modules/include.chrome_layout.h.jsonl",
-   "entities": 36
+   "entities": 39
   },
   {
    "uid": "include/compositor.h",
@@ -1533,9 +2078,14 @@
    "entities": 3
   },
   {
+   "uid": "include/doc_title.h",
+   "path": "modules/include.doc_title.h.jsonl",
+   "entities": 3
+  },
+  {
    "uid": "include/dom.h",
    "path": "modules/include.dom.h.jsonl",
-   "entities": 32
+   "entities": 33
   },
   {
    "uid": "include/dom_debug.h",
@@ -1600,7 +2150,12 @@
   {
    "uid": "include/freedom_config.h",
    "path": "modules/include.freedom_config.h.jsonl",
-   "entities": 21
+   "entities": 27
+  },
+  {
+   "uid": "include/group_index.h",
+   "path": "modules/include.group_index.h.jsonl",
+   "entities": 3
   },
   {
    "uid": "include/hls.h",
@@ -1675,7 +2230,7 @@
   {
    "uid": "include/js_location.h",
    "path": "modules/include.js_location.h.jsonl",
-   "entities": 6
+   "entities": 7
   },
   {
    "uid": "include/js_native.h",
@@ -1706,6 +2261,11 @@
    "uid": "include/link_nav.h",
    "path": "modules/include.link_nav.h.jsonl",
    "entities": 11
+  },
+  {
+   "uid": "include/link_preview.h",
+   "path": "modules/include.link_preview.h.jsonl",
+   "entities": 6
   },
   {
    "uid": "include/local_store.h",
@@ -1828,6 +2388,11 @@
    "entities": 7
   },
   {
+   "uid": "include/smooth_scroll.h",
+   "path": "modules/include.smooth_scroll.h.jsonl",
+   "entities": 9
+  },
+  {
    "uid": "include/subreq_batch.h",
    "path": "modules/include.subreq_batch.h.jsonl",
    "entities": 17
@@ -1850,7 +2415,7 @@
   {
    "uid": "include/tab.h",
    "path": "modules/include.tab.h.jsonl",
-   "entities": 56
+   "entities": 60
   },
   {
    "uid": "include/table_layout.h",
@@ -1885,7 +2450,7 @@
   {
    "uid": "include/url.h",
    "path": "modules/include.url.h.jsonl",
-   "entities": 14
+   "entities": 15
   },
   {
    "uid": "include/util.h",
@@ -1953,6 +2518,11 @@
    "entities": 1
   },
   {
+   "uid": "src/anchor.c",
+   "path": "modules/src.anchor.c.jsonl",
+   "entities": 6
+  },
+  {
    "uid": "src/anti_fp.c",
    "path": "modules/src.anti_fp.c.jsonl",
    "entities": 23
@@ -1980,7 +2550,7 @@
   {
    "uid": "src/browser.c",
    "path": "modules/src.browser.c.jsonl",
-   "entities": 36
+   "entities": 38
   },
   {
    "uid": "src/cached_fetch.c",
@@ -1990,7 +2560,7 @@
   {
    "uid": "src/chrome_layout.c",
    "path": "modules/src.chrome_layout.c.jsonl",
-   "entities": 17
+   "entities": 18
   },
   {
    "uid": "src/compositor.c",
@@ -2035,7 +2605,7 @@
   {
    "uid": "src/css_gradient.c",
    "path": "modules/src.css_gradient.c.jsonl",
-   "entities": 17
+   "entities": 18
   },
   {
    "uid": "src/css_import.c",
@@ -2093,9 +2663,14 @@
    "entities": 5
   },
   {
+   "uid": "src/doc_title.c",
+   "path": "modules/src.doc_title.c.jsonl",
+   "entities": 6
+  },
+  {
    "uid": "src/dom.c",
    "path": "modules/src.dom.c.jsonl",
-   "entities": 53
+   "entities": 54
   },
   {
    "uid": "src/dom_debug.c",
@@ -2161,6 +2736,11 @@
    "uid": "src/freedom.c",
    "path": "modules/src.freedom.c.jsonl",
    "entities": 20
+  },
+  {
+   "uid": "src/group_index.c",
+   "path": "modules/src.group_index.c.jsonl",
+   "entities": 2
   },
   {
    "uid": "src/hls.c",
@@ -2275,7 +2855,7 @@
   {
    "uid": "src/js_location.c",
    "path": "modules/src.js_location.c.jsonl",
-   "entities": 6
+   "entities": 7
   },
   {
    "uid": "src/js_location_internal.h",
@@ -2310,6 +2890,11 @@
   {
    "uid": "src/link_nav.c",
    "path": "modules/src.link_nav.c.jsonl",
+   "entities": 3
+  },
+  {
+   "uid": "src/link_preview.c",
+   "path": "modules/src.link_preview.c.jsonl",
    "entities": 3
   },
   {
@@ -2423,6 +3008,11 @@
    "entities": 11
   },
   {
+   "uid": "src/smooth_scroll.c",
+   "path": "modules/src.smooth_scroll.c.jsonl",
+   "entities": 7
+  },
+  {
    "uid": "src/subreq_batch.c",
    "path": "modules/src.subreq_batch.c.jsonl",
    "entities": 15
@@ -2445,7 +3035,7 @@
   {
    "uid": "src/tab.c",
    "path": "modules/src.tab.c.jsonl",
-   "entities": 111
+   "entities": 113
   },
   {
    "uid": "src/table_layout.c",
@@ -2480,7 +3070,7 @@
   {
    "uid": "src/url.c",
    "path": "modules/src.url.c.jsonl",
-   "entities": 17
+   "entities": 18
   },
   {
    "uid": "src/video_controls.c",
@@ -2605,7 +3195,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2167
+  "total": 2299
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

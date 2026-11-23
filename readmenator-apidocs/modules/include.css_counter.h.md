@@ -152,6 +152,8 @@ Writes a marker into `out` and returns 1; returns 0 when the value has no counte
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_counter.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="cnt_is_marker"></a>
@@ -199,6 +201,8 @@ Returns the length written; always NUL-terminated when cap > 0.
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_counter.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="cnt_state_new"></a>
@@ -212,6 +216,8 @@ cnt_state *cnt_state_new(void);
 ```
 
 **Returns:** `cnt_state *`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_counter.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -230,6 +236,8 @@ void cnt_state_free(cnt_state *s);
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `s` | `cnt_state *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_counter.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -254,6 +262,8 @@ An element at tree depth [`depth`](src.tab.c.md#depth) runs these in order: rese
 | `d` | `cnt_decl *` |  |  |
 | `n` | `int` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_counter.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="cnt_increment"></a>
@@ -275,6 +285,8 @@ void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n);
 | `d` | `cnt_decl *` |  |  |
 | `n` | `int` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_counter.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="cnt_leave"></a>
@@ -295,6 +307,8 @@ The children of an element have all been walked: drop what they created (instanc
 |---|---|---|---|
 | `s` | `cnt_state *` |  |  |
 | `depth` | `int` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_counter.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -324,6 +338,8 @@ A string that is not a marker is copied verbatim. Returns the length written, NU
 | `cap` | `size_t` |  |  |
 
 **Returns:** `size_t`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_counter.c.md#llvmfuzzertestoneinput)
 
 ---
 

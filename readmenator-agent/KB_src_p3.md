@@ -152,39 +152,41 @@ Previous: [KB_src_p2.md](KB_src_p2.md)
   - `find_gradient_call` (function, line 77) `static int find_gradient_call(const char *v, const char *fn, size_t *start,
                      ...`
   - `conic_prelude` (function, line 111) `static int conic_prelude(const char *seg, int *angle)`
-  - `grad_stop_pos` (function, line 153) `static int grad_stop_pos(const char *pp, int conic, const char **endp)`
-  - `CSS_GRAD_STOPS_MAX` (function, line 184) `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
+  - `sRGB` (function, line 154) `* sRGB (spec/css_gradient.md §3b). */
+static int strip_interp(char *seg)`
+  - `grad_stop_pos` (function, line 210) `static int grad_stop_pos(const char *pp, int conic, const char **endp)`
+  - `CSS_GRAD_STOPS_MAX` (function, line 241) `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
  * the gradient fai...`
-  - `emit_gradient` (function, line 291) `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
+  - `emit_gradient` (function, line 352) `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
                          ...`
-  - `find_radial_gradient` (function, line 360) `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+  - `find_radial_gradient` (function, line 421) `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
                       ...`
-  - `cg_first_url` (function, line 398) `int cg_first_url(const char *val, char *out, size_t outcap)`
-  - `emit_radial_geom` (function, line 405) `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)`
-  - `downstream` (function, line 422) `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+  - `cg_first_url` (function, line 459) `int cg_first_url(const char *val, char *out, size_t outcap)`
+  - `emit_radial_geom` (function, line 466) `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)`
+  - `downstream` (function, line 483) `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
 int cg_expand_bg_imag...`
-  - `bg_layer_tokens_ok` (function, line 490) `static int bg_layer_tokens_ok(const char *s)`
-  - `cg_expand_background` (function, line 530) `int cg_expand_background(const char *val, css_decl *dst, int cap,
+  - `bg_layer_tokens_ok` (function, line 551) `static int bg_layer_tokens_ok(const char *s)`
+  - `cg_expand_background` (function, line 591) `int cg_expand_background(const char *val, css_decl *dst, int cap,
                              ch...`
-  - `rad_ieq` (function, line 618) `static int rad_ieq(const char *a, const char *b)`
-  - `rad_len` (function, line 626) `static int rad_len(const char *tok, int *enc)`
-  - `rad_is_len_start` (function, line 647) `static int rad_is_len_start(const char *t)`
-  - `rad_pos_kw` (function, line 652) `static int rad_pos_kw(const char *t, int *axis)`
-  - `rad_parse_position` (function, line 661) `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
-  - `cg_parse_radial_prelude` (function, line 690) `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
-  - `cg_radial_len_px` (function, line 766) `double cg_radial_len_px(int enc, double dim)`
-  - `cg_dmin` (function, line 775) `static double cg_dmin(double a, double b)`
-  - `cg_dmax` (function, line 776) `static double cg_dmax(double a, double b)`
-  - `cg_radial_geometry` (function, line 778) `void cg_radial_geometry(const cg_radial *r, double w, double h,
+  - `rad_ieq` (function, line 679) `static int rad_ieq(const char *a, const char *b)`
+  - `rad_len` (function, line 687) `static int rad_len(const char *tok, int *enc)`
+  - `rad_is_len_start` (function, line 708) `static int rad_is_len_start(const char *t)`
+  - `rad_pos_kw` (function, line 713) `static int rad_pos_kw(const char *t, int *axis)`
+  - `rad_parse_position` (function, line 722) `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
+  - `cg_parse_radial_prelude` (function, line 751) `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
+  - `cg_radial_len_px` (function, line 827) `double cg_radial_len_px(int enc, double dim)`
+  - `cg_dmin` (function, line 836) `static double cg_dmin(double a, double b)`
+  - `cg_dmax` (function, line 837) `static double cg_dmax(double a, double b)`
+  - `cg_radial_geometry` (function, line 839) `void cg_radial_geometry(const cg_radial *r, double w, double h,
                         double *c...`
-  - `cg_parse_linear` (function, line 815) `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
-  - `pool` (function, line 418) `* pool (gradient explicitly reset);`
-  - `declaration` (function, line 483) `* declaration (fail closed);`
-  - `CG_RAD_TOKENS` (macro, line 614) `#define CG_RAD_TOKENS`
-  - `CG_RAD_PM_MAX` (macro, line 615) `#define CG_RAD_PM_MAX`
-  - `CG_RAD_PX_MAX` (macro, line 616) `#define CG_RAD_PX_MAX`
-  - `CG_RAD_FLOOR` (macro, line 772) `#define CG_RAD_FLOOR`
-  - `CG_SQRT2` (macro, line 773) `#define CG_SQRT2`
+  - `cg_parse_linear` (function, line 876) `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
+  - `pool` (function, line 479) `* pool (gradient explicitly reset);`
+  - `declaration` (function, line 544) `* declaration (fail closed);`
+  - `CG_RAD_TOKENS` (macro, line 675) `#define CG_RAD_TOKENS`
+  - `CG_RAD_PM_MAX` (macro, line 676) `#define CG_RAD_PM_MAX`
+  - `CG_RAD_PX_MAX` (macro, line 677) `#define CG_RAD_PX_MAX`
+  - `CG_RAD_FLOOR` (macro, line 833) `#define CG_RAD_FLOOR`
+  - `CG_SQRT2` (macro, line 834) `#define CG_SQRT2`
 - Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_import.c
@@ -405,18 +407,25 @@ int cg_expand_bg_imag...`
 - Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_text.h`, `include/css_values.h`
 
 ## src/css_values.c
+- Doc: mix_arg: One color-mix() argument `[<pct>] <color> [<pct>]` in s[0,n): its percentage (-1 when *...
 - Layer: utility
 - Language: c
 - Symbols:
   - `cv_parse_num` (function, line 11) `static int cv_parse_num(const char *s, double *out, const char **endp)`
-  - `cv_parse_color` (function, line 16) `int cv_parse_color(const char *v)`
-  - `cv_interp_color` (function, line 36) `int cv_interp_color(const char *v)`
-  - `cv_color_ok` (function, line 41) `int cv_color_ok(int c)`
-  - `cv_bg_alpha_of` (function, line 46) `int cv_bg_alpha_of(const char *v)`
-  - `cv_interp_bg` (function, line 160) `int cv_interp_bg(const char *v)`
-  - `cv_parse_color_t7` (function, line 205) `int cv_parse_color_t7(const char *v)`
-  - `cv_text_color` (function, line 222) `int cv_text_color(const char *v)`
-  - `cv_filter_scale` (function, line 231) `double cv_filter_scale(int pct)`
+  - `parse_color_depth` (function, line 18) `static int parse_color_depth(const char *v, int depth)`
+  - `cv_parse_color` (function, line 42) `int cv_parse_color(const char *v)`
+  - `cv_interp_color` (function, line 47) `int cv_interp_color(const char *v)`
+  - `cv_color_ok` (function, line 52) `int cv_color_ok(int c)`
+  - `mix_arg` (function, line 61) `static int mix_arg(const char *s, size_t n, double *pct, double *alpha, int *rgb, int depth)`
+  - `mix_solve` (function, line 110) `static int mix_solve(const char *v, int depth, int *rgb_out, double *alpha_out)`
+  - `mix_color` (function, line 171) `static int mix_color(const char *v, int depth)`
+  - `mix_alpha` (function, line 179) `static int mix_alpha(const char *v, int depth)`
+  - `cv_bg_alpha_of` (function, line 199) `int cv_bg_alpha_of(const char *v)`
+  - `alpha_of_depth` (function, line 204) `static int alpha_of_depth(const char *v, int depth)`
+  - `cv_interp_bg` (function, line 324) `int cv_interp_bg(const char *v)`
+  - `cv_parse_color_t7` (function, line 369) `int cv_parse_color_t7(const char *v)`
+  - `cv_text_color` (function, line 386) `int cv_text_color(const char *v)`
+  - `cv_filter_scale` (function, line 395) `double cv_filter_scale(int pct)`
 - Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 
 ## src/css_vars.c
@@ -436,12 +445,13 @@ int cg_expand_bg_imag...`
   - `is_ws` (function, line 120) `static int is_ws(char c)`
   - `without_important` (function, line 124) `static size_t without_important(const char *val, size_t n)`
   - `cvr_collect_decls` (function, line 139) `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b)`
-  - `scope_get` (function, line 164) `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)`
-  - `env_value` (function, line 182) `static const char *env_value(const char *name, size_t n)`
-  - `resolve_rec` (function, line 192) `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
+  - `wide_keyword` (function, line 168) `static int wide_keyword(const char *v)`
+  - `scope_get` (function, line 179) `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)`
+  - `env_value` (function, line 204) `static const char *env_value(const char *name, size_t n)`
+  - `resolve_rec` (function, line 214) `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
                   ...`
-  - `cvr_resolve` (function, line 281) `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
-  - `cvr_lookup` (function, line 290) `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
+  - `cvr_resolve` (function, line 303) `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
+  - `cvr_lookup` (function, line 312) `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
 - Depends on: `include/css_select.h`, `include/css_vars.h`
 
 ## src/data_url.c

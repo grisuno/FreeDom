@@ -529,6 +529,8 @@ tsh_status tsh_shape(const tsh_font *f, double px, const char *text, size_t len,
 
 **Returns:** `tsh_status`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_text_shape.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_webfont_register.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="tsh_segment"></a>
@@ -610,6 +612,8 @@ tsh_status tsh_draw(cairo_t *cr, const tsh_font *f, double px, double x, double 
 | `len` | `size_t` |  |  |
 
 **Returns:** `tsh_status`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_text_shape.c.md#llvmfuzzertestoneinput)
 
 ---
 

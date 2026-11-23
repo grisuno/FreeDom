@@ -63,6 +63,8 @@ nt_token *nt_new(void);
 
 **Returns:** `nt_token *`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_nav_token.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="nt_ref"></a>
@@ -83,6 +85,8 @@ nt_token *nt_ref(nt_token *t);
 
 **Returns:** `nt_token *`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_nav_token.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="nt_unref"></a>
@@ -101,6 +105,8 @@ void nt_unref(nt_token **t);
 |---|---|---|---|
 | `t` | `nt_token **` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_nav_token.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="nt_cancel"></a>
@@ -118,6 +124,8 @@ void nt_cancel(nt_token *t);
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `t` | `nt_token *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_nav_token.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -139,6 +147,8 @@ int nt_cancelled(const nt_token *t);
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_nav_token.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="nt_set_foreground"></a>
@@ -157,6 +167,8 @@ void nt_set_foreground(nt_token *t, int on);
 |---|---|---|---|
 | `t` | `nt_token *` |  |  |
 | `on` | `int` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_nav_token.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -177,6 +189,8 @@ int nt_foreground(const nt_token *t);
 | `t` | `nt_token *` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_nav_token.c.md#llvmfuzzertestoneinput)
 
 ---
 

@@ -76,4 +76,6 @@ img_status sr_rasterize(const uint8_t *bytes, size_t len, img_pixels *out)
 
 *Calls:* [`svp_draw_ex`](src.svg_paint.c.md#svp_draw_ex), [`sr_sniff`](#sr_sniff), [`sv_parse`](src.svg_render.c.md#sv_parse)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_image_decode.c.md#llvmfuzzertestoneinput)
+
 ---

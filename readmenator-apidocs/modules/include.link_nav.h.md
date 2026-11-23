@@ -166,6 +166,8 @@ Never NULL; an unknown value yields "blocked".
 
 **Returns:** `char *`
 
+*Called by:* [`lp_describe`](src.link_preview.c.md#lp_describe)
+
 ---
 
 ## Macros

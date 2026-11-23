@@ -1,6 +1,23 @@
 # API (page 9 of 13)
 Previous: [API_p8.md](API_p8.md)
 
+## src/find_text.c
+Depends on: `include/find_text.h`
+- `ft_fold` (function) `src/find_text.c:13` `uint32_t ft_fold(uint32_t cp)`
+- `is_ws` (function) `src/find_text.c:33` `static int is_ws(uint32_t cp)`
+- `decode` (function) `src/find_text.c:40` `static size_t decode(const unsigned char *s, size_t n, uint32_t *cp)` -- if (cp >= 0x391u && cp <= 0x3A9u && cp != 0x3A2u) return cp + 0x20u; if (cp == 0x3C2u) return 0x3C3u...
+- `ft_compile` (function) `src/find_text.c:59` `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap)`
+- `piece_len` (function) `src/find_text.c:78` `static size_t piece_len(const ft_piece *p)`
+- `settle` (function) `src/find_text.c:81` `static int settle(const ft_piece *p, size_t n, ft_pos *pos)` -- if (is_ws(cp)) { pending_space = (n > 0); continue; } if (pending_space) { if (n + 1 >= cap) break; out[n++] = ' '...
+- `peek` (function) `src/find_text.c:92` `static uint32_t peek(const ft_piece *p, ft_pos pos, size_t *adv)` -- static size_t piece_len(const ft_piece *p) { return p->text != NULL ? p->len : 0; } /* Moves pos onto a readable byte.
+- `match_at` (function) `src/find_text.c:100` `static int match_at(const ft_piece *p, size_t n, ft_pos s, const uint32_t *q, size_t qn,
+        ...` -- if (pos->piece < n && p[pos->piece].gap_before) gap = 1; } return pos->piece < n ? gap : -1; } /* Reads the code...
+- `ft_search` (function) `src/find_text.c:127` `ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t *q, size_t qn,
+             ...`
+- `ft_spans` (function) `src/find_text.c:158` `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm,
+                f...`
+- `ft_step` (function) `src/find_text.c:180` `long ft_step(long cur, size_t n, int dir)`
+
 ## src/flex_layout.c
 Depends on: `include/flex_layout.h`
 - `nn` (function) `src/flex_layout.c:19` `static double nn(double v)` -- bounded by FX_MAX_ITEMS (no VLAs).
@@ -176,6 +193,11 @@ Depends on: `include/dom_debug.h`, `include/fb_panes.h`, `include/frame_host.h`,
                      ...` -- Fetches a URL with TLS fallbacks (PQ-hybrid -> classical KE -> allowlisted insecure), same chain as...
 - `run_dump_video` (function) `src/freedom.c:1297` `static int run_dump_video(const char *url)` -- -dump-video handler: fetches a video URL and writes the stream to a file * or stdout.
 - `main` (function) `src/freedom.c:1316` `int main(int argc, char **argv)`
+
+## src/group_index.c
+Depends on: `include/group_index.h`
+- `key_ok` (function) `src/group_index.c:6` `static int key_ok(int k, size_t nkeys)`
+- `gi_build` (function) `src/group_index.c:10` `size_t gi_build(const int *keys, size_t n, size_t nkeys, size_t *offs, size_t *items)`
 
 ## src/hls.c
 Depends on: `include/hls.h`, `include/request_policy.h`

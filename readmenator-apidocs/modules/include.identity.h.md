@@ -87,6 +87,8 @@ NULL-safe.
 |---|---|---|---|
 | `c` | `idn_config *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_identity.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="idn_is_default"></a>
@@ -288,6 +290,8 @@ Returns the length (0 on cap overflow, out then "").
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_identity.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="idn_parse"></a>
@@ -310,6 +314,8 @@ Always leaves c valid.
 |---|---|---|---|
 | `c` | `idn_config *` |  |  |
 | `text` | `char *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_identity.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -336,7 +342,7 @@ Returns the IDN_REJ_* mask.
 
 **Returns:** `unsigned`
 
-*Called by:* [`arrives`](gui.browser_ui.c.md#arrives)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_identity.c.md#llvmfuzzertestoneinput), [`arrives`](gui.browser_ui.c.md#arrives)
 
 ---
 
@@ -364,7 +370,7 @@ Returns its length (0 when cap is too small, out "").
 
 **Returns:** `size_t`
 
-*Called by:* [`arrives`](gui.browser_ui.c.md#arrives)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_identity.c.md#llvmfuzzertestoneinput), [`arrives`](gui.browser_ui.c.md#arrives)
 
 ---
 

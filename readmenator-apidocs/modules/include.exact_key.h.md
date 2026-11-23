@@ -46,6 +46,8 @@ NULL-safe.
 |---|---|---|---|
 | `k` | `ek_key *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_exact_key.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ek_reset"></a>
@@ -67,6 +69,8 @@ NULL-safe.
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `k` | `ek_key *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_exact_key.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -115,6 +119,8 @@ int ek_equal(const ek_key *a, const ek_key *b);
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_exact_key.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ek_swap"></a>
@@ -138,6 +144,8 @@ NULL-safe.
 | `a` | `ek_key *` |  |  |
 | `b` | `ek_key *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_exact_key.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ek_free"></a>
@@ -159,6 +167,8 @@ NULL-safe, idempotent.
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `k` | `ek_key *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_exact_key.c.md#llvmfuzzertestoneinput)
 
 ---
 

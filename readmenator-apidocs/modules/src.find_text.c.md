@@ -104,6 +104,8 @@ ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t *q, size_t 
 
 **Returns:** `ft_status`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_find_text.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ft_spans"></a>

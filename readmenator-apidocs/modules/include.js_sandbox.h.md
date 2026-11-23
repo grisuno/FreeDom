@@ -181,7 +181,7 @@ Idempotent; safe on NULL and safe to call twice.
 |---|---|---|---|
 | `ctx` | `js_context *` |  |  |
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput), [`run_js`](src.tab.c.md#run_js)
 
 ---
 
@@ -230,6 +230,8 @@ NULL functions uninstall it (every import then fails).
 | `fetch` | `js_module_fetch_fn` |  |  |
 | `host` | `void *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="js_loc_from_stack"></a>
@@ -257,6 +259,8 @@ Recognised frame forms: at <name> (<file>:<line>:<col>) at <file>:<line>:<col> W
 | `col` | `int *` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -431,6 +435,8 @@ Idempotent; safe on a zero-initialised struct and safe to call twice.
 |---|---|---|---|
 | `res` | `js_result *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="js_pump_jobs"></a>
@@ -455,6 +461,8 @@ Job exceptions (rejected promises with no handler, etc.) are swallowed -- a job 
 | `max_jobs` | `int` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput)
 
 ---
 

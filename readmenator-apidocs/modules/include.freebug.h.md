@@ -112,6 +112,8 @@ Zero-initialise b (no allocation).
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="truncated"></a>
@@ -182,6 +184,8 @@ Caps and fail-closed behaviour are identical to fb_buffer_push; the file copy is
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="fb_buffer_reset"></a>
@@ -203,6 +207,8 @@ Safe on NULL / a zeroed struct.
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -226,6 +232,8 @@ Idempotent; safe on NULL.
 |---|---|---|---|
 | `b` | `fb_buffer *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="fb_buffer_count"></a>
@@ -248,7 +256,7 @@ Number of stored entries (0 for NULL).
 
 **Returns:** `size_t`
 
-*Called by:* [`FB_MAX_FILE_BYTES`](src.tab.c.md#fb_max_file_bytes)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_freebug.c.md#llvmfuzzertestoneinput), [`FB_MAX_FILE_BYTES`](src.tab.c.md#fb_max_file_bytes)
 
 ---
 

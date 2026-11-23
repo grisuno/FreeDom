@@ -36,6 +36,8 @@ Returns 0 (sizes untouched) when sigma is not finite or <= 0, else 1.
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_box_blur.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="wider"></a>

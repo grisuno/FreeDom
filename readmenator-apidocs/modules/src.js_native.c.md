@@ -69,7 +69,7 @@ int jn_seal(js_context *ctx)
 
 *Calls:* [`jn_host_eval`](#jn_host_eval), [`js_host_slot`](src.js_native_internal.h.md#js_host_slot), [`js_context_raw`](src.js_sandbox.c.md#js_context_raw)
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`run_js`](src.tab.c.md#run_js)
 
 ---
 

@@ -297,7 +297,7 @@ Never negative. Pure.
 
 **Returns:** `* caller has to`
 
-*Called by:* [`jt_take_ws`](src.js_trusted.c.md#jt_take_ws)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_smooth_scroll.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_video_controls.c.md#llvmfuzzertestoneinput), [`jt_take_ws`](src.js_trusted.c.md#jt_take_ws)
 
 ---
 

@@ -104,7 +104,7 @@ Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport and
 
 **Returns:** `int`
 
-*Called by:* [`cv_parse_color`](src.css_values.c.md#cv_parse_color), [`PV_COLOR_TOKEN_MAX`](src.page_view.c.md#pv_color_token_max)
+*Called by:* [`PV_COLOR_TOKEN_MAX`](src.page_view.c.md#pv_color_token_max)
 
 ---
 

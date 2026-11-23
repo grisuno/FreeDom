@@ -228,6 +228,8 @@ Returns the number of code points written (<= cap, <= FT_QUERY_MAX); 0 for an em
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_find_text.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="exist"></a>
@@ -277,6 +279,8 @@ Returns the number written (<= cap).
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_find_text.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ft_step"></a>
@@ -302,6 +306,8 @@ A cur outside [0, n) starts at the first (dir > 0) or last (dir < 0) match.
 | `dir` | `int` |  |  |
 
 **Returns:** `long`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_find_text.c.md#llvmfuzzertestoneinput)
 
 ---
 

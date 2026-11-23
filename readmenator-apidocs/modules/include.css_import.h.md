@@ -77,6 +77,8 @@ Skips whitespace, comments, @charset and @layer statements; stops at the first o
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_import.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ci_wrap"></a>
@@ -105,6 +107,8 @@ No condition => both empty. Returns 0, or -1 when an argument is NULL or a buffe
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_import.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ci_balanced"></a>
@@ -129,6 +133,8 @@ NULL => 0 (empty text => 1).
 | `len` | `size_t` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_import.c.md#llvmfuzzertestoneinput)
 
 ---
 

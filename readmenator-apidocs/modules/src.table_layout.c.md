@@ -63,4 +63,6 @@ double tl_columns(const tl_cell *cells, size_t n, size_t ncols, double gap, doub
 
 **Returns:** `double`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_table_layout.c.md#llvmfuzzertestoneinput)
+
 ---

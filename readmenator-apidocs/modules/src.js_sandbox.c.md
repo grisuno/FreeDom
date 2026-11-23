@@ -368,6 +368,8 @@ js_limits js_limits_default(void)
 
 *Calls:* [`js_stack_limit_for`](#js_stack_limit_for)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="js_validate_source"></a>
@@ -413,7 +415,7 @@ js_status js_context_new(const js_limits *lim, js_context **out)
 
 **Returns:** `js_status`
 
-*Called by:* [`js_eval_once`](#js_eval_once), [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput), [`js_eval_once`](#js_eval_once), [`run_js`](src.tab.c.md#run_js)
 
 ---
 
@@ -489,7 +491,7 @@ js_status js_eval(js_context *ctx, const char *src, size_t len, js_result *res)
 
 *Calls:* [`js_eval_named`](#js_eval_named)
 
-*Called by:* [`js_eval_once`](#js_eval_once)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`js_eval_once`](#js_eval_once)
 
 ---
 
@@ -571,6 +573,8 @@ js_status js_eval_once(const char *src, size_t len, const js_limits *lim, js_res
 
 *Calls:* [`js_context_free`](#js_context_free), [`js_context_new`](#js_context_new), [`js_eval`](#js_eval)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="js_result_free"></a>
@@ -639,7 +643,7 @@ void *js_context_raw(js_context *ctx)
 
 **Returns:** `void *`
 
-*Called by:* [`jd_inject_video_shim`](src.js_embed.c.md#jd_inject_video_shim), [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`je_install_canvas`](src.js_env.c.md#je_install_canvas), [`je_install_identity_trusted`](src.js_env.c.md#je_install_identity_trusted), [`jd_fire_click`](src.js_events.c.md#jd_fire_click), [`jd_fire_mouse_event`](src.js_events.c.md#jd_fire_mouse_event), [`jd_fire_submit`](src.js_events.c.md#jd_fire_submit), [`jd_install_events`](src.js_events.c.md#jd_install_events), [`jd_install_xhr_ex`](src.js_fetch.c.md#jd_install_xhr_ex), [`jd_net_deliver`](src.js_fetch.c.md#jd_net_deliver), [`ji_install`](src.js_intl.c.md#ji_install), [`jd_pop_state`](src.js_location.c.md#jd_pop_state) and 15 more
+*Called by:* [`jd_inject_video_shim`](src.js_embed.c.md#jd_inject_video_shim), [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`je_install_canvas`](src.js_env.c.md#je_install_canvas), [`je_install_identity_trusted`](src.js_env.c.md#je_install_identity_trusted), [`jd_fire_click`](src.js_events.c.md#jd_fire_click), [`jd_fire_mouse_event`](src.js_events.c.md#jd_fire_mouse_event), [`jd_fire_submit`](src.js_events.c.md#jd_fire_submit), [`jd_install_events`](src.js_events.c.md#jd_install_events), [`jd_install_xhr_ex`](src.js_fetch.c.md#jd_install_xhr_ex), [`jd_net_deliver`](src.js_fetch.c.md#jd_net_deliver), [`ji_install`](src.js_intl.c.md#ji_install), [`jd_frag_push`](src.js_location.c.md#jd_frag_push) and 16 more
 
 ---
 
@@ -693,6 +697,8 @@ js_status js_eval_module(js_context *ctx, const char *src, size_t len, const cha
 **Returns:** `js_status`
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`js_validate_source`](#js_validate_source)
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_sandbox.c.md#llvmfuzzertestoneinput)
 
 ---
 

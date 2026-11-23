@@ -132,6 +132,8 @@ int cnt_parse_decls(const char *val, int dflt, cnt_decl out[CNT_MAX_DECL])
 
 *Calls:* [`strncmp`](src.css_color.c.md#strncmp), [`cnt_hash`](#cnt_hash)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_css_counter.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="cnt_format"></a>

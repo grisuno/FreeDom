@@ -182,6 +182,8 @@ ng_verdict ng_decide(const ng_request *r, int peer_private)
 
 *Calls:* [`ng_host_is_local`](#ng_host_is_local)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_net_guard.c.md#llvmfuzzertestoneinput)
+
 ---
 
 ## Macros

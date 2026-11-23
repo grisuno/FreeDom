@@ -1,12 +1,12 @@
 # `src/chrome_layout.c`
 
-> Source: [src/chrome_layout.c:1](../../src/chrome_layout.c#L1) | language `c` | coverage 70.6% | [API index](../index.md)
+> Source: [src/chrome_layout.c:1](../../src/chrome_layout.c#L1) | language `c` | coverage 72.2% | [API index](../index.md)
 
 chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md
 
 ## Contents
 
-- **Functions:** [`chl_rect_has`](#chl_rect_has), [`chl_compute`](#chl_compute), [`chl_tab_rect`](#chl_tab_rect), [`chl_tab_close_rect`](#chl_tab_close_rect), [`chl_hit`](#chl_hit), [`chl_tab_drop_index`](#chl_tab_drop_index), [`chl_move_index`](#chl_move_index), [`chl_tab_for_digit`](#chl_tab_for_digit), [`chl_identity_of`](#chl_identity_of), [`chl_identity_label`](#chl_identity_label), [`chl_findbar_compute`](#chl_findbar_compute), [`chl_findbar_hit`](#chl_findbar_hit)
+- **Functions:** [`chl_rect_has`](#chl_rect_has), [`chl_compute`](#chl_compute), [`chl_tab_rect`](#chl_tab_rect), [`chl_tab_close_rect`](#chl_tab_close_rect), [`chl_hit`](#chl_hit), [`chl_tab_drop_index`](#chl_tab_drop_index), [`chl_move_index`](#chl_move_index), [`chl_tab_for_digit`](#chl_tab_for_digit), [`chl_identity_of`](#chl_identity_of), [`chl_identity_label`](#chl_identity_label), [`chl_findbar_compute`](#chl_findbar_compute), [`chl_findbar_hit`](#chl_findbar_hit), [`chl_tab_fallback_title`](#chl_tab_fallback_title)
 - **Macros:** [`CHL_TAB_CLOSE_INSET`](#chl_tab_close_inset), [`CHL_URL_GAP`](#chl_url_gap), [`CHL_ID_INSET`](#chl_id_inset), [`CHL_WIDTH_MAX`](#chl_width_max)
 
 ## Call Graph
@@ -27,6 +27,8 @@ flowchart LR
     n_include_js_policy_h__allowlist["js_policy.allowlist"]
     n_src_text_shape_c__file["text_shape.file"]
     n_src_chrome_layout_c__chl_findbar_compute(["chl_findbar_compute"])
+    n_src_chrome_layout_c__chl_tab_fallback_title(["chl_tab_fallback_title"])
+    n_src_css_color_c__strncmp["css_color.strncmp"]
     n_src_chrome_layout_c__chl_tab_close_rect --> n_src_chrome_layout_c__chl_tab_rect
     n_src_chrome_layout_c__chl_hit --> n_src_chrome_layout_c__chl_rect_has
     n_src_chrome_layout_c__chl_hit --> n_src_chrome_layout_c__chl_tab_close_rect
@@ -37,6 +39,7 @@ flowchart LR
     n_src_chrome_layout_c__chl_identity_label -.-> n_include_js_policy_h__allowlist
     n_src_chrome_layout_c__chl_identity_label -.-> n_src_text_shape_c__file
     n_src_chrome_layout_c__chl_findbar_compute -.-> n_gui_browser_ui_c__rect
+    n_src_chrome_layout_c__chl_tab_fallback_title -.-> n_src_css_color_c__strncmp
 ```
 
 ## Functions
@@ -63,7 +66,7 @@ int chl_rect_has(chl_rect r, double x, double y)
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`chl_rect_has`](#chl_rect_has) (include/chrome_layout.h:85).
+> **Inherited:** Documentation from [`chl_rect_has`](#chl_rect_has) (include/chrome_layout.h:91).
 
 *Called by:* [`chl_findbar_hit`](#chl_findbar_hit), [`chl_hit`](#chl_hit)
 
@@ -93,13 +96,15 @@ chl_status chl_compute(double width, int csd, int tab_count, int active, chl_lay
 
 *Calls:* [`rect`](gui.browser_ui.c.md#rect)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_chrome_layout.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="chl_tab_rect"></a>
 
 ### `chl_tab_rect`
 
-`function` | [src/chrome_layout.c:112](../../src/chrome_layout.c#L112)
+`function` | [src/chrome_layout.c:115](../../src/chrome_layout.c#L115)
 
 ```c
 int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)
@@ -119,7 +124,7 @@ Tab i's rectangle / its close button.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`chl_tab_rect`](#chl_tab_rect) (include/chrome_layout.h:81).
+> **Inherited:** Documentation from [`chl_tab_rect`](#chl_tab_rect) (include/chrome_layout.h:87).
 
 *Called by:* [`chl_hit`](#chl_hit), [`chl_tab_close_rect`](#chl_tab_close_rect)
 
@@ -129,7 +134,7 @@ Tab i's rectangle / its close button.
 
 ### `chl_tab_close_rect`
 
-`function` | [src/chrome_layout.c:122](../../src/chrome_layout.c#L122)
+`function` | [src/chrome_layout.c:125](../../src/chrome_layout.c#L125)
 
 ```c
 int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)
@@ -155,7 +160,7 @@ int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)
 
 ### `chl_hit`
 
-`function` | [src/chrome_layout.c:132](../../src/chrome_layout.c#L132)
+`function` | [src/chrome_layout.c:135](../../src/chrome_layout.c#L135)
 
 ```c
 chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)
@@ -174,13 +179,15 @@ chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)
 
 *Calls:* [`chl_rect_has`](#chl_rect_has), [`chl_tab_close_rect`](#chl_tab_close_rect), [`chl_tab_rect`](#chl_tab_rect)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_chrome_layout.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="chl_tab_drop_index"></a>
 
 ### `chl_tab_drop_index`
 
-`function` | [src/chrome_layout.c:165](../../src/chrome_layout.c#L165)
+`function` | [src/chrome_layout.c:169](../../src/chrome_layout.c#L169)
 
 ```c
 int chl_tab_drop_index(const chl_layout *l, double x)
@@ -197,7 +204,7 @@ Absolute index of the visible tab slot under x (clamped to the visible tabs): wh
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`chl_tab_drop_index`](#chl_tab_drop_index) (include/chrome_layout.h:93).
+> **Inherited:** Documentation from [`chl_tab_drop_index`](#chl_tab_drop_index) (include/chrome_layout.h:99).
 
 ---
 
@@ -205,13 +212,13 @@ Absolute index of the visible tab slot under x (clamped to the visible tabs): wh
 
 ### `chl_move_index`
 
-`function` | [src/chrome_layout.c:175](../../src/chrome_layout.c#L175)
+`function` | [src/chrome_layout.c:179](../../src/chrome_layout.c#L179)
 
 ```c
 int chl_move_index(int i, int from, int to)
 ```
 
-Where element i ends up after the element at `from` moves to [`to`](include.render_doc.h.md#rd_block-to) (the others shift to close the gap and open the slot).
+Where element i ends up after the element at [`from`](include.smooth_scroll.h.md#from) moves to [`to`](include.render_doc.h.md#rd_block-to) (the others shift to close the gap and open the slot).
 
 The single remapping for every index the GUI keeps.
 
@@ -225,7 +232,7 @@ The single remapping for every index the GUI keeps.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`chl_move_index`](#chl_move_index) (include/chrome_layout.h:97).
+> **Inherited:** Documentation from [`chl_move_index`](#chl_move_index) (include/chrome_layout.h:103).
 
 ---
 
@@ -233,7 +240,7 @@ The single remapping for every index the GUI keeps.
 
 ### `chl_tab_for_digit`
 
-`function` | [src/chrome_layout.c:182](../../src/chrome_layout.c#L182)
+`function` | [src/chrome_layout.c:186](../../src/chrome_layout.c#L186)
 
 ```c
 int chl_tab_for_digit(int digit, int tab_count)
@@ -250,7 +257,7 @@ Ctrl+<digit>: 1..8 select that tab, 9 the last one (Firefox). -1 when there is n
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`chl_tab_for_digit`](#chl_tab_for_digit) (include/chrome_layout.h:100).
+> **Inherited:** Documentation from [`chl_tab_for_digit`](#chl_tab_for_digit) (include/chrome_layout.h:106).
 
 ---
 
@@ -258,7 +265,7 @@ Ctrl+<digit>: 1..8 select that tab, 9 the last one (Firefox). -1 when there is n
 
 ### `chl_identity_of`
 
-`function` | [src/chrome_layout.c:228](../../src/chrome_layout.c#L228)
+`function` | [src/chrome_layout.c:232](../../src/chrome_layout.c#L232)
 
 ```c
 chl_identity chl_identity_of(const char *url, int transport_known, int downgrade, int operator_insecure)
@@ -275,13 +282,15 @@ chl_identity chl_identity_of(const char *url, int transport_known, int downgrade
 
 **Returns:** `chl_identity`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_chrome_layout.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="chl_identity_label"></a>
 
 ### `chl_identity_label`
 
-`function` `const` | [src/chrome_layout.c:252](../../src/chrome_layout.c#L252)
+`function` `const` | [src/chrome_layout.c:256](../../src/chrome_layout.c#L256)
 
 ```c
 const char *chl_identity_label(chl_identity id)
@@ -297,7 +306,7 @@ Short English label for the badge (static, never NULL).
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`chl_identity_label`](#chl_identity_label) (include/chrome_layout.h:151).
+> **Inherited:** Documentation from [`chl_identity_label`](#chl_identity_label) (include/chrome_layout.h:162).
 
 *Calls:* [`allowlist`](include.js_policy.h.md#allowlist), [`file`](src.text_shape.c.md#file)
 
@@ -307,7 +316,7 @@ Short English label for the badge (static, never NULL).
 
 ### `chl_findbar_compute`
 
-`function` | [src/chrome_layout.c:269](../../src/chrome_layout.c#L269)
+`function` | [src/chrome_layout.c:273](../../src/chrome_layout.c#L273)
 
 ```c
 chl_status chl_findbar_compute(double width, double height, chl_findbar *out)
@@ -329,13 +338,15 @@ A narrow window shrinks the count, then the field.
 
 *Calls:* [`rect`](gui.browser_ui.c.md#rect)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_chrome_layout.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="chl_findbar_hit"></a>
 
 ### `chl_findbar_hit`
 
-`function` | [src/chrome_layout.c:305](../../src/chrome_layout.c#L305)
+`function` | [src/chrome_layout.c:309](../../src/chrome_layout.c#L309)
 
 ```c
 chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)
@@ -352,6 +363,36 @@ chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)
 **Returns:** `chl_find_part`
 
 *Calls:* [`chl_rect_has`](#chl_rect_has)
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_chrome_layout.c.md#llvmfuzzertestoneinput)
+
+---
+
+<a id="chl_tab_fallback_title"></a>
+
+### `chl_tab_fallback_title`
+
+`function` | [src/chrome_layout.c:321](../../src/chrome_layout.c#L321)
+
+```c
+void chl_tab_fallback_title(const char *url, char *out, size_t cap)
+```
+
+A tab label for a page without <title> (Firefox): a file's name for file: URLs and local paths, otherwise the URL without its "scheme://".
+
+Writes "" for NULL/empty. Truncates on a UTF-8 boundary; out is always NUL-terminated when cap > 0.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `url` | `char *` |  |  |
+| `out` | `char *` |  |  |
+| `cap` | `size_t` |  |  |
+
+> **Inherited:** Documentation from [`chl_tab_fallback_title`](#chl_tab_fallback_title) (include/chrome_layout.h:111).
+
+*Calls:* [`strncmp`](src.css_color.c.md#strncmp)
 
 ---
 

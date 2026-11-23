@@ -1,37 +1,210 @@
-# Symbols (page 6 of 18)
+# Symbols (page 6 of 19)
 Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `tab_image_free` | function | `include/tab.h:451` | `void tab_image_free(tab_image *img);` |
-| `tab_inflight_request_headers` | function | `include/tab.h:214` | `const char *tab_inflight_request_headers(void);` |
-| `tab_last_subreq_stats` | function | `include/tab.h:319` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` |
-| `tab_open` | function | `include/tab.h:165` | `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...` |
+| `RD_MAX_INPUT` | macro | `include/renderer.h:37` | `#define RD_MAX_INPUT` |
+| `rd_result` | struct | `include/renderer.h:29` | `` |
+| `rd_result_free` | function | `include/renderer.h:46` | `void rd_result_free(rd_result *out);` |
+| `rd_status` | enum | `include/renderer.h:20` | `` |
+| `status` | type_alias | `include/renderer.h:28` | `typedef struct rd_result { rd_status status;` |
+| `FREEDOM_REQUEST_POLICY_H` | macro | `include/request_policy.h:2` | `#define FREEDOM_REQUEST_POLICY_H` |
+| `RP_HDR_MAX_BYTES` | macro | `include/request_policy.h:44` | `#define RP_HDR_MAX_BYTES` |
+| `RP_HDR_MAX_COUNT` | macro | `include/request_policy.h:43` | `#define RP_HDR_MAX_COUNT` |
+| `RP_HDR_NAME_MAX` | macro | `include/request_policy.h:45` | `#define RP_HDR_NAME_MAX` |
+| `RP_HDR_VALUE_MAX` | macro | `include/request_policy.h:46` | `#define RP_HDR_VALUE_MAX` |
+| `rp_decision` | enum | `include/request_policy.h:21` | `` |
+| `rp_headers_have` | function | `include/request_policy.h:61` | `static inline int rp_headers_have(const char *lines, const char *name)` |
+| `rp_host_of` | function | `include/request_policy.h:30` | `int rp_host_of(const char *url, char *out, size_t out_size);` |
+| `rp_same_site` | function | `include/request_policy.h:37` | `int rp_same_site(const char *top_level_url, const char *request_url);` |
+| `rp_sanitize_request_headers` | function | `include/request_policy.h:57` | `int rp_sanitize_request_headers(const char *raw, char *out, size_t cap);` |
+| `rp_site_of` | function | `include/request_policy.h:34` | `int rp_site_of(const char *host, char *out, size_t out_size);` |
+| `EXCLUDED` | function | `include/secure_fetch.h:248` | `* cookies are EXCLUDED (network-only, never exposed to JS) and expired cookies skipped. * Only for a TRUSTED host...` |
+| `FREEDOM_SECURE_FETCH_H` | macro | `include/secure_fetch.h:2` | `#define FREEDOM_SECURE_FETCH_H` |
+| `SF_CONNECT_TIMEOUT_MS` | macro | `include/secure_fetch.h:231` | `#define SF_CONNECT_TIMEOUT_MS` |
+| `SF_DEFAULT_KEX_GROUPS` | macro | `include/secure_fetch.h:181` | `#define SF_DEFAULT_KEX_GROUPS` |
+| `SF_DEFAULT_MAX_BODY` | macro | `include/secure_fetch.h:207` | `#define SF_DEFAULT_MAX_BODY` |
+| `SF_DEFAULT_MAX_REDIRECTS` | macro | `include/secure_fetch.h:233` | `#define SF_DEFAULT_MAX_REDIRECTS` |
+| `SF_DEFAULT_TIMEOUT_MS` | macro | `include/secure_fetch.h:208` | `#define SF_DEFAULT_TIMEOUT_MS` |
+| `SF_DEFAULT_USER_AGENT` | macro | `include/secure_fetch.h:206` | `#define SF_DEFAULT_USER_AGENT` |
+| `SF_IMPERSONATE_KEX_GROUPS` | macro | `include/secure_fetch.h:190` | `#define SF_IMPERSONATE_KEX_GROUPS` |
+| `SF_IMPERSONATE_TLS12_CIPHERS` | macro | `include/secure_fetch.h:195` | `#define SF_IMPERSONATE_TLS12_CIPHERS` |
+| `SF_IMPERSONATE_TLS13_CIPHERS` | macro | `include/secure_fetch.h:191` | `#define SF_IMPERSONATE_TLS13_CIPHERS` |
+| `SF_MAX_URL` | macro | `include/secure_fetch.h:234` | `#define SF_MAX_URL` |
+| `SF_META_MAX` | macro | `include/secure_fetch.h:83` | `#define SF_META_MAX` |
+| `SF_RESPONSE_HEADERS_MAX` | macro | `include/secure_fetch.h:84` | `#define SF_RESPONSE_HEADERS_MAX` |
+| `SF_SUBRESOURCE_TIMEOUT_MS` | macro | `include/secure_fetch.h:232` | `#define SF_SUBRESOURCE_TIMEOUT_MS` |
+| `SF_WS_MAX_MESSAGE` | macro | `include/secure_fetch.h:339` | `#define SF_WS_MAX_MESSAGE` |
+| `bits` | function | `include/secure_fetch.h:357` | `* *flags receives CURLWS_* bits (text/binary/close/cont);` |
+| `connection` | function | `include/secure_fetch.h:371` | `* on each connection (Zero Trust). Each target is re-validated and a downgrade * to http:// is refused. Exceeding...` |
+| `exhausted` | function | `include/secure_fetch.h:402` | `* is exhausted (*next untouched). `allowlisted` enables the sovereignty rung. */ int sf_fallback_policy(sf_status...` |
+| `policy` | type_alias | `include/secure_fetch.h:85` | `typedef struct sf_config { sf_policy policy;` |
+| `rp_sanitize_request_headers` | function | `include/secure_fetch.h:115` | `* rp_sanitize_request_headers ("Name: value\n" lines);` |
+| `sf_accept_language_or_default` | function | `include/secure_fetch.h:273` | `const char *sf_accept_language_or_default(const char *lang);` |
+| `sf_chain_info` | struct | `include/secure_fetch.h:67` | `` |
+| `sf_config` | struct | `include/secure_fetch.h:86` | `` |
+| `sf_cookie_line_matches` | function | `include/secure_fetch.h:260` | `int sf_cookie_line_matches(const char *line, const char *host, const char *path, long now, char *out, size_t outsz);` |
+| `sf_cookie_put` | function | `include/secure_fetch.h:255` | `void sf_cookie_put(const char *url, const char *namevalue);` |
+| `sf_get` | function | `include/secure_fetch.h:380` | `* sf_get (Zero Trust): an insecure POST is not representable. Does not follow * redirects (the caller inspects...` |
+| `sf_global_init` | function | `include/secure_fetch.h:242` | `void sf_global_init(void);` |
+| `sf_header_value` | function | `include/secure_fetch.h:320` | `int sf_header_value(const char *header_line, const char *name, char *out, size_t outsz);` |
+| `sf_impersonate_kex_groups` | function | `include/secure_fetch.h:277` | `const char *sf_impersonate_kex_groups(void);` |
+| `sf_impersonate_tls13_ciphers` | function | `include/secure_fetch.h:278` | `const char *sf_impersonate_tls13_ciphers(void);` |
+| `sf_is_redirect_code` | function | `include/secure_fetch.h:309` | `int sf_is_redirect_code(long http_code);` |
+| `sf_policy` | enum | `include/secure_fetch.h:47` | `` |
+| `sf_proxy_type` | enum | `include/secure_fetch.h:76` | `` |
+| `sf_rcache_clear` | function | `include/secure_fetch.h:417` | `void sf_rcache_clear(void);` |
+| `sf_rcache_get` | function | `include/secure_fetch.h:416` | `int sf_rcache_get(const char *from, time_t now, char *out, size_t cap);` |
+| `sf_rcache_put` | function | `include/secure_fetch.h:415` | `int sf_rcache_put(const char *from, const char *to, time_t now);` |
+| `sf_rcache_set_backing` | function | `include/secure_fetch.h:426` | `void sf_rcache_set_backing(sf_rcache_load_fn load, sf_rcache_save_fn save, void *ctx);` |
+| `sf_response` | struct | `include/secure_fetch.h:145` | `` |
+| `sf_response_free` | function | `include/secure_fetch.h:391` | `void sf_response_free(sf_response *resp);` |
+| `sf_status` | enum | `include/secure_fetch.h:24` | `` |
+| `sf_user_agent_or_default` | function | `include/secure_fetch.h:269` | `const char *sf_user_agent_or_default(const char *ua);` |
+| `sf_ws` | type_alias | `include/secure_fetch.h:340` | `typedef struct sf_ws sf_ws;` |
+| `sf_ws_close` | function | `include/secure_fetch.h:367` | `void sf_ws_close(sf_ws *ws);` |
+| `sf_ws_fd` | function | `include/secure_fetch.h:364` | `int sf_ws_fd(const sf_ws *ws);` |
+| `skipped` | function | `include/secure_fetch.h:298` | `* skipped (a classical key exchange is accepted);` |
+| `status` | type_alias | `include/secure_fetch.h:144` | `typedef struct sf_response { sf_status status;` |
+| `validators` | function | `include/secure_fetch.h:18` | `* The security logic lives in pure validators (no I/O);` |
+| `FREEDOM_SHA2_H` | macro | `include/sha2.h:2` | `#define FREEDOM_SHA2_H` |
+| `SHA_MAX_DIGEST` | macro | `include/sha2.h:18` | `#define SHA_MAX_DIGEST` |
+| `sha_alg` | enum | `include/sha2.h:16` | `` |
+| `sha_alg_from_name` | function | `include/sha2.h:24` | `int sha_alg_from_name(const char *name, sha_alg *out);` |
+| `sha_digest` | function | `include/sha2.h:28` | `int sha_digest(sha_alg alg, const void *data, size_t len, uint8_t *out);` |
+| `sha_digest_len` | function | `include/sha2.h:21` | `size_t sha_digest_len(sha_alg alg);` |
+| `FREEDOM_SHEET_CACHE_H` | macro | `include/sheet_cache.h:14` | `#define FREEDOM_SHEET_CACHE_H` |
+| `hits` | type_alias | `include/sheet_cache.h:42` | `typedef struct shc_stats { unsigned long hits;` |
+| `shc_acquire` | function | `include/sheet_cache.h:60` | `shc_sheet *shc_acquire(shc_cache *cache, const shc_key *key);` |
+| `shc_cache` | type_alias | `include/sheet_cache.h:26` | `typedef struct shc_cache shc_cache;` |
+| `shc_css` | function | `include/sheet_cache.h:64` | `const css_sheet *shc_css(const shc_sheet *s);` |
+| `shc_free` | function | `include/sheet_cache.h:55` | `void shc_free(shc_cache *c);` |
+| `shc_key` | struct | `include/sheet_cache.h:36` | `` |
+| `shc_new` | function | `include/sheet_cache.h:52` | `shc_cache *shc_new(size_t max_text_bytes);` |
+| `shc_release` | function | `include/sheet_cache.h:67` | `void shc_release(shc_sheet *s);` |
+| `shc_sheet` | type_alias | `include/sheet_cache.h:28` | `typedef struct shc_sheet shc_sheet;` |
+| `shc_stats` | struct | `include/sheet_cache.h:43` | `` |
+| `shc_stats_get` | function | `include/sheet_cache.h:70` | `void shc_stats_get(const shc_cache *c, shc_stats *out);` |
+| `FREEDOM_SHM_SLOTS_H` | macro | `include/shm_slots.h:2` | `#define FREEDOM_SHM_SLOTS_H` |
+| `SS_COUNT` | macro | `include/shm_slots.h:17` | `#define SS_COUNT` |
+| `busy` | type_alias | `include/shm_slots.h:18` | `typedef struct ss_state { int busy[SS_COUNT];` |
+| `ss_committed` | function | `include/shm_slots.h:41` | `static inline void ss_committed(ss_state *s, int i)` |
+| `ss_init` | function | `include/shm_slots.h:24` | `static inline void ss_init(ss_state *s)` |
+| `ss_released` | function | `include/shm_slots.h:49` | `static inline int ss_released(ss_state *s, int i)` |
+| `ss_state` | struct | `include/shm_slots.h:19` | `` |
+| `FREEDOM_SMOOTH_SCROLL_H` | macro | `include/smooth_scroll.h:2` | `#define FREEDOM_SMOOTH_SCROLL_H` |
+| `from` | type_alias | `include/smooth_scroll.h:17` | `typedef struct sms_state { double from;` |
+| `sms_active` | function | `include/smooth_scroll.h:32` | `int sms_active(const sms_state *s);` |
+| `sms_goal` | function | `include/smooth_scroll.h:31` | `double sms_goal(const sms_state *s);` |
+| `sms_init` | function | `include/smooth_scroll.h:27` | `void sms_init(sms_state *s, double pos);` |
+| `sms_jump` | function | `include/smooth_scroll.h:28` | `void sms_jump(sms_state *s, double pos);` |
+| `sms_retarget` | function | `include/smooth_scroll.h:29` | `void sms_retarget(sms_state *s, double target, double now_ms, double dur_ms);` |
+| `sms_sample` | function | `include/smooth_scroll.h:30` | `double sms_sample(sms_state *s, double now_ms);` |
+| `sms_state` | struct | `include/smooth_scroll.h:18` | `` |
+| `SQB_MAX_JOBS` | macro | `include/subreq_batch.h:14` | `#define SQB_MAX_JOBS` |
+| `SUBREQ_BATCH_H` | macro | `include/subreq_batch.h:10` | `#define SUBREQ_BATCH_H` |
+| `ok` | type_alias | `include/subreq_batch.h:23` | `typedef struct sqb_res { int ok;` |
+| `sqb` | type_alias | `include/subreq_batch.h:34` | `typedef struct sqb sqb;` |
+| `sqb_abandon` | function | `include/subreq_batch.h:43` | `void sqb_abandon(sqb *b);` |
+| `sqb_count` | function | `include/subreq_batch.h:48` | `size_t sqb_count(const sqb *b);` |
+| `sqb_free` | function | `include/subreq_batch.h:64` | `void sqb_free(sqb *b);` |
+| `sqb_new` | function | `include/subreq_batch.h:37` | `sqb *sqb_new(int max_threads, sqb_run_fn run, void *ctx);` |
+| `sqb_new_owned` | function | `include/subreq_batch.h:40` | `sqb *sqb_new_owned(int max_threads, sqb_run_fn run, void *ctx, void (*free_ctx)(void *));` |
+| `sqb_remove` | function | `include/subreq_batch.h:59` | `void sqb_remove(sqb *b, const size_t *idx, size_t k);` |
+| `sqb_req` | struct | `include/subreq_batch.h:16` | `` |
+| `sqb_res` | struct | `include/subreq_batch.h:23` | `` |
+| `sqb_reset` | function | `include/subreq_batch.h:61` | `void sqb_reset(sqb *b);` |
+| `sqb_result` | function | `include/subreq_batch.h:52` | `const sqb_res *sqb_result(const sqb *b, size_t i);` |
+| `sqb_submit` | function | `include/subreq_batch.h:47` | `int sqb_submit(sqb *b, int refused, const sqb_req *req);` |
+| `sqb_wait_all` | function | `include/subreq_batch.h:50` | `void sqb_wait_all(sqb *b);` |
+| `sqb_wait_ready` | function | `include/subreq_batch.h:56` | `size_t sqb_wait_ready(sqb *b, long wait_ms, size_t *idx, size_t cap);` |
+| `FREEDOM_SVG_PAINT_H` | macro | `include/svg_paint.h:2` | `#define FREEDOM_SVG_PAINT_H` |
+| `svp_draw` | function | `include/svg_paint.h:31` | `void svp_draw(cairo_t *cr, const sv_image *img, double x, double y, double w, double h, int current_rgb);` |
+| `way` | function | `include/svg_paint.h:35` | `* worker rasterizes SVG images this way (spec/svg_raster.md section 3): drawing text * would open fontconfig, i.e....` |
+| `FREEDOM_SVG_RASTER_H` | macro | `include/svg_raster.h:2` | `#define FREEDOM_SVG_RASTER_H` |
+| `SR_MAX_DIM` | macro | `include/svg_raster.h:24` | `#define SR_MAX_DIM` |
+| `SR_MIN_RASTER` | macro | `include/svg_raster.h:25` | `#define SR_MIN_RASTER` |
+| `SR_SNIFF_MAX` | macro | `include/svg_raster.h:23` | `#define SR_SNIFF_MAX` |
+| `sr_sniff` | function | `include/svg_raster.h:29` | `int sr_sniff(const uint8_t *bytes, size_t len);` |
+| `FREEDOM_SVG_RENDER_H` | macro | `include/svg_render.h:2` | `#define FREEDOM_SVG_RENDER_H` |
+| `SV_DEFAULT_H` | macro | `include/svg_render.h:42` | `#define SV_DEFAULT_H` |
+| `SV_DEFAULT_W` | macro | `include/svg_render.h:41` | `#define SV_DEFAULT_W` |
+| `SV_MAX_DEPTH` | macro | `include/svg_render.h:35` | `#define SV_MAX_DEPTH` |
+| `SV_MAX_INPUT` | macro | `include/svg_render.h:37` | `#define SV_MAX_INPUT` |
+| `SV_MAX_POINTS` | macro | `include/svg_render.h:33` | `#define SV_MAX_POINTS` |
+| `SV_MAX_SEGS` | macro | `include/svg_render.h:34` | `#define SV_MAX_SEGS` |
+| `SV_MAX_SHAPES` | macro | `include/svg_render.h:32` | `#define SV_MAX_SHAPES` |
+| `SV_TEXT_MAX` | macro | `include/svg_render.h:36` | `#define SV_TEXT_MAX` |
+| `height` | type_alias | `include/svg_render.h:104` | `typedef struct sv_image { double width, height;` |
+| `kind` | type_alias | `include/svg_render.h:75` | `typedef struct sv_shape { int kind;` |
+| `sv_fit` | function | `include/svg_render.h:131` | `void sv_fit(const sv_image *img, double dw, double dh, double *scale, double *off_x, double *off_y);` |
+| `sv_image` | struct | `include/svg_render.h:104` | `` |
+| `sv_seg` | struct | `include/svg_render.h:65` | `` |
+| `sv_shape` | struct | `include/svg_render.h:75` | `` |
+| `sv_shape_kind` | enum | `include/svg_render.h:44` | `` |
+| `sv_status` | enum | `include/svg_render.h:25` | `` |
+| `sv_verb` | enum | `include/svg_render.h:58` | `` |
+| `verb` | type_alias | `include/svg_render.h:64` | `typedef struct sv_seg { int verb;` |
+| `FREEDOM_TAB_H` | macro | `include/tab.h:2` | `#define FREEDOM_TAB_H` |
+| `TAB_MAX_INPUT` | macro | `include/tab.h:160` | `#define TAB_MAX_INPUT` |
+| `bytes` | function | `include/tab.h:226` | `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....` |
+| `decode` | function | `include/tab.h:448` | `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...` |
+| `exclusively` | function | `include/tab.h:298` | `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...` |
+| `free_ctx` | function | `include/tab.h:242` | `* free_ctx(ctx) (may be NULL) runs once the tab is closed AND its last abandoned request ended, * so the fetcher may...` |
+| `granted` | function | `include/tab.h:404` | `* granted (allow.conf AND js.conf);` |
+| `jar` | function | `include/tab.h:283` | `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...` |
+| `kind` | type_alias | `include/tab.h:71` | `typedef struct tab_ws_op { int kind;` |
+| `kind` | type_alias | `include/tab.h:423` | `typedef struct tab_anchor { int kind;` |
+| `load` | function | `include/tab.h:310` | `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);` |
+| `none` | function | `include/tab.h:254` | `* worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick. * The caller must then...` |
+| `origin` | function | `include/tab.h:290` | `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);` |
+| `out_status` | function | `include/tab.h:201` | `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...` |
+| `popstate` | function | `include/tab.h:411` | `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...` |
+| `preorder` | function | `include/tab.h:416` | `* preorder (out->nsub handles) followed by the elements after it, at most * ANC_MAX_HANDLES -- live DOM handles, the...` |
+| `replace` | type_alias | `include/tab.h:54` | `typedef struct tab_hist_op { int replace;` |
+| `returned` | function | `include/tab.h:405` | `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...` |
+| `string` | function | `include/tab.h:355` | `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...` |
+| `tab` | type_alias | `include/tab.h:46` | `typedef struct tab tab;` |
+| `tab_alive` | function | `include/tab.h:461` | `int tab_alive(const tab *t);` |
+| `tab_anchor` | struct | `include/tab.h:423` | `` |
+| `tab_anchor_free` | function | `include/tab.h:430` | `void tab_anchor_free(tab_anchor *a);` |
+| `tab_async_busy` | function | `include/tab.h:276` | `int tab_async_busy(const tab *t);` |
+| `tab_async_fd` | function | `include/tab.h:270` | `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...` |
+| `tab_child_pid` | function | `include/tab.h:464` | `pid_t tab_child_pid(const tab *t);` |
+| `tab_close` | function | `include/tab.h:467` | `void tab_close(tab *t);` |
+| `tab_eval_result` | struct | `include/tab.h:138` | `` |
+| `tab_eval_result_free` | function | `include/tab.h:471` | `void tab_eval_result_free(tab_eval_result *r);` |
+| `tab_hist_op` | struct | `include/tab.h:54` | `` |
+| `tab_image` | struct | `include/tab.h:151` | `` |
+| `tab_image_free` | function | `include/tab.h:472` | `void tab_image_free(tab_image *img);` |
+| `tab_inflight_request_headers` | function | `include/tab.h:217` | `const char *tab_inflight_request_headers(void);` |
+| `tab_last_subreq_stats` | function | `include/tab.h:322` | `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` |
+| `tab_open` | function | `include/tab.h:168` | `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...` |
 | `tab_page` | struct | `include/tab.h:79` | `` |
-| `tab_page_free` | function | `include/tab.h:449` | `void tab_page_free(tab_page *p);` |
-| `tab_page_keep_view` | function | `include/tab.h:258` | `void tab_page_keep_view(tab_page *prev, tab_page *next);` |
-| `tab_parse_worker_args` | function | `include/tab.h:172` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` |
-| `tab_prewarm` | function | `include/tab.h:181` | `void tab_prewarm(void);` |
-| `tab_prewarmed` | function | `include/tab.h:184` | `int tab_prewarmed(void);` |
-| `tab_prewarmed_pid` | function | `include/tab.h:187` | `int tab_prewarmed_pid(void);` |
-| `tab_report_response_headers` | function | `include/tab.h:219` | `void tab_report_response_headers(const char *lines);` |
-| `tab_set_cookies` | function | `include/tab.h:284` | `void tab_set_cookies(tab *t, const char *cookies);` |
-| `tab_set_css_sink` | function | `include/tab.h:232` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
-| `tab_set_fetcher` | function | `include/tab.h:209` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` |
-| `tab_set_identity` | function | `include/tab.h:313` | `void tab_set_identity(tab *t, const char *serialized);` |
-| `tab_set_net_allowed` | function | `include/tab.h:247` | `void tab_set_net_allowed(tab *t, int allowed);` |
-| `tab_set_op_net_budget_ms` | function | `include/tab.h:262` | `void tab_set_op_net_budget_ms(tab *t, int ms);` |
-| `tab_set_storage` | function | `include/tab.h:289` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
-| `tab_set_viewport_w` | function | `include/tab.h:303` | `void tab_set_viewport_w(tab *t, int px);` |
-| `tab_shutdown_spare` | function | `include/tab.h:190` | `void tab_shutdown_spare(void);` |
+| `tab_page_free` | function | `include/tab.h:470` | `void tab_page_free(tab_page *p);` |
+| `tab_page_keep_view` | function | `include/tab.h:261` | `void tab_page_keep_view(tab_page *prev, tab_page *next);` |
+| `tab_parse_worker_args` | function | `include/tab.h:175` | `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` |
+| `tab_prewarm` | function | `include/tab.h:184` | `void tab_prewarm(void);` |
+| `tab_prewarmed` | function | `include/tab.h:187` | `int tab_prewarmed(void);` |
+| `tab_prewarmed_pid` | function | `include/tab.h:190` | `int tab_prewarmed_pid(void);` |
+| `tab_report_response_headers` | function | `include/tab.h:222` | `void tab_report_response_headers(const char *lines);` |
+| `tab_set_cookies` | function | `include/tab.h:287` | `void tab_set_cookies(tab *t, const char *cookies);` |
+| `tab_set_css_sink` | function | `include/tab.h:235` | `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);` |
+| `tab_set_fetcher` | function | `include/tab.h:212` | `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` |
+| `tab_set_identity` | function | `include/tab.h:316` | `void tab_set_identity(tab *t, const char *serialized);` |
+| `tab_set_net_allowed` | function | `include/tab.h:250` | `void tab_set_net_allowed(tab *t, int allowed);` |
+| `tab_set_op_net_budget_ms` | function | `include/tab.h:265` | `void tab_set_op_net_budget_ms(tab *t, int ms);` |
+| `tab_set_storage` | function | `include/tab.h:292` | `void tab_set_storage(tab *t, const char *blob, size_t len);` |
+| `tab_set_viewport_w` | function | `include/tab.h:306` | `void tab_set_viewport_w(tab *t, int px);` |
+| `tab_shutdown_spare` | function | `include/tab.h:193` | `void tab_shutdown_spare(void);` |
 | `tab_status` | enum | `include/tab.h:31` | `` |
-| `tab_subreq_permitted` | function | `include/tab.h:324` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
-| `tab_worker_dispatch` | function | `include/tab.h:161` | `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...` |
+| `tab_subreq_permitted` | function | `include/tab.h:327` | `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` |
+| `tab_worker_dispatch` | function | `include/tab.h:164` | `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...` |
 | `tab_ws_event_kind` | enum | `include/tab.h:67` | `` |
 | `tab_ws_kind` | enum | `include/tab.h:61` | `` |
 | `tab_ws_op` | struct | `include/tab.h:72` | `` |
-| `view` | function | `include/tab.h:332` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
-| `width` | type_alias | `include/tab.h:148` | `typedef struct tab_image { uint32_t width;` |
+| `view` | function | `include/tab.h:335` | `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...` |
+| `width` | type_alias | `include/tab.h:151` | `typedef struct tab_image { uint32_t width;` |
 | `FREEDOM_TABLE_LAYOUT_H` | macro | `include/table_layout.h:11` | `#define FREEDOM_TABLE_LAYOUT_H` |
 | `TL_MAX_COLS` | macro | `include/table_layout.h:20` | `#define TL_MAX_COLS` |
 | `TL_PER_MILLE` | macro | `include/table_layout.h:26` | `#define TL_PER_MILLE` |
@@ -135,7 +308,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `URL_ERR_NOT_HTTPS` | function | `include/url.h:109` | `* URL_ERR_NOT_HTTPS (out untouched);` |
 | `URL_MAX_LEN` | macro | `include/url.h:30` | `#define URL_MAX_LEN` |
 | `URL_SEARCH_ENDPOINT` | macro | `include/url.h:76` | `#define URL_SEARCH_ENDPOINT` |
-| `password` | function | `include/url.h:152` | `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When...` |
+| `password` | function | `include/url.h:159` | `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When...` |
 | `path` | function | `include/url.h:115` | `* absolute path ("file:///..."). NULL => 0. */ int url_is_file(const char *s);` |
 | `url` | function | `include/url.h:126` | `* Every field ALIASES the input url (not owned, valid while url is alive);` |
 | `url_authority_len` | function | `include/url.h:51` | `size_t url_authority_len(const char *url);` |
@@ -144,6 +317,7 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `url_is_https` | function | `include/url.h:42` | `int url_is_https(const char *s);` |
 | `url_omni_kind` | enum | `include/url.h:78` | `` |
 | `url_parts` | struct | `include/url.h:129` | `` |
+| `url_split` | function | `include/url.h:153` | `* it for a network or storage decision: those take url_split (https-only). */ url_status url_split_location(const...` |
 | `url_status` | enum | `include/url.h:32` | `` |
 | `UTIL_H` | macro | `include/util.h:5` | `#define UTIL_H` |
 | `fnv1a` | function | `include/util.h:67` | `static inline uint64_t fnv1a(const char *s, size_t n)` |
@@ -256,6 +430,16 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `zm_scale` | function | `include/zoom.h:38` | `double zm_scale(int pct);` |
 | `zm_zoom_in` | function | `include/zoom.h:29` | `int zm_zoom_in(int pct);` |
 | `zm_zoom_out` | function | `include/zoom.h:32` | `int zm_zoom_out(int pct);` |
+| `anc_collect` | function | `src/anchor.c:93` | `size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, size_t cap,       ...` |
+| `anc_percent_decode` | function | `src/anchor.c:15` | `size_t anc_percent_decode(const char *in, char *out, size_t cap)` |
+| `anc_resolve` | function | `src/anchor.c:63` | `anc_kind anc_resolve(const dom_index *idx, const char *fragment, dom_node_id *out)` |
+| `anc_scroll_for` | function | `src/anchor.c:131` | `double anc_scroll_for(double top, double max_scroll)` |
+| `anc_target_top` | function | `src/anchor.c:110` | `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,               ...` |
+| `first_named_a` | function | `src/anchor.c:35` | `static dom_node_id first_named_a(const dom_index *idx, const char *name)` |
+| `hex_val` | function | `src/anchor.c:8` | `static int hex_val(int c)` |
+| `is_top` | function | `src/anchor.c:59` | `static int is_top(const char *s)` |
+| `next_preorder` | function | `src/anchor.c:81` | `static dom_node_id next_preorder(const dom_index *idx, dom_node_id cur, dom_node_id root,        ...` |
+| `potential_indicated` | function | `src/anchor.c:54` | `static dom_node_id potential_indicated(const dom_index *idx, const char *s)` |
 | `fp_accept_language` | function | `src/anti_fp.c:27` | `const char *fp_accept_language(void)` |
 | `fp_accept_language_header` | function | `src/anti_fp.c:31` | `const char *fp_accept_language_header(void)` |
 | `fp_app_code_name` | function | `src/anti_fp.c:61` | `const char *fp_app_code_name(void)` |
@@ -312,189 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `ZERO` | macro | `src/box_style.c:73` | `#define ZERO` |
 | `bg_size_component` | function | `src/box_style.c:408` | `static double bg_size_component(int px_val, int pct_pm, double area)` |
 | `bx_background_layer` | function | `src/box_style.c:415` | `int bx_background_layer(const bx_bg_layer *in, double *out_w, double *out_h,                     ...` |
-| `bx_block_ua_box` | function | `src/box_style.c:225` | `bx_box bx_block_ua_box(int heading_level, int in_list, bx_ua_tag ua)` |
-| `bx_border_box_h` | function | `src/box_style.c:335` | `double bx_border_box_h(double declared_h, int border_box,                        double pad_t, do...` |
-| `bx_border_span` | function | `src/box_style.c:396` | `double bx_border_span(double width_cap, int border_box,                       double pad_l, doubl...` |
-| `bx_content_cap` | function | `src/box_style.c:378` | `double bx_content_cap(double width_cap, int border_box,                       double pad_l, doubl...` |
-| `bx_content_clipped` | function | `src/box_style.c:361` | `int bx_content_clipped(int overflow_x, int overflow_y)` |
-| `bx_default_for_tag` | function | `src/box_style.c:163` | `bx_box bx_default_for_tag(const char *tag)` |
-| `bx_default_for_ua` | function | `src/box_style.c:219` | `bx_box bx_default_for_ua(bx_ua_tag id)` |
-| `bx_definite_content_h` | function | `src/box_style.c:352` | `double bx_definite_content_h(double h, double min_h, double max_h,                              i...` |
-| `bx_display_name` | function | `src/box_style.c:454` | `const char *bx_display_name(bx_display d)` |
-| `bx_flex_max_clamp` | function | `src/box_style.c:467` | `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box,                      ...` |
-| `bx_flex_min_clamp` | function | `src/box_style.c:389` | `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box,                       ...` |
-| `bx_line_height_px` | function | `src/box_style.c:484` | `double bx_line_height_px(int line_scale, double font_px)` |
-| `bx_lp_px` | function | `src/box_style.c:367` | `double bx_lp_px(int px_val, int pct_pm, double basis)` |
-| `bx_parse_display` | function | `src/box_style.c:261` | `bx_status bx_parse_display(const char *token, bx_display *out)` |
-| `bx_pct_block_size` | function | `src/box_style.c:346` | `double bx_pct_block_size(int px_val, int pct_pm, double cb_h)` |
-| `bx_place` | function | `src/box_style.c:271` | `bx_hplace bx_place(double inset_l, double inset_r, double width_cap, int center,                 ...` |
-| `bx_place_ex` | function | `src/box_style.c:474` | `bx_hplace bx_place_ex(double inset_l, double inset_r, double width_cap, int center,              ...` |
-| `bx_replaced_box` | function | `src/box_style.c:321` | `int bx_replaced_box(int w_px, int w_pct, int aspect_num, int aspect_den,                     doub...` |
-| `bx_table_role_of` | function | `src/box_style.c:171` | `bx_table_role bx_table_role_of(const char *tag, css_display display)` |
-| `bx_ua_of_tag` | function | `src/box_style.c:210` | `bx_ua_tag bx_ua_of_tag(const char *tag)` |
-| `bx_width_cap` | function | `src/box_style.c:288` | `double bx_width_cap(int w_px, int w_pct, double avail_w)` |
-| `bx_width_cap2` | function | `src/box_style.c:313` | `double bx_width_cap2(int w_px, int w_pct, int mw_px, int mw_pct, double avail_w)` |
-| `copy_lower_trim` | function | `src/box_style.c:37` | `static int copy_lower_trim(const char *in, char *out, size_t out_size)` |
-| `disp_row` | struct | `src/box_style.c:241` | `` |
-| `is_ws` | function | `src/box_style.c:31` | `static int is_ws(char c)` |
-| `name_cmp` | function | `src/box_style.c:50` | `static int name_cmp(const void *key, const void *elem)` |
-| `tag_row` | struct | `src/box_style.c:61` | `` |
-| `take` | function | `src/box_style.c:295` | `* caller has to take (Sizing 3 section 5.1), so to a resolver that only sums a * px and a percentage half they read...` |
-| `BT_LEN_AUTO` | macro | `src/box_tree.c:34` | `#define BT_LEN_AUTO` |
-| `BT_SC_DEPTH` | macro | `src/box_tree.c:609` | `#define BT_SC_DEPTH` |
-| `BT_WRAP_EPS` | macro | `src/box_tree.c:65` | `#define BT_WRAP_EPS` |
-| `assign_doc_order` | function | `src/box_tree.c:508` | `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,                   ...` |
-| `block` | function | `src/box_tree.c:569` | `* true block (same flow neighbourhood), strictly better than zeros. NULL      * placed keeps lega...` |
-| `bt_box_hidden` | function | `src/box_tree.c:887` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
-| `bt_containing_block` | function | `src/box_tree.c:558` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,                         ...` |
-| `bt_defer_roots` | function | `src/box_tree.c:919` | `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,                       const bt_positi...` |
-| `bt_in_subtree` | function | `src/box_tree.c:900` | `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)` |
-| `bt_layout` | function | `src/box_tree.c:468` | `bt_status bt_layout(bt_node *root, double avail_w)` |
-| `bt_nn` | function | `src/box_tree.c:61` | `static double bt_nn(double v)` |
-| `bt_oof_anchor` | function | `src/box_tree.c:879` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_oof_avail` | function | `src/box_tree.c:911` | `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)` |
-| `bt_oof_root` | function | `src/box_tree.c:883` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_resolve_positioning` | function | `src/box_tree.c:588` | `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,                           ...` |
-| `bt_resolve_positioning_ex` | function | `src/box_tree.c:706` | `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,                        ...` |
-| `find_positioned_ancestor` | function | `src/box_tree.c:525` | `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,                        ...` |
-| `height` | function | `src/box_tree.c:81` | `* exactly that height (Flexbox 9.4 step 15).  *  * wrap_reverse (node->wrap_reverse): when node->...` |
-| `inset_unset` | function | `src/box_tree.c:554` | `static int inset_unset(int v, int pct_pm)` |
-| `layout_block` | function | `src/box_tree.c:40` | `static bt_status layout_block(bt_node *node, bt_node *const *kids, size_t nk,                    ...` |
-| `layout_flex` | function | `src/box_tree.c:101` | `static bt_status layout_flex(bt_node *node, bt_node *const *kids, size_t nk,                     ...` |
-| `layout_grid` | function | `src/box_tree.c:283` | `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,                     ...` |
-| `layout_node` | function | `src/box_tree.c:423` | `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)` |
-| `len` | type_alias | `src/box_tree.c:610` | `typedef struct sc_chain { uint16_t len;` |
-| `nest_in_contexts` | function | `src/box_tree.c:638` | `static void nest_in_contexts(const pv_box_def *boxes, size_t nbox, const bt_positioned *tmp,     ...` |
-| `oof_walk` | function | `src/box_tree.c:862` | `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` |
-| `resolve_inset` | function | `src/box_tree.c:545` | `static double resolve_inset(int v, int pct_pm, double basis)` |
-| `sc_chain` | struct | `src/box_tree.c:611` | `` |
-| `sc_chain_compare` | function | `src/box_tree.c:629` | `static int sc_chain_compare(const sc_chain *a, const sc_chain *b, const cx_item *by_ref)` |
-| `sc_forms` | function | `src/box_tree.c:616` | `static int sc_forms(const pv_box_def *b)` |
-| `sized` | function | `src/box_tree.c:353` | `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);` |
-| `_POSIX_C_SOURCE` | macro | `src/browser.c:7` | `#define _POSIX_C_SOURCE` |
-| `begin_pending` | function | `src/browser.c:67` | `static void begin_pending(browser_state *bs, int kind)` |
-| `browser_abort_pending` | function | `src/browser.c:593` | `int browser_abort_pending(browser_state *bs)` |
-| `browser_add_exception` | function | `src/browser.c:543` | `browser_status browser_add_exception(browser_state *bs, const char *host)` |
-| `browser_back` | function | `src/browser.c:337` | `browser_status browser_back(browser_state *bs)` |
-| `browser_can_back` | function | `src/browser.c:363` | `int browser_can_back(const browser_state *bs)` |
-| `browser_can_forward` | function | `src/browser.c:367` | `int browser_can_forward(const browser_state *bs)` |
-| `browser_closed_pop` | function | `src/browser.c:576` | `int browser_closed_pop(browser_closed *c, char *out, size_t cap)` |
-| `browser_closed_push` | function | `src/browser.c:561` | `browser_status browser_closed_push(browser_closed *c, const char *url)` |
-| `browser_commit_pending` | function | `src/browser.c:588` | `void browser_commit_pending(browser_state *bs)` |
-| `browser_commit_url_bar` | function | `src/browser.c:227` | `browser_status browser_commit_url_bar(browser_state *bs)` |
-| `browser_current_url` | function | `src/browser.c:371` | `const char *browser_current_url(const browser_state *bs)` |
-| `browser_doc_index` | function | `src/browser.c:329` | `int browser_doc_index(const browser_state *bs)` |
-| `browser_entry_doc` | function | `src/browser.c:324` | `int browser_entry_doc(const browser_state *bs, size_t pos)` |
-| `browser_forward` | function | `src/browser.c:350` | `browser_status browser_forward(browser_state *bs)` |
-| `browser_free` | function | `src/browser.c:203` | `void browser_free(browser_state *bs)` |
-| `browser_has_pending` | function | `src/browser.c:622` | `int browser_has_pending(const browser_state *bs)` |
-| `browser_init` | function | `src/browser.c:192` | `browser_status browser_init(browser_state *bs)` |
-| `browser_is_exception` | function | `src/browser.c:535` | `int browser_is_exception(const browser_state *bs, const char *host)` |
-| `browser_navigate` | function | `src/browser.c:273` | `browser_status browser_navigate(browser_state *bs, const char *url)` |
-| `browser_push_state` | function | `src/browser.c:303` | `browser_status browser_push_state(browser_state *bs, const char *url)` |
-| `browser_replace_state` | function | `src/browser.c:311` | `browser_status browser_replace_state(browser_state *bs, const char *url)` |
-| `browser_set_page` | function | `src/browser.c:480` | `browser_status browser_set_page(browser_state *bs, const char *title,                            ...` |
-| `browser_set_status` | function | `src/browser.c:502` | `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)` |
-| `browser_set_url_bar` | function | `src/browser.c:215` | `browser_status browser_set_url_bar(browser_state *bs, const char *url)` |
-| `browser_status_text` | function | `src/browser.c:516` | `const char *browser_status_text(const browser_state *bs, uint64_t now_ms)` |
-| `browser_url_bar_backspace` | function | `src/browser.c:412` | `browser_status browser_url_bar_backspace(browser_state *bs)` |
-| `browser_url_bar_clear` | function | `src/browser.c:471` | `browser_status browser_url_bar_clear(browser_state *bs)` |
-| `browser_url_bar_delete` | function | `src/browser.c:426` | `browser_status browser_url_bar_delete(browser_state *bs)` |
-| `browser_url_bar_delete_selection` | function | `src/browser.c:387` | `int browser_url_bar_delete_selection(browser_state *bs)` |
-| `browser_url_bar_extend_cursor` | function | `src/browser.c:447` | `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)` |
-| `browser_url_bar_insert` | function | `src/browser.c:397` | `browser_status browser_url_bar_insert(browser_state *bs, char c)` |
-| `browser_url_bar_move_cursor` | function | `src/browser.c:437` | `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)` |
-| `browser_url_bar_select_all` | function | `src/browser.c:464` | `browser_status browser_url_bar_select_all(browser_state *bs)` |
-| `browser_url_bar_selection` | function | `src/browser.c:376` | `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)` |
-| `browser_url_bar_set_cursor` | function | `src/browser.c:456` | `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)` |
-| `clear_status` | function | `src/browser.c:25` | `static void clear_status(browser_state *bs)` |
-| `cp1252_to_ucs` | function | `src/browser.c:124` | `static unsigned int cp1252_to_ucs(unsigned char c)` |
-| `free_exceptions` | function | `src/browser.c:78` | `static void free_exceptions(browser_state *bs)` |
-| `free_history` | function | `src/browser.c:30` | `static void free_history(browser_state *bs)` |
-| `free_page` | function | `src/browser.c:15` | `static void free_page(browser_state *bs)` |
-| `free_pending` | function | `src/browser.c:54` | `static void free_pending(browser_state *bs)` |
-| `free_stash` | function | `src/browser.c:44` | `static void free_stash(browser_state *bs)` |
-| `host_equal` | function | `src/browser.c:524` | `static int host_equal(const char *a, const char *b)` |
-| `is_https_url` | function | `src/browser.c:87` | `static int is_https_url(const char *s)` |
-| `is_local_path` | function | `src/browser.c:91` | `static int is_local_path(const char *s)` |
-| `url_is_allowed` | function | `src/browser.c:96` | `static int url_is_allowed(const char *url)` |
-| `utf8_encode` | function | `src/browser.c:138` | `static size_t utf8_encode(unsigned int cp, char *out)` |
-| `xstrdup` | function | `src/browser.c:110` | `static char *xstrdup(const char *s)` |
-| `_POSIX_C_SOURCE` | macro | `src/cached_fetch.c:7` | `#define _POSIX_C_SOURCE` |
-| `cacheable_request` | function | `src/cached_fetch.c:26` | `static int cacheable_request(const sf_config *cfg, const char *url)` |
-| `cf_attach_redirect_memory` | function | `src/cached_fetch.c:148` | `void cf_attach_redirect_memory(hc_store *store)` |
-| `cf_get` | function | `src/cached_fetch.c:133` | `sf_status cf_get(const char *partition, const char *url, sf_config *cfg, sf_response *out,       ...` |
-| `cf_get_with` | function | `src/cached_fetch.c:85` | `sf_status cf_get_with(hc_store *store, cf_fetch_fn fetch, const char *partition, const char *url,...` |
-| `cf_set_store` | function | `src/cached_fetch.c:22` | `void cf_set_store(hc_store *store)` |
-| `cf_store` | function | `src/cached_fetch.c:23` | `hc_store *cf_store(void)` |
-| `copy_val` | function | `src/cached_fetch.c:33` | `static void copy_val(char *dst, size_t cap, const char *src)` |
-| `meta_from_response` | function | `src/cached_fetch.c:40` | `static void meta_from_response(hc_meta *m, const sf_response *r, const char *url, time_t now)` |
-| `redirect_load` | function | `src/cached_fetch.c:140` | `static int redirect_load(void *ctx, const char *from, time_t now, char *out, size_t cap)` |
-| `redirect_save` | function | `src/cached_fetch.c:144` | `static void redirect_save(void *ctx, const char *from, const char *to, time_t now)` |
-| `remember` | function | `src/cached_fetch.c:77` | `static void remember(hc_store *store, const char *partition, const char *url,                    ...` |
-| `response_from_cache` | function | `src/cached_fetch.c:53` | `static int response_from_cache(sf_response *out, const hc_meta *m, uint8_t *body, size_t len)` |
-| `trace` | function | `src/cached_fetch.c:18` | `static void trace(const char *what, const char *url)` |
-| `CHL_ID_INSET` | macro | `src/chrome_layout.c:13` | `#define CHL_ID_INSET` |
-| `CHL_TAB_CLOSE_INSET` | macro | `src/chrome_layout.c:9` | `#define CHL_TAB_CLOSE_INSET` |
-| `CHL_URL_GAP` | macro | `src/chrome_layout.c:11` | `#define CHL_URL_GAP` |
-| `CHL_WIDTH_MAX` | macro | `src/chrome_layout.c:15` | `#define CHL_WIDTH_MAX` |
-| `chl_compute` | function | `src/chrome_layout.c:30` | `chl_status chl_compute(double width, int csd, int tab_count, int active, chl_layout *out)` |
-| `chl_findbar_compute` | function | `src/chrome_layout.c:269` | `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)` |
-| `chl_findbar_hit` | function | `src/chrome_layout.c:305` | `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)` |
-| `chl_hit` | function | `src/chrome_layout.c:132` | `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)` |
-| `chl_identity_label` | function | `src/chrome_layout.c:252` | `const char *chl_identity_label(chl_identity id)` |
-| `chl_identity_of` | function | `src/chrome_layout.c:228` | `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,                ...` |
-| `chl_move_index` | function | `src/chrome_layout.c:175` | `int chl_move_index(int i, int from, int to)` |
-| `chl_rect_has` | function | `src/chrome_layout.c:26` | `int chl_rect_has(chl_rect r, double x, double y)` |
-| `chl_tab_close_rect` | function | `src/chrome_layout.c:122` | `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)` |
-| `chl_tab_drop_index` | function | `src/chrome_layout.c:165` | `int chl_tab_drop_index(const chl_layout *l, double x)` |
-| `chl_tab_for_digit` | function | `src/chrome_layout.c:182` | `int chl_tab_for_digit(int digit, int tab_count)` |
-| `chl_tab_rect` | function | `src/chrome_layout.c:112` | `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)` |
-| `has_prefix_ci` | function | `src/chrome_layout.c:193` | `static int has_prefix_ci(const char *s, const char *prefix)` |
-| `host_ends_with` | function | `src/chrome_layout.c:200` | `static int host_ends_with(const char *h, size_t n, const char *suffix)` |
-| `lower` | function | `src/chrome_layout.c:190` | `static int lower(int c)` |
-| `rect` | function | `src/chrome_layout.c:17` | `static chl_rect rect(double x, double y, double w, double h)` |
-| `url_host` | function | `src/chrome_layout.c:210` | `static size_t url_host(const char *rest, const char **out)` |
-| `cx_box_layer` | function | `src/compositor.c:36` | `cx_layer cx_box_layer(const cx_style *s)` |
-| `cx_forms_stacking_context` | function | `src/compositor.c:18` | `int cx_forms_stacking_context(const cx_style *s)` |
-| `cx_ink_reach` | function | `src/compositor.c:87` | `double cx_ink_reach(const int (*layers)[6], int n, int outline_w, int outline_offset)` |
-| `cx_item_compare` | function | `src/compositor.c:56` | `int cx_item_compare(const cx_item *a, const cx_item *b)` |
-| `cx_sort` | function | `src/compositor.c:72` | `void cx_sort(cx_item *items, size_t n)` |
-| `cx_span_visible` | function | `src/compositor.c:104` | `int cx_span_visible(double top, double h, double reach, double view_top, double view_h)` |
-| `eff_z` | function | `src/compositor.c:52` | `static int eff_z(const cx_item *it)` |
-| `AUTO_REJECT` | macro | `src/css.c:285` | `#define AUTO_REJECT` |
-| `AUTO_RESET` | macro | `src/css.c:287` | `#define AUTO_RESET` |
-| `AUTO_RESET_NONE` | macro | `src/css.c:288` | `#define AUTO_RESET_NONE` |
-| `AUTO_VALUE` | macro | `src/css.c:286` | `#define AUTO_VALUE` |
-| `CSS_ANIM_ITERS_FINITE_MAX` | macro | `src/css.c:333` | `#define CSS_ANIM_ITERS_FINITE_MAX` |
-| `CSS_ATTR_MARK` | macro | `src/css.c:1997` | `#define CSS_ATTR_MARK` |
-| `CSS_ATTR_SEP` | macro | `src/css.c:1998` | `#define CSS_ATTR_SEP` |
-| `CSS_CQ_TEXT_MAX` | macro | `src/css.c:5311` | `#define CSS_CQ_TEXT_MAX` |
-| `CSS_DECL_SLOTS_MIN` | macro | `src/css.c:67` | `#define CSS_DECL_SLOTS_MIN` |
-| `CSS_INIT_DECLS` | macro | `src/css.c:52` | `#define CSS_INIT_DECLS` |
-| `CSS_INIT_RULES` | macro | `src/css.c:68` | `#define CSS_INIT_RULES` |
-| `CSS_INIT_SELS` | macro | `src/css.c:51` | `#define CSS_INIT_SELS` |
-| `CSS_INLINE_DECLS` | macro | `src/css.c:70` | `#define CSS_INLINE_DECLS` |
-| `CSS_MAX_CQ` | macro | `src/css.c:5310` | `#define CSS_MAX_CQ` |
-| `CSS_MAX_FONT_FACES` | macro | `src/css.c:172` | `#define CSS_MAX_FONT_FACES` |
-| `CSS_MAX_RAW` | macro | `src/css.c:87` | `#define CSS_MAX_RAW` |
-| `CSS_MEDIA_MAX_DEPTH` | macro | `src/css.c:5385` | `#define CSS_MEDIA_MAX_DEPTH` |
-| `CSS_SELS_PER_GROUP` | macro | `src/css.c:69` | `#define CSS_SELS_PER_GROUP` |
-| `CSS_VAR_POOL` | macro | `src/css.c:6758` | `#define CSS_VAR_POOL` |
-| `CSS_WIDE_RESET` | macro | `src/css.c:229` | `#define CSS_WIDE_RESET` |
-| `LIST` | function | `src/css.c:2929` | `* transform FUNCTION LIST (CSS Transforms 1 3). * * Contract: space-separated functions apply in order and compose...` |
-| `NULL` | function | `src/css.c:7180` | `* Sheet can be NULL (inline style, no @keyframes). */ void css_resolve_anim_keyframes(css_style *...` |
-| `P_META_CUSTOM` | macro | `src/css.c:83` | `#define P_META_CUSTOM` |
-| `P_META_VARSRC` | macro | `src/css.c:84` | `#define P_META_VARSRC` |
-| `add_rule` | function | `src/css.c:5060` | `static void add_rule(css_sheet *sh, const char *s, size_t ss, size_t se,                      siz...` |
-| `anim_easing_iv` | function | `src/css.c:1493` | `static int anim_easing_iv(const char *tok)` |
-| `apply_decl` | function | `src/css.c:6172` | `static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
-| `apply_rule` | function | `src/css.c:6789` | `static void apply_rule(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,               ...` |
-| `apply_var_source` | function | `src/css.c:6762` | `static void apply_var_source(css_style *o, int *wi, int *ws, int *wo, int *wem, int *wv,         ...` |
-| `at_is_media` | function | `src/css.c:5212` | `static int at_is_media(const char *s, size_t i, size_t n)` |
-| `at_keyword` | function | `src/css.c:5223` | `static int at_keyword(const char *s, size_t i, size_t n, const char *kw)` |
-| `axis` | function | `src/css.c:1824` | `* bare center displaces it to the free axis (`center right` = x:right, y:center).  * Any other co...` |
-| `bg_alpha_of` | function | `src/css.c:243` | `static int bg_alpha_of(const char *v)` |
-| `bg_to_mask_slot` | function | `src/css.c:755` | `static int bg_to_mask_slot(int prop)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

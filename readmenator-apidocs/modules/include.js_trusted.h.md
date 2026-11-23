@@ -122,6 +122,8 @@ Drains the recorded window.open targets as "url\n" lines, or NULL when none.
 
 **Returns:** `char *`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="parent"></a>
@@ -162,6 +164,8 @@ Returns the count. Operations past JT_WS_MAX_OPS/JT_WS_MAX_BYTES are dropped and
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="jt_ws_ops_free"></a>
@@ -180,6 +184,8 @@ void jt_ws_ops_free(jt_ws_op *ops, size_t n);
 |---|---|---|---|
 | `ops` | `jt_ws_op *` |  |  |
 | `n` | `size_t` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -210,6 +216,8 @@ Returns 1 when a live socket with that id received it.
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="jt_take_storage"></a>
@@ -233,6 +241,8 @@ When the store changed since the last call, returns 1 with an owned snapshot of 
 | `len` | `size_t *` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 

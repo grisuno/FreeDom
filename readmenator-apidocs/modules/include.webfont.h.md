@@ -113,7 +113,7 @@ int wf_scan(const char *css, size_t len, wf_list *out);
 
 **Returns:** `int`
 
-*Called by:* [`wf_load_document`](src.webfont_load.c.md#wf_load_document)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_webfont.c.md#llvmfuzzertestoneinput), [`wf_load_document`](src.webfont_load.c.md#wf_load_document)
 
 ---
 
@@ -133,7 +133,7 @@ void wf_list_free(wf_list *l);
 |---|---|---|---|
 | `l` | `wf_list *` |  |  |
 
-*Called by:* [`wf_load_document`](src.webfont_load.c.md#wf_load_document)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_webfont.c.md#llvmfuzzertestoneinput), [`wf_load_document`](src.webfont_load.c.md#wf_load_document)
 
 ---
 
@@ -203,7 +203,7 @@ The worker hashes the cascaded first-name, the parent hashes scanned @font-face 
 
 **Returns:** `unsigned`
 
-*Called by:* [`tsh_webfont_register`](src.text_shape.c.md#tsh_webfont_register), [`WF_DATA_URL_MAX`](src.webfont_load.c.md#wf_data_url_max)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_webfont_register.c.md#llvmfuzzertestoneinput), [`tsh_webfont_register`](src.text_shape.c.md#tsh_webfont_register), [`WF_DATA_URL_MAX`](src.webfont_load.c.md#wf_data_url_max)
 
 ---
 

@@ -101,6 +101,8 @@ Either output may be NULL. Both are 0 for an invalid ncols.
 | `min_total` | `double *` |  |  |
 | `max_total` | `double *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_table_layout.c.md#llvmfuzzertestoneinput)
+
 ---
 
 ## Macros

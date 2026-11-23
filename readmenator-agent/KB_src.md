@@ -1,6 +1,26 @@
 # Subsystem: src (page 1 of 10)
 Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_src_p3.md), [KB_src_p4.md](KB_src_p4.md), [KB_src_p5.md](KB_src_p5.md), [KB_src_p6.md](KB_src_p6.md), [KB_src_p7.md](KB_src_p7.md), [KB_src_p8.md](KB_src_p8.md), [KB_src_p9.md](KB_src_p9.md), [KB_src_p10.md](KB_src_p10.md)
 
+## src/anchor.c
+- Doc: — the indicated part of a document and where it sits (spec/anchor.md).
+- Layer: utility
+- Language: c
+- Symbols:
+  - `hex_val` (function, line 8) `static int hex_val(int c)`
+  - `anc_percent_decode` (function, line 15) `size_t anc_percent_decode(const char *in, char *out, size_t cap)`
+  - `first_named_a` (function, line 35) `static dom_node_id first_named_a(const dom_index *idx, const char *name)`
+  - `potential_indicated` (function, line 54) `static dom_node_id potential_indicated(const dom_index *idx, const char *s)`
+  - `is_top` (function, line 59) `static int is_top(const char *s)`
+  - `anc_resolve` (function, line 63) `anc_kind anc_resolve(const dom_index *idx, const char *fragment, dom_node_id *out)`
+  - `next_preorder` (function, line 81) `static dom_node_id next_preorder(const dom_index *idx, dom_node_id cur, dom_node_id root,
+       ...`
+  - `anc_collect` (function, line 93) `size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, size_t cap,
+      ...`
+  - `anc_target_top` (function, line 110) `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
+              ...`
+  - `anc_scroll_for` (function, line 131) `double anc_scroll_for(double top, double max_scroll)`
+- Depends on: `include/anchor.h`
+
 ## src/anti_fp.c
 - Layer: utility
 - Language: c
@@ -175,59 +195,61 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
 - Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`, `include/css.h`
 
 ## src/browser.c
-- Doc: clear_status: #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) {...
+- Doc: clear_status: #include <stdlib.h> #include <math.h> #include <string.h> static void...
 - Layer: utility
 - Language: c
 - Symbols:
-  - `free_page` (function, line 15) `static void free_page(browser_state *bs)`
-  - `clear_status` (function, line 25) `static void clear_status(browser_state *bs)`
-  - `free_history` (function, line 30) `static void free_history(browser_state *bs)`
-  - `free_stash` (function, line 44) `static void free_stash(browser_state *bs)`
-  - `free_pending` (function, line 54) `static void free_pending(browser_state *bs)`
-  - `begin_pending` (function, line 67) `static void begin_pending(browser_state *bs, int kind)`
-  - `free_exceptions` (function, line 78) `static void free_exceptions(browser_state *bs)`
-  - `is_https_url` (function, line 87) `static int is_https_url(const char *s)`
-  - `is_local_path` (function, line 91) `static int is_local_path(const char *s)`
-  - `url_is_allowed` (function, line 96) `static int url_is_allowed(const char *url)`
-  - `xstrdup` (function, line 110) `static char *xstrdup(const char *s)`
-  - `cp1252_to_ucs` (function, line 124) `static unsigned int cp1252_to_ucs(unsigned char c)`
-  - `utf8_encode` (function, line 138) `static size_t utf8_encode(unsigned int cp, char *out)`
-  - `browser_init` (function, line 192) `browser_status browser_init(browser_state *bs)`
-  - `browser_free` (function, line 203) `void browser_free(browser_state *bs)`
-  - `browser_set_url_bar` (function, line 215) `browser_status browser_set_url_bar(browser_state *bs, const char *url)`
-  - `browser_commit_url_bar` (function, line 227) `browser_status browser_commit_url_bar(browser_state *bs)`
-  - `browser_navigate` (function, line 273) `browser_status browser_navigate(browser_state *bs, const char *url)`
-  - `browser_push_state` (function, line 303) `browser_status browser_push_state(browser_state *bs, const char *url)`
-  - `browser_replace_state` (function, line 311) `browser_status browser_replace_state(browser_state *bs, const char *url)`
-  - `browser_entry_doc` (function, line 324) `int browser_entry_doc(const browser_state *bs, size_t pos)`
-  - `browser_doc_index` (function, line 329) `int browser_doc_index(const browser_state *bs)`
-  - `browser_back` (function, line 337) `browser_status browser_back(browser_state *bs)`
-  - `browser_forward` (function, line 350) `browser_status browser_forward(browser_state *bs)`
-  - `browser_can_back` (function, line 363) `int browser_can_back(const browser_state *bs)`
-  - `browser_can_forward` (function, line 367) `int browser_can_forward(const browser_state *bs)`
-  - `browser_current_url` (function, line 371) `const char *browser_current_url(const browser_state *bs)`
-  - `browser_url_bar_selection` (function, line 376) `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)`
-  - `browser_url_bar_delete_selection` (function, line 387) `int browser_url_bar_delete_selection(browser_state *bs)`
-  - `browser_url_bar_insert` (function, line 397) `browser_status browser_url_bar_insert(browser_state *bs, char c)`
-  - `browser_url_bar_backspace` (function, line 412) `browser_status browser_url_bar_backspace(browser_state *bs)`
-  - `browser_url_bar_delete` (function, line 426) `browser_status browser_url_bar_delete(browser_state *bs)`
-  - `browser_url_bar_move_cursor` (function, line 437) `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)`
-  - `browser_url_bar_extend_cursor` (function, line 447) `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)`
-  - `browser_url_bar_set_cursor` (function, line 456) `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)`
-  - `browser_url_bar_select_all` (function, line 464) `browser_status browser_url_bar_select_all(browser_state *bs)`
-  - `browser_url_bar_clear` (function, line 471) `browser_status browser_url_bar_clear(browser_state *bs)`
-  - `browser_set_page` (function, line 480) `browser_status browser_set_page(browser_state *bs, const char *title,
+  - `free_page` (function, line 16) `static void free_page(browser_state *bs)`
+  - `clear_status` (function, line 26) `static void clear_status(browser_state *bs)`
+  - `free_history` (function, line 31) `static void free_history(browser_state *bs)`
+  - `free_stash` (function, line 47) `static void free_stash(browser_state *bs)`
+  - `free_pending` (function, line 59) `static void free_pending(browser_state *bs)`
+  - `begin_pending` (function, line 72) `static void begin_pending(browser_state *bs, int kind)`
+  - `free_exceptions` (function, line 83) `static void free_exceptions(browser_state *bs)`
+  - `is_https_url` (function, line 92) `static int is_https_url(const char *s)`
+  - `is_local_path` (function, line 96) `static int is_local_path(const char *s)`
+  - `url_is_allowed` (function, line 101) `static int url_is_allowed(const char *url)`
+  - `xstrdup` (function, line 115) `static char *xstrdup(const char *s)`
+  - `cp1252_to_ucs` (function, line 129) `static unsigned int cp1252_to_ucs(unsigned char c)`
+  - `utf8_encode` (function, line 143) `static size_t utf8_encode(unsigned int cp, char *out)`
+  - `browser_init` (function, line 197) `browser_status browser_init(browser_state *bs)`
+  - `browser_free` (function, line 208) `void browser_free(browser_state *bs)`
+  - `browser_set_url_bar` (function, line 220) `browser_status browser_set_url_bar(browser_state *bs, const char *url)`
+  - `browser_commit_url_bar` (function, line 232) `browser_status browser_commit_url_bar(browser_state *bs)`
+  - `browser_navigate` (function, line 288) `browser_status browser_navigate(browser_state *bs, const char *url)`
+  - `browser_push_state` (function, line 320) `browser_status browser_push_state(browser_state *bs, const char *url)`
+  - `browser_replace_state` (function, line 328) `browser_status browser_replace_state(browser_state *bs, const char *url)`
+  - `browser_set_entry_scroll` (function, line 341) `void browser_set_entry_scroll(browser_state *bs, double scroll)`
+  - `browser_entry_scroll` (function, line 346) `double browser_entry_scroll(const browser_state *bs)`
+  - `browser_entry_doc` (function, line 351) `int browser_entry_doc(const browser_state *bs, size_t pos)`
+  - `browser_doc_index` (function, line 356) `int browser_doc_index(const browser_state *bs)`
+  - `browser_back` (function, line 364) `browser_status browser_back(browser_state *bs)`
+  - `browser_forward` (function, line 377) `browser_status browser_forward(browser_state *bs)`
+  - `browser_can_back` (function, line 390) `int browser_can_back(const browser_state *bs)`
+  - `browser_can_forward` (function, line 394) `int browser_can_forward(const browser_state *bs)`
+  - `browser_current_url` (function, line 398) `const char *browser_current_url(const browser_state *bs)`
+  - `browser_url_bar_selection` (function, line 403) `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)`
+  - `browser_url_bar_delete_selection` (function, line 414) `int browser_url_bar_delete_selection(browser_state *bs)`
+  - `browser_url_bar_insert` (function, line 424) `browser_status browser_url_bar_insert(browser_state *bs, char c)`
+  - `browser_url_bar_backspace` (function, line 439) `browser_status browser_url_bar_backspace(browser_state *bs)`
+  - `browser_url_bar_delete` (function, line 453) `browser_status browser_url_bar_delete(browser_state *bs)`
+  - `browser_url_bar_move_cursor` (function, line 464) `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)`
+  - `browser_url_bar_extend_cursor` (function, line 474) `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)`
+  - `browser_url_bar_set_cursor` (function, line 483) `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)`
+  - `browser_url_bar_select_all` (function, line 491) `browser_status browser_url_bar_select_all(browser_state *bs)`
+  - `browser_url_bar_clear` (function, line 498) `browser_status browser_url_bar_clear(browser_state *bs)`
+  - `browser_set_page` (function, line 507) `browser_status browser_set_page(browser_state *bs, const char *title,
                            ...`
-  - `browser_set_status` (function, line 502) `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)`
-  - `browser_status_text` (function, line 516) `const char *browser_status_text(const browser_state *bs, uint64_t now_ms)`
-  - `host_equal` (function, line 524) `static int host_equal(const char *a, const char *b)`
-  - `browser_is_exception` (function, line 535) `int browser_is_exception(const browser_state *bs, const char *host)`
-  - `browser_add_exception` (function, line 543) `browser_status browser_add_exception(browser_state *bs, const char *host)`
-  - `browser_closed_push` (function, line 561) `browser_status browser_closed_push(browser_closed *c, const char *url)`
-  - `browser_closed_pop` (function, line 576) `int browser_closed_pop(browser_closed *c, char *out, size_t cap)`
-  - `browser_commit_pending` (function, line 588) `void browser_commit_pending(browser_state *bs)`
-  - `browser_abort_pending` (function, line 593) `int browser_abort_pending(browser_state *bs)`
-  - `browser_has_pending` (function, line 622) `int browser_has_pending(const browser_state *bs)`
+  - `browser_set_status` (function, line 529) `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)`
+  - `browser_status_text` (function, line 543) `const char *browser_status_text(const browser_state *bs, uint64_t now_ms)`
+  - `host_equal` (function, line 551) `static int host_equal(const char *a, const char *b)`
+  - `browser_is_exception` (function, line 562) `int browser_is_exception(const browser_state *bs, const char *host)`
+  - `browser_add_exception` (function, line 570) `browser_status browser_add_exception(browser_state *bs, const char *host)`
+  - `browser_closed_push` (function, line 588) `browser_status browser_closed_push(browser_closed *c, const char *url)`
+  - `browser_closed_pop` (function, line 603) `int browser_closed_pop(browser_closed *c, char *out, size_t cap)`
+  - `browser_commit_pending` (function, line 615) `void browser_commit_pending(browser_state *bs)`
+  - `browser_abort_pending` (function, line 620) `int browser_abort_pending(browser_state *bs)`
+  - `browser_has_pending` (function, line 650) `int browser_has_pending(const browser_state *bs)`
   - `_POSIX_C_SOURCE` (macro, line 7) `#define _POSIX_C_SOURCE`
 - Depends on: `include/browser.h`, `include/util.h`
 
@@ -262,21 +284,22 @@ Pages: [KB_src.md](KB_src.md), [KB_src_p2.md](KB_src_p2.md), [KB_src_p3.md](KB_s
   - `rect` (function, line 17) `static chl_rect rect(double x, double y, double w, double h)`
   - `chl_rect_has` (function, line 26) `int chl_rect_has(chl_rect r, double x, double y)`
   - `chl_compute` (function, line 30) `chl_status chl_compute(double width, int csd, int tab_count, int active, chl_layout *out)`
-  - `chl_tab_rect` (function, line 112) `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)`
-  - `chl_tab_close_rect` (function, line 122) `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)`
-  - `chl_hit` (function, line 132) `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)`
-  - `chl_tab_drop_index` (function, line 165) `int chl_tab_drop_index(const chl_layout *l, double x)`
-  - `chl_move_index` (function, line 175) `int chl_move_index(int i, int from, int to)`
-  - `chl_tab_for_digit` (function, line 182) `int chl_tab_for_digit(int digit, int tab_count)`
-  - `lower` (function, line 190) `static int lower(int c)`
-  - `has_prefix_ci` (function, line 193) `static int has_prefix_ci(const char *s, const char *prefix)`
-  - `host_ends_with` (function, line 200) `static int host_ends_with(const char *h, size_t n, const char *suffix)`
-  - `url_host` (function, line 210) `static size_t url_host(const char *rest, const char **out)`
-  - `chl_identity_of` (function, line 228) `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,
+  - `chl_tab_rect` (function, line 115) `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)`
+  - `chl_tab_close_rect` (function, line 125) `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)`
+  - `chl_hit` (function, line 135) `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)`
+  - `chl_tab_drop_index` (function, line 169) `int chl_tab_drop_index(const chl_layout *l, double x)`
+  - `chl_move_index` (function, line 179) `int chl_move_index(int i, int from, int to)`
+  - `chl_tab_for_digit` (function, line 186) `int chl_tab_for_digit(int digit, int tab_count)`
+  - `lower` (function, line 194) `static int lower(int c)`
+  - `has_prefix_ci` (function, line 197) `static int has_prefix_ci(const char *s, const char *prefix)`
+  - `host_ends_with` (function, line 204) `static int host_ends_with(const char *h, size_t n, const char *suffix)`
+  - `url_host` (function, line 214) `static size_t url_host(const char *rest, const char **out)`
+  - `chl_identity_of` (function, line 232) `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,
                ...`
-  - `chl_identity_label` (function, line 252) `const char *chl_identity_label(chl_identity id)`
-  - `chl_findbar_compute` (function, line 269) `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)`
-  - `chl_findbar_hit` (function, line 305) `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)`
+  - `chl_identity_label` (function, line 256) `const char *chl_identity_label(chl_identity id)`
+  - `chl_findbar_compute` (function, line 273) `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)`
+  - `chl_findbar_hit` (function, line 309) `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)`
+  - `chl_tab_fallback_title` (function, line 321) `void chl_tab_fallback_title(const char *url, char *out, size_t cap)`
   - `CHL_TAB_CLOSE_INSET` (macro, line 9) `#define CHL_TAB_CLOSE_INSET`
   - `CHL_URL_GAP` (macro, line 11) `#define CHL_URL_GAP`
   - `CHL_ID_INSET` (macro, line 13) `#define CHL_ID_INSET`

@@ -132,22 +132,22 @@ Previous: [KB_src_p7.md](KB_src_p7.md)
 static void gate_box_image_...`
   - `rd_build` (function, line 293) `rd_status rd_build(const pv_view *view, rdp_caps caps,
                    const char *top_level_u...`
-  - `rd_free` (function, line 744) `void rd_free(rd_doc *d)`
-  - `rd_count` (function, line 761) `size_t rd_count(const rd_doc *d)`
-  - `rd_at` (function, line 765) `const rd_block *rd_at(const rd_doc *d, size_t i)`
-  - `rd_box_count` (function, line 770) `size_t rd_box_count(const rd_doc *d)`
-  - `rd_box_at` (function, line 774) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
-  - `rd_cont_count` (function, line 779) `size_t rd_cont_count(const rd_doc *d)`
-  - `rd_cont_at` (function, line 783) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
-  - `rd_kind_name` (function, line 788) `const char *rd_kind_name(rd_kind k)`
-  - `rd_block_heading_level` (function, line 802) `int rd_block_heading_level(const rd_block *b)`
-  - `rd_block_tag` (function, line 813) `const char *rd_block_tag(const rd_block *b)`
-  - `rd_input_label` (function, line 844) `const char *rd_input_label(int input_type)`
-  - `rd_input_invisible` (function, line 864) `int rd_input_invisible(int input_type)`
-  - `rd_image_label` (function, line 868) `const char *rd_image_label(rdp_img_decision d)`
-  - `rd_image_fail_label` (function, line 879) `const char *rd_image_fail_label(img_fail_reason reason)`
+  - `rd_free` (function, line 745) `void rd_free(rd_doc *d)`
+  - `rd_count` (function, line 762) `size_t rd_count(const rd_doc *d)`
+  - `rd_at` (function, line 766) `const rd_block *rd_at(const rd_doc *d, size_t i)`
+  - `rd_box_count` (function, line 771) `size_t rd_box_count(const rd_doc *d)`
+  - `rd_box_at` (function, line 775) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i)`
+  - `rd_cont_count` (function, line 780) `size_t rd_cont_count(const rd_doc *d)`
+  - `rd_cont_at` (function, line 784) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i)`
+  - `rd_kind_name` (function, line 789) `const char *rd_kind_name(rd_kind k)`
+  - `rd_block_heading_level` (function, line 803) `int rd_block_heading_level(const rd_block *b)`
+  - `rd_block_tag` (function, line 814) `const char *rd_block_tag(const rd_block *b)`
+  - `rd_input_label` (function, line 845) `const char *rd_input_label(int input_type)`
+  - `rd_input_invisible` (function, line 865) `int rd_input_invisible(int input_type)`
+  - `rd_image_label` (function, line 869) `const char *rd_image_label(rdp_img_decision d)`
+  - `rd_image_fail_label` (function, line 880) `const char *rd_image_fail_label(img_fail_reason reason)`
   - `place` (function, line 240) `* judges it under the exact same policy an <img> already goes through: a data: * URI is judged in place (never...`
-  - `unset` (function, line 706) `* background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not...`
+  - `unset` (function, line 707) `* background paints as if unset (no border/box-shadow-style * "broken image" placeholder) -- it is decoration, not...`
 - Depends on: `include/box_style.h`, `include/css.h`, `include/data_url.h`, `include/render_doc.h`, `include/url.h`, `include/util.h`
 
 ## src/render_policy.c
@@ -350,6 +350,19 @@ static void sf_guard_init(fetch_ctx *ctx, cons...`
   - `shc_key_store` (function, line 136) `static int shc_key_store(shc_sheet *s, const shc_key *k)`
   - `shc_acquire` (function, line 155) `shc_sheet *shc_acquire(shc_cache *cache, const shc_key *key)`
 - Depends on: `include/css_select.h`, `include/freedom_config.h`, `include/sheet_cache.h`
+
+## src/smooth_scroll.c
+- Doc: smooth_scroll (sms_) -- spec/smooth_scroll.md.
+- Layer: utility
+- Language: c
+- Symbols:
+  - `sms_init` (function, line 7) `void sms_init(sms_state *s, double pos)`
+  - `sms_jump` (function, line 15) `void sms_jump(sms_state *s, double pos)`
+  - `sms_retarget` (function, line 21) `void sms_retarget(sms_state *s, double target, double now_ms, double dur_ms)`
+  - `sms_sample` (function, line 35) `double sms_sample(sms_state *s, double now_ms)`
+  - `sms_goal` (function, line 59) `double sms_goal(const sms_state *s)`
+  - `sms_active` (function, line 64) `int sms_active(const sms_state *s)`
+- Depends on: `include/smooth_scroll.h`
 
 ## src/subreq_batch.c
 - Doc: subreq_batch -- see include/subreq_batch.h and spec/subreq_async.md.

@@ -1,6 +1,41 @@
 # Subsystem: tests (page 9 of 9)
 Previous: [KB_tests_p8.md](KB_tests_p8.md)
 
+## tests/test_text_shape.c
+- Doc: inked_pixels: Given a Private Use Area code point that no installed face covers (an icon font...
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_null_and_bad_inputs` (function, line 30) `static void test_null_and_bad_inputs(void **state)`
+  - `test_empty_slice_is_ok` (function, line 60) `static void test_empty_slice_is_ok(void **state)`
+  - `test_shape_ascii` (function, line 73) `static void test_shape_ascii(void **state)`
+  - `test_determinism` (function, line 95) `static void test_determinism(void **state)`
+  - `test_measure_matches_shape` (function, line 111) `static void test_measure_matches_shape(void **state)`
+  - `test_overflow_cap` (function, line 123) `static void test_overflow_cap(void **state)`
+  - `test_draw_paints` (function, line 133) `static void test_draw_paints(void **state)`
+  - `inked_pixels` (function, line 149) `static int inked_pixels(cairo_surface_t *s)`
+  - `test_uncovered_pua_draws_nothing` (function, line 161) `static void test_uncovered_pua_draws_nothing(void **state)`
+  - `test_webfont_rejects_bad_input` (function, line 179) `static void test_webfont_rejects_bad_input(void **state)`
+  - `read_host_font` (function, line 202) `static unsigned char *read_host_font(const char *path, size_t *out_n)`
+  - `test_webfont_woff2_container` (function, line 241) `static void test_webfont_woff2_container(void **state)`
+  - `test_webfont_woff_container` (function, line 246) `static void test_webfont_woff_container(void **state)`
+  - `test_webfont_variable_weight` (function, line 253) `static void test_webfont_variable_weight(void **state)`
+  - `test_webfont_optical_size` (function, line 281) `static void test_webfont_optical_size(void **state)`
+  - `test_webfont_register_find_clear` (function, line 323) `static void test_webfont_register_find_clear(void **state)`
+  - `test_generic_keywords` (function, line 371) `static void test_generic_keywords(void **state)`
+  - `table_resolve` (function, line 383) `static int table_resolve(const char *name, char *out, size_t cap, void *ctx)`
+  - `test_pick_from_list_order_and_generic_stop` (function, line 393) `static void test_pick_from_list_order_and_generic_stop(void **state)`
+  - `set_installed` (function, line 413) `static int set_installed(const char *name, void *ctx)`
+  - `test_pick_family_strong_vs_weak` (function, line 420) `static void test_pick_family_strong_vs_weak(void **state)`
+  - `test_local_handle_real_fontconfig` (function, line 444) `static void test_local_handle_real_fontconfig(void **state)`
+  - `teardown` (function, line 465) `static int teardown(void **state)`
+  - `fake_cover` (function, line 490) `static int fake_cover(unsigned cp, void *ctx)`
+  - `test_segment_runs` (function, line 497) `static void test_segment_runs(void **state)`
+  - `test_measure_uses_fallback_face` (function, line 522) `static void test_measure_uses_fallback_face(void **state)`
+  - `test_face_generation_moves_with_faces` (function, line 535) `static void test_face_generation_moves_with_faces(void **state)`
+  - `main` (function, line 557) `int main(void)`
+- Depends on: `include/css.h`, `include/text_shape.h`, `include/webfont.h`
+
 ## tests/test_textfield.c
 - Layer: testing
 - Language: c
@@ -91,22 +126,23 @@ Previous: [KB_tests_p8.md](KB_tests_p8.md)
   - `test_split_no_port_no_path` (function, line 473) `static void test_split_no_port_no_path(void **state)`
   - `test_split_query_without_fragment` (function, line 486) `static void test_split_query_without_fragment(void **state)`
   - `test_split_fragment_without_query` (function, line 495) `static void test_split_fragment_without_query(void **state)`
-  - `test_split_ipv6_literal_with_port` (function, line 504) `static void test_split_ipv6_literal_with_port(void **state)`
-  - `test_extract_userinfo_basic` (function, line 516) `static void test_extract_userinfo_basic(void **state)`
-  - `test_extract_userinfo_user_only` (function, line 529) `static void test_extract_userinfo_user_only(void **state)`
-  - `test_extract_userinfo_no_userinfo` (function, line 542) `static void test_extract_userinfo_no_userinfo(void **state)`
-  - `test_extract_userinfo_non_https_passthrough` (function, line 554) `static void test_extract_userinfo_non_https_passthrough(void **state)`
-  - `test_extract_userinfo_https_subresource_no_auth` (function, line 566) `static void test_extract_userinfo_https_subresource_no_auth(void **state)`
-  - `test_extract_userinfo_nulls` (function, line 579) `static void test_extract_userinfo_nulls(void **state)`
-  - `test_extract_userinfo_at_authority_start` (function, line 589) `static void test_extract_userinfo_at_authority_start(void **state)`
-  - `test_extract_userinfo_no_at_sign` (function, line 602) `static void test_extract_userinfo_no_at_sign(void **state)`
-  - `test_extract_userinfo_empty_password` (function, line 615) `static void test_extract_userinfo_empty_password(void **state)`
-  - `test_split_fail_closed_non_https` (function, line 628) `static void test_split_fail_closed_non_https(void **state)`
-  - `test_history_target_same_origin` (function, line 641) `static void test_history_target_same_origin(void **state)`
-  - `test_history_target_cross_origin_rejected` (function, line 662) `static void test_history_target_cross_origin_rejected(void **state)`
-  - `test_history_target_file_query_fragment_only` (function, line 677) `static void test_history_target_file_query_fragment_only(void **state)`
-  - `test_history_target_bad_args` (function, line 690) `static void test_history_target_bad_args(void **state)`
-  - `main` (function, line 701) `int main(void)`
+  - `test_split_location_file` (function, line 506) `static void test_split_location_file(void **state)`
+  - `test_split_ipv6_literal_with_port` (function, line 534) `static void test_split_ipv6_literal_with_port(void **state)`
+  - `test_extract_userinfo_basic` (function, line 546) `static void test_extract_userinfo_basic(void **state)`
+  - `test_extract_userinfo_user_only` (function, line 559) `static void test_extract_userinfo_user_only(void **state)`
+  - `test_extract_userinfo_no_userinfo` (function, line 572) `static void test_extract_userinfo_no_userinfo(void **state)`
+  - `test_extract_userinfo_non_https_passthrough` (function, line 584) `static void test_extract_userinfo_non_https_passthrough(void **state)`
+  - `test_extract_userinfo_https_subresource_no_auth` (function, line 596) `static void test_extract_userinfo_https_subresource_no_auth(void **state)`
+  - `test_extract_userinfo_nulls` (function, line 609) `static void test_extract_userinfo_nulls(void **state)`
+  - `test_extract_userinfo_at_authority_start` (function, line 619) `static void test_extract_userinfo_at_authority_start(void **state)`
+  - `test_extract_userinfo_no_at_sign` (function, line 632) `static void test_extract_userinfo_no_at_sign(void **state)`
+  - `test_extract_userinfo_empty_password` (function, line 645) `static void test_extract_userinfo_empty_password(void **state)`
+  - `test_split_fail_closed_non_https` (function, line 658) `static void test_split_fail_closed_non_https(void **state)`
+  - `test_history_target_same_origin` (function, line 671) `static void test_history_target_same_origin(void **state)`
+  - `test_history_target_cross_origin_rejected` (function, line 692) `static void test_history_target_cross_origin_rejected(void **state)`
+  - `test_history_target_file_query_fragment_only` (function, line 707) `static void test_history_target_file_query_fragment_only(void **state)`
+  - `test_history_target_bad_args` (function, line 732) `static void test_history_target_bad_args(void **state)`
+  - `main` (function, line 743) `int main(void)`
 - Depends on: `include/url.h`
 
 ## tests/test_video_controls.c

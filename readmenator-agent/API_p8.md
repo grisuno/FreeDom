@@ -1,6 +1,36 @@
 # API (page 8 of 13)
 Previous: [API_p7.md](API_p7.md)
 
+## src/css_counter.c
+Depends on: `include/css_counter.h`
+- `cnt_hash` (function) `src/css_counter.c:18` `unsigned cnt_hash(const char *name, size_t len)`
+- `is_ws` (function) `src/css_counter.c:27` `static int is_ws(char c)`
+- `is_ident_start` (function) `src/css_counter.c:29` `static int is_ident_start(unsigned char c)`
+- `is_ident_char` (function) `src/css_counter.c:32` `static int is_ident_char(unsigned char c)`
+- `ci_eq` (function) `src/css_counter.c:34` `static int ci_eq(const char *a, const char *b)`
+- `valid_name` (function) `src/css_counter.c:45` `static int valid_name(const char *s, size_t n)` -- A <custom-ident> usable as a counter name: identifier syntax, not a CSS-wide * keyword or `none`, and short enough...
+- `cnt_parse_decls` (function) `src/css_counter.c:59` `int cnt_parse_decls(const char *val, int dflt, cnt_decl out[CNT_MAX_DECL])`
+- `put` (function) `src/css_counter.c:102` `static size_t put(char *out, size_t cap, size_t o, const char *s)`
+- `utf8_put` (function) `src/css_counter.c:107` `static void utf8_put(char *buf, unsigned cp)`
+- `cnt_format` (function) `src/css_counter.c:120` `size_t cnt_format(int style, long value, char *out, size_t cap)`
+- `style_of` (function) `src/css_counter.c:174` `static int style_of(const char *name)`
+- `sk_char` (function) `src/css_counter.c:192` `static void sk_char(sink *k, char c)`
+- `sk_str` (function) `src/css_counter.c:196` `static void sk_str(sink *k, const char *s)`
+- `read_string` (function) `src/css_counter.c:201` `static const char *read_string(const char *p, char *dst, size_t cap)` -- A quoted string at p (p[0] is the quote).
+- `split_args` (function) `src/css_counter.c:238` `static int split_args(const char *a, const char *b, char (*f)[CNT_STR_MAX], int max)` -- continue; } cp = (unsigned char)*p; } if (cp >= 0x20 && o + 1 < cap) dst[o++] = (char)cp; else if (cp >= 0x20)...
+- `cnt_is_marker` (function) `src/css_counter.c:272` `int cnt_is_marker(const char *s)`
+- `has_counter_fn` (function) `src/css_counter.c:276` `static int has_counter_fn(const char *v)`
+- `cnt_parse_content` (function) `src/css_counter.c:286` `int cnt_parse_content(const char *val, char *out, size_t cap)`
+- `cnt_state_new` (function) `src/css_counter.c:366` `cnt_state *cnt_state_new(void)`
+- `cnt_state_free` (function) `src/css_counter.c:367` `void cnt_state_free(cnt_state *s)`
+- `top_of` (function) `src/css_counter.c:369` `static cnt_inst *top_of(cnt_state *s, unsigned name)`
+- `clampv` (function) `src/css_counter.c:375` `static int clampv(long v)`
+- `cnt_reset` (function) `src/css_counter.c:379` `void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n)`
+- `cnt_increment` (function) `src/css_counter.c:392` `void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n)`
+- `cnt_leave` (function) `src/css_counter.c:407` `void cnt_leave(cnt_state *s, int depth)`
+- `cnt_resolve` (function) `src/css_counter.c:412` `size_t cnt_resolve(const cnt_state *s, const char *marker, cnt_attr_fn attr, void *ctx,
+         ...`
+
 ## src/css_gradient.c
 Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 - `cg_parse_num` (function) `src/css_gradient.c:13` `static int cg_parse_num(const char *s, double *out, const char **endp)`
@@ -10,34 +40,36 @@ Depends on: `include/css_color.h`, `include/css_decl.h`, `include/css_gradient.h
 - `find_gradient_call` (function) `src/css_gradient.c:77` `static int find_gradient_call(const char *v, const char *fn, size_t *start,
                      ...` -- Locates a gradient function call `fn` (e.g. "linear-gradient(") in v (case-insensitive; an occurrence that is the...
 - `conic_prelude` (function) `src/css_gradient.c:111` `static int conic_prelude(const char *seg, int *angle)` -- conic-gradient prelude: `from <int>deg`, optionally followed by `at <pos>` (position accepted and ignored -- always...
-- `grad_stop_pos` (function) `src/css_gradient.c:153` `static int grad_stop_pos(const char *pp, int conic, const char **endp)` -- One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts `Ndeg` -> the same 0-1000 turn fraction...
-- `CSS_GRAD_STOPS_MAX` (function) `src/css_gradient.c:184` `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
+- `sRGB` (function) `src/css_gradient.c:154` `* sRGB (spec/css_gradient.md §3b). */
+static int strip_interp(char *seg)`
+- `grad_stop_pos` (function) `src/css_gradient.c:210` `static int grad_stop_pos(const char *pp, int conic, const char **endp)` -- One stop position after a color: `N%` -> 0-1000 (x10); conic also accepts `Ndeg` -> the same 0-1000 turn fraction...
+- `CSS_GRAD_STOPS_MAX` (function) `src/css_gradient.c:241` `* CSS_GRAD_STOPS_MAX (stops past the cap are kept out unvalidated), or 0 when
  * the gradient fai...`
-- `emit_gradient` (function) `src/css_gradient.c:291` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
+- `emit_gradient` (function) `src/css_gradient.c:352` `static int emit_gradient(css_decl *dst, int cap, int angle, int nstops,
                          ...` -- Emits the gradient decl group. nstops == 0 emits only the explicit reset * (P_BG_GRAD_N = 0), which is how a...
-- `find_radial_gradient` (function) `src/css_gradient.c:360` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
+- `find_radial_gradient` (function) `src/css_gradient.c:421` `static int find_radial_gradient(const char *v, size_t *start, size_t *end,
                       ...` -- R5c: detects radial-gradient(circle at center, color1, color2).
-- `cg_first_url` (function) `src/css_gradient.c:398` `int cg_first_url(const char *val, char *out, size_t outcap)`
-- `emit_radial_geom` (function) `src/css_gradient.c:405` `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` -- } memcpy(urltab[*nurl], url, strlen(url) + 1); dst[0].ival = (int)*nurl; ++*nurl; return 1; } int cg_first_url(const...
-- `pool` (function) `src/css_gradient.c:418` `* pool (gradient explicitly reset);`
-- `downstream` (function) `src/css_gradient.c:422` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
+- `cg_first_url` (function) `src/css_gradient.c:459` `int cg_first_url(const char *val, char *out, size_t outcap)`
+- `emit_radial_geom` (function) `src/css_gradient.c:466` `static int emit_radial_geom(css_decl *dst, int cap, const cg_radial *r)` -- } memcpy(urltab[*nurl], url, strlen(url) + 1); dst[0].ival = (int)*nurl; ++*nurl; return 1; } int cg_first_url(const...
+- `pool` (function) `src/css_gradient.c:479` `* pool (gradient explicitly reset);`
+- `downstream` (function) `src/css_gradient.c:483` `* happens downstream (render_doc.c), gated by caps.images like an <img>. */
 int cg_expand_bg_imag...`
-- `declaration` (function) `src/css_gradient.c:483` `* declaration (fail closed);`
-- `bg_layer_tokens_ok` (function) `src/css_gradient.c:490` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
-- `cg_expand_background` (function) `src/css_gradient.c:530` `int cg_expand_background(const char *val, css_decl *dst, int cap,
+- `declaration` (function) `src/css_gradient.c:544` `* declaration (fail closed);`
+- `bg_layer_tokens_ok` (function) `src/css_gradient.c:551` `static int bg_layer_tokens_ok(const char *s)` -- True iff every token of s (split on whitespace, '/' and ',') is a valid non-colour component of a background layer...
+- `cg_expand_background` (function) `src/css_gradient.c:591` `int cg_expand_background(const char *val, css_decl *dst, int cap,
                              ch...`
-- `rad_ieq` (function) `src/css_gradient.c:618` `static int rad_ieq(const char *a, const char *b)`
-- `rad_len` (function) `src/css_gradient.c:626` `static int rad_len(const char *tok, int *enc)` -- One <length-percentage> token (`12px`, `40%`, `0`) -> the cg_radial encoding; 1 = ok.
-- `rad_is_len_start` (function) `src/css_gradient.c:647` `static int rad_is_len_start(const char *t)`
-- `rad_pos_kw` (function) `src/css_gradient.c:652` `static int rad_pos_kw(const char *t, int *axis)` -- if (*e == '\0' && v == 0.0) { *enc = 0; return 1; }   /* unitless 0 is a zero length if (rad_ieq(e, "px")) { if (v >...
-- `rad_parse_position` (function) `src/css_gradient.c:661` `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
-- `cg_parse_radial_prelude` (function) `src/css_gradient.c:690` `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
-- `cg_radial_len_px` (function) `src/css_gradient.c:766` `double cg_radial_len_px(int enc, double dim)`
-- `cg_dmin` (function) `src/css_gradient.c:775` `static double cg_dmin(double a, double b)`
-- `cg_dmax` (function) `src/css_gradient.c:776` `static double cg_dmax(double a, double b)`
-- `cg_radial_geometry` (function) `src/css_gradient.c:778` `void cg_radial_geometry(const cg_radial *r, double w, double h,
+- `rad_ieq` (function) `src/css_gradient.c:679` `static int rad_ieq(const char *a, const char *b)`
+- `rad_len` (function) `src/css_gradient.c:687` `static int rad_len(const char *tok, int *enc)` -- One <length-percentage> token (`12px`, `40%`, `0`) -> the cg_radial encoding; 1 = ok.
+- `rad_is_len_start` (function) `src/css_gradient.c:708` `static int rad_is_len_start(const char *t)`
+- `rad_pos_kw` (function) `src/css_gradient.c:713` `static int rad_pos_kw(const char *t, int *axis)` -- if (*e == '\0' && v == 0.0) { *enc = 0; return 1; }   /* unitless 0 is a zero length if (rad_ieq(e, "px")) { if (v >...
+- `rad_parse_position` (function) `src/css_gradient.c:722` `static int rad_parse_position(char (*tok)[CSS_TOK_MAX], int n, int *cx, int *cy)`
+- `cg_parse_radial_prelude` (function) `src/css_gradient.c:751` `int cg_parse_radial_prelude(const char *seg, cg_radial *out)`
+- `cg_radial_len_px` (function) `src/css_gradient.c:827` `double cg_radial_len_px(int enc, double dim)`
+- `cg_dmin` (function) `src/css_gradient.c:836` `static double cg_dmin(double a, double b)`
+- `cg_dmax` (function) `src/css_gradient.c:837` `static double cg_dmax(double a, double b)`
+- `cg_radial_geometry` (function) `src/css_gradient.c:839` `void cg_radial_geometry(const cg_radial *r, double w, double h,
                         double *c...`
-- `cg_parse_linear` (function) `src/css_gradient.c:815` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
+- `cg_parse_linear` (function) `src/css_gradient.c:876` `int cg_parse_linear(const char *fn, int *angle, int *colors, int *positions)`
 
 ## src/css_import.c
 Depends on: `include/css_import.h`
@@ -216,14 +248,20 @@ Depends on: `include/css.h`, `include/css_box.h`, `include/css_color.h`, `includ
 ## src/css_values.c
 Depends on: `include/css.h`, `include/css_color.h`, `include/css_decl.h`, `include/css_length.h`, `include/css_select.h`, `include/css_values.h`
 - `cv_parse_num` (function) `src/css_values.c:11` `static int cv_parse_num(const char *s, double *out, const char **endp)`
-- `cv_parse_color` (function) `src/css_values.c:16` `int cv_parse_color(const char *v)`
-- `cv_interp_color` (function) `src/css_values.c:36` `int cv_interp_color(const char *v)`
-- `cv_color_ok` (function) `src/css_values.c:41` `int cv_color_ok(int c)`
-- `cv_bg_alpha_of` (function) `src/css_values.c:46` `int cv_bg_alpha_of(const char *v)`
-- `cv_interp_bg` (function) `src/css_values.c:160` `int cv_interp_bg(const char *v)`
-- `cv_parse_color_t7` (function) `src/css_values.c:205` `int cv_parse_color_t7(const char *v)`
-- `cv_text_color` (function) `src/css_values.c:222` `int cv_text_color(const char *v)`
-- `cv_filter_scale` (function) `src/css_values.c:231` `double cv_filter_scale(int pct)`
+- `parse_color_depth` (function) `src/css_values.c:18` `static int parse_color_depth(const char *v, int depth)`
+- `cv_parse_color` (function) `src/css_values.c:42` `int cv_parse_color(const char *v)`
+- `cv_interp_color` (function) `src/css_values.c:47` `int cv_interp_color(const char *v)`
+- `cv_color_ok` (function) `src/css_values.c:52` `int cv_color_ok(int c)`
+- `mix_arg` (function) `src/css_values.c:61` `static int mix_arg(const char *s, size_t n, double *pct, double *alpha, int *rgb, int depth)` -- One color-mix() argument `[<pct>] <color> [<pct>]` in s[0,n): its percentage (-1 when * absent) and its alpha in...
+- `mix_solve` (function) `src/css_values.c:110` `static int mix_solve(const char *v, int depth, int *rgb_out, double *alpha_out)` -- color-mix(in <space>, c1 [p1], c2 [p2]) (CSS Color 5 §2): percentages normalised to 100, a sum under 100 scales the...
+- `mix_color` (function) `src/css_values.c:171` `static int mix_color(const char *v, int depth)`
+- `mix_alpha` (function) `src/css_values.c:179` `static int mix_alpha(const char *v, int depth)`
+- `cv_bg_alpha_of` (function) `src/css_values.c:199` `int cv_bg_alpha_of(const char *v)`
+- `alpha_of_depth` (function) `src/css_values.c:204` `static int alpha_of_depth(const char *v, int depth)`
+- `cv_interp_bg` (function) `src/css_values.c:324` `int cv_interp_bg(const char *v)`
+- `cv_parse_color_t7` (function) `src/css_values.c:369` `int cv_parse_color_t7(const char *v)`
+- `cv_text_color` (function) `src/css_values.c:386` `int cv_text_color(const char *v)`
+- `cv_filter_scale` (function) `src/css_values.c:395` `double cv_filter_scale(int pct)`
 
 ## src/css_vars.c
 Depends on: `include/css_select.h`, `include/css_vars.h`
@@ -239,12 +277,13 @@ Depends on: `include/css_select.h`, `include/css_vars.h`
 - `is_ws` (function) `src/css_vars.c:120` `static int is_ws(char c)`
 - `without_important` (function) `src/css_vars.c:124` `static size_t without_important(const char *val, size_t n)` -- Length of val[0,n) once a trailing !important (optional blanks around the '!') * is removed, trailing blanks included.
 - `cvr_collect_decls` (function) `src/css_vars.c:139` `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b)`
-- `scope_get` (function) `src/css_vars.c:164` `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)`
-- `env_value` (function) `src/css_vars.c:182` `static const char *env_value(const char *name, size_t n)` -- The value an env() name resolves to on this device class (CSS Environment Variables 1): a desktop window has no...
-- `resolve_rec` (function) `src/css_vars.c:192` `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
+- `wide_keyword` (function) `src/css_vars.c:168` `static int wide_keyword(const char *v)` -- A stored value that is a CSS-wide keyword (Cascade 5 §7.3), compared whole and case-insensitively: 1 = initial /...
+- `scope_get` (function) `src/css_vars.c:179` `static const char *scope_get(const cvr_scope *sc, const char *name, size_t nlen)`
+- `env_value` (function) `src/css_vars.c:204` `static const char *env_value(const char *name, size_t n)` -- The value an env() name resolves to on this device class (CSS Environment Variables 1): a desktop window has no...
+- `resolve_rec` (function) `src/css_vars.c:214` `static int resolve_rec(const char *val, size_t vlen, char *out, size_t outcap,
                   ...`
-- `cvr_resolve` (function) `src/css_vars.c:281` `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
-- `cvr_lookup` (function) `src/css_vars.c:290` `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
+- `cvr_resolve` (function) `src/css_vars.c:303` `int cvr_resolve(const char *val, char *out, size_t outcap, const cvr_scope *sc)`
+- `cvr_lookup` (function) `src/css_vars.c:312` `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen)`
 
 ## src/data_url.c
 Depends on: `include/data_url.h`
@@ -270,6 +309,17 @@ Depends on: `include/disk_store.h`, `include/local_store.h`, `include/util.h`
                   uint8_t **ou...`
 - `ds_free` (function) `src/disk_store.c:136` `void ds_free(uint8_t *buf, size_t len)`
 
+## src/doc_title.c
+Depends on: `include/doc_title.h`
+- `is_ascii_space` (function) `src/doc_title.c:19` `static int is_ascii_space(unsigned c)`
+- `is_bidi_control` (function) `src/doc_title.c:23` `static int is_bidi_control(uint32_t cp)`
+- `lower` (function) `src/doc_title.c:28` `static unsigned lower(unsigned c)`
+- `utf8_next` (function) `src/doc_title.c:62` `static size_t utf8_next(const unsigned char *s, size_t n, uint32_t *cp)` -- } else { b[0] = (unsigned char)(0xF0u | (cp >> 18)); b[1] = (unsigned char)(0x80u | ((cp >> 12) & 0x3Fu)); b[2] =...
+- `char_ref` (function) `src/doc_title.c:83` `static size_t char_ref(const unsigned char *s, size_t n, uint32_t *cp)` -- A character reference at s[0] == '&'.
+- `at_end_tag` (function) `src/doc_title.c:116` `static int at_end_tag(const unsigned char *s, size_t i, size_t n, const char *name)` -- } if (i == d0) return 0; if (i < n && s[i] == ';') ++i; cp = v; return i; } for (size_t k = 0; k < sizeof named /...
+- `find_end_tag` (function) `src/doc_title.c:125` `static size_t find_end_tag(const unsigned char *s, size_t i, size_t n, const char *name)`
+- `dt_scan` (function) `src/doc_title.c:131` `int dt_scan(const char *html, size_t len, char *out, size_t cap)`
+
 ## src/dom.c
 Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `include/html_parse.h`, `include/util.h`
 - `to_lower_buf` (function) `src/dom.c:33` `static int to_lower_buf(const char *s, size_t n, char *out, size_t outcap)` -- #include <stdint.h> #include <stdlib.h> #include <string.h> #include <lexbor/dom/dom.h> #include...
@@ -292,69 +342,70 @@ Depends on: `include/css_chain.h`, `include/css_select.h`, `include/dom.h`, `inc
 - `dom_node_count` (function) `src/dom.c:349` `size_t dom_node_count(const dom_index *idx)`
 - `node_in_document` (function) `src/dom.c:357` `static int node_in_document(const lxb_dom_node_t *node)` -- 1 when `node` is in the document tree (its topmost ancestor is the document node).
 - `dom_get_element_by_id` (function) `src/dom.c:363` `dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id)`
-- `dom_get_connected_by_id` (function) `src/dom.c:369` `dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id)`
-- `copy_ids` (function) `src/dom.c:392` `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
-- `dom_get_by_tag` (function) `src/dom.c:399` `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
+- `dom_is_connected` (function) `src/dom.c:369` `int dom_is_connected(const dom_index *idx, dom_node_id node)`
+- `dom_get_connected_by_id` (function) `src/dom.c:373` `dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id)`
+- `copy_ids` (function) `src/dom.c:396` `static size_t copy_ids(const sm_entry *e, dom_node_id *out, size_t cap)`
+- `dom_get_by_tag` (function) `src/dom.c:403` `size_t dom_get_by_tag(const dom_index *idx, const char *tag,
                       dom_node_id *o...`
-- `dom_get_by_class` (function) `src/dom.c:408` `size_t dom_get_by_class(const dom_index *idx, const char *cls,
+- `dom_get_by_class` (function) `src/dom.c:412` `size_t dom_get_by_class(const dom_index *idx, const char *cls,
                         dom_node_i...`
-- `id_of` (function) `src/dom.c:421` `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)` -- Max complex selectors in one comma-separated list.
-- `parse_selector_list` (function) `src/dom.c:431` `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)` -- Parses a selector list "a, b, c" into up to cap css_sel.
-- `node_matches_any` (function) `src/dom.c:464` `static int node_matches_any(const lxb_dom_node_t *cn,
+- `id_of` (function) `src/dom.c:425` `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)` -- Max complex selectors in one comma-separated list.
+- `parse_selector_list` (function) `src/dom.c:435` `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)` -- Parses a selector list "a, b, c" into up to cap css_sel.
+- `node_matches_any` (function) `src/dom.c:468` `static int node_matches_any(const lxb_dom_node_t *cn,
                             const css_sel *...` -- s.order = (int)n; s.rule = 0; out[n++] = s; } } start = i + 1; } break; default: break; } } return n; } /* Nonzero...
-- `count` (function) `src/dom.c:472` `* count (may exceed cap), and returns DOM_NODE_NONE. */
+- `count` (function) `src/dom.c:476` `* count (may exceed cap), and returns DOM_NODE_NONE. */
 static dom_node_id qs_walk(const dom_inde...`
-- `dom_query_selector` (function) `src/dom.c:502` `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
+- `dom_query_selector` (function) `src/dom.c:506` `dom_node_id dom_query_selector(const dom_index *idx, dom_node_id root,
                           ...`
-- `dom_query_selector_all` (function) `src/dom.c:511` `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
+- `dom_query_selector_all` (function) `src/dom.c:515` `size_t dom_query_selector_all(const dom_index *idx, dom_node_id root,
                            ...`
-- `dom_matches` (function) `src/dom.c:522` `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
-- `dom_closest` (function) `src/dom.c:531` `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
+- `dom_matches` (function) `src/dom.c:526` `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector)`
+- `dom_closest` (function) `src/dom.c:535` `dom_node_id dom_closest(const dom_index *idx, dom_node_id node,
                         const cha...`
-- `dom_document_position` (function) `src/dom.c:547` `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
-- `dom_precedes` (function) `src/dom.c:552` `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
-- `dom_node_at` (function) `src/dom.c:557` `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
-- `dom_parent` (function) `src/dom.c:562` `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
-- `dom_first_child` (function) `src/dom.c:572` `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
-- `dom_next_sibling` (function) `src/dom.c:580` `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
-- `dom_tag_name` (function) `src/dom.c:588` `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
-- `dom_get_attribute` (function) `src/dom.c:599` `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
+- `dom_document_position` (function) `src/dom.c:551` `size_t dom_document_position(const dom_index *idx, dom_node_id node)`
+- `dom_precedes` (function) `src/dom.c:556` `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b)`
+- `dom_node_at` (function) `src/dom.c:561` `dom_node_id dom_node_at(const dom_index *idx, size_t position)`
+- `dom_parent` (function) `src/dom.c:566` `dom_node_id dom_parent(const dom_index *idx, dom_node_id node)`
+- `dom_first_child` (function) `src/dom.c:576` `dom_node_id dom_first_child(const dom_index *idx, dom_node_id node)`
+- `dom_next_sibling` (function) `src/dom.c:584` `dom_node_id dom_next_sibling(const dom_index *idx, dom_node_id node)`
+- `dom_tag_name` (function) `src/dom.c:592` `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len)`
+- `dom_get_attribute` (function) `src/dom.c:603` `const char *dom_get_attribute(const dom_index *idx, dom_node_id node,
                            ...`
-- `dom_attribute_names` (function) `src/dom.c:621` `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
+- `dom_attribute_names` (function) `src/dom.c:625` `size_t dom_attribute_names(const dom_index *idx, dom_node_id node,
                            con...`
-- `dom_text_content` (function) `src/dom.c:639` `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
-- `dom_document_title` (function) `src/dom.c:649` `const char *dom_document_title(const dom_index *idx, size_t *len)`
-- `dom_set_text_content` (function) `src/dom.c:662` `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
+- `dom_text_content` (function) `src/dom.c:643` `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)`
+- `dom_document_title` (function) `src/dom.c:653` `const char *dom_document_title(const dom_index *idx, size_t *len)`
+- `dom_set_text_content` (function) `src/dom.c:666` `dom_status dom_set_text_content(dom_index *idx, dom_node_id node,
                                ...`
-- `dom_set_document_title` (function) `src/dom.c:697` `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
-- `idx_push` (function) `src/dom.c:709` `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)` -- } dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len) { if (idx != NULL)...
-- `dom_create_element` (function) `src/dom.c:727` `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
-- `dom_append_child` (function) `src/dom.c:747` `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-- `dom_remove_child` (function) `src/dom.c:762` `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
-- `dom_set_attribute` (function) `src/dom.c:771` `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
+- `dom_set_document_title` (function) `src/dom.c:701` `dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len)`
+- `idx_push` (function) `src/dom.c:713` `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)` -- } dom_status dom_set_document_title(dom_index *idx, const char *text, size_t len) { if (idx != NULL)...
+- `dom_create_element` (function) `src/dom.c:731` `dom_status dom_create_element(dom_index *idx, const char *tag, dom_node_id *out_id)`
+- `dom_append_child` (function) `src/dom.c:751` `dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
+- `dom_remove_child` (function) `src/dom.c:766` `dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child)`
+- `dom_set_attribute` (function) `src/dom.c:775` `dom_status dom_set_attribute(dom_index *idx, dom_node_id node,
                              const...`
-- `dom_remove_attribute` (function) `src/dom.c:801` `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
-- `index_subtree` (function) `src/dom.c:811` `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)` -- } return DOM_OK; } dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name) { if (idx !=...
-- `dom_set_inner_html` (function) `src/dom.c:821` `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
+- `dom_remove_attribute` (function) `src/dom.c:805` `dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name)`
+- `index_subtree` (function) `src/dom.c:815` `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)` -- } return DOM_OK; } dom_status dom_remove_attribute(dom_index *idx, dom_node_id node, const char *name) { if (idx !=...
+- `dom_set_inner_html` (function) `src/dom.c:825` `dom_status dom_set_inner_html(dom_index *idx, dom_node_id node,
                               con...`
-- `ih_append` (function) `src/dom.c:875` `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
-- `ih_free` (function) `src/dom.c:902` `static void ih_free(ih_acc *a)`
-- `dom_get_inner_html` (function) `src/dom.c:929` `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
+- `ih_append` (function) `src/dom.c:879` `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)`
+- `ih_free` (function) `src/dom.c:906` `static void ih_free(ih_acc *a)`
+- `dom_get_inner_html` (function) `src/dom.c:933` `dom_status dom_get_inner_html(const dom_index *idx, dom_node_id node,
                            ...`
-- `dom_insert_before` (function) `src/dom.c:959` `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
+- `dom_insert_before` (function) `src/dom.c:963` `dom_status dom_insert_before(dom_index *idx, dom_node_id parent, dom_node_id child,
              ...`
-- `dom_clone_node` (function) `src/dom.c:977` `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)`
-- `dom_move_children` (function) `src/dom.c:991` `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
+- `dom_clone_node` (function) `src/dom.c:981` `dom_status dom_clone_node(dom_index *idx, dom_node_id node, int deep, dom_node_id *out_id)`
+- `dom_move_children` (function) `src/dom.c:995` `dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent,
                ...`
-- `char_kind` (function) `src/dom.c:1025` `static int char_kind(const lxb_dom_node_t *n)`
-- `handle_of` (function) `src/dom.c:1036` `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)` -- /* --- text and comment nodes (spec/dom.md 9) --- static int char_kind(const lxb_dom_node_t *n) { switch (n->type) {...
-- `dom_node_kind` (function) `src/dom.c:1044` `int dom_node_kind(const dom_index *idx, dom_node_id node)`
-- `dom_child_node` (function) `src/dom.c:1048` `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)`
-- `dom_sibling_node` (function) `src/dom.c:1055` `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
-- `dom_create_char_node` (function) `src/dom.c:1062` `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
+- `char_kind` (function) `src/dom.c:1029` `static int char_kind(const lxb_dom_node_t *n)`
+- `handle_of` (function) `src/dom.c:1040` `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)` -- /* --- text and comment nodes (spec/dom.md 9) --- static int char_kind(const lxb_dom_node_t *n) { switch (n->type) {...
+- `dom_node_kind` (function) `src/dom.c:1048` `int dom_node_kind(const dom_index *idx, dom_node_id node)`
+- `dom_child_node` (function) `src/dom.c:1052` `dom_node_id dom_child_node(dom_index *idx, dom_node_id node, int last)`
+- `dom_sibling_node` (function) `src/dom.c:1059` `dom_node_id dom_sibling_node(dom_index *idx, dom_node_id node, int prev)`
+- `dom_create_char_node` (function) `src/dom.c:1066` `dom_status dom_create_char_node(dom_index *idx, int kind, const char *text, size_t len,
          ...`
-- `dom_handle_of_native` (function) `src/dom.c:1076` `dom_node_id dom_handle_of_native(dom_index *idx, const void *native)`
-- `dom_native_node` (function) `src/dom.c:1082` `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
+- `dom_handle_of_native` (function) `src/dom.c:1080` `dom_node_id dom_handle_of_native(dom_index *idx, const void *native)`
+- `dom_native_node` (function) `src/dom.c:1086` `const void *dom_native_node(const dom_index *idx, dom_node_id node)`
 
 ## src/dom_debug.c
 Depends on: `include/box_style.h`, `include/css.h`, `include/dom_debug.h`, `include/flex_layout.h`, `include/page_view.h`
@@ -436,23 +487,6 @@ Depends on: `include/fb_panes.h`
 - `fbp_is_pane` (function) `src/fb_panes.c:155` `int fbp_is_pane(int tab)`
 - `fbp_js_quote` (function) `src/fb_panes.c:157` `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap)`
 - `fbp_expr` (function) `src/fb_panes.c:186` `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap)`
-
-## src/find_text.c
-Depends on: `include/find_text.h`
-- `ft_fold` (function) `src/find_text.c:13` `uint32_t ft_fold(uint32_t cp)`
-- `is_ws` (function) `src/find_text.c:33` `static int is_ws(uint32_t cp)`
-- `decode` (function) `src/find_text.c:40` `static size_t decode(const unsigned char *s, size_t n, uint32_t *cp)` -- if (cp >= 0x391u && cp <= 0x3A9u && cp != 0x3A2u) return cp + 0x20u; if (cp == 0x3C2u) return 0x3C3u...
-- `ft_compile` (function) `src/find_text.c:59` `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap)`
-- `piece_len` (function) `src/find_text.c:78` `static size_t piece_len(const ft_piece *p)`
-- `settle` (function) `src/find_text.c:81` `static int settle(const ft_piece *p, size_t n, ft_pos *pos)` -- if (is_ws(cp)) { pending_space = (n > 0); continue; } if (pending_space) { if (n + 1 >= cap) break; out[n++] = ' '...
-- `peek` (function) `src/find_text.c:92` `static uint32_t peek(const ft_piece *p, ft_pos pos, size_t *adv)` -- static size_t piece_len(const ft_piece *p) { return p->text != NULL ? p->len : 0; } /* Moves pos onto a readable byte.
-- `match_at` (function) `src/find_text.c:100` `static int match_at(const ft_piece *p, size_t n, ft_pos s, const uint32_t *q, size_t qn,
-        ...` -- if (pos->piece < n && p[pos->piece].gap_before) gap = 1; } return pos->piece < n ? gap : -1; } /* Reads the code...
-- `ft_search` (function) `src/find_text.c:127` `ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t *q, size_t qn,
-             ...`
-- `ft_spans` (function) `src/find_text.c:158` `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm,
-                f...`
-- `ft_step` (function) `src/find_text.c:180` `long ft_step(long cur, size_t n, int dir)`
 
 
 Next: [API_p9.md](API_p9.md)

@@ -209,4 +209,6 @@ nt_route_kind nt_route(const nt_token *job, const nt_token *active, nt_token *co
 
 *Calls:* [`nt_cancelled`](#nt_cancelled)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_nav_token.c.md#llvmfuzzertestoneinput)
+
 ---

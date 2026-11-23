@@ -1,10 +1,10 @@
 # `include/js_location.h`
 
-> Source: [include/js_location.h:1](../../include/js_location.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
+> Source: [include/js_location.h:1](../../include/js_location.h#L1) | language `h` | coverage 42.9% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`reads`](#reads), [`jd_take_history`](#jd_take_history), [`jd_pop_state`](#jd_pop_state), [`acting`](#acting)
+- **Functions:** [`reads`](#reads), [`jd_take_history`](#jd_take_history), [`jd_pop_state`](#jd_pop_state), [`url`](#url), [`acting`](#acting)
 - **Macros:** [`JD_HIST_MAX`](#jd_hist_max)
 
 ## Functions
@@ -78,11 +78,31 @@ Returns 1 when applied, 0 when index is out of range or no location is installed
 
 ---
 
+<a id="url"></a>
+
+### `url`
+
+`function` | [include/js_location.h:47](../../include/js_location.h#L47)
+
+```c
+* pushes url (resolved by the page's own same-origin check, dom.histTarget) as a new * entry of the page's history, moves location and dispatches hashchange when the URL * changed. url is passed as a
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `histTarget` | `resolved by the page's own same-origin check, dom.` |  |  |
+
+**Returns:** `* pushes`
+
+---
+
 <a id="acting"></a>
 
 ### `acting`
 
-`function` | [include/js_location.h:49](../../include/js_location.h#L49)
+`function` | [include/js_location.h:56](../../include/js_location.h#L56)
 
 ```c
 * The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace);

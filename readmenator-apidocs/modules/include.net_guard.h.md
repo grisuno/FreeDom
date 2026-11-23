@@ -76,6 +76,8 @@ Anything else answers 1 (fail closed).
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_net_guard.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ng_text_is_private"></a>
@@ -99,6 +101,8 @@ Text that is not exactly one address answers 1 (fail closed).
 | `ip_text` | `char *` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_net_guard.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -124,6 +128,8 @@ A registrable-domain comparison is meaningless for literals: compare them whole.
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_net_guard.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ng_host_is_local"></a>
@@ -147,6 +153,8 @@ NULL/"" answers 0.
 | `host` | `char *` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_net_guard.c.md#llvmfuzzertestoneinput)
 
 ---
 

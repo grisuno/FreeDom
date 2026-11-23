@@ -265,7 +265,7 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const 
 
 *Calls:* [`cx_sort`](include.compositor.h.md#cx_sort), [`bt_containing_block`](#bt_containing_block), [`cx_box_layer`](src.compositor.c.md#cx_box_layer)
 
-*Called by:* [`bt_resolve_positioning`](#bt_resolve_positioning)
+*Called by:* [`FB_MAX`](fuzz.fuzz_box_tree.c.md#fb_max), [`bt_resolve_positioning`](#bt_resolve_positioning)
 
 ---
 
@@ -417,7 +417,7 @@ CSS 2.1 Appendix E steps 8-9 (spec/box_engine.md, tanda 47): an in-flow position
 
 When one of those (an absolute backdrop, say) comes EARLIER in the tree than S, S must paint above it -- but the painter draws all in-flow content first. This names the subtrees the painter has to defer.
 
-[`pos`](include.flex_layout.h.md#fx_result-pos) is the positioned list (out-of-flow boxes), `in_flow[i]` nonzero when box i
+[`pos`](fuzz.fuzz_browser.c.md#pos) is the positioned list (out-of-flow boxes), `in_flow[i]` nonzero when box i
 was laid out in flow. S is deferred iff it is RELATIVE/STICKY, in flow, and some
 non-negative-z out-of-flow P with no out-of-flow ancestor has box_index < S and
 z(P) <= z(S) (an unset z counts 0), "earlier" meaning TREE order (a depth-first

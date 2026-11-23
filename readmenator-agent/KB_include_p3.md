@@ -1,6 +1,50 @@
 # Subsystem: include (page 3 of 6)
 Previous: [KB_include_p2.md](KB_include_p2.md)
 
+## include/fb_panes.h
+- Doc: fbp_tab_label: FBP_CSS, FBP_SCRIPT, FBP_NET, FBP_PROFILE,   /* where the JS time went (sampling...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `fbp_tab` (enum, line 17)
+  - `fbp_tab_label` (function, line 34) `const char *fbp_tab_label(int tab);`
+  - `fbp_tab_from_name` (function, line 37) `int fbp_tab_from_name(const char *name);`
+  - `fbp_tab_wrap` (function, line 40) `int fbp_tab_wrap(int tab, int dir);`
+  - `fbp_tab_span` (function, line 43) `void fbp_tab_span(int tab, double cell_w, double pad_cells, double *x, double *w);`
+  - `fbp_tab_at` (function, line 46) `int fbp_tab_at(double x, double cell_w, double pad_cells);`
+  - `fbp_is_pane` (function, line 49) `int fbp_is_pane(int tab);`
+  - `fbp_js_quote` (function, line 53) `size_t fbp_js_quote(const char *s, size_t n, char *out, size_t cap);`
+  - `fbp_expr` (function, line 57) `size_t fbp_expr(int tab, const char *sel, size_t n, char *out, size_t cap);`
+  - `FREEDOM_FB_PANES_H` (macro, line 2) `#define FREEDOM_FB_PANES_H`
+  - `FBP_SELECTOR_MAX` (macro, line 30) `#define FBP_SELECTOR_MAX`
+  - `FBP_EXPR_MAX` (macro, line 31) `#define FBP_EXPR_MAX`
+- Imported by: `gui/browser_ui.c`, `src/fb_cmdline.c`, `src/fb_panes.c`, `src/freedom.c`, `tests/test_fb_panes.c`, `tests/test_js_dom.c`
+
+## include/find_text.h
+- Doc: ft_piece: One laid-out text piece. gap_before = 1: white space separates it from the previous *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `ft_piece` (struct, line 24)
+  - `ft_pos` (struct, line 30)
+  - `ft_match` (struct, line 31)
+  - `ft_span` (struct, line 32)
+  - `ft_status` (enum, line 20)
+  - `piece` (type_alias, line 29) `typedef struct ft_pos { size_t piece;`
+  - `end` (type_alias, line 31) `typedef struct ft_match { ft_pos start, end;`
+  - `match` (type_alias, line 32) `typedef struct ft_span { size_t piece, start, end, match;`
+  - `find_text` (function, line 2) `* find_text (ft_) -- find in page over the rendered text (spec/find_text.md). * * Pure: no I/O, no global state...`
+  - `ft_fold` (function, line 35) `uint32_t ft_fold(uint32_t cp);`
+  - `written` (function, line 38) `* number of code points written (<= cap, <= FT_QUERY_MAX);`
+  - `ft_compile` (function, line 39) `size_t ft_compile(const char *q, size_t qlen, uint32_t *out, size_t cap);`
+  - `exist` (function, line 42) `* cap matches exist (truncated may be NULL). */ ft_status ft_search(const ft_piece *pieces, size_t n, const uint32_t...`
+  - `ft_spans` (function, line 48) `size_t ft_spans(const ft_piece *pieces, size_t n, const ft_match *m, size_t nm, ft_span *out, size_t cap);`
+  - `ft_step` (function, line 53) `long ft_step(long cur, size_t n, int dir);`
+  - `FREEDOM_FIND_TEXT_H` (macro, line 8) `#define FREEDOM_FIND_TEXT_H`
+  - `FT_QUERY_MAX` (macro, line 17) `#define FT_QUERY_MAX`
+  - `FT_MATCH_MAX` (macro, line 18) `#define FT_MATCH_MAX`
+- Imported by: `fuzz/fuzz_find_text.c`, `gui/browser_ui.c`, `src/find_text.c`, `tests/test_find_text.c`
+
 ## include/flex_layout.h
 - Doc: fx_item: Upper bound on items per flex line / grid columns.
 - Layer: presentation
@@ -51,7 +95,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FX_MAX_COLUMNS` (macro, line 280) `#define FX_MAX_COLUMNS`
   - `FX_MAUTO_TOP` (macro, line 347) `#define FX_MAUTO_TOP`
   - `FX_MAUTO_BOTTOM` (macro, line 348) `#define FX_MAUTO_BOTTOM`
-- Imported by: `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
+- Imported by: `fuzz/fuzz_css.c`, `include/box_tree.h`, `src/css.c`, `src/dom_debug.c`, `src/flex_layout.c`, `src/page_view.c`, `src/tab.c`, `tests/test_css.c`, `tests/test_dom_debug.c`, `tests/test_flex_layout.c`, `tests/test_page_view.c`, `tests/test_render_doc.c`
 
 ## include/form.h
 - Doc: fm_field: One named control. value == NULL is treated as the empty value; name == NULL is *...
@@ -95,7 +139,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FBK_MAX_MSG` (macro, line 18) `#define FBK_MAX_MSG`
   - `FBK_ORIGIN_MAX` (macro, line 19) `#define FBK_ORIGIN_MAX`
   - `FBK_URL_MAX` (macro, line 20) `#define FBK_URL_MAX`
-- Imported by: `src/frame_broker.c`, `src/frame_host.c`, `tests/test_frame_broker.c`
+- Imported by: `fuzz/fuzz_frame_broker.c`, `src/frame_broker.c`, `src/frame_host.c`, `tests/test_frame_broker.c`
 
 ## include/frame_clock.h
 - Doc: active: frame_clock (fc_) — pure animation frame scheduler.
@@ -155,36 +199,52 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `FB_MAX_ENTRY_BYTES` (macro, line 57) `#define FB_MAX_ENTRY_BYTES`
   - `FB_MAX_TOTAL_BYTES` (macro, line 58) `#define FB_MAX_TOTAL_BYTES`
   - `FB_MAX_FILE_BYTES` (macro, line 62) `#define FB_MAX_FILE_BYTES`
-- Imported by: `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/fb_cmdline.c`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_fb_cmdline.c`, `tests/test_freebug.c`
+- Imported by: `fuzz/fuzz_freebug.c`, `gui/browser_ui.c`, `include/js_dom.h`, `include/tab.h`, `src/fb_cmdline.c`, `src/freebug.c`, `src/freedom.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/tab.c`, `tests/test_fb_cmdline.c`, `tests/test_freebug.c`
 
 ## include/freedom_config.h
 - Layer: infrastructure
 - Language: h
 - Symbols:
+  - `px` (function, line 24) `* it computes 12 px (getComputedStyle, measured on the parity host, tanda 102): the * reference renderer is what we...`
   - `FREEDOM_CONFIG_H` (macro, line 14) `#define FREEDOM_CONFIG_H`
   - `FC_PNG_PAGE_W` (macro, line 20) `#define FC_PNG_PAGE_W`
-  - `FC_HEADLESS_VIEW_H` (macro, line 24) `#define FC_HEADLESS_VIEW_H`
-  - `FC_TRUSTED_JS_BUDGET_MS` (macro, line 30) `#define FC_TRUSTED_JS_BUDGET_MS`
-  - `FC_PNG_MARGIN` (macro, line 34) `#define FC_PNG_MARGIN`
-  - `FC_PNG_MAX_H` (macro, line 39) `#define FC_PNG_MAX_H`
-  - `FC_FLEX_MEASURE_W` (macro, line 45) `#define FC_FLEX_MEASURE_W`
-  - `FC_FLEX_MIN_MEASURE_W` (macro, line 51) `#define FC_FLEX_MIN_MEASURE_W`
-  - `FC_FONT_CHAIN_MAX` (macro, line 56) `#define FC_FONT_CHAIN_MAX`
-  - `FC_MAX_BOXES` (macro, line 61) `#define FC_MAX_BOXES`
-  - `FC_FONT_FALLBACK_PX` (macro, line 66) `#define FC_FONT_FALLBACK_PX`
-  - `FC_UI_FONT_SIZE` (macro, line 70) `#define FC_UI_FONT_SIZE`
-  - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 78) `#define FC_MAX_AUTHOR_CSS_BYTES`
-  - `FC_SHC_MAX_TEXT_BYTES` (macro, line 84) `#define FC_SHC_MAX_TEXT_BYTES`
-  - `FC_SHC_MAX_QUERIES` (macro, line 90) `#define FC_SHC_MAX_QUERIES`
-  - `FC_MASK_CACHE_BYTES` (macro, line 95) `#define FC_MASK_CACHE_BYTES`
-  - `FC_MASK_CACHE_ENTRIES` (macro, line 96) `#define FC_MASK_CACHE_ENTRIES`
-  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 99) `#define FC_LAZY_IMAGE_MARGIN_PX`
-  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 105) `#define FC_TAB_OP_NET_BUDGET_MS`
-  - `FC_NET_LOAD_SETTLE_MS` (macro, line 112) `#define FC_NET_LOAD_SETTLE_MS`
-  - `FC_NET_POLL_MS` (macro, line 113) `#define FC_NET_POLL_MS`
-  - `FC_NET_TICK_SETTLE_MS` (macro, line 116) `#define FC_NET_TICK_SETTLE_MS`
-  - `FC_TABLE_TRACK_MAX_PX` (macro, line 120) `#define FC_TABLE_TRACK_MAX_PX`
-- Imported by: `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/svg_paint.c`, `src/tab.c`, `tests/test_sheet_cache.c`, `tests/test_tab.c`
+  - `FC_MONO_DEFAULT_PX` (macro, line 26) `#define FC_MONO_DEFAULT_PX`
+  - `FC_SMOOTH_SCROLL_MS` (macro, line 31) `#define FC_SMOOTH_SCROLL_MS`
+  - `FC_SMOOTH_SCROLL_FRAME_MS` (macro, line 32) `#define FC_SMOOTH_SCROLL_FRAME_MS`
+  - `FC_SMOOTH_SCROLL_ANCHOR_MS` (macro, line 35) `#define FC_SMOOTH_SCROLL_ANCHOR_MS`
+  - `FC_ANCHOR_HOLD_MS` (macro, line 38) `#define FC_ANCHOR_HOLD_MS`
+  - `FC_HEADLESS_VIEW_H` (macro, line 42) `#define FC_HEADLESS_VIEW_H`
+  - `FC_TRUSTED_JS_BUDGET_MS` (macro, line 48) `#define FC_TRUSTED_JS_BUDGET_MS`
+  - `FC_PNG_MARGIN` (macro, line 52) `#define FC_PNG_MARGIN`
+  - `FC_PNG_MAX_H` (macro, line 57) `#define FC_PNG_MAX_H`
+  - `FC_FLEX_MEASURE_W` (macro, line 63) `#define FC_FLEX_MEASURE_W`
+  - `FC_FLEX_MIN_MEASURE_W` (macro, line 69) `#define FC_FLEX_MIN_MEASURE_W`
+  - `FC_FONT_CHAIN_MAX` (macro, line 74) `#define FC_FONT_CHAIN_MAX`
+  - `FC_MAX_BOXES` (macro, line 79) `#define FC_MAX_BOXES`
+  - `FC_FONT_FALLBACK_PX` (macro, line 84) `#define FC_FONT_FALLBACK_PX`
+  - `FC_UI_FONT_SIZE` (macro, line 88) `#define FC_UI_FONT_SIZE`
+  - `FC_MAX_AUTHOR_CSS_BYTES` (macro, line 96) `#define FC_MAX_AUTHOR_CSS_BYTES`
+  - `FC_SHC_MAX_TEXT_BYTES` (macro, line 102) `#define FC_SHC_MAX_TEXT_BYTES`
+  - `FC_SHC_MAX_QUERIES` (macro, line 108) `#define FC_SHC_MAX_QUERIES`
+  - `FC_MASK_CACHE_BYTES` (macro, line 113) `#define FC_MASK_CACHE_BYTES`
+  - `FC_MASK_CACHE_ENTRIES` (macro, line 114) `#define FC_MASK_CACHE_ENTRIES`
+  - `FC_LAZY_IMAGE_MARGIN_PX` (macro, line 117) `#define FC_LAZY_IMAGE_MARGIN_PX`
+  - `FC_TAB_OP_NET_BUDGET_MS` (macro, line 123) `#define FC_TAB_OP_NET_BUDGET_MS`
+  - `FC_NET_LOAD_SETTLE_MS` (macro, line 130) `#define FC_NET_LOAD_SETTLE_MS`
+  - `FC_NET_POLL_MS` (macro, line 131) `#define FC_NET_POLL_MS`
+  - `FC_NET_TICK_SETTLE_MS` (macro, line 134) `#define FC_NET_TICK_SETTLE_MS`
+  - `FC_TABLE_TRACK_MAX_PX` (macro, line 138) `#define FC_TABLE_TRACK_MAX_PX`
+- Imported by: `fuzz/fuzz_page_view.c`, `gui/browser_ui_internal.h`, `gui/ui_render.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/svg_paint.c`, `src/tab.c`, `tests/test_sheet_cache.c`, `tests/test_tab.c`
+
+## include/group_index.h
+- Doc: gi_build: Groups item i under keys[i] when 0 <= keys[i] < nkeys (other keys are left out).
+- Layer: utility
+- Language: h
+- Symbols:
+  - `group_index` (function, line 9) `* group_index (gi_) -- stable group-by of n items by an integer key, in CSR form, so a * per-group pass visits only...`
+  - `gi_build` (function, line 20) `size_t gi_build(const int *keys, size_t n, size_t nkeys, size_t *offs, size_t *items);`
+  - `FREEDOM_GROUP_INDEX_H` (macro, line 2) `#define FREEDOM_GROUP_INDEX_H`
+- Imported by: `fuzz/fuzz_group_index.c`, `gui/browser_ui.c`, `src/group_index.c`, `tests/test_group_index.c`
 
 ## include/hls.h
 - Doc: hls_segment: or variant info.
@@ -202,7 +262,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `domain` (function, line 87) `* domain (everything after the first label). Writes NUL-terminated into out and * returns the length, or 0 when...`
   - `FREEDOM_HLS_H` (macro, line 2) `#define FREEDOM_HLS_H`
   - `HLS_MAX_MIRRORS` (macro, line 83) `#define HLS_MAX_MIRRORS`
-- Imported by: `gui/browser_ui.c`, `include/video_controls.h`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
+- Imported by: `fuzz/fuzz_hls.c`, `gui/browser_ui.c`, `include/video_controls.h`, `src/freedom.c`, `src/hls.c`, `tests/test_hls.c`
 
 ## include/host_conf.h
 - Doc: hcf_search_dirs: Pure.
@@ -250,7 +310,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `he_cdn_kind` (function, line 62) `he_cdn_kind_t he_cdn_kind(const char *url);`
   - `FREEDOM_HOSTEDIT_H` (macro, line 2) `#define FREEDOM_HOSTEDIT_H`
   - `HE_MAX_HOST` (macro, line 32) `#define HE_MAX_HOST`
-- Imported by: `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
+- Imported by: `fuzz/fuzz_identity.c`, `gui/browser_ui.c`, `src/hostedit.c`, `tests/test_hostedit.c`
 
 ## include/html_parse.h
 - Doc: hp_script: One executable <script>.
@@ -281,7 +341,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `HP_DEFAULT_MAX_BYTES` (macro, line 41) `#define HP_DEFAULT_MAX_BYTES`
   - `HP_MAX_SCRIPTS` (macro, line 48) `#define HP_MAX_SCRIPTS`
   - `HP_MAX_STYLESHEETS` (macro, line 115) `#define HP_MAX_STYLESHEETS`
-- Imported by: `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`, `tests/test_page_view.c`
+- Imported by: `fuzz/fuzz_anchor.c`, `fuzz/fuzz_dom.c`, `fuzz/fuzz_dom_debug.c`, `fuzz/fuzz_html_parse.c`, `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_page_view.c`, `gui/freedom_view.c`, `include/dom.h`, `include/page_view.h`, `src/dom.c`, `src/freedom.c`, `src/html_parse.c`, `src/js_dom.c`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/page_view.c`, `src/renderer.c`, `src/tab.c`, `tests/test_anchor.c`, `tests/test_dom.c`, `tests/test_html_parse.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`, `tests/test_page_view.c`
 
 ## include/http_cache.h
 - Doc: hc_parse_http_date: } hc_class; typedef struct hc_meta { char   final_url[HC_URL_MAX]; char...
@@ -339,7 +399,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `IDN_PAGE_MAX` (macro, line 20) `#define IDN_PAGE_MAX`
   - `IDN_GEO_ACC_MIN` (macro, line 22) `#define IDN_GEO_ACC_MIN`
   - `IDN_GEO_ACC_MAX` (macro, line 23) `#define IDN_GEO_ACC_MAX`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/identity.c`, `src/tab.c`, `tests/test_identity.c`
+- Imported by: `fuzz/fuzz_identity.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/identity.c`, `src/tab.c`, `tests/test_identity.c`
 
 ## include/image_decode.h
 - Doc: img_pixels: A decoded bitmap that owns its pixel buffer.
@@ -360,7 +420,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `IMG_MAX_SCALE` (macro, line 67) `#define IMG_MAX_SCALE`
   - `IMG_MAX_DIM` (macro, line 71) `#define IMG_MAX_DIM`
   - `IMG_MAX_PIXELS` (macro, line 72) `#define IMG_MAX_PIXELS`
-- Imported by: `gui/browser_ui.c`, `include/svg_raster.h`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
+- Imported by: `fuzz/fuzz_image_decode.c`, `gui/browser_ui.c`, `include/svg_raster.h`, `src/image_decode.c`, `src/tab.c`, `tests/test_freedom.c`, `tests/test_image_decode.c`
 
 ## include/import_map.h
 - Doc: im_resolve: Resolves specifier as imported from base (the importing module's URL).
@@ -377,7 +437,7 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `IM_MAX_TEXT` (macro, line 17) `#define IM_MAX_TEXT`
   - `IM_MAX_ENTRIES` (macro, line 18) `#define IM_MAX_ENTRIES`
   - `IM_MAX_SCOPES` (macro, line 19) `#define IM_MAX_SCOPES`
-- Imported by: `src/import_map.c`, `src/prefetch.c`, `src/tab.c`, `tests/test_import_map.c`
+- Imported by: `fuzz/fuzz_import_map.c`, `src/import_map.c`, `src/prefetch.c`, `src/tab.c`, `tests/test_import_map.c`
 
 ## include/interp.h
 - Doc: ip_ease: Compute eased t for normalized t ∈ [0,1].
@@ -407,85 +467,6 @@ Previous: [KB_include_p2.md](KB_include_p2.md)
   - `IP_MAX_KEYFRAMES` (macro, line 68) `#define IP_MAX_KEYFRAMES`
   - `IP_ITERATION_INFINITE` (macro, line 85) `#define IP_ITERATION_INFINITE`
 - Imported by: `gui/browser_ui.c`, `src/css.c`, `src/interp.c`, `tests/test_interp.c`
-
-## include/js_dom.h
-- Doc: jd_iframe_track: Tracks iframes already processed by jd_process_iframes, to avoid re-fetching...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `jd_iframe_track` (struct, line 41)
-  - `jd_opaque` (struct, line 46)
-  - `jd_status` (enum, line 25)
-  - `jd_click_state` (type_alias, line 35) `typedef struct jd_click_state jd_click_state;`
-  - `processed` (type_alias, line 41) `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];`
-  - `opaque` (function, line 73) `* the engine runtime opaque (unreachable from script);`
-  - `global` (function, line 80) `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...`
-  - `jd_install_repl_api` (function, line 89) `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...`
-  - `place` (function, line 94) `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...`
-  - `getComputedStyle` (function, line 115) `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...`
-  - `jd_click_state_free` (function, line 125) `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);`
-  - `run` (function, line 134) `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...`
-  - `preventDefault` (function, line 141) `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...`
-  - `host` (function, line 170) `* for a trusted host (allow.conf AND js.conf);`
-  - `jd_get_cookies` (function, line 181) `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);`
-  - `out_status` (function, line 189) `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...`
-  - `jd_process_iframes` (function, line 231) `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...`
-  - `URLs` (function, line 238) `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...`
-  - `jd_video_from_scripts` (function, line 252) `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...`
-  - `jd_flush_custom_elements` (function, line 263) `void jd_flush_custom_elements(js_context *ctx);`
-  - `FREEDOM_JS_DOM_H` (macro, line 2) `#define FREEDOM_JS_DOM_H`
-  - `JD_IFRAME_TRACK_MAX` (macro, line 40) `#define JD_IFRAME_TRACK_MAX`
-  - `JD_REPL_CSS_MAX` (macro, line 86) `#define JD_REPL_CSS_MAX`
-- Depends on: `include/dom.h`, `include/freebug.h`, `include/js_geom.h`, `include/js_location.h`, `include/js_sandbox.h`, `include/url.h`
-- Imported by: `include/js_location.h`, `include/js_trusted.h`, `src/js_dom.c`, `src/js_dom_ext.c`, `src/js_dom_internal.h`, `src/js_embed.c`, `src/js_events.c`, `src/js_fetch.c`, `src/js_location.c`, `src/tab.c`, `tests/test_js_dom.c`, `tests/test_js_env.c`, `tests/test_js_native.c`
-
-## include/js_env.h
-- Layer: infrastructure
-- Language: h
-- Symbols:
-  - `je_status` (enum, line 27)
-  - `poisoned` (function, line 49) `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...`
-  - `FREEDOM_JS_ENV_H` (macro, line 2) `#define FREEDOM_JS_ENV_H`
-  - `JE_READBACK_EXACT` (macro, line 59) `#define JE_READBACK_EXACT`
-- Depends on: `include/js_sandbox.h`
-- Imported by: `src/js_env.c`, `src/tab.c`, `tests/test_js_env.c`, `tests/test_js_native.c`
-
-## include/js_geom.h
-- Doc: jg_init: typedef struct jg_rect { dom_node_id node; int32_t     x, y, w, h;       /* document...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `jg_rect` (struct, line 30)
-  - `jg_table` (struct, line 35)
-  - `node` (type_alias, line 29) `typedef struct jg_rect { dom_node_id node;`
-  - `jg_init` (function, line 44) `void jg_init(jg_table *t);`
-  - `jg_free` (function, line 47) `void jg_free(jg_table *t);`
-  - `jg_add` (function, line 52) `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h);`
-  - `jg_finish` (function, line 56) `int jg_finish(jg_table *t);`
-  - `jg_find` (function, line 59) `const jg_rect *jg_find(const jg_table *t, dom_node_id node);`
-  - `jg_aggregate` (function, line 65) `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx);`
-  - `jg_wire_len` (function, line 68) `size_t jg_wire_len(const jg_table *t);`
-  - `jg_encode` (function, line 71) `int jg_encode(const jg_table *t, int32_t *out, size_t cap);`
-  - `jg_decode` (function, line 77) `int jg_decode(const int32_t *in, size_t n, jg_table *out);`
-  - `jg_hash` (function, line 80) `uint64_t jg_hash(const jg_table *t);`
-  - `FREEDOM_JS_GEOM_H` (macro, line 2) `#define FREEDOM_JS_GEOM_H`
-  - `JG_MAX_RECTS` (macro, line 24) `#define JG_MAX_RECTS`
-  - `JG_MAX_DEPTH` (macro, line 25) `#define JG_MAX_DEPTH`
-  - `JG_COORD_MAX` (macro, line 26) `#define JG_COORD_MAX`
-  - `JG_HEADER_N` (macro, line 27) `#define JG_HEADER_N`
-  - `JG_RECT_N` (macro, line 28) `#define JG_RECT_N`
-- Depends on: `include/dom.h`
-- Imported by: `include/js_dom.h`, `include/tab.h`, `src/js_geom.c`, `tests/test_js_dom.c`, `tests/test_js_geom.c`, `tests/test_tab.c`
-
-## include/js_intl.h
-- Doc: ji_install: Installs `Intl` and the Number/BigInt/Date toLocale* methods that delegate to it. *...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `ji_install` (function, line 16) `int ji_install(js_context *ctx);`
-  - `FREEDOM_JS_INTL_H` (macro, line 6) `#define FREEDOM_JS_INTL_H`
-- Depends on: `include/js_sandbox.h`
-- Imported by: `src/js_dom.c`, `src/js_intl.c`, `tests/test_js_intl.c`
 
 
 Next: [KB_include_p4.md](KB_include_p4.md)

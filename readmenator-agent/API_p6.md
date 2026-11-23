@@ -1,6 +1,84 @@
 # API (page 6 of 13)
 Previous: [API_p5.md](API_p5.md)
 
+## include/tab.h
+Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
+Imported by: `gui/browser_ui.c`, `include/frame_host.h`, `src/freedom.c`, `src/tab.c`, `tests/test_frame_host.c`, `tests/test_tab.c`
+- `tab_worker_dispatch` (function) `include/tab.h:164` `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
+- `tab_open` (function) `include/tab.h:168` `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
+- `tab_parse_worker_args` (function) `include/tab.h:175` `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);` -- Pure validator of the worker handoff arguments (the security-relevant surface of the exec): returns nonzero and...
+- `tab_prewarm` (function) `include/tab.h:184` `void tab_prewarm(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
+- `tab_prewarmed` (function) `include/tab.h:187` `int tab_prewarmed(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
+- `tab_prewarmed_pid` (function) `include/tab.h:190` `int tab_prewarmed_pid(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
+- `tab_shutdown_spare` (function) `include/tab.h:193` `void tab_shutdown_spare(void);` -- Starts one idle, confined worker in advance so the next tab_open does not wait for fork + exec + sandbox setup...
+- `out_status` (function) `include/tab.h:201` `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
+- `tab_set_fetcher` (function) `include/tab.h:212` `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);` -- Installs the subresource fetcher used for XHR/fetch (NULL clears it: requests are then * refused). fn/ctx must...
+- `tab_inflight_request_headers` (function) `include/tab.h:217` `const char *tab_inflight_request_headers(void);` -- Inside a tab_fetch_fn call: the request headers the page attached to this XHR/fetch, already filtered by...
+- `tab_report_response_headers` (function) `include/tab.h:222` `void tab_report_response_headers(const char *lines);` -- Inside a tab_fetch_fn call: reports the response header lines ("name: value\n", no Set-Cookie) the page's XHR/fetch...
+- `bytes` (function) `include/tab.h:226` `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+- `tab_set_css_sink` (function) `include/tab.h:235` `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+- `free_ctx` (function) `include/tab.h:242` `* free_ctx(ctx) (may be NULL) runs once the tab is closed AND its last abandoned request ended, * so the fetcher may...`
+- `tab_set_net_allowed` (function) `include/tab.h:250` `void tab_set_net_allowed(tab *t, int allowed);` -- Grants/revokes page-JS network access (XMLHttpRequest/fetch) for the NEXT load.
+- `none` (function) `include/tab.h:254` `* worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick. * The caller must then...`
+- `tab_page_keep_view` (function) `include/tab.h:261` `void tab_page_keep_view(tab_page *prev, tab_page *next);` -- For a caller that replaces its page with each tick's: when `next` is unchanged, moves the * title, text and view of...
+- `tab_set_op_net_budget_ms` (function) `include/tab.h:265` `void tab_set_op_net_budget_ms(tab *t, int ms);` -- Per-operation network time budget in ms for requests the worker issues AFTER the load * (default...
+- `tab_async_fd` (function) `include/tab.h:270` `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
+- `tab_async_busy` (function) `include/tab.h:276` `int tab_async_busy(const tab *t);`
+- `jar` (function) `include/tab.h:283` `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+- `tab_set_cookies` (function) `include/tab.h:287` `void tab_set_cookies(tab *t, const char *cookies);` -- Seeds the page's document.cookie jar for the NEXT load with cookies ("name=value; ...") the trusted parent read from...
+- `origin` (function) `include/tab.h:290` `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+- `tab_set_storage` (function) `include/tab.h:292` `void tab_set_storage(tab *t, const char *blob, size_t len);` -- Seeds localStorage for the next load from the parent's in-memory store for the page origin (web_storage snapshot...
+- `exclusively` (function) `include/tab.h:298` `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+- `tab_set_viewport_w` (function) `include/tab.h:306` `void tab_set_viewport_w(tab *t, int px);` -- Sets the render viewport width (px) used to evaluate @media width queries on the NEXT load, so a responsive page...
+- `load` (function) `include/tab.h:310` `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);`
+- `tab_set_identity` (function) `include/tab.h:316` `void tab_set_identity(tab *t, const char *serialized);` -- The user's identity override (idn_serialize text, spec/identity.md) for the NEXT loads: the worker applies it to...
+- `tab_last_subreq_stats` (function) `include/tab.h:322` `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);` -- Subresources the parent served for the LAST load (the worker's TAG_SUBREQ: XHR, fetch, external scripts, ES...
+- `tab_subreq_permitted` (function) `include/tab.h:327` `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);` -- Pure parent-side subresource gate (Zero Trust: decided from the PARENT's grants for this load, never the worker's...
+- `view` (function) `include/tab.h:335` `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+- `string` (function) `include/tab.h:355` `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+- `granted` (function) `include/tab.h:404` `* granted (allow.conf AND js.conf);`
+- `returned` (function) `include/tab.h:405` `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+- `popstate` (function) `include/tab.h:411` `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+- `preorder` (function) `include/tab.h:416` `* preorder (out->nsub handles) followed by the elements after it, at most * ANC_MAX_HANDLES -- live DOM handles, the...`
+- `tab_anchor_free` (function) `include/tab.h:430` `void tab_anchor_free(tab_anchor *a);`
+- `decode` (function) `include/tab.h:448` `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+- `tab_alive` (function) `include/tab.h:461` `int tab_alive(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
+- `tab_child_pid` (function) `include/tab.h:464` `pid_t tab_child_pid(const tab *t);` -- Same contract as tab_decode_image, for an inline data: URI image (RFC 2397 base64 variant): data_url slices the...
+- `tab_close` (function) `include/tab.h:467` `void tab_close(tab *t);` -- variant): data_url slices the base64 payload out of `data_url` (no allocation, no network -- the bytes are already...
+- `tab_page_free` (function) `include/tab.h:470` `void tab_page_free(tab_page *p);` -- malformed data: URI is not a transport error: *out stays zeroed, same as an * undecodable format, and the caller...
+- `tab_eval_result_free` (function) `include/tab.h:471` `void tab_eval_result_free(tab_eval_result *r);`
+- `tab_image_free` (function) `include/tab.h:472` `void tab_image_free(tab_image *img);`
+
+## include/table_layout.h
+Imported by: `fuzz/fuzz_table_layout.c`, `gui/browser_ui.c`, `src/table_layout.c`, `tests/test_table_layout.c`
+- `px` (function) `include/table_layout.h:41` `* px (< 0 = auto: the table is as wide as its content, capped at avail). gap is the space * between adjacent...`
+- `tl_intrinsic` (function) `include/table_layout.h:53` `void tl_intrinsic(const tl_cell *cells, size_t n, size_t ncols, double gap, double *min_total, double *max_total);` -- The table's min-content and max-content widths (columns plus gaps): what it contributes when it is itself a cell of...
+
+## include/text_case.h
+Imported by: `fuzz/fuzz_text_case.c`, `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
+- `cp` (function) `include/text_case.h:19` `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);`
+- `tc_lower` (function) `include/text_case.h:21` `uint32_t tc_lower(uint32_t cp);`
+- `tc_is_lower` (function) `include/text_case.h:24` `int tc_is_lower(uint32_t cp);` -- Simple 1:1 case mapping for ASCII, Latin-1, Latin Extended-A, basic Greek and basic Cyrillic.
+- `tc_transform` (function) `include/text_case.h:29` `size_t tc_transform(const char *s, size_t n, int transform, int word_start, char *out, size_t cap);` -- Copies s[0,n) to out applying transform (CSS_TT_UPPERCASE / _LOWERCASE / _CAPITALIZE; any other value copies...
+- `tc_smallcaps_runs` (function) `include/text_case.h:41` `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);` -- Splits s[0,n) into consecutive maximal runs of lowercase letters vs the rest, covering the whole text in order.
+
+## include/text_shape.h
+Imported by: `fuzz/fuzz_text_shape.c`, `fuzz/fuzz_webfont_register.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
+- `content` (function) `include/text_shape.h:11` `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`
+- `tsh_family_is_generic` (function) `include/text_shape.h:52` `int tsh_family_is_generic(const char *name);` -- 1 for a CSS generic family keyword (serif, sans-serif, monospace, cursive, * fantasy, system-ui, ui-*, emoji, math...
+- `wins` (function) `include/text_shape.h:58` `* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig...`
+- `tsh_pick_family` (function) `include/text_shape.h:68` `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...` -- The acceptance rule for one requested name given fontconfig's substituted family list subs[0..n) and their bindings...
+- `tsh_local_handle` (function) `include/text_shape.h:75` `int tsh_local_handle(const char *list);` -- Handle (>0) for an author family list that resolves to a local family, cached per list; 0 when nothing resolves, the...
+- `tsh_ready` (function) `include/text_shape.h:89` `int tsh_ready(void);` -- 1 once a fallback (sans) font resolves; lazily initialises on first call. * 0 means no font backend: the caller must...
+- `origin` (function) `include/text_shape.h:92` `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...`
+- `tsh_measure` (function) `include/text_shape.h:101` `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);` -- Total advance (px) of [text,len).
+- `tsh_webfont_register` (function) `include/text_shape.h:114` `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);` -- Registers one fetched @font-face for this document (spec/webfont.md): name is the author family (hashed with...
+- `tsh_face_generation` (function) `include/text_shape.h:122` `unsigned tsh_face_generation(void);` -- Advances whenever a face text is measured with may have been added, freed or replaced (a webfont registered or...
+- `tsh_webfont_clear` (function) `include/text_shape.h:126` `void tsh_webfont_clear(void);` -- Drops every registered webfont (document teardown / navigation).
+- `tsh_face` (function) `include/text_shape.h:133` `cairo_font_face_t *tsh_face(const tsh_font *f);` -- The cairo face tsh_draw paints f with (webfont, local family or bucket), or NULL when no face resolves.
+- `own` (function) `include/text_shape.h:142` `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....`
+- `tsh_shutdown` (function) `include/text_shape.h:149` `void tsh_shutdown(void);` -- Splits [text,len) into maximal runs of one face.
+
 ## include/textfield.h
 Imported by: `gui/browser_ui.c`, `src/textfield.c`, `tests/test_textfield.c`
 - `tf_init` (function) `include/textfield.h:38` `void tf_init(tf_field *f);` -- typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at [len] size_t len;         /*...
@@ -15,7 +93,7 @@ Imported by: `gui/browser_ui.c`, `src/textfield.c`, `tests/test_textfield.c`
 - `tf_cursor` (function) `include/textfield.h:68` `size_t tf_cursor(const tf_field *f);`
 
 ## include/tls_impersonate.h
-Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
+Imported by: `fuzz/fuzz_tls_impersonate.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 - `path` (function) `include/tls_impersonate.h:26` `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed...`
 - `chain` (function) `include/tls_impersonate.h:32` `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT...`
 - `ti_should_impersonate` (function) `include/tls_impersonate.h:56` `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);` -- The double opt-in + user-flag gate (pure).
@@ -42,7 +120,7 @@ Imported by: `gui/browser_ui.c`, `gui/freedom_view.c`, `gui/ui_render.c`, `src/f
 - `ui_persisted_prefs` (function) `include/ui.h:161` `int ui_persisted_prefs(prefs_state *out);` -- The GUI's persisted choices (JS mode, images/CSS toggles, reader) from the encrypted profile, so `--as-gui` shows...
 
 ## include/url.h
-Imported by: `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
+Imported by: `fuzz/fuzz_anchor.c`, `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_url.c`, `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/js_location.h`, `src/freedom.c`, `src/js_location.c`, `src/link_nav.c`, `src/prefetch.c`, `src/render_doc.c`, `src/secure_fetch.c`, `src/tab.c`, `src/url.c`, `src/webfont_load.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_url.c`
 - `url_is_https` (function) `include/url.h:42` `int url_is_https(const char *s);` -- Nonzero iff s begins (case-insensitively) with "https://" and the host is * neither empty nor a leading '/'.
 - `url_has_scheme` (function) `include/url.h:46` `int url_has_scheme(const char *s);` -- Nonzero iff s begins with "<scheme>:" per RFC 3986 * (ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) ":").
 - `url_authority_len` (function) `include/url.h:51` `size_t url_authority_len(const char *url);` -- Length of "https://host[:port]" within a validated absolute https URL: the index of the first '/', '?' or '#' after...
@@ -50,7 +128,8 @@ Imported by: `gui/browser_ui.c`, `include/form.h`, `include/js_dom.h`, `include/
 - `path` (function) `include/url.h:115` `* absolute path ("file:///..."). NULL => 0. */ int url_is_file(const char *s);`
 - `url_file_path` (function) `include/url.h:121` `const char *url_file_path(const char *s);` -- Returns the absolute filesystem path inside a "file:///path" URL (i.e. the "/path" part), or NULL when s is not a...
 - `url` (function) `include/url.h:126` `* Every field ALIASES the input url (not owned, valid while url is alive);`
-- `password` (function) `include/url.h:152` `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When...`
+- `url_split` (function) `include/url.h:153` `* it for a network or storage decision: those take url_split (https-only). */ url_status url_split_location(const...`
+- `password` (function) `include/url.h:159` `* username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When...`
 
 ## include/util.h
 Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`, `src/html_parse.c`, `src/media_decoder.c`, `src/page_view.c`, `src/render_doc.c`, `src/renderer.c`, `src/tab.c`
@@ -62,7 +141,7 @@ Imported by: `src/browser.c`, `src/disk_store.c`, `src/dom.c`, `src/hostblock.c`
 
 ## include/video_controls.h
 Depends on: `include/hls.h`
-Imported by: `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `src/video_controls.c`, `tests/test_video_controls.c`
+Imported by: `fuzz/fuzz_video_controls.c`, `gui/browser_ui.c`, `gui/browser_ui_internal.h`, `src/video_controls.c`, `tests/test_video_controls.c`
 - `vcl_layout` (function) `include/video_controls.h:47` `int vcl_layout(double x, double y, double w, double h, vcl_geom *g);` -- Lays out the bar inside the video rect (x,y,w,h).
 - `frac` (function) `include/video_controls.h:50` `* *frac (may be NULL) receives the track position for VCL_HIT_SEEK, else 0. */ vcl_hit_kind vcl_hit(const vcl_geom...`
 - `vcl_seg_duration` (function) `include/video_controls.h:55` `double vcl_seg_duration(double d);` -- Classifies a pointer at (px,py). g may be NULL (no bar: the surface toggles). * *frac (may be NULL) receives the...
@@ -81,7 +160,7 @@ Imported by: `gui/browser_ui.c`, `src/video_pick.c`, `tests/test_video_pick.c`
 - `vpk_for_frame` (function) `include/video_pick.h:23` `const char *vpk_for_frame(const pv_view *frame_view, const char *top_video);` -- Video for a click on a live frame's box: the frame's own first video, else top_video (the top document's first...
 
 ## include/web_storage.h
-Imported by: `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`, `src/web_storage.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_web_storage.c`
+Imported by: `fuzz/fuzz_js_dom.c`, `fuzz/fuzz_web_storage.c`, `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`, `src/web_storage.c`, `tests/test_js_dom.c`, `tests/test_tab.c`, `tests/test_web_storage.c`
 - `wst_new` (function) `include/web_storage.h:25` `wst_db *wst_new(void);` -- web_storage — in-MEMORY localStorage for trusted hosts (owner decision: nothing persists to disk).
 - `wst_free` (function) `include/web_storage.h:28` `void wst_free(wst_db *db);` -- before it may touch the database.
 - `wst_encode` (function) `include/web_storage.h:33` `int wst_encode(const wst_db *db, const char *origin, char **out, size_t *len);` -- Snapshot of origin's pairs ([n:u32]([klen:u32][key][vlen:u32][val])*, little-endian) into an owned *out of *len bytes.
@@ -91,7 +170,7 @@ Imported by: `gui/browser_ui.c`, `src/js_dom.c`, `src/js_trusted.c`, `src/tab.c`
 - `wst_origin_bytes` (function) `include/web_storage.h:59` `size_t wst_origin_bytes(const wst_db *db, const char *origin);` -- Builds a snapshot from n pairs into an owned *out.
 
 ## include/webfont.h
-Imported by: `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
+Imported by: `fuzz/fuzz_webfont.c`, `fuzz/fuzz_webfont_register.c`, `gui/browser_ui.c`, `src/css.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont.c`, `src/webfont_load.c`, `tests/test_css.c`, `tests/test_page_view.c`, `tests/test_text_shape.c`, `tests/test_webfont.c`, `tests/test_webfont_load.c`
 - `here` (function) `include/webfont.h:38` `* set with the decoded bytes owned here (freed by wf_list_free);`
 - `wf_scan` (function) `include/webfont.h:52` `int wf_scan(const char *css, size_t len, wf_list *out);`
 - `wf_list_free` (function) `include/webfont.h:53` `void wf_list_free(wf_list *l);`
@@ -138,6 +217,22 @@ Imported by: `gui/browser_ui.c`, `src/prefs.c`, `src/zoom.c`, `tests/test_prefs.
 - `zm_reset` (function) `include/zoom.h:35` `int zm_reset(void);` -- #define ZM_MIN_PCT     50 #define ZM_MAX_PCT     300 #define ZM_DEFAULT_PCT 100 /* Clamp pct to [ZM_MIN_PCT...
 - `zm_scale` (function) `include/zoom.h:38` `double zm_scale(int pct);` -- /* Clamp pct to [ZM_MIN_PCT, ZM_MAX_PCT]. int zm_clamp(int pct); /* Smallest ladder stop strictly greater than...
 - `zm_apply` (function) `include/zoom.h:42` `double zm_apply(double base_px, int pct);` -- base_px * zm_scale(pct), floored to 1.0 when base_px > 0 so a font can never * scale away to nothing. base_px <= 0...
+
+## src/anchor.c
+Depends on: `include/anchor.h`
+- `hex_val` (function) `src/anchor.c:8` `static int hex_val(int c)`
+- `anc_percent_decode` (function) `src/anchor.c:15` `size_t anc_percent_decode(const char *in, char *out, size_t cap)`
+- `first_named_a` (function) `src/anchor.c:35` `static dom_node_id first_named_a(const dom_index *idx, const char *name)` -- unsigned char b = (unsigned char)in[i]; if (b == '%') { int hi = hex_val((unsigned char)in[i + 1]); int lo = (hi >=...
+- `potential_indicated` (function) `src/anchor.c:54` `static dom_node_id potential_indicated(const dom_index *idx, const char *s)` -- size_t n = dom_get_by_tag(idx, "a", ids, total); if (n > total) n = total; dom_node_id best = DOM_NODE_NONE; for...
+- `is_top` (function) `src/anchor.c:59` `static int is_top(const char *s)`
+- `anc_resolve` (function) `src/anchor.c:63` `anc_kind anc_resolve(const dom_index *idx, const char *fragment, dom_node_id *out)`
+- `next_preorder` (function) `src/anchor.c:81` `static dom_node_id next_preorder(const dom_index *idx, dom_node_id cur, dom_node_id root,
+       ...` -- if (len == 0) return ANC_TOP; dom_node_id t = potential_indicated(idx, fragment); if (t != DOM_NODE_NONE) { *out =...
+- `anc_collect` (function) `src/anchor.c:93` `size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, size_t cap,
+      ...`
+- `anc_target_top` (function) `src/anchor.c:110` `int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
+              ...`
+- `anc_scroll_for` (function) `src/anchor.c:131` `double anc_scroll_for(double top, double max_scroll)`
 
 ## src/anti_fp.c
 Depends on: `include/anti_fp.h`
@@ -269,55 +364,57 @@ Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`,
 
 ## src/browser.c
 Depends on: `include/browser.h`, `include/util.h`
-- `free_page` (function) `src/browser.c:15` `static void free_page(browser_state *bs)`
-- `clear_status` (function) `src/browser.c:25` `static void clear_status(browser_state *bs)` -- #include <stdlib.h> #include <string.h> static void free_page(browser_state *bs) { if (bs == NULL) return...
-- `free_history` (function) `src/browser.c:30` `static void free_history(browser_state *bs)`
-- `free_stash` (function) `src/browser.c:44` `static void free_stash(browser_state *bs)`
-- `free_pending` (function) `src/browser.c:54` `static void free_pending(browser_state *bs)` -- } enum { PENDING_NONE = 0, PENDING_NEW = 1, PENDING_MOVE = 2 }; static void free_stash(browser_state *bs) { for...
-- `begin_pending` (function) `src/browser.c:67` `static void begin_pending(browser_state *bs, int kind)` -- Opens a pending navigation of kind: the committed position and page are saved * (the page moves, it is not copied)...
-- `free_exceptions` (function) `src/browser.c:78` `static void free_exceptions(browser_state *bs)`
-- `is_https_url` (function) `src/browser.c:87` `static int is_https_url(const char *s)`
-- `is_local_path` (function) `src/browser.c:91` `static int is_local_path(const char *s)`
-- `url_is_allowed` (function) `src/browser.c:96` `static int url_is_allowed(const char *url)`
-- `xstrdup` (function) `src/browser.c:110` `static char *xstrdup(const char *s)`
-- `cp1252_to_ucs` (function) `src/browser.c:124` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
-- `utf8_encode` (function) `src/browser.c:138` `static size_t utf8_encode(unsigned int cp, char *out)` -- Encodes a BMP scalar (<= 0xFFFF) as UTF-8 into out (up to 3 bytes); returns the * byte count written.
-- `browser_init` (function) `src/browser.c:192` `browser_status browser_init(browser_state *bs)`
-- `browser_free` (function) `src/browser.c:203` `void browser_free(browser_state *bs)`
-- `browser_set_url_bar` (function) `src/browser.c:215` `browser_status browser_set_url_bar(browser_state *bs, const char *url)`
-- `browser_commit_url_bar` (function) `src/browser.c:227` `browser_status browser_commit_url_bar(browser_state *bs)`
-- `browser_navigate` (function) `src/browser.c:273` `browser_status browser_navigate(browser_state *bs, const char *url)`
-- `browser_push_state` (function) `src/browser.c:303` `browser_status browser_push_state(browser_state *bs, const char *url)`
-- `browser_replace_state` (function) `src/browser.c:311` `browser_status browser_replace_state(browser_state *bs, const char *url)`
-- `browser_entry_doc` (function) `src/browser.c:324` `int browser_entry_doc(const browser_state *bs, size_t pos)`
-- `browser_doc_index` (function) `src/browser.c:329` `int browser_doc_index(const browser_state *bs)`
-- `browser_back` (function) `src/browser.c:337` `browser_status browser_back(browser_state *bs)`
-- `browser_forward` (function) `src/browser.c:350` `browser_status browser_forward(browser_state *bs)`
-- `browser_can_back` (function) `src/browser.c:363` `int browser_can_back(const browser_state *bs)`
-- `browser_can_forward` (function) `src/browser.c:367` `int browser_can_forward(const browser_state *bs)`
-- `browser_current_url` (function) `src/browser.c:371` `const char *browser_current_url(const browser_state *bs)`
-- `browser_url_bar_selection` (function) `src/browser.c:376` `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)`
-- `browser_url_bar_delete_selection` (function) `src/browser.c:387` `int browser_url_bar_delete_selection(browser_state *bs)`
-- `browser_url_bar_insert` (function) `src/browser.c:397` `browser_status browser_url_bar_insert(browser_state *bs, char c)`
-- `browser_url_bar_backspace` (function) `src/browser.c:412` `browser_status browser_url_bar_backspace(browser_state *bs)`
-- `browser_url_bar_delete` (function) `src/browser.c:426` `browser_status browser_url_bar_delete(browser_state *bs)`
-- `browser_url_bar_move_cursor` (function) `src/browser.c:437` `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)`
-- `browser_url_bar_extend_cursor` (function) `src/browser.c:447` `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)`
-- `browser_url_bar_set_cursor` (function) `src/browser.c:456` `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)`
-- `browser_url_bar_select_all` (function) `src/browser.c:464` `browser_status browser_url_bar_select_all(browser_state *bs)`
-- `browser_url_bar_clear` (function) `src/browser.c:471` `browser_status browser_url_bar_clear(browser_state *bs)`
-- `browser_set_page` (function) `src/browser.c:480` `browser_status browser_set_page(browser_state *bs, const char *title,
+- `free_page` (function) `src/browser.c:16` `static void free_page(browser_state *bs)`
+- `clear_status` (function) `src/browser.c:26` `static void clear_status(browser_state *bs)` -- #include <stdlib.h> #include <math.h> #include <string.h> static void free_page(browser_state *bs) { if (bs == NULL)...
+- `free_history` (function) `src/browser.c:31` `static void free_history(browser_state *bs)`
+- `free_stash` (function) `src/browser.c:47` `static void free_stash(browser_state *bs)`
+- `free_pending` (function) `src/browser.c:59` `static void free_pending(browser_state *bs)` -- enum { PENDING_NONE = 0, PENDING_NEW = 1, PENDING_MOVE = 2 }; static void free_stash(browser_state *bs) { for...
+- `begin_pending` (function) `src/browser.c:72` `static void begin_pending(browser_state *bs, int kind)` -- Opens a pending navigation of kind: the committed position and page are saved * (the page moves, it is not copied)...
+- `free_exceptions` (function) `src/browser.c:83` `static void free_exceptions(browser_state *bs)`
+- `is_https_url` (function) `src/browser.c:92` `static int is_https_url(const char *s)`
+- `is_local_path` (function) `src/browser.c:96` `static int is_local_path(const char *s)`
+- `url_is_allowed` (function) `src/browser.c:101` `static int url_is_allowed(const char *url)`
+- `xstrdup` (function) `src/browser.c:115` `static char *xstrdup(const char *s)`
+- `cp1252_to_ucs` (function) `src/browser.c:129` `static unsigned int cp1252_to_ucs(unsigned char c)` -- Unicode scalar for a Windows-1252 byte (only meaningful for c >= 0x80).
+- `utf8_encode` (function) `src/browser.c:143` `static size_t utf8_encode(unsigned int cp, char *out)` -- Encodes a BMP scalar (<= 0xFFFF) as UTF-8 into out (up to 3 bytes); returns the * byte count written.
+- `browser_init` (function) `src/browser.c:197` `browser_status browser_init(browser_state *bs)`
+- `browser_free` (function) `src/browser.c:208` `void browser_free(browser_state *bs)`
+- `browser_set_url_bar` (function) `src/browser.c:220` `browser_status browser_set_url_bar(browser_state *bs, const char *url)`
+- `browser_commit_url_bar` (function) `src/browser.c:232` `browser_status browser_commit_url_bar(browser_state *bs)`
+- `browser_navigate` (function) `src/browser.c:288` `browser_status browser_navigate(browser_state *bs, const char *url)`
+- `browser_push_state` (function) `src/browser.c:320` `browser_status browser_push_state(browser_state *bs, const char *url)`
+- `browser_replace_state` (function) `src/browser.c:328` `browser_status browser_replace_state(browser_state *bs, const char *url)`
+- `browser_set_entry_scroll` (function) `src/browser.c:341` `void browser_set_entry_scroll(browser_state *bs, double scroll)`
+- `browser_entry_scroll` (function) `src/browser.c:346` `double browser_entry_scroll(const browser_state *bs)`
+- `browser_entry_doc` (function) `src/browser.c:351` `int browser_entry_doc(const browser_state *bs, size_t pos)`
+- `browser_doc_index` (function) `src/browser.c:356` `int browser_doc_index(const browser_state *bs)`
+- `browser_back` (function) `src/browser.c:364` `browser_status browser_back(browser_state *bs)`
+- `browser_forward` (function) `src/browser.c:377` `browser_status browser_forward(browser_state *bs)`
+- `browser_can_back` (function) `src/browser.c:390` `int browser_can_back(const browser_state *bs)`
+- `browser_can_forward` (function) `src/browser.c:394` `int browser_can_forward(const browser_state *bs)`
+- `browser_current_url` (function) `src/browser.c:398` `const char *browser_current_url(const browser_state *bs)`
+- `browser_url_bar_selection` (function) `src/browser.c:403` `int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)`
+- `browser_url_bar_delete_selection` (function) `src/browser.c:414` `int browser_url_bar_delete_selection(browser_state *bs)`
+- `browser_url_bar_insert` (function) `src/browser.c:424` `browser_status browser_url_bar_insert(browser_state *bs, char c)`
+- `browser_url_bar_backspace` (function) `src/browser.c:439` `browser_status browser_url_bar_backspace(browser_state *bs)`
+- `browser_url_bar_delete` (function) `src/browser.c:453` `browser_status browser_url_bar_delete(browser_state *bs)`
+- `browser_url_bar_move_cursor` (function) `src/browser.c:464` `browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)`
+- `browser_url_bar_extend_cursor` (function) `src/browser.c:474` `browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)`
+- `browser_url_bar_set_cursor` (function) `src/browser.c:483` `browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)`
+- `browser_url_bar_select_all` (function) `src/browser.c:491` `browser_status browser_url_bar_select_all(browser_state *bs)`
+- `browser_url_bar_clear` (function) `src/browser.c:498` `browser_status browser_url_bar_clear(browser_state *bs)`
+- `browser_set_page` (function) `src/browser.c:507` `browser_status browser_set_page(browser_state *bs, const char *title,
                            ...`
-- `browser_set_status` (function) `src/browser.c:502` `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)`
-- `browser_status_text` (function) `src/browser.c:516` `const char *browser_status_text(const browser_state *bs, uint64_t now_ms)`
-- `host_equal` (function) `src/browser.c:524` `static int host_equal(const char *a, const char *b)`
-- `browser_is_exception` (function) `src/browser.c:535` `int browser_is_exception(const browser_state *bs, const char *host)`
-- `browser_add_exception` (function) `src/browser.c:543` `browser_status browser_add_exception(browser_state *bs, const char *host)`
-- `browser_closed_push` (function) `src/browser.c:561` `browser_status browser_closed_push(browser_closed *c, const char *url)`
-- `browser_closed_pop` (function) `src/browser.c:576` `int browser_closed_pop(browser_closed *c, char *out, size_t cap)`
-- `browser_commit_pending` (function) `src/browser.c:588` `void browser_commit_pending(browser_state *bs)`
-- `browser_abort_pending` (function) `src/browser.c:593` `int browser_abort_pending(browser_state *bs)`
-- `browser_has_pending` (function) `src/browser.c:622` `int browser_has_pending(const browser_state *bs)`
+- `browser_set_status` (function) `src/browser.c:529` `browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)`
+- `browser_status_text` (function) `src/browser.c:543` `const char *browser_status_text(const browser_state *bs, uint64_t now_ms)`
+- `host_equal` (function) `src/browser.c:551` `static int host_equal(const char *a, const char *b)`
+- `browser_is_exception` (function) `src/browser.c:562` `int browser_is_exception(const browser_state *bs, const char *host)`
+- `browser_add_exception` (function) `src/browser.c:570` `browser_status browser_add_exception(browser_state *bs, const char *host)`
+- `browser_closed_push` (function) `src/browser.c:588` `browser_status browser_closed_push(browser_closed *c, const char *url)`
+- `browser_closed_pop` (function) `src/browser.c:603` `int browser_closed_pop(browser_closed *c, char *out, size_t cap)`
+- `browser_commit_pending` (function) `src/browser.c:615` `void browser_commit_pending(browser_state *bs)`
+- `browser_abort_pending` (function) `src/browser.c:620` `int browser_abort_pending(browser_state *bs)`
+- `browser_has_pending` (function) `src/browser.c:650` `int browser_has_pending(const browser_state *bs)`
 
 ## src/cached_fetch.c
 Depends on: `include/cached_fetch.h`
@@ -342,21 +439,22 @@ Depends on: `include/chrome_layout.h`
 - `rect` (function) `src/chrome_layout.c:17` `static chl_rect rect(double x, double y, double w, double h)`
 - `chl_rect_has` (function) `src/chrome_layout.c:26` `int chl_rect_has(chl_rect r, double x, double y)`
 - `chl_compute` (function) `src/chrome_layout.c:30` `chl_status chl_compute(double width, int csd, int tab_count, int active, chl_layout *out)`
-- `chl_tab_rect` (function) `src/chrome_layout.c:112` `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)`
-- `chl_tab_close_rect` (function) `src/chrome_layout.c:122` `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)`
-- `chl_hit` (function) `src/chrome_layout.c:132` `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)`
-- `chl_tab_drop_index` (function) `src/chrome_layout.c:165` `int chl_tab_drop_index(const chl_layout *l, double x)`
-- `chl_move_index` (function) `src/chrome_layout.c:175` `int chl_move_index(int i, int from, int to)`
-- `chl_tab_for_digit` (function) `src/chrome_layout.c:182` `int chl_tab_for_digit(int digit, int tab_count)`
-- `lower` (function) `src/chrome_layout.c:190` `static int lower(int c)`
-- `has_prefix_ci` (function) `src/chrome_layout.c:193` `static int has_prefix_ci(const char *s, const char *prefix)` -- return i; } int chl_tab_for_digit(int digit, int tab_count) { if (tab_count < 1 || digit < 1 || digit > 9) return...
-- `host_ends_with` (function) `src/chrome_layout.c:200` `static int host_ends_with(const char *h, size_t n, const char *suffix)` -- } /* --- identity badge --- static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* 1 if...
-- `url_host` (function) `src/chrome_layout.c:210` `static size_t url_host(const char *rest, const char **out)` -- Host of an authority-bearing URL after "scheme://": userinfo, port and one trailing * dot removed.
-- `chl_identity_of` (function) `src/chrome_layout.c:228` `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,
+- `chl_tab_rect` (function) `src/chrome_layout.c:115` `int chl_tab_rect(const chl_layout *l, int i, chl_rect *r)`
+- `chl_tab_close_rect` (function) `src/chrome_layout.c:125` `int chl_tab_close_rect(const chl_layout *l, int i, chl_rect *r)`
+- `chl_hit` (function) `src/chrome_layout.c:135` `chl_part chl_hit(const chl_layout *l, double x, double y, int *tab)`
+- `chl_tab_drop_index` (function) `src/chrome_layout.c:169` `int chl_tab_drop_index(const chl_layout *l, double x)`
+- `chl_move_index` (function) `src/chrome_layout.c:179` `int chl_move_index(int i, int from, int to)`
+- `chl_tab_for_digit` (function) `src/chrome_layout.c:186` `int chl_tab_for_digit(int digit, int tab_count)`
+- `lower` (function) `src/chrome_layout.c:194` `static int lower(int c)`
+- `has_prefix_ci` (function) `src/chrome_layout.c:197` `static int has_prefix_ci(const char *s, const char *prefix)` -- return i; } int chl_tab_for_digit(int digit, int tab_count) { if (tab_count < 1 || digit < 1 || digit > 9) return...
+- `host_ends_with` (function) `src/chrome_layout.c:204` `static int host_ends_with(const char *h, size_t n, const char *suffix)` -- } /* --- identity badge --- static int lower(int c) { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; } /* 1 if...
+- `url_host` (function) `src/chrome_layout.c:214` `static size_t url_host(const char *rest, const char **out)` -- Host of an authority-bearing URL after "scheme://": userinfo, port and one trailing * dot removed.
+- `chl_identity_of` (function) `src/chrome_layout.c:232` `chl_identity chl_identity_of(const char *url, int transport_known, int downgrade,
                ...`
-- `chl_identity_label` (function) `src/chrome_layout.c:252` `const char *chl_identity_label(chl_identity id)`
-- `chl_findbar_compute` (function) `src/chrome_layout.c:269` `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)` -- Find bar: the field at the left, prev/next right after it, the match count, and the * close button at the right edge.
-- `chl_findbar_hit` (function) `src/chrome_layout.c:305` `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)`
+- `chl_identity_label` (function) `src/chrome_layout.c:256` `const char *chl_identity_label(chl_identity id)`
+- `chl_findbar_compute` (function) `src/chrome_layout.c:273` `chl_status chl_findbar_compute(double width, double height, chl_findbar *out)` -- Find bar: the field at the left, prev/next right after it, the match count, and the * close button at the right edge.
+- `chl_findbar_hit` (function) `src/chrome_layout.c:309` `chl_find_part chl_findbar_hit(const chl_findbar *f, double x, double y)`
+- `chl_tab_fallback_title` (function) `src/chrome_layout.c:321` `void chl_tab_fallback_title(const char *url, char *out, size_t cap)`
 
 ## src/compositor.c
 Depends on: `include/compositor.h`, `include/css.h`

@@ -15,10 +15,10 @@ This community groups 2 file(s) rooted at `tools` with dominant language py (coh
 
 ## Key Symbols
 
-- `phase_ms` (function, `tools/guiscroll.py:34`) `def phase_ms(line, phase)`
-- `one_page` (function, `tools/guiscroll.py:44`) `def one_page(binary, page, env, prof, tmp, notches)`
-- `main` (function, `tools/guiscroll.py:85`) `def main()`
-- `procs_display` (function, `tools/guiscroll.py:134`) `def procs_display(procs)` - The X display guitime.start_display put Xvfb on (it is the second process's argv).
+- `phase_ms` (function, `tools/guiscroll.py:38`) `def phase_ms(line, phase)`
+- `one_page` (function, `tools/guiscroll.py:48`) `def one_page(binary, page, env, prof, tmp, notches, hover)`
+- `main` (function, `tools/guiscroll.py:95`) `def main()`
+- `procs_display` (function, `tools/guiscroll.py:149`) `def procs_display(procs)` - The X display guitime.start_display put Xvfb on (it is the second process's argv).
 - `start_display` (function, `tools/guitime.py:34`) `def start_display(workdir)` - Starts Xvfb and a nested weston; returns (env, processes) or None when unavailable.
 - `one_run` (function, `tools/guitime.py:67`) `def one_run(binary, page, env, hosts_dir, tmp)`
 - `main` (function, `tools/guitime.py:96`) `def main()`

@@ -1,10 +1,34 @@
 # `include/freedom_config.h`
 
-> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 85.7% | [API index](../index.md)
+> Source: [include/freedom_config.h:1](../../include/freedom_config.h#L1) | language `h` | coverage 81.5% | [API index](../index.md)
 
 ## Contents
 
-- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes), [`FC_SHC_MAX_TEXT_BYTES`](#fc_shc_max_text_bytes), [`FC_SHC_MAX_QUERIES`](#fc_shc_max_queries), [`FC_MASK_CACHE_BYTES`](#fc_mask_cache_bytes), [`FC_MASK_CACHE_ENTRIES`](#fc_mask_cache_entries), [`FC_LAZY_IMAGE_MARGIN_PX`](#fc_lazy_image_margin_px), [`FC_TAB_OP_NET_BUDGET_MS`](#fc_tab_op_net_budget_ms), [`FC_NET_LOAD_SETTLE_MS`](#fc_net_load_settle_ms), [`FC_NET_POLL_MS`](#fc_net_poll_ms), [`FC_NET_TICK_SETTLE_MS`](#fc_net_tick_settle_ms), [`FC_TABLE_TRACK_MAX_PX`](#fc_table_track_max_px)
+- **Functions:** [`px`](#px)
+- **Macros:** [`FC_PNG_PAGE_W`](#fc_png_page_w), [`FC_MONO_DEFAULT_PX`](#fc_mono_default_px), [`FC_SMOOTH_SCROLL_MS`](#fc_smooth_scroll_ms), [`FC_SMOOTH_SCROLL_FRAME_MS`](#fc_smooth_scroll_frame_ms), [`FC_SMOOTH_SCROLL_ANCHOR_MS`](#fc_smooth_scroll_anchor_ms), [`FC_ANCHOR_HOLD_MS`](#fc_anchor_hold_ms), [`FC_TRUSTED_JS_BUDGET_MS`](#fc_trusted_js_budget_ms), [`FC_PNG_MARGIN`](#fc_png_margin), [`FC_FLEX_MEASURE_W`](#fc_flex_measure_w), [`FC_FLEX_MIN_MEASURE_W`](#fc_flex_min_measure_w), [`FC_FONT_CHAIN_MAX`](#fc_font_chain_max), [`FC_MAX_BOXES`](#fc_max_boxes), [`FC_FONT_FALLBACK_PX`](#fc_font_fallback_px), [`FC_UI_FONT_SIZE`](#fc_ui_font_size), [`FC_MAX_AUTHOR_CSS_BYTES`](#fc_max_author_css_bytes), [`FC_SHC_MAX_TEXT_BYTES`](#fc_shc_max_text_bytes), [`FC_SHC_MAX_QUERIES`](#fc_shc_max_queries), [`FC_MASK_CACHE_BYTES`](#fc_mask_cache_bytes), [`FC_MASK_CACHE_ENTRIES`](#fc_mask_cache_entries), [`FC_LAZY_IMAGE_MARGIN_PX`](#fc_lazy_image_margin_px), [`FC_TAB_OP_NET_BUDGET_MS`](#fc_tab_op_net_budget_ms), [`FC_NET_LOAD_SETTLE_MS`](#fc_net_load_settle_ms), [`FC_NET_POLL_MS`](#fc_net_poll_ms), [`FC_NET_TICK_SETTLE_MS`](#fc_net_tick_settle_ms), [`FC_TABLE_TRACK_MAX_PX`](#fc_table_track_max_px)
+
+## Functions
+
+<a id="px"></a>
+
+### `px`
+
+`function` | [include/freedom_config.h:24](../../include/freedom_config.h#L24)
+
+```c
+* it computes 12 px (getComputedStyle, measured on the parity host, tanda 102): the * reference renderer is what we match. spec/page_view.md "monospace genérica". */ #define FC_MONO_DEFAULT_PX 12.0 /*
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `host` | `measured on the parity` |  |  |
+| `tanda` |  |  |  |
+
+**Returns:** `the * reference renderer is what we match. spec/page_view.md "monospace genérica". */ #define FC_MONO_DEFAULT_PX 12.0 /*`
+
+---
 
 ## Macros
 
@@ -24,11 +48,81 @@ The harness renders Firefox at this same width so both engines measure the SAME 
 
 ---
 
+<a id="fc_mono_default_px"></a>
+
+### `FC_MONO_DEFAULT_PX`
+
+`macro` | [include/freedom_config.h:26](../../include/freedom_config.h#L26)
+
+```c
+#define FC_MONO_DEFAULT_PX
+```
+
+Default size of the bare generic `monospace` (code/kbd/samp/tt/pre), against 16 px for every other family.
+
+Firefox's pref says 13 (font.size.monospace.x-western) but on Linux it computes 12 px (getComputedStyle, measured on the parity host, tanda 102): the reference renderer is what we match. spec/page_view.md "monospace genérica".
+
+---
+
+<a id="fc_smooth_scroll_ms"></a>
+
+### `FC_SMOOTH_SCROLL_MS`
+
+`macro` | [include/freedom_config.h:31](../../include/freedom_config.h#L31)
+
+```c
+#define FC_SMOOTH_SCROLL_MS
+```
+
+Animated page scroll (spec/smooth_scroll.md): duration of one wheel/key scroll, as Firefox's general.smoothScroll durations (~150 ms), and the loop's wake interval while one is in flight (the paint itself paces the frames).
+
+---
+
+<a id="fc_smooth_scroll_frame_ms"></a>
+
+### `FC_SMOOTH_SCROLL_FRAME_MS`
+
+`macro` | [include/freedom_config.h:32](../../include/freedom_config.h#L32)
+
+```c
+#define FC_SMOOTH_SCROLL_FRAME_MS
+```
+
+---
+
+<a id="fc_smooth_scroll_anchor_ms"></a>
+
+### `FC_SMOOTH_SCROLL_ANCHOR_MS`
+
+`macro` | [include/freedom_config.h:35](../../include/freedom_config.h#L35)
+
+```c
+#define FC_SMOOTH_SCROLL_ANCHOR_MS
+```
+
+A fragment jump under `scroll-behavior: smooth` crosses a whole page, not a wheel notch: longer, like Firefox's smooth scrollIntoView (spec/anchor.md).
+
+---
+
+<a id="fc_anchor_hold_ms"></a>
+
+### `FC_ANCHOR_HOLD_MS`
+
+`macro` | [include/freedom_config.h:38](../../include/freedom_config.h#L38)
+
+```c
+#define FC_ANCHOR_HOLD_MS
+```
+
+How long a landed document's fragment is re-applied while its height still moves (late images, scripts) and the user has not scrolled (spec/anchor.md 3).
+
+---
+
 <a id="fc_trusted_js_budget_ms"></a>
 
 ### `FC_TRUSTED_JS_BUDGET_MS`
 
-`macro` | [include/freedom_config.h:30](../../include/freedom_config.h#L30)
+`macro` | [include/freedom_config.h:48](../../include/freedom_config.h#L48)
 
 ```c
 #define FC_TRUSTED_JS_BUDGET_MS
@@ -44,7 +138,7 @@ The user consented to this host; the per-task interrupt still applies. 60 s: the
 
 ### `FC_PNG_MARGIN`
 
-`macro` | [include/freedom_config.h:34](../../include/freedom_config.h#L34)
+`macro` | [include/freedom_config.h:52](../../include/freedom_config.h#L52)
 
 ```c
 #define FC_PNG_MARGIN
@@ -60,7 +154,7 @@ A page's own <html> margin overrides it.
 
 ### `FC_FLEX_MEASURE_W`
 
-`macro` | [include/freedom_config.h:45](../../include/freedom_config.h#L45)
+`macro` | [include/freedom_config.h:63](../../include/freedom_config.h#L63)
 
 ```c
 #define FC_FLEX_MEASURE_W
@@ -76,7 +170,7 @@ A measurement device, not a layout value -- no rendered geometry is ever placed 
 
 ### `FC_FLEX_MIN_MEASURE_W`
 
-`macro` | [include/freedom_config.h:51](../../include/freedom_config.h#L51)
+`macro` | [include/freedom_config.h:69](../../include/freedom_config.h#L69)
 
 ```c
 #define FC_FLEX_MIN_MEASURE_W
@@ -92,7 +186,7 @@ Like FC_FLEX_MEASURE_W it is a measurement device, not a layout value.
 
 ### `FC_FONT_CHAIN_MAX`
 
-`macro` | [include/freedom_config.h:56](../../include/freedom_config.h#L56)
+`macro` | [include/freedom_config.h:74](../../include/freedom_config.h#L74)
 
 ```c
 #define FC_FONT_CHAIN_MAX
@@ -108,7 +202,7 @@ The chain depth is chosen by the attacker, so this is an anti-DoS bound: the wal
 
 ### `FC_MAX_BOXES`
 
-`macro` | [include/freedom_config.h:61](../../include/freedom_config.h#L61)
+`macro` | [include/freedom_config.h:79](../../include/freedom_config.h#L79)
 
 ```c
 #define FC_MAX_BOXES
@@ -124,7 +218,7 @@ Coupled to the out-of-flow resolver's indexed storage by _Static_assert in page_
 
 ### `FC_FONT_FALLBACK_PX`
 
-`macro` | [include/freedom_config.h:66](../../include/freedom_config.h#L66)
+`macro` | [include/freedom_config.h:84](../../include/freedom_config.h#L84)
 
 ```c
 #define FC_FONT_FALLBACK_PX
@@ -140,7 +234,7 @@ Single source for the former scattered 16.0 literals in painters and harnesses; 
 
 ### `FC_UI_FONT_SIZE`
 
-`macro` | [include/freedom_config.h:70](../../include/freedom_config.h#L70)
+`macro` | [include/freedom_config.h:88](../../include/freedom_config.h#L88)
 
 ```c
 #define FC_UI_FONT_SIZE
@@ -156,7 +250,7 @@ Formerly duplicated as UI_FONT_SIZE in gui/ui_render.c and gui/browser_ui_intern
 
 ### `FC_MAX_AUTHOR_CSS_BYTES`
 
-`macro` | [include/freedom_config.h:78](../../include/freedom_config.h#L78)
+`macro` | [include/freedom_config.h:96](../../include/freedom_config.h#L96)
 
 ```c
 #define FC_MAX_AUTHOR_CSS_BYTES
@@ -172,7 +266,7 @@ It is an anti-DoS bound on parser memory and time, and it must sit ABOVE what re
 
 ### `FC_SHC_MAX_TEXT_BYTES`
 
-`macro` | [include/freedom_config.h:84](../../include/freedom_config.h#L84)
+`macro` | [include/freedom_config.h:102](../../include/freedom_config.h#L102)
 
 ```c
 #define FC_SHC_MAX_TEXT_BYTES
@@ -188,7 +282,7 @@ The retained copy of the text is the cache key, so this bounds that copy; a long
 
 ### `FC_SHC_MAX_QUERIES`
 
-`macro` | [include/freedom_config.h:90](../../include/freedom_config.h#L90)
+`macro` | [include/freedom_config.h:108](../../include/freedom_config.h#L108)
 
 ```c
 #define FC_SHC_MAX_QUERIES
@@ -204,7 +298,7 @@ Each is a compact selector copy re-asked on every later derivation, so the bound
 
 ### `FC_MASK_CACHE_BYTES`
 
-`macro` | [include/freedom_config.h:95](../../include/freedom_config.h#L95)
+`macro` | [include/freedom_config.h:113](../../include/freedom_config.h#L113)
 
 ```c
 #define FC_MASK_CACHE_BYTES
@@ -220,7 +314,7 @@ A mask is a function of its geometry alone, so it stays valid across scrolls, fr
 
 ### `FC_MASK_CACHE_ENTRIES`
 
-`macro` | [include/freedom_config.h:96](../../include/freedom_config.h#L96)
+`macro` | [include/freedom_config.h:114](../../include/freedom_config.h#L114)
 
 ```c
 #define FC_MASK_CACHE_ENTRIES
@@ -232,7 +326,7 @@ A mask is a function of its geometry alone, so it stays valid across scrolls, fr
 
 ### `FC_LAZY_IMAGE_MARGIN_PX`
 
-`macro` | [include/freedom_config.h:99](../../include/freedom_config.h#L99)
+`macro` | [include/freedom_config.h:117](../../include/freedom_config.h#L117)
 
 ```c
 #define FC_LAZY_IMAGE_MARGIN_PX
@@ -246,7 +340,7 @@ Distance (px) beyond the viewport at which a loading="lazy" image starts loading
 
 ### `FC_TAB_OP_NET_BUDGET_MS`
 
-`macro` | [include/freedom_config.h:105](../../include/freedom_config.h#L105)
+`macro` | [include/freedom_config.h:123](../../include/freedom_config.h#L123)
 
 ```c
 #define FC_TAB_OP_NET_BUDGET_MS
@@ -262,7 +356,7 @@ The fetch is synchronous in the GUI thread, so this bounds how long a slow serve
 
 ### `FC_NET_LOAD_SETTLE_MS`
 
-`macro` | [include/freedom_config.h:112](../../include/freedom_config.h#L112)
+`macro` | [include/freedom_config.h:130](../../include/freedom_config.h#L130)
 
 ```c
 #define FC_NET_LOAD_SETTLE_MS
@@ -278,7 +372,7 @@ The first view of a page waits at most FC_NET_LOAD_SETTLE_MS for its in-flight r
 
 ### `FC_NET_POLL_MS`
 
-`macro` | [include/freedom_config.h:113](../../include/freedom_config.h#L113)
+`macro` | [include/freedom_config.h:131](../../include/freedom_config.h#L131)
 
 ```c
 #define FC_NET_POLL_MS
@@ -290,7 +384,7 @@ The first view of a page waits at most FC_NET_LOAD_SETTLE_MS for its in-flight r
 
 ### `FC_NET_TICK_SETTLE_MS`
 
-`macro` | [include/freedom_config.h:116](../../include/freedom_config.h#L116)
+`macro` | [include/freedom_config.h:134](../../include/freedom_config.h#L134)
 
 ```c
 #define FC_NET_TICK_SETTLE_MS
@@ -304,7 +398,7 @@ A tick or click waits this long for the requests its handlers issued: a typical 
 
 ### `FC_TABLE_TRACK_MAX_PX`
 
-`macro` | [include/freedom_config.h:120](../../include/freedom_config.h#L120)
+`macro` | [include/freedom_config.h:138](../../include/freedom_config.h#L138)
 
 ```c
 #define FC_TABLE_TRACK_MAX_PX

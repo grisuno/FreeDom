@@ -1,12 +1,12 @@
 # `include/dom.h`
 
-> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 56.2% | [API index](../index.md)
+> Source: [include/dom.h:1](../../include/dom.h#L1) | language `h` | coverage 57.6% | [API index](../index.md)
 
 ## Contents
 
 - **Enums:** [`dom_status`](#dom_status), [`dom_place`](#dom_place)
 - **Type Aliases:** [`dom_node_id`](#dom_node_id), [`dom_index`](#dom_index)
-- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`tree`](#tree), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`valid`](#valid), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length), [`process`](#process), [`sight`](#sight)
+- **Functions:** [`dom_free`](#dom_free), [`dom_node_count`](#dom_node_count), [`tree`](#tree), [`dom_is_connected`](#dom_is_connected), [`count`](#count), [`dom_get_by_class`](#dom_get_by_class), [`dom_matches`](#dom_matches), [`dom_document_position`](#dom_document_position), [`dom_precedes`](#dom_precedes), [`dom_tag_name`](#dom_tag_name), [`dom_get_attribute`](#dom_get_attribute), [`dom_attribute_names`](#dom_attribute_names), [`dom_text_content`](#dom_text_content), [`dom_document_title`](#dom_document_title), [`valid`](#valid), [`cycle`](#cycle), [`parent`](#parent), [`dom_node_kind`](#dom_node_kind), [`index`](#index), [`length`](#length), [`process`](#process), [`sight`](#sight)
 - **Macros:** [`DOM_NODE_NONE`](#dom_node_none), [`DOM_KIND_NONE`](#dom_kind_none), [`DOM_KIND_ELEMENT`](#dom_kind_element), [`DOM_KIND_TEXT`](#dom_kind_text), [`DOM_KIND_COMMENT`](#dom_kind_comment), [`DOM_MAX_HANDLES`](#dom_max_handles)
 
 ## Type Diagram
@@ -42,7 +42,7 @@ typedef enum dom_status
 
 ### `dom_place`
 
-`enum` | [include/dom.h:194](../../include/dom.h#L194)
+`enum` | [include/dom.h:198](../../include/dom.h#L198)
 
 ```c
 typedef enum dom_place
@@ -106,7 +106,7 @@ Does not free the tree.
 |---|---|---|---|
 | `idx` | `dom_index *` |  |  |
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_anchor.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`run_js`](src.tab.c.md#run_js)
 
 ---
 
@@ -132,6 +132,8 @@ NULL idx => 0.
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="tree"></a>
@@ -155,11 +157,38 @@ NULL idx => 0.
 
 ---
 
+<a id="dom_is_connected"></a>
+
+### `dom_is_connected`
+
+`function` | [include/dom.h:65](../../include/dom.h#L65)
+
+```c
+int dom_is_connected(const dom_index *idx, dom_node_id node);
+```
+
+Nonzero iff node is a valid element that is IN the document tree (a node a script detached stays indexed but is not connected).
+
+NULL idx / invalid node => 0.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `idx` | `dom_index *` |  |  |
+| `node` | `dom_node_id` |  |  |
+
+**Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_anchor.c.md#llvmfuzzertestoneinput)
+
+---
+
 <a id="count"></a>
 
 ### `count`
 
-`function` | [include/dom.h:64](../../include/dom.h#L64)
+`function` | [include/dom.h:68](../../include/dom.h#L68)
 
 ```c
 * match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index *idx, const char *tag, dom_node_id *out, size_t cap);
@@ -182,7 +211,7 @@ NULL idx => 0.
 
 ### `dom_get_by_class`
 
-`function` | [include/dom.h:67](../../include/dom.h#L67)
+`function` | [include/dom.h:71](../../include/dom.h#L71)
 
 ```c
 size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);
@@ -205,7 +234,7 @@ size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out,
 
 ### `dom_matches`
 
-`function` | [include/dom.h:96](../../include/dom.h#L96)
+`function` | [include/dom.h:100](../../include/dom.h#L100)
 
 ```c
 int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);
@@ -223,13 +252,15 @@ Nonzero iff node itself matches the selector list (Element.matches).
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_dom.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="dom_document_position"></a>
 
 ### `dom_document_position`
 
-`function` | [include/dom.h:106](../../include/dom.h#L106)
+`function` | [include/dom.h:110](../../include/dom.h#L110)
 
 ```c
 size_t dom_document_position(const dom_index *idx, dom_node_id node);
@@ -252,7 +283,7 @@ size_t dom_document_position(const dom_index *idx, dom_node_id node);
 
 ### `dom_precedes`
 
-`function` | [include/dom.h:109](../../include/dom.h#L109)
+`function` | [include/dom.h:113](../../include/dom.h#L113)
 
 ```c
 int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);
@@ -276,7 +307,7 @@ Nonzero iff a precedes b in document order.
 
 ### `dom_tag_name`
 
-`function` `const` | [include/dom.h:123](../../include/dom.h#L123)
+`function` `const` | [include/dom.h:127](../../include/dom.h#L127)
 
 ```c
 const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);
@@ -302,7 +333,7 @@ Lowercase qualified tag name, or NULL. *len (optional) excludes the NUL.
 
 ### `dom_get_attribute`
 
-`function` `const` | [include/dom.h:126](../../include/dom.h#L126)
+`function` `const` | [include/dom.h:130](../../include/dom.h#L130)
 
 ```c
 const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);
@@ -321,7 +352,7 @@ Attribute value by name, or NULL if absent. *len (optional) excludes NUL.
 
 **Returns:** `char *`
 
-*Called by:* [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`run`](src.tab.c.md#run)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_anchor.c.md#llvmfuzzertestoneinput), [`jd_process_iframes`](src.js_embed.c.md#jd_process_iframes), [`run`](src.tab.c.md#run)
 
 ---
 
@@ -329,7 +360,7 @@ Attribute value by name, or NULL if absent. *len (optional) excludes NUL.
 
 ### `dom_attribute_names`
 
-`function` | [include/dom.h:133](../../include/dom.h#L133)
+`function` | [include/dom.h:137](../../include/dom.h#L137)
 
 ```c
 size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);
@@ -357,7 +388,7 @@ Writes at most cap entries; returns the total attribute count (which may exceed 
 
 ### `dom_text_content`
 
-`function` `const` | [include/dom.h:138](../../include/dom.h#L138)
+`function` `const` | [include/dom.h:142](../../include/dom.h#L142)
 
 ```c
 const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);
@@ -383,7 +414,7 @@ Concatenated text content of node's subtree (borrowed, valid while idx/doc are a
 
 ### `dom_document_title`
 
-`function` `const` | [include/dom.h:141](../../include/dom.h#L141)
+`function` `const` | [include/dom.h:145](../../include/dom.h#L145)
 
 ```c
 const char *dom_document_title(const dom_index *idx, size_t *len);
@@ -406,7 +437,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `valid`
 
-`function` | [include/dom.h:146](../../include/dom.h#L146)
+`function` | [include/dom.h:150](../../include/dom.h#L150)
 
 ```c
 * detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never call lxb_dom_node_destroy. */ /* A counter that moves on every call that can change the
@@ -428,7 +459,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `cycle`
 
-`function` | [include/dom.h:176](../../include/dom.h#L176)
+`function` | [include/dom.h:180](../../include/dom.h#L180)
 
 ```c
 * Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */ dom_status dom_append_child(dom_index *idx, dom_node_id parent, dom_node_id child);
@@ -448,7 +479,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `parent`
 
-`function` | [include/dom.h:203](../../include/dom.h#L203)
+`function` | [include/dom.h:207](../../include/dom.h#L207)
 
 ```c
 * child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status dom_move_children(dom_index *idx, dom_node_id src, dom_node_id parent, dom_place where, dom_node_id ref
@@ -468,7 +499,7 @@ Current document <title> text (borrowed), or NULL. *len excludes the NUL.
 
 ### `dom_node_kind`
 
-`function` | [include/dom.h:219](../../include/dom.h#L219)
+`function` | [include/dom.h:223](../../include/dom.h#L223)
 
 ```c
 int dom_node_kind(const dom_index *idx, dom_node_id node);
@@ -491,7 +522,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `index`
 
-`function` | [include/dom.h:235](../../include/dom.h#L235)
+`function` | [include/dom.h:239](../../include/dom.h#L239)
 
 ```c
 * stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status dom_remove_child(dom_index *idx, dom_node_id parent, dom_node_id child);
@@ -511,7 +542,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `length`
 
-`function` | [include/dom.h:260](../../include/dom.h#L260)
+`function` | [include/dom.h:264](../../include/dom.h#L264)
 
 ```c
 * length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard cap — OOM from malloc is the only limit. * Invalid handle / NULL out => DOM_ERR_NULL
@@ -531,7 +562,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `process`
 
-`function` | [include/dom.h:267](../../include/dom.h#L267)
+`function` | [include/dom.h:271](../../include/dom.h#L271)
 
 ```c
 * modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next mutation of that node. */ const void *dom_native_node(const dom_index *idx, dom_node_id n
@@ -551,7 +582,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `sight`
 
-`function` | [include/dom.h:272](../../include/dom.h#L272)
+`function` | [include/dom.h:276](../../include/dom.h#L276)
 
 ```c
 * first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change: dom_mutation_count does not move. DOM_NODE_NONE for NULL args, * a node kind the index ne
@@ -587,7 +618,7 @@ DOM_KIND_* of node, DOM_KIND_NONE for an invalid handle.
 
 ### `DOM_KIND_NONE`
 
-`macro` | [include/dom.h:210](../../include/dom.h#L210)
+`macro` | [include/dom.h:214](../../include/dom.h#L214)
 
 ```c
 #define DOM_KIND_NONE
@@ -603,7 +634,7 @@ node-level navigation or creation reaches them. Element-only functions reject th
 
 ### `DOM_KIND_ELEMENT`
 
-`macro` | [include/dom.h:211](../../include/dom.h#L211)
+`macro` | [include/dom.h:215](../../include/dom.h#L215)
 
 ```c
 #define DOM_KIND_ELEMENT
@@ -615,7 +646,7 @@ node-level navigation or creation reaches them. Element-only functions reject th
 
 ### `DOM_KIND_TEXT`
 
-`macro` | [include/dom.h:212](../../include/dom.h#L212)
+`macro` | [include/dom.h:216](../../include/dom.h#L216)
 
 ```c
 #define DOM_KIND_TEXT
@@ -629,7 +660,7 @@ the DOM nodeType numbers
 
 ### `DOM_KIND_COMMENT`
 
-`macro` | [include/dom.h:213](../../include/dom.h#L213)
+`macro` | [include/dom.h:217](../../include/dom.h#L217)
 
 ```c
 #define DOM_KIND_COMMENT
@@ -641,7 +672,7 @@ the DOM nodeType numbers
 
 ### `DOM_MAX_HANDLES`
 
-`macro` | [include/dom.h:216](../../include/dom.h#L216)
+`macro` | [include/dom.h:220](../../include/dom.h#L220)
 
 ```c
 #define DOM_MAX_HANDLES

@@ -1,6 +1,53 @@
 # Subsystem: src (page 5 of 10)
 Previous: [KB_src_p4.md](KB_src_p4.md)
 
+## src/hls.c
+- Doc: last_char: Finds the last occurrence of character `c` in `s` (length `n`). * Returns NULL if not...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `last_char` (function, line 43) `static const char *last_char(const char *s, size_t n, int c)`
+  - `parse_attr_long` (function, line 53) `static int parse_attr_long(const char *attrs, const char *end,
+                           const c...`
+  - `parse_attr_resolution` (function, line 67) `static void parse_attr_resolution(const char *attrs, const char *end,
+                           ...`
+  - `hls_parse` (function, line 85) `hls_status hls_parse(const char *text, size_t len, hls_playlist **out)`
+  - `hls_select_variant` (function, line 215) `size_t hls_select_variant(const hls_playlist *pl, int max_w, int max_h)`
+  - `hls_resolve_url` (function, line 236) `size_t hls_resolve_url(const char *base_url, const char *segment_url,
+                       char...`
+  - `hls_playlist_free` (function, line 266) `void hls_playlist_free(hls_playlist *pl)`
+  - `ts_sync_at` (function, line 281) `static int ts_sync_at(const unsigned char *b, size_t len, size_t off)`
+  - `hls_segment_payload` (function, line 290) `long hls_segment_payload(long http_code, const unsigned char *body, size_t len)`
+  - `https_authority` (function, line 309) `static int https_authority(const char *url, const char **a, size_t *alen)`
+  - `host_parts` (function, line 321) `static int host_parts(const char *a, size_t alen, char host[HLS_HOST_MAX], char site[HLS_HOST_MAX...`
+  - `authority_seen_before` (function, line 338) `static int authority_seen_before(const hls_playlist *pl, size_t i, const char *a, size_t alen)`
+  - `hls_mirror_url` (function, line 348) `size_t hls_mirror_url(const hls_playlist *pl, const char *seg_abs, size_t k,
+                    ...`
+  - `name` (function, line 51) `* attr is the attribute name (e.g. "BANDWIDTH=");`
+  - `_GNU_SOURCE` (macro, line 21) `#define _GNU_SOURCE`
+  - `_POSIX_C_SOURCE` (macro, line 22) `#define _POSIX_C_SOURCE`
+  - `HLS_TAG_MAX` (macro, line 32) `#define HLS_TAG_MAX`
+  - `HLS_TS_PACKET` (macro, line 277) `#define HLS_TS_PACKET`
+  - `HLS_TS_PROBE` (macro, line 278) `#define HLS_TS_PROBE`
+  - `HLS_HOST_MAX` (macro, line 305) `#define HLS_HOST_MAX`
+- Depends on: `include/hls.h`, `include/request_policy.h`
+
+## src/host_conf.c
+- Doc: read_conf: add_dir(out, env); if (home != NULL && home[0] != '\0') { char user[HCF_PATH_MAX]...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `add_dir` (function, line 10) `static void add_dir(hcf_dirs *out, const char *path)`
+  - `hcf_search_dirs` (function, line 20) `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out)`
+  - `hcf_search_dirs_from_env` (function, line 32) `void hcf_search_dirs_from_env(hcf_dirs *out)`
+  - `read_conf` (function, line 37) `static char *read_conf(const char *dir, const char *name)`
+  - `load_into` (function, line 58) `static void load_into(hb_set *s, const char *dir, const char *name, hb_list list)`
+  - `hcf_load_filter` (function, line 65) `hb_set *hcf_load_filter(const hcf_dirs *dirs)`
+  - `hcf_load_allowlist` (function, line 76) `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname)`
+  - `HCF_USER_SUBDIR` (macro, line 7) `#define HCF_USER_SUBDIR`
+  - `HCF_REPO_DIR` (macro, line 8) `#define HCF_REPO_DIR`
+- Depends on: `include/host_conf.h`
+
 ## src/hostblock.c
 - Doc: table_probe: Finds the slot for key (length klen) in t, which must have a free slot.
 - Layer: utility

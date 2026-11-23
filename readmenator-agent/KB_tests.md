@@ -10,6 +10,28 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `CHECK` (macro, line 18) `#define CHECK(cond, msg)`
 - Depends on: `include/secure_fetch.h`
 
+## tests/test_anchor.c
+- Doc: — CMocka suite for the anchor module (spec/anchor.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `fixture` (struct, line 15)
+  - `load` (function, line 17) `static int load(fixture *f, const char *html)`
+  - `unload` (function, line 24) `static void unload(fixture *f)`
+  - `tag` (function, line 29) `static const char *tag(const fixture *f, dom_node_id n)`
+  - `attr` (function, line 33) `static const char *attr(const fixture *f, dom_node_id n, const char *name)`
+  - `test_percent_decode` (function, line 37) `static void test_percent_decode(void **state)`
+  - `test_resolve_id_then_name` (function, line 54) `static void test_resolve_id_then_name(void **state)`
+  - `test_resolve_name_only_on_a` (function, line 71) `static void test_resolve_name_only_on_a(void **state)`
+  - `test_resolve_top_and_empty` (function, line 80) `static void test_resolve_top_and_empty(void **state)`
+  - `test_resolve_decoded` (function, line 97) `static void test_resolve_decoded(void **state)`
+  - `test_resolve_rejects_detached_and_bad_args` (function, line 112) `static void test_resolve_rejects_detached_and_bad_args(void **state)`
+  - `test_collect_subtree_then_following` (function, line 134) `static void test_collect_subtree_then_following(void **state)`
+  - `test_target_top` (function, line 162) `static void test_target_top(void **state)`
+  - `test_scroll_for` (function, line 188) `static void test_scroll_for(void **state)`
+  - `main` (function, line 198) `int main(void)`
+- Depends on: `include/anchor.h`, `include/dom.h`, `include/html_parse.h`, `include/js_geom.h`
+
 ## tests/test_anti_fp.c
 - Doc: test_origin_key_unlinks_readback: The property that actually matters: the same canvas buffer...
 - Layer: testing
@@ -205,36 +227,37 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
 - Depends on: `include/box_tree.h`, `include/css.h`, `include/page_view.h`
 
 ## tests/test_browser.c
-- Doc: nav: #define _POSIX_C_SOURCE 200809L #include <stdarg.h> #include <stddef.h> #include <stdint.h>...
+- Doc: nav: #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include <stdlib.h> #include...
 - Layer: testing
 - Language: c
 - Symbols:
-  - `nav` (function, line 22) `static browser_status nav(browser_state *bs, const char *url)`
-  - `back` (function, line 27) `static browser_status back(browser_state *bs)`
-  - `fwd` (function, line 32) `static browser_status fwd(browser_state *bs)`
-  - `test_init` (function, line 38) `static void test_init(void **state)`
-  - `test_navigate_history` (function, line 49) `static void test_navigate_history(void **state)`
-  - `test_navigate_from_middle_discards_future` (function, line 79) `static void test_navigate_from_middle_discards_future(void **state)`
-  - `test_back_forward_bounds` (function, line 97) `static void test_back_forward_bounds(void **state)`
-  - `test_rejects_invalid_url` (function, line 113) `static void test_rejects_invalid_url(void **state)`
-  - `test_accepts_https_and_file` (function, line 126) `static void test_accepts_https_and_file(void **state)`
-  - `test_url_bar_editing` (function, line 140) `static void test_url_bar_editing(void **state)`
-  - `test_url_bar_selection` (function, line 170) `static void test_url_bar_selection(void **state)`
-  - `test_set_page` (function, line 214) `static void test_set_page(void **state)`
-  - `test_set_page_sanitizes_invalid_utf8` (function, line 236) `static void test_set_page_sanitizes_invalid_utf8(void **state)`
-  - `test_exceptions` (function, line 270) `static void test_exceptions(void **state)`
-  - `test_status_toast` (function, line 295) `static void test_status_toast(void **state)`
-  - `test_status_truncates` (function, line 327) `static void test_status_truncates(void **state)`
-  - `test_push_state_same_document` (function, line 346) `static void test_push_state_same_document(void **state)`
-  - `test_push_state_rejects_and_guards` (function, line 379) `static void test_push_state_rejects_and_guards(void **state)`
-  - `test_closed_tabs` (function, line 396) `static void test_closed_tabs(void **state)`
-  - `test_stop_restores_history` (function, line 431) `static void test_stop_restores_history(void **state)`
-  - `test_commit_keeps_entry` (function, line 459) `static void test_commit_keeps_entry(void **state)`
-  - `test_navigate_replaces_pending` (function, line 477) `static void test_navigate_replaces_pending(void **state)`
-  - `test_multi_step_back_is_one_pending` (function, line 505) `static void test_multi_step_back_is_one_pending(void **state)`
-  - `test_pending_guards_push_state` (function, line 530) `static void test_pending_guards_push_state(void **state)`
-  - `main` (function, line 557) `int main(void)`
-  - `entry` (function, line 521) `* returns to the COMMITTED entry (c), with its whole history intact. */ assert_int_equal(browser_back(&bs), BROWSER_OK);`
+  - `nav` (function, line 23) `static browser_status nav(browser_state *bs, const char *url)`
+  - `back` (function, line 28) `static browser_status back(browser_state *bs)`
+  - `fwd` (function, line 33) `static browser_status fwd(browser_state *bs)`
+  - `test_init` (function, line 39) `static void test_init(void **state)`
+  - `test_navigate_history` (function, line 50) `static void test_navigate_history(void **state)`
+  - `test_navigate_from_middle_discards_future` (function, line 80) `static void test_navigate_from_middle_discards_future(void **state)`
+  - `test_back_forward_bounds` (function, line 98) `static void test_back_forward_bounds(void **state)`
+  - `test_rejects_invalid_url` (function, line 114) `static void test_rejects_invalid_url(void **state)`
+  - `test_accepts_https_and_file` (function, line 127) `static void test_accepts_https_and_file(void **state)`
+  - `test_url_bar_editing` (function, line 141) `static void test_url_bar_editing(void **state)`
+  - `test_url_bar_selection` (function, line 171) `static void test_url_bar_selection(void **state)`
+  - `test_set_page` (function, line 215) `static void test_set_page(void **state)`
+  - `test_set_page_sanitizes_invalid_utf8` (function, line 237) `static void test_set_page_sanitizes_invalid_utf8(void **state)`
+  - `test_exceptions` (function, line 271) `static void test_exceptions(void **state)`
+  - `test_status_toast` (function, line 296) `static void test_status_toast(void **state)`
+  - `test_status_truncates` (function, line 328) `static void test_status_truncates(void **state)`
+  - `test_push_state_same_document` (function, line 347) `static void test_push_state_same_document(void **state)`
+  - `test_push_state_rejects_and_guards` (function, line 380) `static void test_push_state_rejects_and_guards(void **state)`
+  - `test_closed_tabs` (function, line 397) `static void test_closed_tabs(void **state)`
+  - `test_stop_restores_history` (function, line 432) `static void test_stop_restores_history(void **state)`
+  - `test_commit_keeps_entry` (function, line 460) `static void test_commit_keeps_entry(void **state)`
+  - `test_navigate_replaces_pending` (function, line 478) `static void test_navigate_replaces_pending(void **state)`
+  - `test_multi_step_back_is_one_pending` (function, line 506) `static void test_multi_step_back_is_one_pending(void **state)`
+  - `test_pending_guards_push_state` (function, line 531) `static void test_pending_guards_push_state(void **state)`
+  - `test_entry_scroll` (function, line 560) `static void test_entry_scroll(void **state)`
+  - `main` (function, line 594) `int main(void)`
+  - `entry` (function, line 522) `* returns to the COMMITTED entry (c), with its whole history intact. */ assert_int_equal(browser_back(&bs), BROWSER_OK);`
   - `_POSIX_C_SOURCE` (macro, line 8) `#define _POSIX_C_SOURCE`
 - Depends on: `include/browser.h`
 
@@ -272,15 +295,17 @@ Pages: [KB_tests.md](KB_tests.md), [KB_tests_p2.md](KB_tests_p2.md), [KB_tests_p
   - `test_many_tabs_keep_minimum_and_drag` (function, line 58) `static void test_many_tabs_keep_minimum_and_drag(void **state)`
   - `test_close_buttons` (function, line 78) `static void test_close_buttons(void **state)`
   - `test_toolbar_hits` (function, line 100) `static void test_toolbar_hits(void **state)`
-  - `test_tiny_and_hostile_widths` (function, line 126) `static void test_tiny_and_hostile_widths(void **state)`
-  - `test_identity_table` (function, line 145) `static void test_identity_table(void **state)`
-  - `test_identity_labels` (function, line 175) `static void test_identity_labels(void **state)`
-  - `test_findbar` (function, line 185) `static void test_findbar(void **state)`
-  - `test_hidden_tab_indicators` (function, line 226) `static void test_hidden_tab_indicators(void **state)`
-  - `test_tab_drop_index` (function, line 264) `static void test_tab_drop_index(void **state)`
-  - `test_tab_for_digit` (function, line 285) `static void test_tab_for_digit(void **state)`
-  - `test_move_index` (function, line 298) `static void test_move_index(void **state)`
-  - `main` (function, line 315) `int main(void)`
+  - `test_bookmark_star` (function, line 126) `static void test_bookmark_star(void **state)`
+  - `test_tab_fallback_title` (function, line 149) `static void test_tab_fallback_title(void **state)`
+  - `test_tiny_and_hostile_widths` (function, line 170) `static void test_tiny_and_hostile_widths(void **state)`
+  - `test_identity_table` (function, line 189) `static void test_identity_table(void **state)`
+  - `test_identity_labels` (function, line 219) `static void test_identity_labels(void **state)`
+  - `test_findbar` (function, line 229) `static void test_findbar(void **state)`
+  - `test_hidden_tab_indicators` (function, line 270) `static void test_hidden_tab_indicators(void **state)`
+  - `test_tab_drop_index` (function, line 308) `static void test_tab_drop_index(void **state)`
+  - `test_tab_for_digit` (function, line 329) `static void test_tab_for_digit(void **state)`
+  - `test_move_index` (function, line 342) `static void test_move_index(void **state)`
+  - `main` (function, line 359) `int main(void)`
 - Depends on: `include/chrome_layout.h`
 
 ## tests/test_compositor.c

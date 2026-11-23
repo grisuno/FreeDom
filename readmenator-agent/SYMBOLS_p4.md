@@ -1,27 +1,171 @@
-# Symbols (page 4 of 18)
+# Symbols (page 4 of 19)
 Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
-| `dom_get_attribute` | function | `include/dom.h:126` | `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);` |
-| `dom_get_by_class` | function | `include/dom.h:67` | `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);` |
+| `cl_lp` | struct | `include/css_length.h:139` | `` |
+| `cl_number` | function | `include/css_length.h:237` | `int cl_number(const char *s, double *out, const char **endp);` |
+| `cl_status` | enum | `include/css_length.h:68` | `` |
+| `cl_unit_font_ratio` | function | `include/css_length.h:189` | `double cl_unit_font_ratio(const char *unit, size_t unit_len);` |
+| `cl_unit_is_font_relative` | function | `include/css_length.h:164` | `* cl_unit_is_font_relative() draws. */ /* * Re-fits a resolved length to a different font-size: * * used = px + em *...` |
+| `font_size` | type_alias | `include/css_length.h:91` | `typedef struct cl_ctx { double font_size;` |
+| `here` | function | `include/css_length.h:193` | `* Every input cl_resolve accepts resolves identically here (with has_pct 0);` |
+| `length` | function | `include/css_length.h:213` | `* * A basis that is not a usable length (negative, zero, non-finite) contributes * nothing, but the absolute...` |
+| `prelude` | function | `include/css_length.h:106` | `* correct context for a media query prelude (whose `em` is defined to use the * initial font size, never the...` |
+| `px` | type_alias | `include/css_length.h:139` | `typedef struct cl_lp { double px;` |
+| `CM_LAYERS` | macro | `include/css_mask.h:12` | `#define CM_LAYERS` |
+| `FREEDOM_CSS_MASK_H` | macro | `include/css_mask.h:2` | `#define FREEDOM_CSS_MASK_H` |
+| `cm_clip` | enum | `include/css_mask.h:15` | `` |
+| `cm_comp` | enum | `include/css_mask.h:14` | `` |
+| `cm_decode_layer` | function | `include/css_mask.h:36` | `void cm_decode_layer(int meta, int alphas, int poss, cm_layer *out);` |
+| `cm_encode_layer` | function | `include/css_mask.h:35` | `void cm_encode_layer(const cm_layer *l, int *meta, int *alphas, int *poss);` |
+| `cm_is_mask_prop` | function | `include/css_mask.h:28` | `int cm_is_mask_prop(const char *prop);` |
+| `cm_layer` | struct | `include/css_mask.h:19` | `` |
+| `kind` | type_alias | `include/css_mask.h:19` | `typedef struct cm_layer { int kind;` |
+| `malformed` | function | `include/css_mask.h:31` | `* the value is unsupported or malformed (the caller drops the declaration). */ int cm_expand(const char *prop, const...` |
+| `CMQ_CONTAINER_NAMES` | macro | `include/css_mq.h:37` | `#define CMQ_CONTAINER_NAMES` |
+| `CMQ_MAX_DEPTH` | macro | `include/css_mq.h:16` | `#define CMQ_MAX_DEPTH` |
+| `CMQ_TOK_MAX` | macro | `include/css_mq.h:17` | `#define CMQ_TOK_MAX` |
+| `FREEDOM_CSS_MQ_H` | macro | `include/css_mq.h:2` | `#define FREEDOM_CSS_MQ_H` |
+| `cmq_container` | struct | `include/css_mq.h:41` | `` |
+| `cmq_container_decl` | function | `include/css_mq.h:63` | `int cmq_container_decl(const char *prop, const char *val, int *type, unsigned names[CMQ_CONTAINER_NAMES], int...` |
+| `cmq_container_surely` | function | `include/css_mq.h:34` | `int cmq_container_surely(const char *s, size_t len, int max_width);` |
+| `cmq_env` | struct | `include/css_mq.h:19` | `` |
+| `cmq_matches` | function | `include/css_mq.h:28` | `int cmq_matches(const char *s, size_t len, const cmq_env *env);` |
+| `cmq_name_hash` | function | `include/css_mq.h:50` | `unsigned cmq_name_hash(const char *s, size_t n);` |
+| `names` | type_alias | `include/css_mq.h:41` | `typedef struct cmq_container { unsigned names[CMQ_CONTAINER_NAMES];` |
+| `width_px` | type_alias | `include/css_mq.h:18` | `typedef struct cmq_env { int width_px;` |
+| `CSEL_FOLD_MARK` | macro | `include/css_select.h:216` | `#define CSEL_FOLD_MARK` |
+| `CSEL_FOLD_PREFIX` | macro | `include/css_select.h:215` | `#define CSEL_FOLD_PREFIX` |
+| `CSEL_IDENT_SCRATCH` | macro | `include/css_select.h:217` | `#define CSEL_IDENT_SCRATCH` |
+| `CSS_MAX_CLASSES_PER_SEL` | macro | `include/css_select.h:28` | `#define CSS_MAX_CLASSES_PER_SEL` |
+| `CSS_MAX_SUB_SELS` | macro | `include/css_select.h:83` | `#define CSS_MAX_SUB_SELS` |
+| `CSS_SUB_MAX_ATTRS` | macro | `include/css_select.h:84` | `#define CSS_SUB_MAX_ATTRS` |
+| `CSS_SUB_MAX_PSEUDOS` | macro | `include/css_select.h:85` | `#define CSS_SUB_MAX_PSEUDOS` |
+| `CSS_TOK_MAX` | macro | `include/css_select.h:27` | `#define CSS_TOK_MAX` |
+| `FREEDOM_CSS_SELECT_H` | macro | `include/css_select.h:2` | `#define FREEDOM_CSS_SELECT_H` |
+| `comb` | type_alias | `include/css_select.h:139` | `typedef struct css_sel { int comb[CSS_MAX_COMPOUNDS];` |
+| `conservative` | function | `include/css_select.h:202` | `* Pure and conservative (anything unrecognised answers 1). A selector that answers 0 matches * from the element's...` |
+| `csel_anc_reject` | function | `include/css_select.h:195` | `static inline int csel_anc_reject(const css_sel *sel, const css_element *el)` |
+| `csel_ci_eq` | function | `include/css_select.h:244` | `static inline int csel_ci_eq(const char *a, const char *b)` |
+| `csel_ci_starts` | function | `include/css_select.h:253` | `static inline int csel_ci_starts(const char *a, const char *p)` |
+| `csel_compact_dup` | function | `include/css_select.h:173` | `css_sel *csel_compact_dup(const css_sel *sel);` |
+| `csel_compact_size` | function | `include/css_select.h:168` | `size_t csel_compact_size(int nparts);` |
+| `csel_decl_end` | function | `include/css_select.h:236` | `size_t csel_decl_end(const char *s, size_t i, size_t b, int stop_brace);` |
+| `csel_element_feature_bits` | function | `include/css_select.h:194` | `unsigned long long csel_element_feature_bits(const css_element *e);` |
+| `csel_emit_utf8` | function | `include/css_select.h:220` | `size_t csel_emit_utf8(unsigned int cp, char *out);` |
+| `csel_escape_len` | function | `include/css_select.h:224` | `size_t csel_escape_len(const char *s, size_t i, size_t b);` |
+| `csel_ident_ch` | function | `include/css_select.h:281` | `static inline int csel_ident_ch(char c)` |
+| `csel_ident_eq` | function | `include/css_select.h:228` | `int csel_ident_eq(const char *stored, const char *tok, size_t tlen);` |
+| `csel_ident_fold` | function | `include/css_select.h:226` | `void csel_ident_fold(const char *src, size_t len, char *dst);` |
+| `csel_lower_ch` | function | `include/css_select.h:240` | `static inline char csel_lower_ch(char c)` |
+| `csel_matches` | function | `include/css_select.h:186` | `int csel_matches(const css_sel *sel, const css_element *el, const char *target_id, int allow_pseudo_el, int...` |
+| `csel_parse` | function | `include/css_select.h:177` | `int csel_parse(const char *s, size_t a, size_t b, css_sel *sel);` |
+| `csel_read_ident` | function | `include/css_select.h:231` | `int csel_read_ident(const char *s, size_t *ip, size_t b, char *dst, int lower);` |
+| `csel_span_eq` | function | `include/css_select.h:262` | `static inline int csel_span_eq(const char *a, const char *b, size_t n, int ci)` |
+| `csel_substr` | function | `include/css_select.h:273` | `static inline int csel_substr(const char *hay, const char *needle, int ci)` |
+| `csel_unescape` | function | `include/css_select.h:222` | `void csel_unescape(char *dst, size_t cap, const char *src, size_t n);` |
+| `css_attr_match` | struct | `include/css_select.h:88` | `` |
+| `css_compound` | struct | `include/css_select.h:122` | `` |
+| `css_pseudo_match` | struct | `include/css_select.h:112` | `` |
+| `css_sel` | struct | `include/css_select.h:139` | `` |
+| `css_sub_sel` | struct | `include/css_select.h:95` | `` |
+| `identifier` | function | `include/css_select.h:208` | `* A selector identifier (tag, .class, #id) is read with CSS escapes decoded * (`.md\:flex` is the class "md:flex")...` |
+| `kind` | type_alias | `include/css_select.h:112` | `typedef struct css_pseudo_match { int kind;` |
+| `name` | type_alias | `include/css_select.h:88` | `typedef struct css_attr_match { char name[CSS_TOK_MAX];` |
+| `tag` | type_alias | `include/css_select.h:94` | `typedef struct css_sub_sel { char tag[CSS_TOK_MAX];` |
+| `tag` | type_alias | `include/css_select.h:122` | `typedef struct css_compound { char tag[CSS_TOK_MAX];` |
+| `FREEDOM_CSS_TEXT_H` | macro | `include/css_text.h:2` | `#define FREEDOM_CSS_TEXT_H` |
+| `ct_emit_spacing` | function | `include/css_text.h:24` | `int ct_emit_spacing(css_decl *dst, int cap, int slot, const char *val);` |
+| `ct_expand_shadow` | function | `include/css_text.h:25` | `int ct_expand_shadow(const char *val, css_decl *dst, int cap);` |
+| `ct_expand_valign` | function | `include/css_text.h:14` | `int ct_expand_valign(const char *val, css_decl *dst, int cap);` |
+| `ct_interp_aspect_ratio` | function | `include/css_text.h:20` | `int ct_interp_aspect_ratio(const char *v, int *num, int *den);` |
+| `ct_interp_direction` | function | `include/css_text.h:21` | `int ct_interp_direction(const char *v);` |
+| `ct_interp_fontfamily` | function | `include/css_text.h:10` | `int ct_interp_fontfamily(const char *v);` |
+| `ct_interp_liststyle` | function | `include/css_text.h:22` | `int ct_interp_liststyle(const char *v);` |
+| `ct_interp_opacity` | function | `include/css_text.h:12` | `int ct_interp_opacity(const char *v);` |
+| `ct_interp_spacing` | function | `include/css_text.h:23` | `int ct_interp_spacing(const char *v, int *out);` |
+| `ct_interp_tabsize` | function | `include/css_text.h:17` | `int ct_interp_tabsize(const char *v);` |
+| `ct_interp_textdeco_style` | function | `include/css_text.h:18` | `int ct_interp_textdeco_style(const char *v);` |
+| `ct_interp_textdeco_thickness` | function | `include/css_text.h:19` | `int ct_interp_textdeco_thickness(const char *v);` |
+| `ct_interp_texttransform` | function | `include/css_text.h:11` | `int ct_interp_texttransform(const char *v);` |
+| `ct_interp_transition_property` | function | `include/css_text.h:15` | `int ct_interp_transition_property(const char *v);` |
+| `ct_interp_valign` | function | `include/css_text.h:13` | `int ct_interp_valign(const char *v);` |
+| `ct_interp_whitespace` | function | `include/css_text.h:16` | `int ct_interp_whitespace(const char *v);` |
+| `FREEDOM_CSS_VALUES_H` | macro | `include/css_values.h:2` | `#define FREEDOM_CSS_VALUES_H` |
+| `black` | function | `include/css_values.h:27` | `* transparent black (127 << 24) -- text that paints nothing, not an absent * value. CC_COLOR_CURRENT and -1...` |
+| `cv_bg_alpha_of` | function | `include/css_values.h:15` | `int cv_bg_alpha_of(const char *v);` |
+| `cv_color_ok` | function | `include/css_values.h:14` | `int cv_color_ok(int c);` |
+| `cv_filter_scale` | function | `include/css_values.h:20` | `double cv_filter_scale(int pct);` |
+| `cv_interp_bg` | function | `include/css_values.h:30` | `int cv_interp_bg(const char *v);` |
+| `cv_interp_color` | function | `include/css_values.h:13` | `int cv_interp_color(const char *v);` |
+| `cv_parse_color` | function | `include/css_values.h:12` | `int cv_parse_color(const char *v);` |
+| `cv_parse_color_t7` | function | `include/css_values.h:24` | `int cv_parse_color_t7(const char *v);` |
+| `CVR_CHAIN_MAX` | macro | `include/css_vars.h:45` | `#define CVR_CHAIN_MAX` |
+| `CVR_MAX_DEPTH` | macro | `include/css_vars.h:22` | `#define CVR_MAX_DEPTH` |
+| `CVR_MAX_ENTRIES` | macro | `include/css_vars.h:21` | `#define CVR_MAX_ENTRIES` |
+| `CVR_MAX_LOOKUPS` | macro | `include/css_vars.h:26` | `#define CVR_MAX_LOOKUPS` |
+| `CVR_NAME_MAX` | macro | `include/css_vars.h:19` | `#define CVR_NAME_MAX` |
+| `CVR_VALUE_MAX` | macro | `include/css_vars.h:20` | `#define CVR_VALUE_MAX` |
+| `FREEDOM_CSS_VARS_H` | macro | `include/css_vars.h:2` | `#define FREEDOM_CSS_VARS_H` |
+| `cvr_chain` | struct | `include/css_vars.h:46` | `` |
+| `cvr_collect_decls` | function | `include/css_vars.h:83` | `void cvr_collect_decls(cvr_table *t, const char *s, size_t a, size_t b);` |
+| `cvr_count` | function | `include/css_vars.h:71` | `size_t cvr_count(const cvr_table *t);` |
+| `cvr_ent` | struct | `include/css_vars.h:28` | `` |
+| `cvr_free` | function | `include/css_vars.h:78` | `void cvr_free(cvr_table *t);` |
+| `cvr_get` | function | `include/css_vars.h:69` | `const char *cvr_get(const cvr_table *t, const char *name, size_t nlen);` |
+| `cvr_lookup` | function | `include/css_vars.h:96` | `const char *cvr_lookup(const cvr_scope *sc, const char *name, size_t nlen);` |
+| `cvr_reset` | function | `include/css_vars.h:75` | `void cvr_reset(cvr_table *t);` |
+| `cvr_scope` | struct | `include/css_vars.h:54` | `` |
+| `cvr_table` | struct | `include/css_vars.h:35` | `` |
+| `declaration` | function | `include/css_vars.h:91` | `* then drops the whole declaration (CSS Variables 1: invalid at computed time). */ int cvr_resolve(const char *val...` |
+| `name` | function | `include/css_vars.h:62` | `* name (last declaration wins). Returns 1 when stored, 0 when dropped: a name that * is not "--" + at least one...` |
+| `DU_MAX_ENCODED_LEN` | macro | `include/data_url.h:43` | `#define DU_MAX_ENCODED_LEN` |
+| `FREEDOM_DATA_URL_H` | macro | `include/data_url.h:2` | `#define FREEDOM_DATA_URL_H` |
+| `allocation` | function | `include/data_url.h:21` | `* * du_base64_payload does no allocation (it only slices the caller's url string);` |
+| `closed` | function | `include/data_url.h:65` | `* 4 fails closed (DU_ERR_BAD_BASE64) -- never decodes a partial prefix. * b64/out/out_len == NULL (with b64_len !=...` |
+| `du_is_data_url` | function | `include/data_url.h:46` | `int du_is_data_url(const char *url);` |
+| `du_status` | enum | `include/data_url.h:27` | `` |
+| `worker` | function | `include/data_url.h:59` | `* the confined worker (du_decode). */ du_status du_shape_ok(const char *url);` |
+| `FREEDOM_DISK_STORE_H` | macro | `include/disk_store.h:2` | `#define FREEDOM_DISK_STORE_H` |
+| `ds_free` | function | `include/disk_store.h:47` | `void ds_free(uint8_t *buf, size_t len);` |
+| `ds_status` | enum | `include/disk_store.h:25` | `` |
+| `DT_SCAN_MAX` | macro | `include/doc_title.h:14` | `#define DT_SCAN_MAX` |
+| `FREEDOM_DOC_TITLE_H` | macro | `include/doc_title.h:5` | `#define FREEDOM_DOC_TITLE_H` |
+| `dt_scan` | function | `include/doc_title.h:20` | `int dt_scan(const char *html, size_t len, char *out, size_t cap);` |
+| `DOM_KIND_COMMENT` | macro | `include/dom.h:217` | `#define DOM_KIND_COMMENT` |
+| `DOM_KIND_ELEMENT` | macro | `include/dom.h:215` | `#define DOM_KIND_ELEMENT` |
+| `DOM_KIND_NONE` | macro | `include/dom.h:214` | `#define DOM_KIND_NONE` |
+| `DOM_KIND_TEXT` | macro | `include/dom.h:216` | `#define DOM_KIND_TEXT` |
+| `DOM_MAX_HANDLES` | macro | `include/dom.h:220` | `#define DOM_MAX_HANDLES` |
+| `DOM_NODE_NONE` | macro | `include/dom.h:37` | `#define DOM_NODE_NONE` |
+| `FREEDOM_DOM_H` | macro | `include/dom.h:2` | `#define FREEDOM_DOM_H` |
+| `count` | function | `include/dom.h:68` | `* match count (which may exceed cap, so the caller can size a buffer). */ size_t dom_get_by_tag(const dom_index...` |
+| `cycle` | function | `include/dom.h:180` | `* Rejects a cycle (child being an ancestor of parent). Invalid handle / self / cycle * => DOM_ERR_NULL_ARG. */...` |
+| `dom_attribute_names` | function | `include/dom.h:137` | `size_t dom_attribute_names(const dom_index *idx, dom_node_id node, const char **names, size_t *lens, size_t cap);` |
+| `dom_document_position` | function | `include/dom.h:110` | `size_t dom_document_position(const dom_index *idx, dom_node_id node);` |
+| `dom_document_title` | function | `include/dom.h:145` | `const char *dom_document_title(const dom_index *idx, size_t *len);` |
+| `dom_free` | function | `include/dom.h:48` | `void dom_free(dom_index *idx);` |
+| `dom_get_attribute` | function | `include/dom.h:130` | `const char *dom_get_attribute(const dom_index *idx, dom_node_id node, const char *name, size_t *len);` |
+| `dom_get_by_class` | function | `include/dom.h:71` | `size_t dom_get_by_class(const dom_index *idx, const char *cls, dom_node_id *out, size_t cap);` |
 | `dom_index` | type_alias | `include/dom.h:40` | `typedef struct dom_index dom_index;` |
-| `dom_matches` | function | `include/dom.h:96` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);` |
+| `dom_is_connected` | function | `include/dom.h:65` | `int dom_is_connected(const dom_index *idx, dom_node_id node);` |
+| `dom_matches` | function | `include/dom.h:100` | `int dom_matches(const dom_index *idx, dom_node_id node, const char *selector);` |
 | `dom_node_count` | function | `include/dom.h:51` | `size_t dom_node_count(const dom_index *idx);` |
 | `dom_node_id` | type_alias | `include/dom.h:34` | `typedef uint32_t dom_node_id;` |
-| `dom_node_kind` | function | `include/dom.h:219` | `int dom_node_kind(const dom_index *idx, dom_node_id node);` |
-| `dom_place` | enum | `include/dom.h:194` | `` |
-| `dom_precedes` | function | `include/dom.h:109` | `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);` |
+| `dom_node_kind` | function | `include/dom.h:223` | `int dom_node_kind(const dom_index *idx, dom_node_id node);` |
+| `dom_place` | enum | `include/dom.h:198` | `` |
+| `dom_precedes` | function | `include/dom.h:113` | `int dom_precedes(const dom_index *idx, dom_node_id a, dom_node_id b);` |
 | `dom_status` | enum | `include/dom.h:26` | `` |
-| `dom_tag_name` | function | `include/dom.h:123` | `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);` |
-| `dom_text_content` | function | `include/dom.h:138` | `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);` |
-| `index` | function | `include/dom.h:235` | `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...` |
-| `length` | function | `include/dom.h:260` | `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...` |
-| `parent` | function | `include/dom.h:203` | `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...` |
-| `process` | function | `include/dom.h:267` | `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...` |
-| `sight` | function | `include/dom.h:272` | `* first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change...` |
+| `dom_tag_name` | function | `include/dom.h:127` | `const char *dom_tag_name(const dom_index *idx, dom_node_id node, size_t *len);` |
+| `dom_text_content` | function | `include/dom.h:142` | `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len);` |
+| `index` | function | `include/dom.h:239` | `* stays valid in the index (not freed). Invalid handle / not-a-child => DOM_ERR_NULL_ARG. */ dom_status...` |
+| `length` | function | `include/dom.h:264` | `* length (no children => an owned empty string). Uses a chain of fixed-size * blocks internally so there is no hard...` |
+| `parent` | function | `include/dom.h:207` | `* child of parent (for the *_REF places) or an invalid handle => DOM_ERR_NULL_ARG. */ dom_status...` |
+| `process` | function | `include/dom.h:271` | `* modules in the same process (style resolution). NULL for a bad or non-element * handle. Valid until the next...` |
+| `sight` | function | `include/dom.h:276` | `* first sight (an innerHTML subtree has no handles until something asks). Registration * is not a tree change...` |
 | `tree` | function | `include/dom.h:59` | `* tree (the index only grows, so a node a script removed is still registered and must not be * found);` |
-| `valid` | function | `include/dom.h:146` | `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...` |
+| `valid` | function | `include/dom.h:150` | `* detached node stays valid (it just becomes unreachable from the root and is no * longer rendered). These never...` |
 | `DD_FIELD_MAX` | macro | `include/dom_debug.h:28` | `#define DD_FIELD_MAX` |
 | `FREEDOM_DOM_DEBUG_H` | macro | `include/dom_debug.h:2` | `#define FREEDOM_DOM_DEBUG_H` |
 | `dd_format` | function | `include/dom_debug.h:36` | `size_t dd_format(const rd_doc *doc, char *out, size_t cap);` |
@@ -204,29 +348,38 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `fb_level_name` | function | `include/freebug.h:96` | `const char *fb_level_name(int level);` |
 | `level` | type_alias | `include/freebug.h:36` | `typedef struct fb_entry { int level;` |
 | `truncated` | function | `include/freebug.h:69` | `* A message longer than FB_MAX_ENTRY_BYTES is stored truncated (not dropped). A * dropped push raises b->overflow...` |
-| `FC_FLEX_MEASURE_W` | macro | `include/freedom_config.h:45` | `#define FC_FLEX_MEASURE_W` |
-| `FC_FLEX_MIN_MEASURE_W` | macro | `include/freedom_config.h:51` | `#define FC_FLEX_MIN_MEASURE_W` |
-| `FC_FONT_CHAIN_MAX` | macro | `include/freedom_config.h:56` | `#define FC_FONT_CHAIN_MAX` |
-| `FC_FONT_FALLBACK_PX` | macro | `include/freedom_config.h:66` | `#define FC_FONT_FALLBACK_PX` |
-| `FC_HEADLESS_VIEW_H` | macro | `include/freedom_config.h:24` | `#define FC_HEADLESS_VIEW_H` |
-| `FC_LAZY_IMAGE_MARGIN_PX` | macro | `include/freedom_config.h:99` | `#define FC_LAZY_IMAGE_MARGIN_PX` |
-| `FC_MASK_CACHE_BYTES` | macro | `include/freedom_config.h:95` | `#define FC_MASK_CACHE_BYTES` |
-| `FC_MASK_CACHE_ENTRIES` | macro | `include/freedom_config.h:96` | `#define FC_MASK_CACHE_ENTRIES` |
-| `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:78` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
-| `FC_MAX_BOXES` | macro | `include/freedom_config.h:61` | `#define FC_MAX_BOXES` |
-| `FC_NET_LOAD_SETTLE_MS` | macro | `include/freedom_config.h:112` | `#define FC_NET_LOAD_SETTLE_MS` |
-| `FC_NET_POLL_MS` | macro | `include/freedom_config.h:113` | `#define FC_NET_POLL_MS` |
-| `FC_NET_TICK_SETTLE_MS` | macro | `include/freedom_config.h:116` | `#define FC_NET_TICK_SETTLE_MS` |
-| `FC_PNG_MARGIN` | macro | `include/freedom_config.h:34` | `#define FC_PNG_MARGIN` |
-| `FC_PNG_MAX_H` | macro | `include/freedom_config.h:39` | `#define FC_PNG_MAX_H` |
+| `FC_ANCHOR_HOLD_MS` | macro | `include/freedom_config.h:38` | `#define FC_ANCHOR_HOLD_MS` |
+| `FC_FLEX_MEASURE_W` | macro | `include/freedom_config.h:63` | `#define FC_FLEX_MEASURE_W` |
+| `FC_FLEX_MIN_MEASURE_W` | macro | `include/freedom_config.h:69` | `#define FC_FLEX_MIN_MEASURE_W` |
+| `FC_FONT_CHAIN_MAX` | macro | `include/freedom_config.h:74` | `#define FC_FONT_CHAIN_MAX` |
+| `FC_FONT_FALLBACK_PX` | macro | `include/freedom_config.h:84` | `#define FC_FONT_FALLBACK_PX` |
+| `FC_HEADLESS_VIEW_H` | macro | `include/freedom_config.h:42` | `#define FC_HEADLESS_VIEW_H` |
+| `FC_LAZY_IMAGE_MARGIN_PX` | macro | `include/freedom_config.h:117` | `#define FC_LAZY_IMAGE_MARGIN_PX` |
+| `FC_MASK_CACHE_BYTES` | macro | `include/freedom_config.h:113` | `#define FC_MASK_CACHE_BYTES` |
+| `FC_MASK_CACHE_ENTRIES` | macro | `include/freedom_config.h:114` | `#define FC_MASK_CACHE_ENTRIES` |
+| `FC_MAX_AUTHOR_CSS_BYTES` | macro | `include/freedom_config.h:96` | `#define FC_MAX_AUTHOR_CSS_BYTES` |
+| `FC_MAX_BOXES` | macro | `include/freedom_config.h:79` | `#define FC_MAX_BOXES` |
+| `FC_MONO_DEFAULT_PX` | macro | `include/freedom_config.h:26` | `#define FC_MONO_DEFAULT_PX` |
+| `FC_NET_LOAD_SETTLE_MS` | macro | `include/freedom_config.h:130` | `#define FC_NET_LOAD_SETTLE_MS` |
+| `FC_NET_POLL_MS` | macro | `include/freedom_config.h:131` | `#define FC_NET_POLL_MS` |
+| `FC_NET_TICK_SETTLE_MS` | macro | `include/freedom_config.h:134` | `#define FC_NET_TICK_SETTLE_MS` |
+| `FC_PNG_MARGIN` | macro | `include/freedom_config.h:52` | `#define FC_PNG_MARGIN` |
+| `FC_PNG_MAX_H` | macro | `include/freedom_config.h:57` | `#define FC_PNG_MAX_H` |
 | `FC_PNG_PAGE_W` | macro | `include/freedom_config.h:20` | `#define FC_PNG_PAGE_W` |
-| `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:90` | `#define FC_SHC_MAX_QUERIES` |
-| `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:84` | `#define FC_SHC_MAX_TEXT_BYTES` |
-| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:120` | `#define FC_TABLE_TRACK_MAX_PX` |
-| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:105` | `#define FC_TAB_OP_NET_BUDGET_MS` |
-| `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:30` | `#define FC_TRUSTED_JS_BUDGET_MS` |
-| `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:70` | `#define FC_UI_FONT_SIZE` |
+| `FC_SHC_MAX_QUERIES` | macro | `include/freedom_config.h:108` | `#define FC_SHC_MAX_QUERIES` |
+| `FC_SHC_MAX_TEXT_BYTES` | macro | `include/freedom_config.h:102` | `#define FC_SHC_MAX_TEXT_BYTES` |
+| `FC_SMOOTH_SCROLL_ANCHOR_MS` | macro | `include/freedom_config.h:35` | `#define FC_SMOOTH_SCROLL_ANCHOR_MS` |
+| `FC_SMOOTH_SCROLL_FRAME_MS` | macro | `include/freedom_config.h:32` | `#define FC_SMOOTH_SCROLL_FRAME_MS` |
+| `FC_SMOOTH_SCROLL_MS` | macro | `include/freedom_config.h:31` | `#define FC_SMOOTH_SCROLL_MS` |
+| `FC_TABLE_TRACK_MAX_PX` | macro | `include/freedom_config.h:138` | `#define FC_TABLE_TRACK_MAX_PX` |
+| `FC_TAB_OP_NET_BUDGET_MS` | macro | `include/freedom_config.h:123` | `#define FC_TAB_OP_NET_BUDGET_MS` |
+| `FC_TRUSTED_JS_BUDGET_MS` | macro | `include/freedom_config.h:48` | `#define FC_TRUSTED_JS_BUDGET_MS` |
+| `FC_UI_FONT_SIZE` | macro | `include/freedom_config.h:88` | `#define FC_UI_FONT_SIZE` |
 | `FREEDOM_CONFIG_H` | macro | `include/freedom_config.h:14` | `#define FREEDOM_CONFIG_H` |
+| `px` | function | `include/freedom_config.h:24` | `* it computes 12 px (getComputedStyle, measured on the parity host, tanda 102): the * reference renderer is what we...` |
+| `FREEDOM_GROUP_INDEX_H` | macro | `include/group_index.h:2` | `#define FREEDOM_GROUP_INDEX_H` |
+| `gi_build` | function | `include/group_index.h:20` | `size_t gi_build(const int *keys, size_t n, size_t nkeys, size_t *offs, size_t *items);` |
+| `group_index` | function | `include/group_index.h:9` | `* group_index (gi_) -- stable group-by of n items by an integer key, in CSR form, so a * per-group pass visits only...` |
 | `FREEDOM_HLS_H` | macro | `include/hls.h:2` | `#define FREEDOM_HLS_H` |
 | `HLS_MAX_MIRRORS` | macro | `include/hls.h:83` | `#define HLS_MAX_MIRRORS` |
 | `domain` | function | `include/hls.h:87` | `* domain (everything after the first label). Writes NUL-terminated into out and * returns the length, or 0 when...` |
@@ -343,158 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `img_pixels` | struct | `include/image_decode.h:56` | `` |
 | `img_pixels_free` | function | `include/image_decode.h:127` | `void img_pixels_free(img_pixels *p);` |
 | `img_status` | enum | `include/image_decode.h:41` | `` |
-| `inputs` | function | `include/image_decode.h:87` | `* Degenerate inputs (<= 0) yield (0,0). Pure. */ void img_fit(uint32_t iw, uint32_t ih, double box_w, double box_h...` |
-| `width` | type_alias | `include/image_decode.h:56` | `typedef struct img_pixels { uint32_t width;` |
-| `FREEDOM_IMPORT_MAP_H` | macro | `include/import_map.h:2` | `#define FREEDOM_IMPORT_MAP_H` |
-| `IM_MAX_ENTRIES` | macro | `include/import_map.h:18` | `#define IM_MAX_ENTRIES` |
-| `IM_MAX_SCOPES` | macro | `include/import_map.h:19` | `#define IM_MAX_SCOPES` |
-| `IM_MAX_TEXT` | macro | `include/import_map.h:17` | `#define IM_MAX_TEXT` |
-| `algorithm` | function | `include/import_map.h:13` | `* resolution algorithm (scopes, exact and prefix matches). URL resolution is the * caller's (the same resolver the...` |
-| `im_count` | function | `include/import_map.h:37` | `size_t im_count(const im_map *m);` |
-| `im_free` | function | `include/import_map.h:40` | `void im_free(im_map *m);` |
-| `im_map` | type_alias | `include/import_map.h:23` | `typedef struct im_map im_map;` |
-| `im_resolve` | function | `include/import_map.h:33` | `int im_resolve(const im_map *m, const char *base, const char *specifier, im_url_fn resolve, void *ctx, char *out...` |
-| `map` | function | `include/import_map.h:28` | `* map (fail closed = no mapping). NULL only on OOM. */ im_map *im_parse(const char *json, size_t len, const char...` |
-| `FREEDOM_INTERP_H` | macro | `include/interp.h:2` | `#define FREEDOM_INTERP_H` |
-| `IP_ITERATION_INFINITE` | macro | `include/interp.h:85` | `#define IP_ITERATION_INFINITE` |
-| `IP_MAX_KEYFRAMES` | macro | `include/interp.h:68` | `#define IP_MAX_KEYFRAMES` |
-| `ip_anim` | struct | `include/interp.h:101` | `` |
-| `ip_anim_current` | function | `include/interp.h:131` | `double ip_anim_current(const ip_anim *a);` |
-| `ip_anim_done` | function | `include/interp.h:134` | `int ip_anim_done(const ip_anim *a);` |
-| `ip_anim_init` | function | `include/interp.h:121` | `void ip_anim_init(ip_anim *a, ip_val_kind vk, const ip_ease_fn *ease, const ip_keyframe *kf, int n_kf, double...` |
-| `ip_anim_tick` | function | `include/interp.h:128` | `int ip_anim_tick(ip_anim *a, double dt_ms);` |
-| `ip_direction` | enum | `include/interp.h:87` | `` |
-| `ip_ease` | function | `include/interp.h:48` | `double ip_ease(double t, const ip_ease_fn *fn);` |
-| `ip_ease_fn` | struct | `include/interp.h:38` | `` |
-| `ip_easing` | enum | `include/interp.h:25` | `` |
-| `ip_fill_mode` | enum | `include/interp.h:94` | `` |
-| `ip_interp` | function | `include/interp.h:62` | `double ip_interp(ip_val_kind kind, double a, double b, double t);` |
-| `ip_keyframe` | struct | `include/interp.h:70` | `` |
-| `ip_kf_interp` | function | `include/interp.h:78` | `double ip_kf_interp(ip_val_kind val_kind, const ip_keyframe *kf, int n_kf, double pct);` |
-| `ip_lerp` | function | `include/interp.h:60` | `double ip_lerp(double a, double b, double t);` |
-| `ip_lerp_color` | function | `include/interp.h:61` | `uint32_t ip_lerp_color(uint32_t c1, uint32_t c2, double t);` |
-| `ip_val_kind` | enum | `include/interp.h:54` | `` |
-| `kind` | type_alias | `include/interp.h:37` | `typedef struct ip_ease_fn { ip_easing kind;` |
-| `pct` | type_alias | `include/interp.h:69` | `typedef struct ip_keyframe { double pct;` |
-| `val_kind` | type_alias | `include/interp.h:100` | `typedef struct ip_anim { ip_val_kind val_kind;` |
-| `FREEDOM_JS_DOM_H` | macro | `include/js_dom.h:2` | `#define FREEDOM_JS_DOM_H` |
-| `JD_IFRAME_TRACK_MAX` | macro | `include/js_dom.h:40` | `#define JD_IFRAME_TRACK_MAX` |
-| `JD_REPL_CSS_MAX` | macro | `include/js_dom.h:86` | `#define JD_REPL_CSS_MAX` |
-| `URLs` | function | `include/js_dom.h:238` | `* video URLs (.m3u8 then .mp4 patterns), and creates <video> elements in the document for * any found. Does NOT...` |
-| `getComputedStyle` | function | `include/js_dom.h:115` | `* getComputedStyle (spec/js_computed_style.md). fn writes the computed value of the * kebab-case `prop` of element h...` |
-| `global` | function | `include/js_dom.h:80` | `* globals: page scripts never see them and an existing page global (jQuery's `$`) is * never replaced. Read-only...` |
-| `host` | function | `include/js_dom.h:170` | `* for a trusted host (allow.conf AND js.conf);` |
-| `jd_click_state` | type_alias | `include/js_dom.h:35` | `typedef struct jd_click_state jd_click_state;` |
-| `jd_click_state_free` | function | `include/js_dom.h:125` | `* jd_click_state_free(). Bound to one context via jd_install_events(). */ jd_click_state *jd_click_state_new(void);` |
-| `jd_flush_custom_elements` | function | `include/js_dom.h:263` | `void jd_flush_custom_elements(js_context *ctx);` |
-| `jd_get_cookies` | function | `include/js_dom.h:181` | `int jd_get_cookies(js_context *ctx, char *buf, size_t bufsz);` |
-| `jd_iframe_track` | struct | `include/js_dom.h:41` | `` |
-| `jd_install_repl_api` | function | `include/js_dom.h:89` | `* jd_install_repl_api (the shim reads and deletes the carrier global, so a page script never * sees it). css == NULL...` |
-| `jd_opaque` | struct | `include/js_dom.h:46` | `` |
-| `jd_process_iframes` | function | `include/js_dom.h:231` | `* BEFORE jd_process_iframes() (so iframes are in the DOM for it to process). * ctx == NULL => JD_ERR_NULL_ARG. */...` |
-| `jd_status` | enum | `include/js_dom.h:25` | `` |
-| `jd_video_from_scripts` | function | `include/js_dom.h:252` | `size_t jd_video_from_scripts(dom_index *idx, const char *const *script_texts, const size_t *script_lens, size_t...` |
-| `opaque` | function | `include/js_dom.h:73` | `* the engine runtime opaque (unreachable from script);` |
-| `out_status` | function | `include/js_dom.h:189` | `* On success returns 0 and sets *out_status (HTTP status, 0 if unknown), *out_body / * *out_body_len (response...` |
-| `place` | function | `include/js_dom.h:94` | `* configured place (spec/identity.md), no sensor, no network. Call it ONLY for a trusted host * with geolocation set...` |
-| `preventDefault` | function | `include/js_dom.h:141` | `* preventDefault() was called, 1 if the default (form submission) should proceed. * ctx == NULL or no form found =>...` |
-| `processed` | type_alias | `include/js_dom.h:41` | `typedef struct jd_iframe_track { dom_node_id processed[JD_IFRAME_TRACK_MAX];` |
-| `run` | function | `include/js_dom.h:134` | `* run (no handler registered, or handlers ran without calling preventDefault()), * and 0 if a handler called...` |
-| `FREEDOM_JS_ENV_H` | macro | `include/js_env.h:2` | `#define FREEDOM_JS_ENV_H` |
-| `JE_READBACK_EXACT` | macro | `include/js_env.h:59` | `#define JE_READBACK_EXACT` |
-| `je_status` | enum | `include/js_env.h:27` | `` |
-| `poisoned` | function | `include/js_env.h:49` | `* readback is poisoned (deterministic within an origin, unlinkable across * sessions and across origins) to defeat...` |
-| `FREEDOM_JS_GEOM_H` | macro | `include/js_geom.h:2` | `#define FREEDOM_JS_GEOM_H` |
-| `JG_COORD_MAX` | macro | `include/js_geom.h:26` | `#define JG_COORD_MAX` |
-| `JG_HEADER_N` | macro | `include/js_geom.h:27` | `#define JG_HEADER_N` |
-| `JG_MAX_DEPTH` | macro | `include/js_geom.h:25` | `#define JG_MAX_DEPTH` |
-| `JG_MAX_RECTS` | macro | `include/js_geom.h:24` | `#define JG_MAX_RECTS` |
-| `JG_RECT_N` | macro | `include/js_geom.h:28` | `#define JG_RECT_N` |
-| `jg_add` | function | `include/js_geom.h:52` | `int jg_add(jg_table *t, dom_node_id node, double x, double y, double w, double h);` |
-| `jg_aggregate` | function | `include/js_geom.h:65` | `int jg_aggregate(jg_table *t, dom_node_id (*parent)(void *ctx, dom_node_id node), void *ctx);` |
-| `jg_decode` | function | `include/js_geom.h:77` | `int jg_decode(const int32_t *in, size_t n, jg_table *out);` |
-| `jg_encode` | function | `include/js_geom.h:71` | `int jg_encode(const jg_table *t, int32_t *out, size_t cap);` |
-| `jg_find` | function | `include/js_geom.h:59` | `const jg_rect *jg_find(const jg_table *t, dom_node_id node);` |
-| `jg_finish` | function | `include/js_geom.h:56` | `int jg_finish(jg_table *t);` |
-| `jg_free` | function | `include/js_geom.h:47` | `void jg_free(jg_table *t);` |
-| `jg_hash` | function | `include/js_geom.h:80` | `uint64_t jg_hash(const jg_table *t);` |
-| `jg_init` | function | `include/js_geom.h:44` | `void jg_init(jg_table *t);` |
-| `jg_rect` | struct | `include/js_geom.h:30` | `` |
-| `jg_table` | struct | `include/js_geom.h:35` | `` |
-| `jg_wire_len` | function | `include/js_geom.h:68` | `size_t jg_wire_len(const jg_table *t);` |
-| `node` | type_alias | `include/js_geom.h:29` | `typedef struct jg_rect { dom_node_id node;` |
-| `FREEDOM_JS_INTL_H` | macro | `include/js_intl.h:6` | `#define FREEDOM_JS_INTL_H` |
-| `ji_install` | function | `include/js_intl.h:16` | `int ji_install(js_context *ctx);` |
-| `FREEDOM_JS_LOCATION_H` | macro | `include/js_location.h:2` | `#define FREEDOM_JS_LOCATION_H` |
-| `JD_HIST_MAX` | macro | `include/js_location.h:31` | `#define JD_HIST_MAX` |
-| `acting` | function | `include/js_location.h:49` | `* The caller MUST gate the raw target with ln_resolve before acting (Zero Trust). */ int...` |
-| `jd_pop_state` | function | `include/js_location.h:44` | `int jd_pop_state(js_context *ctx, int index);` |
-| `jd_take_history` | function | `include/js_location.h:38` | `char *jd_take_history(js_context *ctx, int *go);` |
-| `reads` | function | `include/js_location.h:25` | `* reads (NULL => only href is known, the rest fall back to stub defaults). Call after * jd_install, on the page's...` |
-| `FREEDOM_JS_NATIVE_H` | macro | `include/js_native.h:12` | `#define FREEDOM_JS_NATIVE_H` |
-| `failure` | function | `include/js_native.h:22` | `* engine failure (the page then simply runs with the unsealed surface). */ int jn_seal(js_context *ctx);` |
-| `FREEDOM_JS_POLICY_H` | macro | `include/js_policy.h:2` | `#define FREEDOM_JS_POLICY_H` |
-| `allowlist` | function | `include/js_policy.h:34` | `* allowlist (e.g. hb_is_allowlisted over js.conf). Fails closed: an unknown mode * yields false. */ bool...` |
-| `jsp_mode` | enum | `include/js_policy.h:27` | `` |
-| `jsp_mode_str` | function | `include/js_policy.h:64` | `const char *jsp_mode_str(jsp_mode mode);` |
-| `jsp_present_trusted` | function | `include/js_policy.h:54` | `bool jsp_present_trusted(int host_allowlisted);` |
-| `jsp_trusted` | function | `include/js_policy.h:45` | `bool jsp_trusted(bool js_enabled, int host_allowlisted);` |
-| `membership` | function | `include/js_policy.h:16` | `* membership (the allowlist itself is matched by the hostblock module, which * already covers subdomains). No I/O...` |
-| `FREEDOM_JS_SANDBOX_H` | macro | `include/js_sandbox.h:2` | `#define FREEDOM_JS_SANDBOX_H` |
-| `JS_DEFAULT_MAX_SOURCE` | macro | `include/js_sandbox.h:66` | `#define JS_DEFAULT_MAX_SOURCE` |
-| `JS_DEFAULT_MEM_LIMIT` | macro | `include/js_sandbox.h:67` | `#define JS_DEFAULT_MEM_LIMIT` |
-| `JS_DEFAULT_STACK_LIMIT` | macro | `include/js_sandbox.h:70` | `#define JS_DEFAULT_STACK_LIMIT` |
-| `JS_DEFAULT_TIME_BUDGET` | macro | `include/js_sandbox.h:71` | `#define JS_DEFAULT_TIME_BUDGET` |
-| `JS_LOC_FILE_MAX` | macro | `include/js_sandbox.h:64` | `#define JS_LOC_FILE_MAX` |
-| `JS_MAX_STACK_LIMIT` | macro | `include/js_sandbox.h:69` | `#define JS_MAX_STACK_LIMIT` |
-| `JS_MIN_STACK_LIMIT` | macro | `include/js_sandbox.h:68` | `#define JS_MIN_STACK_LIMIT` |
-| `JS_MODULE_BYTES_MAX` | macro | `include/js_sandbox.h:116` | `#define JS_MODULE_BYTES_MAX` |
-| `JS_MODULE_MAX` | macro | `include/js_sandbox.h:115` | `#define JS_MODULE_MAX` |
-| `JS_PROFILE_PERIOD_MS` | macro | `include/js_sandbox.h:165` | `#define JS_PROFILE_PERIOD_MS` |
-| `JS_REALM_MAX` | macro | `include/js_sandbox.h:215` | `#define JS_REALM_MAX` |
-| `JS_REJECT_MAX` | macro | `include/js_sandbox.h:218` | `#define JS_REJECT_MAX` |
-| `JS_THROW_SLOTS` | macro | `include/js_sandbox.h:174` | `#define JS_THROW_SLOTS` |
-| `global` | function | `include/js_sandbox.h:181` | `* Freebug REPL installs: its shim takes them once and deletes them from the global (like * __netLog), because the...` |
-| `handle` | function | `include/js_sandbox.h:198` | `* as an opaque handle (so this header stays free of backend types), or NULL. * Valid only while ctx is alive....` |
-| `js_context` | type_alias | `include/js_sandbox.h:47` | `typedef struct js_context js_context;` |
-| `js_context_free` | function | `include/js_sandbox.h:96` | `void js_context_free(js_context *ctx);` |
-| `js_limits` | struct | `include/js_sandbox.h:39` | `` |
-| `js_loc_from_stack` | function | `include/js_sandbox.h:150` | `int js_loc_from_stack(const char *stack, char *file_out, size_t file_cap, int *line, int *col);` |
-| `js_prime_stack_limit` | function | `include/js_sandbox.h:79` | `void js_prime_stack_limit(void);` |
-| `js_profile_enable` | function | `include/js_sandbox.h:166` | `void js_profile_enable(js_context *ctx);` |
-| `js_profile_report` | function | `include/js_sandbox.h:167` | `size_t js_profile_report(js_context *ctx, char *out, size_t cap, size_t top_n);` |
-| `js_pump_jobs` | function | `include/js_sandbox.h:195` | `int js_pump_jobs(js_context *ctx, int max_jobs);` |
-| `js_result` | struct | `include/js_sandbox.h:49` | `` |
-| `js_result_free` | function | `include/js_sandbox.h:187` | `void js_result_free(js_result *res);` |
-| `js_set_current_script` | function | `include/js_sandbox.h:207` | `void js_set_current_script(js_context *ctx, const char *src, const char *type);` |
-| `js_set_module_host` | function | `include/js_sandbox.h:129` | `void js_set_module_host(js_context *ctx, js_module_resolve_fn resolve, js_module_fetch_fn fetch, void *host);` |
-| `js_set_time_budget` | function | `include/js_sandbox.h:158` | `void js_set_time_budget(js_context *ctx, uint64_t budget_ms);` |
-| `js_stack_limit_for` | function | `include/js_sandbox.h:75` | `size_t js_stack_limit_for(size_t soft_stack);` |
-| `js_status` | enum | `include/js_sandbox.h:24` | `` |
-| `js_throws_report` | function | `include/js_sandbox.h:176` | `size_t js_throws_report(js_context *ctx, char *out, size_t cap, size_t top_n);` |
-| `loaded` | function | `include/js_sandbox.h:124` | `* NULL when it cannot be loaded (policy refusal, network error, not JavaScript). */ typedef char...` |
-| `max_source_bytes` | type_alias | `include/js_sandbox.h:39` | `typedef struct js_limits { size_t max_source_bytes;` |
-| `out` | function | `include/js_sandbox.h:163` | `* into out (NUL-terminated, truncated at cap);` |
-| `silently` | function | `include/js_sandbox.h:171` | `* fails silently (an exception swallowed by a try/catch, a rejected promise nobody awaits) shows * its real first...` |
-| `status` | type_alias | `include/js_sandbox.h:48` | `typedef struct js_result { js_status status;` |
-| `FREEDOM_JS_TRUSTED_H` | macro | `include/js_trusted.h:2` | `#define FREEDOM_JS_TRUSTED_H` |
-| `JT_WS_MAX` | macro | `include/js_trusted.h:46` | `#define JT_WS_MAX` |
-| `JT_WS_MAX_BYTES` | macro | `include/js_trusted.h:48` | `#define JT_WS_MAX_BYTES` |
-| `JT_WS_MAX_OPS` | macro | `include/js_trusted.h:47` | `#define JT_WS_MAX_OPS` |
-| `jt_take_opens` | function | `include/js_trusted.h:42` | `char *jt_take_opens(js_context *ctx);` |
-| `jt_take_storage` | function | `include/js_trusted.h:104` | `int jt_take_storage(js_context *ctx, char **out, size_t *len);` |
-| `jt_take_ws` | function | `include/js_trusted.h:86` | `size_t jt_take_ws(js_context *ctx, jt_ws_op *ops, size_t cap);` |
-| `jt_ws_event` | function | `include/js_trusted.h:92` | `int jt_ws_event(js_context *ctx, int id, int kind, int code, const char *data, size_t len);` |
-| `jt_ws_event_kind` | enum | `include/js_trusted.h:68` | `` |
-| `jt_ws_kind` | enum | `include/js_trusted.h:50` | `` |
-| `jt_ws_op` | struct | `include/js_trusted.h:61` | `` |
-| `jt_ws_ops_free` | function | `include/js_trusted.h:87` | `void jt_ws_ops_free(jt_ws_op *ops, size_t n);` |
-| `kind` | type_alias | `include/js_trusted.h:60` | `typedef struct jt_ws_op { int kind;` |
-| `null` | function | `include/js_trusted.h:24` | `* noopener semantics: it returns null (no cross-window reference, so no same-origin * channel) and only records up...` |
-| `parent` | function | `include/js_trusted.h:80` | `* socket: the object records operations for the parent (jt_take_ws). */ jd_status jt_enable_ws(js_context *ctx);` |
-| `realm` | function | `include/js_trusted.h:107` | `* runs in its own realm (js_install_realms) of this context's runtime, inside the * same confined process and...` |
-| `FREEDOM_LAZY_LOAD_H` | macro | `include/lazy_load.h:2` | `#define FREEDOM_LAZY_LOAD_H` |
-| `FREEDOM_LINK_NAV_H` | macro | `include/link_nav.h:2` | `#define FREEDOM_LINK_NAV_H` |
-| `LN_MAX_FRAGMENT` | macro | `include/link_nav.h:38` | `#define LN_MAX_FRAGMENT` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)

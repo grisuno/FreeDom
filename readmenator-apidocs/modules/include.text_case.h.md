@@ -119,6 +119,8 @@ Returns n, or 0 (out untouched) when s/out is NULL or cap < n.
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_text_case.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="tc_smallcaps_runs"></a>
@@ -145,6 +147,8 @@ Returns the runs written; when cap is too small the last run absorbs the remaind
 | `cap` | `size_t` |  |  |
 
 **Returns:** `size_t`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_text_case.c.md#llvmfuzzertestoneinput)
 
 ---
 

@@ -1,14 +1,14 @@
 # src: text_shape
 
-*Community 3 | 54 files | cohesion 0.58*
+*Community 3 | 55 files | cohesion 0.60*
 
 ## Definition
 
-This community groups 54 file(s) rooted at `src` with dominant language c (cohesion 0.58). Central symbols: `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FREEDOM_DATA_URL_H`, `FREEDOM_HLS_H`. Core file: `src/text_shape.c` (75 symbols). Documented purpose: test_wl_display — CMocka suite for the pure Wayland socket picker..
+This community groups 55 file(s) rooted at `src` with dominant language c (cohesion 0.60). Central symbols: `ASCII`, `BLOCKED`, `CSS_DROPS_REPORT_MAX`, `DU_MAX_ENCODED_LEN`, `EXIT_ERROR`, `EXIT_OK`, `EXIT_USAGE`, `FREEDOM_DATA_URL_H`. Core file: `src/text_shape.c` (75 symbols). Documented purpose: libFuzzer harness for hls (spec/hls.md): hostile playlist text, hostile.
 
 ## Files
 
-### `src` (19 files)
+### `src` (17 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -17,10 +17,8 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 | `src/hls.c` | c | utility | 20 | no |
 | `src/host_conf.c` | c | utility | 9 | no |
 | `src/hostblock.c` | c | utility | 19 | no |
-| `src/js_policy.c` | c | business_logic | 6 | no |
-| `src/link_nav.c` | c | utility | 10 | no |
 
-### `include` (18 files)
+### `include` (16 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -29,10 +27,8 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 | `include/host_conf.h` | h | utility | 9 | no |
 | `include/hostblock.h` | h | utility | 10 | no |
 | `include/js_policy.h` | h | business_logic | 7 | no |
-| `include/link_nav.h` | h | utility | 11 | no |
-| `include/media_decoder.h` | h | utility | 12 | no |
 
-### `tests` (17 files)
+### `tests` (15 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
@@ -41,13 +37,31 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 | `tests/test_host_conf.c` | c | testing | 8 | no |
 | `tests/test_hostblock.c` | c | testing | 24 | no |
 | `tests/test_js_policy.c` | c | testing | 5 | no |
-| `tests/test_link_nav.c` | c | testing | 22 | no |
 
-*... and 34 more files in this community.*
+### `fuzz` (7 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `fuzz/fuzz_data_url.c` | c | data_access | 1 | no |
+| `fuzz/fuzz_hls.c` | c | utility | 1 | yes |
+| `fuzz/fuzz_request_headers.c` | c | utility | 0 | no |
+| `fuzz/fuzz_text_shape.c` | c | utility | 4 | no |
+| `fuzz/fuzz_tls_impersonate.c` | c | utility | 0 | no |
+
+*... and 35 more files in this community.*
 
 
 ## Key Symbols
 
+- `worker` (function, `fuzz/fuzz_data_url.c:6`) `* confined tab worker (OP_DECODE_IMAGE_B64) on bytes the parent only sliced, nev`
+- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_hls.c:13`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- `FZ_CAP` (macro, `fuzz/fuzz_text_shape.c:23`) `#define FZ_CAP`
+- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_text_shape.c:25`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- `glyph` (function, `fuzz/fuzz_text_shape.c:54`) `* one lacks a glyph (spec/text_shape.md 8);`
+- `ASCII` (function, `fuzz/fuzz_text_shape.c:56`) `* printable ASCII (one run, the requested face) the two must agree. */ double m`
+- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_webfont.c:11`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+- `FZ_GLYPHS` (macro, `fuzz/fuzz_webfont_register.c:24`) `#define FZ_GLYPHS`
+- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_webfont_register.c:26`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 - `FREEDOM_DATA_URL_H` (macro, `include/data_url.h:2`) `#define FREEDOM_DATA_URL_H`
 - `allocation` (function, `include/data_url.h:21`) `* * du_base64_payload does no allocation (it only slices the caller's url string`
 - `du_status` (enum, `include/data_url.h:27`)
@@ -69,29 +83,15 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 - `FREEDOM_HOST_CONF_H` (macro, `include/host_conf.h:2`) `#define FREEDOM_HOST_CONF_H`
 - `HCF_MAX_DIRS` (macro, `include/host_conf.h:15`) `#define HCF_MAX_DIRS`
 - `HCF_PATH_MAX` (macro, `include/host_conf.h:16`) `#define HCF_PATH_MAX`
-- `HCF_MAX_FILE_BYTES` (macro, `include/host_conf.h:18`) `#define HCF_MAX_FILE_BYTES`
-- `hcf_dirs` (struct, `include/host_conf.h:20`)
-- `hcf_search_dirs` (function, `include/host_conf.h:28`) `void hcf_search_dirs(const char *env, const char *home, hcf_dirs *out);` - Pure. Fills out with, in order: env (when non-empty), home + "/.config/freedom" (when home is non-em
-- `hcf_search_dirs_from_env` (function, `include/host_conf.h:31`) `void hcf_search_dirs_from_env(hcf_dirs *out);` - Pure. Fills out with, in order: env (when non-empty), home + "/.config/freedom" (when home is non-em
-- `hcf_load_filter` (function, `include/host_conf.h:35`) `hb_set *hcf_load_filter(const hcf_dirs *dirs);` - block.conf (BLOCK) + allow.conf (ALLOW) from every directory, cumulative. Missing or * unreadable fi
-- `hcf_load_allowlist` (function, `include/host_conf.h:39`) `hb_set *hcf_load_allowlist(const hcf_dirs *dirs, const char *fname);` - One file (js.conf, allow.conf, ...) from every directory as an ALLOW list. NULL only on * OOM or a N
-- `FREEDOM_HOSTBLOCK_H` (macro, `include/hostblock.h:2`) `#define FREEDOM_HOSTBLOCK_H`
-- `hb_set` (type_alias, `include/hostblock.h:29`) `typedef struct hb_set hb_set;` - caller reads the list files and passes their text in; this module parses them into hash tables and d
-- `hb_list` (enum, `include/hostblock.h:32`)
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 64
-- Cross-boundary resolved imports (EXTRACTED): 47
+- Internal resolved imports (EXTRACTED): 67
+- Cross-boundary resolved imports (EXTRACTED): 44
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
-- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui_internal.h imports include/video_controls.h.
-- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
-- [EXTRACTED] depends_on community 3 <-> 2 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.
-- [EXTRACTED] depends_on community 3 <-> 5 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/identity.h.
-- [EXTRACTED] depends_on community 3 <-> 9 (strength 0.9): Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.
+- [EXTRACTED] depends_on community 1 <-> 3 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.
 
 ## Risks
 
@@ -101,18 +101,24 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 
 ## Open Questions
 
-- Why do 53 file(s) lack file-level docs (e.g. `include/data_url.h`)? What purpose do they serve?
+- Why do 52 file(s) lack file-level docs (e.g. `fuzz/fuzz_data_url.c`)? What purpose do they serve?
 - What would break if the most connected file in src: text_shape changed?
-- Should src: text_shape be split, given cohesion 0.58?
+- Should src: text_shape be split, given cohesion 0.60?
 
 ## Sources
 
+- `fuzz/fuzz_data_url.c`
+- `fuzz/fuzz_hls.c`
+- `fuzz/fuzz_request_headers.c`
+- `fuzz/fuzz_text_shape.c`
+- `fuzz/fuzz_tls_impersonate.c`
+- `fuzz/fuzz_webfont.c`
+- `fuzz/fuzz_webfont_register.c`
 - `include/data_url.h`
 - `include/hls.h`
 - `include/host_conf.h`
 - `include/hostblock.h`
 - `include/js_policy.h`
-- `include/link_nav.h`
 - `include/media_decoder.h`
 - `include/net_realm.h`
 - `include/perf_trace.h`
@@ -120,11 +126,5 @@ This community groups 54 file(s) rooted at `src` with dominant language c (cohes
 - `include/request_policy.h`
 - `include/text_shape.h`
 - `include/tls_impersonate.h`
-- `include/video_controls.h`
 - `include/webcaps.h`
-- `include/webfont.h`
-- `include/webfont_load.h`
-- `include/wl_display.h`
-- `src/data_url.c`
-- `src/freedom.c`
-- *... and 34 more*
+- *... and 35 more*

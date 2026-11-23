@@ -304,6 +304,8 @@ Returns < 0.0 on any failure so the caller can fall back to the toy-API measurem
 
 **Returns:** `double`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_text_shape.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_webfont_register.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="tsh_webfont_register"></a>
@@ -332,7 +334,7 @@ Re-registering a key replaces it. Returns 0 on success, -1 fail-closed (NULL/emp
 
 **Returns:** `int`
 
-*Called by:* [`WF_DATA_URL_MAX`](src.webfont_load.c.md#wf_data_url_max)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_webfont_register.c.md#llvmfuzzertestoneinput), [`WF_DATA_URL_MAX`](src.webfont_load.c.md#wf_data_url_max)
 
 ---
 
@@ -368,7 +370,7 @@ Drops every registered webfont (document teardown / navigation).
 
 Idempotent, NULL-safe by construction (no args). tsh_shutdown also clears the table.
 
-*Called by:* [`first`](gui.browser_ui.c.md#first), [`first`](src.freedom.c.md#first)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_webfont_register.c.md#llvmfuzzertestoneinput), [`first`](gui.browser_ui.c.md#first), [`first`](src.freedom.c.md#first)
 
 ---
 

@@ -11,7 +11,11 @@ The window runs with FREEDOM_JS_PROFILE=1, so every frame prints its phases on s
 ("gui-profile paint(total) ..." and the layout_doc / position_doc lines). Only the frames
 painted after the first wheel notch are counted.
 
-Usage: guiscroll.py [--bin PATH] [--notches N] <page.html> ...
+With --hover the wheel is replaced by N pointer moves across the content (what a user does
+while reading): each move runs the hover hit-tests ("gui-profile hover") and repaints only
+when what is under the pointer changed. The fifth column is then the median hover ms.
+
+Usage: guiscroll.py [--bin PATH] [--notches N] [--hover] <page.html> ...
 Prints one line per page:  <name>       <frames>        <median frame ms>       <p90 frame ms>  <median layout ms>
 Exit 0 when every page was measured, 1 on a failed measurement, 2 when the environment is missing.
 
@@ -43,7 +47,7 @@ flowchart LR
 
 ### `phase_ms`
 
-`function` | [tools/guiscroll.py:34](../../tools/guiscroll.py#L34)
+`function` | [tools/guiscroll.py:38](../../tools/guiscroll.py#L38)
 
 ```python
 def phase_ms(line, phase)
@@ -64,10 +68,10 @@ def phase_ms(line, phase)
 
 ### `one_page`
 
-`function` | [tools/guiscroll.py:44](../../tools/guiscroll.py#L44)
+`function` | [tools/guiscroll.py:48](../../tools/guiscroll.py#L48)
 
 ```python
-def one_page(binary, page, env, prof, tmp, notches)
+def one_page(binary, page, env, prof, tmp, notches, hover=False)
 ```
 
 **Parameters**
@@ -80,6 +84,7 @@ def one_page(binary, page, env, prof, tmp, notches)
 | `prof` |  |  |  |
 | `tmp` |  |  |  |
 | `notches` |  |  |  |
+| `hover` |  | `False` |  |
 
 *Calls:* [`phase_ms`](#phase_ms)
 
@@ -91,7 +96,7 @@ def one_page(binary, page, env, prof, tmp, notches)
 
 ### `main`
 
-`function` | [tools/guiscroll.py:85](../../tools/guiscroll.py#L85)
+`function` | [tools/guiscroll.py:95](../../tools/guiscroll.py#L95)
 
 ```python
 def main()
@@ -105,7 +110,7 @@ def main()
 
 ### `procs_display`
 
-`function` | [tools/guiscroll.py:134](../../tools/guiscroll.py#L134)
+`function` | [tools/guiscroll.py:149](../../tools/guiscroll.py#L149)
 
 ```python
 def procs_display(procs)
@@ -129,7 +134,7 @@ The X display guitime.start_display put Xvfb on (it is the second process's argv
 
 ### `LOAD_WAIT_S`
 
-`constant` | [tools/guiscroll.py:28](../../tools/guiscroll.py#L28)
+`constant` | [tools/guiscroll.py:32](../../tools/guiscroll.py#L32)
 
 ```python
 LOAD_WAIT_S = 6.0
@@ -141,7 +146,7 @@ LOAD_WAIT_S = 6.0
 
 ### `WHEEL_GAP_S`
 
-`constant` | [tools/guiscroll.py:29](../../tools/guiscroll.py#L29)
+`constant` | [tools/guiscroll.py:33](../../tools/guiscroll.py#L33)
 
 ```python
 WHEEL_GAP_S = 0.08
@@ -153,7 +158,7 @@ WHEEL_GAP_S = 0.08
 
 ### `SETTLE_S`
 
-`constant` | [tools/guiscroll.py:30](../../tools/guiscroll.py#L30)
+`constant` | [tools/guiscroll.py:34](../../tools/guiscroll.py#L34)
 
 ```python
 SETTLE_S = 1.5
@@ -165,7 +170,7 @@ SETTLE_S = 1.5
 
 ### `MARK`
 
-`constant` | [tools/guiscroll.py:31](../../tools/guiscroll.py#L31)
+`constant` | [tools/guiscroll.py:35](../../tools/guiscroll.py#L35)
 
 ```python
 MARK = 'guiscroll-start'

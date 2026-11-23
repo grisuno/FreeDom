@@ -285,20 +285,21 @@ static void test_dump_layout_c...`
   - `test_rejects_http_url` (function, line 4018) `static void test_rejects_http_url(void **state)`
   - `white` (function, line 4080) `* and not white (the old behaviour where only text rows got background fills). */
 static void tes...`
-  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 4176) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
-  - `test_download_png_flex_container_paints_one_band` (function, line 4201) `static void test_download_png_flex_container_paints_one_band(void **state)`
-  - `test_download_png_inline_block_shrinks_and_centers` (function, line 4221) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
-  - `test_download_png_inline_svg_path_and_drops_image` (function, line 4265) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
-  - `test_dump_timings_prints_stages` (function, line 4281) `static void test_dump_timings_prints_stages(void **state)`
-  - `test_dump_layout_shrink_pill_nested_container` (function, line 4311) `static void test_dump_layout_shrink_pill_nested_container(void **state)`
-  - `test_dump_layout_inline_input_shares_line` (function, line 4348) `static void test_dump_layout_inline_input_shares_line(void **state)`
-  - `test_dump_layout_oof_label_does_not_widen_nested_container` (function, line 4394) `static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state)`
-  - `test_dump_layout_br_after_block_is_a_line` (function, line 4429) `static void test_dump_layout_br_after_block_is_a_line(void **state)`
-  - `test_dump_layout_flex_item_contains_block_margins` (function, line 4449) `static void test_dump_layout_flex_item_contains_block_margins(void **state)`
-  - `test_dump_layout_flex_definite_height_centres_item` (function, line 4474) `static void test_dump_layout_flex_definite_height_centres_item(void **state)`
-  - `test_download_png_text_color_alpha_blends` (function, line 4498) `static void test_download_png_text_color_alpha_blends(void **state)`
-  - `test_dump_layout_ua_margin_scales_with_font_size` (function, line 4535) `static void test_dump_layout_ua_margin_scales_with_font_size(void **state)`
-  - `main` (function, line 4581) `int main(void)`
+  - `test_png_leading_inline_block_shares_line` (function, line 4186) `static void test_png_leading_inline_block_shares_line(void **state)`
+  - `test_download_png_gradient_box_text_keeps_gradient` (function, line 4206) `static void test_download_png_gradient_box_text_keeps_gradient(void **state)`
+  - `test_download_png_flex_container_paints_one_band` (function, line 4231) `static void test_download_png_flex_container_paints_one_band(void **state)`
+  - `test_download_png_inline_block_shrinks_and_centers` (function, line 4251) `static void test_download_png_inline_block_shrinks_and_centers(void **state)`
+  - `test_download_png_inline_svg_path_and_drops_image` (function, line 4295) `static void test_download_png_inline_svg_path_and_drops_image(void **state)`
+  - `test_dump_timings_prints_stages` (function, line 4311) `static void test_dump_timings_prints_stages(void **state)`
+  - `test_dump_layout_shrink_pill_nested_container` (function, line 4341) `static void test_dump_layout_shrink_pill_nested_container(void **state)`
+  - `test_dump_layout_inline_input_shares_line` (function, line 4378) `static void test_dump_layout_inline_input_shares_line(void **state)`
+  - `test_dump_layout_oof_label_does_not_widen_nested_container` (function, line 4424) `static void test_dump_layout_oof_label_does_not_widen_nested_container(void **state)`
+  - `test_dump_layout_br_after_block_is_a_line` (function, line 4459) `static void test_dump_layout_br_after_block_is_a_line(void **state)`
+  - `test_dump_layout_flex_item_contains_block_margins` (function, line 4479) `static void test_dump_layout_flex_item_contains_block_margins(void **state)`
+  - `test_dump_layout_flex_definite_height_centres_item` (function, line 4504) `static void test_dump_layout_flex_definite_height_centres_item(void **state)`
+  - `test_download_png_text_color_alpha_blends` (function, line 4528) `static void test_download_png_text_color_alpha_blends(void **state)`
+  - `test_dump_layout_ua_margin_scales_with_font_size` (function, line 4565) `static void test_dump_layout_ua_margin_scales_with_font_size(void **state)`
+  - `main` (function, line 4611) `int main(void)`
   - `rows` (function, line 1602) `* rows (the bug) made it several times taller. */ assert_true(px.height < 60);`
   - `bottom` (function, line 3539) `* at the page bottom (the grey-stripe bug had npositioned pushing it away). */ /* (Each sized float now has a box of...`
   - `_DEFAULT_SOURCE` (macro, line 1) `#define _DEFAULT_SOURCE`
@@ -309,6 +310,18 @@ static void tes...`
   - `PIXEL` (macro, line 509) `#define PIXEL(yy, xx)`
   - `NAV_CSS` (macro, line 2758) `#define NAV_CSS`
 - Depends on: `include/image_decode.h`
+
+## tests/test_group_index.c
+- Doc: Tests for group_index (spec/group_index.md).
+- Layer: testing
+- Language: c
+- Symbols:
+  - `test_groups_stable_and_excludes_out_of_range` (function, line 10) `static void test_groups_stable_and_excludes_out_of_range(void **state)`
+  - `test_empty_input` (function, line 24) `static void test_empty_input(void **state)`
+  - `test_no_keys` (function, line 31) `static void test_no_keys(void **state)`
+  - `test_invalid_arguments` (function, line 40) `static void test_invalid_arguments(void **state)`
+  - `main` (function, line 50) `int main(void)`
+- Depends on: `include/group_index.h`
 
 ## tests/test_hls.c
 - Doc: test_unterminated_tag_stays_in_bounds: static void test_segment_single_packet_and_bmff(void...

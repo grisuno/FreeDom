@@ -18,6 +18,11 @@
 - Layer: utility
 - Language: sh
 
+## fuzz.sh
+- Doc: Thin wrapper.
+- Layer: utility
+- Language: sh
+
 ## install.sh
 - Doc: Exit immediately if a command exits with a non-zero status,
 - Layer: utility

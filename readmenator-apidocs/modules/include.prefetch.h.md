@@ -221,6 +221,8 @@ Fills out (owns the URLs; free with pf_list_free). Comment, <script> and <style>
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefetch.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="pf_list_free"></a>
@@ -238,6 +240,8 @@ void pf_list_free(pf_list *l);
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `l` | `pf_list *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefetch.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -283,6 +287,8 @@ Span of the first <script type=importmap> body in html (pure, bounded): 1 with [
 | `n` | `size_t *` |  |  |
 
 **Returns:** `int`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_prefetch.c.md#llvmfuzzertestoneinput)
 
 ---
 

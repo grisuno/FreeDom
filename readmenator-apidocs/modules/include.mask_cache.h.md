@@ -96,6 +96,8 @@ NULL when either bound is 0 or on allocation failure.
 
 **Returns:** `mkc_cache *`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_mask_cache.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="mkc_free"></a>
@@ -118,6 +120,8 @@ NULL-safe.
 |---|---|---|---|
 | `c` | `mkc_cache *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_mask_cache.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="mkc_clear"></a>
@@ -139,6 +143,8 @@ NULL-safe, idempotent.
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `c` | `mkc_cache *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_mask_cache.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -166,6 +172,8 @@ Valid until the next mkc_put / mkc_clear / mkc_free.
 
 **Returns:** `unsigned char *`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_mask_cache.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="mkc_put"></a>
@@ -192,6 +200,8 @@ NULL, cache untouched, when an argument is invalid (stride < w, a size <= 0, an 
 
 **Returns:** `unsigned char *`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_mask_cache.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="mkc_bytes"></a>
@@ -214,6 +224,8 @@ Bytes currently retained / number of masks retained (0 for NULL).
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_mask_cache.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="mkc_count"></a>
@@ -233,5 +245,7 @@ size_t mkc_count(const mkc_cache *c);
 | `c` | `mkc_cache *` |  |  |
 
 **Returns:** `size_t`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_mask_cache.c.md#llvmfuzzertestoneinput)
 
 ---

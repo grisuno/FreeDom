@@ -1,6 +1,46 @@
 [
   {
-    "community_a": 0,
+    "community_a": 2,
+    "community_b": 4,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: fuzz/fuzz_css.c imports include/flex_layout.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 4,
+    "community_b": 0,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 7,
+    "community_b": 0,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: fuzz/fuzz_url.c imports include/url.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 1,
+    "community_b": 0,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/anchor.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 1,
+    "community_b": 12,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/table_layout.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 1,
     "community_b": 4,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.",
@@ -8,23 +48,23 @@
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 1,
+    "community_a": 1,
+    "community_b": 2,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/compositor.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 7,
+    "community_a": 1,
+    "community_b": 8,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/svg_paint.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
+    "community_a": 1,
     "community_b": 3,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/data_url.h.",
@@ -32,39 +72,55 @@
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 2,
+    "community_a": 1,
+    "community_b": 10,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/download.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 1,
+    "community_b": 9,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/freebug.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 5,
+    "community_a": 1,
+    "community_b": 6,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/identity.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 9,
+    "community_a": 1,
+    "community_b": 7,
+    "connection_type": "depends_on",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/link_nav.h.",
+    "strength": 0.9,
+    "confidence": "EXTRACTED"
+  },
+  {
+    "community_a": 1,
+    "community_b": 11,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/prefetch.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 0,
-    "community_b": 8,
+    "community_a": 1,
+    "community_b": 5,
     "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/tab.h.",
+    "explanation": "Extracted import edge crosses communities: gui/browser_ui.c imports include/prefs.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 1,
+    "community_a": 7,
     "community_b": 4,
     "connection_type": "depends_on",
     "explanation": "Extracted import edge crosses communities: gui/browser_ui_internal.h imports include/freedom_config.h.",
@@ -72,90 +128,34 @@
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 1,
-    "community_b": 3,
+    "community_a": 7,
+    "community_b": 2,
     "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: gui/browser_ui_internal.h imports include/video_controls.h.",
+    "explanation": "Extracted import edge crosses communities: gui/bui_mask_img.c imports include/css.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
     "community_a": 5,
-    "community_b": 6,
+    "community_b": 0,
     "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: include/cached_fetch.h imports include/http_cache.h.",
+    "explanation": "Extracted import edge crosses communities: gui/freedom_view.c imports include/html_parse.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
-    "community_a": 8,
+    "community_a": 5,
     "community_b": 4,
     "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 4,
-    "community_b": 2,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: include/page_view.h imports include/dom.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 0,
-    "community_b": 6,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: include/profile.h imports include/local_store.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 8,
-    "community_b": 2,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: include/tab.h imports include/freebug.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 3,
-    "community_b": 4,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.",
+    "explanation": "Extracted import edge crosses communities: gui/ui_render.c imports include/freedom_config.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   },
   {
     "community_a": 6,
-    "community_b": 4,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: src/disk_store.c imports include/util.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 3,
-    "community_b": 2,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: src/freedom.c imports include/html_parse.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 3,
     "community_b": 5,
     "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: src/freedom.c imports include/identity.h.",
-    "strength": 0.9,
-    "confidence": "EXTRACTED"
-  },
-  {
-    "community_a": 3,
-    "community_b": 9,
-    "connection_type": "depends_on",
-    "explanation": "Extracted import edge crosses communities: src/freedom.c imports include/prefetch.h.",
+    "explanation": "Extracted import edge crosses communities: include/cached_fetch.h imports include/http_cache.h.",
     "strength": 0.9,
     "confidence": "EXTRACTED"
   }

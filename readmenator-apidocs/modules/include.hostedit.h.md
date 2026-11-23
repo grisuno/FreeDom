@@ -119,6 +119,8 @@ he_cdn_kind_t he_cdn_kind(const char *url);
 |---|---|---|---|
 | `url` | `char *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_identity.c.md#llvmfuzzertestoneinput)
+
 ---
 
 ## Macros

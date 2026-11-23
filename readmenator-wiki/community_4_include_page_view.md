@@ -1,36 +1,23 @@
 # include: page_view
 
-*Community 4 | 30 files | cohesion 0.45*
+*Community 4 | 30 files | cohesion 0.49*
 
 ## Definition
 
-This community groups 30 file(s) rooted at `include` with dominant language c (cohesion 0.45). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (292 symbols). Documented purpose: — shared pure helpers (no I/O except where noted). Static inline so each compilation unit gets its own copy without adding link dependencies..
+This community groups 30 file(s) rooted at `include` with dominant language c (cohesion 0.49). Central symbols: `BLOCK`, `BT_ALIGN_CENTER`, `BT_ALIGN_END`, `BT_ALIGN_START`, `BT_ALIGN_STRETCH`, `BT_LEN_AUTO`, `BT_MAUTO_LEFT`, `BT_MAUTO_RIGHT`. Core file: `src/page_view.c` (294 symbols). Documented purpose: Hostile box trees (any parent graph, cycles included) through the positioned paint.
 
 ## Files
 
-### `include` (12 files)
+### `include` (10 files)
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/box_style.h` | h | utility | 31 | no |
 | `include/box_tree.h` | h | utility | 34 | no |
-| `include/css_chain.h` | h | utility | 12 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 45 | no |
-| `include/freedom_config.h` | h | infrastructure | 23 | no |
+| `include/freedom_config.h` | h | infrastructure | 29 | no |
 | `include/page_view.h` | h | presentation | 103 | no |
-
-### `src` (9 files)
-
-| File | Language | Layer | Symbols | Doc |
-|------|----------|-------|---------|-----|
-| `src/box_style.c` | c | utility | 48 | no |
-| `src/box_tree.c` | c | utility | 31 | no |
-| `src/dom.c` | c | utility | 77 | no |
-| `src/dom_debug.c` | c | utility | 24 | no |
-| `src/flex_layout.c` | c | presentation | 36 | no |
-| `src/page_view.c` | c | presentation | 292 | no |
-| `src/render_doc.c` | c | presentation | 22 | no |
 
 ### `tests` (9 files)
 
@@ -40,14 +27,34 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 | `tests/test_box_tree.c` | c | testing | 71 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 72 | no |
-| `tests/test_page_view.c` | c | testing | 229 | no |
+| `tests/test_page_view.c` | c | testing | 231 | no |
 | `tests/test_render_doc.c` | c | testing | 37 | no |
+
+### `src` (8 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `src/box_style.c` | c | utility | 48 | no |
+| `src/box_tree.c` | c | utility | 31 | no |
+| `src/dom_debug.c` | c | utility | 24 | no |
+| `src/flex_layout.c` | c | presentation | 36 | no |
+| `src/page_view.c` | c | presentation | 294 | no |
+
+### `fuzz` (3 files)
+
+| File | Language | Layer | Symbols | Doc |
+|------|----------|-------|---------|-----|
+| `fuzz/fuzz_box_tree.c` | c | utility | 1 | yes |
+| `fuzz/fuzz_dom_debug.c` | c | utility | 1 | no |
+| `fuzz/fuzz_page_view.c` | c | presentation | 0 | no |
 
 *... and 10 more files in this community.*
 
 
 ## Key Symbols
 
+- `FB_MAX` (macro, `fuzz/fuzz_box_tree.c:8`) `#define FB_MAX`
+- `pass` (function, `fuzz/fuzz_dom_debug.c:8`) `* the measure pass (cap 0) must agree with the would-write return value.  *  * B`
 - `FREEDOM_BOX_STYLE_H` (macro, `include/box_style.h:2`) `#define FREEDOM_BOX_STYLE_H`
 - `BX_TAG_NAME_MAX` (macro, `include/box_style.h:33`) `#define BX_TAG_NAME_MAX`
 - `bx_display` (enum, `include/box_style.h:35`)
@@ -76,22 +83,19 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 - `bx_border_span` (function, `include/box_style.h:286`) `double bx_border_span(double width_cap, int border_box, double pad_l, double pad` - The border-inclusive span the painter lays a box out with (its content plus left/right border; paddi
 - `bx_flex_max_clamp` (function, `include/box_style.h:292`) `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, doub` - Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size
 - `bx_flex_min_clamp` (function, `include/box_style.h:298`) `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, doubl` - The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (conv
-- `bx_bg_layer` (struct, `include/box_style.h:321`) - the explicit form, each component is a px value (CSS_LEN_AUTO = auto, CSS_LEN_UNSET = not declared,
-- `nat_h` (type_alias, `include/box_style.h:321`) `typedef struct bx_bg_layer { double nat_w, nat_h;` - the explicit form, each component is a px value (CSS_LEN_AUTO = auto, CSS_LEN_UNSET = not declared,
 
 ## Internal vs External Edges
 
-- Internal resolved imports (EXTRACTED): 55
-- Cross-boundary resolved imports (EXTRACTED): 67
+- Internal resolved imports (EXTRACTED): 58
+- Cross-boundary resolved imports (EXTRACTED): 60
 
 ## Connections
 
-- [EXTRACTED] depends_on community 0 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
-- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui_internal.h imports include/freedom_config.h.
-- [EXTRACTED] depends_on community 8 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/frame_host.h imports include/page_view.h.
-- [EXTRACTED] depends_on community 4 <-> 2 (strength 0.9): Extracted import edge crosses communities: include/page_view.h imports include/dom.h.
-- [EXTRACTED] depends_on community 3 <-> 4 (strength 0.9): Extracted import edge crosses communities: include/webcaps.h imports include/render_policy.h.
-- [EXTRACTED] depends_on community 6 <-> 4 (strength 0.9): Extracted import edge crosses communities: src/disk_store.c imports include/util.h.
+- [EXTRACTED] depends_on community 2 <-> 4 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_css.c imports include/flex_layout.h.
+- [EXTRACTED] depends_on community 4 <-> 0 (strength 0.9): Extracted import edge crosses communities: fuzz/fuzz_dom_debug.c imports include/html_parse.h.
+- [EXTRACTED] depends_on community 1 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui.c imports include/box_style.h.
+- [EXTRACTED] depends_on community 7 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/browser_ui_internal.h imports include/freedom_config.h.
+- [EXTRACTED] depends_on community 5 <-> 4 (strength 0.9): Extracted import edge crosses communities: gui/ui_render.c imports include/freedom_config.h.
 
 ## Risks
 
@@ -113,15 +117,17 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 
 ## Open Questions
 
-- Why do 25 file(s) lack file-level docs (e.g. `include/box_style.h`)? What purpose do they serve?
+- Why do 25 file(s) lack file-level docs (e.g. `fuzz/fuzz_dom_debug.c`)? What purpose do they serve?
 - What would break if the most connected file in include: page_view changed?
-- Should include: page_view be split, given cohesion 0.45?
+- Should include: page_view be split, given cohesion 0.49?
 
 ## Sources
 
+- `fuzz/fuzz_box_tree.c`
+- `fuzz/fuzz_dom_debug.c`
+- `fuzz/fuzz_page_view.c`
 - `include/box_style.h`
 - `include/box_tree.h`
-- `include/css_chain.h`
 - `include/dom_debug.h`
 - `include/flex_layout.h`
 - `include/freedom_config.h`
@@ -129,11 +135,9 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 - `include/render_doc.h`
 - `include/render_policy.h`
 - `include/sheet_cache.h`
-- `include/util.h`
 - `include/video_pick.h`
 - `src/box_style.c`
 - `src/box_tree.c`
-- `src/dom.c`
 - `src/dom_debug.c`
 - `src/flex_layout.c`
 - `src/page_view.c`

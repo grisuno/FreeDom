@@ -34,6 +34,8 @@ Parses an HTML dimension: 1 with *px set (percent 0), 2 with *per_mille set, 0 =
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_table_layout.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="ph_apply"></a>
@@ -59,6 +61,8 @@ No-op on a NULL tag, getter or style.
 | `ctx` | `void *` |  |  |
 | `flags` | `unsigned` |  |  |
 | `cs` | `css_style *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_table_layout.c.md#llvmfuzzertestoneinput)
 
 ---
 

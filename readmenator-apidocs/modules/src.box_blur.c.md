@@ -95,6 +95,8 @@ int bb_blur_a8(unsigned char *buf, int w, int h, int stride, double sigma)
 
 *Calls:* [`bb_box_sizes`](#bb_box_sizes)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_box_blur.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="bb_ink_rect"></a>

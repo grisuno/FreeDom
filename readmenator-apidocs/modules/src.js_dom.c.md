@@ -333,7 +333,7 @@ jd_status jd_install(js_context *ctx, dom_index *idx, jd_opaque *opaque)
 
 **Returns:** `jd_status`
 
-*Called by:* [`run_js`](src.tab.c.md#run_js)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`run_js`](src.tab.c.md#run_js)
 
 ---
 
@@ -514,6 +514,8 @@ jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)
 | `geom` | `jg_table *` |  |  |
 
 **Returns:** `jd_status`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput)
 
 ---
 

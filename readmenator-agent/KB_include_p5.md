@@ -1,6 +1,106 @@
 # Subsystem: include (page 5 of 6)
 Previous: [KB_include_p4.md](KB_include_p4.md)
 
+## include/perf_trace.h
+- Doc: pt_init: #define PT_MAX_SAMPLES 256 typedef struct pt_stage_stats { uint64_t...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `pt_stage_stats` (struct, line 34)
+  - `pt_trace` (struct, line 41)
+  - `order` (enum, line 71)
+  - `samples` (type_alias, line 33) `typedef struct pt_stage_stats { uint64_t samples[PT_MAX_SAMPLES];`
+  - `stage` (type_alias, line 40) `typedef struct pt_trace { pt_stage_stats stage[PT_STAGE_COUNT];`
+  - `pt_init` (function, line 46) `void pt_init(pt_trace *t);`
+  - `pt_elapsed_us` (function, line 50) `uint64_t pt_elapsed_us(uint64_t start_us, uint64_t end_us);`
+  - `pt_record` (function, line 54) `void pt_record(pt_trace *t, pt_stage stage, uint64_t elapsed_us);`
+  - `pt_count` (function, line 57) `size_t pt_count(const pt_trace *t, pt_stage stage);`
+  - `pt_last_us` (function, line 60) `uint64_t pt_last_us(const pt_trace *t, pt_stage stage);`
+  - `pt_min_us` (function, line 63) `uint64_t pt_min_us(const pt_trace *t, pt_stage stage);`
+  - `pt_max_us` (function, line 64) `uint64_t pt_max_us(const pt_trace *t, pt_stage stage);`
+  - `pt_median_us` (function, line 65) `uint64_t pt_median_us(const pt_trace *t, pt_stage stage);`
+  - `pt_stage_name` (function, line 69) `const char *pt_stage_name(pt_stage stage);`
+  - `pt_format` (function, line 76) `size_t pt_format(const pt_trace *t, char *buf, size_t cap);`
+  - `FREEDOM_PERF_TRACE_H` (macro, line 2) `#define FREEDOM_PERF_TRACE_H`
+  - `PT_MAX_SAMPLES` (macro, line 32) `#define PT_MAX_SAMPLES`
+- Imported by: `src/freedom.c`, `src/perf_trace.c`, `tests/test_perf_trace.c`
+
+## include/pq_seal.h
+- Doc: pqs_buf_free: DER of the PRIVATE key: secret, the caller seals it before it touches disk. *der...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `pqs_status` (enum, line 24)
+  - `pqs_keys` (type_alias, line 33) `typedef struct pqs_keys pqs_keys;`
+  - `pqs_free` (function, line 41) `void pqs_free(pqs_keys *k);`
+  - `pqs_buf_free` (function, line 51) `void pqs_buf_free(uint8_t *buf, size_t len);`
+  - `FREEDOM_PQ_SEAL_H` (macro, line 2) `#define FREEDOM_PQ_SEAL_H`
+  - `PQS_MAGIC` (macro, line 20) `#define PQS_MAGIC`
+  - `PQS_MAGIC_LEN` (macro, line 21) `#define PQS_MAGIC_LEN`
+  - `PQS_CT_LEN` (macro, line 22) `#define PQS_CT_LEN`
+- Depends on: `include/local_store.h`
+- Imported by: `src/http_cache.c`, `src/pq_seal.c`, `tests/test_pq_seal.c`
+
+## include/prefetch.h
+- Doc: pf_ref: One scanned reference. url is the RAW attribute value (the policy-gated fetcher *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `pf_ref` (struct, line 42)
+  - `pf_list` (struct, line 53)
+  - `pf_job` (struct, line 80)
+  - `pf_pool` (struct, line 90)
+  - `pf_gated_fetch` (struct, line 159)
+  - `pf_kind` (enum, line 35)
+  - `pf_job_state` (enum, line 73)
+  - `kind` (type_alias, line 42) `typedef struct pf_ref { pf_kind kind;`
+  - `refs` (type_alias, line 52) `typedef struct pf_list { pf_ref refs[PF_MAX_REFS];`
+  - `jobs` (type_alias, line 89) `typedef struct pf_pool { pf_job jobs[PF_MAX_JOBS];`
+  - `inner` (type_alias, line 159) `typedef struct pf_gated_fetch { pf_fetch_fn inner;`
+  - `pf_scan` (function, line 62) `int pf_scan(const char *html, size_t len, pf_list *out);`
+  - `pf_list_free` (function, line 63) `void pf_list_free(pf_list *l);`
+  - `specifiers` (function, line 110) `* specifiers (each < PF_SPEC_MAX) into out[k] and returns how many. Pure. */ size_t pf_scan_imports(const char *js...`
+  - `pf_find_importmap` (function, line 115) `int pf_find_importmap(const char *html, size_t len, size_t *start, size_t *n);`
+  - `started` (function, line 121) `* to fetch or no thread started (the caller fetches serially). */ int pf_pool_start_page(pf_pool *p, const char...`
+  - `pf_pool_add` (function, line 127) `int pf_pool_add(pf_pool *p, const char *url);`
+  - `fetch` (function, line 132) `* claiming jobs and running fetch(ctx, "GET", url, ...). Returns 0 on success or * -1 when no thread could start...`
+  - `pf_pool_take` (function, line 145) `int pf_pool_take(pf_pool *p, const char *url, int *rc, int *status, char **body, size_t *len, char **ctype);`
+  - `pf_pool_finish` (function, line 151) `void pf_pool_finish(pf_pool *p);`
+  - `pool` (function, line 155) `* whose URL is pooled is served from the pool (a failed prefetch propagates the * failure -- never refetched);`
+  - `pf_pooled_fetch` (function, line 165) `int pf_pooled_fetch(void *vctx, const char *method, const char *url, const char *body, size_t body_len, int...`
+  - `FREEDOM_PREFETCH_H` (macro, line 2) `#define FREEDOM_PREFETCH_H`
+  - `PF_MAX_REFS` (macro, line 47) `#define PF_MAX_REFS`
+  - `PF_MAX_THREADS` (macro, line 48) `#define PF_MAX_THREADS`
+  - `PF_MAX_JOBS` (macro, line 49) `#define PF_MAX_JOBS`
+  - `PF_MAX_IMPORTS` (macro, line 50) `#define PF_MAX_IMPORTS`
+  - `PF_SPEC_MAX` (macro, line 51) `#define PF_SPEC_MAX`
+- Imported by: `fuzz/fuzz_prefetch.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/prefetch.c`, `tests/test_prefetch.c`
+
+## include/prefs.h
+- Doc: prefs_init: Safe defaults (a virgin session: everything private/off, zoom 100%, *...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `prefs_entry` (struct, line 45)
+  - `prefs_state` (struct, line 50)
+  - `prefs_status` (enum, line 36)
+  - `theme_mode` (type_alias, line 49) `typedef struct prefs_state { int theme_mode;`
+  - `prefs_init` (function, line 66) `void prefs_init(prefs_state *p);`
+  - `prefs_free` (function, line 69) `void prefs_free(prefs_state *p);`
+  - `free` (function, line 72) `* free(). */ prefs_status prefs_format(const prefs_state *p, char **out, size_t *out_len);`
+  - `prefs_bookmark_index` (function, line 82) `int prefs_bookmark_index(const prefs_state *p, const char *url);`
+  - `prefs_suggest` (function, line 101) `int prefs_suggest(const prefs_state *p, const char *query, char *out, size_t row_len, int max_rows);`
+  - `anyway` (function, line 106) `* page is rendered by the normal confined pipeline anyway (defence in depth). * *out is owned (free());`
+  - `FREEDOM_PREFS_H` (macro, line 2) `#define FREEDOM_PREFS_H`
+  - `PREFS_VERSION` (macro, line 26) `#define PREFS_VERSION`
+  - `PREFS_MAX_URL` (macro, line 27) `#define PREFS_MAX_URL`
+  - `PREFS_MAX_TITLE` (macro, line 28) `#define PREFS_MAX_TITLE`
+  - `PREFS_MAX_BOOKMARKS` (macro, line 29) `#define PREFS_MAX_BOOKMARKS`
+  - `PREFS_MAX_HISTORY` (macro, line 30) `#define PREFS_MAX_HISTORY`
+  - `PREFS_MAX_TEXT` (macro, line 31) `#define PREFS_MAX_TEXT`
+  - `PREFS_PAGE_HISTORY` (macro, line 34) `#define PREFS_PAGE_HISTORY`
+- Imported by: `fuzz/fuzz_prefs.c`, `gui/browser_ui.c`, `include/profile.h`, `include/ui.h`, `src/prefs.c`, `tests/test_prefs.c`, `tests/test_profile.c`
+
 ## include/pres_hints.h
 - Doc: pres_hints (ph_) -- HTML presentational attributes as zero-specificity style.
 - Layer: utility
@@ -17,7 +117,7 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `PH_CENTERED` (macro, line 26) `#define PH_CENTERED`
   - `PH_QUIRKS` (macro, line 27) `#define PH_QUIRKS`
 - Depends on: `include/css.h`
-- Imported by: `src/page_view.c`, `src/pres_hints.c`, `tests/test_pres_hints.c`
+- Imported by: `fuzz/fuzz_table_layout.c`, `src/page_view.c`, `src/pres_hints.c`, `tests/test_pres_hints.c`
 
 ## include/profile.h
 - Doc: profile_close: Loads and decrypts prefs.bin over an out ALREADY initialised (prefs_init).
@@ -58,31 +158,31 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `rd_doc` (struct, line 267)
   - `img_fail_reason` (enum, line 34)
   - `rd_kind` (enum, line 42)
-  - `rd_status` (enum, line 299)
+  - `rd_status` (enum, line 300)
   - `kind` (type_alias, line 64) `typedef struct rd_block { rd_kind kind;`
   - `list` (function, line 18) `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...`
   - `RD_IMAGE` (function, line 59) `* RD_IMAGE (image src) and RD_INPUT (the owning form's action);`
   - `form` (function, line 63) `* form (-1 = none);`
   - `default` (function, line 153) `* default (layout is structure, not author styling, and leaks nothing to the * network) so the presentation layer...`
   - `to` (function, line 253) `* belongs to (-1 = none);`
-  - `rdp_images_warning` (function, line 308) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
-  - `rd_free` (function, line 318) `void rd_free(rd_doc *d);`
-  - `rd_count` (function, line 321) `size_t rd_count(const rd_doc *d);`
-  - `rd_at` (function, line 322) `const rd_block *rd_at(const rd_doc *d, size_t i);`
-  - `rd_box_count` (function, line 326) `size_t rd_box_count(const rd_doc *d);`
-  - `rd_box_at` (function, line 327) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
-  - `rd_cont_count` (function, line 331) `size_t rd_cont_count(const rd_doc *d);`
-  - `rd_cont_at` (function, line 332) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
-  - `rd_kind_name` (function, line 336) `const char *rd_kind_name(rd_kind k);`
-  - `rd_block_tag` (function, line 344) `const char *rd_block_tag(const rd_block *b);`
-  - `rd_block_heading_level` (function, line 351) `int rd_block_heading_level(const rd_block *b);`
-  - `decision` (function, line 354) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
-  - `IMG_FAIL_OK` (function, line 360) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
-  - `rd_input_label` (function, line 365) `const char *rd_input_label(int input_type);`
-  - `rd_input_invisible` (function, line 370) `int rd_input_invisible(int input_type);`
+  - `rdp_images_warning` (function, line 309) `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...`
+  - `rd_free` (function, line 319) `void rd_free(rd_doc *d);`
+  - `rd_count` (function, line 322) `size_t rd_count(const rd_doc *d);`
+  - `rd_at` (function, line 323) `const rd_block *rd_at(const rd_doc *d, size_t i);`
+  - `rd_box_count` (function, line 327) `size_t rd_box_count(const rd_doc *d);`
+  - `rd_box_at` (function, line 328) `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);`
+  - `rd_cont_count` (function, line 332) `size_t rd_cont_count(const rd_doc *d);`
+  - `rd_cont_at` (function, line 333) `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);`
+  - `rd_kind_name` (function, line 337) `const char *rd_kind_name(rd_kind k);`
+  - `rd_block_tag` (function, line 345) `const char *rd_block_tag(const rd_block *b);`
+  - `rd_block_heading_level` (function, line 352) `int rd_block_heading_level(const rd_block *b);`
+  - `decision` (function, line 355) `* decision (e.g. "image (allowed)" / "image blocked: tracking pixel"). Never * NULL. */ const char...`
+  - `IMG_FAIL_OK` (function, line 361) `* IMG_FAIL_OK (not a failure) or the reason is unknown. */ const char *rd_image_fail_label(img_fail_reason reason);`
+  - `rd_input_label` (function, line 366) `const char *rd_input_label(int input_type);`
+  - `rd_input_invisible` (function, line 371) `int rd_input_invisible(int input_type);`
   - `FREEDOM_RENDER_DOC_H` (macro, line 2) `#define FREEDOM_RENDER_DOC_H`
 - Depends on: `include/page_view.h`, `include/render_policy.h`
-- Imported by: `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/dom_debug.h`, `src/freedom.c`, `src/render_doc.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`
 
 ## include/render_policy.h
 - Doc: rdp_caps: Render capabilities for a page.
@@ -98,7 +198,7 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `rdp_images_warning` (function, line 69) `const char *rdp_images_warning(void);`
   - `FREEDOM_RENDER_POLICY_H` (macro, line 2) `#define FREEDOM_RENDER_POLICY_H`
   - `RDP_TRACKER_MAX_DIM` (macro, line 27) `#define RDP_TRACKER_MAX_DIM`
-- Imported by: `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
+- Imported by: `fuzz/fuzz_dom_debug.c`, `gui/browser_ui.c`, `include/render_doc.h`, `include/webcaps.h`, `src/freedom.c`, `src/render_policy.c`, `tests/test_dom_debug.c`, `tests/test_render_doc.c`, `tests/test_render_policy.c`
 
 ## include/renderer.h
 - Doc: rd_result_free: Renders untrusted HTML out-of-process and returns an inert title + text. html ==...
@@ -130,7 +230,7 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `RP_HDR_MAX_BYTES` (macro, line 44) `#define RP_HDR_MAX_BYTES`
   - `RP_HDR_NAME_MAX` (macro, line 45) `#define RP_HDR_NAME_MAX`
   - `RP_HDR_VALUE_MAX` (macro, line 46) `#define RP_HDR_VALUE_MAX`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/hls.c`, `src/render_policy.c`, `src/request_policy.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_request_policy.c`
+- Imported by: `fuzz/fuzz_hls.c`, `fuzz/fuzz_request_headers.c`, `gui/browser_ui.c`, `src/freedom.c`, `src/hls.c`, `src/render_policy.c`, `src/request_policy.c`, `src/secure_fetch.c`, `src/tab.c`, `tests/test_request_policy.c`
 
 ## include/secure_fetch.h
 - Doc: sf_chain_info: Minimal view of the verified certificate chain, used by sf_check_chain_policy. *...
@@ -219,7 +319,7 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `shc_stats_get` (function, line 70) `void shc_stats_get(const shc_cache *c, shc_stats *out);`
   - `FREEDOM_SHEET_CACHE_H` (macro, line 14) `#define FREEDOM_SHEET_CACHE_H`
 - Depends on: `include/css.h`
-- Imported by: `src/page_view.c`, `src/sheet_cache.c`, `src/tab.c`, `tests/test_page_view.c`, `tests/test_sheet_cache.c`
+- Imported by: `fuzz/fuzz_page_view.c`, `src/page_view.c`, `src/sheet_cache.c`, `src/tab.c`, `tests/test_page_view.c`, `tests/test_sheet_cache.c`
 
 ## include/shm_slots.h
 - Doc: ss_committed: Chooses the slot to paint into: the current one if free, else the other free one.
@@ -234,6 +334,22 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `FREEDOM_SHM_SLOTS_H` (macro, line 2) `#define FREEDOM_SHM_SLOTS_H`
   - `SS_COUNT` (macro, line 17) `#define SS_COUNT`
 - Imported by: `gui/browser_ui.c`, `tests/test_shm_slots.c`
+
+## include/smooth_scroll.h
+- Doc: from: smooth_scroll (sms_) -- pure arithmetic of the page's animated scroll: a cubic ease-out...
+- Layer: utility
+- Language: h
+- Symbols:
+  - `sms_state` (struct, line 18)
+  - `from` (type_alias, line 17) `typedef struct sms_state { double from;`
+  - `sms_init` (function, line 27) `void sms_init(sms_state *s, double pos);`
+  - `sms_jump` (function, line 28) `void sms_jump(sms_state *s, double pos);`
+  - `sms_retarget` (function, line 29) `void sms_retarget(sms_state *s, double target, double now_ms, double dur_ms);`
+  - `sms_sample` (function, line 30) `double sms_sample(sms_state *s, double now_ms);`
+  - `sms_goal` (function, line 31) `double sms_goal(const sms_state *s);`
+  - `sms_active` (function, line 32) `int sms_active(const sms_state *s);`
+  - `FREEDOM_SMOOTH_SCROLL_H` (macro, line 2) `#define FREEDOM_SMOOTH_SCROLL_H`
+- Imported by: `fuzz/fuzz_smooth_scroll.c`, `gui/browser_ui.c`, `src/smooth_scroll.c`, `tests/test_smooth_scroll.c`
 
 ## include/subreq_batch.h
 - Doc: sqb_res: #ifndef SUBREQ_BATCH_H #define SUBREQ_BATCH_H #include <stddef.h> #define SQB_MAX_JOBS...
@@ -281,7 +397,7 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `SR_MAX_DIM` (macro, line 24) `#define SR_MAX_DIM`
   - `SR_MIN_RASTER` (macro, line 25) `#define SR_MIN_RASTER`
 - Depends on: `include/image_decode.h`
-- Imported by: `src/svg_raster.c`, `src/tab.c`, `tests/test_svg_raster.c`
+- Imported by: `fuzz/fuzz_image_decode.c`, `src/svg_raster.c`, `src/tab.c`, `tests/test_svg_raster.c`
 
 ## include/svg_render.h
 - Doc: sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g>...
@@ -307,7 +423,7 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `SV_MAX_INPUT` (macro, line 37) `#define SV_MAX_INPUT`
   - `SV_DEFAULT_W` (macro, line 41) `#define SV_DEFAULT_W`
   - `SV_DEFAULT_H` (macro, line 42) `#define SV_DEFAULT_H`
-- Imported by: `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_raster.c`, `src/svg_render.c`, `tests/test_svg_render.c`
+- Imported by: `fuzz/fuzz_svg_render.c`, `gui/browser_ui.c`, `include/svg_paint.h`, `src/page_view.c`, `src/svg_raster.c`, `src/svg_render.c`, `tests/test_svg_render.c`
 
 ## include/tab.h
 - Doc: tab_hist_op: One history operation the page's JS performed (spec/js_dom.md 7e): pushState...
@@ -317,175 +433,65 @@ Previous: [KB_include_p4.md](KB_include_p4.md)
   - `tab_hist_op` (struct, line 54)
   - `tab_ws_op` (struct, line 72)
   - `tab_page` (struct, line 79)
-  - `tab_eval_result` (struct, line 135)
-  - `tab_image` (struct, line 148)
+  - `tab_eval_result` (struct, line 138)
+  - `tab_image` (struct, line 151)
+  - `tab_anchor` (struct, line 423)
   - `tab_status` (enum, line 31)
   - `tab_ws_kind` (enum, line 61)
   - `tab_ws_event_kind` (enum, line 67)
   - `tab` (type_alias, line 46) `typedef struct tab tab;`
   - `replace` (type_alias, line 54) `typedef struct tab_hist_op { int replace;`
   - `kind` (type_alias, line 71) `typedef struct tab_ws_op { int kind;`
-  - `width` (type_alias, line 148) `typedef struct tab_image { uint32_t width;`
-  - `tab_worker_dispatch` (function, line 161) `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
-  - `tab_open` (function, line 165) `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
-  - `tab_parse_worker_args` (function, line 172) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
-  - `tab_prewarm` (function, line 181) `void tab_prewarm(void);`
-  - `tab_prewarmed` (function, line 184) `int tab_prewarmed(void);`
-  - `tab_prewarmed_pid` (function, line 187) `int tab_prewarmed_pid(void);`
-  - `tab_shutdown_spare` (function, line 190) `void tab_shutdown_spare(void);`
-  - `out_status` (function, line 198) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
-  - `tab_set_fetcher` (function, line 209) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
-  - `tab_inflight_request_headers` (function, line 214) `const char *tab_inflight_request_headers(void);`
-  - `tab_report_response_headers` (function, line 219) `void tab_report_response_headers(const char *lines);`
-  - `bytes` (function, line 223) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
-  - `tab_set_css_sink` (function, line 232) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
-  - `free_ctx` (function, line 239) `* free_ctx(ctx) (may be NULL) runs once the tab is closed AND its last abandoned request ended, * so the fetcher may...`
-  - `tab_set_net_allowed` (function, line 247) `void tab_set_net_allowed(tab *t, int allowed);`
-  - `none` (function, line 251) `* worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick. * The caller must then...`
-  - `tab_page_keep_view` (function, line 258) `void tab_page_keep_view(tab_page *prev, tab_page *next);`
-  - `tab_set_op_net_budget_ms` (function, line 262) `void tab_set_op_net_budget_ms(tab *t, int ms);`
-  - `tab_async_fd` (function, line 267) `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
-  - `tab_async_busy` (function, line 273) `int tab_async_busy(const tab *t);`
-  - `jar` (function, line 280) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
-  - `tab_set_cookies` (function, line 284) `void tab_set_cookies(tab *t, const char *cookies);`
-  - `origin` (function, line 287) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
-  - `tab_set_storage` (function, line 289) `void tab_set_storage(tab *t, const char *blob, size_t len);`
-  - `exclusively` (function, line 295) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
-  - `tab_set_viewport_w` (function, line 303) `void tab_set_viewport_w(tab *t, int px);`
-  - `load` (function, line 307) `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);`
-  - `tab_set_identity` (function, line 313) `void tab_set_identity(tab *t, const char *serialized);`
-  - `tab_last_subreq_stats` (function, line 319) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
-  - `tab_subreq_permitted` (function, line 324) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
-  - `view` (function, line 332) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
-  - `string` (function, line 352) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
-  - `granted` (function, line 401) `* granted (allow.conf AND js.conf);`
-  - `returned` (function, line 402) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
-  - `popstate` (function, line 408) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
-  - `decode` (function, line 427) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
-  - `tab_alive` (function, line 440) `int tab_alive(const tab *t);`
-  - `tab_child_pid` (function, line 443) `pid_t tab_child_pid(const tab *t);`
-  - `tab_close` (function, line 446) `void tab_close(tab *t);`
-  - `tab_page_free` (function, line 449) `void tab_page_free(tab_page *p);`
-  - `tab_eval_result_free` (function, line 450) `void tab_eval_result_free(tab_eval_result *r);`
-  - `tab_image_free` (function, line 451) `void tab_image_free(tab_image *img);`
+  - `width` (type_alias, line 151) `typedef struct tab_image { uint32_t width;`
+  - `kind` (type_alias, line 423) `typedef struct tab_anchor { int kind;`
+  - `tab_worker_dispatch` (function, line 164) `* Call tab_worker_dispatch(argc, argv) as the FIRST thing in main(): if argv is the * internal "--tab-worker <rfd>...`
+  - `tab_open` (function, line 168) `* and reaches tab_open (the app and the test harness) must call this first. */ void tab_worker_dispatch(int argc...`
+  - `tab_parse_worker_args` (function, line 175) `int tab_parse_worker_args(int argc, const char *const *argv, int *rfd, int *wfd);`
+  - `tab_prewarm` (function, line 184) `void tab_prewarm(void);`
+  - `tab_prewarmed` (function, line 187) `int tab_prewarmed(void);`
+  - `tab_prewarmed_pid` (function, line 190) `int tab_prewarmed_pid(void);`
+  - `tab_shutdown_spare` (function, line 193) `void tab_shutdown_spare(void);`
+  - `out_status` (function, line 201) `* On success return 0 and set *out_status (HTTP status), *out_body / *out_body_len * (malloc'd response bytes, tab...`
+  - `tab_set_fetcher` (function, line 212) `void tab_set_fetcher(tab *t, tab_fetch_fn fn, void *ctx);`
+  - `tab_inflight_request_headers` (function, line 217) `const char *tab_inflight_request_headers(void);`
+  - `tab_report_response_headers` (function, line 222) `void tab_report_response_headers(const char *lines);`
+  - `bytes` (function, line 226) `* so the parent can retain the bytes (spec/webfont.md b3b feeds them to the * @font-face loader as extern sheets)....`
+  - `tab_set_css_sink` (function, line 235) `void tab_set_css_sink(tab *t, tab_css_sink_fn fn, void *ctx);`
+  - `free_ctx` (function, line 242) `* free_ctx(ctx) (may be NULL) runs once the tab is closed AND its last abandoned request ended, * so the fetcher may...`
+  - `tab_set_net_allowed` (function, line 250) `void tab_set_net_allowed(tab *t, int allowed);`
+  - `none` (function, line 254) `* worker sent carries none (tab_page.unchanged) -- on a live page that is almost every tick. * The caller must then...`
+  - `tab_page_keep_view` (function, line 261) `void tab_page_keep_view(tab_page *prev, tab_page *next);`
+  - `tab_set_op_net_budget_ms` (function, line 265) `void tab_set_op_net_budget_ms(tab *t, int ms);`
+  - `tab_async_fd` (function, line 270) `* the completion is signalled on tab_async_fd (readable). The pipe to the worker is a single * channel, so EVERY...`
+  - `tab_async_busy` (function, line 276) `int tab_async_busy(const tab *t);`
+  - `jar` (function, line 283) `* the trusted parent read from its ephemeral network jar (sf_cookie_header_for). Only * meaningful for a trusted...`
+  - `tab_set_cookies` (function, line 287) `void tab_set_cookies(tab *t, const char *cookies);`
+  - `origin` (function, line 290) `* page origin (web_storage snapshot, copied). Used only when the load is trusted * (net granted);`
+  - `tab_set_storage` (function, line 292) `void tab_set_storage(tab *t, const char *blob, size_t len);`
+  - `exclusively` (function, line 298) `* exclusively (tab_subreq_permitted). Default 0: zero fetches, Privacy by Default. */ void tab_set_css_allowed(tab...`
+  - `tab_set_viewport_w` (function, line 306) `void tab_set_viewport_w(tab *t, int px);`
+  - `load` (function, line 310) `* trusted load (net granted). */ void tab_set_frame_id(tab *t, int id);`
+  - `tab_set_identity` (function, line 316) `void tab_set_identity(tab *t, const char *serialized);`
+  - `tab_last_subreq_stats` (function, line 322) `void tab_last_subreq_stats(const tab *t, size_t *count, uint64_t *total_us);`
+  - `tab_subreq_permitted` (function, line 327) `int tab_subreq_permitted(int net_allowed, int css_allowed, const char *method);`
+  - `view` (function, line 335) `* <noscript> handling in the built view (off => fallback shown, on => suppressed) * and is where allowlisted...`
+  - `string` (function, line 355) `* event_type is a JS event type string (e.g. "keydown", "input", "change"). * key is the keyboard key value (may be...`
+  - `granted` (function, line 404) `* granted (allow.conf AND js.conf);`
+  - `returned` (function, line 405) `* returned (the page keeps its zeros). The worker re-checks the same condition. * g must be finished (jg_finish). */...`
+  - `popstate` (function, line 411) `* popstate (+ hashchange) and re-derives the view like a click. */ tab_status tab_popstate(tab *t, int index...`
+  - `preorder` (function, line 416) `* preorder (out->nsub handles) followed by the elements after it, at most * ANC_MAX_HANDLES -- live DOM handles, the...`
+  - `tab_anchor_free` (function, line 430) `void tab_anchor_free(tab_anchor *a);`
+  - `decode` (function, line 448) `* could not decode (caller shows the placeholder), which is not a transport error. * TAB_ERR_* is reserved for...`
+  - `tab_alive` (function, line 461) `int tab_alive(const tab *t);`
+  - `tab_child_pid` (function, line 464) `pid_t tab_child_pid(const tab *t);`
+  - `tab_close` (function, line 467) `void tab_close(tab *t);`
+  - `tab_page_free` (function, line 470) `void tab_page_free(tab_page *p);`
+  - `tab_eval_result_free` (function, line 471) `void tab_eval_result_free(tab_eval_result *r);`
+  - `tab_image_free` (function, line 472) `void tab_image_free(tab_image *img);`
   - `FREEDOM_TAB_H` (macro, line 2) `#define FREEDOM_TAB_H`
-  - `TAB_MAX_INPUT` (macro, line 157) `#define TAB_MAX_INPUT`
+  - `TAB_MAX_INPUT` (macro, line 160) `#define TAB_MAX_INPUT`
 - Depends on: `include/freebug.h`, `include/js_geom.h`, `include/page_view.h`
 - Imported by: `gui/browser_ui.c`, `include/frame_host.h`, `src/freedom.c`, `src/tab.c`, `tests/test_frame_host.c`, `tests/test_tab.c`
-
-## include/table_layout.h
-- Doc: table_layout (tl_) -- used column widths of a table (automatic table layout).
-- Layer: presentation
-- Language: h
-- Symbols:
-  - `tl_cell` (struct, line 28)
-  - `col` (type_alias, line 27) `typedef struct tl_cell { int col;`
-  - `px` (function, line 41) `* px (< 0 = auto: the table is as wide as its content, capped at avail). gap is the space * between adjacent...`
-  - `tl_intrinsic` (function, line 53) `void tl_intrinsic(const tl_cell *cells, size_t n, size_t ncols, double gap, double *min_total, double *max_total);`
-  - `FREEDOM_TABLE_LAYOUT_H` (macro, line 11) `#define FREEDOM_TABLE_LAYOUT_H`
-  - `TL_MAX_COLS` (macro, line 20) `#define TL_MAX_COLS`
-  - `TL_WIDTH_MAX` (macro, line 23) `#define TL_WIDTH_MAX`
-  - `TL_PER_MILLE` (macro, line 26) `#define TL_PER_MILLE`
-- Imported by: `gui/browser_ui.c`, `src/table_layout.c`, `tests/test_table_layout.c`
-
-## include/text_case.h
-- Doc: Case mapping for text-transform and synthesized small caps (spec/text_case.md).
-- Layer: utility
-- Language: h
-- Symbols:
-  - `tc_run` (struct, line 33)
-  - `cp` (function, line 19) `* cp (identity otherwise), so a transformed text keeps its length. */ uint32_t tc_upper(uint32_t cp);`
-  - `tc_lower` (function, line 21) `uint32_t tc_lower(uint32_t cp);`
-  - `tc_is_lower` (function, line 24) `int tc_is_lower(uint32_t cp);`
-  - `tc_transform` (function, line 29) `size_t tc_transform(const char *s, size_t n, int transform, int word_start, char *out, size_t cap);`
-  - `tc_smallcaps_runs` (function, line 41) `size_t tc_smallcaps_runs(const char *s, size_t n, tc_run *out, size_t cap);`
-  - `FREEDOM_TEXT_CASE_H` (macro, line 2) `#define FREEDOM_TEXT_CASE_H`
-  - `TC_SMALLCAPS_SCALE` (macro, line 15) `#define TC_SMALLCAPS_SCALE`
-- Imported by: `gui/browser_ui.c`, `src/text_case.c`, `tests/test_text_case.c`
-
-## include/text_shape.h
-- Doc: tsh_font: Font selector: a css_font_family bucket (CSS_FF_*) plus weight/slant flags.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `tsh_font` (struct, line 33)
-  - `tsh_run` (struct, line 138)
-  - `tsh_status` (enum, line 80)
-  - `family` (type_alias, line 33) `typedef struct tsh_font { int family;`
-  - `end` (type_alias, line 138) `typedef struct tsh_run { size_t start, end;`
-  - `content` (function, line 11) `* TEXT is hostile remote content (sanitised UTF-8) and is fuzzed (make fuzz-tsh);`
-  - `tsh_family_is_generic` (function, line 52) `int tsh_family_is_generic(const char *name);`
-  - `wins` (function, line 58) `* the first name the resolver accepts wins (returns 1, family in out). Pure: the * resolver is injected (fontconfig...`
-  - `tsh_pick_family` (function, line 68) `const char *tsh_pick_family(const char *req, const char *const *subs, const int *strong, size_t n, int...`
-  - `tsh_local_handle` (function, line 75) `int tsh_local_handle(const char *list);`
-  - `tsh_ready` (function, line 89) `int tsh_ready(void);`
-  - `origin` (function, line 92) `* glyphs are written with positions relative to origin (0,0) on the baseline, * and *out_adv holds the total pen...`
-  - `tsh_measure` (function, line 101) `double tsh_measure(const tsh_font *f, double px, const char *text, size_t len);`
-  - `tsh_webfont_register` (function, line 114) `int tsh_webfont_register(const char *name, const unsigned char *bytes, size_t nbytes, int bold, int italic);`
-  - `tsh_face_generation` (function, line 122) `unsigned tsh_face_generation(void);`
-  - `tsh_webfont_clear` (function, line 126) `void tsh_webfont_clear(void);`
-  - `tsh_face` (function, line 133) `cairo_font_face_t *tsh_face(const tsh_font *f);`
-  - `own` (function, line 142) `* face of their own (controls, combining marks, variation selectors, ZWJ/ZWNJ) * stay in the run before them....`
-  - `tsh_shutdown` (function, line 149) `void tsh_shutdown(void);`
-  - `FREEDOM_TEXT_SHAPE_H` (macro, line 19) `#define FREEDOM_TEXT_SHAPE_H`
-  - `TSH_LOCAL_LISTS` (macro, line 46) `#define TSH_LOCAL_LISTS`
-  - `TSH_LOCAL_FAMILIES` (macro, line 47) `#define TSH_LOCAL_FAMILIES`
-  - `TSH_FAMILY_MAX` (macro, line 48) `#define TSH_FAMILY_MAX`
-  - `TSH_MAX_GLYPHS` (macro, line 77) `#define TSH_MAX_GLYPHS`
-  - `TSH_MAX_TEXT` (macro, line 78) `#define TSH_MAX_TEXT`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/text_shape.c`, `src/webfont_load.c`, `tests/test_text_shape.c`, `tests/test_webfont_load.c`
-
-## include/textfield.h
-- Doc: tf_init: typedef struct tf_field { char   buf[TF_CAP]; /* content, always NUL-terminated at...
-- Layer: utility
-- Language: h
-- Symbols:
-  - `tf_field` (struct, line 25)
-  - `tf_status` (enum, line 31)
-  - `buf` (type_alias, line 24) `typedef struct tf_field { char buf[TF_CAP];`
-  - `tf_init` (function, line 38) `void tf_init(tf_field *f);`
-  - `tf_clear` (function, line 45) `void tf_clear(tf_field *f);`
-  - `tf_backspace` (function, line 53) `void tf_backspace(tf_field *f);`
-  - `tf_delete` (function, line 56) `void tf_delete(tf_field *f);`
-  - `tf_move` (function, line 59) `void tf_move(tf_field *f, long delta);`
-  - `tf_home` (function, line 62) `void tf_home(tf_field *f);`
-  - `tf_end` (function, line 63) `void tf_end(tf_field *f);`
-  - `tf_text` (function, line 66) `const char *tf_text(const tf_field *f);`
-  - `tf_len` (function, line 67) `size_t tf_len(const tf_field *f);`
-  - `tf_cursor` (function, line 68) `size_t tf_cursor(const tf_field *f);`
-  - `FREEDOM_TEXTFIELD_H` (macro, line 2) `#define FREEDOM_TEXTFIELD_H`
-  - `TF_CAP` (macro, line 23) `#define TF_CAP`
-- Imported by: `gui/browser_ui.c`, `src/textfield.c`, `tests/test_textfield.c`
-
-## include/tls_impersonate.h
-- Doc: ti_req: Request: parent -> helper.
-- Layer: utility
-- Language: h
-- Symbols:
-  - `ti_req` (struct, line 72)
-  - `ti_resp` (struct, line 82)
-  - `ti_profile` (enum, line 41)
-  - `status` (type_alias, line 82) `typedef struct ti_resp { long status;`
-  - `path` (function, line 26) `* Zero Knowledge path (PQ-hybrid, VERIFYPEER). * * 2. ti_encode_x / ti_decode_x — the length-prefixed, fail-closed...`
-  - `chain` (function, line 32) `* * The response carries the peer certificate chain (DER) and the negotiated group so * the TRUSTED PARENT...`
-  - `ti_should_impersonate` (function, line 56) `int ti_should_impersonate(int host_in_allowlist, int host_js_enabled, int user_opt_in);`
-  - `success` (function, line 97) `* ti_decode_* returns 0 on success (out fully populated), <0 on any malformed, * truncated or over-cap input (out...`
-  - `ti_decode_req` (function, line 101) `int ti_decode_req(const uint8_t *in, size_t len, ti_req *out);`
-  - `ti_req_free` (function, line 102) `void ti_req_free(ti_req *r);`
-  - `ti_encode_resp` (function, line 104) `size_t ti_encode_resp(const ti_resp *r, uint8_t *out, size_t out_cap);`
-  - `ti_decode_resp` (function, line 105) `int ti_decode_resp(const uint8_t *in, size_t len, ti_resp *out);`
-  - `ti_resp_free` (function, line 106) `void ti_resp_free(ti_resp *r);`
-  - `FREEDOM_TLS_IMPERSONATE_H` (macro, line 2) `#define FREEDOM_TLS_IMPERSONATE_H`
-  - `TI_MAGIC` (macro, line 60) `#define TI_MAGIC`
-  - `TI_MAX_URL` (macro, line 61) `#define TI_MAX_URL`
-  - `TI_MAX_METHOD` (macro, line 62) `#define TI_MAX_METHOD`
-  - `TI_MAX_HEADERS` (macro, line 63) `#define TI_MAX_HEADERS`
-  - `TI_MAX_BODY` (macro, line 64) `#define TI_MAX_BODY`
-  - `TI_MAX_RESP_HDR` (macro, line 65) `#define TI_MAX_RESP_HDR`
-  - `TI_MAX_RESP_BODY` (macro, line 66) `#define TI_MAX_RESP_BODY`
-  - `TI_MAX_CHAIN` (macro, line 67) `#define TI_MAX_CHAIN`
-  - `TI_MAX_GROUP` (macro, line 68) `#define TI_MAX_GROUP`
-- Imported by: `gui/browser_ui.c`, `src/freedom.c`, `src/tls_impersonate.c`, `tests/test_tls_impersonate.c`
 
 
 Next: [KB_include_p6.md](KB_include_p6.md)

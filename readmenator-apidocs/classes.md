@@ -8,7 +8,9 @@ Project types nested under the project types they derive from. External bases ar
 - [`active`](modules/include.frame_clock.h.md#active) type_alias in `include/frame_clock.h`
 - [`addr`](modules/gui.browser_ui.c.md#addr) type_alias in `gui/browser_ui.c`
 - [`allowlisted`](modules/gui.browser_ui.c.md#allowlisted) type_alias in `gui/browser_ui.c`
+- [`anc_kind`](modules/include.anchor.h.md#anc_kind) enum in `include/anchor.h`
 - [`attr_span`](modules/src.prefetch.c.md#attr_span) struct in `src/prefetch.c`
+- [`attr_src`](modules/fuzz.fuzz_table_layout.c.md#attr_src) struct in `fuzz/fuzz_table_layout.c`
 - [`b`](modules/gui.browser_ui_internal.h.md#b) type_alias in `gui/browser_ui_internal.h`
 - [`b`](modules/include.css_color.h.md#b) type_alias in `include/css_color.h`
 - [`bar`](modules/include.video_controls.h.md#bar) type_alias in `include/video_controls.h`
@@ -195,6 +197,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`dom_place`](modules/include.dom.h.md#dom_place) enum in `include/dom.h`
 - [`dom_status`](modules/include.dom.h.md#dom_status) enum in `include/dom.h`
 - [`ds_status`](modules/include.disk_store.h.md#ds_status) enum in `include/disk_store.h`
+- [`dt_writer`](modules/src.doc_title.c.md#dt_writer) struct in `src/doc_title.c`
 - [`du_status`](modules/include.data_url.h.md#du_status) enum in `include/data_url.h`
 - [`ek_key`](modules/include.exact_key.h.md#ek_key) struct in `include/exact_key.h`
 - [`end`](modules/include.find_text.h.md#end) type_alias in `include/find_text.h`
@@ -243,6 +246,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`frame_undo`](modules/gui.browser_ui.c.md#frame_undo) struct in `gui/browser_ui.c`
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) type_alias in `gui/browser_ui.c`
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) struct in `gui/browser_ui.c`
+- [`from`](modules/include.smooth_scroll.h.md#from) type_alias in `include/smooth_scroll.h`
 - [`ft_match`](modules/include.find_text.h.md#ft_match) struct in `include/find_text.h`
 - [`ft_piece`](modules/include.find_text.h.md#ft_piece) struct in `include/find_text.h`
 - [`ft_pos`](modules/include.find_text.h.md#ft_pos) struct in `include/find_text.h`
@@ -255,6 +259,9 @@ Project types nested under the project types they derive from. External bases ar
 - [`fx_justify`](modules/include.flex_layout.h.md#fx_justify) enum in `include/flex_layout.h`
 - [`fx_result`](modules/include.flex_layout.h.md#fx_result) struct in `include/flex_layout.h`
 - [`fx_status`](modules/include.flex_layout.h.md#fx_status) enum in `include/flex_layout.h`
+- [`fz_mod`](modules/fuzz.fuzz_js_sandbox.c.md#fz_mod) struct in `fuzz/fuzz_js_sandbox.c`
+- [`fz_out`](modules/fuzz.fuzz_css_import.c.md#fz_out) struct in `fuzz/fuzz_css_import.c`
+- [`fz_parent`](modules/fuzz.fuzz_js_geom.c.md#fz_parent) struct in `fuzz/fuzz_js_geom.c`
 - [`gif_bits`](modules/src.image_decode.c.md#gif_bits) struct in `src/image_decode.c`
 - [`gif_reader`](modules/src.image_decode.c.md#gif_reader) struct in `src/image_decode.c`
 - [`gui_net_ctx`](modules/gui.browser_ui.c.md#gui_net_ctx) struct in `gui/browser_ui.c`
@@ -351,10 +358,12 @@ Project types nested under the project types they derive from. External bases ar
 - [`kind`](modules/include.form.h.md#kind) type_alias in `include/form.h`
 - [`kind`](modules/include.interp.h.md#kind) type_alias in `include/interp.h`
 - [`kind`](modules/include.js_trusted.h.md#kind) type_alias in `include/js_trusted.h`
+- [`kind`](modules/include.link_preview.h.md#kind) type_alias in `include/link_preview.h`
 - [`kind`](modules/include.page_view.h.md#kind) type_alias in `include/page_view.h`
 - [`kind`](modules/include.prefetch.h.md#kind) type_alias in `include/prefetch.h`
 - [`kind`](modules/include.render_doc.h.md#kind) type_alias in `include/render_doc.h`
 - [`kind`](modules/include.svg_render.h.md#kind) type_alias in `include/svg_render.h`
+- [`kind`](modules/include.tab.h.md#kind) type_alias in `include/tab.h`
 - [`kind`](modules/include.tab.h.md#kind) type_alias in `include/tab.h`
 - [`kind`](modules/src.css_mq.c.md#kind) type_alias in `src/css_mq.c`
 - [`cx_item.layer`](modules/include.compositor.h.md#cx_item-layer) type_alias in `include/compositor.h`
@@ -370,6 +379,10 @@ Project types nested under the project types they derive from. External bases ar
 - [`ln_status`](modules/include.link_nav.h.md#ln_status) enum in `include/link_nav.h`
 - [`ln_target_kind`](modules/include.link_nav.h.md#ln_target_kind) enum in `include/link_nav.h`
 - [`loaded`](modules/src.text_shape.c.md#loaded) type_alias in `src/text_shape.c`
+- [`lp_kind`](modules/include.link_preview.h.md#lp_kind) enum in `include/link_preview.h`
+- [`lp_preview`](modules/include.link_preview.h.md#lp_preview) struct in `include/link_preview.h`
+- [`lp_sink`](modules/src.link_preview.c.md#lp_sink) struct in `src/link_preview.c`
+- [`lp_status`](modules/include.link_preview.h.md#lp_status) enum in `include/link_preview.h`
 - [`ls_aead`](modules/include.local_store.h.md#ls_aead) enum in `include/local_store.h`
 - [`ls_status`](modules/include.local_store.h.md#ls_status) enum in `include/local_store.h`
 - [`ft_span.match`](modules/include.find_text.h.md#ft_span-match) type_alias in `include/find_text.h`
@@ -427,6 +440,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`pm_entry`](modules/src.dom.c.md#pm_entry) struct in `src/dom.c`
 - [`png_flow_ctx`](modules/gui.browser_ui.c.md#png_flow_ctx) struct in `gui/browser_ui.c`
 - [`policy`](modules/include.secure_fetch.h.md#policy) type_alias in `include/secure_fetch.h`
+- [`pos`](modules/fuzz.fuzz_browser.c.md#pos) type_alias in `fuzz/fuzz_browser.c`
 - [`fx_result.pos`](modules/include.flex_layout.h.md#fx_result-pos) type_alias in `include/flex_layout.h`
 - [`cx_style.position`](modules/include.compositor.h.md#cx_style-position) type_alias in `include/compositor.h`
 - [`pqs_keys`](modules/include.pq_seal.h.md#pqs_keys) type_alias in `include/pq_seal.h`
@@ -530,6 +544,8 @@ Project types nested under the project types they derive from. External bases ar
 - [`sink`](modules/src.css_counter.c.md#sink) struct in `src/css_counter.c`
 - [`sink`](modules/src.secure_fetch.c.md#sink) type_alias in `src/secure_fetch.c`
 - [`sm_entry`](modules/src.dom.c.md#sm_entry) struct in `src/dom.c`
+- [`sms_state`](modules/include.smooth_scroll.h.md#sms_state) struct in `include/smooth_scroll.h`
+- [`snap`](modules/fuzz.fuzz_browser.c.md#snap) struct in `fuzz/fuzz_browser.c`
 - [`sqb`](modules/include.subreq_batch.h.md#sqb) type_alias in `include/subreq_batch.h`
 - [`sqb`](modules/src.subreq_batch.c.md#sqb) struct in `src/subreq_batch.c`
 - [`sqb_job`](modules/src.subreq_batch.c.md#sqb_job) struct in `src/subreq_batch.c`
@@ -557,6 +573,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`tab`](modules/include.tab.h.md#tab) type_alias in `include/tab.h`
 - [`tab`](modules/include.ui.h.md#tab) struct in `include/ui.h`
 - [`tab`](modules/src.tab.c.md#tab) struct in `src/tab.c`
+- [`tab_anchor`](modules/include.tab.h.md#tab_anchor) struct in `include/tab.h`
 - [`tab_ctx`](modules/gui.browser_ui.c.md#tab_ctx) struct in `gui/browser_ui.c`
 - [`tab_eval_result`](modules/include.tab.h.md#tab_eval_result) struct in `include/tab.h`
 - [`tab_hist_op`](modules/include.tab.h.md#tab_hist_op) struct in `include/tab.h`

@@ -70,6 +70,8 @@ hls_status hls_parse(const char *text, size_t len, hls_playlist **out)
 
 *Calls:* [`hls_playlist_free`](#hls_playlist_free)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_hls.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="hls_select_variant"></a>
@@ -123,6 +125,8 @@ size_t hls_resolve_url(const char *base_url, const char *segment_url, char *reso
 
 *Calls:* [`strncmp`](src.css_color.c.md#strncmp)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_hls.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="hls_playlist_free"></a>
@@ -171,6 +175,8 @@ long hls_segment_payload(long http_code, const unsigned char *body, size_t len)
 
 **Returns:** `long`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_hls.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="hls_mirror_url"></a>
@@ -196,6 +202,8 @@ size_t hls_mirror_url(const hls_playlist *pl, const char *seg_abs, size_t k, cha
 **Returns:** `size_t`
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_hls.c.md#llvmfuzzertestoneinput)
 
 ---
 

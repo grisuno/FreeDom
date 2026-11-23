@@ -123,6 +123,8 @@ Returns 1 and fills *g, or 0 (and zeroes *g) when the rect is too small or not f
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_video_controls.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="frac"></a>
@@ -188,6 +190,8 @@ Always finite.
 | `pl` | `hls_playlist *` |  |  |
 
 **Returns:** `double`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_video_controls.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -259,6 +263,8 @@ Playback position: base_s + (pts_us - pts0_us)/1e6, clamped to [0,total].
 
 **Returns:** `double`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_video_controls.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="vcl_clamp_frac"></a>
@@ -306,6 +312,8 @@ Negative/NaN => 0:00.
 | `cap` | `size_t` |  |  |
 
 **Returns:** `size_t`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_video_controls.c.md#llvmfuzzertestoneinput)
 
 ---
 

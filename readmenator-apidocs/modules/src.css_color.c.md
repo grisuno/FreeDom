@@ -137,7 +137,7 @@ cc_status cc_parse(const char *token, cc_rgb *out)
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp), [`strncmp`](#strncmp)
 
-*Called by:* [`cv_parse_color`](src.css_values.c.md#cv_parse_color), [`PV_COLOR_TOKEN_MAX`](src.page_view.c.md#pv_color_token_max)
+*Called by:* [`PV_COLOR_TOKEN_MAX`](src.page_view.c.md#pv_color_token_max)
 
 ---
 
@@ -160,7 +160,7 @@ strncmp(buf, "oklab(", 6) == 0 || strncmp(buf, "oklch(", 6) == 0)
 
 *Calls:* [`strcmp`](gui.browser_ui.c.md#strcmp)
 
-*Called by:* [`arrives`](gui.browser_ui.c.md#arrives), [`only`](gui.browser_ui.c.md#only), [`blur`](src.css.c.md#blur), [`cb_clip_inset`](src.css_box.c.md#cb_clip_inset), [`cc_parse`](#cc_parse), [`cnt_is_marker`](src.css_counter.c.md#cnt_is_marker), [`cnt_parse_decls`](src.css_counter.c.md#cnt_parse_decls), [`dl_should_download`](src.download.c.md#dl_should_download), [`gets`](src.freedom.c.md#gets), [`main`](src.freedom.c.md#main), [`parent`](src.freedom.c.md#parent), [`HLS_HOST_MAX`](src.hls.c.md#hls_host_max) and 6 more
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_download.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_hls.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_pdf_export.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`arrives`](gui.browser_ui.c.md#arrives), [`only`](gui.browser_ui.c.md#only), [`chl_tab_fallback_title`](src.chrome_layout.c.md#chl_tab_fallback_title), [`blur`](src.css.c.md#blur), [`cb_clip_inset`](src.css_box.c.md#cb_clip_inset), [`cc_parse`](#cc_parse), [`cnt_is_marker`](src.css_counter.c.md#cnt_is_marker), [`cnt_parse_decls`](src.css_counter.c.md#cnt_parse_decls) and 14 more
 
 ---
 

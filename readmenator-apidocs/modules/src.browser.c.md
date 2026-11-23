@@ -1,10 +1,10 @@
 # `src/browser.c`
 
-> Source: [src/browser.c:1](../../src/browser.c#L1) | language `c` | coverage 27.8% | [API index](../index.md)
+> Source: [src/browser.c:1](../../src/browser.c#L1) | language `c` | coverage 28.9% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`browser_init`](#browser_init), [`browser_free`](#browser_free), [`browser_set_url_bar`](#browser_set_url_bar), [`browser_commit_url_bar`](#browser_commit_url_bar), [`browser_navigate`](#browser_navigate), [`browser_push_state`](#browser_push_state), [`browser_replace_state`](#browser_replace_state), [`browser_entry_doc`](#browser_entry_doc), [`browser_doc_index`](#browser_doc_index), [`browser_back`](#browser_back), [`browser_forward`](#browser_forward), [`browser_can_back`](#browser_can_back), [`browser_can_forward`](#browser_can_forward), [`browser_current_url`](#browser_current_url), [`browser_url_bar_selection`](#browser_url_bar_selection), [`browser_url_bar_delete_selection`](#browser_url_bar_delete_selection), [`browser_url_bar_insert`](#browser_url_bar_insert), [`browser_url_bar_backspace`](#browser_url_bar_backspace), [`browser_url_bar_delete`](#browser_url_bar_delete), [`browser_url_bar_move_cursor`](#browser_url_bar_move_cursor), [`browser_url_bar_extend_cursor`](#browser_url_bar_extend_cursor), [`browser_url_bar_set_cursor`](#browser_url_bar_set_cursor), [`browser_url_bar_select_all`](#browser_url_bar_select_all), [`browser_url_bar_clear`](#browser_url_bar_clear), [`browser_set_page`](#browser_set_page), [`browser_set_status`](#browser_set_status), [`browser_status_text`](#browser_status_text), [`browser_is_exception`](#browser_is_exception), [`browser_add_exception`](#browser_add_exception), [`browser_closed_push`](#browser_closed_push), [`browser_closed_pop`](#browser_closed_pop), [`browser_commit_pending`](#browser_commit_pending), [`browser_abort_pending`](#browser_abort_pending), [`browser_has_pending`](#browser_has_pending)
+- **Functions:** [`browser_init`](#browser_init), [`browser_free`](#browser_free), [`browser_set_url_bar`](#browser_set_url_bar), [`browser_commit_url_bar`](#browser_commit_url_bar), [`browser_navigate`](#browser_navigate), [`browser_push_state`](#browser_push_state), [`browser_replace_state`](#browser_replace_state), [`browser_set_entry_scroll`](#browser_set_entry_scroll), [`browser_entry_scroll`](#browser_entry_scroll), [`browser_entry_doc`](#browser_entry_doc), [`browser_doc_index`](#browser_doc_index), [`browser_back`](#browser_back), [`browser_forward`](#browser_forward), [`browser_can_back`](#browser_can_back), [`browser_can_forward`](#browser_can_forward), [`browser_current_url`](#browser_current_url), [`browser_url_bar_selection`](#browser_url_bar_selection), [`browser_url_bar_delete_selection`](#browser_url_bar_delete_selection), [`browser_url_bar_insert`](#browser_url_bar_insert), [`browser_url_bar_backspace`](#browser_url_bar_backspace), [`browser_url_bar_delete`](#browser_url_bar_delete), [`browser_url_bar_move_cursor`](#browser_url_bar_move_cursor), [`browser_url_bar_extend_cursor`](#browser_url_bar_extend_cursor), [`browser_url_bar_set_cursor`](#browser_url_bar_set_cursor), [`browser_url_bar_select_all`](#browser_url_bar_select_all), [`browser_url_bar_clear`](#browser_url_bar_clear), [`browser_set_page`](#browser_set_page), [`browser_set_status`](#browser_set_status), [`browser_status_text`](#browser_status_text), [`browser_is_exception`](#browser_is_exception), [`browser_add_exception`](#browser_add_exception), [`browser_closed_push`](#browser_closed_push), [`browser_closed_pop`](#browser_closed_pop), [`browser_commit_pending`](#browser_commit_pending), [`browser_abort_pending`](#browser_abort_pending), [`browser_has_pending`](#browser_has_pending)
 - **Macros:** [`_POSIX_C_SOURCE`](#_posix_c_source)
 
 ## Call Graph
@@ -54,7 +54,7 @@ flowchart LR
 
 ### `browser_init`
 
-`function` | [src/browser.c:192](../../src/browser.c#L192)
+`function` | [src/browser.c:197](../../src/browser.c#L197)
 
 ```c
 browser_status browser_init(browser_state *bs)
@@ -70,13 +70,15 @@ browser_status browser_init(browser_state *bs)
 
 *Calls:* [`browser_free`](#browser_free), [`browser_set_url_bar`](#browser_set_url_bar)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_browser.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="browser_free"></a>
 
 ### `browser_free`
 
-`function` | [src/browser.c:203](../../src/browser.c#L203)
+`function` | [src/browser.c:208](../../src/browser.c#L208)
 
 ```c
 void browser_free(browser_state *bs)
@@ -92,7 +94,7 @@ Safe on NULL and zero-initialised.
 |---|---|---|---|
 | `bs` | `browser_state *` |  |  |
 
-> **Inherited:** Documentation from [`browser_free`](#browser_free) (include/browser.h:78).
+> **Inherited:** Documentation from [`browser_free`](#browser_free) (include/browser.h:80).
 
 *Called by:* [`browser_init`](#browser_init)
 
@@ -102,7 +104,7 @@ Safe on NULL and zero-initialised.
 
 ### `browser_set_url_bar`
 
-`function` | [src/browser.c:215](../../src/browser.c#L215)
+`function` | [src/browser.c:220](../../src/browser.c#L220)
 
 ```c
 browser_status browser_set_url_bar(browser_state *bs, const char *url)
@@ -125,7 +127,7 @@ browser_status browser_set_url_bar(browser_state *bs, const char *url)
 
 ### `browser_commit_url_bar`
 
-`function` | [src/browser.c:227](../../src/browser.c#L227)
+`function` | [src/browser.c:232](../../src/browser.c#L232)
 
 ```c
 browser_status browser_commit_url_bar(browser_state *bs)
@@ -147,7 +149,7 @@ browser_status browser_commit_url_bar(browser_state *bs)
 
 ### `browser_navigate`
 
-`function` | [src/browser.c:273](../../src/browser.c#L273)
+`function` | [src/browser.c:288](../../src/browser.c#L288)
 
 ```c
 browser_status browser_navigate(browser_state *bs, const char *url)
@@ -164,7 +166,7 @@ browser_status browser_navigate(browser_state *bs, const char *url)
 
 *Calls:* [`browser_abort_pending`](#browser_abort_pending)
 
-*Called by:* [`browser_commit_url_bar`](#browser_commit_url_bar)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_browser.c.md#llvmfuzzertestoneinput), [`browser_commit_url_bar`](#browser_commit_url_bar)
 
 ---
 
@@ -172,7 +174,7 @@ browser_status browser_navigate(browser_state *bs, const char *url)
 
 ### `browser_push_state`
 
-`function` | [src/browser.c:303](../../src/browser.c#L303)
+`function` | [src/browser.c:320](../../src/browser.c#L320)
 
 ```c
 browser_status browser_push_state(browser_state *bs, const char *url)
@@ -187,13 +189,15 @@ browser_status browser_push_state(browser_state *bs, const char *url)
 
 **Returns:** `browser_status`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_browser.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="browser_replace_state"></a>
 
 ### `browser_replace_state`
 
-`function` | [src/browser.c:311](../../src/browser.c#L311)
+`function` | [src/browser.c:328](../../src/browser.c#L328)
 
 ```c
 browser_status browser_replace_state(browser_state *bs, const char *url)
@@ -210,13 +214,60 @@ browser_status browser_replace_state(browser_state *bs, const char *url)
 
 *Calls:* [`browser_set_url_bar`](#browser_set_url_bar)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_browser.c.md#llvmfuzzertestoneinput)
+
+---
+
+<a id="browser_set_entry_scroll"></a>
+
+### `browser_set_entry_scroll`
+
+`function` | [src/browser.c:341](../../src/browser.c#L341)
+
+```c
+void browser_set_entry_scroll(browser_state *bs, double scroll)
+```
+
+Scroll offset of the CURRENT entry (spec/anchor.md 3): set it when leaving an entry, read it when a same-document Back/Forward lands on one.
+
+A new entry starts at 0; a non-finite value is ignored and a negative one is stored as 0. NULL-safe; 0 with no entry.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `bs` | `browser_state *` |  |  |
+| `scroll` | `double` |  |  |
+
+> **Inherited:** Documentation from [`browser_set_entry_scroll`](#browser_set_entry_scroll) (include/browser.h:122).
+
+---
+
+<a id="browser_entry_scroll"></a>
+
+### `browser_entry_scroll`
+
+`function` | [src/browser.c:346](../../src/browser.c#L346)
+
+```c
+double browser_entry_scroll(const browser_state *bs)
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `bs` | `browser_state *` |  |  |
+
+**Returns:** `double`
+
 ---
 
 <a id="browser_entry_doc"></a>
 
 ### `browser_entry_doc`
 
-`function` | [src/browser.c:324](../../src/browser.c#L324)
+`function` | [src/browser.c:351](../../src/browser.c#L351)
 
 ```c
 int browser_entry_doc(const browser_state *bs, size_t pos)
@@ -233,7 +284,7 @@ Document id of entry pos, or -1 when out of range / NULL.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`browser_entry_doc`](#browser_entry_doc) (include/browser.h:110).
+> **Inherited:** Documentation from [`browser_entry_doc`](#browser_entry_doc) (include/browser.h:112).
 
 ---
 
@@ -241,7 +292,7 @@ Document id of entry pos, or -1 when out of range / NULL.
 
 ### `browser_doc_index`
 
-`function` | [src/browser.c:329](../../src/browser.c#L329)
+`function` | [src/browser.c:356](../../src/browser.c#L356)
 
 ```c
 int browser_doc_index(const browser_state *bs)
@@ -257,7 +308,7 @@ Index of the current entry within its document's contiguous run of entries (0 fo
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`browser_doc_index`](#browser_doc_index) (include/browser.h:114).
+> **Inherited:** Documentation from [`browser_doc_index`](#browser_doc_index) (include/browser.h:116).
 
 ---
 
@@ -265,7 +316,7 @@ Index of the current entry within its document's contiguous run of entries (0 fo
 
 ### `browser_back`
 
-`function` | [src/browser.c:337](../../src/browser.c#L337)
+`function` | [src/browser.c:364](../../src/browser.c#L364)
 
 ```c
 browser_status browser_back(browser_state *bs)
@@ -281,13 +332,15 @@ browser_status browser_back(browser_state *bs)
 
 *Calls:* [`browser_abort_pending`](#browser_abort_pending), [`browser_set_url_bar`](#browser_set_url_bar)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_browser.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="browser_forward"></a>
 
 ### `browser_forward`
 
-`function` | [src/browser.c:350](../../src/browser.c#L350)
+`function` | [src/browser.c:377](../../src/browser.c#L377)
 
 ```c
 browser_status browser_forward(browser_state *bs)
@@ -303,13 +356,15 @@ browser_status browser_forward(browser_state *bs)
 
 *Calls:* [`browser_abort_pending`](#browser_abort_pending), [`browser_set_url_bar`](#browser_set_url_bar)
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_browser.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="browser_can_back"></a>
 
 ### `browser_can_back`
 
-`function` | [src/browser.c:363](../../src/browser.c#L363)
+`function` | [src/browser.c:390](../../src/browser.c#L390)
 
 ```c
 int browser_can_back(const browser_state *bs)
@@ -325,7 +380,7 @@ Query helpers.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`browser_can_back`](#browser_can_back) (include/browser.h:117).
+> **Inherited:** Documentation from [`browser_can_back`](#browser_can_back) (include/browser.h:126).
 
 ---
 
@@ -333,7 +388,7 @@ Query helpers.
 
 ### `browser_can_forward`
 
-`function` | [src/browser.c:367](../../src/browser.c#L367)
+`function` | [src/browser.c:394](../../src/browser.c#L394)
 
 ```c
 int browser_can_forward(const browser_state *bs)
@@ -353,7 +408,7 @@ int browser_can_forward(const browser_state *bs)
 
 ### `browser_current_url`
 
-`function` `const` | [src/browser.c:371](../../src/browser.c#L371)
+`function` `const` | [src/browser.c:398](../../src/browser.c#L398)
 
 ```c
 const char *browser_current_url(const browser_state *bs)
@@ -375,7 +430,7 @@ const char *browser_current_url(const browser_state *bs)
 
 ### `browser_url_bar_selection`
 
-`function` | [src/browser.c:376](../../src/browser.c#L376)
+`function` | [src/browser.c:403](../../src/browser.c#L403)
 
 ```c
 int browser_url_bar_selection(const browser_state *bs, size_t *start, size_t *len)
@@ -395,7 +450,7 @@ Lets the GUI copy/cut the selected text and paint the highlight. NULL-safe.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`browser_url_bar_selection`](#browser_url_bar_selection) (include/browser.h:154).
+> **Inherited:** Documentation from [`browser_url_bar_selection`](#browser_url_bar_selection) (include/browser.h:163).
 
 *Called by:* [`browser_url_bar_delete_selection`](#browser_url_bar_delete_selection)
 
@@ -405,7 +460,7 @@ Lets the GUI copy/cut the selected text and paint the highlight. NULL-safe.
 
 ### `browser_url_bar_delete_selection`
 
-`function` | [src/browser.c:387](../../src/browser.c#L387)
+`function` | [src/browser.c:414](../../src/browser.c#L414)
 
 ```c
 int browser_url_bar_delete_selection(browser_state *bs)
@@ -423,7 +478,7 @@ Used by cut and by an edit over a selection.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`browser_url_bar_delete_selection`](#browser_url_bar_delete_selection) (include/browser.h:158).
+> **Inherited:** Documentation from [`browser_url_bar_delete_selection`](#browser_url_bar_delete_selection) (include/browser.h:167).
 
 *Calls:* [`browser_url_bar_selection`](#browser_url_bar_selection)
 
@@ -435,7 +490,7 @@ Used by cut and by an edit over a selection.
 
 ### `browser_url_bar_insert`
 
-`function` | [src/browser.c:397](../../src/browser.c#L397)
+`function` | [src/browser.c:424](../../src/browser.c#L424)
 
 ```c
 browser_status browser_url_bar_insert(browser_state *bs, char c)
@@ -458,7 +513,7 @@ browser_status browser_url_bar_insert(browser_state *bs, char c)
 
 ### `browser_url_bar_backspace`
 
-`function` | [src/browser.c:412](../../src/browser.c#L412)
+`function` | [src/browser.c:439](../../src/browser.c#L439)
 
 ```c
 browser_status browser_url_bar_backspace(browser_state *bs)
@@ -480,7 +535,7 @@ browser_status browser_url_bar_backspace(browser_state *bs)
 
 ### `browser_url_bar_delete`
 
-`function` | [src/browser.c:426](../../src/browser.c#L426)
+`function` | [src/browser.c:453](../../src/browser.c#L453)
 
 ```c
 browser_status browser_url_bar_delete(browser_state *bs)
@@ -502,7 +557,7 @@ browser_status browser_url_bar_delete(browser_state *bs)
 
 ### `browser_url_bar_move_cursor`
 
-`function` | [src/browser.c:437](../../src/browser.c#L437)
+`function` | [src/browser.c:464](../../src/browser.c#L464)
 
 ```c
 browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)
@@ -523,7 +578,7 @@ browser_status browser_url_bar_move_cursor(browser_state *bs, long delta)
 
 ### `browser_url_bar_extend_cursor`
 
-`function` | [src/browser.c:447](../../src/browser.c#L447)
+`function` | [src/browser.c:474](../../src/browser.c#L474)
 
 ```c
 browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)
@@ -544,7 +599,7 @@ browser_status browser_url_bar_extend_cursor(browser_state *bs, long delta)
 
 ### `browser_url_bar_set_cursor`
 
-`function` | [src/browser.c:456](../../src/browser.c#L456)
+`function` | [src/browser.c:483](../../src/browser.c#L483)
 
 ```c
 browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int extend)
@@ -566,7 +621,7 @@ browser_status browser_url_bar_set_cursor(browser_state *bs, size_t pos, int ext
 
 ### `browser_url_bar_select_all`
 
-`function` | [src/browser.c:464](../../src/browser.c#L464)
+`function` | [src/browser.c:491](../../src/browser.c#L491)
 
 ```c
 browser_status browser_url_bar_select_all(browser_state *bs)
@@ -586,7 +641,7 @@ browser_status browser_url_bar_select_all(browser_state *bs)
 
 ### `browser_url_bar_clear`
 
-`function` | [src/browser.c:471](../../src/browser.c#L471)
+`function` | [src/browser.c:498](../../src/browser.c#L498)
 
 ```c
 browser_status browser_url_bar_clear(browser_state *bs)
@@ -606,7 +661,7 @@ browser_status browser_url_bar_clear(browser_state *bs)
 
 ### `browser_set_page`
 
-`function` | [src/browser.c:480](../../src/browser.c#L480)
+`function` | [src/browser.c:507](../../src/browser.c#L507)
 
 ```c
 browser_status browser_set_page(browser_state *bs, const char *title, const char *text, int error)
@@ -629,7 +684,7 @@ browser_status browser_set_page(browser_state *bs, const char *title, const char
 
 ### `browser_set_status`
 
-`function` | [src/browser.c:502](../../src/browser.c#L502)
+`function` | [src/browser.c:529](../../src/browser.c#L529)
 
 ```c
 browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t now_ms)
@@ -653,7 +708,7 @@ browser_status browser_set_status(browser_state *bs, const char *msg, uint64_t n
 
 ### `browser_status_text`
 
-`function` `const` | [src/browser.c:516](../../src/browser.c#L516)
+`function` `const` | [src/browser.c:543](../../src/browser.c#L543)
 
 ```c
 const char *browser_status_text(const browser_state *bs, uint64_t now_ms)
@@ -670,7 +725,7 @@ The active status text, or NULL when there is none or it has expired at now_ms.
 
 **Returns:** `char *`
 
-> **Inherited:** Documentation from [`browser_status_text`](#browser_status_text) (include/browser.h:173).
+> **Inherited:** Documentation from [`browser_status_text`](#browser_status_text) (include/browser.h:182).
 
 ---
 
@@ -678,7 +733,7 @@ The active status text, or NULL when there is none or it has expired at now_ms.
 
 ### `browser_is_exception`
 
-`function` | [src/browser.c:535](../../src/browser.c#L535)
+`function` | [src/browser.c:562](../../src/browser.c#L562)
 
 ```c
 int browser_is_exception(const browser_state *bs, const char *host)
@@ -695,7 +750,7 @@ Exception list: hosts explicitly allowed to use weak TLS.
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`browser_is_exception`](#browser_is_exception) (include/browser.h:122).
+> **Inherited:** Documentation from [`browser_is_exception`](#browser_is_exception) (include/browser.h:131).
 
 *Called by:* [`browser_add_exception`](#browser_add_exception)
 
@@ -705,7 +760,7 @@ Exception list: hosts explicitly allowed to use weak TLS.
 
 ### `browser_add_exception`
 
-`function` | [src/browser.c:543](../../src/browser.c#L543)
+`function` | [src/browser.c:570](../../src/browser.c#L570)
 
 ```c
 browser_status browser_add_exception(browser_state *bs, const char *host)
@@ -728,7 +783,7 @@ browser_status browser_add_exception(browser_state *bs, const char *host)
 
 ### `browser_closed_push`
 
-`function` | [src/browser.c:561](../../src/browser.c#L561)
+`function` | [src/browser.c:588](../../src/browser.c#L588)
 
 ```c
 browser_status browser_closed_push(browser_closed *c, const char *url)
@@ -749,7 +804,7 @@ browser_status browser_closed_push(browser_closed *c, const char *url)
 
 ### `browser_closed_pop`
 
-`function` | [src/browser.c:576](../../src/browser.c#L576)
+`function` | [src/browser.c:603](../../src/browser.c#L603)
 
 ```c
 int browser_closed_pop(browser_closed *c, char *out, size_t cap)
@@ -769,7 +824,7 @@ Takes the most recently closed URL into out[cap].
 
 **Returns:** `int`
 
-> **Inherited:** Documentation from [`browser_closed_pop`](#browser_closed_pop) (include/browser.h:188).
+> **Inherited:** Documentation from [`browser_closed_pop`](#browser_closed_pop) (include/browser.h:197).
 
 ---
 
@@ -777,7 +832,7 @@ Takes the most recently closed URL into out[cap].
 
 ### `browser_commit_pending`
 
-`function` | [src/browser.c:588](../../src/browser.c#L588)
+`function` | [src/browser.c:615](../../src/browser.c#L615)
 
 ```c
 void browser_commit_pending(browser_state *bs)
@@ -793,7 +848,7 @@ A navigate while pending first aborts the pending one (the new one replaces it);
 |---|---|---|---|
 | `bs` | `browser_state *` |  |  |
 
-> **Inherited:** Documentation from [`browser_commit_pending`](#browser_commit_pending) (include/browser.h:105).
+> **Inherited:** Documentation from [`browser_commit_pending`](#browser_commit_pending) (include/browser.h:107).
 
 ---
 
@@ -801,7 +856,7 @@ A navigate while pending first aborts the pending one (the new one replaces it);
 
 ### `browser_abort_pending`
 
-`function` | [src/browser.c:593](../../src/browser.c#L593)
+`function` | [src/browser.c:620](../../src/browser.c#L620)
 
 ```c
 int browser_abort_pending(browser_state *bs)
@@ -825,7 +880,7 @@ int browser_abort_pending(browser_state *bs)
 
 ### `browser_has_pending`
 
-`function` | [src/browser.c:622](../../src/browser.c#L622)
+`function` | [src/browser.c:650](../../src/browser.c#L650)
 
 ```c
 int browser_has_pending(const browser_state *bs)

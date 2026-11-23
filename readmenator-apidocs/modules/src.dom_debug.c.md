@@ -19,7 +19,7 @@
 typedef struct dd_cursor
 ```
 
-Bounded write cursor: [`pos`](include.flex_layout.h.md#fx_result-pos) bytes are committed to `out` (always leaving room for the terminating NUL); `need` counts every byte that WOULD be written so the caller gets snprintf semantics even when truncated.
+Bounded write cursor: [`pos`](fuzz.fuzz_browser.c.md#pos) bytes are committed to `out` (always leaving room for the terminating NUL); `need` counts every byte that WOULD be written so the caller gets snprintf semantics even when truncated.
 
 ---
 

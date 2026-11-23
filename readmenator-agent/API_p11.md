@@ -141,235 +141,237 @@ Depends on: `include/box_style.h`, `include/box_tree.h`, `include/css.h`, `inclu
 - `item_ordinal` (function) `src/page_view.c:1396` `static int item_ordinal(pv_item_track *tr, int cid, const lxb_dom_node_t *item)` -- Ordinal for a run of container `cid` whose direct-child item is `item` (NULL = * anonymous: every such run is its...
 - `pv_content_hidden` (function) `src/page_view.c:1441` `int pv_content_hidden(int box_hidden, int run_visibility)` -- The author text-presentation extensions struct (pv_text_ext) is public now (include/page_view.h): each field...
 - `pv_text_ext_reset` (function) `src/page_view.c:1447` `void pv_text_ext_reset(pv_text_ext *e)`
-- `pv_text_ext_merge` (function) `src/page_view.c:1475` `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` -- Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten...
-- `css_has_hbox` (function) `src/page_view.c:1540` `static int css_has_hbox(const css_style *cs)` -- True if the resolved style declares any HORIZONTAL box property, in either half of the <length-percentage>: `width...
-- `pv_mauto_of` (function) `src/page_view.c:1554` `static int pv_mauto_of(const css_style *cs)` -- Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side...
-- `css_hbox_resolve` (function) `src/page_view.c:1561` `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)`
-- `css_has_position` (function) `src/page_view.c:1614` `static int css_has_position(const css_style *cs)` -- A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree...
-- `border_side_cleared` (function) `src/page_view.c:1621` `static int border_side_cleared(int width, int style)` -- A side whose border the author zeroed (`border:0`, `border-width:0`) or switched off * (`border:none`); an unset...
-- `pv_control_frame_cleared` (function) `src/page_view.c:1627` `static int pv_control_frame_cleared(const css_style *cs)` -- The author cleared the control's frame on all four sides (pure): Firefox then paints * no native field chrome at all.
-- `ua_field_background` (function) `src/page_view.c:1639` `static void ua_field_background(pv_box_def *d, int frame_cleared)` -- A text field whose author frame replaces the native chrome (frame cleared, a border or a radius: the painter then...
-- `css_has_boxdeco` (function) `src/page_view.c:1646` `static int css_has_boxdeco(const css_style *cs)`
-- `cont_def_reset` (function) `src/page_view.c:1793` `static void cont_def_reset(pv_cont_def *d)` -- Per-container parameters + parent linkage (2026-07-31).
-- `cont_reg_init` (function) `src/page_view.c:1813` `static int cont_reg_init(pv_container_reg *reg, size_t cap)` -- Allocates a registry of `cap` slots.
-- `cont_reg_free` (function) `src/page_view.c:1826` `static void cont_reg_free(pv_container_reg *reg)`
-- `container_id` (function) `src/page_view.c:1832` `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` -- free(reg->node); free(reg->def); reg->node = NULL; reg->def = NULL; return -1; } reg->cap = cap; return 0; } static...
-- `annotate_flow_run` (function) `src/page_view.c:1920` `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,
+- `pv_text_ext_merge` (function) `src/page_view.c:1477` `static void pv_text_ext_merge(pv_text_ext *e, const css_style *cs)` -- Merges one ancestor's resolved css_style into ext, nearest ancestor first (a field * already set is not overwritten...
+- `css_has_hbox` (function) `src/page_view.c:1544` `static int css_has_hbox(const css_style *cs)` -- True if the resolved style declares any HORIZONTAL box property, in either half of the <length-percentage>: `width...
+- `pv_mauto_of` (function) `src/page_view.c:1558` `static int pv_mauto_of(const css_style *cs)` -- Pre-resolves the horizontal box (px) into a run's wire fields: l/r insets = padding + non-auto margin of each side...
+- `css_hbox_resolve` (function) `src/page_view.c:1565` `static void css_hbox_resolve(const css_style *cs, pv_box_info *out)`
+- `css_has_position` (function) `src/page_view.c:1618` `static int css_has_position(const css_style *cs)` -- A real (non-static) position makes a block box-carrying too, so its position/insets/ * z-index ride the box-def tree...
+- `border_side_cleared` (function) `src/page_view.c:1625` `static int border_side_cleared(int width, int style)` -- A side whose border the author zeroed (`border:0`, `border-width:0`) or switched off * (`border:none`); an unset...
+- `pv_control_frame_cleared` (function) `src/page_view.c:1631` `static int pv_control_frame_cleared(const css_style *cs)` -- The author cleared the control's frame on all four sides (pure): Firefox then paints * no native field chrome at all.
+- `ua_field_background` (function) `src/page_view.c:1643` `static void ua_field_background(pv_box_def *d, int frame_cleared)` -- A text field whose author frame replaces the native chrome (frame cleared, a border or a radius: the painter then...
+- `css_has_boxdeco` (function) `src/page_view.c:1650` `static int css_has_boxdeco(const css_style *cs)`
+- `cont_def_reset` (function) `src/page_view.c:1797` `static void cont_def_reset(pv_cont_def *d)` -- Per-container parameters + parent linkage (2026-07-31).
+- `cont_reg_init` (function) `src/page_view.c:1817` `static int cont_reg_init(pv_container_reg *reg, size_t cap)` -- Allocates a registry of `cap` slots.
+- `cont_reg_free` (function) `src/page_view.c:1830` `static void cont_reg_free(pv_container_reg *reg)`
+- `container_id` (function) `src/page_view.c:1836` `static int container_id(pv_container_reg *reg, const lxb_dom_node_t *node)` -- free(reg->node); free(reg->def); reg->node = NULL; reg->def = NULL; return -1; } reg->cap = cap; return 0; } static...
+- `annotate_flow_run` (function) `src/page_view.c:1924` `static void annotate_flow_run(pv_view *v, pv_container_reg *reg, pv_item_track *items,
           ...` -- Stamps the last run with its element's layout annotation: container membership and item slot, flex/grid item...
-- `after_pending_emit` (function) `src/page_view.c:1969` `static pv_status after_pending_emit(pv_view *v, pv_container_reg *reg, pv_item_track *items,
+- `after_pending_emit` (function) `src/page_view.c:1973` `static pv_status after_pending_emit(pv_view *v, pv_container_reg *reg, pv_item_track *items,
     ...`
-- `trying` (function) `src/page_view.c:2007` `* a real page passes without trying (slashdot's front page saturates it), and past
+- `trying` (function) `src/page_view.c:2011` `* a real page passes without trying (slashdot's front page saturates it), and past
  * it box_reg_...`
-- `box_reg_free` (function) `src/page_view.c:2036` `static void box_reg_free(pv_box_reg *r)`
-- `boxdef_from_style` (function) `src/page_view.c:2045` `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` -- Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style.
-- `here` (function) `src/page_view.c:2147` `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3...`
-- `glyphs` (function) `src/page_view.c:2198` `* glyphs (the runs carry it as their fill source);`
-- `box_reg_id` (function) `src/page_view.c:2296` `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
+- `box_reg_free` (function) `src/page_view.c:2040` `static void box_reg_free(pv_box_reg *r)`
+- `boxdef_from_style` (function) `src/page_view.c:2049` `static void boxdef_from_style(pv_box_def *d, const css_style *cs)` -- Fills *d (decoration + hbox + bg; parent_id defaults to -1) from a resolved style.
+- `here` (function) `src/page_view.c:2151` `* always 0 here (the engine sizes boxes by their content). An intrinsic * keyword on the block axis (CSS Sizing 3...`
+- `glyphs` (function) `src/page_view.c:2202` `* glyphs (the runs carry it as their fill source);`
+- `box_reg_id` (function) `src/page_view.c:2300` `static int box_reg_id(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
            ...` -- Registers (or finds) the box for `node`. font_px is the element's COMPUTED font-size, needed because the user-agent...
-- `pseudo_box_reg` (function) `src/page_view.c:2325` `static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,
+- `pseudo_box_reg` (function) `src/page_view.c:2329` `static int pseudo_box_reg(pv_box_reg *r, const lxb_dom_node_t *el, int which,
                    ...` -- Registers (or finds) the GENERATED box of el's ::before / ::after (which = CSS_PSEUDO_BEFORE / CSS_PSEUDO_AFTER)...
-- `pseudo_generates_box` (function) `src/page_view.c:2346` `static int pseudo_generates_box(const css_style *ps)` -- True iff a generated box paints or sizes something of its own: the same gate as any element's box, plus a declared...
-- `pseudo_is_oof` (function) `src/page_view.c:2359` `static int pseudo_is_oof(const css_style *ps)`
-- `pseudo_is_block` (function) `src/page_view.c:2363` `static int pseudo_is_block(const css_style *ps)`
-- `pseudo_key` (function) `src/page_view.c:2369` `static const void *pseudo_key(const lxb_dom_node_t *el, int which)` -- return css_has_boxdeco(ps) || ps->width > 0 || ps->pct[CSS_PCT_WIDTH] > 0 || ps->background >= 0 ||...
-- `pv_ptr_hash` (function) `src/page_view.c:2455` `static size_t pv_ptr_hash(const void *p)`
-- `pv_cache_reindex` (function) `src/page_view.c:2463` `static void pv_cache_reindex(pv_style_cache *c)`
-- `pv_style_cache_free` (function) `src/page_view.c:2499` `static void pv_style_cache_free(pv_style_cache *c)`
-- `pv_style_cache_reserve` (function) `src/page_view.c:2520` `static void pv_style_cache_reserve(pv_style_cache *c, size_t n)` -- Sizes an EMPTY cache for n elements up front.
-- `pv_cache_find` (function) `src/page_view.c:2545` `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- cch_element_style(el, sheet), memoized in *cache.
-- `pv_cached_font_px` (function) `src/page_view.c:2560` `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- The COMPUTED font-size memoized for `node`, or 0 when it is not in the cache (no cache, or the element's style was...
-- `pv_cache_put` (function) `src/page_view.c:2565` `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
+- `pseudo_generates_box` (function) `src/page_view.c:2350` `static int pseudo_generates_box(const css_style *ps)` -- True iff a generated box paints or sizes something of its own: the same gate as any element's box, plus a declared...
+- `pseudo_is_oof` (function) `src/page_view.c:2363` `static int pseudo_is_oof(const css_style *ps)`
+- `pseudo_is_block` (function) `src/page_view.c:2367` `static int pseudo_is_block(const css_style *ps)`
+- `pseudo_key` (function) `src/page_view.c:2373` `static const void *pseudo_key(const lxb_dom_node_t *el, int which)` -- return css_has_boxdeco(ps) || ps->width > 0 || ps->pct[CSS_PCT_WIDTH] > 0 || ps->background >= 0 ||...
+- `pv_ptr_hash` (function) `src/page_view.c:2459` `static size_t pv_ptr_hash(const void *p)`
+- `pv_cache_reindex` (function) `src/page_view.c:2467` `static void pv_cache_reindex(pv_style_cache *c)`
+- `pv_style_cache_free` (function) `src/page_view.c:2503` `static void pv_style_cache_free(pv_style_cache *c)`
+- `pv_style_cache_reserve` (function) `src/page_view.c:2524` `static void pv_style_cache_reserve(pv_style_cache *c, size_t n)` -- Sizes an EMPTY cache for n elements up front.
+- `pv_cache_find` (function) `src/page_view.c:2549` `static long pv_cache_find(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- cch_element_style(el, sheet), memoized in *cache.
+- `pv_cached_font_px` (function) `src/page_view.c:2564` `static double pv_cached_font_px(const pv_style_cache *cache, const lxb_dom_node_t *node)` -- The COMPUTED font-size memoized for `node`, or 0 when it is not in the cache (no cache, or the element's style was...
+- `pv_cache_put` (function) `src/page_view.c:2569` `static void pv_cache_put(pv_style_cache *cache, const lxb_dom_node_t *node,
                      ...`
-- `pv_var_push` (function) `src/page_view.c:2615` `static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,
+- `pv_var_push` (function) `src/page_view.c:2619` `static const cvr_chain *pv_var_push(pv_style_cache *cache, cvr_table *own,
                       ...` -- Takes ownership of *own (left zeroed) as a new chain node over `parent`. * Returns the node's chain, or `parent`...
-- `pv_cq_push` (function) `src/page_view.c:2638` `static const cmq_container *pv_cq_push(pv_style_cache *cache, const lxb_dom_node_t *node,
+- `pv_cq_push` (function) `src/page_view.c:2642` `static const cmq_container *pv_cq_push(pv_style_cache *cache, const lxb_dom_node_t *node,
        ...` -- The scope an element's children see: `parent` unless the element is itself a query container, in which case a new...
-- `pv_parent_element` (function) `src/page_view.c:2677` `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` -- int bw = (id != DOM_NODE_NONE) ? src->width(src->ctx, id) : -1; if (bw >= 0) n->width_px = (bw > edges) ? bw - edges...
-- `pv_hint_attr` (function) `src/page_view.c:2684` `static const char *pv_hint_attr(void *ctx, const char *name, size_t *len)` -- } } cache->cqn[cache->ncqn++] = n; return n; } /* The nearest ancestor that is an element, or NULL at the root....
-- `pv_cell_table` (function) `src/page_view.c:2705` `static lxb_dom_element_t *pv_cell_table(lxb_dom_element_t *el)` -- static int pv_centered_by_ancestor(lxb_dom_element_t *el) { lxb_dom_element_t *p = pv_parent_element(el); for (int...
-- `pv_apply_pres_hints` (function) `src/page_view.c:2721` `static void pv_apply_pres_hints(lxb_dom_element_t *el, css_style *cs)` -- border-spacing as the table grid's gap (spec/pres_hints.md): never negative, and * none at all in the collapsing...
-- `cached_element_style_ref` (function) `src/page_view.c:2821` `static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const css_sheet *sheet,
+- `pv_parent_element` (function) `src/page_view.c:2681` `static lxb_dom_element_t *pv_parent_element(lxb_dom_element_t *el)` -- int bw = (id != DOM_NODE_NONE) ? src->width(src->ctx, id) : -1; if (bw >= 0) n->width_px = (bw > edges) ? bw - edges...
+- `pv_hint_attr` (function) `src/page_view.c:2688` `static const char *pv_hint_attr(void *ctx, const char *name, size_t *len)` -- } } cache->cqn[cache->ncqn++] = n; return n; } /* The nearest ancestor that is an element, or NULL at the root....
+- `pv_cell_table` (function) `src/page_view.c:2709` `static lxb_dom_element_t *pv_cell_table(lxb_dom_element_t *el)` -- static int pv_centered_by_ancestor(lxb_dom_element_t *el) { lxb_dom_element_t *p = pv_parent_element(el); for (int...
+- `pv_apply_pres_hints` (function) `src/page_view.c:2725` `static void pv_apply_pres_hints(lxb_dom_element_t *el, css_style *cs)` -- border-spacing as the table grid's gap (spec/pres_hints.md): never negative, and * none at all in the collapsing...
+- `cached_element_style_ref` (function) `src/page_view.c:2825` `static const css_style *cached_element_style_ref(lxb_dom_element_t *el, const css_sheet *sheet,
  ...` -- The same, returning a pointer to the memoized entry instead of a copy: css_style is ~7 KB, and the ancestor/subtree...
-- `cached_element_style` (function) `src/page_view.c:2906` `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
+- `cached_element_style` (function) `src/page_view.c:2910` `static css_style cached_element_style(lxb_dom_element_t *el, const css_sheet *sheet,
             ...`
-- `col_free_share` (function) `src/page_view.c:2967` `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...` -- box_reg_id plus the line alignment an inline-level box needs (see * pv_box_def.line_align).
-- `inherited_text_color` (function) `src/page_view.c:2973` `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,
+- `col_free_share` (function) `src/page_view.c:2971` `static int col_free_share(const lxb_dom_node_t *el, const css_style *cs, const css_sheet *sheet, pv_style_cache...` -- box_reg_id plus the line alignment an inline-level box needs (see * pv_box_def.line_align).
+- `inherited_text_color` (function) `src/page_view.c:2977` `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,
              ...` -- The computed `color` of an element: its own declaration, else its nearest ancestor's (`color` inherits). -1 when no...
-- `is_inline_container_style` (function) `src/page_view.c:2986` `static int is_inline_container_style(const css_style *cs)` -- An inline-level flex/grid container (`inline-flex`, `inline-grid`; CSS Display 3 * section 2): an atom of its line...
-- `css_width_declared` (function) `src/page_view.c:2994` `static int css_width_declared(const css_style *cs)` -- An inline-level flex/grid container (`inline-flex`, `inline-grid`; CSS Display 3 * section 2): an atom of its line...
-- `parent_is_author_container` (function) `src/page_view.c:3001` `static int parent_is_author_container(const lxb_dom_node_t *node, const css_sheet *sheet,
+- `is_inline_container_style` (function) `src/page_view.c:2990` `static int is_inline_container_style(const css_style *cs)` -- An inline-level flex/grid container (`inline-flex`, `inline-grid`; CSS Display 3 * section 2): an atom of its line...
+- `css_width_declared` (function) `src/page_view.c:2998` `static int css_width_declared(const css_style *cs)` -- An inline-level flex/grid container (`inline-flex`, `inline-grid`; CSS Display 3 * section 2): an atom of its line...
+- `parent_is_author_container` (function) `src/page_view.c:3005` `static int parent_is_author_container(const lxb_dom_node_t *node, const css_sheet *sheet,
        ...` -- The parent element's own display is flex or grid (an AUTHOR container, as opposed * to the anonymous row synthesised...
-- `box_reg_id_ex` (function) `src/page_view.c:3010` `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
+- `box_reg_id_ex` (function) `src/page_view.c:3014` `static int box_reg_id_ex(pv_box_reg *r, const lxb_dom_node_t *node, const css_style *cs,
         ...`
-- `none` (function) `src/page_view.c:3015` `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...`
-- `cached_pseudo_style` (function) `src/page_view.c:3070` `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,
+- `none` (function) `src/page_view.c:3019` `* inherited when it declares none (every hamburger bar and divider drawn as * a coloured empty box). A box cannot...`
+- `cached_pseudo_style` (function) `src/page_view.c:3074` `static css_style cached_pseudo_style(lxb_dom_element_t *el, const css_sheet *sheet,
              ...` -- The ::before/::after generated box's style of el (spec/page_view.md "Cajas generadas"): resolved against el's...
-- `subtree_is_oof` (function) `src/page_view.c:3088` `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
+- `subtree_is_oof` (function) `src/page_view.c:3092` `static int subtree_is_oof(const lxb_dom_node_t *el, const css_sheet *sheet,
                      ...` -- True iff the element itself is out of flow (position:absolute/fixed) or descends from one.
-- `size` (function) `src/page_view.c:3108` `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
+- `size` (function) `src/page_view.c:3112` `* viewBox natural size (~100px) instead of the CSS 40px, blowing up flex rows. */
 static void app...`
-- `css_replaced_h_fixed` (function) `src/page_view.c:3117` `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,
+- `css_replaced_h_fixed` (function) `src/page_view.c:3121` `static int css_replaced_h_fixed(lxb_dom_element_t *el, const css_sheet *sheet,
                   ...` -- flat model, and auto keeps the intrinsic/attribute size (so the common `img{max-width:100%;height:auto}` rule does...
-- `builder` (function) `src/page_view.c:3135` `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
+- `builder` (function) `src/page_view.c:3139` `* unresolvable in this flat builder (no containing width in hand). box-sizing:border-box
  * (the ...`
-- `css_to_fx_justify` (function) `src/page_view.c:3164` `static int css_to_fx_justify(css_justify j)` -- Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to...
-- `is_bold_tag` (function) `src/page_view.c:3183` `static int is_bold_tag(lxb_tag_id_t t)` -- Tags the user-agent sheet renders bold.
-- `is_italic_tag` (function) `src/page_view.c:3188` `static int is_italic_tag(lxb_tag_id_t t)`
-- `is_inline_level_style` (function) `src/page_view.c:3225` `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` -- Inline-level box (CSS 2.1 9.2.2): display inline or inline-block, or a tag the UA * sheet makes inline, and not...
-- `in_mixed_line` (function) `src/page_view.c:3233` `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
+- `css_to_fx_justify` (function) `src/page_view.c:3168` `static int css_to_fx_justify(css_justify j)` -- Maps a css_justify (resolved by the css cascade) to a flex_layout fx_justify. * Unset / start / unknown all fall to...
+- `is_bold_tag` (function) `src/page_view.c:3187` `static int is_bold_tag(lxb_tag_id_t t)` -- Tags the user-agent sheet renders bold.
+- `is_italic_tag` (function) `src/page_view.c:3192` `static int is_italic_tag(lxb_tag_id_t t)`
+- `is_mono_tag` (function) `src/page_view.c:3198` `static int is_mono_tag(lxb_tag_id_t t)` -- Tags the UA sheet sets in monospace (HTML 15.3.4; <pre> is handled with its * white-space default).
+- `mono_generic_size` (function) `src/page_view.c:3205` `static void mono_generic_size(const pv_text_ext *ext, int *font_scale)` -- A bare generic monospace (the UA family of code/kbd/samp/tt/pre, or an author list that is exactly `monospace`)...
+- `is_inline_level_style` (function) `src/page_view.c:3245` `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` -- Inline-level box (CSS 2.1 9.2.2): display inline or inline-block, or a tag the UA * sheet makes inline, and not...
+- `in_mixed_line` (function) `src/page_view.c:3253` `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,
                        ...` -- True when `p` shares a line with inline content: a sibling that is non-blank text * or an inline-level element.
-- `is_float_container_style` (function) `src/page_view.c:3254` `static int is_float_container_style(const css_style *cs)` -- A FLOATED flex/grid container (in flow otherwise).
-- `row_lone_float_side` (function) `src/page_view.c:3262` `static int row_lone_float_side(const lxb_dom_node_t *p, const css_sheet *sheet,
+- `is_float_container_style` (function) `src/page_view.c:3274` `static int is_float_container_style(const css_style *cs)` -- A FLOATED flex/grid container (in flow otherwise).
+- `row_lone_float_side` (function) `src/page_view.c:3282` `static int row_lone_float_side(const lxb_dom_node_t *p, const css_sheet *sheet,
                  ...` -- The float side of `p`'s LONE in-flow child when that child is a floated flex/grid * container and `p` has no text of...
-- `children_all_inline_block` (function) `src/page_view.c:3281` `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
+- `children_all_inline_block` (function) `src/page_view.c:3301` `static int children_all_inline_block(const lxb_dom_node_t *p, const css_sheet *sheet,
            ...`
-- `it` (function) `src/page_view.c:3309` `* without it (minified markup) keeps the row gapless -- the mixed case is a known limit. */
+- `it` (function) `src/page_view.c:3329` `* without it (minified markup) keeps the row gapless -- the mixed case is a known limit. */
 stati...`
-- `col_has_free_space` (function) `src/page_view.c:3334` `static int col_has_free_space(const css_style *cs)` -- True iff a column can have FREE space on its main axis: a px height or a px min-height floor.
-- `flex_column_flows_as_block` (function) `src/page_view.c:3348` `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
+- `col_has_free_space` (function) `src/page_view.c:3354` `static int col_has_free_space(const css_style *cs)` -- True iff a column can have FREE space on its main axis: a px height or a px min-height floor.
+- `flex_column_flows_as_block` (function) `src/page_view.c:3368` `static int flex_column_flows_as_block(const lxb_dom_node_t *el, const css_style *cs,
             ...`
-- `flex_column_flows_as_block_uncached` (function) `src/page_view.c:3357` `static int flex_column_flows_as_block_uncached(const lxb_dom_node_t *el, const css_style *cs,
+- `flex_column_flows_as_block_uncached` (function) `src/page_view.c:3377` `static int flex_column_flows_as_block_uncached(const lxb_dom_node_t *el, const css_style *cs,
    ...`
-- `fold_column_gap` (function) `src/page_view.c:3425` `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
+- `fold_column_gap` (function) `src/page_view.c:3445` `static void fold_column_gap(const lxb_dom_node_t *el, css_style *cs,
                             ...` -- The gap of a column that flows as block (above) is the space BETWEEN its items (Flexbox 8.1), so every item but the...
-- `column_gap_candidate` (function) `src/page_view.c:3450` `static int column_gap_candidate(const lxb_dom_node_t *el, const css_sheet *sheet,
+- `column_gap_candidate` (function) `src/page_view.c:3470` `static int column_gap_candidate(const lxb_dom_node_t *el, const css_sheet *sheet,
                ...` -- Cheap prefilter: could fold_column_gap change this element's style?
-- `is_layout_container` (function) `src/page_view.c:3460` `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
+- `is_layout_container` (function) `src/page_view.c:3480` `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,
                    ...` -- Cheap prefilter: could fold_column_gap change this element's style?
-- `css_has_hmargin` (function) `src/page_view.c:3486` `static int css_has_hmargin(const css_style *cs)` -- A flex/grid ITEM: its parent element is a layout container.
-- `item_sizes_itself` (function) `src/page_view.c:3515` `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
+- `css_has_hmargin` (function) `src/page_view.c:3506` `static int css_has_hmargin(const css_style *cs)` -- A flex/grid ITEM: its parent element is a layout container.
+- `item_sizes_itself` (function) `src/page_view.c:3535` `static int item_sizes_itself(const lxb_dom_node_t *el, const css_style *cs,
                      ...`
-- `li_is_list_item` (function) `src/page_view.c:3531` `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
+- `li_is_list_item` (function) `src/page_view.c:3551` `static int li_is_list_item(const lxb_dom_node_t *li, const css_sheet *sheet,
                     ...` -- A marker is generated by a `display:list-item` box (CSS Lists 3 3.1), which is what the UA sheet makes an <li>; an...
-- `pv_element_has_before` (function) `src/page_view.c:3608` `static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,
+- `pv_element_has_before` (function) `src/page_view.c:3628` `static int pv_element_has_before(lxb_dom_node_t *n, const css_sheet *sheet,
                      ...` -- True when the element's resolved style carries ::before generated content (spec/css.md ::before/::after: only...
-- `subtree_has_own_text` (function) `src/page_view.c:3640` `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `subtree_has_own_text` (function) `src/page_view.c:3660` `static int subtree_has_own_text(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
             ...` -- True when the subtree holds no non-blank text of its own outside skipped / hidden / closed-details subtrees...
-- `is_plain_wrapper` (function) `src/page_view.c:3662` `static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs)` -- A plain wrapper: a generic container with no decoration and no size of its own, so * it adds nothing to its parent's...
-- `element_is_content_leaf_d` (function) `src/page_view.c:3674` `static int element_is_content_leaf_d(const lxb_dom_node_t *n, const css_sheet *sheet,
+- `is_plain_wrapper` (function) `src/page_view.c:3682` `static int is_plain_wrapper(const lxb_dom_node_t *c, const css_style *cs)` -- A plain wrapper: a generic container with no decoration and no size of its own, so * it adds nothing to its parent's...
+- `element_is_content_leaf_d` (function) `src/page_view.c:3694` `static int element_is_content_leaf_d(const lxb_dom_node_t *n, const css_sheet *sheet,
            ...`
-- `media_has_source` (function) `src/page_view.c:3700` `static int media_has_source(const lxb_dom_node_t *n)` -- Whether a <video>/<audio> names anything to play: its own `src`, or a <source> child with one.
-- `element_is_content_leaf` (function) `src/page_view.c:3714` `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
+- `media_has_source` (function) `src/page_view.c:3720` `static int media_has_source(const lxb_dom_node_t *n)` -- Whether a <video>/<audio> names anything to play: its own `src`, or a <source> child with one.
+- `element_is_content_leaf` (function) `src/page_view.c:3734` `static int element_is_content_leaf(const lxb_dom_node_t *n, const css_sheet *sheet,
              ...`
-- `table_cell_pos` (function) `src/page_view.c:3726` `static int table_cell_pos(struct pv_flow_reg *fr, const lxb_dom_node_t *table, const lxb_dom_node_t *cell, int *row...`
-- `resolve_context` (function) `src/page_view.c:3731` `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `table_cell_pos` (function) `src/page_view.c:3746` `static int table_cell_pos(struct pv_flow_reg *fr, const lxb_dom_node_t *table, const lxb_dom_node_t *cell, int *row...`
+- `resolve_context` (function) `src/page_view.c:3751` `static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                 ...`
-- `outermost` (function) `src/page_view.c:4017` `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
-- `opens` (function) `src/page_view.c:4074` `* painter applies it when the box opens (band/shared context) — seeding
+- `outermost` (function) `src/page_view.c:4044` `* nearest IS the outermost (single-level float, old path). */ cont->float_oid = container_id(float_reg, p);`
+- `opens` (function) `src/page_view.c:4101` `* painter applies it when the box opens (band/shared context) — seeding
              * it onto ru...`
-- `css_inline_boxdeco` (function) `src/page_view.c:4127` `css_inline_boxdeco(cs) &&
+- `css_inline_boxdeco` (function) `src/page_view.c:4154` `css_inline_boxdeco(cs) &&
                            !is_layout_item(p, sheet, style_cache))`
-- `margins` (function) `src/page_view.c:4166` `* margins (boxdef_from_style) and the painter applies them when
+- `margins` (function) `src/page_view.c:4193` `* margins (boxdef_from_style) and the painter applies them when
                          * it ope...`
-- `container` (function) `src/page_view.c:4293` `* membership in this container (and none in any container further out,
+- `container` (function) `src/page_view.c:4320` `* membership in this container (and none in any container further out,
                  * since i...`
-- `walk` (function) `src/page_view.c:4414` `* far on this walk (they are all inside this element). */
+- `walk` (function) `src/page_view.c:4441` `* far on this walk (they are all inside this element). */
 
                         /* The innermo...`
-- `float` (function) `src/page_view.c:4555` `* genuinely nested float (oid != id) takes the deferred-column path. */
+- `float` (function) `src/page_view.c:4582` `* genuinely nested float (oid != id) takes the deferred-column path. */
     if (cont->float_oid =...`
-- `sz_count` (function) `src/page_view.c:4601` `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` -- Serialises an element subtree (the element itself included) into a fresh NUL-terminated buffer.
-- `sz_write` (function) `src/page_view.c:4615` `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
-- `serialize_subtree` (function) `src/page_view.c:4623` `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
-- `collapse_ws` (function) `src/page_view.c:4642` `static char *collapse_ws(const char *s, size_t n)` -- if (total == 0 || total > SV_MAX_INPUT) return NULL; char *buf = (char *)calloc(1, total + 1u); if (buf == NULL)...
-- `pv_frame_marked` (function) `src/page_view.c:4672` `static int pv_frame_marked(const lxb_dom_node_t *n)`
-- `parse_dim` (function) `src/page_view.c:4681` `static int parse_dim(const lxb_char_t *s, size_t len)`
-- `present` (function) `src/page_view.c:4698` `* when no width descriptors are present (density-only or bare URLs). */
+- `sz_count` (function) `src/page_view.c:4629` `static lxb_status_t sz_count(const lxb_char_t *data, size_t len, void *ctx)` -- Serialises an element subtree (the element itself included) into a fresh NUL-terminated buffer.
+- `sz_write` (function) `src/page_view.c:4643` `static lxb_status_t sz_write(const lxb_char_t *data, size_t len, void *ctx)`
+- `serialize_subtree` (function) `src/page_view.c:4651` `static char *serialize_subtree(const lxb_dom_node_t *n, size_t *out_len)`
+- `collapse_ws` (function) `src/page_view.c:4670` `static char *collapse_ws(const char *s, size_t n)` -- if (total == 0 || total > SV_MAX_INPUT) return NULL; char *buf = (char *)calloc(1, total + 1u); if (buf == NULL)...
+- `pv_frame_marked` (function) `src/page_view.c:4700` `static int pv_frame_marked(const lxb_dom_node_t *n)`
+- `parse_dim` (function) `src/page_view.c:4709` `static int parse_dim(const lxb_char_t *s, size_t len)`
+- `present` (function) `src/page_view.c:4726` `* when no width descriptors are present (density-only or bare URLs). */
 static void srcset_best_u...`
-- `srcset_slot_width` (function) `src/page_view.c:4793` `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
+- `srcset_slot_width` (function) `src/page_view.c:4821` `static int srcset_slot_width(const lxb_char_t *sizes, size_t slen,
                               ...` -- Parses a sizes attribute ("(max-width: 600px) 100vw, 50vw") and returns the effective slot width in px for the given...
-- `dimensions` (function) `src/page_view.c:4839` `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
+- `dimensions` (function) `src/page_view.c:4867` `* viewport dimensions (data: inline detection, <picture> <source> scanning). */
 static void srcse...`
-- `find_body` (function) `src/page_view.c:4871` `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
-- `find_root_els` (function) `src/page_view.c:4884` `static pv_root_els find_root_els(lxb_dom_node_t *root)`
-- `attributes` (function) `src/page_view.c:4898` `* carries those attributes (spec/css.md, "Root matcher"). */
+- `find_body` (function) `src/page_view.c:4899` `static lxb_dom_node_t *find_body(lxb_dom_node_t *root)`
+- `find_root_els` (function) `src/page_view.c:4912` `static pv_root_els find_root_els(lxb_dom_node_t *root)`
+- `attributes` (function) `src/page_view.c:4926` `* carries those attributes (spec/css.md, "Root matcher"). */
 static int root_els_match(void *ctx,...`
-- `string` (function) `src/page_view.c:4909` `* Returns a heap string (caller frees) or NULL when neither carries a class —
+- `string` (function) `src/page_view.c:4937` `* Returns a heap string (caller frees) or NULL when neither carries a class —
  * NULL simply mean...`
-- `acquire_page_sheet` (function) `src/page_view.c:4948` `static shc_sheet *acquire_page_sheet(lxb_dom_node_t *root, const char *extern_css,
+- `acquire_page_sheet` (function) `src/page_view.c:4976` `static shc_sheet *acquire_page_sheet(lxb_dom_node_t *root, const char *extern_css,
               ...` -- The page's parsed sheet: collects the CSS text and every other parse input and asks the sheet cache for it (cache ==...
-- `forms_free` (function) `src/page_view.c:5000` `static void forms_free(form_table *ft)`
-- `ascii_ieq` (function) `src/page_view.c:5007` `static int ascii_ieq(const char *s, const char *lit)` -- } form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void...
-- `attr_dup` (function) `src/page_view.c:5019` `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
-- `forms_add` (function) `src/page_view.c:5028` `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
-- `form_for` (function) `src/page_view.c:5048` `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
+- `forms_free` (function) `src/page_view.c:5028` `static void forms_free(form_table *ft)`
+- `ascii_ieq` (function) `src/page_view.c:5035` `static int ascii_ieq(const char *s, const char *lit)` -- } form_rec; typedef struct form_table { form_rec *recs; size_t    count, cap; } form_table; static void...
+- `attr_dup` (function) `src/page_view.c:5047` `static char *attr_dup(lxb_dom_element_t *el, const char *name, size_t namelen)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
+- `forms_add` (function) `src/page_view.c:5056` `static int forms_add(form_table *ft, const lxb_dom_node_t *node)` -- Owned NUL-terminated copy of an attribute value, or NULL when the attribute is * absent.
+- `form_for` (function) `src/page_view.c:5076` `static int form_for(const form_table *ft, const lxb_dom_node_t *n,
                     const lxb_...` -- } lxb_dom_element_t *el = lxb_dom_interface_element((lxb_dom_node_t *)node); char *method = attr_dup(el, "method"...
-- `under_unrendered` (function) `src/page_view.c:5064` `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` -- Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected...
-- `collect_text` (function) `src/page_view.c:5077` `static char *collect_text(const lxb_dom_node_t *el)` -- Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of...
-- `classify_input` (function) `src/page_view.c:5101` `static pv_input_type classify_input(const char *type)`
-- `li_ordinal` (function) `src/page_view.c:5272` `static int li_ordinal(const lxb_dom_node_t *li)` -- 1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out...
-- `roman_marker` (function) `src/page_view.c:5298` `static void roman_marker(int n, int upper, char *out, size_t cap)` -- int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ?...
-- `list_marker` (function) `src/page_view.c:5323` `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
+- `under_unrendered` (function) `src/page_view.c:5092` `static int under_unrendered(const lxb_dom_node_t *n, const lxb_dom_node_t *el)` -- Nonzero if a descendant text node sits under a non-rendered element (a <style> or <script> nested in the collected...
+- `collect_text` (function) `src/page_view.c:5105` `static char *collect_text(const lxb_dom_node_t *el)` -- Concatenates the descendant text of el into an owned NUL-terminated string (the value of a <textarea> / the label of...
+- `classify_input` (function) `src/page_view.c:5129` `static pv_input_type classify_input(const char *type)`
+- `li_ordinal` (function) `src/page_view.c:5300` `static int li_ordinal(const lxb_dom_node_t *li)` -- 1-based position of an <li> among its <li> siblings (an <ol> counter, basic: the `start`/`value` attributes are out...
+- `roman_marker` (function) `src/page_view.c:5326` `static void roman_marker(int n, int upper, char *out, size_t cap)` -- int k = 0; if (n < 1) n = 1; while (n > 0 && k < (int)sizeof buf) { int r = (n - 1) % 26; buf[k++] = (char)((upper ?...
+- `list_marker` (function) `src/page_view.c:5351` `static void list_marker(int ordered, const lxb_dom_node_t *li, int list_style,
                   ...` -- Builds the list marker for the first run of an <li>.
-- `node_table_role` (function) `src/page_view.c:5368` `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- The table role of an element: its computed `display` when that names one, else the role the HTML user-agent sheet...
-- `nearest_table` (function) `src/page_view.c:5386` `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `node_table_role` (function) `src/page_view.c:5396` `static bx_table_role node_table_role(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- The table role of an element: its computed `display` when that names one, else the role the HTML user-agent sheet...
+- `nearest_table` (function) `src/page_view.c:5414` `static const lxb_dom_node_t *nearest_table(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
  ...` -- const lxb_char_t *nm = lxb_dom_element_local_name(el, &nl); char tag[BX_TAG_NAME_MAX]; const char *tagp = NULL; if...
-- `parent_is_table_internal` (function) `src/page_view.c:5425` `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a row group, a row or a column group.
-- `cell_has_nested_table` (function) `src/page_view.c:5457` `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` -- Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not a leaf cell.
-- `next_skip` (function) `src/page_view.c:5471` `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` -- Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the...
-- `cell_span_attr` (function) `src/page_view.c:5481` `static int cell_span_attr(const lxb_dom_node_t *cell, const char *name, size_t name_len,
+- `parent_is_table_internal` (function) `src/page_view.c:5453` `static int parent_is_table_internal(const lxb_dom_node_t *n, const pv_flow_reg *fr)` -- Nonzero when n's DIRECT parent is table structure that is not a cell -- a table, a row group, a row or a column group.
+- `cell_has_nested_table` (function) `src/page_view.c:5485` `static int cell_has_nested_table(const lxb_dom_node_t *cell, const pv_flow_reg *fr)` -- Nonzero if cell has a descendant table box: it is then a structural CONTAINER, not a leaf cell.
+- `next_skip` (function) `src/page_view.c:5499` `static lxb_dom_node_t *next_skip(lxb_dom_node_t *n, const lxb_dom_node_t *root)` -- Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the...
+- `cell_span_attr` (function) `src/page_view.c:5509` `static int cell_span_attr(const lxb_dom_node_t *cell, const char *name, size_t name_len,
         ...` -- Pre-order successor that does NOT descend into n's children (used to skip an * already-decided subtree during the...
-- `table_next_row` (function) `src/page_view.c:5494` `static const lxb_dom_node_t *table_next_row(const lxb_dom_node_t *table,
+- `table_next_row` (function) `src/page_view.c:5522` `static const lxb_dom_node_t *table_next_row(const lxb_dom_node_t *table,
                         ...` -- The row after `from` among the rows of `table` in document order (from == NULL: the * first), skipping nested...
-- `cell_is_rich` (function) `src/page_view.c:5555` `static int cell_is_rich(const lxb_dom_node_t *cell)` -- Nonzero when flattening the cell to one text run would lose structure: it holds a line break, a replaced element or...
-- `cell_kind` (function) `src/page_view.c:5582` `static unsigned cell_kind(pv_flow_reg *fr, const lxb_dom_node_t *cell)` -- if (t == LXB_TAG_A) { size_t hl = 0; const lxb_char_t *h = lxb_dom_element_get_attribute(...
-- `cell_is_grid_item` (function) `src/page_view.c:5591` `static int cell_is_grid_item(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
+- `cell_is_rich` (function) `src/page_view.c:5583` `static int cell_is_rich(const lxb_dom_node_t *cell)` -- Nonzero when flattening the cell to one text run would lose structure: it holds a line break, a replaced element or...
+- `cell_kind` (function) `src/page_view.c:5610` `static unsigned cell_kind(pv_flow_reg *fr, const lxb_dom_node_t *cell)` -- if (t == LXB_TAG_A) { size_t hl = 0; const lxb_char_t *h = lxb_dom_element_get_attribute(...
+- `cell_is_grid_item` (function) `src/page_view.c:5619` `static int cell_is_grid_item(const lxb_dom_node_t *cell, const lxb_dom_node_t *base,
             ...`
-- `in_collected_cell` (function) `src/page_view.c:5601` `static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `in_collected_cell` (function) `src/page_view.c:5629` `static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...` -- Nonzero if n's NEAREST <td>/<th> ancestor (up to base) is a COLLECTED leaf cell: its text was already emitted as one...
-- `table_columns` (function) `src/page_view.c:5622` `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` -- Memoised per table: every run of every rich cell asks, and the scan is the whole table.
-- `table_columns_scan` (function) `src/page_view.c:5631` `static int table_columns_scan(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
-- `in_hidden_subtree` (function) `src/page_view.c:5705` `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
+- `table_columns` (function) `src/page_view.c:5650` `static int table_columns(const lxb_dom_node_t *table, const pv_flow_reg *fr)` -- Memoised per table: every run of every rich cell asks, and the scan is the whole table.
+- `table_columns_scan` (function) `src/page_view.c:5659` `static int table_columns_scan(const lxb_dom_node_t *table, const pv_flow_reg *fr)`
+- `in_hidden_subtree` (function) `src/page_view.c:5733` `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                ...` -- Nonzero if n or any ancestor up to base has display:none (from the <style> sheet or its inline style=). display:none...
-- `in_boilerplate_subtree` (function) `src/page_view.c:5732` `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>).
-- `in_closed_details_subtree` (function) `src/page_view.c:5747` `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is inside a <details> without an `open` attribute and n is NOT inside its...
-- `pv_build` (function) `src/page_view.c:5767` `pv_status pv_build(const hp_document *doc, pv_view **out)`
-- `pv_build_ex` (function) `src/page_view.c:5771` `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
-- `pv_build_full` (function) `src/page_view.c:5775` `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
+- `in_boilerplate_subtree` (function) `src/page_view.c:5760` `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is page boilerplate (<nav>/<header>/ <footer>/<aside>).
+- `in_closed_details_subtree` (function) `src/page_view.c:5775` `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` -- Nonzero if n or any ancestor up to base is inside a <details> without an `open` attribute and n is NOT inside its...
+- `pv_build` (function) `src/page_view.c:5795` `pv_status pv_build(const hp_document *doc, pv_view **out)`
+- `pv_build_ex` (function) `src/page_view.c:5799` `pv_status pv_build_ex(const hp_document *doc, int js_enabled, pv_view **out)`
+- `pv_build_full` (function) `src/page_view.c:5803` `pv_status pv_build_full(const hp_document *doc, int js_enabled, int reader,
                      ...`
-- `annotate_replaced_run` (function) `src/page_view.c:5797` `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
+- `annotate_replaced_run` (function) `src/page_view.c:5825` `static void annotate_replaced_run(pv_view *v, pv_container_reg *reg,
                             ...` -- Attaches the layout membership a replaced run needs to take part in its surroundings: flex/grid container identity...
-- `pv_root_insets` (function) `src/page_view.c:5872` `void pv_root_insets(const css_style *body, int out[4])`
-- `collect_page_css` (function) `src/page_view.c:5882` `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
+- `pv_root_insets` (function) `src/page_view.c:5900` `void pv_root_insets(const css_style *body, int out[4])`
+- `collect_page_css` (function) `src/page_view.c:5910` `static char *collect_page_css(lxb_dom_node_t *root, const char *extern_css,
                      ...`
-- `pv_cnt_attr` (function) `src/page_view.c:5924` `static const char *pv_cnt_attr(void *ctx, const char *name)`
-- `pv_cnt_resolve_field` (function) `src/page_view.c:5937` `static void pv_cnt_resolve_field(const cnt_state *st, lxb_dom_element_t *el, char *field)` -- static const char *pv_cnt_attr(void *ctx, const char *name) { pv_cnt_attr_ctx *c = (pv_cnt_attr_ctx *)ctx; size_t vl...
-- `pv_cnt_enter` (function) `src/page_view.c:5948` `static int pv_cnt_enter(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
+- `pv_cnt_attr` (function) `src/page_view.c:5952` `static const char *pv_cnt_attr(void *ctx, const char *name)`
+- `pv_cnt_resolve_field` (function) `src/page_view.c:5965` `static void pv_cnt_resolve_field(const cnt_state *st, lxb_dom_element_t *el, char *field)` -- static const char *pv_cnt_attr(void *ctx, const char *name) { pv_cnt_attr_ctx *c = (pv_cnt_attr_ctx *)ctx; size_t vl...
+- `pv_cnt_enter` (function) `src/page_view.c:5976` `static int pv_cnt_enter(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
     ...` -- Element entry: its own counter operations, then its ::before's, then the resolution of the generated text.
-- `pv_cnt_exit` (function) `src/page_view.c:5972` `static void pv_cnt_exit(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
+- `pv_cnt_exit` (function) `src/page_view.c:6000` `static void pv_cnt_exit(cnt_state *st, lxb_dom_node_t *n, int depth, const css_sheet *sheet,
     ...` -- Re-read the entry: asking for the pseudo style may have grown (and retired) * the block the first pointer pointed...
-- `pv_counters_pass` (function) `src/page_view.c:5984` `static void pv_counters_pass(lxb_dom_node_t *root, const css_sheet *sheet, pv_style_cache *cache)`
-- `pv_build_styled` (function) `src/page_view.c:6008` `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
+- `pv_counters_pass` (function) `src/page_view.c:6012` `static void pv_counters_pass(lxb_dom_node_t *root, const css_sheet *sheet, pv_style_cache *cache)`
+- `pv_build_styled` (function) `src/page_view.c:6036` `pv_status pv_build_styled(const hp_document *doc, int js_enabled, int reader,
                    ...`
-- `pv_build_cached` (function) `src/page_view.c:6015` `pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
+- `pv_build_cached` (function) `src/page_view.c:6043` `pv_status pv_build_cached(const hp_document *doc, int js_enabled, int reader,
                    ...`
-- `pv_build_cq` (function) `src/page_view.c:6022` `pv_status pv_build_cq(const hp_document *doc, int js_enabled, int reader,
+- `pv_build_cq` (function) `src/page_view.c:6050` `pv_status pv_build_cq(const hp_document *doc, int js_enabled, int reader,
                       i...`
-- `pv_build_live` (function) `src/page_view.c:6029` `pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
+- `pv_build_live` (function) `src/page_view.c:6057` `pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                      ...`
-- `url` (function) `src/page_view.c:6054` `* fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css * module, so OOM here degrades to...`
-- `inside` (function) `src/page_view.c:6139` `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
-- `control` (function) `src/page_view.c:6449` `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
-- `px` (function) `src/page_view.c:6630` `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
+- `url` (function) `src/page_view.c:6082` `* fetches and drops url()/@-rules). A NULL sheet is treated as empty by the css * module, so OOM here degrades to...`
+- `inside` (function) `src/page_view.c:6169` `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...`
+- `control` (function) `src/page_view.c:6479` `* caret_color tints the caret of the focused control (2026-07-10). */ pv_set_text_ext(v, &ctl_ext);`
+- `px` (function) `src/page_view.c:6660` `* the viewBox extent for intrinsic px (slashdot social-icon balloon). */
                 if (iw <...`
-- `band` (function) `src/page_view.c:6696` `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...`
-- `height` (function) `src/page_view.c:6723` `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-- `block_id` (function) `src/page_view.c:6881` `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
-- `URL` (function) `src/page_view.c:7022` `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
-- `block` (function) `src/page_view.c:7299` `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
-- `flow` (function) `src/page_view.c:7478` `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
-- `engine` (function) `src/page_view.c:7587` `* layout engine (contiguous item gather) drops every cell onto its own row and
+- `band` (function) `src/page_view.c:6726` `* run: without its float annotation it cut the band (the icon row of a * `float:right` social list became one float...`
+- `height` (function) `src/page_view.c:6753` `* times its height (jkanime's donghuas/ovas panes). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+- `block_id` (function) `src/page_view.c:6911` `* box block_id (spec/float.md §7d, slashdot rail): without an * anchor the layout layer cannot position it and it...`
+- `URL` (function) `src/page_view.c:7052` `* path resolves it against the page URL (ln_resolve). */ lxb_dom_element_t *el = lxb_dom_interface_element(n);`
+- `block` (function) `src/page_view.c:7329` `* block (Gecko): it never resolves as its own block here. */ int opens_line = block != n && (pending_break || block...`
+- `flow` (function) `src/page_view.c:7509` `* it is removed from flow (CSS 2.1 9.7), so neither a block change nor * a pending break may flush the band through...`
+- `engine` (function) `src/page_view.c:7626` `* layout engine (contiguous item gather) drops every cell onto its own row and
          * a 2-col...`
-- `line` (function) `src/page_view.c:7596` `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
-- `pv_css_drops` (function) `src/page_view.c:7755` `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
+- `line` (function) `src/page_view.c:7635` `* to paint an empty line (Wikipedia: 412 such runs = ~11000px of blank page);`
+- `pv_css_drops` (function) `src/page_view.c:7794` `pv_status pv_css_drops(const hp_document *doc, int prefers_dark,
                        const cha...` -- Diagnostic counterpart to pv_build_styled: same document, same collected CSS text, same @media/root-scope context...
-- `pv_computed_new` (function) `src/page_view.c:7789` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
+- `pv_computed_new` (function) `src/page_view.c:7828` `pv_computed *pv_computed_new(const hp_document *doc, int prefers_dark, const char *extern_css,
   ...`
-- `pv_computed_new_cached` (function) `src/page_view.c:7794` `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,
+- `pv_computed_new_cached` (function) `src/page_view.c:7833` `pv_computed *pv_computed_new_cached(const hp_document *doc, int prefers_dark,
                    ...`
-- `pv_computed_get` (function) `src/page_view.c:7808` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
+- `pv_computed_get` (function) `src/page_view.c:7847` `int pv_computed_get(pv_computed *pc, const void *native_el, css_style *st,
                     do...`
-- `pv_computed_free` (function) `src/page_view.c:7830` `void pv_computed_free(pv_computed *pc)`
+- `pv_computed_free` (function) `src/page_view.c:7869` `void pv_computed_free(pv_computed *pc)`
 
 ## src/pdf_export.c
 Depends on: `include/pdf_export.h`

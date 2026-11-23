@@ -1,12 +1,12 @@
 # `include/url.h`
 
-> Source: [include/url.h:1](../../include/url.h#L1) | language `h` | coverage 50.0% | [API index](../index.md)
+> Source: [include/url.h:1](../../include/url.h#L1) | language `h` | coverage 46.7% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`url_parts`](#url_parts)
 - **Enums:** [`url_status`](#url_status), [`url_omni_kind`](#url_omni_kind)
-- **Functions:** [`url_is_https`](#url_is_https), [`url_has_scheme`](#url_has_scheme), [`url_authority_len`](#url_authority_len), [`URL_ERR_NOT_HTTPS`](#url_err_not_https), [`path`](#path), [`url_file_path`](#url_file_path), [`url`](#url), [`password`](#password)
+- **Functions:** [`url_is_https`](#url_is_https), [`url_has_scheme`](#url_has_scheme), [`url_authority_len`](#url_authority_len), [`URL_ERR_NOT_HTTPS`](#url_err_not_https), [`path`](#path), [`url_file_path`](#url_file_path), [`url`](#url), [`url_split`](#url_split), [`password`](#password)
 - **Macros:** [`URL_MAX_LEN`](#url_max_len), [`URL_SEARCH_ENDPOINT`](#url_search_endpoint)
 
 ## Type Diagram
@@ -90,7 +90,7 @@ NULL => 0.
 
 **Returns:** `int`
 
-*Called by:* [`ln_resolve`](src.link_nav.c.md#ln_resolve)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput), [`ln_resolve`](src.link_nav.c.md#ln_resolve)
 
 ---
 
@@ -225,11 +225,33 @@ The pointer aliases s (not owned).
 
 ---
 
+<a id="url_split"></a>
+
+### `url_split`
+
+`function` | [include/url.h:153](../../include/url.h#L153)
+
+```c
+* it for a network or storage decision: those take url_split (https-only). */ url_status url_split_location(const char *url, url_parts *out);
+```
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `only` | `https-` |  |  |
+
+**Returns:** `* it for a network or storage decision: those take`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_js_dom.c.md#llvmfuzzertestoneinput), [`LLVMFuzzerTestOneInput`](fuzz.fuzz_url.c.md#llvmfuzzertestoneinput)
+
+---
+
 <a id="password"></a>
 
 ### `password`
 
-`function` | [include/url.h:152](../../include/url.h#L152)
+`function` | [include/url.h:159](../../include/url.h#L159)
 
 ```c
 * username and password (owned, must be freed) into *username_out and * *password_out, and returns URL_OK. When there is no userinfo ("@") in the * URL, writes the original URL into out and sets *user

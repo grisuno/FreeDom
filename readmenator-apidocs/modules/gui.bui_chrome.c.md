@@ -1,11 +1,11 @@
 # `gui/bui_chrome.c`
 
-> Source: [gui/bui_chrome.c:1](../../gui/bui_chrome.c#L1) | language `c` | coverage 55.2% | [API index](../index.md)
+> Source: [gui/bui_chrome.c:1](../../gui/bui_chrome.c#L1) | language `c` | coverage 52.8% | [API index](../index.md)
 
 ## Contents
 
-- **Functions:** [`bui_round_rect`](#bui_round_rect), [`bui_chrome_font`](#bui_chrome_font), [`bui_url_text_x`](#bui_url_text_x), [`bui_url_index_at`](#bui_url_index_at), [`bui_paint_chrome`](#bui_paint_chrome), [`bui_paint_findbar`](#bui_paint_findbar), [`bui_paint_site_panel`](#bui_paint_site_panel), [`bui_paint_video_bar`](#bui_paint_video_bar)
-- **Macros:** [`BUI_TWO_PI`](#bui_two_pi), [`BUI_ICON_LINE`](#bui_icon_line), [`BUI_TAB_RADIUS`](#bui_tab_radius), [`BUI_PILL_RADIUS`](#bui_pill_radius), [`BUI_TAB_PAD`](#bui_tab_pad), [`BUI_TAB_FADE`](#bui_tab_fade), [`BUI_SPINNER_R`](#bui_spinner_r), [`BUI_STOP_HALF`](#bui_stop_half), [`BUI_URL_TEXT_PAD`](#bui_url_text_pad), [`BUI_URL_END_PAD`](#bui_url_end_pad), [`BUI_FOCUS_RING`](#bui_focus_ring), [`BUI_INACTIVE_TEXT`](#bui_inactive_text), [`BUI_DISABLED`](#bui_disabled), [`BUI_URL_MEASURE`](#bui_url_measure), [`BUI_SP_RADIUS`](#bui_sp_radius), [`BUI_SP_LABEL_W`](#bui_sp_label_w), [`BUI_VBAR_ALPHA`](#bui_vbar_alpha), [`BUI_VTRACK_ALPHA`](#bui_vtrack_alpha), [`BUI_VKNOB_R`](#bui_vknob_r), [`BUI_VTEXT_SIZE`](#bui_vtext_size)
+- **Functions:** [`bui_round_rect`](#bui_round_rect), [`bui_chrome_font`](#bui_chrome_font), [`bui_url_text_x`](#bui_url_text_x), [`bui_url_index_at`](#bui_url_index_at), [`bui_paint_chrome`](#bui_paint_chrome), [`bui_paint_findbar`](#bui_paint_findbar), [`bui_paint_site_panel`](#bui_paint_site_panel), [`bui_paint_video_bar`](#bui_paint_video_bar), [`bui_link_status_flips`](#bui_link_status_flips), [`bui_paint_link_status`](#bui_paint_link_status)
+- **Macros:** [`BUI_TWO_PI`](#bui_two_pi), [`BUI_ICON_LINE`](#bui_icon_line), [`BUI_TAB_RADIUS`](#bui_tab_radius), [`BUI_PILL_RADIUS`](#bui_pill_radius), [`BUI_TAB_PAD`](#bui_tab_pad), [`BUI_TAB_FADE`](#bui_tab_fade), [`BUI_SPINNER_R`](#bui_spinner_r), [`BUI_STOP_HALF`](#bui_stop_half), [`BUI_URL_TEXT_PAD`](#bui_url_text_pad), [`BUI_URL_END_PAD`](#bui_url_end_pad), [`BUI_FOCUS_RING`](#bui_focus_ring), [`BUI_INACTIVE_TEXT`](#bui_inactive_text), [`BUI_DISABLED`](#bui_disabled), [`BUI_URL_MEASURE`](#bui_url_measure), [`BUI_SP_RADIUS`](#bui_sp_radius), [`BUI_SP_LABEL_W`](#bui_sp_label_w), [`BUI_VBAR_ALPHA`](#bui_vbar_alpha), [`BUI_VTRACK_ALPHA`](#bui_vtrack_alpha), [`BUI_VKNOB_R`](#bui_vknob_r), [`BUI_VTEXT_SIZE`](#bui_vtext_size), [`BUI_LS_PAD_X`](#bui_ls_pad_x), [`BUI_LS_PAD_Y`](#bui_ls_pad_y), [`BUI_LS_RADIUS`](#bui_ls_radius), [`BUI_LS_MAX_FRAC`](#bui_ls_max_frac), [`BUI_LS_FONT`](#bui_ls_font)
 
 ## Call Graph
 
@@ -20,6 +20,8 @@ flowchart LR
     n_gui_bui_chrome_c__bui_paint_site_panel(["bui_paint_site_panel"])
     n_gui_bui_chrome_c__bui_round_rect(["bui_round_rect"])
     n_gui_bui_chrome_c__bui_paint_video_bar(["bui_paint_video_bar"])
+    n_gui_bui_chrome_c__bui_paint_link_status(["bui_paint_link_status"])
+    n_gui_bui_chrome_c__bui_link_status_flips(["bui_link_status_flips"])
     n_gui_browser_ui_internal_h__set_rgb["browser_ui_internal.set_rgb"]
     n_gui_bui_chrome_c__bui_url_index_at --> n_gui_bui_chrome_c__bui_chrome_font
     n_gui_bui_chrome_c__bui_url_index_at --> n_gui_bui_chrome_c__bui_url_text_x
@@ -28,8 +30,12 @@ flowchart LR
     n_gui_bui_chrome_c__bui_paint_site_panel --> n_gui_bui_chrome_c__bui_round_rect
     n_gui_bui_chrome_c__bui_paint_video_bar --> n_gui_bui_chrome_c__bui_chrome_font
     n_gui_bui_chrome_c__bui_paint_video_bar --> n_gui_bui_chrome_c__bui_round_rect
+    n_gui_bui_chrome_c__bui_paint_link_status --> n_gui_bui_chrome_c__bui_chrome_font
+    n_gui_bui_chrome_c__bui_paint_link_status --> n_gui_bui_chrome_c__bui_link_status_flips
+    n_gui_bui_chrome_c__bui_paint_link_status --> n_gui_bui_chrome_c__bui_round_rect
     n_gui_bui_chrome_c__bui_paint_findbar -.-> n_gui_browser_ui_internal_h__set_rgb
     n_gui_bui_chrome_c__bui_paint_site_panel -.-> n_gui_browser_ui_internal_h__set_rgb
+    n_gui_bui_chrome_c__bui_paint_link_status -.-> n_gui_browser_ui_internal_h__set_rgb
 ```
 
 ## Functions
@@ -57,9 +63,9 @@ Rounded rectangle path.
 | `h` | `double` |  |  |
 | `r` | `double` |  |  |
 
-> **Inherited:** Documentation from [`bui_round_rect`](#bui_round_rect) (gui/browser_ui_internal.h:174).
+> **Inherited:** Documentation from [`bui_round_rect`](#bui_round_rect) (gui/browser_ui_internal.h:175).
 
-*Called by:* [`bui_paint_site_panel`](#bui_paint_site_panel), [`bui_paint_video_bar`](#bui_paint_video_bar)
+*Called by:* [`bui_paint_link_status`](#bui_paint_link_status), [`bui_paint_site_panel`](#bui_paint_site_panel), [`bui_paint_video_bar`](#bui_paint_video_bar)
 
 ---
 
@@ -80,7 +86,7 @@ void bui_chrome_font(cairo_t *cr, double size)
 | `cr` | `cairo_t *` |  |  |
 | `size` | `double` |  |  |
 
-*Called by:* [`bui_paint_findbar`](#bui_paint_findbar), [`bui_paint_site_panel`](#bui_paint_site_panel), [`bui_paint_video_bar`](#bui_paint_video_bar), [`bui_url_index_at`](#bui_url_index_at)
+*Called by:* [`bui_paint_findbar`](#bui_paint_findbar), [`bui_paint_link_status`](#bui_paint_link_status), [`bui_paint_site_panel`](#bui_paint_site_panel), [`bui_paint_video_bar`](#bui_paint_video_bar), [`bui_url_index_at`](#bui_url_index_at)
 
 ---
 
@@ -88,7 +94,7 @@ void bui_chrome_font(cairo_t *cr, double size)
 
 ### `bui_url_text_x`
 
-`function` | [gui/bui_chrome.c:296](../../gui/bui_chrome.c#L296)
+`function` | [gui/bui_chrome.c:335](../../gui/bui_chrome.c#L335)
 
 ```c
 double bui_url_text_x(const bui_chrome_view *v, cairo_t *cr, double *shift)
@@ -106,7 +112,7 @@ X where URL text starts and the horizontal shift keeping the caret visible: the 
 
 **Returns:** `double`
 
-> **Inherited:** Documentation from [`bui_url_text_x`](#bui_url_text_x) (gui/browser_ui_internal.h:170).
+> **Inherited:** Documentation from [`bui_url_text_x`](#bui_url_text_x) (gui/browser_ui_internal.h:171).
 
 *Called by:* [`bui_url_index_at`](#bui_url_index_at)
 
@@ -116,7 +122,7 @@ X where URL text starts and the horizontal shift keeping the caret visible: the 
 
 ### `bui_url_index_at`
 
-`function` | [gui/bui_chrome.c:310](../../gui/bui_chrome.c#L310)
+`function` | [gui/bui_chrome.c:349](../../gui/bui_chrome.c#L349)
 
 ```c
 size_t bui_url_index_at(cairo_t *cr, const bui_chrome_view *v, double x)
@@ -134,7 +140,7 @@ Byte index of the URL caret for a click at surface x (UTF-8 boundary).
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`bui_url_index_at`](#bui_url_index_at) (gui/browser_ui_internal.h:172).
+> **Inherited:** Documentation from [`bui_url_index_at`](#bui_url_index_at) (gui/browser_ui_internal.h:173).
 
 *Calls:* [`bui_chrome_font`](#bui_chrome_font), [`bui_url_text_x`](#bui_url_text_x)
 
@@ -144,7 +150,7 @@ Byte index of the URL caret for a click at surface x (UTF-8 boundary).
 
 ### `bui_paint_chrome`
 
-`function` | [gui/bui_chrome.c:606](../../gui/bui_chrome.c#L606)
+`function` | [gui/bui_chrome.c:646](../../gui/bui_chrome.c#L646)
 
 ```c
 void bui_paint_chrome(cairo_t *cr, const bui_chrome_view *v)
@@ -159,7 +165,7 @@ Paints both chrome rows.
 | `cr` | `cairo_t *` |  |  |
 | `v` | `bui_chrome_view *` |  |  |
 
-> **Inherited:** Documentation from [`bui_paint_chrome`](#bui_paint_chrome) (gui/browser_ui_internal.h:167).
+> **Inherited:** Documentation from [`bui_paint_chrome`](#bui_paint_chrome) (gui/browser_ui_internal.h:168).
 
 ---
 
@@ -167,7 +173,7 @@ Paints both chrome rows.
 
 ### `bui_paint_findbar`
 
-`function` | [gui/bui_chrome.c:692](../../gui/bui_chrome.c#L692)
+`function` | [gui/bui_chrome.c:732](../../gui/bui_chrome.c#L732)
 
 ```c
 void bui_paint_findbar(cairo_t *cr, const bui_find_view *v)
@@ -188,7 +194,7 @@ void bui_paint_findbar(cairo_t *cr, const bui_find_view *v)
 
 ### `bui_paint_site_panel`
 
-`function` | [gui/bui_chrome.c:775](../../gui/bui_chrome.c#L775)
+`function` | [gui/bui_chrome.c:815](../../gui/bui_chrome.c#L815)
 
 ```c
 void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g, int hot_action)
@@ -206,7 +212,7 @@ The site identity panel (spec/site_panel.md); hot_action = action under the poin
 | `g` | `sp_geom *` |  |  |
 | `hot_action` | `int` |  |  |
 
-> **Inherited:** Documentation from [`bui_paint_site_panel`](#bui_paint_site_panel) (gui/browser_ui_internal.h:183).
+> **Inherited:** Documentation from [`bui_paint_site_panel`](#bui_paint_site_panel) (gui/browser_ui_internal.h:184).
 
 *Calls:* [`set_rgb`](gui.browser_ui_internal.h.md#set_rgb), [`bui_chrome_font`](#bui_chrome_font), [`bui_round_rect`](#bui_round_rect)
 
@@ -216,7 +222,7 @@ The site identity panel (spec/site_panel.md); hot_action = action under the poin
 
 ### `bui_paint_video_bar`
 
-`function` | [gui/bui_chrome.c:863](../../gui/bui_chrome.c#L863)
+`function` | [gui/bui_chrome.c:903](../../gui/bui_chrome.c#L903)
 
 ```c
 void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos, double total)
@@ -234,9 +240,73 @@ The browser's player bar over a playing video (spec/video_controls.md), drawn in
 | `pos` | `double` |  |  |
 | `total` | `double` |  |  |
 
-> **Inherited:** Documentation from [`bui_paint_video_bar`](#bui_paint_video_bar) (gui/browser_ui_internal.h:179).
+> **Inherited:** Documentation from [`bui_paint_video_bar`](#bui_paint_video_bar) (gui/browser_ui_internal.h:180).
 
 *Calls:* [`bui_chrome_font`](#bui_chrome_font), [`bui_round_rect`](#bui_round_rect)
+
+---
+
+<a id="bui_link_status_flips"></a>
+
+### `bui_link_status_flips`
+
+`function` | [gui/bui_chrome.c:962](../../gui/bui_chrome.c#L962)
+
+```c
+int bui_link_status_flips(const double zone[3], double ptr_x, double ptr_y)
+```
+
+Whether the pointer sits over the strip's left placement `zone` (left, top, right) that the last paint reported: the strip then paints on the right.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `zone` | `double [3]` |  |  |
+| `ptr_x` | `double` |  |  |
+| `ptr_y` | `double` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`bui_link_status_flips`](#bui_link_status_flips) (gui/browser_ui_internal.h:196).
+
+*Called by:* [`bui_paint_link_status`](#bui_paint_link_status)
+
+---
+
+<a id="bui_paint_link_status"></a>
+
+### `bui_paint_link_status`
+
+`function` | [gui/bui_chrome.c:966](../../gui/bui_chrome.c#L966)
+
+```c
+double bui_paint_link_status(cairo_t *cr, const ui_theme *th, const lp_preview *p, double left, double right, double bottom, double ptr_x, double ptr_y, double zone[3])
+```
+
+The status strip for the link under the pointer (spec/link_preview.md): bottom-left of the content area [left, right) ending at [`bottom`](include.flex_layout.h.md#bottom), flipped right when the pointer is over it.
+
+The host is emphasised; a blocked link is in the "bad" tone. Returns the strip height.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `cr` | `cairo_t *` |  |  |
+| `th` | `ui_theme *` |  |  |
+| `p` | `lp_preview *` |  |  |
+| `left` | `double` |  |  |
+| `right` | `double` |  |  |
+| `bottom` | `double` |  |  |
+| `ptr_x` | `double` |  |  |
+| `ptr_y` | `double` |  |  |
+| `zone` | `double [3]` |  |  |
+
+**Returns:** `double`
+
+> **Inherited:** Documentation from [`bui_paint_link_status`](#bui_paint_link_status) (gui/browser_ui_internal.h:191).
+
+*Calls:* [`set_rgb`](gui.browser_ui_internal.h.md#set_rgb), [`bui_chrome_font`](#bui_chrome_font), [`bui_link_status_flips`](#bui_link_status_flips), [`bui_round_rect`](#bui_round_rect)
 
 ---
 
@@ -430,7 +500,7 @@ alpha of a disabled button's icon
 
 ### `BUI_SP_RADIUS`
 
-`macro` | [gui/bui_chrome.c:741](../../gui/bui_chrome.c#L741)
+`macro` | [gui/bui_chrome.c:781](../../gui/bui_chrome.c#L781)
 
 ```c
 #define BUI_SP_RADIUS
@@ -442,7 +512,7 @@ alpha of a disabled button's icon
 
 ### `BUI_SP_LABEL_W`
 
-`macro` | [gui/bui_chrome.c:742](../../gui/bui_chrome.c#L742)
+`macro` | [gui/bui_chrome.c:782](../../gui/bui_chrome.c#L782)
 
 ```c
 #define BUI_SP_LABEL_W
@@ -454,7 +524,7 @@ alpha of a disabled button's icon
 
 ### `BUI_VBAR_ALPHA`
 
-`macro` | [gui/bui_chrome.c:858](../../gui/bui_chrome.c#L858)
+`macro` | [gui/bui_chrome.c:898](../../gui/bui_chrome.c#L898)
 
 ```c
 #define BUI_VBAR_ALPHA
@@ -466,7 +536,7 @@ alpha of a disabled button's icon
 
 ### `BUI_VTRACK_ALPHA`
 
-`macro` | [gui/bui_chrome.c:859](../../gui/bui_chrome.c#L859)
+`macro` | [gui/bui_chrome.c:899](../../gui/bui_chrome.c#L899)
 
 ```c
 #define BUI_VTRACK_ALPHA
@@ -480,7 +550,7 @@ bar background over the picture
 
 ### `BUI_VKNOB_R`
 
-`macro` | [gui/bui_chrome.c:860](../../gui/bui_chrome.c#L860)
+`macro` | [gui/bui_chrome.c:900](../../gui/bui_chrome.c#L900)
 
 ```c
 #define BUI_VKNOB_R
@@ -494,10 +564,72 @@ unplayed part of the track
 
 ### `BUI_VTEXT_SIZE`
 
-`macro` | [gui/bui_chrome.c:861](../../gui/bui_chrome.c#L861)
+`macro` | [gui/bui_chrome.c:901](../../gui/bui_chrome.c#L901)
 
 ```c
 #define BUI_VTEXT_SIZE
 ```
+
+---
+
+<a id="bui_ls_pad_x"></a>
+
+### `BUI_LS_PAD_X`
+
+`macro` | [gui/bui_chrome.c:956](../../gui/bui_chrome.c#L956)
+
+```c
+#define BUI_LS_PAD_X
+```
+
+---
+
+<a id="bui_ls_pad_y"></a>
+
+### `BUI_LS_PAD_Y`
+
+`macro` | [gui/bui_chrome.c:957](../../gui/bui_chrome.c#L957)
+
+```c
+#define BUI_LS_PAD_Y
+```
+
+---
+
+<a id="bui_ls_radius"></a>
+
+### `BUI_LS_RADIUS`
+
+`macro` | [gui/bui_chrome.c:958](../../gui/bui_chrome.c#L958)
+
+```c
+#define BUI_LS_RADIUS
+```
+
+---
+
+<a id="bui_ls_max_frac"></a>
+
+### `BUI_LS_MAX_FRAC`
+
+`macro` | [gui/bui_chrome.c:959](../../gui/bui_chrome.c#L959)
+
+```c
+#define BUI_LS_MAX_FRAC
+```
+
+---
+
+<a id="bui_ls_font"></a>
+
+### `BUI_LS_FONT`
+
+`macro` | [gui/bui_chrome.c:960](../../gui/bui_chrome.c#L960)
+
+```c
+#define BUI_LS_FONT
+```
+
+of the content width, like Firefox's status panel
 
 ---

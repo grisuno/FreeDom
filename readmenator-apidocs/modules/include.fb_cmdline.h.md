@@ -66,6 +66,8 @@ void fbc_history_init(fbc_history *h);
 |---|---|---|---|
 | `h` | `fbc_history *` |  |  |
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_fb_cmdline.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="fbc_history_free"></a>
@@ -83,6 +85,8 @@ void fbc_history_free(fbc_history *h);
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `h` | `fbc_history *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_fb_cmdline.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -110,6 +114,8 @@ Returns to the live line.
 
 **Returns:** `int`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_fb_cmdline.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="fbc_history_prev"></a>
@@ -136,6 +142,8 @@ The pointer is valid until the next call on h.
 
 **Returns:** `char *`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_fb_cmdline.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="fbc_history_next"></a>
@@ -159,6 +167,8 @@ NULL when already on the live line.
 | `h` | `fbc_history *` |  |  |
 
 **Returns:** `char *`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_fb_cmdline.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -188,6 +198,8 @@ Returns the prefix length, or -1 when nothing is completable.
 
 **Returns:** `long`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_fb_cmdline.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="fbc_names_expr"></a>
@@ -213,6 +225,8 @@ Returns its length, 0 on a bad path or small cap.
 | `cap` | `size_t` |  |  |
 
 **Returns:** `size_t`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_fb_cmdline.c.md#llvmfuzzertestoneinput)
 
 ---
 
@@ -244,6 +258,8 @@ Returns the length of the insertion.
 | `count` | `size_t *` |  |  |
 
 **Returns:** `size_t`
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_fb_cmdline.c.md#llvmfuzzertestoneinput)
 
 ---
 

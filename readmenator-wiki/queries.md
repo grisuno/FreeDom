@@ -4,23 +4,23 @@ Log each answered question here so the wiki compounds. Format: question, answer,
 
 ## Suggested
 
-### Q: What does browser_ui.c depend on, and what depends on it? (65 connections)
+### Q: What does browser_ui.c depend on, and what depends on it? (69 connections)
 
 - Status: unanswered
 
-### Q: What does css.h depend on, and what depends on it? (43 connections)
+### Q: What does css.h depend on, and what depends on it? (45 connections)
 
 - Status: unanswered
 
-### Q: What does tab.c depend on, and what depends on it? (32 connections)
+### Q: What does tab.c depend on, and what depends on it? (33 connections)
 
 - Status: unanswered
 
-### Q: How are the 65 files in 'include: browser_ui' related to each other?
+### Q: How are the 72 files in 'src: tab' related to each other?
 
 - Status: unanswered
 
-### Q: Why are frame_broker.c and sha2.c connected through 9 hops across 5 communities?
+### Q: Why are fuzz_frame_broker.c and sha2.c connected through 9 hops across 3 communities?
 
 - Status: unanswered
 

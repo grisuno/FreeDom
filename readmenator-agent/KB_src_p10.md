@@ -1,6 +1,15 @@
 # Subsystem: src (page 10 of 10)
 Previous: [KB_src_p9.md](KB_src_p9.md)
 
+## src/video_pick.c
+- Doc: Only an absolute http(s) URL names a stream the decoder can fetch; anything else a script stored...
+- Layer: utility
+- Language: c
+- Symbols:
+  - `vpk_first_video` (function, line 15) `const char *vpk_first_video(const pv_view *v)`
+  - `vpk_for_frame` (function, line 26) `const char *vpk_for_frame(const pv_view *frame_view, const char *top_video)`
+- Depends on: `include/video_pick.h`
+
 ## src/web_storage.c
 - Doc: utf8_ok: Well-formed UTF-8, allowing encoded surrogates (WTF-8): a JS string may hold a lone...
 - Layer: data_access

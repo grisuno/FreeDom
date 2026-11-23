@@ -108,6 +108,8 @@ Returns the index of the chosen variant, or (size_t)-1 on failure (empty variant
 
 **Returns:** `size_t`
 
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_hls.c.md#llvmfuzzertestoneinput)
+
 ---
 
 <a id="resolved"></a>
@@ -149,6 +151,8 @@ Safe on NULL.
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `pl` | `hls_playlist *` |  |  |
+
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_hls.c.md#llvmfuzzertestoneinput)
 
 ---
 
