@@ -4,6 +4,8 @@
 
 [docs]
 command = "readmenator . --rebuild"
+# A full rebuild of this tree takes longer than the 300 s default.
+timeout_s = 1200
 
 [pypi]
 enabled = false
