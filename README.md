@@ -38,10 +38,11 @@ telemetry, mandatory API keys or hidden solver workers.
   accent-insensitive, invisible to the page), reopen closed tab (`Ctrl+Shift+T`, kept in
   memory only), Stop (`Esc` or the reload button, which cuts the transfer and leaves no
   ghost history entry), a built-in player bar for HLS video (pause, seek, time; `Space`,
-  arrow keys) and Firefox's keyboard shortcuts.
+  arrow keys), smooth scrolling (wheel and keys; touchpads scroll by pixel), a bookmark star in
+  the URL bar and Firefox's keyboard shortcuts.
 - **Agent-safe and agent-friendly.** Deterministic headless mode with `--download-png`,
   `--dump-dom`, `--dump-layout` and `--dump-console`, plus an MCP server.
-- **Tested and fuzzed.** 102 CMocka suites, ASan/UBSan, 41 libFuzzer targets, and
+- **Tested and fuzzed.** 109 CMocka suites, ASan/UBSan, 47 libFuzzer targets, and
   measured parity against Firefox (`make parity`, `make wpt`).
 
 ## Quick start

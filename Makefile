@@ -126,11 +126,11 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
                $(BUILD_DIR)/test_css_index $(BUILD_DIR)/test_box_blur \
                $(BUILD_DIR)/test_text_case $(BUILD_DIR)/test_css_computed \
                $(BUILD_DIR)/test_css_counter $(BUILD_DIR)/test_sheet_cache \
-               $(BUILD_DIR)/test_net_guard $(BUILD_DIR)/test_chrome_layout $(BUILD_DIR)/test_site_panel $(BUILD_DIR)/test_link_preview $(BUILD_DIR)/test_doc_title $(BUILD_DIR)/test_nav_token \
+               $(BUILD_DIR)/test_net_guard $(BUILD_DIR)/test_chrome_layout $(BUILD_DIR)/test_site_panel $(BUILD_DIR)/test_link_preview $(BUILD_DIR)/test_doc_title $(BUILD_DIR)/test_smooth_scroll $(BUILD_DIR)/test_group_index $(BUILD_DIR)/test_nav_token \
                $(BUILD_DIR)/test_mask_cache $(BUILD_DIR)/test_exact_key \
                $(BUILD_DIR)/test_find_text $(BUILD_DIR)/test_video_pick $(BUILD_DIR)/test_video_controls
 
-.PHONY: asan-run gscroll ghover fuzz-dt fuzz-bt fuzz-vcl fuzz-hls fuzz-nt fuzz-sp fuzz-lp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: asan-run gscroll ghover fuzz-gi fuzz-ss fuzz-dt fuzz-bt fuzz-vcl fuzz-hls fuzz-nt fuzz-sp fuzz-lp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -492,6 +492,14 @@ $(BUILD_DIR)/test_nav_token: $(TEST_DIR)/test_nav_token.c $(BUILD_DIR)/nav_token
 $(BUILD_DIR)/test_doc_title: $(TEST_DIR)/test_doc_title.c $(BUILD_DIR)/doc_title.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Animated page scroll arithmetic (spec/smooth_scroll.md). Pure, no deps.
+$(BUILD_DIR)/test_smooth_scroll: $(TEST_DIR)/test_smooth_scroll.c $(BUILD_DIR)/smooth_scroll.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
+
+# Stable per-key grouping for the deferred paint passes (spec/group_index.md). Pure.
+$(BUILD_DIR)/test_group_index: $(TEST_DIR)/test_group_index.c $(BUILD_DIR)/group_index.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
+
 # Status-strip preview of the link under the pointer (spec/link_preview.md). Pure.
 $(BUILD_DIR)/test_link_preview: $(TEST_DIR)/test_link_preview.c $(BUILD_DIR)/link_preview.o $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/url.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
@@ -719,7 +727,7 @@ $(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/css_i
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
                       $(BUILD_DIR)/anti_fp.o $(BUILD_DIR)/page_view.o $(BUILD_DIR)/pres_hints.o $(BUILD_DIR)/sheet_cache.o $(BUILD_DIR)/css_chain.o $(QJS_OBJ) \
-                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/net_guard.o $(BUILD_DIR)/chrome_layout.o $(BUILD_DIR)/site_panel.o $(BUILD_DIR)/link_preview.o $(BUILD_DIR)/doc_title.o $(BUILD_DIR)/nav_token.o $(BUILD_DIR)/find_text.o $(BUILD_DIR)/video_pick.o $(BUILD_DIR)/video_controls.o $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/url.o \
+                      $(BUILD_DIR)/secure_fetch.o $(BUILD_DIR)/net_guard.o $(BUILD_DIR)/chrome_layout.o $(BUILD_DIR)/site_panel.o $(BUILD_DIR)/link_preview.o $(BUILD_DIR)/doc_title.o $(BUILD_DIR)/smooth_scroll.o $(BUILD_DIR)/group_index.o $(BUILD_DIR)/nav_token.o $(BUILD_DIR)/find_text.o $(BUILD_DIR)/video_pick.o $(BUILD_DIR)/video_controls.o $(BUILD_DIR)/ws_hub.o $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/url.o \
                       $(BUILD_DIR)/link_nav.o $(BUILD_DIR)/css_color.o \
                       $(BUILD_DIR)/css.o $(BUILD_DIR)/css_text.o $(BUILD_DIR)/css_box.o $(BUILD_DIR)/css_gradient.o $(BUILD_DIR)/css_mask.o $(BUILD_DIR)/css_values.o $(BUILD_DIR)/css_vars.o $(BUILD_DIR)/css_atrule.o $(BUILD_DIR)/css_mq.o $(BUILD_DIR)/flex_layout.o $(BUILD_DIR)/css_length.o $(BUILD_DIR)/css_counter.o $(BUILD_DIR)/css_select.o $(BUILD_DIR)/css_index.o \
                       $(BUILD_DIR)/request_policy.o \
@@ -1127,6 +1135,20 @@ fuzz-nt: | $(BUILD_DIR)
 	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
 	  $(FUZZ_DIR)/fuzz_nav_token.c $(SRC_DIR)/nav_token.c -o $(BUILD_DIR)/fuzz_nav_token
 	./$(BUILD_DIR)/fuzz_nav_token -max_total_time=30 -rss_limit_mb=2048
+
+# Group index (spec/group_index.md): every CSR grouping equals a naive reference (stable,
+# complete, keys out of range excluded), for random keys and key counts.
+fuzz-gi: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_group_index.c $(SRC_DIR)/group_index.c -o $(BUILD_DIR)/fuzz_group_index
+	./$(BUILD_DIR)/fuzz_group_index -max_total_time=30 -rss_limit_mb=2048
+
+# Smooth scroll (spec/smooth_scroll.md): position always finite, between from and to,
+# monotone within an animation, continuous across retargets, exact at the end.
+fuzz-ss: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_smooth_scroll.c $(SRC_DIR)/smooth_scroll.c -o $(BUILD_DIR)/fuzz_smooth_scroll -lm
+	./$(BUILD_DIR)/fuzz_smooth_scroll -max_total_time=30 -rss_limit_mb=2048
 
 # Parked-document title (spec/doc_title.md): output always valid bounded UTF-8 with no
 # controls or bidi overrides, never read past len.

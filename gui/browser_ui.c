@@ -11,6 +11,8 @@
 
 #define _GNU_SOURCE
 
+#include "smooth_scroll.h"
+#include "group_index.h"
 #include "browser.h"
 #include "block_flow.h"
 #include "table_layout.h"
@@ -432,6 +434,9 @@ typedef struct browser_window {
      int       dragging_scroll;  /* the scrollbar thumb is being dragged */
     double    scroll_grab_dy;   /* pointer offset within the thumb at drag start */
     int       pending_g;        /* a 'g' was pressed; a second one scrolls to the top (vim gg) */
+    sms_state sscroll;          /* animated page scroll (spec/smooth_scroll.md) */
+    int       smooth_off;       /* FREEDOM_SMOOTH_SCROLL=0: wheel and keys jump instantly */
+    uint32_t  axis_source;      /* wl_pointer axis_source of the pending pointer frame (v5) */
 
     /* Real async JS timers (2026-07-11): the worker reports its smallest pending
      * timer delay (tab_page.next_timer_ms); the trusted parent schedules an
@@ -15783,7 +15788,98 @@ typedef struct screen_flow_ctx {
     double origin, left, content_top, content_h, content_w;
     const double *sticky_off;
     size_t nbox_total;
+    /* Frame index (spec/group_index.md), NULL = full scans (same result, slower): boxes and
+     * rows grouped by deferred root, and block_id -> first box index (-1 = none). */
+    const size_t *dbox_offs, *dbox_items, *drow_offs, *drow_items;
+    const int *box_of_bid;
+    size_t nbid;
 } screen_flow_ctx;
+
+/* The first box of block `bid` (what the old linear scan found), or NULL. */
+static const rc_box *flow_box_of(const screen_flow_ctx *c, int bid) {
+    const rc_layout *L = c->L;
+    if (bid < 0) return NULL;
+    if (c->box_of_bid != NULL) {
+        if ((size_t)bid >= c->nbid || c->box_of_bid[bid] < 0) return NULL;
+        return &L->boxes[c->box_of_bid[bid]];
+    }
+    for (size_t bi = 0; bi < L->nbox; ++bi)
+        if (L->boxes[bi].block_id == bid) return &L->boxes[bi];
+    return NULL;
+}
+
+/* Builds the frame index into c (spec/group_index.md); on any allocation failure the
+ * index stays NULL and the passes scan everything. *blob receives what to free. */
+static void flow_index_build(screen_flow_ctx *c, void **blob) {
+    const rc_layout *L = c->L;
+    *blob = NULL;
+    size_t nb = L->nbox, nr = L->nrow, nk = L->ndefer, maxbid = 0;
+    for (size_t i = 0; i < nb; ++i)
+        if (L->boxes[i].block_id >= 0 && (size_t)L->boxes[i].block_id + 1 > maxbid)
+            maxbid = (size_t)L->boxes[i].block_id + 1;
+    size_t nsz = 2 * (nk + 1) + nb + nr, nint = nb + nr + maxbid;
+    if (nsz < nk || nint < nb) return;
+    size_t *z = (size_t *)calloc(nsz ? nsz : 1, sizeof *z);
+    int *ik = (int *)calloc(nint ? nint : 1, sizeof *ik);
+    if (z == NULL || ik == NULL) { free(z); free(ik); return; }
+    int *bkeys = ik, *rkeys = ik + nb, *map = ik + nb + nr;
+    for (size_t i = 0; i < nb; ++i) bkeys[i] = defer_root_of(L, L->boxes[i].block_id);
+    for (size_t i = 0; i < nr; ++i) rkeys[i] = defer_root_of(L, row_owner_block_id(L, &L->rows[i]));
+    for (size_t b = 0; b < maxbid; ++b) map[b] = -1;
+    for (size_t i = nb; i-- > 0;)          /* backwards: the FIRST box of a block wins */
+        if (L->boxes[i].block_id >= 0) map[L->boxes[i].block_id] = (int)i;
+    size_t *bo = z, *ro = z + nk + 1, *bi = z + 2 * (nk + 1), *ri = bi + nb;
+    if (gi_build(bkeys, nb, nk, bo, bi) == (size_t)-1 ||
+        gi_build(rkeys, nr, nk, ro, ri) == (size_t)-1) {
+        free(z); free(ik); return;
+    }
+    c->dbox_offs = bo; c->dbox_items = bi; c->drow_offs = ro; c->drow_items = ri;
+    c->box_of_bid = map; c->nbid = maxbid;
+    /* Both blocks hang off one pointer pair; flow_index_free releases them. */
+    void **pair = (void **)calloc(2, sizeof *pair);
+    if (pair == NULL) {
+        free(z); free(ik);
+        c->dbox_offs = c->dbox_items = c->drow_offs = c->drow_items = NULL;
+        c->box_of_bid = NULL; c->nbid = 0;
+        return;
+    }
+    pair[0] = z; pair[1] = ik;
+    *blob = pair;
+    /* FREEDOM_FLOW_INDEX_CHECK=1: differential oracle -- every group must be exactly the
+     * full scan's selection in the same order, and the map the scan's first box. */
+    static int check = -1;
+    if (check < 0) check = (getenv("FREEDOM_FLOW_INDEX_CHECK") != NULL);
+    if (check) {
+        size_t bad = 0;
+        for (size_t r = 0; r < nk; ++r) {
+            size_t at = bo[r];
+            for (size_t i = 0; i < nb; ++i)
+                if (defer_wants(L, L->boxes[i].block_id, (int)r))
+                    bad += (at >= bo[r + 1] || bi[at++] != i);
+            bad += (at != bo[r + 1]);
+            at = ro[r];
+            for (size_t i = 0; i < nr; ++i)
+                if (defer_wants(L, row_owner_block_id(L, &L->rows[i]), (int)r))
+                    bad += (at >= ro[r + 1] || ri[at++] != i);
+            bad += (at != ro[r + 1]);
+        }
+        screen_flow_ctx scan = *c;
+        scan.box_of_bid = NULL;
+        for (size_t i = 0; i < nr; ++i) {
+            int bid = row_owner_block_id(L, &L->rows[i]);
+            bad += (flow_box_of(c, bid) != flow_box_of(&scan, bid));
+        }
+        fprintf(stderr, "flow-index check: %zu roots %zu boxes %zu rows, %zu mismatches\n",
+                nk, nb, nr, bad);
+    }
+}
+
+static void flow_index_free(void **blob) {
+    if (*blob == NULL) return;
+    void **pair = (void **)*blob;
+    free(pair[0]); free(pair[1]); free(pair);
+    *blob = NULL;
+}
 
 /* Paints the in-flow boxes and rows the pass `only_root` serves (see defer_wants):
  * -1 = everything that is not deferred, else exactly one deferred subtree. */
@@ -15813,10 +15909,23 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
      * as part of a parent's stacking-context group to avoid double paint. */
     char *box_done = (Lp->nbox > 0) ? (char *)calloc(Lp->nbox, 1) : NULL;
 
-    if (box_done != NULL)
+    /* A deferred pass walks only its root's group (spec/group_index.md); the boxes of
+     * other roots are marked done lazily, before the first nested-children walk -- the
+     * only other reader of box_done -- exactly as the full pre-marking did. */
+    const size_t *bsel = NULL, *rsel = NULL;
+    size_t nbsel = Lp->nbox, nrsel = Lp->nrow;
+    if (only_root >= 0 && (size_t)only_root < Lp->ndefer && c->dbox_offs != NULL) {
+        bsel = c->dbox_items + c->dbox_offs[only_root];
+        nbsel = c->dbox_offs[only_root + 1] - c->dbox_offs[only_root];
+        rsel = c->drow_items + c->drow_offs[only_root];
+        nrsel = c->drow_offs[only_root + 1] - c->drow_offs[only_root];
+    }
+    int others_marked = (bsel == NULL);
+    if (box_done != NULL && bsel == NULL)
         for (size_t i = 0; i < Lp->nbox; ++i)
             if (!defer_wants(Lp, Lp->boxes[i].block_id, only_root)) box_done[i] = 1;
-    for (size_t i = 0; i < Lp->nbox; ++i) {
+    for (size_t ii = 0; ii < nbsel; ++ii) {
+        size_t i = (bsel != NULL) ? bsel[ii] : ii;
         if (box_done != NULL && box_done[i]) continue;
         const rc_box *orig_bx = &Lp->boxes[i];
         int bid = orig_bx->block_id;
@@ -15843,6 +15952,11 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
             continue;
 
         if (is_sc) {
+            if (!others_marked && box_done != NULL) {
+                for (size_t k = 0; k < Lp->nbox; ++k)
+                    if (!defer_wants(Lp, Lp->boxes[k].block_id, only_root)) box_done[k] = 1;
+                others_marked = 1;
+            }
             bui_paint_backdrop_blur(cr, def, left + bx->x, origin + bx->top,
                                     bx->w, bx->h);
             cairo_push_group(cr);
@@ -15863,7 +15977,8 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
         }
     }
     for (int pass = ROW_PAINT_BAND; pass <= ROW_PAINT_CONTENT; ++pass)
-    for (size_t i = 0; i < Lp->nrow; ++i) {
+    for (size_t ii = 0; ii < nrsel; ++ii) {
+        size_t i = (rsel != NULL) ? rsel[ii] : ii;
         if (row_done != NULL && row_done[i]) continue;
         const rc_row *r = &Lp->rows[i];
         int row_bid = row_owner_block_id(Lp, r);
@@ -15873,19 +15988,13 @@ static void paint_screen_inflow(const screen_flow_ctx *c, int only_root) {
          * decoration still paints; only the content rows past the content edge
          * are hidden. */
         int skip_overflowed = 0;
-        if (row_bid >= 0) {
-            for (size_t bi = 0; bi < Lp->nbox; ++bi) {
-                const rc_box *bx = &Lp->boxes[bi];
-                if (bx->block_id != row_bid) continue;
-                if ((bx->box_h > 0 || bx->box_h_set) && bx->h >= 0.0) {
-                    const pv_box_def *bd = rd_box_at(w->doc, (size_t)row_bid);
-                    if (bd != NULL && bd->overflow_y != CSS_OF_VISIBLE
-                        && bd->overflow_y != CSS_OF_UNSET) {
-                        double box_bottom = bx->top + bx->h;
-                        if (r->top + r->height > box_bottom) skip_overflowed = 1;
-                    }
-                }
-                break;
+        const rc_box *obx = flow_box_of(c, row_bid);
+        if (obx != NULL && (obx->box_h > 0 || obx->box_h_set) && obx->h >= 0.0) {
+            const pv_box_def *bd = rd_box_at(w->doc, (size_t)row_bid);
+            if (bd != NULL && bd->overflow_y != CSS_OF_VISIBLE
+                && bd->overflow_y != CSS_OF_UNSET) {
+                double box_bottom = obx->top + obx->h;
+                if (r->top + r->height > box_bottom) skip_overflowed = 1;
             }
         }
         if (skip_overflowed) continue;
@@ -16311,7 +16420,9 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     }
 
     screen_flow_ctx sfc = { cr, w, Lp, origin, left, content_top, content_h, content_w,
-                            sticky_off, nbox_total };
+                            sticky_off, nbox_total, NULL, NULL, NULL, NULL, NULL, 0 };
+    void *flow_index = NULL;
+    if (Lp->ndefer > 0) flow_index_build(&sfc, &flow_index);
     double prof_i0 = gui_prof_now_ms();
     paint_screen_inflow(&sfc, -1);
     double prof_i1 = gui_prof_now_ms();
@@ -16325,6 +16436,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     paint_positioned_layer(cr, w, th, Lp, left, origin, content_top, content_h,
                            (double)w->width, paint_screen_deferred, &sfc);
     gui_prof_log("paint_positioned", gui_prof_now_ms() - prof_i1);
+    flow_index_free(&flow_index);
     free(sticky_off);
     frame_undo_restore(Lp, &undo);
     if (owned) rc_free(&Lown);
@@ -20148,6 +20260,58 @@ static double scroll_line_px(const browser_window *w) {
     return w->theme.body_font * w->theme.line_spacing;
 }
 
+/* Largest scroll offset of the current document (0 when it fits). */
+static double scroll_max(const browser_window *w) {
+    double top, h;
+    content_geometry(w, &top, &h);
+    double m = w->content_total_h - h;
+    return m > 0.0 ? m : 0.0;
+}
+
+/* Cancel by observation (spec/smooth_scroll.md): a scroll offset the animation did not
+ * write means another path moved the page (find, scrollbar, anchor, script, clamp at the
+ * end), and the animation is dropped where the page now is. */
+static void smooth_scroll_sync(browser_window *w) {
+    if (sms_active(&w->sscroll) && fabs(w->scroll - w->sscroll.pos) > 0.5)
+        sms_jump(&w->sscroll, w->scroll);
+}
+
+/* One animation frame; returns 1 while still animating. */
+static int smooth_scroll_step(browser_window *w) {
+    smooth_scroll_sync(w);
+    if (!sms_active(&w->sscroll)) return 0;
+    w->scroll = sms_sample(&w->sscroll, (double)now_ms());
+    redraw(w);
+    smooth_scroll_sync(w); /* paint clamped it at the end of the page */
+    return sms_active(&w->sscroll);
+}
+
+/* Where the page is heading: a running animation's target, else where it is. Steps
+ * accumulate on it, so three presses of Down are three lines. */
+static double scroll_goal(browser_window *w) {
+    smooth_scroll_sync(w);
+    return sms_active(&w->sscroll) ? sms_goal(&w->sscroll) : w->scroll;
+}
+
+/* Scrolls the page to target (clamped to the document), animated unless disabled. */
+static void scroll_animate_to(browser_window *w, double target) {
+    double mx = scroll_max(w);
+    if (target > mx) target = mx;
+    if (target < 0.0) target = 0.0;
+    if (w->smooth_off) {
+        sms_jump(&w->sscroll, target);
+        w->scroll = target;
+        redraw(w);
+        return;
+    }
+    if (!sms_active(&w->sscroll)) sms_jump(&w->sscroll, w->scroll);
+    sms_retarget(&w->sscroll, target, (double)now_ms(), FC_SMOOTH_SCROLL_MS);
+    if (!smooth_scroll_step(w) && w->scroll != target) { /* jumped (same instant) */
+        w->scroll = target;
+        redraw(w);
+    }
+}
+
 static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
                      uint32_t axis, wl_fixed_t value) {
     (void)p; (void)time;
@@ -20157,10 +20321,19 @@ static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
     if (w->ptr_y < toolbar_top(w) + UI_TOOLBAR_H) return; /* the wheel scrolls the page, not the chrome */
 
     double v = wl_fixed_to_double(value);
-    double step = w->theme.scroll_step_lines * scroll_line_px(w);
-    w->scroll += (v > 0.0) ? step : -step;
-    if (w->scroll < 0.0) w->scroll = 0.0; /* the upper bound is clamped during paint */
-    redraw(w);
+    if (w->axis_source == WL_POINTER_AXIS_SOURCE_FINGER ||
+        w->axis_source == WL_POINTER_AXIS_SOURCE_CONTINUOUS) {
+        /* A touchpad reports surface pixels many times per gesture: the finger is the
+         * animation. Before seat v5 every one of these advanced a whole wheel step. */
+        double t = scroll_goal(w) + v;
+        if (t < 0.0) t = 0.0;
+        sms_jump(&w->sscroll, t);
+        w->scroll = t;      /* the upper bound is clamped during paint */
+        redraw(w);
+    } else {
+        double step = w->theme.scroll_step_lines * scroll_line_px(w);
+        scroll_animate_to(w, scroll_goal(w) + ((v > 0.0) ? step : -step));
+    }
 
     /* Dispatch wheel + scroll events to the element under the pointer. */
     if (w->js_mode != JSP_OFF && w->tab_worker != NULL) {
@@ -20173,7 +20346,22 @@ static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,
 }
 
 static void ptr_frame(void *d, struct wl_pointer *p) {
-    (void)d; (void)p;
+    (void)p;
+    ((browser_window *)d)->axis_source = WL_POINTER_AXIS_SOURCE_WHEEL; /* per frame (v5) */
+}
+
+/* Seat v5: the source of the axis events of this pointer frame (wheel vs touchpad). */
+static void ptr_axis_source(void *d, struct wl_pointer *p, uint32_t source) {
+    (void)p;
+    ((browser_window *)d)->axis_source = source;
+}
+
+static void ptr_axis_stop(void *d, struct wl_pointer *p, uint32_t time, uint32_t axis) {
+    (void)d; (void)p; (void)time; (void)axis;
+}
+
+static void ptr_axis_discrete(void *d, struct wl_pointer *p, uint32_t axis, int32_t discrete) {
+    (void)d; (void)p; (void)axis; (void)discrete;
 }
 
 static const struct wl_pointer_listener pointer_listener = {
@@ -20183,6 +20371,9 @@ static const struct wl_pointer_listener pointer_listener = {
     .button = ptr_button,
     .axis = ptr_axis,
     .frame = ptr_frame,
+    .axis_source = ptr_axis_source,
+    .axis_stop = ptr_axis_stop,
+    .axis_discrete = ptr_axis_discrete,
 };
 
 /* --- clipboard (wl_data_device) --- */
@@ -21067,16 +21258,17 @@ static void handle_key_press(browser_window *w, xkb_keysym_t sym, const char *ut
         int was_g = w->pending_g;
         w->pending_g = 0;
         int scrolled = 1;
-        if (sym == XKB_KEY_Up || sym == XKB_KEY_k) { w->scroll -= line; }
-        else if (sym == XKB_KEY_Down || sym == XKB_KEY_j) { w->scroll += line; }
-        else if (sym == XKB_KEY_Page_Up || sym == XKB_KEY_b) { w->scroll -= page; }
-        else if (sym == XKB_KEY_Page_Down || sym == XKB_KEY_space) { w->scroll += page; }
-        else if (sym == XKB_KEY_Home) { w->scroll = 0.0; }
-        else if (sym == XKB_KEY_End || sym == XKB_KEY_G) { w->scroll = w->content_total_h; }
-        else if (sym == XKB_KEY_g) { if (was_g) w->scroll = 0.0; else w->pending_g = 1; scrolled = 0; }
+        double goal = scroll_goal(w);
+        if (sym == XKB_KEY_Up || sym == XKB_KEY_k) { goal -= line; }
+        else if (sym == XKB_KEY_Down || sym == XKB_KEY_j) { goal += line; }
+        else if (sym == XKB_KEY_Page_Up || sym == XKB_KEY_b) { goal -= page; }
+        else if (sym == XKB_KEY_Page_Down || sym == XKB_KEY_space) { goal += page; }
+        else if (sym == XKB_KEY_Home) { goal = 0.0; }
+        else if (sym == XKB_KEY_End || sym == XKB_KEY_G) { goal = w->content_total_h; }
+        else if (sym == XKB_KEY_g) { if (was_g) goal = 0.0; else w->pending_g = 1; scrolled = was_g; }
         else { scrolled = 0; }
-        if (w->scroll < 0.0) w->scroll = 0.0;
-        redraw(w);
+        if (scrolled) scroll_animate_to(w, goal);
+        else redraw(w);
         /* Dispatch scroll event if the page actually scrolled. */
         if (scrolled && w->js_mode != JSP_OFF && w->tab_worker != NULL) {
             dom_node_id nid = node_at_point(w, w->ptr_x, w->ptr_y);
@@ -21249,8 +21441,8 @@ static void keyboard_repeat_info(void *d, struct wl_keyboard *kbd, int32_t rate,
     (void)kbd;
     browser_window *w = (browser_window *)d;
     /* rate is repeats/second (0 => repeat disabled); delay is ms before the first. */
-    w->repeat_rate = rate;
-    w->repeat_delay = delay;
+    w->repeat_rate = rate > 0 ? rate : 0;
+    w->repeat_delay = delay > 0 ? delay : 0;
 }
 
 static const struct wl_keyboard_listener keyboard_listener = {
@@ -21284,7 +21476,6 @@ static const struct wl_seat_listener seat_listener = { seat_caps, seat_name };
 
 static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
                             const char *iface, uint32_t version) {
-    (void)version;
     browser_window *w = (browser_window *)data;
     if (strcmp(iface, wl_compositor_interface.name) == 0) {
         w->compositor = wl_registry_bind(reg, name, &wl_compositor_interface, 4);
@@ -21294,7 +21485,10 @@ static void registry_global(void *data, struct wl_registry *reg, uint32_t name,
         w->wm_base = wl_registry_bind(reg, name, &xdg_wm_base_interface, 1);
         xdg_wm_base_add_listener(w->wm_base, &wm_base_listener, w);
     } else if (strcmp(iface, wl_seat_interface.name) == 0) {
-        w->seat = wl_registry_bind(reg, name, &wl_seat_interface, 1);
+        /* v5: wl_pointer.axis_source tells a touchpad from a wheel, and wl_keyboard
+         * repeat_info (v4) delivers the compositor's key repeat. Every v5 event has a
+         * listener; never bind above what the compositor offers. */
+        w->seat = wl_registry_bind(reg, name, &wl_seat_interface, version < 5 ? version : 5);
         wl_seat_add_listener(w->seat, &seat_listener, w);
     } else if (strcmp(iface, wl_data_device_manager_interface.name) == 0) {
         w->data_device_manager = wl_registry_bind(reg, name, &wl_data_device_manager_interface, 1);
@@ -21467,6 +21661,11 @@ ui_status ui_run_browser(const char *start_url_arg) {
     idn_defaults(&w.identity);
     identity_load(&w);          /* the persisted identity override ("" => anti_fp default) */
     fc_init(&w.fc);             /* animation frame scheduler (Phase R1) */
+    {
+        const char *ssv = getenv("FREEDOM_SMOOTH_SCROLL");
+        w.smooth_off = (ssv != NULL && strcmp(ssv, "0") == 0);
+    }
+    w.axis_source = WL_POINTER_AXIS_SOURCE_WHEEL;
 
     /* Key auto-repeat: a monotonic timerfd polled alongside the Wayland fd. Defaults
      * apply until the compositor sends keyboard_repeat_info. A failed create (-1) just
@@ -21711,6 +21910,9 @@ ui_status ui_run_browser(const char *start_url_arg) {
             int ai = fc_interval_ms(&w.fc);
             if (timeout < 0 || ai < timeout) timeout = ai;
         }
+        /* An animated scroll in flight wakes the loop for its next frame. */
+        if (sms_active(&w.sscroll) && (timeout < 0 || FC_SMOOTH_SCROLL_FRAME_MS < timeout))
+            timeout = FC_SMOOTH_SCROLL_FRAME_MS;
 
         /* Poll the Wayland fd, the key-repeat timer, the async-fetch result pipe,
          * and the video decoder + feeder-thread eventfds together. */
@@ -21815,6 +22017,8 @@ ui_status ui_run_browser(const char *start_url_arg) {
                 }
             }
         }
+
+        smooth_scroll_step(&w); /* animated scroll: next frame (no-op when idle) */
 
         /* Frame timers: advance each iframe worker's virtual clock, route what they posted. */
         if (w.frames != NULL && w.frames_due_ms != 0 && now_ms() >= w.frames_due_ms && !w.loading) {

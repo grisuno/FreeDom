@@ -25,6 +25,12 @@
  * reference renderer is what we match. spec/page_view.md "monospace genérica". */
 #define FC_MONO_DEFAULT_PX 12.0
 
+/* Animated page scroll (spec/smooth_scroll.md): duration of one wheel/key scroll, as
+ * Firefox's general.smoothScroll durations (~150 ms), and the loop's wake interval while
+ * one is in flight (the paint itself paces the frames). */
+#define FC_SMOOTH_SCROLL_MS 150.0
+#define FC_SMOOTH_SCROLL_FRAME_MS 8
+
 /* Viewport height (px) the headless render reports to a trusted page's JS
  * (window.innerHeight, spec/js_geom.md); the parity harness's reference height. */
 #define FC_HEADLESS_VIEW_H 768
