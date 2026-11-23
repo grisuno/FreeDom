@@ -20,7 +20,9 @@ parts/
 sdist/
 var/
 wheels/
-fuzz/
+fuzz/in/
+fuzz/out/
+fuzz/seeds/
 share/python-wheels/
 *.egg-info/
 .installed.cfg

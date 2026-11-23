@@ -1,0 +1,9 @@
+# Release config for deploynator. Tests stay auto-detected (make test).
+# The docs step calls the readmenator console script directly: the default
+# `python -m readmenator` resolves to whichever venv is first on PATH.
+
+[docs]
+command = "readmenator . --rebuild"
+
+[pypi]
+enabled = false
