@@ -878,6 +878,9 @@ typedef struct pv_view {
     /* 1 when the root <html> computes scroll-behavior: smooth (CSSOM View 12.1: the
      * value on <body> is NOT propagated to the viewport). spec/anchor.md. */
     int         scroll_smooth;
+    /* The root <html>'s scroll-padding-top/bottom in px, 0 when undeclared: the optimal
+     * viewing region of an anchor or scrollIntoView (spec/scroll_req.md 3). */
+    int         scroll_pad_top, scroll_pad_bottom;
 } pv_view;
 
 /* The UA stylesheet's body margin (HTML Rendering 15.3.1). */

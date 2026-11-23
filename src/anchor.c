@@ -107,24 +107,35 @@ size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, s
     return n;
 }
 
-int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
-                   double *top) {
-    if (g == NULL || h == NULL || top == NULL) return -1;
+int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
+                   double *top, double *bottom) {
+    if (g == NULL || h == NULL || top == NULL || bottom == NULL) return -1;
     if (nsub > n) nsub = n;
     int found = 0;
-    double best = 0.0;
+    double best = 0.0, low = 0.0;
     for (size_t i = 0; i < nsub; ++i) {
         const jg_rect *r = jg_find(g, h[i]);
         if (r == NULL) continue;
-        if (!found || (double)r->y < best) best = (double)r->y;
+        double y = (double)r->y, b = (double)r->y + (double)r->h;
+        if (!found || y < best) best = y;
+        if (!found || b > low) low = b;
         found = 1;
     }
     for (size_t i = nsub; i < n && !found; ++i) {
         const jg_rect *r = jg_find(g, h[i]);
-        if (r != NULL) { best = (double)r->y; found = 1; }
+        if (r != NULL) { best = low = (double)r->y; found = 1; }
     }
     if (!found) return -1;
     *top = best;
+    *bottom = (low < best) ? best : low;
+    return 0;
+}
+
+int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
+                   double *top) {
+    double t, b;
+    if (top == NULL || anc_target_box(g, h, n, nsub, &t, &b) != 0) return -1;
+    *top = t;
     return 0;
 }
 

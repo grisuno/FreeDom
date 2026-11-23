@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Scroll and anchors</title>
+<style>
+html{scroll-padding-top:70px}
+body{font:16px sans-serif;margin:0}
+header{position:sticky;top:0;height:60px;background:#263238;color:#fff;z-index:10}
+header a{color:#ffeb3b;margin-right:16px}
+header button{margin-right:6px}
+#st{color:#80cbc4}
+section{height:900px;padding:8px 16px;border-top:1px solid #ccc}
+h2{scroll-margin-top:10px}
+:target{background:#ffd54f;outline:3px solid #e53935}
+.row a{margin-right:24px;background:#bbdefb}
+</style></head>
+<body>
+<header>
+<a href="#s1">S1</a><a href="#s2">S2</a><a href="#s3">S3</a>
+<button id="bh">hash s3</button><button id="bt">top</button><button id="bi">into s2</button><button id="bb">by -300</button>
+<span id="st">idle</span>
+</header>
+<section><p class="row"><a href="#s1">one</a><a href="#s2">two</a><a href="#s3">three</a></p></section>
+<section><h2 id="s1">Section one</h2><p>First.</p></section>
+<section><h2 id="s2">Section two</h2><p>Second.</p></section>
+<section><h2 id="s3">Section three</h2><p>Third.</p></section>
+<script>
+var n=0, q=function(i){return document.getElementById(i);};
+function show(){ q('st').textContent='hash='+location.hash+' changes='+n; }
+addEventListener('hashchange',function(){ n++; show(); });
+q('bh').addEventListener('click',function(){ location.hash='s3'; show(); });
+q('bt').addEventListener('click',function(){ window.scrollTo({top:0}); });
+q('bi').addEventListener('click',function(){ q('s2').scrollIntoView({block:'center'}); });
+q('bb').addEventListener('click',function(){ window.scrollBy(0,-300); });
+/* Driven from timers too (headless/GUI verification): the first hashchange starts it. */
+var steps=[function(){ location.hash='s3'; show(); },
+           function(){ q('s2').scrollIntoView({block:'center'}); },
+           function(){ window.scrollBy(0,-300); },
+           function(){ window.scrollTo({top:0}); }], k=0, started=false;
+addEventListener('hashchange',function(){ if(started) return; started=true;
+  (function next(){ if(k<steps.length) setTimeout(function(){ steps[k++](); next(); },1500); })(); });
+show();
+</script>
+</body></html>

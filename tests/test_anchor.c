@@ -159,6 +159,30 @@ static void test_collect_subtree_then_following(void **state) {
     unload(&f);
 }
 
+/* tanda 104 (spec/scroll_req.md): the whole box of the target, for scrollIntoView. */
+static void test_target_box(void **state) {
+    (void)state;
+    jg_table g;
+    jg_init(&g);
+    assert_int_equal(jg_add(&g, 10, 0, 900, 50, 20), 0);
+    assert_int_equal(jg_add(&g, 11, 0, 840, 50, 300), 0);   /* bottom 1140 */
+    assert_int_equal(jg_add(&g, 20, 0, 1200, 50, 20), 0);
+    assert_int_equal(jg_finish(&g), 0);
+    double top = -1.0, bottom = -1.0;
+    dom_node_id a[] = { 9, 10, 11, 20 };
+    assert_int_equal(anc_target_box(&g, a, 4, 3, &top, &bottom), 0);
+    assert_true(top == 840.0 && bottom == 1140.0);
+    dom_node_id b[] = { 5, 20 };                              /* empty target: a point */
+    assert_int_equal(anc_target_box(&g, b, 2, 1, &top, &bottom), 0);
+    assert_true(top == 1200.0 && bottom == 1200.0);
+    dom_node_id c[] = { 1 };
+    top = bottom = 7.0;
+    assert_int_equal(anc_target_box(&g, c, 1, 1, &top, &bottom), -1);
+    assert_true(top == 7.0 && bottom == 7.0);
+    assert_int_equal(anc_target_box(&g, a, 4, 3, &top, NULL), -1);
+    jg_free(&g);
+}
+
 static void test_target_top(void **state) {
     (void)state;
     jg_table g;
@@ -205,6 +229,7 @@ int main(void) {
         cmocka_unit_test(test_resolve_rejects_detached_and_bad_args),
         cmocka_unit_test(test_collect_subtree_then_following),
         cmocka_unit_test(test_target_top),
+        cmocka_unit_test(test_target_box),
         cmocka_unit_test(test_scroll_for),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

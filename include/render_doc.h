@@ -279,6 +279,8 @@ typedef struct rd_doc {
     int       oof_view_root;
     int       html_center;     /* 1 if root has margin-left:auto && margin-right:auto */
     int       scroll_smooth;   /* root scroll-behavior: smooth (spec/anchor.md) */
+    double    scroll_pad_top;  /* root scroll-padding-top/bottom, px (spec/scroll_req.md) */
+    double    scroll_pad_bottom;
     int       author_css;      /* the effective caps.css this document was built with */
     int       has_images;  /* the page declared at least one image */
     /* Box engine (Hito 23b-8 Step D): the box-definition TREE. boxes[block_id]

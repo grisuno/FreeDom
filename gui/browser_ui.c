@@ -13,6 +13,7 @@
 
 #include "smooth_scroll.h"
 #include "anchor.h"
+#include "scroll_req.h"
 #include "group_index.h"
 #include "browser.h"
 #include "block_flow.h"
@@ -445,6 +446,12 @@ typedef struct browser_window {
      * a new document height re-applies the fragment (spec/anchor.md 3). "" = none. */
     char     frag_hold[ANC_MAX_FRAGMENT];
     double   frag_hold_scroll, frag_hold_h;
+    /* Back/Forward to ANOTHER document (spec/anchor.md 3d): the entry's saved scroll is
+     * restored once it lands (restore_pending), then held like a fragment while the page
+     * settles (restore_hold >= 0). */
+    int      restore_pending;
+    double   restore_scroll;
+    double   restore_hold;
     uint64_t frag_hold_until;
     uint32_t  axis_source;      /* wl_pointer axis_source of the pending pointer frame (v5) */
 
@@ -572,6 +579,15 @@ typedef struct browser_window {
                                     * sent it is the initiator the private-network guard
                                     * judges (spec/net_guard.md), not the user */
     int js_nav_depth;        /* consecutive JS-driven navigations (location.href=); capped */
+    int js_frag_depth;       /* nested script fragment navigations (spec/anchor.md 3b) */
+    unsigned frag_nav_serial; /* bumped by every fragment navigation (supersession check) */
+    /* A load script set THIS document's fragment (location.hash=): applied, as a replace,
+     * once the document is on screen (scroll_to_url_fragment). "" = none. */
+    char load_js_frag[ANC_MAX_FRAGMENT];
+    int  load_js_frag_set;
+    /* A load script's scroll request (spec/scroll_req.md), applied after the fragment. */
+    srq_req      load_scroll;
+    dom_node_id *load_scroll_h;
 
     /* Streaming progressive render: the fetch thread copies accumulated body here
      * as data downloads, then signals the main loop via stream_evfd (eventfd). The
@@ -1585,9 +1601,18 @@ static void clear_doc(browser_window *w) {
     w->hover_cursor = CSS_CUR_UNSET;
 }
 
+/* Drops what a load script asked for that the window has not applied yet. */
+static void load_requests_reset(browser_window *w) {
+    free(w->load_scroll_h);
+    w->load_scroll_h = NULL;
+    memset(&w->load_scroll, 0, sizeof w->load_scroll);
+    w->load_js_frag_set = 0;
+}
+
 /* Replaces the cached page source. Takes ownership of html; copies top. */
 static void set_cache(browser_window *w, char *html, size_t len, const char *top) {
     gui_quiesce(w);   /* a background tick reads what this changes */
+    load_requests_reset(w);   /* a previous document's pending script scroll/hash */
     free(w->cur_html);
     free(w->cur_top);
     w->cur_html = html;
@@ -2654,9 +2679,14 @@ static void load_bg_images(browser_window *w, tab *t, tab_fetch_fn img_fetch, vo
 
 static void do_load(browser_window *w, const char *url); /* JS navigation re-enters it */
 static void scroll_to_url_fragment(browser_window *w);
+static const char *js_same_doc_fragment(browser_window *w, const tab_page *p);
+static void navigate_fragment_ex(browser_window *w, const char *fragment, int replace);
 static void frag_hold_check(browser_window *w);
 static void apply_history_ops(browser_window *w, const tab_page *page);
 static void history_step(browser_window *w, int steps);
+static void refresh_fragment_target(browser_window *w);
+static double scroll_max(const browser_window *w);
+static browser_status gui_navigate(browser_window *w, const char *url);
 static int  apply_click_result(browser_window *w, tab_page *page);
 static void load_current(browser_window *w);
 static void tab_new(browser_window *w, const char *url);
@@ -2922,7 +2952,19 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
      * resolved AND policy-gated by the trusted parent; we never render the transient
      * page, we navigate (re-applying ALL network policy via do_load). Capped so a
      * redirect loop cannot pin the browser; a settled page resets the chain. */
-    if (allow_js_nav && page.nav_url != NULL && page.nav_url[0] != '\0') {
+    if (allow_js_nav) {   /* a load script's scrollTo: applied once the document is on screen */
+        free(w->load_scroll_h);
+        w->load_scroll = page.scroll;
+        w->load_scroll_h = page.scroll_handles;
+        page.scroll_handles = NULL;
+        page.scroll.kind = SRQ_NONE;
+    }
+    const char *load_frag = allow_js_nav ? js_same_doc_fragment(w, &page) : NULL;
+    if (load_frag != NULL) {   /* spec/anchor.md 3b: never a reload of this document */
+        snprintf(w->load_js_frag, sizeof w->load_js_frag, "%s", load_frag);
+        w->load_js_frag_set = 1;
+        w->js_nav_depth = 0;
+    } else if (allow_js_nav && page.nav_url != NULL && page.nav_url[0] != '\0') {
         if (w->js_nav_depth < JS_NAV_MAX) {
             char target[LN_MAX_TARGET];
             snprintf(target, sizeof target, "%s", page.nav_url);
@@ -2930,7 +2972,7 @@ static void render_current_ex(browser_window *w, int allow_js_nav) {
             tab_page_free(&page);
             gui_net_ctx_retire(nctx);
             tab_close(t);
-            if (browser_navigate(&w->bs, target) == BROWSER_OK) do_load(w, target);
+            if (gui_navigate(w, target) == BROWSER_OK) do_load(w, target);
             return;
         }
         browser_set_status(&w->bs, "Stopped a JavaScript redirect loop.", now_ms());
@@ -3339,6 +3381,7 @@ static void free_live_page(browser_window *w) {
     free(w->font_done_for); w->font_done_for = NULL;
     free(w->cur_html); w->cur_html = NULL;
     free(w->cur_top);  w->cur_top = NULL;
+    load_requests_reset(w);
     browser_free(&w->bs);
     memset(&w->bs, 0, sizeof w->bs);
 }
@@ -3438,7 +3481,7 @@ static void tab_new(browser_window *w, const char *url) {
     if (browser_init(&w->bs) != BROWSER_OK) { browser_set_page(&w->bs, "Freedom", "", 0); }
     if (url != NULL) {
         w->url_bar_focused = 0;
-        if (browser_navigate(&w->bs, url) == BROWSER_OK) do_load(w, url);
+        if (gui_navigate(w, url) == BROWSER_OK) do_load(w, url);
         redraw(w);
         return;
     }
@@ -10889,7 +10932,8 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
                           ((abd->display == CSS_DISP_INLINE_BLOCK &&
                             (empty_atom_continues_line(doc, i, b->block_id) ||
                              text_atom_continues_line(doc, i, b->block_id))) ||
-                           (abd->display == CSS_DISP_INLINE_BOX && b->kind == RD_PARAGRAPH)));
+                           (abd->display == CSS_DISP_INLINE_BOX
+                            && (b->kind == RD_PARAGRAPH || b->kind == RD_LINK))));
         }
         if (atom_first) {
             flush_line(L, &s, th);
@@ -17515,48 +17559,97 @@ static dom_node_id frag_at_point(browser_window *w, double px, double py,
 
 static void scroll_animate_to_ms(browser_window *w, double target, double dur_ms);
 static int apply_click_result(browser_window *w, tab_page *page);
+static int scroll_apply_request(browser_window *w, const srq_req *r, const dom_node_id *h,
+                                int allow_anim);
 static void set_page_url(browser_window *w, const char *url);
 
-/* Scrolls to the indicated part of the document for fragment (spec/anchor.md): the worker
- * resolves it against the live DOM, the retained layout locates it. push_url (or NULL) is
- * the same-document URL the caller just pushed, so a JS page records it and hears
- * hashchange. animate honors the root's scroll-behavior. */
-static void scroll_to_fragment(browser_window *w, const char *fragment, const char *push_url,
-                               int animate) {
-    if (w->tab_worker == NULL || w->doc == NULL || w->cairo_surface == NULL) return;
-    tab_anchor a;
-    tab_page page;
-    if (tab_anchor_query(w->tab_worker, fragment, push_url, &a, &page) != TAB_OK) return;
-    int navigated = (page.view != NULL || page.nav_url != NULL) ? apply_click_result(w, &page) : 0;
-    tab_page_free(&page);
-    double target = -1.0;
-    if (!navigated && a.kind == ANC_TOP) target = 0.0;
-    if (!navigated && a.kind == ANC_ELEMENT && w->doc != NULL) {
-        double content_top, content_h, top = 0.0;
-        content_geometry(w, &content_top, &content_h);
-        double content_w = content_width(w);
-        cairo_t *cr = cairo_create(w->cairo_surface);
-        rc_layout Lown;
-        int owned = 0;
-        const rc_layout *L = hit_layout(cr, w, content_w, content_h, &Lown, &owned);
+/* Applies a validated scroll request against the retained layout (spec/scroll_req.md):
+ * window.scrollTo/scrollBy, scrollIntoView, and an anchor's target (block start). The
+ * root's scroll-padding and the target's scroll-margin shape where it lands; allow_anim
+ * lets SRQ_SMOOTH (or SRQ_AUTO under root scroll-behavior: smooth) animate. Returns 1 when
+ * the page moved or started moving. */
+static int scroll_apply_request(browser_window *w, const srq_req *r, const dom_node_id *h,
+                                int allow_anim) {
+    if (r == NULL || r->kind == SRQ_NONE || w->doc == NULL || w->cairo_surface == NULL) return 0;
+    double content_top, content_h;
+    content_geometry(w, &content_top, &content_h);
+    double content_w = content_width(w);
+    cairo_t *cr = cairo_create(w->cairo_surface);
+    rc_layout Lown;
+    int owned = 0;
+    const rc_layout *L = hit_layout(cr, w, content_w, content_h, &Lown, &owned);
+    double top = 0.0, bottom = 0.0;
+    int located = 1;
+    if (r->kind == SRQ_ELEMENT) {
         jg_table g;
         jg_init(&g);
         geom_from_layout(w->doc, L, content_margin_x(w), page_gutter(w), content_w, &g);
-        if (anc_target_top(&g, a.handles, a.n, a.nsub, &top) == 0)
-            target = anc_scroll_for(top, fmax(0.0, L->total_h - content_h));
+        located = (h != NULL && anc_target_box(&g, h, r->n, r->nsub, &top, &bottom) == 0);
         jg_free(&g);
-        hit_layout_done(&Lown, owned);
-        cairo_destroy(cr);
     }
-    tab_anchor_free(&a);
-    if (target < 0.0) { redraw(w); return; }
-    if (animate && w->doc != NULL && w->doc->scroll_smooth) {
+    /* A scroll already in flight is where the page is going: scrollBy adds to its goal. */
+    srq_view v = {
+        .scroll = sms_active(&w->sscroll) ? sms_goal(&w->sscroll) : w->scroll,
+        .max_scroll = fmax(0.0, L->total_h - content_h),
+        .view_h = content_h,
+        .pad_top = w->doc->scroll_pad_top,
+        .pad_bottom = w->doc->scroll_pad_bottom,
+    };
+    hit_layout_done(&Lown, owned);
+    cairo_destroy(cr);
+    double target = 0.0;
+    if (!located || srq_target(r, &v, top, bottom, &target) != 0) return 0;
+    if (allow_anim && srq_smooth(r, w->doc->scroll_smooth)) {
         scroll_animate_to_ms(w, target, FC_SMOOTH_SCROLL_ANCHOR_MS);
-        return;
+        return 1;
     }
     sms_jump(&w->sscroll, target);
     w->scroll = target;
     redraw(w);
+    return 1;
+}
+
+/* Scrolls to the indicated part of the document for fragment (spec/anchor.md): the worker
+ * resolves it against the live DOM, the retained layout locates it. push_url (or NULL) is
+ * the same-document URL the caller just pushed, so a JS page records it and hears
+ * hashchange. animate honors the root's scroll-behavior. The reply's view (hashchange
+ * handlers, :target) is applied FIRST so the target is located on the restyled layout; a
+ * scroll the handlers themselves requested comes after the anchor's and wins, and a
+ * fragment navigation they started (the hash set again) supersedes this one. */
+static void scroll_to_fragment_ex(browser_window *w, const char *fragment, const char *push_url,
+                                  unsigned flags, int animate) {
+    if (w->tab_worker == NULL || w->doc == NULL || w->cairo_surface == NULL) return;
+    tab_anchor a;
+    tab_page page;
+    if (tab_anchor_query_ex(w->tab_worker, fragment, push_url, flags, &a, &page) != TAB_OK) return;
+    srq_req later = page.scroll;
+    dom_node_id *later_h = page.scroll_handles;
+    page.scroll_handles = NULL;
+    page.scroll.kind = SRQ_NONE;
+    unsigned serial = w->frag_nav_serial;
+    int navigated = (page.view != NULL || page.nav_url != NULL || page.nav_fragment != NULL)
+                  ? apply_click_result(w, &page) : 0;
+    tab_page_free(&page);
+    int moved = 0;
+    if (!navigated && serial == w->frag_nav_serial) {
+        if (a.kind == ANC_TOP) {
+            srq_req top = { .kind = SRQ_TO, .y = 0.0 };
+            moved = scroll_apply_request(w, &top, NULL, animate);
+        } else if (a.kind == ANC_ELEMENT) {
+            srq_req el = { .kind = SRQ_ELEMENT, .block = SRQ_START, .n = a.n, .nsub = a.nsub,
+                           .margin_top = a.margin_top, .margin_bottom = a.margin_bottom };
+            moved = scroll_apply_request(w, &el, a.handles, animate);
+        }
+        if (scroll_apply_request(w, &later, later_h, 1)) moved = 1;
+    }
+    free(later_h);
+    tab_anchor_free(&a);
+    if (!moved && !navigated) redraw(w);
+}
+
+static void scroll_to_fragment(browser_window *w, const char *fragment, const char *push_url,
+                               int animate) {
+    scroll_to_fragment_ex(w, fragment, push_url, 0u, animate);
 }
 
 /* The fragment of url (after the first '#', bounded), or NULL when it has none. */
@@ -17565,12 +17658,49 @@ static const char *url_fragment(const char *url) {
     return (h != NULL && strlen(h + 1) < ANC_MAX_FRAGMENT) ? h + 1 : NULL;
 }
 
+static void scroll_to_url_fragment_inner(browser_window *w);
+
 /* A loaded document whose URL carries a fragment opens at its indicated part
- * (HTML 7.4.6.4), instantly: the page has not been seen yet. */
+ * (HTML 7.4.6.4), instantly: the page has not been seen yet. A scroll the load scripts
+ * requested comes after it (it ran later than the parser saw the fragment's target). */
 static void scroll_to_url_fragment(browser_window *w) {
+    scroll_to_url_fragment_inner(w);
+    if (w->frag_pending || w->load_scroll.kind == SRQ_NONE) return;
+    srq_req r = w->load_scroll;
+    dom_node_id *h = w->load_scroll_h;
+    w->load_scroll.kind = SRQ_NONE;
+    w->load_scroll_h = NULL;
+    if (scroll_apply_request(w, &r, h, 0)) w->frag_hold[0] = '\0';
+    free(h);
+}
+
+static void scroll_to_url_fragment_inner(browser_window *w) {
     w->frag_pending = 0;
     w->frag_hold[0] = '\0';
     if (!w->configured || w->cairo_surface == NULL) { w->frag_pending = 1; return; }
+    if (w->load_js_frag_set) {   /* a load script set the hash: it wins, as a replace */
+        char f[ANC_MAX_FRAGMENT];
+        snprintf(f, sizeof f, "%s", w->load_js_frag);
+        w->load_js_frag_set = 0;
+        navigate_fragment_ex(w, f, 1);
+        return;
+    }
+    w->restore_hold = -1.0;
+    if (w->restore_pending) {   /* Back/Forward: the entry's own scroll beats its fragment */
+        w->restore_pending = 0;
+        if (w->restore_scroll > 0.0) {
+            double mx = scroll_max(w);
+            double sc = (w->restore_scroll < mx) ? w->restore_scroll : mx;
+            sms_jump(&w->sscroll, sc);
+            w->scroll = sc;
+            w->restore_hold = w->restore_scroll;
+            w->frag_hold_scroll = w->scroll;
+            w->frag_hold_h = w->content_total_h;
+            w->frag_hold_until = now_ms() + FC_ANCHOR_HOLD_MS;
+            redraw(w);
+            return;
+        }
+    }
     const char *f = url_fragment(browser_current_url(&w->bs));
     if (f == NULL || f[0] == '\0') return;
     scroll_to_fragment(w, f, NULL, 0);
@@ -17583,21 +17713,32 @@ static void scroll_to_url_fragment(browser_window *w) {
 /* Called after every frame: re-applies a held fragment when the document height moved
  * under it, drops the hold once the user scrolled or the window expired. */
 static void frag_hold_check(browser_window *w) {
-    if (w->frag_hold[0] == '\0') return;
+    if (w->frag_hold[0] == '\0' && w->restore_hold < 0.0) return;
     if (now_ms() > w->frag_hold_until || fabs(w->scroll - w->frag_hold_scroll) > 0.5) {
         w->frag_hold[0] = '\0';
+        w->restore_hold = -1.0;
         return;
     }
     if (w->content_total_h == w->frag_hold_h) return;
     w->frag_hold_h = w->content_total_h;          /* set first: the repaint below re-enters */
+    if (w->restore_hold >= 0.0) {                 /* a restored scroll: the page grew under it */
+        double mx = scroll_max(w);
+        double sc = (w->restore_hold < mx) ? w->restore_hold : mx;
+        sms_jump(&w->sscroll, sc);
+        w->scroll = sc;
+        w->frag_hold_scroll = w->scroll;
+        redraw(w);
+        return;
+    }
     scroll_to_fragment(w, w->frag_hold, NULL, 0);
     w->frag_hold_scroll = w->scroll;
 }
 
 /* Same-document fragment navigation (spec/anchor.md 3): the entry being left keeps its
  * scroll, a new entry is pushed unless the URL is the current one, and the page scrolls. */
-static void navigate_fragment(browser_window *w, const char *fragment) {
-    w->frag_hold[0] = '\0';   /* the user chose where to go */
+static void navigate_fragment_ex(browser_window *w, const char *fragment, int replace) {
+    w->frag_hold[0] = '\0';   /* the user (or the page) chose where to go */
+    w->frag_nav_serial++;
     const char *cur = browser_current_url(&w->bs);
     if (cur == NULL) return;
     char url[LN_MAX_TARGET];
@@ -17609,14 +17750,40 @@ static void navigate_fragment(browser_window *w, const char *fragment) {
     char hash[ANC_MAX_FRAGMENT + 2];
     const char *push = NULL;
     if (strcmp(url, cur) != 0) {
-        browser_set_entry_scroll(&w->bs, w->scroll);
-        if (browser_push_state(&w->bs, url) == BROWSER_OK) {
+        if (!replace) browser_set_entry_scroll(&w->bs, w->scroll);
+        browser_status st = replace ? browser_replace_state(&w->bs, url)
+                                    : browser_push_state(&w->bs, url);
+        if (st == BROWSER_OK) {
             set_page_url(w, url);
             snprintf(hash, sizeof hash, "#%s", fragment);
             push = hash;
         }
     }
-    scroll_to_fragment(w, fragment, push, 1);
+    scroll_to_fragment_ex(w, fragment, push, replace ? TAB_ANCHOR_REPLACE : 0u, 1);
+}
+
+static void navigate_fragment(browser_window *w, const char *fragment) {
+    navigate_fragment_ex(w, fragment, 0);
+}
+
+/* The fragment of a script's navigation when it is THIS document's (spec/anchor.md 3b): a
+ * bare reference ('#x', nav_url NULL), or a target whose URL without fragment is the
+ * current entry's or the page's own. NULL otherwise (another document: a real load). */
+static const char *js_same_doc_fragment(browser_window *w, const tab_page *p) {
+    if (p == NULL || p->nav_fragment == NULL) return NULL;
+    if (p->nav_url == NULL || p->nav_url[0] == '\0') return p->nav_fragment;
+    /* A local page's entry is its plain path while its location is file://: compare paths. */
+    const char *nu = p->nav_url;
+    if (strncmp(nu, "file://", 7) == 0) nu += 7;
+    size_t nb = strcspn(nu, "#");
+    const char *bases[2] = { browser_current_url(&w->bs), w->cur_top };
+    for (int i = 0; i < 2; ++i) {
+        const char *b = bases[i];
+        if (b != NULL && strncmp(b, "file://", 7) == 0) b += 7;
+        if (b != NULL && strcspn(b, "#") == nb && strncmp(b, nu, nb) == 0)
+            return p->nav_fragment;
+    }
+    return NULL;
 }
 
 /* Resolves a clicked link's raw href against the current page location through
@@ -17649,7 +17816,7 @@ static void follow_link(browser_window *w, const char *href) {
            ? snprintf(target, sizeof target, "%s#%s", res.target, res.fragment)
            : snprintf(target, sizeof target, "%s", res.target);
     if (tn < 0 || (size_t)tn >= sizeof target) snprintf(target, sizeof target, "%s", res.target);
-    if (browser_navigate(&w->bs, target) != BROWSER_OK) return;
+    if (gui_navigate(w, target) != BROWSER_OK) return;
     do_load(w, target);
 }
 
@@ -17826,7 +17993,8 @@ static void history_step(browser_window *w, int steps) {
             set_page_url(w, browser_current_url(&w->bs));
             int navigated = (ps == TAB_OK) ? apply_click_result(w, &page) : 0;
             tab_page_free(&page);
-            if (!navigated) {   /* spec/anchor.md 3: the entry's own scroll comes back */
+            if (!navigated) refresh_fragment_target(w);   /* :target follows (spec 3c) */
+            if (!navigated && w->tab_worker != NULL) {   /* spec/anchor.md 3: its own scroll */
                 double sc = browser_entry_scroll(&w->bs);
                 sms_jump(&w->sscroll, sc);
                 w->scroll = sc;
@@ -17836,7 +18004,33 @@ static void history_step(browser_window *w, int steps) {
         }
         tab_page_free(&page);
     }
+    w->restore_scroll = browser_entry_scroll(&w->bs);   /* spec/anchor.md 3d */
+    w->restore_pending = 1;
     load_current(w);
+}
+
+/* Re-points :target at the current entry's fragment after Back/Forward within a document
+ * (spec/anchor.md 3c): the worker answers with a re-derived view only when it changed. */
+static void refresh_fragment_target(browser_window *w) {
+    if (w->tab_worker == NULL || w->doc == NULL) return;
+    const char *f = url_fragment(browser_current_url(&w->bs));
+    tab_anchor a;
+    tab_page page;
+    if (tab_anchor_query(w->tab_worker, (f != NULL) ? f : "", NULL, &a, &page) == TAB_OK
+        && page.view != NULL) {
+        page.scroll.kind = SRQ_NONE;   /* the entry's saved scroll is what comes back */
+        (void)apply_click_result(w, &page);
+    }
+    tab_page_free(&page);
+    tab_anchor_free(&a);
+}
+
+/* Every new navigation from this window: the entry being left keeps its scroll (Back to it
+ * restores it, spec/anchor.md 3d), and a restoration still pending is dropped. */
+static browser_status gui_navigate(browser_window *w, const char *url) {
+    browser_set_entry_scroll(&w->bs, w->scroll);
+    w->restore_pending = 0;
+    return browser_navigate(&w->bs, url);
 }
 
 /* The caps a document of THIS page is rendered with: the user's toggles widened by the host's trust
@@ -17863,12 +18057,16 @@ static rdp_caps page_render_caps(const browser_window *w) {
 static void update_hover(browser_window *w);
 
 static int apply_click_result(browser_window *w, tab_page *page) {
-    if (page->nav_url != NULL && page->nav_url[0] != '\0') {
+    char js_frag[ANC_MAX_FRAGMENT];
+    const char *jf = js_same_doc_fragment(w, page);
+    int js_frag_set = (jf != NULL && snprintf(js_frag, sizeof js_frag, "%s", jf) >= 0);
+    int js_frag_replace = page->nav_replace;
+    if (!js_frag_set && page->nav_url != NULL && page->nav_url[0] != '\0') {
         if (w->js_nav_depth < JS_NAV_MAX) {
             char target[LN_MAX_TARGET];
             snprintf(target, sizeof target, "%s", page->nav_url);
             w->js_nav_depth++;
-            if (browser_navigate(&w->bs, target) == BROWSER_OK) do_load(w, target);
+            if (gui_navigate(w, target) == BROWSER_OK) do_load(w, target);
             return 1;
         }
         browser_set_status(&w->bs, "Stopped a JavaScript redirect loop.", now_ms());
@@ -17903,6 +18101,8 @@ static int apply_click_result(browser_window *w, tab_page *page) {
     apply_history_ops(w, page);
     collect_local_storage(w, page);
     ws_apply_ops(w, page);
+    /* window.scrollTo/scrollBy/scrollIntoView (spec/scroll_req.md), on the view just built. */
+    if (w->tab_worker != NULL) (void)scroll_apply_request(w, &page->scroll, page->scroll_handles, 1);
     /* window.open on a user gesture (trusted host, noopener): each target in a new
      * tab. Last, because tab_new parks this tab and switches the window to the new
      * one -- the caller must not touch the (now background) document afterwards. */
@@ -17915,6 +18115,14 @@ static int apply_click_result(browser_window *w, tab_page *page) {
         history_step(w, page->hist_go);
         w->hist_depth--;
         return 1;   /* history_step may have replaced the document */
+    }
+    /* location.hash= / href='#x' (spec/anchor.md 3b): a same-document fragment navigation,
+     * after the view the handler produced. A hashchange listener that sets the hash again
+     * re-enters here, bounded. */
+    if (js_frag_set && w->js_frag_depth < FC_JS_FRAGMENT_DEPTH) {
+        w->js_frag_depth++;
+        navigate_fragment_ex(w, js_frag, js_frag_replace);
+        w->js_frag_depth--;
     }
     return 0;
 }
@@ -18203,7 +18411,7 @@ static void deliver_fetch_result(browser_window *w, fetch_job *j) {
     if (j->is_post && sf_is_redirect_code(j->http_code) && j->location != NULL) {
         char next[SF_MAX_URL];
         if (sf_resolve_redirect(j->url, j->location, next, sizeof next) == SF_OK) {
-            if (browser_navigate(&w->bs, next) == BROWSER_OK) {
+            if (gui_navigate(w, next) == BROWSER_OK) {
                 /* The server sent us there, not the user: a POST answered with a
                  * redirect to a private address is refused like any other hop. */
                 w->nav_redirect_from = j->url;
@@ -18399,7 +18607,7 @@ static void submit_form(browser_window *w, const rd_block *rep) {
         return;
     }
     if (plan.kind == FM_NAVIGATE) {
-        if (browser_navigate(&w->bs, plan.url) == BROWSER_OK) do_load(w, plan.url);
+        if (gui_navigate(w, plan.url) == BROWSER_OK) do_load(w, plan.url);
         return;
     }
     if (plan.kind == FM_POST_REQUEST) {
@@ -20094,7 +20302,7 @@ static void go_omnibox(browser_window *w) {
     if (url_is_file(raw)) {
         const char *p = url_file_path(raw);
         if (p != NULL && access(p, R_OK) == 0) {
-            if (browser_navigate(&w->bs, p) == BROWSER_OK) load_current(w);
+            if (gui_navigate(w, p) == BROWSER_OK) load_current(w);
             return;
         }
     }
@@ -20102,14 +20310,14 @@ static void go_omnibox(browser_window *w) {
     /* A readable local path keeps the file-browsing capability (the start page is a
      * relative path), and must win over the host heuristic ("docs/index.html"). */
     if (!is_https_url(raw) && !is_overlay_http_url(raw) && access(raw, R_OK) == 0) {
-        if (browser_navigate(&w->bs, raw) == BROWSER_OK) load_current(w);
+        if (gui_navigate(w, raw) == BROWSER_OK) load_current(w);
         return;
     }
 
     char target[URL_MAX_LEN];
     url_omni_kind kind;
     if (url_omnibox(raw, &kind, target, sizeof target) == URL_OK &&
-        browser_navigate(&w->bs, target) == BROWSER_OK) {
+        gui_navigate(w, target) == BROWSER_OK) {
         do_load(w, target);
         return;
     }

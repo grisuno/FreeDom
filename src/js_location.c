@@ -71,8 +71,15 @@ JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValu
  * execute or resolve it. The trusted parent gates the raw string with ln_resolve. */
 static const char JD_LOCATION_SHIM[] =
     "(function(){"
-    "  var lp = __G.__locParts || {};"
-    "  function nav(u, replace){ __G.__navReq = String(u);"
+    "  var lp = __G.__locParts || {}, fragOld=null;"
+    /* A same-document fragment (spec/anchor.md 3b) moves location AT ONCE and travels
+     * absolute; the href it leaves is kept for the hashchange the parent will cause. */
+    "  function nav(u, replace){ u=String(u);"
+    "    if(u.indexOf('#')>=0){ var p=null; try{ p=dom.histTarget(lp.href||'',u); }catch(e){ p=null; }"
+    "      if(p&&String(p.href).split('#')[0]===String(lp.href||'').split('#')[0]){"
+    "        if(fragOld===null) fragOld=lp.href||''; lp=p; __G.__locParts=p;"
+    "        var hh=String(p.href), hx=hh.indexOf('#'); u=(hx>=0)?hh.slice(hx):'#'; } }"
+    "    __G.__navReq = u;"
     "    __G.__navReplace = !!replace; }"
     "  var loc = {"
     "    get href(){ return lp.href||''; }, set href(v){ nav(v,false); },"
@@ -83,6 +90,9 @@ static const char JD_LOCATION_SHIM[] =
     "    get pathname(){ return lp.pathname||'/'; },"
     "    get search(){ return lp.search||''; },"
     "    get hash(){ return lp.hash||''; },"
+    "    set hash(v){ var f=String(v); if(f.charAt(0)==='#') f=f.slice(1);"
+    "      if(f===String(lp.hash||'').replace(/^#/,'')) return;"
+    "      nav(String(lp.href||'').split('#')[0]+'#'+f,false); },"
     "    get origin(){ return lp.origin||''; },"
     "    assign: function(u){ nav(u,false); },"
     "    replace: function(u){ nav(u,true); },"
@@ -129,10 +139,10 @@ static const char JD_LOCATION_SHIM[] =
     "    return 1; };"
     /* A same-document fragment navigation the PARENT already pushed (spec/anchor.md):
      * mirror it as a new entry, move location and queue hashchange, no history op. */
-    "  __G.__histFrag=function(u){ var old=lp.href||'';"
-    "    var p=dom.histTarget(old,String(u)); if(!p) return 0;"
-    "    if(hi+1<HMAX){ H.splice(hi+1); H.push({url:p.href,state:null}); hi=H.length-1; }"
-    "    else H[hi]={url:p.href,state:null};"
+    "  __G.__histFrag=function(u,rep){ var old=(fragOld!==null)?fragOld:(lp.href||''); fragOld=null;"
+    "    var p=dom.histTarget(lp.href||'',String(u)); if(!p) return 0;"
+    "    if(!rep&&hi+1<HMAX){ H.splice(hi+1); H.push({url:p.href,state:null}); hi=H.length-1; }"
+    "    else H[hi]={url:p.href,state:H[hi].state};"
     "    lp=p; __G.__locParts=p; var nu=p.href;"
     "    if(old!==nu){ var he=__G.__mkEvent('hashchange',{}); he.oldURL=old; he.newURL=nu;"
     "      he.isTrusted=true; __G.dispatchEvent(he); }"
@@ -218,6 +228,38 @@ int jd_take_nav_request(js_context *ctx, char *buf, size_t bufsz, int *replace) 
     return present;
 }
 
+/* Takes and clears the page's pending scroll request (spec/scroll_req.md): the
+ * [kind, y, behavior, block, handle] array the js_dom shim recorded. Values are read as
+ * numbers (never as source); the parent validates every field. */
+static const char JD_TAKE_SCROLL[] =
+    "(typeof __takeScroll==='function')?__takeScroll():null";
+
+int jd_take_scroll(js_context *ctx, double out[JD_SCROLL_N]) {
+    if (out != NULL) for (unsigned i = 0; i < JD_SCROLL_N; ++i) out[i] = 0.0;
+    if (ctx == NULL || out == NULL) return 0;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return 0;
+    JSValue r = jn_host_eval(jsctx, JD_TAKE_SCROLL, sizeof JD_TAKE_SCROLL - 1, "<take-scroll>");
+    if (JS_IsException(r)) {
+        JS_FreeValue(jsctx, JS_GetException(jsctx));
+        return 0;
+    }
+    int present = JS_IsObject(r);
+    for (unsigned i = 0; present && i < JD_SCROLL_N; ++i) {
+        JSValue v = JS_GetPropertyUint32(jsctx, r, i);
+        double d = 0.0;
+        if (JS_IsException(v) || JS_ToFloat64(jsctx, &d, v) != 0) {
+            JS_FreeValue(jsctx, JS_GetException(jsctx));
+            present = 0;
+        }
+        JS_FreeValue(jsctx, v);
+        out[i] = d;
+    }
+    JS_FreeValue(jsctx, r);
+    if (!present) for (unsigned i = 0; i < JD_SCROLL_N; ++i) out[i] = 0.0;
+    return present;
+}
+
 /* Serialises and clears globalThis.__histOps (["P"|"R", url] pairs) into
  * "K url\n" lines, and reads/clears __histGo. Runs as page-independent source: the
  * URLs are read as values, never interpolated. */
@@ -258,7 +300,7 @@ char *jd_take_history(js_context *ctx, int *go) {
     return out;
 }
 
-int jd_frag_push(js_context *ctx, const char *url) {
+int jd_frag_push(js_context *ctx, const char *url, int replace) {
     if (ctx == NULL || url == NULL) return 0;
     JSContext *jsctx = (JSContext *)js_context_raw(ctx);
     if (jsctx == NULL) return 0;
@@ -267,9 +309,10 @@ int jd_frag_push(js_context *ctx, const char *url) {
     JSValue fn = JS_GetPropertyStr(jsctx, global, "__histFrag");
     int32_t v = 0;
     if (JS_IsFunction(jsctx, fn)) {
-        JSValue arg = JS_NewString(jsctx, url);   /* data, never source text */
+        JSValue args[2] = { JS_NewString(jsctx, url), JS_NewBool(jsctx, replace ? 1 : 0) };
+        JSValue arg = args[0];   /* data, never source text */
         if (!JS_IsException(arg)) {
-            JSValue r = JS_Call(jsctx, fn, global, 1, &arg);
+            JSValue r = JS_Call(jsctx, fn, global, 2, args);
             if (JS_IsException(r)) JS_FreeValue(jsctx, JS_GetException(jsctx));
             else if (JS_ToInt32(jsctx, &v, r) != 0) v = 0;
             JS_FreeValue(jsctx, r);

@@ -57,6 +57,12 @@ size_t anc_collect(const dom_index *idx, dom_node_id target, dom_node_id *out, s
 int anc_target_top(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
                    double *top);
 
+/* As anc_target_top, plus the target's bottom: the largest y + h among the subtree's rects
+ * (= *top when the position came from a following element: an empty target is a point).
+ * 0 and both outputs; -1 (outputs untouched) when nothing painted or on NULL. */
+int anc_target_box(const jg_table *g, const dom_node_id *h, size_t n, size_t nsub,
+                   double *top, double *bottom);
+
 /* The scroll offset that puts top at the top of the viewport, clamped to
  * [0, max_scroll]. Non-finite arguments or max_scroll < 0 => 0. */
 double anc_scroll_for(double top, double max_scroll);

@@ -1,6 +1,6 @@
 # anchor (`anc_`) — navegar a un fragmento (`#id`) y `scroll-behavior`
 
-> Estado: cerrado (2026-11-23, tanda 103). Módulo puro `anchor` (`anc_`), sin I/O ni estado global.
+> Estado: cerrado (2026-11-23, tandas 103–104). Módulo puro `anchor` (`anc_`), sin I/O ni estado global.
 > Consumidores: `src/tab.c` (worker, `OP_ANCHOR`), `gui/browser_ui.c` (ventana).
 
 ## 1. Por qué
@@ -60,6 +60,50 @@ nada que animar.
   página local es la ruta llana, su `location` es `file://`. Atrás/Adelante re-resuelven la URL
   absoluta guardada (`url_history_target` acepta la del mismo archivo).
 
+## 3b. Fragmento pedido por un script (tanda 104)
+
+`location.hash = "x"`, `location.href = "#x"`, `location.assign(".../misma-página#x")` y
+`location.replace("#x")` son navegaciones de MISMO documento (HTML §7.4.2.3.3 *navigate to a
+fragment*), nunca una recarga:
+
+- **Worker** (shim de `location`): si la URL pedida tiene `#` y su parte sin fragmento es la del
+  documento, `location` cambia EN EL ACTO (un `location.hash` leído justo después ya es el nuevo),
+  se recuerda el `href` anterior para el `hashchange` y la petición viaja RELATIVA (`#x`): así
+  `ln_resolve` la clasifica `LN_SAME_DOCUMENT` también en una página local (`file://`) o tras un
+  `pushState`, sin depender de que el padre conozca la URL actual del documento. El setter de
+  `hash` quita el `#` inicial y, si el fragmento es el actual, no hace nada (WHATWG `hash` setter).
+- **Padre** (`gate_js_nav`, Zero Trust): `ln_resolve` sigue siendo el único juez. Una petición con
+  `#` produce `tab_page.nav_fragment` (el fragmento, dato); si además es `LN_NAVIGATE`, `nav_url`
+  lleva el fragmento (`target#frag`) para que la carga de OTRO documento abra en su ancla.
+- **Ventana**: el fragmento es de este documento si `nav_url` es NULL (referencia `#x`) o su URL
+  sin fragmento es la de la entrada actual o la de la página (`cur_top`). Entonces se aplica la
+  vista que trajo la respuesta y se llama a `navigate_fragment` (entrada nueva, o *replace* con
+  `location.replace` y durante la carga —el documento aún no está *completely loaded*—), que le
+  pide al worker resolver/ubicar el destino y despachar `hashchange` con el `oldURL` recordado.
+  Un oyente de `hashchange` que vuelve a cambiar el hash re-entra acotado por
+  `FC_JS_FRAGMENT_DEPTH`; más allá se ignora (igual que `JS_NAV_MAX` para redirecciones).
+- Lo que no es mismo documento (otra ruta, otro host) sigue por `do_load` con TODA la política.
+
+## 3c. `:target` (tanda 104)
+
+Tras resolver un fragmento (clic, script, carga con `#x`, Atrás/Adelante entre fragmentos) el
+worker fija el destino del documento (`cch_set_target`: el puntero vive en el `user` del
+`lxb_dom_document_t`, por documento, sin estado global) y `fill_css_node` le pone el bit
+`CSEL_STATE_TARGET`: `:target` es un pseudo de ESTADO más, como `:hover`. Si el destino cambió,
+la respuesta a `OP_ANCHOR` trae la vista re-derivada también para una página SIN JS. `ANC_TOP` y
+`ANC_NONE` dejan el documento sin destino (`:target` no coincide con nada), como Firefox. Un
+elemento quitado del árbol solo se compara por puntero (los mutadores DETACHAN, nunca liberan).
+
+## 3d. Volver a OTRO documento (tanda 104)
+
+Toda navegación nueva desde la ventana (`gui_navigate`: enlace, omnibox, formulario, redirección
+de JS) guarda en la entrada que se deja su scroll (`browser_set_entry_scroll`). Atrás/Adelante a
+una entrada de otro documento recarga y, cuando el documento llega, restaura ese scroll acotado
+al máximo (`restore_pending`), por encima de su fragmento (como Firefox), y lo **sostiene** igual
+que un fragmento (§3, `FC_ANCHOR_HOLD_MS`) mientras el alto crece y el usuario no se mueva. Una
+navegación nueva descarta la restauración pendiente. El scroll vive solo en RAM, en la entrada
+del historial (Zero Knowledge: nada a disco).
+
 ## 4. API (C)
 
 ```c
@@ -115,8 +159,5 @@ double   anc_scroll_for(double top, double max_scroll);
 
 ## 8. Fuera de alcance (abierto)
 
-`scrollIntoView()`/`window.scrollTo()`/`scrollBy()` del JS (hoy no-ops: requieren un canal
-worker→padre de petición de scroll), `scroll-padding`/`scroll-margin` (cabeceras fijas que tapan
-el destino), contenedores `overflow:auto` internos que contienen el destino, `:target` en la
-cascada tras navegar, `location.hash = …` desde un script (hoy recarga la página), restaurar el scroll al volver
-Atrás a OTRO documento (se recarga y, si su URL tiene fragmento, va al ancla).
+Contenedores `overflow:auto` internos que contienen el destino; `:target-within`; `scroll-snap-*`.
+`scrollIntoView`/`scrollTo` y `scroll-margin`/`scroll-padding` viven en `spec/scroll_req.md`.

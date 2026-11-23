@@ -1,0 +1,26 @@
+Scroll and anchors
+=== Freedom layout ===
+content_w=1000 total_h=3744.0 nbox=15 nrow=8 npositioned=0
+  row[0] top=0.0 h=27.0 x_off=0.0 w=1000.0
+  row[1] top=85.0 h=23.0 x_off=16.0 w=968.0
+  row[2] top=1021.9 h=34.0 x_off=16.0 w=968.0
+  row[3] top=1075.8 h=23.0 x_off=16.0 w=968.0
+  row[4] top=1938.9 h=34.0 x_off=16.0 w=968.0
+  row[5] top=1992.8 h=23.0 x_off=16.0 w=968.0
+  row[6] top=2855.9 h=34.0 x_off=16.0 w=968.0
+  row[7] top=2909.8 h=23.0 x_off=16.0 w=968.0
+  box[0] bid=0 x=0.0 top=0.0 w=1000.0 h=60.0
+  box[1] bid=1 x=0.0 top=2.0 w=18.0 h=23.0
+  box[2] bid=2 x=33.9 top=2.0 w=18.0 h=23.0
+  box[3] bid=3 x=67.9 top=2.0 w=18.0 h=23.0
+  box[4] bid=4 x=106.0 top=0.0 w=62.0 h=27.0
+  box[5] bid=5 x=167.6 top=0.0 w=35.0 h=27.0
+  box[6] bid=6 x=202.6 top=0.0 w=56.0 h=27.0
+  box[7] bid=7 x=258.5 top=0.0 w=59.0 h=27.0
+  box[8] bid=9 x=0.0 top=76.0 w=1000.0 h=917.0
+  box[9] bid=8 x=16.0 top=85.0 w=29.0 h=23.0
+  box[10] bid=10 x=68.6 top=85.0 w=28.0 h=23.0
+  box[11] bid=11 x=120.7 top=85.0 w=40.0 h=23.0
+  box[12] bid=12 x=0.0 top=993.0 w=1000.0 h=917.0
+  box[13] bid=13 x=0.0 top=1910.0 w=1000.0 h=917.0
+  box[14] bid=14 x=0.0 top=2827.0 w=1000.0 h=917.0

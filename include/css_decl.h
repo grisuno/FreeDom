@@ -236,6 +236,8 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
         /* Query containers (spec/css_mq.md, tanda 90; APPENDED): the type is a CMQ_CT_*,
          * each name its cmq_name_hash carried as an int (0 = none). */
         P_CONTAINER_TYPE, P_CONTAINER_NAME0, P_CONTAINER_NAME1,
+        /* scroll-margin-top/bottom, scroll-padding-top/bottom: px (spec/scroll_req.md), APPENDED. */
+        P_SCROLL_MT, P_SCROLL_MB, P_SCROLL_PT, P_SCROLL_PB,
         P_NSLOTS };
 
 typedef struct css_decl {

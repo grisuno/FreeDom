@@ -4969,6 +4969,42 @@ static void test_inline_text_underline_offset(void **state) {
                      CSS_LEN_UNSET);
 }
 
+/* scroll-margin / scroll-padding (Scroll Snap 1 4.1, spec/scroll_req.md 3): only the block
+ * sides travel; the shorthands expand like margin/padding; padding is non-negative, `auto`
+ * is its initial value, a percentage is a drop (no scrollport in the cascade). */
+static void test_inline_scroll_margin_padding(void **state) {
+    (void)state;
+    css_style s = css_parse_inline("color:red", 0);
+    assert_int_equal(s.scroll_margin_top, CSS_LEN_UNSET);
+    assert_int_equal(s.scroll_pad_top, CSS_LEN_UNSET);
+    s = css_parse_inline("scroll-margin-top:16px;scroll-margin-bottom:-4px", 0);
+    assert_int_equal(s.scroll_margin_top, 16);
+    assert_int_equal(s.scroll_margin_bottom, -4);
+    s = css_parse_inline("scroll-margin:10px 3px 20px", 0);
+    assert_int_equal(s.scroll_margin_top, 10);
+    assert_int_equal(s.scroll_margin_bottom, 20);
+    s = css_parse_inline("scroll-margin:7px", 0);
+    assert_int_equal(s.scroll_margin_top, 7);
+    assert_int_equal(s.scroll_margin_bottom, 7);
+    s = css_parse_inline("scroll-margin-block:1px 2px", 0);
+    assert_int_equal(s.scroll_margin_top, 1);
+    assert_int_equal(s.scroll_margin_bottom, 2);
+    s = css_parse_inline("scroll-margin-top:1em", 0);
+    assert_int_equal(s.scroll_margin_top, 16);
+    s = css_parse_inline("scroll-padding-top:80px;scroll-padding-bottom:auto", 0);
+    assert_int_equal(s.scroll_pad_top, 80);
+    assert_int_equal(s.scroll_pad_bottom, CSS_LEN_UNSET);
+    s = css_parse_inline("scroll-padding:5px 0", 0);
+    assert_int_equal(s.scroll_pad_top, 5);
+    assert_int_equal(s.scroll_pad_bottom, 5);
+    s = css_parse_inline("scroll-padding-block-start:calc(60px + 1rem)", 0);
+    assert_int_equal(s.scroll_pad_top, 76);
+    s = css_parse_inline("scroll-padding-top:-5px", 0);
+    assert_int_equal(s.scroll_pad_top, CSS_LEN_UNSET);
+    s = css_parse_inline("scroll-padding-top:10%", 0);
+    assert_int_equal(s.scroll_pad_top, CSS_LEN_UNSET);
+}
+
 /* object-position (CSS Images 3 5.4): keywords and percentages, one or two values,
  * either axis order; packed as ((x_pm+1)<<16)|(y_pm+1), 0 = not declared. */
 static void test_inline_object_position(void **state) {
@@ -6318,6 +6354,7 @@ int main(void) {
         cmocka_unit_test(test_inline_object_fit),
         cmocka_unit_test(test_inline_object_position),
         cmocka_unit_test(test_inline_text_underline_offset),
+        cmocka_unit_test(test_inline_scroll_margin_padding),
         cmocka_unit_test(test_inline_list_style_pos),
         cmocka_unit_test(test_inline_font_kerning),
         cmocka_unit_test(test_inline_text_rendering),

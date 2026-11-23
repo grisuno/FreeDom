@@ -665,6 +665,10 @@ typedef struct css_style {
     int         text_decoration_color; /* 0xRRGGBB or -1 (unset) */
     int         text_decoration_style; /* css_text_decoration_style, 0 (unset) */
     int         text_underline_offset;     /* px, CSS_LEN_AUTO = auto, CSS_LEN_UNSET = not declared */
+    /* scroll-margin-top/bottom and scroll-padding-top/bottom (block axis only), px;
+     * CSS_LEN_UNSET = not declared (0 at use). spec/scroll_req.md. */
+    int         scroll_margin_top, scroll_margin_bottom;
+    int         scroll_pad_top, scroll_pad_bottom;
     int         text_decoration_thickness; /* px for underline/strike/overline line width,
                                               or -1 unset, or 0 for from-font */
     int         bold;        /* 1, 0, or -1 (unset) */

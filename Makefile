@@ -128,9 +128,9 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
                $(BUILD_DIR)/test_css_counter $(BUILD_DIR)/test_sheet_cache \
                $(BUILD_DIR)/test_net_guard $(BUILD_DIR)/test_chrome_layout $(BUILD_DIR)/test_site_panel $(BUILD_DIR)/test_link_preview $(BUILD_DIR)/test_doc_title $(BUILD_DIR)/test_smooth_scroll $(BUILD_DIR)/test_group_index $(BUILD_DIR)/test_nav_token \
                $(BUILD_DIR)/test_mask_cache $(BUILD_DIR)/test_exact_key \
-               $(BUILD_DIR)/test_find_text $(BUILD_DIR)/test_anchor $(BUILD_DIR)/test_video_pick $(BUILD_DIR)/test_video_controls
+               $(BUILD_DIR)/test_find_text $(BUILD_DIR)/test_anchor $(BUILD_DIR)/test_scroll_req $(BUILD_DIR)/test_video_pick $(BUILD_DIR)/test_video_controls
 
-.PHONY: asan-run gscroll ghover fuzz-anc fuzz-gifuzz-ss fuzz-dt fuzz-bt fuzz-vcl fuzz-hls fuzz-nt fuzz-sp fuzz-lp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: asan-run gscroll ghover fuzz-anc fuzz-srq fuzz-gi fuzz-ss fuzz-dt fuzz-bt fuzz-vcl fuzz-hls fuzz-nt fuzz-sp fuzz-lp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -496,6 +496,10 @@ $(BUILD_DIR)/test_nav_token: $(TEST_DIR)/test_nav_token.c $(BUILD_DIR)/nav_token
 $(BUILD_DIR)/test_doc_title: $(TEST_DIR)/test_doc_title.c $(BUILD_DIR)/doc_title.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS)
 
+# Script scroll requests + scroll-margin/padding (spec/scroll_req.md). Pure, no deps.
+$(BUILD_DIR)/test_scroll_req: $(TEST_DIR)/test_scroll_req.c $(BUILD_DIR)/scroll_req.o | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
+
 # Animated page scroll arithmetic (spec/smooth_scroll.md). Pure, no deps.
 $(BUILD_DIR)/test_smooth_scroll: $(TEST_DIR)/test_smooth_scroll.c $(BUILD_DIR)/smooth_scroll.o | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(CMOCKA_LIBS) -lm
@@ -687,7 +691,7 @@ $(BUILD_DIR)/test_disk_store: $(TEST_DIR)/test_disk_store.c $(BUILD_DIR)/disk_st
 
 # Long-lived per-tab worker: links the whole hostile-content pipeline that runs
 # inside the confined child (parse + DOM + JS sandbox + bindings) plus os_sandbox.
-$(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/anchor.o $(BUILD_DIR)/css_import.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/anchor.o $(BUILD_DIR)/scroll_req.o $(BUILD_DIR)/css_import.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
@@ -702,7 +706,7 @@ $(BUILD_DIR)/test_tab: $(TEST_DIR)/test_tab.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/an
 	$(CC) $(CFLAGS) $(CMOCKA_CFLAGS) $^ -o $@ $(LDFLAGS) $(JS_LIBS) $(HP_LIBS) $(IMG_LIBS) $(CAIRO_LIBS) $(CMOCKA_LIBS)
 
 # Trusted-parent iframe host over real confined workers.
-$(BUILD_DIR)/test_frame_host: $(TEST_DIR)/test_frame_host.c $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/tab.o $(BUILD_DIR)/anchor.o $(BUILD_DIR)/css_import.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/test_frame_host: $(TEST_DIR)/test_frame_host.c $(BUILD_DIR)/frame_host.o $(BUILD_DIR)/frame_broker.o $(BUILD_DIR)/tab.o $(BUILD_DIR)/anchor.o $(BUILD_DIR)/scroll_req.o $(BUILD_DIR)/css_import.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                        $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                        $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                        $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
@@ -726,7 +730,7 @@ FREEDOM_GUI_OBJ = $(GUI_DIR)/browser_ui.c \
                   $(BUILD_DIR)/xdg-shell-protocol.c \
                   $(BUILD_DIR)/xdg-decoration-protocol.c
 
-$(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/anchor.o $(BUILD_DIR)/css_import.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
+$(BUILD_DIR)/freedom: $(SRC_DIR)/freedom.c $(BUILD_DIR)/tab.o $(BUILD_DIR)/anchor.o $(BUILD_DIR)/scroll_req.o $(BUILD_DIR)/css_import.o $(BUILD_DIR)/subreq_batch.o $(BUILD_DIR)/identity.o $(BUILD_DIR)/css_computed.o \
                       $(BUILD_DIR)/os_sandbox.o $(BUILD_DIR)/html_parse.o \
                       $(BUILD_DIR)/dom.o $(BUILD_DIR)/js_sandbox.o \
                       $(BUILD_DIR)/js_dom.o $(BUILD_DIR)/js_dom_ext.o $(BUILD_DIR)/js_custom_elements.o $(BUILD_DIR)/js_native.o $(BUILD_DIR)/js_intl.o $(BUILD_DIR)/js_fetch.o $(BUILD_DIR)/js_events.o $(BUILD_DIR)/js_embed.o $(BUILD_DIR)/js_location.o $(BUILD_DIR)/js_trusted.o $(BUILD_DIR)/js_geom.o $(BUILD_DIR)/web_storage.o $(BUILD_DIR)/import_map.o $(BUILD_DIR)/js_env.o $(BUILD_DIR)/sha2.o \
@@ -1156,6 +1160,13 @@ fuzz-ss: | $(BUILD_DIR)
 
 # Parked-document title (spec/doc_title.md): output always valid bounded UTF-8 with no
 # controls or bidi overrides, never read past len.
+# Script scroll requests (spec/scroll_req.md): a hostile record either decodes to a
+# fully in-range request or is refused; srq_target is always finite and in [0, max].
+fuzz-srq: | $(BUILD_DIR)
+	clang $(STD) -g -O1 -Iinclude -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+	  $(FUZZ_DIR)/fuzz_scroll_req.c $(SRC_DIR)/scroll_req.c -o $(BUILD_DIR)/fuzz_scroll_req -lm
+	./$(BUILD_DIR)/fuzz_scroll_req -max_total_time=$(or $(FUZZ_SECS),60) -rss_limit_mb=2048
+
 # Indicated part (spec/anchor.md): hostile document x hostile fragment, plus the
 # file:// location split. FUZZ_SECS overrides the 60 s budget.
 fuzz-anc: | $(BUILD_DIR)

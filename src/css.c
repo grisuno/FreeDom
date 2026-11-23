@@ -3961,6 +3961,50 @@ static int is_inert_prop(const char *prop) {
     return 0;
 }
 
+/* One scroll-margin/-padding side (spec/scroll_req.md 3). Padding is non-negative and its
+ * `auto` is the initial value (it claims the slot, like any CSS-wide keyword). */
+static int emit_scroll_side(css_decl *dst, int cap, int slot, const char *v, int padding) {
+    if (padding && csel_ci_eq(v, "auto")) v = "initial";
+    return emit_len(dst, cap, slot, v, 0, padding ? 0 : 1);
+}
+
+/* scroll-margin[-top|-bottom|-block[-start|-end]] and the scroll-padding twins. Only the
+ * block axis matters to a vertical scroll; the inline sides return 0 (the caller marks them
+ * inert). The 1-4 value shorthand follows margin's (top, right, bottom, left) rule. All
+ * sides must parse or nothing is written (a shorthand is atomic). */
+static int expand_scroll_box(const char *prop, const char *val, css_decl *dst, int cap) {
+    int padding = (prop[7] == 'p');
+    const char *side = prop + (padding ? 14 : 13);
+    int st = padding ? P_SCROLL_PT : P_SCROLL_MT, sb = padding ? P_SCROLL_PB : P_SCROLL_MB;
+    if (strcmp(side, "-top") == 0 || strcmp(side, "-block-start") == 0)
+        return emit_scroll_side(dst, cap, st, val, padding);
+    if (strcmp(side, "-bottom") == 0 || strcmp(side, "-block-end") == 0)
+        return emit_scroll_side(dst, cap, sb, val, padding);
+    if (strcmp(side, "") != 0 && strcmp(side, "-block") != 0) return 0;
+    char tok[4][CSS_TOK_MAX];
+    int nt = 0;
+    const char *p = val;
+    while (nt < 4 && next_ws_token(&p, tok[nt], sizeof tok[nt])) ++nt;
+    while (*p == ' ' || *p == '\t') ++p;
+    int block = (side[0] != '\0');
+    if (nt == 0 || *p != '\0' || (block && nt > 2)) return 0;
+    const char *top = tok[0];
+    const char *bottom = block ? tok[nt == 2 ? 1 : 0] : tok[nt >= 3 ? 2 : 0];
+    if (cap < 2) return 0;
+    int a = emit_scroll_side(dst, cap, st, top, padding);
+    if (a <= 0) return 0;
+    int b = emit_scroll_side(dst + a, cap - a, sb, bottom, padding);
+    if (b <= 0) return 0;
+    if (!block) {   /* the inline sides must still be valid for the declaration to be */
+        css_decl scratch[2];
+        for (int i = 1; i < nt; ++i) {
+            if (i == 2) continue;
+            if (emit_scroll_side(scratch, 2, st, tok[i], padding) <= 0) return 0;
+        }
+    }
+    return a + b;
+}
+
 static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *dst, int cap,
                            char (*urltab)[CSS_URL_MAX], size_t *nurl, size_t urlcap,
                            char (*contenttab)[CSS_URL_MAX], size_t *ncontent, size_t contentcap,
@@ -4652,6 +4696,13 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
     }
     else if (strcmp(prop, "text-underline-offset") == 0)
         return emit_len(dst, cap, P_TEXT_UL_OFFSET, val, CB_AUTO_VALUE, 1);
+    else if (strncmp(prop, "scroll-margin", 13) == 0 || strncmp(prop, "scroll-padding", 14) == 0) {
+        int n = expand_scroll_box(prop, val, dst, cap);
+        if (n != 0 || !is_inert_prop(prop) || val[0] == '\0' || cap <= 0) return n;
+        memset(&dst[0], 0, sizeof dst[0]);   /* inline axis: valid, no block-axis effect */
+        dst[0].prop = P_INERT;
+        return 1;
+    }
     else if (strcmp(prop, "counter-reset") == 0 || strcmp(prop, "counter-increment") == 0)
         return expand_counter_decls(prop, val, dst, cap, contenttab, ncontent, contentcap);
     else if (strcmp(prop, "content") == 0)                return expand_content(val, dst, cap, contenttab, ncontent, contentcap);
@@ -6498,6 +6549,10 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_BACKFACE_VISIBILITY: o->backface_visibility = d->ival; break;
             case P_TEXTDECO_THICKNESS:  o->text_decoration_thickness = d->ival; break;
             case P_TEXT_UL_OFFSET:      o->text_underline_offset = d->ival; break;
+            case P_SCROLL_MT:           o->scroll_margin_top = d->ival; break;
+            case P_SCROLL_MB:           o->scroll_margin_bottom = d->ival; break;
+            case P_SCROLL_PT:           o->scroll_pad_top = d->ival; break;
+            case P_SCROLL_PB:           o->scroll_pad_bottom = d->ival; break;
             case P_ASPECT_NUM:          o->aspect_num = d->ival; break;
             case P_ASPECT_DEN:          o->aspect_den = d->ival; break;
             case P_ANIM_DURATION:       o->anim_duration_ms = d->ival; break;
@@ -6977,6 +7032,8 @@ static css_style resolve_core(const css_sheet *sheet, const css_element *el,
         .touch_action = CSS_TA_UNSET, .overscroll_behavior = CSS_OS_UNSET,
         .backface_visibility = CSS_BF_UNSET,
         .text_decoration_thickness = -1, .text_underline_offset = CSS_LEN_UNSET,
+        .scroll_margin_top = CSS_LEN_UNSET, .scroll_margin_bottom = CSS_LEN_UNSET,
+        .scroll_pad_top = CSS_LEN_UNSET, .scroll_pad_bottom = CSS_LEN_UNSET,
         .aspect_num = 0, .aspect_den = 0,
         .bg_grad_n = 0, .bg_grad_angle = 180, .bg_grad_radial = 0,
         .bg_rad_size = 0, .bg_rad_cx = 500, .bg_rad_cy = 500,

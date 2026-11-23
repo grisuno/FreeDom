@@ -15,6 +15,8 @@
 
 #include "tab.h"
 #include "anchor.h"
+#include "scroll_req.h"
+#include "css_chain.h"
 #include "css_gradient.h"
 #include "flex_layout.h"
 
@@ -118,6 +120,7 @@ static int tab_read_full(int fd, void *buf, size_t n) {
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -262,6 +265,7 @@ typedef struct child_state {
      * is one: a lazy tick whose tree still has that count sends no view (spec/tab.md). */
     uint64_t        view_gen;
     int             view_gen_ok;
+    int             static_rederive; /* one mutation reply may rebuild a no-JS page (:target) */
     /* Query containers of the last derived view and the widths it evaluated with
      * (spec/css_mq.md). cq_gen/cq_rederives bound the re-derivations a geometry
      * table may trigger per DOM generation. */
@@ -411,6 +415,26 @@ static uint64_t computed_signature(const dom_index *idx) {
     return h;
 }
 
+/* Element h's style from the page's CURRENT cascade (spec/js_computed_style.md). The
+ * retained sheet is a snapshot, so it is rebuilt when its inputs changed (a script added a
+ * <style>, flipped a root theme class). 0 on success, -1 when any piece is missing. */
+static int child_computed_style(child_state *cs, dom_node_id h, css_style *st,
+                                double *font_px, int *inherited) {
+    if (cs->doc == NULL || cs->idx == NULL) return -1;
+    uint64_t sig = computed_signature(cs->idx);
+    if (cs->computed == NULL || sig != cs->computed_sig) {
+        pv_computed_free(cs->computed);
+        cs->computed = pv_computed_new_cached(cs->doc, cs->last_prefers_dark, cs->extern_css,
+                                              cs->extern_css_len, cs->last_viewport_w,
+                                              child_sheets(cs));
+        cs->computed_sig = sig;
+    }
+    const void *native = dom_native_node(cs->idx, h);
+    if (cs->computed == NULL || native == NULL
+        || pv_computed_get(cs->computed, native, st, font_px, inherited) != 0) return -1;
+    return 0;
+}
+
 /* jd_computed_fn: the computed value of `prop` for element h from the page's CURRENT
  * cascade (spec/js_computed_style.md). The retained sheet is a snapshot, so it is
  * rebuilt when its inputs changed (a script added a <style>, flipped a root theme class).
@@ -433,21 +457,10 @@ static int child_computed(void *ctx, dom_node_id h, const char *prop, char *out,
         }
         return (int)n;
     }
-    if (cs->doc == NULL || cs->idx == NULL) return 0;
-    uint64_t sig = computed_signature(cs->idx);
-    if (cs->computed == NULL || sig != cs->computed_sig) {
-        pv_computed_free(cs->computed);
-        cs->computed = pv_computed_new_cached(cs->doc, cs->last_prefers_dark, cs->extern_css,
-                                              cs->extern_css_len, cs->last_viewport_w,
-                                              child_sheets(cs));
-        cs->computed_sig = sig;
-    }
-    const void *native = dom_native_node(cs->idx, h);
     css_style st;
     double font_px = 0.0;
     int inherited = -1;
-    if (cs->computed == NULL || native == NULL
-        || pv_computed_get(cs->computed, native, &st, &font_px, &inherited) != 0) return 0;
+    if (child_computed_style(cs, h, &st, &font_px, &inherited) != 0) return 0;
     size_t tl = 0;
     const char *tag = dom_tag_name(cs->idx, h, &tl);
     char tagbuf[32];
@@ -1264,12 +1277,13 @@ static int write_view_raw(int wfd, const pv_view *v) {
      * are pv_view-level fields (not per-run or per-box). Written after the box
      * tree; read_view reads them in the same order. */
     {
-        int32_t view_hdr[9] = {
+        int32_t view_hdr[11] = {
             (int32_t)v->canvas_bg, (int32_t)v->html_max_width,
             (int32_t)v->html_margin_top, (int32_t)v->html_center,
             (int32_t)v->root_m[0], (int32_t)v->root_m[1],
             (int32_t)v->root_m[2], (int32_t)v->root_m[3],
             (int32_t)v->scroll_smooth,
+            (int32_t)v->scroll_pad_top, (int32_t)v->scroll_pad_bottom,
         };
         if (write_full(wfd, view_hdr, sizeof view_hdr) != 0) return -1;
     }
@@ -1478,6 +1492,63 @@ static int write_history(int wfd, child_state *cs) {
            && (n == 0 || write_full(wfd, ops, n) == 0)
            && write_full(wfd, &g, sizeof g) == 0) ? 0 : -1;
     free(ops);
+    return rc;
+}
+
+/* The target's computed scroll-margin-top/bottom in px (spec/scroll_req.md 3), 0 when the
+ * cascade cannot answer (fail-safe: no margin is the CSS initial value). */
+static void child_scroll_margins(child_state *cs, dom_node_id h, double *top, double *bottom) {
+    *top = 0.0;
+    *bottom = 0.0;
+    css_style st;
+    double font_px = 0.0;
+    int inherited = -1;
+    if (child_computed_style(cs, h, &st, &font_px, &inherited) != 0) return;
+    if (st.scroll_margin_top != CSS_LEN_UNSET && st.scroll_margin_top != CSS_LEN_AUTO)
+        *top = (double)st.scroll_margin_top;
+    if (st.scroll_margin_bottom != CSS_LEN_UNSET && st.scroll_margin_bottom != CSS_LEN_AUTO)
+        *bottom = (double)st.scroll_margin_bottom;
+}
+
+/* The page's pending scroll request (spec/scroll_req.md): [SRQ_WIRE_N x int32] then, for
+ * SRQ_ELEMENT, the target's anc_collect handles. The JS values are page data: anything out
+ * of range is dropped here, and the parent re-checks the record anyway (srq_decode). */
+static int write_scroll(int wfd, child_state *cs) {
+    double q[JD_SCROLL_N];
+    srq_req r;
+    memset(&r, 0, sizeof r);
+    int32_t *hv = NULL;
+    if (cs->js != NULL && jd_take_scroll(cs->js, q) && isfinite(q[0])) {
+        int kind = (int)q[0];
+        int beh = (isfinite(q[2]) && q[2] >= SRQ_AUTO && q[2] <= SRQ_SMOOTH) ? (int)q[2] : SRQ_AUTO;
+        int blk = (isfinite(q[3]) && q[3] >= SRQ_START && q[3] <= SRQ_NEAREST) ? (int)q[3] : SRQ_START;
+        if ((kind == SRQ_TO || kind == SRQ_BY) && !isnan(q[1])) {
+            r.kind = kind;
+            r.behavior = beh;
+            r.y = q[1];
+        } else if (kind == SRQ_ELEMENT && cs->idx != NULL && isfinite(q[4])
+                   && q[4] > 0.0 && q[4] <= (double)INT32_MAX) {
+            dom_node_id target = (dom_node_id)q[4];
+            _Static_assert(sizeof(dom_node_id) == sizeof(int32_t), "handles travel as int32");
+            hv = (int32_t *)calloc(ANC_MAX_HANDLES, sizeof *hv);
+            size_t n = 0, nsub = 0;
+            if (hv != NULL && dom_is_connected(cs->idx, target))
+                n = anc_collect(cs->idx, target, (dom_node_id *)hv, ANC_MAX_HANDLES, &nsub);
+            if (n > 0) {
+                r.kind = SRQ_ELEMENT;
+                r.behavior = beh;
+                r.block = blk;
+                r.n = n;
+                r.nsub = nsub;
+                child_scroll_margins(cs, target, &r.margin_top, &r.margin_bottom);
+            }
+        }
+    }
+    int32_t rec[SRQ_WIRE_N];
+    srq_encode(&r, rec);
+    int rc = (write_full(wfd, rec, sizeof rec) == 0
+              && (r.n == 0 || write_full(wfd, hv, r.n * sizeof *hv) == 0)) ? 0 : -1;
+    free(hv);
     return rc;
 }
 
@@ -2156,7 +2227,8 @@ static void child_handle_load(int wfd, child_state *cs, const char *html, size_t
             && write_console(wfd, &cs->log) == 0
             && write_full(wfd, &next_ms, sizeof next_ms) == 0
             && write_full(wfd, &cklen, sizeof cklen) == 0
-            && (cklen == 0 || write_full(wfd, ckdump, cklen) == 0));
+            && (cklen == 0 || write_full(wfd, ckdump, cklen) == 0)
+            && write_scroll(wfd, cs) == 0);
     }
     prof_lap("write-response", &ph);
     if (prof_on()) fprintf(stderr, "tab-profile %-14s %7.1f ms\n", "WORKER-TOTAL", prof_now_ms() - ph0);
@@ -2246,7 +2318,17 @@ static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
     int32_t default_prevented = 0;
     uint64_t gen0 = dom_mutation_count(cs->idx);
     double tp0 = prof_now_ms();
-    if (cs->js != NULL && cs->doc != NULL && cs->idx != NULL) {
+    if (cs->js == NULL && cs->static_rederive && cs->doc != NULL && cs->idx != NULL) {
+        /* No script to run: only the cascade moved (spec/anchor.md 3c, :target). */
+        title = hp_get_title(cs->doc, &tl);
+        text  = hp_extract_text(cs->doc, &xl);
+        if (title != NULL && text != NULL
+            && pv_build_live(cs->doc, cs->last_run_js, cs->last_reader, cs->last_prefers_dark,
+                             cs->extern_css, cs->extern_css_len, cs->last_viewport_w,
+                             child_sheets(cs), child_cq(cs), &(pv_node_ids){ child_node_id, cs },
+                             &view) == PV_OK)
+            ok = 1;
+    } else if (cs->js != NULL && cs->doc != NULL && cs->idx != NULL) {
         if (is_tick) {
             char tick[64];
             int n = snprintf(tick, sizeof tick, "__tickTimers(%d)",
@@ -2330,7 +2412,8 @@ static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
             && write_ws(wfd, cs) == 0
             && write_storage(wfd, cs) == 0
             && write_console(wfd, &cs->log) == 0
-            && write_full(wfd, &next_ms, sizeof next_ms) == 0);
+            && write_full(wfd, &next_ms, sizeof next_ms) == 0
+            && write_scroll(wfd, cs) == 0);
     }
     hp_free(title);
     hp_free(text);
@@ -2341,21 +2424,34 @@ static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id) {
     child_handle_mutation(wfd, cs, 0, node_id, 0);
 }
 
-/* OP_ANCHOR reply: [TAG_RESULT][kind][n][nsub][n x handle][has_view], then -- only when
+/* OP_ANCHOR reply: [TAG_RESULT][kind][n][nsub][margin_top][margin_bottom][n x handle][has_view], then -- only when
  * has_view -- a full mutation reply. The target is resolved BEFORE the page hears about
  * the navigation (HTML 7.4.6.4: scroll, then queue hashchange), and the header is written
  * before any handler runs, so a handler's subrequest cannot interleave with it. */
-static void child_handle_anchor(int wfd, child_state *cs, const char *frag, const char *push_url) {
+static void child_handle_anchor(int wfd, child_state *cs, const char *frag, const char *push_url,
+                                int replace) {
     dom_node_id target = DOM_NODE_NONE;
     int32_t kind = (cs->idx != NULL) ? (int32_t)anc_resolve(cs->idx, frag, &target) : ANC_NONE;
     dom_node_id *h = (kind == ANC_ELEMENT)
                    ? (dom_node_id *)calloc(ANC_MAX_HANDLES, sizeof *h) : NULL;
     size_t n = 0, nsub = 0;
     if (h != NULL) n = anc_collect(cs->idx, target, h, ANC_MAX_HANDLES, &nsub);
-    int32_t has_view = (push_url[0] != '\0' && cs->js != NULL && cs->doc != NULL
-                        && cs->idx != NULL) ? 1 : 0;
+    /* :target (spec/anchor.md 3c): the document's indicated element, compared by pointer. */
+    int target_moved = 0;
+    if (cs->doc != NULL && cs->idx != NULL) {
+        const void *nat = (kind == ANC_ELEMENT) ? dom_native_node(cs->idx, target) : NULL;
+        target_moved = cch_set_target((lxb_dom_node_t *)hp_document_root(cs->doc),
+                                      (lxb_dom_element_t *)nat);
+    }
+    int pushed = (push_url[0] != '\0' && cs->js != NULL);
+    int32_t has_view = ((pushed || target_moved) && cs->doc != NULL && cs->idx != NULL) ? 1 : 0;
+    double mt = 0.0, mb = 0.0;
+    if (n > 0) child_scroll_margins(cs, target, &mt, &mb);
+    srq_req mr = { .margin_top = mt, .margin_bottom = mb };
+    int32_t mrec[SRQ_WIRE_N];
+    srq_encode(&mr, mrec);   /* the same clamp as a script request */
     uint8_t rtag = TAG_RESULT;
-    int32_t hdr[3] = { kind, (int32_t)n, (int32_t)nsub };
+    int32_t hdr[5] = { kind, (int32_t)n, (int32_t)nsub, mrec[4], mrec[5] };
     int sent = write_full(wfd, &rtag, 1) == 0 && write_full(wfd, hdr, sizeof hdr) == 0;
     for (size_t i = 0; sent && i < n; ++i) {
         int32_t v = (int32_t)h[i];
@@ -2363,9 +2459,13 @@ static void child_handle_anchor(int wfd, child_state *cs, const char *frag, cons
     }
     free(h);
     if (!sent || write_full(wfd, &has_view, sizeof has_view) != 0 || !has_view) return;
-    (void)jd_frag_push(cs->js, push_url);
-    (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
+    if (pushed) {
+        (void)jd_frag_push(cs->js, push_url, replace);
+        (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
+    }
+    cs->static_rederive = 1;
     child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
+    cs->static_rederive = 0;
 }
 
 /* Handles a generic DOM event (OP_EVENT). Reads: node_id:int32, event_type_len:size_t,
@@ -2720,7 +2820,7 @@ static void tab_worker_run(int rfd, int wfd) {
             continue;
         }
 
-        /* OP_ANCHOR: [flen:size_t][fragment][ulen:size_t][push url] (spec/anchor.md). */
+        /* OP_ANCHOR: [flen:size_t][fragment][ulen:size_t][push url][replace:1] (spec/anchor.md). */
         if (op == OP_ANCHOR) {
             char frag[ANC_MAX_FRAGMENT], purl[LN_MAX_TARGET];
             size_t flen = 0, ulen = 0;
@@ -2730,7 +2830,9 @@ static void tab_worker_run(int rfd, int wfd) {
             if (read_full(rfd, &ulen, sizeof ulen) != 0 || ulen >= sizeof purl) break;
             if (ulen != 0 && read_full(rfd, purl, ulen) != 0) break;
             purl[ulen] = '\0';
-            child_handle_anchor(wfd, &cs, frag, purl);
+            uint8_t rflag = 0;
+            if (read_full(rfd, &rflag, 1) != 0 || rflag > 1) break;
+            child_handle_anchor(wfd, &cs, frag, purl, rflag);
             continue;
         }
 
@@ -3540,7 +3642,7 @@ static int read_view_raw(int fd, pv_view **out) {
      * by write_view after the box tree. On EOF or mismatch, use defaults (no
      * canvas bg, no html constraints). Bounded against hostile worker. */
     {
-        int32_t view_hdr[9];
+        int32_t view_hdr[11];
         ssize_t rv = read_full(fd, view_hdr, sizeof view_hdr);
         if (rv == 0) {
             v->canvas_bg      = view_hdr[0];
@@ -3554,6 +3656,13 @@ static int read_view_raw(int fd, pv_view **out) {
                 v->root_m[k] = (m == PV_UA_BODY_MARGIN) ? PV_UA_BODY_MARGIN : 0;
             }
             v->scroll_smooth = (view_hdr[8] == 1) ? 1 : 0;
+            /* scroll-padding: non-negative and bounded like a script record. */
+            for (int k = 0; k < 2; ++k) {
+                int32_t pd = view_hdr[9 + k];
+                int ok = (pd >= 0 && pd <= SRQ_MAX_COORD);
+                if (k == 0) v->scroll_pad_top = ok ? pd : 0;
+                else v->scroll_pad_bottom = ok ? pd : 0;
+            }
         }
     }
 
@@ -4206,7 +4315,8 @@ static void open_urls_free(char **u, size_t n) {
     free(u);
 }
 
-static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom);
+static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom,
+                         char **frag_out);
 
 /* Reads the window.open block (see write_opens). Targets survive only when the
  * operation was a user gesture, each gated exactly like a JS navigation. */
@@ -4227,7 +4337,9 @@ static tab_status read_opens(tab *t, const char *page_url, int gesture,
         while (e < n && o[e] != '\n') ++e;
         if (e < n) o[e] = '\0';   /* read_field already NUL-terminates o[n] */
         int oom = 0;
-        char *g = (e > i) ? gate_js_nav(page_url, o + i, e - i, &oom) : NULL;
+        char *gfrag = NULL;
+        char *g = (e > i) ? gate_js_nav(page_url, o + i, e - i, &oom, &gfrag) : NULL;
+        free(gfrag);
         if (oom) { open_urls_free(out, k); free(o); return TAB_ERR_OOM; }
         if (g != NULL) out[k++] = g;
         i = e + 1;
@@ -4312,18 +4424,54 @@ static tab_status read_storage(tab *t, char **out, size_t *nout) {
     return TAB_OK;
 }
 
+/* Reads the scroll block of a response (see write_scroll) into out->scroll /
+ * out->scroll_handles. Every field is range-checked (srq_decode): a bad record is a desync,
+ * the worker is treated as compromised. */
+static tab_status read_scroll(tab *t, tab_page *out) {
+    int32_t rec[SRQ_WIRE_N];
+    srq_req r;
+    if (read_full(t->resp_fd, rec, sizeof rec) != 0) return io_failure(t);
+    if (srq_decode(rec, ANC_MAX_HANDLES, &r) != 0) return io_failure(t);
+    dom_node_id *h = NULL;
+    if (r.n != 0) {
+        int32_t *hv = (int32_t *)calloc(r.n, sizeof *hv);
+        h = (dom_node_id *)calloc(r.n, sizeof *h);
+        if (hv == NULL || h == NULL || read_full(t->resp_fd, hv, r.n * sizeof *hv) != 0) {
+            free(hv); free(h);
+            return io_failure(t);   /* the reply cannot be drained: resync by death */
+        }
+        for (size_t i = 0; i < r.n; ++i) h[i] = (dom_node_id)hv[i];
+        free(hv);
+    }
+    out->scroll = r;
+    out->scroll_handles = h;
+    return TAB_OK;
+}
+
 /* Gates a raw JS navigation request against the page URL in the trusted parent
  * (Zero Trust: a compromised worker cannot drive the browser off-policy): ln_resolve
  * allows only https / a local file under a local base; a downgrade, a foreign scheme
  * or a same-document fragment yields no navigation. Returns an owned target, NULL
  * for none; *oom is set when the copy failed. */
-static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom) {
+static char *gate_js_nav(const char *page_url, const char *navreq, size_t nlen, int *oom,
+                         char **frag_out) {
     *oom = 0;
+    *frag_out = NULL;
     if (nlen == 0 || page_url == NULL || navreq == NULL) return NULL;
     ln_result ln;
-    if (ln_resolve(page_url, navreq, &ln) != LN_OK || ln.action != LN_NAVIGATE) return NULL;
-    char *nav = strdup(ln.target);
-    if (nav == NULL) *oom = 1;
+    if (ln_resolve(page_url, navreq, &ln) != LN_OK) return NULL;
+    int has_frag = (memchr(navreq, '#', nlen) != NULL);
+    if (ln.action != LN_NAVIGATE && !(ln.action == LN_SAME_DOCUMENT && has_frag)) return NULL;
+    if (has_frag) {   /* spec/anchor.md 3b: the fragment is data for the caller */
+        *frag_out = strdup(ln.fragment);
+        if (*frag_out == NULL) { *oom = 1; return NULL; }
+    }
+    if (ln.action != LN_NAVIGATE) return NULL;
+    char buf[LN_MAX_TARGET + LN_MAX_FRAGMENT + 1];
+    int n = has_frag ? snprintf(buf, sizeof buf, "%s#%s", ln.target, ln.fragment)
+                     : snprintf(buf, sizeof buf, "%s", ln.target);
+    char *nav = (n >= 0 && (size_t)n < sizeof buf) ? strdup(buf) : strdup(ln.target);
+    if (nav == NULL) { *oom = 1; free(*frag_out); *frag_out = NULL; }
     return nav;
 }
 
@@ -4493,17 +4641,26 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
         return io_failure(t);
     }
     if (set_cookies != NULL && set_cookies[0] == '\0') { free(set_cookies); set_cookies = NULL; }
+    if (read_scroll(t, out) != TAB_OK) {
+        free(title); free(text); free(navreq); pv_free(view);
+        hist_ops_free(hist, nhist); ws_ops_free(wsops, nws); free(stor);
+        fb_buffer_free(&console); free(set_cookies);
+        return TAB_ERR_IO;
+    }
 
     /* Gate the raw request HERE (trusted parent, Zero Trust): a compromised worker
      * cannot drive the browser off-policy. ln_resolve allows only https / a local
      * file under a local base; a downgrade / foreign scheme / fragment yields no nav. */
     int nav_oom = 0;
-    char *nav_url = gate_js_nav(page_url, navreq, nlen, &nav_oom);
+    char *nav_frag = NULL;
+    char *nav_url = gate_js_nav(page_url, navreq, nlen, &nav_oom, &nav_frag);
     free(navreq);
     if (nav_oom) {
         free(title); free(text); pv_free(view);
         hist_ops_free(hist, nhist); ws_ops_free(wsops, nws); free(stor);
         fb_buffer_free(&console); free(set_cookies);
+        free(out->scroll_handles); out->scroll_handles = NULL;
+        memset(&out->scroll, 0, sizeof out->scroll);
         return TAB_ERR_OOM;
     }
 
@@ -4511,7 +4668,8 @@ tab_status tab_load_full(tab *t, const char *html, size_t len, const char *page_
     out->text  = text;  out->text_len  = xl;
     out->view  = view;
     out->nav_url = nav_url;
-    out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
+    out->nav_fragment = nav_frag;
+    out->nav_replace = (nav_url != NULL || nav_frag != NULL) ? (nav_replace ? 1 : 0) : 0;
     out->console = console; /* ownership moves to the caller (tab_page_free) */
     out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
     out->set_cookies = set_cookies; /* ownership moves to the caller */
@@ -4731,19 +4889,20 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
         return io_failure(t);
     }
     int nav_oom = 0;
-    char *nav_url = gate_js_nav(t->page_url, navreq, nlen, &nav_oom);
+    char *nav_frag = NULL;
+    char *nav_url = gate_js_nav(t->page_url, navreq, nlen, &nav_oom, &nav_frag);
     free(navreq);
     if (nav_oom) { free(title); free(text); pv_free(view); return TAB_ERR_OOM; }
     tab_hist_op *hist = NULL;
     size_t nhist = 0;
     int hist_go = 0;
     tab_status hs = read_history(t, t->page_url, &hist, &nhist, &hist_go);
-    if (hs != TAB_OK) { free(title); free(text); pv_free(view); free(nav_url); return hs; }
+    if (hs != TAB_OK) { free(title); free(text); pv_free(view); free(nav_url); free(nav_frag); return hs; }
     char **opens = NULL;
     size_t nopen = 0;
     hs = read_opens(t, t->page_url, gesture, &opens, &nopen);
     if (hs != TAB_OK) {
-        free(title); free(text); pv_free(view); free(nav_url);
+        free(title); free(text); pv_free(view); free(nav_url); free(nav_frag);
         hist_ops_free(hist, nhist);
         return hs;
     }
@@ -4751,7 +4910,7 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     size_t nws = 0;
     hs = read_ws(t, &wsops, &nws);
     if (hs != TAB_OK) {
-        free(title); free(text); pv_free(view); free(nav_url);
+        free(title); free(text); pv_free(view); free(nav_url); free(nav_frag);
         hist_ops_free(hist, nhist); open_urls_free(opens, nopen);
         return hs;
     }
@@ -4759,7 +4918,7 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     size_t stor_len = 0;
     hs = read_storage(t, &stor, &stor_len);
     if (hs != TAB_OK) {
-        free(title); free(text); pv_free(view); free(nav_url);
+        free(title); free(text); pv_free(view); free(nav_url); free(nav_frag);
         hist_ops_free(hist, nhist); open_urls_free(opens, nopen); ws_ops_free(wsops, nws);
         return hs;
     }
@@ -4767,7 +4926,7 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     fb_buffer console;
     fb_buffer_init(&console);
     if (read_console(t->resp_fd, &console) != 0) {
-        free(title); free(text); pv_free(view); free(nav_url);
+        free(title); free(text); pv_free(view); free(nav_url); free(nav_frag);
         hist_ops_free(hist, nhist); open_urls_free(opens, nopen); ws_ops_free(wsops, nws);
         free(stor);
         fb_buffer_free(&console);
@@ -4775,11 +4934,18 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     }
     int32_t next_ms = -1;
     if (read_full(t->resp_fd, &next_ms, sizeof next_ms) != 0) {
-        free(title); free(text); pv_free(view); free(nav_url);
+        free(title); free(text); pv_free(view); free(nav_url); free(nav_frag);
         hist_ops_free(hist, nhist); open_urls_free(opens, nopen); ws_ops_free(wsops, nws);
         free(stor);
         fb_buffer_free(&console);
         return io_failure(t);
+    }
+    if (read_scroll(t, out) != TAB_OK) {
+        free(title); free(text); pv_free(view); free(nav_url); free(nav_frag);
+        hist_ops_free(hist, nhist); open_urls_free(opens, nopen); ws_ops_free(wsops, nws);
+        free(stor);
+        fb_buffer_free(&console);
+        return TAB_ERR_IO;
     }
     out->hist = hist; out->nhist = nhist; out->hist_go = hist_go;
     out->open_urls = opens; out->nopen = nopen;
@@ -4791,7 +4957,8 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     out->view  = view;
     out->unchanged = unchanged;
     out->nav_url = nav_url;
-    out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
+    out->nav_fragment = nav_frag;
+    out->nav_replace = (nav_url != NULL || nav_frag != NULL) ? (nav_replace ? 1 : 0) : 0;
     out->default_prevented = (default_prevented == 1) ? 1 : 0;
     out->console = console;
     out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
@@ -4942,6 +5109,7 @@ void tab_page_free(tab_page *p) {
     free(p->text);
     pv_free(p->view);
     free(p->nav_url);
+    free(p->nav_fragment);
     free(p->set_cookies);
     hist_ops_free(p->hist, p->nhist);
     p->hist = NULL;
@@ -4955,11 +5123,16 @@ void tab_page_free(tab_page *p) {
     free(p->storage);
     p->storage = NULL;
     p->storage_len = 0;
+    free(p->scroll_handles);
+    p->scroll_handles = NULL;
+    memset(&p->scroll, 0, sizeof p->scroll);
     fb_buffer_free(&p->console);
     p->title = NULL;
     p->text = NULL;
     p->view = NULL;
     p->nav_url = NULL;
+    p->nav_fragment = NULL;
+    p->nav_replace = 0;
     p->set_cookies = NULL;
     p->nav_replace = 0;
     p->title_len = 0;
@@ -5189,6 +5362,11 @@ void tab_anchor_free(tab_anchor *a) {
 
 tab_status tab_anchor_query(tab *t, const char *fragment, const char *push_url,
                             tab_anchor *out, tab_page *page) {
+    return tab_anchor_query_ex(t, fragment, push_url, 0u, out, page);
+}
+
+tab_status tab_anchor_query_ex(tab *t, const char *fragment, const char *push_url,
+                               unsigned flags, tab_anchor *out, tab_page *page) {
     tab_async_sync(t);
     if (out != NULL) memset(out, 0, sizeof *out);
     if (page != NULL) memset(page, 0, sizeof *page);
@@ -5201,22 +5379,25 @@ tab_status tab_anchor_query(tab *t, const char *fragment, const char *push_url,
     tab_refresh_alive(t);
     if (!t->alive) return TAB_ERR_DEAD;
 
-    uint8_t op = OP_ANCHOR;
+    uint8_t op = OP_ANCHOR, rflag = (flags & TAB_ANCHOR_REPLACE) ? 1 : 0;
     if (write_full(t->req_fd, &op, 1) != 0
      || write_full(t->req_fd, &flen, sizeof flen) != 0
      || (flen != 0 && write_full(t->req_fd, fragment, flen) != 0)
      || write_full(t->req_fd, &ulen, sizeof ulen) != 0
-     || (ulen != 0 && write_full(t->req_fd, u, ulen) != 0)) {
+     || (ulen != 0 && write_full(t->req_fd, u, ulen) != 0)
+     || write_full(t->req_fd, &rflag, 1) != 0) {
         tab_refresh_alive(t);
         return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
     }
     tab_status aw = tab_await_result(t);
     if (aw != TAB_OK) return aw;
-    int32_t hdr[3];
+    int32_t hdr[5];
     if (read_full(t->resp_fd, hdr, sizeof hdr) != 0) return io_failure(t);
     if (hdr[0] < ANC_NONE || hdr[0] > ANC_ELEMENT || hdr[1] < 0
      || (uint32_t)hdr[1] > ANC_MAX_HANDLES || hdr[2] < 0 || hdr[2] > hdr[1]
-     || (hdr[0] != ANC_ELEMENT && hdr[1] != 0)) return io_failure(t);
+     || (hdr[0] != ANC_ELEMENT && hdr[1] != 0)
+     || hdr[3] < -SRQ_MAX_COORD || hdr[3] > SRQ_MAX_COORD
+     || hdr[4] < -SRQ_MAX_COORD || hdr[4] > SRQ_MAX_COORD) return io_failure(t);
     size_t n = (size_t)hdr[1];
     dom_node_id *h = NULL;
     if (n != 0) {
@@ -5229,8 +5410,7 @@ tab_status tab_anchor_query(tab *t, const char *fragment, const char *push_url,
         }
     }
     int32_t has_view = 0;
-    if (read_full(t->resp_fd, &has_view, sizeof has_view) != 0 || (has_view != 0 && has_view != 1)
-     || (has_view && ulen == 0)) {
+    if (read_full(t->resp_fd, &has_view, sizeof has_view) != 0 || (has_view != 0 && has_view != 1)) {
         free(h);
         return io_failure(t);
     }
@@ -5238,6 +5418,8 @@ tab_status tab_anchor_query(tab *t, const char *fragment, const char *push_url,
     out->handles = h;
     out->n = n;
     out->nsub = (size_t)hdr[2];
+    out->margin_top = (double)hdr[3];
+    out->margin_bottom = (double)hdr[4];
     if (!has_view) return TAB_OK;
     tab_status st = tab_read_view_ex(t, page, 0);
     if (st != TAB_OK) tab_anchor_free(out);

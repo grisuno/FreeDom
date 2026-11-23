@@ -36,6 +36,9 @@
 /* How long a landed document's fragment is re-applied while its height still moves
  * (late images, scripts) and the user has not scrolled (spec/anchor.md 3). */
 #define FC_ANCHOR_HOLD_MS 6000u
+/* A hashchange listener that sets the hash again re-enters the fragment navigation; past
+ * this depth the request is dropped, like JS_NAV_MAX for redirects (spec/anchor.md 3b). */
+#define FC_JS_FRAGMENT_DEPTH 4
 
 /* Viewport height (px) the headless render reports to a trusted page's JS
  * (window.innerHeight, spec/js_geom.md); the parity harness's reference height. */

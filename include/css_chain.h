@@ -88,6 +88,13 @@ int cch_element_matches(lxb_dom_element_t *el, const css_sel *sel);
  * pays O(depth) attribute captures per element. */
 int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n);
 
+/* :target (spec/anchor.md 3c): records el (NULL = none) as the indicated element of the
+ * document that owns doc_node. Per document, kept in the lexbor document's `user` slot (no
+ * global state); every later selector match gives that element CSEL_STATE_TARGET. The
+ * pointer is only ever COMPARED (a detached element is never freed while the document
+ * lives). Returns 1 when the target changed, 0 when it was already el or doc_node is NULL. */
+int cch_set_target(lxb_dom_node_t *doc_node, lxb_dom_element_t *el);
+
 /* The style of el's ::before (CSS_PSEUDO_BEFORE) or ::after (CSS_PSEUDO_AFTER)
  * generated box (css_resolve_pseudo) against the same element context.
  * font_size is el's own COMPUTED font-size (the pseudo inherits it) and

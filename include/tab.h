@@ -8,6 +8,7 @@
 #include "freebug.h"
 #include "js_geom.h"
 #include "page_view.h"
+#include "scroll_req.h"
 
 #ifdef __cplusplus
 #error "Freedom is pure C (C11). C++ is not supported."
@@ -93,6 +94,11 @@ typedef struct tab_page {
      * drives it through the normal load path, re-applying ALL network policy. */
     char    *nav_url;
     int      nav_replace;
+    /* The fragment (without '#', may be "") when the request carried one (spec/anchor.md
+     * 3b): location.hash= / href='#x' alone gives nav_fragment with nav_url NULL; a request
+     * for another document gives both (nav_url then ends in "#" nav_fragment). The caller
+     * decides whether it is THIS document's fragment. Owned; freed by tab_page_free. */
+    char    *nav_fragment;
     /* 1 when a click handler called preventDefault() (mutation replies to tab_click only):
      * the caller must not follow the clicked link (HTML 4.6.4 activation behavior). */
     int      default_prevented;
@@ -132,6 +138,12 @@ typedef struct tab_page {
      * NULL when unchanged or untrusted. Owned; freed by tab_page_free. */
     char        *storage;
     size_t       storage_len;
+    /* The scroll the page's script requested during this operation (spec/scroll_req.md),
+     * range-checked by srq_decode; scroll.kind == SRQ_NONE when none. For SRQ_ELEMENT,
+     * scroll_handles holds the target's subtree then the elements after it (scroll.n
+     * handles, scroll.nsub of them the subtree; anc_collect shape). Owned. */
+    srq_req      scroll;
+    dom_node_id *scroll_handles;
 } tab_page;
 
 /* Result of evaluating script: the value, or a JS error message. */
@@ -424,9 +436,17 @@ typedef struct tab_anchor {
     int          kind;
     dom_node_id *handles;
     size_t       n, nsub;
+    /* ANC_ELEMENT: the target's computed scroll-margin-top/bottom, px (spec/scroll_req.md). */
+    double       margin_top, margin_bottom;
 } tab_anchor;
 tab_status tab_anchor_query(tab *t, const char *fragment, const char *push_url,
                             tab_anchor *out, tab_page *page);
+/* As tab_anchor_query; flags TAB_ANCHOR_REPLACE makes the page REPLACE its current
+ * history entry with push_url instead of adding one (location.replace('#x'), a fragment
+ * set while the document loads: spec/anchor.md 3b). */
+#define TAB_ANCHOR_REPLACE 1u
+tab_status tab_anchor_query_ex(tab *t, const char *fragment, const char *push_url,
+                               unsigned flags, tab_anchor *out, tab_page *page);
 void tab_anchor_free(tab_anchor *a);
 
 /* Delivers a WebSocket event the parent's connection produced (open, a text/binary

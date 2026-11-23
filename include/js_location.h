@@ -43,12 +43,22 @@ char *jd_take_history(js_context *ctx, int *go);
  * range or no location is installed. */
 int jd_pop_state(js_context *ctx, int index);
 
+/* Takes and CLEARS the page's pending scroll request (window.scrollTo/scrollBy,
+ * Element.scrollIntoView, root scrollTop=; spec/scroll_req.md) as JD_SCROLL_N numbers:
+ * kind (srq_kind), y, behavior (srq_behavior), block (srq_block), element handle. Returns
+ * 1 when one was pending, 0 otherwise (out then all 0). The values are UNVALIDATED page
+ * data: the caller range-checks them before use. */
+#define JD_SCROLL_N 5u
+int jd_take_scroll(js_context *ctx, double out[JD_SCROLL_N]);
+
 /* A same-document fragment navigation the parent already recorded (spec/anchor.md):
  * pushes url (resolved by the page's own same-origin check, dom.histTarget) as a new
  * entry of the page's history, moves location and dispatches hashchange when the URL
- * changed. url is passed as a JS string value, never as source. Returns 1 when
+ * changed. replace != 0 replaces the current entry instead (location.replace). The
+ * hashchange oldURL is the href a script's own fragment request left (spec/anchor.md
+ * 3b). url is passed as a JS string value, never as source. Returns 1 when
  * applied, 0 when refused (cross-origin, no location installed, NULL). */
-int jd_frag_push(js_context *ctx, const char *url);
+int jd_frag_push(js_context *ctx, const char *url, int replace);
 
 /* Reads and CLEARS the navigation the page's JS requested (globalThis.__navReq). Returns
  * 1 and copies the raw (unresolved) target into buf (bounded, NUL-terminated) with

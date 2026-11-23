@@ -304,6 +304,8 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
     for (int k = 0; k < 4; ++k) d->root_m[k] = (view != NULL) ? view->root_m[k] : 0;
     d->html_center = (view != NULL) ? view->html_center : 0;
     d->scroll_smooth = (view != NULL) ? view->scroll_smooth : 0;
+    d->scroll_pad_top = (view != NULL) ? (double)view->scroll_pad_top : 0.0;
+    d->scroll_pad_bottom = (view != NULL) ? (double)view->scroll_pad_bottom : 0.0;
     d->author_css = caps.css ? 1 : 0;
 
     size_t n = pv_count(view);

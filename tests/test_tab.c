@@ -1769,7 +1769,8 @@ static void test_js_navigation_relative_resolved(void **state) {
     tab_close(t);
 }
 
-/* Fail-closed gate: the parent rejects a downgrade / foreign-scheme / fragment nav,
+/* Fail-closed gate: the parent rejects a downgrade / foreign-scheme nav (a fragment is
+ * reported as a same-document fragment, spec/anchor.md 3b),
  * so a hostile or compromised worker cannot drive the browser off-policy. */
 static void test_js_navigation_unsafe_is_blocked(void **state) {
     (void)state;
@@ -1786,7 +1787,15 @@ static void test_js_navigation_unsafe_is_blocked(void **state) {
         tab_page p;
         assert_int_equal(tab_load_full(t, cases[i], strlen(cases[i]),
                                        "https://example.com/", 1, 0, 0, &p), TAB_OK);
-        assert_true(p.nav_url == NULL || p.nav_url[0] == '\0'); /* no navigation */
+        if (i < 2) {
+            assert_true(p.nav_url == NULL || p.nav_url[0] == '\0'); /* no navigation */
+            assert_null(p.nav_fragment);
+        } else {   /* spec/anchor.md 3b: THIS document's fragment, never another load */
+            assert_non_null(p.nav_fragment);
+            assert_string_equal(p.nav_fragment, "section");
+            assert_true(p.nav_url == NULL
+                        || strcmp(p.nav_url, "https://example.com/#section") == 0);
+        }
         tab_page_free(&p);
         tab_close(t);
     }
@@ -4321,7 +4330,7 @@ static void test_anchor_query_resolves(void **state) {
     int saw_title = 0;
     for (size_t i = 0; i < a.nsub; ++i) saw_title |= (a.handles[i] == title);
     assert_true(saw_title);
-    assert_null(pg.view);                               /* no push: no view */
+    assert_non_null(pg.view);                           /* :target moved (spec 3c) */
     tab_anchor_free(&a);
     tab_page_free(&pg);
     assert_int_equal(tab_anchor_query(t, "empty", NULL, &a, &pg), TAB_OK);
@@ -4384,6 +4393,310 @@ static void test_anchor_query_push_fires_hashchange(void **state) {
     tab_close(t);
 }
 
+/* tanda 104 (spec/anchor.md 3b): location.hash= is a same-document fragment navigation.
+ * location moves at once, the request travels absolute and the parent reports the fragment. */
+static void test_js_hash_set_is_fragment_nav(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><p id=o>idle</p><h2 id=s2>S2</h2><script>"
+        "location.hash='s2';document.getElementById('o').textContent='now'+location.hash;"
+        "</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://a.test/p", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.nav_fragment);
+    assert_string_equal(p.nav_fragment, "s2");
+    assert_null(p.nav_url);                     /* same document: travels as "#s2" */
+    assert_int_not_equal(node_of_text(p.view, "now#s2"), DOM_NODE_NONE);
+    tab_page_free(&p);
+    assert_null(p.nav_fragment);
+    tab_close(t);
+}
+
+/* href='#x' is LN_SAME_DOCUMENT: no load target, only the fragment. Another document's
+ * fragment travels with its load target. The same hash again requests nothing. */
+static void test_js_fragment_nav_variants(void **state) {
+    (void)state;
+    static const char REL[] =
+        "<html><body><script>location.href='#sec';</script></body></html>";
+    static const char OTHER[] =
+        "<html><body><script>location.assign('/other#x');</script></body></html>";
+    static const char SAME[] =
+        "<html><body><script>location.hash='#a';</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, REL, sizeof REL - 1, "https://a.test/p", 1, 0, 0, &p), TAB_OK);
+    assert_non_null(p.nav_fragment);
+    assert_string_equal(p.nav_fragment, "sec");
+    assert_null(p.nav_url);
+    tab_page_free(&p);
+    assert_int_equal(tab_load_full(t, OTHER, sizeof OTHER - 1, "https://a.test/p", 1, 0, 0, &p),
+                     TAB_OK);
+    assert_non_null(p.nav_url);
+    assert_string_equal(p.nav_url, "https://a.test/other#x");
+    assert_non_null(p.nav_fragment);
+    assert_string_equal(p.nav_fragment, "x");
+    tab_page_free(&p);
+    /* a local page: its location is file://, the request still travels as "#x" */
+    assert_int_equal(tab_load_full(t, REL, sizeof REL - 1, "file:///tmp/x.html", 1, 0, 0, &p),
+                     TAB_OK);
+    assert_non_null(p.nav_fragment);
+    assert_string_equal(p.nav_fragment, "sec");
+    assert_null(p.nav_url);
+    tab_page_free(&p);
+    assert_int_equal(tab_load_full(t, SAME, sizeof SAME - 1, "https://a.test/p#a", 1, 0, 0, &p),
+                     TAB_OK);
+    assert_null(p.nav_url);
+    assert_null(p.nav_fragment);
+    tab_page_free(&p);
+    tab_close(t);
+}
+
+/* A click handler setting the hash: the parent pushes and asks OP_ANCHOR, the page then
+ * hears hashchange with the URL it had BEFORE the (already applied) location change. */
+static void test_js_hash_click_hashchange_old_url(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><p id=o>idle</p><button id=b>go</button><h2 id=s2>S2</h2><script>"
+        "document.getElementById('b').onclick=function(){location.hash='s2';};"
+        "addEventListener('hashchange',function(e){document.getElementById('o').textContent="
+        "e.oldURL+'|'+e.newURL+'|'+history.length;});</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://a.test/p", 1, 0, 0, &p), TAB_OK);
+    dom_node_id b = node_of_text(p.view, "go");
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_click(t, b, &c), TAB_OK);
+    assert_non_null(c.nav_fragment);
+    assert_string_equal(c.nav_fragment, "s2");
+    tab_page_free(&c);
+    tab_anchor a;
+    tab_page pg;
+    assert_int_equal(tab_anchor_query(t, "s2", "#s2", &a, &pg), TAB_OK);
+    assert_int_equal(a.kind, ANC_ELEMENT);
+    assert_non_null(pg.view);
+    assert_int_not_equal(node_of_text(pg.view, "https://a.test/p|https://a.test/p#s2|2"),
+                         DOM_NODE_NONE);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    tab_close(t);
+}
+
+/* location.replace('#x') replaces the page's own entry (history.length stays 1). */
+static void test_js_hash_replace_keeps_length(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><p id=o>idle</p><button id=b>go</button><h2 id=s2>S2</h2><script>"
+        "document.getElementById('b').onclick=function(){location.replace('#s2');};"
+        "addEventListener('hashchange',function(e){document.getElementById('o').textContent="
+        "'len'+history.length;});</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://a.test/p", 1, 0, 0, &p), TAB_OK);
+    dom_node_id b = node_of_text(p.view, "go");
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_click(t, b, &c), TAB_OK);
+    assert_int_equal(c.nav_replace, 1);
+    tab_page_free(&c);
+    tab_anchor a;
+    tab_page pg;
+    assert_int_equal(tab_anchor_query_ex(t, "s2", "#s2", TAB_ANCHOR_REPLACE, &a, &pg), TAB_OK);
+    assert_non_null(pg.view);
+    assert_int_not_equal(node_of_text(pg.view, "len1"), DOM_NODE_NONE);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    tab_close(t);
+}
+
+/* tanda 104 (spec/scroll_req.md): script scroll requests are recorded in the worker and
+ * travel validated to the parent with every load/mutation reply. */
+static void test_scroll_requests_travel(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><button id=a>a</button><button id=b>b</button><button id=c>c</button>"
+        "<button id=d>d</button><button id=e>e</button><h2 id=t>T</h2><script>"
+        "scrollTo(0,40);"
+        "var q=function(i){return document.getElementById(i);};"
+        "q('a').onclick=function(){ window.scrollTo(0,2000); };"
+        "q('b').onclick=function(){ scrollBy({top:-500,behavior:'smooth'}); };"
+        "q('c').onclick=function(){ q('t').scrollIntoView({block:'center'}); };"
+        "q('d').onclick=function(){ document.documentElement.scrollTop=300; };"
+        "q('e').onclick=function(){ scrollTo(0,NaN); scrollTo({left:5}); };"
+        "</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://a.test/p", 1, 0, 0, &p), TAB_OK);
+    assert_int_equal(p.scroll.kind, SRQ_TO);              /* load-time request */
+    assert_true(p.scroll.y == 40.0);
+    dom_node_id id[5] = { node_of_text(p.view, "a"), node_of_text(p.view, "b"),
+                          node_of_text(p.view, "c"), node_of_text(p.view, "d"),
+                          node_of_text(p.view, "e") };
+    dom_node_id tt = node_of_text(p.view, "T");
+    tab_page_free(&p);
+    assert_int_equal(p.scroll.kind, SRQ_NONE);
+    tab_page c;
+    assert_int_equal(tab_click(t, id[0], &c), TAB_OK);
+    assert_int_equal(c.scroll.kind, SRQ_TO);
+    assert_true(c.scroll.y == 2000.0);
+    assert_int_equal(c.scroll.behavior, SRQ_AUTO);
+    tab_page_free(&c);
+    assert_int_equal(tab_click(t, id[1], &c), TAB_OK);
+    assert_int_equal(c.scroll.kind, SRQ_BY);
+    assert_true(c.scroll.y == -500.0);
+    assert_int_equal(c.scroll.behavior, SRQ_SMOOTH);
+    tab_page_free(&c);
+    assert_int_equal(tab_click(t, id[2], &c), TAB_OK);
+    assert_int_equal(c.scroll.kind, SRQ_ELEMENT);
+    assert_int_equal(c.scroll.block, SRQ_CENTER);
+    assert_true(c.scroll.n >= 1 && c.scroll.nsub >= 1);
+    assert_non_null(c.scroll_handles);
+    int saw = 0;
+    for (size_t i = 0; i < c.scroll.nsub; ++i) saw |= (c.scroll_handles[i] == tt);
+    assert_true(saw);
+    tab_page_free(&c);
+    assert_null(c.scroll_handles);
+    assert_int_equal(tab_click(t, id[3], &c), TAB_OK);
+    assert_int_equal(c.scroll.kind, SRQ_TO);
+    assert_true(c.scroll.y == 300.0);
+    tab_page_free(&c);
+    assert_int_equal(tab_click(t, id[4], &c), TAB_OK);
+    assert_int_equal(c.scroll.kind, SRQ_NONE);           /* no vertical coordinate */
+    tab_page_free(&c);
+    /* a request does not repeat: the next operation carries none */
+    assert_int_equal(tab_click(t, id[4], &c), TAB_OK);
+    assert_int_equal(c.scroll.kind, SRQ_NONE);
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+/* A hostile value: Infinity is clamped, a forged handle scrolls nowhere. */
+static void test_scroll_request_hostile_values(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><button id=a>a</button><button id=b>b</button><script>"
+        "document.getElementById('a').onclick=function(){ scrollTo(0,Infinity); };"
+        "document.getElementById('b').onclick=function(){ __scrollIntoView(999999,{block:'end'}); };"
+        "</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://a.test/p", 1, 0, 0, &p), TAB_OK);
+    dom_node_id a = node_of_text(p.view, "a"), b = node_of_text(p.view, "b");
+    tab_page_free(&p);
+    tab_page c;
+    assert_int_equal(tab_click(t, a, &c), TAB_OK);
+    assert_int_equal(c.scroll.kind, SRQ_TO);
+    assert_true(c.scroll.y == (double)SRQ_MAX_COORD);
+    tab_page_free(&c);
+    assert_int_equal(tab_click(t, b, &c), TAB_OK);
+    assert_int_equal(c.scroll.kind, SRQ_NONE);
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+/* spec/scroll_req.md 3: the anchor reply carries the target's scroll-margin and the view
+ * the root's scroll-padding, also without JS. */
+static void test_anchor_scroll_margin_padding(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><style>html{scroll-padding-top:80px;scroll-padding-bottom:-3px}"
+        "h2{scroll-margin-top:1em;scroll-margin-bottom:6px}</style></head>"
+        "<body><p>x</p><h2 id=t>T</h2></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_int_equal(p.view->scroll_pad_top, 80);
+    assert_int_equal(p.view->scroll_pad_bottom, 0);        /* negative padding is invalid */
+    tab_page_free(&p);
+    tab_anchor a;
+    tab_page pg;
+    assert_int_equal(tab_anchor_query(t, "t", NULL, &a, &pg), TAB_OK);
+    assert_int_equal(a.kind, ANC_ELEMENT);
+    assert_true(a.margin_top == 24.0);                     /* 1em of a 24 px <h2> */
+    assert_true(a.margin_bottom == 6.0);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    tab_close(t);
+}
+
+static int fg_of_text(const pv_view *v, const char *text) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && strcmp(r->text, text) == 0) return r->fg_rgb;
+    }
+    return -2;
+}
+
+/* spec/anchor.md 3c: :target follows the indicated element, also without JS; the reply
+ * carries a re-derived view only when the target changed. */
+static void test_anchor_target_pseudo(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><head><style>h2{color:#0000ff}:target{color:#ff0000}</style></head>"
+        "<body><p>x</p><h2 id=t>T</h2><h2 id=u>U</h2></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    assert_int_equal(fg_of_text(p.view, "T"), 0x0000ff);
+    tab_page_free(&p);
+    tab_anchor a;
+    tab_page pg;
+    assert_int_equal(tab_anchor_query(t, "t", NULL, &a, &pg), TAB_OK);
+    assert_non_null(pg.view);
+    assert_int_equal(fg_of_text(pg.view, "T"), 0xff0000);
+    assert_int_equal(fg_of_text(pg.view, "U"), 0x0000ff);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    assert_int_equal(tab_anchor_query(t, "t", NULL, &a, &pg), TAB_OK);
+    assert_null(pg.view);                                  /* same target: nothing to redo */
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    assert_int_equal(tab_anchor_query(t, "u", NULL, &a, &pg), TAB_OK);
+    assert_non_null(pg.view);
+    assert_int_equal(fg_of_text(pg.view, "T"), 0x0000ff);
+    assert_int_equal(fg_of_text(pg.view, "U"), 0xff0000);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    assert_int_equal(tab_anchor_query(t, "", NULL, &a, &pg), TAB_OK);   /* top: no target */
+    assert_non_null(pg.view);
+    assert_int_equal(fg_of_text(pg.view, "U"), 0x0000ff);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    tab_close(t);
+}
+
+/* With JS, querySelector(':target') sees it too. */
+static void test_anchor_target_js(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><p id=o>idle</p><h2 id=t>T</h2><script>"
+        "addEventListener('hashchange',function(){ var e=document.querySelector(':target');"
+        "document.getElementById('o').textContent='tg:'+(e?e.id:'none'); });"
+        "</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://a.test/p", 1, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    tab_anchor a;
+    tab_page pg;
+    assert_int_equal(tab_anchor_query(t, "t", "#t", &a, &pg), TAB_OK);
+    assert_non_null(pg.view);
+    assert_int_not_equal(node_of_text(pg.view, "tg:t"), DOM_NODE_NONE);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    tab_close(t);
+}
+
 int main(int argc, char **argv) {
     /* The worker re-execs /proc/self/exe (this very test binary), so the first thing
      * any tab-linking main() must do is run the worker when invoked as one. */
@@ -4414,6 +4727,15 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_click_reports_default_prevented),
         cmocka_unit_test(test_anchor_query_resolves),
         cmocka_unit_test(test_anchor_query_push_fires_hashchange),
+        cmocka_unit_test(test_js_hash_set_is_fragment_nav),
+        cmocka_unit_test(test_js_fragment_nav_variants),
+        cmocka_unit_test(test_js_hash_click_hashchange_old_url),
+        cmocka_unit_test(test_js_hash_replace_keeps_length),
+        cmocka_unit_test(test_scroll_requests_travel),
+        cmocka_unit_test(test_scroll_request_hostile_values),
+        cmocka_unit_test(test_anchor_scroll_margin_padding),
+        cmocka_unit_test(test_anchor_target_pseudo),
+        cmocka_unit_test(test_anchor_target_js),
         cmocka_unit_test(test_event_ipc_via_tab_eval),
         cmocka_unit_test(test_mouse_ipc_round_trip),
         cmocka_unit_test(test_focus_ipc_round_trip),

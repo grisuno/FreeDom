@@ -110,6 +110,8 @@ static void fill_css_node(lxb_dom_element_t *e, cch_node *node) {
      * the ASan build did not. Zero-init by construction so the next field added to
      * css_element cannot repeat it. */
     node->el = (css_element){ 0 };
+    lxb_dom_document_t *owner = lxb_dom_interface_node(e)->owner_document;
+    if (owner != NULL && owner->user == (void *)e) node->el.state |= CSEL_STATE_TARGET;
     size_t nl = 0;
     const lxb_char_t *ln = lxb_dom_element_local_name(e, &nl);
     size_t tn = (ln != NULL && nl > 0 && nl < sizeof node->tag) ? nl : 0;
@@ -487,4 +489,13 @@ int cch_element_matches_any(lxb_dom_element_t *el, const css_sel *sels, size_t n
         if (cch_element_matches(el, &sels[k])) return 1;
     }
     return 0;
+}
+
+int cch_set_target(lxb_dom_node_t *doc_node, lxb_dom_element_t *el) {
+    if (doc_node == NULL) return 0;
+    lxb_dom_document_t *d = (doc_node->type == LXB_DOM_NODE_TYPE_DOCUMENT)
+                          ? lxb_dom_interface_document(doc_node) : doc_node->owner_document;
+    if (d == NULL || d->user == (void *)el) return 0;
+    d->user = (void *)el;
+    return 1;
 }

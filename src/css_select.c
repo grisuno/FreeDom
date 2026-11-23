@@ -917,8 +917,9 @@ static int pseudo_matches(const css_pseudo_match *pm, const css_element *el,
                    nth_matches(pm->a, pm->b, el->nsib_of_type - el->nth_of_type + 1);
         /* R2: element-state pseudos */
         case PSEUDO_EMPTY:          return el->child_count == 0;
-        case PSEUDO_TARGET:         return (target_id != NULL && el->id != NULL &&
-                                           strcmp(el->id, target_id) == 0);
+        case PSEUDO_TARGET:         return (el->state & CSEL_STATE_TARGET) != 0 ||
+                                           (target_id != NULL && el->id != NULL &&
+                                            strcmp(el->id, target_id) == 0);
         case PSEUDO_LANG: {
             /* Match if element's lang attribute starts with pm->lang (e.g. "en"
              * matches "en", "en-US"). Fail closed on missing attr. */

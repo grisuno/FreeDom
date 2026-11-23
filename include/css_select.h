@@ -49,7 +49,8 @@ enum {
     CSEL_STATE_ACTIVE         = 1u << 1,
     CSEL_STATE_FOCUS          = 1u << 2,
     CSEL_STATE_FOCUS_WITHIN   = 1u << 3,
-    CSEL_STATE_FOCUS_VISIBLE  = 1u << 4
+    CSEL_STATE_FOCUS_VISIBLE  = 1u << 4,
+    CSEL_STATE_TARGET         = 1u << 5   /* the document's indicated element (spec/anchor.md 3c) */
 };
 
 /* Pseudo-class kind (Hito 23b-9). NEVER covers :visited (Zero Knowledge: no
