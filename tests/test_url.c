@@ -501,6 +501,36 @@ static void test_split_fragment_without_query(void **state) {
     assert_span(u.hash, u.hash_len, "#sec");
 }
 
+/* The read side of `location` also decomposes a local file:// page (spec/anchor.md):
+ * origin is opaque ("null"), host empty; url_split itself stays https-only. */
+static void test_split_location_file(void **state) {
+    (void)state;
+    url_parts u;
+    assert_int_equal(url_split_location("file:///d/p.html?q=1#t1", &u), URL_OK);
+    assert_span(u.protocol, u.protocol_len, "file:");
+    assert_span(u.origin, u.origin_len, "null");
+    assert_int_equal(u.host_len, 0);
+    assert_int_equal(u.hostname_len, 0);
+    assert_int_equal(u.port_len, 0);
+    assert_span(u.pathname, u.pathname_len, "/d/p.html");
+    assert_span(u.search, u.search_len, "?q=1");
+    assert_span(u.hash, u.hash_len, "#t1");
+    /* WHATWG: an empty fragment reads as "" (the href keeps its '#') */
+    assert_int_equal(url_split_location("file:///d/p.html#", &u), URL_OK);
+    assert_int_equal(u.hash_len, 0);
+    assert_int_equal(url_split_location("https://h.test/p?#", &u), URL_OK);
+    assert_int_equal(u.hash_len, 0);
+    assert_int_equal(u.search_len, 0);
+    assert_int_equal(url_split_location("https://h.test/p#sec", &u), URL_OK);
+    assert_span(u.hash, u.hash_len, "#sec");
+    assert_span(u.origin, u.origin_len, "https://h.test");
+    assert_int_not_equal(url_split_location("file://host/p", &u), URL_OK);  /* no remote file */
+    assert_int_not_equal(url_split_location("http://h.test/", &u), URL_OK);
+    assert_int_not_equal(url_split_location("file:relative", &u), URL_OK);
+    assert_int_equal(url_split_location(NULL, &u), URL_ERR_NULL_ARG);
+    assert_int_not_equal(url_split("file:///d/p.html", &u), URL_OK);         /* unchanged */
+}
+
 static void test_split_ipv6_literal_with_port(void **state) {
     (void)state;
     url_parts u;
@@ -685,6 +715,18 @@ static void test_history_target_file_query_fragment_only(void **state) {
                      URL_ERR_NOT_LOCAL);
     assert_int_equal(url_history_target("file:///d/p.html", "https://a.test/", out, sizeof out),
                      URL_ERR_NOT_LOCAL);
+    /* The stored absolute URL of an entry of the SAME document (Back/Forward re-resolves
+     * it, spec/anchor.md): accepted as is; another document still is not. */
+    assert_int_equal(url_history_target("file:///d/p.html#t1", "file:///d/p.html#", out, sizeof out),
+                     URL_OK);
+    assert_string_equal(out, "file:///d/p.html#");
+    assert_int_equal(url_history_target("file:///d/p.html?a#t1", "file:///d/p.html?b", out, sizeof out),
+                     URL_OK);
+    assert_string_equal(out, "file:///d/p.html?b");
+    assert_int_equal(url_history_target("file:///d/p.html", "file:///d/q.html#x", out, sizeof out),
+                     URL_ERR_NOT_LOCAL);
+    assert_int_equal(url_history_target("file:///d/p.html", "file:///d/p.htmlx", out, sizeof out),
+                     URL_ERR_NOT_LOCAL);
 }
 
 static void test_history_target_bad_args(void **state) {
@@ -733,6 +775,7 @@ int main(void) {
         cmocka_unit_test(test_split_query_without_fragment),
         cmocka_unit_test(test_split_fragment_without_query),
         cmocka_unit_test(test_split_ipv6_literal_with_port),
+        cmocka_unit_test(test_split_location_file),
         cmocka_unit_test(test_split_fail_closed_non_https),
     };
     const struct CMUnitTest extract_tests[] = {

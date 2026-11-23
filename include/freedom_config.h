@@ -30,6 +30,12 @@
  * one is in flight (the paint itself paces the frames). */
 #define FC_SMOOTH_SCROLL_MS 150.0
 #define FC_SMOOTH_SCROLL_FRAME_MS 8
+/* A fragment jump under `scroll-behavior: smooth` crosses a whole page, not a wheel
+ * notch: longer, like Firefox's smooth scrollIntoView (spec/anchor.md). */
+#define FC_SMOOTH_SCROLL_ANCHOR_MS 320.0
+/* How long a landed document's fragment is re-applied while its height still moves
+ * (late images, scripts) and the user has not scrolled (spec/anchor.md 3). */
+#define FC_ANCHOR_HOLD_MS 6000u
 
 /* Viewport height (px) the headless render reports to a trusted page's JS
  * (window.innerHeight, spec/js_geom.md); the parity harness's reference height. */

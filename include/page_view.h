@@ -875,6 +875,9 @@ typedef struct pv_view {
     /* Root insets (top, right, bottom, left) in px: the UA body margin on every
      * side the author left undeclared (pv_root_insets), 0 elsewhere. */
     int         root_m[4];
+    /* 1 when the root <html> computes scroll-behavior: smooth (CSSOM View 12.1: the
+     * value on <body> is NOT propagated to the viewport). spec/anchor.md. */
+    int         scroll_smooth;
 } pv_view;
 
 /* The UA stylesheet's body margin (HTML Rendering 15.3.1). */

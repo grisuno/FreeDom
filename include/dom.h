@@ -60,6 +60,10 @@ dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id);
  * found); with several live matches the first in tree order. DOM_NODE_NONE otherwise. */
 dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id);
 
+/* Nonzero iff node is a valid element that is IN the document tree (a node a script
+ * detached stays indexed but is not connected). NULL idx / invalid node => 0. */
+int dom_is_connected(const dom_index *idx, dom_node_id node);
+
 /* Writes up to cap matching ids (in document order) into out; returns the total
  * match count (which may exceed cap, so the caller can size a buffer). */
 size_t dom_get_by_tag(const dom_index *idx, const char *tag,

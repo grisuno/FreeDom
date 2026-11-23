@@ -4407,6 +4407,27 @@ static void test_body_background_propagates_to_canvas(void **state) {
     hp_document_free(doc);
 }
 
+/* scroll-behavior: smooth on the ROOT reaches the view; on <body> it does not propagate to
+ * the viewport (CSSOM View 12.1, spec/anchor.md). */
+static void test_root_scroll_behavior(void **state) {
+    (void)state;
+    const char *cases[][2] = {
+        { "<html><head><style>html{scroll-behavior:smooth}</style></head><body><p>x</p></body></html>", "1" },
+        { "<html style='scroll-behavior:smooth'><body><p>x</p></body></html>", "1" },
+        { "<html><head><style>body{scroll-behavior:smooth}</style></head><body><p>x</p></body></html>", "0" },
+        { "<html><head><style>html{scroll-behavior:smooth}html{scroll-behavior:auto}</style></head><body><p>x</p></body></html>", "0" },
+        { "<p>x</p>", "0" },
+    };
+    for (size_t i = 0; i < sizeof cases / sizeof cases[0]; ++i) {
+        hp_document *doc = parse(cases[i][0]);
+        pv_view *v = NULL;
+        assert_int_equal(pv_build(doc, &v), PV_OK);
+        assert_int_equal(v->scroll_smooth, cases[i][1][0] - '0');
+        pv_free(v);
+        hp_document_free(doc);
+    }
+}
+
 /* `mask` reaches the box: a masked element registers a box (it is composed through a group)
  * carrying its layer count, composite and clip. */
 static void test_mask_reaches_the_box(void **state) {
@@ -6131,6 +6152,7 @@ int main(void) {
         cmocka_unit_test(test_before_box_of_hidden_only_host_emitted_once),
         cmocka_unit_test(test_mask_reaches_the_box),
         cmocka_unit_test(test_body_background_propagates_to_canvas),
+        cmocka_unit_test(test_root_scroll_behavior),
         cmocka_unit_test(test_before_box_on_host_with_only_element_children),
         cmocka_unit_test(test_pseudo_display_none_generates_nothing),
         cmocka_unit_test(test_inline_pseudo_registers_no_box),

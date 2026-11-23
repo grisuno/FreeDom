@@ -14,6 +14,7 @@
 #define _GNU_SOURCE
 
 #include "tab.h"
+#include "anchor.h"
 #include "css_gradient.h"
 #include "flex_layout.h"
 
@@ -175,7 +176,7 @@ enum { OP_LOAD = 1, OP_EVAL = 2, OP_QUIT = 3, OP_DECODE_IMAGE = 4, OP_CLICK = 5,
        OP_TICK = 6, OP_SUBMIT = 7, OP_EVENT = 8, OP_MOUSE = 9,
        OP_DECODE_IMAGE_DATA = 10, OP_GEOM = 11, OP_POPSTATE = 12, OP_WS_EVENT = 13,
        /* OP_TICK whose reply may omit the view when the document is untouched (spec/tab.md). */
-       OP_TICK_LAZY = 14 };
+       OP_TICK_LAZY = 14, OP_ANCHOR = 15 };
 
 /* The ok word of a view reply: 0 failed, 1 a full view follows, 2 unchanged (lazy tick). */
 enum { VIEW_REPLY_FAIL = 0, VIEW_REPLY_FULL = 1, VIEW_REPLY_UNCHANGED = 2 };
@@ -759,11 +760,11 @@ static int child_load(child_state *cs, const char *html, size_t len, int run_js,
      * opaque. Installed regardless of run_js so the REPL works on any page. */
     fb_buffer_reset(&cs->log);
     (void)jd_install_console(js, &cs->log);
-    /* Install a real `location` over the page URL. url_split is https-only; a local
-     * file:// (or empty) URL still gets href + navigation capture (parts == NULL). */
+    /* Install a real `location` over the page URL (https, or a local file:// page with an
+     * opaque origin); any other URL still gets href + navigation capture (parts == NULL). */
     if (page_url != NULL && page_url[0] != '\0') {
         url_parts parts;
-        int have = (url_split(page_url, &parts) == URL_OK);
+        int have = (url_split_location(page_url, &parts) == URL_OK);
         (void)jd_set_location(js, page_url, have ? &parts : NULL);
     }
     /* Network APIs (XMLHttpRequest/fetch) are installed ONLY when the trusted parent
@@ -1263,11 +1264,12 @@ static int write_view_raw(int wfd, const pv_view *v) {
      * are pv_view-level fields (not per-run or per-box). Written after the box
      * tree; read_view reads them in the same order. */
     {
-        int32_t view_hdr[8] = {
+        int32_t view_hdr[9] = {
             (int32_t)v->canvas_bg, (int32_t)v->html_max_width,
             (int32_t)v->html_margin_top, (int32_t)v->html_center,
             (int32_t)v->root_m[0], (int32_t)v->root_m[1],
             (int32_t)v->root_m[2], (int32_t)v->root_m[3],
+            (int32_t)v->scroll_smooth,
         };
         if (write_full(wfd, view_hdr, sizeof view_hdr) != 0) return -1;
     }
@@ -2241,6 +2243,7 @@ static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
     pv_view *view = NULL;
     int ok = 0;
     int unchanged = 0;
+    int32_t default_prevented = 0;
     uint64_t gen0 = dom_mutation_count(cs->idx);
     double tp0 = prof_now_ms();
     if (cs->js != NULL && cs->doc != NULL && cs->idx != NULL) {
@@ -2258,8 +2261,8 @@ static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
                 js_result_free(&r);
                 (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
             }
-        } else {
-            (void)jd_fire_click(cs->js, node_id);
+        } else if (jd_fire_click(cs->js, node_id) == 0 && node_id != DOM_NODE_NONE) {
+            default_prevented = 1;   /* a handler called preventDefault(): no link follow */
         }
         child_net_drain(cs, FC_NET_TICK_SETTLE_MS);
         if (cs->js != NULL) jd_flush_custom_elements(cs->js);
@@ -2321,6 +2324,7 @@ static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
             && write_full(wfd, &navlen, sizeof navlen) == 0
             && (navlen == 0 || write_full(wfd, navbuf, navlen) == 0)
             && write_full(wfd, &nav_replace, sizeof nav_replace) == 0
+            && write_full(wfd, &default_prevented, sizeof default_prevented) == 0
             && write_history(wfd, cs) == 0
             && write_opens(wfd, cs) == 0
             && write_ws(wfd, cs) == 0
@@ -2335,6 +2339,33 @@ static void child_handle_mutation_ex(int wfd, child_state *cs, int is_tick,
 
 static void child_handle_click(int wfd, child_state *cs, dom_node_id node_id) {
     child_handle_mutation(wfd, cs, 0, node_id, 0);
+}
+
+/* OP_ANCHOR reply: [TAG_RESULT][kind][n][nsub][n x handle][has_view], then -- only when
+ * has_view -- a full mutation reply. The target is resolved BEFORE the page hears about
+ * the navigation (HTML 7.4.6.4: scroll, then queue hashchange), and the header is written
+ * before any handler runs, so a handler's subrequest cannot interleave with it. */
+static void child_handle_anchor(int wfd, child_state *cs, const char *frag, const char *push_url) {
+    dom_node_id target = DOM_NODE_NONE;
+    int32_t kind = (cs->idx != NULL) ? (int32_t)anc_resolve(cs->idx, frag, &target) : ANC_NONE;
+    dom_node_id *h = (kind == ANC_ELEMENT)
+                   ? (dom_node_id *)calloc(ANC_MAX_HANDLES, sizeof *h) : NULL;
+    size_t n = 0, nsub = 0;
+    if (h != NULL) n = anc_collect(cs->idx, target, h, ANC_MAX_HANDLES, &nsub);
+    int32_t has_view = (push_url[0] != '\0' && cs->js != NULL && cs->doc != NULL
+                        && cs->idx != NULL) ? 1 : 0;
+    uint8_t rtag = TAG_RESULT;
+    int32_t hdr[3] = { kind, (int32_t)n, (int32_t)nsub };
+    int sent = write_full(wfd, &rtag, 1) == 0 && write_full(wfd, hdr, sizeof hdr) == 0;
+    for (size_t i = 0; sent && i < n; ++i) {
+        int32_t v = (int32_t)h[i];
+        sent = write_full(wfd, &v, sizeof v) == 0;
+    }
+    free(h);
+    if (!sent || write_full(wfd, &has_view, sizeof has_view) != 0 || !has_view) return;
+    (void)jd_frag_push(cs->js, push_url);
+    (void)js_pump_jobs(cs->js, TAB_MAX_JS_JOBS);
+    child_handle_mutation(wfd, cs, 0, DOM_NODE_NONE, 0);
 }
 
 /* Handles a generic DOM event (OP_EVENT). Reads: node_id:int32, event_type_len:size_t,
@@ -2655,7 +2686,7 @@ static void tab_worker_run(int rfd, int wfd) {
             op != OP_DECODE_IMAGE_DATA &&
             op != OP_CLICK && op != OP_TICK && op != OP_TICK_LAZY && op != OP_SUBMIT &&
             op != OP_EVENT && op != OP_MOUSE && op != OP_GEOM && op != OP_POPSTATE &&
-            op != OP_WS_EVENT)
+            op != OP_WS_EVENT && op != OP_ANCHOR)
             break; /* desync */
 
         /* The network window follows the operation, not just the load: a timer, a click or an
@@ -2665,7 +2696,8 @@ static void tab_worker_run(int rfd, int wfd) {
         cs.net_active = (cs.last_net && cs.js != NULL
                          && (op == OP_CLICK || op == OP_TICK || op == OP_TICK_LAZY || op == OP_EVENT
                              || op == OP_MOUSE
-                             || op == OP_GEOM || op == OP_POPSTATE || op == OP_WS_EVENT)) ? 1 : 0;
+                             || op == OP_GEOM || op == OP_POPSTATE || op == OP_WS_EVENT
+                             || op == OP_ANCHOR)) ? 1 : 0;
         if (cs.net_active) cs.subreq_used = 0;
 
         /* OP_WS_EVENT: [id][kind][code][len][bytes] -- an event of a WebSocket the
@@ -2685,6 +2717,20 @@ static void tab_worker_run(int rfd, int wfd) {
                 (void)jt_ws_event(cs.js, (int)wid, (int)wkind, (int)wcode, wdata, wlen);
             free(wdata);
             child_handle_mutation(wfd, &cs, 0, DOM_NODE_NONE, 0);
+            continue;
+        }
+
+        /* OP_ANCHOR: [flen:size_t][fragment][ulen:size_t][push url] (spec/anchor.md). */
+        if (op == OP_ANCHOR) {
+            char frag[ANC_MAX_FRAGMENT], purl[LN_MAX_TARGET];
+            size_t flen = 0, ulen = 0;
+            if (read_full(rfd, &flen, sizeof flen) != 0 || flen >= sizeof frag) break;
+            if (flen != 0 && read_full(rfd, frag, flen) != 0) break;
+            frag[flen] = '\0';
+            if (read_full(rfd, &ulen, sizeof ulen) != 0 || ulen >= sizeof purl) break;
+            if (ulen != 0 && read_full(rfd, purl, ulen) != 0) break;
+            purl[ulen] = '\0';
+            child_handle_anchor(wfd, &cs, frag, purl);
             continue;
         }
 
@@ -3494,7 +3540,7 @@ static int read_view_raw(int fd, pv_view **out) {
      * by write_view after the box tree. On EOF or mismatch, use defaults (no
      * canvas bg, no html constraints). Bounded against hostile worker. */
     {
-        int32_t view_hdr[8];
+        int32_t view_hdr[9];
         ssize_t rv = read_full(fd, view_hdr, sizeof view_hdr);
         if (rv == 0) {
             v->canvas_bg      = view_hdr[0];
@@ -3507,6 +3553,7 @@ static int read_view_raw(int fd, pv_view **out) {
                 int32_t m = view_hdr[4 + k];
                 v->root_m[k] = (m == PV_UA_BODY_MARGIN) ? PV_UA_BODY_MARGIN : 0;
             }
+            v->scroll_smooth = (view_hdr[8] == 1) ? 1 : 0;
         }
     }
 
@@ -4676,9 +4723,10 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     }
     char *navreq = NULL;
     size_t nlen = 0;
-    int32_t nav_replace = 0;
+    int32_t nav_replace = 0, default_prevented = 0;
     if (read_field(t->resp_fd, &navreq, &nlen) != 0
-     || read_full(t->resp_fd, &nav_replace, sizeof nav_replace) != 0) {
+     || read_full(t->resp_fd, &nav_replace, sizeof nav_replace) != 0
+     || read_full(t->resp_fd, &default_prevented, sizeof default_prevented) != 0) {
         free(title); free(text); free(navreq); pv_free(view);
         return io_failure(t);
     }
@@ -4744,6 +4792,7 @@ static tab_status tab_read_view_ex(tab *t, tab_page *out, int gesture) {
     out->unchanged = unchanged;
     out->nav_url = nav_url;
     out->nav_replace = (nav_url != NULL) ? (nav_replace ? 1 : 0) : 0;
+    out->default_prevented = (default_prevented == 1) ? 1 : 0;
     out->console = console;
     out->next_timer_ms = (next_ms >= 0) ? (int)next_ms : -1;
     t->lazy_ok = 1;                    /* the caller now holds (or kept) the current view */
@@ -5130,4 +5179,67 @@ void tab_set_storage(tab *t, const char *blob, size_t len) {
     memcpy(c, blob, len);
     t->storage_in = c;
     t->storage_in_len = len;
+}
+
+void tab_anchor_free(tab_anchor *a) {
+    if (a == NULL) return;
+    free(a->handles);
+    memset(a, 0, sizeof *a);
+}
+
+tab_status tab_anchor_query(tab *t, const char *fragment, const char *push_url,
+                            tab_anchor *out, tab_page *page) {
+    tab_async_sync(t);
+    if (out != NULL) memset(out, 0, sizeof *out);
+    if (page != NULL) memset(page, 0, sizeof *page);
+    if (t == NULL || fragment == NULL || out == NULL || page == NULL) return TAB_ERR_NULL_ARG;
+    size_t flen = strlen(fragment);
+    if (flen >= ANC_MAX_FRAGMENT) return TAB_OK;          /* ANC_NONE: never a partial id */
+    const char *u = (push_url != NULL) ? push_url : "";
+    size_t ulen = strlen(u);
+    if (ulen >= LN_MAX_TARGET) return TAB_ERR_TOO_LARGE;
+    tab_refresh_alive(t);
+    if (!t->alive) return TAB_ERR_DEAD;
+
+    uint8_t op = OP_ANCHOR;
+    if (write_full(t->req_fd, &op, 1) != 0
+     || write_full(t->req_fd, &flen, sizeof flen) != 0
+     || (flen != 0 && write_full(t->req_fd, fragment, flen) != 0)
+     || write_full(t->req_fd, &ulen, sizeof ulen) != 0
+     || (ulen != 0 && write_full(t->req_fd, u, ulen) != 0)) {
+        tab_refresh_alive(t);
+        return t->alive ? TAB_ERR_IO : TAB_ERR_DEAD;
+    }
+    tab_status aw = tab_await_result(t);
+    if (aw != TAB_OK) return aw;
+    int32_t hdr[3];
+    if (read_full(t->resp_fd, hdr, sizeof hdr) != 0) return io_failure(t);
+    if (hdr[0] < ANC_NONE || hdr[0] > ANC_ELEMENT || hdr[1] < 0
+     || (uint32_t)hdr[1] > ANC_MAX_HANDLES || hdr[2] < 0 || hdr[2] > hdr[1]
+     || (hdr[0] != ANC_ELEMENT && hdr[1] != 0)) return io_failure(t);
+    size_t n = (size_t)hdr[1];
+    dom_node_id *h = NULL;
+    if (n != 0) {
+        h = (dom_node_id *)calloc(n, sizeof *h);
+        if (h == NULL) return io_failure(t);   /* the reply cannot be drained: resync by death */
+        for (size_t i = 0; i < n; ++i) {
+            int32_t v = 0;
+            if (read_full(t->resp_fd, &v, sizeof v) != 0) { free(h); return io_failure(t); }
+            h[i] = (dom_node_id)v;
+        }
+    }
+    int32_t has_view = 0;
+    if (read_full(t->resp_fd, &has_view, sizeof has_view) != 0 || (has_view != 0 && has_view != 1)
+     || (has_view && ulen == 0)) {
+        free(h);
+        return io_failure(t);
+    }
+    out->kind = (int)hdr[0];
+    out->handles = h;
+    out->n = n;
+    out->nsub = (size_t)hdr[2];
+    if (!has_view) return TAB_OK;
+    tab_status st = tab_read_view_ex(t, page, 0);
+    if (st != TAB_OK) tab_anchor_free(out);
+    return st;
 }

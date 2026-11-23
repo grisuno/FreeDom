@@ -303,6 +303,7 @@ rd_status rd_build(const pv_view *view, rdp_caps caps,
     d->html_margin_top = (view != NULL) ? view->html_margin_top : 0;
     for (int k = 0; k < 4; ++k) d->root_m[k] = (view != NULL) ? view->root_m[k] : 0;
     d->html_center = (view != NULL) ? view->html_center : 0;
+    d->scroll_smooth = (view != NULL) ? view->scroll_smooth : 0;
     d->author_css = caps.css ? 1 : 0;
 
     size_t n = pv_count(view);

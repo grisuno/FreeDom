@@ -659,6 +659,12 @@ url_status url_history_target(const char *base, const char *ref, char *out, size
         size_t cut = blen;
         if (ref[0] == '?')      cut = strcspn(base, "?#");
         else if (ref[0] == '#') cut = strcspn(base, "#");
+        else if (url_is_file(ref)) {
+            /* The absolute URL of an entry of this same document (Back/Forward). */
+            size_t bd = strcspn(base, "?#");
+            if (strcspn(ref, "?#") != bd || strncmp(ref, base, bd) != 0) return URL_ERR_NOT_LOCAL;
+            return copy_bounded(out, outsz, ref, rlen, "", 0);
+        }
         else if (ref[0] != '\0') return URL_ERR_NOT_LOCAL;
         return copy_bounded(out, outsz, base, cut, ref, rlen);
     }
@@ -676,5 +682,33 @@ url_status url_history_target(const char *base, const char *ref, char *out, size
     if (url_split(base, &pb) != URL_OK || url_split(out, &po) != URL_OK) return URL_ERR_NOT_HTTPS;
     if (pb.origin_len != po.origin_len
         || strncasecmp(pb.origin, po.origin, pb.origin_len) != 0) return URL_ERR_NOT_HTTPS;
+    return URL_OK;
+}
+
+url_status url_split_location(const char *url, url_parts *out) {
+    if (url == NULL || out == NULL) return URL_ERR_NULL_ARG;
+    if (strncmp(url, "file:///", 8) != 0) {
+        url_status st = url_split(url, out);
+        if (st == URL_OK && out->hash_len == 1) out->hash_len = 0;     /* "#" reads as "" */
+        if (st == URL_OK && out->search_len == 1) out->search_len = 0; /* "?" reads as "" */
+        return st;
+    }
+    memset(out, 0, sizeof *out);
+    size_t total = strlen(url);
+    static const char opaque[] = "null";       /* WHATWG: a file origin is opaque */
+    out->href = url;          out->href_len = total;
+    out->protocol = url;      out->protocol_len = 5;   /* "file:" */
+    out->origin = opaque;     out->origin_len = sizeof opaque - 1;
+    out->host = url + 7;      out->hostname = url + 7;  out->port = url + 7;
+    const char *rem = url + 7;                          /* the path's leading '/' */
+    size_t rem_len = total - 7;
+    size_t hpos = strcspn(rem, "#");
+    size_t qpos = strcspn(rem, "?#");
+    if (qpos > hpos) qpos = hpos;
+    out->pathname = rem;        out->pathname_len = qpos;
+    out->search   = rem + qpos; out->search_len   = hpos - qpos;
+    out->hash     = rem + hpos; out->hash_len     = rem_len - hpos;
+    if (out->hash_len == 1) out->hash_len = 0;          /* WHATWG: an empty fragment is "" */
+    if (out->search_len == 1) out->search_len = 0;
     return URL_OK;
 }

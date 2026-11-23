@@ -14,6 +14,7 @@
 #include <setjmp.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 #include <cmocka.h>
 
 #include "browser.h"
@@ -37,7 +38,7 @@ static browser_status fwd(browser_state *bs) {
 
 static void test_init(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
     assert_string_equal(bs.url_bar, "about:blank");
@@ -48,7 +49,7 @@ static void test_init(void **state) {
 
 static void test_navigate_history(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -78,7 +79,7 @@ static void test_navigate_history(void **state) {
 
 static void test_navigate_from_middle_discards_future(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -96,7 +97,7 @@ static void test_navigate_from_middle_discards_future(void **state) {
 
 static void test_back_forward_bounds(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -112,7 +113,7 @@ static void test_back_forward_bounds(void **state) {
 
 static void test_rejects_invalid_url(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -125,7 +126,7 @@ static void test_rejects_invalid_url(void **state) {
 
 static void test_accepts_https_and_file(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -139,7 +140,7 @@ static void test_accepts_https_and_file(void **state) {
 
 static void test_url_bar_editing(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -169,7 +170,7 @@ static void test_url_bar_editing(void **state) {
  * plain move collapses it. */
 static void test_url_bar_selection(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -213,7 +214,7 @@ static void test_url_bar_selection(void **state) {
 
 static void test_set_page(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -235,7 +236,7 @@ static void test_set_page(void **state) {
  * must store well-formed UTF-8, substituting '?' for any invalid byte. */
 static void test_set_page_sanitizes_invalid_utf8(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -269,7 +270,7 @@ static void test_set_page_sanitizes_invalid_utf8(void **state) {
 
 static void test_exceptions(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -294,7 +295,7 @@ static void test_exceptions(void **state) {
  * navigation drops a stale toast. */
 static void test_status_toast(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -326,7 +327,7 @@ static void test_status_toast(void **state) {
 
 static void test_status_truncates(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
 
@@ -345,7 +346,7 @@ static void test_status_truncates(void **state) {
 
 static void test_push_state_same_document(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
     assert_int_equal(nav(&bs, "https://a.test/"), BROWSER_OK);
@@ -378,7 +379,7 @@ static void test_push_state_same_document(void **state) {
 
 static void test_push_state_rejects_and_guards(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
     /* nothing to push onto */
@@ -430,7 +431,7 @@ static void test_closed_tabs(void **state) {
 
 static void test_stop_restores_history(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
     assert_int_equal(browser_has_pending(&bs), 0);
@@ -458,7 +459,7 @@ static void test_stop_restores_history(void **state) {
 
 static void test_commit_keeps_entry(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
     nav(&bs, "/a.html");
@@ -476,7 +477,7 @@ static void test_commit_keeps_entry(void **state) {
 
 static void test_navigate_replaces_pending(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
     nav(&bs, "/a.html");
@@ -504,7 +505,7 @@ static void test_navigate_replaces_pending(void **state) {
 
 static void test_multi_step_back_is_one_pending(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
     nav(&bs, "/a.html");
@@ -529,7 +530,7 @@ static void test_multi_step_back_is_one_pending(void **state) {
 
 static void test_pending_guards_push_state(void **state) {
     (void)state;
-    browser_state bs;
+    browser_state bs = {0};
     memset(&bs, 0, sizeof bs);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
     nav(&bs, "/a.html");
@@ -551,6 +552,42 @@ static void test_pending_guards_push_state(void **state) {
     assert_int_equal(browser_navigate(&bs, "/d.html"), BROWSER_OK);
     assert_int_equal(browser_init(&bs), BROWSER_OK);
     assert_int_equal(browser_has_pending(&bs), 0);
+    browser_free(&bs);
+}
+
+/* Each entry keeps the scroll offset it was left at (spec/anchor.md 3): same-document
+ * Back/Forward restore it; a pending navigation stashes and restores it with its entry. */
+static void test_entry_scroll(void **state) {
+    (void)state;
+    browser_state bs = {0};
+    assert_int_equal(browser_init(&bs), BROWSER_OK);
+    assert_true(browser_entry_scroll(&bs) == 0.0);
+    browser_set_entry_scroll(&bs, 99.0);                  /* no entry: no-op */
+    assert_int_equal(browser_navigate(&bs, "https://a.test/p"), BROWSER_OK);
+    browser_commit_pending(&bs);
+    assert_true(browser_entry_scroll(&bs) == 0.0);
+    browser_set_entry_scroll(&bs, 120.0);
+    assert_int_equal(browser_push_state(&bs, "https://a.test/p#s2"), BROWSER_OK);
+    assert_true(browser_entry_scroll(&bs) == 0.0);         /* a new entry starts at 0 */
+    browser_set_entry_scroll(&bs, 3400.0);
+    assert_int_equal(browser_back(&bs), BROWSER_OK);
+    browser_commit_pending(&bs);
+    assert_true(browser_entry_scroll(&bs) == 120.0);
+    /* navigating away from the first entry discards the future into the stash; Stop
+     * brings it back with its scroll */
+    assert_int_equal(browser_navigate(&bs, "https://b.test/"), BROWSER_OK);
+    assert_true(browser_entry_scroll(&bs) == 0.0);
+    assert_int_equal(browser_abort_pending(&bs), 1);
+    assert_true(browser_entry_scroll(&bs) == 120.0);
+    assert_int_equal(browser_forward(&bs), BROWSER_OK);
+    browser_commit_pending(&bs);
+    assert_true(browser_entry_scroll(&bs) == 3400.0);
+    browser_set_entry_scroll(&bs, NAN);                    /* non-finite: ignored */
+    assert_true(browser_entry_scroll(&bs) == 3400.0);
+    browser_set_entry_scroll(&bs, -5.0);                   /* negative: clamped to 0 */
+    assert_true(browser_entry_scroll(&bs) == 0.0);
+    browser_set_entry_scroll(NULL, 1.0);
+    assert_true(browser_entry_scroll(NULL) == 0.0);
     browser_free(&bs);
 }
 
@@ -577,6 +614,7 @@ int main(void) {
         cmocka_unit_test(test_navigate_replaces_pending),
         cmocka_unit_test(test_multi_step_back_is_one_pending),
         cmocka_unit_test(test_pending_guards_push_state),
+        cmocka_unit_test(test_entry_scroll),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

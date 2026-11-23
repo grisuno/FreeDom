@@ -481,3 +481,17 @@ mutadores de `dom.c`, que mueven el contador — sobrecuenta a proposito), y de 
 solo cambian en `OP_LOAD` (CSS externo, viewport, tema, reader). Contadores iguales PRUEBAN
 arbol igual; ante la duda el contador se mueve y se manda la vista. Fail-safe: un worker
 hostil que mienta "sin cambios" solo consigue que SU pagina no se repinte.
+
+## Ancla y `preventDefault` del clic (tanda 103, 2026-11-23)
+- **`OP_ANCHOR`** (`tab_anchor_query`, `spec/anchor.md`): pedido `[flen][fragmento][ulen][push]`
+  (`flen < ANC_MAX_FRAGMENT`, `ulen < LN_MAX_TARGET`, si no: desync). Respuesta
+  `[TAG_RESULT][kind][n][nsub][n×handle][has_view]` y, solo si `has_view`, una respuesta de
+  mutación completa. El destino se resuelve ANTES de que la página se entere (`__histFrag`:
+  entrada nueva, `location`, `hashchange`), y la cabecera sale antes de correr ningún oyente, así
+  una subpetición de un oyente no se intercala con ella. El padre valida `kind`, `n ≤
+  ANC_MAX_HANDLES`, `nsub ≤ n`, `n = 0` salvo `ANC_ELEMENT` y `has_view ∈ {0,1}` solo con `push`;
+  cualquier otra cosa es `io_failure` (worker muerto). Los handles solo se usan como clave en la
+  tabla de geometría del padre: uno inventado no se encuentra.
+- **`tab_page.default_prevented`**: la respuesta de mutación lleva un int32 tras `nav_replace`
+  (1 si un oyente de clic llamó `preventDefault()`); la GUI no sigue el enlace pulsado. Antes un
+  `<a href="…">` con un manejador que cancelaba navegaba igual.

@@ -43,6 +43,13 @@ char *jd_take_history(js_context *ctx, int *go);
  * range or no location is installed. */
 int jd_pop_state(js_context *ctx, int index);
 
+/* A same-document fragment navigation the parent already recorded (spec/anchor.md):
+ * pushes url (resolved by the page's own same-origin check, dom.histTarget) as a new
+ * entry of the page's history, moves location and dispatches hashchange when the URL
+ * changed. url is passed as a JS string value, never as source. Returns 1 when
+ * applied, 0 when refused (cross-origin, no location installed, NULL). */
+int jd_frag_push(js_context *ctx, const char *url);
+
 /* Reads and CLEARS the navigation the page's JS requested (globalThis.__navReq). Returns
  * 1 and copies the raw (unresolved) target into buf (bounded, NUL-terminated) with
  * *replace set from location.replace; returns 0 when no (non-empty) request is pending.

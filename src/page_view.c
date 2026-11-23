@@ -6132,6 +6132,7 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
     v->html_max_width = -1;
     v->html_margin_top = -1;
     v->html_center = 0;
+    v->scroll_smooth = 0;
     /* The document root node is NOT the <html> element — it is a DOCUMENT_NODE.
      * Find the <html> element by scanning from `root`. */
     lxb_dom_node_t *html_node = NULL;
@@ -6152,6 +6153,7 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
             v->html_margin_top = html_cs->margin_top;
         if (html_cs->margin_left == CSS_LEN_AUTO && html_cs->margin_right == CSS_LEN_AUTO)
             v->html_center = 1;
+        v->scroll_smooth = (html_cs->scroll_behavior == CSS_SB_SMOOTH) ? 1 : 0;
     }
     if (body != NULL) {
         const css_style *body_cs = cached_element_style_ref(lxb_dom_interface_element(body),

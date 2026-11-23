@@ -32,6 +32,7 @@
 
 #include "css.h"
 #include "tab.h"
+#include "anchor.h"
 #include "freedom_config.h"
 #include "css_import.h"
 #include "url.h"
@@ -4264,6 +4265,125 @@ static void test_load_view_codec_full_roundtrip(void **state) {
     tab_close(t);
 }
 
+/* A click handler's preventDefault() reaches the caller, so the GUI does not follow the
+ * clicked link (spec/anchor.md: `<a href="#" onclick="...;return false">` buttons). */
+static dom_node_id node_of_text(const pv_view *v, const char *text) {
+    for (size_t i = 0; i < pv_count(v); ++i) {
+        const pv_run *r = pv_at(v, i);
+        if (r->text != NULL && strcmp(r->text, text) == 0) return r->node_id;
+    }
+    return DOM_NODE_NONE;
+}
+
+static void test_click_reports_default_prevented(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><a id=a href=\"#x\">stop</a> <a id=b href=\"#y\">go</a>"
+        "<script>document.getElementById('a').addEventListener('click',function(e){"
+        "e.preventDefault();});</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_ex(t, H, sizeof H - 1, 1, &p), TAB_OK);
+    dom_node_id a = node_of_text(p.view, "stop"), b = node_of_text(p.view, "go");
+    tab_page_free(&p);
+    assert_int_not_equal(a, DOM_NODE_NONE);
+    assert_int_not_equal(b, DOM_NODE_NONE);
+    tab_page c;
+    assert_int_equal(tab_click(t, a, &c), TAB_OK);
+    assert_int_equal(c.default_prevented, 1);
+    tab_page_free(&c);
+    assert_int_equal(tab_click(t, b, &c), TAB_OK);
+    assert_int_equal(c.default_prevented, 0);
+    tab_page_free(&c);
+    tab_close(t);
+}
+
+/* OP_ANCHOR (spec/anchor.md): the worker resolves the fragment against the live DOM and
+ * returns the target's subtree handles, also for a page without JS. */
+static void test_anchor_query_resolves(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><p>intro</p><section id=sec><h2>Title</h2><p>body</p></section>"
+        "<a name=empty></a><p>after</p></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load(t, H, sizeof H - 1, &p), TAB_OK);
+    dom_node_id title = node_of_text(p.view, "Title"), after = node_of_text(p.view, "after");
+    tab_page_free(&p);
+    tab_anchor a;
+    tab_page pg;
+    assert_int_equal(tab_anchor_query(t, "sec", NULL, &a, &pg), TAB_OK);
+    assert_int_equal(a.kind, ANC_ELEMENT);
+    assert_int_equal(a.nsub, 3);                        /* section h2 p */
+    assert_true(a.n >= a.nsub);
+    int saw_title = 0;
+    for (size_t i = 0; i < a.nsub; ++i) saw_title |= (a.handles[i] == title);
+    assert_true(saw_title);
+    assert_null(pg.view);                               /* no push: no view */
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    assert_int_equal(tab_anchor_query(t, "empty", NULL, &a, &pg), TAB_OK);
+    assert_int_equal(a.kind, ANC_ELEMENT);
+    assert_int_equal(a.nsub, 1);
+    int saw_after = 0;
+    for (size_t i = a.nsub; i < a.n; ++i) saw_after |= (a.handles[i] == after);
+    assert_true(saw_after);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    assert_int_equal(tab_anchor_query(t, "", NULL, &a, &pg), TAB_OK);
+    assert_int_equal(a.kind, ANC_TOP);
+    assert_int_equal(a.n, 0);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    assert_int_equal(tab_anchor_query(t, "nope", NULL, &a, &pg), TAB_OK);
+    assert_int_equal(a.kind, ANC_NONE);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    tab_anchor_free(&a);                                /* idempotent */
+    assert_int_equal(tab_anchor_query(NULL, "x", NULL, &a, &pg), TAB_ERR_NULL_ARG);
+    tab_close(t);
+}
+
+/* With a push URL a JS page records the same-document entry, moves location and
+ * dispatches hashchange; the reply carries the re-derived view. */
+static void test_anchor_query_push_fires_hashchange(void **state) {
+    (void)state;
+    static const char H[] =
+        "<html><body><p id=out>idle</p><h2 id=s2>S2</h2>"
+        "<script>addEventListener('hashchange',function(e){"
+        "document.getElementById('out').textContent="
+        "location.hash+'|'+history.length+'|'+e.newURL;});</script></body></html>";
+    tab *t = NULL;
+    assert_int_equal(tab_open(&t), TAB_OK);
+    tab_page p;
+    assert_int_equal(tab_load_full(t, H, sizeof H - 1, "https://a.test/p", 1, 0, 0, &p), TAB_OK);
+    tab_page_free(&p);
+    tab_anchor a;
+    tab_page pg;
+    assert_int_equal(tab_anchor_query(t, "s2", "https://a.test/p#s2", &a, &pg), TAB_OK);
+    assert_int_equal(a.kind, ANC_ELEMENT);
+    assert_non_null(pg.view);
+    assert_int_not_equal(node_of_text(pg.view, "#s2|2|https://a.test/p#s2"), DOM_NODE_NONE);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    /* Back to the first entry: popstate + hashchange move the page's location back */
+    assert_int_equal(tab_popstate(t, 0, &pg), TAB_OK);
+    assert_non_null(pg.view);
+    assert_int_not_equal(node_of_text(pg.view, "|2|https://a.test/p"), DOM_NODE_NONE);
+    tab_page_free(&pg);
+    assert_int_equal(tab_popstate(t, 1, &pg), TAB_OK);
+    tab_page_free(&pg);
+    /* a cross-origin push is refused by the page's own history (no event) */
+    assert_int_equal(tab_anchor_query(t, "s2", "https://evil.test/#s2", &a, &pg), TAB_OK);
+    assert_non_null(pg.view);
+    assert_int_not_equal(node_of_text(pg.view, "#s2|2|https://a.test/p#s2"), DOM_NODE_NONE);
+    tab_anchor_free(&a);
+    tab_page_free(&pg);
+    tab_close(t);
+}
+
 int main(int argc, char **argv) {
     /* The worker re-execs /proc/self/exe (this very test binary), so the first thing
      * any tab-linking main() must do is run the worker when invoked as one. */
@@ -4291,6 +4411,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_load_carries_node_id),
         cmocka_unit_test(test_load_carries_oof_flag),
         cmocka_unit_test(test_click_runs_handler_and_returns_view),
+        cmocka_unit_test(test_click_reports_default_prevented),
+        cmocka_unit_test(test_anchor_query_resolves),
+        cmocka_unit_test(test_anchor_query_push_fires_hashchange),
         cmocka_unit_test(test_event_ipc_via_tab_eval),
         cmocka_unit_test(test_mouse_ipc_round_trip),
         cmocka_unit_test(test_focus_ipc_round_trip),

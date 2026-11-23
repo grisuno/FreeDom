@@ -10,6 +10,7 @@
 #include "util.h"
 
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 
 static void free_page(browser_state *bs) {
@@ -32,8 +33,10 @@ static void free_history(browser_state *bs) {
     for (size_t i = 0; i < bs->history_len; ++i) free(bs->history[i]);
     free(bs->history);
     free(bs->history_doc);
+    free(bs->history_scroll);
     bs->history = NULL;
     bs->history_doc = NULL;
+    bs->history_scroll = NULL;
     bs->history_len = 0;
     bs->history_cap = 0;
     bs->history_pos = 0;
@@ -45,8 +48,10 @@ static void free_stash(browser_state *bs) {
     for (size_t i = 0; i < bs->stash_len; ++i) free(bs->stash[i]);
     free(bs->stash);
     free(bs->stash_doc);
+    free(bs->stash_scroll);
     bs->stash = NULL;
     bs->stash_doc = NULL;
+    bs->stash_scroll = NULL;
     bs->stash_len = 0;
 }
 
@@ -237,13 +242,19 @@ static browser_status append_entry(browser_state *bs, const char *url, int doc, 
     size_t keep = (bs->history_len == 0) ? 0 : bs->history_pos + 1;
     size_t tail = bs->history_len - keep;
     if (stash && tail > 0) {
-        char **sh = (char **)calloc(tail, sizeof *sh);
-        int   *sd = (int *)calloc(tail, sizeof *sd);
-        if (sh == NULL || sd == NULL) { free(sh); free(sd); return BROWSER_ERR_OOM; }
+        char  **sh = (char **)calloc(tail, sizeof *sh);
+        int    *sd = (int *)calloc(tail, sizeof *sd);
+        double *ss = (double *)calloc(tail, sizeof *ss);
+        if (sh == NULL || sd == NULL || ss == NULL) {
+            free(sh); free(sd); free(ss);
+            return BROWSER_ERR_OOM;
+        }
         memcpy(sh, bs->history + keep, tail * sizeof *sh);
         memcpy(sd, bs->history_doc + keep, tail * sizeof *sd);
+        memcpy(ss, bs->history_scroll + keep, tail * sizeof *ss);
         bs->stash = sh;
         bs->stash_doc = sd;
+        bs->stash_scroll = ss;
         bs->stash_len = tail;
         bs->history_len = keep;
     } else if (tail > 0) {
@@ -258,12 +269,16 @@ static browser_status append_entry(browser_state *bs, const char *url, int doc, 
         int *nd = (int *)realloc(bs->history_doc, new_cap * sizeof *nd);
         if (nd == NULL) return BROWSER_ERR_OOM;
         bs->history_doc = nd;
+        double *nsc = (double *)realloc(bs->history_scroll, new_cap * sizeof *nsc);
+        if (nsc == NULL) return BROWSER_ERR_OOM;
+        bs->history_scroll = nsc;
         bs->history_cap = new_cap;
     }
     char *copy = xstrdup(url);
     if (copy == NULL) return BROWSER_ERR_OOM;
     bs->history[bs->history_len] = copy;
     bs->history_doc[bs->history_len] = doc;
+    bs->history_scroll[bs->history_len] = 0.0;
     bs->history_len++;
     bs->history_pos = bs->history_len - 1;
     browser_set_url_bar(bs, url);
@@ -281,6 +296,7 @@ browser_status browser_navigate(browser_state *bs, const char *url) {
         for (size_t i = 0; i < bs->stash_len; ++i) {
             bs->history[bs->history_len] = bs->stash[i];
             bs->history_doc[bs->history_len] = bs->stash_doc[i];
+            bs->history_scroll[bs->history_len] = bs->stash_scroll[i];
             bs->history_len++;
             bs->stash[i] = NULL;
         }
@@ -291,9 +307,10 @@ browser_status browser_navigate(browser_state *bs, const char *url) {
     }
     bs->next_doc++;
     {
-        char **sh = bs->stash; int *sd = bs->stash_doc; size_t sl = bs->stash_len;
+        char **sh = bs->stash; int *sd = bs->stash_doc; double *ss = bs->stash_scroll;
+        size_t sl = bs->stash_len;
         begin_pending(bs, PENDING_NEW);
-        bs->stash = sh; bs->stash_doc = sd; bs->stash_len = sl;
+        bs->stash = sh; bs->stash_doc = sd; bs->stash_scroll = ss; bs->stash_len = sl;
     }
     bs->pending_pos = pos0;
     clear_status(bs);
@@ -319,6 +336,16 @@ browser_status browser_replace_state(browser_state *bs, const char *url) {
     bs->history[bs->history_pos] = copy;
     browser_set_url_bar(bs, url);
     return BROWSER_OK;
+}
+
+void browser_set_entry_scroll(browser_state *bs, double scroll) {
+    if (bs == NULL || bs->history_len == 0 || !isfinite(scroll)) return;
+    bs->history_scroll[bs->history_pos] = (scroll < 0.0) ? 0.0 : scroll;
+}
+
+double browser_entry_scroll(const browser_state *bs) {
+    if (bs == NULL || bs->history_len == 0) return 0.0;
+    return bs->history_scroll[bs->history_pos];
 }
 
 int browser_entry_doc(const browser_state *bs, size_t pos) {
@@ -601,6 +628,7 @@ int browser_abort_pending(browser_state *bs) {
         for (size_t i = 0; i < bs->stash_len; ++i) {
             bs->history[bs->history_len] = bs->stash[i];
             bs->history_doc[bs->history_len] = bs->stash_doc[i];
+            bs->history_scroll[bs->history_len] = bs->stash_scroll[i];
             bs->history_len++;
             bs->stash[i] = NULL;
         }

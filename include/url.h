@@ -146,6 +146,13 @@ typedef struct url_parts {
  * points into url. */
 url_status url_split(const char *url, url_parts *out);
 
+/* As url_split, for the read side of `location` only: also decomposes a local
+ * "file:///path" URL (spec/anchor.md) -- protocol "file:", origin the opaque "null"
+ * (a static string, not a span of url), host/hostname/port empty, then pathname /
+ * search / hash. A file URL with an authority ("file://host/") is refused. Never use
+ * it for a network or storage decision: those take url_split (https-only). */
+url_status url_split_location(const char *url, url_parts *out);
+
 /* Extracts HTTP Basic Auth credentials from a URL of the form
  * "https://user:password@host/path..." or "https://user@host/path...".
  * On success, writes the cleaned URL (without userinfo) into out, writes the

@@ -366,6 +366,10 @@ dom_node_id dom_get_element_by_id(const dom_index *idx, const char *id) {
     return (e != NULL && e->count > 0) ? e->ids[0] : DOM_NODE_NONE;
 }
 
+int dom_is_connected(const dom_index *idx, dom_node_id node) {
+    return idx != NULL && valid_el(idx, node) && node_in_document(idx->nodes[node]);
+}
+
 dom_node_id dom_get_connected_by_id(const dom_index *idx, const char *id) {
     if (idx == NULL || id == NULL) return DOM_NODE_NONE;
     const sm_entry *e = sm_find(&idx->by_id, id, strlen(id));

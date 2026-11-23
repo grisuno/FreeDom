@@ -78,6 +78,14 @@ el worker lleva en su propio `history`. `browser_entry_doc(bs, pos)` expone el i
 GUI decida, al ir Atrás/Adelante, entre **popstate** (mismo documento: sin recarga) y recarga.
 `url_is_allowed` sigue aplicando a toda URL que entra al historial.
 
+### 3b'. Scroll por entrada (tanda 103, 2026-11-23)
+
+`browser_set_entry_scroll(bs, y)` / `browser_entry_scroll(bs)`: cada entrada guarda el
+desplazamiento con el que se la dejó (`history_scroll`, paralelo a `history_doc`; viaja al
+`stash` y vuelve con él). La GUI lo escribe al salir de una entrada (fragmento, Atrás/Adelante) y
+lo lee cuando un Atrás/Adelante del MISMO documento aterriza (`spec/anchor.md` §3). Una entrada
+nueva empieza en 0; un valor no finito se ignora y uno negativo se guarda como 0.
+
 ### 3c. Navegación provisional y Detener (tanda 97, 2026-11-22)
 
 Una navegación de red tarda; hasta que la respuesta llega la página vieja sigue en pantalla.

@@ -71,5 +71,6 @@ int    sms_active(const sms_state *s);
 
 ## Fuera de alcance
 
-Física de inercia (*fling*) tras soltar el dedo, desplazamiento horizontal, desplazamiento
-suave de contenedores `overflow:auto` internos y de `scroll-behavior: smooth` del autor.
+Física de inercia (*fling*) tras soltar el dedo, desplazamiento horizontal y desplazamiento
+suave de contenedores `overflow:auto` internos. `scroll-behavior: smooth` del autor anima los
+saltos a un fragmento desde la tanda 103 (`spec/anchor.md`, `FC_SMOOTH_SCROLL_ANCHOR_MS`).

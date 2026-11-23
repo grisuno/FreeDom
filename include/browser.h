@@ -30,6 +30,7 @@ typedef struct browser_state {
     size_t history_cap;
     size_t history_pos;
     int   *history_doc;  /* document id per entry (same-document pushState entries share it) */
+    double *history_scroll; /* scroll offset each entry was left at (spec/anchor.md 3) */
     int    next_doc;     /* id the next browser_navigate opens */
 
     /* Provisional navigation (spec/browser.md 3c): set from navigate/back/forward until
@@ -38,6 +39,7 @@ typedef struct browser_state {
     size_t pending_pos;      /* history_pos before the pending navigation */
     char **stash;            /* forward entries navigate discarded, restored on abort */
     int   *stash_doc;
+    double *stash_scroll;
     size_t stash_len;
     char  *pending_title;    /* the committed page's title/text, restored on abort */
     char  *pending_text;
@@ -112,6 +114,13 @@ int browser_entry_doc(const browser_state *bs, size_t pos);
 /* Index of the current entry within its document's contiguous run of entries (0 for
  * the entry the document was loaded at) -- the worker's own history index. */
 int browser_doc_index(const browser_state *bs);
+
+/* Scroll offset of the CURRENT entry (spec/anchor.md 3): set it when leaving an entry,
+ * read it when a same-document Back/Forward lands on one. A new entry starts at 0;
+ * a non-finite value is ignored and a negative one is stored as 0. NULL-safe; 0 with
+ * no entry. */
+void   browser_set_entry_scroll(browser_state *bs, double scroll);
+double browser_entry_scroll(const browser_state *bs);
 
 /* Query helpers. */
 int  browser_can_back(const browser_state *bs);

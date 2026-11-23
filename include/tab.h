@@ -93,6 +93,9 @@ typedef struct tab_page {
      * drives it through the normal load path, re-applying ALL network policy. */
     char    *nav_url;
     int      nav_replace;
+    /* 1 when a click handler called preventDefault() (mutation replies to tab_click only):
+     * the caller must not follow the clicked link (HTML 4.6.4 activation behavior). */
+    int      default_prevented;
     /* Console output (console.* calls + any uncaught script exception) captured
      * while loading the page, for the Freebug devtools. Owned; drained from the
      * worker. Empty when JS did not run. Release via tab_page_free. */
@@ -407,6 +410,24 @@ tab_status tab_set_geometry(tab *t, const jg_table *g);
  * entry): the worker moves its history there, updates location, dispatches
  * popstate (+ hashchange) and re-derives the view like a click. */
 tab_status tab_popstate(tab *t, int index, tab_page *out);
+
+/* The indicated part of the loaded document for fragment (spec/anchor.md, OP_ANCHOR).
+ * out->kind is an anc_kind; for ANC_ELEMENT out->handles holds the target's subtree in
+ * preorder (out->nsub handles) followed by the elements after it, at most
+ * ANC_MAX_HANDLES -- live DOM handles, the same ids the view carries. push_url (NULL or
+ * "" for none) is the same-document URL the parent just pushed: a page with JS records
+ * it in its own history, moves location and dispatches hashchange, and *page then
+ * receives the re-derived view (release with tab_page_free); otherwise *page is empty.
+ * A fragment of ANC_MAX_FRAGMENT bytes or more resolves to ANC_NONE without asking.
+ * out must be released with tab_anchor_free (idempotent). */
+typedef struct tab_anchor {
+    int          kind;
+    dom_node_id *handles;
+    size_t       n, nsub;
+} tab_anchor;
+tab_status tab_anchor_query(tab *t, const char *fragment, const char *push_url,
+                            tab_anchor *out, tab_page *page);
+void tab_anchor_free(tab_anchor *a);
 
 /* Delivers a WebSocket event the parent's connection produced (open, a text/binary
  * message of len bytes, close with code/reason, error) to the page and re-derives the

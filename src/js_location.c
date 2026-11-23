@@ -52,7 +52,7 @@ JSValue jl_m_hist_target(JSContext *ctx, JSValueConst this_val, int argc, JSValu
     size_t n = strlen(out);
     url_parts parts;
     jd_lp_set(ctx, lp, "href", out, n);
-    if (url_split(out, &parts) == URL_OK) {
+    if (url_split_location(out, &parts) == URL_OK) {
         jd_lp_set(ctx, lp, "protocol", parts.protocol, parts.protocol_len);
         jd_lp_set(ctx, lp, "origin",   parts.origin,   parts.origin_len);
         jd_lp_set(ctx, lp, "host",     parts.host,     parts.host_len);
@@ -126,6 +126,16 @@ static const char JD_LOCATION_SHIM[] =
     "    var nu=lp.href||''; if(old!==nu&&old.split('#')[0]===nu.split('#')[0]){"
     "      var he=__G.__mkEvent('hashchange',{}); he.oldURL=old; he.newURL=nu; he.isTrusted=true;"
     "      __G.dispatchEvent(he); }"
+    "    return 1; };"
+    /* A same-document fragment navigation the PARENT already pushed (spec/anchor.md):
+     * mirror it as a new entry, move location and queue hashchange, no history op. */
+    "  __G.__histFrag=function(u){ var old=lp.href||'';"
+    "    var p=dom.histTarget(old,String(u)); if(!p) return 0;"
+    "    if(hi+1<HMAX){ H.splice(hi+1); H.push({url:p.href,state:null}); hi=H.length-1; }"
+    "    else H[hi]={url:p.href,state:null};"
+    "    lp=p; __G.__locParts=p; var nu=p.href;"
+    "    if(old!==nu){ var he=__G.__mkEvent('hashchange',{}); he.oldURL=old; he.newURL=nu;"
+    "      he.isTrusted=true; __G.dispatchEvent(he); }"
     "    return 1; };"
     "  try{ if(typeof document!=='undefined'){"
     "    Object.defineProperty(document,'location',{configurable:true,enumerable:true,"
@@ -246,6 +256,29 @@ char *jd_take_history(js_context *ctx, int *go) {
     JS_FreeValue(jsctx, gv);
     JS_FreeValue(jsctx, r);
     return out;
+}
+
+int jd_frag_push(js_context *ctx, const char *url) {
+    if (ctx == NULL || url == NULL) return 0;
+    JSContext *jsctx = (JSContext *)js_context_raw(ctx);
+    if (jsctx == NULL) return 0;
+    JSValue global = JS_GetGlobalObject(jsctx);
+    if (JS_IsException(global)) return 0;
+    JSValue fn = JS_GetPropertyStr(jsctx, global, "__histFrag");
+    int32_t v = 0;
+    if (JS_IsFunction(jsctx, fn)) {
+        JSValue arg = JS_NewString(jsctx, url);   /* data, never source text */
+        if (!JS_IsException(arg)) {
+            JSValue r = JS_Call(jsctx, fn, global, 1, &arg);
+            if (JS_IsException(r)) JS_FreeValue(jsctx, JS_GetException(jsctx));
+            else if (JS_ToInt32(jsctx, &v, r) != 0) v = 0;
+            JS_FreeValue(jsctx, r);
+        }
+        JS_FreeValue(jsctx, arg);
+    }
+    JS_FreeValue(jsctx, fn);
+    JS_FreeValue(jsctx, global);
+    return v == 1 ? 1 : 0;
 }
 
 int jd_pop_state(js_context *ctx, int index) {

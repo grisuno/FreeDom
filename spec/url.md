@@ -222,9 +222,25 @@ el worker (antes de actualizar `location`) y el padre (re-valida cada operación
   ser idéntico al de `base`; si no, `URL_ERR_NOT_HTTPS`.
 - `base` `file://` ⇒ solo cambia la parte de consulta/fragmento del **mismo** archivo
   (`ref` vacío o que empieza por `?`/`#`): el resultado es `ruta_de_base + ref`
-  (reemplazando la consulta/fragmento previos). Cualquier otra forma ⇒ `URL_ERR_NOT_LOCAL`.
+  (reemplazando la consulta/fragmento previos). También la URL **absoluta** de una entrada
+  del mismo archivo (`file:///misma/ruta?…#…`: Atrás/Adelante re-resuelven la URL guardada;
+  tanda 103, antes se rechazaba y la `location` de una página local no volvía nunca).
+  Cualquier otra forma ⇒ `URL_ERR_NOT_LOCAL`.
 - `ref` vacío ⇒ `base` sin cambios (pushState(state, '') conserva la URL).
 - NULL/`outsz == 0` ⇒ `URL_ERR_NULL_ARG`; resultado que no cabe ⇒ `URL_ERR_OVERFLOW`.
+
+### 2.y `url_split_location` — lado de lectura de `location` (tanda 103, 2026-11-23)
+
+```c
+url_status url_split_location(const char *url, url_parts *out);
+```
+
+Como `url_split`, pero también descompone una página local `file:///ruta`: `protocol`
+`"file:"`, `origin` la cadena opaca `"null"` (WHATWG: el origen de un archivo es opaco; cadena
+estática, no un tramo de `url`), `host`/`hostname`/`port` vacíos, luego `pathname`/`search`/
+`hash`. Un fragmento o una consulta vacíos (`#`/`?` solos) se leen `""` (WHATWG), también en
+https. Un `file://host/` se rechaza. **Solo** para `location` (worker y `dom.histTarget`): toda
+decisión de red o de almacenamiento sigue usando `url_split` (solo https, falla cerrado).
 
 ## 3. Garantías
 
