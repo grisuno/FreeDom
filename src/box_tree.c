@@ -613,11 +613,16 @@ typedef struct sc_chain {
     uint16_t lvl[BT_SC_DEPTH];   /* indices into `order` (by ref), outermost first */
 } sc_chain;
 
+/* 1 when the box has an author transform other than none. */
+static int box_has_transform(const pv_box_def *b) {
+    return b->transform_tx != PV_LEN_UNSET || b->transform_ty != PV_LEN_UNSET ||
+           b->transform_sx != PV_LEN_UNSET || b->transform_sy != PV_LEN_UNSET ||
+           b->transform_rotate != PV_LEN_UNSET || b->transform_skx != PV_LEN_UNSET ||
+           b->transform_sky != PV_LEN_UNSET;
+}
+
 static int sc_forms(const pv_box_def *b) {
-    int has_tf = b->transform_tx != PV_LEN_UNSET || b->transform_ty != PV_LEN_UNSET ||
-                 b->transform_sx != PV_LEN_UNSET || b->transform_sy != PV_LEN_UNSET ||
-                 b->transform_rotate != PV_LEN_UNSET || b->transform_skx != PV_LEN_UNSET ||
-                 b->transform_sky != PV_LEN_UNSET;
+    int has_tf = box_has_transform(b);
     cx_style st = { .position = b->position,
                     .z_index = (b->z_index == PV_LEN_UNSET) ? 0 : b->z_index,
                     .z_auto = (b->z_index == PV_LEN_UNSET), .opacity = b->opacity,
@@ -824,13 +829,7 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
     cx_item order[BT_MAX_POSITIONED];
     for (size_t i = 0; i < tmp_count; ++i) {
         int z_auto = (boxes[tmp[i].box_index].z_index == PV_LEN_UNSET) ? 1 : 0;
-        int has_tf = boxes[tmp[i].box_index].transform_tx != PV_LEN_UNSET ||
-                     boxes[tmp[i].box_index].transform_ty != PV_LEN_UNSET ||
-                     boxes[tmp[i].box_index].transform_sx != PV_LEN_UNSET ||
-                     boxes[tmp[i].box_index].transform_sy != PV_LEN_UNSET ||
-                     boxes[tmp[i].box_index].transform_rotate != PV_LEN_UNSET ||
-                     boxes[tmp[i].box_index].transform_skx != PV_LEN_UNSET ||
-                     boxes[tmp[i].box_index].transform_sky != PV_LEN_UNSET;
+        int has_tf = box_has_transform(&boxes[tmp[i].box_index]);
         cx_style st = { .position = boxes[tmp[i].box_index].position,
                          .z_index = tmp[i].z_index, .z_auto = z_auto,
                          .opacity = boxes[tmp[i].box_index].opacity,
@@ -882,6 +881,33 @@ int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid) {
 
 int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid) {
     return oof_walk(boxes, nbox, bid, 0);
+}
+
+/* A transform, a translate percentage or any filter makes a box the containing block of
+ * its fixed descendants. */
+static int box_captures_fixed(const pv_box_def *b) {
+    return box_has_transform(b) || b->transform_tx_pct != 0 || b->transform_ty_pct != 0 ||
+           b->filter_blur > 0 || b->filter_grayscale > 0 || b->filter_brightness > 0 ||
+           b->filter_contrast > 0 || b->filter_sepia > 0 || b->filter_invert > 0 ||
+           b->filter_saturate > 0 || b->filter_hue_rotate > 0 ||
+           b->filter_drop_dx != 0 || b->filter_drop_dy != 0 || b->filter_drop_blur > 0;
+}
+
+int bt_fixed_pinned(const pv_box_def *boxes, size_t nbox, int bid) {
+    if (boxes == NULL || bid < 0 || (size_t)bid >= nbox) return 0;
+    int fixed_seen = 0;
+    size_t cur = (size_t)bid;
+    for (size_t steps = 0; steps <= nbox; ++steps) {
+        const pv_box_def *b = &boxes[cur];
+        /* a capturing ancestor ends that fixed box's pinning; an outer fixed box can
+         * still pin the whole chain */
+        if (fixed_seen && box_captures_fixed(b)) fixed_seen = 0;
+        if (b->position == BT_POS_FIXED) fixed_seen = 1;
+        if (b->parent_id < 0) return fixed_seen;           /* reached the root */
+        if ((size_t)b->parent_id >= nbox) return 0;        /* dangling: fail open */
+        cur = (size_t)b->parent_id;
+    }
+    return 0;  /* a parent cycle: fail open */
 }
 
 int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid) {

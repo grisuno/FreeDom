@@ -130,7 +130,7 @@ TEST_BINS := $(BUILD_DIR)/test_subreq_batch $(BUILD_DIR)/test_secure_fetch $(BUI
                $(BUILD_DIR)/test_mask_cache $(BUILD_DIR)/test_exact_key \
                $(BUILD_DIR)/test_find_text $(BUILD_DIR)/test_anchor $(BUILD_DIR)/test_scroll_req $(BUILD_DIR)/test_video_pick $(BUILD_DIR)/test_video_controls
 
-.PHONY: asan-run gscroll ghover fuzz-anc fuzz-srq fuzz-gi fuzz-ss fuzz-dt fuzz-bt fuzz-vcl fuzz-hls fuzz-nt fuzz-sp fuzz-lp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
+.PHONY: asan-run readme-shot gscroll ghover fuzz-anc fuzz-srq fuzz-gi fuzz-ss fuzz-dt fuzz-bt fuzz-vcl fuzz-hls fuzz-nt fuzz-sp fuzz-lp fuzz-br fuzz-ft fuzz-bb fuzz-mkc fuzz-ek fuzz-chl fuzz-ci fuzz-idn fuzz-cnt fuzz-tl fuzz-ng parity-refresh parity-age parity-snapshot all install test itest asan fuzz fuzz-svg fuzz-js fuzz-jsdom fuzz-geom fuzz-rqh fuzz-wst fuzz-fbk fuzz-fbc fuzz-imap fuzz-img fuzz-pv fuzz-pe fuzz-dl fuzz-css fuzz-url fuzz-fb fuzz-tsh fuzz-tc fuzz-dd fuzz-dom fuzz-pf fuzz-prefs fuzz-ti fuzz-du fuzz-wf fuzz-afl \
         deps run deb docker view clean \
         parity parity-update layout-diff layout-update geom bench wpt wpt-update drops drops-update
 
@@ -1538,6 +1538,13 @@ gscroll: $(BUILD_DIR)/freedom
 ghover: $(BUILD_DIR)/freedom
 	@python3 tools/guiscroll.py --hover --notches $(if $(NOTCHES),$(NOTCHES),40) \
 	  $(addprefix $(PARITY_DIR)/pages/,$(addsuffix .html,$(if $(PAGES),$(PAGES),$(GSCROLL_PAGES))))
+
+# make readme-shot [SHOT_URLS="a b"]: the README picture of the REAL window (tools/guishot.py:
+# nested weston, the first URL in front, the others as background tabs) -> docs/img/freedom-ui.png.
+# Throwaway profile; a page shown with its author CSS must be in config/allow.conf + js.conf.
+SHOT_URLS ?= https://lobste.rs https://news.ycombinator.com https://en.wikipedia.org/wiki/Free_software https://github.com
+readme-shot: $(BUILD_DIR)/freedom
+	@python3 tools/guishot.py --out docs/img/freedom-ui.png $(SHOT_URLS)
 
 # Freeze the render-to-idle numbers of the last `make fbench` as the baseline later runs diff against.
 timing-update:

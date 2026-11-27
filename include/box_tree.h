@@ -253,6 +253,18 @@ int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)
 int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);
 int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid);
 
+/* Viewport pinning (spec/box_engine.md "Fixed pinned to the viewport"): 1 when box
+ * `bid` is position:fixed or lies inside a position:fixed box, AND no box strictly above
+ * that fixed box has a transform or a filter (CSS Transforms 1 §2 / Filter Effects 1 §5:
+ * such an ancestor becomes the fixed box's containing block, so it scrolls with it --
+ * unless an outer fixed box above the capturing one pins the whole chain). A
+ * pinned box keeps its place in the viewport while the page scrolls, and no overflow
+ * clip of an ancestor above its fixed box applies to it. 0 for everything else, and FAILS
+ * OPEN to 0 (scrolls with the page: the pre-pinning behaviour, never content that hides)
+ * on NULL boxes, an out-of-range bid, a dangling link or a parent cycle. Pure; bounded
+ * by nbox links; no allocation. */
+int bt_fixed_pinned(const pv_box_def *boxes, size_t nbox, int bid);
+
 /* Stage 2f (spec/box_engine.md, CSS 2.1 10.3.7 / 10.6.4): the size available to
  * an out-of-flow box's MARGIN box on one axis of its containing block `cb`: cb
  * minus the two insets (px half + per-mille half of cb), an auto/unset inset

@@ -850,6 +850,75 @@ static void test_in_subtree(void **state) {
     assert_int_equal(bt_in_subtree(cyc, 2, 5, 0), 0);     /* terminates */
 }
 
+/* A box with no transform: the transform fields are PV_LEN_UNSET, not 0. */
+static pv_box_def pin_box(int parent, int position) {
+    pv_box_def b;
+    memset(&b, 0, sizeof b);
+    b.parent_id = parent;
+    b.position = position;
+    b.transform_tx = b.transform_ty = b.transform_sx = b.transform_sy = PV_LEN_UNSET;
+    b.transform_rotate = b.transform_skx = b.transform_sky = PV_LEN_UNSET;
+    return b;
+}
+
+static void test_fixed_pinned_self_and_subtree(void **state) {
+    (void)state;
+    /* static body (0) > fixed header (1) > static link box (2); a static sibling (3). */
+    pv_box_def boxes[4] = { pin_box(-1, BT_POS_STATIC), pin_box(0, BT_POS_FIXED),
+                            pin_box(1, BT_POS_STATIC), pin_box(0, BT_POS_STATIC) };
+    assert_int_equal(bt_fixed_pinned(boxes, 4, 1), 1);
+    assert_int_equal(bt_fixed_pinned(boxes, 4, 2), 1);
+    assert_int_equal(bt_fixed_pinned(boxes, 4, 3), 0);
+    assert_int_equal(bt_fixed_pinned(boxes, 4, 0), 0);
+}
+
+static void test_fixed_pinned_absolute_is_not(void **state) {
+    (void)state;
+    pv_box_def boxes[2] = { pin_box(-1, BT_POS_STATIC), pin_box(0, BT_POS_ABSOLUTE) };
+    assert_int_equal(bt_fixed_pinned(boxes, 2, 1), 0);
+    /* an absolute box inside a fixed one is pinned with it */
+    pv_box_def nest[3] = { pin_box(-1, BT_POS_FIXED), pin_box(0, BT_POS_STATIC),
+                           pin_box(1, BT_POS_ABSOLUTE) };
+    assert_int_equal(bt_fixed_pinned(nest, 3, 2), 1);
+}
+
+static void test_fixed_pinned_captured_by_transform_or_filter(void **state) {
+    (void)state;
+    /* transformed wrapper (0) > fixed (1): the wrapper is its containing block. */
+    pv_box_def tf[2] = { pin_box(-1, BT_POS_STATIC), pin_box(0, BT_POS_FIXED) };
+    tf[0].transform_tx = 10;
+    assert_int_equal(bt_fixed_pinned(tf, 2, 1), 0);
+    pv_box_def pct[2] = { pin_box(-1, BT_POS_STATIC), pin_box(0, BT_POS_FIXED) };
+    pct[0].transform_ty_pct = -500;
+    assert_int_equal(bt_fixed_pinned(pct, 2, 1), 0);
+    pv_box_def fl[2] = { pin_box(-1, BT_POS_STATIC), pin_box(0, BT_POS_FIXED) };
+    fl[0].filter_blur = 4;
+    assert_int_equal(bt_fixed_pinned(fl, 2, 1), 0);
+    /* a transform on the fixed box ITSELF or inside it does not capture it */
+    pv_box_def own[3] = { pin_box(-1, BT_POS_STATIC), pin_box(0, BT_POS_FIXED),
+                          pin_box(1, BT_POS_STATIC) };
+    own[1].transform_rotate = 45;
+    own[2].filter_blur = 2;
+    assert_int_equal(bt_fixed_pinned(own, 3, 2), 1);
+    /* outer fixed (0) > transformed (1) > inner fixed (2): the outer one pins it all */
+    pv_box_def outer[3] = { pin_box(-1, BT_POS_FIXED), pin_box(0, BT_POS_STATIC),
+                            pin_box(1, BT_POS_FIXED) };
+    outer[1].transform_sx = 150;
+    assert_int_equal(bt_fixed_pinned(outer, 3, 2), 1);
+}
+
+static void test_fixed_pinned_fails_open(void **state) {
+    (void)state;
+    pv_box_def boxes[1] = { pin_box(-1, BT_POS_FIXED) };
+    assert_int_equal(bt_fixed_pinned(NULL, 1, 0), 0);
+    assert_int_equal(bt_fixed_pinned(boxes, 1, -1), 0);
+    assert_int_equal(bt_fixed_pinned(boxes, 1, 1), 0);
+    pv_box_def dang[1] = { pin_box(7, BT_POS_FIXED) };
+    assert_int_equal(bt_fixed_pinned(dang, 1, 0), 0);
+    pv_box_def cyc[2] = { pin_box(1, BT_POS_FIXED), pin_box(0, BT_POS_STATIC) };
+    assert_int_equal(bt_fixed_pinned(cyc, 2, 1), 0);   /* terminates */
+}
+
 static void test_oof_anchor_none_on_static_chain(void **state) {
     (void)state;
     pv_box_def boxes[2] = {
@@ -1356,6 +1425,10 @@ int main(void) {
         cmocka_unit_test(test_nested_context_orders_its_children),
         cmocka_unit_test(test_relative_context_does_not_capture),
         cmocka_unit_test(test_child_of_negative_context_follows_it),
+        cmocka_unit_test(test_fixed_pinned_self_and_subtree),
+        cmocka_unit_test(test_fixed_pinned_absolute_is_not),
+        cmocka_unit_test(test_fixed_pinned_captured_by_transform_or_filter),
+        cmocka_unit_test(test_fixed_pinned_fails_open),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

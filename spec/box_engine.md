@@ -1096,3 +1096,41 @@ retira del paso en flujo y se pinta en la capa posicionada, intercalado con P po
   tenga NINGÚN run en flujo (`item_root_box_in`): un `<video>` absoluto dentro de un marco
   `display:flex` salía como una barra de alto 0 pintada en flujo. Test
   `test_dump_layout_aspect_ratio_frame_with_absolute_child`.
+
+### Fixed pinned to the viewport (tanda 105, 2026-11-26)
+
+Until now a `position:fixed` box was laid out against the viewport at scroll 0 and then
+scrolled away with the page in the window, like `absolute`. Clicks inside it (and inside any
+absolute box with its own sub-layout) never landed: every hit-test walked only the page flow.
+
+- `int bt_fixed_pinned(const pv_box_def *boxes, size_t nbox, int bid)` (pure, `box_tree`):
+  1 when `bid` is fixed or inside a fixed box and no box above that fixed box has a transform
+  (translate percentages included) or a filter, since such a box is its containing block
+  (Transforms 1 §2, Filter Effects 1 §5). An outer fixed box above the capturing one pins the
+  whole chain again. Fails open to 0 (scrolls with the page, the old behaviour) on NULL, an
+  out-of-range id, a dangling link or a cycle.
+- Painter: during a window frame `w->pin_dy` = the clamped scroll; `paint_positioned_one` adds
+  it to the origin of a pinned box, so the box, its sub-layout and its Stage-2d rows stay put.
+  PNG/PDF paint at scroll 0 (`pin_dy` 0): unchanged.
+- Overflow: the clip chain (`ov_collect_chain`) stops at a pinned fixed box: no ancestor's
+  `overflow` clips it (CSS Overflow 3 §2.3; its containing block is the viewport).
+- Hit-test: `hit_text_frags` is the ONE walk shared by link, cursor and node hits. Positioned
+  boxes with z >= 0 come first, topmost first (their sub-layouts, pinned ones where they are on
+  screen); a positioned box that paints a background covers what lies under it. The page flow
+  comes after.
+
+**Given** a fixed header and a fixed button on a page taller than the window, **when** the
+user scrolls, **then** both stay where they were and the content passes under the header.
+
+**Given** the same page scrolled, **when** the user hovers or clicks the header link or the
+button, **then** the cursor, the link preview and the navigation are those of the link
+(verified in weston + xdotool, `examples/fixed-pin.html`).
+
+**Given** a fixed box inside a `transform`ed or `filter`ed ancestor, **when** the page scrolls,
+**then** it scrolls with that ancestor (not pinned).
+
+**Given** a hostile parent graph (cycles, dangling links), **when** pinning is asked, **then**
+the walk ends within nbox links and answers 0 (`fuzz-bt` oracle).
+
+Out of scope (open): the Stage-2d path (a positioned box with no sub-layout) is still not
+hit-testable; `getBoundingClientRect` of a pinned box reports its scroll-0 page position.

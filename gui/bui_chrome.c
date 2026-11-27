@@ -578,14 +578,16 @@ static void paint_tabstrip(cairo_t *cr, const bui_chrome_view *v) {
         }
 
         double tx = t.x + BUI_TAB_PAD;
-        double mid = t.y + (active ? t.h : t.h - 4.0) / 2.0;
+        chl_rect c;
+        int has_close = chl_tab_close_rect(l, i, &c);
+        /* Title, spinner and close button share one centre line: the close box is the
+         * geometry the pointer hits, so the text follows it, never the other way round. */
+        double mid = has_close ? rcy(c) : t.y + (active ? t.h : t.h - 4.0) / 2.0;
         int loading = (v->tab_loading != NULL && v->tab_loading[i]);
         if (loading) {
             spinner(cr, th->accent, tx + BUI_SPINNER_R, mid, v->phase);
             tx += 2.0 * BUI_SPINNER_R + 6.0;
         }
-        chl_rect c;
-        int has_close = chl_tab_close_rect(l, i, &c);
         double tend = has_close ? c.x - 2.0 : t.x + t.w - BUI_TAB_PAD;
         bui_chrome_font(cr, BUI_CHROME_FONT_SIZE);
         tab_title(cr, v->titles[i], th->chrome_text, active ? 1.0 : BUI_INACTIVE_TEXT,

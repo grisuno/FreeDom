@@ -10,7 +10,9 @@
 /* Hostile box trees (any parent graph, cycles included) through the positioned paint
  * order (spec/compositor.md "Anidado"): the output is a permutation of the positioned
  * boxes, and a non-negative box always follows its out-of-flow stacking-context ancestors
- * when no cycle hides them. */
+ * when no cycle hides them. bt_fixed_pinned is checked against a reference: on an acyclic
+ * chain a box is pinned iff some fixed box on its chain has no capturing ancestor (a
+ * transform or a filter); a cycle or a dangling link is never pinned. */
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     size_t n = size / 4;
     if (n == 0) return 0;
@@ -28,9 +30,33 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         b[i].opacity = (p[3] & 1) ? (int)(p[3] % 101) : -1;
         b[i].transform_tx = b[i].transform_ty = b[i].transform_sx = b[i].transform_sy =
             b[i].transform_rotate = b[i].transform_skx = b[i].transform_sky = PV_LEN_UNSET;
+        if (p[3] & 2) b[i].transform_tx = 1;
+        if (p[3] & 4) b[i].filter_blur = 1;
         b[i].inset_left = b[i].inset_right = b[i].inset_top = b[i].inset_bottom = PV_LEN_UNSET;
         g1[i] = 10.0;
         placed[i] = 1;
+    }
+    for (size_t i = 0; i < n; ++i) {
+        int got = bt_fixed_pinned(b, n, (int)i);
+        char vis[FB_MAX] = {0};
+        int acyclic = 1, want = 0;
+        for (int id = (int)i; id >= 0; id = b[id].parent_id) {
+            if (vis[id]) { acyclic = 0; break; }
+            vis[id] = 1;
+        }
+        if (acyclic) {
+            int chain[FB_MAX], nch = 0;
+            for (int id = (int)i; id >= 0; id = b[id].parent_id) chain[nch++] = id;
+            for (int k = 0; k < nch; ++k) {
+                if (b[chain[k]].position != BT_POS_FIXED) continue;
+                int cap = 0;
+                for (int a = k + 1; a < nch; ++a)
+                    if (b[chain[a]].transform_tx != PV_LEN_UNSET || b[chain[a]].filter_blur > 0)
+                        cap = 1;
+                if (!cap) want = 1;
+            }
+        }
+        if (got != want) abort();
     }
     size_t cnt = 0;
     if (bt_resolve_positioning_ex(b, n, g0, g0, g1, g1, NULL, NULL, placed, 800, 600, out,

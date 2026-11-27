@@ -430,6 +430,8 @@ typedef struct browser_window {
     char      tor_addr[64];  /* Tor SOCKS5h proxy "host:port" (default 127.0.0.1:9050) */
     char      i2p_addr[64];  /* I2P HTTP proxy "host:port" (default 127.0.0.1:4444) */
     double    scroll;   /* content scroll offset in pixels */
+    double    pin_dy;   /* during a window frame: the scroll a viewport-pinned (position:fixed)
+                         * box adds back to its origin; 0 outside paint_structured (PNG/PDF) */
     double    content_total_h;  /* full height of the laid-out content, cached each paint */
      int       maximized;        /* toplevel currently maximized (from xdg states) */
      int       fullscreen;       /* toplevel currently fullscreen */
@@ -14303,6 +14305,11 @@ static int ov_collect_chain(const rd_doc *doc, int block_id, int *out, int cap) 
         const pv_box_def *d = rd_box_at(doc, (size_t)id);
         if (d == NULL) break;
         if (ov_box_clips(d)) tmp[n++] = id;
+        /* No overflow clip above a viewport-pinned fixed box applies to it: its
+         * containing block is the viewport (CSS Overflow 3 §2.3). */
+        if (d->position == CSS_POS_FIXED &&
+            bt_fixed_pinned(doc->boxes, rd_box_count(doc), id))
+            break;
         id = d->parent_id;
     }
     /* tmp is innermost..outermost; reverse to outermost..innermost */
@@ -15360,6 +15367,18 @@ static int negz_owner_box(const browser_window *w, const rc_layout *L, const bt_
  * anchor's decoration is painted flat (the caller already opened its stacking
  * group and transform); every other box keeps its own stacking behaviour, exactly
  * as in the page flow. */
+/* The scroll a viewport-pinned box adds back to the page origin in this frame: the window's
+ * pin_dy for a box bt_fixed_pinned accepts, 0 otherwise (and always 0 in PNG/PDF, which
+ * paint the whole page at scroll 0). */
+static double pinned_dy_at(const browser_window *w, int box_index, double pin) {
+    if (pin == 0.0 || w->doc == NULL) return 0.0;
+    return bt_fixed_pinned(w->doc->boxes, rd_box_count(w->doc), box_index) ? pin : 0.0;
+}
+
+static double pinned_dy(const browser_window *w, int box_index) {
+    return pinned_dy_at(w, box_index, w->pin_dy);
+}
+
 static void paint_oof_sub(cairo_t *cr, browser_window *w, const rc_oof_sub *sub,
                           int anchor, double left, double origin, double page_w,
                           double content_top, double content_h) {
@@ -15409,6 +15428,9 @@ static void paint_positioned_one(cairo_t *cr, browser_window *w, const ui_theme 
      * on itself or an ancestor box paints nothing (out-of-flow reserves no
      * in-flow space, so nothing is reserved either). Pure walk, cycle-bounded. */
     if (bt_box_hidden(w->doc->boxes, rd_box_count(w->doc), pb->box_index)) return;
+    /* position:fixed (or inside it): its containing block is the viewport, so in the
+     * window it stays where it was laid out at scroll 0 (spec/box_engine.md). */
+    origin += pinned_dy(w, (int)pb->box_index);
     /* A non-invertible transform: the box and its subtree are not rendered. */
     cairo_matrix_t m;
     int64_t elapsed = (int64_t)(now_ms() - w->page_load_mono_ms);
@@ -15683,9 +15705,10 @@ static void paint_nested_children(cairo_t *cr, browser_window *w,
 /* One rect per element from a final layout, in document coordinates (spec/js_geom.md):
  * every text fragment under its node and every in-flow/positioned box under its
  * generating element. Shared by the window and the headless export so both hand
- * page JS the same geometry for the same layout. */
+ * page JS the same geometry for the same layout. `pin` is the scroll a viewport-pinned
+ * (position:fixed) box carries in the window, 0 for an export painted at scroll 0. */
 static void geom_from_layout(const rd_doc *doc, const rc_layout *L, double left,
-                             double top0, double content_w, jg_table *g) {
+                             double top0, double content_w, double pin, jg_table *g) {
     for (size_t i = 0; i < L->nrow; ++i) {
         const rc_row *r = &L->rows[i];
         if (r->kind != RC_TEXT) continue;
@@ -15705,8 +15728,11 @@ static void geom_from_layout(const rd_doc *doc, const rc_layout *L, double left,
     }
     for (size_t i = 0; i < L->npositioned; ++i) {
         const pv_box_def *bd = rd_box_at(doc, L->positioned[i].box_index);
+        double dy = (pin != 0.0 && bt_fixed_pinned(doc->boxes, rd_box_count(doc),
+                                                   (int)L->positioned[i].box_index)) ? pin : 0.0;
         if (bd != NULL)
-            (void)jg_add(g, bd->node_id, left + L->positioned[i].x, top0 + L->positioned[i].y,
+            (void)jg_add(g, bd->node_id, left + L->positioned[i].x,
+                         top0 + L->positioned[i].y + dy,
                          L->positioned[i].w, L->positioned[i].h);
     }
     (void)jg_finish(g);
@@ -15726,7 +15752,7 @@ static void publish_geometry(browser_window *w, const rc_layout *L, double left,
     g.view_h = (int32_t)lround(content_h);
     g.doc_w = w->width;
     g.doc_h = (int32_t)lround(L->total_h + 2.0 * top0);
-    geom_from_layout(w->doc, L, left, top0, content_w, &g);
+    geom_from_layout(w->doc, L, left, top0, content_w, w->pin_dy, &g);
     uint64_t h = jg_hash(&g);
     if (h != w->geom_hash || w->geom_page_ms != w->page_load_mono_ms) {
         /* Background job: the observer callbacks it fires (lazy loaders) may fetch, and a slow
@@ -16400,6 +16426,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
         if (owned) { rc_free(&Lown); owned = 0; }   /* a retained one is re-keyed next pass */
     }
     frame_undo undo = { NULL, { 0 }, 0 };
+    w->pin_dy = w->scroll;
     double prof_g0 = gui_prof_now_ms();
     publish_geometry(w, Lp, left, content_w, content_h);
     load_lazy_bg_images(w, Lp, origin, content_top, content_h);
@@ -16505,6 +16532,7 @@ static void paint_structured(cairo_t *cr, browser_window *w, double content_top,
     flow_index_free(&flow_index);
     free(sticky_off);
     frame_undo_restore(Lp, &undo);
+    w->pin_dy = 0.0;
     if (owned) rc_free(&Lown);
 }
 
@@ -17093,7 +17121,7 @@ ui_status ui_page_geometry(const rd_doc *doc, jg_table *out) {
     out->view_h = FC_HEADLESS_VIEW_H;
     out->doc_w = (int32_t)PNG_PAGE_W;
     out->doc_h = (int32_t)lround(L.total_h + 2.0 * margin);
-    geom_from_layout(doc, &L, left, margin, content_w, out);
+    geom_from_layout(doc, &L, left, margin, content_w, 0.0, out);
     rc_free(&L);
     cairo_destroy(mcr);
     cairo_surface_destroy(meas);
@@ -17264,6 +17292,86 @@ static void hit_layout_done(rc_layout *own, int owned) {
     if (owned) rc_free(own);
 }
 
+/* The scroll the last frame was painted at: w->scroll clamped to the page, exactly as
+ * paint_structured clamps it, so a hit lands where the pixels are. */
+static double hit_scroll(const browser_window *w, const rc_layout *L, double content_h) {
+    double max_scroll = fmax(0.0, L->total_h - content_h);
+    return fmin(fmax(w->scroll, 0.0), max_scroll);
+}
+
+/* One text fragment under the pointer: the predicate decides whether it is the hit (a
+ * link wants an href, the cursor any fragment) and records what it needs in ctx. */
+typedef int (*hit_frag_fn)(void *ctx, const browser_window *w, const rc_frag *f);
+
+/* Text rows of one layout (the page flow or a positioned box's sub-layout) under
+ * (px, py), with the same alignment and justification the painter uses. */
+static int hit_layout_rows(const browser_window *w, const rc_layout *L, double px, double py,
+                           double origin, double left, double content_w,
+                           hit_frag_fn fn, void *ctx) {
+    for (size_t i = 0; i < L->nrow; ++i) {
+        const rc_row *r = &L->rows[i];
+        if (r->kind != RC_TEXT) continue;
+        double ry = origin + r->top;
+        if (py < ry || py > ry + r->height) continue;
+        double ax = row_align_offset(L, r, content_w);
+        double jgap = row_justify_gap(L, r, content_w);
+        double jdx = 0.0;
+        for (size_t k = r->first; k < r->first + r->count && k < L->nfrag; ++k) {
+            const rc_frag *f = &L->frags[k];
+            double fx = left + r->x_off + ax + f->x + jdx;
+            if (!box_pointer_events_none(w->doc, f->block_id)
+                && px >= fx && px <= fx + f->width && fn(ctx, w, f))
+                return 1;
+            for (size_t j = 0; j < f->len; ++j)
+                if (f->text[j] == ' ') jdx += jgap;
+        }
+    }
+    return 0;
+}
+
+/* A positioned box under the pointer that paints a background hides what lies under it
+ * from the pointer too (a fixed header over the scrolled text). */
+static int positioned_occludes(const browser_window *w, const bt_positioned *pb,
+                               double px, double py, double left, double origin) {
+    const pv_box_def *d = rd_box_at(w->doc, pb->box_index);
+    if (d == NULL || box_pointer_events_none(w->doc, (int)pb->box_index)) return 0;
+    if (d->bg_rgb < 0 && d->grad_n <= 0 && d->bg_image_url[0] == '\0') return 0;
+    double x0 = left + pb->x, y0 = origin + pb->y;
+    return px >= x0 && px <= x0 + pb->w && py >= y0 && py <= y0 + pb->h;
+}
+
+/* The text fragment under (px, py) in paint order, topmost first: positioned boxes with
+ * z >= 0 (their sub-layouts, a pinned fixed box where it is on screen), then the flow.
+ * Returns 1 when fn accepted a fragment, 0 when none did or an opaque positioned box
+ * covers the point. `scroll` is the clamped scroll the frame was painted at. */
+static int hit_text_frags(const browser_window *w, const rc_layout *L, double px, double py,
+                          double origin, double left, double content_w, double scroll,
+                          hit_frag_fn fn, void *ctx) {
+    size_t nbox = rd_box_count(w->doc);
+    for (size_t i = L->npositioned; i > 0; --i) {
+        const bt_positioned *pb = &L->positioned[i - 1];
+        if (pb->z_index < 0) break;            /* the negative prefix paints under the flow */
+        if (pb->box_index >= nbox || bt_box_hidden(w->doc->boxes, nbox, pb->box_index))
+            continue;
+        double o = origin + pinned_dy_at(w, (int)pb->box_index, scroll);
+        const rc_oof_sub *sub = (L->oof_sub != NULL && pb->box_index < L->noof_sub
+                                 && L->oof_sub[pb->box_index].L != NULL)
+                                ? &L->oof_sub[pb->box_index] : NULL;
+        if (sub != NULL && hit_layout_rows(w, sub->L, px, py, o + sub->dy, left + sub->dx,
+                                           sub->w, fn, ctx))
+            return 1;
+        if (positioned_occludes(w, pb, px, py, left, o)) return 0;
+    }
+    return hit_layout_rows(w, L, px, py, origin, left, content_w, fn, ctx);
+}
+
+static int hit_href(void *ctx, const browser_window *w, const rc_frag *f) {
+    (void)w;
+    if (f->href == NULL) return 0;
+    *(const char **)ctx = f->href;
+    return 1;
+}
+
 static const char *link_at_point(browser_window *w, double px, double py) {
     if (w->doc == NULL || w->cairo_surface == NULL) return NULL;
 
@@ -17279,31 +17387,11 @@ static const char *link_at_point(browser_window *w, double px, double py) {
     int Lowned = 0;
     const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = Lp->total_h - content_h;
-    if (max_scroll < 0.0) max_scroll = 0.0;
-    double scroll = w->scroll;
-    if (scroll < 0.0) scroll = 0.0;
-    if (scroll > max_scroll) scroll = max_scroll;
+    double scroll = hit_scroll(w, Lp, content_h);
     double origin = content_top + page_gutter(w) - scroll;
 
     const char *hit = NULL;
-    for (size_t i = 0; i < Lp->nrow && hit == NULL; ++i) {
-        const rc_row *r = &Lp->rows[i];
-        if (r->kind != RC_TEXT) continue;
-        double ry = origin + r->top;
-        if (py < ry || py > ry + r->height) continue;
-        double ax = row_align_offset(Lp, r, content_w);
-        double jgap = row_justify_gap(Lp, r, content_w);
-        double jdx = 0.0;
-        for (size_t k = r->first; k < r->first + r->count && k < Lp->nfrag; ++k) {
-            const rc_frag *f = &Lp->frags[k];
-            double fx = left + r->x_off + ax + f->x + jdx;
-            if (f->href != NULL && !box_pointer_events_none(w->doc, f->block_id)
-                && px >= fx && px <= fx + f->width) { hit = f->href; break; }
-            for (size_t j = 0; j < f->len; ++j)
-                if (f->text[j] == ' ') jdx += jgap;
-        }
-    }
+    (void)hit_text_frags(w, Lp, px, py, origin, left, content_w, scroll, hit_href, &hit);
 
     hit_layout_done(&Lown, Lowned);
     cairo_destroy(cr);
@@ -17347,11 +17435,7 @@ static const char *video_at_point(browser_window *w, double px, double py,
     int Lowned = 0;
     const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = Lp->total_h - content_h;
-    if (max_scroll < 0.0) max_scroll = 0.0;
-    double scroll = w->scroll;
-    if (scroll < 0.0) scroll = 0.0;
-    if (scroll > max_scroll) scroll = max_scroll;
+    double scroll = hit_scroll(w, Lp, content_h);
     double origin = content_top + page_gutter(w) - scroll;
 
     const char *hit = NULL;
@@ -17412,6 +17496,11 @@ static int box_pointer_events_none(const rd_doc *doc, int block_id) {
  * clickable element (a JS-driven button/div). A separate layout+hit-test walk from
  * link_at_point/node_at_point (matching this file's existing per-purpose hit-test
  * style); update_hover calls all it needs once per pointer-motion event. */
+static int hit_cursor(void *ctx, const browser_window *w, const rc_frag *f) {
+    *(int *)ctx = resolve_box_cursor(w->doc, f->block_id);
+    return 1;
+}
+
 static int cursor_at_point(browser_window *w, double px, double py) {
     if (w->doc == NULL || w->cairo_surface == NULL) return CSS_CUR_UNSET;
 
@@ -17427,34 +17516,11 @@ static int cursor_at_point(browser_window *w, double px, double py) {
     int Lowned = 0;
     const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = Lp->total_h - content_h;
-    if (max_scroll < 0.0) max_scroll = 0.0;
-    double scroll = w->scroll;
-    if (scroll < 0.0) scroll = 0.0;
-    if (scroll > max_scroll) scroll = max_scroll;
+    double scroll = hit_scroll(w, Lp, content_h);
     double origin = content_top + page_gutter(w) - scroll;
 
     int cur = CSS_CUR_UNSET;
-    for (size_t i = 0; i < Lp->nrow && cur == CSS_CUR_UNSET; ++i) {
-        const rc_row *r = &Lp->rows[i];
-        if (r->kind != RC_TEXT) continue;
-        double ry = origin + r->top;
-        if (py < ry || py > ry + r->height) continue;
-        double ax = row_align_offset(Lp, r, content_w);
-        double jgap = row_justify_gap(Lp, r, content_w);
-        double jdx = 0.0;
-        for (size_t k = r->first; k < r->first + r->count && k < Lp->nfrag; ++k) {
-            const rc_frag *f = &Lp->frags[k];
-            double fx = left + r->x_off + ax + f->x + jdx;
-            if (!box_pointer_events_none(w->doc, f->block_id)
-                && px >= fx && px <= fx + f->width) {
-                cur = resolve_box_cursor(w->doc, f->block_id);
-                break;
-            }
-            for (size_t j = 0; j < f->len; ++j)
-                if (f->text[j] == ' ') jdx += jgap;
-        }
-    }
+    (void)hit_text_frags(w, Lp, px, py, origin, left, content_w, scroll, hit_cursor, &cur);
     if (cur == CSS_CUR_UNSET) {
         for (size_t bi = Lp->nbox; bi > 0 && cur == CSS_CUR_UNSET; --bi) {
             const rc_box *bx = &Lp->boxes[bi - 1];
@@ -17505,6 +17571,20 @@ static const rd_block *submit_proxy_for_box(const rd_doc *doc, int bid) {
     return NULL;
 }
 
+typedef struct frag_hit {
+    dom_node_id node;
+    int block_id;
+} frag_hit;
+
+static int hit_node(void *ctx, const browser_window *w, const rc_frag *f) {
+    (void)w;
+    if (f->node_id == DOM_NODE_NONE) return 0;
+    frag_hit *h = (frag_hit *)ctx;
+    h->node = f->node_id;
+    h->block_id = f->block_id;
+    return 1;
+}
+
 static dom_node_id frag_at_point(browser_window *w, double px, double py,
                                  int *out_block_id) {
     if (out_block_id != NULL) *out_block_id = -1;
@@ -17522,35 +17602,13 @@ static dom_node_id frag_at_point(browser_window *w, double px, double py,
     int Lowned = 0;
     const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = Lp->total_h - content_h;
-    if (max_scroll < 0.0) max_scroll = 0.0;
-    double scroll = w->scroll;
-    if (scroll < 0.0) scroll = 0.0;
-    if (scroll > max_scroll) scroll = max_scroll;
+    double scroll = hit_scroll(w, Lp, content_h);
     double origin = content_top + page_gutter(w) - scroll;
 
-    dom_node_id hit = DOM_NODE_NONE;
-    for (size_t i = 0; i < Lp->nrow && hit == DOM_NODE_NONE; ++i) {
-        const rc_row *r = &Lp->rows[i];
-        if (r->kind != RC_TEXT) continue;
-        double ry = origin + r->top;
-        if (py < ry || py > ry + r->height) continue;
-        double ax = row_align_offset(Lp, r, content_w);
-        double jgap = row_justify_gap(Lp, r, content_w);
-        double jdx = 0.0;
-        for (size_t k = r->first; k < r->first + r->count && k < Lp->nfrag; ++k) {
-            const rc_frag *f = &Lp->frags[k];
-            double fx = left + r->x_off + ax + f->x + jdx;
-            if (f->node_id != DOM_NODE_NONE && !box_pointer_events_none(w->doc, f->block_id)
-                && px >= fx && px <= fx + f->width) {
-                hit = f->node_id;
-                if (out_block_id != NULL) *out_block_id = f->block_id;
-                break;
-            }
-            for (size_t j = 0; j < f->len; ++j)
-                if (f->text[j] == ' ') jdx += jgap;
-        }
-    }
+    frag_hit fh = { DOM_NODE_NONE, -1 };
+    (void)hit_text_frags(w, Lp, px, py, origin, left, content_w, scroll, hit_node, &fh);
+    dom_node_id hit = fh.node;
+    if (out_block_id != NULL) *out_block_id = fh.block_id;
 
     hit_layout_done(&Lown, Lowned);
     cairo_destroy(cr);
@@ -17583,7 +17641,8 @@ static int scroll_apply_request(browser_window *w, const srq_req *r, const dom_n
     if (r->kind == SRQ_ELEMENT) {
         jg_table g;
         jg_init(&g);
-        geom_from_layout(w->doc, L, content_margin_x(w), page_gutter(w), content_w, &g);
+        geom_from_layout(w->doc, L, content_margin_x(w), page_gutter(w), content_w,
+                         hit_scroll(w, L, content_h), &g);
         located = (h != NULL && anc_target_box(&g, h, r->n, r->nsub, &top, &bottom) == 0);
         jg_free(&g);
     }
@@ -18239,11 +18298,7 @@ static const rd_block *input_at_point(browser_window *w, double px, double py) {
     int Lowned = 0;
     const rc_layout *Lp = hit_layout(cr, w, content_w, content_h, &Lown, &Lowned);
 
-    double max_scroll = Lp->total_h - content_h;
-    if (max_scroll < 0.0) max_scroll = 0.0;
-    double scroll = w->scroll;
-    if (scroll < 0.0) scroll = 0.0;
-    if (scroll > max_scroll) scroll = max_scroll;
+    double scroll = hit_scroll(w, Lp, content_h);
     double origin = content_top + page_gutter(w) - scroll;
 
     const rd_block *hit = NULL;
