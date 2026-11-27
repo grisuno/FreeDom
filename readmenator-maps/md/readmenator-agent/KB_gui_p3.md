@@ -1,6 +1,40 @@
 # Subsystem: gui (page 3 of 3)
 Previous: [KB_gui_p2.md](KB_gui_p2.md)
 
+## gui/browser_ui_internal.h
+- Doc: bui_chrome_view: ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to a palette...
+- Layer: presentation
+- Language: h
+- Symbols:
+  - `ui_rgb` (struct, line 41)
+  - `ui_theme` (struct, line 43)
+  - `bui_chrome_view` (struct, line 132)
+  - `bui_find_view` (struct, line 151)
+  - `ui_theme_mode` (enum, line 107)
+  - `b` (type_alias, line 40) `typedef struct ui_rgb { double r, g, b;`
+  - `body_font` (type_alias, line 42) `typedef struct ui_theme { double body_font;`
+  - `set_rgb` (function, line 120) `void set_rgb(cairo_t *cr, ui_rgb c);`
+  - `bui_paint_findbar` (function, line 164) `void bui_paint_findbar(cairo_t *cr, const bui_find_view *v);`
+  - `bui_chrome_font` (function, line 166) `void bui_chrome_font(cairo_t *cr, double size);`
+  - `bui_paint_chrome` (function, line 168) `void bui_paint_chrome(cairo_t *cr, const bui_chrome_view *v);`
+  - `bui_url_text_x` (function, line 171) `double bui_url_text_x(const bui_chrome_view *v, cairo_t *cr, double *shift);`
+  - `bui_url_index_at` (function, line 173) `size_t bui_url_index_at(cairo_t *cr, const bui_chrome_view *v, double x);`
+  - `bui_round_rect` (function, line 175) `void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r);`
+  - `bui_paint_video_bar` (function, line 180) `void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos, double total);`
+  - `bui_paint_site_panel` (function, line 184) `void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g, int hot_action);`
+  - `bui_paint_link_status` (function, line 191) `double bui_paint_link_status(cairo_t *cr, const ui_theme *th, const lp_preview *p, double left, double right, double...`
+  - `bui_link_status_flips` (function, line 196) `int bui_link_status_flips(const double zone[3], double ptr_x, double ptr_y);`
+  - `area` (function, line 201) `* tiled over the mask area (ax, ay, aw, ah) by the layer geometry `geo` (css.h CSS_MG_*, * resolved by...`
+  - `FREEDOM_BROWSER_UI_INTERNAL_H` (macro, line 2) `#define FREEDOM_BROWSER_UI_INTERNAL_H`
+  - `UI_FONT_SIZE` (macro, line 30) `#define UI_FONT_SIZE`
+  - `UI_TEXT_MARGIN` (macro, line 31) `#define UI_TEXT_MARGIN`
+  - `UI_HEADING_LEVELS` (macro, line 32) `#define UI_HEADING_LEVELS`
+  - `BUI_CHROME_FONT` (macro, line 127) `#define BUI_CHROME_FONT`
+  - `BUI_CHROME_FONT_SIZE` (macro, line 128) `#define BUI_CHROME_FONT_SIZE`
+  - `BUI_URL_FONT_SIZE` (macro, line 129) `#define BUI_URL_FONT_SIZE`
+- Depends on: `include/chrome_layout.h`, `include/freedom_config.h`, `include/link_preview.h`, `include/video_controls.h`
+- Imported by: `gui/browser_ui.c`, `gui/bui_chrome.c`, `gui/bui_mask_img.c`, `gui/bui_theme.c`
+
 ## gui/bui_chrome.c
 - Doc: tab_path: void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r) {...
 - Layer: utility
@@ -42,21 +76,21 @@ Previous: [KB_gui_p2.md](KB_gui_p2.md)
                       d...`
   - `icon_side_chevron` (function, line 521) `static void icon_side_chevron(cairo_t *cr, double cx, double cy, int dir)`
   - `paint_tabstrip` (function, line 554) `static void paint_tabstrip(cairo_t *cr, const bui_chrome_view *v)`
-  - `bui_paint_chrome` (function, line 646) `void bui_paint_chrome(cairo_t *cr, const bui_chrome_view *v)`
-  - `paint_find_field` (function, line 663) `static void paint_find_field(cairo_t *cr, const bui_find_view *v)`
-  - `find_button` (function, line 712) `static void find_button(cairo_t *cr, const bui_find_view *v, chl_rect r, chl_find_part part,
+  - `bui_paint_chrome` (function, line 648) `void bui_paint_chrome(cairo_t *cr, const bui_chrome_view *v)`
+  - `paint_find_field` (function, line 665) `static void paint_find_field(cairo_t *cr, const bui_find_view *v)`
+  - `find_button` (function, line 714) `static void find_button(cairo_t *cr, const bui_find_view *v, chl_rect r, chl_find_part part,
     ...`
-  - `icon_chevron` (function, line 724) `static void icon_chevron(cairo_t *cr, double cx, double cy, int dir)`
-  - `bui_paint_findbar` (function, line 732) `void bui_paint_findbar(cairo_t *cr, const bui_find_view *v)`
-  - `mix_rgb` (function, line 785) `static ui_rgb mix_rgb(ui_rgb a, ui_rgb b, double t)`
-  - `tone_rgb` (function, line 793) `static ui_rgb tone_rgb(const ui_theme *th, sp_tone t)`
-  - `text_in` (function, line 804) `static void text_in(cairo_t *cr, const char *s, double x, double baseline, double w, double top,
+  - `icon_chevron` (function, line 726) `static void icon_chevron(cairo_t *cr, double cx, double cy, int dir)`
+  - `bui_paint_findbar` (function, line 734) `void bui_paint_findbar(cairo_t *cr, const bui_find_view *v)`
+  - `mix_rgb` (function, line 787) `static ui_rgb mix_rgb(ui_rgb a, ui_rgb b, double t)`
+  - `tone_rgb` (function, line 795) `static ui_rgb tone_rgb(const ui_theme *th, sp_tone t)`
+  - `text_in` (function, line 806) `static void text_in(cairo_t *cr, const char *s, double x, double baseline, double w, double top,
 ...`
-  - `bui_paint_site_panel` (function, line 815) `void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g,
+  - `bui_paint_site_panel` (function, line 817) `void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g,
  ...`
-  - `bui_paint_video_bar` (function, line 903) `void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos, double total)`
-  - `bui_link_status_flips` (function, line 962) `int bui_link_status_flips(const double zone[3], double ptr_x, double ptr_y)`
-  - `bui_paint_link_status` (function, line 966) `double bui_paint_link_status(cairo_t *cr, const ui_theme *th, const lp_preview *p, double left,
+  - `bui_paint_video_bar` (function, line 905) `void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos, double total)`
+  - `bui_link_status_flips` (function, line 964) `int bui_link_status_flips(const double zone[3], double ptr_x, double ptr_y)`
+  - `bui_paint_link_status` (function, line 968) `double bui_paint_link_status(cairo_t *cr, const ui_theme *th, const lp_preview *p, double left,
  ...`
   - `BUI_TWO_PI` (macro, line 18) `#define BUI_TWO_PI`
   - `BUI_ICON_LINE` (macro, line 19) `#define BUI_ICON_LINE`
@@ -72,17 +106,17 @@ Previous: [KB_gui_p2.md](KB_gui_p2.md)
   - `BUI_INACTIVE_TEXT` (macro, line 29) `#define BUI_INACTIVE_TEXT`
   - `BUI_DISABLED` (macro, line 30) `#define BUI_DISABLED`
   - `BUI_URL_MEASURE` (macro, line 31) `#define BUI_URL_MEASURE`
-  - `BUI_SP_RADIUS` (macro, line 781) `#define BUI_SP_RADIUS`
-  - `BUI_SP_LABEL_W` (macro, line 782) `#define BUI_SP_LABEL_W`
-  - `BUI_VBAR_ALPHA` (macro, line 898) `#define BUI_VBAR_ALPHA`
-  - `BUI_VTRACK_ALPHA` (macro, line 899) `#define BUI_VTRACK_ALPHA`
-  - `BUI_VKNOB_R` (macro, line 900) `#define BUI_VKNOB_R`
-  - `BUI_VTEXT_SIZE` (macro, line 901) `#define BUI_VTEXT_SIZE`
-  - `BUI_LS_PAD_X` (macro, line 956) `#define BUI_LS_PAD_X`
-  - `BUI_LS_PAD_Y` (macro, line 957) `#define BUI_LS_PAD_Y`
-  - `BUI_LS_RADIUS` (macro, line 958) `#define BUI_LS_RADIUS`
-  - `BUI_LS_MAX_FRAC` (macro, line 959) `#define BUI_LS_MAX_FRAC`
-  - `BUI_LS_FONT` (macro, line 960) `#define BUI_LS_FONT`
+  - `BUI_SP_RADIUS` (macro, line 783) `#define BUI_SP_RADIUS`
+  - `BUI_SP_LABEL_W` (macro, line 784) `#define BUI_SP_LABEL_W`
+  - `BUI_VBAR_ALPHA` (macro, line 900) `#define BUI_VBAR_ALPHA`
+  - `BUI_VTRACK_ALPHA` (macro, line 901) `#define BUI_VTRACK_ALPHA`
+  - `BUI_VKNOB_R` (macro, line 902) `#define BUI_VKNOB_R`
+  - `BUI_VTEXT_SIZE` (macro, line 903) `#define BUI_VTEXT_SIZE`
+  - `BUI_LS_PAD_X` (macro, line 958) `#define BUI_LS_PAD_X`
+  - `BUI_LS_PAD_Y` (macro, line 959) `#define BUI_LS_PAD_Y`
+  - `BUI_LS_RADIUS` (macro, line 960) `#define BUI_LS_RADIUS`
+  - `BUI_LS_MAX_FRAC` (macro, line 961) `#define BUI_LS_MAX_FRAC`
+  - `BUI_LS_FONT` (macro, line 962) `#define BUI_LS_FONT`
 - Depends on: `gui/browser_ui_internal.h`
 
 ## gui/bui_mask_img.c

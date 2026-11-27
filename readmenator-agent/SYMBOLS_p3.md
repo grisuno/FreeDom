@@ -3,6 +3,18 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `button_rects` | function | `gui/ui_render.c:107` | `static void button_rects(const ui_window *w, double *min_x, double *max_x, double *close_x)` |
+| `deco_configure` | function | `gui/ui_render.c:294` | `static void deco_configure(void *data, struct zxdg_toplevel_decoration_v1 *d, uint32_t mode)` |
+| `destroy_buffer` | function | `gui/ui_render.c:122` | `static void destroy_buffer(ui_window *w)` |
+| `ensure_buffer` | function | `gui/ui_render.c:128` | `static int ensure_buffer(ui_window *w)` |
+| `paint` | function | `gui/ui_render.c:159` | `static void paint(ui_window *w)` |
+| `ptr_axis` | function | `gui/ui_render.c:344` | `static void ptr_axis(void *data, struct wl_pointer *p, uint32_t time,                      uint32...` |
+| `ptr_button` | function | `gui/ui_render.c:322` | `static void ptr_button(void *d, struct wl_pointer *p, uint32_t serial, uint32_t t,               ...` |
+| `ptr_enter` | function | `gui/ui_render.c:305` | `static void ptr_enter(void *d, struct wl_pointer *p, uint32_t s,                       struct wl_...` |
+| `ptr_leave` | function | `gui/ui_render.c:312` | `static void ptr_leave(void *d, struct wl_pointer *p, uint32_t s, struct wl_surface *sf)` |
+| `ptr_motion` | function | `gui/ui_render.c:315` | `static void ptr_motion(void *d, struct wl_pointer *p, uint32_t t, wl_fixed_t x, wl_fixed_t y)` |
+| `redraw` | function | `gui/ui_render.c:245` | `static void redraw(ui_window *w)` |
+| `registry_global` | function | `gui/ui_render.c:383` | `static void registry_global(void *data, struct wl_registry *reg, uint32_t name,                  ...` |
 | `registry_remove` | function | `gui/ui_render.c:401` | `static void registry_remove(void *d, struct wl_registry *r, uint32_t name)` |
 | `sanitize_utf8_inplace` | function | `gui/ui_render.c:39` | `static void sanitize_utf8_inplace(char *s)` |
 | `seat_caps` | function | `gui/ui_render.c:367` | `static void seat_caps(void *data, struct wl_seat *seat, uint32_t caps)` |
@@ -115,8 +127,9 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `bottom` | function | `include/box_tree.h:208` | `* bottom with auto top still anchors bottom (R8). * `placed` (may be NULL) marks which boxes have an in-flow rect in...` |
 | `box_index` | type_alias | `include/box_tree.h:146` | `typedef struct bt_positioned { size_t box_index;` |
 | `bt_box_hidden` | function | `include/box_tree.h:233` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid);` |
-| `bt_containing_block` | function | `include/box_tree.h:268` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...` |
-| `bt_defer_roots` | function | `include/box_tree.h:291` | `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char...` |
+| `bt_containing_block` | function | `include/box_tree.h:280` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i, const double *box_x, const double *box_y...` |
+| `bt_defer_roots` | function | `include/box_tree.h:303` | `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char...` |
+| `bt_fixed_pinned` | function | `include/box_tree.h:266` | `int bt_fixed_pinned(const pv_box_def *boxes, size_t nbox, int bid);` |
 | `bt_in_subtree` | function | `include/box_tree.h:239` | `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid);` |
 | `bt_node` | struct | `include/box_tree.h:67` | `` |
 | `bt_oof_anchor` | function | `include/box_tree.h:253` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid);` |
@@ -126,7 +139,7 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `closed` | function | `include/box_tree.h:34` | `* fails closed (BT_ERR_RANGE) instead of overflowing the stack. */ #define BT_MAX_DEPTH 64u #define BT_MAX_CHILDREN...` |
 | `display` | type_alias | `include/box_tree.h:66` | `typedef struct bt_node { bx_display display;` |
 | `flow` | function | `include/box_tree.h:201` | `* position is where the box would have started in flow (CSS 2.2 §10.3.7/§10.6.4);` |
-| `insets` | function | `include/box_tree.h:258` | `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...` |
+| `insets` | function | `include/box_tree.h:270` | `* minus the two insets (px half + per-mille half of cb), an auto/unset inset * counting 0, never below 0. *both (may...` |
 | `line` | function | `include/box_tree.h:115` | `* its line (already resolved from align-self / the * container's align-items by the caller). */ /* this node as a...` |
 | `node` | function | `include/box_tree.h:162` | `* node (x/y parent-relative, w/h border-box). display:none nodes get a zero rect and * take no space. The caller...` |
 | `one` | function | `include/box_tree.h:99` | `* of forcing them all onto one (flex-wrap);` |
@@ -483,18 +496,5 @@ Previous: [SYMBOLS_p2.md](SYMBOLS_p2.md)
 | `CI_MAX_PER_PAGE` | macro | `include/css_import.h:22` | `#define CI_MAX_PER_PAGE` |
 | `CI_MAX_PER_SHEET` | macro | `include/css_import.h:23` | `#define CI_MAX_PER_SHEET` |
 | `CI_URL_MAX` | macro | `include/css_import.h:19` | `#define CI_URL_MAX` |
-| `FREEDOM_CSS_IMPORT_H` | macro | `include/css_import.h:2` | `#define FREEDOM_CSS_IMPORT_H` |
-| `ci_balanced` | function | `include/css_import.h:45` | `int ci_balanced(const char *css, size_t len);` |
-| `ci_import` | struct | `include/css_import.h:25` | `` |
-| `ci_scan` | function | `include/css_import.h:36` | `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap);` |
-| `ci_wrap` | function | `include/css_import.h:41` | `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap);` |
-| `url` | type_alias | `include/css_import.h:24` | `typedef struct ci_import { char url[CI_URL_MAX];` |
-| `url` | function | `include/css_import.h:55` | `* rewritten to url("ABS"), ABS = resolve(base, ref) (spec/css_import.md, "Rebase"). * Fragment-only, schemed, empty...` |
-| `FREEDOM_CSS_INDEX_H` | macro | `include/css_index.h:11` | `#define FREEDOM_CSS_INDEX_H` |
-| `cix_build` | function | `include/css_index.h:34` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` |
-| `cix_build_ptrs` | function | `include/css_index.h:37` | `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);` |
-| `cix_entry` | struct | `include/css_index.h:18` | `` |
-| `cix_free` | function | `include/css_index.h:40` | `void cix_free(cix_index *idx);` |
-| `cix_index` | struct | `include/css_index.h:23` | `` |
 
 Next: [SYMBOLS_p4.md](SYMBOLS_p4.md)

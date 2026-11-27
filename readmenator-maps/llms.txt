@@ -1,6 +1,6 @@
 # freedom-0.0.3
 
-> Static analysis knowledge base for freedom-0.0.3: 14 communities, 426 files, 2389 imports, 4 languages, 9050 symbols.
+> Static analysis knowledge base for freedom-0.0.3: 14 communities, 427 files, 2397 imports, 4 languages, 9073 symbols.
 
 Generated offline by readmenator (zero LLM tokens). Start with the wiki index for the big picture, then the agent INDEX for file lookup.
 
@@ -15,7 +15,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/API_p13.md](md/readmenator-agent/API_p13.md): Depends on: include/anchor.h, include/antifp.h, include/boxtree.h, include/css.h, include/csschain.h, include/csscomputed.h, include/cssgradient.h...
 - [readmenator-agent/API_p14.md](md/readmenator-agent/API_p14.md): Depends on: include/zoom.h
 - [readmenator-agent/API_p2.md](md/readmenator-agent/API_p2.md): Depends on: gui/browseruiinternal.h, include/anchor.h, include/blockflow.h, include/boxblur.h, include/boxstyle.h, include/boxtree.h, include/browser.h...
-- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): boxformsstackingcontext (function) gui/browserui.c:14418 static int boxformsstackingcontext(const pvboxdef def) -- Does this box need its own offscreen...
+- [readmenator-agent/API_p3.md](md/readmenator-agent/API_p3.md): boxformsstackingcontext (function) gui/browserui.c:14425 static int boxformsstackingcontext(const pvboxdef def) -- Does this box need its own offscreen...
 - [readmenator-agent/API_p4.md](md/readmenator-agent/API_p4.md): Depends on: include/css.h
 - [readmenator-agent/API_p5.md](md/readmenator-agent/API_p5.md): Imported by: gui/browserui.c, include/hostconf.h, src/freedom.c, src/hostblock.c, tests/testhostblock.c
 - [readmenator-agent/API_p6.md](md/readmenator-agent/API_p6.md): Imported by: src/subreqbatch.c, src/tab.c, tests/testsubreqbatch.c
@@ -28,8 +28,8 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/CONCEPTS.md](md/readmenator-agent/CONCEPTS.md): Nouns map atomically to file sets (EXTRACTED); verbs aggregate structural edges (INFERRED).
 - [readmenator-agent/KB_fuzz.md](md/readmenator-agent/KB_fuzz.md): Doc: Fuzzer for anchor (spec/anchor.md) and urlsplitlocation: a hostile document x a
 - [readmenator-agent/KB_gui.md](md/readmenator-agent/KB_gui.md): Doc: uiinputstate: Live editable state for one form text control, aliasing a block of the current...
-- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): paintpositionedone (function, line 15401) static void paintpositionedone(cairot cr, browserwindow w, const uitheme th,
-- [readmenator-agent/KB_gui_p3.md](md/readmenator-agent/KB_gui_p3.md): Doc: tabpath: void buiroundrect(cairot cr, double x, double y, double w, double h, double r) {...
+- [readmenator-agent/KB_gui_p2.md](md/readmenator-agent/KB_gui_p2.md): pinneddyat (function, line 15373) static double pinneddyat(const browserwindow w, int boxindex, double pin)
+- [readmenator-agent/KB_gui_p3.md](md/readmenator-agent/KB_gui_p3.md): Doc: buichromeview: uitheme uithemefor(int mode); / maps a uithememode to a palette...
 - [readmenator-agent/KB_include.md](md/readmenator-agent/KB_include.md): Doc: anccollect: Writes target and its element subtree in preorder (nsub handles), then the...
 - [readmenator-agent/KB_include_p2.md](md/readmenator-agent/KB_include_p2.md): Doc: cchelementmatches: Nonzero iff the parsed selector sel matches element el, built against...
 - [readmenator-agent/KB_include_p3.md](md/readmenator-agent/KB_include_p3.md): Doc: fbptablabel: FBPCSS, FBPSCRIPT, FBPNET, FBPPROFILE, / where the JS time went (sampling...
@@ -57,7 +57,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 - [readmenator-agent/KB_tests_p8.md](md/readmenator-agent/KB_tests_p8.md): Doc: testrenderbinarydoesnotcrashparent: (void)state; rdresult r...
 - [readmenator-agent/KB_tests_p9.md](md/readmenator-agent/KB_tests_p9.md): Doc: testtablelayout -- automatic table layout (spec/tablelayout.md).
 - [readmenator-agent/KB_tools.md](md/readmenator-agent/KB_tools.md): Doc: fbench -- turn the PNG pairs make parity leaves behind into something you can act on.
-- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 426 files at commit a55d43120e2f. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
+- [readmenator-agent/MEMORY.md](md/readmenator-agent/MEMORY.md): Generated from 427 files at commit f8606f527d45. Read this first, then readmenator-wiki/index.md, then readmenator . ask "<question>" for anything specific.
 - [readmenator-agent/SECURITY.md](md/readmenator-agent/SECURITY.md)
 - [readmenator-agent/SYMBOLS.md](md/readmenator-agent/SYMBOLS.md)
 - [readmenator-agent/SYMBOLS_p10.md](md/readmenator-agent/SYMBOLS_p10.md)
@@ -67,7 +67,7 @@ Generated offline by readmenator (zero LLM tokens). Start with the wiki index fo
 ## Project Docs
 
 - [KNOWLEDGE_BASE.md](md/KNOWLEDGE_BASE.md): Start here: Statistics Dashboard for scope, God Nodes for blast radius, Architecture Reference for per-file API. Agents: prefer readmenator-agent/INDEX.md +...
-- [README.md](md/README.md): !Freedom vs Firefox on lobste.rs
+- [README.md](md/README.md): !Freedom: lobste.rs in the real window, with three more tabs in the background
 - [SECURITY.md](md/SECURITY.md): We prioritize security patches on the active development branch. Due to the independent, local-first research nature of this project, only the latest major...
 
 ## Optional

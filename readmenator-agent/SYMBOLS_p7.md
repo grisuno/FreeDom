@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `fp_on_line` | function | `src/anti_fp.c:89` | `int fp_on_line(void)` |
+| `fp_origin_key` | function | `src/anti_fp.c:139` | `uint64_t fp_origin_key(uint64_t session_key, const char *registrable_domain)` |
+| `fp_oscpu` | function | `src/anti_fp.c:77` | `const char *fp_oscpu(void)` |
+| `fp_perturb` | function | `src/anti_fp.c:128` | `void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key)` |
+| `fp_platform` | function | `src/anti_fp.c:39` | `const char *fp_platform(void)` |
+| `fp_product` | function | `src/anti_fp.c:65` | `const char *fp_product(void)` |
+| `fp_product_sub` | function | `src/anti_fp.c:73` | `const char *fp_product_sub(void)` |
+| `fp_timezone` | function | `src/anti_fp.c:35` | `const char *fp_timezone(void)` |
+| `fp_user_agent` | function | `src/anti_fp.c:23` | `const char *fp_user_agent(void)` |
+| `fp_vendor` | function | `src/anti_fp.c:43` | `const char *fp_vendor(void)` |
+| `splitmix64` | function | `src/anti_fp.c:121` | `static uint64_t splitmix64(uint64_t *state)` |
+| `bf_collapse` | function | `src/block_flow.c:30` | `double bf_collapse(double a, double b)` |
+| `bf_collapse_n` | function | `src/block_flow.c:15` | `double bf_collapse_n(const double *m, size_t n)` |
 | `bf_margins_adjoin` | function | `src/block_flow.c:35` | `int bf_margins_adjoin(double border_px, double padding_px)` |
 | `finite_or_zero` | function | `src/block_flow.c:11` | `static double finite_or_zero(double v)` |
 | `BB_BOX_MAX` | macro | `src/box_blur.c:31` | `#define BB_BOX_MAX` |
@@ -67,17 +80,20 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `BT_WRAP_EPS` | macro | `src/box_tree.c:65` | `#define BT_WRAP_EPS` |
 | `assign_doc_order` | function | `src/box_tree.c:508` | `static void assign_doc_order(const pv_box_def *boxes, size_t nbox, size_t idx,                   ...` |
 | `block` | function | `src/box_tree.c:569` | `* true block (same flow neighbourhood), strictly better than zeros. NULL      * placed keeps lega...` |
-| `bt_box_hidden` | function | `src/box_tree.c:887` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
+| `box_captures_fixed` | function | `src/box_tree.c:888` | `static int box_captures_fixed(const pv_box_def *b)` |
+| `box_has_transform` | function | `src/box_tree.c:617` | `static int box_has_transform(const pv_box_def *b)` |
+| `bt_box_hidden` | function | `src/box_tree.c:913` | `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)` |
 | `bt_containing_block` | function | `src/box_tree.c:558` | `void bt_containing_block(const pv_box_def *boxes, size_t nbox, size_t i,                         ...` |
-| `bt_defer_roots` | function | `src/box_tree.c:919` | `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,                       const bt_positi...` |
-| `bt_in_subtree` | function | `src/box_tree.c:900` | `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)` |
+| `bt_defer_roots` | function | `src/box_tree.c:945` | `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,                       const bt_positi...` |
+| `bt_fixed_pinned` | function | `src/box_tree.c:896` | `int bt_fixed_pinned(const pv_box_def *boxes, size_t nbox, int bid)` |
+| `bt_in_subtree` | function | `src/box_tree.c:926` | `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)` |
 | `bt_layout` | function | `src/box_tree.c:468` | `bt_status bt_layout(bt_node *root, double avail_w)` |
 | `bt_nn` | function | `src/box_tree.c:61` | `static double bt_nn(double v)` |
-| `bt_oof_anchor` | function | `src/box_tree.c:879` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` |
-| `bt_oof_avail` | function | `src/box_tree.c:911` | `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)` |
-| `bt_oof_root` | function | `src/box_tree.c:883` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
+| `bt_oof_anchor` | function | `src/box_tree.c:878` | `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)` |
+| `bt_oof_avail` | function | `src/box_tree.c:937` | `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)` |
+| `bt_oof_root` | function | `src/box_tree.c:882` | `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)` |
 | `bt_resolve_positioning` | function | `src/box_tree.c:588` | `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,                           ...` |
-| `bt_resolve_positioning_ex` | function | `src/box_tree.c:706` | `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,                        ...` |
+| `bt_resolve_positioning_ex` | function | `src/box_tree.c:711` | `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,                        ...` |
 | `find_positioned_ancestor` | function | `src/box_tree.c:525` | `static int find_positioned_ancestor(const pv_box_def *boxes, size_t nbox,                        ...` |
 | `height` | function | `src/box_tree.c:81` | `* exactly that height (Flexbox 9.4 step 15).  *  * wrap_reverse (node->wrap_reverse): when node->...` |
 | `inset_unset` | function | `src/box_tree.c:554` | `static int inset_unset(int v, int pct_pm)` |
@@ -86,12 +102,12 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `layout_grid` | function | `src/box_tree.c:283` | `static bt_status layout_grid(bt_node *node, bt_node *const *kids, size_t nk,                     ...` |
 | `layout_node` | function | `src/box_tree.c:423` | `static bt_status layout_node(bt_node *node, double avail_w, unsigned depth)` |
 | `len` | type_alias | `src/box_tree.c:610` | `typedef struct sc_chain { uint16_t len;` |
-| `nest_in_contexts` | function | `src/box_tree.c:638` | `static void nest_in_contexts(const pv_box_def *boxes, size_t nbox, const bt_positioned *tmp,     ...` |
-| `oof_walk` | function | `src/box_tree.c:862` | `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` |
+| `nest_in_contexts` | function | `src/box_tree.c:643` | `static void nest_in_contexts(const pv_box_def *boxes, size_t nbox, const bt_positioned *tmp,     ...` |
+| `oof_walk` | function | `src/box_tree.c:861` | `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` |
 | `resolve_inset` | function | `src/box_tree.c:545` | `static double resolve_inset(int v, int pct_pm, double basis)` |
 | `sc_chain` | struct | `src/box_tree.c:611` | `` |
-| `sc_chain_compare` | function | `src/box_tree.c:629` | `static int sc_chain_compare(const sc_chain *a, const sc_chain *b, const cx_item *by_ref)` |
-| `sc_forms` | function | `src/box_tree.c:616` | `static int sc_forms(const pv_box_def *b)` |
+| `sc_chain_compare` | function | `src/box_tree.c:634` | `static int sc_chain_compare(const sc_chain *a, const sc_chain *b, const cx_item *by_ref)` |
+| `sc_forms` | function | `src/box_tree.c:624` | `static int sc_forms(const pv_box_def *b)` |
 | `sized` | function | `src/box_tree.c:353` | `* the tracks are sized (CSS Grid 1 11.5, items spanning several tracks come * last);` |
 | `_POSIX_C_SOURCE` | macro | `src/browser.c:7` | `#define _POSIX_C_SOURCE` |
 | `begin_pending` | function | `src/browser.c:72` | `static void begin_pending(browser_state *bs, int kind)` |
@@ -480,21 +496,5 @@ Previous: [SYMBOLS_p6.md](SYMBOLS_p6.md)
 | `AUTO_VALUE` | macro | `src/css_box.c:1249` | `#define AUTO_VALUE` |
 | `CSS_CALC_MAX_DEPTH` | macro | `src/css_box.c:714` | `#define CSS_CALC_MAX_DEPTH` |
 | `CSS_MATHFN_MAX_ARGS` | macro | `src/css_box.c:718` | `#define CSS_MATHFN_MAX_ARGS` |
-| `RELATIVE` | function | `src/css_box.c:63` | `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...` |
-| `accepts` | function | `src/css_box.c:706` | `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...` |
-| `calc_eval_em` | function | `src/css_box.c:974` | `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` |
-| `calc_eval_full` | function | `src/css_box.c:960` | `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,            ...` |
-| `calc_expr` | function | `src/css_box.c:938` | `static int calc_expr(calc_parser *p, calc_val *out, int depth)` |
-| `calc_match_fn` | function | `src/css_box.c:746` | `static int calc_match_fn(calc_parser *p, const char *name)` |
-| `calc_mathfn` | function | `src/css_box.c:788` | `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` |
-| `calc_parser` | struct | `src/css_box.c:737` | `` |
-| `calc_piecewise` | function | `src/css_box.c:773` | `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` |
-| `calc_skip_ws` | function | `src/css_box.c:739` | `static void calc_skip_ws(calc_parser *p)` |
-| `calc_term` | function | `src/css_box.c:911` | `static int calc_term(calc_parser *p, calc_val *out, int depth)` |
-| `calc_unwrap` | function | `src/css_box.c:982` | `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` |
-| `calc_val` | struct | `src/css_box.c:736` | `` |
-| `cb_clip_inset` | function | `src/css_box.c:1141` | `int cb_clip_inset(const char *val, int px[4], int pm[4])` |
-| `cb_copy_trim` | function | `src/css_box.c:25` | `static size_t cb_copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
-| `cb_expand_box2` | function | `src/css_box.c:1422` | `int cb_expand_box2(const char *val, int slot_start, int slot_end,                        int allo...` |
 
 Next: [SYMBOLS_p8.md](SYMBOLS_p8.md)

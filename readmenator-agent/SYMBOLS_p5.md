@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `idn_config` | struct | `include/identity.h:37` | `` |
+| `idn_defaults` | function | `include/identity.h:50` | `void idn_defaults(idn_config *c);` |
+| `idn_geo_mode` | enum | `include/identity.h:25` | `` |
+| `idn_is_default` | function | `include/identity.h:53` | `int idn_is_default(const idn_config *c);` |
+| `idn_parse` | function | `include/identity.h:72` | `void idn_parse(idn_config *c, const char *text);` |
+| `idn_primary_language` | function | `include/identity.h:64` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);` |
+| `idn_render_page` | function | `include/identity.h:78` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` |
+| `idn_serialize` | function | `include/identity.h:68` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` |
+| `idn_set_geo` | function | `include/identity.h:58` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);` |
+| `idn_set_languages` | function | `include/identity.h:57` | `int idn_set_languages(idn_config *c, const char *list);` |
+| `idn_set_user_agent` | function | `include/identity.h:56` | `int idn_set_user_agent(idn_config *c, const char *ua);` |
+| `idn_user_agent` | function | `include/identity.h:62` | `const char *idn_user_agent(const idn_config *c);` |
+| `user_agent` | type_alias | `include/identity.h:36` | `typedef struct idn_config { char user_agent[IDN_UA_MAX];` |
 | `FREEDOM_IMAGE_DECODE_H` | macro | `include/image_decode.h:2` | `#define FREEDOM_IMAGE_DECODE_H` |
 | `IMG_MAX_DIM` | macro | `include/image_decode.h:71` | `#define IMG_MAX_DIM` |
 | `IMG_MAX_PIXELS` | macro | `include/image_decode.h:72` | `#define IMG_MAX_PIXELS` |
@@ -483,18 +496,5 @@ Previous: [SYMBOLS_p4.md](SYMBOLS_p4.md)
 | `list` | function | `include/render_doc.h:18` | `* inert display list (page_view) and the presentation orchestrator (the GUI and * the --headless writer). It decides...` |
 | `rd_at` | function | `include/render_doc.h:325` | `const rd_block *rd_at(const rd_doc *d, size_t i);` |
 | `rd_block` | struct | `include/render_doc.h:64` | `` |
-| `rd_block_heading_level` | function | `include/render_doc.h:354` | `int rd_block_heading_level(const rd_block *b);` |
-| `rd_block_tag` | function | `include/render_doc.h:347` | `const char *rd_block_tag(const rd_block *b);` |
-| `rd_box_at` | function | `include/render_doc.h:330` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);` |
-| `rd_box_count` | function | `include/render_doc.h:329` | `size_t rd_box_count(const rd_doc *d);` |
-| `rd_cont_at` | function | `include/render_doc.h:335` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);` |
-| `rd_cont_count` | function | `include/render_doc.h:334` | `size_t rd_cont_count(const rd_doc *d);` |
-| `rd_count` | function | `include/render_doc.h:324` | `size_t rd_count(const rd_doc *d);` |
-| `rd_doc` | struct | `include/render_doc.h:267` | `` |
-| `rd_free` | function | `include/render_doc.h:321` | `void rd_free(rd_doc *d);` |
-| `rd_input_invisible` | function | `include/render_doc.h:373` | `int rd_input_invisible(int input_type);` |
-| `rd_input_label` | function | `include/render_doc.h:368` | `const char *rd_input_label(int input_type);` |
-| `rd_kind` | enum | `include/render_doc.h:42` | `` |
-| `rd_kind_name` | function | `include/render_doc.h:339` | `const char *rd_kind_name(rd_kind k);` |
 
 Next: [SYMBOLS_p6.md](SYMBOLS_p6.md)

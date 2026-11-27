@@ -4,7 +4,7 @@
 
 These files have the most connections. Changes here have high blast radius.
 
-- `gui/browser_ui.c` (score: 217.00)
+- `gui/browser_ui.c` (score: 218.00)
 - `include/css.h` (score: 104.80, imported by 42 files)
 - `src/tab.c` (score: 91.90)
 - `src/page_view.c` (score: 63.40)
@@ -18,8 +18,8 @@ These files have the most connections. Changes here have high blast radius.
 
 Editing these files can break the listed number of dependents. Run their tests after any change.
 
-- `include/css.h` -- 42 direct, 52 total dependents
-- `include/css_color.h` -- 14 direct, 51 total dependents
+- `include/css.h` -- 42 direct, 55 total dependents
+- `include/css_color.h` -- 14 direct, 52 total dependents
 - `include/css_counter.h` -- 4 direct, 51 total dependents
 - `include/dom.h` -- 22 direct, 51 total dependents
 - `include/css_mq.h` -- 5 direct, 50 total dependents
@@ -66,10 +66,10 @@ Circular dependencies. Refactor to break the cycle.
 - `fuzz/fuzz_css_import.c:37` `fz_resolve` [UNCHECKED_ALLOC] `o`: Result of allocator stored in `o` is never checked against NULL.
 - `fuzz/fuzz_fb_cmdline.c:7` `LLVMFuzzerTestOneInput` [UNCHECKED_ALLOC] `cut`: Result of allocator stored in `cut` is never checked against NULL.
 - `fuzz/fuzz_fb_cmdline.c:7` `LLVMFuzzerTestOneInput` [UNCHECKED_ALLOC] `t`: Result of allocator stored in `t` is never checked against NULL.
-- `gui/browser_ui.c:1867` `gui_sub_perform` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- `gui/browser_ui.c:2106` `first` [DEAD_STORE] `dg`: `dg` assigned at line 2106 but never read afterwards.
-- `gui/browser_ui.c:5088` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 5088 but never read afterwards.
-- `gui/browser_ui.c:5090` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 5090 but never read afterwards.
-- `gui/browser_ui.c:6162` `table` [DEAD_STORE] `parent`: `parent` assigned at line 6162 but never read afterwards.
-- `gui/browser_ui.c:6163` `table` [DEAD_STORE] `seen`: `seen` assigned at line 6163 but never read afterwards.
-- `gui/browser_ui.c:6165` `table` [DEAD_STORE] `j`: `j` assigned at line 6165 but never read afterwards.
+- `gui/browser_ui.c:1869` `gui_sub_perform` [UNCHECKED_ALLOC] `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- `gui/browser_ui.c:2108` `first` [DEAD_STORE] `dg`: `dg` assigned at line 2108 but never read afterwards.
+- `gui/browser_ui.c:5090` `flow_text` [DEAD_STORE] `space_w`: `space_w` assigned at line 5090 but never read afterwards.
+- `gui/browser_ui.c:5092` `flow_text` [DEAD_STORE] `i`: `i` assigned at line 5092 but never read afterwards.
+- `gui/browser_ui.c:6164` `table` [DEAD_STORE] `parent`: `parent` assigned at line 6164 but never read afterwards.
+- `gui/browser_ui.c:6165` `table` [DEAD_STORE] `seen`: `seen` assigned at line 6165 but never read afterwards.
+- `gui/browser_ui.c:6167` `table` [DEAD_STORE] `j`: `j` assigned at line 6167 but never read afterwards.

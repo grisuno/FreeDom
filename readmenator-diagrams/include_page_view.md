@@ -19,7 +19,7 @@ graph LR
 
 ## fuzz (5.1)
 
-fuzz groups 3 files (c) around FB_MAX, pass. Hostile box trees (any parent graph, cycles included) through the positioned paint
+fuzz groups 3 files (c) around FB_MAX, order, LLVMFuzzerTestOneInput, pass. Hostile box trees (any parent graph, cycles included) through the positioned paint
 
 ## include (5.2)
 

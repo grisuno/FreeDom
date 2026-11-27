@@ -3,6 +3,27 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_dimensions_ok_bounds` | function | `tests/test_image_decode.c:120` | `static void test_dimensions_ok_bounds(void **state)` |
+| `test_dimensions_truncated` | function | `tests/test_image_decode.c:97` | `static void test_dimensions_truncated(void **state)` |
+| `test_fit_degenerate` | function | `tests/test_image_decode.c:154` | `static void test_fit_degenerate(void **state)` |
+| `test_fit_landscape_into_square` | function | `tests/test_image_decode.c:136` | `static void test_fit_landscape_into_square(void **state)` |
+| `test_fit_portrait_into_box` | function | `tests/test_image_decode.c:145` | `static void test_fit_portrait_into_box(void **state)` |
+| `test_format_name` | function | `tests/test_image_decode.c:227` | `static void test_format_name(void **state)` |
+| `test_pixels_free_idempotent` | function | `tests/test_image_decode.c:218` | `static void test_pixels_free_idempotent(void **state)` |
+| `test_sniff_gif` | function | `tests/test_image_decode.c:356` | `static void test_sniff_gif(void **state)` |
+| `test_sniff_jpeg` | function | `tests/test_image_decode.c:236` | `static void test_sniff_jpeg(void **state)` |
+| `test_sniff_png` | function | `tests/test_image_decode.c:75` | `static void test_sniff_png(void **state)` |
+| `test_sniff_unsupported` | function | `tests/test_image_decode.c:80` | `static void test_sniff_unsupported(void **state)` |
+| `test_sniff_webp` | function | `tests/test_image_decode.c:448` | `static void test_sniff_webp(void **state)` |
+| `DOC` | macro | `tests/test_import_map.c:36` | `#define DOC` |
+| `expect_res` | function | `tests/test_import_map.c:38` | `static void expect_res(const im_map *m, const char *base, const char *spec, const char *want)` |
+| `main` | function | `tests/test_import_map.c:123` | `int main(void)` |
+| `test_exact_and_prefix_imports` | function | `tests/test_import_map.c:48` | `static void test_exact_and_prefix_imports(void **state)` |
+| `test_invalid_input_yields_empty_map` | function | `tests/test_import_map.c:102` | `static void test_invalid_input_yields_empty_map(void **state)` |
+| `test_json_escapes_and_ignored_members` | function | `tests/test_import_map.c:90` | `static void test_json_escapes_and_ignored_members(void **state)` |
+| `test_scopes_win_by_longest_prefix` | function | `tests/test_import_map.c:74` | `static void test_scopes_win_by_longest_prefix(void **state)` |
+| `tres` | function | `tests/test_import_map.c:17` | `static int tres(void *ctx, const char *base, const char *ref, char *out, size_t outsz)` |
+| `assert_float_equal` | function | `tests/test_interp.c:64` | `assert_float_equal(ip_ease(0.0, &(ip_ease_fn)` |
 | `assert_float_equal` | function | `tests/test_interp.c:66` | `assert_float_equal(ip_ease(0.0, &(ip_ease_fn)` |
 | `linear_ease` | function | `tests/test_interp.c:258` | `static ip_ease_fn linear_ease(void)` |
 | `main` | function | `tests/test_interp.c:474` | `int main(void)` |
@@ -475,26 +496,5 @@ Previous: [SYMBOLS_p15.md](SYMBOLS_p15.md)
 | `test_https_scheme_relative` | function | `tests/test_link_nav.c:91` | `static void test_https_scheme_relative(void **state)` |
 | `test_no_base` | function | `tests/test_link_nav.c:179` | `static void test_no_base(void **state)` |
 | `test_null_href_blocked` | function | `tests/test_link_nav.c:29` | `static void test_null_href_blocked(void **state)` |
-| `test_null_out` | function | `tests/test_link_nav.c:24` | `static void test_null_out(void **state)` |
-| `test_overflow_blocked` | function | `tests/test_link_nav.c:195` | `static void test_overflow_blocked(void **state)` |
-| `test_resolve_long_bundle_target` | function | `tests/test_link_nav.c:101` | `static void test_resolve_long_bundle_target(void **state)` |
-| `assert_clean` | function | `tests/test_link_preview.c:11` | `static void assert_clean(const lp_preview *p)` |
-| `host_is` | function | `tests/test_link_preview.c:21` | `static void host_is(const lp_preview *p, const char *host)` |
-| `main` | function | `tests/test_link_preview.c:139` | `int main(void)` |
-| `test_bidi_and_controls_escaped` | function | `tests/test_link_preview.c:71` | `static void test_bidi_and_controls_escaped(void **state)` |
-| `test_downgrade_blocked` | function | `tests/test_link_preview.c:63` | `static void test_downgrade_blocked(void **state)` |
-| `test_fragment_same_document` | function | `tests/test_link_preview.c:84` | `static void test_fragment_same_document(void **state)` |
-| `test_javascript_blocked` | function | `tests/test_link_preview.c:52` | `static void test_javascript_blocked(void **state)` |
-| `test_local_file` | function | `tests/test_link_preview.c:97` | `static void test_local_file(void **state)` |
-| `test_long_blocked_bounded` | function | `tests/test_link_preview.c:124` | `static void test_long_blocked_bounded(void **state)` |
-| `test_long_path_keeps_host` | function | `tests/test_link_preview.c:106` | `static void test_long_path_keeps_host(void **state)` |
-| `test_null_out` | function | `tests/test_link_preview.c:26` | `static void test_null_out(void **state)` |
-| `test_relative_resolves_to_absolute` | function | `tests/test_link_preview.c:31` | `static void test_relative_resolves_to_absolute(void **state)` |
-| `test_userinfo_and_port_not_host` | function | `tests/test_link_preview.c:42` | `static void test_userinfo_and_port_not_host(void **state)` |
-| `local_store` | function | `tests/test_local_store.c:2` | `* TDD suite for local_store (Hito 5 - Zero Knowledge: encrypted local state). * * RED state until src/local_store.c...` |
-| `main` | function | `tests/test_local_store.c:193` | `int main(void)` |
-| `roundtrip_raw` | function | `tests/test_local_store.c:30` | `static void roundtrip_raw(ls_aead aead)` |
-| `tamper_at` | function | `tests/test_local_store.c:85` | `static void tamper_at(size_t off)` |
-| `test_derive_key` | function | `tests/test_local_store.c:149` | `static void test_derive_key(void **s)` |
 
 Next: [SYMBOLS_p17.md](SYMBOLS_p17.md)

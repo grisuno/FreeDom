@@ -13,7 +13,7 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `include/box_style.h` | h | utility | 31 | no |
-| `include/box_tree.h` | h | utility | 34 | no |
+| `include/box_tree.h` | h | utility | 35 | no |
 | `include/dom_debug.h` | h | utility | 4 | no |
 | `include/flex_layout.h` | h | presentation | 45 | no |
 | `include/freedom_config.h` | h | infrastructure | 29 | no |
@@ -24,7 +24,7 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `tests/test_box_style.c` | c | testing | 49 | no |
-| `tests/test_box_tree.c` | c | testing | 71 | no |
+| `tests/test_box_tree.c` | c | testing | 76 | no |
 | `tests/test_dom_debug.c` | c | testing | 11 | no |
 | `tests/test_flex_layout.c` | c | testing | 72 | no |
 | `tests/test_page_view.c` | c | testing | 231 | no |
@@ -35,7 +35,7 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
 | `src/box_style.c` | c | utility | 48 | no |
-| `src/box_tree.c` | c | utility | 31 | no |
+| `src/box_tree.c` | c | utility | 34 | no |
 | `src/dom_debug.c` | c | utility | 24 | no |
 | `src/flex_layout.c` | c | presentation | 36 | no |
 | `src/page_view.c` | c | presentation | 294 | no |
@@ -44,7 +44,7 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `fuzz/fuzz_box_tree.c` | c | utility | 1 | yes |
+| `fuzz/fuzz_box_tree.c` | c | utility | 3 | yes |
 | `fuzz/fuzz_dom_debug.c` | c | utility | 1 | no |
 | `fuzz/fuzz_page_view.c` | c | presentation | 0 | no |
 
@@ -54,6 +54,8 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 ## Key Symbols
 
 - `FB_MAX` (macro, `fuzz/fuzz_box_tree.c:8`) `#define FB_MAX`
+- `order` (function, `fuzz/fuzz_box_tree.c:11`) `* order (spec/compositor.md "Anidado"): the output is a permutation of the posit`
+- `LLVMFuzzerTestOneInput` (function, `fuzz/fuzz_box_tree.c:16`) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)` - Hostile box trees (any parent graph, cycles included) through the positioned paint order (spec/compo
 - `pass` (function, `fuzz/fuzz_dom_debug.c:8`) `* the measure pass (cap 0) must agree with the would-write return value.  *  * B`
 - `FREEDOM_BOX_STYLE_H` (macro, `include/box_style.h:2`) `#define FREEDOM_BOX_STYLE_H`
 - `BX_TAG_NAME_MAX` (macro, `include/box_style.h:33`) `#define BX_TAG_NAME_MAX`
@@ -81,8 +83,6 @@ This community groups 30 file(s) rooted at `include` with dominant language c (c
 - `bx_lp_px` (function, `include/box_style.h:267`) `double bx_lp_px(int px_val, int pct_pm, double basis);` - half plus pct_pm per-mille of `basis`. This is the ONLY place the engine turns a percentage into pix
 - `bx_content_cap` (function, `include/box_style.h:275`) `double bx_content_cap(double width_cap, int border_box, double pad_l, double pad` - Content-width cap adjusted for box-sizing (2026-07-11). With border_box set, the declared width incl
 - `bx_border_span` (function, `include/box_style.h:286`) `double bx_border_span(double width_cap, int border_box, double pad_l, double pad` - The border-inclusive span the painter lays a box out with (its content plus left/right border; paddi
-- `bx_flex_max_clamp` (function, `include/box_style.h:292`) `double bx_flex_max_clamp(double outer_basis, double mw_cap, int border_box, doub` - Flexbox 1 9.2.3: an item's OUTER flex base size clamped by its max-width (the hypothetical main size
-- `bx_flex_min_clamp` (function, `include/box_style.h:298`) `double bx_flex_min_clamp(double outer_basis, double min_w, int border_box, doubl` - The min-width half of the same clamp (Flexbox 9.2.3): an outer base below the item's min-width (conv
 
 ## Internal vs External Edges
 

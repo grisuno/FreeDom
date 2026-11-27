@@ -3,6 +3,27 @@ Previous: [SYMBOLS_p17.md](SYMBOLS_p17.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_image_data_url_malformed_is_invalid` | function | `tests/test_render_policy.c:191` | `static void test_image_data_url_malformed_is_invalid(void **state)` |
+| `test_image_disabled_by_default` | function | `tests/test_render_policy.c:72` | `static void test_image_disabled_by_default(void **state)` |
+| `test_image_disabled_precedence` | function | `tests/test_render_policy.c:209` | `static void test_image_disabled_precedence(void **state)` |
+| `test_images_warning_present` | function | `tests/test_render_policy.c:234` | `static void test_images_warning_present(void **state)` |
+| `test_img_reason_total_and_stable` | function | `tests/test_render_policy.c:219` | `static void test_img_reason_total_and_stable(void **state)` |
+| `test_tracking_pixel_normal` | function | `tests/test_render_policy.c:52` | `static void test_tracking_pixel_normal(void **state)` |
+| `test_tracking_pixel_tiny` | function | `tests/test_render_policy.c:37` | `static void test_tracking_pixel_tiny(void **state)` |
+| `test_tracking_pixel_unknown` | function | `tests/test_render_policy.c:62` | `static void test_tracking_pixel_unknown(void **state)` |
+| `test_tracking_pixel_zero_area` | function | `tests/test_render_policy.c:45` | `static void test_tracking_pixel_zero_area(void **state)` |
+| `main` | function | `tests/test_renderer.c:93` | `int main(void)` |
+| `test_render_basic` | function | `tests/test_renderer.c:27` | `static void test_render_basic(void **state)` |
+| `test_render_binary_does_not_crash_parent` | function | `tests/test_renderer.c:63` | `static void test_render_binary_does_not_crash_parent(void **state)` |
+| `test_render_multiple_independent` | function | `tests/test_renderer.c:74` | `static void test_render_multiple_independent(void **state)` |
+| `test_render_null_args` | function | `tests/test_renderer.c:48` | `static void test_render_null_args(void **state)` |
+| `test_render_strips_script` | function | `tests/test_renderer.c:39` | `static void test_render_strips_script(void **state)` |
+| `test_render_too_large` | function | `tests/test_renderer.c:55` | `static void test_render_too_large(void **state)` |
+| `test_result_free_null_and_double` | function | `tests/test_renderer.c:84` | `static void test_result_free_null_and_double(void **state)` |
+| `main` | function | `tests/test_request_policy.c:212` | `int main(void)` |
+| `test_evaluate_allow_same_site` | function | `tests/test_request_policy.c:106` | `static void test_evaluate_allow_same_site(void **state)` |
+| `test_evaluate_block_invalid` | function | `tests/test_request_policy.c:129` | `static void test_evaluate_block_invalid(void **state)` |
+| `test_evaluate_block_scheme` | function | `tests/test_request_policy.c:121` | `static void test_evaluate_block_scheme(void **state)` |
 | `test_evaluate_block_third_party` | function | `tests/test_request_policy.c:113` | `static void test_evaluate_block_third_party(void **state)` |
 | `test_hdr_caps_and_args` | function | `tests/test_request_policy.c:191` | `static void test_hdr_caps_and_args(void **state)` |
 | `test_hdr_drops_forbidden_and_identity` | function | `tests/test_request_policy.c:157` | `static void test_hdr_drops_forbidden_and_identity(void **state)` |
@@ -475,26 +496,5 @@ Previous: [SYMBOLS_p17.md](SYMBOLS_p17.md)
 | `test_omnibox_navigate_https` | function | `tests/test_url.c:238` | `static void test_omnibox_navigate_https(void **state)` |
 | `test_omnibox_nulls_and_empty` | function | `tests/test_url.c:311` | `static void test_omnibox_nulls_and_empty(void **state)` |
 | `test_omnibox_search_for_queries` | function | `tests/test_url.c:278` | `static void test_omnibox_search_for_queries(void **state)` |
-| `test_remove_dot_segments` | function | `tests/test_url.c:98` | `static void test_remove_dot_segments(void **state)` |
-| `test_remove_dot_segments_nulls` | function | `tests/test_url.c:127` | `static void test_remove_dot_segments_nulls(void **state)` |
-| `test_resolve_absolute` | function | `tests/test_url.c:138` | `static void test_resolve_absolute(void **state)` |
-| `test_resolve_absolute_path` | function | `tests/test_url.c:169` | `static void test_resolve_absolute_path(void **state)` |
-| `test_resolve_dot_segments` | function | `tests/test_url.c:193` | `static void test_resolve_dot_segments(void **state)` |
-| `test_resolve_fail_closed_on_bad_base` | function | `tests/test_url.c:210` | `static void test_resolve_fail_closed_on_bad_base(void **state)` |
-| `test_resolve_file_confinement_fail_closed` | function | `tests/test_url.c:411` | `static void test_resolve_file_confinement_fail_closed(void **state)` |
-| `test_resolve_file_nulls` | function | `tests/test_url.c:437` | `static void test_resolve_file_nulls(void **state)` |
-| `test_resolve_file_relative` | function | `tests/test_url.c:391` | `static void test_resolve_file_relative(void **state)` |
-| `test_resolve_null_and_overflow` | function | `tests/test_url.c:222` | `static void test_resolve_null_and_overflow(void **state)` |
-| `test_resolve_rejects_downgrade_and_schemes` | function | `tests/test_url.c:146` | `static void test_resolve_rejects_downgrade_and_schemes(void **state)` |
-| `test_resolve_relative_path` | function | `tests/test_url.c:181` | `static void test_resolve_relative_path(void **state)` |
-| `test_resolve_scheme_relative` | function | `tests/test_url.c:161` | `static void test_resolve_scheme_relative(void **state)` |
-| `test_search_rewrite_ddg_spa` | function | `tests/test_url.c:327` | `static void test_search_rewrite_ddg_spa(void **state)` |
-| `test_search_rewrite_leaves_others_alone` | function | `tests/test_url.c:344` | `static void test_search_rewrite_leaves_others_alone(void **state)` |
-| `test_search_rewrite_nulls` | function | `tests/test_url.c:364` | `static void test_search_rewrite_nulls(void **state)` |
-| `test_split_fail_closed_non_https` | function | `tests/test_url.c:658` | `static void test_split_fail_closed_non_https(void **state)` |
-| `test_split_fragment_without_query` | function | `tests/test_url.c:495` | `static void test_split_fragment_without_query(void **state)` |
-| `test_split_full_url` | function | `tests/test_url.c:454` | `static void test_split_full_url(void **state)` |
-| `test_split_ipv6_literal_with_port` | function | `tests/test_url.c:534` | `static void test_split_ipv6_literal_with_port(void **state)` |
-| `test_split_location_file` | function | `tests/test_url.c:506` | `static void test_split_location_file(void **state)` |
 
 Next: [SYMBOLS_p19.md](SYMBOLS_p19.md)

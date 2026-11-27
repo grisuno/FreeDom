@@ -3,6 +3,27 @@ Previous: [SYMBOLS_p18.md](SYMBOLS_p18.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_remove_dot_segments` | function | `tests/test_url.c:98` | `static void test_remove_dot_segments(void **state)` |
+| `test_remove_dot_segments_nulls` | function | `tests/test_url.c:127` | `static void test_remove_dot_segments_nulls(void **state)` |
+| `test_resolve_absolute` | function | `tests/test_url.c:138` | `static void test_resolve_absolute(void **state)` |
+| `test_resolve_absolute_path` | function | `tests/test_url.c:169` | `static void test_resolve_absolute_path(void **state)` |
+| `test_resolve_dot_segments` | function | `tests/test_url.c:193` | `static void test_resolve_dot_segments(void **state)` |
+| `test_resolve_fail_closed_on_bad_base` | function | `tests/test_url.c:210` | `static void test_resolve_fail_closed_on_bad_base(void **state)` |
+| `test_resolve_file_confinement_fail_closed` | function | `tests/test_url.c:411` | `static void test_resolve_file_confinement_fail_closed(void **state)` |
+| `test_resolve_file_nulls` | function | `tests/test_url.c:437` | `static void test_resolve_file_nulls(void **state)` |
+| `test_resolve_file_relative` | function | `tests/test_url.c:391` | `static void test_resolve_file_relative(void **state)` |
+| `test_resolve_null_and_overflow` | function | `tests/test_url.c:222` | `static void test_resolve_null_and_overflow(void **state)` |
+| `test_resolve_rejects_downgrade_and_schemes` | function | `tests/test_url.c:146` | `static void test_resolve_rejects_downgrade_and_schemes(void **state)` |
+| `test_resolve_relative_path` | function | `tests/test_url.c:181` | `static void test_resolve_relative_path(void **state)` |
+| `test_resolve_scheme_relative` | function | `tests/test_url.c:161` | `static void test_resolve_scheme_relative(void **state)` |
+| `test_search_rewrite_ddg_spa` | function | `tests/test_url.c:327` | `static void test_search_rewrite_ddg_spa(void **state)` |
+| `test_search_rewrite_leaves_others_alone` | function | `tests/test_url.c:344` | `static void test_search_rewrite_leaves_others_alone(void **state)` |
+| `test_search_rewrite_nulls` | function | `tests/test_url.c:364` | `static void test_search_rewrite_nulls(void **state)` |
+| `test_split_fail_closed_non_https` | function | `tests/test_url.c:658` | `static void test_split_fail_closed_non_https(void **state)` |
+| `test_split_fragment_without_query` | function | `tests/test_url.c:495` | `static void test_split_fragment_without_query(void **state)` |
+| `test_split_full_url` | function | `tests/test_url.c:454` | `static void test_split_full_url(void **state)` |
+| `test_split_ipv6_literal_with_port` | function | `tests/test_url.c:534` | `static void test_split_ipv6_literal_with_port(void **state)` |
+| `test_split_location_file` | function | `tests/test_url.c:506` | `static void test_split_location_file(void **state)` |
 | `test_split_no_port_no_path` | function | `tests/test_url.c:473` | `static void test_split_no_port_no_path(void **state)` |
 | `test_split_query_without_fragment` | function | `tests/test_url.c:486` | `static void test_split_query_without_fragment(void **state)` |
 | `test_validate_https` | function | `tests/test_url.c:36` | `static void test_validate_https(void **state)` |
@@ -144,6 +165,8 @@ Previous: [SYMBOLS_p18.md](SYMBOLS_p18.md)
 | `one_page` | function | `tools/guiscroll.py:48` | `def one_page(binary, page, env, prof, tmp, notches, hover)` |
 | `phase_ms` | function | `tools/guiscroll.py:38` | `def phase_ms(line, phase)` |
 | `procs_display` | function | `tools/guiscroll.py:149` | `def procs_display(procs)` |
+| `main` | function | `tools/guishot.py:43` | `def main()` |
+| `xdo` | function | `tools/guishot.py:38` | `def xdo(env)` |
 | `main` | function | `tools/guitime.py:96` | `def main()` |
 | `one_run` | function | `tools/guitime.py:67` | `def one_run(binary, page, env, hosts_dir, tmp)` |
 | `start_display` | function | `tools/guitime.py:34` | `def start_display(workdir)` |

@@ -17,6 +17,11 @@ Depends on: `include/box_blur.h`
 - `ref_line` (function) `fuzz/fuzz_box_blur.c:12` `static void ref_line(unsigned char *p, int n, int step, int bw, unsigned char *tmp)`
 - `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_box_blur.c:25` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
 
+## fuzz/fuzz_box_tree.c
+Depends on: `include/box_tree.h`, `include/page_view.h`
+- `order` (function) `fuzz/fuzz_box_tree.c:11` `* order (spec/compositor.md "Anidado"): the output is a permutation of the positioned * boxes, and a non-negative...`
+- `LLVMFuzzerTestOneInput` (function) `fuzz/fuzz_box_tree.c:16` `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)` -- Hostile box trees (any parent graph, cycles included) through the positioned paint order (spec/compositor.md...
+
 ## fuzz/fuzz_browser.c
 Depends on: `include/browser.h`
 - `snap_free` (function) `fuzz/fuzz_browser.c:25` `static void snap_free(snap *s)`

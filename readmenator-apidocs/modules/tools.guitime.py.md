@@ -57,7 +57,7 @@ Starts Xvfb and a nested weston; returns (env, processes) or None when unavailab
 |---|---|---|---|
 | `workdir` |  |  |  |
 
-*Called by:* [`main`](tools.guiscroll.py.md#main), [`main`](#main)
+*Called by:* [`main`](tools.guiscroll.py.md#main), [`main`](tools.guishot.py.md#main), [`main`](#main)
 
 ---
 

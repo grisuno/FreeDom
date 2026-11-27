@@ -243,6 +243,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`cl_ctx.font_size`](modules/include.css_length.h.md#cl_ctx-font_size) type_alias in `include/css_length.h`
 - [`form_rec`](modules/src.page_view.c.md#form_rec) struct in `src/page_view.c`
 - [`form_table`](modules/src.page_view.c.md#form_table) struct in `src/page_view.c`
+- [`frag_hit`](modules/gui.browser_ui.c.md#frag_hit) struct in `gui/browser_ui.c`
 - [`frame_undo`](modules/gui.browser_ui.c.md#frame_undo) struct in `gui/browser_ui.c`
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) type_alias in `gui/browser_ui.c`
 - [`freebug_window`](modules/gui.browser_ui.c.md#freebug_window) struct in `gui/browser_ui.c`
@@ -408,6 +409,7 @@ Project types nested under the project types they derive from. External bases ar
 - [`net_reply`](modules/src.tab.c.md#net_reply) struct in `src/tab.c`
 - [`ng_request`](modules/include.net_guard.h.md#ng_request) struct in `include/net_guard.h`
 - [`ng_verdict`](modules/include.net_guard.h.md#ng_verdict) enum in `include/net_guard.h`
+- [`node`](modules/gui.browser_ui.c.md#node) type_alias in `gui/browser_ui.c`
 - [`node`](modules/include.js_geom.h.md#node) type_alias in `include/js_geom.h`
 - [`nr_config`](modules/include.net_realm.h.md#nr_config) struct in `include/net_realm.h`
 - [`nr_realm`](modules/include.net_realm.h.md#nr_realm) enum in `include/net_realm.h`

@@ -1,10 +1,10 @@
 # freedom-0.0.3 API Reference
 
-> Generated offline by readmenator: 315 modules, 4248 documented entities, documentation coverage 45.0% (1895/4214 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
+> Generated offline by readmenator: 316 modules, 4261 documented entities, documentation coverage 45.0% (1899/4223 public items). Deterministic, zero tokens: signatures from source, docs parsed from Google, NumPy, reST, Javadoc/JSDoc/Doxygen, C# XML, and Rustdoc comments.
 
 Navigate: [Interactive architecture and flows](flows.html) | [Architecture and flows (Mermaid)](architecture.md) | [Class hierarchy](classes.md) | [General index](genindex.md) | [Coverage and warnings](COVERAGE.md) | [`api/index.json`](api/index.json) | [HTML browser](index.html)
 
-Languages: c (174), h (123), py (13), sh (5)
+Languages: c (174), h (123), py (14), sh (5)
 
 ## Modules
 
@@ -25,7 +25,7 @@ Languages: c (174), h (123), py (13), sh (5)
 |---|---|---|---|---|
 | [`fuzz/fuzz_anchor.c`](modules/fuzz.fuzz_anchor.c.md) | Fuzzer for anchor (spec/anchor.md) and url_split_location: a hostile document x a | 0 | 1 | 50.0% |
 | [`fuzz/fuzz_box_blur.c`](modules/fuzz.fuzz_box_blur.c.md) | libFuzzer harness for box_blur (spec/box_blur.md): a hostile mask, size, stride and sigma | 0 | 1 | 50.0% |
-| [`fuzz/fuzz_box_tree.c`](modules/fuzz.fuzz_box_tree.c.md) | Hostile box trees (any parent graph, cycles included) through the positioned paint | 0 | 1 | 50.0% |
+| [`fuzz/fuzz_box_tree.c`](modules/fuzz.fuzz_box_tree.c.md) | Hostile box trees (any parent graph, cycles included) through the positioned paint | 0 | 3 | 50.0% |
 | [`fuzz/fuzz_browser.c`](modules/fuzz.fuzz_browser.c.md) |  | 2 | 3 | 33.3% |
 | [`fuzz/fuzz_chrome_layout.c`](modules/fuzz.fuzz_chrome_layout.c.md) | libFuzzer harness for chrome_layout (spec/chrome_layout.md): a hostile URL (a page | 0 | 1 | 50.0% |
 | [`fuzz/fuzz_css.c`](modules/fuzz.fuzz_css.c.md) |  | 0 | 1 | 0.0% |
@@ -77,7 +77,7 @@ Languages: c (174), h (123), py (13), sh (5)
 
 | Module | Summary | Types | Callables | Coverage |
 |---|---|---|---|---|
-| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 50 | 222 | 31.5% |
+| [`gui/browser_ui.c`](modules/gui.browser_ui.c.md) |  | 52 | 222 | 31.3% |
 | [`gui/browser_ui_internal.h`](modules/gui.browser_ui_internal.h.md) |  | 7 | 18 | 57.7% |
 | [`gui/bui_chrome.c`](modules/gui.bui_chrome.c.md) |  | 0 | 35 | 52.8% |
 | [`gui/bui_mask_img.c`](modules/gui.bui_mask_img.c.md) | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | 0 | 1 | 50.0% |
@@ -94,7 +94,7 @@ Languages: c (174), h (123), py (13), sh (5)
 | [`include/block_flow.h`](modules/include.block_flow.h.md) | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | 0 | 3 | 50.0% |
 | [`include/box_blur.h`](modules/include.box_blur.h.md) | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | 0 | 4 | 60.0% |
 | [`include/box_style.h`](modules/include.box_style.h.md) |  | 12 | 18 | 64.5% |
-| [`include/box_tree.h`](modules/include.box_tree.h.md) |  | 5 | 28 | 38.2% |
+| [`include/box_tree.h`](modules/include.box_tree.h.md) |  | 5 | 29 | 40.0% |
 | [`include/browser.h`](modules/include.browser.h.md) |  | 3 | 24 | 50.0% |
 | [`include/cached_fetch.h`](modules/include.cached_fetch.h.md) |  | 0 | 3 | 50.0% |
 | [`include/chrome_layout.h`](modules/include.chrome_layout.h.md) |  | 10 | 28 | 53.8% |
@@ -216,7 +216,7 @@ Languages: c (174), h (123), py (13), sh (5)
 | [`src/block_flow.c`](modules/src.block_flow.c.md) | block_flow (bf_) -- vertical margin collapsing. | 0 | 3 | 50.0% |
 | [`src/box_blur.c`](modules/src.box_blur.c.md) |  | 0 | 5 | 33.3% |
 | [`src/box_style.c`](modules/src.box_style.c.md) |  | 2 | 42 | 31.1% |
-| [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 2 | 16 | 42.1% |
+| [`src/box_tree.c`](modules/src.box_tree.c.md) |  | 2 | 17 | 45.0% |
 | [`src/browser.c`](modules/src.browser.c.md) |  | 0 | 37 | 28.9% |
 | [`src/cached_fetch.c`](modules/src.cached_fetch.c.md) |  | 0 | 6 | 28.6% |
 | [`src/chrome_layout.c`](modules/src.chrome_layout.c.md) | chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md | 0 | 17 | 72.2% |
@@ -345,6 +345,7 @@ Languages: c (174), h (123), py (13), sh (5)
 | [`tools.fftime`](modules/tools.fftime.py.md) | fftime -- Firefox's time from "navigate" to "painted and idle", for `make fbench`. | 0 | 1 | 50.0% |
 | [`tools/gen_psl.c`](modules/tools.gen_psl.c.md) |  | 1 | 2 | 0.0% |
 | [`tools.guiscroll`](modules/tools.guiscroll.py.md) | guiscroll -- what one frame costs in the REAL Freedom window while the user scrolls. | 0 | 4 | 40.0% |
+| [`tools.guishot`](modules/tools.guishot.py.md) | guishot -- a picture of the REAL Freedom window for the README. | 0 | 2 | 33.3% |
 | [`tools.guitime`](modules/tools.guitime.py.md) | guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle". | 0 | 3 | 50.0% |
 | [`tools.mutate`](modules/tools.mutate.py.md) | mutate -- compile-time mutation testing for the CMocka suites. | 0 | 6 | 14.3% |
 | [`tools/pngdiff.c`](modules/tools.pngdiff.c.md) |  | 3 | 5 | 44.4% |

@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `rd_block_heading_level` | function | `include/render_doc.h:354` | `int rd_block_heading_level(const rd_block *b);` |
+| `rd_block_tag` | function | `include/render_doc.h:347` | `const char *rd_block_tag(const rd_block *b);` |
+| `rd_box_at` | function | `include/render_doc.h:330` | `const pv_box_def *rd_box_at(const rd_doc *d, size_t i);` |
+| `rd_box_count` | function | `include/render_doc.h:329` | `size_t rd_box_count(const rd_doc *d);` |
+| `rd_cont_at` | function | `include/render_doc.h:335` | `const pv_cont_def *rd_cont_at(const rd_doc *d, size_t i);` |
+| `rd_cont_count` | function | `include/render_doc.h:334` | `size_t rd_cont_count(const rd_doc *d);` |
+| `rd_count` | function | `include/render_doc.h:324` | `size_t rd_count(const rd_doc *d);` |
+| `rd_doc` | struct | `include/render_doc.h:267` | `` |
+| `rd_free` | function | `include/render_doc.h:321` | `void rd_free(rd_doc *d);` |
+| `rd_input_invisible` | function | `include/render_doc.h:373` | `int rd_input_invisible(int input_type);` |
+| `rd_input_label` | function | `include/render_doc.h:368` | `const char *rd_input_label(int input_type);` |
+| `rd_kind` | enum | `include/render_doc.h:42` | `` |
+| `rd_kind_name` | function | `include/render_doc.h:339` | `const char *rd_kind_name(rd_kind k);` |
 | `rd_status` | enum | `include/render_doc.h:302` | `` |
 | `rdp_images_warning` | function | `include/render_doc.h:311` | `* rdp_images_warning() is prepended so the user is always told. Each image * becomes an RD_IMAGE block whose...` |
 | `to` | function | `include/render_doc.h:253` | `* belongs to (-1 = none);` |
@@ -483,18 +496,5 @@ Previous: [SYMBOLS_p5.md](SYMBOLS_p5.md)
 | `fp_device_memory_gb` | function | `src/anti_fp.c:51` | `int fp_device_memory_gb(void)` |
 | `fp_hardware_concurrency` | function | `src/anti_fp.c:47` | `int fp_hardware_concurrency(void)` |
 | `fp_max_touch_points` | function | `src/anti_fp.c:85` | `int fp_max_touch_points(void)` |
-| `fp_on_line` | function | `src/anti_fp.c:89` | `int fp_on_line(void)` |
-| `fp_origin_key` | function | `src/anti_fp.c:139` | `uint64_t fp_origin_key(uint64_t session_key, const char *registrable_domain)` |
-| `fp_oscpu` | function | `src/anti_fp.c:77` | `const char *fp_oscpu(void)` |
-| `fp_perturb` | function | `src/anti_fp.c:128` | `void fp_perturb(uint8_t *buf, size_t len, uint64_t session_key)` |
-| `fp_platform` | function | `src/anti_fp.c:39` | `const char *fp_platform(void)` |
-| `fp_product` | function | `src/anti_fp.c:65` | `const char *fp_product(void)` |
-| `fp_product_sub` | function | `src/anti_fp.c:73` | `const char *fp_product_sub(void)` |
-| `fp_timezone` | function | `src/anti_fp.c:35` | `const char *fp_timezone(void)` |
-| `fp_user_agent` | function | `src/anti_fp.c:23` | `const char *fp_user_agent(void)` |
-| `fp_vendor` | function | `src/anti_fp.c:43` | `const char *fp_vendor(void)` |
-| `splitmix64` | function | `src/anti_fp.c:121` | `static uint64_t splitmix64(uint64_t *state)` |
-| `bf_collapse` | function | `src/block_flow.c:30` | `double bf_collapse(double a, double b)` |
-| `bf_collapse_n` | function | `src/block_flow.c:15` | `double bf_collapse_n(const double *m, size_t n)` |
 
 Next: [SYMBOLS_p7.md](SYMBOLS_p7.md)

@@ -4,7 +4,7 @@
 
 ## Definition
 
-This community groups 69 file(s) rooted at `include` with dominant language c (cohesion 0.53). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_BOX_MAX`, `BB_MAX_PIXELS`, `BROWSER_CLOSED_MAX`, `BROWSER_STATUS_DURATION_MS`. Core file: `gui/browser_ui.c` (770 symbols). Documented purpose: libFuzzer harness for box_blur (spec/box_blur.md): a hostile mask, size, stride and sigma.
+This community groups 69 file(s) rooted at `include` with dominant language c (cohesion 0.53). Central symbols: `AA_QUEUE_MAX`, `ABSENT`, `ALIVE`, `BALANCE_MAX_LINES`, `BB_BOX_MAX`, `BB_MAX_PIXELS`, `BROWSER_CLOSED_MAX`, `BROWSER_STATUS_DURATION_MS`. Core file: `gui/browser_ui.c` (780 symbols). Documented purpose: libFuzzer harness for box_blur (spec/box_blur.md): a hostile mask, size, stride and sigma.
 
 ## Files
 
@@ -51,7 +51,7 @@ This community groups 69 file(s) rooted at `include` with dominant language c (c
 
 | File | Language | Layer | Symbols | Doc |
 |------|----------|-------|---------|-----|
-| `gui/browser_ui.c` | c | presentation | 770 | no |
+| `gui/browser_ui.c` | c | presentation | 780 | no |
 
 *... and 49 more files in this community.*
 
@@ -111,19 +111,19 @@ This community groups 69 file(s) rooted at `include` with dominant language c (c
 
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/data_url.h` (data_access)
 - [layer strict] `gui/browser_ui.c` (presentation) -> `include/web_storage.h` (data_access)
-- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1867` `gui_sub_perform` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:2106` `first` `dg`: `dg` assigned at line 2106 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5088` `flow_text` `space_w`: `space_w` assigned at line 5088 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:5090` `flow_text` `i`: `i` assigned at line 5090 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6162` `table` `parent`: `parent` assigned at line 6162 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6163` `table` `seen`: `seen` assigned at line 6163 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6165` `table` `j`: `j` assigned at line 6165 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6338` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 6338 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6359` `measure_item_w_at` `rw`: `rw` assigned at line 6359 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6570` `nested_cont_basis` `total`: `total` assigned at line 6570 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:6571` `nested_cont_basis` `n_items`: `n_items` assigned at line 6571 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:7845` `descriptor` `sb`: `sb` assigned at line 7845 but never read afterwards.
-- [dataflow DEAD_STORE] `gui/browser_ui.c:7846` `descriptor` `sr`: `sr` assigned at line 7846 but never read afterwards.
+- [dataflow UNCHECKED_ALLOC] `gui/browser_ui.c:1869` `gui_sub_perform` `out_ctype`: Result of allocator stored in `out_ctype` is never checked against NULL.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:2108` `first` `dg`: `dg` assigned at line 2108 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5090` `flow_text` `space_w`: `space_w` assigned at line 5090 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:5092` `flow_text` `i`: `i` assigned at line 5092 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6164` `table` `parent`: `parent` assigned at line 6164 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6165` `table` `seen`: `seen` assigned at line 6165 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6167` `table` `j`: `j` assigned at line 6167 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6340` `measure_item_w_at` `atom_line_max`: `atom_line_max` assigned at line 6340 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6361` `measure_item_w_at` `rw`: `rw` assigned at line 6361 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6572` `nested_cont_basis` `total`: `total` assigned at line 6572 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:6573` `nested_cont_basis` `n_items`: `n_items` assigned at line 6573 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:7847` `descriptor` `sb`: `sb` assigned at line 7847 but never read afterwards.
+- [dataflow DEAD_STORE] `gui/browser_ui.c:7848` `descriptor` `sr`: `sr` assigned at line 7848 but never read afterwards.
 
 ## Open Questions
 

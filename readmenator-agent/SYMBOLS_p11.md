@@ -3,6 +3,22 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `ignored` | function | `src/page_view.c:695` | `* source is ignored (fail-visible: never invisible text from half a      * pattern). A real text-...` |
+| `in_boilerplate_subtree` | function | `src/page_view.c:5760` | `static int in_boilerplate_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
+| `in_closed_details_subtree` | function | `src/page_view.c:5775` | `static int in_closed_details_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base)` |
+| `in_collected_cell` | function | `src/page_view.c:5629` | `static int in_collected_cell(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                ...` |
+| `in_hidden_subtree` | function | `src/page_view.c:5733` | `static int in_hidden_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,                ...` |
+| `in_mixed_line` | function | `src/page_view.c:3253` | `static int in_mixed_line(const lxb_dom_node_t *p, const css_sheet *sheet,                        ...` |
+| `in_skipped_subtree` | function | `src/page_view.c:1216` | `static int in_skipped_subtree(const lxb_dom_node_t *n, const lxb_dom_node_t *base,               ...` |
+| `inherited_text_color` | function | `src/page_view.c:2977` | `static int inherited_text_color(const lxb_dom_node_t *node, const css_sheet *sheet,              ...` |
+| `inside` | function | `src/page_view.c:6173` | `* page inside (the top one collapses with the first child's margin), so a * margin-only body stays box-less. */...` |
+| `is_block_like` | function | `src/page_view.c:1045` | `static int is_block_like(lxb_tag_id_t t, css_display display)` |
+| `is_block_like_style` | function | `src/page_view.c:1084` | `static int is_block_like_style(lxb_tag_id_t t, const css_style *cs)` |
+| `is_block_tag` | function | `src/page_view.c:1020` | `static int is_block_tag(lxb_tag_id_t t)` |
+| `is_bold_tag` | function | `src/page_view.c:3187` | `static int is_bold_tag(lxb_tag_id_t t)` |
+| `is_float_container_style` | function | `src/page_view.c:3274` | `static int is_float_container_style(const css_style *cs)` |
+| `is_inline_container_style` | function | `src/page_view.c:2990` | `static int is_inline_container_style(const css_style *cs)` |
+| `is_inline_level_style` | function | `src/page_view.c:3245` | `static int is_inline_level_style(lxb_tag_id_t t, const css_style *cs)` |
 | `is_italic_tag` | function | `src/page_view.c:3192` | `static int is_italic_tag(lxb_tag_id_t t)` |
 | `is_layout_container` | function | `src/page_view.c:3480` | `static int is_layout_container(const lxb_dom_node_t *el, const css_style *cs,                    ...` |
 | `is_mono_tag` | function | `src/page_view.c:3198` | `static int is_mono_tag(lxb_tag_id_t t)` |
@@ -480,21 +496,5 @@ Previous: [SYMBOLS_p10.md](SYMBOLS_p10.md)
 | `sqb_wait_all` | function | `src/subreq_batch.c:156` | `void sqb_wait_all(sqb *b)` |
 | `sqb_wait_ready` | function | `src/subreq_batch.c:169` | `size_t sqb_wait_ready(sqb *b, long wait_ms, size_t *idx, size_t cap)` |
 | `svp_alpha` | function | `src/svg_paint.c:31` | `static double svp_alpha(int opacity, int paint_opacity)` |
-| `svp_draw` | function | `src/svg_paint.c:139` | `void svp_draw(cairo_t *cr, const sv_image *img,               double x, double y, double w, doubl...` |
-| `svp_draw_ex` | function | `src/svg_paint.c:144` | `void svp_draw_ex(cairo_t *cr, const sv_image *img,                  double x, double y, double w,...` |
-| `svp_draw_text` | function | `src/svg_paint.c:126` | `static void svp_draw_text(cairo_t *cr, const sv_shape *sh, int current_rgb)` |
-| `svp_rect_path` | function | `src/svg_paint.c:38` | `static void svp_rect_path(cairo_t *cr, const sv_shape *sh)` |
-| `svp_shape_path` | function | `src/svg_paint.c:73` | `static void svp_shape_path(cairo_t *cr, const sv_image *img, const sv_shape *sh)` |
-| `sr_rasterize` | function | `src/svg_raster.c:50` | `img_status sr_rasterize(const uint8_t *bytes, size_t len, img_pixels *out)` |
-| `sr_skip_past` | function | `src/svg_raster.c:18` | `static size_t sr_skip_past(const uint8_t *b, size_t i, size_t n, const char *end)` |
-| `sr_sniff` | function | `src/svg_raster.c:25` | `int sr_sniff(const uint8_t *bytes, size_t len)` |
-| `sr_ws` | function | `src/svg_raster.c:14` | `static int sr_ws(uint8_t c)` |
-| `SV_MAX_ATTRS` | macro | `src/svg_render.c:96` | `#define SV_MAX_ATTRS` |
-| `point` | function | `src/svg_render.c:567` | `* current point (SVG 8.3.6). */ int had = (prev == 'C' \|\| prev == 'c' \|\| prev == 'S' \|\| prev == 's');` |
-| `stroke` | type_alias | `src/svg_render.c:151` | `typedef struct sv_ctx { int fill, stroke;` |
-| `sv_apply_prop` | function | `src/svg_render.c:260` | `static void sv_apply_prop(sv_ctx *ctx, const char *nm, size_t nl,                           const...` |
-| `sv_arc_to_cubics` | function | `src/svg_render.c:399` | `static int sv_arc_to_cubics(sv_image *im, sv_shape *sh,                             double x0, do...` |
-| `sv_attr` | struct | `src/svg_render.c:91` | `` |
-| `sv_attr_get` | function | `src/svg_render.c:99` | `static const char *sv_attr_get(const sv_attr *at, size_t nat, const char *name, size_t *len)` |
 
 Next: [SYMBOLS_p12.md](SYMBOLS_p12.md)

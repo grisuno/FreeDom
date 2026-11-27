@@ -3,6 +3,27 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_inline_bg_size` | function | `tests/test_css.c:4540` | `static void test_inline_bg_size(void **state)` |
+| `test_inline_border_collapse` | function | `tests/test_css.c:4404` | `static void test_inline_border_collapse(void **state)` |
+| `test_inline_border_spacing` | function | `tests/test_css.c:4413` | `static void test_inline_border_spacing(void **state)` |
+| `test_inline_box_longhands` | function | `tests/test_css.c:2786` | `static void test_inline_box_longhands(void **state)` |
+| `test_inline_caption_side` | function | `tests/test_css.c:4433` | `static void test_inline_caption_side(void **state)` |
+| `test_inline_caret_color` | function | `tests/test_css.c:4481` | `static void test_inline_caret_color(void **state)` |
+| `test_inline_clip_path_forms_stacking_context` | function | `tests/test_css.c:4595` | `static void test_inline_clip_path_forms_stacking_context(void **state)` |
+| `test_inline_clip_path_inset_sets_clip_edges` | function | `tests/test_css.c:4575` | `static void test_inline_clip_path_inset_sets_clip_edges(void **state)` |
+| `test_inline_color_scheme` | function | `tests/test_css.c:4644` | `static void test_inline_color_scheme(void **state)` |
+| `test_inline_contain` | function | `tests/test_css.c:4611` | `static void test_inline_contain(void **state)` |
+| `test_inline_container_props` | function | `tests/test_css.c:333` | `static void test_inline_container_props(void **state)` |
+| `test_inline_content_visibility` | function | `tests/test_css.c:4626` | `static void test_inline_content_visibility(void **state)` |
+| `test_inline_direction` | function | `tests/test_css.c:3235` | `static void test_inline_direction(void **state)` |
+| `test_inline_display` | function | `tests/test_css.c:295` | `static void test_inline_display(void **state)` |
+| `test_inline_display_table_family` | function | `tests/test_css.c:308` | `static void test_inline_display_table_family(void **state)` |
+| `test_inline_empty_cells` | function | `tests/test_css.c:4424` | `static void test_inline_empty_cells(void **state)` |
+| `test_inline_font_kerning` | function | `tests/test_css.c:5050` | `static void test_inline_font_kerning(void **state)` |
+| `test_inline_font_size` | function | `tests/test_css.c:45` | `static void test_inline_font_size(void **state)` |
+| `test_inline_font_size_absolute_flag` | function | `tests/test_css.c:60` | `static void test_inline_font_size_absolute_flag(void **state)` |
+| `test_inline_font_stretch` | function | `tests/test_css.c:5069` | `static void test_inline_font_stretch(void **state)` |
+| `test_inline_font_variant` | function | `tests/test_css.c:4451` | `static void test_inline_font_variant(void **state)` |
 | `test_inline_font_weight_style` | function | `tests/test_css.c:104` | `static void test_inline_font_weight_style(void **state)` |
 | `test_inline_hyphens` | function | `tests/test_css.c:4460` | `static void test_inline_hyphens(void **state)` |
 | `test_inline_image_rendering` | function | `tests/test_css.c:4635` | `static void test_inline_image_rendering(void **state)` |
@@ -475,26 +496,5 @@ Previous: [SYMBOLS_p13.md](SYMBOLS_p13.md)
 | `test_get_inner_html` | function | `tests/test_dom.c:338` | `static void test_get_inner_html(void **state)` |
 | `test_insert_before` | function | `tests/test_dom.c:550` | `static void test_insert_before(void **state)` |
 | `test_matches_and_closest` | function | `tests/test_dom.c:517` | `static void test_matches_and_closest(void **state)` |
-| `test_move_children` | function | `tests/test_dom.c:605` | `static void test_move_children(void **state)` |
-| `test_mutation_count` | function | `tests/test_dom.c:648` | `static void test_mutation_count(void **state)` |
-| `test_navigation` | function | `tests/test_dom.c:154` | `static void test_navigation(void **state)` |
-| `test_node_count` | function | `tests/test_dom.c:84` | `static void test_node_count(void **state)` |
-| `test_qs_subject_prefilter_is_exact` | function | `tests/test_dom.c:729` | `static void test_qs_subject_prefilter_is_exact(void **state)` |
-| `test_query_selector_all_counts` | function | `tests/test_dom.c:434` | `static void test_query_selector_all_counts(void **state)` |
-| `test_query_selector_combinators` | function | `tests/test_dom.c:445` | `static void test_query_selector_combinators(void **state)` |
-| `test_query_selector_fail_closed` | function | `tests/test_dom.c:530` | `static void test_query_selector_fail_closed(void **state)` |
-| `test_query_selector_nth_and_structural` | function | `tests/test_dom.c:492` | `static void test_query_selector_nth_and_structural(void **state)` |
-| `test_query_selector_scope_is_descendants_only` | function | `tests/test_dom.c:505` | `static void test_query_selector_scope_is_descendants_only(void **state)` |
-| `test_query_selector_type_class_id` | function | `tests/test_dom.c:420` | `static void test_query_selector_type_class_id(void **state)` |
-| `test_remove_attribute` | function | `tests/test_dom.c:297` | `static void test_remove_attribute(void **state)` |
-| `test_remove_child` | function | `tests/test_dom.c:272` | `static void test_remove_child(void **state)` |
-| `test_set_and_get_document_title` | function | `tests/test_dom.c:232` | `static void test_set_and_get_document_title(void **state)` |
-| `test_set_attribute_reindexes_id` | function | `tests/test_dom.c:284` | `static void test_set_attribute_reindexes_id(void **state)` |
-| `test_set_inner_html` | function | `tests/test_dom.c:314` | `static void test_set_inner_html(void **state)` |
-| `test_set_text_content_changes_tree` | function | `tests/test_dom.c:199` | `static void test_set_text_content_changes_tree(void **state)` |
-| `test_set_text_content_empty_clears` | function | `tests/test_dom.c:217` | `static void test_set_text_content_empty_clears(void **state)` |
-| `test_set_text_content_invalid_node` | function | `tests/test_dom.c:227` | `static void test_set_text_content_invalid_node(void **state)` |
-| `test_text_content_read` | function | `tests/test_dom.c:188` | `static void test_text_content_read(void **state)` |
-| `build` | function | `tests/test_dom_debug.c:36` | `static rd_doc *build(pv_view *v, rdp_caps caps)` |
 
 Next: [SYMBOLS_p15.md](SYMBOLS_p15.md)

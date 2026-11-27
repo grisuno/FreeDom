@@ -2,23 +2,23 @@
  "schema_version": 1,
  "format": "jsonl",
  "meta": {
-  "modules": 315,
-  "entities": 4248,
+  "modules": 316,
+  "entities": 4261,
   "languages": {
    "c": 174,
    "h": 123,
-   "py": 13,
+   "py": 14,
    "sh": 5
   },
   "kinds": {
-   "constant": 27,
+   "constant": 31,
    "enum": 175,
-   "function": 2345,
+   "function": 2351,
    "macro": 858,
    "method": 28,
-   "module": 315,
-   "struct": 320,
-   "type_alias": 173,
+   "module": 316,
+   "struct": 321,
+   "type_alias": 174,
    "variable": 7
   },
   "truncated": false,
@@ -27,8 +27,8 @@
  },
  "coverage": {
   "overall": {
-   "documented": 1895,
-   "total": 4214,
+   "documented": 1899,
+   "total": 4223,
    "percent": 45.0
   },
   "by_kind": {
@@ -38,8 +38,8 @@
     "percent": 45.7
    },
    "function": {
-    "documented": 1067,
-    "total": 2345,
+    "documented": 1070,
+    "total": 2351,
     "percent": 45.5
    },
    "macro": {
@@ -53,19 +53,19 @@
     "percent": 0.0
    },
    "module": {
-    "documented": 77,
-    "total": 315,
-    "percent": 24.4
+    "documented": 78,
+    "total": 316,
+    "percent": 24.7
    },
    "struct": {
     "documented": 142,
-    "total": 320,
-    "percent": 44.4
+    "total": 321,
+    "percent": 44.2
    },
    "type_alias": {
     "documented": 123,
-    "total": 173,
-    "percent": 71.1
+    "total": 174,
+    "percent": 70.7
    }
   },
   "by_module": {
@@ -100,8 +100,8 @@
     "percent": 50.0
    },
    "fuzz/fuzz_box_tree.c": {
-    "documented": 1,
-    "total": 2,
+    "documented": 2,
+    "total": 4,
     "percent": 50.0
    },
    "fuzz/fuzz_browser.c": {
@@ -336,8 +336,8 @@
    },
    "gui/browser_ui.c": {
     "documented": 86,
-    "total": 273,
-    "percent": 31.5
+    "total": 275,
+    "percent": 31.3
    },
    "gui/browser_ui_internal.h": {
     "documented": 15,
@@ -395,9 +395,9 @@
     "percent": 64.5
    },
    "include/box_tree.h": {
-    "documented": 13,
-    "total": 34,
-    "percent": 38.2
+    "documented": 14,
+    "total": 35,
+    "percent": 40.0
    },
    "include/browser.h": {
     "documented": 14,
@@ -990,9 +990,9 @@
     "percent": 31.1
    },
    "src/box_tree.c": {
-    "documented": 8,
-    "total": 19,
-    "percent": 42.1
+    "documented": 9,
+    "total": 20,
+    "percent": 45.0
    },
    "src/browser.c": {
     "documented": 11,
@@ -1609,6 +1609,11 @@
     "total": 5,
     "percent": 40.0
    },
+   "tools/guishot.py": {
+    "documented": 1,
+    "total": 3,
+    "percent": 33.3
+   },
    "tools/guitime.py": {
     "documented": 2,
     "total": 4,
@@ -1680,7 +1685,7 @@
   {
    "uid": "fuzz/fuzz_box_tree.c",
    "path": "modules/fuzz.fuzz_box_tree.c.jsonl",
-   "entities": 2
+   "entities": 4
   },
   {
    "uid": "fuzz/fuzz_browser.c",
@@ -1915,7 +1920,7 @@
   {
    "uid": "gui/browser_ui.c",
    "path": "modules/gui.browser_ui.c.jsonl",
-   "entities": 273
+   "entities": 275
   },
   {
    "uid": "gui/browser_ui_internal.h",
@@ -1975,7 +1980,7 @@
   {
    "uid": "include/box_tree.h",
    "path": "modules/include.box_tree.h.jsonl",
-   "entities": 34
+   "entities": 35
   },
   {
    "uid": "include/browser.h",
@@ -2570,7 +2575,7 @@
   {
    "uid": "src/box_tree.c",
    "path": "modules/src.box_tree.c.jsonl",
-   "entities": 19
+   "entities": 20
   },
   {
    "uid": "src/browser.c",
@@ -3188,6 +3193,11 @@
    "entities": 9
   },
   {
+   "uid": "tools/guishot.py",
+   "path": "modules/tools.guishot.py.jsonl",
+   "entities": 7
+  },
+  {
    "uid": "tools/guitime.py",
    "path": "modules/tools.guitime.py.jsonl",
    "entities": 6
@@ -3225,7 +3235,7 @@
  ],
  "warnings": {
   "path": "warnings.jsonl",
-  "total": 2320
+  "total": 2325
  },
  "usage": [
   "grep -h '\"name\":\"<Name>\"' readmenator-apidocs/api/modules/*.jsonl",

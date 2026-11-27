@@ -379,19 +379,22 @@ Depends on: `include/box_style.h`, `include/box_tree.h`, `include/compositor.h`,
      * placed keeps lega...`
 - `bt_resolve_positioning` (function) `src/box_tree.c:588` `bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox,
                           ...`
-- `sc_forms` (function) `src/box_tree.c:616` `static int sc_forms(const pv_box_def *b)`
-- `sc_chain_compare` (function) `src/box_tree.c:629` `static int sc_chain_compare(const sc_chain *a, const sc_chain *b, const cx_item *by_ref)`
-- `nest_in_contexts` (function) `src/box_tree.c:638` `static void nest_in_contexts(const pv_box_def *boxes, size_t nbox, const bt_positioned *tmp,
+- `box_has_transform` (function) `src/box_tree.c:617` `static int box_has_transform(const pv_box_def *b)` -- their own (layer, z, tree order) inside it.
+- `sc_forms` (function) `src/box_tree.c:624` `static int sc_forms(const pv_box_def *b)`
+- `sc_chain_compare` (function) `src/box_tree.c:634` `static int sc_chain_compare(const sc_chain *a, const sc_chain *b, const cx_item *by_ref)`
+- `nest_in_contexts` (function) `src/box_tree.c:643` `static void nest_in_contexts(const pv_box_def *boxes, size_t nbox, const bt_positioned *tmp,
     ...`
-- `bt_resolve_positioning_ex` (function) `src/box_tree.c:706` `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
+- `bt_resolve_positioning_ex` (function) `src/box_tree.c:711` `bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox,
                        ...`
-- `oof_walk` (function) `src/box_tree.c:862` `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` -- Shared walk for the Stage 2d classifiers: nearest==1 stops at the first * ABSOLUTE/FIXED box, nearest==0 remembers...
-- `bt_oof_anchor` (function) `src/box_tree.c:879` `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
-- `bt_oof_root` (function) `src/box_tree.c:883` `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
-- `bt_box_hidden` (function) `src/box_tree.c:887` `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
-- `bt_in_subtree` (function) `src/box_tree.c:900` `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)`
-- `bt_oof_avail` (function) `src/box_tree.c:911` `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
-- `bt_defer_roots` (function) `src/box_tree.c:919` `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
+- `oof_walk` (function) `src/box_tree.c:861` `static int oof_walk(const pv_box_def *boxes, size_t nbox, int bid, int nearest)` -- Shared walk for the Stage 2d classifiers: nearest==1 stops at the first * ABSOLUTE/FIXED box, nearest==0 remembers...
+- `bt_oof_anchor` (function) `src/box_tree.c:878` `int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)`
+- `bt_oof_root` (function) `src/box_tree.c:882` `int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)`
+- `box_captures_fixed` (function) `src/box_tree.c:888` `static int box_captures_fixed(const pv_box_def *b)` -- A transform, a translate percentage or any filter makes a box the containing block of * its fixed descendants.
+- `bt_fixed_pinned` (function) `src/box_tree.c:896` `int bt_fixed_pinned(const pv_box_def *boxes, size_t nbox, int bid)`
+- `bt_box_hidden` (function) `src/box_tree.c:913` `int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)`
+- `bt_in_subtree` (function) `src/box_tree.c:926` `int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)`
+- `bt_oof_avail` (function) `src/box_tree.c:937` `double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)`
+- `bt_defer_roots` (function) `src/box_tree.c:945` `size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox,
                       const bt_positi...`
 
 ## src/browser.c

@@ -3,6 +3,22 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `idx_push` | function | `src/dom.c:713` | `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)` |
+| `ih_acc` | struct | `src/dom.c:871` | `` |
+| `ih_append` | function | `src/dom.c:879` | `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)` |
+| `ih_block` | struct | `src/dom.c:866` | `` |
+| `ih_free` | function | `src/dom.c:906` | `static void ih_free(ih_acc *a)` |
+| `index_element` | function | `src/dom.c:255` | `static int index_element(dom_index *idx, lxb_dom_element_t *el, dom_node_id id)` |
+| `index_subtree` | function | `src/dom.c:815` | `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)` |
+| `node_in_document` | function | `src/dom.c:357` | `static int node_in_document(const lxb_dom_node_t *node)` |
+| `node_matches_any` | function | `src/dom.c:468` | `static int node_matches_any(const lxb_dom_node_t *cn,                             const css_sel *...` |
+| `node_next` | function | `src/dom.c:233` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
+| `parse_selector_list` | function | `src/dom.c:435` | `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)` |
+| `pm_entry` | struct | `src/dom.c:154` | `` |
+| `pm_free` | function | `src/dom.c:211` | `static void pm_free(ptrmap *m)` |
+| `pm_get` | function | `src/dom.c:200` | `static int pm_get(const ptrmap *m, const void *key, dom_node_id *out)` |
+| `pm_grow` | function | `src/dom.c:166` | `static int pm_grow(ptrmap *m)` |
+| `pm_put` | function | `src/dom.c:183` | `static int pm_put(ptrmap *m, const void *key, dom_node_id id)` |
 | `ptr_hash` | function | `src/dom.c:45` | `static size_t ptr_hash(const void *p)` |
 | `ptrmap` | struct | `src/dom.c:160` | `` |
 | `sm_entry` | struct | `src/dom.c:55` | `` |
@@ -480,21 +496,5 @@ Previous: [SYMBOLS_p8.md](SYMBOLS_p8.md)
 | `jd_method` | struct | `src/js_dom.c:456` | `` |
 | `jd_opaque_get` | function | `src/js_dom.c:27` | `jd_opaque *jd_opaque_get(JSContext *ctx)` |
 | `jd_query_list` | function | `src/js_dom.c:70` | `static JSValue jd_query_list(JSContext *ctx, JSValueConst arg, int by_class)` |
-| `jd_rebind` | function | `src/js_dom.c:2083` | `jd_status jd_rebind(js_context *ctx, dom_index *idx, jd_opaque *from, jd_opaque *to)` |
-| `jd_set_computed` | function | `src/js_dom.c:2301` | `jd_status jd_set_computed(js_context *ctx, jd_computed_fn fn, void *fn_ctx)` |
-| `jd_set_cookies` | function | `src/js_dom.c:2258` | `jd_status jd_set_cookies(js_context *ctx, const char *cookies)` |
-| `jd_set_geometry` | function | `src/js_dom.c:2312` | `jd_status jd_set_geometry(js_context *ctx, const jg_table *geom)` |
-| `js_env` | function | `src/js_dom.c:1445` | `* are owned by js_env (anti_fp) and are NOT redefined here. Runs after the  * document shim (uses...` |
-| `m_append_child` | function | `src/js_dom.c:264` | `static JSValue m_append_child(JSContext *ctx, JSValueConst this_val,                             ...` |
-| `m_attr_names` | function | `src/js_dom.c:538` | `static JSValue m_attr_names(JSContext *ctx, JSValueConst this_val,                             in...` |
-| `m_child_node` | function | `src/js_dom.c:159` | `static JSValue m_child_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_clone_node` | function | `src/js_dom.c:289` | `static JSValue m_clone_node(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_closest` | function | `src/js_dom.c:526` | `static JSValue m_closest(JSContext *ctx, JSValueConst this_val,                          int argc...` |
-| `m_computed` | function | `src/js_dom.c:420` | `static JSValue m_computed(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_create_char` | function | `src/js_dom.c:174` | `static JSValue m_create_char(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)` |
-| `m_create_element` | function | `src/js_dom.c:252` | `static JSValue m_create_element(JSContext *ctx, JSValueConst this_val,                           ...` |
-| `m_first_child` | function | `src/js_dom.c:143` | `static JSValue m_first_child(JSContext *ctx, JSValueConst this_val,                              ...` |
-| `m_get_attribute` | function | `src/js_dom.c:122` | `static JSValue m_get_attribute(JSContext *ctx, JSValueConst this_val,                            ...` |
-| `m_get_by_class` | function | `src/js_dom.c:106` | `static JSValue m_get_by_class(JSContext *ctx, JSValueConst this_val,                             ...` |
 
 Next: [SYMBOLS_p10.md](SYMBOLS_p10.md)

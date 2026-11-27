@@ -387,6 +387,7 @@ Previous: [ARCHITECTURE_p2.md](ARCHITECTURE_p2.md)
 - `tools/fftime.py` -> os, selenium, selenium.webdriver.firefox.options, selenium.webdriver.firefox.service, shutil, statistics, sys, time
 - `tools/gen_psl.c` -> stdio.h, stdlib.h, string.h
 - `tools/guiscroll.py` -> os, shutil, statistics, subprocess, sys, tempfile, time
+- `tools/guishot.py` -> argparse, os, shutil, subprocess, sys, tempfile, time
 - `tools/guitime.py` -> json, os, shutil, statistics, subprocess, sys, tempfile, time
 - `tools/mutate.py` -> os, re, shutil, subprocess, sys
 - `tools/pngdiff.c` -> math.h, png.h, stdint.h, stdio.h, stdlib.h, string.h

@@ -1,12 +1,12 @@
 # `src/box_tree.c`
 
-> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 42.1% | [API index](../index.md)
+> Source: [src/box_tree.c:1](../../src/box_tree.c#L1) | language `c` | coverage 45.0% | [API index](../index.md)
 
 ## Contents
 
 - **Structs:** [`sc_chain`](#sc_chain)
 - **Type Aliases:** [`len`](#len)
-- **Functions:** [`height`](#height), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_box_hidden`](#bt_box_hidden), [`bt_in_subtree`](#bt_in_subtree), [`bt_oof_avail`](#bt_oof_avail), [`bt_defer_roots`](#bt_defer_roots)
+- **Functions:** [`height`](#height), [`sized`](#sized), [`bt_layout`](#bt_layout), [`bt_containing_block`](#bt_containing_block), [`block`](#block), [`bt_resolve_positioning`](#bt_resolve_positioning), [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex), [`bt_oof_anchor`](#bt_oof_anchor), [`bt_oof_root`](#bt_oof_root), [`bt_fixed_pinned`](#bt_fixed_pinned), [`bt_box_hidden`](#bt_box_hidden), [`bt_in_subtree`](#bt_in_subtree), [`bt_oof_avail`](#bt_oof_avail), [`bt_defer_roots`](#bt_defer_roots)
 - **Macros:** [`BT_LEN_AUTO`](#bt_len_auto), [`BT_WRAP_EPS`](#bt_wrap_eps), [`BT_SC_DEPTH`](#bt_sc_depth)
 
 ## Type Diagram
@@ -174,7 +174,7 @@ Any non-absolute box answers the viewport. Pure; out pointers must be non-NULL.
 | `cb_w` | `double *` |  |  |
 | `cb_h` | `double *` |  |  |
 
-> **Inherited:** Documentation from [`bt_containing_block`](#bt_containing_block) (include/box_tree.h:268).
+> **Inherited:** Documentation from [`bt_containing_block`](#bt_containing_block) (include/box_tree.h:280).
 
 *Called by:* [`bt_resolve_positioning_ex`](#bt_resolve_positioning_ex)
 
@@ -236,7 +236,7 @@ bt_status bt_resolve_positioning(const pv_box_def *boxes, size_t nbox, const dou
 
 ### `bt_resolve_positioning_ex`
 
-`function` | [src/box_tree.c:706](../../src/box_tree.c#L706)
+`function` | [src/box_tree.c:711](../../src/box_tree.c#L711)
 
 ```c
 bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const double *box_x, const double *box_y, const double *box_w, const double *box_h, const double *static_x, const double *static_y, const char *placed, double viewport_w, double viewport_h, bt_positioned *out, size_t out_cap, size_t *out_count)
@@ -265,7 +265,7 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const 
 
 *Calls:* [`cx_sort`](include.compositor.h.md#cx_sort), [`bt_containing_block`](#bt_containing_block), [`cx_box_layer`](src.compositor.c.md#cx_box_layer)
 
-*Called by:* [`FB_MAX`](fuzz.fuzz_box_tree.c.md#fb_max), [`bt_resolve_positioning`](#bt_resolve_positioning)
+*Called by:* [`LLVMFuzzerTestOneInput`](fuzz.fuzz_box_tree.c.md#llvmfuzzertestoneinput), [`bt_resolve_positioning`](#bt_resolve_positioning)
 
 ---
 
@@ -273,7 +273,7 @@ bt_status bt_resolve_positioning_ex(const pv_box_def *boxes, size_t nbox, const 
 
 ### `bt_oof_anchor`
 
-`function` | [src/box_tree.c:879](../../src/box_tree.c#L879)
+`function` | [src/box_tree.c:878](../../src/box_tree.c#L878)
 
 ```c
 int bt_oof_anchor(const pv_box_def *boxes, size_t nbox, int bid)
@@ -301,7 +301,7 @@ Both walk the parent_id chain from `bid` (self first) looking for a box whose po
 
 ### `bt_oof_root`
 
-`function` | [src/box_tree.c:883](../../src/box_tree.c#L883)
+`function` | [src/box_tree.c:882](../../src/box_tree.c#L882)
 
 ```c
 int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)
@@ -321,11 +321,39 @@ int bt_oof_root(const pv_box_def *boxes, size_t nbox, int bid)
 
 ---
 
+<a id="bt_fixed_pinned"></a>
+
+### `bt_fixed_pinned`
+
+`function` | [src/box_tree.c:896](../../src/box_tree.c#L896)
+
+```c
+int bt_fixed_pinned(const pv_box_def *boxes, size_t nbox, int bid)
+```
+
+Viewport pinning (spec/box_engine.md "Fixed pinned to the viewport"): 1 when box `bid` is position:fixed or lies inside a position:fixed box, AND no box strictly above that fixed box has a transform or a filter (CSS Transforms 1 §2 / Filter Effects 1 §5: such an ancestor becomes the fixed box's containing block, so it scrolls with it -- unless an outer fixed box above the capturing one pins the whole chain).
+
+A pinned box keeps its place in the viewport while the page scrolls, and no overflow clip of an ancestor above its fixed box applies to it. 0 for everything else, and FAILS OPEN to 0 (scrolls with the page: the pre-pinning behaviour, never content that hides) on NULL boxes, an out-of-range bid, a dangling link or a parent cycle. Pure; bounded by nbox links; no allocation.
+
+**Parameters**
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `boxes` | `pv_box_def *` |  |  |
+| `nbox` | `size_t` |  |  |
+| `bid` | `int` |  |  |
+
+**Returns:** `int`
+
+> **Inherited:** Documentation from [`bt_fixed_pinned`](#bt_fixed_pinned) (include/box_tree.h:266).
+
+---
+
 <a id="bt_box_hidden"></a>
 
 ### `bt_box_hidden`
 
-`function` | [src/box_tree.c:887](../../src/box_tree.c#L887)
+`function` | [src/box_tree.c:913](../../src/box_tree.c#L913)
 
 ```c
 int bt_box_hidden(const pv_box_def *boxes, size_t nbox, size_t bid)
@@ -353,7 +381,7 @@ The walk is bounded by nbox links and fails closed (returns 1, hidden) on NULL b
 
 ### `bt_in_subtree`
 
-`function` | [src/box_tree.c:900](../../src/box_tree.c#L900)
+`function` | [src/box_tree.c:926](../../src/box_tree.c#L926)
 
 ```c
 int bt_in_subtree(const pv_box_def *boxes, size_t nbox, size_t root, size_t bid)
@@ -382,7 +410,7 @@ The walk is bounded by nbox links. An out-of-flow sub-layout owns its anchor's s
 
 ### `bt_oof_avail`
 
-`function` | [src/box_tree.c:911](../../src/box_tree.c#L911)
+`function` | [src/box_tree.c:937](../../src/box_tree.c#L937)
 
 ```c
 double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)
@@ -407,7 +435,7 @@ double bt_oof_avail(int a, int a_pct, int b, int b_pct, double cb, int *both)
 
 ### `bt_defer_roots`
 
-`function` | [src/box_tree.c:919](../../src/box_tree.c#L919)
+`function` | [src/box_tree.c:945](../../src/box_tree.c#L945)
 
 ```c
 size_t bt_defer_roots(const pv_box_def *boxes, size_t nbox, const bt_positioned *pos, size_t npos, const char *in_flow, int *root_of, size_t *order_of)
@@ -442,7 +470,7 @@ malformed input fails OPEN: every entry -1, nothing deferred (normal paint).
 
 **Returns:** `size_t`
 
-> **Inherited:** Documentation from [`bt_defer_roots`](#bt_defer_roots) (include/box_tree.h:291).
+> **Inherited:** Documentation from [`bt_defer_roots`](#bt_defer_roots) (include/box_tree.h:303).
 
 *Calls:* [`bt_oof_root`](#bt_oof_root)
 

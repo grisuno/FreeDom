@@ -122,7 +122,7 @@ graph LR
 
 ## Details
 
-Static architecture map of 426 files (c, h, py, sh) in 14 components: src: tab, include: browser_ui, include: css, src: text_shape, include: page_view, include: http_cache, include: secure_fetch, include: bui_chrome. Structure is extracted statically without LLM calls; component prose may be enriched locally.
+Static architecture map of 427 files (c, h, py, sh) in 14 components: src: tab, include: browser_ui, include: css, src: text_shape, include: page_view, include: http_cache, include: secure_fetch, include: bui_chrome. Structure is extracted statically without LLM calls; component prose may be enriched locally.
 
 ### src: tab (1)
 
@@ -321,7 +321,7 @@ include: pres_hints groups 7 files (c, h) around FREEDOM_TABLE_LAYOUT_H, TL_MAX_
 
 ### tools (14)
 
-tools groups 2 files (py) around start_display, one_run, main, phase_ms, one_page. guiscroll -- what one frame costs in the REAL Freedom window while the user scrolls....
+tools groups 3 files (py) around start_display, one_run, main, phase_ms, one_page. guiscroll -- what one frame costs in the REAL Freedom window while the user scrolls....
 
 **Related Classes/Methods**:
 
@@ -332,3 +332,4 @@ tools groups 2 files (py) around start_display, one_run, main, phase_ms, one_pag
 - <a href="../tools/guiscroll.py#L48-L94">tools/guiscroll.py::one_page</a>
 - <a href="../tools/guiscroll.py#L95-L148">tools/guiscroll.py::main</a>
 - <a href="../tools/guiscroll.py#L149-L156">tools/guiscroll.py::procs_display</a>
+- <a href="../tools/guishot.py#L38-L42">tools/guishot.py::xdo</a>

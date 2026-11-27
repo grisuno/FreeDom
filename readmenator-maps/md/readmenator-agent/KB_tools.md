@@ -81,6 +81,15 @@
   - `procs_display` (function, line 149) `def procs_display(procs)`
 - Depends on: `tools/guitime.py`
 
+## tools/guishot.py
+- Doc: guishot -- a picture of the REAL Freedom window for the README.
+- Layer: utility
+- Language: py
+- Symbols:
+  - `xdo` (function, line 38) `def xdo(env)`
+  - `main` (function, line 43) `def main()`
+- Depends on: `tools/guitime.py`
+
 ## tools/guitime.py
 - Doc: guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle".
 - Layer: utility
@@ -89,7 +98,7 @@
   - `start_display` (function, line 34) `def start_display(workdir)`
   - `one_run` (function, line 67) `def one_run(binary, page, env, hosts_dir, tmp)`
   - `main` (function, line 96) `def main()`
-- Imported by: `tools/guiscroll.py`
+- Imported by: `tools/guiscroll.py`, `tools/guishot.py`
 
 ## tools/mutate.py
 - Doc: mutate -- compile-time mutation testing for the CMocka suites.

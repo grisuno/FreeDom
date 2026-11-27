@@ -8,7 +8,7 @@
 | `fuzz.sh` | Thin wrapper. | root | 0 | 0 |
 | `fuzz/fuzz_anchor.c` | Fuzzer for anchor (spec/anchor.md) and url_split_location: a hostile document x a | fuzz | 3 | 0 |
 | `fuzz/fuzz_box_blur.c` | libFuzzer harness for box_blur (spec/box_blur.md): a hostile mask, size, stride and sigma | fuzz | 2 | 0 |
-| `fuzz/fuzz_box_tree.c` | Hostile box trees (any parent graph, cycles included) through the positioned paint | fuzz | 1 | 0 |
+| `fuzz/fuzz_box_tree.c` | Hostile box trees (any parent graph, cycles included) through the positioned paint | fuzz | 3 | 0 |
 | `fuzz/fuzz_browser.c` | pos: define SNAP_MAX 512 | fuzz | 9 | 0 |
 | `fuzz/fuzz_chrome_layout.c` | libFuzzer harness for chrome_layout (spec/chrome_layout.md): a hostile URL (a page | fuzz | 3 | 0 |
 | `fuzz/fuzz_css.c` | fuzz_root_match: Root matcher for the attribute-scoped custom-property path: a fixed <html... | fuzz | 2 | 0 |
@@ -55,7 +55,7 @@
 | `fuzz/fuzz_web_storage.c` | - | fuzz | 0 | 0 |
 | `fuzz/fuzz_webfont.c` | libFuzzer harness for the webfont lookahead scanner (spec/webfont.md). | fuzz | 1 | 0 |
 | `fuzz/fuzz_webfont_register.c` | - | fuzz | 2 | 0 |
-| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 770 | 0 |
+| `gui/browser_ui.c` | ui_input_state: Live editable state for one form text control, aliasing a block of the current... | gui | 780 | 0 |
 | `gui/browser_ui_internal.h` | bui_chrome_view: ui_theme ui_theme_for(int mode);          /* maps a ui_theme_mode to a palette... | gui | 26 | 4 |
 | `gui/bui_chrome.c` | tab_path: void bui_round_rect(cairo_t *cr, double x, double y, double w, double h, double r) {... | gui | 71 | 0 |
 | `gui/bui_mask_img.c` | bui_mask_img -- paints a mask-image: url() layer into a mask surface. | gui | 1 | 0 |
@@ -67,7 +67,7 @@
 | `include/block_flow.h` | block_flow (bf_) -- vertical margin collapsing for block-level boxes. | include | 4 | 3 |
 | `include/box_blur.h` | Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md). | include | 5 | 4 |
 | `include/box_style.h` | bx_edges: anything longer fails closed instead of truncating into a wrong match. #define... | include | 31 | 12 |
-| `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 34 | 6 |
+| `include/box_tree.h` | bt_positioned: Stage 2: one positioned box in the final paint order. | include | 35 | 6 |
 | `include/browser.h` | browser_closed: Transient status line (a toast, e.g. "blocked: insecure http link"). msg is... | include | 28 | 4 |
 | `include/cached_fetch.h` | cf_set_store: Cache-aware GET. | include | 4 | 3 |
 | `include/chrome_layout.h` | chl_tab_rect: Computes the layout. tab_count >= 1 and 0 <= active < tab_count, else CHL_EINVAL *... | include | 44 | 4 |
@@ -186,7 +186,7 @@
 | `src/block_flow.c` | block_flow (bf_) -- vertical margin collapsing. | src | 4 | 0 |
 | `src/box_blur.c` | box_recip: floor((sum + bw/2) / bw) without a division: m = floor(2^32 / bw) + 1 makes (n * m)... | src | 9 | 0 |
 | `src/box_style.c` | tag_row: One row of the user-agent sheet. | src | 48 | 0 |
-| `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 31 | 0 |
+| `src/box_tree.c` | layout_block: Block container: stack non-none children vertically, collapsing each child's top *... | src | 34 | 0 |
 | `src/browser.c` | clear_status: #include <stdlib.h> #include <math.h> #include <string.h> static void... | src | 51 | 0 |
 | `src/cached_fetch.c` | trace: fetcher, and so the same policy, as an uncached request.  #define _POSIX_C_SOURCE 200809L... | src | 14 | 0 |
 | `src/chrome_layout.c` | chrome_layout -- browser chrome geometry + identity badge. spec/chrome_layout.md | src | 22 | 0 |
@@ -309,7 +309,7 @@
 | `tests/test_block_flow.c` | test_two_positive_collapse_to_max: Two positive margins collapse to the LARGER, never to their... | tests | 8 | 0 |
 | `tests/test_box_blur.c` | ref_line: put_px(argb, W * 4, 30, 20, 255); int r[4]; assert_int_equal(bb_ink_rect(argb, W, H, W... | tests | 15 | 0 |
 | `tests/test_box_style.c` | dbl_eq: #include <setjmp.h> #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include... | tests | 49 | 0 |
-| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 71 | 0 |
+| `tests/test_box_tree.c` | test_flex_auto_margin_pushes_item: Flexbox 8.1: an item's auto margin takes the free space... | tests | 76 | 0 |
 | `tests/test_browser.c` | nav: #include <stdarg.h> #include <stddef.h> #include <stdint.h> #include <stdlib.h> #include... | tests | 28 | 0 |
 | `tests/test_cached_fetch.c` | - | tests | 14 | 0 |
 | `tests/test_chrome_layout.c` | Suite for chrome_layout (spec/chrome_layout.md). | tests | 20 | 0 |
@@ -421,7 +421,8 @@
 | `tools/fftime.py` | fftime -- Firefox's time from "navigate" to "painted and idle", for `make fbench`. | tools | 1 | 0 |
 | `tools/gen_psl.c` | sort_unique: v->cap = v->cap ? v->cap * 2 : 1024; v->items = (char **)realloc(v->items, v->cap *... | tools | 8 | 0 |
 | `tools/guiscroll.py` | guiscroll -- what one frame costs in the REAL Freedom window while the user scrolls.  guitime... | tools | 4 | 0 |
-| `tools/guitime.py` | guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle". | tools | 3 | 1 |
+| `tools/guishot.py` | guishot -- a picture of the REAL Freedom window for the README. | tools | 2 | 0 |
+| `tools/guitime.py` | guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle". | tools | 3 | 2 |
 | `tools/mutate.py` | mutate -- compile-time mutation testing for the CMocka suites. | tools | 6 | 0 |
 | `tools/pngdiff.c` | pd_reader_open: Opens `path` and normalises whatever colour type it carries into 8-bit RGB, so *... | tools | 14 | 0 |
 | `tools/pngprof.py` | pngprof -- structural ink-profile dump for page screenshots. | tools | 4 | 0 |

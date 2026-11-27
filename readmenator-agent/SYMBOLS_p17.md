@@ -3,6 +3,27 @@ Previous: [SYMBOLS_p16.md](SYMBOLS_p16.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `test_null_out` | function | `tests/test_link_nav.c:24` | `static void test_null_out(void **state)` |
+| `test_overflow_blocked` | function | `tests/test_link_nav.c:195` | `static void test_overflow_blocked(void **state)` |
+| `test_resolve_long_bundle_target` | function | `tests/test_link_nav.c:101` | `static void test_resolve_long_bundle_target(void **state)` |
+| `assert_clean` | function | `tests/test_link_preview.c:11` | `static void assert_clean(const lp_preview *p)` |
+| `host_is` | function | `tests/test_link_preview.c:21` | `static void host_is(const lp_preview *p, const char *host)` |
+| `main` | function | `tests/test_link_preview.c:139` | `int main(void)` |
+| `test_bidi_and_controls_escaped` | function | `tests/test_link_preview.c:71` | `static void test_bidi_and_controls_escaped(void **state)` |
+| `test_downgrade_blocked` | function | `tests/test_link_preview.c:63` | `static void test_downgrade_blocked(void **state)` |
+| `test_fragment_same_document` | function | `tests/test_link_preview.c:84` | `static void test_fragment_same_document(void **state)` |
+| `test_javascript_blocked` | function | `tests/test_link_preview.c:52` | `static void test_javascript_blocked(void **state)` |
+| `test_local_file` | function | `tests/test_link_preview.c:97` | `static void test_local_file(void **state)` |
+| `test_long_blocked_bounded` | function | `tests/test_link_preview.c:124` | `static void test_long_blocked_bounded(void **state)` |
+| `test_long_path_keeps_host` | function | `tests/test_link_preview.c:106` | `static void test_long_path_keeps_host(void **state)` |
+| `test_null_out` | function | `tests/test_link_preview.c:26` | `static void test_null_out(void **state)` |
+| `test_relative_resolves_to_absolute` | function | `tests/test_link_preview.c:31` | `static void test_relative_resolves_to_absolute(void **state)` |
+| `test_userinfo_and_port_not_host` | function | `tests/test_link_preview.c:42` | `static void test_userinfo_and_port_not_host(void **state)` |
+| `local_store` | function | `tests/test_local_store.c:2` | `* TDD suite for local_store (Hito 5 - Zero Knowledge: encrypted local state). * * RED state until src/local_store.c...` |
+| `main` | function | `tests/test_local_store.c:193` | `int main(void)` |
+| `roundtrip_raw` | function | `tests/test_local_store.c:30` | `static void roundtrip_raw(ls_aead aead)` |
+| `tamper_at` | function | `tests/test_local_store.c:85` | `static void tamper_at(size_t off)` |
+| `test_derive_key` | function | `tests/test_local_store.c:149` | `static void test_derive_key(void **s)` |
 | `test_empty_plaintext` | function | `tests/test_local_store.c:53` | `static void test_empty_plaintext(void **s)` |
 | `test_format_errors` | function | `tests/test_local_store.c:166` | `static void test_format_errors(void **s)` |
 | `test_nondeterministic` | function | `tests/test_local_store.c:107` | `static void test_nondeterministic(void **s)` |
@@ -475,26 +496,5 @@ Previous: [SYMBOLS_p16.md](SYMBOLS_p16.md)
 | `test_image_block_scheme` | function | `tests/test_render_policy.c:134` | `static void test_image_block_scheme(void **state)` |
 | `test_image_block_tracker` | function | `tests/test_render_policy.c:119` | `static void test_image_block_tracker(void **state)` |
 | `test_image_data_url_disabled_by_default` | function | `tests/test_render_policy.c:183` | `static void test_image_data_url_disabled_by_default(void **state)` |
-| `test_image_data_url_malformed_is_invalid` | function | `tests/test_render_policy.c:191` | `static void test_image_data_url_malformed_is_invalid(void **state)` |
-| `test_image_disabled_by_default` | function | `tests/test_render_policy.c:72` | `static void test_image_disabled_by_default(void **state)` |
-| `test_image_disabled_precedence` | function | `tests/test_render_policy.c:209` | `static void test_image_disabled_precedence(void **state)` |
-| `test_images_warning_present` | function | `tests/test_render_policy.c:234` | `static void test_images_warning_present(void **state)` |
-| `test_img_reason_total_and_stable` | function | `tests/test_render_policy.c:219` | `static void test_img_reason_total_and_stable(void **state)` |
-| `test_tracking_pixel_normal` | function | `tests/test_render_policy.c:52` | `static void test_tracking_pixel_normal(void **state)` |
-| `test_tracking_pixel_tiny` | function | `tests/test_render_policy.c:37` | `static void test_tracking_pixel_tiny(void **state)` |
-| `test_tracking_pixel_unknown` | function | `tests/test_render_policy.c:62` | `static void test_tracking_pixel_unknown(void **state)` |
-| `test_tracking_pixel_zero_area` | function | `tests/test_render_policy.c:45` | `static void test_tracking_pixel_zero_area(void **state)` |
-| `main` | function | `tests/test_renderer.c:93` | `int main(void)` |
-| `test_render_basic` | function | `tests/test_renderer.c:27` | `static void test_render_basic(void **state)` |
-| `test_render_binary_does_not_crash_parent` | function | `tests/test_renderer.c:63` | `static void test_render_binary_does_not_crash_parent(void **state)` |
-| `test_render_multiple_independent` | function | `tests/test_renderer.c:74` | `static void test_render_multiple_independent(void **state)` |
-| `test_render_null_args` | function | `tests/test_renderer.c:48` | `static void test_render_null_args(void **state)` |
-| `test_render_strips_script` | function | `tests/test_renderer.c:39` | `static void test_render_strips_script(void **state)` |
-| `test_render_too_large` | function | `tests/test_renderer.c:55` | `static void test_render_too_large(void **state)` |
-| `test_result_free_null_and_double` | function | `tests/test_renderer.c:84` | `static void test_result_free_null_and_double(void **state)` |
-| `main` | function | `tests/test_request_policy.c:212` | `int main(void)` |
-| `test_evaluate_allow_same_site` | function | `tests/test_request_policy.c:106` | `static void test_evaluate_allow_same_site(void **state)` |
-| `test_evaluate_block_invalid` | function | `tests/test_request_policy.c:129` | `static void test_evaluate_block_invalid(void **state)` |
-| `test_evaluate_block_scheme` | function | `tests/test_request_policy.c:121` | `static void test_evaluate_block_scheme(void **state)` |
 
 Next: [SYMBOLS_p18.md](SYMBOLS_p18.md)

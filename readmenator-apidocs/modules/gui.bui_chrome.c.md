@@ -150,7 +150,7 @@ Byte index of the URL caret for a click at surface x (UTF-8 boundary).
 
 ### `bui_paint_chrome`
 
-`function` | [gui/bui_chrome.c:646](../../gui/bui_chrome.c#L646)
+`function` | [gui/bui_chrome.c:648](../../gui/bui_chrome.c#L648)
 
 ```c
 void bui_paint_chrome(cairo_t *cr, const bui_chrome_view *v)
@@ -173,7 +173,7 @@ Paints both chrome rows.
 
 ### `bui_paint_findbar`
 
-`function` | [gui/bui_chrome.c:732](../../gui/bui_chrome.c#L732)
+`function` | [gui/bui_chrome.c:734](../../gui/bui_chrome.c#L734)
 
 ```c
 void bui_paint_findbar(cairo_t *cr, const bui_find_view *v)
@@ -194,7 +194,7 @@ void bui_paint_findbar(cairo_t *cr, const bui_find_view *v)
 
 ### `bui_paint_site_panel`
 
-`function` | [gui/bui_chrome.c:815](../../gui/bui_chrome.c#L815)
+`function` | [gui/bui_chrome.c:817](../../gui/bui_chrome.c#L817)
 
 ```c
 void bui_paint_site_panel(cairo_t *cr, const ui_theme *th, const sp_panel *p, const sp_geom *g, int hot_action)
@@ -222,7 +222,7 @@ The site identity panel (spec/site_panel.md); hot_action = action under the poin
 
 ### `bui_paint_video_bar`
 
-`function` | [gui/bui_chrome.c:903](../../gui/bui_chrome.c#L903)
+`function` | [gui/bui_chrome.c:905](../../gui/bui_chrome.c#L905)
 
 ```c
 void bui_paint_video_bar(cairo_t *cr, const vcl_geom *g, int paused, double pos, double total)
@@ -250,7 +250,7 @@ The browser's player bar over a playing video (spec/video_controls.md), drawn in
 
 ### `bui_link_status_flips`
 
-`function` | [gui/bui_chrome.c:962](../../gui/bui_chrome.c#L962)
+`function` | [gui/bui_chrome.c:964](../../gui/bui_chrome.c#L964)
 
 ```c
 int bui_link_status_flips(const double zone[3], double ptr_x, double ptr_y)
@@ -278,7 +278,7 @@ Whether the pointer sits over the strip's left placement `zone` (left, top, righ
 
 ### `bui_paint_link_status`
 
-`function` | [gui/bui_chrome.c:966](../../gui/bui_chrome.c#L966)
+`function` | [gui/bui_chrome.c:968](../../gui/bui_chrome.c#L968)
 
 ```c
 double bui_paint_link_status(cairo_t *cr, const ui_theme *th, const lp_preview *p, double left, double right, double bottom, double ptr_x, double ptr_y, double zone[3])
@@ -500,7 +500,7 @@ alpha of a disabled button's icon
 
 ### `BUI_SP_RADIUS`
 
-`macro` | [gui/bui_chrome.c:781](../../gui/bui_chrome.c#L781)
+`macro` | [gui/bui_chrome.c:783](../../gui/bui_chrome.c#L783)
 
 ```c
 #define BUI_SP_RADIUS
@@ -512,7 +512,7 @@ alpha of a disabled button's icon
 
 ### `BUI_SP_LABEL_W`
 
-`macro` | [gui/bui_chrome.c:782](../../gui/bui_chrome.c#L782)
+`macro` | [gui/bui_chrome.c:784](../../gui/bui_chrome.c#L784)
 
 ```c
 #define BUI_SP_LABEL_W
@@ -524,7 +524,7 @@ alpha of a disabled button's icon
 
 ### `BUI_VBAR_ALPHA`
 
-`macro` | [gui/bui_chrome.c:898](../../gui/bui_chrome.c#L898)
+`macro` | [gui/bui_chrome.c:900](../../gui/bui_chrome.c#L900)
 
 ```c
 #define BUI_VBAR_ALPHA
@@ -536,7 +536,7 @@ alpha of a disabled button's icon
 
 ### `BUI_VTRACK_ALPHA`
 
-`macro` | [gui/bui_chrome.c:899](../../gui/bui_chrome.c#L899)
+`macro` | [gui/bui_chrome.c:901](../../gui/bui_chrome.c#L901)
 
 ```c
 #define BUI_VTRACK_ALPHA
@@ -550,7 +550,7 @@ bar background over the picture
 
 ### `BUI_VKNOB_R`
 
-`macro` | [gui/bui_chrome.c:900](../../gui/bui_chrome.c#L900)
+`macro` | [gui/bui_chrome.c:902](../../gui/bui_chrome.c#L902)
 
 ```c
 #define BUI_VKNOB_R
@@ -564,7 +564,7 @@ unplayed part of the track
 
 ### `BUI_VTEXT_SIZE`
 
-`macro` | [gui/bui_chrome.c:901](../../gui/bui_chrome.c#L901)
+`macro` | [gui/bui_chrome.c:903](../../gui/bui_chrome.c#L903)
 
 ```c
 #define BUI_VTEXT_SIZE
@@ -576,7 +576,7 @@ unplayed part of the track
 
 ### `BUI_LS_PAD_X`
 
-`macro` | [gui/bui_chrome.c:956](../../gui/bui_chrome.c#L956)
+`macro` | [gui/bui_chrome.c:958](../../gui/bui_chrome.c#L958)
 
 ```c
 #define BUI_LS_PAD_X
@@ -588,7 +588,7 @@ unplayed part of the track
 
 ### `BUI_LS_PAD_Y`
 
-`macro` | [gui/bui_chrome.c:957](../../gui/bui_chrome.c#L957)
+`macro` | [gui/bui_chrome.c:959](../../gui/bui_chrome.c#L959)
 
 ```c
 #define BUI_LS_PAD_Y
@@ -600,7 +600,7 @@ unplayed part of the track
 
 ### `BUI_LS_RADIUS`
 
-`macro` | [gui/bui_chrome.c:958](../../gui/bui_chrome.c#L958)
+`macro` | [gui/bui_chrome.c:960](../../gui/bui_chrome.c#L960)
 
 ```c
 #define BUI_LS_RADIUS
@@ -612,7 +612,7 @@ unplayed part of the track
 
 ### `BUI_LS_MAX_FRAC`
 
-`macro` | [gui/bui_chrome.c:959](../../gui/bui_chrome.c#L959)
+`macro` | [gui/bui_chrome.c:961](../../gui/bui_chrome.c#L961)
 
 ```c
 #define BUI_LS_MAX_FRAC
@@ -624,7 +624,7 @@ unplayed part of the track
 
 ### `BUI_LS_FONT`
 
-`macro` | [gui/bui_chrome.c:960](../../gui/bui_chrome.c#L960)
+`macro` | [gui/bui_chrome.c:962](../../gui/bui_chrome.c#L962)
 
 ```c
 #define BUI_LS_FONT

@@ -24,6 +24,8 @@
 - Layer: utility
 - Language: c
 - Symbols:
+  - `LLVMFuzzerTestOneInput` (function, line 16) `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`
+  - `order` (function, line 11) `* order (spec/compositor.md "Anidado"): the output is a permutation of the positioned * boxes, and a non-negative...`
   - `FB_MAX` (macro, line 8) `#define FB_MAX`
 - Depends on: `include/box_tree.h`, `include/page_view.h`
 

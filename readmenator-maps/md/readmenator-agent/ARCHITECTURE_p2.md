@@ -280,6 +280,7 @@ Previous: [ARCHITECTURE.md](ARCHITECTURE.md)
 - `tests/test_ws_hub.c` -> `include/ws_hub.h`
 - `tests/test_zoom.c` -> `include/zoom.h`
 - `tools/guiscroll.py` -> `tools/guitime.py`
+- `tools/guishot.py` -> `tools/guitime.py`
 
 
 Next: [ARCHITECTURE_p3.md](ARCHITECTURE_p3.md)

@@ -3,6 +3,22 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `RELATIVE` | function | `src/css_box.c:63` | `* or RELATIVE (of the inherited size). Absolute: px/pt/rem/viewport units and the * absolute keywords. Relative: em...` |
+| `accepts` | function | `src/css_box.c:706` | `* itself accepts (no %: this engine has no containing block to resolve it * against, so calc() cannot reach further...` |
+| `calc_eval_em` | function | `src/css_box.c:974` | `static int calc_eval_em(const char *v, size_t vlen, double *out_em)` |
+| `calc_eval_full` | function | `src/css_box.c:960` | `static int calc_eval_full(const char *v, size_t vlen, double *out_px, double *out_em,            ...` |
+| `calc_expr` | function | `src/css_box.c:938` | `static int calc_expr(calc_parser *p, calc_val *out, int depth)` |
+| `calc_match_fn` | function | `src/css_box.c:746` | `static int calc_match_fn(calc_parser *p, const char *name)` |
+| `calc_mathfn` | function | `src/css_box.c:788` | `static int calc_mathfn(calc_parser *p, calc_val *out, int depth, int kind)` |
+| `calc_parser` | struct | `src/css_box.c:737` | `` |
+| `calc_piecewise` | function | `src/css_box.c:773` | `static double calc_piecewise(const calc_val *args, int nargs, int want_pct)` |
+| `calc_skip_ws` | function | `src/css_box.c:739` | `static void calc_skip_ws(calc_parser *p)` |
+| `calc_term` | function | `src/css_box.c:911` | `static int calc_term(calc_parser *p, calc_val *out, int depth)` |
+| `calc_unwrap` | function | `src/css_box.c:982` | `static int calc_unwrap(const char *s, size_t *inner_start, size_t *inner_len)` |
+| `calc_val` | struct | `src/css_box.c:736` | `` |
+| `cb_clip_inset` | function | `src/css_box.c:1141` | `int cb_clip_inset(const char *val, int px[4], int pm[4])` |
+| `cb_copy_trim` | function | `src/css_box.c:25` | `static size_t cb_copy_trim(const char *s, size_t a, size_t b, char *dst, size_t cap)` |
+| `cb_expand_box2` | function | `src/css_box.c:1422` | `int cb_expand_box2(const char *val, int slot_start, int slot_end,                        int allo...` |
 | `cb_expand_grid_template_cols` | function | `src/css_box.c:623` | `int cb_expand_grid_template_cols(const char *val, css_decl *dst, int cap)` |
 | `cb_expand_grid_template_rows` | function | `src/css_box.c:646` | `int cb_expand_grid_template_rows(const char *val, css_decl *dst, int cap)` |
 | `cb_interp_align` | function | `src/css_box.c:54` | `int cb_interp_align(const char *v)` |
@@ -480,21 +496,5 @@ Previous: [SYMBOLS_p7.md](SYMBOLS_p7.md)
 | `dom_text_content` | function | `src/dom.c:643` | `const char *dom_text_content(const dom_index *idx, dom_node_id node, size_t *len)` |
 | `handle_of` | function | `src/dom.c:1040` | `static dom_node_id handle_of(dom_index *idx, lxb_dom_node_t *n)` |
 | `id_of` | function | `src/dom.c:425` | `static dom_node_id id_of(const dom_index *idx, const lxb_dom_node_t *node)` |
-| `idx_push` | function | `src/dom.c:713` | `static dom_status idx_push(dom_index *idx, lxb_dom_node_t *node, dom_node_id *out_id)` |
-| `ih_acc` | struct | `src/dom.c:871` | `` |
-| `ih_append` | function | `src/dom.c:879` | `static lxb_status_t ih_append(const lxb_char_t *data, size_t len, void *ctx)` |
-| `ih_block` | struct | `src/dom.c:866` | `` |
-| `ih_free` | function | `src/dom.c:906` | `static void ih_free(ih_acc *a)` |
-| `index_element` | function | `src/dom.c:255` | `static int index_element(dom_index *idx, lxb_dom_element_t *el, dom_node_id id)` |
-| `index_subtree` | function | `src/dom.c:815` | `static dom_status index_subtree(dom_index *idx, lxb_dom_node_t *sub)` |
-| `node_in_document` | function | `src/dom.c:357` | `static int node_in_document(const lxb_dom_node_t *node)` |
-| `node_matches_any` | function | `src/dom.c:468` | `static int node_matches_any(const lxb_dom_node_t *cn,                             const css_sel *...` |
-| `node_next` | function | `src/dom.c:233` | `static lxb_dom_node_t *node_next(lxb_dom_node_t *node, const lxb_dom_node_t *root)` |
-| `parse_selector_list` | function | `src/dom.c:435` | `static size_t parse_selector_list(const char *sel, css_sel *out, size_t cap)` |
-| `pm_entry` | struct | `src/dom.c:154` | `` |
-| `pm_free` | function | `src/dom.c:211` | `static void pm_free(ptrmap *m)` |
-| `pm_get` | function | `src/dom.c:200` | `static int pm_get(const ptrmap *m, const void *key, dom_node_id *out)` |
-| `pm_grow` | function | `src/dom.c:166` | `static int pm_grow(ptrmap *m)` |
-| `pm_put` | function | `src/dom.c:183` | `static int pm_put(ptrmap *m, const void *key, dom_node_id id)` |
 
 Next: [SYMBOLS_p9.md](SYMBOLS_p9.md)

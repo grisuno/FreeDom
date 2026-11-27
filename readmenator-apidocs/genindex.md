@@ -187,6 +187,8 @@
 - [`bt_containing_block`](modules/src.box_tree.c.md#bt_containing_block) function in `src/box_tree.c`
 - [`bt_defer_roots`](modules/include.box_tree.h.md#bt_defer_roots) function in `include/box_tree.h`
 - [`bt_defer_roots`](modules/src.box_tree.c.md#bt_defer_roots) function in `src/box_tree.c`
+- [`bt_fixed_pinned`](modules/include.box_tree.h.md#bt_fixed_pinned) function in `include/box_tree.h`
+- [`bt_fixed_pinned`](modules/src.box_tree.c.md#bt_fixed_pinned) function in `src/box_tree.c`
 - [`bt_in_subtree`](modules/include.box_tree.h.md#bt_in_subtree) function in `include/box_tree.h`
 - [`bt_in_subtree`](modules/src.box_tree.c.md#bt_in_subtree) function in `src/box_tree.c`
 - [`bt_layout`](modules/src.box_tree.c.md#bt_layout) function in `src/box_tree.c`
@@ -1484,6 +1486,7 @@
 - [`fp_vendor`](modules/include.anti_fp.h.md#fp_vendor) function in `include/anti_fp.h`
 - [`fp_vendor`](modules/src.anti_fp.c.md#fp_vendor) function in `src/anti_fp.c`
 - [`frac`](modules/include.video_controls.h.md#frac) function in `include/video_controls.h`
+- [`frag_hit`](modules/gui.browser_ui.c.md#frag_hit) struct in `gui/browser_ui.c`
 - [`fragment`](modules/gui.browser_ui.c.md#fragment) function in `gui/browser_ui.c`
 - [`FRAME_BOX_MAX`](modules/gui.browser_ui.c.md#frame_box_max) macro in `gui/browser_ui.c`
 - [`frame_undo`](modules/gui.browser_ui.c.md#frame_undo) struct in `gui/browser_ui.c`
@@ -2150,6 +2153,7 @@
 - [`key`](modules/gui.browser_ui.c.md#key) function in `gui/browser_ui.c`
 - [`key`](modules/include.css_index.h.md#key) type_alias in `include/css_index.h`
 - [`key`](modules/src.mask_cache.c.md#key) type_alias in `src/mask_cache.c`
+- [`KEY_DELAY_MS`](modules/tools.guishot.py.md#key_delay_ms) constant in `tools.guishot`
 - [`key_ref`](modules/src.web_storage.c.md#key_ref) struct in `src/web_storage.c`
 - [`KEYS`](modules/fuzz.fuzz_mask_cache.c.md#keys) macro in `fuzz/fuzz_mask_cache.c`
 - [`kind`](modules/include.css_mask.h.md#cm_layer-kind) type_alias of `cm_layer` in `include/css_mask.h`
@@ -2204,6 +2208,7 @@
 - [`LL_FS_BASE`](modules/src.os_sandbox.c.md#ll_fs_base) macro in `src/os_sandbox.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_anchor.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_anchor.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_box_blur.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_box_blur.c`
+- [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_box_tree.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_box_tree.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_browser.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_browser.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_chrome_layout.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_chrome_layout.c`
 - [`LLVMFuzzerTestOneInput`](modules/fuzz.fuzz_css.c.md#llvmfuzzertestoneinput) function in `fuzz/fuzz_css.c`
@@ -2314,6 +2319,7 @@
 - [`main`](modules/tools.fftime.py.md#main) function in `tools.fftime`
 - [`main`](modules/tools.gen_psl.c.md#main) function in `tools/gen_psl.c`
 - [`main`](modules/tools.guiscroll.py.md#main) function in `tools.guiscroll`
+- [`main`](modules/tools.guishot.py.md#main) function in `tools.guishot`
 - [`main`](modules/tools.guitime.py.md#main) function in `tools.guitime`
 - [`main`](modules/tools.mutate.py.md#main) function in `tools.mutate`
 - [`main`](modules/tools.pngdiff.c.md#main) function in `tools/pngdiff.c`
@@ -2413,6 +2419,7 @@
 - [`NG_V4_LEN`](modules/src.net_guard.c.md#ng_v4_len) macro in `src/net_guard.c`
 - [`NG_V6_LEN`](modules/src.net_guard.c.md#ng_v6_len) macro in `src/net_guard.c`
 - [`ng_verdict`](modules/include.net_guard.h.md#ng_verdict) enum in `include/net_guard.h`
+- [`node`](modules/gui.browser_ui.c.md#node) type_alias in `gui/browser_ui.c`
 - [`node`](modules/include.box_tree.h.md#node) function in `include/box_tree.h`
 - [`node`](modules/include.js_geom.h.md#node) type_alias in `include/js_geom.h`
 - [`NONE`](modules/src.box_style.c.md#none) macro in `src/box_style.c`
@@ -2489,6 +2496,7 @@
 - [`open`](modules/src.media_decoder.c.md#open) function in `src/media_decoder.c`
 - [`opens`](modules/src.page_view.c.md#opens) function in `src/page_view.c`
 - [`OPS`](modules/tools.mutate.py.md#ops) constant in `tools.mutate`
+- [`order`](modules/fuzz.fuzz_box_tree.c.md#order) function in `fuzz/fuzz_box_tree.c`
 - [`order`](modules/include.css.h.md#order) function in `include/css.h`
 - [`order`](modules/include.css_decl.h.md#order) function in `include/css_decl.h`
 - [`order`](modules/include.perf_trace.h.md#order) enum in `include/perf_trace.h`
@@ -2652,6 +2660,7 @@
 - [`png_set_background`](modules/tools.pngdiff.c.md#png_set_background) function in `tools/pngdiff.c`
 - [`point`](modules/src.svg_render.c.md#point) function in `src/svg_render.c`
 - [`POINTER`](modules/include.css.h.md#pointer) function in `include/css.h`
+- [`POINTER_PARK`](modules/tools.guishot.py.md#pointer_park) constant in `tools.guishot`
 - [`poisoned`](modules/include.js_env.h.md#poisoned) function in `include/js_env.h`
 - [`policy`](modules/include.page_view.h.md#policy) function in `include/page_view.h`
 - [`policy`](modules/include.secure_fetch.h.md#policy) type_alias in `include/secure_fetch.h`
@@ -3267,6 +3276,7 @@
 - [`shortcut`](modules/include.ui.h.md#shortcut) function in `include/ui.h`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
 - [`shorthand`](modules/src.css.c.md#shorthand) function in `src/css.c`
+- [`SHOT_PERIOD_S`](modules/tools.guishot.py.md#shot_period_s) constant in `tools.guishot`
 - [`sight`](modules/include.dom.h.md#sight) function in `include/dom.h`
 - [`silently`](modules/include.js_sandbox.h.md#silently) function in `include/js_sandbox.h`
 - [`sink`](modules/src.css_counter.c.md#sink) struct in `src/css_counter.c`
@@ -3456,6 +3466,7 @@
 - [`tab_eval_result`](modules/include.tab.h.md#tab_eval_result) struct in `include/tab.h`
 - [`tab_eval_result_free`](modules/include.tab.h.md#tab_eval_result_free) function in `include/tab.h`
 - [`tab_eval_result_free`](modules/src.tab.c.md#tab_eval_result_free) function in `src/tab.c`
+- [`TAB_GAP_S`](modules/tools.guishot.py.md#tab_gap_s) constant in `tools.guishot`
 - [`tab_geometry_async`](modules/src.tab.c.md#tab_geometry_async) function in `src/tab.c`
 - [`tab_hist_op`](modules/include.tab.h.md#tab_hist_op) struct in `include/tab.h`
 - [`tab_image`](modules/include.tab.h.md#tab_image) struct in `include/tab.h`
@@ -4032,6 +4043,7 @@
 
 - [`x`](modules/gui.browser_ui.c.md#x) function in `gui/browser_ui.c`
 - [`x_off`](modules/include.box_style.h.md#bx_hplace-x_off) type_alias of `bx_hplace` in `include/box_style.h`
+- [`xdo`](modules/tools.guishot.py.md#xdo) function in `tools.guishot`
 
 <a id="y"></a>
 

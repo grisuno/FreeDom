@@ -1,12 +1,12 @@
 # GraphRAG Community Reports
 
-Entities: 9629 | Relationships: 17357 | Communities: 15 | Themes: 4 | Text units: 9084
+Entities: 9654 | Relationships: 17416 | Communities: 15 | Themes: 4 | Text units: 9107
 
 Query with `readmenator . ask "<question>"` (local: BM25 + Personalized PageRank; global: map-reduce over these reports) or the MCP tool `readmenator.graphrag`.
 
 ## Project overview (`root`, root, rating 7.0)
 
-426 files in 15 communities and 4 themes. Highest-impact communities: include: css (7.0), src: tab (6.5), include: browser_ui (4.7). God nodes: gui/browser_ui.c, include/css.h, src/tab.c, src/page_view.c, src/freedom.c.
+427 files in 15 communities and 4 themes. Highest-impact communities: include: css (7.0), src: tab (6.5), include: browser_ui (4.7). God nodes: gui/browser_ui.c, include/css.h, src/tab.c, src/page_view.c, src/freedom.c.
 
 - [include: css] rating 7.0: `include/css.h` ranks 1 by PageRank, 42 importers, 148 symbols: css_style: A resolved presentation.
 - [src: tab] rating 6.5: `include/html_parse.h` ranks 1 by PageRank, 26 importers, 24 symbols: hp_script: One executable <script>.
@@ -62,24 +62,24 @@ Theme of 1 communities and 20 files: unassigned files (20 files, rating 0.8).
 - Children: c14
 - Theme rating = highest child community rating.
 
-## tools (`t3`, theme, rating 0.1)
+## tools (`t3`, theme, rating 0.2)
 
-Theme of 1 communities and 2 files: tools (2 files, rating 0.1).
+Theme of 1 communities and 3 files: tools (3 files, rating 0.2).
 
-- [tools] `tools/guitime.py` ranks 1 by PageRank, 1 importers, 3 symbols: guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle".
+- [tools] `tools/guitime.py` ranks 1 by PageRank, 2 importers, 3 symbols: guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle".
 - [tools] `tools/guiscroll.py` ranks 2 by PageRank, 0 importers, 4 symbols: guiscroll -- what one frame costs in the REAL Freedom window while the user scrolls.  guitime measures "navigate -> painted and idle"; this measures the frames AFTER that: the page is loaded in a nested weston (Xvfb + weston, pixman...
-- Key entities: file:tools/guitime.py, file:tools/guiscroll.py
+- Key entities: file:tools/guitime.py, file:tools/guishot.py
 - Children: c13
 - Theme rating = highest child community rating.
 
 ## include: css (`c2`, community, rating 7.0)
 
-58 files under include (c 39, h 19), mostly utility. Core file include/css.h (PageRank 0.0445, imported by 42 files): css_style: A resolved presentation. Key abstractions: css_status, css_align, css_display, css_justify, css_font_family, css_text_transform. Depends on include: page_view (3), src: tab (2), src: text_shape (2). Used by include: page_view (19), src: tab (7), include: browser_ui (7).
+58 files under include (c 39, h 19), mostly utility. Core file include/css.h (PageRank 0.0444, imported by 42 files): css_style: A resolved presentation. Key abstractions: css_status, css_align, css_display, css_justify, css_font_family, css_text_transform. Depends on include: page_view (3), src: tab (2), src: text_shape (2). Used by include: page_view (19), src: tab (7), include: browser_ui (7).
 
 - `include/css.h` ranks 1 by PageRank, 42 importers, 148 symbols: css_style: A resolved presentation.
 - `include/css_color.h` ranks 2 by PageRank, 14 importers, 7 symbols: cc_pack: Packs a color into a non-negative 0x00RRGGBB integer (suitable for transport * and for the pipeline's "no color" sentinel of -1).
 - `include/css_counter.h` ranks 3 by PageRank, 4 importers, 19 symbols: cnt_hash: FNV-1a over `len` bytes of an identifier, ASCII case preserved (identifiers are * case-sensitive).
-- Hotspot `src/css.c`: 276 symbols, 40 connections (score 0.29).
+- Hotspot `src/css.c`: 276 symbols, 40 connections (score 0.28).
 - Hotspot `tests/test_css.c`: 374 symbols, 19 connections (score 0.26).
 - 1 layer violations, e.g. test_css.c (testing) -> flex_layout.h (presentation).
 - Key entities: file:tests/test_css.c, file:src/css.c, file:include/css.h, file:src/css_box.c, file:include/css_select.h, file:src/css_computed.c, file:src/css_select.c, file:src/css_mq.c
@@ -107,7 +107,7 @@ Theme of 1 communities and 2 files: tools (2 files, rating 0.1).
 - `include/scroll_req.h` ranks 1 by PageRank, 6 importers, 14 symbols: srq_encode: Writes r as SRQ_WIRE_N int32: kind, behavior, block, y, margin_top, margin_bottom, n, nsub.
 - `include/frame_broker.h` ranks 2 by PageRank, 4 importers, 17 symbols: fbk_origin_of: Serialized origin ("https://host[:port]", lowercase) or "null" for opaque/non-https/unparseable. * 0 on success, -1 if out does not fit or args are NULL.
 - `include/box_blur.h` ranks 3 by PageRank, 4 importers, 5 symbols: Gaussian blur of an 8-bit alpha mask by three box passes per axis (spec/box_blur.md).
-- Hotspot `gui/browser_ui.c`: 770 symbols, 168 connections (score 1.00).
+- Hotspot `gui/browser_ui.c`: 780 symbols, 168 connections (score 1.00).
 - Hotspot `include/tab.h`: 62 symbols, 17 connections (score 0.09).
 - 2 layer violations, e.g. browser_ui.c (presentation) -> data_url.h (data_access).
 - Dataflow: 41 INFERRED issues (first: UNCHECKED_ALLOC in gui_sub_perform).
@@ -117,7 +117,7 @@ Theme of 1 communities and 2 files: tools (2 files, rating 0.1).
 
 ## src: text_shape (`c3`, community, rating 3.9)
 
-55 files under src (c 39, h 16), mostly utility. Core file include/hls.h (PageRank 0.0076, imported by 6 files): hls_segment: or variant info. Key abstractions: hls_status, hls_segment, hls_variant, hls_playlist, FREEDOM_HLS_H, hls_select_variant. Depends on include: page_view (6), src: tab (5), include: css (3). Used by include: browser_ui (13), src: tab (2), include: css (2).
+55 files under src (c 39, h 16), mostly utility. Core file include/hls.h (PageRank 0.0075, imported by 6 files): hls_segment: or variant info. Key abstractions: hls_status, hls_segment, hls_variant, hls_playlist, FREEDOM_HLS_H, hls_select_variant. Depends on include: page_view (6), src: tab (5), include: css (3). Used by include: browser_ui (13), src: tab (2), include: css (2).
 
 - `include/hls.h` ranks 1 by PageRank, 6 importers, 11 symbols: hls_segment: or variant info.
 - `include/webfont.h` ranks 2 by PageRank, 13 importers, 17 symbols: wf_name_hash: FNV-1a (32-bit) over s[0,n), lowercased per byte, for author family names.
@@ -139,7 +139,7 @@ Theme of 1 communities and 2 files: tools (2 files, rating 0.1).
 - Hotspot `tests/test_page_view.c`: 231 symbols, 26 connections (score 0.21).
 - 14 layer violations, e.g. render_doc.c (presentation) -> data_url.h (data_access).
 - Dataflow: 6 INFERRED issues (first: DEAD_STORE in layout_grid).
-- Key entities: file:src/page_view.c, file:tests/test_page_view.c, file:include/page_view.h, file:tests/test_flex_layout.c, file:tests/test_box_tree.c, file:include/flex_layout.h, file:tests/test_box_style.c, file:src/box_style.c
+- Key entities: file:src/page_view.c, file:tests/test_page_view.c, file:include/page_view.h, file:tests/test_box_tree.c, file:tests/test_flex_layout.c, file:include/flex_layout.h, file:tests/test_box_style.c, file:src/box_style.c
 - Rating 2.4/10 = 7 x PageRank share 0.34 + 3 x risk 0.00. Internal imports: 58.
 
 ## include: http_cache (`c5`, community, rating 2.3)
@@ -183,12 +183,12 @@ Theme of 1 communities and 2 files: tools (2 files, rating 0.1).
 
 ## include: svg_render (`c8`, community, rating 1.1)
 
-14 files under include (c 10, h 4), mostly utility. Core file include/image_decode.h (PageRank 0.0076, imported by 7 files): img_pixels: A decoded bitmap that owns its pixel buffer. Key abstractions: img_format, img_status, img_pixels, FREEDOM_IMAGE_DECODE_H, guards, width. Depends on include: css (2), include: page_view (1). Used by include: browser_ui (3), src: tab (2), include: page_view (1).
+14 files under include (c 10, h 4), mostly utility. Core file include/image_decode.h (PageRank 0.0075, imported by 7 files): img_pixels: A decoded bitmap that owns its pixel buffer. Key abstractions: img_format, img_status, img_pixels, FREEDOM_IMAGE_DECODE_H, guards, width. Depends on include: css (2), include: page_view (1). Used by include: browser_ui (3), src: tab (2), include: page_view (1).
 
 - `include/image_decode.h` ranks 1 by PageRank, 7 importers, 14 symbols: img_pixels: A decoded bitmap that owns its pixel buffer.
 - `include/svg_render.h` ranks 2 by PageRank, 7 importers, 19 symbols: sv_shape: One paintable shape, already resolved: presentation attributes inherited from the <g> chain, and `m` the flattened affine transform of that chain (a,b,c,d,e,f in Cairo order).
 - `include/svg_raster.h` ranks 3 by PageRank, 4 importers, 5 symbols: sr_sniff: 1 when the first element of the document (after BOM, whitespace, the XML * declaration, comments and a doctype) is <svg; 0 otherwise.
-- Hotspot `tests/test_freedom.c`: 121 symbols, 12 connections (score 0.11).
+- Hotspot `tests/test_freedom.c`: 121 symbols, 12 connections (score 0.10).
 - Hotspot `tests/test_svg_render.c`: 17 symbols, 11 connections (score 0.05).
 - 1 layer violations, e.g. test_svg_render.c (testing) -> svg_render.h (presentation).
 - Key entities: file:tests/test_freedom.c, file:tests/test_image_decode.c, file:src/svg_render.c, file:src/image_decode.c, file:tests/test_svg_render.c, file:include/svg_render.h, file:include/image_decode.h, file:tests/test_svg_raster.c
@@ -204,7 +204,7 @@ Theme of 1 communities and 2 files: tools (2 files, rating 0.1).
 - Hotspot `tests/test_site_panel.c`: 13 symbols, 7 connections (score 0.03).
 - Hotspot `tools/fftime.py`: 1 symbols, 8 connections (score 0.03).
 - Taint: 5 paths reach this group via subprocess, urllib.request.
-- Key entities: file:tools/pngdiff.c, file:tests/test_site_panel.c, file:tools/gen_psl.c, file:tools/ffgeom.py, file:tools/fbench.py, file:tools/mutate.py, file:fuzz/fuzz_site_panel.c, file:tools/snapshot.py
+- Key entities: file:tools/pngdiff.c, file:tests/test_site_panel.c, file:tools/gen_psl.c, file:tools/ffgeom.py, file:tools/fbench.py, file:fuzz/fuzz_site_panel.c, file:tools/mutate.py, file:tools/snapshot.py
 - Rating 0.8/10 = 7 x PageRank share 0.12 + 3 x risk 0.00. Internal imports: 0.
 
 ## include: fb_cmdline (`c9`, community, rating 0.8)
@@ -222,7 +222,7 @@ Theme of 1 communities and 2 files: tools (2 files, rating 0.1).
 
 ## include: download (`c10`, community, rating 0.6)
 
-8 files under include (c 6, h 2), mostly utility. Core file include/pdf_export.h (PageRank 0.0049, imported by 5 files): pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order) onto pages of usable height page_h without ever splitting a row. Key abstractions: pe_status, FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. Used by include: browser_ui (2).
+8 files under include (c 6, h 2), mostly utility. Core file include/pdf_export.h (PageRank 0.0048, imported by 5 files): pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order) onto pages of usable height page_h without ever splitting a row. Key abstractions: pe_status, FREEDOM_PDF_EXPORT_H, PE_NAME_MAX, PE_EXT, PE_EXT_PNG, PE_FALLBACK_NAME. Used by include: browser_ui (2).
 
 - `include/pdf_export.h` ranks 1 by PageRank, 5 importers, 10 symbols: pe_paginate: Deterministic pagination: lays the rows (document-space tops + heights, in order) onto pages of usable height page_h without ever splitting a row.
 - `include/download.h` ranks 2 by PageRank, 4 importers, 9 symbols: dl_should_download: 1 if the response should be saved (attachment, or a non-renderable media type), 0 if it should be rendered.
@@ -257,14 +257,15 @@ Theme of 1 communities and 2 files: tools (2 files, rating 0.1).
 - Key entities: file:tests/test_table_layout.c, file:include/pres_hints.h, file:tests/test_pres_hints.c, file:src/pres_hints.c, file:include/table_layout.h, file:src/table_layout.c, file:fuzz/fuzz_table_layout.c, sym:src/pres_hints.c::PH_PER_MILLE_MAX@8
 - Rating 0.5/10 = 7 x PageRank share 0.07 + 3 x risk 0.00. Internal imports: 6.
 
-## tools (`c13`, community, rating 0.1)
+## tools (`c13`, community, rating 0.2)
 
-2 files under tools (py 2), mostly utility. Core file tools/guitime.py (PageRank 0.0023, imported by 1 files): guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle". Key abstractions: start_display, one_run, main, phase_ms, one_page, main.
+3 files under tools (py 3), mostly utility. Core file tools/guitime.py (PageRank 0.0033, imported by 2 files): guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle". Key abstractions: start_display, one_run, main, phase_ms, one_page, main.
 
-- `tools/guitime.py` ranks 1 by PageRank, 1 importers, 3 symbols: guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle".
+- `tools/guitime.py` ranks 1 by PageRank, 2 importers, 3 symbols: guitime -- how long the REAL Freedom window takes from "navigate" to "painted and idle".
 - `tools/guiscroll.py` ranks 2 by PageRank, 0 importers, 4 symbols: guiscroll -- what one frame costs in the REAL Freedom window while the user scrolls.  guitime measures "navigate -> painted and idle"; this measures the frames AFTER that: the page is loaded in a nested weston (Xvfb + weston, pixman...
+- `tools/guishot.py` ranks 3 by PageRank, 0 importers, 2 symbols: guishot -- a picture of the REAL Freedom window for the README.
+- Hotspot `tools/guitime.py`: 3 symbols, 10 connections (score 0.04).
 - Hotspot `tools/guiscroll.py`: 4 symbols, 9 connections (score 0.03).
-- Hotspot `tools/guitime.py`: 3 symbols, 9 connections (score 0.03).
-- Taint: 3 paths reach this group via subprocess.
-- Key entities: file:tools/guitime.py, file:tools/guiscroll.py, sym:tools/guiscroll.py::one_page@48, sym:tools/guiscroll.py::main@95, sym:tools/guitime.py::main@96, sym:tools/guiscroll.py::phase_ms@38, sym:tools/guitime.py::one_run@67, sym:tools/guitime.py::start_display@34
-- Rating 0.1/10 = 7 x PageRank share 0.02 + 3 x risk 0.00. Internal imports: 1.
+- Taint: 5 paths reach this group via subprocess.
+- Key entities: file:tools/guitime.py, file:tools/guishot.py, file:tools/guiscroll.py, sym:tools/guiscroll.py::one_page@48, sym:tools/guiscroll.py::main@95, sym:tools/guitime.py::main@96, sym:tools/guiscroll.py::phase_ms@38, sym:tools/guishot.py::main@43
+- Rating 0.2/10 = 7 x PageRank share 0.03 + 3 x risk 0.00. Internal imports: 2.

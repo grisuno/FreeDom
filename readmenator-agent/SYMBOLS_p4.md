@@ -3,6 +3,19 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 
 | Symbol | Kind | File:Line | Signature |
 |--------|------|-----------|-----------|
+| `FREEDOM_CSS_IMPORT_H` | macro | `include/css_import.h:2` | `#define FREEDOM_CSS_IMPORT_H` |
+| `ci_balanced` | function | `include/css_import.h:45` | `int ci_balanced(const char *css, size_t len);` |
+| `ci_import` | struct | `include/css_import.h:25` | `` |
+| `ci_scan` | function | `include/css_import.h:36` | `size_t ci_scan(const char *css, size_t len, ci_import *out, size_t cap);` |
+| `ci_wrap` | function | `include/css_import.h:41` | `int ci_wrap(const ci_import *im, char *open, size_t ocap, char *close, size_t ccap);` |
+| `url` | type_alias | `include/css_import.h:24` | `typedef struct ci_import { char url[CI_URL_MAX];` |
+| `url` | function | `include/css_import.h:55` | `* rewritten to url("ABS"), ABS = resolve(base, ref) (spec/css_import.md, "Rebase"). * Fragment-only, schemed, empty...` |
+| `FREEDOM_CSS_INDEX_H` | macro | `include/css_index.h:11` | `#define FREEDOM_CSS_INDEX_H` |
+| `cix_build` | function | `include/css_index.h:34` | `void cix_build(const css_sel *sels, size_t n, cix_index *idx);` |
+| `cix_build_ptrs` | function | `include/css_index.h:37` | `void cix_build_ptrs(css_sel *const *sels, size_t n, cix_index *idx);` |
+| `cix_entry` | struct | `include/css_index.h:18` | `` |
+| `cix_free` | function | `include/css_index.h:40` | `void cix_free(cix_index *idx);` |
+| `cix_index` | struct | `include/css_index.h:23` | `` |
 | `index` | function | `include/css_index.h:44` | `* index (the caller then scans linearly). */ size_t cix_candidates(const cix_index *idx, const css_element *el...` |
 | `key` | type_alias | `include/css_index.h:17` | `typedef struct cix_entry { uint64_t key;` |
 | `CL_FALLBACK_CAP_RATIO` | macro | `include/css_length.h:65` | `#define CL_FALLBACK_CAP_RATIO` |
@@ -483,18 +496,5 @@ Previous: [SYMBOLS_p3.md](SYMBOLS_p3.md)
 | `idn_accept_language` | function | `include/identity.h:63` | `size_t idn_accept_language(const idn_config *c, char *out, size_t cap);` |
 | `idn_apply_query` | function | `include/identity.h:75` | `unsigned idn_apply_query(idn_config *c, const char *query);` |
 | `idn_clear_geo` | function | `include/identity.h:59` | `void idn_clear_geo(idn_config *c);` |
-| `idn_config` | struct | `include/identity.h:37` | `` |
-| `idn_defaults` | function | `include/identity.h:50` | `void idn_defaults(idn_config *c);` |
-| `idn_geo_mode` | enum | `include/identity.h:25` | `` |
-| `idn_is_default` | function | `include/identity.h:53` | `int idn_is_default(const idn_config *c);` |
-| `idn_parse` | function | `include/identity.h:72` | `void idn_parse(idn_config *c, const char *text);` |
-| `idn_primary_language` | function | `include/identity.h:64` | `size_t idn_primary_language(const idn_config *c, char *out, size_t cap);` |
-| `idn_render_page` | function | `include/identity.h:78` | `size_t idn_render_page(const idn_config *c, char *out, size_t cap);` |
-| `idn_serialize` | function | `include/identity.h:68` | `size_t idn_serialize(const idn_config *c, char *out, size_t cap);` |
-| `idn_set_geo` | function | `include/identity.h:58` | `int idn_set_geo(idn_config *c, double lat, double lon, double accuracy_m);` |
-| `idn_set_languages` | function | `include/identity.h:57` | `int idn_set_languages(idn_config *c, const char *list);` |
-| `idn_set_user_agent` | function | `include/identity.h:56` | `int idn_set_user_agent(idn_config *c, const char *ua);` |
-| `idn_user_agent` | function | `include/identity.h:62` | `const char *idn_user_agent(const idn_config *c);` |
-| `user_agent` | type_alias | `include/identity.h:36` | `typedef struct idn_config { char user_agent[IDN_UA_MAX];` |
 
 Next: [SYMBOLS_p5.md](SYMBOLS_p5.md)
