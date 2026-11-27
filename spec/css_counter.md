@@ -42,6 +42,12 @@ size_t cnt_resolve(const cnt_state *, const char *marker, cnt_attr_fn attr, void
 - **Cotas anti-DoS.** `CNT_MAX_INSTANCES` 1024 vivas (las nuevas se ignoran, nunca desborda),
   nombre ≤ 63 bytes, enteros acotados a ±1e9, salida siempre acotada y NUL-terminada.
 
+- **`counter-set` (Lists 3 §4.3, tanda 106).** Orden por elemento: reset → increment → set.
+  Sobrescribe la instancia visible más interna; sin instancia crea una a la profundidad del
+  elemento (desde 0) y luego fija. Así numera MediaWiki (`h2{counter-increment:h2;
+  counter-set:h3 h4 h5 h6}`). `CNT_MAX_DECL` es 8: el `counter-reset` de cinco nombres de
+  MediaWiki superaba el tope de 4 y la declaración entera se descartaba (secciones «0.1»).
+
 ## Fuera de alcance
-`counter-set`, contadores con `list-item` implícito, estilos CJK/árabe-índico, `symbols()`,
+Contadores con `list-item` implícito, estilos CJK/árabe-índico, `symbols()`,
 `@counter-style`.

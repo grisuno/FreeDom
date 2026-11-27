@@ -1964,7 +1964,8 @@ typedef struct pv_after_pending {
     int bdeco, indent;          /* the element's own block box and list indent */
     int heading;                /* the element's heading level: generated text rides its text style */
     int align, font_scale, font_abs, line_scale, text_decoration;
-    int color;                  /* inherited colour of the element, -1 = none declared */
+    int color;                  /* the generated text's colour, -1 = none declared */
+    int bold, italic;           /* the generated text's emphasis (pseudo_text_style) */
     pv_cont_info cont;
     pv_box_info boxinfo;
     pv_text_ext ext;
@@ -1977,10 +1978,8 @@ static pv_status after_pending_emit(pv_view *v, pv_container_reg *reg, pv_item_t
     if (st != PV_OK) return st;
     pv_set_node_id(v, node_id);
     if (ap->color >= 0) pv_set_color(v, ap->color);
-    if (acs != NULL) {
-        if (acs->background >= 0) pv_set_bgcolor(v, acs->background);
-        pv_set_emphasis(v, acs->bold > 0, acs->italic > 0);
-    }
+    if (acs != NULL && acs->background >= 0) pv_set_bgcolor(v, acs->background);
+    pv_set_emphasis(v, ap->bold, ap->italic);
     pv_set_indent(v, ap->indent);
     pv_set_text_style(v, ap->align, ap->font_scale, ap->font_abs, ap->line_scale,
                       ap->text_decoration);
@@ -2362,6 +2361,29 @@ static int pseudo_generates_box(const css_style *ps) {
 
 static int pseudo_is_oof(const css_style *ps) {
     return ps->position == CSS_POS_ABSOLUTE || ps->position == CSS_POS_FIXED;
+}
+
+static int css_inline_boxdeco(const css_style *cs);
+
+/* A plain inline ::before WITH TEXT whose margin/padding/border moves that text (the
+ * `margin-right:1ex` after a MediaWiki section number): an inline box of its own, the
+ * one a `display:inline` element with the same style gets. Without text there is
+ * nothing in the line to carry it, so the textless paths keep pseudo_generates_box. */
+static int pseudo_inline_box(const css_style *ps) {
+    return (ps->display == CSS_DISP_UNSET || ps->display == CSS_DISP_INLINE)
+        && !pseudo_is_oof(ps) && ps->float_side != CSS_FLOAT_LEFT
+        && ps->float_side != CSS_FLOAT_RIGHT && css_inline_boxdeco(ps);
+}
+
+/* The text style of a generated run: the pseudo's own declared colour, weight and
+ * slant over what it inherits from its element (CSS 2.1 12.1: the pseudo-element
+ * inherits from its element like a child would). The run used to take the ELEMENT's
+ * declared values, so a ::before was neither its own colour nor the heading's weight. */
+static void pseudo_text_style(const css_style *ps, int ctx_color, int ctx_bold,
+                              int ctx_italic, int *color, int *bold, int *italic) {
+    *color = ps->color >= 0 ? ps->color : ctx_color;
+    *bold = ps->bold >= 0 ? (ps->bold > 0) : (ctx_bold > 0);
+    *italic = ps->italic >= 0 ? (ps->italic > 0) : (ctx_italic > 0);
 }
 
 static int pseudo_is_block(const css_style *ps) {
@@ -4086,9 +4108,11 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
                      * for width-less and split evenly across the row (slashdot grid_24
                      * stories collapsing into thin columns). A width-less float seeds
                      * nothing and keeps its even-split. */
+                    /* Only the px half: a `%` is the column's width, resolved ONCE by the
+                     * band packer from float_w_pct. Seeded on the runs too, the painter
+                     * resolved it again against the column (25% of a 225px float). */
                     if (box != NULL && !crossed_container && box->w == 0 && box->w_pct == 0) {
                         if (cs->width != CSS_LEN_UNSET && cs->width > 0) box->w = cs->width;
-                        if (cs->pct[CSS_PCT_WIDTH] > 0) box->w_pct = cs->pct[CSS_PCT_WIDTH];
                     }
                 }
             }
@@ -4103,6 +4127,8 @@ static void resolve_context(const lxb_dom_node_t *n, const lxb_dom_node_t *base,
              * instead of ~654). */
             if (!got_hbox && !crossed_container && is_block_like_style(t, cs) && css_has_hbox(cs)) {
                 css_hbox_resolve(cs, box);
+                /* The float founder's own `%` width is its column (float_w_pct), see above. */
+                if (p == float_el && box != NULL) box->w_pct = 0;
                 got_hbox = 1;
             }
             /* Box engine (Hito 23b-8 Step D): EVERY box-carrying block ancestor is
@@ -5980,11 +6006,13 @@ static int pv_cnt_enter(cnt_state *st, lxb_dom_node_t *n, int depth, const css_s
     if (cs->display == CSS_DISP_NONE) return 0;
     cnt_reset(st, depth, cs->cnt_reset, cs->cnt_reset_n);
     cnt_increment(st, depth, cs->cnt_inc, cs->cnt_inc_n);
+    cnt_set(st, depth, cs->cnt_set, cs->cnt_set_n);
     int before = cs->content_before_on, own = cs->content_on;
     if (before) {
         css_style bps = cached_pseudo_style(el, sheet, cache, CSS_PSEUDO_BEFORE);
         cnt_reset(st, depth + 1, bps.cnt_reset, bps.cnt_reset_n);
         cnt_increment(st, depth + 1, bps.cnt_inc, bps.cnt_inc_n);
+        cnt_set(st, depth + 1, bps.cnt_set, bps.cnt_set_n);
     }
     if (before || own) {
         /* Re-read the entry: asking for the pseudo style may have grown (and retired)
@@ -6005,6 +6033,7 @@ static void pv_cnt_exit(cnt_state *st, lxb_dom_node_t *n, int depth, const css_s
     css_style aps = cached_pseudo_style(el, sheet, cache, CSS_PSEUDO_AFTER);
     cnt_reset(st, depth + 1, aps.cnt_reset, aps.cnt_reset_n);
     cnt_increment(st, depth + 1, aps.cnt_inc, aps.cnt_inc_n);
+    cnt_set(st, depth + 1, aps.cnt_set, aps.cnt_set_n);
     css_style *w = (css_style *)cached_element_style_ref(el, sheet, cache);
     pv_cnt_resolve_field(st, el, w->content_after_str);
 }
@@ -7217,9 +7246,14 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                     pv_set_color(v, efg);
                     pv_set_bgcolor(v, ebg);
                     if (leaf_text[0] != '\0') {
-                        if (ecs->color >= 0) pv_set_color(v, ecs->color);
+                        int lc = ecs->color >= 0 ? ecs->color : efg;
+                        int lb = ecs->bold >= 0 ? (ecs->bold > 0) : ebold;
+                        int li = ecs->italic >= 0 ? (ecs->italic > 0) : eitalic;
+                        if (ecs->content_before_on)
+                            pseudo_text_style(&bps, lc, lb, li, &lc, &lb, &li);
+                        if (lc >= 0) pv_set_color(v, lc);
                         if (ecs->background >= 0) pv_set_bgcolor(v, ecs->background);
-                        pv_set_emphasis(v, ecs->bold > 0, ecs->italic > 0);
+                        pv_set_emphasis(v, lb, li);
                     }
                     pv_set_text_style(v, ealign, efs, efs_abs, elh, edeco);
                     pv_set_container(v, econt.id, econt.display, econt.gap, econt.justify,
@@ -7396,6 +7430,28 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                         else if (pseudo_generates_box(&pps))
                             verdict = pseudo_box_reg(&box_reg, n->parent, which, &pps, bdeco,
                                                      pv_cached_font_px(&cache, n->parent));
+                        else if (which == CSS_PSEUDO_BEFORE && pcs->content_str[0] != '\0'
+                                 && pseudo_inline_box(&pps)) {
+                            verdict = pseudo_box_reg(&box_reg, n->parent, which, &pps, bdeco,
+                                                     pv_cached_font_px(&cache, n->parent));
+                            if (verdict >= 0) {
+                                /* The generated text rides the run, as any inline box's
+                                 * text does; left on the def too, the painter drew it a
+                                 * second time inside the box. */
+                                pv_box_def *gd = &box_reg.def[verdict];
+                                gd->display = CSS_DISP_INLINE_BOX;
+                                gd->content_str[0] = '\0';
+                                gd->content_before_str[0] = '\0';
+                                gd->content_after_str[0] = '\0';
+                                /* Same for the element's own box, if it has one. */
+                                for (size_t bi = 0; bi < box_reg.count; ++bi)
+                                    if (box_reg.node[bi] == n->parent) {
+                                        box_reg.def[bi].content_str[0] = '\0';
+                                        box_reg.def[bi].content_before_str[0] = '\0';
+                                        break;
+                                    }
+                            }
+                        }
                         else verdict = -1;
                         pv_ptrmap_put(&pseudo_memo, pk, verdict);
                     }
@@ -7415,8 +7471,13 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                     if (pst != PV_OK) { free(collapsed); rc = pst; goto cleanup; }
                     pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
                     pv_set_oof(v, poof || subtree_is_oof(n->parent, sheet, &cache));
-                    pv_set_color(v, (pps.color >= 0) ? pps.color : pcs->color);
-                    pv_set_emphasis(v, pcs->bold > 0, pcs->italic > 0);
+                    {
+                        int gc, gb, gi;
+                        pseudo_text_style(&pps, pv_inherited_color(n->parent, sheet, &cache),
+                                          bold, italic, &gc, &gb, &gi);
+                        pv_set_color(v, gc);
+                        pv_set_emphasis(v, gb, gi);
+                    }
                     pv_set_indent(v, list_depth);
                     pv_set_text_style(v, align, font_scale, font_abs, line_scale,
                                       text_decoration);
@@ -7472,9 +7533,16 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                     if (st != PV_OK) { free(collapsed); rc = st; goto cleanup; }
                     pv_set_node_id(v, pv_node_map_id(&node_map, n->parent));
                     pv_set_oof(v, before_oof);
-                    pv_set_color(v, pv_inherited_color(n->parent, sheet, &cache));
+                    {
+                        css_style gps = cached_pseudo_style(pel, sheet, &cache,
+                                                            CSS_PSEUDO_BEFORE);
+                        int gc, gb, gi;
+                        pseudo_text_style(&gps, pv_inherited_color(n->parent, sheet, &cache),
+                                          bold, italic, &gc, &gb, &gi);
+                        pv_set_color(v, gc);
+                        pv_set_emphasis(v, gb, gi);
+                    }
                     pv_set_bgcolor(v, pcs->background);
-                    pv_set_emphasis(v, pcs->bold > 0, pcs->italic > 0);
                     pv_set_indent(v, list_depth);
                     pv_set_text_style(v, align, font_scale, font_abs, line_scale,
                                       text_decoration);
@@ -7501,7 +7569,13 @@ pv_status pv_build_live(const hp_document *doc, int js_enabled, int reader,
                     after_p.font_abs = font_abs;
                     after_p.line_scale = line_scale;
                     after_p.text_decoration = text_decoration;
-                    after_p.color = pv_inherited_color(n->parent, sheet, &cache);
+                    {
+                        css_style gps = cached_pseudo_style(pel, sheet, &cache,
+                                                            CSS_PSEUDO_AFTER);
+                        pseudo_text_style(&gps, pv_inherited_color(n->parent, sheet, &cache),
+                                          bold, italic, &after_p.color, &after_p.bold,
+                                          &after_p.italic);
+                    }
                     after_p.cont = cont;
                     after_p.boxinfo = box;
                     after_p.ext = ext;

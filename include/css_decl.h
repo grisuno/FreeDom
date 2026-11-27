@@ -238,6 +238,8 @@ enum { P_COLOR = 0, P_BG, P_ALIGN, P_FONTSIZE, P_FONTABS, P_LINEHEIGHT, P_WEIGHT
         P_CONTAINER_TYPE, P_CONTAINER_NAME0, P_CONTAINER_NAME1,
         /* scroll-margin-top/bottom, scroll-padding-top/bottom: px (spec/scroll_req.md), APPENDED. */
         P_SCROLL_MT, P_SCROLL_MB, P_SCROLL_PT, P_SCROLL_PB,
+        /* counter-set (CSS Lists 3 section 4.3): same storage as P_CNT_RESET (APPENDED). */
+        P_CNT_SET,
         P_NSLOTS };
 
 typedef struct css_decl {

@@ -14,7 +14,7 @@
 #error "css_counter requires C11"
 #endif
 
-#define CNT_MAX_DECL       4
+#define CNT_MAX_DECL       8
 #define CNT_MAX_INSTANCES  1024
 #define CNT_NAME_MAX       64
 
@@ -52,9 +52,12 @@ typedef struct cnt_state cnt_state;
 cnt_state *cnt_state_new(void);
 void       cnt_state_free(cnt_state *s);
 
-/* An element at tree depth `depth` runs these in order: reset, then increment. */
+/* An element at tree depth `depth` runs these in order: reset, increment, then set
+ * (CSS Lists 3 section 4.3). counter-set overwrites the innermost visible instance and,
+ * when there is none, creates one at `depth` (starting at 0, then set). */
 void cnt_reset(cnt_state *s, int depth, const cnt_decl *d, int n);
 void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n);
+void cnt_set(cnt_state *s, int depth, const cnt_decl *d, int n);
 /* The children of an element have all been walked: drop what they created
  * (instances created at depth >= `depth`, i.e. the children's depth). */
 void cnt_leave(cnt_state *s, int depth);

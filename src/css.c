@@ -19,6 +19,7 @@
 _Static_assert(FX_GL_SPAN_MAX == CSS_GRID_SPAN_MAX, "grid span caps must agree");
 #include "css_select.h"
 #include "css_index.h"
+#include "css_nest.h"
 
 #include <limits.h>
 #include <math.h>
@@ -2085,18 +2086,19 @@ static int expand_content_attr(const char *val, css_decl *dst, int cap,
     return 1;
 }
 
-/* counter-reset / counter-increment: validated here (hostile text), stored VERBATIM in the
+/* counter-reset / counter-increment / counter-set: validated here (hostile text), stored VERBATIM in the
  * content pool and re-parsed when the declaration is applied. `none` claims the slot with
  * -1. An invalid list drops the whole declaration (fail closed). */
 static int expand_counter_decls(const char *prop, const char *val, css_decl *dst, int cap,
                                 char (*contenttab)[CSS_URL_MAX], size_t *ncontent,
                                 size_t contentcap) {
     if (cap < 1) return 0;
-    int inc = (prop[8] == 'i');   /* counter-increment, not counter-reset */
+    int inc = (prop[8] == 'i');   /* counter-increment */
+    int set = (prop[8] == 's');   /* counter-set */
     cnt_decl tmp[CNT_MAX_DECL];
     int n = cnt_parse_decls(val, inc ? 1 : 0, tmp);
     if (n < 0) return 0;
-    dst[0].prop = inc ? P_CNT_INC : P_CNT_RESET;
+    dst[0].prop = inc ? P_CNT_INC : set ? P_CNT_SET : P_CNT_RESET;
     if (n == 0 || *ncontent >= contentcap || strlen(val) >= CSS_URL_MAX) { dst[0].ival = -1; return 1; }
     memcpy(contenttab[*ncontent], val, strlen(val) + 1);
     dst[0].ival = (int)*ncontent;
@@ -4703,7 +4705,8 @@ static int interpret_prop_dispatch(const char *prop, const char *val, css_decl *
         dst[0].prop = P_INERT;
         return 1;
     }
-    else if (strcmp(prop, "counter-reset") == 0 || strcmp(prop, "counter-increment") == 0)
+    else if (strcmp(prop, "counter-reset") == 0 || strcmp(prop, "counter-increment") == 0 ||
+             strcmp(prop, "counter-set") == 0)
         return expand_counter_decls(prop, val, dst, cap, contenttab, ncontent, contentcap);
     else if (strcmp(prop, "content") == 0)                return expand_content(val, dst, cap, contenttab, ncontent, contentcap);
     else if (strcmp(prop, "grid-template-areas") == 0)
@@ -6129,6 +6132,19 @@ css_status css_parse_logged(const char *text, size_t len, const css_media *media
         size_t clen = 0;
         char *clean = strip_comments(text, len, &clen);
         if (clean == NULL) { css_free(sh); return CSS_ERR_OOM; }
+        /* CSS Nesting (spec/css_nest.md): desugared to flat rules in the text, so the
+         * parser, the cascade and the @media gate see ordinary rules. A sheet with no
+         * nested block keeps its text byte-identical. A flatten failure keeps the flat
+         * text: the parser then drops the nested blocks as before. */
+        if (cn_has_nesting(clean, clen)) {
+            char *flat = NULL;
+            size_t flen = 0;
+            if (cn_flatten(clean, clen, &flat, &flen) == CN_OK) {
+                free(clean);
+                clean = flat;
+                clen = flen;
+            }
+        }
         /* Viewport WIDTH units resolve against the render width @media already sees
          * (owner decision 2026-10-15): a computed length then leaks nothing a width
          * query did not. Rewritten once in the text, like rem below, so every
@@ -6528,10 +6544,11 @@ static void apply_decl(css_style *o, int *wi, int *ws, int *wo, int *wem, int *w
             case P_OBJECT_FIT:          o->object_fit = d->ival; break;
             case P_OBJECT_POS:          o->object_pos = d->ival; break;
             case P_CNT_RESET:
+            case P_CNT_SET:
             case P_CNT_INC: {
                 int is_inc = (d->prop == P_CNT_INC);
-                cnt_decl *dstc = is_inc ? o->cnt_inc : o->cnt_reset;
-                int *dn = is_inc ? &o->cnt_inc_n : &o->cnt_reset_n;
+                cnt_decl *dstc = is_inc ? o->cnt_inc : d->prop == P_CNT_SET ? o->cnt_set : o->cnt_reset;
+                int *dn = is_inc ? &o->cnt_inc_n : d->prop == P_CNT_SET ? &o->cnt_set_n : &o->cnt_reset_n;
                 int pn = 0;
                 if (d->ival >= 0 && contenttab != NULL)
                     pn = cnt_parse_decls(contenttab[d->ival], is_inc ? 1 : 0, dstc);
@@ -7295,6 +7312,7 @@ int css_sheet_uses_containers(const css_sheet *sheet) {
 int css_sheet_uses_counters(const css_sheet *sheet) {
     if (sheet == NULL) return 0;
     for (size_t i = 0; i < sheet->ndecls; ++i)
-        if (sheet->decls[i].prop == P_CNT_RESET || sheet->decls[i].prop == P_CNT_INC) return 1;
+        if (sheet->decls[i].prop == P_CNT_RESET || sheet->decls[i].prop == P_CNT_INC ||
+            sheet->decls[i].prop == P_CNT_SET) return 1;
     return 0;
 }

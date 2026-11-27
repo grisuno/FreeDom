@@ -49,6 +49,22 @@ static void test_alpha(void **state)
     assert_int_equal(cv_bg_alpha_of("url(#a0b1) #0000"), 0);
 }
 
+/* light-dark(<light>, <dark>) (CSS Color 5 section 6): the used colour is the light one,
+ * the scheme this engine renders (prefers-color-scheme is light; MediaWiki writes every
+ * accent this way, so ArchWiki's section numbers came out black). Nested functions and
+ * the alpha of the chosen branch carry over; a malformed call fails closed. */
+static void test_light_dark_takes_the_light_branch(void **state)
+{
+    (void)state;
+    assert_int_equal(cv_parse_color("light-dark(#6b3e26,#a07501)"), 0x6b3e26);
+    assert_int_equal(cv_parse_color("LIGHT-DARK( rgb(1, 2, 3) , #fff )"), 0x010203);
+    assert_int_equal(cv_parse_color("light-dark(color-mix(in srgb, red, blue), black)"), 0x800080);
+    assert_int_equal(cv_bg_alpha_of("light-dark(rgba(0,0,0,.5), white)"), 50);
+    assert_int_equal(cv_parse_color("light-dark(red)"), -1);
+    assert_int_equal(cv_parse_color("light-dark(red, blue"), -1);
+    assert_int_equal(cv_parse_color("light-dark(junk, blue)"), -1);
+}
+
 /* Every CSS Color 4/5 function carries its alpha after a slash, and color-mix() mixes the
  * alphas: Tailwind v4 writes `bg-white/10` as color-mix(in oklab, white 10%, transparent). */
 static void test_alpha_modern_functions(void **state)
@@ -119,6 +135,7 @@ int main(void)
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_parse_named),
         cmocka_unit_test(test_alpha_modern_functions),
+        cmocka_unit_test(test_light_dark_takes_the_light_branch),
         cmocka_unit_test(test_sentinels_ok),
         cmocka_unit_test(test_junk_fails_closed),
         cmocka_unit_test(test_alpha),

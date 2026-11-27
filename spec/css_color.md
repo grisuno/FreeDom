@@ -90,6 +90,9 @@ cc_rgb    cc_unpack(int packed);        /* inverso de cc_pack; bits altos ignora
 ## 5. Fuera de alcance
 
 - `hwb()`, `lab()`, `color()`, `color-mix()`, `currentColor`, `var()`, palabras `inherit`/`initial`.
+- `light-dark(<claro>, <oscuro>)` (Color 5 §6, tanda 106): lo resuelve `css_values` (dueño de las
+  funciones de color compuestas, junto a `color-mix()`) al argumento CLARO, el esquema que pinta
+  el motor; alfa incluido. Exactamente dos argumentos de primer nivel o falla cerrado.
 - La palabra `none` como componente (CSS Color 4 la permite; aquí falla cerrado a tema).
 - Composición de alfa: Freedom pinta opaco; el alfa se valida pero no se aplica.
 - La extracción del token desde el documento (qué declaración `color:` aplica): la hace `page_view`.

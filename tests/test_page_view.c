@@ -1013,7 +1013,7 @@ static void test_build_svg_no_ancestor_width_unset(void **state) {
 /* A floated element's width must define its float column even when the text it wraps
  * sits under width-less inner wrappers (a padding-only <div>/<header>). The nearest-hbox
  * resolution stops at the inner wrapper (no width), so the float element's own width is
- * captured at the float boundary and rides every descendant run. Regression: each
+ * captured at the float boundary and rides every descendant run as float_w. Regression: each
  * slashdot `.grid_24` story (width:99.8% on the <article>, body nested under wrappers)
  * was treated as width-less, so the float band split the row evenly and N full-width
  * stories collapsed into N thin side-by-side columns. */
@@ -1028,7 +1028,11 @@ static void test_build_float_width_from_float_element(void **state) {
     const pv_run *p = find_text(v, "Body text of the story.");
     assert_non_null(p);
     assert_true(p->float_id >= 0);       /* inside the float */
-    assert_int_equal(p->box_w_pct, 998); /* carries the float element's 99.8% width */
+    /* the float element's 99.8% rides every descendant run as the COLUMN width
+     * (float_w_pct, resolved once by the band packer), never as the runs' own box
+     * width, which the painter would resolve a second time against the column */
+    assert_int_equal(p->float_w_pct, 998);
+    assert_int_equal(p->box_w_pct, 0);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -4307,6 +4311,98 @@ static void test_counters_number_sections_in_document_order(void **state) {
     hp_document_free(doc);
 }
 
+/* Given MediaWiki's numbered headings (ArchWiki): five names reset on body, each level
+ * incremented under .mw-heading and the deeper levels zeroed with counter-set, then the
+ * sections read 1, 1.1, 1.2, 2, 2.1 like Firefox (was 1, 0.1, 0.1: the five-name reset
+ * was dropped and the increments lived inside each heading's wrapper). */
+static void test_counters_mediawiki_counter_set_sections(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='mw-heading'><h2>P</h2></div>"
+        "<div class='mw-heading'><h3>S</h3></div><div class='mw-heading'><h3>M</h3></div>"
+        "<div class='mw-heading'><h2>Q</h2></div><div class='mw-heading'><h3>T</h3></div></body>");
+    static const char CSS[] =
+        "body{counter-reset:h2-section h3-section h4-section h5-section h6-section}"
+        ".mw-heading > h2{counter-increment:h2-section;counter-set:h3-section h4-section h5-section h6-section}"
+        ".mw-heading > h3{counter-increment:h3-section;counter-set:h4-section h5-section h6-section}"
+        ".mw-heading > h2::before{content:counter(h2-section) \"|\"}"
+        ".mw-heading > h3::before{content:counter(h2-section) \".\" counter(h3-section) \"|\"}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    assert_non_null(run_with_text(v, "1|"));
+    assert_non_null(run_with_text(v, "1.1|"));
+    assert_non_null(run_with_text(v, "1.2|"));
+    assert_non_null(run_with_text(v, "2|"));
+    assert_non_null(run_with_text(v, "2.1|"));
+    assert_null(run_with_text(v, "0.1|"));
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Given a heading ::before with its own colour, italic and margin-right (MediaWiki's
+ * section numbers), when the view is built, then the generated run carries the pseudo's
+ * colour and italic, inherits the heading's level like the text it marks, and sits in an
+ * inline box of its own that carries the margin (CSS 2.1 12.1: the pseudo is a box whose
+ * style cascades like an element's). Before, the run took the PARENT's declared style and
+ * the margin was lost: "1Principles" with no gap, upright and black. */
+static void test_before_takes_its_own_style_and_inline_box(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><h2>Principles</h2><p>x</p></body>");
+    static const char CSS[] = "h2{width:600px}"
+        "h2::before{content:\"1\";color:#ff0000;font-style:italic;margin-right:10px}"
+        "p::before{content:\"q\";font-weight:bold}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *g = run_with_text(v, "1");
+    const pv_run *t = run_with_text(v, "Principles");
+    assert_non_null(g);
+    assert_non_null(t);
+    assert_int_equal(g->italic, 1);
+    assert_int_equal(g->fg_rgb, 0xff0000);
+    assert_int_equal(g->heading, t->heading);
+    assert_true(g->block_id >= 0);
+    const pv_box_def *b = pv_box_at(v, (size_t)g->block_id);
+    assert_non_null(b);
+    assert_int_equal(b->display, CSS_DISP_INLINE_BOX);
+    assert_int_equal(b->box_r, 10);
+    assert_string_equal(b->content_str, "");
+    assert_string_equal(b->content_before_str, "");
+    assert_int_not_equal(t->block_id, g->block_id);
+    /* the element's own box (h2{width}) must not paint the generated text again */
+    const pv_box_def *eb = pv_box_at(v, (size_t)t->block_id);
+    assert_non_null(eb);
+    assert_string_equal(eb->content_str, "");
+    assert_string_equal(eb->content_before_str, "");
+    const pv_run *q = run_with_text(v, "q");
+    assert_non_null(q);
+    assert_int_equal(q->bold, 1);
+    assert_int_equal(q->italic, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
+/* Given a float with `width:25%` (ArchWiki's "Related articles"), when the view is built,
+ * then the founder's percentage travels as the float's width (float_w_pct, resolved ONCE by
+ * the band packer against the band) and NOT as the box width of every run inside it: there
+ * the painter resolved it again against the 225px column and the list wrapped at 56px. */
+static void test_float_pct_width_resolves_once(void **state) {
+    (void)state;
+    hp_document *doc = parse("<body><div class='r'><p>Related</p><ul><li>Arch compared</li>"
+                             "</ul></div><p>Body text</p></body>");
+    static const char CSS[] = ".r{float:right;width:25%}";
+    pv_view *v = NULL;
+    assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
+    const pv_run *h = run_with_text(v, "Related");
+    const pv_run *li = find_sub(v, "Arch compared");
+    assert_non_null(h);
+    assert_non_null(li);
+    assert_true(h->float_w_pct > 0);
+    assert_int_equal(li->float_w_pct, h->float_w_pct);
+    assert_int_equal(h->box_w_pct, 0);
+    assert_int_equal(li->box_w_pct, 0);
+    pv_free(v);
+    hp_document_free(doc);
+}
+
 /* Given nested lists with counters(item, "."), then the inner items read 2.1, 2.2 and the
  * outer scope resumes at 3 afterwards (the nested reset ends with its parent). */
 static void test_counters_nested_scope_joins_and_unwinds(void **state) {
@@ -4498,17 +4594,28 @@ static void test_pseudo_display_none_generates_nothing(void **state) {
     hp_document_free(doc);
 }
 
-/* An INLINE generated box (no display) is part of its line: it registers no box,
- * or the painter would break the line at each one -- Wikipedia's `[`/`]` round
- * every reference marker multiplied its line count. Its text still flows. */
+/* An INLINE generated box (no display) is part of its line. With only a background it
+ * registers no box (Wikipedia's `[`/`]` round every reference keep the per-fragment fill);
+ * with a margin or padding it gets the INLINE box a `display:inline` element with that
+ * style gets, which flows in the line: the run after it takes no block break. */
 static void test_inline_pseudo_registers_no_box(void **state) {
     (void)state;
-    hp_document *doc = parse("<body><p>See <a class='r'>1</a> here</p></body>");
-    static const char CSS[] = ".r::before{content:\"[\";background:#abcdef;margin-left:2px}";
+    hp_document *doc = parse("<body><p>See <a class='r'>1</a> and <a class='m'>2</a> here</p></body>");
+    static const char CSS[] = ".r::before{content:\"[\";background:#abcdef}"
+        ".m::before{content:\"{\";background:#fedcba;margin-left:2px}";
     pv_view *v = NULL;
     assert_int_equal(pv_build_styled(doc, 0, 0, 0, CSS, sizeof CSS - 1, 0, &v), PV_OK);
     assert_null(box_of_run_with_bg(v, 0xabcdef));
     assert_non_null(find_sub(v, "["));
+    const pv_run *g = run_with_text(v, "{");
+    assert_non_null(g);
+    assert_int_equal(g->block_break, 0);
+    const pv_box_def *b = pv_box_at(v, (size_t)g->block_id);
+    assert_non_null(b);
+    assert_int_equal(b->display, CSS_DISP_INLINE_BOX);
+    const pv_run *t = run_with_text(v, "2");
+    assert_non_null(t);
+    assert_int_equal(t->block_break, 0);
     pv_free(v);
     hp_document_free(doc);
 }
@@ -6145,6 +6252,9 @@ int main(void) {
         cmocka_unit_test(test_pct_padding_generates_box),
         cmocka_unit_test(test_before_box_on_empty_element),
         cmocka_unit_test(test_counters_number_sections_in_document_order),
+        cmocka_unit_test(test_counters_mediawiki_counter_set_sections),
+        cmocka_unit_test(test_float_pct_width_resolves_once),
+        cmocka_unit_test(test_before_takes_its_own_style_and_inline_box),
         cmocka_unit_test(test_counters_nested_scope_joins_and_unwinds),
         cmocka_unit_test(test_before_in_heading_shares_the_line),
         cmocka_unit_test(test_checked_boolean_attribute_is_detected),

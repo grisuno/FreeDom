@@ -15,6 +15,43 @@ static int cv_parse_num(const char *s, double *out, const char **endp)
 
 static int mix_color(const char *v, int depth);
 
+#define CV_LD_MAX 256
+
+/* light-dark(<light>, <dark>) (CSS Color 5 section 6) at v: copies the LIGHT argument,
+ * trimmed, into buf. This engine renders the light scheme (prefers-color-scheme is light),
+ * so that branch is the used colour. *end gets the byte after the closing parenthesis.
+ * 0 = not exactly two top-level arguments, unbalanced, or too long (fail closed). */
+static int light_dark_arg(const char *v, char *buf, size_t cap, const char **end)
+{
+    const char *open = strchr(v, '(');
+    if (open == NULL) return 0;
+    const char *comma = NULL, *q = open + 1;
+    int d = 1, commas = 0;
+    for (; *q != '\0' && d > 0; ++q) {
+        if (*q == '(') ++d;
+        else if (*q == ')') --d;
+        else if (*q == ',' && d == 1) { if (++commas == 1) comma = q; }
+    }
+    if (d != 0 || commas != 1) return 0;
+    const char *a = open + 1, *b = comma;
+    while (a < b && (*a == ' ' || *a == '\t')) ++a;
+    while (b > a && (b[-1] == ' ' || b[-1] == '\t')) --b;
+    size_t n = (size_t)(b - a);
+    if (n == 0 || n >= cap) return 0;
+    memcpy(buf, a, n);
+    buf[n] = '\0';
+    if (end != NULL) *end = q;
+    return 1;
+}
+
+static int is_light_dark(const char *v)
+{
+    static const char name[] = "light-dark(";
+    for (size_t k = 0; k + 1 < sizeof name; ++k)
+        if (csel_lower_ch(v[k]) != name[k]) return 0;
+    return 1;
+}
+
 static int parse_color_depth(const char *v, int depth)
 {
     cc_rgb c;
@@ -25,6 +62,14 @@ static int parse_color_depth(const char *v, int depth)
     while (*v == ' ' || *v == '\t') ++v;
     if (strncmp(v, "color-mix(", 10) == 0 || strncmp(v, "COLOR-MIX(", 10) == 0) {
         return mix_color(v, depth);
+    }
+    if (is_light_dark(v)) {
+        char arg[CV_LD_MAX];
+        const char *end = NULL;
+        if (depth > 8 || !light_dark_arg(v, arg, sizeof arg, &end)) return -1;
+        while (*end == ' ' || *end == '\t') ++end;
+        if (*end != '\0') return -1;
+        return parse_color_depth(arg, depth + 1);
     }
     st = cc_parse(v, &c);
     if (st == CC_OK) {
@@ -210,6 +255,11 @@ static int alpha_of_depth(const char *v, int depth)
     for (p = v; *p != '\0'; ++p) {
         if (fn_at(v, p, "color-mix")) {
             return mix_alpha(p, depth);
+        }
+        if (fn_at(v, p, "light-dark")) {
+            char arg[CV_LD_MAX];
+            if (!light_dark_arg(p, arg, sizeof arg, NULL)) return CSS_LEN_UNSET;
+            return alpha_of_depth(arg, depth + 1);
         }
         /* #RGBA / #RRGGBBAA (CSS Color 4 section 5.2): a hex token standing on
          * its own (start or after a space/comma -- never `url(#id)`). */

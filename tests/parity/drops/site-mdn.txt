@@ -1,0 +1,7 @@
+display CSS property - CSS | MDN
+CSS drops: 4 declaration(s) dropped, 4 distinct
+  count  cause         property                     first value
+      1  unknown-prop  font-feature-settings        "calt" 0
+      1  unknown-prop  font-variant-alternates      styleset(disambiguation)
+      1  unknown-prop  break-inside                 avoid
+      1  unknown-prop  page-break-inside            avoid

@@ -404,6 +404,20 @@ void cnt_increment(cnt_state *s, int depth, const cnt_decl *d, int n) {
     }
 }
 
+void cnt_set(cnt_state *s, int depth, const cnt_decl *d, int n) {
+    if (s == NULL || d == NULL) return;
+    for (int i = 0; i < n; ++i) {
+        cnt_inst *t = top_of(s, d[i].name);
+        if (t == NULL) {
+            if (s->n >= CNT_MAX_INSTANCES) continue;
+            t = &s->a[s->n++];
+            t->name = d[i].name;
+            t->depth = depth;
+        }
+        t->value = clampv((long)d[i].value);
+    }
+}
+
 void cnt_leave(cnt_state *s, int depth) {
     if (s == NULL) return;
     while (s->n > 0 && s->a[s->n - 1].depth >= depth) --s->n;

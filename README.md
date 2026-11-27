@@ -30,7 +30,7 @@ telemetry, mandatory API keys or hidden solver workers.
   private, loopback or link-local address, judged on the resolved IP before a socket is
   opened, so DNS rebinding does not get around it. You can still browse to your own router.
 - **Own rendering engine.** It has a CSS cascade with a rule index, plus flex, grid,
-  floats, margin collapsing, multicol, `@layer`/`@supports`/media queries, `@import`
+  floats, margin collapsing, multicol, CSS Nesting, counters, `@layer`/`@supports`/media queries, `@import`
   (fetched like any `<link>`, through the same gated parent), custom
   properties, inline SVG, HarfBuzz shaping with local fonts, and image decoding inside the
   sandbox.

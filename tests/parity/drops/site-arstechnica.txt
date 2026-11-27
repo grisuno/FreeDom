@@ -1,0 +1,5 @@
+Ars Technica - Serving the Technologist since 1998. News, reviews, and analysis.
+CSS drops: 7 declaration(s) dropped, 2 distinct
+  count  cause         property                     first value
+      4  unknown-prop  font-variation-settings      normal
+      3  unknown-prop  font-feature-settings        normal

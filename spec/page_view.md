@@ -1713,3 +1713,18 @@ multiplica sobre esa base: `<h1><code>` = 2 × 12.
   tamaño UA del encabezado.
 
 Fuera de alcance: los `em` de caja (padding de `code`) siguen midiendo contra la base de 16 px.
+
+
+## Estilo propio del texto generado (tanda 106)
+- El run de un `::before`/`::after` toma el color, peso e itálica DECLARADOS en el pseudo y, si no,
+  los HEREDADOS del contexto de su elemento (`pseudo_text_style`). Antes tomaba lo declarado en el
+  elemento: el número de sección de MediaWiki salía negro y recto, y sin la negrita del `h2`.
+- Un `::before` inline con texto y margen/padding/borde (`css_inline_boxdeco`) recibe la caja
+  `CSS_DISP_INLINE_BOX` que recibiría un `<span>` con ese estilo (`pseudo_inline_box`). El texto
+  viaja en el run; se borra de la def de la caja generada Y de la caja propia del elemento, o el
+  pintor lo dibujaba dos veces. Un pseudo con solo fondo sigue sin caja (`[`/`]` de Wikipedia).
+- Un `display:inline` que ABRE la línea de un encabezado (`atom_first`) se abre como en un párrafo:
+  antes la caja del primer hijo inline de un `<h2>` se perdía entera.
+- El `width:%` de un flotante viaja como `float_w_pct` (ancho de la COLUMNA, resuelto una vez por
+  la banda), nunca como `box_w_pct` de los runs de adentro: allí el pintor lo resolvía otra vez
+  contra la columna (25 % de 225 px: la lista de «Related articles» envolvía a 56 px).

@@ -879,8 +879,8 @@ typedef struct css_style {
     int         object_pos;       /* CSS_OBJPOS_PACK, 0 (unset) = centred */
     /* counter-reset / counter-increment (spec/css_counter.md). Not inherited; the
      * values are applied by page_view in document order, never by the cascade. */
-    cnt_decl    cnt_reset[CNT_MAX_DECL], cnt_inc[CNT_MAX_DECL];
-    int         cnt_reset_n, cnt_inc_n;
+    cnt_decl    cnt_reset[CNT_MAX_DECL], cnt_inc[CNT_MAX_DECL], cnt_set[CNT_MAX_DECL];
+    int         cnt_reset_n, cnt_inc_n, cnt_set_n;
     int         list_style_pos;   /* css_list_pos, 0 (unset) */
     int         font_kerning;     /* css_font_kerning, 0 (unset) */
     int         text_rendering;   /* css_text_rendering, 0 (unset) */

@@ -27,11 +27,58 @@ static void test_parse_decls_fails_closed(void **state) {
     cnt_decl d[CNT_MAX_DECL];
     assert_int_equal(cnt_parse_decls("", 0, d), -1);
     assert_int_equal(cnt_parse_decls("1abc", 0, d), -1);
-    assert_int_equal(cnt_parse_decls("a b c d e", 0, d), -1);
+    assert_int_equal(cnt_parse_decls("a b c d e f g h i", 0, d), -1);
     assert_int_equal(cnt_parse_decls("a 99999999999", 0, d), -1);
     assert_int_equal(cnt_parse_decls("inherit 2", 0, d), -1);
     assert_int_equal(cnt_parse_decls("a;b", 0, d), -1);
     assert_int_equal(cnt_parse_decls("a 1.5", 0, d), -1);
+}
+
+/* Given MediaWiki's body{counter-reset:h2-section ... h6-section} (five names), when it
+ * is parsed, then all five are kept: a real stylesheet with more names than the old cap
+ * dropped the whole declaration and every section number restarted. */
+static void test_parse_decls_mediawiki_five_names(void **state) {
+    (void)state;
+    cnt_decl d[16];
+    assert_int_equal(cnt_parse_decls("h2-section h3-section h4-section h5-section h6-section", 0, d), 5);
+    assert_int_equal((int)d[4].name, (int)h("h6-section"));
+}
+
+/* Given counter-set (CSS Lists 3 section 4.3), when it runs after reset and increment,
+ * then it overwrites the innermost visible instance; with no instance it creates one at
+ * the element's depth, starting at 0 before setting. */
+static void test_counter_set_overwrites_or_instantiates(void **state) {
+    (void)state;
+    char m[64], out[32];
+    assert_int_equal(cnt_parse_content("counter(a) \".\" counter(b)", m, sizeof m), 1);
+    cnt_state *s = cnt_state_new();
+    cnt_decl ra = { h("a"), 0 }, rb = { h("b"), 0 }, ia = { h("a"), 1 }, ib = { h("b"), 1 };
+    cnt_decl sb = { h("b"), 0 };
+    cnt_reset(s, 1, &ra, 1);
+    cnt_reset(s, 1, &rb, 1);                       /* body{counter-reset:a b} */
+    cnt_increment(s, 3, &ia, 1);                   /* h2{counter-increment:a; counter-set:b} */
+    cnt_set(s, 3, &sb, 1);
+    cnt_increment(s, 3, &ib, 1);                   /* h3 */
+    cnt_increment(s, 3, &ib, 1);                   /* h3 */
+    cnt_resolve(s, m, NULL, NULL, out, sizeof out);
+    assert_string_equal(out, "1.2");
+    cnt_increment(s, 3, &ia, 1);                   /* next h2 resets b through counter-set */
+    cnt_set(s, 3, &sb, 1);
+    cnt_increment(s, 3, &ib, 1);
+    cnt_resolve(s, m, NULL, NULL, out, sizeof out);
+    assert_string_equal(out, "2.1");
+    cnt_leave(s, 2);                               /* the body-level instances survive */
+    cnt_resolve(s, m, NULL, NULL, out, sizeof out);
+    assert_string_equal(out, "2.1");
+    cnt_decl sz = { h("z"), 7 };
+    cnt_set(s, 4, &sz, 1);                         /* no instance: created, then set */
+    assert_int_equal(cnt_parse_content("counter(z)", m, sizeof m), 1);
+    cnt_resolve(s, m, NULL, NULL, out, sizeof out);
+    assert_string_equal(out, "7");
+    cnt_leave(s, 4);
+    cnt_resolve(s, m, NULL, NULL, out, sizeof out);
+    assert_string_equal(out, "0");
+    cnt_state_free(s);
 }
 
 static void test_format_styles(void **state) {
@@ -161,6 +208,8 @@ int main(void) {
     const struct CMUnitTest t[] = {
         cmocka_unit_test(test_parse_decls_defaults_and_values),
         cmocka_unit_test(test_parse_decls_fails_closed),
+        cmocka_unit_test(test_parse_decls_mediawiki_five_names),
+        cmocka_unit_test(test_counter_set_overwrites_or_instantiates),
         cmocka_unit_test(test_format_styles),
         cmocka_unit_test(test_content_marker_roundtrip),
         cmocka_unit_test(test_content_marker_malformed),

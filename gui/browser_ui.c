@@ -10927,15 +10927,16 @@ static void layout_doc(cairo_t *cr, const browser_window *w, double content_w,
         int atom_first = 0;
         if (b->block_break && b->block_id >= 0 && s.ibx_open == 0) {
             const pv_box_def *abd = rd_box_at(doc, (size_t)b->block_id);
-            /* A display:inline box that opens a line (`<p><kbd>Esc</kbd> closes`) opens it in
-             * reconcile too: settled after, its border box materialised on the PREVIOUS
+            /* A display:inline box that opens a line (`<p><kbd>Esc</kbd> closes`, a heading's
+             * `::before` section number with its margin) opens it in reconcile too: settled after, its border box materialised on the PREVIOUS
              * line (a dash at the top, a stray box after the last word). */
             atom_first = (abd != NULL &&
                           ((abd->display == CSS_DISP_INLINE_BLOCK &&
                             (empty_atom_continues_line(doc, i, b->block_id) ||
                              text_atom_continues_line(doc, i, b->block_id))) ||
                            (abd->display == CSS_DISP_INLINE_BOX
-                            && (b->kind == RD_PARAGRAPH || b->kind == RD_LINK))));
+                            && (b->kind == RD_PARAGRAPH || b->kind == RD_LINK
+                                || b->kind == RD_HEADING))));
         }
         if (atom_first) {
             flush_line(L, &s, th);
